@@ -18,6 +18,7 @@ class CreateProjectsTable extends Migration
             $table->integer('company_id');
             $table->string('name');
             $table->string('description');
+            $table->softDeletes();
             $table->timestamps();
         });
     }

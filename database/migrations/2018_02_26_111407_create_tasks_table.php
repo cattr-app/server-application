@@ -22,6 +22,7 @@ class CreateTasksTable extends Migration
             $table->integer('assigned_by');
             $table->string('url');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('project_id')->references('id')->on('projects');
         });

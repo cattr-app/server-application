@@ -19,6 +19,7 @@ class CreateScreenshotsTable extends Migration
             $table->string('name');
             $table->string('path');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('time_interval_id')->references('id')->on('time_intervals');
         });

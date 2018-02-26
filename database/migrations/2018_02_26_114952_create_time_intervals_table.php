@@ -19,6 +19,7 @@ class CreateTimeIntervalsTable extends Migration
             $table->dateTime('start_at');
             $table->dateTime('end_at');
             $table->timestamps();
+            $table->softDeletes();
 
             $table->foreign('task_id')->references('id')->on('tasks');
         });
