@@ -15,7 +15,7 @@ class CreateTimeIntervalsTable extends Migration
     {
         Schema::create('time_intervals', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('task_id');
+            $table->integer('task_id')->unsigned();
             $table->dateTime('start_at');
             $table->dateTime('end_at');
             $table->timestamps();

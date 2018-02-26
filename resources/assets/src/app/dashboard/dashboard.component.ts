@@ -15,7 +15,7 @@ export class DashboardComponent implements OnInit {
   }
 
   onTest() {
-    this.api.test([], this.result);
+    this.api.send("webservice/create", [], this.result);
   }
 
   result(res) {

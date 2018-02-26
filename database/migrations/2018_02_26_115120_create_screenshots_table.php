@@ -15,7 +15,7 @@ class CreateScreenshotsTable extends Migration
     {
         Schema::create('screenshots', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('time_interval_id');
+            $table->integer('time_interval_id')->unsigned();
             $table->string('name');
             $table->string('path');
             $table->timestamps();
