@@ -1,0 +1,14 @@
+<nav class="navbar">
+    <ul class="nav nav-pills">
+        <li *ngFor="let item of items" class="nav-item" routerLinkActive="active">
+            <div *ngIf="item.isLink; then link else action"></div>
+
+            <ng-template #link>
+                <a routerLink="/{{item.action}}">{{item.title}}</a>
+            </ng-template>
+            <ng-template #action>
+                <a href="#" (click)="processLinkAction(item.action)">{{item.title}}</a>
+            </ng-template>
+        </li>
+    </ul>
+</nav>

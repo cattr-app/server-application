@@ -1,0 +1,57 @@
+{
+    "name": "amazing-time/core-application",
+    "description": "Core Application for AmazingTime tracker application",
+    "keywords": ["amazingcat", "time tracking", "amazing", "cat"],
+    "license": "Beerware",
+    "type": "project",
+    "require": {
+        "php": ">=7.1",
+        "barryvdh/laravel-ide-helper": "^2.4",
+        "laravel/framework": "^5.6",
+        "laravel/tinker": "^1.0",
+        "tymon/jwt-auth": " 1.0.0-rc.2"
+    },
+    "require-dev": {
+    },
+    "autoload": {
+        "classmap": [
+            "database"
+        ],
+        "psr-4": {
+            "App\\": "app/"
+        }
+    },
+    "autoload-dev": {
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "scripts": {
+        "config:init": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php artisan key:generate",
+            "@php artisan jwt:secret",
+            "@config:update",
+            "npm install",
+            "ng build"
+        ],
+        "config:update": [
+            "@php artisan package:discover",
+            "@php artisan ide-helper:generate",
+            "@php artisan ide-helper:meta"
+        ],
+        "post-install-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postInstall",
+            "@config:update"
+        ],
+        "post-update-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postUpdate",
+            "@config:update"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true
+    }
+}
