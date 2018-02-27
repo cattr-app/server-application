@@ -1,15 +1,15 @@
 import {ModuleWithProviders} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
-import {ProjectsCreateComponent} from './create/projects.create.component';
-import {ProjectsEditComponent} from './edit/projects.edit.component';
-import {ProjectsShowComponent} from './show/projects.show.component';
-import {ProjectsListComponent} from './list/projects.list.component';
+import {TasksCreateComponent} from './create/tasks.create.component';
+import {TasksEditComponent} from './edit/tasks.edit.component';
+import {TasksShowComponent} from './show/tasks.show.component';
+import {TasksListComponent} from './list/tasks.list.component';
 
 export const AuthRoutes: Routes = [
-    {path: 'create', component: ProjectsCreateComponent},
-    {path: 'edit', component: ProjectsEditComponent},
-    {path: 'list', component: ProjectsListComponent},
-    {path: 'show', component: ProjectsShowComponent},
+    {path: 'create', component: TasksCreateComponent},
+    {path: 'edit', component: TasksEditComponent},
+    {path: 'list', component: TasksListComponent},
+    {path: 'show', component: TasksShowComponent},
     {path: '', redirectTo: 'login', pathMatch: 'full'},
 ];
 
