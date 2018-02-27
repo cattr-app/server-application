@@ -1,14 +1,15 @@
 import {ModuleWithProviders, NgModule, Optional, SkipSelf} from '@angular/core';
 
 import {CommonModule} from '@angular/common';
-import {ApiService} from "./api.service";
-import {HttpClientModule} from "@angular/common/http";
+import {ApiService} from './api.service';
+import {HttpClientModule} from '@angular/common/http';
+
 
 @NgModule({
     imports: [
         CommonModule,
         HttpClientModule
-    ]
+    ],
 })
 export class ApiModule {
     constructor(@Optional() @SkipSelf() parentModule: ApiModule) {

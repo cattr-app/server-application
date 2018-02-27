@@ -40,6 +40,8 @@ Route::group([
     'prefix' => 'v1',
 ], function (Router $router) {
     $router->post('/webservice/create', 'Api\v1\WebserviceController@create');
+    $router->post('/projects', 'Api\v1\ProjectController@index');
+    $router->post('/projects/create', 'Api\v1\ProjectController@create');
     //$router->resource('/webservice', 'Api\v1\WebserviceController');
 });
 

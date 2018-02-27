@@ -13,9 +13,6 @@ class CreateProjectsUsersTable extends Migration
      */
     public function up()
     {
-
-        
-
         Schema::create('projects_users', function (Blueprint $table) {
             $table->integer('project_id')->unsigned();
             $table->integer('user_id')->unsigned();

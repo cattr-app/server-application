@@ -6,10 +6,10 @@ import {AppRoutingModule} from './app-routing.module';
 
 import {AppComponent} from './app.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
-import {ApiModule} from "./api/api.module";
-import {NavigationComponent} from "./navigation/navigation.component";
-import {ApiService} from "./api/api.service";
-import {Router} from "@angular/router";
+import {ApiModule} from './api/api.module';
+import {NavigationComponent} from './navigation/navigation.component';
+import {ApiService} from './api/api.service';
+import {Router} from '@angular/router';
 import { Location } from '@angular/common';
 
 
@@ -23,7 +23,7 @@ import { Location } from '@angular/common';
     declarations: [
         AppComponent,
         DashboardComponent,
-        NavigationComponent
+        NavigationComponent,
     ],
     providers: [],
     bootstrap: [AppComponent]

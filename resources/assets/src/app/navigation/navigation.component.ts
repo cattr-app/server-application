@@ -26,6 +26,8 @@ export class NavigationComponent implements OnInit {
 
     protected itemsAuthorized: NavigationLink[] = [
         {title: "Dashboard", action: "dashboard", isLink: true},
+        {title: "Projects", action: "projects", isLink: true},
+        {title: "Users", action: "users", isLink: true},
         {title: "Logout", action: "onLogout", isLink: false},
     ];
 
