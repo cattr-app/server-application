@@ -1,5 +1,49 @@
-<ul>
-    <li *ngFor="let item of items">
-
-    </li>
-</ul>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Projects</div>
+                <div class="panel-body">
+                    <a href="#" class="btn btn-success" title="Add new project">
+                        <i class="fa fa-plus" aria-hidden="true"></i> Add New
+                    </a>
+                    <br/>
+                    <br/>
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                            <tr>
+                                <th>Project Id</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr>
+                                <td>ProjId</td>
+                                <td>ProjName</td>
+                                <td>ProjDescr</td>
+                                <td>
+                                    <a href="#" title="View vendorproduct">
+                                        <button class="btn btn-info btn-sm">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                            View
+                                        </button>
+                                    </a>
+                                    <a href="#" title="Edit vendorproduct">
+                                        <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
+                                                                                  aria-hidden="true"></i>
+                                            Edit
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
