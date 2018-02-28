@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {Create} from "./projects.create.model";
+import {Project} from "../../../models/project.model";
 import {Router} from "@angular/router";
 
 
@@ -16,7 +16,7 @@ export class ProjectsCreateComponent implements OnInit {
         private router: Router
     ) {}
 
-    public model: Create = new Create();
+    public model: Project = new Project();
 
 
     ngOnInit() {}
