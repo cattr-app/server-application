@@ -12,33 +12,39 @@
                     <div class="table-responsive">
                         <table class="table table-borderless">
                             <thead>
-                                <tr>
-                                    <th>Project Id</th>
-                                    <th>Name</th>
-                                    <th>Description</th>
-                                    <th>Actions</th>
-                                </tr>
+                            <tr>
+                                <th>Project Id</th>
+                                <th>Name</th>
+                                <th>Description</th>
+                                <th>Actions</th>
+                            </tr>
                             </thead>
                             <tbody>
-                                <tr>
-                                    <td>ProjId</td>
-                                    <td>ProjName</td>
-                                    <td>ProjDescr</td>
-                                    <td>
-                                        <a href="#" title="View vendorproduct">
-                                            <button class="btn btn-info btn-sm">
-                                                <i class="fa fa-eye" aria-hidden="true"></i>
-                                                View
-                                            </button>
-                                        </a>
-                                        <a href="#" title="Edit vendorproduct">
-                                            <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
-                                                                                      aria-hidden="true"></i>
-                                                Edit
-                                            </button>
-                                        </a>
-                                    </td>
-                                </tr>
+                            <tr *ngFor="let project of projectsArray">
+                                <td>{{project.id}}</td>
+                                <td>{{project.name}}</td>
+                                <td>{{project.description}}</td>
+                                <td>
+                                    <a [routerLink]="['/projects/show', project.id]" title="View project">
+                                        <button class="btn btn-info btn-sm">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                            View
+                                        </button>
+                                    </a>
+                                    <a [routerLink]="['/projects/edit', project.id]" title="Edit project">
+                                        <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
+                                                                                  aria-hidden="true"></i>
+                                            Edit
+                                        </button>
+                                    </a>
+                                    <a (click)="openRemoveProjectModalWindow(template, project.id)" title="Delete project">
+                                        <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
+                                                                                 aria-hidden="true"></i>
+                                            Delete
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
                             </tbody>
                         </table>
                     </div>
@@ -47,3 +53,16 @@
         </div>
     </div>
 </div>
+
+<ng-template #template>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Remove this project?</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <button type="button" class="btn btn-default" (click)="removeProject()">Yes</button>
+        <button type="button" class="btn btn-primary" (click)="modalRef.hide()">No</button>
+    </div>
+</ng-template>

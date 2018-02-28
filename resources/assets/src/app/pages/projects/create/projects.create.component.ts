@@ -2,6 +2,7 @@ import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Project} from "../../../models/project.model";
 import {Router} from "@angular/router";
+import {ProjectsService} from "../projects.service";
 
 
 @Component({
@@ -11,29 +12,29 @@ import {Router} from "@angular/router";
 })
 
 export class ProjectsCreateComponent implements OnInit {
+
+    public project: Project = new Project();
+
     constructor(
         private api: ApiService,
+        private projectService: ProjectsService,
         private router: Router
     ) {}
-
-    public model: Project = new Project();
-
 
     ngOnInit() {}
 
     public onSubmit() {
-        this.api.send(
-            'projects/create',
-            {
-                'company_id': this.model.company_id,
-                'name': this.model.name,
-                'description': this.model.description
-            },
-            (result) => {
-                console.log(result);
-                this.router.navigateByUrl('/projects/list');
-            }
+        this.projectService.createProject(
+            this.project.company_id,
+            this.project.name,
+            this.project.description,
+            this.createCallback.bind(this)
         );
+    }
+
+    createCallback(result) {
+        console.log(result);
+        this.router.navigateByUrl('/projects/list');
     }
 
 

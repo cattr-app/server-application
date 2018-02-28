@@ -1,3 +1,56 @@
-<p>
-    <button type="button" class="btn btn-success" (click)="onTest()">Test</button>
-</p>
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">{{ project.id }} - {{ project.name }}</div>
+                <div class="panel-body">
+
+                    <a routerLink="/projects/list" title="Back">
+                        <button class="btn btn-warning">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            Back
+                        </button>
+                    </a>
+                    <a [routerLink]="['/projects/edit', project.id]" title="Edit project">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            Edit
+                        </button>
+                    </a>
+                    <div class="project-info">
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tbody>
+                                <tr>
+                                    <th>ID</th>
+                                    <td>{{ project.id }}</td>
+                                </tr>
+                                <tr>
+                                    <th> Company Id</th>
+                                    <td> {{ project.company_id }}</td>
+                                </tr>
+                                <tr>
+                                    <th> Name</th>
+                                    <td> {{ project.name }}</td>
+                                </tr>
+                                <tr>
+                                    <th> Description</th>
+                                    <td> {{ project.description }}</td>
+                                </tr>
+                                <tr>
+                                    <th> Created at</th>
+                                    <td> {{ project.created_at }}</td>
+                                </tr>
+                                <tr>
+                                    <th> Updated at</th>
+                                    <td> {{ project.updated_at }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

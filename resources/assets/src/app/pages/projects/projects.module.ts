@@ -4,6 +4,7 @@ import {FormsModule} from '@angular/forms';
 
 import {AuthRoute} from './projects-routing.module';
 import {LoginService} from "../../auth/login/login.service";
+import {ProjectsService} from "./projects.service";
 
 import {ProjectsCreateComponent} from './create/projects.create.component';
 import {ProjectsEditComponent} from './edit/projects.edit.component';
@@ -26,7 +27,8 @@ import {HttpClientModule} from '@angular/common/http';
         ProjectsShowComponent,
     ],
     providers: [
-        LoginService
+        LoginService,
+        ProjectsService
     ]
 })
 

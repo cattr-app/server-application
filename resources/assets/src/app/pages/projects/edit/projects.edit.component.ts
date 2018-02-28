@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
+import {ProjectsService} from "../projects.service";
+import { ActivatedRoute } from '@angular/router';
+import {Project} from "../../../models/project.model";
 
 
 @Component({
@@ -8,19 +11,40 @@ import {ApiService} from '../../../api/api.service';
     styleUrls: ['./projects.edit.component.scss']
 })
 export class ProjectsEditComponent implements OnInit {
-    constructor(private api: ApiService) { }
 
-    //items: Project[] = [];
+    id: number;
+    private sub: any;
+    public project: Project = new Project();
+
+    constructor(
+        private api: ApiService,
+        private projectService: ProjectsService,
+        private router: ActivatedRoute
+    ) {}
 
     ngOnInit() {
+        this.sub = this.router.params.subscribe(params => {
+            this.id = +params['id'];
+        });
 
+        this.projectService.getProject(this.id, this.setProject.bind(this));
     }
 
-    onTest() {
-        this.api.send('projects/edit', [], this.result);
+    setProject(result) {
+        this.project = result;
     }
 
-    result(res) {
-        console.log(res);
+    public onSubmit() {
+        this.projectService.editProject(
+            this.id,
+            this.project.company_id,
+            this.project.name,
+            this.project.description,
+            this.editCallback.bind(this)
+        );
+    }
+
+    editCallback(result) {
+        console.log("Updated");
     }
 }

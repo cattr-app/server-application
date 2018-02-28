@@ -7,9 +7,9 @@ import {ProjectsListComponent} from './list/projects.list.component';
 
 export const AuthRoutes: Routes = [
     {path: 'create', component: ProjectsCreateComponent},
-    {path: 'edit', component: ProjectsEditComponent},
+    {path: 'edit/:id', component: ProjectsEditComponent},
     {path: 'list', component: ProjectsListComponent},
-    {path: 'show', component: ProjectsShowComponent},
+    {path: 'show/:id', component: ProjectsShowComponent},
     {path: '', redirectTo: 'login', pathMatch: 'full'},
 ];
 

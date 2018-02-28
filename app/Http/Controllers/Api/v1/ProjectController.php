@@ -26,9 +26,8 @@ class ProjectController extends Controller
             $projects = Project::paginate($perPage);
         }
 
-        return response()->json([
-            'projects' => $projects,
-        ], 200);
+        return response()->json(
+            $projects, 200);
     }
 
     /**
@@ -61,11 +60,11 @@ class ProjectController extends Controller
     public function store(Request $request)
     {
         $requestData = $request->all();
-        
+
         $project = Project::create($requestData);
 
         return response()->json([
-            'project'    => $project,
+            'project' => $project,
             'message' => 'Success'
         ], 200);
     }
@@ -77,30 +76,33 @@ class ProjectController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $project = Project::findOrFail($id);
+        $projectId = $request->get('project_id');
+        $project = Project::findOrFail($projectId);
 
-       // return view('projects.show', compact('project'));
-
-        return response()->json([
-            'project'    => $project,
-        ], 200);
+        return response()->json($project, 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
-     *
+     * @param Request $request
      * @return \Illuminate\View\View
      */
-    public function edit($id)
+    public function edit(Request $request)
     {
-        $project = Project::findOrFail($id);
+        $projectId = $request->get('project_id');
+        $project = Project::findOrFail($projectId);
+
+        $project->company_id = $request->get('company_id');
+        $project->name = $request->get('name');
+        $project->description = $request->get('description');
+
+        $project->save();
 
         return response()->json([
-            'project'    => $project,
+            'project' => $project,
         ], 200);
     }
 
@@ -109,18 +111,17 @@ class ProjectController extends Controller
      *
      * @param \Illuminate\Http\Request $request
      * @param  int $id
-
      * @return string
      */
     public function update(Request $request, $id)
     {
         $requestData = $request->all();
-        
+
         $project = Project::findOrFail($id);
         $project->update($requestData);
 
         return response()->json([
-            'project'    => $project,
+            'project' => $project,
             'message' => 'Success'
         ], 200);
     }
@@ -128,13 +129,14 @@ class ProjectController extends Controller
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int $id
+     * @param Request $request
      * @return string
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        Project::destroy($id);
+        $projectId = $request->get('project_id');
+        Project::destroy($projectId);
 
-        return "Project successfully deleted ";
+        return response()->json(['message'=>'project has been removed']);
     }
 }

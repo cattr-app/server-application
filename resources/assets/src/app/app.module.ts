@@ -1,4 +1,5 @@
 import {NgModule} from '@angular/core';
+import {ModalModule} from 'ngx-bootstrap';
 import {BrowserModule} from '@angular/platform-browser';
 import {FormsModule} from '@angular/forms';
 
@@ -18,7 +19,8 @@ import { Location } from '@angular/common';
         BrowserModule,
         FormsModule,
         AppRoutingModule,
-        ApiModule.forRoot()
+        ApiModule.forRoot(),
+        ModalModule.forRoot()
     ],
     declarations: [
         AppComponent,
