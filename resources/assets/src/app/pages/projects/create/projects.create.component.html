@@ -1,3 +1,40 @@
-<p>
-    <button type="button" class="btn btn-success" (click)="onTest()">Test</button>
-</p>
+<div class="container">
+    <div class="row">
+        <div class="col col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Create New Project</div>
+                <div class="panel-body">
+                    <a routerLink="/projects/list" title="Back">
+                        <button class="btn btn-warning">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            Back
+                        </button>
+                    </a>
+                    <div class="create-form">
+                        <form (ngSubmit)="onSubmit()">
+                            <div class="form-group row">
+                                <label class="col-md-2">Company Id</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="project-company-id" [(ngModel)]="model.company_id">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-md-2">Name</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="project-name" [(ngModel)]="model.name">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-md-2">Description</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="project-description" [(ngModel)]="model.description">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

@@ -1,7 +1,8 @@
 <?php
 
-namespace App\Http\Controllers;
+namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests;
 use App\Models\Project;
 
@@ -33,11 +34,20 @@ class ProjectController extends Controller
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\View\View
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('projects.create');
+        //return view('projects.create');
+        //$projectName = $request->get('name');
+        //$projectDescription = $request->get('description');
+
+        $requestData = $request->all();
+
+        $project = Project::create($requestData);
+
+        return response()->json([
+            'res' => $project,
+        ], 200);
     }
 
     /**

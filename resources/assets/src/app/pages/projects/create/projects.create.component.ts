@@ -1,5 +1,7 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
+import {Create} from "./projects.create.model";
+import {Router} from "@angular/router";
 
 
 @Component({
@@ -7,20 +9,32 @@ import {ApiService} from '../../../api/api.service';
     templateUrl: './projects.create.component.html',
     styleUrls: ['./projects.create.component.scss']
 })
+
 export class ProjectsCreateComponent implements OnInit {
-    constructor(private api: ApiService) { }
+    constructor(
+        private api: ApiService,
+        private router: Router
+    ) {}
 
-    //items: Project[] = [];
+    public model: Create = new Create();
 
-    ngOnInit() {
 
+    ngOnInit() {}
+
+    public onSubmit() {
+        this.api.send(
+            'projects/create',
+            {
+                'company_id': this.model.company_id,
+                'name': this.model.name,
+                'description': this.model.description
+            },
+            (result) => {
+                console.log(result);
+                this.router.navigateByUrl('/projects/list');
+            }
+        );
     }
 
-    onTest() {
-        this.api.send('projects/create', [], this.result);
-    }
 
-    result(res) {
-        console.log(res);
-    }
 }

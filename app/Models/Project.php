@@ -14,7 +14,7 @@ class Project extends Model
      */
     protected $table = 'projects';
 
-    protected $fillable = array('id', 'user_id', 'role');
+    protected $fillable = array('company_id', 'name', 'description');
 
     /**
      * The users that belong to the projects.
