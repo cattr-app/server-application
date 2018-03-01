@@ -1,4 +1,6 @@
-export class User {
+import {Item} from "./item.model";
+
+export class User extends Item{
     public id: number;
     public full_name: string;
     public first_name: string;
@@ -52,6 +54,7 @@ export class User {
                 createdAt?,
                 updatedAt?,
                 deletedAt?) {
+        super();
         this.id = id;
         this.full_name = full_name;
         this.first_name = first_name;

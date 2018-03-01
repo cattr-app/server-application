@@ -25,14 +25,20 @@ export class TasksCreateComponent implements OnInit {
 
     public onSubmit() {
         this.taskService.createTask(
-            this.task.project_id,
-            this.task.task_name,
-            this.task.active,
-            this.task.user_id,
-            this.task.assigned_by,
-            this.task.url,
+            this.prepareData(),
             this.createCallback.bind(this)
         );
+    }
+
+    prepareData() {
+        return {
+            'project_id': this.task.project_id,
+            'task_name': this.task.task_name,
+            'active': this.task.active,
+            'user_id': this.task.user_id,
+            'assigned_by': this.task.assigned_by,
+            'url': this.task.url
+        }
     }
 
     createCallback(result) {

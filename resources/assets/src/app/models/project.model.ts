@@ -1,5 +1,6 @@
+import {Item} from "./item.model";
 
-export class Project {
+export class Project extends Item {
     public id: number;
     public company_id?: string;
     public name?: string;
@@ -9,6 +10,7 @@ export class Project {
     public updated_at?: string;
 
     constructor(id?, companyId?, name?, description?, deletedAt?, createdAt?, updatedAt?) {
+        super();
         this.id = id;
         this.company_id = companyId;
         this.name = name;

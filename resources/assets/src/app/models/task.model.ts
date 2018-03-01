@@ -1,4 +1,6 @@
-export class Task {
+import {Item} from "./item.model";
+
+export class Task extends Item {
     public id: number;
     public project_id?: number;
     public task_name?: string;
@@ -11,6 +13,7 @@ export class Task {
     public updated_at?: string;
 
     constructor(id?, projectId?, taskName?, active = 1, userId?, assignedBy?, url = "URL", createdAt?, updatedAt?, deletedAt?) {
+        super();
         this.id = id;
         this.project_id = projectId;
         this.task_name = taskName;
