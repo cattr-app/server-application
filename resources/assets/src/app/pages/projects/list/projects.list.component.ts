@@ -4,6 +4,7 @@ import {Project} from "../../../models/project.model";
 import {ProjectsService} from "../projects.service";
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {Router} from "@angular/router";
 
 
 @Component({
@@ -20,7 +21,8 @@ export class ProjectsListComponent implements OnInit {
 
     constructor(private api: ApiService,
                 private projectService: ProjectsService,
-                private modalService: BsModalService) {
+                private modalService: BsModalService,
+                private router: Router) {
 
     }
 
@@ -33,7 +35,6 @@ export class ProjectsListComponent implements OnInit {
     }
 
     removeProject() {
-        console.log('remove project'+ this.projectIdForRemoving);
         this.projectService.removeProject(this.projectIdForRemoving, this.removeProjectCallback.bind(this));
         this.modalRef.hide();
     }
@@ -48,6 +49,6 @@ export class ProjectsListComponent implements OnInit {
     }
 
     removeProjectCallback(result) {
-        console.log(result);
+        location.reload();
     }
 }

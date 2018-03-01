@@ -15,13 +15,13 @@ export class ProjectsCreateComponent implements OnInit {
 
     public project: Project = new Project();
 
-    constructor(
-        private api: ApiService,
-        private projectService: ProjectsService,
-        private router: Router
-    ) {}
+    constructor(private api: ApiService,
+                private projectService: ProjectsService,
+                private router: Router) {
+    }
 
-    ngOnInit() {}
+    ngOnInit() {
+    }
 
     public onSubmit() {
         this.projectService.createProject(

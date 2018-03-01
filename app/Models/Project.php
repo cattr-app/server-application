@@ -4,10 +4,12 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\User;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Project extends Model
 {
-    
+    use SoftDeletes;
+
 	/**
      * table name from database
      * @var string

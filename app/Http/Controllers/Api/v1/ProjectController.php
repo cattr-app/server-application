@@ -131,11 +131,14 @@ class ProjectController extends Controller
      *
      * @param Request $request
      * @return string
+     * @throws \Exception
      */
     public function destroy(Request $request)
     {
         $projectId = $request->get('project_id');
-        Project::destroy($projectId);
+
+        $project = Project::findOrFail($projectId);
+        $project->delete();
 
         return response()->json(['message'=>'project has been removed']);
     }
