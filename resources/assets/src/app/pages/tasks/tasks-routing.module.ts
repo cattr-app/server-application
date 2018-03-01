@@ -7,9 +7,9 @@ import {TasksListComponent} from './list/tasks.list.component';
 
 export const AuthRoutes: Routes = [
     {path: 'create', component: TasksCreateComponent},
-    {path: 'edit', component: TasksEditComponent},
+    {path: 'edit/:id', component: TasksEditComponent},
     {path: 'list', component: TasksListComponent},
-    {path: 'show', component: TasksShowComponent},
+    {path: 'show/:id', component: TasksShowComponent},
     {path: '', redirectTo: 'login', pathMatch: 'full'},
 ];
 

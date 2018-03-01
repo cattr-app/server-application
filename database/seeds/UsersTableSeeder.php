@@ -15,7 +15,6 @@ class UsersTableSeeder extends Seeder
             'last_name'              => 'Min',
             'email'                  => 'admin@example.com',
             'url'                    => '',
-            'user_id'                => 1,
             'company_id'             => 1,
             'level'                  => 'admin',
             'payroll_access'         => 1,

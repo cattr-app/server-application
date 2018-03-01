@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
+import {ActivatedRoute} from "@angular/router";
+import {TasksService} from "../tasks.service";
+import {Task} from "../../../models/task.model";
 
 @Component({
     selector: 'app-tasks-show',
@@ -7,19 +10,24 @@ import {ApiService} from '../../../api/api.service';
     styleUrls: ['./tasks.show.component.scss']
 })
 export class TasksShowComponent implements OnInit {
-    constructor(private api: ApiService) { }
+    id: number;
+    private sub: any;
+    public task: Task = new Task();
 
-    //items: Project[] = [];
+    constructor(private api: ApiService,
+                private taskService: TasksService,
+                private router: ActivatedRoute) {
+    }
 
     ngOnInit() {
+        this.sub = this.router.params.subscribe(params => {
+            this.id = +params['id'];
+        });
 
+        this.taskService.getTask(this.id, this.setTask.bind(this));
     }
 
-    onTest() {
-        this.api.send('tasks/show', [], this.result);
-    }
-
-    result(res) {
-        console.log(res);
+    setTask(result) {
+        this.task = result;
     }
 }

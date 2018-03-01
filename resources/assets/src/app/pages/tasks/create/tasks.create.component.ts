@@ -1,5 +1,8 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
+import {Task} from "../../../models/task.model";
+import {Router} from "@angular/router";
+import {TasksService} from "../tasks.service";
 
 
 @Component({
@@ -8,19 +11,32 @@ import {ApiService} from '../../../api/api.service';
     styleUrls: ['./tasks.create.component.scss']
 })
 export class TasksCreateComponent implements OnInit {
-    constructor(private api: ApiService) { }
 
-    //items: Project[] = [];
+    public task: Task = new Task();
+
+    constructor(private api: ApiService,
+                private taskService: TasksService,
+                private router: Router) {
+    }
 
     ngOnInit() {
 
     }
 
-    onTest() {
-        this.api.send('tasks/create', [], this.result);
+    public onSubmit() {
+        this.taskService.createTask(
+            this.task.project_id,
+            this.task.task_name,
+            this.task.active,
+            this.task.user_id,
+            this.task.assigned_by,
+            this.task.url,
+            this.createCallback.bind(this)
+        );
     }
 
-    result(res) {
-        console.log(res);
+    createCallback(result) {
+        console.log(result);
+        this.router.navigateByUrl('/tasks/list');
     }
 }

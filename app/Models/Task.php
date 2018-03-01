@@ -3,16 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
+
 
 class Task extends Model
 {
-    
+    use SoftDeletes;
+
 	/**
      * table name from database
      * @var string
      */
     protected $table = 'tasks';
-
+    protected $fillable = array('project_id', 'task_name', 'active', 'user_id', 'assigned_by', 'url');
 
     /**
      * The project that belong to the task.

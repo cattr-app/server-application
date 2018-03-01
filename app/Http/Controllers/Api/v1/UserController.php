@@ -13,7 +13,8 @@ class UserController extends Controller
     /**
      * Display a listing of the resource.
      *
-     * @return \Illuminate\View\View
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function index(Request $request)
     {
@@ -26,107 +27,97 @@ class UserController extends Controller
             $users = User::paginate($perPage);
         }
 
-        return response()->json([
-            'users' => $users,
-        ], 200);
+        return response()->json(
+            $users, 200);
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\View\View
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function create()
+    public function create(Request $request)
     {
-        return view('users.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     *
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     */
-    public function store(Request $request)
-    {
-        
         $requestData = $request->all();
-        
+
         $user = User::create($requestData);
 
         return response()->json([
-            'user'    => $user,
-            'message' => 'Success'
+            'res' => $user,
         ], 200);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int  $id
-     *
-     * @return \Illuminate\View\View
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $user = User::findOrFail($id);
+        $userId = $request->get('user_id');
+        $user = User::findOrFail($userId);
 
-        return response()->json([
-            'user'    => $user,
-        ], 200);
+        return response()->json($user, 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int  $id
-     *
-     * @return \Illuminate\View\View
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($id)
+    public function edit(Request $request)
     {
-        $user = User::findOrFail($id);
+        $userId = $request->get('user_id');
+        $user = User::findOrFail($userId);
+
+        $user->full_name = $request->get('full_name');
+        $user->first_name = $request->get('first_name');
+        $user->last_name = $request->get('last_name');
+        $user->email = $request->get('email');
+        $user->url = $request->get('url');
+        $user->company_id = $request->get('company_id');
+        $user->level = $request->get('level');
+        $user->payroll_access = $request->get('payroll_access');
+        $user->billing_access = $request->get('billing_access');
+        $user->avatar = $request->get('avatar');
+        $user->screenshots_active = $request->get('screenshots_active');
+        $user->manual_time = $request->get('manual_time');
+        $user->permanent_tasks = $request->get('permanent_tasks');
+        $user->computer_time_popup = $request->get('computer_time_popup');
+        $user->poor_time_popup = $request->get('poor_time_popup');
+        $user->blur_screenshots = $request->get('blur_screenshots');
+        $user->web_and_app_monitoring = $request->get('web_and_app_monitoring');
+        $user->webcam_shots = $request->get('webcam_shots');
+        $user->screenshots_interval = $request->get('screenshots_interval');
+        $user->user_role_value = $request->get('user_role_value');
+        $user->active = $request->get('active');
+        $user->password = $request->get('password');
+
+        $user->save();
 
         return response()->json([
-            '$user'    => $user,
-        ], 200);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param  int  $id
-     *
-     * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
-     */
-    public function update(Request $request, $id)
-    {
-        
-        $requestData = $request->all();
-        
-        $user = User::findOrFail($id);
-        $user->update($requestData);
-
-        return response()->json([
-            'user'    => $user,
-            'message' => 'Success'
+            'taks' => $user,
         ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int  $id
-     *
+     * @param Request $request
      * @return \Illuminate\Http\RedirectResponse|\Illuminate\Routing\Redirector
+     * @throws \Exception
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        User::destroy($id);
+        $userId = $request->get('user_id');
 
-        return "User successfully deleted ";
+        $user = User::findOrFail($userId);
+        $user->delete();
+
+        return response()->json(['message'=>'task has been removed']);
     }
 }
 

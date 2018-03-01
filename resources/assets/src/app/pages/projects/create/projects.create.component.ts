@@ -33,7 +33,6 @@ export class ProjectsCreateComponent implements OnInit {
     }
 
     createCallback(result) {
-        console.log(result);
         this.router.navigateByUrl('/projects/list');
     }
 

@@ -20,7 +20,6 @@ class CreateUsersTable extends Migration
             $table->string('last_name');
             $table->string('email')->unique();
             $table->string('url');
-            $table->integer('user_id');
             $table->integer('company_id');
             $table->string('level');
             $table->integer('payroll_access');

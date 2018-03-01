@@ -2,9 +2,9 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Tasks</div>
+                <div class="panel-heading">Users</div>
                 <div class="panel-body">
-                    <a routerLink="/tasks/create" class="btn btn-success" title="Add new task">
+                    <a routerLink="/users/create" class="btn btn-success" title="Add new user">
                         <i class="fa fa-plus" aria-hidden="true"></i> Add New
                     </a>
                     <br/>
@@ -13,31 +13,33 @@
                         <table class="table table-borderless">
                             <thead>
                             <tr>
-                                <th>Task Id</th>
-                                <th>Project Id</th>
-                                <th>Name</th>
+                                <th>User Id</th>
+                                <th>First Name</th>
+                                <th>Last Name</th>
+                                <th>Email</th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let task of tasksArray">
-                                <td>{{task.id}}</td>
-                                <td>{{task.project_id}}</td>
-                                <td>{{task.task_name}}</td>
+                            <tr *ngFor="let user of usersArray">
+                                <td>{{user.id}}</td>
+                                <td>{{user.first_name}}</td>
+                                <td>{{user.last_name}}</td>
+                                <td>{{user.email}}</td>
                                 <td>
-                                    <a [routerLink]="['/tasks/show', task.id]" title="View project">
+                                    <a [routerLink]="['/users/show', user.id]" title="View user">
                                         <button class="btn btn-info btn-sm">
                                             <i class="fa fa-eye" aria-hidden="true"></i>
                                             View
                                         </button>
                                     </a>
-                                    <a [routerLink]="['/tasks/edit', task.id]" title="Edit project">
+                                    <a [routerLink]="['/users/edit', user.id]" title="Edit user">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
                                             Edit
                                         </button>
                                     </a>
-                                    <a (click)="openRemoveTaskModalWindow(template, task.id)" title="Delete project">
+                                    <a (click)="openRemoveUserModalWindow(template, user.id)" title="Delete user">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
                                             Delete
@@ -55,13 +57,13 @@
 </div>
 <ng-template #template>
     <div class="modal-header">
-        <h4 class="modal-title pull-left">Remove this task?</h4>
+        <h4 class="modal-title pull-left">Remove this user?</h4>
         <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body">
-        <button type="button" class="btn btn-default" (click)="removeTask()">Yes</button>
+        <button type="button" class="btn btn-default" (click)="removeUser()">Yes</button>
         <button type="button" class="btn btn-primary" (click)="modalRef.hide()">No</button>
     </div>
 </ng-template>

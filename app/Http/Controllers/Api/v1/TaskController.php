@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Controllers\Controller;
 use App\Http\Requests;
-use App\Task;
+use App\Models\Task;
 use Illuminate\Http\Request;
 
 class TaskController extends Controller
@@ -24,104 +25,78 @@ class TaskController extends Controller
             $tasks = Task::paginate($perPage);
         }
 
-        return response()->json([
-            'tasks' => $tasks,
-        ], 200);
+        return response()->json(
+            $tasks, 200);
     }
 
     /**
      * Show the form for creating a new resource.
      *
-     * @return \Illuminate\View\View
-     */
-    public function create()
-    {
-        return view('tasks.create');
-    }
-
-    /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function store(Request $request)
+    public function create(Request $request)
     {
-        
         $requestData = $request->all();
-        
+
         $task = Task::create($requestData);
 
         return response()->json([
-            'task'    => $task,
-            'message' => 'Success'
+            'res' => $task,
         ], 200);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param  int $id
-     *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function show($id)
+    public function show(Request $request)
     {
-        $task = Task::findOrFail($id);
+        $taskId = $request->get('task_id');
+        $task = Task::findOrFail($taskId);
 
-        return response()->json([
-            'task'    => $task,
-        ], 200);
+        return response()->json($task, 200);
     }
 
     /**
      * Show the form for editing the specified resource.
      *
-     * @param  int $id
-     *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function edit($id)
+    public function edit(Request $request)
     {
-        $task = Task::findOrFail($id);
+        $taskId = $request->get('task_id');
+        $task = Task::findOrFail($taskId);
+
+        $task->project_id = $request->get('project_id');
+        $task->task_name = $request->get('task_name');
+        $task->user_id = $request->get('user_id');
+        $task->assigned_by = $request->get('assigned_by');
+
+        $task->save();
 
         return response()->json([
-            'task'    => $task,
-        ], 200);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param  int $id
-     *
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function update(Request $request, $id)
-    {
-        $requestData = $request->all();
-        
-        $task = Task::findOrFail($id);
-        $task->update($requestData);
-
-        return response()->json([
-            'task'    => $task,
-            'message' => 'Success'
+            'taks' => $task,
         ], 200);
     }
 
     /**
      * Remove the specified resource from storage.
      *
-     * @param  int $id
-     * @return string
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      */
-    public function destroy($id)
+    public function destroy(Request $request)
     {
-        Task::destroy($id);
+        $taskId = $request->get('task_id');
 
-        return "Task successfully deleted ";
+        $task = Task::findOrFail($taskId);
+        $task->delete();
+
+        return response()->json(['message'=>'task has been removed']);
     }
 }

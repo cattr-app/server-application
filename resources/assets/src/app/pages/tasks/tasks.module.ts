@@ -11,6 +11,7 @@ import {TasksShowComponent} from './show/tasks.show.component';
 import {TasksListComponent} from './list/tasks.list.component';
 
 import {HttpClientModule} from '@angular/common/http';
+import {TasksService} from "./tasks.service";
 
 @NgModule({
     imports: [
@@ -26,7 +27,8 @@ import {HttpClientModule} from '@angular/common/http';
         TasksShowComponent,
     ],
     providers: [
-        LoginService
+        LoginService,
+        TasksService
     ]
 })
 

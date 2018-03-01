@@ -13,6 +13,7 @@ class ProjectController extends Controller
     /**
      * Display a listing of the resource.
      *
+     * @param Request $request
      * @return \Illuminate\View\View
      */
     public function index(Request $request)
@@ -32,14 +33,11 @@ class ProjectController extends Controller
 
     /**
      * Show the form for creating a new resource.
-     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function create(Request $request)
     {
-        //return view('projects.create');
-        //$projectName = $request->get('name');
-        //$projectDescription = $request->get('description');
-
         $requestData = $request->all();
 
         $project = Project::create($requestData);
@@ -50,30 +48,9 @@ class ProjectController extends Controller
     }
 
     /**
-     * Store a newly created resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     *
-     *
-     * @return string
-     */
-    public function store(Request $request)
-    {
-        $requestData = $request->all();
-
-        $project = Project::create($requestData);
-
-        return response()->json([
-            'project' => $project,
-            'message' => 'Success'
-        ], 200);
-    }
-
-    /**
      * Display the specified resource.
      *
-     * @param  int $id
-     *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function show(Request $request)
@@ -103,26 +80,6 @@ class ProjectController extends Controller
 
         return response()->json([
             'project' => $project,
-        ], 200);
-    }
-
-    /**
-     * Update the specified resource in storage.
-     *
-     * @param \Illuminate\Http\Request $request
-     * @param  int $id
-     * @return string
-     */
-    public function update(Request $request, $id)
-    {
-        $requestData = $request->all();
-
-        $project = Project::findOrFail($id);
-        $project->update($requestData);
-
-        return response()->json([
-            'project' => $project,
-            'message' => 'Success'
         ], 200);
     }
 

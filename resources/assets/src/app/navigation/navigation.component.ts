@@ -28,7 +28,7 @@ export class NavigationComponent implements OnInit {
         {title: "Dashboard", action: "dashboard", isLink: true},
         {title: "Projects", action: "projects/list", isLink: true},
         {title: "Tasks", action: "tasks/list", isLink: true},
-        //{title: "Users", action: "users", isLink: true},
+        {title: "Users", action: "users/list", isLink: true},
         {title: "Logout", action: "onLogout", isLink: false},
     ];
 

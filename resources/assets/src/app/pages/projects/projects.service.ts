@@ -1,6 +1,7 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import {ApiService} from "../../api/api.service";
 import {Project} from "../../models/project.model";
+import {Task} from "../../models/task.model";
 
 @Injectable()
 export class ProjectsService {
@@ -44,16 +45,7 @@ export class ProjectsService {
             'projects/show',
             {'project_id': projectId},
             (projectFromApi) => {
-                project = new Project(
-                    projectFromApi.id,
-                    projectFromApi.company_id,
-                    projectFromApi.name,
-                    projectFromApi.description,
-                    projectFromApi.deleted_at,
-                    projectFromApi.created_at,
-                    projectFromApi.updated_at
-                );
-
+                project = ProjectsService.convertFromApi(projectFromApi);
                 callback(project);
             });
     }
@@ -66,15 +58,7 @@ export class ProjectsService {
             [],
             (result) => {
                 result.data.forEach(function (projectFromApi) {
-                    projectsArray.push(new Project(
-                        projectFromApi.id,
-                        projectFromApi.company_id,
-                        projectFromApi.name,
-                        projectFromApi.description,
-                        projectFromApi.deleted_at,
-                        projectFromApi.created_at,
-                        projectFromApi.updated_at
-                    ));
+                    projectsArray.push(ProjectsService.convertFromApi(projectFromApi));
                 });
 
                 callback(projectsArray);
@@ -91,6 +75,18 @@ export class ProjectsService {
                 callback(result);
             }
         );
+    }
+
+    static convertFromApi(projectFromApi) {
+        return new Project(
+            projectFromApi.id,
+            projectFromApi.company_id,
+            projectFromApi.name,
+            projectFromApi.description,
+            projectFromApi.deleted_at,
+            projectFromApi.created_at,
+            projectFromApi.updated_at
+        )
     }
 
 }
