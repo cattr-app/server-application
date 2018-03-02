@@ -10,4 +10,13 @@ class ProjectController extends ItemController
     {
         return Project::class;
     }
+
+    function getValidationRules()
+    {
+        return [
+            'company_id'  => 'required',
+            'name'        => 'required',
+            'description' => 'required',
+        ];
+    }
 }

@@ -4,12 +4,14 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests;
-use App\Models\Task;
 use Illuminate\Http\Request;
+use Validator;
 
 abstract class ItemController extends Controller
 {
     abstract function getItemClass();
+
+    abstract function getValidationRules();
 
     /**
      * Display a listing of the resource.
@@ -41,8 +43,16 @@ abstract class ItemController extends Controller
      */
     public function create(Request $request)
     {
-        $cls = $this->getItemClass();
         $requestData = $request->all();
+        $validator = Validator::make($requestData, $this->getValidationRules());
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 'validation fail',
+            ], 400);
+        }
+
+        $cls = $this->getItemClass();
         $item = $cls::create($requestData);
 
         return response()->json([
@@ -73,11 +83,20 @@ abstract class ItemController extends Controller
      */
     public function edit(Request $request)
     {
+        $requestData = $request->all();
+        $validator = Validator::make($requestData, $this->getValidationRules());
+
+        if ($validator->fails()) {
+            return response()->json([
+                'error' => 'validation fail',
+            ], 400);
+        }
+
         $cls = $this->getItemClass();
         $itemId = $request->get('id');
         $item = $cls::findOrFail($itemId);
 
-        $item->fill($request->all());
+        $item->fill($requestData);
         $item->save();
 
         return response()->json([

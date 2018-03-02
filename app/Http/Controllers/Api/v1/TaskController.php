@@ -10,4 +10,16 @@ class TaskController extends ItemController
     {
         return Task::class;
     }
+
+    function getValidationRules()
+    {
+        return [
+            'project_id'  => 'required',
+            'task_name'   => 'required',
+            'active'      => 'required',
+            'user_id'     => 'required',
+            'assigned_by' => 'required',
+            'url'         => 'required'
+        ];
+    }
 }
