@@ -8,7 +8,7 @@ import {ItemsShowComponent} from "../../items.show.component";
 @Component({
     selector: 'app-users-show',
     templateUrl: './users.show.component.html',
-    styleUrls: ['./users.show.component.scss']
+    styleUrls: ['../../items.component.scss']
 })
 export class UsersShowComponent extends ItemsShowComponent implements OnInit {
 

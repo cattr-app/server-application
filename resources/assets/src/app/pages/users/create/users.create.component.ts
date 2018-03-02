@@ -9,7 +9,7 @@ import {ItemsCreateComponent} from "../../items.create.component";
 @Component({
     selector: 'app-users-create',
     templateUrl: './users.create.component.html',
-    styleUrls: ['./users.create.component.scss']
+    styleUrls: ['../../items.component.scss']
 })
 export class UsersCreateComponent extends ItemsCreateComponent implements OnInit {
 

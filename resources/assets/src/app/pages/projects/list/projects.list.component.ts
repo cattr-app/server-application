@@ -12,7 +12,7 @@ import {Task} from "../../../models/task.model";
 @Component({
     selector: 'app-projects-list',
     templateUrl: './projects.list.component.html',
-    styleUrls: ['./projects.list.component.scss']
+    styleUrls: ['../../items.component.scss']
 })
 export class ProjectsListComponent extends ItemsListComponent implements OnInit {
 

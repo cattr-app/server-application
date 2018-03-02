@@ -5,11 +5,10 @@ import {Router} from "@angular/router";
 import {TasksService} from "../tasks.service";
 import {ItemsCreateComponent} from "../../items.create.component";
 
-
 @Component({
     selector: 'app-tasks-create',
     templateUrl: './tasks.create.component.html',
-    styleUrls: ['./tasks.create.component.scss']
+    styleUrls: ['../../items.component.scss']
 })
 export class TasksCreateComponent extends ItemsCreateComponent implements OnInit {
 

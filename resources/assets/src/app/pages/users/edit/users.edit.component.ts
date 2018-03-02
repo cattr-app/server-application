@@ -8,7 +8,7 @@ import {ItemsEditComponent} from "../../items.edit.component";
 @Component({
     selector: 'app-users-edit',
     templateUrl: './users.edit.component.html',
-    styleUrls: ['./users.edit.component.scss']
+    styleUrls: ['../../items.component.scss']
 })
 export class UsersEditComponent extends ItemsEditComponent implements OnInit {
 

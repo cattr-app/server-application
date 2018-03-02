@@ -8,7 +8,7 @@ import {ItemsShowComponent} from "../../items.show.component";
 @Component({
     selector: 'app-tasks-show',
     templateUrl: './tasks.show.component.html',
-    styleUrls: ['./tasks.show.component.scss']
+    styleUrls: ['../../items.component.scss']
 })
 export class TasksShowComponent extends ItemsShowComponent implements OnInit {
 

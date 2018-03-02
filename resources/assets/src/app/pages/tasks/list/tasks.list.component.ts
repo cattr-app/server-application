@@ -8,7 +8,7 @@ import {ItemsListComponent} from "../../items.list.component";
 @Component({
     selector: 'app-tasks-list',
     templateUrl: './tasks.list.component.html',
-    styleUrls: ['./tasks.list.component.scss']
+    styleUrls: ['../../items.component.scss']
 })
 export class TasksListComponent extends ItemsListComponent implements OnInit {
 

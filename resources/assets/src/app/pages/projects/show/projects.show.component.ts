@@ -9,7 +9,7 @@ import {Task} from "../../../models/task.model";
 @Component({
     selector: 'app-projects-show',
     templateUrl: './projects.show.component.html',
-    styleUrls: ['./projects.show.component.scss']
+    styleUrls: ['../../items.component.scss']
 })
 export class ProjectsShowComponent extends ItemsShowComponent implements OnInit {
 

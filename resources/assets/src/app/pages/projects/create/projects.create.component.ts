@@ -5,11 +5,10 @@ import {Router} from "@angular/router";
 import {ProjectsService} from "../projects.service";
 import {ItemsCreateComponent} from "../../items.create.component";
 
-
 @Component({
     selector: 'app-projects-create',
     templateUrl: './projects.create.component.html',
-    styleUrls: ['./projects.create.component.scss']
+    styleUrls: ['../../items.component.scss']
 })
 
 export class ProjectsCreateComponent extends ItemsCreateComponent implements OnInit {
