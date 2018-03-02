@@ -12,7 +12,7 @@ import {ItemsEditComponent} from "../../items.edit.component";
 })
 export class TasksEditComponent extends ItemsEditComponent implements OnInit {
 
-    public item: Task;
+    public item: Task = new Task();
 
     constructor(api: ApiService,
                 taskService: TasksService,

@@ -12,7 +12,7 @@ import {ItemsEditComponent} from "../../items.edit.component";
 })
 export class ProjectsEditComponent extends ItemsEditComponent implements OnInit {
 
-    public item: Project;
+    public item: Project = new Project();
 
     constructor(api: ApiService,
                 projectService: ProjectsService,

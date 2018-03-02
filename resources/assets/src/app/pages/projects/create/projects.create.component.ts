@@ -3,6 +3,7 @@ import {ApiService} from '../../../api/api.service';
 import {Project} from "../../../models/project.model";
 import {Router} from "@angular/router";
 import {ProjectsService} from "../projects.service";
+import {ItemsCreateComponent} from "../../items.create.component";
 
 
 @Component({
@@ -11,36 +12,22 @@ import {ProjectsService} from "../projects.service";
     styleUrls: ['./projects.create.component.scss']
 })
 
-export class ProjectsCreateComponent implements OnInit {
+export class ProjectsCreateComponent extends ItemsCreateComponent implements OnInit {
 
-    public project: Project = new Project();
+    public item: Project = new Project();
 
-    constructor(private api: ApiService,
-                private projectService: ProjectsService,
-                private router: Router) {
+    constructor(api: ApiService,
+                projectService: ProjectsService,
+                router: Router) {
+        super(api, projectService, router);
     }
 
-    ngOnInit() {
-    }
-
-    public onSubmit() {
-        this.projectService.createItem(
-            this.prepareData(),
-            this.createCallback.bind(this)
-        );
-    }
 
     prepareData() {
         return {
-            'company_id':     this.project.company_id,
-            'name': this.project.name,
-            'description': this.project.description,
+            'company_id': this.item.company_id,
+            'name': this.item.name,
+            'description': this.item.description,
         }
     }
-
-    createCallback(result) {
-        this.router.navigateByUrl('/projects/list');
-    }
-
-
 }
