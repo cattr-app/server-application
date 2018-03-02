@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">{{ task.id }} - {{ task.task_name }}</div>
+                <div class="panel-heading">{{ item.id }} - {{ item.task_name }}</div>
                 <div class="panel-body">
 
                     <a routerLink="/tasks/list" title="Back">
@@ -11,7 +11,7 @@
                             Back
                         </button>
                     </a>
-                    <a [routerLink]="['/tasks/edit', task.id]" title="Edit task">
+                    <a [routerLink]="['/tasks/edit', item.id]" title="Edit task">
                         <button class="btn btn-primary">
                             <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                             Edit
@@ -23,39 +23,39 @@
                                 <tbody>
                                 <tr>
                                     <th>ID</th>
-                                    <td>{{ task.id }}</td>
+                                    <td>{{ item.id }}</td>
                                 </tr>
                                 <tr>
                                     <th> Project Id</th>
-                                    <td> {{ task.project_id }}</td>
+                                    <td> {{ item.project_id }}</td>
                                 </tr>
                                 <tr>
                                     <th> Name</th>
-                                    <td> {{ task.task_name }}</td>
+                                    <td> {{ item.task_name }}</td>
                                 </tr>
                                 <tr>
                                     <th> Active</th>
-                                    <td> {{ task.active }}</td>
+                                    <td> {{ item.active }}</td>
                                 </tr>
                                 <tr>
                                     <th> User ID</th>
-                                    <td> {{ task.user_id }}</td>
+                                    <td> {{ item.user_id }}</td>
                                 </tr>
                                 <tr>
                                     <th> Assigned by</th>
-                                    <td> {{ task.assigned_by }}</td>
+                                    <td> {{ item.assigned_by }}</td>
                                 </tr>
                                 <tr>
                                     <th> URL</th>
-                                    <td> {{ task.url }}</td>
+                                    <td> {{ item.url }}</td>
                                 </tr>
                                 <tr>
                                     <th> Created at</th>
-                                    <td> {{ task.created_at }}</td>
+                                    <td> {{ item.created_at }}</td>
                                 </tr>
                                 <tr>
                                     <th> Updated at</th>
-                                    <td> {{ task.updated_at }}</td>
+                                    <td> {{ item.updated_at }}</td>
                                 </tr>
                                 </tbody>
                             </table>

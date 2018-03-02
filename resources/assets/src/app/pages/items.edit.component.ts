@@ -14,7 +14,7 @@ export abstract class ItemsEditComponent implements OnInit {
     abstract prepareData();
 
     constructor(protected api: ApiService,
-                protected userService: ItemsService,
+                protected itemService: ItemsService,
                 protected router: ActivatedRoute) {
     }
 
@@ -23,11 +23,11 @@ export abstract class ItemsEditComponent implements OnInit {
             this.id = +params['id'];
         });
 
-        this.userService.getItem(this.id, this.setItem.bind(this));
+        this.itemService.getItem(this.id, this.setItem.bind(this));
     }
 
     public onSubmit() {
-        this.userService.editItem(
+        this.itemService.editItem(
             this.id,
             this.prepareData(),
             this.editCallback.bind(this)

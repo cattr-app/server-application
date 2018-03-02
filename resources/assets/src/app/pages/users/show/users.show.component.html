@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">{{ user.id }} - {{ user.first_name }}</div>
+                <div class="panel-heading">{{ item.id }} - {{ item.first_name }}</div>
                 <div class="panel-body">
 
                     <a routerLink="/users/list" title="Back">
@@ -11,7 +11,7 @@
                             Back
                         </button>
                     </a>
-                    <a [routerLink]="['/users/edit', user.id]" title="Edit user">
+                    <a [routerLink]="['/users/edit', item.id]" title="Edit user">
                         <button class="btn btn-primary">
                             <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                             Edit
@@ -23,31 +23,31 @@
                                 <tbody>
                                 <tr>
                                     <th>ID</th>
-                                    <td>{{ user.id }}</td>
+                                    <td>{{ item.id }}</td>
                                 </tr>
                                 <tr>
                                     <th> First Name</th>
-                                    <td> {{ user.first_name }}</td>
+                                    <td> {{ item.first_name }}</td>
                                 </tr>
                                 <tr>
                                     <th>Last Name</th>
-                                    <td> {{ user.last_name }}</td>
+                                    <td> {{ item.last_name }}</td>
                                 </tr>
                                 <tr>
                                     <th> Email</th>
-                                    <td> {{ user.email }}</td>
+                                    <td> {{ item.email }}</td>
                                 </tr>
                                 <tr>
                                     <th> Level</th>
-                                    <td> {{ user.level }}</td>
+                                    <td> {{ item.level }}</td>
                                 </tr>
                                 <tr>
                                     <th> Created at</th>
-                                    <td> {{ user.created_at }}</td>
+                                    <td> {{ item.created_at }}</td>
                                 </tr>
                                 <tr>
                                     <th> Updated at</th>
-                                    <td> {{ user.updated_at }}</td>
+                                    <td> {{ item.updated_at }}</td>
                                 </tr>
                                 </tbody>
                             </table>

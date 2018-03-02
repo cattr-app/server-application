@@ -1,34 +1,23 @@
-import { Component, OnInit } from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Project} from "../../../models/project.model";
 import {ProjectsService} from "../projects.service";
 import {ActivatedRoute} from "@angular/router";
+import {ItemsShowComponent} from "../../items.show.component";
+import {Task} from "../../../models/task.model";
 
 @Component({
     selector: 'app-projects-show',
     templateUrl: './projects.show.component.html',
     styleUrls: ['./projects.show.component.scss']
 })
-export class ProjectsShowComponent implements OnInit {
-    id: number;
-    private sub: any;
-    public project: Project = new Project();
+export class ProjectsShowComponent extends ItemsShowComponent implements OnInit {
 
-    constructor(
-        private api: ApiService,
-        private projectService: ProjectsService,
-        private router: ActivatedRoute
-    ) {}
+    public item: Project;
 
-    ngOnInit() {
-        this.sub = this.router.params.subscribe(params => {
-            this.id = +params['id'];
-        });
-
-        this.projectService.getItem(this.id, this.setProject.bind(this));
-    }
-
-    setProject(result) {
-        this.project = result;
+    constructor(api: ApiService,
+                projectService: ProjectsService,
+                router: ActivatedRoute) {
+        super(api, projectService, router);
     }
 }
