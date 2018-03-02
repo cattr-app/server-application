@@ -22,6 +22,8 @@ export abstract class ItemsService {
     }
 
     editItem(id, data, callback) {
+        data.id = id;
+
         this.api.send(
             this.getApiPath() + '/edit',
             data,

@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Edit {{user.first_name}} {{user.last_name}}</div>
+                <div class="panel-heading">Edit {{item.first_name}} {{item.last_name}}</div>
                 <div class="panel-body">
                     <a routerLink="/users/list" title="Back">
                         <button class="btn btn-warning">
@@ -15,121 +15,127 @@
                             <div class="form-group row">
                                 <label class="col-md-2">First Name</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-company-id" [(ngModel)]="user.first_name">
+                                    <input type="text" class="form-control" name="user-company-id" [(ngModel)]="item.first_name">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Last Name</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-name" [(ngModel)]="user.last_name">
+                                    <input type="text" class="form-control" name="user-name" [(ngModel)]="item.last_name">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Email</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-email" [(ngModel)]="user.email">
+                                    <input type="text" class="form-control" name="user-email" [(ngModel)]="item.email">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">URL</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-url" [(ngModel)]="user.url">
+                                    <input type="text" class="form-control" name="user-url" [(ngModel)]="item.url">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Company Id</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-company_id" [(ngModel)]="user.company_id">
+                                    <input type="text" class="form-control" name="user-company_id" [(ngModel)]="item.company_id">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Level</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-level" [(ngModel)]="user.level">
+                                    <input type="text" class="form-control" name="user-level" [(ngModel)]="item.level">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Payroll Access</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-payroll-access" [(ngModel)]="user.payroll_access">
+                                    <input type="text" class="form-control" name="user-payroll-access" [(ngModel)]="item.payroll_access">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Billing Access</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-billing-access" [(ngModel)]="user.billing_access">
+                                    <input type="text" class="form-control" name="user-billing-access" [(ngModel)]="item.billing_access">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-md-2">Avatar</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="user-billing-access" [(ngModel)]="item.avatar">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Screenshots Active</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-screenshots-active" [(ngModel)]="user.screenshots_active">
+                                    <input type="text" class="form-control" name="user-screenshots-active" [(ngModel)]="item.screenshots_active">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Manual time</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-manual-time" [(ngModel)]="user.manual_time">
+                                    <input type="text" class="form-control" name="user-manual-time" [(ngModel)]="item.manual_time">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Permanent tasks</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-permanent-tasks" [(ngModel)]="user.permanent_tasks">
+                                    <input type="text" class="form-control" name="user-permanent-tasks" [(ngModel)]="item.permanent_tasks">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Computer time popup</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-computer-time-popup" [(ngModel)]="user.computer_time_popup">
+                                    <input type="text" class="form-control" name="user-computer-time-popup" [(ngModel)]="item.computer_time_popup">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Poor time popup</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-poor-time-popup" [(ngModel)]="user.poor_time_popup">
+                                    <input type="text" class="form-control" name="user-poor-time-popup" [(ngModel)]="item.poor_time_popup">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Blur screenshots</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-blur-screenshots" [(ngModel)]="user.blur_screenshots">
+                                    <input type="text" class="form-control" name="user-blur-screenshots" [(ngModel)]="item.blur_screenshots">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Web and app monitoring</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-web-and-app-monitoring" [(ngModel)]="user.web_and_app_monitoring">
+                                    <input type="text" class="form-control" name="user-web-and-app-monitoring" [(ngModel)]="item.web_and_app_monitoring">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Webcam Shots</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-webcam-shots" [(ngModel)]="user.webcam_shots">
+                                    <input type="text" class="form-control" name="user-webcam-shots" [(ngModel)]="item.webcam_shots">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Screenshots Interval</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-screenshots-interval" [(ngModel)]="user.screenshots_interval">
+                                    <input type="text" class="form-control" name="user-screenshots-interval" [(ngModel)]="item.screenshots_interval">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">User role value</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-user-role-value" [(ngModel)]="user.user_role_value">
+                                    <input type="text" class="form-control" name="user-user-role-value" [(ngModel)]="item.user_role_value">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Active</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-active" [(ngModel)]="user.active">
+                                    <input type="text" class="form-control" name="user-active" [(ngModel)]="item.active">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Password</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-password" [(ngModel)]="user.password">
+                                    <input type="text" class="form-control" name="user-password" [(ngModel)]="item.password">
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">Update</button>

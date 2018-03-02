@@ -70,7 +70,7 @@ class UserController extends Controller
      */
     public function edit(Request $request)
     {
-        $userId = $request->get('user_id');
+        $userId = $request->get('id');
         $user = User::findOrFail($userId);
 
         $user->full_name = $request->get('full_name');

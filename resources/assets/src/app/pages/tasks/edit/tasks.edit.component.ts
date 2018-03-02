@@ -3,55 +3,31 @@ import {ApiService} from '../../../api/api.service';
 import {Task} from "../../../models/task.model";
 import {ActivatedRoute} from "@angular/router";
 import {TasksService} from "../tasks.service";
-
+import {ItemsEditComponent} from "../../items.edit.component";
 
 @Component({
     selector: 'app-tasks-edit',
     templateUrl: './tasks.edit.component.html',
     styleUrls: ['./tasks.edit.component.scss']
 })
-export class TasksEditComponent implements OnInit {
-    id: number;
-    private sub: any;
-    public task: Task = new Task();
+export class TasksEditComponent extends ItemsEditComponent implements OnInit {
 
-    constructor(private api: ApiService,
-                private taskService: TasksService,
-                private router: ActivatedRoute) {
-    }
+    public item: Task;
 
-    ngOnInit() {
-        this.sub = this.router.params.subscribe(params => {
-            this.id = +params['id'];
-        });
-
-        this.taskService.getItem(this.id, this.setTask.bind(this));
-    }
-
-    public onSubmit() {
-        this.taskService.editItem(
-            this.id,
-            this.prepareData(),
-            this.editCallback.bind(this)
-        );
+    constructor(api: ApiService,
+                taskService: TasksService,
+                router: ActivatedRoute) {
+        super(api, taskService, router)
     }
 
     prepareData() {
         return {
-            'project_id': this.task.project_id,
-            'task_name': this.task.task_name,
-            'active': this.task.active,
-            'user_id': this.task.user_id,
-            'assigned_by': this.task.assigned_by,
-            'url': this.task.url
+            'project_id': this.item.project_id,
+            'task_name': this.item.task_name,
+            'active': this.item.active,
+            'user_id': this.item.user_id,
+            'assigned_by': this.item.assigned_by,
+            'url': this.item.url
         }
-    }
-
-    setTask(result) {
-        this.task = result;
-    }
-
-    editCallback(result) {
-        console.log("Updated");
     }
 }
