@@ -92,7 +92,7 @@ class TaskController extends Controller
      */
     public function destroy(Request $request)
     {
-        $taskId = $request->get('task_id');
+        $taskId = $request->get('id');
 
         $task = Task::findOrFail($taskId);
         $task->delete();

@@ -12,7 +12,7 @@ import {ItemsShowComponent} from "../../items.show.component";
 })
 export class TasksShowComponent extends ItemsShowComponent implements OnInit {
 
-    public item: Task;
+    public item: Task = new Task();
 
     constructor(api: ApiService,
                 taskService: TasksService,

@@ -22,7 +22,6 @@ export class ProjectsCreateComponent extends ItemsCreateComponent implements OnI
         super(api, projectService, router);
     }
 
-
     prepareData() {
         return {
             'company_id': this.item.company_id,

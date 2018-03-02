@@ -13,7 +13,7 @@ import {Task} from "../../../models/task.model";
 })
 export class ProjectsShowComponent extends ItemsShowComponent implements OnInit {
 
-    public item: Project;
+    public item: Project = new Project();
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
