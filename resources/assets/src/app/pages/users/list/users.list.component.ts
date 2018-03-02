@@ -24,7 +24,7 @@ export class UsersListComponent implements OnInit {
                 private modalService: BsModalService) { }
 
     ngOnInit() {
-        this.userService.getUsers(this.setUsers.bind(this));
+        this.userService.getItems(this.setUsers.bind(this));
     }
 
     setUsers(result) {
@@ -32,7 +32,7 @@ export class UsersListComponent implements OnInit {
     }
 
     removeUser() {
-        this.userService.removeUser(this.userIdForRemoving, this.removeUserCallback.bind(this));
+        this.userService.removeItem(this.userIdForRemoving, this.removeUserCallback.bind(this));
         this.modalRef.hide();
     }
 

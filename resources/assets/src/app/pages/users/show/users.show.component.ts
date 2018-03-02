@@ -24,7 +24,7 @@ export class UsersShowComponent implements OnInit {
             this.id = +params['id'];
         });
 
-        this.userService.getUser(this.id, this.setUser.bind(this));
+        this.userService.getItem(this.id, this.setUser.bind(this));
     }
 
     setUser(result) {

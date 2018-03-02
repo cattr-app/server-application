@@ -56,7 +56,7 @@ class UserController extends Controller
      */
     public function show(Request $request)
     {
-        $userId = $request->get('user_id');
+        $userId = $request->get('id');
         $user = User::findOrFail($userId);
 
         return response()->json($user, 200);
@@ -112,7 +112,7 @@ class UserController extends Controller
      */
     public function destroy(Request $request)
     {
-        $userId = $request->get('user_id');
+        $userId = $request->get('id');
 
         $user = User::findOrFail($userId);
         $user->delete();
