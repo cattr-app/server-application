@@ -5,6 +5,8 @@ import {ProjectsService} from "../projects.service";
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {Router} from "@angular/router";
+import {ItemsListComponent} from "../../items.list.component";
+import {Task} from "../../../models/task.model";
 
 
 @Component({
@@ -12,43 +14,13 @@ import {Router} from "@angular/router";
     templateUrl: './projects.list.component.html',
     styleUrls: ['./projects.list.component.scss']
 })
-export class ProjectsListComponent implements OnInit {
+export class ProjectsListComponent extends ItemsListComponent implements OnInit {
 
-    projectsArray: Project[] = [];
-    modalRef: BsModalRef;
+    itemsArray: Project[] = [];
 
-    projectIdForRemoving = 0;
-
-    constructor(private api: ApiService,
-                private projectService: ProjectsService,
-                private modalService: BsModalService,
-                private router: Router) {
-
-    }
-
-    ngOnInit() {
-        this.projectService.getItems(this.setProjects.bind(this));
-    }
-
-    setProjects(result) {
-        this.projectsArray = result;
-    }
-
-    removeProject() {
-        this.projectService.removeItem(this.projectIdForRemoving, this.removeProjectCallback.bind(this));
-        this.modalRef.hide();
-    }
-
-    ngOnDestroy() {
-        this.projectsArray = [];
-    }
-
-    openRemoveProjectModalWindow(template: TemplateRef<any>, projectId) {
-        this.projectIdForRemoving = projectId;
-        this.modalRef = this.modalService.show(template);
-    }
-
-    removeProjectCallback(result) {
-        location.reload();
+    constructor(api: ApiService,
+                projectService: ProjectsService,
+                modalService: BsModalService,) {
+        super(api, projectService, modalService);
     }
 }

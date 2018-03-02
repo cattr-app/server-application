@@ -3,45 +3,20 @@ import {ApiService} from '../../../api/api.service';
 import {TasksService} from "../../tasks/tasks.service";
 import {Task} from "../../../models/task.model";
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
+import {ItemsListComponent} from "../../items.list.component";
 
 @Component({
     selector: 'app-tasks-list',
     templateUrl: './tasks.list.component.html',
     styleUrls: ['./tasks.list.component.scss']
 })
-export class TasksListComponent implements OnInit {
+export class TasksListComponent extends ItemsListComponent implements OnInit {
 
-    tasksArray: Task[] = [];
+    itemsArray: Task[] = [];
 
-    modalRef: BsModalRef;
-
-    taskIdForRemoving = 0;
-
-    constructor(private api: ApiService,
-                private taskService: TasksService,
-                private modalService: BsModalService,) { }
-
-    ngOnInit() {
-        this.taskService.getItems(this.setTasks.bind(this));
+    constructor(api: ApiService,
+                taskService: TasksService,
+                modalService: BsModalService,) {
+        super(api, taskService, modalService);
     }
-
-    setTasks(result) {
-        this.tasksArray = result;
-    }
-
-    removeTask() {
-        this.taskService.removeItem(this.taskIdForRemoving, this.removeTaskCallback.bind(this));
-        this.modalRef.hide();
-    }
-
-    openRemoveTaskModalWindow(template: TemplateRef<any>,taskId) {
-        this.taskIdForRemoving = taskId;
-        this.modalRef = this.modalService.show(template);
-    }
-
-    removeTaskCallback(result) {
-        location.reload();
-    }
-
 }

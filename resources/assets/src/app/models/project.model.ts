@@ -1,5 +1,15 @@
 import {Item} from "./item.model";
 
+export interface ProjectData {
+    id: number;
+    company_id?: string;
+    name?: string;
+    description?: string;
+    deleted_at?: string;
+    created_at?: string;
+    updated_at?: string;
+}
+
 export class Project extends Item {
     public id: number;
     public company_id?: string;
@@ -9,14 +19,13 @@ export class Project extends Item {
     public created_at?: string;
     public updated_at?: string;
 
-    constructor(id?, companyId?, name?, description?, deletedAt?, createdAt?, updatedAt?) {
+    constructor(data?: ProjectData) {
         super();
-        this.id = id;
-        this.company_id = companyId;
-        this.name = name;
-        this.description = description;
-        this.deleted_at = deletedAt;
-        this.created_at = createdAt;
-        this.updated_at = updatedAt;
+
+        if (data) {
+            for (let key in data) {
+                this[key] = data[key];
+            }
+        }
     }
 }

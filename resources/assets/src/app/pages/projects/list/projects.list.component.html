@@ -20,7 +20,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let project of projectsArray">
+                            <tr *ngFor="let project of itemsArray">
                                 <td>{{project.id}}</td>
                                 <td>{{project.name}}</td>
                                 <td>{{project.description}}</td>
@@ -37,7 +37,7 @@
                                             Edit
                                         </button>
                                     </a>
-                                    <a (click)="openRemoveProjectModalWindow(template, project.id)" title="Delete project">
+                                    <a (click)="openRemoveItemModalWindow(template, project.id)" title="Delete project">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
                                             Delete

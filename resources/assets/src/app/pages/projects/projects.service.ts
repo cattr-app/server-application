@@ -15,15 +15,7 @@ export class ProjectsService extends ItemsService {
     }
 
     convertFromApi(itemFromApi) {
-        return new Project(
-            itemFromApi.id,
-            itemFromApi.company_id,
-            itemFromApi.name,
-            itemFromApi.description,
-            itemFromApi.deleted_at,
-            itemFromApi.created_at,
-            itemFromApi.updated_at
-        )
+        return new Project(itemFromApi)
     }
 
 }

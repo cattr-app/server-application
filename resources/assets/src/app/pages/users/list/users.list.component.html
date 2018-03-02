@@ -21,7 +21,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let user of usersArray">
+                            <tr *ngFor="let user of itemsArray">
                                 <td>{{user.id}}</td>
                                 <td>{{user.first_name}}</td>
                                 <td>{{user.last_name}}</td>
@@ -39,7 +39,7 @@
                                             Edit
                                         </button>
                                     </a>
-                                    <a (click)="openRemoveUserModalWindow(template, user.id)" title="Delete user">
+                                    <a (click)="openRemoveItemModalWindow(template, user.id)" title="Delete user">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
                                             Delete

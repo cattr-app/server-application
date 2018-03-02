@@ -2,47 +2,23 @@ import {Component, OnInit, TemplateRef} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import {User} from "../../../models/user.model";
 import {UsersService} from "../users.service";
+import {ItemsListComponent} from "../../items.list.component";
+import {User} from "../../../models/user.model";
 
 @Component({
     selector: 'app-users-list',
     templateUrl: './users.list.component.html',
     styleUrls: ['./users.list.component.scss']
 })
-export class UsersListComponent implements OnInit {
+export class UsersListComponent extends ItemsListComponent implements OnInit {
 
-    usersArray: User[] = [];
+    itemsArray: User[] = [];
 
-    modalRef: BsModalRef;
-
-    userIdForRemoving = 0;
-
-    constructor(private api: ApiService,
-                private userService: UsersService,
-                private modalService: BsModalService) { }
-
-    ngOnInit() {
-        this.userService.getItems(this.setUsers.bind(this));
-    }
-
-    setUsers(result) {
-        this.usersArray = result;
-    }
-
-    removeUser() {
-        this.userService.removeItem(this.userIdForRemoving, this.removeUserCallback.bind(this));
-        this.modalRef.hide();
-    }
-
-    openRemoveUserModalWindow(template: TemplateRef<any>,taskId) {
-        this.userIdForRemoving = taskId;
-        this.modalRef = this.modalService.show(template);
-    }
-
-    removeUserCallback(result) {
-        location.reload();
+    constructor(api: ApiService,
+                userService: UsersService,
+                modalService: BsModalService) {
+        super(api, userService, modalService);
     }
 
 }

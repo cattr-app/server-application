@@ -1,4 +1,4 @@
-/*import {Component, OnInit, TemplateRef} from '@angular/core';
+import {Component, OnInit, TemplateRef} from '@angular/core';
 import {ApiService} from '../api/api.service';
 import {ItemsService} from "./items.service";
 
@@ -6,9 +6,6 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {Item} from "../models/item.model";
 
-@Component({
-    selector: 'app-item-list',
-})
 export abstract class ItemsListComponent implements OnInit {
 
     itemsArray: Item[] = [];
@@ -17,9 +14,9 @@ export abstract class ItemsListComponent implements OnInit {
 
     itemIdForRemoving = 0;
 
-    constructor(private api: ApiService,
-                private itemService: ItemsService,
-                private modalService: BsModalService) {
+    constructor(protected api: ApiService,
+                protected itemService: ItemsService,
+                protected modalService: BsModalService) {
     }
 
     ngOnInit() {
@@ -31,7 +28,7 @@ export abstract class ItemsListComponent implements OnInit {
     }
 
     removeItem() {
-        this.itemService.removeTask(this.itemIdForRemoving, this.removeItemCallback.bind(this));
+        this.itemService.removeItem(this.itemIdForRemoving, this.removeItemCallback.bind(this));
         this.modalRef.hide();
     }
 
@@ -43,4 +40,9 @@ export abstract class ItemsListComponent implements OnInit {
     removeItemCallback(result) {
         location.reload();
     }
-}*/
+}
+
+
+
+
+
