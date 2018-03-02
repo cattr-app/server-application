@@ -7,7 +7,7 @@ import {ItemsCreateComponent} from "../../items.create.component";
 
 @Component({
     selector: 'app-projects-create',
-    templateUrl: './projects.create.component.html',
+    templateUrl: '../../items.create.component.html',
     styleUrls: ['../../items.component.scss']
 })
 
@@ -27,5 +27,17 @@ export class ProjectsCreateComponent extends ItemsCreateComponent implements OnI
             'name': this.item.name,
             'description': this.item.description,
         }
+    }
+
+    getHeader() {
+        return "Create New Project";
+    }
+
+    getFields() {
+        return [
+            {'label': 'Company Id', 'name': 'project-company-id', 'model': 'company_id'},
+            {'label': 'Name', 'name': 'project-name', 'model': 'name'},
+            {'label': 'Description', 'name': 'project-description', 'model': 'description'},
+        ];
     }
 }

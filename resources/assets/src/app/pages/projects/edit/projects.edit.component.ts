@@ -7,7 +7,7 @@ import {ItemsEditComponent} from "../../items.edit.component";
 
 @Component({
     selector: 'app-projects-edit',
-    templateUrl: './projects.edit.component.html',
+    templateUrl: '../../items.create.component.html',
     styleUrls: ['../../items.component.scss']
 })
 export class ProjectsEditComponent extends ItemsEditComponent implements OnInit {
@@ -26,6 +26,17 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
             'name': this.item.name,
             'description': this.item.description,
         }
+    }
+    getHeader() {
+        return "Edit Project";
+    }
+
+    getFields() {
+        return [
+            {'label': 'Company Id', 'name': 'project-company-id', 'model': 'company_id'},
+            {'label': 'Name', 'name': 'project-name', 'model': 'name'},
+            {'label': 'Description', 'name': 'project-description', 'model': 'description'},
+        ];
     }
 
 }

@@ -1,0 +1,28 @@
+<div class="container">
+    <div class="row">
+        <div class="col col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">{{getHeader()}}</div>
+                <div class="panel-body">
+                    <a routerLink="/projects/list" title="Back">
+                        <button class="btn btn-warning">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            Back
+                        </button>
+                    </a>
+                    <div class="create-form">
+                        <form (ngSubmit)="onSubmit()">
+                            <div *ngFor="let field of getFields()" class="form-group row">
+                                <label class="col-md-2">{{field.label}}</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="{{field.name}}" ng-model="item[field.model]">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Create</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
