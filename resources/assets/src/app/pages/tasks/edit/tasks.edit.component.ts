@@ -25,11 +25,11 @@ export class TasksEditComponent implements OnInit {
             this.id = +params['id'];
         });
 
-        this.taskService.getTask(this.id, this.setTask.bind(this));
+        this.taskService.getItem(this.id, this.setTask.bind(this));
     }
 
     public onSubmit() {
-        this.taskService.editTask(
+        this.taskService.editItem(
             this.id,
             this.prepareData(),
             this.editCallback.bind(this)

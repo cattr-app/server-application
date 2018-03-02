@@ -25,7 +25,7 @@ export class ProjectsShowComponent implements OnInit {
             this.id = +params['id'];
         });
 
-        this.projectService.getProject(this.id, this.setProject.bind(this));
+        this.projectService.getItem(this.id, this.setProject.bind(this));
     }
 
     setProject(result) {

@@ -1,91 +1,28 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import {ApiService} from "../../api/api.service";
 import {Project} from "../../models/project.model";
-import {Task} from "../../models/task.model";
+import {ItemsService} from "../items.service";
 
 @Injectable()
-export class ProjectsService {
+export class ProjectsService extends ItemsService {
 
-    constructor(private api: ApiService) {
+    constructor(api: ApiService) {
+        super(api);
     }
 
-    createProject(companyId, name, description, callback) {
-        this.api.send(
-            'projects/create',
-            {
-                'company_id': companyId,
-                'name': name,
-                'description': description
-            },
-            (result) => {
-                callback(result);
-            }
-        );
+    getApiPath() {
+        return 'projects';
     }
 
-    editProject(projectId, companyId, name, description, callback) {
-        this.api.send(
-            'projects/edit',
-            {
-                'project_id': projectId,
-                'company_id': companyId,
-                'name': name,
-                'description': description
-            },
-            (result) => {
-                callback(result);
-            }
-        );
-    }
-
-    getProject(projectId, callback) {
-        let project: Project;
-
-        return this.api.send(
-            'projects/show',
-            {'project_id': projectId},
-            (projectFromApi) => {
-                project = ProjectsService.convertFromApi(projectFromApi);
-                callback(project);
-            });
-    }
-
-    getProjects(callback) {
-        let projectsArray: Project[] = [];
-
-        return this.api.send(
-            'projects/list',
-            [],
-            (result) => {
-                result.data.forEach(function (projectFromApi) {
-                    projectsArray.push(ProjectsService.convertFromApi(projectFromApi));
-                });
-
-                callback(projectsArray);
-            });
-    }
-
-    removeProject(projectId, callback) {
-        this.api.send(
-            'projects/remove',
-            {
-                'project_id': projectId,
-            },
-            (result) => {
-                callback(result);
-            }
-        );
-    }
-
-    static convertFromApi(projectFromApi) {
+    convertFromApi(itemFromApi) {
         return new Project(
-            projectFromApi.id,
-            projectFromApi.company_id,
-            projectFromApi.name,
-            projectFromApi.description,
-            projectFromApi.deleted_at,
-            projectFromApi.created_at,
-            projectFromApi.updated_at
+            itemFromApi.id,
+            itemFromApi.company_id,
+            itemFromApi.name,
+            itemFromApi.description,
+            itemFromApi.deleted_at,
+            itemFromApi.created_at,
+            itemFromApi.updated_at
         )
     }
 

@@ -24,7 +24,7 @@ export class TasksShowComponent implements OnInit {
             this.id = +params['id'];
         });
 
-        this.taskService.getTask(this.id, this.setTask.bind(this));
+        this.taskService.getItem(this.id, this.setTask.bind(this));
     }
 
     setTask(result) {

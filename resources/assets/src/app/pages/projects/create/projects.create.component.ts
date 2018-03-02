@@ -24,12 +24,18 @@ export class ProjectsCreateComponent implements OnInit {
     }
 
     public onSubmit() {
-        this.projectService.createProject(
-            this.project.company_id,
-            this.project.name,
-            this.project.description,
+        this.projectService.createItem(
+            this.prepareData(),
             this.createCallback.bind(this)
         );
+    }
+
+    prepareData() {
+        return {
+            'company_id':     this.project.company_id,
+            'name': this.project.name,
+            'description': this.project.description,
+        }
     }
 
     createCallback(result) {

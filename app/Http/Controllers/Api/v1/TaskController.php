@@ -54,7 +54,7 @@ class TaskController extends Controller
      */
     public function show(Request $request)
     {
-        $taskId = $request->get('task_id');
+        $taskId = $request->get('id');
         $task = Task::findOrFail($taskId);
 
         return response()->json($task, 200);
@@ -68,7 +68,7 @@ class TaskController extends Controller
      */
     public function edit(Request $request)
     {
-        $taskId = $request->get('task_id');
+        $taskId = $request->get('id');
         $task = Task::findOrFail($taskId);
 
         $task->project_id = $request->get('project_id');

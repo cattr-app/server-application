@@ -24,7 +24,7 @@ export class TasksCreateComponent implements OnInit {
     }
 
     public onSubmit() {
-        this.taskService.createTask(
+        this.taskService.createItem(
             this.prepareData(),
             this.createCallback.bind(this)
         );

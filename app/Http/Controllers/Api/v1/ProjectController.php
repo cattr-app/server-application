@@ -55,7 +55,7 @@ class ProjectController extends Controller
      */
     public function show(Request $request)
     {
-        $projectId = $request->get('project_id');
+        $projectId = $request->get('id');
         $project = Project::findOrFail($projectId);
 
         return response()->json($project, 200);
@@ -69,7 +69,7 @@ class ProjectController extends Controller
      */
     public function edit(Request $request)
     {
-        $projectId = $request->get('project_id');
+        $projectId = $request->get('id');
         $project = Project::findOrFail($projectId);
 
         $project->company_id = $request->get('company_id');
@@ -92,7 +92,7 @@ class ProjectController extends Controller
      */
     public function destroy(Request $request)
     {
-        $projectId = $request->get('project_id');
+        $projectId = $request->get('id');
 
         $project = Project::findOrFail($projectId);
         $project->delete();

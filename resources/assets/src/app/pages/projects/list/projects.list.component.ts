@@ -27,7 +27,7 @@ export class ProjectsListComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.projectService.getProjects(this.setProjects.bind(this));
+        this.projectService.getItems(this.setProjects.bind(this));
     }
 
     setProjects(result) {
@@ -35,7 +35,7 @@ export class ProjectsListComponent implements OnInit {
     }
 
     removeProject() {
-        this.projectService.removeProject(this.projectIdForRemoving, this.removeProjectCallback.bind(this));
+        this.projectService.removeItem(this.projectIdForRemoving, this.removeProjectCallback.bind(this));
         this.modalRef.hide();
     }
 

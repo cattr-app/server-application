@@ -23,7 +23,7 @@ export class TasksListComponent implements OnInit {
                 private modalService: BsModalService,) { }
 
     ngOnInit() {
-        this.taskService.getTasks(this.setTasks.bind(this));
+        this.taskService.getItems(this.setTasks.bind(this));
     }
 
     setTasks(result) {
@@ -31,7 +31,7 @@ export class TasksListComponent implements OnInit {
     }
 
     removeTask() {
-        this.taskService.removeTask(this.taskIdForRemoving, this.removeTaskCallback.bind(this));
+        this.taskService.removeItem(this.taskIdForRemoving, this.removeTaskCallback.bind(this));
         this.modalRef.hide();
     }
 

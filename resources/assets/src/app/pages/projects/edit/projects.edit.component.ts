@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {ProjectsService} from "../projects.service";
-import { ActivatedRoute } from '@angular/router';
+import {ActivatedRoute} from '@angular/router';
 import {Project} from "../../../models/project.model";
 
 
@@ -16,18 +16,17 @@ export class ProjectsEditComponent implements OnInit {
     private sub: any;
     public project: Project = new Project();
 
-    constructor(
-        private api: ApiService,
-        private projectService: ProjectsService,
-        private router: ActivatedRoute
-    ) {}
+    constructor(private api: ApiService,
+                private projectService: ProjectsService,
+                private router: ActivatedRoute) {
+    }
 
     ngOnInit() {
         this.sub = this.router.params.subscribe(params => {
             this.id = +params['id'];
         });
 
-        this.projectService.getProject(this.id, this.setProject.bind(this));
+        this.projectService.getItem(this.id, this.setProject.bind(this));
     }
 
     setProject(result) {
@@ -35,13 +34,19 @@ export class ProjectsEditComponent implements OnInit {
     }
 
     public onSubmit() {
-        this.projectService.editProject(
+        this.projectService.editItem(
             this.id,
-            this.project.company_id,
-            this.project.name,
-            this.project.description,
+            this.prepareData(),
             this.editCallback.bind(this)
         );
+    }
+
+    prepareData() {
+        return {
+            'company_id': this.project.company_id,
+            'name': this.project.name,
+            'description': this.project.description,
+        }
     }
 
     editCallback(result) {

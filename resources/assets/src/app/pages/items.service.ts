@@ -5,12 +5,15 @@ import {Item} from "../models/item.model";
 @Injectable()
 export abstract class ItemsService {
 
+    abstract convertFromApi(itemFromApi);
+    abstract getApiPath();
+
     constructor(private api: ApiService) {
     }
 
-    createItem(path, data, callback) {
+    createItem(data, callback) {
         this.api.send(
-            path + '/create',
+            this.getApiPath() + '/create',
             data,
             (result) => {
                 callback(result);
@@ -18,9 +21,9 @@ export abstract class ItemsService {
         );
     }
 
-    editItem(id, path, data, callback) {
+    editItem(id, data, callback) {
         this.api.send(
-            path + '/edit',
+            this.getApiPath() + '/edit',
             data,
             (result) => {
                 callback(result);
@@ -28,40 +31,36 @@ export abstract class ItemsService {
         );
     }
 
-    getItem(id, path, callback) {
-        let cls = this.getItemClass();
+    getItem(id, callback) {
         let item: Item;
 
         return this.api.send(
-            path + '/show',
+            this.getApiPath() + '/show',
             {'id': id},
             (taskFromApi) => {
-                let item = cls.convertFromApi(taskFromApi);
+                item = this.convertFromApi(taskFromApi);
                 callback(item);
             });
     }
 
-    getItems(path, callback) {
-        let cls = this.getItemClass();
-        console.log(cls);
-
+    getItems(callback) {
         let itemsArray: Item[] = [];
 
         return this.api.send(
-            path + '/list',
+            this.getApiPath() + '/list',
             [],
             (result) => {
-                result.data.forEach(function (taskFromApi) {
-                    itemsArray.push(cls.convertFromApi(taskFromApi));
+                result.data.forEach((itemFromApi) => {
+                    itemsArray.push(this.convertFromApi(itemFromApi));
                 });
 
                 callback(itemsArray);
             });
     }
 
-    removeItem(id, path, callback) {
+    removeItem(id, callback) {
         this.api.send(
-            path + '/remove',
+            this.getApiPath() + '/remove',
             {
                 'id': id,
             },
@@ -70,8 +69,5 @@ export abstract class ItemsService {
             }
         );
     }
-
-    abstract getApiPath();
-    abstract getItemClass();
 }
 
