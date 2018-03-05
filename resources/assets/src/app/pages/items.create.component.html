@@ -12,10 +12,10 @@
                     </a>
                     <div class="create-form">
                         <form (ngSubmit)="onSubmit()">
-                            <div *ngFor="let field of getFields()" class="form-group row">
+                            <div *ngFor="let field of getFields(); let ind=index" class="form-group row">
                                 <label class="col-md-2">{{field.label}}</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="{{field.name}}" ng-model="item[field.model]">
+                                    <input type="text" class="form-control" name="{{field.name}}" [(ngModel)] = "field.model"> => {{field.model}}
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">Create</button>

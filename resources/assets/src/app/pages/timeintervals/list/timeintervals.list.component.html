@@ -1,0 +1,71 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Time Intervals</div>
+                <div class="panel-body">
+                    <a routerLink="/timeintervals/create" class="btn btn-success" title="Add new task">
+                        <i class="fa fa-plus" aria-hidden="true"></i> Add New
+                    </a>
+                    <br/>
+                    <br/>
+                    <div class="table-responsive">
+                        <table class="table table-borderless">
+                            <thead>
+                            <tr>
+                                <th>Time Interval Id</th>
+                                <th>Task Id</th>
+                                <th>Start at</th>
+                                <th>End at</th>
+                                <th>Actions</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr *ngFor="let task of itemsArray">
+                                <td>{{task.id}}</td>
+                                <td>{{task.task_id}}</td>
+                                <td>{{task.start_at}}</td>
+                                <td>{{task.end_at}}</td>
+
+                                <td>
+                                    <a [routerLink]="['/timeintervals/show', task.id]" title="View time interval">
+                                        <button class="btn btn-info btn-sm">
+                                            <i class="fa fa-eye" aria-hidden="true"></i>
+                                            View
+                                        </button>
+                                    </a>
+                                    <a [routerLink]="['/timeintervals/edit', task.id]" title="Edit time interval">
+                                        <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
+                                                                                  aria-hidden="true"></i>
+                                            Edit
+                                        </button>
+                                    </a>
+                                    <a (click)="openRemoveItemModalWindow(template, task.id)" title="Delete time interval">
+                                        <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
+                                                                                 aria-hidden="true"></i>
+                                            Delete
+                                        </button>
+                                    </a>
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+<ng-template #template>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Remove this time interval?</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <button type="button" class="btn btn-default" (click)="removeItem()">Yes</button>
+        <button type="button" class="btn btn-primary" (click)="modalRef.hide()">No</button>
+    </div>
+</ng-template>
+

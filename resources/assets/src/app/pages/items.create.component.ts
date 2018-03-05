@@ -30,4 +30,5 @@ export abstract class ItemsCreateComponent implements OnInit {
         console.log(result);
         this.router.navigateByUrl(this.itemService.getApiPath() + '/list');
     }
+
 }

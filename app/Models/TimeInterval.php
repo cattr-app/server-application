@@ -3,17 +3,19 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class TimeInterval extends Model
 {
-    
+    use SoftDeletes;
+
 	/**
      * table name from database
      * @var string
      */
     protected $table = 'time_intervals';
 
-
+    protected $fillable = array('task_id', 'start_at', 'end_at');
 
     public function task()
     {

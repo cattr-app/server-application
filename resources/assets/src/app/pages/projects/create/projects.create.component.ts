@@ -7,13 +7,15 @@ import {ItemsCreateComponent} from "../../items.create.component";
 
 @Component({
     selector: 'app-projects-create',
-    templateUrl: '../../items.create.component.html',
+    templateUrl: './projects.create.component.html',
     styleUrls: ['../../items.component.scss']
 })
 
 export class ProjectsCreateComponent extends ItemsCreateComponent implements OnInit {
 
     public item: Project = new Project();
+
+
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
@@ -40,4 +42,6 @@ export class ProjectsCreateComponent extends ItemsCreateComponent implements OnI
             {'label': 'Description', 'name': 'project-description', 'model': 'description'},
         ];
     }
+
+
 }

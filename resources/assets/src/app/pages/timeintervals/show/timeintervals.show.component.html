@@ -1,0 +1,56 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">{{ item.id }}</div>
+                <div class="panel-body">
+
+                    <a routerLink="/timeintervals/list" title="Back">
+                        <button class="btn btn-warning">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            Back
+                        </button>
+                    </a>
+                    <a [routerLink]="['/timeintervals/edit', item.id]" title="Edit time interval">
+                        <button class="btn btn-primary">
+                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                            Edit
+                        </button>
+                    </a>
+                    <div class="time-intervals-info">
+                        <div class="table-responsive">
+                            <table class="table table-borderless">
+                                <tbody>
+                                <tr>
+                                    <th>ID</th>
+                                    <td>{{ item.id }}</td>
+                                </tr>
+                                <tr>
+                                    <th> Task Id</th>
+                                    <td> {{ item.task_id }}</td>
+                                </tr>
+                                <tr>
+                                    <th> Start At</th>
+                                    <td> {{ item.start_at }}</td>
+                                </tr>
+                                <tr>
+                                    <th> End At</th>
+                                    <td> {{ item.end_at }}</td>
+                                </tr>
+                                <tr>
+                                    <th> Created at</th>
+                                    <td> {{ item.created_at }}</td>
+                                </tr>
+                                <tr>
+                                    <th> Updated at</th>
+                                    <td> {{ item.updated_at }}</td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

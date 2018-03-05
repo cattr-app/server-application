@@ -7,6 +7,8 @@ const routes: Routes = [
     {path: 'projects', loadChildren: './pages/projects/projects.module#ProjectsModule'},
     {path: 'tasks', loadChildren: './pages/tasks/tasks.module#TasksModule'},
     {path: 'users', loadChildren: './pages/users/users.module#UsersModule'},
+    {path: 'screenshots', loadChildren: './pages/screenshots/screenshots.module#ScreenshotsModule'},
+    {path: 'timeintervals', loadChildren: './pages/timeintervals/timeintervals.module#TimeIntervalsModule'},
     {path: 'auth', loadChildren: './auth/auth.module#AuthModule'},
     {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
     {path: 'dashboard', component: DashboardComponent}

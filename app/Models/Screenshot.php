@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 class Screenshot extends Model
 {
+    use SoftDeletes;
 
     /**
      * table name from database
@@ -13,6 +15,7 @@ class Screenshot extends Model
      */
     protected $table = 'screenshots';
 
+    protected $fillable = array('time_interval_id', 'name', 'path');
 
     public function timeInverval()
     {

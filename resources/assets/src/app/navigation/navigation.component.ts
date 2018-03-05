@@ -29,6 +29,8 @@ export class NavigationComponent implements OnInit {
         {title: "Projects", action: "projects/list", isLink: true},
         {title: "Tasks", action: "tasks/list", isLink: true},
         {title: "Users", action: "users/list", isLink: true},
+        {title: "Screenshots", action: "screenshots/list", isLink: true},
+        {title: "Time Intervals", action: "timeintervals/list", isLink: true},
         {title: "Logout", action: "onLogout", isLink: false},
     ];
 

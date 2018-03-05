@@ -61,6 +61,21 @@ Route::group([
     $router->post('/users/edit', 'Api\v1\UserController@edit');
     $router->post('/users/show', 'Api\v1\UserController@show');
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
+
+    //Screenshots routes
+    $router->post('/screenshots/list', 'Api\v1\ScreenshotController@index');
+    $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
+    $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
+    $router->post('/screenshots/show', 'Api\v1\ScreenshotController@show');
+    $router->post('/screenshots/remove', 'Api\v1\ScreenshotController@destroy');
+
+    //Time Intervals routes
+    $router->post('/timeintervals/list', 'Api\v1\TimeIntervalController@index');
+    $router->post('/timeintervals/create', 'Api\v1\TimeIntervalController@create');
+    $router->post('/timeintervals/edit', 'Api\v1\TimeIntervalController@edit');
+    $router->post('/timeintervals/show', 'Api\v1\TimeIntervalController@show');
+    $router->post('/timeintervals/remove', 'Api\v1\TimeIntervalController@destroy');
+
     //$router->resource('/webservice', 'Api\v1\WebserviceController');
 });
 
