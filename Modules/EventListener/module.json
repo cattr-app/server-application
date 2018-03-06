@@ -1,0 +1,16 @@
+{
+    "name": "EventListener",
+    "alias": "eventlistener",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\EventListener\\Providers\\EventListenerServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "start.php"
+    ],
+    "requires": []
+}
