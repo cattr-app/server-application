@@ -38,5 +38,10 @@ class UserController extends ItemController
             'password'               => 'required'
         ];
     }
+
+    function getEventUniqueNamePart()
+    {
+        return 'user';
+    }
 }
 
