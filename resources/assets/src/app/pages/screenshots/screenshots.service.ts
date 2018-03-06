@@ -7,6 +7,7 @@ import {Screenshot} from "../../models/screenshot.model";
 @Injectable()
 export class ScreenshotsService extends ItemsService {
 
+
     constructor(api: ApiService) {
         super(api);
     }
@@ -17,5 +18,15 @@ export class ScreenshotsService extends ItemsService {
 
     convertFromApi(itemFromApi) {
         return new Screenshot(itemFromApi);
+    }
+
+    createItem(data, callback) {
+        this.api.sendFile(
+            this.getApiPath() + '/create',
+            data,
+            (result) => {
+                callback(result);
+            }
+        );
     }
 }

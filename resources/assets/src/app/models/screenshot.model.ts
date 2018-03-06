@@ -3,7 +3,6 @@ import {Item} from "./item.model";
 export interface ScreenshotData {
     id: number;
     time_interval_id?: number;
-    name?: string;
     path?: string;
     deleted_at?: string;
     created_at?: string;
@@ -13,7 +12,6 @@ export interface ScreenshotData {
 export class Screenshot extends Item {
     public id: number;
     public time_interval_id?: number;
-    public name?: string;
     public path?: string;
     public deleted_at?: string;
     public created_at?: string;

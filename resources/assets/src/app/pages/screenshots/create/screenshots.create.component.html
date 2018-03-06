@@ -15,19 +15,14 @@
                             <div class="form-group row">
                                 <label class="col-md-2">Time Interval Id</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="screenshot-time-interval-id" [(ngModel)]="item.time_interval_id">
+                                    <input type="text" class="form-control" name="screenshot-time-interval-id"
+                                           [(ngModel)]="item.time_interval_id">
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2">Name</label>
+                                <label class="col-md-2">Choose File</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="screenshot-name" [(ngModel)]="item.name">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Path</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="screenshot-path" [(ngModel)]="item.path">
+                                    <input #fileInput type="file"/>
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">Create</button>

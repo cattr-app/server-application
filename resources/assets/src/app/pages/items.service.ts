@@ -8,7 +8,7 @@ export abstract class ItemsService {
     abstract convertFromApi(itemFromApi);
     abstract getApiPath();
 
-    constructor(private api: ApiService) {
+    constructor(protected api: ApiService) {
     }
 
     createItem(data, callback) {

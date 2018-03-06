@@ -38,6 +38,14 @@ export class ApiService {
         }).subscribe(callback);
     }
 
+    public sendFile(path, data, callback) {
+        return this.http.post(`/api/v1/${path}`, data, {
+            headers: new HttpHeaders({
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(callback);
+    }
+
     public isGuest() {
         return !this.isAuthorized();
     }

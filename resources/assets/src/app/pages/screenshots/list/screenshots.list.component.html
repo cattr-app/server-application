@@ -15,7 +15,6 @@
                             <tr>
                                 <th>Screenshot Id</th>
                                 <th>Time Interval Id</th>
-                                <th>Name</th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
@@ -23,7 +22,6 @@
                             <tr *ngFor="let screenshot of itemsArray">
                                 <td>{{screenshot.id}}</td>
                                 <td>{{screenshot.time_interval_id}}</td>
-                                <td>{{screenshot.name}}</td>
                                 <td>
                                     <a [routerLink]="['/screenshots/show', screenshot.id]" title="View screenshot">
                                         <button class="btn btn-info btn-sm">

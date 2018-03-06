@@ -15,7 +15,7 @@ class Screenshot extends Model
      */
     protected $table = 'screenshots';
 
-    protected $fillable = array('time_interval_id', 'name', 'path');
+    protected $fillable = array('time_interval_id', 'path');
 
     public function timeInverval()
     {
