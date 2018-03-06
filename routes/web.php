@@ -8,9 +8,14 @@ Route::get('/test-module', function () {
 
     dump($data);
 
-    $a = Event::fire('answer.success.item.create.test', $data);
 
-    dd($a[0]);
+    // Return filtered value
+    $a = Filter::fire('answer.success.item.create.test', $data);
+
+    // Static event/action
+    Event::fire('answer.success.item.create.test', $data);
+
+    dd($a);
 });
 
 

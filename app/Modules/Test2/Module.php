@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Modules\Test;
+namespace App\Modules\Test2;
 
 use App\EventFilter\EventServiceProvider as ServiceProvider;
 
@@ -8,7 +8,7 @@ class Module extends ServiceProvider
 {
     protected $listen = [
         'answer.success.item.create.*' => [
-            'App\Modules\Test\Event@modifyAnswer',
+            'App\Modules\Test2\Event@modifyAnswer',
         ],
     ];
 
