@@ -19,4 +19,9 @@ class TimeIntervalController extends ItemController
             'end_at' => 'required',
         ];
     }
+
+    function getEventUniqueNamePart()
+    {
+        return 'timeinterval';
+    }
 }

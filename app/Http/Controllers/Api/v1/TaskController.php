@@ -22,4 +22,9 @@ class TaskController extends ItemController
             'url'         => 'required'
         ];
     }
+
+    function getEventUniqueNamePart()
+    {
+        return 'task';
+    }
 }

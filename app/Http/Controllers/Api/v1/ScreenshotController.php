@@ -19,4 +19,9 @@ class ScreenshotController extends ItemController
             'path' => 'required',
         ];
     }
+
+    function getEventUniqueNamePart()
+    {
+        return 'screenshot';
+    }
 }

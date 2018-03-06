@@ -19,4 +19,9 @@ class ProjectController extends ItemController
             'description' => 'required',
         ];
     }
+
+    function getEventUniqueNamePart()
+    {
+        return 'project';
+    }
 }
