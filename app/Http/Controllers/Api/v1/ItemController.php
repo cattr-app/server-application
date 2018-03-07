@@ -38,7 +38,8 @@ abstract class ItemController extends Controller
      */
     public function index(Request $request)
     {
-        $keyword = $request->get('search');
+        $keyword = Filter::process($this->getEventUniqueName('request.item.list'), $request->get('search'));
+
         $perPage = 25;
 
         $cls = $this->getItemClass();
@@ -50,7 +51,9 @@ abstract class ItemController extends Controller
         }
 
         return response()->json(
-            $items, 200);
+            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
+            200
+        );
     }
 
     /**
@@ -61,16 +64,16 @@ abstract class ItemController extends Controller
      */
     public function create(Request $request)
     {
-        $requestData = Filter::fire($this->getEventUniqueName('request.item.create'), $request->all());
+        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
 
         $validator = Validator::make(
             $requestData,
-            Filter::fire($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
         );
 
         if ($validator->fails()) {
             return response()->json(
-                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
                     'error' => 'validation fail',
                 ]),
                 400
@@ -78,10 +81,10 @@ abstract class ItemController extends Controller
         }
 
         $cls = $this->getItemClass();
-        $item = Filter::fire($this->getEventUniqueName('item.create'), $cls::create($requestData));
+        $item = Filter::process($this->getEventUniqueName('item.create'), $cls::create($requestData));
 
         return response()->json(
-            Filter::fire($this->getEventUniqueName('answer.success.item.create'), [
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                 'res' => $item,
             ]),
             200
@@ -98,16 +101,16 @@ abstract class ItemController extends Controller
     {
         $cls = $this->getItemClass();
 
-        $itemId = Filter::fire($this->getEventUniqueName('request.item.show'), $request->get('id'));
+        $itemId = Filter::process($this->getEventUniqueName('request.item.show'), $request->get('id'));
 
         if (is_array($itemId)) {
             $itemId = $itemId[0];
         }
 
         $item = $cls::findOrFail($itemId);
-        //  Filter::fire($this->getEventUniqueName('answer.success.item.show'), $item),
+
         return response()->json(
-            $item,
+            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item),
             200
         );
     }
@@ -120,16 +123,16 @@ abstract class ItemController extends Controller
      */
     public function edit(Request $request)
     {
-        $requestData = Filter::fire($this->getEventUniqueName('request.item.edit'), $request->all());
+        $requestData = Filter::process($this->getEventUniqueName('request.item.edit'), $request->all());
 
         $validator = Validator::make(
             $requestData,
-            Filter::fire($this->getEventUniqueName('validation.item.edit'), $this->getValidationRules())
+            Filter::process($this->getEventUniqueName('validation.item.edit'), $this->getValidationRules())
         );
 
         if ($validator->fails()) {
             return response()->json(
-                Filter::fire($this->getEventUniqueName('answer.error.item.edit'), [
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                     'error' => 'validation fail',
                 ]),
                 400
@@ -141,11 +144,11 @@ abstract class ItemController extends Controller
         $item = $cls::findOrFail($itemId);
 
         $item->fill($requestData);
-        $item = Filter::fire($this->getEventUniqueName('item.edit'), $item);
+        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
         $item->save();
 
         return response()->json(
-            Filter::fire($this->getEventUniqueName('answer.success.item.edit'), [
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
                 'res' => $item,
             ]),
             200
@@ -162,13 +165,13 @@ abstract class ItemController extends Controller
     public function destroy(Request $request)
     {
         $cls = $this->getItemClass();
-        $itemId = Filter::fire($this->getEventUniqueName('request.item.remove'), $request->get('id'));
+        $itemId = Filter::process($this->getEventUniqueName('request.item.remove'), $request->get('id'));
 
         $item = $cls::findOrFail($itemId);
         $item->delete();
 
         return response()->json(
-            Filter::fire($this->getEventUniqueName('answer.success.item.remove'), [
+            Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                 'message' => 'item has been removed'
             ]),
             200
