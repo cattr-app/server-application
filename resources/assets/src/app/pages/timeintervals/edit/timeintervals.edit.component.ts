@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {TimeInterval} from "../../../models/timeinterval.model";
-import {ActivatedRoute} from "@angular/router";
+import {Router, ActivatedRoute} from "@angular/router";
 import {TimeIntervalsService} from "../timeintervals.service";
 import {ItemsEditComponent} from "../../items.edit.component";
 
@@ -16,8 +16,9 @@ export class TimeIntervalsEditComponent extends ItemsEditComponent implements On
 
     constructor(api: ApiService,
                 timeIntervalService: TimeIntervalsService,
-                router: ActivatedRoute) {
-        super(api, timeIntervalService, router)
+                activatedRoute: ActivatedRoute,
+                router: Router) {
+        super(api, timeIntervalService, activatedRoute, router)
     }
 
     prepareData() {

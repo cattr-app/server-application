@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Task} from "../../../models/task.model";
-import {ActivatedRoute} from "@angular/router";
+import {Router, ActivatedRoute} from "@angular/router";
 import {TasksService} from "../tasks.service";
 import {ItemsEditComponent} from "../../items.edit.component";
 
@@ -16,8 +16,9 @@ export class TasksEditComponent extends ItemsEditComponent implements OnInit {
 
     constructor(api: ApiService,
                 taskService: TasksService,
-                router: ActivatedRoute) {
-        super(api, taskService, router)
+                activatedRoute: ActivatedRoute,
+                router: Router) {
+        super(api, taskService, activatedRoute, router)
     }
 
     prepareData() {

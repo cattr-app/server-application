@@ -124,7 +124,7 @@ abstract class ItemController extends Controller
     public function edit(Request $request)
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.edit'), $request->all());
-
+        
         $validator = Validator::make(
             $requestData,
             Filter::process($this->getEventUniqueName('validation.item.edit'), $this->getValidationRules())

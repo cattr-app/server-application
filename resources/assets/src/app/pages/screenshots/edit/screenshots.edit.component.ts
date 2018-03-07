@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {ActivatedRoute} from "@angular/router";
+import {Router, ActivatedRoute} from "@angular/router";
 import {ScreenshotsService} from "../screenshots.service";
 import {ItemsEditComponent} from "../../items.edit.component";
 import {Screenshot} from "../../../models/screenshot.model";
@@ -16,8 +16,9 @@ export class ScreenshotsEditComponent extends ItemsEditComponent implements OnIn
 
     constructor(api: ApiService,
                 screenshotService: ScreenshotsService,
-                router: ActivatedRoute) {
-        super(api, screenshotService, router)
+                activatedRoute: ActivatedRoute,
+                router: Router) {
+        super(api, screenshotService, activatedRoute, router)
     }
 
     prepareData() {

@@ -35,7 +35,7 @@ export abstract class ItemsService {
 
     getItem(id, callback) {
         let item: Item;
-
+        console.log('asxxxx');
         return this.api.send(
             this.getApiPath() + '/show',
             {'id': id},

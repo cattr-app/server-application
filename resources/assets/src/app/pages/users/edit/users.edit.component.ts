@@ -1,7 +1,7 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {User} from "../../../models/user.model";
-import {ActivatedRoute} from "@angular/router";
+import {Router, ActivatedRoute} from "@angular/router";
 import {UsersService} from "../users.service";
 import {ItemsEditComponent} from "../../items.edit.component";
 
@@ -16,8 +16,9 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
 
     constructor(api: ApiService,
                 userService: UsersService,
-                router: ActivatedRoute) {
-        super(api, userService, router)
+                activatedRoute: ActivatedRoute,
+                router: Router) {
+        super(api, userService, activatedRoute, router)
     }
 
     prepareData() {

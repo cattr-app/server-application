@@ -1,6 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../api/api.service';
-import {ActivatedRoute} from "@angular/router";
+import {Router,ActivatedRoute} from "@angular/router";
 import {ItemsService} from "./items.service";
 import {Item} from "../models/item.model";
 
@@ -15,11 +15,12 @@ export abstract class ItemsEditComponent implements OnInit {
 
     constructor(protected api: ApiService,
                 protected itemService: ItemsService,
-                protected router: ActivatedRoute) {
+                protected activatedRoute: ActivatedRoute,
+                protected router: Router) {
     }
 
     ngOnInit() {
-        this.sub = this.router.params.subscribe(params => {
+        this.sub = this.activatedRoute.params.subscribe(params => {
             this.id = +params['id'];
         });
 
@@ -41,5 +42,6 @@ export abstract class ItemsEditComponent implements OnInit {
 
     editCallback(result) {
         console.log("Updated");
+        this.router.navigateByUrl(this.itemService.getApiPath() + '/list');
     }
 }

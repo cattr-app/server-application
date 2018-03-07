@@ -1,13 +1,13 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {ProjectsService} from "../projects.service";
-import {ActivatedRoute} from '@angular/router';
+import {Router, ActivatedRoute} from '@angular/router';
 import {Project} from "../../../models/project.model";
 import {ItemsEditComponent} from "../../items.edit.component";
 
 @Component({
     selector: 'app-projects-edit',
-    templateUrl: '../../items.create.component.html',
+    templateUrl: './projects.edit.component.html',
     styleUrls: ['../../items.component.scss']
 })
 export class ProjectsEditComponent extends ItemsEditComponent implements OnInit {
@@ -16,8 +16,9 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
-                router: ActivatedRoute) {
-        super(api, projectService, router);
+                activatedRoute: ActivatedRoute,
+                router: Router) {
+        super(api, projectService, activatedRoute, router);
     }
 
     prepareData() {
