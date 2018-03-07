@@ -8,7 +8,7 @@ Route::get('/test-module', function () {
 
 
     // Return filtered value
-    $a = Filter::process('answer.success.item.create.test', $data);
+    $a = Filter::process('answer.success.item.create.test', $data, 'asdas', 123);
 
     // Static event/action
     Event::fire('answer.success.item.create.test', $data);

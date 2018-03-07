@@ -63,12 +63,32 @@ class Dispatcher extends LaravelDispatcher
             return $this->createClassListener($listener, $wildcard);
         }
 
-        return function ($event, $payload) use ($listener, $wildcard) {
+        return function ($event, ...$payload) use ($listener, $wildcard) {
             if ($wildcard) {
                 return $listener($event, ...$payload);
             }
 
             return $listener(...array_values($payload));
+        };
+    }
+
+    /**
+     * Create a class based listener using the IoC container.
+     *
+     * @param  string  $listener
+     * @param  bool  $wildcard
+     * @return \Closure
+     */
+    public function createClassListener($listener, $wildcard = false): callable
+    {
+        return function ($event, $payload) use ($listener, $wildcard) {
+            if ($wildcard) {
+                return \call_user_func($this->createClassCallable($listener), $event, ...$payload);
+            }
+
+            return \call_user_func_array(
+                $this->createClassCallable($listener), $payload
+            );
         };
     }
 }

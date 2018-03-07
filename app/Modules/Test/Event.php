@@ -13,13 +13,11 @@ class Event
 
     /**
      * @param string $event
-     * @param $payload
+     * @param array $answer
      * @return array
      */
-    public function modifyAnswer(string $event, $payload): array
+    public function modifyAnswer(string $event, array $answer): array
     {
-        [$answer] = $payload;
-
         $answer['additional_info'] = 'Some string';
 
         return $answer;
