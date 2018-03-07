@@ -2,9 +2,7 @@
 
 namespace Modules\EventListener\Providers;
 
-//use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
-
 use App\EventFilter\EventServiceProvider as ServiceProvider;
 
 class EventListenerServiceProvider extends ServiceProvider
@@ -17,8 +15,48 @@ class EventListenerServiceProvider extends ServiceProvider
     protected $defer = false;
 
     protected $listen = [
-        'item.create.project' => [
-            'Modules\EventListener\Listeners\EventObserver@createItem',
+        'request.item.create.*' => [
+            'Modules\EventListener\Listeners\EventCreateItemObserver@request',
+        ],
+        'validation.item.create.*' => [
+            'Modules\EventListener\Listeners\EventCreateItemObserver@validate',
+        ],
+        'answer.error.item.create.*' => [
+            'Modules\EventListener\Listeners\EventCreateItemObserver@answerError',
+        ],
+        'item.create.*' => [
+            'Modules\EventListener\Listeners\EventCreateItemObserver@action',
+        ],
+        'answer.success.item.create.*' => [
+            'Modules\EventListener\Listeners\EventCreateItemObserver@answerSuccess',
+        ],
+        'request.item.show.*' => [
+            'Modules\EventListener\Listeners\EventShowItemObserver@request',
+        ],
+        'answer.success.item.show.*' => [
+            'Modules\EventListener\Listeners\EventShowItemObserver@answerSuccess',
+        ],
+        'request.item.edit.*' => [
+            'Modules\EventListener\Listeners\EventEditItemObserver@request',
+        ],
+        'validation.item.edit*' => [
+            'Modules\EventListener\Listeners\EventEditItemObserver@validate',
+        ],
+        'answer.error.item.edit.*' => [
+            'Modules\EventListener\Listeners\EventEditItemObserver@answerError',
+        ],
+        'item.edit.*' => [
+            'Modules\EventListener\Listeners\EventEditItemObserver@action',
+        ],
+        'answer.success.item.edit.*' => [
+            'Modules\EventListener\Listeners\EventEditItemObserver@answerSuccess',
+        ],
+
+        'request.item.remove.*' => [
+            'Modules\EventListener\Listeners\EventRemoveItemObserver@request',
+        ],
+        'answer.success.item.remove.*' => [
+            'Modules\EventListener\Listeners\EventRemoveItemObserver@answerSuccess',
         ],
     ];
 
