@@ -33,6 +33,8 @@
     "scripts": {
         "config:init": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "mkdir public/uploads",
+            "ln -sr storage/app/uploads/screenshots public/uploads/screenshots",
             "@php artisan key:generate",
             "@php artisan jwt:secret",
             "@config:update",

@@ -79,7 +79,7 @@ abstract class ItemController extends Controller
 
         $cls = $this->getItemClass();
         $item = Filter::fire($this->getEventUniqueName('item.create'), $cls::create($requestData));
-
+        dd($item);
         return response()->json(
             Filter::fire($this->getEventUniqueName('answer.success.item.create'), [
                 'res' => $item,

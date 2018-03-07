@@ -2,8 +2,10 @@
 
 namespace Modules\EventListener\Providers;
 
-use Illuminate\Support\ServiceProvider;
+//use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+
+use App\EventFilter\EventServiceProvider as ServiceProvider;
 
 class EventListenerServiceProvider extends ServiceProvider
 {
@@ -13,6 +15,12 @@ class EventListenerServiceProvider extends ServiceProvider
      * @var bool
      */
     protected $defer = false;
+
+    protected $listen = [
+        'item.create.project' => [
+            'Modules\EventListener\Listeners\EventObserver@createItem',
+        ],
+    ];
 
     /**
      * Boot the application events.
@@ -26,6 +34,8 @@ class EventListenerServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
+        parent::boot();
     }
 
     /**
@@ -46,10 +56,10 @@ class EventListenerServiceProvider extends ServiceProvider
     protected function registerConfig()
     {
         $this->publishes([
-            __DIR__.'/../Config/config.php' => config_path('eventlistener.php'),
+            __DIR__ . '/../Config/config.php' => config_path('eventlistener.php'),
         ], 'config');
         $this->mergeConfigFrom(
-            __DIR__.'/../Config/config.php', 'eventlistener'
+            __DIR__ . '/../Config/config.php', 'eventlistener'
         );
     }
 
@@ -62,11 +72,11 @@ class EventListenerServiceProvider extends ServiceProvider
     {
         $viewPath = resource_path('views/modules/eventlistener');
 
-        $sourcePath = __DIR__.'/../Resources/views';
+        $sourcePath = __DIR__ . '/../Resources/views';
 
         $this->publishes([
             $sourcePath => $viewPath
-        ],'views');
+        ], 'views');
 
         $this->loadViewsFrom(array_merge(array_map(function ($path) {
             return $path . '/modules/eventlistener';
@@ -85,7 +95,7 @@ class EventListenerServiceProvider extends ServiceProvider
         if (is_dir($langPath)) {
             $this->loadTranslationsFrom($langPath, 'eventlistener');
         } else {
-            $this->loadTranslationsFrom(__DIR__ .'/../Resources/lang', 'eventlistener');
+            $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'eventlistener');
         }
     }
 
@@ -95,7 +105,7 @@ class EventListenerServiceProvider extends ServiceProvider
      */
     public function registerFactories()
     {
-        if (! app()->environment('production')) {
+        if (!app()->environment('production')) {
             app(Factory::class)->load(__DIR__ . '/../Database/factories');
         }
     }

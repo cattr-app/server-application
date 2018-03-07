@@ -49,6 +49,7 @@ return [
 
         App\Modules\Test\Module::class,
         App\Modules\Test2\Module::class,
+        Modules\EventListener\Providers\EventListenerServiceProvider::class,
     ],
     'aliases' => [
 
