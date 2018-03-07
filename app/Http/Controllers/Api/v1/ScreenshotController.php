@@ -38,7 +38,7 @@ class ScreenshotController extends ItemController
     {
         //$requestData = Filter::fire($this->getEventUniqueName('request.item.create'), $request->all());
 
-        $path = $request->screenshot->store('images');
+        $path = $request->screenshot->store('uploads/screenshots');
         $timeIntervalId = (int)$request->time_interval_id;
 
         $requestData = [
