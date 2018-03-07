@@ -99,10 +99,15 @@ abstract class ItemController extends Controller
         $cls = $this->getItemClass();
 
         $itemId = Filter::fire($this->getEventUniqueName('request.item.show'), $request->get('id'));
-        $item = $cls::findOrFail($itemId);
 
+        if (is_array($itemId)) {
+            $itemId = $itemId[0];
+        }
+
+        $item = $cls::findOrFail($itemId);
+        //  Filter::fire($this->getEventUniqueName('answer.success.item.show'), $item),
         return response()->json(
-            Filter::fire($this->getEventUniqueName('answer.success.item.show'), $item),
+            $item,
             200
         );
     }

@@ -40,7 +40,9 @@ export abstract class ItemsService {
             this.getApiPath() + '/show',
             {'id': id},
             (taskFromApi) => {
+                console.log(taskFromApi);
                 item = this.convertFromApi(taskFromApi);
+
                 callback(item);
             });
     }

@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">{{ item.id }} - {{ item.name }}</div>
+                <div class="panel-heading">{{ item.id }}</div>
                 <div class="panel-body">
 
                     <a routerLink="/screenshots/list" title="Back">
@@ -17,7 +17,7 @@
                             Edit
                         </button>
                     </a>
-                    <div class="screenshots-info">
+                    <div class="show-info">
                         <div class="table-responsive">
                             <table class="table table-borderless">
                                 <tbody>
@@ -44,6 +44,9 @@
                                 </tbody>
                             </table>
                         </div>
+                    </div>
+                    <div class="col-md-12">
+                        <img src="/storage/{{ item.path }}" style="width:100%;">
                     </div>
                 </div>
             </div>

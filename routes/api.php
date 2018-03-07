@@ -76,8 +76,13 @@ Route::group([
     $router->post('/timeintervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/timeintervals/remove', 'Api\v1\TimeIntervalController@destroy');
 
+
+
+
     //$router->resource('/webservice', 'Api\v1\WebserviceController');
 });
+
+
 
 Route::middleware('auth:api')->get('/user', function(Request $request) {
     return $request->user();
