@@ -6,11 +6,9 @@ Route::get('/test-module', function () {
         'asdasd' => 'qweqwe',
     ];
 
-    dump($data);
-
 
     // Return filtered value
-    $a = Filter::fire('answer.success.item.create.test', $data);
+    $a = Filter::process('answer.success.item.create.test', $data);
 
     // Static event/action
     Event::fire('answer.success.item.create.test', $data);

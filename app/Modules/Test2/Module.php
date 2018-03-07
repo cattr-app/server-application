@@ -7,7 +7,7 @@ use App\EventFilter\EventServiceProvider as ServiceProvider;
 class Module extends ServiceProvider
 {
     protected $listen = [
-        'answer.success.item.create.*' => [
+        'answer.success.item.create.test' => [
             'App\Modules\Test2\Event@modifyAnswer',
         ],
     ];

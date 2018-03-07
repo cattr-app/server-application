@@ -7,6 +7,18 @@ use Illuminate\Events\Dispatcher as LaravelDispatcher;
 class Dispatcher extends LaravelDispatcher
 {
     /**
+     * @param $event
+     * @param array ...$payload
+     * @return mixed
+     */
+    public function process($event, ...$payload)
+    {
+        $data = $this->dispatch($event, $payload);
+
+        return \is_array($data) ? ($data[0] ?? null) : $data;
+    }
+
+    /**
      * @param object|string $event
      * @param array $payload
      * @param bool $halt
@@ -31,9 +43,32 @@ class Dispatcher extends LaravelDispatcher
                 break;
             }
 
-            $payload = $response;
+            $payload[0] = $response;
         }
 
         return $halt ? null : $payload;
+    }
+
+
+    /**
+     * Register an event listener with the dispatcher.
+     *
+     * @param  \Closure|string  $listener
+     * @param  bool  $wildcard
+     * @return \Closure
+     */
+    public function makeListener($listener, $wildcard = false): callable
+    {
+        if (\is_string($listener)) {
+            return $this->createClassListener($listener, $wildcard);
+        }
+
+        return function ($event, $payload) use ($listener, $wildcard) {
+            if ($wildcard) {
+                return $listener($event, ...$payload);
+            }
+
+            return $listener(...array_values($payload));
+        };
     }
 }

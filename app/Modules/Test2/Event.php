@@ -12,11 +12,10 @@ class Event
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     /**
-     * @param string $event
      * @param array $answer
      * @return array
      */
-    public function modifyAnswer(string $event, array $answer): array
+    public function modifyAnswer(array $answer): array
     {
         $answer['additional_info_2'] = 'Some other string';
 
