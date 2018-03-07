@@ -5,6 +5,7 @@ namespace Modules\EventListener\Listeners;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Log;
 
 abstract class AbstractEventObserver
 {
@@ -21,38 +22,37 @@ abstract class AbstractEventObserver
     {
     }
 
-    //Create items events
     public function request($event, $data)
     {
-        //TODO: Save to log
+        Log::info('Request to ' . $this->getObserveredAction() . ' item', ['data' => $data]);
 
         return $data;
     }
 
     public function validate($event, $validationRules)
     {
-        //TODO: Save to log
+        Log::info('Validation when ' . $this->getObserveredAction() . ' item', ['validationRules' => $validationRules]);
 
         return $validationRules;
     }
 
     public function answerError($event, $errorMessages)
     {
-        //TODO: Save to log
+        Log::info('Error when ' . $this->getObserveredAction() . ' item', ['errors' => $errorMessages]);
 
         return $errorMessages;
     }
 
     public function action($event, $item)
     {
-        //TODO: Save to log
+        Log::info($this->getObserveredAction() . ' item action', ['item' => $item]);
 
         return $item;
     }
 
     public function answerSuccess($event, $successMessages)
     {
-        //TODO: Save to log
+        Log::info("Successful " . $this->getObserveredAction() . ' item', ['successMessage' => $successMessages]);
 
         return $successMessages;
     }

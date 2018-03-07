@@ -36,9 +36,7 @@ class ScreenshotController extends ItemController
      */
     public function create(Request $request)
     {
-        //$requestData = Filter::fire($this->getEventUniqueName('request.item.create'), $request->all());
-
-        $path = $request->screenshot->store('uploads/screenshots');
+        $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
         $timeIntervalId = (int)$request->time_interval_id;
 
         $requestData = [
@@ -48,7 +46,7 @@ class ScreenshotController extends ItemController
 
         $validator = Validator::make(
             $requestData,
-            Filter::fire($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
         );
 
         if ($validator->fails()) {
@@ -61,10 +59,10 @@ class ScreenshotController extends ItemController
         }
 
         $cls = $this->getItemClass();
-        $item = Filter::fire($this->getEventUniqueName('item.create'), $cls::create($requestData));
+        $item = Filter::process($this->getEventUniqueName('item.create'), $cls::create($requestData));
 
         return response()->json(
-            Filter::fire($this->getEventUniqueName('answer.success.item.create'), [
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                 'res' => $item,
             ]),
             200

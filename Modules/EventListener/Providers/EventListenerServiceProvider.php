@@ -51,7 +51,12 @@ class EventListenerServiceProvider extends ServiceProvider
         'answer.success.item.edit.*' => [
             'Modules\EventListener\Listeners\EventEditItemObserver@answerSuccess',
         ],
-
+        'request.item.list.*' => [
+            'Modules\EventListener\Listeners\EventListItemObserver@request',
+        ],
+        'answer.success.item.list.*' => [
+            'Modules\EventListener\Listeners\EventListItemObserver@answerSuccess',
+        ],
         'request.item.remove.*' => [
             'Modules\EventListener\Listeners\EventRemoveItemObserver@request',
         ],
