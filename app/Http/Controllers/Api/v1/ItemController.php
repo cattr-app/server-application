@@ -38,9 +38,11 @@ abstract class ItemController extends Controller
      */
     public function index(Request $request)
     {
+        //TODO: add pagination on front
+
         $keyword = Filter::process($this->getEventUniqueName('request.item.list'), $request->get('search'));
 
-        $perPage = 25;
+        $perPage = 200;
 
         $cls = $this->getItemClass();
 
