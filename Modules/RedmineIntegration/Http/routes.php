@@ -13,6 +13,7 @@ Route::group(['prefix' => 'redmineintegration', 'namespace' => 'Modules\RedmineI
     //Project routes
     Route::get('/projects', 'ProjectRedmineController@list');
     Route::get('/projects/show/{id}', 'ProjectRedmineController@show');
+    Route::get('/projects/synchronize', 'ProjectRedmineController@synchronize');
 
     //User routes
     Route::get('/users', 'UserRedmineController@list');
@@ -21,5 +22,4 @@ Route::group(['prefix' => 'redmineintegration', 'namespace' => 'Modules\RedmineI
     //Time Entry routes
     Route::get('/timeentries', 'TimeEntryRedmineController@list');
     Route::get('/timeentries/show/{id}', 'TimeEntryRedmineController@show');
-
 });
