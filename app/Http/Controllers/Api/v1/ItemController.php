@@ -57,7 +57,7 @@ abstract class ItemController extends Controller
     }
 
     /**
-     * Show the form for creating a new resource.
+     * Create item
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse

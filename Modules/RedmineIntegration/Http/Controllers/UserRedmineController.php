@@ -30,14 +30,4 @@ class UserRedmineController extends AbstractRedmineController
             'limit' => 1000
         ]));
     }
-
-    /**
-     * Get issues assigned to current user
-     *
-     * @param $userId
-     */
-    public function getIssues($userId)
-    {
-
-    }
 }
