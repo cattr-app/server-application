@@ -30,4 +30,28 @@ class IssueRedmineController extends AbstractRedmineController
             'limit' => 1000
         ]));
     }
+
+    /**
+     * Returns issues from project with id == $projectId
+     *
+     * @param $projectId
+     */
+    public function getProjectIssues($projectId)
+    {
+        dd($this->client->issue->all([
+            'project_id' => $projectId
+        ]));
+    }
+
+    /**
+     * Returns issues assigned to user with id == $userId
+     *
+     * @param $userId
+     */
+    public function getUserIssues($userId)
+    {
+        dd($this->client->issue->all([
+            'assigned_to_id' => $userId
+        ]));
+    }
 }

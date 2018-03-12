@@ -7,6 +7,8 @@ Route::group(['prefix' => 'redmineintegration', 'namespace' => 'Modules\RedmineI
     // Issue routes
     Route::get('/issues', 'IssueRedmineController@list');
     Route::get('/issues/show/{id}', 'IssueRedmineController@show');
+    Route::get('/issues/project/{id}', 'IssueRedmineController@getProjectIssues');
+    Route::get('/issues/user/{id}', 'IssueRedmineController@getUserIssues');
 
     //Project routes
     Route::get('/projects', 'ProjectRedmineController@list');
