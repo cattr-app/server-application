@@ -17,6 +17,7 @@ class CreateTasksTable extends Migration
             $table->increments('id');
             $table->integer('project_id')->unsigned();
             $table->string('task_name');
+            $table->text('description');
             $table->boolean('active');
             $table->integer('user_id');
             $table->integer('assigned_by');

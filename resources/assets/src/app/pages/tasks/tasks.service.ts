@@ -20,6 +20,7 @@ export class TasksService extends ItemsService {
             itemFromApi.id,
             itemFromApi.project_id,
             itemFromApi.task_name,
+            itemFromApi.description,
             itemFromApi.active,
             itemFromApi.user_id,
             itemFromApi.assigned_by,

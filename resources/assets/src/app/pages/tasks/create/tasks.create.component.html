@@ -25,15 +25,21 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-md-2">Description</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="task-description" [(ngModel)]="item.description">
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-md-2">User Id</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="task-description" [(ngModel)]="item.user_id">
+                                    <input type="text" class="form-control" name="task-user-id" [(ngModel)]="item.user_id">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Assigned by</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="task-description" [(ngModel)]="item.assigned_by">
+                                    <input type="text" class="form-control" name="task-assigned-by" [(ngModel)]="item.assigned_by">
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">Create</button>

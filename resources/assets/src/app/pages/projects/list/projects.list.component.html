@@ -15,7 +15,6 @@
                             <tr>
                                 <th>Project Id</th>
                                 <th>Name</th>
-                                <th>Description</th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
@@ -23,7 +22,6 @@
                             <tr *ngFor="let project of itemsArray">
                                 <td>{{project.id}}</td>
                                 <td>{{project.name}}</td>
-                                <td>{{project.description}}</td>
                                 <td>
                                     <a [routerLink]="['/projects/show', project.id]" title="View project">
                                         <button class="btn btn-info btn-sm">
@@ -47,9 +45,6 @@
                             </tr>
                             </tbody>
                         </table>
-                    </div>
-                    <div>
-                        <posts-pagination></posts-pagination>
                     </div>
                 </div>
             </div>

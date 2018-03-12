@@ -24,6 +24,7 @@ export class TasksCreateComponent extends ItemsCreateComponent implements OnInit
         return {
             'project_id': this.item.project_id,
             'task_name': this.item.task_name,
+            'description': this.item.description,
             'active': this.item.active,
             'user_id': this.item.user_id,
             'assigned_by': this.item.assigned_by,

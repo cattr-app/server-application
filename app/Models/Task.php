@@ -15,7 +15,7 @@ class Task extends Model
      * @var string
      */
     protected $table = 'tasks';
-    protected $fillable = array('project_id', 'task_name', 'active', 'user_id', 'assigned_by', 'url');
+    protected $fillable = array('project_id', 'task_name', 'description', 'active', 'user_id', 'assigned_by', 'url');
 
     /**
      * The project that belong to the task.
