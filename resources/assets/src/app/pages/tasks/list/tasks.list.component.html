@@ -23,7 +23,7 @@
                             <tr *ngFor="let task of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{task.id}}</td>
                                 <td>{{task.project_id}}</td>
-                                <td>{{task.task_name}}</td>
+                                <td class="task-name">{{task.task_name}}</td>
                                 <td>
                                     <a [routerLink]="['/tasks/show', task.id]" title="View project">
                                         <button class="btn btn-info btn-sm">

@@ -9,6 +9,7 @@ Route::group(['prefix' => 'redmineintegration', 'namespace' => 'Modules\RedmineI
     Route::get('/tasks/show/{id}', 'TaskRedmineController@show');
     Route::get('/tasks/project/{id}', 'TaskRedmineController@getProjectIssues');
     Route::get('/tasks/user/{id}', 'TaskRedmineController@getUserIssues');
+    Route::get('/tasks/synchronize', 'TaskRedmineController@synchronize');
 
     //Project routes
     Route::get('/projects', 'ProjectRedmineController@list');

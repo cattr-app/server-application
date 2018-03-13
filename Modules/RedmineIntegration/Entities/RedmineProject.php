@@ -9,7 +9,7 @@ class RedmineProject extends Model
 {
     protected $table = 'redmine_projects';
 
-    protected $fillable = array('project_id', 'redmine_project_id');
+    protected $fillable = ['project_id', 'redmine_project_id'];
 
     public function project()
     {

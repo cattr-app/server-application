@@ -43,9 +43,9 @@ class ProjectRedmineController extends AbstractRedmineController
         $projects = $projectsData['projects'];
 
         foreach ($projects as $projectFromRedmine) {
-            $user = RedmineProject::where('redmine_project_id', '=', $projectFromRedmine['id'])->first();
+            $projectExist = RedmineProject::where('redmine_project_id', '=', $projectFromRedmine['id'])->first();
 
-            if ($user != null) {
+            if ($projectExist != null) {
                 continue;
             }
 
