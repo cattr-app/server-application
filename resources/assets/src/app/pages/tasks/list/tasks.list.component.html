@@ -20,7 +20,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let task of itemsArray">
+                            <tr *ngFor="let task of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{task.id}}</td>
                                 <td>{{task.project_id}}</td>
                                 <td>{{task.task_name}}</td>
@@ -47,6 +47,7 @@
                             </tr>
                             </tbody>
                         </table>
+                        <pagination-controls (pageChange)="p = $event"></pagination-controls>
                     </div>
                 </div>
             </div>

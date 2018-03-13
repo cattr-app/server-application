@@ -13,6 +13,7 @@ import {ItemsListComponent} from "../../items.list.component";
 export class TasksListComponent extends ItemsListComponent implements OnInit {
 
     itemsArray: Task[] = [];
+    p: number = 1;
 
     constructor(api: ApiService,
                 taskService: TasksService,

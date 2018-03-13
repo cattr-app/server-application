@@ -12,13 +12,15 @@ import {TasksListComponent} from './list/tasks.list.component';
 
 import {HttpClientModule} from '@angular/common/http';
 import {TasksService} from "./tasks.service";
+import {NgxPaginationModule} from 'ngx-pagination';
 
 @NgModule({
     imports: [
         CommonModule,
         AuthRoute,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        NgxPaginationModule
     ],
     declarations: [
         TasksCreateComponent,
