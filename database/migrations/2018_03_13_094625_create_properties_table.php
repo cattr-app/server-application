@@ -34,7 +34,7 @@ class CreatePropertiesTable extends Migration
     public function down()
     {
         Schema::table('properties', function (Blueprint $table) {
-            $table->dropIndex(['properties_index']);
+            $table->dropIndex('properties_index');
         });
 
         Schema::dropIfExists('properties');

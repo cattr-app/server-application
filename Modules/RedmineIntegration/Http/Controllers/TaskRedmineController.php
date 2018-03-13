@@ -59,13 +59,20 @@ class TaskRedmineController extends AbstractRedmineController
 
     public function synchronize()
     {
+        //get current user's id
+        $currentUser = $this->client->user->getCurrentUser();
+        $currentUserId = $currentUser['user']['id'];
+
+        //get tasks assigned to current user
         $tasksData = $this->client->issue->all([
-            'limit' => 1000
+            'limit' => 1000,
+            'assigned_to_id' => $currentUserId
         ]);
 
         $tasks = $tasksData['issues'];
 
         foreach ($tasks as $taskFromRedmine) {
+            //if task already exists => continue
             $taskExist = Property::where([
                 ['entity_type', '=', Property::TASK_CODE],
                 ['name', '=', 'REDMINE_ID'],
@@ -76,18 +83,20 @@ class TaskRedmineController extends AbstractRedmineController
                 continue;
             }
 
+            //is task's project exists => add task
             $projectProperty = Property::where([
                 ['entity_type', '=', Property::PROJECT_CODE],
                 ['name', '=', 'REDMINE_ID'],
                 ['value', '=', $taskFromRedmine['project']['id']]
             ])->first();
 
+            //TODO: add user_id and assigned_by from our system
             if ($projectProperty && $projectProperty->entity_id) {
                 $taskInfo = [
                     'project_id'  => $projectProperty->entity_id,
                     'task_name'   => $taskFromRedmine['subject'],
                     'description' => $taskFromRedmine['description'],
-                    'active' => 1,
+                    'active' =>  $taskFromRedmine['status']['id'],
                     'user_id' => 1,
                     'assigned_by' => 1,
                     'url' => 'url',

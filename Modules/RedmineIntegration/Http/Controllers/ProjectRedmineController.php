@@ -42,6 +42,7 @@ class ProjectRedmineController extends AbstractRedmineController
         $projects = $projectsData['projects'];
 
         foreach ($projects as $projectFromRedmine) {
+            //if project already exists => continue
             $projectExist = Property::where([
                 ['entity_type', '=', Property::PROJECT_CODE],
                 ['name', '=', 'REDMINE_ID'],
