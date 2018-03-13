@@ -13,6 +13,7 @@ import {ItemsListComponent} from "../../items.list.component";
 export class TimeIntervalsListComponent extends ItemsListComponent implements OnInit {
 
     itemsArray: TimeInterval[] = [];
+    p: number = 1;
 
     constructor(api: ApiService,
                 timeIntervalService: TimeIntervalsService,

@@ -19,7 +19,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let screenshot of itemsArray">
+                            <tr *ngFor="let screenshot of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{screenshot.id}}</td>
                                 <td>{{screenshot.time_interval_id}}</td>
                                 <td>
@@ -45,6 +45,7 @@
                             </tr>
                             </tbody>
                         </table>
+                        <pagination-controls (pageChange)="p = $event"></pagination-controls>
                     </div>
                 </div>
             </div>

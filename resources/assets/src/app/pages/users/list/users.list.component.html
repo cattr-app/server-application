@@ -21,7 +21,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let user of itemsArray">
+                            <tr *ngFor="let user of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{user.id}}</td>
                                 <td>{{user.first_name}}</td>
                                 <td>{{user.last_name}}</td>
@@ -49,6 +49,7 @@
                             </tr>
                             </tbody>
                         </table>
+                        <pagination-controls (pageChange)="p = $event"></pagination-controls>
                     </div>
                 </div>
             </div>

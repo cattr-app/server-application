@@ -13,6 +13,7 @@ import {ScreenshotsService} from "../screenshots.service";
 export class ScreenshotsListComponent extends ItemsListComponent implements OnInit {
 
     itemsArray: Screenshot[] = [];
+    p: number = 1;
 
     constructor(api: ApiService,
                 screenshotService: ScreenshotsService,

@@ -12,13 +12,15 @@ import {UsersListComponent} from './list/users.list.component';
 
 import {HttpClientModule} from '@angular/common/http';
 import {UsersService} from "./users.service";
+import {NgxPaginationModule} from 'ngx-pagination';
 
 @NgModule({
     imports: [
         CommonModule,
         AuthRoute,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        NgxPaginationModule
     ],
     declarations: [
         UsersCreateComponent,

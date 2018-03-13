@@ -14,6 +14,7 @@ import {User} from "../../../models/user.model";
 export class UsersListComponent extends ItemsListComponent implements OnInit {
 
     itemsArray: User[] = [];
+    p: number = 1;
 
     constructor(api: ApiService,
                 userService: UsersService,

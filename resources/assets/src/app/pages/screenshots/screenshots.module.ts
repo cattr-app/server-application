@@ -12,13 +12,15 @@ import {ScreenshotsListComponent} from './list/screenshots.list.component';
 
 import {HttpClientModule} from '@angular/common/http';
 import {ScreenshotsService} from "./screenshots.service";
+import {NgxPaginationModule} from 'ngx-pagination';
 
 @NgModule({
     imports: [
         CommonModule,
         AuthRoute,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        NgxPaginationModule
     ],
     declarations: [
         ScreenshotsCreateComponent,
