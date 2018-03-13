@@ -36,7 +36,6 @@ class ProjectRedmineController extends AbstractRedmineController
 
     public function synchronize()
     {
-        //TODO: get all projects form redmine => check projects existing [=> add project]
         $projectsData = $this->client->project->all([
             'limit' => 1000
         ]);
