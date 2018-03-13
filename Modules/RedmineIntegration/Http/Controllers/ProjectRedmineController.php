@@ -2,9 +2,8 @@
 
 namespace Modules\RedmineIntegration\Http\Controllers;
 
-
 use App\Models\Project;
-use Modules\RedmineIntegration\Entities\RedmineProject;
+use App\Models\Property;
 
 class ProjectRedmineController extends AbstractRedmineController
 {
@@ -43,7 +42,11 @@ class ProjectRedmineController extends AbstractRedmineController
         $projects = $projectsData['projects'];
 
         foreach ($projects as $projectFromRedmine) {
-            $projectExist = RedmineProject::where('redmine_project_id', '=', $projectFromRedmine['id'])->first();
+            $projectExist = Property::where([
+                ['entity_type', '=', Property::PROJECT_CODE],
+                ['name', '=', 'REDMINE_ID'],
+                ['value', '=', $projectFromRedmine['id']]
+            ])->first();
 
             if ($projectExist != null) {
                 continue;
@@ -57,7 +60,7 @@ class ProjectRedmineController extends AbstractRedmineController
 
             $project = Project::create($projectInfo);
 
-            RedmineProject::create(['project_id' => $project->id, 'redmine_project_id' => $projectFromRedmine['id']]);
+            Property::create(['entity_id' => $project->id, 'entity_type' => Property::PROJECT_CODE, 'name' => 'REDMINE_ID', 'value' => $projectFromRedmine['id']]);
         }
     }
 }

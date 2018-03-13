@@ -3,8 +3,7 @@
 namespace Modules\RedmineIntegration\Http\Controllers;
 
 use App\Models\Task;
-use Modules\RedmineIntegration\Entities\RedmineProject;
-use Modules\RedmineIntegration\Entities\RedmineTask;
+use App\Models\Property;
 
 class TaskRedmineController extends AbstractRedmineController
 {
@@ -67,17 +66,25 @@ class TaskRedmineController extends AbstractRedmineController
         $tasks = $tasksData['issues'];
 
         foreach ($tasks as $taskFromRedmine) {
-            $taskExist = RedmineTask::where('redmine_task_id', '=', $taskFromRedmine['id'])->first();
+            $taskExist = Property::where([
+                ['entity_type', '=', Property::TASK_CODE],
+                ['name', '=', 'REDMINE_ID'],
+                ['value', '=', $taskFromRedmine['id']]
+            ])->first();
 
             if ($taskExist != null) {
                 continue;
             }
 
-            $project = RedmineProject::where('redmine_project_id', '=', $taskFromRedmine['project']['id'])->first();
+            $projectProperty = Property::where([
+                ['entity_type', '=', Property::PROJECT_CODE],
+                ['name', '=', 'REDMINE_ID'],
+                ['value', '=', $taskFromRedmine['project']['id']]
+            ])->first();
 
-            if ($project && $project->project_id) {
+            if ($projectProperty && $projectProperty->entity_id) {
                 $taskInfo = [
-                    'project_id'  => $project->project_id,
+                    'project_id'  => $projectProperty->entity_id,
                     'task_name'   => $taskFromRedmine['subject'],
                     'description' => $taskFromRedmine['description'],
                     'active' => 1,
@@ -85,11 +92,11 @@ class TaskRedmineController extends AbstractRedmineController
                     'assigned_by' => 1,
                     'url' => 'url',
                 ];
+
+                $task = Task::create($taskInfo);
+
+                Property::create(['entity_id' => $task->id, 'entity_type' => Property::TASK_CODE, 'name' => 'REDMINE_ID', 'value' => $taskFromRedmine['id']]);
             }
-
-            $task = Task::create($taskInfo);
-
-            RedmineTask::create(['task_id' => $task->id, 'redmine_task_id' => $taskFromRedmine['id']]);
         }
     }
 }
