@@ -36,7 +36,6 @@ export abstract class ItemsEditComponent implements OnInit {
     }
 
     setItem(result) {
-        console.log(result);
         this.item = result;
     }
 
