@@ -17,6 +17,7 @@ import {Task} from "../../../models/task.model";
 export class ProjectsListComponent extends ItemsListComponent implements OnInit {
 
     itemsArray: Project[] = [];
+    p: number = 1;
 
     constructor(api: ApiService,
                 projectService: ProjectsService,

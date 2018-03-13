@@ -38,19 +38,8 @@ abstract class ItemController extends Controller
      */
     public function index(Request $request)
     {
-        //TODO: add pagination on front
-
-        $keyword = Filter::process($this->getEventUniqueName('request.item.list'), $request->get('search'));
-
-        $perPage = 200;
-
         $cls = $this->getItemClass();
-
-        if (!empty($keyword)) {
-            $items = $cls::paginate($perPage);
-        } else {
-            $items = $cls::paginate($perPage);
-        }
+        $items = $cls::all();
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),

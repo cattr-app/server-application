@@ -54,7 +54,7 @@ export abstract class ItemsService {
             this.getApiPath() + '/list',
             [],
             (result) => {
-                result.data.forEach((itemFromApi) => {
+                result.forEach((itemFromApi) => {
                     itemsArray.push(this.convertFromApi(itemFromApi));
                 });
 

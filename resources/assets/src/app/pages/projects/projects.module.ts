@@ -12,13 +12,15 @@ import {ProjectsShowComponent} from './show/projects.show.component';
 import {ProjectsListComponent} from './list/projects.list.component';
 
 import {HttpClientModule} from '@angular/common/http';
+import {NgxPaginationModule} from 'ngx-pagination';
 
 @NgModule({
     imports: [
         CommonModule,
         AuthRoute,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        NgxPaginationModule
     ],
     declarations: [
         ProjectsCreateComponent,

@@ -15,7 +15,6 @@ export class ProjectsService extends ItemsService {
     }
 
     convertFromApi(itemFromApi) {
-        console.log(itemFromApi);
         return new Project(itemFromApi)
     }
 

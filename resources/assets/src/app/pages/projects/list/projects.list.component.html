@@ -19,7 +19,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let project of itemsArray">
+                            <tr *ngFor="let project of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{project.id}}</td>
                                 <td>{{project.name}}</td>
                                 <td>
@@ -45,6 +45,7 @@
                             </tr>
                             </tbody>
                         </table>
+                        <pagination-controls (pageChange)="p = $event"></pagination-controls>
                     </div>
                 </div>
             </div>
