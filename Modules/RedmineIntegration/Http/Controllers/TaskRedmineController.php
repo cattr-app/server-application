@@ -3,7 +3,7 @@
 namespace Modules\RedmineIntegration\Http\Controllers;
 
 
-class IssueRedmineController extends AbstractRedmineController
+class TaskRedmineController extends AbstractRedmineController
 {
     public function __construct()
     {
