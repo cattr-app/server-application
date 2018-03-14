@@ -21,22 +21,6 @@ Route::get('/{any?}', function () {
     return view('welcome');
 });
 
-Route::get('/storage/images/{filename}', function ($filename) {
-    $path = storage_path() . '/app/images/' . $filename;
-
-    if (!File::exists($path)) {
-        abort(404);
-    }
-
-    $file = File::get($path);
-    $type = File::mimeType($path);
-
-    $response = Response::make($file, 200);
-    $response->header("Content-Type", $type);
-
-    return $response;
-});
-
 Route::get('/{any1?}/{any2?}', function () {
     return view('welcome');
 });
