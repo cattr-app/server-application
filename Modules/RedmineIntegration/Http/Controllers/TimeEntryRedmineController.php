@@ -2,7 +2,6 @@
 
 namespace Modules\RedmineIntegration\Http\Controllers;
 
-
 use App\Models\Property;
 use App\Models\Task;
 use App\Models\TimeInterval;
@@ -10,16 +9,31 @@ use DateTime;
 
 class TimeEntryRedmineController extends AbstractRedmineController
 {
+    /**
+     * TimeEntryRedmineController constructor.
+     */
     public function __construct()
     {
         parent::__construct();
     }
 
+    /**
+     * Returns class name string
+     *
+     * @return string
+     */
     public function getRedmineClientPropertyName()
     {
         return 'time_entry';
     }
 
+    /**
+     * Send Time Interval to Redmine
+     *
+     * Upload time interval with id == $timeIntercalId to Redmine by API
+     *
+     * @param $timeIntervalId
+     */
     public function create($timeIntervalId)
     {
         $timeInterval = TimeInterval::where('id', '=', $timeIntervalId)->first();
@@ -39,6 +53,7 @@ class TimeEntryRedmineController extends AbstractRedmineController
             ['name', '=', 'REDMINE_ID']
         ])->first();
 
+        //calculate count of hours
         $startDateTime = new DateTime($timeInterval->start_at);
         $endDateTime = new DateTime($timeInterval->end_at);
 

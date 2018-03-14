@@ -9,6 +9,9 @@ use Redmine;
 
 abstract class AbstractRedmineController extends Controller
 {
+    /**
+     * @var Redmine\Client
+     */
     protected $client;
 
     /**
@@ -21,6 +24,9 @@ abstract class AbstractRedmineController extends Controller
      */
     abstract public function getRedmineClientPropertyName();
 
+    /**
+     * AbstractRedmineController constructor.
+     */
     public function __construct()
     {
         //init Redmine client

@@ -7,11 +7,19 @@ use App\Models\Property;
 
 class TaskRedmineController extends AbstractRedmineController
 {
+    /**
+     * TaskRedmineController constructor.
+     */
     public function __construct()
     {
         parent::__construct();
     }
 
+    /**
+     * Returns class name string
+     *
+     * @return string
+     */
     public function getRedmineClientPropertyName()
     {
         return 'issue';
@@ -91,10 +99,11 @@ class TaskRedmineController extends AbstractRedmineController
 
                 $task = Task::create($taskInfo);
 
-                Property::create(['entity_id'   => $task->id,
-                                  'entity_type' => Property::TASK_CODE,
-                                  'name'        => 'REDMINE_ID',
-                                  'value'       => $taskFromRedmine['id']
+                Property::create([
+                    'entity_id'   => $task->id,
+                    'entity_type' => Property::TASK_CODE,
+                    'name'        => 'REDMINE_ID',
+                    'value'       => $taskFromRedmine['id']
                 ]);
             }
         }

@@ -7,11 +7,19 @@ use App\Models\Property;
 
 class ProjectRedmineController extends AbstractRedmineController
 {
+    /**
+     * ProjectRedmineController constructor.
+     */
     public function __construct()
     {
         parent::__construct();
     }
 
+    /**
+     * Returns class name string
+     *
+     * @return string
+     */
     public function getRedmineClientPropertyName()
     {
         return 'project';
@@ -48,10 +56,11 @@ class ProjectRedmineController extends AbstractRedmineController
 
             $project = Project::create($projectInfo);
 
-            Property::create(['entity_id'   => $project->id,
-                              'entity_type' => Property::PROJECT_CODE,
-                              'name'        => 'REDMINE_ID',
-                              'value'       => $projectFromRedmine['id']
+            Property::create([
+                'entity_id'   => $project->id,
+                'entity_type' => Property::PROJECT_CODE,
+                'name'        => 'REDMINE_ID',
+                'value'       => $projectFromRedmine['id']
             ]);
         }
     }
