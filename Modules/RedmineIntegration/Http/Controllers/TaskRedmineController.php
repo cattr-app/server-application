@@ -12,33 +12,17 @@ class TaskRedmineController extends AbstractRedmineController
         parent::__construct();
     }
 
-    /**
-     * Gets Issue with id == $id from Redmine
-     *
-     * @param $id
-     * @return \Illuminate\Http\Response|void
-     */
-    public function show($id)
+    public function getRedmineClientPropertyName()
     {
-        dd($this->client->issue->show($id));
+        return 'issue';
     }
 
     /**
-     * Gets list of issues
-     */
-    public function list()
-    {
-        dd($this->client->issue->all([
-            'limit' => 1000
-        ]));
-    }
-
-    /**
-     * Returns issues from project with id == $projectId
+     * Returns tasks from project with id == $projectId
      *
      * @param $projectId
      */
-    public function getProjectIssues($projectId)
+    public function getProjectTasks($projectId)
     {
         dd($this->client->issue->all([
             'project_id' => $projectId
@@ -46,17 +30,20 @@ class TaskRedmineController extends AbstractRedmineController
     }
 
     /**
-     * Returns issues assigned to user with id == $userId
+     * Returns tasks assigned to user with id == $userId
      *
      * @param $userId
      */
-    public function getUserIssues($userId)
+    public function getUserTasks($userId)
     {
         dd($this->client->issue->all([
             'assigned_to_id' => $userId
         ]));
     }
 
+    /**
+     * Synchronize Redmine tasks with AmazingTime tasks
+     */
     public function synchronize()
     {
         //get current user's id
@@ -65,7 +52,7 @@ class TaskRedmineController extends AbstractRedmineController
 
         //get tasks assigned to current user
         $tasksData = $this->client->issue->all([
-            'limit' => 1000,
+            'limit'          => 1000,
             'assigned_to_id' => $currentUserId
         ]);
 
@@ -96,16 +83,21 @@ class TaskRedmineController extends AbstractRedmineController
                     'project_id'  => $projectProperty->entity_id,
                     'task_name'   => $taskFromRedmine['subject'],
                     'description' => $taskFromRedmine['description'],
-                    'active' =>  $taskFromRedmine['status']['id'],
-                    'user_id' => 1,
+                    'active'      => $taskFromRedmine['status']['id'],
+                    'user_id'     => 1,
                     'assigned_by' => 1,
-                    'url' => 'url',
+                    'url'         => 'url',
                 ];
 
                 $task = Task::create($taskInfo);
 
-                Property::create(['entity_id' => $task->id, 'entity_type' => Property::TASK_CODE, 'name' => 'REDMINE_ID', 'value' => $taskFromRedmine['id']]);
+                Property::create(['entity_id'   => $task->id,
+                                  'entity_type' => Property::TASK_CODE,
+                                  'name'        => 'REDMINE_ID',
+                                  'value'       => $taskFromRedmine['id']
+                ]);
             }
         }
     }
+
 }

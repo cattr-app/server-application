@@ -10,28 +10,12 @@ class UserRedmineController extends AbstractRedmineController
         parent::__construct();
     }
 
-    /**
-     * Gets user with id == $id from Redmine
-     *
-     * @param $id
-     * @return \Illuminate\Http\Response|void
-     */
-    public function show($id)
+    public function getRedmineClientPropertyName()
     {
-        dd($this->client->user->show($id));
+        return 'user';
     }
 
-    /**
-     * Gets list of users
-     */
-    public function list()
-    {
-        dd($this->client->user->all([
-            'limit' => 1000
-        ]));
-    }
-
-    public function synchronize()
+    /*public function synchronize()
     {
         $usersData = $this->client->user->all([
             'limit' => 1000
@@ -81,5 +65,6 @@ class UserRedmineController extends AbstractRedmineController
 
             RedmineTask::create(['task_id' => $task->id, 'redmine_task_id' => $taskFromRedmine['id']]);
         }
-    }
+    }*/
+
 }

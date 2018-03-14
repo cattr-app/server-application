@@ -7,8 +7,8 @@ Route::group(['prefix' => 'redmineintegration', 'namespace' => 'Modules\RedmineI
     // Task routes
     Route::get('/tasks', 'TaskRedmineController@list');
     Route::get('/tasks/show/{id}', 'TaskRedmineController@show');
-    Route::get('/tasks/project/{id}', 'TaskRedmineController@getProjectIssues');
-    Route::get('/tasks/user/{id}', 'TaskRedmineController@getUserIssues');
+    Route::get('/tasks/project/{id}', 'TaskRedmineController@getProjectTasks');
+    Route::get('/tasks/user/{id}', 'TaskRedmineController@getUserTasks');
     Route::get('/tasks/synchronize', 'TaskRedmineController@synchronize');
 
     //Project routes
@@ -24,4 +24,5 @@ Route::group(['prefix' => 'redmineintegration', 'namespace' => 'Modules\RedmineI
     //Time Entry routes
     Route::get('/timeentries', 'TimeEntryRedmineController@list');
     Route::get('/timeentries/show/{id}', 'TimeEntryRedmineController@show');
+    Route::get('/timeentries/create/{id}', 'TimeEntryRedmineController@create');
 });

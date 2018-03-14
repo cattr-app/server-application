@@ -12,27 +12,14 @@ class ProjectRedmineController extends AbstractRedmineController
         parent::__construct();
     }
 
-    /**
-     * Gets project with id == $id from Redmine
-     *
-     * @param $id
-     * @return \Illuminate\Http\Response|void
-     */
-    public function show($id)
+    public function getRedmineClientPropertyName()
     {
-        dd($this->client->project->show($id));
+        return 'project';
     }
 
     /**
-     * Gets list of projects
+     * Synchronize Redmine projects with AmazingTime projects
      */
-    public function list()
-    {
-        dd($this->client->project->all([
-            'limit' => 1000
-        ]));
-    }
-
     public function synchronize()
     {
         $projectsData = $this->client->project->all([
@@ -61,7 +48,13 @@ class ProjectRedmineController extends AbstractRedmineController
 
             $project = Project::create($projectInfo);
 
-            Property::create(['entity_id' => $project->id, 'entity_type' => Property::PROJECT_CODE, 'name' => 'REDMINE_ID', 'value' => $projectFromRedmine['id']]);
+            Property::create(['entity_id'   => $project->id,
+                              'entity_type' => Property::PROJECT_CODE,
+                              'name'        => 'REDMINE_ID',
+                              'value'       => $projectFromRedmine['id']
+            ]);
         }
     }
+
+
 }
