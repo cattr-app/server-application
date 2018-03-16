@@ -72,7 +72,7 @@ abstract class ItemController extends Controller
         }
 
         $cls = $this->getItemClass();
-        $item = Filter::process($this->getEventUniqueName('item.create'), $cls::create($requestData));
+        $item = Filter::process($this->getEventUniqueName('item.create'), $cls::create($this->filterRequestData($requestData)));
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
@@ -170,12 +170,24 @@ abstract class ItemController extends Controller
     }
 
     /**
+     * Opportunity to filtering request data
+     *
+     * Override this in child class for filtering
+     * @param array $requestData
+     * @return array
+     */
+    protected function filterRequestData(array $requestData): array
+    {
+        return $requestData;
+    }
+
+    /**
      * Returns event's name with current item's unique part
      *
      * @param $eventName
      * @return string
      */
-    protected function getEventUniqueName($eventName)
+    protected function getEventUniqueName(string $eventName): String
     {
         return $eventName . '.' . $this->getEventUniqueNamePart();
     }

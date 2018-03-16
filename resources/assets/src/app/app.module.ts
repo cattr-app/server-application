@@ -12,6 +12,7 @@ import {NavigationComponent} from './navigation/navigation.component';
 import {ApiService} from './api/api.service';
 import {Router} from '@angular/router';
 import { Location } from '@angular/common';
+import {IntegrationsComponent} from "./integrations/integrations.component";
 
 @NgModule({
     imports: [
@@ -25,6 +26,7 @@ import { Location } from '@angular/common';
         AppComponent,
         DashboardComponent,
         NavigationComponent,
+        IntegrationsComponent,
     ],
     providers: [],
     bootstrap: [AppComponent]

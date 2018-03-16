@@ -43,5 +43,14 @@ class UserController extends ItemController
     {
         return 'user';
     }
+
+    protected function filterRequestData(array $requestData): array
+    {
+        $requestData['password'] = bcrypt($requestData['password']);
+
+        return $requestData;
+    }
+
+
 }
 

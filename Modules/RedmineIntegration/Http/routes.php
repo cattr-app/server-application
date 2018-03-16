@@ -25,4 +25,7 @@ Route::group(['prefix' => 'redmineintegration', 'namespace' => 'Modules\RedmineI
         Route::get('/timeentries', 'TimeEntryRedmineController@list');
         Route::get('/timeentries/show/{id}', 'TimeEntryRedmineController@show');
         Route::get('/timeentries/create/{id}', 'TimeEntryRedmineController@create');
+
+        //Redmine Settings routes
+        Route::post('/settings', 'RedmineSettingsController@updateSettings');
     });

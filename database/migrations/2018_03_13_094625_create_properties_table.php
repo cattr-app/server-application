@@ -14,6 +14,7 @@ class CreatePropertiesTable extends Migration
     public function up()
     {
         Schema::create('properties', function (Blueprint $table) {
+            $table->increments('id');
             $table->integer('entity_id');
             $table->string('entity_type', 15);
             $table->string('name');
@@ -21,7 +22,7 @@ class CreatePropertiesTable extends Migration
             $table->timestamps();
             $table->softDeletes();
 
-            $table->primary(['entity_id', 'entity_type', 'name']);
+            $table->unique(['entity_id', 'entity_type', 'name']);
             $table->index(['entity_id', 'entity_type'], 'properties_index');
         });
     }

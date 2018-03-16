@@ -1,0 +1,26 @@
+<div class="container">
+    <div class="row">
+        <div class="col col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Redmine Settings</div>
+                <div class="panel-body">
+                    <form (ngSubmit)="onSubmit()">
+                        <div class="form-group row">
+                            <label class="col-md-2">Redmine URL</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" name="redmine-url" [(ngModel)]="redmineUrl">
+                            </div>
+                        </div>
+                        <div class="form-group row">
+                            <label class="col-md-2">Redmine API key</label>
+                            <div class="col-md-10">
+                                <input type="text" class="form-control" name="redmine-api-key" [(ngModel)]="redmineApiKey">
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary">Save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

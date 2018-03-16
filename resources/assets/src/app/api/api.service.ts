@@ -46,6 +46,15 @@ export class ApiService {
         }).subscribe(callback);
     }
 
+    public sendSettings(data, callback) {
+        return this.http.post(`/redmineintegration/settings`, data, {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(callback);
+    }
+
     public isGuest() {
         return !this.isAuthorized();
     }
