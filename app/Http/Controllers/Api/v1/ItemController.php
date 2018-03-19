@@ -134,7 +134,7 @@ abstract class ItemController extends Controller
         $itemId = $request->get('id');
         $item = $cls::findOrFail($itemId);
 
-        $item->fill($requestData);
+        $item->fill($this->filterRequestData($requestData));
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
         $item->save();
 
