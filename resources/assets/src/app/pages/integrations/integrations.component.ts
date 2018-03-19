@@ -29,7 +29,6 @@ export class IntegrationsComponent implements OnInit {
     }
 
     getSettingsCallback(result) {
-        console.log(result);
         this.redmineUrl = result.redmine_url;
         this.redmineApiKey = result.redmine_api_key;
     }
