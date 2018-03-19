@@ -5,13 +5,36 @@ namespace Modules\RedmineIntegration\Http\Controllers;
 use App\Models\Property;
 use Filter;
 use Illuminate\Http\Request;
+use Validator;
 
 class RedmineSettingsController extends AbstractRedmineController
 {
+    function getValidationRules()
+    {
+        return [
+            'redmine_url' => 'required',
+            'redmine_key' => 'required',
+        ];
+    }
+
     public function updateSettings(Request $request)
     {
-        $request = Filter::process('request.redmine.settings.change', $request);
+        $request = Filter::process('request.redmine.settings.update', $request);
         $user = auth()->user();
+
+        $validator = Validator::make(
+            $request->all(),
+            Filter::process('validation.redmine.settings.update', $this->getValidationRules())
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.redmine.settings.update'), [
+                    'error' => 'Validation fail',
+                ]),
+                400
+            );
+        }
 
         $propertyRedmineUrl = Filter::process(
             'redmine.settings.url.change',

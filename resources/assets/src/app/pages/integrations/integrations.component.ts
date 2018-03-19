@@ -1,7 +1,6 @@
 import {ApiService} from '../../api/api.service';
 import { Component, OnInit } from '@angular/core';
 import {Message} from 'primeng/components/common/api';
-import {MessageService} from 'primeng/components/common/messageservice';
 
 @Component({
     selector: 'app-integrations',

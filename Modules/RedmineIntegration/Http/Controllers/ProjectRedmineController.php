@@ -60,6 +60,4 @@ class ProjectRedmineController extends AbstractRedmineController
             ], 200
         );
     }
-
-
 }
