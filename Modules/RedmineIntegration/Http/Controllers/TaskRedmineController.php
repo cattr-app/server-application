@@ -31,26 +31,36 @@ class TaskRedmineController extends AbstractRedmineController
         $addedTasksCounter = 0;
 
         foreach ($tasks as $taskFromRedmine) {
-            //if task already exists => continue
+
             $taskExist = Property::where([
                 ['entity_type', '=', Property::TASK_CODE],
                 ['name', '=', 'REDMINE_ID'],
                 ['value', '=', $taskFromRedmine['id']]
             ])->first();
 
+            //if task already exists => check task's assigned user
             if ($taskExist != null) {
+                //if tasks assigned to other user in our system => set current user to task's user
+                $task = Task::find($taskExist->entity_id);
+
+                if ($task->user_id != $user->id) {
+                    $task->user_id = $user->id;
+                    $task->save();
+                    $addedTasksCounter++;
+                }
+
                 continue;
             }
 
-            //is task's project exists => add task
             $projectProperty = Property::where([
                 ['entity_type', '=', Property::PROJECT_CODE],
                 ['name', '=', 'REDMINE_ID'],
                 ['value', '=', $taskFromRedmine['project']['id']]
             ])->first();
 
-            //TODO: add user_id and assigned_by from our system
+            //if task's project exists in our system => add task
             if ($projectProperty && $projectProperty->entity_id) {
+                //TODO: add assigned_by from our system
                 $taskInfo = [
                     'project_id'  => $projectProperty->entity_id,
                     'task_name'   => $taskFromRedmine['subject'],
@@ -64,6 +74,7 @@ class TaskRedmineController extends AbstractRedmineController
                 $task = Task::create($taskInfo);
                 $addedTasksCounter++;
 
+                //Add task redmine id property
                 Property::create([
                     'entity_id'   => $task->id,
                     'entity_type' => Property::TASK_CODE,
@@ -74,8 +85,8 @@ class TaskRedmineController extends AbstractRedmineController
         }
 
         return response()->json([
-                'added_tasks' => $addedTasksCounter
-            ], 200
+            'added_tasks' => $addedTasksCounter
+        ], 200
         );
     }
 
