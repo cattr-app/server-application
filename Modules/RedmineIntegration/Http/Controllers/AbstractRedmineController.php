@@ -23,7 +23,7 @@ abstract class AbstractRedmineController extends Controller
             ->where('entity_type', '=', Property::USER_CODE)
             ->where('name', '=', 'REDMINE_URL')->first();
 
-        return $redmineUrlProperty->value;
+        return $redmineUrlProperty ? $redmineUrlProperty ->value : '';
     }
 
     protected function getUserRedmineApiKey($userId)
@@ -32,7 +32,7 @@ abstract class AbstractRedmineController extends Controller
             ->where('entity_type', '=', Property::USER_CODE)
             ->where('name', '=', 'REDMINE_KEY')->first();
 
-        return $redmineApiKeyProperty->value;
+        return $redmineApiKeyProperty? $redmineApiKeyProperty->value : '';
     }
 
 
