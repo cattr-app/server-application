@@ -56,7 +56,7 @@ class TaskRedmineController extends AbstractRedmineController
                     'task_name'   => $taskFromRedmine['subject'],
                     'description' => $taskFromRedmine['description'],
                     'active'      => $taskFromRedmine['status']['id'],
-                    'user_id'     => 1,
+                    'user_id'     => $user->id,
                     'assigned_by' => 1,
                     'url'         => 'url',
                 ];
