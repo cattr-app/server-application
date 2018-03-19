@@ -4,67 +4,31 @@ namespace Modules\RedmineIntegration\Http\Controllers;
 
 use App\Models\Task;
 use App\Models\Property;
+use Illuminate\Http\Request;
 
 class TaskRedmineController extends AbstractRedmineController
 {
     /**
-     * TaskRedmineController constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Returns class name string
-     *
-     * @return string
-     */
-    public function getRedmineClientPropertyName()
-    {
-        return 'issue';
-    }
-
-    /**
-     * Returns tasks from project with id == $projectId
-     *
-     * @param $projectId
-     */
-    public function getProjectTasks($projectId)
-    {
-        dd($this->client->issue->all([
-            'project_id' => $projectId
-        ]));
-    }
-
-    /**
-     * Returns tasks assigned to user with id == $userId
-     *
-     * @param $userId
-     */
-    public function getUserTasks($userId)
-    {
-        dd($this->client->issue->all([
-            'assigned_to_id' => $userId
-        ]));
-    }
-
-    /**
      * Synchronize Redmine tasks with AmazingTime tasks
      */
-    public function synchronize()
+    public function synchronize(Request $request)
     {
+        $user = auth()->user();
+
+        $client = $this->initRedmineClient($user->id);
+
         //get current user's id
-        $currentUser = $this->client->user->getCurrentUser();
-        $currentUserId = $currentUser['user']['id'];
+        $currentRedmineUser = $client->user->getCurrentUser();
+        $currentRedmineUserId = $currentRedmineUser['user']['id'];
 
         //get tasks assigned to current user
-        $tasksData = $this->client->issue->all([
+        $tasksData = $client->issue->all([
             'limit'          => 1000,
-            'assigned_to_id' => $currentUserId
+            'assigned_to_id' => $currentRedmineUserId
         ]);
 
         $tasks = $tasksData['issues'];
+        $addedTasksCounter = 0;
 
         foreach ($tasks as $taskFromRedmine) {
             //if task already exists => continue
@@ -98,6 +62,7 @@ class TaskRedmineController extends AbstractRedmineController
                 ];
 
                 $task = Task::create($taskInfo);
+                $addedTasksCounter++;
 
                 Property::create([
                     'entity_id'   => $task->id,
@@ -107,6 +72,11 @@ class TaskRedmineController extends AbstractRedmineController
                 ]);
             }
         }
+
+        return response()->json([
+                'added_tasks' => $addedTasksCounter
+            ], 200
+        );
     }
 
 }

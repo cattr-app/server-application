@@ -2,12 +2,11 @@
 
 namespace Modules\RedmineIntegration\Http\Controllers;
 
-use App\Http\Controllers\Controller;
 use App\Models\Property;
 use Filter;
 use Illuminate\Http\Request;
 
-class RedmineSettingsController extends Controller
+class RedmineSettingsController extends AbstractRedmineController
 {
     public function updateSettings(Request $request)
     {
@@ -46,6 +45,21 @@ class RedmineSettingsController extends Controller
 
         return response()->json(
             Filter::process('answer.success.redmine.settings.change', 'Updated!'),
+            200
+        );
+    }
+
+    public function getSettings(Request $request)
+    {
+        $user = auth()->user();
+
+        $settingsArray = [
+            'redmine_url'     => $this->getUserRedmineUrl($user->id),
+            'redmine_api_key' => $this->getUserRedmineApiKey($user->id)
+        ];
+
+        return response()->json(
+            $settingsArray,
             200
         );
     }

@@ -2,7 +2,7 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
 import {DashboardComponent} from './dashboard/dashboard.component';
-import {IntegrationsComponent} from "./integrations/integrations.component";
+import {IntegrationsComponent} from "./pages/integrations/integrations.component";
 
 const routes: Routes = [
     {path: 'projects', loadChildren: './pages/projects/projects.module#ProjectsModule'},
