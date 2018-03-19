@@ -13,6 +13,7 @@ import {ApiService} from './api/api.service';
 import {Router} from '@angular/router';
 import { Location } from '@angular/common';
 import {IntegrationsComponent} from "./pages/integrations/integrations.component";
+import {GrowlModule} from 'primeng/growl';
 
 @NgModule({
     imports: [
@@ -20,7 +21,8 @@ import {IntegrationsComponent} from "./pages/integrations/integrations.component
         FormsModule,
         AppRoutingModule,
         ApiModule.forRoot(),
-        ModalModule.forRoot()
+        ModalModule.forRoot(),
+        GrowlModule
     ],
     declarations: [
         AppComponent,

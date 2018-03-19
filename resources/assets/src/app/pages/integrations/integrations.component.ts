@@ -1,16 +1,20 @@
 import {ApiService} from '../../api/api.service';
 import { Component, OnInit } from '@angular/core';
+import {Message} from 'primeng/components/common/api';
+import {MessageService} from 'primeng/components/common/messageservice';
 
 @Component({
     selector: 'app-integrations',
     templateUrl: './integrations.component.html',
-    styleUrls: ['../../app.component.scss']
+    styleUrls: ['../../app.component.scss'],
 })
 export class IntegrationsComponent implements OnInit {
 
-    constructor(private api: ApiService) { }
+    msgs: Message[] = [];
     redmineUrl : string;
     redmineApiKey : string;
+
+    constructor(private api: ApiService) { }
 
     ngOnInit() {
         this.api.getSettings([],  this.getSettingsCallback.bind(this))
@@ -35,13 +39,25 @@ export class IntegrationsComponent implements OnInit {
 
     redmineUpdateCallback(result) {
         console.log(result);
+        this.msgs = [];
+        this.msgs.push({severity:'success', summary:'Success Message', detail:'Settings have been updated'});
     }
 
     synchronizeProjectsCallback(result) {
-        console.log(result);
+        this.msgs = [];
+        this.msgs.push({
+            severity:'success',
+            summary:'Projects have been synchronized',
+            detail:'New projects: ' + result.added_projects
+        });
     }
 
     synchronizeTasksCallback(result) {
-        console.log(result);
+        this.msgs = [];
+        this.msgs.push({
+            severity:'success',
+            summary:'Tasks have been synchronized',
+            detail:'New tasks: ' + result.added_tasks
+        });
     }
 }
