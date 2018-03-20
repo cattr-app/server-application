@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1;
 use App\Models\Role;
 use App\Models\Rule;
 use Filter;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\Request;
 
 class RulesController extends ItemController
@@ -52,6 +53,13 @@ class RulesController extends ItemController
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), ['error' => 'rule does not exist']),
                 400
             );
+
+        if(Auth::user()->role_id == $rule->role_id) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), ['error' => 'you cannot change your own privileges']),
+                403
+            );
+        }
 
         $rule->allow = $requestData['allow'];
 

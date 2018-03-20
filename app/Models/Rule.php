@@ -38,6 +38,7 @@ class Rule extends Model
             'tasks' => [
                 'list' => __('Task list'),
                 'view' => __('Task view'),
+                'show' => __('Task show'),
                 'edit' => __('Task edit'),
                 'remove' => __('Task remove'),
             ],
@@ -48,6 +49,20 @@ class Rule extends Model
                 'show' => __('Role show'),
                 'remove' => __('Role remove'),
             ],
+            'screenshots' => [
+                'list' => __('Screenshot list'),
+                'create' => __('Screenshot create'),
+                'edit' => __('Screenshot edit'),
+                'show' => __('Screenshot show'),
+                'remove' => __('Screenshot remove'),
+            ],
+            'timeintervals' => [
+                'list' => __('Time interval list'),
+                'create' => __('Time interval create'),
+                'edit' => __('Time interval edit'),
+                'show' => __('Time interval show'),
+                'remove' => __('Time interval remove'),
+            ],
             'users' => [
                 'list' => __('User list'),
                 'create' => __('User create'),
@@ -57,6 +72,9 @@ class Rule extends Model
             ],
             'actions' => [
                 'list' => __('Actions list'),
+            ],
+            'allowed' => [
+                'list' => __('Allowed actions list'),
             ],
             'rules' => [
                 'edit' => __('Rules edit'),

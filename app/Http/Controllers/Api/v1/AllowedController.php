@@ -5,9 +5,10 @@ namespace App\Http\Controllers\Api\v1;
 use Filter;
 use Illuminate\Http\Request;
 use App\models\Rule;
+use Illuminate\Support\Facades\Auth;
 
 
-class ActionsController extends ItemController
+class AllowedController extends ItemController
 {
 
 
@@ -24,11 +25,12 @@ class ActionsController extends ItemController
 
     function getEventUniqueNamePart()
     {
-        return 'action';
+        return 'allowed';
     }
 
+
     /**
-     * Get action list.
+     * Get allowed action list.
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -40,17 +42,20 @@ class ActionsController extends ItemController
 
         $items = [];
 
-        foreach ($actionList as $object => $actions) {
 
-                foreach ($actions as $action => $name) {
+        $rules = Auth::user()->role->rules;
 
-                    $items[] = [
-                        'object' => $object,
-                        'action' => $action,
-                        'name' => $name,
-                    ];
 
+        foreach ($rules as $rule) {
+
+            if(!$rule->allow) {
+                continue;
             }
+
+            $items[] = [
+                'object' => $rule->object,
+                'action' => $rule->action,
+            ];
         }
 
         $items = ['data' => $items];
@@ -61,6 +66,5 @@ class ActionsController extends ItemController
             200
         );
     }
-
 
 }

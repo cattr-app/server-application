@@ -85,6 +85,7 @@ Route::group([
 
 
     $router->post('/actions/list', 'Api\v1\ActionsController@list');
+    $router->post('/allowed/list', 'Api\v1\AllowedController@list');
 
 
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
