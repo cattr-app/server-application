@@ -21,7 +21,7 @@ class CreateTasksTable extends Migration
             $table->boolean('active');
             $table->integer('user_id');
             $table->integer('assigned_by');
-            $table->string('url');
+            $table->string('url', 500);
             $table->timestamps();
             $table->softDeletes();
 

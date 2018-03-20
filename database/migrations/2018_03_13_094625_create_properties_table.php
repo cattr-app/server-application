@@ -17,7 +17,7 @@ class CreatePropertiesTable extends Migration
             $table->increments('id');
             $table->integer('entity_id');
             $table->string('entity_type', 15);
-            $table->string('name');
+            $table->string('name', 150);
             $table->text('value');
             $table->timestamps();
             $table->softDeletes();
