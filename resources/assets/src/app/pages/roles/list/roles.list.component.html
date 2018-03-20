@@ -1,0 +1,64 @@
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Roles</div>
+                <div class="panel-body">
+                    <a routerLink="/roles/create" class="btn btn-success" title="Add new role">
+                        <i class="fa fa-plus" aria-hidden="true"></i> Add New
+                    </a>
+                    <br/>
+                    <br/>
+                    <div class="table-responsive">
+                        <table *ngFor="let role of itemsArray" class="table table-borderless">
+                            <thead>
+                            <tr>
+                                <th>username (id: {{role.id}})</th>
+                                <th>rule name</th>
+                                <th>allow</th>
+                                <th>
+                                    <a [routerLink]="['/roles/edit', role.id]" title="Edit role">
+                                        <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
+                                                                                  aria-hidden="true"></i>
+                                            Edit
+                                        </button>
+                                    </a>
+                                    <a (click)="openRemoveItemModalWindow(template, role.id)" title="Delete role">
+                                        <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
+                                                                                 aria-hidden="true"></i>
+                                            Delete
+                                        </button>
+                                    </a>
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr *ngFor="let rule of role.rules">
+                                <td>{{role.name}}</td>
+                                <td>{{ruleName(rule)}}</td>
+                                <td>
+                                    <input type="checkbox" [(ngModel)]="rule.allow" (change)="onRuleUpdate(rule)">
+                                </td>
+                                <td></td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<ng-template #template>
+    <div class="modal-header">
+        <h4 class="modal-title pull-left">Remove this role?</h4>
+        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+            <span aria-hidden="true">&times;</span>
+        </button>
+    </div>
+    <div class="modal-body">
+        <button type="button" class="btn btn-default" (click)="removeItem()">Yes</button>
+        <button type="button" class="btn btn-primary" (click)="modalRef.hide()">No</button>
+    </div>
+</ng-template>

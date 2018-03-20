@@ -3,7 +3,16 @@
 
 Route::get('/test-module', function () {
     $data = [
-        'asdasd' => 'qweqwe',
+        'project' => [
+            'view' => 'Project View',
+            'edit' => 'Project Edit',
+            'delete' => 'Project Delete',
+        ],
+        'task' => [
+            'view' => 'Task View',
+            'edit' => 'Task Edit',
+            'delete' => 'Task Delete',
+        ],
     ];
 
 

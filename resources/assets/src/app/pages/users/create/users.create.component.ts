@@ -45,6 +45,7 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
             'user_role_value': this.item.user_role_value,
             'active': this.item.active,
             'password': this.item.password,
+            'role_id': this.item.role_id,
         }
     }
 }

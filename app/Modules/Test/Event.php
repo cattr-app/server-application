@@ -18,8 +18,6 @@ class Event
      */
     public function modifyAnswer(string $event, array $answer): array
     {
-        $answer['additional_info'] = 'Some string';
-
         return $answer;
     }
 }
