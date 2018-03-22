@@ -4,6 +4,7 @@ import {TimeIntervalsService} from "../timeintervals.service";
 import {TimeInterval} from "../../../models/timeinterval.model";
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {ItemsListComponent} from "../../items.list.component";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-timeintervals-list',
@@ -16,7 +17,8 @@ export class TimeIntervalsListComponent extends ItemsListComponent implements On
 
     constructor(api: ApiService,
                 timeIntervalService: TimeIntervalsService,
-                modalService: BsModalService,) {
-        super(api, timeIntervalService, modalService);
+                modalService: BsModalService,
+                allowedService: AllowedActionsService,) {
+        super(api, timeIntervalService, modalService, allowedService);
     }
 }

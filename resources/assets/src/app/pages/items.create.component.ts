@@ -3,6 +3,8 @@ import {ApiService} from '../api/api.service';
 import {Router} from "@angular/router";
 import {Item} from "../models/item.model";
 import {ItemsService} from "./items.service";
+import {AllowedActionsService} from "./roles/allowed-actions.service";
+
 
 export abstract class ItemsCreateComponent implements OnInit {
 
@@ -12,11 +14,16 @@ export abstract class ItemsCreateComponent implements OnInit {
 
     constructor(private api: ApiService,
                 private itemService: ItemsService,
-                private router: Router) {
+                private router: Router,
+                protected allowedAction: AllowedActionsService,) {
     }
 
     ngOnInit() {
 
+    }
+
+    can(action: string ): boolean {
+        return this.allowedAction.can(action);
     }
 
     public onSubmit() {

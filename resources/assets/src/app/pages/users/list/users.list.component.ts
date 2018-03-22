@@ -5,6 +5,7 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {UsersService} from "../users.service";
 import {ItemsListComponent} from "../../items.list.component";
 import {User} from "../../../models/user.model";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-users-list',
@@ -17,8 +18,9 @@ export class UsersListComponent extends ItemsListComponent implements OnInit {
 
     constructor(api: ApiService,
                 userService: UsersService,
-                modalService: BsModalService) {
-        super(api, userService, modalService);
+                modalService: BsModalService,
+                allowedService: AllowedActionsService,) {
+        super(api, userService, modalService, allowedService);
     }
 
 }

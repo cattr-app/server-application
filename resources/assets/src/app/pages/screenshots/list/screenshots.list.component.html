@@ -4,7 +4,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Screenshots</div>
                 <div class="panel-body">
-                    <a routerLink="/screenshots/create" class="btn btn-success" title="Add new screenshot">
+                    <a *ngIf="can('/screenshots/create')" routerLink="/screenshots/create" class="btn btn-success" title="Add new screenshot">
                         <i class="fa fa-plus" aria-hidden="true"></i> Add New
                     </a>
                     <br/>
@@ -23,19 +23,19 @@
                                 <td>{{screenshot.id}}</td>
                                 <td>{{screenshot.time_interval_id}}</td>
                                 <td>
-                                    <a [routerLink]="['/screenshots/show', screenshot.id]" title="View screenshot">
+                                    <a *ngIf="can('/screenshots/show')" [routerLink]="['/screenshots/show', screenshot.id]" title="View screenshot">
                                         <button class="btn btn-info btn-sm">
                                             <i class="fa fa-eye" aria-hidden="true"></i>
                                             View
                                         </button>
                                     </a>
-                                    <a [routerLink]="['/screenshots/edit', screenshot.id]" title="Edit screenshot">
+                                    <a *ngIf="can('/screenshots/edit')" [routerLink]="['/screenshots/edit', screenshot.id]" title="Edit screenshot">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
                                             Edit
                                         </button>
                                     </a>
-                                    <a (click)="openRemoveItemModalWindow(template, screenshot.id)" title="Delete screenshot">
+                                    <a *ngIf="can('/screenshots/remove')" (click)="openRemoveItemModalWindow(template, screenshot.id)" title="Delete screenshot">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
                                             Delete

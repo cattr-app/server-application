@@ -17,7 +17,6 @@ interface NavigationLink {
 })
 export class NavigationComponent implements OnInit {
     items: NavigationLink[];
-    allowedActions: AllowedAction[] = [];
     isAuthorized: boolean = false;
 
     protected itemsGuest: NavigationLink[] = [
@@ -40,17 +39,18 @@ export class NavigationComponent implements OnInit {
 
     ngOnInit(): void {
         this.updateItems();
-        this.updateAllowedList();
+        this.allowedService.subscribeOnUpdate(this.onAllowedActionsUpdate.bind(this));
+
+        if(this.isAuthorized) {
+            this.allowedService.updateAllowedList();
+        }
     }
 
-    updateAllowedList() {
-        this.allowedService.getItems(this.setupAllowedList.bind(this));
-    }
 
-    setupAllowedList(items) {
-        this.allowedActions = items;
+    onAllowedActionsUpdate(items) {
         this.updateItems();
     }
+
 
     constructor(
         protected apiService: ApiService,
@@ -65,8 +65,12 @@ export class NavigationComponent implements OnInit {
 
     setAuth(status: boolean): void {
         this.isAuthorized = status;
-        this.updateItems();
-        this.updateAllowedList();
+
+        if(status) {
+            this.allowedService.updateAllowedList();
+        } else {
+            this.updateItems();
+        }
     }
 
     updateItems(): void {
@@ -86,18 +90,8 @@ export class NavigationComponent implements OnInit {
                 continue;
             }
 
-            if(!this.allowedActions.length) {
-                continue;
-            }
-
-            for(let allowedAction of this.allowedActions) {
-
-                if(allowedAction.object + '/' + allowedAction.action ==
-                    item.action) {
-                    allowedItems.push(item);
-                    break;
-                }
-            }
+            if(this.allowedService.can(item.action))
+                allowedItems.push(item);
 
         }
 

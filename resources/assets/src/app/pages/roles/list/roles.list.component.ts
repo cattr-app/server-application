@@ -6,6 +6,7 @@ import {Action} from "../../../models/action.model";
 import {RolesService} from "../roles.service";
 import {RulesService} from "../rules.service";
 import {ActionsService} from "../actions.service";
+import {AllowedActionsService} from "../allowed-actions.service";
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {Router} from "@angular/router";
@@ -23,8 +24,6 @@ import {Task} from "../../../models/task.model";
 export class RolesListComponent extends ItemsListComponent implements OnInit {
 
     actionsArray: Action[] = [];
-    actionsService: ActionsService;
-    ruleService: RulesService;
 
     ngOnInit() {
         super.ngOnInit();
@@ -67,12 +66,11 @@ export class RolesListComponent extends ItemsListComponent implements OnInit {
     constructor(
         api: ApiService,
         roleService: RolesService,
-        ruleService: RulesService,
-        actionsService: ActionsService,
-        modalService: BsModalService
+        modalService: BsModalService,
+        protected ruleService: RulesService,
+        protected actionsService: ActionsService,
+        allowedService: AllowedActionsService,
     ) {
-        super(api, roleService, modalService);
-        this.actionsService = actionsService;
-        this.ruleService = ruleService;
+        super(api, roleService, modalService, allowedService);
     }
 }

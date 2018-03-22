@@ -4,7 +4,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Roles</div>
                 <div class="panel-body">
-                    <a routerLink="/roles/create" class="btn btn-success" title="Add new role">
+                    <a *ngIf="can('/roles/create')" routerLink="/roles/create" class="btn btn-success" title="Add new role">
                         <i class="fa fa-plus" aria-hidden="true"></i> Add New
                     </a>
                     <br/>
@@ -17,13 +17,13 @@
                                 <th>rule name</th>
                                 <th>allow</th>
                                 <th>
-                                    <a [routerLink]="['/roles/edit', role.id]" title="Edit role">
+                                    <a *ngIf="can('/roles/edit')"  [routerLink]="['/roles/edit', role.id]" title="Edit role">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
                                             Edit
                                         </button>
                                     </a>
-                                    <a (click)="openRemoveItemModalWindow(template, role.id)" title="Delete role">
+                                    <a *ngIf="can('/roles/remove')" (click)="openRemoveItemModalWindow(template, role.id)" title="Delete role">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
                                             Delete

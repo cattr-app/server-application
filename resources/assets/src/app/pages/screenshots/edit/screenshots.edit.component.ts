@@ -4,6 +4,7 @@ import {Router, ActivatedRoute} from "@angular/router";
 import {ScreenshotsService} from "../screenshots.service";
 import {ItemsEditComponent} from "../../items.edit.component";
 import {Screenshot} from "../../../models/screenshot.model";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-screenshots-edit',
@@ -17,8 +18,9 @@ export class ScreenshotsEditComponent extends ItemsEditComponent implements OnIn
     constructor(api: ApiService,
                 screenshotService: ScreenshotsService,
                 activatedRoute: ActivatedRoute,
-                router: Router) {
-        super(api, screenshotService, activatedRoute, router)
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, screenshotService, activatedRoute, router, allowedService)
     }
 
     prepareData() {

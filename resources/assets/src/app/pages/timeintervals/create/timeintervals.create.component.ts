@@ -4,6 +4,7 @@ import {TimeInterval} from "../../../models/timeinterval.model";
 import {Router} from "@angular/router";
 import {TimeIntervalsService} from "../timeintervals.service";
 import {ItemsCreateComponent} from "../../items.create.component";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-timeintervals-create',
@@ -16,8 +17,9 @@ export class TimeIntervalsCreateComponent extends ItemsCreateComponent implement
 
     constructor(api: ApiService,
                 timeIntervalService: TimeIntervalsService,
-                router: Router) {
-        super(api, timeIntervalService, router);
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, timeIntervalService, router, allowedService);
     }
 
     prepareData() {

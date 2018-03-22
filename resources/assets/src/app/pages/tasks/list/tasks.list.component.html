@@ -4,7 +4,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Tasks</div>
                 <div class="panel-body">
-                    <a routerLink="/tasks/create" class="btn btn-success" title="Add new task">
+                    <a *ngIf="can('/tasks/create')" routerLink="/tasks/create" class="btn btn-success" title="Add new task">
                         <i class="fa fa-plus" aria-hidden="true"></i> Add New
                     </a>
                     <br/>
@@ -25,19 +25,19 @@
                                 <td>{{task.project_id}}</td>
                                 <td>{{task.task_name}}</td>
                                 <td>
-                                    <a [routerLink]="['/tasks/show', task.id]" title="View project">
+                                    <a *ngIf="can('/tasks/show')" [routerLink]="['/tasks/show', task.id]" title="View project">
                                         <button class="btn btn-info btn-sm">
                                             <i class="fa fa-eye" aria-hidden="true"></i>
                                             View
                                         </button>
                                     </a>
-                                    <a [routerLink]="['/tasks/edit', task.id]" title="Edit project">
+                                    <a *ngIf="can('/tasks/edit')" [routerLink]="['/tasks/edit', task.id]" title="Edit project">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
                                             Edit
                                         </button>
                                     </a>
-                                    <a (click)="openRemoveItemModalWindow(template, task.id)" title="Delete project">
+                                    <a *ngIf="can('/tasks/remove')" (click)="openRemoveItemModalWindow(template, task.id)" title="Delete project">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
                                             Delete

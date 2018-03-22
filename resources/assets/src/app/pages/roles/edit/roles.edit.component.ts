@@ -4,6 +4,7 @@ import {Role} from "../../../models/role.model";
 import {Router, ActivatedRoute} from "@angular/router";
 import {RolesService} from "../roles.service";
 import {ItemsEditComponent} from "../../items.edit.component";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-roles-edit',
@@ -17,8 +18,9 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
     constructor(api: ApiService,
                 roleService: RolesService,
                 activatedRoute: ActivatedRoute,
-                router: Router) {
-        super(api, roleService, activatedRoute, router)
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, roleService, activatedRoute, router, allowedService)
     }
 
     prepareData() {

@@ -4,6 +4,7 @@ import {Task} from "../../../models/task.model";
 import {Router} from "@angular/router";
 import {TasksService} from "../tasks.service";
 import {ItemsCreateComponent} from "../../items.create.component";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-tasks-create',
@@ -16,8 +17,9 @@ export class TasksCreateComponent extends ItemsCreateComponent implements OnInit
 
     constructor(api: ApiService,
                 taskService: TasksService,
-                router: Router) {
-        super(api, taskService, router);
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, taskService, router, allowedService);
     }
 
     prepareData() {

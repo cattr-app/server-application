@@ -4,6 +4,7 @@ import {Role} from "../../../models/role.model";
 import {Router} from "@angular/router";
 import {RolesService} from "../roles.service";
 import {ItemsCreateComponent} from "../../items.create.component";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 
 @Component({
@@ -17,8 +18,9 @@ export class RolesCreateComponent extends ItemsCreateComponent implements OnInit
 
     constructor(api: ApiService,
                 roleService: RolesService,
-                router: Router) {
-        super(api, roleService, router);
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, roleService, router, allowedService);
     }
 
     prepareData() {
