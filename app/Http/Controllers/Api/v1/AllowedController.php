@@ -58,7 +58,7 @@ class AllowedController extends ItemController
             ];
         }
 
-        $items = ['data' => $items];
+
 
 
         return response()->json(
