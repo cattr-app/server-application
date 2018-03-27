@@ -11,6 +11,7 @@ import {ActionsService} from "./actions.service";
 import {RolesListComponent} from './list/roles.list.component';
 import {RolesCreateComponent} from './create/roles.create.component';
 import {RolesEditComponent} from './edit/roles.edit.component';
+import {NgxPaginationModule} from 'ngx-pagination';
 
 import {HttpClientModule} from '@angular/common/http';
 
@@ -19,7 +20,8 @@ import {HttpClientModule} from '@angular/common/http';
         CommonModule,
         RolesRoute,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        NgxPaginationModule
     ],
     declarations: [
         RolesListComponent,

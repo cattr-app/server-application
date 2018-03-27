@@ -58,9 +58,6 @@ class AllowedController extends ItemController
             ];
         }
 
-
-
-
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
             200

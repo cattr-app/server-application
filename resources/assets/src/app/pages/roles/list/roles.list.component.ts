@@ -24,6 +24,7 @@ import {Task} from "../../../models/task.model";
 export class RolesListComponent extends ItemsListComponent implements OnInit {
 
     actionsArray: Action[] = [];
+    p: number = 1;
 
     ngOnInit() {
         super.ngOnInit();
@@ -32,6 +33,8 @@ export class RolesListComponent extends ItemsListComponent implements OnInit {
 
     ActionsUpdate(result) {
         this.actionsArray = result;
+        console.log("items:");
+        console.log(result);
     }
 
     ruleName(rule: Rule) {

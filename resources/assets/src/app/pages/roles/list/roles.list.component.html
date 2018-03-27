@@ -10,7 +10,7 @@
                     <br/>
                     <br/>
                     <div class="table-responsive">
-                        <table *ngFor="let role of itemsArray" class="table table-borderless">
+                        <table *ngFor="let role of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }" class="table table-borderless">
                             <thead>
                             <tr>
                                 <th>username (id: {{role.id}})</th>

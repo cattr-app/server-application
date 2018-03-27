@@ -16,7 +16,7 @@ class RolesController extends ItemController
     function getValidationRules()
     {
         return [
-            'name'        => 'required',
+            'name' => 'required',
         ];
     }
 
@@ -25,8 +25,6 @@ class RolesController extends ItemController
         return 'role';
     }
 
-
-
     public function index(Request $request)
     {
         $keyword = Filter::process($this->getEventUniqueName('request.item.list'), $request->get('search'));
@@ -34,15 +32,9 @@ class RolesController extends ItemController
         $perPage = 25;
 
         $cls = $this->getItemClass();
-
         $cls::updateRules();
 
-
-        if (!empty($keyword)) {
-            $items = $cls::with('rules')->paginate($perPage);
-        } else {
-            $items = $cls::with('rules')->paginate($perPage);
-        }
+        $items = $cls::with('rules')->get();
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
