@@ -31,12 +31,14 @@ class Rule extends Model
         return \Filter::process('role.actions.list', [
             'projects' => [
                 'list' => __('Project list'),
+                'create' => __('Project create'),
                 'view' => __('Project view'),
                 'edit' => __('Project edit'),
                 'remove' => __('Project remove'),
             ],
             'tasks' => [
                 'list' => __('Task list'),
+                'create' => __('Project create'),
                 'view' => __('Task view'),
                 'show' => __('Task show'),
                 'edit' => __('Task edit'),
