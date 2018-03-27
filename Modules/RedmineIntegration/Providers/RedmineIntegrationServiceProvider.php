@@ -2,8 +2,8 @@
 
 namespace Modules\RedmineIntegration\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use App\EventFilter\EventServiceProvider as ServiceProvider;
 
 class RedmineIntegrationServiceProvider extends ServiceProvider
 {
@@ -13,6 +13,13 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
      * @var bool
      */
     protected $defer = false;
+
+    protected $listen = [
+        'answer.success.item.list.allowed' => [
+            'Modules\RedmineIntegration\Listeners\RoleObserver@list',
+        ]
+    ];
+
 
     /**
      * Boot the application events.
