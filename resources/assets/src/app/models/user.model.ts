@@ -24,6 +24,7 @@ export class User extends Item{
     public user_role_value: string;
     public active: string;
     public password: string;
+    public role_id: number;
     public created_at?: string;
     public updated_at?: string;
     public deleted_at?: string;
@@ -51,6 +52,7 @@ export class User extends Item{
                 user_role_value?,
                 active?,
                 password?,
+                role_id?,
                 createdAt?,
                 updatedAt?,
                 deletedAt?) {
@@ -78,6 +80,7 @@ export class User extends Item{
         this.user_role_value = user_role_value;
         this.active = active;
         this.password = password;
+        this.role_id = role_id;
         this.created_at = createdAt;
         this.updated_at = updatedAt;
         this.deleted_at = deletedAt;

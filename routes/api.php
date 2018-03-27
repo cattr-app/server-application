@@ -76,6 +76,19 @@ Route::group([
     $router->post('/timeintervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/timeintervals/remove', 'Api\v1\TimeIntervalController@destroy');
 
+    //role routes
+    $router->post('/roles/list', 'Api\v1\RolesController@index');
+    $router->post('/roles/create', 'Api\v1\RolesController@create');
+    $router->post('/roles/edit', 'Api\v1\RolesController@edit');
+    $router->post('/roles/show', 'Api\v1\RolesController@show');
+    $router->post('/roles/remove', 'Api\v1\RolesController@destroy');
+
+
+    $router->post('/actions/list', 'Api\v1\ActionsController@list');
+    $router->post('/allowed/list', 'Api\v1\AllowedController@list');
+
+
+    $router->post('/rules/edit', 'Api\v1\RulesController@edit');
 
 
 

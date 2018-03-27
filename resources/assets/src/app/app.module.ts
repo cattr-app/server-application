@@ -10,6 +10,7 @@ import {DashboardComponent} from './dashboard/dashboard.component';
 import {ApiModule} from './api/api.module';
 import {NavigationComponent} from './navigation/navigation.component';
 import {ApiService} from './api/api.service';
+import {AllowedActionsService} from './pages/roles/allowed-actions.service';
 import {Router} from '@angular/router';
 import { Location } from '@angular/common';
 import {IntegrationsComponent} from "./pages/integrations/integrations.component";
@@ -30,7 +31,9 @@ import {GrowlModule} from 'primeng/growl';
         NavigationComponent,
         IntegrationsComponent,
     ],
-    providers: [],
+    providers: [
+        AllowedActionsService,
+    ],
     bootstrap: [AppComponent]
 })
 export class AppModule {

@@ -39,6 +39,7 @@ export class UsersService extends ItemsService {
             itemFromApi.user_role_value,
             itemFromApi.active,
             itemFromApi.password,
+            itemFromApi.role_id,
             itemFromApi.created_at,
             itemFromApi.updated_at,
             itemFromApi.deleted_at

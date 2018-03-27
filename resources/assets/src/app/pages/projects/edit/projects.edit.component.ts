@@ -4,6 +4,7 @@ import {ProjectsService} from "../projects.service";
 import {Router, ActivatedRoute} from '@angular/router';
 import {Project} from "../../../models/project.model";
 import {ItemsEditComponent} from "../../items.edit.component";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-projects-edit',
@@ -17,8 +18,9 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
     constructor(api: ApiService,
                 projectService: ProjectsService,
                 activatedRoute: ActivatedRoute,
-                router: Router) {
-        super(api, projectService, activatedRoute, router);
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, projectService, activatedRoute, router, allowedService);
     }
 
     prepareData() {

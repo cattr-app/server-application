@@ -6,7 +6,8 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Model\Project;
+use App\Models\Project;
+use App\Models\Role;
 
 class User extends Authenticatable implements JWTSubject
 {
@@ -48,7 +49,8 @@ class User extends Authenticatable implements JWTSubject
         'screenshots_interval',
         'user_role_value',
         'active',
-        'password'
+        'password',
+        'role_id',
     ];
 
 
@@ -87,6 +89,11 @@ class User extends Authenticatable implements JWTSubject
     public function getJWTCustomClaims(): array
     {
         return [];
+    }
+
+    public function role()
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
 

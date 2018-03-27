@@ -1,0 +1,28 @@
+<div class="container">
+    <div class="row">
+        <div class="col col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading">Edit role {{item.name}}</div>
+                <div class="panel-body">
+                    <a routerLink="/roles/list" title="Back">
+                        <button class="btn btn-warning">
+                            <i class="fa fa-arrow-left" aria-hidden="true"></i>
+                            Back
+                        </button>
+                    </a>
+                    <div class="create-form">
+                        <form (ngSubmit)="onSubmit()">
+                            <div class="form-group row">
+                                <label class="col-md-2">Role name</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="name" [(ngModel)]="item.name">
+                                </div>
+                            </div>
+                            <button type="submit" class="btn btn-primary">Update</button>
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
