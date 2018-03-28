@@ -26,7 +26,7 @@ class Rule extends Model
     }
 
 
-    public static function getActionList()
+    public static function getActionList(): array
     {
         return \Filter::process('role.actions.list', [
             'projects' => [

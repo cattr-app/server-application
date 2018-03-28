@@ -22,14 +22,8 @@ class CreateRoles extends Migration
             $table->timestamps();
         });
 
-        Role::create(['id' => '1', 'name' => 'user']);
-        Role::create(['id' => '2', 'name' => 'root']);
-        Role::create(['id' => '3', 'name' => 'blocked']);
-
-
         Schema::table('users', function (Blueprint $table) {
-            $table->unsignedInteger('role_id')->default('2');
-
+            $table->unsignedInteger('role_id')->nullable();
             $table->foreign('role_id')->references('id')->on('role');
         });
 
@@ -45,19 +39,6 @@ class CreateRoles extends Migration
             $table->unique(['role_id', 'object', 'action']);
             $table->foreign('role_id')->references('id')->on('role')->onDelete('cascade');
         });
-
-
-        foreach (Rule::getActionList() as $object => $actions) {
-            foreach ($actions as $action => $action_name) {
-                Rule::create([
-                    'role_id' => '2',
-                    'object' => $object,
-                    'action' => $action,
-                    'allow' => true,
-                ]);
-            }
-        }
-
     }
 
     /**
