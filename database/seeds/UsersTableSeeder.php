@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Database\Seeder;
+use Symfony\Component\Console\Output\ConsoleOutput;
 
 class UsersTableSeeder extends Seeder
 {
@@ -9,11 +10,16 @@ class UsersTableSeeder extends Seeder
      */
     public function run(): void
     {
+        $this->command->getOutput()->writeln('<fg=yellow>Create admin user</>');
+
+        $login = 'admin@example.com';
+        $pass = 'admin';
+
         DB::table('users')->insert([
             'full_name'              => 'Admin',
             'first_name'             => 'Ad',
             'last_name'              => 'Min',
-            'email'                  => 'admin@example.com',
+            'email'                  => $login,
             'url'                    => '',
             'company_id'             => 1,
             'level'                  => 'admin',
@@ -31,7 +37,9 @@ class UsersTableSeeder extends Seeder
             'screenshots_interval'   => 9,
             'user_role_value'        => '',
             'active'                 => 'active',
-            'password'               => bcrypt('admin'),
+            'password'               => bcrypt($pass),
         ]);
+
+        $this->command->getOutput()->writeln('<fg=green>Admin user has been created</>');
     }
 }
