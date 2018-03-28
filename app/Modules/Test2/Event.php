@@ -17,8 +17,6 @@ class Event
      */
     public function modifyAnswer(array $answer): array
     {
-        $answer['additional_info_2'] = 'Some other string';
-
         return $answer;
     }
 }

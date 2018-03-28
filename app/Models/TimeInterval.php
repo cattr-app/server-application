@@ -25,7 +25,7 @@ class TimeInterval extends Model
 
     public function screenshots()
     {
-    	$this->hasMany(Screenshot::class, 'time_interval_id');
+    	return $this->hasMany(Screenshot::class, 'time_interval_id');
     }
-    
+
 }

@@ -13,6 +13,7 @@ import {ScreenshotsListComponent} from './list/screenshots.list.component';
 import {HttpClientModule} from '@angular/common/http';
 import {ScreenshotsService} from "./screenshots.service";
 import {NgxPaginationModule} from 'ngx-pagination';
+import {GrowlModule} from 'primeng/growl';
 
 @NgModule({
     imports: [
@@ -20,7 +21,8 @@ import {NgxPaginationModule} from 'ngx-pagination';
         AuthRoute,
         FormsModule,
         HttpClientModule,
-        NgxPaginationModule
+        NgxPaginationModule,
+        GrowlModule
     ],
     declarations: [
         ScreenshotsCreateComponent,

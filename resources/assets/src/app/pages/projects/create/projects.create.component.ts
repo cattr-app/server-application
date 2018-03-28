@@ -3,6 +3,7 @@ import {ApiService} from '../../../api/api.service';
 import {Project} from "../../../models/project.model";
 import {Router} from "@angular/router";
 import {ProjectsService} from "../projects.service";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 import {ItemsCreateComponent} from "../../items.create.component";
 
 @Component({
@@ -19,8 +20,9 @@ export class ProjectsCreateComponent extends ItemsCreateComponent implements OnI
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
-                router: Router) {
-        super(api, projectService, router);
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, projectService, router, allowedService);
     }
 
     prepareData() {

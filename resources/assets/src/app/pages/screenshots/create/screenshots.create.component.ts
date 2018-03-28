@@ -4,6 +4,7 @@ import {Router} from "@angular/router";
 import {ScreenshotsService} from "../screenshots.service";
 import {ItemsCreateComponent} from "../../items.create.component";
 import {Screenshot} from "../../../models/screenshot.model";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-screenshots-create',
@@ -18,8 +19,9 @@ export class ScreenshotsCreateComponent extends ItemsCreateComponent implements 
 
     constructor(api: ApiService,
                 screenshotService: ScreenshotsService,
-                router: Router) {
-        super(api, screenshotService, router);
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, screenshotService, router, allowedService);
         this.screenshotService = screenshotService;
     }
 

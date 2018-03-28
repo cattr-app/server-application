@@ -4,6 +4,8 @@ import {Task} from "../../../models/task.model";
 import {Router, ActivatedRoute} from "@angular/router";
 import {TasksService} from "../tasks.service";
 import {ItemsEditComponent} from "../../items.edit.component";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
+
 
 @Component({
     selector: 'app-tasks-edit',
@@ -17,8 +19,9 @@ export class TasksEditComponent extends ItemsEditComponent implements OnInit {
     constructor(api: ApiService,
                 taskService: TasksService,
                 activatedRoute: ActivatedRoute,
-                router: Router) {
-        super(api, taskService, activatedRoute, router)
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, taskService, activatedRoute, router, allowedService)
     }
 
     prepareData() {

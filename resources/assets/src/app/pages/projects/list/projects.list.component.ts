@@ -7,6 +7,7 @@ import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {Router} from "@angular/router";
 import {ItemsListComponent} from "../../items.list.component";
 import {Task} from "../../../models/task.model";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 
 @Component({
@@ -21,7 +22,8 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit 
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
-                modalService: BsModalService,) {
-        super(api, projectService, modalService);
+                modalService: BsModalService,
+                allowedService: AllowedActionsService,) {
+        super(api, projectService, modalService, allowedService);
     }
 }

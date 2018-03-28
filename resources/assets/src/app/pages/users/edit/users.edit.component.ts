@@ -4,6 +4,7 @@ import {User} from "../../../models/user.model";
 import {Router, ActivatedRoute} from "@angular/router";
 import {UsersService} from "../users.service";
 import {ItemsEditComponent} from "../../items.edit.component";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-users-edit',
@@ -17,8 +18,9 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
     constructor(api: ApiService,
                 userService: UsersService,
                 activatedRoute: ActivatedRoute,
-                router: Router) {
-        super(api, userService, activatedRoute, router)
+                router: Router,
+                allowedService: AllowedActionsService,) {
+        super(api, userService, activatedRoute, router, allowedService)
     }
 
     prepareData() {

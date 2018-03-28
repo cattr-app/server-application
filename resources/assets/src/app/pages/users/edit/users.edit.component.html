@@ -1,3 +1,4 @@
+<p-growl [(value)]="msgs"></p-growl>
 <div class="container">
     <div class="row">
         <div class="col col-md-12">
@@ -133,9 +134,15 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-md-2">role_id</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="user-active" [(ngModel)]="item.role_id">
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-md-2">Password</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-password" [(ngModel)]="item.password">
+                                    <input type="password" class="form-control" name="user-password" [(ngModel)]="item.password">
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">Update</button>

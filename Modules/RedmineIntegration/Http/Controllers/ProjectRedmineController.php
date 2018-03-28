@@ -4,37 +4,27 @@ namespace Modules\RedmineIntegration\Http\Controllers;
 
 use App\Models\Project;
 use App\Models\Property;
+use Illuminate\Http\Request;
+use Redmine;
 
 class ProjectRedmineController extends AbstractRedmineController
 {
     /**
-     * ProjectRedmineController constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
-     * Returns class name string
-     *
-     * @return string
-     */
-    public function getRedmineClientPropertyName()
-    {
-        return 'project';
-    }
-
-    /**
      * Synchronize Redmine projects with AmazingTime projects
      */
-    public function synchronize()
+    public function synchronize(Request $request)
     {
-        $projectsData = $this->client->project->all([
+        $user = auth()->user();
+
+        $client = $this->initRedmineClient($user->id);
+
+        $projectsData = $client->project->all([
             'limit' => 1000
         ]);
 
         $projects = $projectsData['projects'];
+
+        $addedProjectsCounter = 0;
 
         foreach ($projects as $projectFromRedmine) {
             //if project already exists => continue
@@ -55,6 +45,7 @@ class ProjectRedmineController extends AbstractRedmineController
             ];
 
             $project = Project::create($projectInfo);
+            $addedProjectsCounter++;
 
             Property::create([
                 'entity_id'   => $project->id,
@@ -63,7 +54,10 @@ class ProjectRedmineController extends AbstractRedmineController
                 'value'       => $projectFromRedmine['id']
             ]);
         }
+
+        return response()->json([
+                'added_projects' => $addedProjectsCounter
+            ], 200
+        );
     }
-
-
 }

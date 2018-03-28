@@ -99,7 +99,34 @@ export class ApiService {
     }
 
     public sendSettings(data, callback) {
-        return this.http.post(`/redmineintegration/settings`, data, {
+        return this.http.post(`/redmineintegration/settings/update`, data, {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(callback);
+    }
+
+    public getSettings(data, callback) {
+        return this.http.post(`/redmineintegration/settings/get`, data, {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(callback);
+    }
+
+    public sendSynchronizeProjects(data, callback) {
+        return this.http.post(`/redmineintegration/projects/synchronize`, data, {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(callback);
+    }
+
+    public sendSynchronizeTasks(data, callback) {
+        return this.http.post(`/redmineintegration/tasks/synchronize`, data, {
             headers: new HttpHeaders({
                 'Content-Type': 'application/json',
                 'Authorization': this.getAuthString()

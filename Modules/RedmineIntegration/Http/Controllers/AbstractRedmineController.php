@@ -6,57 +6,33 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Routing\Controller;
 use Redmine;
+use App\Models\Property;
 
 abstract class AbstractRedmineController extends Controller
 {
-    /**
-     * @var Redmine\Client
-     */
-    protected $client;
-
-    /**
-     * Returns class name string
-     *
-     * Available class names located in Redmine\Client $classes array ('project', 'issue', 'user', ...)
-     *
-     * Abstract method that must be implemented when
-     * sub-classing this class.
-     */
-    abstract public function getRedmineClientPropertyName();
-
-    /**
-     * AbstractRedmineController constructor.
-     */
-    public function __construct()
+    protected function initRedmineClient($userId)
     {
-        //init Redmine client
-        $this->client = new Redmine\Client(
-            'https://redmine.amazingcat.net',
-            '992435da9137d96e79d501b201946d1ed1d9a6b2'
-        );
+        $client = new Redmine\Client($this->getUserRedmineUrl($userId), $this->getUserRedmineApiKey($userId));
+
+        return $client;
     }
 
-    /**
-     * Show info about entity
-     * @param $id
-     */
-    public function show($id)
+    protected function getUserRedmineUrl($userId)
     {
-        $name = $this->getRedmineClientPropertyName();
+        $redmineUrlProperty =  Property::where('entity_id', '=', $userId)
+            ->where('entity_type', '=', Property::USER_CODE)
+            ->where('name', '=', 'REDMINE_URL')->first();
 
-        dd($this->client->$name->show($id));
+        return $redmineUrlProperty ? $redmineUrlProperty->value : '';
     }
 
-    /**
-     *  Show list of entities
-     */
-    public function list()
+    protected function getUserRedmineApiKey($userId)
     {
-        $name = $this->getRedmineClientPropertyName();
+        $redmineApiKeyProperty =  Property::where('entity_id', '=', $userId)
+            ->where('entity_type', '=', Property::USER_CODE)
+            ->where('name', '=', 'REDMINE_KEY')->first();
 
-        dd($this->client->$name->all([
-            'limit' => 1000
-        ]));
+        return $redmineApiKeyProperty? $redmineApiKeyProperty->value : '';
     }
 
 

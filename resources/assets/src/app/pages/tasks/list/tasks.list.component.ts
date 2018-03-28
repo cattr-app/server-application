@@ -4,6 +4,7 @@ import {TasksService} from "../../tasks/tasks.service";
 import {Task} from "../../../models/task.model";
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {ItemsListComponent} from "../../items.list.component";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-tasks-list',
@@ -17,7 +18,8 @@ export class TasksListComponent extends ItemsListComponent implements OnInit {
 
     constructor(api: ApiService,
                 taskService: TasksService,
-                modalService: BsModalService,) {
-        super(api, taskService, modalService);
+                modalService: BsModalService,
+                allowedService: AllowedActionsService,) {
+        super(api, taskService, modalService, allowedService);
     }
 }

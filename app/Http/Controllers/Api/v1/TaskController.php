@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Task;
+use Illuminate\Http\Request;
+use Filter;
 
 /**
  * Class TaskController
@@ -40,5 +42,22 @@ class TaskController extends ItemController
     public function getEventUniqueNamePart(): string
     {
         return 'task';
+    }
+
+    /**
+     * Display a listing of the resource.
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function index(Request $request)
+    {
+        $user = auth()->user();
+
+        $items = Task::where('user_id', '=', $user->id)->get();
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
+            200
+        );
     }
 }

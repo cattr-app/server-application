@@ -4,7 +4,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Time Intervals</div>
                 <div class="panel-body">
-                    <a routerLink="/timeintervals/create" class="btn btn-success" title="Add new task">
+                    <a *ngIf="can('/timeintervals/create')" routerLink="/timeintervals/create" class="btn btn-success" title="Add new task">
                         <i class="fa fa-plus" aria-hidden="true"></i> Add New
                     </a>
                     <br/>
@@ -28,19 +28,19 @@
                                 <td>{{task.end_at}}</td>
 
                                 <td>
-                                    <a [routerLink]="['/timeintervals/show', task.id]" title="View time interval">
+                                    <a *ngIf="can('/timeintervals/show')" [routerLink]="['/timeintervals/show', task.id]" title="View time interval">
                                         <button class="btn btn-info btn-sm">
                                             <i class="fa fa-eye" aria-hidden="true"></i>
                                             View
                                         </button>
                                     </a>
-                                    <a [routerLink]="['/timeintervals/edit', task.id]" title="Edit time interval">
+                                    <a *ngIf="can('/timeintervals/edit')" [routerLink]="['/timeintervals/edit', task.id]" title="Edit time interval">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
                                             Edit
                                         </button>
                                     </a>
-                                    <a (click)="openRemoveItemModalWindow(template, task.id)" title="Delete time interval">
+                                    <a *ngIf="can('/timeintervals/remove')" (click)="openRemoveItemModalWindow(template, task.id)" title="Delete time interval">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
                                             Delete

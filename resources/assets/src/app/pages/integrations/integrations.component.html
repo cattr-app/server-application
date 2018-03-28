@@ -1,8 +1,9 @@
+<p-growl [(value)]="msgs"></p-growl>
 <div class="container">
     <div class="row">
         <div class="col col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Redmine Settings</div>
+                <div class="panel-heading">Redmine Integration</div>
                 <div class="panel-body">
                     <form (ngSubmit)="onSubmit()">
                         <div class="form-group row">
@@ -19,6 +20,10 @@
                         </div>
                         <button type="submit" class="btn btn-primary">Save</button>
                     </form>
+                    <div class="synchronize-block">
+                        <button class="btn btn-default" (click)="synchronizeProjects()">Synchronize Projects</button>
+                        <button class="btn btn-default" (click)="synchronizeTasks()">Synchronize Tasks</button>
+                    </div>
                 </div>
             </div>
         </div>

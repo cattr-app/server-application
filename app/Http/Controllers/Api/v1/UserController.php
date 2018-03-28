@@ -47,7 +47,8 @@ class UserController extends ItemController
             'screenshots_interval'   => 'required',
             'user_role_value'        => 'required',
             'active'                 => 'required',
-            'password'               => 'required'
+            'password'               => 'required',
+            'role_id'                => 'required',
         ];
     }
 

@@ -4,6 +4,7 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {ItemsListComponent} from "../../items.list.component";
 import {Screenshot} from "../../../models/screenshot.model";
 import {ScreenshotsService} from "../screenshots.service";
+import {AllowedActionsService} from "../../roles/allowed-actions.service";
 
 @Component({
     selector: 'app-screenshots-list',
@@ -17,7 +18,8 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
 
     constructor(api: ApiService,
                 screenshotService: ScreenshotsService,
-                modalService: BsModalService,) {
-        super(api, screenshotService, modalService);
+                modalService: BsModalService,
+                allowedService: AllowedActionsService,) {
+        super(api, screenshotService, modalService, allowedService);
     }
 }

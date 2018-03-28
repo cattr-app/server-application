@@ -3,20 +3,23 @@ import {ApiService} from '../api/api.service';
 import {Router,ActivatedRoute} from "@angular/router";
 import {ItemsService} from "./items.service";
 import {Item} from "../models/item.model";
-
+import {Message} from 'primeng/components/common/api';
+import {AllowedActionsService} from "./roles/allowed-actions.service";
 
 export abstract class ItemsEditComponent implements OnInit {
 
     id: number;
     protected sub: any;
     public item: Item;
+    msgs: Message[] = [];
 
     abstract prepareData();
 
     constructor(protected api: ApiService,
                 protected itemService: ItemsService,
                 protected activatedRoute: ActivatedRoute,
-                protected router: Router) {
+                protected router: Router,
+                protected allowedAction: AllowedActionsService,) {
     }
 
     ngOnInit() {
@@ -25,6 +28,10 @@ export abstract class ItemsEditComponent implements OnInit {
         });
 
         this.itemService.getItem(this.id, this.setItem.bind(this));
+    }
+
+    can(action: string ): boolean {
+        return this.allowedAction.can(action);
     }
 
     public onSubmit() {
@@ -40,7 +47,7 @@ export abstract class ItemsEditComponent implements OnInit {
     }
 
     editCallback(result) {
-        console.log("Updated");
-        this.router.navigateByUrl(this.itemService.getApiPath() + '/list');
+        this.msgs = [];
+        this.msgs.push({severity:'success', summary:'Success Message', detail:'Item has been updated'});
     }
 }

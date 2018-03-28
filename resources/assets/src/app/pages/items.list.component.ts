@@ -5,6 +5,8 @@ import {ItemsService} from "./items.service";
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
 import {Item} from "../models/item.model";
+import {AllowedActionsService} from "./roles/allowed-actions.service";
+
 
 export abstract class ItemsListComponent implements OnInit {
 
@@ -16,11 +18,16 @@ export abstract class ItemsListComponent implements OnInit {
 
     constructor(protected api: ApiService,
                 protected itemService: ItemsService,
-                protected modalService: BsModalService) {
+                protected modalService: BsModalService,
+                protected allowedAction: AllowedActionsService,) {
     }
 
     ngOnInit() {
         this.itemService.getItems(this.setItems.bind(this));
+    }
+
+    can(action: string ): boolean {
+        return this.allowedAction.can(action);
     }
 
     setItems(result) {
