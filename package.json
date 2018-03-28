@@ -5,7 +5,9 @@
   "scripts": {
     "ng": "ng",
     "build": "ng build",
+    "watch": "ng build --watch",
     "build-prod": "ng build --prod --output-hashing=none",
+    "watch-prod": "ng build --prod --output-hashing=none --watch",
     "test": "ng test",
     "lint": "ng lint",
     "e2e": "ng e2e"

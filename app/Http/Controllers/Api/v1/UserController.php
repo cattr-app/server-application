@@ -3,15 +3,27 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\User;
+use Illuminate\Http\JsonResponse;
 
+/**
+ * Class UserController
+ *
+ * @package App\Http\Controllers\Api\v1
+ */
 class UserController extends ItemController
 {
-    function getItemClass()
+    /**
+     * @return string
+     */
+    public function getItemClass(): string
     {
         return User::class;
     }
 
-    function getValidationRules()
+    /**
+     * @return array
+     */
+    public function getValidationRules(): array
     {
         return [
             'full_name'              => 'required',
@@ -39,18 +51,24 @@ class UserController extends ItemController
         ];
     }
 
-    function getEventUniqueNamePart()
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
     {
         return 'user';
     }
 
+    /**
+     * @param array $requestData
+     *
+     * @return array
+     */
     protected function filterRequestData(array $requestData): array
     {
         $requestData['password'] = bcrypt($requestData['password']);
 
         return $requestData;
     }
-
-
 }
 

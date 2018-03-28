@@ -4,14 +4,25 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\TimeInterval;
 
+/**
+ * Class TimeIntervalController
+ *
+ * @package App\Http\Controllers\Api\v1
+ */
 class TimeIntervalController extends ItemController
 {
-    function getItemClass()
+    /**
+     * @return string
+     */
+    public function getItemClass(): string
     {
         return TimeInterval::class;
     }
 
-    function getValidationRules()
+    /**
+     * @return array
+     */
+    public function getValidationRules(): array
     {
         return [
             'task_id'  => 'required',
@@ -20,7 +31,10 @@ class TimeIntervalController extends ItemController
         ];
     }
 
-    function getEventUniqueNamePart()
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
     {
         return 'timeinterval';
     }

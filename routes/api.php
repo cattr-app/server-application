@@ -29,10 +29,11 @@ Route::group([
     'middleware' => 'api',
     'prefix' => 'auth',
 ], function(Router $router) {
+    $router->any('ping', 'AuthController@ping');
     $router->post('login', 'AuthController@login');
-    $router->post('logout', 'AuthController@logout');
+    $router->any('logout', 'AuthController@logout');
     $router->post('refresh', 'AuthController@refresh');
-    $router->post('me', 'AuthController@me');
+    $router->any('me', 'AuthController@me');
 });
 
 Route::group([
@@ -42,49 +43,37 @@ Route::group([
     $router->post('/webservice/create', 'Api\v1\WebserviceController@create');
 
     //Projects routes
-    $router->post('/projects/list', 'Api\v1\ProjectController@index');
+    $router->any('/projects/list', 'Api\v1\ProjectController@index');
     $router->post('/projects/create', 'Api\v1\ProjectController@create');
     $router->post('/projects/edit', 'Api\v1\ProjectController@edit');
-    $router->post('/projects/show', 'Api\v1\ProjectController@show');
+    $router->any('/projects/show', 'Api\v1\ProjectController@show');
     $router->post('/projects/remove', 'Api\v1\ProjectController@destroy');
 
     //Tasks routes
-    $router->post('/tasks/list', 'Api\v1\TaskController@index');
+    $router->any('/tasks/list', 'Api\v1\TaskController@index');
     $router->post('/tasks/create', 'Api\v1\TaskController@create');
     $router->post('/tasks/edit', 'Api\v1\TaskController@edit');
-    $router->post('/tasks/show', 'Api\v1\TaskController@show');
+    $router->any('/tasks/show', 'Api\v1\TaskController@show');
     $router->post('/tasks/remove', 'Api\v1\TaskController@destroy');
 
     //Users routes
-    $router->post('/users/list', 'Api\v1\UserController@index');
+    $router->any('/users/list', 'Api\v1\UserController@index');
     $router->post('/users/create', 'Api\v1\UserController@create');
     $router->post('/users/edit', 'Api\v1\UserController@edit');
-    $router->post('/users/show', 'Api\v1\UserController@show');
+    $router->any('/users/show', 'Api\v1\UserController@show');
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
 
     //Screenshots routes
-    $router->post('/screenshots/list', 'Api\v1\ScreenshotController@index');
+    $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
-    $router->post('/screenshots/show', 'Api\v1\ScreenshotController@show');
+    $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');
     $router->post('/screenshots/remove', 'Api\v1\ScreenshotController@destroy');
 
     //Time Intervals routes
-    $router->post('/timeintervals/list', 'Api\v1\TimeIntervalController@index');
+    $router->any('/timeintervals/list', 'Api\v1\TimeIntervalController@index');
     $router->post('/timeintervals/create', 'Api\v1\TimeIntervalController@create');
     $router->post('/timeintervals/edit', 'Api\v1\TimeIntervalController@edit');
-    $router->post('/timeintervals/show', 'Api\v1\TimeIntervalController@show');
+    $router->any('/timeintervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/timeintervals/remove', 'Api\v1\TimeIntervalController@destroy');
-
-
-
-
-    //$router->resource('/webservice', 'Api\v1\WebserviceController');
 });
-
-
-
-Route::middleware('auth:api')->get('/user', function(Request $request) {
-    return $request->user();
-})
-;

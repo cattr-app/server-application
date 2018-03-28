@@ -4,14 +4,25 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
 
+/**
+ * Class ProjectController
+ *
+ * @package App\Http\Controllers\Api\v1
+ */
 class ProjectController extends ItemController
 {
-    function getItemClass()
+    /**
+     * @return string
+     */
+    public function getItemClass(): string
     {
         return Project::class;
     }
 
-    function getValidationRules()
+    /**
+     * @return array
+     */
+    public function getValidationRules(): array
     {
         return [
             'company_id'  => 'required',
@@ -20,7 +31,10 @@ class ProjectController extends ItemController
         ];
     }
 
-    function getEventUniqueNamePart()
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
     {
         return 'project';
     }

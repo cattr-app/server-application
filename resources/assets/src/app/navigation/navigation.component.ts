@@ -69,9 +69,13 @@ export class NavigationComponent implements OnInit {
     }
 
     onLogout(): false {
-        this.apiService.setToken(null);
-        this.location.replaceState("/");
-        this.router.navigateByUrl("/");
+        const callback = function(response){
+            console.log(response);
+            this.apiService.setToken(null);
+            this.location.replaceState("/");
+            this.router.navigateByUrl("/");
+        };
+        this.apiService.logout(callback.bind(this));
 
         return false;
     }

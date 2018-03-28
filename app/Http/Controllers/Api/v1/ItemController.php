@@ -5,9 +5,15 @@ namespace App\Http\Controllers\Api\v1;
 use App\Http\Controllers\Controller;
 use App\Http\Requests;
 use Filter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
 
+/**
+ * Class ItemController
+ *
+ * @package App\Http\Controllers\Api\v1
+ */
 abstract class ItemController extends Controller
 {
     /**
@@ -15,35 +21,33 @@ abstract class ItemController extends Controller
      *
      * @return string
      */
-    abstract function getItemClass();
+    abstract public function getItemClass(): string;
 
     /**
      * Returns validation rules for current item
      *
      * @return array
      */
-    abstract function getValidationRules();
+    abstract public function getValidationRules(): array;
 
     /**
      * Returns unique part of event name for current item
      *
      * @return string
      */
-    abstract function getEventUniqueNamePart();
+    abstract public function getEventUniqueNamePart(): string;
 
     /**
      * Display a listing of the resource.
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function index(Request $request)
+    public function index(): JsonResponse
     {
         $cls = $this->getItemClass();
         $items = $cls::all();
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
-            200
+            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items)
         );
     }
 
@@ -51,9 +55,9 @@ abstract class ItemController extends Controller
      * Create item
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function create(Request $request)
+    public function create(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
 
@@ -72,13 +76,16 @@ abstract class ItemController extends Controller
         }
 
         $cls = $this->getItemClass();
-        $item = Filter::process($this->getEventUniqueName('item.create'), $cls::create($this->filterRequestData($requestData)));
+
+        $item = Filter::process(
+            $this->getEventUniqueName('item.create'),
+            $cls::create($this->filterRequestData($requestData))
+        );
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                 'res' => $item,
-            ]),
-            200
+            ])
         );
     }
 
@@ -86,23 +93,22 @@ abstract class ItemController extends Controller
      * Display the specified resource.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function show(Request $request)
+    public function show(Request $request): JsonResponse
     {
         $cls = $this->getItemClass();
 
         $itemId = Filter::process($this->getEventUniqueName('request.item.show'), $request->get('id'));
 
-        if (is_array($itemId)) {
+        if (\is_array($itemId)) {
             $itemId = $itemId[0];
         }
 
         $item = $cls::findOrFail($itemId);
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item),
-            200
+            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item)
         );
     }
 
@@ -110,15 +116,21 @@ abstract class ItemController extends Controller
      * Show the form for editing the specified resource.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function edit(Request $request)
+    public function edit(Request $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.edit'), $request->all());
+        $requestData = Filter::process(
+            $this->getEventUniqueName('request.item.edit'),
+            $request->all()
+        );
         
         $validator = Validator::make(
             $requestData,
-            Filter::process($this->getEventUniqueName('validation.item.edit'), $this->getValidationRules())
+            Filter::process(
+                $this->getEventUniqueName('validation.item.edit'),
+                $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
@@ -141,8 +153,7 @@ abstract class ItemController extends Controller
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
                 'res' => $item,
-            ]),
-            200
+            ])
         );
     }
 
@@ -150,13 +161,16 @@ abstract class ItemController extends Controller
      * Remove the specified resource from storage.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      * @throws \Exception
      */
-    public function destroy(Request $request)
+    public function destroy(Request $request): JsonResponse
     {
         $cls = $this->getItemClass();
-        $itemId = Filter::process($this->getEventUniqueName('request.item.remove'), $request->get('id'));
+        $itemId = Filter::process(
+            $this->getEventUniqueName('request.item.remove'),
+            $request->get('id')
+        );
 
         $item = $cls::findOrFail($itemId);
         $item->delete();
@@ -164,8 +178,7 @@ abstract class ItemController extends Controller
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                 'message' => 'item has been removed'
-            ]),
-            200
+            ])
         );
     }
 
@@ -189,6 +202,6 @@ abstract class ItemController extends Controller
      */
     protected function getEventUniqueName(string $eventName): String
     {
-        return $eventName . '.' . $this->getEventUniqueNamePart();
+        return "{$eventName}.{$this->getEventUniqueNamePart()}";
     }
 }

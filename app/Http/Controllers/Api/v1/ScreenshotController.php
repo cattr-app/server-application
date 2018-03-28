@@ -3,19 +3,31 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Screenshot;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Filter;
 use Illuminate\Support\Facades\Input;
 use Validator;
 
+/**
+ * Class ScreenshotController
+ *
+ * @package App\Http\Controllers\Api\v1
+ */
 class ScreenshotController extends ItemController
 {
-    function getItemClass()
+    /**
+     * @return string
+     */
+    public function getItemClass(): string
     {
         return Screenshot::class;
     }
 
-    function getValidationRules()
+    /**
+     * @return array
+     */
+    public function getValidationRules(): array
     {
         return [
             'time_interval_id' => 'required',
@@ -23,7 +35,10 @@ class ScreenshotController extends ItemController
         ];
     }
 
-    function getEventUniqueNamePart()
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
     {
         return 'screenshot';
     }
@@ -32,12 +47,12 @@ class ScreenshotController extends ItemController
      * Show the form for creating a new resource.
      *
      * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
-    public function create(Request $request)
+    public function create(Request $request): JsonResponse
     {
         $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
-        $timeIntervalId = (int)$request->time_interval_id;
+        $timeIntervalId = (int) $request->time_interval_id;
 
         $requestData = [
             'time_interval_id' => $timeIntervalId,
@@ -64,8 +79,7 @@ class ScreenshotController extends ItemController
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                 'res' => $item,
-            ]),
-            200
+            ])
         );
     }
 }

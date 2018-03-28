@@ -1,28 +1,13 @@
-<?php namespace App\Http\Controllers\Api\v1;
+<?php
+namespace App\Http\Controllers\Api\v1;
 
-// use App\Libraries\WebService;
-// use App\Libraries\CustomErrorHandler;
-
-use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\BaseWebserviceController;
 
-use Illuminate\Support\Facades\Input;
-use Illuminate\Contracts\Routing\ResponseFactory;
-use Illuminate\Http\Request;
-
-use Tymon\JWTAuth\JWTAuth;
-use Tymon\JWTAuth\Exceptions\TokenExpiredException;
-use Tymon\JWTAuth\Exceptions\TokenInvalidException;
-use Tymon\JWTAuth\Exceptions\JWTException;
-
-use Lang;
-use Config;
-use Response;
-use File;
-use DB;
-use Carbon;
-use Validator;
-
+/**
+ * Class WebserviceController
+ *
+ * @package App\Http\Controllers\Api\v1
+ */
 class WebserviceController extends BaseWebserviceController
 {
     public function create()

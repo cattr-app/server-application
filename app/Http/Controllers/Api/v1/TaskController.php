@@ -4,14 +4,25 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Task;
 
+/**
+ * Class TaskController
+ *
+ * @package App\Http\Controllers\Api\v1
+ */
 class TaskController extends ItemController
 {
-    function getItemClass()
+    /**
+     * @return string
+     */
+    public function getItemClass(): string
     {
         return Task::class;
     }
 
-    function getValidationRules()
+    /**
+     * @return array
+     */
+    public function getValidationRules(): array
     {
         return [
             'project_id'  => 'required',
@@ -23,7 +34,10 @@ class TaskController extends ItemController
         ];
     }
 
-    function getEventUniqueNamePart()
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
     {
         return 'task';
     }

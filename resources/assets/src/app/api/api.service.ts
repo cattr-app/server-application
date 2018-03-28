@@ -2,6 +2,17 @@ import {EventEmitter, Injectable, Output} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {LocalStorage} from './storage.model';
 
+interface TokenResponse {
+    access_token?: string;
+    token_type?: string;
+    error?: string;
+}
+
+interface PingResponse {
+    status: string;
+    cat: string;
+}
+
 @Injectable()
 export class ApiService {
     @Output() auth: EventEmitter<boolean> = new EventEmitter<boolean>();
@@ -27,6 +38,47 @@ export class ApiService {
         this.storage.set('tokenType', this.tokenType);
 
         this.auth.emit(this.hasToken);
+    }
+
+    public updateToken() {
+        const f = function (result: TokenResponse) {
+            if (!result.error) {
+                this.setToken(result.access_token, result.token_type);
+            }
+        };
+
+        return this.http.post("/api/auth/refresh", [], {
+            headers: new HttpHeaders({
+                'Content-Type':  'application/json',
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(f.bind(this));
+    }
+
+    public logout(callback = null) {
+        callback = callback || function (result) {
+            console.log(result);
+        };
+
+        return this.http.post("/api/auth/logout", [], {
+            headers: new HttpHeaders({
+                'Content-Type':  'application/json',
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(callback);
+    }
+
+    public ping(callback = null) {
+        callback = callback || function (result: PingResponse) {
+            console.log(result.cat);
+        };
+
+        return this.http.get("/api/auth/ping", {
+            headers: new HttpHeaders({
+                'Content-Type':  'application/json',
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(callback);
     }
 
     public send(path, data, callback) {
