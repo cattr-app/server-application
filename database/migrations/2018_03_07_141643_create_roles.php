@@ -5,8 +5,6 @@ use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 use App\Models\Role;
 use App\Models\Rule;
-use App\User;
-
 
 class CreateRoles extends Migration
 {
@@ -19,7 +17,7 @@ class CreateRoles extends Migration
     {
         Schema::create('role', function (Blueprint $table) {
             $table->increments('id');
-            $table->string('name');
+            $table->string('name', 255);
             $table->softDeletes();
             $table->timestamps();
         });
@@ -36,26 +34,27 @@ class CreateRoles extends Migration
         });
 
 
-
-
         Schema::create('rule', function (Blueprint $table) {
             $table->increments('id');
             $table->unsignedInteger('role_id');
-            $table->string('object');
-            $table->string('action');
+            $table->string('object', 50);
+            $table->string('action', 50);
             $table->boolean('allow')->default(false);
             $table->timestamps();
-
 
             $table->unique(['role_id', 'object', 'action']);
             $table->foreign('role_id')->references('id')->on('role')->onDelete('cascade');
         });
 
 
-
-        foreach (Rule::getActionList() as $object => $actions) { // allow everything to root
+        foreach (Rule::getActionList() as $object => $actions) {
             foreach ($actions as $action => $action_name) {
-                Rule::create(['role_id' => '2', 'object' => $object, 'action' => $action, 'allow' => true]);
+                Rule::create([
+                    'role_id' => '2',
+                    'object' => $object,
+                    'action' => $action,
+                    'allow' => true,
+                ]);
             }
         }
 
@@ -68,15 +67,12 @@ class CreateRoles extends Migration
      */
     public function down()
     {
-
         Schema::table('users', function (Blueprint $table) {
             $table->dropForeign('users_role_id_foreign');
             $table->dropColumn('role_id');
         });
 
         Schema::dropIfExists('rule');
-
         Schema::dropIfExists('role');
-
     }
 }
