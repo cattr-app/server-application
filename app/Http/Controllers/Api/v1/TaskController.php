@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Task;
 use Illuminate\Http\Request;
+use Illuminate\Http\JsonResponse;
 use Filter;
 
 /**
@@ -46,11 +47,12 @@ class TaskController extends ItemController
 
     /**
      * Display a listing of the resource.
-     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request)
+    public function index(): JsonResponse
     {
+	$request = request();
+
         $user = auth()->user();
 
         $items = Task::where('user_id', '=', $user->id)->get();
