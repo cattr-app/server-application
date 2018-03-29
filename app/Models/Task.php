@@ -3,9 +3,26 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-
+/**
+ * Class Task
+ * @package App\Models
+ *
+ * @property int $id
+ * @property int $project_id
+ * @property int $user_id
+ * @property int $assigned_by
+ * @property string $task_name
+ * @property string $description
+ * @property bool $active
+ * @property string $url
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string $deleted_at
+ */
 class Task extends Model
 {
     use SoftDeletes;
@@ -15,20 +32,26 @@ class Task extends Model
      * @var string
      */
     protected $table = 'tasks';
-    protected $fillable = array('project_id', 'task_name', 'description', 'active', 'user_id', 'assigned_by', 'url');
 
     /**
-     * The project that belong to the task.
+     * @var array
      */
-    public function project()
+    protected $fillable = ['project_id', 'task_name', 'description', 'active', 'user_id', 'assigned_by', 'url'];
+
+    /**
+     * @return BelongsTo
+     */
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
     }
 
-
-    public function timeIntervals()
+    /**
+     * @return HasMany
+     */
+    public function timeIntervals(): HasMany
     {
-    	$this->hasMany(TimeInterval::class, 'task_id');
+    	return $this->hasMany(TimeInterval::class, 'task_id');
     }
-    
+
 }

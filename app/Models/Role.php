@@ -5,13 +5,25 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\User;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
-
+/**
+ * Class Role
+ * @package App\Models
+ *
+ * @property int $id
+ * @property string $name
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string $deleted_at
+ *
+ * @property User[] $users
+ * @property Rule[] $rules
+ */
 class Role extends Model
 {
     use SoftDeletes;
-
 
     /**
      * table name from database
@@ -19,85 +31,85 @@ class Role extends Model
      */
     protected $table = 'role';
 
-    protected $fillable = array('name');
+    /**
+     * @var array
+     */
+    protected $fillable = ['name'];
 
-
-    public function users()
+    /**
+     * @return HasMany
+     */
+    public function users(): HasMany
     {
         return $this->hasMany(User::class, 'role_id');
     }
 
-
-    public static function updateRules()
+    /**
+     * @return HasMany
+     */
+    public function rules(): HasMany
     {
+        return $this->hasMany(Rule::class, 'role_id');
+    }
+
+    /**
+     * @throws \Exception
+     */
+    public static function updateRules(): void
+    {
+        /** @var array[] $actionList */
         $actionList = Rule::getActionList();
 
-
+        /** @var Role $role */
         foreach (static::where([])->get() as $role) {
-
             foreach ($role->rules as $rule) {
-
-                if (
-                    isset($actionList[$rule->object]) &&
-                    isset($actionList[$rule->object][$rule->action])) {
+                if (isset($actionList[$rule->object][$rule->action])) {
                     continue;
                 }
 
                 $rule->delete();
             }
 
-
             foreach ($actionList as $object => $actions) {
-
                 foreach ($actions as $action => $name) {
-
                     $rule = Rule::where([
                         'role_id' => $role->id,
                         'object' => $object,
                         'action' => $action,
                     ])->first();
 
-
-                    if(!$rule) {
-
-                        $rule = new Rule;
-
-                        $rule->role_id = $role->id;
-                        $rule->object = $object;
-                        $rule->action = $action;
-                        $rule->allow = false;
-
-                        $rule->save();
+                    if (!$rule) {
+                        Rule::create([
+                            'role_id' => $role->id,
+                            'object' => $object,
+                            'action' => $action,
+                            'allow' => false,
+                        ]);
                     }
-
-
                 }
             }
         }
     }
 
-    public function rules()
+    /**
+     * @param $user
+     * @param $object
+     * @param $action
+     * @return bool
+     */
+    public static function can($user, $object, $action): bool
     {
-        return $this->hasMany(Rule::class, 'role_id');
-    }
-
-
-
-    public static function can($user, $object, $action)
-    {
-
         $rule = Rule::where([
             'role_id' => $user->role->id,
             'object' => $object,
             'action' => $action,
         ])->first();
 
-
-
-        if(!$rule)
+        if (!$rule) {
             return false;
+        }
 
-        return $rule->allow;
+        return (bool) $rule->allow;
     }
 
 }

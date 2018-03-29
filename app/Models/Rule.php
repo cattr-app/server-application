@@ -5,8 +5,22 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\User;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-
+/**
+ * Class Rule
+ * @package App\Models
+ *
+ * @property int $id
+ * @property int $role_id
+ * @property string $object
+ * @property string $action
+ * @property bool $allow
+ * @property string $created_at
+ * @property string $updated_at
+ *
+ * @property Role $role
+ */
 class Rule extends Model
 {
 
@@ -16,16 +30,22 @@ class Rule extends Model
      */
     protected $table = 'rule';
 
-    protected $fillable = array('role_id','object','action','allow');
+    /**
+     * @var array
+     */
+    protected $fillable = ['role_id', 'object', 'action', 'allow'];
 
-
-
-    public function role()
+    /**
+     * @return BelongsTo
+     */
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
 
-
+    /**
+     * @return array[]
+     */
     public static function getActionList(): array
     {
         return \Filter::process('role.actions.list', [
