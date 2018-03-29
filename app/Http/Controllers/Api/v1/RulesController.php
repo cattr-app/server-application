@@ -38,9 +38,9 @@ class RulesController extends ItemController
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function getEventUniqueNamePart(): array
+    public function getEventUniqueNamePart(): string
     {
         return 'rule';
     }
@@ -49,6 +49,7 @@ class RulesController extends ItemController
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws \Exception
      */
     public function edit(Request $request): JsonResponse
     {

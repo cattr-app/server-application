@@ -7,7 +7,7 @@ use Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use App\models\Rule;
-use Illuminate\Support\Facades\Auth;
+use Auth;
 
 /**
  * Class AllowedController

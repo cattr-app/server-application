@@ -3,11 +3,13 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests;
 use Filter;
+use Illuminate\Database\Eloquent\MassAssignmentException;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class ItemController
@@ -19,7 +21,7 @@ abstract class ItemController extends Controller
     /**
      * Returns current item's class name
      *
-     * @return string
+     * @return string|Model
      */
     abstract public function getItemClass(): string;
 
@@ -94,6 +96,7 @@ abstract class ItemController extends Controller
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws ModelNotFoundException
      */
     public function show(Request $request): JsonResponse
     {
@@ -117,6 +120,8 @@ abstract class ItemController extends Controller
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws MassAssignmentException
+     * @throws ModelNotFoundException
      */
     public function edit(Request $request): JsonResponse
     {
@@ -124,7 +129,7 @@ abstract class ItemController extends Controller
             $this->getEventUniqueName('request.item.edit'),
             $request->all()
         );
-        
+
         $validator = Validator::make(
             $requestData,
             Filter::process(

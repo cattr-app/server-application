@@ -2,6 +2,8 @@
 
 namespace App;
 
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -9,18 +11,50 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\Project;
 use App\Models\Role;
 
+/**
+ * Class User
+ * @package App
+ *
+ * @property int $id
+ * @property string $full_name
+ * @property string $first_name
+ * @property string $last_name
+ * @property string $email
+ * @property string $url
+ * @property int $company_id
+ * @property string $level
+ * @property int $payroll_access
+ * @property int $billing_access
+ * @property string $avatar
+ * @property int $screenshots_active
+ * @property int $manual_time
+ * @property int $permanent_tasks
+ * @property int $computer_time_popup
+ * @property string $poor_time_popup
+ * @property int $blur_screenshots
+ * @property int $web_and_app_monitoring
+ * @property int $webcam_shots
+ * @property int $screenshots_interval
+ * @property string $user_role_value
+ * @property string $active
+ * @property string $password
+ * @property int $role_id
+ * @property string $created_at
+ * @property string $updated_at
+ * @property string $deleted_at
+ *
+ * @property Role $role
+ * @property Project[] $projects
+ */
 class User extends Authenticatable implements JWTSubject
 {
-    use Notifiable;
-    use SoftDeletes;
-
+    use Notifiable, SoftDeletes;
 
     /**
      * table name from database
      * @var string
      */
     protected $table = 'users';
-
 
     /**
      * The attributes that are mass assignable.
@@ -91,16 +125,19 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    public function role()
+    /**
+     * @return BelongsTo
+     */
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
 
 
     /**
-     * The users that belong to the projects.
+     * @return BelongsToMany
      */
-    public function projects()
+    public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id');
     }

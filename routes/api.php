@@ -40,8 +40,6 @@ Route::group([
     'middleware' => 'auth:api',
     'prefix' => 'v1',
 ], function (Router $router) {
-    $router->post('/webservice/create', 'Api\v1\WebserviceController@create');
-
     //Projects routes
     $router->any('/projects/list', 'Api\v1\ProjectController@index');
     $router->post('/projects/create', 'Api\v1\ProjectController@create');
@@ -88,5 +86,4 @@ Route::group([
     $router->any('/allowed/list', 'Api\v1\AllowedController@list');
 
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
-
 });
