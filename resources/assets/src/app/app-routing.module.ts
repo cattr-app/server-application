@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {DashboardComponent} from './dashboard/dashboard.component';
 import {IntegrationsComponent} from "./pages/integrations/integrations.component";
 
 const routes: Routes = [
@@ -13,7 +12,7 @@ const routes: Routes = [
     {path: 'timeintervals', loadChildren: './pages/timeintervals/timeintervals.module#TimeIntervalsModule'},
     {path: 'auth', loadChildren: './auth/auth.module#AuthModule'},
     {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
-    {path: 'dashboard', component: DashboardComponent},
+    {path: 'dashboard', loadChildren: './pages/dashboard/dashboard.module#DashboardModule'},
     {path: 'integrations', component: IntegrationsComponent}
 ];
 
