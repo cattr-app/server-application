@@ -30,7 +30,7 @@ class RoleCheck
 
 
             if(!Role::can(Auth::user(),$object , $action)) {
-                abort(403, "Access denied to $object/$action");
+                return response()->json(['error' => "Access denied to $object/$action", 'reason' => 'action is not allowed'], 403);
             }
         }
 
