@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1;
 use App\Http\Controllers\Controller;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
@@ -42,6 +43,14 @@ abstract class ItemController extends Controller
     abstract public function getEventUniqueNamePart(): string;
 
     /**
+     * @return string[]
+     */
+    public function getQueryWith(): array
+    {
+        return [];
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @param Request $request
@@ -50,12 +59,11 @@ abstract class ItemController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $cls = $this->getItemClass();
-        $itemsQuery = $this->applyQueryFilter($cls::query(), $request->all() ?: []);
-
-        Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query'),
-            $itemsQuery
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), $request->all() ?: []
+            )
         );
 
         return response()->json(
@@ -224,6 +232,31 @@ abstract class ItemController extends Controller
     }
 
     /**
+     * @param bool $withRelations
+     *
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true): Builder
+    {
+        /** @var Model $cls */
+        $cls = static::getItemClass();
+
+        $query = new Builder($cls::getQuery());
+        $query->setModel(new $cls());
+
+        if ($withRelations) {
+            foreach ($this->getQueryWith() as $with) {
+                $query->with($with);
+            }
+        }
+
+        return Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.get'),
+            $query
+        );
+    }
+
+    /**
      * @param Builder $query
      * @param array $filter
      *
@@ -242,6 +275,9 @@ abstract class ItemController extends Controller
             }
         }
 
-        return $query;
+        return Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.filter'),
+            $query
+        );
     }
 }

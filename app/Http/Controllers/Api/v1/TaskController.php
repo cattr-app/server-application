@@ -47,6 +47,16 @@ class TaskController extends ItemController
     }
 
     /**
+     * @return string[]
+     */
+    public function getQueryWith(): array
+    {
+        return [
+            'user', 'project', 'assigned',
+        ];
+    }
+
+    /**
      * Display a listing of the resource.
      *
      * @param Request $request
@@ -61,12 +71,9 @@ class TaskController extends ItemController
         $filter = $request->all() ?: [];
         $filter['user_id'] = $user->id;
 
-        $cls = $this->getItemClass();
-        $itemsQuery = $this->applyQueryFilter($cls::query(), $filter);
-
-        Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query'),
-            $itemsQuery
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $this->applyQueryFilter($this->getQuery(), $filter)
         );
 
         return response()->json(
