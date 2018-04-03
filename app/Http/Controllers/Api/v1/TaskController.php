@@ -59,12 +59,23 @@ class TaskController extends ItemController
     /**
      * Display a listing of the resource.
      *
-     * @api {post} /api/v1/task/list
+     * @api {post} /api/v1/tasks/list List
+     * @apiDescription Get list of Tasks
      * @apiVersion 0.1.0
      * @apiName GetTaskList
      * @apiGroup Task
      *
-     * @apiSuccess {Task[]} TaskList array of task objects
+     * @apiParam {Integer} [id] `QueryParam` Task ID
+     * @apiParam {Integer} [project_id] `QueryParam` Task Project
+     * @apiParam {String} [task_name] `QueryParam` Task Name
+     * @apiParam {Boolean} [active] Active/Inactive Task
+     * @apiParam {Integer} [user_id] `QueryParam` Task's User
+     * @apiParam {Integer} [assigned_by] `QueryParam` User who assigned task
+     * @apiParam {DateTime} [created_at] `QueryParam` Task Creation DateTime
+     * @apiParam {DateTime} [updated_at] `QueryParam` Last Task update DataTime
+     * @apiParam {DateTime} [deleted_at] `QueryParam` When Task was deleted (null if not)
+     *
+     * @apiSuccess (200) {Task[]} TaskList array of Task objects
      *
      * @param Request $request
      *
@@ -90,4 +101,38 @@ class TaskController extends ItemController
             )
         );
     }
+
+
+
+    /**
+     * @api {post} /api/v1/tasks/create Create
+     * @apiDescription Create Task
+     * @apiVersion 0.1.0
+     * @apiName CreateTask
+     * @apiGroup Task
+     */
+
+    /**
+     * @api {post} /api/v1/tasks/show Show
+     * @apiDescription Show Task
+     * @apiVersion 0.1.0
+     * @apiName ShowTask
+     * @apiGroup Task
+     */
+
+    /**
+     * @api {post} /api/v1/tasks/edit Edit
+     * @apiDescription Edit Task
+     * @apiVersion 0.1.0
+     * @apiName EditTask
+     * @apiGroup Task
+     */
+
+    /**
+     * @api {post} /api/v1/tasks/destroy Destroy
+     * @apiDescription Destroy Task
+     * @apiVersion 0.1.0
+     * @apiName DestroyTask
+     * @apiGroup Task
+     */
 }

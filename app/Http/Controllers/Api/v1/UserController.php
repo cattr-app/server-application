@@ -71,5 +71,76 @@ class UserController extends ItemController
 
         return $requestData;
     }
+
+    /**
+     * @api {post} /api/v1/users/list List
+     * @apiDescription Get list of Users
+     * @apiVersion 0.1.0
+     * @apiName GetUserList
+     * @apiGroup User
+     *
+     * @apiParam {Integer} [id] `QueryParam` User ID
+     * @apiParam {String} [full_name] `QueryParam` Full Name
+     * @apiParam {String} [first_name] `QueryParam` First Name
+     * @apiParam {String} [last_name] `QueryParam` Last Name
+     * @apiParam {String} [email] `QueryParam` E-mail
+     * @apiParam {String} [url] `QueryParam` ???
+     * @apiParam {Integer} [company_id] `QueryParam` ???
+     * @apiParam {String} [level] `QueryParam` Role access level
+     * @apiParam {Boolean} [payroll_access] ???
+     * @apiParam {Boolean} [billing_access] ???
+     * @apiParam {String} [avatar] `QueryParam` Avatar image url/uri
+     * @apiParam {Boolean} [screenshots_active] Screenshots should be captured
+     * @apiParam {Boolean} [manual_time] Allow manual time edit
+     * @apiParam {Boolean} [permanent_tasks] ???
+     * @apiParam {Boolean} [computer_time_popup] ???
+     * @apiParam {Boolean} [poor_time_popup] ???
+     * @apiParam {Boolean} [blur_screenshots] ???
+     * @apiParam {Boolean} [web_and_app_monitoring] ???
+     * @apiParam {Boolean} [webcam_shots] ???
+     * @apiParam {Integer} [screenshots_interval] `QueryParam` Screenshots creation interval (seconds)
+     * @apiParam {String} [user_role_value] `QueryParam` ???
+     * @apiParam {Boolean} [active] User is active
+     * @apiParam {Integer} [role_id] `QueryParam` User's Role ID
+     * @apiParam {DateTime} [created_at] `QueryParam` User Creation DateTime
+     * @apiParam {DateTime} [updated_at] `QueryParam` Last User data update DataTime
+     * @apiParam {DateTime} [deleted_at] `QueryParam` When User was deleted (null if not)
+     *
+     * @apiSuccess (200) {User[]} UserList array of users objects
+     */
+
+
+
+    /**
+     * @api {post} /api/v1/users/create Create
+     * @apiDescription Create User
+     * @apiVersion 0.1.0
+     * @apiName CreateUser
+     * @apiGroup User
+     */
+
+    /**
+     * @api {post} /api/v1/users/show Show
+     * @apiDescription Show User
+     * @apiVersion 0.1.0
+     * @apiName ShowUser
+     * @apiGroup User
+     */
+
+    /**
+     * @api {post} /api/v1/users/edit Edit
+     * @apiDescription Edit User
+     * @apiVersion 0.1.0
+     * @apiName EditUser
+     * @apiGroup User
+     */
+
+    /**
+     * @api {post} /api/v1/users/destroy Destroy
+     * @apiDescription Destroy User
+     * @apiVersion 0.1.0
+     * @apiName DestroyUser
+     * @apiGroup User
+     */
 }
 
