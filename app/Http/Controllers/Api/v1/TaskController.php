@@ -59,6 +59,13 @@ class TaskController extends ItemController
     /**
      * Display a listing of the resource.
      *
+     * @api {post} /api/v1/task/list
+     * @apiVersion 0.1.0
+     * @apiName GetTaskList
+     * @apiGroup Task
+     *
+     * @apiSuccess {Task[]} TaskList array of task objects
+     *
      * @param Request $request
      *
      * @return \Illuminate\Http\JsonResponse

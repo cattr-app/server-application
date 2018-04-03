@@ -41,13 +41,13 @@
         ],
         "config:init": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php -r '\"if (!is_dir('public/uploads')) mkdir('public/uploads')\"",
-            "ln -sr storage/app/uploads/screenshots public/uploads/screenshots",
+            "@php -r \"if (!is_dir(__DIR__.'/public/uploads')) mkdir(__DIR__.'/public/uploads')\"",
+            "@php -r \"if (!file_exists(__DIR__.'/public/uploads/screenshots')) symlink(__DIR__.'/storage/app/uploads/screenshots', __DIR__.'/public/uploads/screenshots');\"",
             "@php artisan key:generate",
             "@php artisan jwt:secret",
-            "@config:update",
             "npm install",
-            "npm run build"
+            "npm run build",
+            "@config:update"
         ],
         "config:update": [
             "@php artisan package:discover",
