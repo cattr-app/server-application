@@ -271,7 +271,12 @@ abstract class ItemController extends Controller
         foreach ($filter as $key => $param) {
             if (Schema::hasColumn($table, $key)) {
                 [$operator, $value] = \is_array($param) ? $param : ['=', $param];
-                $query->where($key, $operator, $value);
+
+                if (\is_array($value) && $operator === '=') {
+                    $query->whereIn($key, $value);
+                } else {
+                    $query->where($key, $operator, $value);
+                }
             }
         }
 

@@ -102,8 +102,6 @@ class TaskController extends ItemController
         );
     }
 
-
-
     /**
      * @api {post} /api/v1/tasks/create Create
      * @apiDescription Create Task
