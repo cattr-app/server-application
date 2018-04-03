@@ -31,21 +31,23 @@
             "Modules\\": "Modules/"
         }
     },
-    "autoload-dev": {
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
     "scripts": {
+        "project:update": [
+            "git pull",
+            "@composer update",
+            "npm install",
+            "npm run build",
+            "@config:update"
+        ],
         "config:init": [
             "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "mkdir public/uploads",
+            "@php -r '\"if (!is_dir('public/uploads')) mkdir('public/uploads')\"",
             "ln -sr storage/app/uploads/screenshots public/uploads/screenshots",
             "@php artisan key:generate",
             "@php artisan jwt:secret",
             "@config:update",
             "npm install",
-            "ng build"
+            "npm run build"
         ],
         "config:update": [
             "@php artisan package:discover",

@@ -48,18 +48,32 @@ class TaskController extends ItemController
 
     /**
      * Display a listing of the resource.
+     *
+     * @param Request $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         /** @var User $user */
         $user = auth()->user();
 
-        $items = Task::where('user_id', '=', $user->id)->get();
+        $filter = $request->all() ?: [];
+        $filter['user_id'] = $user->id;
+
+        $cls = $this->getItemClass();
+        $itemsQuery = $this->applyQueryFilter($cls::query(), $filter);
+
+        Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query'),
+            $itemsQuery
+        );
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
-            200
+            Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.result'),
+                $itemsQuery->get()
+            )
         );
     }
 }

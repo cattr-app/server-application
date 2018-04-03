@@ -4,10 +4,12 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Http\Controllers\Controller;
 use Filter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Schema;
 use Validator;
 use Illuminate\Database\Eloquent\Model;
 
@@ -41,15 +43,26 @@ abstract class ItemController extends Controller
 
     /**
      * Display a listing of the resource.
+     *
+     * @param Request $request
+     *
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         $cls = $this->getItemClass();
-        $items = $cls::all();
+        $itemsQuery = $this->applyQueryFilter($cls::query(), $request->all() ?: []);
+
+        Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query'),
+            $itemsQuery
+        );
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items)
+            Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.result'),
+                $itemsQuery->get()
+            )
         );
     }
 
@@ -208,5 +221,27 @@ abstract class ItemController extends Controller
     protected function getEventUniqueName(string $eventName): String
     {
         return "{$eventName}.{$this->getEventUniqueNamePart()}";
+    }
+
+    /**
+     * @param Builder $query
+     * @param array $filter
+     *
+     * @return Builder
+     */
+    protected function applyQueryFilter(Builder $query, array $filter = []): Builder
+    {
+        $cls = static::getItemClass();
+        $model = new $cls();
+        $table = $model->getTable();
+
+        foreach ($filter as $key => $param) {
+            if (Schema::hasColumn($table, $key)) {
+                [$operator, $value] = \is_array($param) ? $param : ['=', $param];
+                $query->where($key, $operator, $value);
+            }
+        }
+
+        return $query;
     }
 }

@@ -36,11 +36,13 @@ class RolesController extends ItemController
     }
 
     /**
+     * @param Request $request
+     *
      * @return JsonResponse
      */
-    public function index(): JsonResponse
+    public function index(Request $request): JsonResponse
     {
-        $keyword = Filter::process($this->getEventUniqueName('request.item.list'), request()->get('search'));
+        $keyword = Filter::process($this->getEventUniqueName('request.item.list'), $request->get('search'));
 
         $perPage = 25;
 
