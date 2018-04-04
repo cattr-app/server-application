@@ -1,6 +1,8 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {LocalStorage} from './storage.model';
+import {Router} from "@angular/router";
+import { Location } from '@angular/common';
 
 interface TokenResponse {
     access_token?: string;
@@ -23,7 +25,7 @@ export class ApiService {
 
     private storage: LocalStorage = LocalStorage.getStorage();
 
-    constructor(private http: HttpClient) {
+    constructor(private http: HttpClient, private router: Router, protected location: Location) {
         this.token = this.storage.get('token');
         this.tokenType = this.storage.get('tokenType');
         this.hasToken = !!(this.token && this.tokenType);
@@ -55,7 +57,7 @@ export class ApiService {
         }).subscribe(f.bind(this));
     }
 
-    public logout(callback = null) {
+    public logout(callback = null, errorCallback = this.errorCallback.bind(this)) {
         callback = callback || function (result) {
             console.log(result);
         };
@@ -65,7 +67,7 @@ export class ApiService {
                 'Content-Type':  'application/json',
                 'Authorization': this.getAuthString()
             })
-        }).subscribe(callback);
+        }).subscribe(callback, errorCallback);
     }
 
     public ping(callback = null) {
@@ -78,7 +80,7 @@ export class ApiService {
                 'Content-Type':  'application/json',
                 'Authorization': this.getAuthString()
             })
-        }).subscribe(callback);
+        }).subscribe(callback)
     }
 
     public send(path, data, callback) {
@@ -140,6 +142,13 @@ export class ApiService {
 
     public isAuthorized() {
         return this.hasToken;
+    }
+
+    public errorCallback(error) {
+        console.log(error);
+        this.setToken(null);
+        this.location.replaceState("/");
+        this.router.navigateByUrl("/");
     }
 
     private getAuthString() {
