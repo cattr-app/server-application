@@ -75,7 +75,7 @@ class ScreenshotController extends ItemController
      */
     public function create(Request $request): JsonResponse
     {
-        $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->get('screenshot')->store('uploads/screenshots'));
+        $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
         $timeIntervalId = (int) $request->get('time_interval_id');
 
         $requestData = [
