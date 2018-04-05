@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\Screenshot;
 use App\Models\TimeInterval;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Filter;
+use Validator;
 
 /**
  * Class TimeIntervalController
@@ -29,6 +34,57 @@ class TimeIntervalController extends ItemController
             'start_at'        => 'required',
             'end_at' => 'required',
         ];
+    }
+
+    /**
+     * Create time interval
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function create(Request $request): JsonResponse
+    {
+        $intervalData = [
+            'task_id' => (int)$request->get('task_id'),
+            'start_at' => $request->get('start_at'),
+            'end_at' => $request->get('end_at')
+        ];
+
+        $validator = Validator::make(
+            $intervalData,
+            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
+                    'error' => 'validation fail',
+                ]),
+                400
+            );
+        }
+
+        //create time interval
+        $timeInterval = Filter::process($this->getEventUniqueName('item.create'), TimeInterval::create($intervalData));
+
+        //create screenshot
+        if (isset($request->screenshot)) {
+            $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
+
+            $screenshotData = [
+                'time_interval_id' => $timeInterval->id,
+                'path' => $path
+            ];
+
+            $screenshot = Filter::process('item.create.screenshot', Screenshot::create($screenshotData));
+        }
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'interval' => $timeInterval,
+            ]),
+            200
+        );
     }
 
     /**
