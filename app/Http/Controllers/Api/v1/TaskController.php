@@ -88,6 +88,7 @@ class TaskController extends ItemController
 
         $filter = $request->all() ?: [];
         $filter['user_id'] = $user->id;
+        $filter['active'] = 1;
 
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
