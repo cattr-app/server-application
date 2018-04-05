@@ -56,7 +56,7 @@ export class IntegrationsComponent implements OnInit {
         this.msgs.push({
             severity:'success',
             summary:'Tasks have been synchronized',
-            detail:'New tasks: ' + result.added_tasks
+            detail:"New tasks: " + result.added_tasks + "\nChanged tasks: " + result.changed_tasks
         });
     }
 }

@@ -5,11 +5,15 @@ namespace Modules\RedmineIntegration\Http\Controllers;
 use App\Models\Task;
 use App\Models\Property;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 class TaskRedmineController extends AbstractRedmineController
 {
     /**
      * Synchronize Redmine tasks with AmazingTime tasks
+     *
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function synchronize(Request $request)
     {
@@ -29,8 +33,11 @@ class TaskRedmineController extends AbstractRedmineController
 
         $tasks = $tasksData['issues'];
         $addedTasksCounter = 0;
+        $changedTasksCounter = 0;
+        $synchronizedTasks = [];
 
         foreach ($tasks as $taskFromRedmine) {
+            $synchronizedTasks[] = $taskFromRedmine['id'];
 
             $taskExist = Property::where([
                 ['entity_type', '=', Property::TASK_CODE],
@@ -40,13 +47,22 @@ class TaskRedmineController extends AbstractRedmineController
 
             //if task already exists => check task's assigned user
             if ($taskExist != null) {
-                //if tasks assigned to other user in our system => set current user to task's user
                 $task = Task::find($taskExist->entity_id);
 
+                //if task assigned to other user in our system => set current user to task's user
                 if ($task->user_id != $user->id) {
                     $task->user_id = $user->id;
                     $task->save();
-                    $addedTasksCounter++;
+
+                    $changedTasksCounter++;
+                }
+
+                //if task is inactive in our system => activate task in our system
+                if ($task->active == 0) {
+                    $task->active = 1;
+                    $task->save();
+
+                    $changedTasksCounter++;
                 }
 
                 continue;
@@ -84,10 +100,54 @@ class TaskRedmineController extends AbstractRedmineController
             }
         }
 
-        return response()->json([
-            'added_tasks' => $addedTasksCounter
-        ], 200
+        //check: if any task has been closed
+        $changedTasksCounter += $this->checkClosedTasks($user->id, $synchronizedTasks);
+
+        return response()->json(
+            [
+                'added_tasks'    => $addedTasksCounter,
+                'changed_tasks' => $changedTasksCounter
+            ],
+            200
         );
+    }
+
+    /**
+     * If any task has been closed in Redmine => deactivate this tasks in our system
+     * @param $userId
+     * @param $redmineSynchronizedTasks
+     * @return int
+     */
+    public function checkClosedTasks($userId, $redmineSynchronizedTasks)
+    {
+        $userLocalRedmineTasksIds = $this->getUserRedmineTasks($userId);
+
+        $closedTasksCounter = 0;
+
+        foreach ($userLocalRedmineTasksIds as $taskIds) {
+            if (!in_array($taskIds->redmine_id, $redmineSynchronizedTasks)) {
+                $localTask = Task::findOrFail($taskIds->task_id);
+
+                if ($localTask && $localTask->active == 1) {
+                    $localTask->active = 0;
+                    $localTask->save();
+
+                    $closedTasksCounter++;
+                }
+            }
+        }
+
+        return $closedTasksCounter;
+    }
+
+    public function getUserRedmineTasks($userId)
+    {
+        return DB::table('properties as prop')
+            ->select('prop.value as redmine_id', 'prop.entity_id as task_id')
+            ->join('tasks as t', 'prop.entity_id', '=', 't.id')
+            ->where('prop.entity_type', '=', Property::TASK_CODE)
+            ->where('prop.name', '=', 'REDMINE_ID')
+            ->where('t.user_id', '=', (int)$userId)->get();
     }
 
 }
