@@ -4,6 +4,8 @@ import {ActivatedRoute} from "@angular/router";
 import {TimeIntervalsService} from "../timeintervals.service";
 import {TimeInterval} from "../../../models/timeinterval.model";
 import {ItemsShowComponent} from "../../items.show.component";
+import {ScreenshotsService} from "../../screenshots/screenshots.service";
+import {Screenshot} from "../../../models/screenshot.model";
 
 @Component({
     selector: 'app-timeintervals-show',
@@ -13,10 +15,29 @@ import {ItemsShowComponent} from "../../items.show.component";
 export class TimeIntervalsShowComponent extends ItemsShowComponent implements OnInit {
 
     public item: TimeInterval = new TimeInterval();
+    public screenshot: Screenshot = new Screenshot();
 
-    constructor(api: ApiService,
-                timeIntervalService: TimeIntervalsService,
-                router: ActivatedRoute) {
+    constructor(protected api: ApiService,
+                protected timeIntervalService: TimeIntervalsService,
+                protected screenshotsService: ScreenshotsService,
+                protected router: ActivatedRoute) {
         super(api, timeIntervalService, router);
+    }
+
+    ngOnInit() {
+        this.sub = this.router.params.subscribe(params => {
+            this.id = +params['id'];
+        });
+
+        this.timeIntervalService.getItem(this.id, this.setItem.bind(this));
+        this.screenshotsService.getScreenshotByIntervalId(this.id, this.setScreenshot.bind(this))
+    }
+
+    setScreenshot(result) {
+        this.screenshot = result;
+    }
+
+    isEmptyObject(obj) {
+        return (obj && (Object.keys(obj).length === 0));
     }
 }

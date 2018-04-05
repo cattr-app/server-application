@@ -76,6 +76,7 @@ class Rule extends Model
                 'create' => __('Screenshot create'),
                 'edit' => __('Screenshot edit'),
                 'show' => __('Screenshot show'),
+                'get' => __('Screenshot get by interval id'),
                 'remove' => __('Screenshot remove'),
             ],
             'timeintervals' => [

@@ -6,12 +6,12 @@ import {ItemsService} from "./items.service";
 
 export abstract class ItemsShowComponent implements OnInit {
     id: number;
-    private sub: any;
+    protected sub: any;
     public item: Item;
 
-    constructor(private api: ApiService,
-                private itemService: ItemsService,
-                private router: ActivatedRoute) {
+    constructor(protected api: ApiService,
+                protected itemService: ItemsService,
+                protected router: ActivatedRoute) {
     }
 
     ngOnInit() {

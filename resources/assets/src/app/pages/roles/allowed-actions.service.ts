@@ -22,7 +22,6 @@ export class AllowedActionsService extends ItemsService {
     }
 
     convertFromApi(itemFromApi) {
-        console.log(itemFromApi);
         return new AllowedAction(itemFromApi)
     }
 

@@ -15,6 +15,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {TimeIntervalsService} from "./timeintervals.service";
 import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
+import {ScreenshotsService} from "../screenshots/screenshots.service";
 
 @NgModule({
     imports: [
@@ -33,7 +34,8 @@ import {GrowlModule} from 'primeng/growl';
     ],
     providers: [
         LoginService,
-        TimeIntervalsService
+        TimeIntervalsService,
+        ScreenshotsService
     ]
 })
 

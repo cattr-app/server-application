@@ -66,6 +66,7 @@ Route::group([
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
     $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');
+    $router->any('/screenshots/get', 'Api\v1\ScreenshotController@getScreenshotByIntervalId');
     $router->post('/screenshots/remove', 'Api\v1\ScreenshotController@destroy');
 
     //Time Intervals routes

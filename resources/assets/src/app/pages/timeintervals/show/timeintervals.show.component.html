@@ -57,6 +57,9 @@
                             </table>
                         </div>
                     </div>
+                    <div class="col-md-12" *ngIf="!isEmptyObject(screenshot)" >
+                        <img src="{{ screenshot.path }}" style="width:100%;">
+                    </div>
                 </div>
             </div>
         </div>

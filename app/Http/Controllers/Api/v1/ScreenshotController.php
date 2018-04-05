@@ -108,6 +108,24 @@ class ScreenshotController extends ItemController
     }
 
     /**
+     * Returns screenshot for time interval
+     *
+     * [pass interval_id param in request]
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function getScreenshotByIntervalId(Request $request): JsonResponse
+    {
+        $timeIntervalId = $request->get('interval_id');
+        $screenshot =  Screenshot::where('time_interval_id', '=', $timeIntervalId)->first();
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.get'), $screenshot)
+        );
+    }
+
+    /**
      * @api {post} /api/v1/screenshots/show Show
      * @apiDescription Show Screenshot
      * @apiVersion 0.1.0
