@@ -35,7 +35,7 @@ class TimeInterval extends Model
     /**
      * @var array
      */
-    protected $fillable = ['task_id', 'start_at', 'end_at'];
+    protected $fillable = ['task_id', 'start_at', 'end_at', 'count_mouse', 'count_keyboard'];
 
     /**
      * @return BelongsTo

@@ -47,7 +47,9 @@ class TimeIntervalController extends ItemController
         $intervalData = [
             'task_id' => (int)$request->get('task_id'),
             'start_at' => $request->get('start_at'),
-            'end_at' => $request->get('end_at')
+            'end_at' => $request->get('end_at'),
+            'count_mouse' => $request->get('count_mouse') ?: 0,
+            'count_keyboard' => $request->get('count_keyboard') ?: 0,
         ];
 
         $validator = Validator::make(

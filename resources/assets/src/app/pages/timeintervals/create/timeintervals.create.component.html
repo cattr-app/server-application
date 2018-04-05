@@ -15,19 +15,31 @@
                             <div class="form-group row">
                                 <label class="col-md-2">Task Id</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="task-company-id" [(ngModel)]="item.task_id">
+                                    <input type="text" class="form-control" name="timeinterval-task-id" [(ngModel)]="item.task_id">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">Start at</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="task-name" [(ngModel)]="item.start_at">
+                                    <input type="text" class="form-control" name="timeinterval-start" [(ngModel)]="item.start_at">
                                 </div>
                             </div>
                             <div class="form-group row">
                                 <label class="col-md-2">End at</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="task-description" [(ngModel)]="item.end_at">
+                                    <input type="text" class="form-control" name="timeinterval-end" [(ngModel)]="item.end_at">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-md-2">Count mouse events</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="timeinterval-mouse" [(ngModel)]="item.count_mouse">
+                                </div>
+                            </div>
+                            <div class="form-group row">
+                                <label class="col-md-2">Count keyboard events</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="timeinterval-keyboard" [(ngModel)]="item.count_keyboard">
                                 </div>
                             </div>
                             <button type="submit" class="btn btn-primary">Create</button>

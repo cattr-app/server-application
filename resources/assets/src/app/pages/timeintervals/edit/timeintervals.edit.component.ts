@@ -27,7 +27,9 @@ export class TimeIntervalsEditComponent extends ItemsEditComponent implements On
         return {
             'task_id': this.item.task_id,
             'start_at': this.item.start_at,
-            'end_at': this.item.end_at
+            'end_at': this.item.end_at,
+            'count_mouse': this.item.count_mouse,
+            'count_keyboard': this.item.count_keyboard
         }
     }
 }
