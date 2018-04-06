@@ -3,8 +3,7 @@
 namespace Modules\RedmineIntegration\Console;
 
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
+use Modules\RedmineIntegration\Helpers\ProjectIntegrationHelper;
 
 /**
  * Class SynchronizeProjects
@@ -18,7 +17,7 @@ class SynchronizeProjects extends Command
      *
      * @var string
      */
-    protected $name = 'synchronize_redmine:projects';
+    protected $name = 'redmine-synchronize:projects';
 
     /**
      * The console command description.
@@ -40,34 +39,11 @@ class SynchronizeProjects extends Command
     /**
      * Execute the console command.
      *
+     * @param ProjectIntegrationHelper $projectIntegrationHelper
      * @return mixed
      */
-    public function handle()
+    public function handle(ProjectIntegrationHelper $projectIntegrationHelper)
     {
-        //
-    }
-
-    /**
-     * Get the console command arguments.
-     *
-     * @return array
-     */
-    protected function getArguments()
-    {
-        return [
-            ['example', InputArgument::REQUIRED, 'An example argument.'],
-        ];
-    }
-
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return [
-            ['example', null, InputOption::VALUE_OPTIONAL, 'An example option.', null],
-        ];
+        $projectIntegrationHelper->synchronizeProjects();
     }
 }

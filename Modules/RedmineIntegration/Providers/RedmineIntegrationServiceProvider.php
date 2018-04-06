@@ -42,6 +42,7 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         $this->registerViews();
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->registerCommands();
     }
 
     /**
@@ -51,6 +52,9 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
      */
     public function register()
     {
+        //Register Schedule service provider
+        $this->app->register('Modules\RedmineIntegration\Providers\ScheduleServiceProvider');
+
         //Register Helpers and Repositories for DI
         $this->app->singleton(TaskIntegrationHelper::class, function ($app) {
             return new TaskIntegrationHelper();

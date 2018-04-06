@@ -3,8 +3,8 @@
 namespace Modules\RedmineIntegration\Console;
 
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
+use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
+use Modules\RedmineIntegration\Helpers\TaskIntegrationHelper;
 
 /**
  * Class SynchronizeTasks
@@ -18,7 +18,7 @@ class SynchronizeTasks extends Command
      *
      * @var string
      */
-    protected $name = 'synchronize_redmine:tasks';
+    protected $name = 'redmine-synchronize:tasks';
 
     /**
      * The console command description.
@@ -40,34 +40,12 @@ class SynchronizeTasks extends Command
     /**
      * Execute the console command.
      *
+     * @param TaskIntegrationHelper $taskIntegrationHelper
+     * @param UserRepository $repo
      * @return mixed
      */
-    public function handle()
+    public function handle(TaskIntegrationHelper $taskIntegrationHelper, UserRepository $repo)
     {
-        //
-    }
-
-    /**
-     * Get the console command arguments.
-     *
-     * @return array
-     */
-    protected function getArguments()
-    {
-        return [
-            ['example', InputArgument::REQUIRED, 'An example argument.'],
-        ];
-    }
-
-    /**
-     * Get the console command options.
-     *
-     * @return array
-     */
-    protected function getOptions()
-    {
-        return [
-            ['example', null, InputOption::VALUE_OPTIONAL, 'An example option.', null],
-        ];
+        $taskIntegrationHelper->synchronizeTasks($repo);
     }
 }
