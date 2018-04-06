@@ -5,6 +5,7 @@ namespace Modules\RedmineIntegration\Providers;
 use Illuminate\Database\Eloquent\Factory;
 use App\EventFilter\EventServiceProvider as ServiceProvider;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
+use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Helpers\TaskIntegrationHelper;
 use Modules\RedmineIntegration\Helpers\TimeIntervalIntegrationHelper;
@@ -28,7 +29,6 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
             'Modules\RedmineIntegration\Listeners\RoleObserver@list',
         ]
     ];
-
 
     /**
      * Boot the application events.
@@ -66,6 +66,10 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
 
         $this->app->singleton(ProjectRepository::class, function ($app) {
             return new ProjectRepository();
+        });
+
+        $this->app->singleton(TaskRepository::class, function ($app) {
+            return new TaskRepository();
         });
     }
 

@@ -26,11 +26,11 @@ class TimeEntryRedmineController extends AbstractRedmineController
         app()->call(
             [
                 $timeIntervalIntegration,
-                'synchronizeUserTasks'
+                'createInterval'
             ],
             [
                 'userId'          => auth()->user()->id,
-                '$timeIntervalId' => $request->time_interval_id
+                'timeIntervalId' => $request->time_interval_id
             ]
         );
     }
