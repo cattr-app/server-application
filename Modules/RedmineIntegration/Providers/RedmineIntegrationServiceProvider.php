@@ -4,7 +4,16 @@ namespace Modules\RedmineIntegration\Providers;
 
 use Illuminate\Database\Eloquent\Factory;
 use App\EventFilter\EventServiceProvider as ServiceProvider;
+use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
+use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
+use Modules\RedmineIntegration\Helpers\TaskIntegrationHelper;
+use Modules\RedmineIntegration\Helpers\TimeIntervalIntegrationHelper;
 
+/**
+ * Class RedmineIntegrationServiceProvider
+ *
+ * @package Modules\RedmineIntegration\Providers
+ */
 class RedmineIntegrationServiceProvider extends ServiceProvider
 {
     /**
@@ -42,8 +51,37 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        //
+        //Register Helpers and Repositories for DI
+        $this->app->singleton(TaskIntegrationHelper::class, function ($app) {
+            return new TaskIntegrationHelper();
+        });
+
+        $this->app->singleton(TimeIntervalIntegrationHelper::class, function ($app) {
+            return new TimeIntervalIntegrationHelper();
+        });
+
+        $this->app->singleton(UserRepository::class, function ($app) {
+            return new UserRepository();
+        });
+
+        $this->app->singleton(ProjectRepository::class, function ($app) {
+            return new ProjectRepository();
+        });
     }
+
+    protected function registerCommands()
+    {
+        //Register synchronize redmine tasks command
+        $this->commands([
+            \Modules\RedmineIntegration\Console\SynchronizeTasks::class,
+        ]);
+
+        //Register synchronize redmine projects command
+        $this->commands([
+            \Modules\RedmineIntegration\Console\SynchronizeProjects::class,
+        ]);
+    }
+
 
     /**
      * Register config.
@@ -53,10 +91,10 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
     protected function registerConfig()
     {
         $this->publishes([
-            __DIR__.'/../Config/config.php' => config_path('redmineintegration.php'),
+            __DIR__ . '/../Config/config.php' => config_path('redmineintegration.php'),
         ], 'config');
         $this->mergeConfigFrom(
-            __DIR__.'/../Config/config.php', 'redmineintegration'
+            __DIR__ . '/../Config/config.php', 'redmineintegration'
         );
     }
 
@@ -69,11 +107,11 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
     {
         $viewPath = resource_path('views/modules/redmineintegration');
 
-        $sourcePath = __DIR__.'/../Resources/views';
+        $sourcePath = __DIR__ . '/../Resources/views';
 
         $this->publishes([
             $sourcePath => $viewPath
-        ],'views');
+        ], 'views');
 
         $this->loadViewsFrom(array_merge(array_map(function ($path) {
             return $path . '/modules/redmineintegration';
@@ -92,7 +130,7 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         if (is_dir($langPath)) {
             $this->loadTranslationsFrom($langPath, 'redmineintegration');
         } else {
-            $this->loadTranslationsFrom(__DIR__ .'/../Resources/lang', 'redmineintegration');
+            $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'redmineintegration');
         }
     }
 
@@ -102,7 +140,7 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
      */
     public function registerFactories()
     {
-        if (! app()->environment('production')) {
+        if (!app()->environment('production')) {
             app(Factory::class)->load(__DIR__ . '/../Database/factories');
         }
     }

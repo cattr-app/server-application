@@ -71,4 +71,9 @@ class Task extends Model
     	return $this->hasMany(TimeInterval::class, 'task_id');
     }
 
+    public static function getTableName()
+    {
+        return with(new static)->getTable();
+    }
+
 }
