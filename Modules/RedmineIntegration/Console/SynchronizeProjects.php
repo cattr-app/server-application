@@ -40,10 +40,9 @@ class SynchronizeProjects extends Command
      * Execute the console command.
      *
      * @param ProjectIntegrationHelper $projectIntegrationHelper
-     * @return mixed
      */
     public function handle(ProjectIntegrationHelper $projectIntegrationHelper)
     {
-         $projectIntegrationHelper->synchronizeProjects();
+        $projectIntegrationHelper->synchronizeProjects();
     }
 }

@@ -7,6 +7,11 @@ use App\Models\Task;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
+/**
+ * Class UserRepository
+ *
+ * @package Modules\RedmineIntegration\Entities\Repositories
+ */
 class UserRepository
 {
     /**
@@ -113,9 +118,9 @@ class UserRepository
     /**
      * Returns redmine id for current user
      * @param int $userId
-     * @return mixed|string
+     * @return string
      */
-    public function getUserRedmineId(int $userId)
+    public function getUserRedmineId(int $userId): string
     {
         $userRedmineId = Property::where('entity_id', '=', $userId)
             ->where('entity_type', '=', Property::USER_CODE)
@@ -124,7 +129,13 @@ class UserRepository
         return $userRedmineId ? $userRedmineId->value : '';
     }
 
-    public function setRedmineId($userId, $userRedmineId)
+    /**
+     * Set redmine id for user
+     *
+     * @param int $userId User local id
+     * @param int $userRedmineId User redmine id
+     */
+    public function setRedmineId(int $userId, int $userRedmineId)
     {
         Property::create([
             'entity_id'   => $userId,
@@ -134,6 +145,13 @@ class UserRepository
         ]);
     }
 
+    /**
+     * Returns new users, who turn on redmine intergration
+     *
+     * Add special row to properties table
+     *
+     * @return Collection
+     */
     public function getNewRedmineUsers()
     {
         return Property::where('entity_type', '=', Property::USER_CODE)

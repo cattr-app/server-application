@@ -34,8 +34,19 @@ class SynchronizeTasks extends Command
      */
     protected $description = 'Synchronize tasks from redmine for all users, who activated redmine integration.';
 
+    /**
+     * @var UserRepository
+     */
     protected $userRepo;
+
+    /**
+     * @var ProjectRepository
+     */
     protected $projectRepo;
+
+    /**
+     * @var TaskRepository
+     */
     protected $taskRepo;
 
     /**
@@ -57,11 +68,9 @@ class SynchronizeTasks extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
      */
     public function handle()
     {
-        //$taskIntegrationHelper->synchronizeTasks($repo,$projectRepo);
         $this->synchronizeTasks();
     }
 
@@ -91,9 +100,8 @@ class SynchronizeTasks extends Command
         $client = $this->initRedmineClient($userId);
 
         foreach ($userNewRedmineTasks as $task) {
-           $redmineTask = $this->createRedmineTask($client, $task);
-            Log::info(print_r($task, true));
-            $this->taskRepo->setRedmineId($task->id, $redmineTask->id);
+            $redmineTask = $this->createRedmineTask($client, $task);
+            $this->taskRepo->setRedmineId($task->id, (int)$redmineTask->id);
             $this->taskRepo->markAsOld($task->id);
 
         }
@@ -120,14 +128,6 @@ class SynchronizeTasks extends Command
             ]
         );
     }
-
-    public function setUserRedmineId($userId)
-    {
-        $client = $this->initRedmineClient($userId);
-        $currentUserInfo = $client->user->getCurrentUser();
-        $this->userRepo->setRedmineId($userId, $currentUserInfo['id']);
-    }
-
 
     /**
      * Synchronize task's for current user

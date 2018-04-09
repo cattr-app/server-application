@@ -1,4 +1,5 @@
 <?php
+
 namespace Modules\RedmineIntegration\Entities\Repositories;
 
 use App\Models\Property;
@@ -58,7 +59,12 @@ class TaskRepository
             ->update(['value' => 0]);
     }
 
-    public function setRedmineId($taskId, $taskRedmineId)
+    /**
+     * Set redmine id for task
+     * @param int $taskId Task id in local system
+     * @param int $taskRedmineId Task id in redmine
+     */
+    public function setRedmineId(int $taskId, int $taskRedmineId)
     {
         Property::create([
             'entity_id'   => $taskId,

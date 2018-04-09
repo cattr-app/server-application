@@ -29,6 +29,9 @@ class SynchronizeUsers extends Command
      */
     protected $description = 'Synchronize users with redmine';
 
+    /**
+     * @var UserRepository
+     */
     protected $userRepo;
 
     /**
@@ -49,7 +52,7 @@ class SynchronizeUsers extends Command
      */
     public function handle()
     {
-         $this->synchronizeNewUsers();
+        $this->synchronizeNewUsers();
     }
 
     /**
