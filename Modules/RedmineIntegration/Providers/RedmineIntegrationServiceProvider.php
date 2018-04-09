@@ -25,8 +25,8 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
     protected $defer = false;
 
     protected $listen = [
-        'answer.success.item.list.allowed' => [
-            'Modules\RedmineIntegration\Listeners\RoleObserver@list',
+        'item.create.task' => [
+            'Modules\RedmineIntegration\Listeners\IntegrationObserver@taskCreation',
         ]
     ];
 
@@ -43,6 +43,8 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         $this->registerCommands();
+
+        parent::boot();
     }
 
     /**
@@ -87,6 +89,11 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         //Register synchronize redmine projects command
         $this->commands([
             \Modules\RedmineIntegration\Console\SynchronizeProjects::class,
+        ]);
+
+        //Register synchronize redmine users command
+        $this->commands([
+            \Modules\RedmineIntegration\Console\SynchronizeUsers::class,
         ]);
     }
 

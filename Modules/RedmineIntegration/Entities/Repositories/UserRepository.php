@@ -39,6 +39,12 @@ class UserRepository
         return $redmineApiKeyProperty ? $redmineApiKeyProperty->value : '';
     }
 
+    /**
+     * Returns user's redmine tasks
+     *
+     * @param int $userId
+     * @return Collection
+     */
     public function getUserRedmineTasks(int $userId): Collection
     {
         return DB::table(Property::getTableName() . ' as prop')
@@ -47,5 +53,91 @@ class UserRepository
             ->where('prop.entity_type', '=', Property::TASK_CODE)
             ->where('prop.name', '=', 'REDMINE_ID')
             ->where('t.user_id', '=', (int)$userId)->get();
+    }
+
+    /**
+     * Returns user's new (unsynchronized) tasks
+     *
+     * @param int $userId
+     * @return Collection
+     */
+    public function getUserNewRedmineTasks(int $userId): Collection
+    {
+        return DB::table(Property::getTableName() . ' as prop')
+            ->select(
+                't.id',
+                't.project_id',
+                't.task_name',
+                't.description',
+                't.user_id',
+                't.assigned_by'
+            )->join(Task::getTableName() . ' as t', 'prop.entity_id', '=', 't.id')
+            ->where('prop.entity_type', '=', Property::TASK_CODE)
+            ->where('prop.name', '=', 'NEW')
+            ->where('prop.value', '=', '1')
+            ->where('t.user_id', '=', (int)$userId)->get();
+    }
+
+    /**
+     * Mark user with id == $userId as NEW
+     *
+     * Adds a specific row to properties table
+     *
+     * @param int $userId
+     */
+    public function markAsNew(int $userId)
+    {
+        Property::create([
+            'entity_id'   => $userId,
+            'entity_type' => Property::USER_CODE,
+            'name'        => 'NEW',
+            'value'       => 1
+        ]);
+    }
+
+    /**
+     * Mark user with id == $userId as NEW
+     *
+     * Adds a specific row to properties table
+     *
+     * @param int $userId
+     */
+    public function markAsOld(int $userId)
+    {
+        Property::where('entity_id', '=', $userId)
+            ->where('entity_type', '=', Property::USER_CODE)
+            ->where('name', '=', 'NEW')
+            ->update(['value' => 0]);
+    }
+
+    /**
+     * Returns redmine id for current user
+     * @param int $userId
+     * @return mixed|string
+     */
+    public function getUserRedmineId(int $userId)
+    {
+        $userRedmineId = Property::where('entity_id', '=', $userId)
+            ->where('entity_type', '=', Property::USER_CODE)
+            ->where('name', '=', 'REDMINE_ID')->first();
+
+        return $userRedmineId ? $userRedmineId->value : '';
+    }
+
+    public function setRedmineId($userId, $userRedmineId)
+    {
+        Property::create([
+            'entity_id'   => $userId,
+            'entity_type' => Property::USER_CODE,
+            'name'        => 'REDMINE_ID',
+            'value'       => $userRedmineId
+        ]);
+    }
+
+    public function getNewRedmineUsers()
+    {
+        return Property::where('entity_type', '=', Property::USER_CODE)
+            ->where('name', '=', 'NEW')
+            ->where('value', '=', '1')->get();
     }
 }

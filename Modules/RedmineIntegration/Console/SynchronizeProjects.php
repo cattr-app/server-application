@@ -7,7 +7,7 @@ use Modules\RedmineIntegration\Helpers\ProjectIntegrationHelper;
 
 /**
  * Class SynchronizeProjects
- * 
+ *
  * @package Modules\RedmineIntegration\Console
  */
 class SynchronizeProjects extends Command
@@ -44,6 +44,6 @@ class SynchronizeProjects extends Command
      */
     public function handle(ProjectIntegrationHelper $projectIntegrationHelper)
     {
-        $projectIntegrationHelper->synchronizeProjects();
+         $projectIntegrationHelper->synchronizeProjects();
     }
 }

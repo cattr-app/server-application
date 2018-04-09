@@ -15,6 +15,11 @@ use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
  */
 class RedmineSettingsController extends AbstractRedmineController
 {
+    /**
+     * Returns validation rules for 'updateSettings' request
+     *
+     * @return array
+     */
     function getValidationRules()
     {
         return [
@@ -23,7 +28,14 @@ class RedmineSettingsController extends AbstractRedmineController
         ];
     }
 
-    public function updateSettings(Request $request)
+    /**
+     * Update user's redmine settings
+     *
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateSettings(Request $request, UserRepository $userRepository)
     {
         $request = Filter::process('request.redmine.settings.update', $request);
         $user = auth()->user();
@@ -71,12 +83,27 @@ class RedmineSettingsController extends AbstractRedmineController
             )
         );
 
+        //If user hasn't a redmine id in our system => mark user as NEW
+        $userRedmineId = $userRepository->getUserRedmineId($user->id);
+
+        if (!$userRedmineId) {
+            $userRepository->markAsNew($user->id);
+        }
+
         return response()->json(
             Filter::process('answer.success.redmine.settings.change', 'Updated!'),
             200
         );
     }
 
+    /**
+     * Returns user's redmine settings
+     *
+     * @param Request $request
+     * @param UserRepository $userRepository
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
     public function getSettings(Request $request, UserRepository $userRepository)
     {
         $userId = auth()->user()->id;
