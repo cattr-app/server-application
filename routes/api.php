@@ -49,6 +49,7 @@ Route::group([
 
     //Tasks routes
     $router->any('/tasks/list', 'Api\v1\TaskController@index');
+    $router->any('/tasks/dashboard', 'Api\v1\TaskController@dashboard');
     $router->post('/tasks/create', 'Api\v1\TaskController@create');
     $router->post('/tasks/edit', 'Api\v1\TaskController@edit');
     $router->any('/tasks/show', 'Api\v1\TaskController@show');

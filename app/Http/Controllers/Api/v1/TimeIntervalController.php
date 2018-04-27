@@ -38,4 +38,5 @@ class TimeIntervalController extends ItemController
     {
         return 'timeinterval';
     }
+
 }

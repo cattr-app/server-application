@@ -1,32 +1,29 @@
 <?php
 
-use App\Models\Role;
 use App\Models\Rule;
-use App\User;
 use Illuminate\Database\Seeder;
+use Symfony\Component\Console\Output\ConsoleOutput;
+
 
 class RoleSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
     public function run(): void
     {
-        $this->command->getOutput()->writeln('<fg=yellow>Create default roles</>');
+        $this->command->getOutput()->writeln('<fg=yellow>Add base roles</>');
 
-        Role::create(['id' => 1, 'name' => 'root']);
-        Role::create(['id' => 2, 'name' => 'user']);
-        Role::create(['id' => 255, 'name' => 'blocked']);
 
-        /**
-         * @var string $object
-         * @var array $actions
-         */
+        DB::table('role')->insert(['id' => 1, 'name' => 'root']);
+        DB::table('role')->insert(['id' => 2, 'name' => 'user']);
+        DB::table('role')->insert(['id' => 255, 'name' => 'blocked']);
+
+
+
         foreach (Rule::getActionList() as $object => $actions) {
             foreach ($actions as $action => $action_name) {
-                Rule::create([
+                DB::table('rule')->insert([
                     'role_id' => 1,
                     'object' => $object,
                     'action' => $action,
@@ -35,11 +32,7 @@ class RoleSeeder extends Seeder
             }
         }
 
-        foreach (User::all() as $user) {
-            $user->role_id = 1;
-            $user->save();
-        }
 
-        $this->command->getOutput()->writeln('<fg=green>Roles has been created</>');
+        $this->command->getOutput()->writeln('<fg=green>Base roles has been created</>');
     }
 }
