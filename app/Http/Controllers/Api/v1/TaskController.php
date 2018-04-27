@@ -79,14 +79,16 @@ class TaskController extends ItemController
 
 
 
-        $items = Task::where('user_id', '=', $user->id)->with([
-            'timeIntervals' => function ($query) {
+        $items = Task::where('user_id', '=', $user->id)
+            ->whereHas('timeIntervals', function ($query) {
 
-                $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
-                $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
+                    $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
+                    $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
 
-                $query->where('updated_at', '>=', $compareDate);
-            }])->get();
+                    $query->where('updated_at', '>=', $compareDate);
+            })
+            ->take(10)
+            ->get();
 
 
         foreach ($items as $key => $task) {
@@ -100,7 +102,7 @@ class TaskController extends ItemController
             }
 
 
-            $items[$key]->total_time = $totalTime;
+            $items[$key]->total_time = gmdate("H:i:s", $totalTime);
         }
 
 
