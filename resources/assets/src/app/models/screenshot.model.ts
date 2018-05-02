@@ -9,6 +9,9 @@ export interface ScreenshotData {
     updated_at?: string;
 }
 
+
+
+
 export class Screenshot extends Item {
     public id: number;
     public time_interval_id?: number;
@@ -26,4 +29,20 @@ export class Screenshot extends Item {
             }
         }
     }
+}
+
+
+export class ScreenshotsBlock {
+
+    constructor(data) {
+
+        if (data) {
+            for (let key in data) {
+                this[key] = data[key];
+            }
+        }
+    }
+
+    public screenshots: Screenshot[];
+    public time: string;
 }

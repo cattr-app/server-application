@@ -78,6 +78,7 @@ class Rule extends Model
                 'edit' => __('Screenshot edit'),
                 'show' => __('Screenshot show'),
                 'remove' => __('Screenshot remove'),
+                'dashboard' => __('Screenshot list at dashboard'),
             ],
             'timeintervals' => [
                 'list' => __('Time interval list'),
