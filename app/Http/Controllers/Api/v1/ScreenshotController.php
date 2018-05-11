@@ -53,6 +53,7 @@ class ScreenshotController extends ItemController
      *
      * @apiParam {Integer} [id] `QueryParam` Screenshot ID
      * @apiParam {Integer} [time_interval_id] `QueryParam` Screenshot's Time Interval ID
+     * @apiParam {Integer} [user_id] `QueryParam` Screenshot's User ID
      * @apiParam {String} [path] `QueryParam` Image path URI
      * @apiParam {DateTime} [created_at] `QueryParam` Screenshot Creation DateTime
      * @apiParam {DateTime} [updated_at] `QueryParam` Last Screenshot data update DataTime
@@ -60,6 +61,35 @@ class ScreenshotController extends ItemController
      *
      * @apiSuccess (200) {Screenshot[]} ScreenshotList array of Screenshot objects
      */
+    public function index(Request $request): JsonResponse
+    {
+        $userId = (int) $request->get('user_id');
+
+        $baseQuery = $this->applyQueryFilter(
+            $this->getQuery(),
+            $request->all() ?: []
+        );
+
+        if (is_int($userId) && $userId !== 0) {
+            $baseQuery = $baseQuery->whereHas('timeInterval', function($q) use ($userId) {
+                $q->whereHas('task', function($qq) use ($userId) {
+                    $qq->where('user_id', '=', $userId);
+                });
+            });
+        }
+
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $baseQuery
+        );
+
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.result'),
+                $itemsQuery->get()
+            )
+        );
+    }
 
     /**
      * Show the form for creating a new resource.

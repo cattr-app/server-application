@@ -1,10 +1,10 @@
 import {Component, OnInit, TemplateRef} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {ItemsListComponent} from "../../items.list.component";
-import {Screenshot} from "../../../models/screenshot.model";
-import {ScreenshotsService} from "../screenshots.service";
-import {AllowedActionsService} from "../../roles/allowed-actions.service";
+import {ItemsListComponent} from '../../items.list.component';
+import {Screenshot} from '../../../models/screenshot.model';
+import {ScreenshotsService} from '../screenshots.service';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
 @Component({
     selector: 'app-screenshots-list',
@@ -14,12 +14,18 @@ import {AllowedActionsService} from "../../roles/allowed-actions.service";
 export class ScreenshotsListComponent extends ItemsListComponent implements OnInit {
 
     itemsArray: Screenshot[] = [];
-    p: number = 1;
+    p = 1;
 
     constructor(api: ApiService,
-                screenshotService: ScreenshotsService,
+                protected itemService: ScreenshotsService,
                 modalService: BsModalService,
-                allowedService: AllowedActionsService,) {
-        super(api, screenshotService, modalService, allowedService);
+                allowedService: AllowedActionsService) {
+        super(api, itemService, modalService, allowedService);
     }
+
+    ngOnInit() {
+        const user: any = this.api.getUser();
+        this.itemService.getItems(this.setItems.bind(this), user.id);
+    }
+
 }

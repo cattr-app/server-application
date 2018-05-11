@@ -1,13 +1,11 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
-import {ApiService} from "../../api/api.service";
-import {ItemsService} from "../items.service";
-import {Screenshot} from "../../models/screenshot.model";
-import {Item} from "../../models/item.model";
-
+import {ApiService} from '../../api/api.service';
+import {ItemsService} from '../items.service';
+import {Screenshot} from '../../models/screenshot.model';
+import {Item} from '../../models/item.model';
 
 @Injectable()
 export class ScreenshotsService extends ItemsService {
-
 
     constructor(api: ApiService) {
         super(api);
@@ -42,5 +40,20 @@ export class ScreenshotsService extends ItemsService {
                 callback(result);
             }
         );
+    }
+
+    getItems(callback, userId?: number) {
+        const itemsArray: Item[] = [];
+
+        return this.api.send(
+            this.getApiPath() + '/list',
+            (userId > 0) ? {'user_id': userId} : [],
+            (result) => {
+                result.forEach((itemFromApi) => {
+                    itemsArray.push(this.convertFromApi(itemFromApi));
+                });
+
+                callback(itemsArray);
+        });
     }
 }

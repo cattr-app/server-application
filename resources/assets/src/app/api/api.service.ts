@@ -1,13 +1,14 @@
 import {EventEmitter, Injectable, Output} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {LocalStorage} from './storage.model';
-import {Router} from "@angular/router";
+import {Router} from '@angular/router';
 import { Location } from '@angular/common';
 
 interface TokenResponse {
     access_token?: string;
     token_type?: string;
     error?: string;
+    user?: any;
 }
 
 interface PingResponse {
@@ -22,6 +23,7 @@ export class ApiService {
     private token?: string = null;
     private tokenType?: string = null;
     private hasToken = false;
+    private user?: any = null;
 
     private storage: LocalStorage = LocalStorage.getStorage();
 
@@ -29,27 +31,34 @@ export class ApiService {
         this.token = this.storage.get('token');
         this.tokenType = this.storage.get('tokenType');
         this.hasToken = !!(this.token && this.tokenType);
+        this.user = this.storage.get('user');
     }
 
-    public setToken(token?: string, tokenType?: string) {
+    public setToken(token?: string, tokenType?: string, user?: any) {
         this.token = token;
         this.tokenType = tokenType || null;
         this.hasToken = !!(token && tokenType);
+        this.user = user || null;
 
         this.storage.set('token', this.token);
         this.storage.set('tokenType', this.tokenType);
+        this.storage.set('user', this.user);
 
         this.auth.emit(this.hasToken);
+    }
+
+    public getUser() {
+        return this.storage.get('user');
     }
 
     public updateToken() {
         const f = function (result: TokenResponse) {
             if (!result.error) {
-                this.setToken(result.access_token, result.token_type);
+                this.setToken(result.access_token, result.token_type, result.user);
             }
         };
 
-        return this.http.post("/api/auth/refresh", [], {
+        return this.http.post('/api/auth/refresh', [], {
             headers: new HttpHeaders({
                 'Content-Type':  'application/json',
                 'Authorization': this.getAuthString()
@@ -62,7 +71,7 @@ export class ApiService {
             console.log(result);
         };
 
-        return this.http.post("/api/auth/logout", [], {
+        return this.http.post('/api/auth/logout', [], {
             headers: new HttpHeaders({
                 'Content-Type':  'application/json',
                 'Authorization': this.getAuthString()
@@ -75,12 +84,12 @@ export class ApiService {
             console.log(result.cat);
         };
 
-        return this.http.get("/api/auth/ping", {
+        return this.http.get('/api/auth/ping', {
             headers: new HttpHeaders({
                 'Content-Type':  'application/json',
                 'Authorization': this.getAuthString()
             })
-        }).subscribe(callback)
+        }).subscribe(callback);
     }
 
     public send(path, data, callback) {
@@ -147,8 +156,8 @@ export class ApiService {
     public errorCallback(error) {
         console.log(error);
         this.setToken(null);
-        this.location.replaceState("/");
-        this.router.navigateByUrl("/");
+        this.location.replaceState('/');
+        this.router.navigateByUrl('/');
     }
 
     private getAuthString() {
