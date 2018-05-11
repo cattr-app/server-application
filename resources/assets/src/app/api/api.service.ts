@@ -92,13 +92,13 @@ export class ApiService {
         }).subscribe(callback);
     }
 
-    public send(path, data, callback) {
+    public send(path, data, callback, errorCallback = this.errorCallback.bind(this)) {
         return this.http.post(`/api/v1/${path}`, data, {
             headers: new HttpHeaders({
                 'Content-Type': 'application/json',
                 'Authorization': this.getAuthString()
             })
-        }).subscribe(callback);
+        }).subscribe(callback, errorCallback);
     }
 
     public sendFile(path, data, callback) {
@@ -154,10 +154,12 @@ export class ApiService {
     }
 
     public errorCallback(error) {
+        if (error.status === 403 && error.error.reason === 'not logined') {
+            this.setToken(null);
+            this.location.replaceState('/');
+            this.router.navigateByUrl('/');
+        }
         console.log(error);
-        this.setToken(null);
-        this.location.replaceState('/');
-        this.router.navigateByUrl('/');
     }
 
     private getAuthString() {
