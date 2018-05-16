@@ -76,6 +76,13 @@ Route::group([
     $router->any('/timeintervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/timeintervals/remove', 'Api\v1\TimeIntervalController@destroy');
 
+    //Time routes
+    $router->any('/time/total', 'Api\v1\TimeController@total');
+    $router->any('/time/project', 'Api\v1\TimeController@project');
+    $router->any('/time/tasks', 'Api\v1\TimeController@tasks');
+    $router->any('/time/task', 'Api\v1\TimeController@task');
+    $router->any('/time/task-user', 'Api\v1\TimeController@taskUser');
+
     //role routes
     $router->any('/roles/list', 'Api\v1\RolesController@index');
     $router->post('/roles/create', 'Api\v1\RolesController@create');

@@ -86,6 +86,13 @@ class Rule extends Model
                 'show' => __('Time interval show'),
                 'remove' => __('Time interval remove'),
             ],
+            'time' => [
+                'total' => __('Time total'),
+                'project' => __('Time by project'),
+                'tasks' => __('Time by tasks'),
+                'task' => __('Time by single task'),
+                'task-user' => __('Time by single task and user'),
+            ],
             'users' => [
                 'list' => __('User list'),
                 'create' => __('User create'),
