@@ -3,6 +3,7 @@ import {Item} from "./item.model";
 export interface TimeIntervalData {
     id: number;
     task_id?: number;
+    user_id?: number;
     start_at?: Date;
     end_at?: Date;
     count_mouse?: number;
@@ -15,6 +16,7 @@ export interface TimeIntervalData {
 export class TimeInterval extends Item {
     public id: number;
     public task_id?: number;
+    public user_id?: number;
     public start_at?: Date;
     public end_at?: Date;
     public count_mouse?: number;

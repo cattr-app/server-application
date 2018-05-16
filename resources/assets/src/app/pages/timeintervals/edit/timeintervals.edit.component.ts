@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {TimeInterval} from "../../../models/timeinterval.model";
-import {Router, ActivatedRoute} from "@angular/router";
-import {TimeIntervalsService} from "../timeintervals.service";
-import {ItemsEditComponent} from "../../items.edit.component";
-import {AllowedActionsService} from "../../roles/allowed-actions.service";
+import {TimeInterval} from '../../../models/timeinterval.model';
+import {Router, ActivatedRoute} from '@angular/router';
+import {TimeIntervalsService} from '../timeintervals.service';
+import {ItemsEditComponent} from '../../items.edit.component';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
 @Component({
     selector: 'app-timeintervals-edit',
@@ -19,17 +19,18 @@ export class TimeIntervalsEditComponent extends ItemsEditComponent implements On
                 timeIntervalService: TimeIntervalsService,
                 activatedRoute: ActivatedRoute,
                 router: Router,
-                allowedService: AllowedActionsService,) {
-        super(api, timeIntervalService, activatedRoute, router, allowedService)
+                allowedService: AllowedActionsService, ) {
+        super(api, timeIntervalService, activatedRoute, router, allowedService);
     }
 
     prepareData() {
         return {
             'task_id': this.item.task_id,
+            'user_id': this.item.user_id,
             'start_at': this.item.start_at,
             'end_at': this.item.end_at,
             'count_mouse': this.item.count_mouse,
             'count_keyboard': this.item.count_keyboard
-        }
+        };
     }
 }

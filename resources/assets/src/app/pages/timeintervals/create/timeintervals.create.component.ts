@@ -25,6 +25,7 @@ export class TimeIntervalsCreateComponent extends ItemsCreateComponent implement
     prepareData() {
         return {
             'task_id': this.item.task_id,
+            'user_id': this.item.user_id,
             'start_at': this.item.start_at,
             'end_at': this.item.end_at,
             'count_mouse': this.item.count_mouse,

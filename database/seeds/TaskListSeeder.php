@@ -96,6 +96,7 @@ class TaskListSeeder extends Seeder
 
             $interval = TimeInterval::create([
                 'task_id' => $task->id,
+                'user_id' => $user->id,
                 'start_at' => date('Y-m-d H:i:s', $start),
                 'end_at' => date('Y-m-d H:i:s', $end),
                 'count_mouse' => random_int(0, 150),

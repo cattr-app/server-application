@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -13,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property int $id
  * @property int $task_id
+ * @property int $user_id
  * @property string $start_at
  * @property string $end_at
  * @property string $created_at
@@ -35,7 +37,7 @@ class TimeInterval extends Model
     /**
      * @var array
      */
-    protected $fillable = ['task_id', 'start_at', 'end_at', 'count_mouse', 'count_keyboard'];
+    protected $fillable = ['task_id', 'start_at', 'user_id', 'end_at', 'count_mouse', 'count_keyboard'];
 
     /**
      * @return BelongsTo
@@ -45,6 +47,13 @@ class TimeInterval extends Model
         return $this->belongsTo(Task::class, 'task_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
 
     /**
      * @return HasMany

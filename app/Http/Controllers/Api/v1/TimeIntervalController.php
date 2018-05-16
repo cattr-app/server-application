@@ -31,6 +31,7 @@ class TimeIntervalController extends ItemController
     {
         return [
             'task_id'  => 'required',
+            'user_id'  => 'required',
             'start_at'        => 'required',
             'end_at' => 'required',
         ];
@@ -46,6 +47,7 @@ class TimeIntervalController extends ItemController
     {
         $intervalData = [
             'task_id' => (int)$request->get('task_id'),
+            'user_id' => (int)$request->get('user_id'),
             'start_at' => $request->get('start_at'),
             'end_at' => $request->get('end_at'),
             'count_mouse' => (int) $request->get('count_mouse') ?: 0,
@@ -106,6 +108,7 @@ class TimeIntervalController extends ItemController
      *
      * @apiParam {Integer} [id] `QueryParam` Time Interval ID
      * @apiParam {Integer} [task_id] `QueryParam` Time Interval's Task ID
+     * @apiParam {Integer} [user_id] `QueryParam` Time Interval's User ID
      * @apiParam {String} [start_at] `QueryParam` Interval Start DataTime
      * @apiParam {String} [end_at] `QueryParam` Interval End DataTime
      * @apiParam {DateTime} [created_at] `QueryParam` Time Interval Creation DateTime
