@@ -4,7 +4,6 @@ namespace App\Models;
 
 
 use Illuminate\Database\Eloquent\Model;
-use App\User;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -53,6 +52,7 @@ class Rule extends Model
                 'list' => __('Project list'),
                 'create' => __('Project create'),
                 'view' => __('Project view'),
+                'show' => __('Project show'),
                 'edit' => __('Project edit'),
                 'remove' => __('Project remove'),
             ],
