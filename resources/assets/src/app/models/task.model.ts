@@ -12,8 +12,9 @@ export class Task extends Item {
     public deleted_at?: string;
     public created_at?: string;
     public updated_at?: string;
+    public total_time?: string;
 
-    constructor(id?, projectId?, taskName?, description?, active = 1, userId?, assignedBy?, url = "URL", createdAt?, updatedAt?, deletedAt?) {
+    constructor(id?, projectId?, taskName?, description?, active = 1, userId?, assignedBy?, url = "URL", createdAt?, updatedAt?, deletedAt?, total_time?) {
         super();
         this.id = id;
         this.project_id = projectId;
@@ -26,5 +27,6 @@ export class Task extends Item {
         this.deleted_at = deletedAt;
         this.created_at = createdAt;
         this.updated_at = updatedAt;
+        this.total_time = total_time;
     }
 }

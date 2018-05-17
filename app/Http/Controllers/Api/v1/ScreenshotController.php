@@ -179,4 +179,57 @@ class ScreenshotController extends ItemController
      * @apiGroup Screenshot
      */
 
+    public function dashboard(): JsonResponse
+    {
+        $limit = request()->limit;
+        $offset = request()->offset;
+
+        $screenshots = Screenshot::whereHas('timeInterval', function ($query) {
+
+
+                    $query->whereHas('task', function ($query) {
+                            $query->where('user_id', auth()->user()->id);
+                        }
+                    );
+
+                }
+            )
+            ->orderBy('created_at','desc')
+            ->skip($offset)
+            ->take($limit)
+            ->get();
+
+        $items = [];
+
+        foreach ($screenshots as $screenshot) {
+            $hasInterval = false;
+            $matches = [];
+
+            preg_match('/(\d{4}-\d{2}-\d{2} \d{2})/', $screenshot->created_at, $matches);
+
+            $hour = $matches[1].':00:00';
+
+            foreach ($items as $itemkey => $item) {
+                if($item['interval'] == $hour) {
+                    $hasInterval = true;
+                    break;
+                }
+            }
+
+            if($hasInterval) {
+                $items[$itemkey]['screenshots'][] = $screenshot->toArray();
+            } else {
+                $items[] = [
+                    'interval' => $hour,
+                    'screenshots' => [$screenshot],
+                ];
+            }
+        }
+
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
+            200
+        );
+    }
 }

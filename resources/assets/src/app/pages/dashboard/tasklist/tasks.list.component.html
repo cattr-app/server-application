@@ -1,5 +1,5 @@
 <p class="h2">Today time use:</p>
-<table class="table">
+<table class="table" *ngIf="itemsArray.length">
   <thead>
     <tr>
       <th scope="col">Task</th>
@@ -8,20 +8,13 @@
     </tr>
   </thead>
   <tbody>
-    <tr>
-      <td>Testing</td>
-      <td>ASB</td>
-      <td>03:02</td>
-    </tr>
-    <tr>
-      <td>Convertors 5.0</td>
-      <td>ASB bigcommerce</td>
-      <td>02:00</td>
-    </tr>
-    <tr>
-      <td>rm -rf /cache</td>
-      <td>internal</td>
-      <td>01:40</td>
+    <tr  *ngFor="let task of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
+      <td>{{task.task_name}}</td>
+      <td>{{task.project_id}}</td>
+      <td>{{task.total_time}}</td>
     </tr>
   </tbody>
 </table>
+<div *ngIf="!itemsArray.length" class="alert alert-info">
+  No task for last 24 hours. ¯\_(ツ)_/¯
+</div>

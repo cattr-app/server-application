@@ -58,7 +58,8 @@ class Rule extends Model
             ],
             'tasks' => [
                 'list' => __('Task list'),
-                'create' => __('Project create'),
+                'dashboard' => __('Task list at dashboard'),
+                'create' => __('Task create'),
                 'view' => __('Task view'),
                 'show' => __('Task show'),
                 'edit' => __('Task edit'),
@@ -78,6 +79,7 @@ class Rule extends Model
                 'show' => __('Screenshot show'),
                 'get' => __('Screenshot get by interval id'),
                 'remove' => __('Screenshot remove'),
+                'dashboard' => __('Screenshot list at dashboard'),
             ],
             'timeintervals' => [
                 'list' => __('Time interval list'),

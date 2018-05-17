@@ -49,6 +49,7 @@ Route::group([
 
     //Tasks routes
     $router->any('/tasks/list', 'Api\v1\TaskController@index');
+    $router->any('/tasks/dashboard', 'Api\v1\TaskController@dashboard');
     $router->post('/tasks/create', 'Api\v1\TaskController@create');
     $router->post('/tasks/edit', 'Api\v1\TaskController@edit');
     $router->any('/tasks/show', 'Api\v1\TaskController@show');
@@ -63,6 +64,7 @@ Route::group([
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
+    $router->any('/screenshots/dashboard', 'Api\v1\ScreenshotController@dashboard');
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
     $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');

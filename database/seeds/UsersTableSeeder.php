@@ -1,7 +1,10 @@
 <?php
 
+use App\User;
+use App\Models\Rule;
 use Illuminate\Database\Seeder;
 use Symfony\Component\Console\Output\ConsoleOutput;
+
 
 class UsersTableSeeder extends Seeder
 {
@@ -15,7 +18,7 @@ class UsersTableSeeder extends Seeder
         $login = 'admin@example.com';
         $pass = 'admin';
 
-        DB::table('users')->insert([
+        User::updateOrCreate([
             'full_name'              => 'Admin',
             'first_name'             => 'Ad',
             'last_name'              => 'Min',
@@ -23,6 +26,7 @@ class UsersTableSeeder extends Seeder
             'url'                    => '',
             'company_id'             => 1,
             'level'                  => 'admin',
+            'role_id'                  => '1',
             'payroll_access'         => 1,
             'billing_access'         => 1,
             'avatar'                 => '',

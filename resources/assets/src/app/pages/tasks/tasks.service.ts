@@ -28,6 +28,7 @@ export class TasksService extends ItemsService {
             itemFromApi.created_at,
             itemFromApi.updated_at,
             itemFromApi.deleted_at,
+            itemFromApi.total_time,
         );
     }
 }

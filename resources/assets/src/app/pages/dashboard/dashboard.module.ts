@@ -4,6 +4,7 @@ import { FormsModule } from '@angular/forms';
 
 import { AuthRoute } from './dashboard-routing.module';
 import { LoginService } from "../../auth/login/login.service";
+import { DashboardService } from "./dashboard.service";
 
 import { HttpClientModule } from '@angular/common/http';
 import { NgxPaginationModule } from 'ngx-pagination';
@@ -26,7 +27,8 @@ import { ScreenshotListComponent } from './screenshotlist/screenshot.list.compon
     ScreenshotListComponent
   ],
   providers: [
-    LoginService
+    LoginService,
+    DashboardService
   ]
 })
 

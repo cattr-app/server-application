@@ -1,141 +1,29 @@
-<div class="row">
-  <div class="col-md-11">
-    <!-- items start -->
-    <div class="col-md-2">
-      <div class="card">
-        <input type="checkbox" class="select_image">
-        <img class="card-img-top" src="http://amazingcat.net/img/logob.png" alt="image">
-        <div class="card-body">
-          <p class="card-text">
-            <span>12:03</span>
-            <span>rm -rf /cache</span>
-            <span>internal</span>
-          </p>
+<div class="container-fuild">
+  <div class="row" *ngFor="let block of blocks">
+    <div class="col-md-10">
+      <!-- items start -->
+      <div class="col-md-3" *ngFor="let screenshot of block.screenshots">
+        <div class="card">
+          <input type="checkbox" class="select_image">
+          <img class="card-img-top" src="{{ screenshot.path }}" alt="image">
+          <div class="card-body">
+            <p class="card-text">
+              <span>{{ minutes(screenshot.created_at) }}</span>
+              <span>timeInterval: {{ screenshot.time_interval_id }}</span>
+            </p>
+          </div>
         </div>
       </div>
+      <!-- items end  -->
     </div>
     <div class="col-md-2">
-      <div class="card">
-        <input type="checkbox" class="select_image">
-        <img class="card-img-top" src="http://amazingcat.net/img/logob.png" alt="image">
-        <div class="card-body">
-          <p class="card-text">
-            <span>12:03</span>
-            <span>rm -rf /cache</span>
-            <span>internal</span>
-          </p>
-        </div>
-      </div>
+      <input type="checkbox" class="select_row">
+      {{ hour(block.interval) }}
     </div>
-    <div class="col-md-2">
-      <div class="card">
-        <input type="checkbox" class="select_image">
-        <img class="card-img-top" src="http://amazingcat.net/img/logob.png" alt="image">
-        <div class="card-body">
-          <p class="card-text">
-            <span>12:03</span>
-            <span>rm -rf /cache</span>
-            <span>internal</span>
-          </p>
-        </div>
-      </div>
-    </div>
-    <!-- items end  -->
-  </div>
-  <div class="col-md-1">
-    <input type="checkbox" class="select_row">
   </div>
 </div>
 
-<div class="row">
-  <div class="col-md-11">
-    <!-- items start -->
-    <div class="col-md-2">
-      <div class="card">
-        <input type="checkbox" class="select_image">
-        <img class="card-img-top" src="http://amazingcat.net/img/logob.png" alt="image">
-        <div class="card-body">
-          <p class="card-text">
-            <span>12:03</span>
-            <span>rm -rf /cache</span>
-            <span>internal</span>
-          </p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <input type="checkbox" class="select_image">
-        <img class="card-img-top" src="http://amazingcat.net/img/logob.png" alt="image">
-        <div class="card-body">
-          <p class="card-text">
-            <span>12:03</span>
-            <span>rm -rf /cache</span>
-            <span>internal</span>
-          </p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <input type="checkbox" class="select_image">
-        <img class="card-img-top" src="http://amazingcat.net/img/logob.png" alt="image">
-        <div class="card-body">
-          <p class="card-text">
-            <span>12:03</span>
-            <span>rm -rf /cache</span>
-            <span>internal</span>
-          </p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <input type="checkbox" class="select_image">
-        <img class="card-img-top" src="http://amazingcat.net/img/logob.png" alt="image">
-        <div class="card-body">
-          <p class="card-text">
-            <span>12:03</span>
-            <span>rm -rf /cache</span>
-            <span>internal</span>
-          </p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <input type="checkbox" class="select_image">
-        <img class="card-img-top" src="http://amazingcat.net/img/logob.png" alt="image">
-        <div class="card-body">
-          <p class="card-text">
-            <span>12:03</span>
-            <span>rm -rf /cache</span>
-            <span>internal</span>
-          </p>
-        </div>
-      </div>
-    </div>
-    <div class="col-md-2">
-      <div class="card">
-        <input type="checkbox" class="select_image">
-        <img class="card-img-top" src="http://amazingcat.net/img/logob.png" alt="image">
-        <div class="card-body">
-          <p class="card-text">
-            <span>12:03</span>
-            <span>rm -rf /cache</span>
-            <span>internal</span>
-          </p>
-        </div>
-      </div>
-    </div>
-    <!-- items end  -->
-  </div>
-  <div class="col-md-1">
-    <input type="checkbox" class="select_row">
-  </div>
-</div>
-
-<div class="loading">
+<div class="loading" #loading>
 <p class="h2">...</p>
 <p class="h2">screenshots auto-loading</p>
 </div>
