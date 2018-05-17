@@ -88,6 +88,13 @@ class TimeController extends ItemController
         $time_intervals = $itemsQuery->get();
         $total_time = 0;
 
+        if (collect($time_intervals)->isEmpty()) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.success.item.list'),
+                []
+            ));
+        }
+
         foreach ($time_intervals as $interval) {
             $total_time += Carbon::parse($interval->end_at)->timestamp - Carbon::parse($interval->start_at)->timestamp;
         }
@@ -163,6 +170,13 @@ class TimeController extends ItemController
         $time_intervals = $itemsQuery->get();
         $total_time = 0;
 
+        if (collect($time_intervals)->isEmpty()) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.success.item.list'),
+                []
+            ));
+        }
+
         foreach ($time_intervals as $interval) {
             $total_time += Carbon::parse($interval->end_at)->timestamp - Carbon::parse($interval->start_at)->timestamp;
         }
@@ -231,6 +245,13 @@ class TimeController extends ItemController
         $time_intervals = $itemsQuery->get()->groupBy('task_id')->map(function ($item, $key) {
             return collect($item)->groupBy('user_id');
         });
+
+        if (collect($time_intervals)->isEmpty()) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.success.item.list'),
+                []
+            ));
+        }
 
         $taskList = $itemsQuery->with('task')->get()->map(function ($item, $key) {
             return collect($item)->only('task');
@@ -346,6 +367,13 @@ class TimeController extends ItemController
             return collect($item)->groupBy('user_id');
         });
 
+        if (collect($time_intervals)->isEmpty()) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.success.item.list'),
+                []
+            ));
+        }
+
         $taskList = $itemsQuery->with('task')->get()->map(function ($item, $key) {
             return collect($item)->only('task');
         })->flatten(1)->unique()->values()->all();
@@ -448,9 +476,16 @@ class TimeController extends ItemController
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
             $baseQuery
         );
+        $time_intervals = $itemsQuery->get();
+
+        if (collect($time_intervals)->isEmpty()) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.success.item.list'),
+                []
+            ));
+        }
 
         $time = 0;
-        $time_intervals = $itemsQuery->get();
         $first = $time_intervals->first();
         $last = $time_intervals->last();
 
