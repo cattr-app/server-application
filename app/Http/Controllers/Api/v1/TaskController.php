@@ -84,28 +84,6 @@ class TaskController extends ItemController
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function index(Request $request): JsonResponse
-    {
-        /** @var User $user */
-        $user = auth()->user();
-
-        $filter = $request->all() ?: [];
-        $filter['user_id'] = $user->id;
-        $filter['active'] = 1;
-
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $this->applyQueryFilter($this->getQuery(), $filter)
-        );
-
-
-        return response()->json(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.item.list.result'),
-                $itemsQuery->get()
-            )
-        );
-    }
 
     /**
      * @api {post} /api/v1/tasks/create Create
@@ -139,31 +117,65 @@ class TaskController extends ItemController
      * @apiGroup Task
      */
 
-    public function dashboard(): JsonResponse
+    /**
+     * @api {post} /api/v1/tasks/dashboard Dashboard
+     * @apiDescription Display task for dashboard
+     * @apiVersion 0.1.0
+     * @apiName DashboardTask
+     * @apiGroup Task
+     * @apiParam {Integer} [id] `QueryParam` Task ID
+     * @apiParam {Integer} [project_id] `QueryParam` Task Project
+     * @apiParam {String} [task_name] `QueryParam` Task Name
+     * @apiParam {Boolean} [active] Active/Inactive Task
+     * @apiParam {Integer} [user_id] `QueryParam` Task's User ID and Time Interval's User ID
+     * @apiParam {Integer} [assigned_by] `QueryParam` User who assigned task
+     * @apiParam {DateTime} [created_at] `QueryParam` Task Creation DateTime
+     * @apiParam {DateTime} [updated_at] `QueryParam` Last Task update DataTime
+     * @apiParam {DateTime} [deleted_at] `QueryParam` When Task was deleted (null if not)
+     *
+     * @apiSuccess (200) {Task[TimeInterval]} TaskList array of Task with Time Interval objects
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dashboard(Request $request): JsonResponse
     {
-        /** @var User $user */
-        $user = auth()->user();
-        $limit = request()->limit;
-        $items = Task::where('user_id', '=', $user->id)
-            ->whereHas('timeIntervals', function ($query) {
+        $filters = $request->all();
+        $request->get('user_id') ? $filters['timeIntervals.user_id'] = (int) $request->get('user_id') : False;
+        $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
+        $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
+        $filters['timeIntervals.update_at'] = ['>=', $compareDate];
+        $filters['limit'] = 10;
 
-                    $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
-                    $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
+        $baseQuery = $this->applyQueryFilter(
+            $this->getQuery(False),
+            $filters ?: []
+        );
 
-                    $query->where('updated_at', '>=', $compareDate);
-            })
-            ->take(10)
-            ->get();
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $baseQuery
+        );
+
+        $items = $itemsQuery->with(['TimeIntervals' => function($q) use ($request) {
+            $request->get('user_id') ? $q->where('user_id', '=', $request->get('user_id')) : False;
+        }])->get()->toArray();
+
+        if (collect($items)->isEmpty()) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.success.item.list'),
+                []
+            ));
+        }
 
         foreach ($items as $key => $task) {
             $totalTime = 0;
 
-            foreach ($task->timeIntervals as $timeInterval) {
-                $end = new DateTime($timeInterval->end_at);
-                $totalTime += $end->diff(new DateTime($timeInterval->start_at))->s;
+            foreach ($task['time_intervals'] as $timeInterval) {
+                $end = new DateTime($timeInterval['end_at']);
+                $totalTime += $end->diff(new DateTime($timeInterval['start_at']))->s;
             }
 
-            $items[$key]->total_time = gmdate("H:i:s", $totalTime);
+            $items[$key]['total_time'] = gmdate("H:i:s", $totalTime);
         }
 
 

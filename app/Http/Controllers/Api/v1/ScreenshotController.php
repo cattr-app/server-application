@@ -63,20 +63,13 @@ class ScreenshotController extends ItemController
      */
     public function index(Request $request): JsonResponse
     {
-        $userId = (int) $request->get('user_id');
+        $filters = $request->all();
+        (int) $request->get('user_id') ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),
-            $request->all() ?: []
+            $filters ?: []
         );
-
-        if (is_int($userId) && $userId !== 0) {
-            $baseQuery = $baseQuery->whereHas('timeInterval', function($q) use ($userId) {
-                $q->whereHas('task', function($qq) use ($userId) {
-                    $qq->where('user_id', '=', $userId);
-                });
-            });
-        }
 
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
@@ -177,27 +170,53 @@ class ScreenshotController extends ItemController
      * @apiVersion 0.1.0
      * @apiName DestroyScreenshot
      * @apiGroup Screenshot
+     * @apiParam {Integer} [user_id] `QueryParam` Screenshot's User ID
+     * @param Request $request
+     * @return JsonResponse
      */
 
-    public function dashboard(): JsonResponse
+    /**
+     * @api {post} /api/v1/screenshots/dashboard Dashboard
+     * @apiDescription Get dashboard of Screenshots
+     * @apiVersion 0.1.0
+     * @apiName GetScreenshotDashboard
+     * @apiGroup Screenshot
+     *
+     * @apiParam {Integer} [id] `QueryParam` Screenshot ID
+     * @apiParam {Integer} [time_interval_id] `QueryParam` Screenshot's Time Interval ID
+     * @apiParam {Integer} [user_id] `QueryParam` Screenshot's User ID
+     * @apiParam {String} [path] `QueryParam` Image path URI
+     * @apiParam {DateTime} [created_at] `QueryParam` Screenshot Creation DateTime
+     * @apiParam {DateTime} [updated_at] `QueryParam` Last Screenshot data update DataTime
+     * @apiParam {DateTime} [deleted_at] `QueryParam` When Screenshot was deleted (null if not)
+     *
+     * @apiSuccess (200) {Screenshots[]} ScreenshotList array of Screenshot objects and interval
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function dashboard(Request $request): JsonResponse
     {
-        $limit = request()->limit;
-        $offset = request()->offset;
+        $filters = $request->all();
+        (int) $request->get('user_id') ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
 
-        $screenshots = Screenshot::whereHas('timeInterval', function ($query) {
+        $baseQuery = $this->applyQueryFilter(
+            $this->getQuery(),
+            $filters ?: []
+        );
 
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $baseQuery->orderBy('created_at', 'desc')
+        );
 
-                    $query->whereHas('task', function ($query) {
-                            $query->where('user_id', auth()->user()->id);
-                        }
-                    );
+        $screenshots = $itemsQuery->get();
 
-                }
-            )
-            ->orderBy('created_at','desc')
-            ->skip($offset)
-            ->take($limit)
-            ->get();
+        if (collect($screenshots)->isEmpty()) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.success.item.list'),
+                []
+            ));
+        }
 
         $items = [];
 

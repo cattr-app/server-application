@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
@@ -266,19 +267,9 @@ abstract class ItemController extends Controller
     {
         $cls = static::getItemClass();
         $model = new $cls();
-        $table = $model->getTable();
+        $helper = new QueryHelper();
 
-        foreach ($filter as $key => $param) {
-            if (Schema::hasColumn($table, $key)) {
-                [$operator, $value] = \is_array($param) ? $param : ['=', $param];
-
-                if (\is_array($value) && $operator === '=') {
-                    $query->whereIn($key, $value);
-                } else {
-                    $query->where($key, $operator, $value);
-                }
-            }
-        }
+        $helper->apply($query, $filter, $model);
 
         return Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.filter'),

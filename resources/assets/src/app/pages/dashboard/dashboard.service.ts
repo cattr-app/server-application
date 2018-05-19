@@ -12,12 +12,12 @@ export class DashboardService {
     }
 
 
-    getTasks(callback) {
+    getTasks(callback, userId) {
         let itemsArray: Item[] = [];
 
         return this.api.send(
             'tasks/dashboard',
-            [],
+            userId ? {'user_id': userId} : [],
             (result) => {
                 result.forEach((itemFromApi) => {
                     itemsArray.push(new Task(
@@ -42,12 +42,13 @@ export class DashboardService {
     }
 
 
-    getScreenshots(limit, offset, callback) {
+    getScreenshots(limit, offset, callback, userId) {
         let itemsArray: Item[] = [];
 
         return this.api.send(
             'screenshots/dashboard',
             {
+                'user_id': userId,
                 'limit': limit,
                 'offset': offset,
             },

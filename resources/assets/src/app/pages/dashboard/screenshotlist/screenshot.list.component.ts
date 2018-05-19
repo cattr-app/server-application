@@ -1,5 +1,6 @@
-import { Component, ViewChild, AfterViewInit } from '@angular/core';
+import {Component, ViewChild, AfterViewInit, OnInit} from '@angular/core';
 import {Screenshot, ScreenshotsBlock} from "../../../models/screenshot.model";
+import {ApiService} from '../../../api/api.service';
 import {DashboardService} from "../dashboard.service";
 
 
@@ -8,7 +9,7 @@ import {DashboardService} from "../dashboard.service";
   templateUrl: './screenshot.list.component.html',
   styleUrls: ['./screenshot.list.component.css']
 })
-export class ScreenshotListComponent {
+export class ScreenshotListComponent implements OnInit, AfterViewInit {
 
     @ViewChild('loading') element: any;
     chunksize: number = 32;
@@ -16,24 +17,23 @@ export class ScreenshotListComponent {
     blocks: ScreenshotsBlock[] = [];
     screenshotLoading: boolean = false;
 
-    constructor(protected dashboardService: DashboardService) {
+    constructor(protected api: ApiService, protected dashboardService: DashboardService) {
     }
-
 
     ngOnInit() {
       window.addEventListener('scroll', this.onScrollDown.bind(this), true);
+
       this.loadNext();
     }
 
-
     loadNext() {
-
         if(this.screenshotLoading) {
           return;
         }
 
+        const user: any = this.api.getUser() ? this.api.getUser() : null;
         this.screenshotLoading = true;
-        this.dashboardService.getScreenshots(this.chunksize, this.offset,this.setData.bind(this));
+        this.dashboardService.getScreenshots(this.chunksize, this.offset,this.setData.bind(this), user.id);
     }
 
     setData(result) {

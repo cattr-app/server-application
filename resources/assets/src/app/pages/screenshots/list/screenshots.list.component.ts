@@ -17,15 +17,15 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
     p = 1;
 
     constructor(api: ApiService,
-                protected itemService: ScreenshotsService,
+                itemService: ScreenshotsService,
                 modalService: BsModalService,
                 allowedService: AllowedActionsService) {
         super(api, itemService, modalService, allowedService);
     }
 
     ngOnInit() {
-        const user: any = this.api.getUser();
-        this.itemService.getItems(this.setItems.bind(this), user.id);
+        const user: any = this.api.getUser() ? this.api.getUser() : null;
+        this.itemService.getItems(this.setItems.bind(this), {'user_id': user.id});
     }
 
 }

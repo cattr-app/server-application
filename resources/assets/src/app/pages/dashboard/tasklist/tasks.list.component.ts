@@ -1,6 +1,7 @@
 import { Component, OnInit } from '@angular/core';
 import {Task} from "../../../models/task.model";
 import {DashboardService} from "../dashboard.service";
+import {ApiService} from '../../../api/api.service';
 
 @Component({
   selector: 'dashboard-tasklist',
@@ -11,12 +12,13 @@ export class TaskListComponent implements OnInit {
 
 
 
-    constructor(protected dashboardService: DashboardService) {
+    constructor(protected api: ApiService, protected dashboardService: DashboardService) {
     }
 
 
     ngOnInit() {
-        this.dashboardService.getTasks(this.setTasks.bind(this));
+        const user: any = this.api.getUser() ? this.api.getUser() : null;
+        this.dashboardService.getTasks(this.setTasks.bind(this), user.id);
     }
 
     setTasks(result) {

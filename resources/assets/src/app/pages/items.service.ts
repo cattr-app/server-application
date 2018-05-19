@@ -46,12 +46,12 @@ export abstract class ItemsService {
             });
     }
 
-    getItems(callback) {
+    getItems(callback, params ?: any) {
         let itemsArray: Item[] = [];
 
         return this.api.send(
             this.getApiPath() + '/list',
-            [],
+            params ? params : [],
             (result) => {
                 result.forEach((itemFromApi) => {
                     itemsArray.push(this.convertFromApi(itemFromApi));

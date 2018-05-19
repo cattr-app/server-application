@@ -41,19 +41,4 @@ export class ScreenshotsService extends ItemsService {
             }
         );
     }
-
-    getItems(callback, userId?: number) {
-        const itemsArray: Item[] = [];
-
-        return this.api.send(
-            this.getApiPath() + '/list',
-            (userId > 0) ? {'user_id': userId} : [],
-            (result) => {
-                result.forEach((itemFromApi) => {
-                    itemsArray.push(this.convertFromApi(itemFromApi));
-                });
-
-                callback(itemsArray);
-        });
-    }
 }

@@ -1,10 +1,10 @@
 import {Component, OnInit, TemplateRef} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {TimeIntervalsService} from "../timeintervals.service";
-import {TimeInterval} from "../../../models/timeinterval.model";
+import {TimeIntervalsService} from '../timeintervals.service';
+import {TimeInterval} from '../../../models/timeinterval.model';
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {ItemsListComponent} from "../../items.list.component";
-import {AllowedActionsService} from "../../roles/allowed-actions.service";
+import {ItemsListComponent} from '../../items.list.component';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
 @Component({
     selector: 'app-timeintervals-list',
@@ -14,12 +14,17 @@ import {AllowedActionsService} from "../../roles/allowed-actions.service";
 export class TimeIntervalsListComponent extends ItemsListComponent implements OnInit {
 
     itemsArray: TimeInterval[] = [];
-    p: number = 1;
+    p = 1;
 
     constructor(api: ApiService,
                 timeIntervalService: TimeIntervalsService,
                 modalService: BsModalService,
-                allowedService: AllowedActionsService,) {
+                allowedService: AllowedActionsService, ) {
         super(api, timeIntervalService, modalService, allowedService);
+    }
+
+    ngOnInit() {
+        const user: any = this.api.getUser() ? this.api.getUser() : null;
+        this.itemService.getItems(this.setItems.bind(this), {'user_id': user.id});
     }
 }
