@@ -140,11 +140,11 @@ class TaskController extends ItemController
     public function dashboard(Request $request): JsonResponse
     {
         $filters = $request->all();
-        $request->get('user_id') ? $filters['timeIntervals.user_id'] = (int) $request->get('user_id') : False;
         $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
+        $request->get('user_id') ? $filters['timeIntervals.user_id'] = (int) $request->get('user_id') : False;
         $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
         $filters['timeIntervals.update_at'] = ['>=', $compareDate];
-        $filters['limit'] = 10;
+        unset($filters['user_id']);
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(False),

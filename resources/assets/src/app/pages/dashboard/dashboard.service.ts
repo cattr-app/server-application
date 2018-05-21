@@ -12,12 +12,12 @@ export class DashboardService {
     }
 
 
-    getTasks(callback, userId) {
+    getTasks(callback, params ?: any) {
         let itemsArray: Item[] = [];
 
         return this.api.send(
             'tasks/dashboard',
-            userId ? {'user_id': userId} : [],
+            params ? params : [],
             (result) => {
                 result.forEach((itemFromApi) => {
                     itemsArray.push(new Task(
