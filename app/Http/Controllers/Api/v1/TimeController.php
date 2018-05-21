@@ -41,43 +41,75 @@ class TimeController extends ItemController
     }
 
     /**
+     * @apiDefine Relations
+     * @apiParam {Object} [task]        `QueryParam` TimeInterval's relation task. All params in <a href="#api-Task-GetTaskList" >@Task</a>
+     * @apiParam {Object} [user]        `QueryParam` TimeInterval's relation user. All params in <a href="#api-User-GetUserList" >@User</a>
+     * @apiParam {Object} [screenshots] `QueryParam` TimeInterval's relation screenshots. All params in <a href="#api-Screenshot-GetScreenshotList" >@Screenshot</a>
+     */
+
+    /**
+     * @apiDefine RelationsExample
+     * @apiParamExample {json} Request-With-Relations-Example:
+     *  {
+     *      "task.id":        [">", 1],
+     *      "task.active":    1,
+     *      "user.id":        [">", 1],
+     *      "user.full_name": ["like", "%lorem%"],
+     *      "screenshots.id": [">", 1]
+     *  }
+     */
+
+    /**
      * Display a total of time.
      *
-     * @api {post} /api/v1/time/total
+     * @api {post} /api/v1/time/total Total
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "user_id":        1,
+     *      "task_id":        [1,2,3],
+     *      "project_id":     [">", 1],
+     *      "start_at":       "2005-01-01 00:00:00",
+     *      "end_at":         "2019-01-01 00:00:00",
+     *      "count_mouse":    [">=", 30],
+     *      "count_keyboard": ["<=", 200],
+     *      "id":             [">", 1]
+     *  }
+     * @apiUse RelationsExample
      * @apiDescription Get total of Time
      * @apiVersion 0.1.0
      * @apiName GetTimeTotal
      * @apiGroup Time
      *
-     * @apiParam {DateTime} [start_at] `QueryParam` TimeInterval Start DataTime
-     * @apiParam {DateTime} [end_at] `QueryParam` TimeInterval End DataTime
-     * @apiParam {Array} [tasks_id] `QueryParam` TimeInterval's Tasks ID
-     * @apiParam {Integer} [project_id] `QueryParam` TimeInterval's Task's Project ID
-     * @apiParam {Integer} [user_id] `QueryParam` TimeInterval's Task's User ID
+     * @apiParam {Integer[]} [tasks_id]       `QueryParam` TimeInterval's Task ID
+     * @apiParam {Integer}   [project_id]     `QueryParam` TimeInterval's Task's Project ID
+     * @apiParam {Integer}   [user_id]        `QueryParam` TimeInterval's Task's User ID
+     * @apiParam {DateTime}  [start_at]                    TimeInterval Start DataTime
+     * @apiParam {DateTime}  [end_at]                      TimeInterval End DataTime
+     * @apiParam {Integer}   [count_mouse]    `QueryParam` TimeInterval Count mouse
+     * @apiParam {Integer}   [count_keyboard] `QueryParam` TimeInterval Count keyboard
+     * @apiParam {Integer}   [id]             `QueryParam` TimeInterval ID
+     * @apiUse Relations
      *
-     * @apiSuccess (200) {array} array total of Time
+     * @apiSuccess {DateTime} current_datetime Current datetime of server
+     * @apiSuccess {Integer}  time             Total time in seconds
+     * @apiSuccess {DateTime} start            Datetime of first Time Interval's start_at
+     * @apiSuccess {DateTime} end              DateTime of last Time Interval's end_at
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function total(Request $request): JsonResponse
     {
-        $filters = $request;
+        $filters = $request->all();
         $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
         $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
-        $projectId = (int) $request->get('project_id')?: False;
+        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),
             $filters ?: []
         );
-
-        if ($projectId) {
-            $baseQuery = $baseQuery->whereHas('task', function($q) use ($projectId) {
-                $q->where('project_id', '=', $projectId);
-            });
-        }
 
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
@@ -113,30 +145,58 @@ class TimeController extends ItemController
     }
 
     /**
-     * Display a time of project.
+     * Display the project time.
      *
-     * @api {post} /api/v1/time/project
+     * @api {post} /api/v1/time/project Project
+     * @apiParamExample {json} Request-Example:
+     *  {
+     *      "user_id":        1,
+     *      "task_id":        [1,2,3],
+     *      "project_id":     ["<", 2],
+     *      "start_at":       "2005-01-01 00:00:00",
+     *      "end_at":         "2019-01-01 00:00:00",
+     *      "count_mouse":    [">=", 30],
+     *      "count_keyboard": ["<=", 200],
+     *      "id":             [">", 1]
+     *  }
+     * @apiUse RelationsExample
      * @apiDescription Get time of project
      * @apiVersion 0.1.0
      * @apiName GetTimeByProject
      * @apiGroup Time
      *
-     * @apiParam {DateTime} [start_at] `QueryParam` TimeInterval Start DataTime
-     * @apiParam {DateTime} [end_at] `QueryParam` TimeInterval End DataTime
-     * @apiParam {Array} [tasks_id] `QueryParam` TimeInterval's Task ID
-     * @apiParam {Integer} [project_id] `QueryParam` TimeInterval's Task's Project ID {required}
-     * @apiParam {Integer} [user_id] `QueryParam` TimeInterval's Task's User ID
+     * @apiParam {Integer[]} [tasks_id]       `QueryParam` TimeInterval's Task ID
+     * @apiParam {Integer}   project_id       `QueryParam` TimeInterval's Task's Project ID
+     * @apiParam {Integer}   [user_id]        `QueryParam` TimeInterval's Task's User ID
+     * @apiParam {DateTime}  [start_at]                    TimeInterval Start DataTime
+     * @apiParam {DateTime}  [end_at]                      TimeInterval End DataTime
+     * @apiParam {Integer}   [count_mouse]    `QueryParam` TimeInterval Count mouse
+     * @apiParam {Integer}   [count_keyboard] `QueryParam` TimeInterval Count keyboard
+     * @apiParam {Integer}   [id]             `QueryParam` TimeInterval ID
+     * @apiUse Relations
      *
-     * @apiSuccess (200) {array} array Time of Project
+     * @apiSuccess {DateTime} current_datetime Current datetime of server
+     * @apiSuccess {Integer}  time             Total time of project in seconds
+     * @apiSuccess {DateTime} start            Datetime of first Time Interval's start_at
+     * @apiSuccess {DateTime} end              DateTime of last Time Interval's end_at
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function project(Request $request): JsonResponse
     {
-        $projectId = (int) $request->get('project_id')?: False;
-        if (!$projectId) {
+        $filters = $request->all();
+        $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
+        $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
+        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
+
+        $validator = Validator::make(
+            $filters,
+            Filter::process($this->getEventUniqueName('validation.item.get'), ['project_id' => 'required'])
+        );
+
+        if ($validator->fails()) {
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.get'), [
                     'error' => 'validation fail',
@@ -146,18 +206,10 @@ class TimeController extends ItemController
             );
         }
 
-        $filters = $request->all();
-        $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
-        $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
-
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),
             $filters ?: []
         );
-
-        $baseQuery = $baseQuery->whereHas('task', function($q) use ($projectId) {
-            $q->where('project_id', '=', $projectId);
-        });
 
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
@@ -193,43 +245,64 @@ class TimeController extends ItemController
     }
 
     /**
-     * Display tasks and a time of tasks.
+     * Display the Tasks and its total time.
      *
-     * @api {post} /api/v1/time/tasks
-     * @apiDescription Get tasks and a time of tasks
+     * @api {post} /api/v1/time/tasks Tasks
+     * @apiParamExample {json} Request-Example:
+     *  {
+     *      "user_id":    1,
+     *      "task_id":    [">", 1],
+     *      "project_id": 2,
+     *      "start_at":   "2005-01-01 00:00:00",
+     *      "end_at":     "2019-01-01 00:00:00",
+     *      "count_mouse":    [">=", 30],
+     *      "count_keyboard": ["<=", 200],
+     *      "id":             [">", 1]
+     *  }
+     * @apiUse RelationsExample
+     * @apiDescription Get tasks and its total time
      * @apiVersion 0.1.0
      * @apiName GetTimeByTasks
      * @apiGroup Time
      *
-     * @apiParam {DateTime} [start_at] `QueryParam` TimeInterval Start DataTime
-     * @apiParam {DateTime} [end_at] `QueryParam` TimeInterval End DataTime
-     * @apiParam {Array} [tasks_id] `QueryParam` TimeInterval's Task ID
-     * @apiParam {Integer} [project_id] `QueryParam` TimeInterval's Task's Project ID
-     * @apiParam {Integer} [user_id] `QueryParam` TimeInterval's Task's User ID
+     * @apiParam {Integer[]} [tasks_id]       `QueryParam` TimeInterval's Task ID
+     * @apiParam {Integer}   [project_id]     `QueryParam` TimeInterval's Task's Project ID
+     * @apiParam {Integer}   [user_id]        `QueryParam` TimeInterval's Task's User ID
+     * @apiParam {DateTime}  [start_at]                    TimeInterval Start DataTime
+     * @apiParam {DateTime}  [end_at]                      TimeInterval End DataTime
+     * @apiParam {Integer}   [count_mouse]    `QueryParam` TimeInterval Count mouse
+     * @apiParam {Integer}   [count_keyboard] `QueryParam` TimeInterval Count keyboard
+     * @apiParam {Integer}   [id]             `QueryParam` TimeInterval ID
+     * @apiUse Relations
      *
-     * @apiSuccess (200) {(DateTime)CurrentTime {}Tasks {}Total} array of Tasks objects and Total Time, Current Time
+     * @apiSuccess {DateTime} current_datetime Current datetime of server
+     * @apiSuccess {Object[]} tasks            Array of objects Task
+     * @apiSuccess {Integer}  tasks.id         Tasks's ID
+     * @apiSuccess {Integer}  tasks.user_id    Tasks's User ID
+     * @apiSuccess {Integer}  tasks.project_id Tasks's Project ID
+     * @apiSuccess {Integer}  tasks.time       Tasks's total time in seconds
+     * @apiSuccess {DateTime} tasks.start      Datetime of first Tasks's Time Interval's start_at
+     * @apiSuccess {DateTime} tasks.end        Datetime of last Tasks's Time Interval's end_at
+     * @apiSuccess {Total[]}  total            Array of total tasks time
+     * @apiSuccess {Integer}  total.time       Total time of tasks in seconds
+     * @apiSuccess {DateTime} total.start      Datetime of first Time Interval's start_at
+     * @apiSuccess {DateTime} total.end        DateTime of last Time Interval's end_at
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function tasks(Request $request): JsonResponse
     {
         $filters = $request->all();
         $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
         $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
-        $projectId = (int) $request->get('project_id')?: False;
+        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),
             $filters ?: []
         );
-
-        if ($projectId) {
-            $baseQuery = $baseQuery->whereHas('task', function($q) use ($projectId) {
-                $q->where('project_id', '=', $projectId);
-            });
-        }
 
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
@@ -297,37 +370,60 @@ class TimeController extends ItemController
     }
 
     /**
-     * Display task and time of single task.
+     * Display the Task and its total time.
      *
-     * @api {post} /api/v1/time/task
-     * @apiDescription Get task and time of single task
+     * @api {post} /api/v1/time/task Task
+     * @apiParamExample {json} Request-Example:
+     *  {
+     *      "user_id":        1,
+     *      "task_id":        1,
+     *      "project_id":     2,
+     *      "start_at":       "2005-01-01 00:00:00",
+     *      "end_at":         "2019-01-01 00:00:00",
+     *      "count_mouse":    [">=", 30],
+     *      "count_keyboard": ["<=", 200],
+     *      "id":             [">", 1]
+     *  }
+     * @apiUse RelationsExample
+     * @apiDescription Get task and its total time
      * @apiVersion 0.1.0
      * @apiName GetTimeBySingleTask
      * @apiGroup Time
      *
-     * @apiParam {DateTime} [start_at] `QueryParam` TimeInterval Start DataTime
-     * @apiParam {DateTime} [end_at] `QueryParam` TimeInterval End DataTime
-     * @apiParam {Integer} [task_id] `QueryParam` TimeInterval's Task ID {required}
-     * @apiParam {Integer} [project_id] `QueryParam` TimeInterval's Task's Project ID
-     * @apiParam {Integer} [user_id] `QueryParam` TimeInterval's Task's User ID
+     * @apiParam {Integer}  task_id                       TimeInterval's Task ID
+     * @apiParam {Integer}  [project_id]     `QueryParam` TimeInterval's Task's Project ID
+     * @apiParam {Integer}  [user_id]        `QueryParam` TimeInterval's Task's User ID
+     * @apiParam {DateTime} [start_at]                    TimeInterval Start DataTime
+     * @apiParam {DateTime} [end_at]                      TimeInterval End DataTime
+     * @apiParam {Integer}  [count_mouse]    `QueryParam` TimeInterval Count mouse
+     * @apiParam {Integer}  [count_keyboard] `QueryParam` TimeInterval Count keyboard
+     * @apiParam {Integer}  [id]             `QueryParam` TimeInterval ID
+     * @apiUse Relations
      *
-     * @apiSuccess (200) {(DateTime)CurrentTime {}Task {}Total} array of Task objects and Total Time, Current Time
+     * @apiSuccess {DateTime} current_datetime Current datetime of server
+     * @apiSuccess {Object[]} tasks            Array of objects Task
+     * @apiSuccess {Integer}  tasks.id         Tasks's ID
+     * @apiSuccess {Integer}  tasks.user_id    Tasks's User ID
+     * @apiSuccess {Integer}  tasks.project_id Tasks's Project ID
+     * @apiSuccess {Integer}  tasks.time       Tasks's total time in seconds
+     * @apiSuccess {DateTime} tasks.start      Datetime of first Tasks's Time Interval's start_at
+     * @apiSuccess {DateTime} tasks.end        Datetime of last Tasks's Time Interval's end_at
+     * @apiSuccess {Total[]}  total            Array of total tasks time
+     * @apiSuccess {Integer}  total.time       Total time of tasks in seconds
+     * @apiSuccess {DateTime} total.start      Datetime of first Time Interval's start_at
+     * @apiSuccess {DateTime} total.end        DateTime of last Time Interval's end_at
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function task(Request $request): JsonResponse
     {
         $filters = $request->all();
         $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
         $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
-        $projectId = (int) $request->get('project_id')?: False;
-
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(),
-            $filters ?: []
-        );
+        $request->get('task_id') ? $filters['task_id'] = (int) $request->get('task_id') : False;
+        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
 
         $validator = Validator::make(
             $filters,
@@ -344,11 +440,10 @@ class TimeController extends ItemController
             );
         }
 
-        if ($projectId) {
-            $baseQuery = $baseQuery->whereHas('task', function($q) use ($projectId) {
-                $q->where('project_id', '=', $projectId);
-            });
-        }
+        $baseQuery = $this->applyQueryFilter(
+            $this->getQuery(),
+            $filters ?: []
+        );
 
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
@@ -418,24 +513,48 @@ class TimeController extends ItemController
     /**
      * Display time of user's single task.
      *
-     * @api {post} /api/v1/time/task-user
+     * @api {post} /api/v1/time/task-user TaskUser
+     * @apiParamExample {json} Request-Example:
+     *  {
+     *      "user_id":        1,
+     *      "task_id":        1,
+     *      "start_at":       [">=", "2005-01-01 00:00:00"],
+     *      "end_at":         ["<=", "2019-01-01 00:00:00"],
+     *      "count_mouse":    [">=", 30],
+     *      "count_keyboard": ["<=", 200],
+     *      "id":             [">", 1]
+     *  }
+     * @apiUse RelationsExample
      * @apiDescription Get time of user's single task
      * @apiVersion 0.1.0
      * @apiName GetTimeBySingleTaskAndUser
      * @apiGroup Time
      *
-     * @apiParam {Integer} [task_id] `QueryParam` TimeInterval's Task ID {required}
-     * @apiParam {Integer} [user_id] `QueryParam` TimeInterval's Task's User ID {required}
+     * @apiParam {Integer}  task_id                       TimeInterval's Task ID
+     * @apiParam {Integer}  user_id                       TimeInterval's Task's User ID
+     * @apiParam {DateTime} [start_at]       `QueryParam` TimeInterval Start DataTime
+     * @apiParam {DateTime} [end_at]         `QueryParam` TimeInterval End DataTime
+     * @apiParam {Integer}  [count_mouse]    `QueryParam` TimeInterval Count mouse
+     * @apiParam {Integer}  [count_keyboard] `QueryParam` TimeInterval Count keyboard
+     * @apiParam {Integer}  [id]             `QueryParam` TimeInterval ID
+     * @apiUse Relations
      *
-     * @apiSuccess (200) {array} array Total Time, Current Time
+     * @apiSuccess {DateTime} current_datetime Current datetime of server
+     * @apiSuccess {Integer}  id               Task's ID
+     * @apiSuccess {Integer}  user_id          Task's User's ID
+     * @apiSuccess {Integer}  time             Total time of task in seconds
+     * @apiSuccess {DateTime} start            Datetime of first Task's Time Interval's start_at
+     * @apiSuccess {DateTime} end              DateTime of last Task's Time Interval's end_at
      *
      * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function taskUser(Request $request): JsonResponse
     {
         $filters = $request->all();
+        $request->get('user_id') ? $filters['user_id'] = (int) $request->get('user_id') : False; 
+        $request->get('task_id') ? $filters['task_id'] = (int) $request->get('task_id') : False;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),
