@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {User} from "../../../models/user.model";
-import {Router, ActivatedRoute} from "@angular/router";
-import {UsersService} from "../users.service";
-import {ItemsEditComponent} from "../../items.edit.component";
-import {AllowedActionsService} from "../../roles/allowed-actions.service";
+import {User} from '../../../models/user.model';
+import {Router, ActivatedRoute} from '@angular/router';
+import {UsersService} from '../users.service';
+import {ItemsEditComponent} from '../../items.edit.component';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
 @Component({
     selector: 'app-users-edit',
@@ -19,8 +19,8 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
                 userService: UsersService,
                 activatedRoute: ActivatedRoute,
                 router: Router,
-                allowedService: AllowedActionsService,) {
-        super(api, userService, activatedRoute, router, allowedService)
+                allowedService: AllowedActionsService, ) {
+        super(api, userService, activatedRoute, router, allowedService);
     }
 
     prepareData() {
@@ -47,6 +47,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             'user_role_value': this.item.user_role_value,
             'active': this.item.active,
             'password': this.item.password,
-        }
+            'role_id': this.item.role_id,
+        };
     }
 }

@@ -39,13 +39,22 @@ class ActionsController extends ItemController
         return 'action';
     }
 
-    /**
-     * Get action list.
+     /**
+     * @api {get} /api/v1/actions/list List
+     * @apiDescription Get list of Actions
+     * @apiVersion 0.1.0
+     * @apiName GetActionList
+     * @apiGroup Action
+     *
+     * @apiSuccess (200) {Object[]} actions               Array of Action objects
+     * @apiSuccess (200) {Object}   actions.action        Action object
+     * @apiSuccess (200) {String}   actions.action.object Object of action
+     * @apiSuccess (200) {String}   actions.action.action Action of action
+     * @apiSuccess (200) {String}   actions.action.string Name of action
      *
      * @param Request $request
      *
      * @return JsonResponse
-     * @throws \Exception
      */
     public function list(Request $request): JsonResponse
     {

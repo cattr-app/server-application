@@ -1,3 +1,4 @@
+<p-growl [(value)]="msgs"></p-growl>
 <div class="container">
     <div class="row">
         <div class="col col-md-12">
@@ -18,6 +19,10 @@
                                     <input type="text" class="form-control" name="role-name" [(ngModel)]="item.name">
                                 </div>
                             </div>
+                            <h1>Rules</h1>
+                            <dual-list [sort]="keepSorted" [source]="sourceRules" [key]="key" [filter]="filter"
+                                       [display]="displayRules" [(destination)]="confirmedRules" [format]="format" [height]="height"></dual-list>
+                            <br>
                             <button type="submit" class="btn btn-primary">Create</button>
                         </form>
                     </div>

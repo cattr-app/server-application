@@ -1,9 +1,9 @@
 <p-growl [(value)]="msgs"></p-growl>
 <div class="container">
     <div class="row">
-        <div class="col col-md-12">
+        <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Edit role {{item.name}}</div>
+                <div class="panel-heading">Edit users of role {{item.name}}</div>
                 <div class="panel-body">
                     <a routerLink="/roles/list" title="Back">
                         <button class="btn btn-warning">
@@ -13,15 +13,6 @@
                     </a>
                     <div class="create-form">
                         <form (ngSubmit)="onSubmit()">
-                            <div class="form-group row">
-                                <label class="col-md-2">Role name</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="name" [(ngModel)]="item.name">
-                                </div>
-                            </div>
-                            <h1>Rules</h1>
-                            <dual-list [sort]="keepSorted" [source]="sourceRules" [key]="key" [filter]="filter"
-                                       [display]="displayRules" [(destination)]="confirmedRules" [format]="format" [height]="height"></dual-list>
                             <h1>Users</h1>
                             <dual-list [sort]="keepSorted" [source]="sourceUsers" [key]="key" [filter]="filter"
                                        [display]="displayUsers" [(destination)]="confirmedUsers" [format]="format" [height]="height"></dual-list>

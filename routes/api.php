@@ -61,6 +61,7 @@ Route::group([
     $router->post('/users/edit', 'Api\v1\UserController@edit');
     $router->any('/users/show', 'Api\v1\UserController@show');
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
+    $router->post('/users/bulk/edit', 'Api\v1\UserController@bulkEdit');
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
@@ -96,4 +97,5 @@ Route::group([
     $router->any('/allowed/list', 'Api\v1\AllowedController@list');
 
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
+    $router->post('/rules/bulk/edit', 'Api\v1\RulesController@bulkEdit');
 });

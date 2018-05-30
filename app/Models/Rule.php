@@ -101,6 +101,7 @@ class Rule extends Model
                 'edit' => __('User edit'),
                 'show' => __('User show'),
                 'remove' => __('User remove'),
+                'bulk' => __('User multiple edit'),
             ],
             'actions' => [
                 'list' => __('Actions list'),
@@ -110,6 +111,7 @@ class Rule extends Model
             ],
             'rules' => [
                 'edit' => __('Rules edit'),
+                'bulk' => __('Rules multiple edit'),
             ],
         ]);
     }

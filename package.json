@@ -21,6 +21,7 @@
     "@angular/platform-browser": "^5.2.0",
     "@angular/platform-browser-dynamic": "^5.2.0",
     "@angular/router": "^5.2.0",
+    "angular-dual-listbox": "^4.7.0",
     "apidoc": "^0.17.6",
     "bootstrap-sass": "^3.3.7",
     "core-js": "^2.4.1",

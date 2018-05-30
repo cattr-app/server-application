@@ -1,17 +1,19 @@
 import {Component, OnInit, TemplateRef} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {Role} from "../../../models/role.model";
-import {Rule} from "../../../models/rule.model";
-import {Action} from "../../../models/action.model";
-import {RolesService} from "../roles.service";
-import {RulesService} from "../rules.service";
-import {ActionsService} from "../actions.service";
-import {AllowedActionsService} from "../allowed-actions.service";
+import {Role} from '../../../models/role.model';
+import {Rule} from '../../../models/rule.model';
+import {Action} from '../../../models/action.model';
+import {RolesService} from '../roles.service';
+import {RulesService} from '../rules.service';
+import {ActionsService} from '../actions.service';
+import {AllowedActionsService} from '../allowed-actions.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import {Router} from "@angular/router";
-import {ItemsListComponent} from "../../items.list.component";
-import {Task} from "../../../models/task.model";
+import {Router} from '@angular/router';
+import {ItemsListComponent} from '../../items.list.component';
+import {Task} from '../../../models/task.model';
+import {User} from '../../../models/user.model';
+
 
 
 
@@ -24,25 +26,29 @@ import {Task} from "../../../models/task.model";
 export class RolesListComponent extends ItemsListComponent implements OnInit {
 
     actionsArray: Action[] = [];
-    p: number = 1;
+    user: User;
+    p = 1;
 
     ngOnInit() {
         super.ngOnInit();
         this.actionsService.getItems(this.ActionsUpdate.bind(this));
+        this.UserUpdate();
     }
 
     ActionsUpdate(result) {
         this.actionsArray = result;
-        console.log("items:");
-        console.log(result);
+    }
+
+    UserUpdate() {
+        this.user = this.api.getUser();
     }
 
     ruleName(rule: Rule) {
 
 
-        for(let action of this.actionsArray) {
+        for (const action of this.actionsArray) {
 
-            if(rule.object == action.object &&
+            if (rule.object == action.object &&
                 rule.action == action.action) {
                 return action.name;
             }
@@ -62,7 +68,7 @@ export class RolesListComponent extends ItemsListComponent implements OnInit {
 
 
     editCallback(result) {
-        console.log("Updated");
+        console.log('Updated');
     }
 
 

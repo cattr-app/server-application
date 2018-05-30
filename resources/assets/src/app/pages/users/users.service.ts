@@ -43,6 +43,17 @@ export class UsersService extends ItemsService {
             itemFromApi.created_at,
             itemFromApi.updated_at,
             itemFromApi.deleted_at
-        )
+        );
+    }
+
+    editItems(items, callback, errorCallback ?: null) {
+        this.api.send(
+            this.getApiPath() + '/bulk/edit',
+            {'users': items},
+            (result) => {
+                callback(result);
+            },
+            errorCallback ? errorCallback : this.api.errorCallback.bind(this)
+        );
     }
 }

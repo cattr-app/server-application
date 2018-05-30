@@ -15,8 +15,7 @@ export class ActionsService extends ItemsService {
     }
 
     convertFromApi(itemFromApi) {
-        console.log(itemFromApi);
-        return new Action(itemFromApi)
+        return new Action(itemFromApi);
     }
 
 }

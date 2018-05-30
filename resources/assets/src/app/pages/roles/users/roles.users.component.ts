@@ -9,47 +9,38 @@ import {DualListComponent} from 'angular-dual-listbox';
 
 import {ApiService} from '../../../api/api.service';
 import {RolesService} from '../roles.service';
-import {RulesService} from '../rules.service';
 import {UsersService} from '../../users/users.service';
-import {ActionsService} from '../actions.service';
 import {AllowedActionsService} from '../allowed-actions.service';
 
 
 @Component({
-    selector: 'app-roles-edit',
-    templateUrl: './roles.edit.component.html',
+    selector: 'app-roles-users',
+    templateUrl: './roles.users.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class RolesEditComponent extends ItemsEditComponent implements OnInit {
+export class RolesUsersComponent extends ItemsEditComponent implements OnInit {
 
     public item: Role = new Role();
     user: User;
-    sourceRules: any = [];
-    confirmedRules: any = [];
     sourceUsers: any = [];
     confirmedUsers: any = [];
     key = 'id';
-    displayRules: any = 'name';
     displayUsers: any = 'full_name';
     keepSorted = true;
     filter = true;
     height = '250px';
     format: any = DualListComponent.DEFAULT_FORMAT;
     differUsers: any;
-    differRules: any;
 
     constructor(api: ApiService,
                 roleService: RolesService,
                 activatedRoute: ActivatedRoute,
                 router: Router,
                 protected allowedService: AllowedActionsService,
-                protected actionsService: ActionsService,
-                protected ruleService: RulesService,
                 protected usersService: UsersService,
                 differs: IterableDiffers) {
         super(api, roleService, activatedRoute, router, allowedService);
         this.differUsers = differs.find([]).create(null);
-        this.differRules = differs.find([]).create(null);
     }
 
     prepareData() {
@@ -61,16 +52,11 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
     ngOnInit() {
         super.ngOnInit();
         this.usersService.getItems(this.UsersUpdate.bind(this));
-        this.actionsService.getItems(this.ActionsUpdate.bind(this));
-        this.UserUpdate();
     }
 
     onSubmit() {
-        super.onSubmit();
         const id = this.id;
-        const rules = [];
         const users = [];
-        const RulesChanges = this.differRules.diff(this.confirmedRules);
         const UserChanges = this.differUsers.diff(this.confirmedUsers);
 
         if (UserChanges) {
@@ -87,21 +73,6 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
         if (users.length > 0) {
             this.usersService.editItems(users, this.editBulkCallback.bind(this, 'Users'));
         }
-
-        if (RulesChanges) {
-            RulesChanges.forEachAddedItem((record) => {
-                record.item.allow = 1;
-                rules.push(record.item);
-            });
-            RulesChanges.forEachRemovedItem((record) => {
-                record.item.allow = 0;
-                rules.push(record.item);
-            });
-        }
-
-        if (rules.length > 0) {
-            this.ruleService.editItems(id, rules, this.editBulkCallback.bind(this, 'Rules'), this.errorCallback.bind(this));
-        }
     }
 
     editBulkCallback(name, results) {
@@ -114,7 +85,7 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
                         reason += ' ' + msg.reason[element][0];
                     });
                 } else {
-                   reason = msg.reason;
+                    reason = msg.reason;
                 }
                 errors.push({'error': msg.error, 'reason': reason});
             }
@@ -133,34 +104,12 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
         this.msgs.push({severity: 'error', summary: result.error.error, detail: result.error.reason});
     }
 
-    UserUpdate() {
-        this.user = this.api.getUser();
-        if (this.id === this.user.role_id) {
-            this.router.navigateByUrl('/roles/list');
-        }
-    }
-
-    ActionsUpdate(result) {
-        for (const item of result) {
-            item['id'] = this.sourceRules.length;
-            this.sourceRules.push(item);
-        }
-        this.allowedService.getItems(this.AllowedUpdate.bind(this), {'role_id': this.id});
-    }
-
-    AllowedUpdate(result) {
-        this.confirmedRules = this.sourceRules.filter(function (action) {
-            return result.some((item) => (item.object === action.object && item.action === action.action));
-        });
-        this.differRules.diff(this.confirmedRules);
-    }
-
     UsersUpdate(result) {
         this.sourceUsers = result;
         const id = this.id;
         this.confirmedUsers = this.sourceUsers.filter(function (user) {
-                return user.role_id === id;
-            });
+            return user.role_id === id;
+        });
         this.differUsers.diff(this.confirmedUsers);
     }
 }

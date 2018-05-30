@@ -33,7 +33,7 @@ export abstract class ItemsCreateComponent implements OnInit {
         );
     }
 
-    createCallback(result) {
+    public createCallback(result) {
         console.log(result);
         this.router.navigateByUrl(this.itemService.getApiPath() + '/list');
     }

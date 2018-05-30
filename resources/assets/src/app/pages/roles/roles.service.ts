@@ -15,8 +15,7 @@ export class RolesService extends ItemsService {
     }
 
     convertFromApi(itemFromApi) {
-        console.log(itemFromApi);
-        return new Role(itemFromApi)
+        return new Role(itemFromApi);
     }
 
 }

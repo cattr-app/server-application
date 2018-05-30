@@ -5,6 +5,8 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use App\User;
+use Filter;
+use Auth;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
@@ -89,6 +91,28 @@ class Role extends Model
                 }
             }
         }
+    }
+
+    /**
+     * @param $rule_id
+     * @param $object
+     * @param $action
+     * @param $allow
+     * @return bool
+     */
+    public static function updateAllow($rule_id, $object, $action, $allow): bool
+    {
+        $rule = Rule::where([
+            'role_id' => $rule_id,
+            'object' => $object,
+            'action' => $action,
+        ])->first();
+
+        throw_if(!$rule, new \Exception('rule does not exist', 400));
+        throw_if(Auth::user()->role_id === $rule->role_id, new \Exception('you cannot change your own privileges', 403));
+
+        $rule->allow = $allow;
+        return $rule->save();
     }
 
     /**
