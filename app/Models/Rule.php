@@ -81,7 +81,7 @@ class Rule extends Model
                 'remove' => __('Screenshot remove'),
                 'dashboard' => __('Screenshot list at dashboard'),
             ],
-            'timeintervals' => [
+            'time-intervals' => [
                 'list' => __('Time interval list'),
                 'create' => __('Time interval create'),
                 'edit' => __('Time interval edit'),
@@ -101,7 +101,7 @@ class Rule extends Model
                 'edit' => __('User edit'),
                 'show' => __('User show'),
                 'remove' => __('User remove'),
-                'bulk' => __('User multiple edit'),
+                'bulk-edit' => __('User multiple edit'),
             ],
             'actions' => [
                 'list' => __('Actions list'),
@@ -111,7 +111,7 @@ class Rule extends Model
             ],
             'rules' => [
                 'edit' => __('Rules edit'),
-                'bulk' => __('Rules multiple edit'),
+                'bulk-edit' => __('Rules multiple edit'),
             ],
         ]);
     }

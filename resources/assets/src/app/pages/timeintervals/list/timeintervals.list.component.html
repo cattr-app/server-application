@@ -4,7 +4,7 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Time Intervals</div>
                 <div class="panel-body">
-                    <a *ngIf="can('/timeintervals/create')" routerLink="/timeintervals/create" class="btn btn-success" title="Add new task">
+                    <a *ngIf="can('/time-intervals/create')" routerLink="/time-intervals/create" class="btn btn-success" title="Add new task">
                         <i class="fa fa-plus" aria-hidden="true"></i> Add New
                     </a>
                     <br/>
@@ -30,19 +30,19 @@
                                 <td>{{timeinterval.end_at}}</td>
 
                                 <td>
-                                    <a *ngIf="can('/timeintervals/show')" [routerLink]="['/timeintervals/show', timeinterval.id]" title="View time interval">
+                                    <a *ngIf="can('/time-intervals/show')" [routerLink]="['/time-intervals/show', timeinterval.id]" title="View time interval">
                                         <button class="btn btn-info btn-sm">
                                             <i class="fa fa-eye" aria-hidden="true"></i>
                                             View
                                         </button>
                                     </a>
-                                    <a *ngIf="can('/timeintervals/edit')" [routerLink]="['/timeintervals/edit', timeinterval.id]" title="Edit time interval">
+                                    <a *ngIf="can('/time-intervals/edit')" [routerLink]="['/time-intervals/edit', timeinterval.id]" title="Edit time interval">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
                                             Edit
                                         </button>
                                     </a>
-                                    <a *ngIf="can('/timeintervals/remove')" (click)="openRemoveItemModalWindow(template, timeinterval.id)" title="Delete time interval">
+                                    <a *ngIf="can('/time-intervals/remove')" (click)="openRemoveItemModalWindow(template, timeinterval.id)" title="Delete time interval">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
                                             Delete

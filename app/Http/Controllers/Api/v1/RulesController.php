@@ -54,10 +54,11 @@ class RulesController extends ItemController
      * @apiName EditRule
      * @apiGroup Rule
      *
-     * @apiParam {Integer} role_id Rule's Role's ID
+     * @apiParam {Integer} role_id Role's ID
      * @apiParam {String}  object  Object name
      * @apiParam {String}  action  Action name
-
+     * @apiParam {Boolean} allow   Allow status
+     *
      * @apiSuccess {String} message OK
      *
      * @param Request $request
@@ -104,7 +105,7 @@ class RulesController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/rules/bulk/edit bulkEdit
+     * @api {post} /api/v1/rules/bulk-edit bulkEdit
      * @apiDescription Editing Multiple Rules
      * @apiVersion 0.1.0
      * @apiName bulkEditRules
@@ -113,8 +114,9 @@ class RulesController extends ItemController
      * @apiParam {Object[]} rules                Array of objects Rule
      * @apiParam {Object}   rules.object         Rule object
      * @apiParam {Integer}  rules.object.role_id Rule's Role's ID
-     * @apiParam {String}   rules.object.object  Object name
-     * @apiParam {String}   rules.object.action  Action name
+     * @apiParam {String}   rules.object.object  Rule's object name
+     * @apiParam {String}   rules.object.action  Rule's action name
+     * @apiParam {Boolean}  rules.object.allow   Rule's allow status
      *
      * @apiSuccess {String[]}  messages         Array of string response
      * @apiSuccess {String}    messages.message  OK

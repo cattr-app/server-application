@@ -32,7 +32,7 @@ export class RulesService extends ItemsService {
         }
 
         this.api.send(
-            this.getApiPath() + '/bulk/edit',
+            this.getApiPath() + '/bulk-edit',
             {'rules': data},
             (result) => {
                 callback(result);

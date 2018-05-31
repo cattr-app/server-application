@@ -12,7 +12,7 @@ export class TimeIntervalsService extends ItemsService {
     }
 
     getApiPath() {
-        return 'timeintervals';
+        return 'time-intervals';
     }
 
     convertFromApi(itemFromApi) {

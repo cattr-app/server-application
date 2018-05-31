@@ -23,7 +23,9 @@ class RoleCheck
 
         $matches = [];
 
-        if(Auth::check() && preg_match('/^api\/v1\/(\w+)\/(\w+)/', $request->path(), $matches)) {
+        $w = '[a-zA-Z\\-_0-9]+';
+
+        if(Auth::check() && preg_match("#^api/v1/({$w})/({$w})#", $request->path(), $matches)) {
             // is api request
             $object = $matches[1];
             $action = $matches[2];

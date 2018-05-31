@@ -7,7 +7,7 @@ import {ItemsListComponent} from '../../items.list.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
 @Component({
-    selector: 'app-timeintervals-list',
+    selector: 'app-timentervals-list',
     templateUrl: './timeintervals.list.component.html',
     styleUrls: ['../../items.component.scss']
 })

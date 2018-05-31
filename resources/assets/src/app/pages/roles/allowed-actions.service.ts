@@ -33,13 +33,12 @@ export class AllowedActionsService extends ItemsService {
         return this.allowedActions;
     }
 
-    //is user can do this actions
+    // is user can do this actions
     can(action: string): boolean {
+        const re  = new RegExp('([a-zA-Z\-\_0-9]+)\/([a-zA-Z\-\_0-9]+)');
+        const matches = re.exec(action);
 
-        let regexp = /(\w+)\/(\w+)/;
-        let matches = regexp.exec(action);
-
-        if(matches === null) {
+        if (matches === null) {
             return true;
         }
 
@@ -47,21 +46,18 @@ export class AllowedActionsService extends ItemsService {
             return false;
         }
 
-        let object = matches[1];
-        let objAction = matches[2];
+        const object = matches[1];
+        const  objAction = matches[2];
 
+        for (const allowedAction of this.allowedActions) {
 
-        for(let allowedAction of this.allowedActions) {
-
-            if(allowedAction.object == object &&
+            if (allowedAction.object == object &&
                 allowedAction.action == objAction) {
                 return true;
             }
         }
         return false;
     }
-
-
 
     updateAllowedList() {
         this.getItems(this.setupAllowedList.bind(this));

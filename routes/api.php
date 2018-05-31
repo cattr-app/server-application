@@ -61,7 +61,7 @@ Route::group([
     $router->post('/users/edit', 'Api\v1\UserController@edit');
     $router->any('/users/show', 'Api\v1\UserController@show');
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
-    $router->post('/users/bulk/edit', 'Api\v1\UserController@bulkEdit');
+    $router->post('/users/bulk-edit', 'Api\v1\UserController@bulkEdit');
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
@@ -73,11 +73,11 @@ Route::group([
     $router->post('/screenshots/remove', 'Api\v1\ScreenshotController@destroy');
 
     //Time Intervals routes
-    $router->any('/timeintervals/list', 'Api\v1\TimeIntervalController@index');
-    $router->post('/timeintervals/create', 'Api\v1\TimeIntervalController@create');
-    $router->post('/timeintervals/edit', 'Api\v1\TimeIntervalController@edit');
-    $router->any('/timeintervals/show', 'Api\v1\TimeIntervalController@show');
-    $router->post('/timeintervals/remove', 'Api\v1\TimeIntervalController@destroy');
+    $router->any('/time-intervals/list', 'Api\v1\TimeIntervalController@index');
+    $router->post('/time-intervals/create', 'Api\v1\TimeIntervalController@create');
+    $router->post('/time-intervals/edit', 'Api\v1\TimeIntervalController@edit');
+    $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
+    $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
 
     //Time routes
     $router->any('/time/total', 'Api\v1\TimeController@total');
@@ -97,5 +97,5 @@ Route::group([
     $router->any('/allowed/list', 'Api\v1\AllowedController@list');
 
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
-    $router->post('/rules/bulk/edit', 'Api\v1\RulesController@bulkEdit');
+    $router->post('/rules/bulk-edit', 'Api\v1\RulesController@bulkEdit');
 });

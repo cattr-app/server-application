@@ -9,7 +9,7 @@ const routes: Routes = [
     {path: 'users', loadChildren: './pages/users/users.module#UsersModule'},
     {path: 'roles', loadChildren: './pages/roles/roles.module#RolesModule'},
     {path: 'screenshots', loadChildren: './pages/screenshots/screenshots.module#ScreenshotsModule'},
-    {path: 'timeintervals', loadChildren: './pages/timeintervals/timeintervals.module#TimeIntervalsModule'},
+    {path: 'time-intervals', loadChildren: './pages/timeintervals/timeintervals.module#TimeIntervalsModule'},
     {path: 'auth', loadChildren: './auth/auth.module#AuthModule'},
     {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
     {path: 'dashboard', loadChildren: './pages/dashboard/dashboard.module#DashboardModule'},

@@ -19,9 +19,11 @@
                                     <input type="text" class="form-control" name="role-name" [(ngModel)]="item.name">
                                 </div>
                             </div>
-                            <h1>Rules</h1>
-                            <dual-list [sort]="keepSorted" [source]="sourceRules" [key]="key" [filter]="filter"
-                                       [display]="displayRules" [(destination)]="confirmedRules" [format]="format" [height]="height"></dual-list>
+                            <div *ngIf="can('/rules/bulk-edit')" class="col-12">
+                                <h1>Rules</h1>
+                                <dual-list [sort]="keepSorted" [source]="sourceRules" [key]="key" [filter]="filter"
+                                           [display]="displayRules" [(destination)]="confirmedRules" [format]="format" [height]="height"></dual-list>
+                            </div>
                             <br>
                             <button type="submit" class="btn btn-primary">Create</button>
                         </form>

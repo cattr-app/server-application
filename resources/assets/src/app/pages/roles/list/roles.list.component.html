@@ -29,7 +29,7 @@
                                                 View
                                             </button>
                                         </a>
-                                        <a *ngIf="can('/users/bulk') && can('/users/edit')"  [routerLink]="['/roles/users', role.id]" title="Assign users">
+                                        <a *ngIf="can('/users/bulk-edit')"  [routerLink]="['/roles/users', role.id]" title="Assign users">
                                             <button class="btn btn-primary btn-sm">
                                                 <i class="fa fa-users" aria-hidden="true"></i>
                                                 Assign users

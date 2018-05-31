@@ -202,37 +202,37 @@ class UserController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/users/bulk/edit bulkEdit
+     * @api {post} /api/v1/users/bulk-edit bulkEdit
      * @apiDescription Editing Multiple Users
      * @apiVersion 0.1.0
      * @apiName bulkEditUsers
-     * @apiGroup Rule
+     * @apiGroup User
      *
-     * @apiParam {Object[]} users                               Array of objects User
-     * @apiParam {Object}   users.object                        User object
-     * @apiParam {Integer}  users.object.id                     User ID
-     * @apiParam {String}   users.object.full_name              Full Name
-     * @apiParam {String}   users.object.first_name             First Name
-     * @apiParam {String}   users.object.last_name              Last Name
-     * @apiParam {String}   users.object.email                  E-mail
-     * @apiParam {String}   users.object.url                    ???
-     * @apiParam {Integer}  users.object.company_id             ???
-     * @apiParam {String}   users.object.level                  Role access level
-     * @apiParam {Boolean}  users.object.payroll_access         ???
-     * @apiParam {Boolean}  users.object.billing_access         ???
-     * @apiParam {String}   users.object.avatar                 Avatar image url/uri
-     * @apiParam {Boolean}  users.object.screenshots_active     Screenshots should be captured
-     * @apiParam {Boolean}  users.object.manual_time            Allow manual time edit
-     * @apiParam {Boolean}  users.object.permanent_tasks        ???
-     * @apiParam {Boolean}  users.object.computer_time_popup    ???
-     * @apiParam {Boolean}  users.object.poor_time_popup        ???
-     * @apiParam {Boolean}  users.object.blur_screenshots       ???
-     * @apiParam {Boolean}  users.object.web_and_app_monitoring ???
-     * @apiParam {Boolean}  users.object.webcam_shots           ???
-     * @apiParam {Integer}  users.object.screenshots_interval   Screenshots creation interval (seconds)
-     * @apiParam {String}   users.object.user_role_value        ???
-     * @apiParam {Boolean}  users.object.active                 User is active
-     * @apiParam {Integer}  [users.object.role_id]              User's Role ID
+     * @apiParam {Object[]} users                                 Array of objects User
+     * @apiParam {Object}   users.object                          User object
+     * @apiParam {Integer}  users.object.id                       User ID
+     * @apiParam {String}   users.object.full_name                Full Name
+     * @apiParam {String}   [users.object.first_name]             First Name
+     * @apiParam {String}   [users.object.last_name]              Last Name
+     * @apiParam {String}   users.object.email                    E-mail
+     * @apiParam {String}   [users.object.url]                    ???
+     * @apiParam {Integer}  [users.object.company_id]             ???
+     * @apiParam {String}   [users.object.level]                  Role access level
+     * @apiParam {Boolean}  [users.object.payroll_access]         ???
+     * @apiParam {Boolean}  [users.object.billing_access]         ???
+     * @apiParam {String}   [users.object.avatar]                 Avatar image url/uri
+     * @apiParam {Boolean}  [users.object.screenshots_active]     Screenshots should be captured
+     * @apiParam {Boolean}  [users.object.manual_time]            Allow manual time edit
+     * @apiParam {Boolean}  [users.object.permanent_tasks]        ???
+     * @apiParam {Boolean}  [users.object.computer_time_popup]    ???
+     * @apiParam {Boolean}  [users.object.poor_time_popup]        ???
+     * @apiParam {Boolean}  [users.object.blur_screenshots]       ???
+     * @apiParam {Boolean}  [users.object.web_and_app_monitoring] ???
+     * @apiParam {Boolean}  [users.object.webcam_shots]           ???
+     * @apiParam {Integer}  [users.object.screenshots_interval]   Screenshots creation interval (seconds)
+     * @apiParam {String}   [users.object.user_role_value]        ???
+     * @apiParam {Boolean}  users.object.active                   User is active
+     * @apiParam {Integer}  [users.object.role_id]                User's Role ID
      *
      * @apiSuccess {Object[]} message        Array of User object
      * @apiSuccess {Object}   message.object User object

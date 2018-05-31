@@ -48,7 +48,7 @@ export class UsersService extends ItemsService {
 
     editItems(items, callback, errorCallback ?: null) {
         this.api.send(
-            this.getApiPath() + '/bulk/edit',
+            this.getApiPath() + '/bulk-edit',
             {'users': items},
             (result) => {
                 callback(result);

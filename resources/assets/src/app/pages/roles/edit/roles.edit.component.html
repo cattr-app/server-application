@@ -19,12 +19,16 @@
                                     <input type="text" class="form-control" name="name" [(ngModel)]="item.name">
                                 </div>
                             </div>
-                            <h1>Rules</h1>
-                            <dual-list [sort]="keepSorted" [source]="sourceRules" [key]="key" [filter]="filter"
-                                       [display]="displayRules" [(destination)]="confirmedRules" [format]="format" [height]="height"></dual-list>
-                            <h1>Users</h1>
-                            <dual-list [sort]="keepSorted" [source]="sourceUsers" [key]="key" [filter]="filter"
-                                       [display]="displayUsers" [(destination)]="confirmedUsers" [format]="format" [height]="height"></dual-list>
+                            <div *ngIf="can('/rules/bulk-edit')" class="col-12">
+                                <h1>Rules</h1>
+                                <dual-list [sort]="keepSorted" [source]="sourceRules" [key]="key" [filter]="filter"
+                                           [display]="displayRules" [(destination)]="confirmedRules" [format]="format" [height]="height"></dual-list>
+                            </div>
+                            <div *ngIf="can('/users/bulk-edit')" class="col-12">
+                                <h1>Users</h1>
+                                <dual-list [sort]="keepSorted" [source]="sourceUsers" [key]="key" [filter]="filter"
+                                           [display]="displayUsers" [(destination)]="confirmedUsers" [format]="format" [height]="height"></dual-list>
+                            </div>
                             <br>
                             <button type="submit" class="btn btn-primary">Update</button>
                         </form>

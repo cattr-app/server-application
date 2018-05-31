@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Model;
  *
  * @package App\Http\Controllers\Api\v1
  */
-abstract class ItemController extends Controller
+abstract class  ItemController extends Controller
 {
     /**
      * Returns current item's class name
@@ -60,6 +60,7 @@ abstract class ItemController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
+        /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
             $this->applyQueryFilter(
@@ -244,6 +245,12 @@ abstract class ItemController extends Controller
 
         $query = new Builder($cls::getQuery());
         $query->setModel(new $cls());
+
+        $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls));
+
+        if ($softDelete) {
+            $query->whereNull('deleted_at');
+        }
 
         if ($withRelations) {
             foreach ($this->getQueryWith() as $with) {
