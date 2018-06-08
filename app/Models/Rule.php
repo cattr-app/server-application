@@ -51,19 +51,19 @@ class Rule extends Model
             'projects' => [
                 'list' => __('Project list'),
                 'create' => __('Project create'),
-                'view' => __('Project view'),
                 'show' => __('Project show'),
                 'edit' => __('Project edit'),
                 'remove' => __('Project remove'),
+                'full_access' => __('Project full access'),
             ],
             'tasks' => [
                 'list' => __('Task list'),
                 'dashboard' => __('Task list at dashboard'),
                 'create' => __('Task create'),
-                'view' => __('Task view'),
                 'show' => __('Task show'),
                 'edit' => __('Task edit'),
                 'remove' => __('Task remove'),
+                'full_access' => __('Tasks full access'),
             ],
             'roles' => [
                 'list' => __('Role list'),
@@ -71,6 +71,8 @@ class Rule extends Model
                 'edit' => __('Role edit'),
                 'show' => __('Role show'),
                 'remove' => __('Role remove'),
+                'allowed-rules' => __('Role allowed rule list'),
+                'full_access' => __('Roles full access'),
             ],
             'screenshots' => [
                 'list' => __('Screenshot list'),
@@ -80,6 +82,7 @@ class Rule extends Model
                 'get' => __('Screenshot get by interval id'),
                 'remove' => __('Screenshot remove'),
                 'dashboard' => __('Screenshot list at dashboard'),
+                'full_access' => __('Screenshots full access'),
             ],
             'time-intervals' => [
                 'list' => __('Time interval list'),
@@ -87,6 +90,7 @@ class Rule extends Model
                 'edit' => __('Time interval edit'),
                 'show' => __('Time interval show'),
                 'remove' => __('Time interval remove'),
+                'full_access' => __('Time intervals full access'),
             ],
             'time' => [
                 'total' => __('Time total'),
@@ -94,6 +98,7 @@ class Rule extends Model
                 'tasks' => __('Time by tasks'),
                 'task' => __('Time by single task'),
                 'task-user' => __('Time by single task and user'),
+                'full_access' => __('Time full access'),
             ],
             'users' => [
                 'list' => __('User list'),
@@ -102,12 +107,11 @@ class Rule extends Model
                 'show' => __('User show'),
                 'remove' => __('User remove'),
                 'bulk-edit' => __('User multiple edit'),
+                'relations' => __('Attached users list'),
+                'full_access' => __('Users full access'),
             ],
             'actions' => [
                 'list' => __('Actions list'),
-            ],
-            'allowed' => [
-                'list' => __('Allowed actions list'),
             ],
             'rules' => [
                 'edit' => __('Rules edit'),

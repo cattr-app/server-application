@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use Auth;
 use Carbon\Carbon;
 use Filter;
+use Illuminate\Database\Eloquent\Builder;
 use Validator;
 use App\Models\TimeInterval;
 use Illuminate\Http\JsonResponse;
@@ -66,7 +68,7 @@ class TimeController extends ItemController
      * @apiParamExample {json} Simple-Request-Example:
      *  {
      *      "user_id":        1,
-     *      "task_id":        [1,2,3],
+     *      "task_id":        ["=", [1,2,3]],
      *      "project_id":     [">", 1],
      *      "start_at":       "2005-01-01 00:00:00",
      *      "end_at":         "2019-01-01 00:00:00",
@@ -151,7 +153,7 @@ class TimeController extends ItemController
      * @apiParamExample {json} Request-Example:
      *  {
      *      "user_id":        1,
-     *      "task_id":        [1,2,3],
+     *      "task_id":        ["=", [1,2,3]],
      *      "project_id":     ["<", 2],
      *      "start_at":       "2005-01-01 00:00:00",
      *      "end_at":         "2019-01-01 00:00:00",
@@ -250,11 +252,11 @@ class TimeController extends ItemController
      * @api {post} /api/v1/time/tasks Tasks
      * @apiParamExample {json} Request-Example:
      *  {
-     *      "user_id":    1,
-     *      "task_id":    [">", 1],
-     *      "project_id": 2,
-     *      "start_at":   "2005-01-01 00:00:00",
-     *      "end_at":     "2019-01-01 00:00:00",
+     *      "user_id":        1,
+     *      "task_id":        [">", 1],
+     *      "project_id":     2,
+     *      "start_at":       "2005-01-01 00:00:00",
+     *      "end_at":         "2019-01-01 00:00:00",
      *      "count_mouse":    [">=", 30],
      *      "count_keyboard": ["<=", 200],
      *      "id":             [">", 1]
@@ -615,5 +617,33 @@ class TimeController extends ItemController
             $this->getEventUniqueName('answer.success.item.list'),
             $response
         ));
+    }
+
+    /**
+     * @param bool $withRelations
+     *
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true): Builder
+    {
+        $query = parent::getQuery($withRelations);
+
+        $full_access = collect(Auth::user()->role->rules)
+            ->whereStrict('object', 'time')
+            ->whereStrict('action', 'full_access')
+            ->pluck('allow')
+            ->pop();
+
+        if (!$full_access) {
+            $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
+                return collect($val->id);
+            });
+            $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
+                return collect($val->timeIntervals)->pluck('id');
+            });
+            $time_intervals_id = collect([$user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
+            $query->whereIn('time_intervals.id', $time_intervals_id);
+        }
+        return $query;
     }
 }

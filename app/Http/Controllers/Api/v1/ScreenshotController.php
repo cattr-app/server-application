@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Screenshot;
+use Auth;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Filter;
@@ -51,20 +53,20 @@ class ScreenshotController extends ItemController
      * @apiName GetScreenshotList
      * @apiGroup Screenshot
      *
-     * @apiParam {Integer} [id] `QueryParam` Screenshot ID
-     * @apiParam {Integer} [time_interval_id] `QueryParam` Screenshot's Time Interval ID
-     * @apiParam {Integer} [user_id] `QueryParam` Screenshot's User ID
-     * @apiParam {String} [path] `QueryParam` Image path URI
-     * @apiParam {DateTime} [created_at] `QueryParam` Screenshot Creation DateTime
-     * @apiParam {DateTime} [updated_at] `QueryParam` Last Screenshot data update DataTime
-     * @apiParam {DateTime} [deleted_at] `QueryParam` When Screenshot was deleted (null if not)
+     * @apiParam {Integer}  [id]               `QueryParam` Screenshot ID
+     * @apiParam {Integer}  [time_interval_id] `QueryParam` Screenshot's Time Interval ID
+     * @apiParam {Integer}  [user_id]          `QueryParam` Screenshot's User ID
+     * @apiParam {String}   [path]             `QueryParam` Image path URI
+     * @apiParam {DateTime} [created_at]       `QueryParam` Screenshot Creation DateTime
+     * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
+     * @apiParam {DateTime} [deleted_at]       `QueryParam` When Screenshot was deleted (null if not)
      *
      * @apiSuccess (200) {Screenshot[]} ScreenshotList array of Screenshot objects
      */
     public function index(Request $request): JsonResponse
     {
         $filters = $request->all();
-        (int) $request->get('user_id') ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
+        $request->get('user_id') ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),
@@ -99,7 +101,7 @@ class ScreenshotController extends ItemController
     public function create(Request $request): JsonResponse
     {
         $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
-        $timeIntervalId = (int) $request->get('time_interval_id');
+        $timeIntervalId = is_int($request->get('time_interval_id')) ? $request->get('time_interval_id') : null;
 
         $requestData = [
             'time_interval_id' => $timeIntervalId,
@@ -250,5 +252,33 @@ class ScreenshotController extends ItemController
             Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
             200
         );
+    }
+
+    /**
+     * @param bool $withRelations
+     *
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true): Builder
+    {
+        $query = parent::getQuery($withRelations);
+
+        $full_access = collect(Auth::user()->role->rules)
+            ->whereStrict('object', 'screenshots')
+            ->whereStrict('action', 'full_access')
+            ->pluck('allow')
+            ->pop();
+
+        if (!$full_access) {
+            $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
+                return collect($val->id);
+            });
+            $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
+                return collect($val->timeIntervals)->pluck('id');
+            });
+            $time_intervals_id = collect([$user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
+            $query->whereIn('screenshots.time_interval_id', $time_intervals_id);
+        }
+        return $query;
     }
 }

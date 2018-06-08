@@ -46,10 +46,6 @@ class QueryHelper
 
                 $relations[$domain][$filterParam] = $param;
             } else {
-//                if ($key !== "user_id") {
-//                    echo var_dump($relations);
-//                    die();
-//                }
                 if (Schema::hasColumn($table, $key)) {
                     [$operator, $value] = \is_array($param) ? $param : ['=', $param];
 

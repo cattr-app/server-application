@@ -118,8 +118,8 @@ class RulesController extends ItemController
      * @apiParam {String}   rules.object.action  Rule's action name
      * @apiParam {Boolean}  rules.object.allow   Rule's allow status
      *
-     * @apiSuccess {String[]}  messages         Array of string response
-     * @apiSuccess {String}    messages.message  OK
+     * @apiSuccess {String[]} messages         Array of string response
+     * @apiSuccess {String}   messages.message OK
      *
      * @param Request $request
      *

@@ -62,6 +62,7 @@ Route::group([
     $router->any('/users/show', 'Api\v1\UserController@show');
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
     $router->post('/users/bulk-edit', 'Api\v1\UserController@bulkEdit');
+    $router->post('/users/relations', 'Api\v1\UserController@relations');
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
@@ -86,15 +87,15 @@ Route::group([
     $router->any('/time/task', 'Api\v1\TimeController@task');
     $router->any('/time/task-user', 'Api\v1\TimeController@taskUser');
 
-    //role routes
+    //Role routes
     $router->any('/roles/list', 'Api\v1\RolesController@index');
     $router->post('/roles/create', 'Api\v1\RolesController@create');
     $router->post('/roles/edit', 'Api\v1\RolesController@edit');
     $router->any('/roles/show', 'Api\v1\RolesController@show');
     $router->post('/roles/remove', 'Api\v1\RolesController@destroy');
+    $router->post('/roles/allowed-rules', 'Api\v1\RolesController@allowedRules');
 
     $router->any('/actions/list', 'Api\v1\ActionsController@list');
-    $router->any('/allowed/list', 'Api\v1\AllowedController@list');
 
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
     $router->post('/rules/bulk-edit', 'Api\v1\RulesController@bulkEdit');

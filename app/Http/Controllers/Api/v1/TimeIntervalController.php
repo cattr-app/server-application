@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
+use Auth;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Filter;
@@ -149,4 +151,32 @@ class TimeIntervalController extends ItemController
      * @apiName DestroyTimeInterval
      * @apiGroup Time Interval
      */
+
+    /**
+     * @param bool $withRelations
+     *
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true): Builder
+    {
+        $query = parent::getQuery($withRelations);
+
+        $full_access = collect(Auth::user()->role->rules)
+            ->whereStrict('object', 'time-intervals')
+            ->whereStrict('action', 'full_access')
+            ->pluck('allow')
+            ->pop();
+
+        if (!$full_access) {
+            $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
+                return collect($val->id);
+            });
+            $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
+                return collect($val->timeIntervals)->pluck('id');
+            });
+            $time_intervals_id = collect([$user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
+            $query->whereIn('time_intervals.id', $time_intervals_id);
+        }
+        return $query;
+    }
 }

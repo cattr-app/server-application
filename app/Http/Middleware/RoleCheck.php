@@ -17,12 +17,7 @@ class RoleCheck
      */
     public function handle($request, Closure $next)
     {
-
-        $path = $request->path();
-
-
         $matches = [];
-
         $w = '[a-zA-Z\\-_0-9]+';
 
         if(Auth::check() && preg_match("#^api/v1/({$w})/({$w})#", $request->path(), $matches)) {
@@ -30,8 +25,7 @@ class RoleCheck
             $object = $matches[1];
             $action = $matches[2];
 
-
-            if(!Role::can(Auth::user(),$object , $action)) {
+            if (!Role::can(Auth::user(),$object , $action) && !Role::can(Auth::user(), $object, 'full_access')) {
                 return response()->json(['error' => "Access denied to $object/$action", 'reason' => 'action is not allowed'], 403);
             }
         }

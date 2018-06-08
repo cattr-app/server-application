@@ -22,6 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $deleted_at
  *
  * @property Task $task
+ * @property User $user
  * @property Screenshot[] $screenshots
  */
 class TimeInterval extends Model

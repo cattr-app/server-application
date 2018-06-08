@@ -3,6 +3,7 @@
 namespace App;
 
 use App\Models\Task;
+use App\Models\TimeInterval;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -45,8 +46,11 @@ use App\Models\Role;
  * @property string $updated_at
  * @property string $deleted_at
  *
- * @property Role $role
- * @property Project[] $projects
+ * @property Role           $role
+ * @property Project[]      $projects
+ * @property Task[]         $tasks
+ * @property TimeInterval[] $timeIntervals
+ * @property User[]         $attached_users
  */
 class User extends Authenticatable implements JWTSubject
 {
@@ -145,10 +149,34 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
+     * @return BelongsToMany
+     */
+    public function attached_users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'relations_users', 'user_id', 'attached_user_id');
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function attached_to(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'relations_users', 'attached_user_id', 'user_id');
+    }
+
+    /**
      * @return HasMany
      */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'user_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function timeIntervals(): HasMany
+    {
+        return $this->hasMany(TimeInterval::class, 'user_id');
     }
 }

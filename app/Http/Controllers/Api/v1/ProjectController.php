@@ -3,6 +3,11 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
+use Auth;
+use Filter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 /**
  * Class ProjectController
@@ -40,21 +45,56 @@ class ProjectController extends ItemController
     }
 
     /**
+     * @return string[]
+     */
+    public function getQueryWith(): array
+    {
+        return ['users'];
+    }
+
+    /**
      * @api {post} /api/v1/projects/list List
      * @apiDescription Get list of Projects
      * @apiVersion 0.1.0
      * @apiName GetProjectList
      * @apiGroup Project
      *
-     * @apiParam {Integer} [id] `QueryParam` Project ID
-     * @apiParam {String} [name] `QueryParam` Project Name
-     * @apiParam {String} [description] `QueryParam` Project Description
-     * @apiParam {DateTime} [created_at] `QueryParam` Project Creation DateTime
-     * @apiParam {DateTime} [updated_at] `QueryParam` Last Project update DataTime
-     * @apiParam {DateTime} [deleted_at] `QueryParam` When Project was deleted (null if not)
+     * @apiParam {Integer}  [id]          `QueryParam` Project ID
+     * @apiParam {Integer}  [user_id]     `QueryParam` Project's Users ID
+     * @apiParam {String}   [name]        `QueryParam` Project Name
+     * @apiParam {String}   [description] `QueryParam` Project Description
+     * @apiParam {Integer}  [company_id]  `QueryParam` Project Company's ID
+     * @apiParam {DateTime} [created_at]  `QueryParam` Project Creation DateTime
+     * @apiParam {DateTime} [updated_at]  `QueryParam` Last Project update DataTime
+     * @apiParam {DateTime} [deleted_at]  `QueryParam` When Project was deleted (null if not)
      *
      * @apiSuccess (200) {Project[]} ProjectList array of Project objects
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
      */
+    public function index(Request $request): JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.list'), $request->all());
+        $request->get('user_id') ? $requestData['users.id'] = $request->get('user_id') : False;
+        unset($requestData['user_id']);
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), $requestData ?: []
+            )
+        );
+
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.result'),
+                $itemsQuery->get()
+            )
+        );
+    }
 
     /**
      * @api {post} /api/v1/projects/create Create
@@ -87,4 +127,32 @@ class ProjectController extends ItemController
      * @apiName DestroyProject
      * @apiGroup Project
      */
+
+    /**
+     * @param bool $withRelations
+     *
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true): Builder
+    {
+        $query = parent::getQuery($withRelations);
+
+        $full_access = collect(Auth::user()->role->rules)
+            ->whereStrict('object', 'projects')
+            ->whereStrict('action', 'full_access')
+            ->pluck('allow')
+            ->pop();
+
+        if (!$full_access) {
+            $user_projects_id = collect(Auth::user()->projects)->pluck('id');
+            $attached_users_project_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
+                return collect($val->projects)->pluck('id');
+            });
+            $projects_id = collect([$user_projects_id, $attached_users_project_id])->collapse()->unique();
+
+            $query->whereIn('projects.id', $projects_id);
+        }
+
+        return $query->without('users');
+    }
 }

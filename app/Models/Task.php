@@ -23,6 +23,10 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ *
+ * @property TimeInterval[] $timeIntervals
+ * @property User[]         $user
+ * @property Project[]      $project
  */
 class Task extends Model
 {

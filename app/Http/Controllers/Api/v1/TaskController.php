@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Task;
 use App\User;
+use Auth;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Filter;
@@ -68,15 +70,15 @@ class TaskController extends ItemController
      * @apiName GetTaskList
      * @apiGroup Task
      *
-     * @apiParam {Integer} [id] `QueryParam` Task ID
-     * @apiParam {Integer} [project_id] `QueryParam` Task Project
-     * @apiParam {String} [task_name] `QueryParam` Task Name
-     * @apiParam {Boolean} [active] Active/Inactive Task
-     * @apiParam {Integer} [user_id] `QueryParam` Task's User
-     * @apiParam {Integer} [assigned_by] `QueryParam` User who assigned task
-     * @apiParam {DateTime} [created_at] `QueryParam` Task Creation DateTime
-     * @apiParam {DateTime} [updated_at] `QueryParam` Last Task update DataTime
-     * @apiParam {DateTime} [deleted_at] `QueryParam` When Task was deleted (null if not)
+     * @apiParam {Integer}  [id]          `QueryParam` Task ID
+     * @apiParam {Integer}  [project_id]  `QueryParam` Task Project
+     * @apiParam {String}   [task_name]   `QueryParam` Task Name
+     * @apiParam {Boolean}  [active]                   Active/Inactive Task
+     * @apiParam {Integer}  [user_id]     `QueryParam` Task's User
+     * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
+     * @apiParam {DateTime} [created_at]  `QueryParam` Task Creation DateTime
+     * @apiParam {DateTime} [updated_at]  `QueryParam` Last Task update DataTime
+     * @apiParam {DateTime} [deleted_at]  `QueryParam` When Task was deleted (null if not)
      *
      * @apiSuccess (200) {Task[]} TaskList array of Task objects
      *
@@ -123,17 +125,19 @@ class TaskController extends ItemController
      * @apiVersion 0.1.0
      * @apiName DashboardTask
      * @apiGroup Task
-     * @apiParam {Integer} [id] `QueryParam` Task ID
-     * @apiParam {Integer} [project_id] `QueryParam` Task Project
-     * @apiParam {String} [task_name] `QueryParam` Task Name
-     * @apiParam {Boolean} [active] Active/Inactive Task
-     * @apiParam {Integer} [user_id] `QueryParam` Task's User ID and Time Interval's User ID
-     * @apiParam {Integer} [assigned_by] `QueryParam` User who assigned task
-     * @apiParam {DateTime} [created_at] `QueryParam` Task Creation DateTime
-     * @apiParam {DateTime} [updated_at] `QueryParam` Last Task update DataTime
-     * @apiParam {DateTime} [deleted_at] `QueryParam` When Task was deleted (null if not)
+     * @apiParam {Integer}  [id]          `QueryParam` Task ID
+     * @apiParam {Integer}  [project_id]  `QueryParam` Task Project
+     * @apiParam {String}   [task_name]   `QueryParam` Task Name
+     * @apiParam {Boolean}  [active]                   Active/Inactive Task
+     * @apiParam {Integer}  [user_id]     `QueryParam` Task's User ID and Time Interval's User ID
+     * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
+     * @apiParam {DateTime} [created_at]  `QueryParam` Task Creation DateTime
+     * @apiParam {DateTime} [updated_at]  `QueryParam` Last Task update DataTime
+     * @apiParam {DateTime} [deleted_at]  `QueryParam` When Task was deleted (null if not)
      *
      * @apiSuccess (200) {Task[TimeInterval]} TaskList array of Task with Time Interval objects
+     *
+     * @param Request $request
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -141,7 +145,7 @@ class TaskController extends ItemController
     {
         $filters = $request->all();
         $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
-        $request->get('user_id') ? $filters['timeIntervals.user_id'] = (int) $request->get('user_id') : False;
+        is_int($request->get('user_id')) ? $filters['timeIntervals.user_id'] = $request->get('user_id') : False;
         $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
         $filters['timeIntervals.update_at'] = ['>=', $compareDate];
         unset($filters['user_id']);
@@ -183,6 +187,33 @@ class TaskController extends ItemController
             Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
             200
         );
+    }
+
+    /**
+     * @param bool $withRelations
+     *
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true): Builder
+    {
+        $query = parent::getQuery($withRelations);
+
+        $full_access = collect(Auth::user()->role->rules)
+            ->whereStrict('object', 'tasks')
+            ->whereStrict('action', 'full_access')
+            ->pluck('allow')
+            ->pop();
+
+        if (!$full_access) {
+            $user_tasks_id = collect(Auth::user()->tasks)->pluck('id');
+            $attached_users_tasks_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
+                return collect($val->tasks)->pluck('id');
+            });
+            $tasks_id = collect([$user_tasks_id, $attached_users_tasks_id])->collapse()->unique();
+            $query->whereIn('tasks.id', $tasks_id);
+        }
+
+        return $query->without('users');
     }
 
 }

@@ -94,7 +94,7 @@ abstract class  ItemController extends Controller
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'validation fail',
+                    'error' => 'Validation fail',
                 ]),
                 400
             );
@@ -123,15 +123,26 @@ abstract class  ItemController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $cls = $this->getItemClass();
-
         $itemId = Filter::process($this->getEventUniqueName('request.item.show'), $request->get('id'));
+        $idInt = is_int($itemId);
 
-        if (\is_array($itemId)) {
-            $itemId = $itemId[0];
+        if (!$idInt) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
+                    'error' => 'Validation fail',
+                    'reason' => 'Id invalid',
+                ]),
+                400
+            );
         }
 
-        $item = $cls::findOrFail($itemId);
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+                $this->getQuery()
+        );
+
+        $item = $itemsQuery->find($itemId);
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.show'), $item)
@@ -153,26 +164,59 @@ abstract class  ItemController extends Controller
             $request->all()
         );
 
+        $validationRules = $this->getValidationRules();
+        $validationRules['id'] = ['required'];
+
         $validator = Validator::make(
             $requestData,
             Filter::process(
                 $this->getEventUniqueName('validation.item.edit'),
-                $this->getValidationRules()
+                $validationRules
             )
         );
 
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'validation fail',
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
                 ]),
                 400
             );
         }
 
-        $cls = $this->getItemClass();
-        $itemId = $request->get('id');
-        $item = $cls::findOrFail($itemId);
+        $idInt = is_int($request->get('id'));
+
+        if (!$idInt) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'Invalid id',
+                    'reason' => 'Id is not integer',
+                ]),
+                400
+            );
+        }
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), ['id' => $request->get('id')]
+            )
+        );
+
+        /** @var \Illuminate\Database\Eloquent\Model $item */
+        $item = $itemsQuery->first();
+
+        if (!$item) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'Model fetch fail',
+                    'reason' => 'Model not found',
+                ]),
+                400
+            );
+        }
 
         $item->fill($this->filterRequestData($requestData));
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
@@ -194,18 +238,34 @@ abstract class  ItemController extends Controller
      */
     public function destroy(Request $request): JsonResponse
     {
-        $cls = $this->getItemClass();
-        $itemId = Filter::process(
-            $this->getEventUniqueName('request.item.remove'),
-            $request->get('id')
+        $itemId = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->get('id'));
+        $idInt = is_int($itemId);
+
+        if (!$idInt) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
+                    'error' => 'Validation fail',
+                    'reason' => 'Id invalid',
+                ]),
+                400
+            );
+        }
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), ['id' => $itemId]
+            )
         );
 
-        $item = $cls::findOrFail($itemId);
+        /** @var \Illuminate\Database\Eloquent\Model $item */
+        $item = $itemsQuery->firstOrFail();
         $item->delete();
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'message' => 'item has been removed'
+                'message' => 'Item has been removed'
             ])
         );
     }

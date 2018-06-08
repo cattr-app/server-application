@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use Auth;
 use Filter;
+use Illuminate\Database\Eloquent\Builder;
 use Validator;
 use App\User;
 use Illuminate\Http\JsonResponse;
@@ -173,9 +175,37 @@ class UserController extends ItemController
             );
         }
 
-        $cls = $this->getItemClass();
-        $itemId = $request->get('id');
-        $item = $cls::findOrFail($itemId);
+        $idInt = is_int($request->get('id'));
+
+        if (!$idInt) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'Invalid id',
+                    'reason' => 'Id is not integer',
+                ]),
+                400
+            );
+        }
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), ['id' => $request->get('id')]
+            )
+        );
+        /** @var \Illuminate\Database\Eloquent\Model $item */
+        $item = $itemsQuery->first();
+
+        if (!$item) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'User fetch fail',
+                    'reason' => 'User not found',
+                ]),
+                400
+            );
+        }
 
         if (isset($requestData['password'])) {
             $item->fill($this->filterRequestData($requestData));
@@ -275,9 +305,37 @@ class UserController extends ItemController
                 continue;
             }
 
-            $cls = $this->getItemClass();
-            $itemId = $user['id'];
-            $item = $cls::findOrFail($itemId);
+            $idInt = is_int($user['id']);
+
+            if (!$idInt) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'error' => 'Invalid id',
+                        'reason' => 'Id is not integer',
+                    ]),
+                    400
+                );
+            }
+
+            /** @var Builder $itemsQuery */
+            $itemsQuery = Filter::process(
+                $this->getEventUniqueName('answer.success.item.query.prepare'),
+                $this->applyQueryFilter(
+                    $this->getQuery(), ['id' => $user['id']]
+                )
+            );
+            /** @var \Illuminate\Database\Eloquent\Model $item */
+            $item = $itemsQuery->first();
+
+            if (!$item) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'error' => 'User fetch fail',
+                        'reason' => 'User not found',
+                    ]),
+                    400
+                );
+            }
 
             if (isset($user['password'])) {
                 $item->fill($this->filterRequestData($user));
@@ -295,6 +353,115 @@ class UserController extends ItemController
                 'messages' => $result,
             ]
         ));
+    }
+
+
+    /**
+     * @api {post} /api/v1/users/relations Relations
+     * @apiDescription Show attached users and to whom the user is attached
+     * @apiVersion 0.1.0
+     * @apiName RelationsUser
+     * @apiGroup User
+     *
+     * @apiParam {Integer}  [id]               User ID
+     * @apiParam {Integer}  [attached_user_id] Attached User ID
+
+     * @apiSuccess {Object[]} array        Array of User object
+     * @apiSuccess {Object}   array.object User object
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function relations(Request $request): JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.relations'), $request->all());
+        $full_access = collect(Auth::user()->role->rules)
+            ->whereStrict('object', 'users')
+            ->whereStrict('action', 'full_access')
+            ->pluck('allow')
+            ->pop();
+
+        if (isset($requestData['id'])) {
+            $userId = is_int($requestData['id']) && $requestData['id'] > 0 ? $requestData['id'] : false;
+        } else {
+            $userId = false;
+        }
+
+        if (isset($requestData['attached_user_id'])) {
+            $attachedId = is_int($requestData['attached_user_id']) && $requestData['attached_user_id'] > 0 ? $requestData['attached_user_id'] : false;
+        } else {
+            $attachedId = false;
+        }
+
+        if (!$userId && !$attachedId) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.error.item.relations'),
+                [
+                    'error' => 'Validation fail',
+                    'reason' => 'id and attached_user_id is invalid',
+                ]),
+                400
+            );
+        }
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->getQuery()
+        );
+        $user = $itemsQuery->find($userId ? $userId : $attachedId);
+
+        if (!$user) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.error.item.relations'),
+                [
+                    'error' => 'User not found',
+                ]),
+                400
+            );
+        }
+
+        // if full_access user
+        if ($full_access && Auth::user()->id === $userId) {
+            /** @var User[] $rules */
+            $users = User::where('id', '<>', $userId)->get();
+        } else {
+            /** @var User[] $rules */
+            $users = $userId ? $user->attached_users : $user->attached_to;
+        }
+
+        return response()->json(Filter::process(
+            $this->getEventUniqueName('answer.success.item.relations'),
+            $users
+        ));
+    }
+
+    /**
+     * @param bool $withRelations
+     *
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true): Builder
+    {
+        $query = parent::getQuery($withRelations);
+
+        $full_access = collect(Auth::user()->role->rules)
+            ->whereStrict('object', 'users')
+            ->whereStrict('action', 'full_access')
+            ->pluck('allow')
+            ->pop();
+
+        if (!$full_access) {
+            $user_id = collect(Auth::user()->id);
+            $attached_users_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
+                return collect($val->id);
+            });
+            $users_id = collect([$user_id, $attached_users_id])->collapse()->unique();
+            $query->whereIn('users.id', $users_id);
+        }
+
+        return $query;
     }
 }
 
