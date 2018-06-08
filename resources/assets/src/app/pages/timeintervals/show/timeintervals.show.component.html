@@ -11,12 +11,12 @@
                             Back
                         </button>
                     </a>
-                    <a [routerLink]="['/time-intervals/edit', item.id]" title="Edit time interval">
-                        <button class="btn btn-primary">
-                            <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                            Edit
-                        </button>
-                    </a>
+                    <!--<a [routerLink]="['/time-intervals/edit', item.id]" title="Edit time interval">-->
+                        <!--<button class="btn btn-primary">-->
+                            <!--<i class="fa fa-pencil-square-o" aria-hidden="true"></i>-->
+                            <!--Edit-->
+                        <!--</button>-->
+                    <!--</a>-->
                     <div class="show-info">
                         <div class="table-responsive">
                             <table class="table table-borderless">
@@ -61,8 +61,8 @@
                             </table>
                         </div>
                     </div>
-                    <div class="col-md-12" *ngIf="!isEmptyObject(screenshot)" >
-                        <img src="{{ screenshot.path }}" style="width:100%;">
+                    <div class="col-md-12" *ngIf="!isEmptyObject(screenshots)">
+                        <img *ngFor="let screenshot of screenshots" src="{{ screenshot.path }}" style="width:100%;">
                     </div>
                 </div>
             </div>

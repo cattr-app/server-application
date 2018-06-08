@@ -1,9 +1,9 @@
-import {NgModule, OnInit} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
 import {AuthRoute} from './screenshots-routing.module';
-import {LoginService} from "../../auth/login/login.service";
+import {LoginService} from '../../auth/login/login.service';
 
 import {ScreenshotsCreateComponent} from './create/screenshots.create.component';
 import {ScreenshotsEditComponent} from './edit/screenshots.edit.component';
@@ -11,9 +11,10 @@ import {ScreenshotsShowComponent} from './show/screenshots.show.component';
 import {ScreenshotsListComponent} from './list/screenshots.list.component';
 
 import {HttpClientModule} from '@angular/common/http';
-import {ScreenshotsService} from "./screenshots.service";
+import {ScreenshotsService} from './screenshots.service';
 import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
+import {SharedModule} from '../../shared.module';
 
 @NgModule({
     imports: [
@@ -22,7 +23,8 @@ import {GrowlModule} from 'primeng/growl';
         FormsModule,
         HttpClientModule,
         NgxPaginationModule,
-        GrowlModule
+        GrowlModule,
+        SharedModule
     ],
     declarations: [
         ScreenshotsCreateComponent,

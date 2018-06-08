@@ -1,7 +1,7 @@
-import {EventEmitter, Injectable, Output} from '@angular/core';
-import {ApiService} from "../../api/api.service";
-import {Project} from "../../models/project.model";
-import {ItemsService} from "../items.service";
+import {Injectable} from '@angular/core';
+import {ApiService} from '../../api/api.service';
+import {Project} from '../../models/project.model';
+import {ItemsService} from '../items.service';
 
 @Injectable()
 export class ProjectsService extends ItemsService {
@@ -15,7 +15,7 @@ export class ProjectsService extends ItemsService {
     }
 
     convertFromApi(itemFromApi) {
-        return new Project(itemFromApi)
+        return new Project(itemFromApi);
     }
 
 }

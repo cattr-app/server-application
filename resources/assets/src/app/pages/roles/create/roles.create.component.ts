@@ -7,7 +7,6 @@ import {DualListComponent} from 'angular-dual-listbox';
 import {ItemsCreateComponent} from '../../items.create.component';
 
 import {UsersService} from '../../users/users.service';
-import {ActionsService} from '../actions.service';
 import {ApiService} from '../../../api/api.service';
 import {RolesService} from '../roles.service';
 import {AllowedActionsService} from '../allowed-actions.service';
@@ -38,7 +37,6 @@ export class RolesCreateComponent extends ItemsCreateComponent implements OnInit
                 protected roleServ: RolesService,
                 protected myRouter: Router,
                 allowedService: AllowedActionsService,
-                protected actionsService: ActionsService,
                 protected usersService: UsersService,
                 protected ruleService: RulesService,
                 differs: IterableDiffers) {
@@ -54,7 +52,7 @@ export class RolesCreateComponent extends ItemsCreateComponent implements OnInit
 
     ngOnInit() {
         super.ngOnInit();
-        this.actionsService.getItems(this.ActionsUpdate.bind(this));
+        this.ruleService.getActions(this.ActionsUpdate.bind(this));
     }
 
     onSubmit() {

@@ -6,8 +6,8 @@ import {TimeIntervalsListComponent} from './list/timeintervals.list.component';
 import {TimeIntervalsShowComponent} from './show/timeintervals.show.component';
 
 export const AuthRoutes: Routes = [
-    {path: 'create', component: TimeIntervalsCreateComponent},
-    {path: 'edit/:id', component: TimeIntervalsEditComponent},
+    // {path: 'create', component: TimeIntervalsCreateComponent},
+    // {path: 'edit/:id', component: TimeIntervalsEditComponent},
     {path: 'list', component: TimeIntervalsListComponent},
     {path: 'show/:id', component: TimeIntervalsShowComponent},
     {path: '', redirectTo: 'login', pathMatch: 'full'},

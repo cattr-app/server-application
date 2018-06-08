@@ -1,4 +1,4 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import {Component, DoCheck, IterableDiffers, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {TimeIntervalsService} from '../timeintervals.service';
 import {TimeInterval} from '../../../models/timeinterval.model';
@@ -11,20 +11,31 @@ import {AllowedActionsService} from '../../roles/allowed-actions.service';
     templateUrl: './timeintervals.list.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class TimeIntervalsListComponent extends ItemsListComponent implements OnInit {
+export class TimeIntervalsListComponent extends ItemsListComponent implements OnInit, DoCheck {
 
     itemsArray: TimeInterval[] = [];
     p = 1;
+    userId: any = '';
+    differ: any;
 
     constructor(api: ApiService,
                 timeIntervalService: TimeIntervalsService,
                 modalService: BsModalService,
-                allowedService: AllowedActionsService, ) {
+                allowedService: AllowedActionsService,
+                differs: IterableDiffers
+    ) {
         super(api, timeIntervalService, modalService, allowedService);
+        this.differ = differs.find([]).create(null);
     }
 
     ngOnInit() {
-        const user: any = this.api.getUser() ? this.api.getUser() : null;
-        this.itemService.getItems(this.setItems.bind(this), {'user_id': user.id});
+    }
+
+    ngDoCheck() {
+        const changeId = this.differ.diff([this.userId]);
+
+        if (changeId) {
+            this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
+        }
     }
 }

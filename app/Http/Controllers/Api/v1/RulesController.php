@@ -68,7 +68,6 @@ class RulesController extends ItemController
     public function edit(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.edit'), $request->all());
-        $cls = $this->getItemClass();
         Role::updateRules();
 
         $validator = Validator::make(
@@ -169,6 +168,45 @@ class RulesController extends ItemController
             $this->getEventUniqueName('answer.success.item.bulkEdit'), [
                 'messages' => $result,
             ]
+        ));
+    }
+
+    /**
+     * @api {get} /api/v1/rules/actions Actions
+     * @apiDescription Get list of Rules Actions
+     * @apiVersion 0.1.0
+     * @apiName GetRulesActions
+     * @apiGroup Rule
+     *
+     * @apiSuccess (200) {Object[]} actions               Array of Action objects
+     * @apiSuccess (200) {Object}   actions.action        Action object
+     * @apiSuccess (200) {String}   actions.action.object Object of action
+     * @apiSuccess (200) {String}   actions.action.action Action of action
+     * @apiSuccess (200) {String}   actions.action.string Name of action
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function actions(Request $request): JsonResponse
+    {
+        /** @var array[] $actionList */
+        $actionList = Rule::getActionList();
+
+        $items = [];
+
+        foreach ($actionList as $object => $actions) {
+            foreach ($actions as $action => $name) {
+                $items[] = [
+                    'object' => $object,
+                    'action' => $action,
+                    'name' => $name,
+                ];
+            }
+        }
+
+        return response()->json(Filter::process(
+            $this->getEventUniqueName('answer.success.item.list'), $items
         ));
     }
 }

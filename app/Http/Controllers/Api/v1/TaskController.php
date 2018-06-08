@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\Role;
 use App\Models\Task;
 use App\User;
 use Auth;
@@ -197,21 +198,34 @@ class TaskController extends ItemController
     protected function getQuery($withRelations = true): Builder
     {
         $query = parent::getQuery($withRelations);
+        $full_access = Role::can(Auth::user(), 'tasks', 'full_access');
+        $relations_access = Role::can(Auth::user(), 'users', 'relations');
+        $project_relations_access = Role::can(Auth::user(), 'users', 'project-relations');
 
-        $full_access = collect(Auth::user()->role->rules)
-            ->whereStrict('object', 'tasks')
-            ->whereStrict('action', 'full_access')
-            ->pluck('allow')
-            ->pop();
-
-        if (!$full_access) {
-            $user_tasks_id = collect(Auth::user()->tasks)->pluck('id');
-            $attached_users_tasks_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
-                return collect($val->tasks)->pluck('id');
-            });
-            $tasks_id = collect([$user_tasks_id, $attached_users_tasks_id])->collapse()->unique();
-            $query->whereIn('tasks.id', $tasks_id);
+        if ($full_access) {
+            return $query;
         }
+
+        $user_tasks_id = collect(Auth::user()->tasks)->pluck('id');
+        $tasks_id = collect([]);
+
+        if ($project_relations_access) {
+            $attached_task_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
+                return collect($project->tasks)->pluck('id');
+            });
+            $tasks_id = collect([$attached_task_id_to_project])->collapse();
+        }
+
+        if ($relations_access) {
+            $attached_tasks_id_to_users = collect(Auth::user()->attached_users)->flatMap(function($user) {
+                return collect($user->tasks)->pluck('id');
+            });
+            $tasks_id = collect([$tasks_id, $user_tasks_id, $attached_tasks_id_to_users])->collapse()->unique();
+        } else {
+            $tasks_id = collect([$tasks_id, $user_tasks_id])->collapse()->unique();
+        }
+
+        $query->whereIn('tasks.id', $tasks_id);
 
         return $query->without('users');
     }

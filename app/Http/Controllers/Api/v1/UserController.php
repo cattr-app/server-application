@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\Role;
 use Auth;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
@@ -32,7 +33,7 @@ class UserController extends ItemController
     {
         return [
             'full_name'              => 'required',
-            'email'                  => 'required',
+            'email'                  => 'required|unique:users,email',
             'active'                 => 'required',
             'password'               => 'required',
         ];
@@ -152,9 +153,21 @@ class UserController extends ItemController
             $this->getEventUniqueName('request.item.edit'),
             $request->all()
         );
+        $idInt = is_int($request->get('id'));
+
+        if (!$idInt) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'Invalid id',
+                    'reason' => 'Id is not integer',
+                ]),
+                400
+            );
+        }
 
         $validationRules = $this->getValidationRules();
         $validationRules['id'] = 'required';
+        $validationRules['email'] .= ','.$request->get('id');
         unset($validationRules['password']);
 
         $validator = Validator::make(
@@ -170,18 +183,6 @@ class UserController extends ItemController
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                     'error' => 'validation fail',
                     'reason' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        $idInt = is_int($request->get('id'));
-
-        if (!$idInt) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Invalid id',
-                    'reason' => 'Id is not integer',
                 ]),
                 400
             );
@@ -291,6 +292,19 @@ class UserController extends ItemController
         unset($validationRules['password']);
 
         foreach ($requestData['users'] as $user) {
+            $idInt = is_int($user['id']);
+
+            if (!$idInt) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'error' => 'Invalid id',
+                        'reason' => 'Id is not integer',
+                    ]),
+                    400
+                );
+            }
+
+            $validationRules['email'] = 'required|unique:users,email,'.$user['id'];
             $validator = Validator::make(
                 $user,
                 Filter::process($this->getEventUniqueName('validation.item.bulkEdit'), $validationRules)
@@ -303,18 +317,6 @@ class UserController extends ItemController
                     'code' => 400
                 ];
                 continue;
-            }
-
-            $idInt = is_int($user['id']);
-
-            if (!$idInt) {
-                return response()->json(
-                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                        'error' => 'Invalid id',
-                        'reason' => 'Id is not integer',
-                    ]),
-                    400
-                );
             }
 
             /** @var Builder $itemsQuery */
@@ -363,9 +365,9 @@ class UserController extends ItemController
      * @apiName RelationsUser
      * @apiGroup User
      *
-     * @apiParam {Integer}  [id]               User ID
-     * @apiParam {Integer}  [attached_user_id] Attached User ID
-
+     * @apiParam {Integer} id               User ID
+     * @apiParam {Integer} [attached_user_id] Attached User ID
+     *
      * @apiSuccess {Object[]} array        Array of User object
      * @apiSuccess {Object}   array.object User object
      *
@@ -376,11 +378,7 @@ class UserController extends ItemController
     public function relations(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.relations'), $request->all());
-        $full_access = collect(Auth::user()->role->rules)
-            ->whereStrict('object', 'users')
-            ->whereStrict('action', 'full_access')
-            ->pluck('allow')
-            ->pop();
+        $full_access = Role::can(Auth::user(), 'users', 'full_access');
 
         if (isset($requestData['id'])) {
             $userId = is_int($requestData['id']) && $requestData['id'] > 0 ? $requestData['id'] : false;
@@ -438,6 +436,54 @@ class UserController extends ItemController
     }
 
     /**
+     * @api {post} /api/v1/users/project-relations Project Relations
+     * @apiDescription Show attached users to project
+     * @apiVersion 0.1.0
+     * @apiName ProjectRelationsUser
+     * @apiGroup User
+     *
+     * @apiParam {Integer}  project_id Attached Project ID
+
+     * @apiSuccess {Object[]} array        Array of User object
+     * @apiSuccess {Object}   array.object User object
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function projectRelations(Request $request): JsonResponse
+    {
+        $projectId = Filter::process($this->getEventUniqueName('request.item.project_relations'), $request->get('project_id'));
+
+        if (!is_int($projectId) && $projectId <= 0) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.error.item.project_relations'),
+                [
+                    'error' => 'Validation fail',
+                    'reason' => 'project_id is invalid',
+                ]),
+                400
+            );
+        }
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), ['projects.id' => $projectId, 'id' => ['<>', Auth::user()->id]]
+            )
+        );
+
+        /** @var User[] $rules */
+        $users = $itemsQuery->get();
+
+        return response()->json(Filter::process(
+            $this->getEventUniqueName('answer.success.item.project_relations'),
+            $users
+        ));
+    }
+
+    /**
      * @param bool $withRelations
      *
      * @return Builder
@@ -445,21 +491,36 @@ class UserController extends ItemController
     protected function getQuery($withRelations = true): Builder
     {
         $query = parent::getQuery($withRelations);
+        $full_access = Role::can(Auth::user(), 'users', 'full_access');
+        $relations_access = Role::can(Auth::user(), 'users', 'relations');
+        $project_relations_access = Role::can(Auth::user(), 'users', 'project-relations');
 
-        $full_access = collect(Auth::user()->role->rules)
-            ->whereStrict('object', 'users')
-            ->whereStrict('action', 'full_access')
-            ->pluck('allow')
-            ->pop();
-
-        if (!$full_access) {
-            $user_id = collect(Auth::user()->id);
-            $attached_users_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
-                return collect($val->id);
-            });
-            $users_id = collect([$user_id, $attached_users_id])->collapse()->unique();
-            $query->whereIn('users.id', $users_id);
+        if ($full_access) {
+            return $query;
         }
+
+        $user_id = collect(Auth::user()->id);
+        $users_id = collect([]);
+
+        if ($project_relations_access) {
+            $attached_user_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
+                return collect($project->users)->flatMap(function ($user) {
+                    return collect($user->id);
+                });
+            });
+
+            $users_id = collect([$attached_user_id_to_project])->collapse();
+        }
+
+        if ($relations_access) {
+            $attached_users_id = collect(Auth::user()->attached_users)->flatMap(function($user) {
+                return collect($user->id);
+            });
+            $users_id = collect([$users_id, $user_id, $attached_users_id])->collapse()->unique();
+        } else {
+            $users_id = collect([$users_id, $user_id]);
+        }
+        $query->whereIn('users.id', $users_id);
 
         return $query;
     }

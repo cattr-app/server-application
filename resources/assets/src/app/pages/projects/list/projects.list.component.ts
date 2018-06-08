@@ -1,29 +1,40 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import {Component, DoCheck, IterableDiffers, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {Project} from "../../../models/project.model";
-import {ProjectsService} from "../projects.service";
+import {Project} from '../../../models/project.model';
+import {ProjectsService} from '../projects.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
-import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import {Router} from "@angular/router";
-import {ItemsListComponent} from "../../items.list.component";
-import {Task} from "../../../models/task.model";
-import {AllowedActionsService} from "../../roles/allowed-actions.service";
-
+import {ItemsListComponent} from '../../items.list.component';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
 @Component({
     selector: 'app-projects-list',
     templateUrl: './projects.list.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class ProjectsListComponent extends ItemsListComponent implements OnInit {
+export class ProjectsListComponent extends ItemsListComponent implements OnInit, DoCheck {
 
     itemsArray: Project[] = [];
-    p: number = 1;
+    p = 1;
+    userId: any = '';
+    differ: any;
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
                 modalService: BsModalService,
-                allowedService: AllowedActionsService,) {
+                allowedService: AllowedActionsService,
+                differs: IterableDiffers,
+                ) {
         super(api, projectService, modalService, allowedService);
+        this.differ = differs.find([]).create(null);
+    }
+
+    ngOnInit() {
+    }
+
+    ngDoCheck() {
+        const changeId = this.differ.diff([this.userId]);
+        if (changeId) {
+            this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
+        }
     }
 }

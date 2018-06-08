@@ -1,7 +1,6 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../api/api.service';
 import {AllowedActionsService} from '../pages/roles/allowed-actions.service';
-import {AllowedAction} from '../models/allowed-action.model';
 import {Router} from '@angular/router';
 import { Location } from '@angular/common';
 
@@ -38,6 +37,16 @@ export class NavigationComponent implements OnInit {
         {title: 'Logout', action: 'onLogout', isLink: false},
     ];
 
+    constructor(
+        protected apiService: ApiService,
+        protected router: Router,
+        protected location: Location,
+        protected allowedService: AllowedActionsService,
+    ) {
+        this.isAuthorized = apiService.isAuthorized();
+        apiService.auth.subscribe(this.setAuth.bind(this));
+    }
+
     ngOnInit(): void {
         this.updateItems();
         this.allowedService.subscribeOnUpdate(this.onAllowedActionsUpdate.bind(this));
@@ -47,21 +56,8 @@ export class NavigationComponent implements OnInit {
         }
     }
 
-
     onAllowedActionsUpdate(items) {
         this.updateItems();
-    }
-
-
-    constructor(
-        protected apiService: ApiService,
-        protected router: Router,
-        protected location: Location,
-        protected allowedService: AllowedActionsService,
-
-    ) {
-        this.isAuthorized = apiService.isAuthorized();
-        apiService.auth.subscribe(this.setAuth.bind(this));
     }
 
     setAuth(status: boolean): void {
@@ -75,7 +71,6 @@ export class NavigationComponent implements OnInit {
     }
 
     updateItems(): void {
-
         if (!this.isAuthorized) {
             this.items = this.itemsGuest;
             return;
@@ -84,7 +79,6 @@ export class NavigationComponent implements OnInit {
         const allowedItems: NavigationLink[] = [];
 
         for (const item of this.itemsAuthorized) {
-
             if (!item.isLink) {
                 allowedItems.push(item);
                 continue;
@@ -93,7 +87,6 @@ export class NavigationComponent implements OnInit {
             if (this.allowedService.can(item.action)) {
                 allowedItems.push(item);
             }
-
         }
 
         this.items = allowedItems;
@@ -114,6 +107,8 @@ export class NavigationComponent implements OnInit {
         const callback = function(response) {
             console.log(response);
             this.apiService.setToken(null);
+            this.apiService.setAttachedUsers(null);
+            this.apiService.setAttachedProjects(null);
             this.location.replaceState('/');
             this.router.navigateByUrl('/');
         };

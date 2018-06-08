@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\Role;
 use Auth;
 use Carbon\Carbon;
 use Filter;
@@ -627,23 +628,27 @@ class TimeController extends ItemController
     protected function getQuery($withRelations = true): Builder
     {
         $query = parent::getQuery($withRelations);
+        $full_access = Role::can(Auth::user(), 'time', 'full_access');
+        $relations_access = Role::can(Auth::user(), 'users', 'relations');
 
-        $full_access = collect(Auth::user()->role->rules)
-            ->whereStrict('object', 'time')
-            ->whereStrict('action', 'full_access')
-            ->pluck('allow')
-            ->pop();
+        if ($full_access) {
+            return $query;
+        }
 
-        if (!$full_access) {
-            $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
-                return collect($val->id);
-            });
+        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
+            return collect($val->id);
+        });
+
+        if ($relations_access) {
             $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
                 return collect($val->timeIntervals)->pluck('id');
             });
             $time_intervals_id = collect([$user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
             $query->whereIn('time_intervals.id', $time_intervals_id);
+        } else {
+            $query->whereIn('time_intervals.id', $user_time_interval_id);
         }
+
         return $query;
     }
 }

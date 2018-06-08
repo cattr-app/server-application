@@ -63,6 +63,7 @@ Route::group([
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
     $router->post('/users/bulk-edit', 'Api\v1\UserController@bulkEdit');
     $router->post('/users/relations', 'Api\v1\UserController@relations');
+    $router->post('/users/project-relations', 'Api\v1\UserController@projectRelations');
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
@@ -70,7 +71,6 @@ Route::group([
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
     $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');
-    $router->any('/screenshots/get', 'Api\v1\ScreenshotController@getScreenshotByIntervalId');
     $router->post('/screenshots/remove', 'Api\v1\ScreenshotController@destroy');
 
     //Time Intervals routes
@@ -95,8 +95,8 @@ Route::group([
     $router->post('/roles/remove', 'Api\v1\RolesController@destroy');
     $router->post('/roles/allowed-rules', 'Api\v1\RolesController@allowedRules');
 
-    $router->any('/actions/list', 'Api\v1\ActionsController@list');
-
+    //Rule routes
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
     $router->post('/rules/bulk-edit', 'Api\v1\RulesController@bulkEdit');
+    $router->post('/rules/actions', 'Api\v1\RulesController@actions');
 });

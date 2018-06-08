@@ -1,7 +1,7 @@
 import {Component, ViewChild, AfterViewInit, OnInit} from '@angular/core';
-import {Screenshot, ScreenshotsBlock} from "../../../models/screenshot.model";
+import {Screenshot, ScreenshotsBlock} from '../../../models/screenshot.model';
 import {ApiService} from '../../../api/api.service';
-import {DashboardService} from "../dashboard.service";
+import {DashboardService} from '../dashboard.service';
 
 
 @Component({
@@ -12,10 +12,10 @@ import {DashboardService} from "../dashboard.service";
 export class ScreenshotListComponent implements OnInit, AfterViewInit {
 
     @ViewChild('loading') element: any;
-    chunksize: number = 32;
-    offset: number = 0;
+    chunksize = 32;
+    offset = 0;
     blocks: ScreenshotsBlock[] = [];
-    screenshotLoading: boolean = false;
+    screenshotLoading = false;
 
     constructor(protected api: ApiService, protected dashboardService: DashboardService) {
     }
@@ -27,13 +27,13 @@ export class ScreenshotListComponent implements OnInit, AfterViewInit {
     }
 
     loadNext() {
-        if(this.screenshotLoading) {
+        if (this.screenshotLoading) {
           return;
         }
 
         const user: any = this.api.getUser() ? this.api.getUser() : null;
         this.screenshotLoading = true;
-        this.dashboardService.getScreenshots(this.chunksize, this.offset,this.setData.bind(this), user.id);
+        this.dashboardService.getScreenshots(this.chunksize, this.offset, this.setData.bind(this), user.id);
     }
 
     setData(result) {
@@ -41,7 +41,7 @@ export class ScreenshotListComponent implements OnInit, AfterViewInit {
         this.offset += this.chunksize;
 
 
-        for(let block of result) {
+        for (const block of result) {
           this.blocks.push(new ScreenshotsBlock(block));
         }
 
@@ -51,22 +51,19 @@ export class ScreenshotListComponent implements OnInit, AfterViewInit {
 
 
     ngAfterViewInit() {
-      let htmlElement = this.element.nativeElement;
-      let height = this.element.nativeElement.offsetHeight;
-
-      console.log(height);
+      const htmlElement = this.element.nativeElement;
+      const height = this.element.nativeElement.offsetHeight;
     }
 
 
     onScrollDown() {
-      let block_Y_position = this.element.nativeElement.offsetTop;
-      let scroll_Y_top_position = window.scrollY;
-      let windowHeight = window.innerHeight;
+      const block_Y_position = this.element.nativeElement.offsetTop;
+      const scroll_Y_top_position = window.scrollY;
+      const windowHeight = window.innerHeight;
 
-      let bottom_scroll_Y_position = scroll_Y_top_position + windowHeight;
+      const bottom_scroll_Y_position = scroll_Y_top_position + windowHeight;
 
-
-      if(bottom_scroll_Y_position < block_Y_position) { // loading new screenshots doesn't needs
+      if (bottom_scroll_Y_position < block_Y_position) { // loading new screenshots doesn't needs
         return;
       }
 
@@ -75,15 +72,15 @@ export class ScreenshotListComponent implements OnInit, AfterViewInit {
     }
 
     hour(datetime) {
-      let regex = /(\d{4}-\d{2}-\d{2}) (\d{2}):\d{2}:\d{2}/;
-      let matches = datetime.match(regex);
+      const regex = /(\d{4}-\d{2}-\d{2}) (\d{2}):\d{2}:\d{2}/;
+      const matches = datetime.match(regex);
 
       return matches[2] + ':00 ' + matches[1];
     }
 
     minutes(datetime) {
-      let regex = /\d{4}-\d{2}-\d{2} \d{2}:(\d{2}:\d{2})/;
-      let matches = datetime.match(regex);
+      const regex = /\d{4}-\d{2}-\d{2} \d{2}:(\d{2}:\d{2})/;
+      const matches = datetime.match(regex);
 
       return matches[1];
     }

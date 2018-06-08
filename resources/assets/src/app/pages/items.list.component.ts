@@ -1,25 +1,23 @@
-import {Component, OnInit, TemplateRef} from '@angular/core';
+import {OnInit, TemplateRef} from '@angular/core';
 import {ApiService} from '../api/api.service';
-import {ItemsService} from "./items.service";
+import {ItemsService} from './items.service';
 
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {BsModalRef} from 'ngx-bootstrap/modal/bs-modal-ref.service';
-import {Item} from "../models/item.model";
-import {AllowedActionsService} from "./roles/allowed-actions.service";
+import {Item} from '../models/item.model';
+import {AllowedActionsService} from './roles/allowed-actions.service';
 
 
 export abstract class ItemsListComponent implements OnInit {
 
     itemsArray: Item[] = [];
-
     modalRef: BsModalRef;
-
     itemIdForRemoving = 0;
 
     constructor(protected api: ApiService,
                 protected itemService: ItemsService,
                 protected modalService: BsModalService,
-                protected allowedAction: AllowedActionsService,) {
+                protected allowedAction: AllowedActionsService, ) {
     }
 
     ngOnInit() {

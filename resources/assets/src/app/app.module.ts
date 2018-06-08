@@ -1,29 +1,35 @@
+import { Location } from '@angular/common';
+import {Router} from '@angular/router';
 import {NgModule} from '@angular/core';
 import {ModalModule} from 'ngx-bootstrap';
 import {BrowserModule} from '@angular/platform-browser';
-import {FormsModule} from '@angular/forms';
+import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 
 import {AppRoutingModule} from './app-routing.module';
+import {ApiModule} from './api/api.module';
+import {GrowlModule} from 'primeng/growl';
+import {SharedModule} from './shared.module';
 
 import {AppComponent} from './app.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
-import {ApiModule} from './api/api.module';
 import {NavigationComponent} from './navigation/navigation.component';
-import {ApiService} from './api/api.service';
+import {IntegrationsComponent} from './pages/integrations/integrations.component';
+
 import {AllowedActionsService} from './pages/roles/allowed-actions.service';
-import {Router} from '@angular/router';
-import { Location } from '@angular/common';
-import {IntegrationsComponent} from "./pages/integrations/integrations.component";
-import {GrowlModule} from 'primeng/growl';
+import {AttachedUsersService} from './pages/users/attached-users.service';
+import {AttachedProjectService} from './pages/projects/attached-project.service';
+import {ApiService} from './api/api.service';
 
 @NgModule({
     imports: [
         BrowserModule,
         FormsModule,
+        ReactiveFormsModule,
         AppRoutingModule,
         ApiModule.forRoot(),
         ModalModule.forRoot(),
-        GrowlModule
+        GrowlModule,
+        SharedModule
     ],
     declarations: [
         AppComponent,
@@ -33,6 +39,8 @@ import {GrowlModule} from 'primeng/growl';
     ],
     providers: [
         AllowedActionsService,
+        AttachedUsersService,
+        AttachedProjectService,
     ],
     bootstrap: [AppComponent]
 })

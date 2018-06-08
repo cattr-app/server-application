@@ -1,6 +1,6 @@
-import {EventEmitter, Injectable, Output} from '@angular/core';
-import {ApiService} from "../api/api.service";
-import {Item} from "../models/item.model";
+import {Injectable} from '@angular/core';
+import {ApiService} from '../api/api.service';
+import {Item} from '../models/item.model';
 
 @Injectable()
 export abstract class ItemsService {
@@ -21,7 +21,7 @@ export abstract class ItemsService {
         );
     }
 
-    editItem(id, data, callback) {
+    editItem(id, data, callback, errorCallback ?: null) {
         data.id = id;
 
         this.api.send(
@@ -29,7 +29,8 @@ export abstract class ItemsService {
             data,
             (result) => {
                 callback(result);
-            }
+            },
+            errorCallback ? errorCallback : this.api.errorCallback.bind(this)
         );
     }
 
@@ -47,7 +48,7 @@ export abstract class ItemsService {
     }
 
     getItems(callback, params ?: any) {
-        let itemsArray: Item[] = [];
+        const itemsArray: Item[] = [];
 
         return this.api.send(
             this.getApiPath() + '/list',

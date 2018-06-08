@@ -1,9 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {ActivatedRoute} from "@angular/router";
-import {ScreenshotsService} from "../screenshots.service";
-import {ItemsShowComponent} from "../../items.show.component";
-import {Screenshot} from "../../../models/screenshot.model";
+import {ActivatedRoute} from '@angular/router';
+import {ScreenshotsService} from '../screenshots.service';
+import {ItemsShowComponent} from '../../items.show.component';
+import {Screenshot} from '../../../models/screenshot.model';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
 @Component({
     selector: 'app-screenshots-show',
@@ -16,7 +17,8 @@ export class ScreenshotsShowComponent extends ItemsShowComponent implements OnIn
 
     constructor(api: ApiService,
                 screenshotService: ScreenshotsService,
-                router: ActivatedRoute) {
-        super(api, screenshotService, router);
+                router: ActivatedRoute,
+                allowService: AllowedActionsService) {
+        super(api, screenshotService, router, allowService);
     }
 }

@@ -4,10 +4,12 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Screenshots</div>
                 <div class="panel-body">
-                    <a *ngIf="can('/screenshots/create')" routerLink="/screenshots/create" class="btn btn-success" title="Add new screenshot">
-                        <i class="fa fa-plus" aria-hidden="true"></i> Add New
-                    </a>
+                    <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
                     <br/>
+                    <!--<a *ngIf="can('/screenshots/create')" routerLink="/screenshots/create" class="btn btn-success" title="Add new screenshot">-->
+                        <!--<i class="fa fa-plus" aria-hidden="true"></i> Add New-->
+                    <!--</a>-->
+                    <!--<br/>-->
                     <br/>
                     <div class="table-responsive">
                         <table class="table table-borderless">
@@ -29,12 +31,12 @@
                                             View
                                         </button>
                                     </a>
-                                    <a *ngIf="can('/screenshots/edit')" [routerLink]="['/screenshots/edit', screenshot.id]" title="Edit screenshot">
-                                        <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
-                                                                                  aria-hidden="true"></i>
-                                            Edit
-                                        </button>
-                                    </a>
+                                    <!--<a *ngIf="can('/screenshots/edit')" [routerLink]="['/screenshots/edit', screenshot.id]" title="Edit screenshot">-->
+                                        <!--<button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"-->
+                                                                                  <!--aria-hidden="true"></i>-->
+                                            <!--Edit-->
+                                        <!--</button>-->
+                                    <!--</a>-->
                                     <a *ngIf="can('/screenshots/remove')" (click)="openRemoveItemModalWindow(template, screenshot.id)" title="Delete screenshot">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>

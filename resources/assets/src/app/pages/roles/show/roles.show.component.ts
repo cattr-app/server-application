@@ -2,14 +2,13 @@ import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Role} from '../../../models/role.model';
 import {RolesService} from '../roles.service';
-import {ActionsService} from '../actions.service';
 import {AllowedActionsService} from '../allowed-actions.service';
 import {ActivatedRoute} from '@angular/router';
 import {ItemsShowComponent} from '../../items.show.component';
 import {DualListComponent} from 'angular-dual-listbox';
 import {RulesService} from '../rules.service';
-import {UsersService} from "../../users/users.service";
-import {User} from "../../../models/user.model";
+import {UsersService} from '../../users/users.service';
+import {User} from '../../../models/user.model';
 
 @Component({
     selector: 'app-roles-show',
@@ -36,17 +35,17 @@ export class RolesShowComponent extends ItemsShowComponent implements OnInit {
     constructor(api: ApiService,
                 roleService: RolesService,
                 router: ActivatedRoute,
-                protected actionsService: ActionsService,
+                allowService: AllowedActionsService,
                 protected allowedService: AllowedActionsService,
                 protected usersService: UsersService,
                 protected ruleService: RulesService) {
-        super(api, roleService, router);
+        super(api, roleService, router, allowService);
     }
 
     ngOnInit() {
         super.ngOnInit();
         this.usersService.getItems(this.UsersUpdate.bind(this));
-        this.actionsService.getItems(this.ActionsUpdate.bind(this));
+        this.ruleService.getActions(this.ActionsUpdate.bind(this));
         this.UserUpdate();
     }
 
@@ -68,7 +67,7 @@ export class RolesShowComponent extends ItemsShowComponent implements OnInit {
             item['id'] = this.sourceRules.length;
             this.sourceRules.push(item);
         }
-        this.allowedService.getItems(this.AllowedUpdate.bind(this), {'role_id': this.id});
+        this.allowedService.getItems(this.AllowedUpdate.bind(this), this.id);
     }
 
     AllowedUpdate(result) {

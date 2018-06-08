@@ -2,6 +2,7 @@ import {EventEmitter, Injectable, Output} from '@angular/core';
 import {ApiService} from '../../api/api.service';
 import {Rule} from '../../models/rule.model';
 import {ItemsService} from '../items.service';
+import {Item} from "../../models/item.model";
 
 @Injectable()
 export class RulesService extends ItemsService {
@@ -15,7 +16,6 @@ export class RulesService extends ItemsService {
     }
 
     convertFromApi(itemFromApi) {
-        console.log(itemFromApi);
         return new Rule(itemFromApi);
     }
 
@@ -41,4 +41,18 @@ export class RulesService extends ItemsService {
         );
     }
 
+    getActions(callback, params ?: any) {
+        const itemsArray: Item[] = [];
+
+        return this.api.send(
+            this.getApiPath() + '/actions',
+            params ? params : [],
+            (result) => {
+                result.forEach((itemFromApi) => {
+                    itemsArray.push(this.convertFromApi(itemFromApi));
+                });
+
+                callback(itemsArray);
+            });
+    }
 }

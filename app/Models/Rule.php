@@ -5,6 +5,7 @@ namespace App\Models;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Rule
@@ -17,11 +18,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property bool $allow
  * @property string $created_at
  * @property string $updated_at
+ * @property string $deleted_at
  *
  * @property Role $role
  */
 class Rule extends Model
 {
+    use SoftDeletes;
+
 
     /**
      * table name from database
@@ -79,7 +83,6 @@ class Rule extends Model
                 'create' => __('Screenshot create'),
                 'edit' => __('Screenshot edit'),
                 'show' => __('Screenshot show'),
-                'get' => __('Screenshot get by interval id'),
                 'remove' => __('Screenshot remove'),
                 'dashboard' => __('Screenshot list at dashboard'),
                 'full_access' => __('Screenshots full access'),
@@ -108,14 +111,13 @@ class Rule extends Model
                 'remove' => __('User remove'),
                 'bulk-edit' => __('User multiple edit'),
                 'relations' => __('Attached users list'),
+                'project-relations' => __('Users list attached to project'),
                 'full_access' => __('Users full access'),
-            ],
-            'actions' => [
-                'list' => __('Actions list'),
             ],
             'rules' => [
                 'edit' => __('Rules edit'),
                 'bulk-edit' => __('Rules multiple edit'),
+                'actions' => __('Rules actions list'),
             ],
         ]);
     }

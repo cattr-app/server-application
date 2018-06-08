@@ -4,6 +4,8 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Projects</div>
                 <div class="panel-body">
+                    <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
+                    <br/>
                     <a *ngIf="can('/projects/create')" routerLink="/projects/create" class="btn btn-success" title="Add new project">
                         <i class="fa fa-plus" aria-hidden="true"></i> Add New
                     </a>

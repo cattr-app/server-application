@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
 use Auth;
@@ -160,23 +161,39 @@ class TimeIntervalController extends ItemController
     protected function getQuery($withRelations = true): Builder
     {
         $query = parent::getQuery($withRelations);
+        $full_access = Role::can(Auth::user(), 'time-intervals', 'full_access');
+        $relations_access = Role::can(Auth::user(), 'users', 'relations');
+        $project_relations_access = Role::can(Auth::user(), 'users', 'project-relations');
 
-        $full_access = collect(Auth::user()->role->rules)
-            ->whereStrict('object', 'time-intervals')
-            ->whereStrict('action', 'full_access')
-            ->pluck('allow')
-            ->pop();
+        if ($full_access) {
+            return $query;
+        }
 
-        if (!$full_access) {
-            $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
-                return collect($val->id);
+        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
+            return collect($val->id);
+        });
+        $time_intervals_id = collect([]);
+
+        if ($project_relations_access) {
+            $attached_time_interval_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
+                return collect($project->tasks)->flatMap(function ($task) {
+                    return collect($task->timeIntervals)->pluck('id');
+                });
             });
+            $time_intervals_id = collect([$attached_time_interval_id_to_project])->collapse();
+        }
+
+        if ($relations_access) {
             $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
                 return collect($val->timeIntervals)->pluck('id');
             });
-            $time_intervals_id = collect([$user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
-            $query->whereIn('time_intervals.id', $time_intervals_id);
+            $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
+        } else {
+            $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id])->collapse()->unique();
         }
+
+        $query->whereIn('time_intervals.id', $time_intervals_id);
+
         return $query;
     }
 }

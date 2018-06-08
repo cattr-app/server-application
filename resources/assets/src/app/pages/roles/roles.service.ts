@@ -1,7 +1,7 @@
-import {EventEmitter, Injectable, Output} from '@angular/core';
-import {ApiService} from "../../api/api.service";
-import {Role} from "../../models/role.model";
-import {ItemsService} from "../items.service";
+import {Injectable} from '@angular/core';
+import {ApiService} from '../../api/api.service';
+import {Role} from '../../models/role.model';
+import {ItemsService} from '../items.service';
 
 @Injectable()
 export class RolesService extends ItemsService {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
+use App\Models\Role;
 use Auth;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
@@ -136,21 +137,23 @@ class ProjectController extends ItemController
     protected function getQuery($withRelations = true): Builder
     {
         $query = parent::getQuery($withRelations);
+        $full_access = Role::can(Auth::user(), 'projects', 'full_access');
+        $relations_access = Role::can(Auth::user(), 'users', 'relations');
 
-        $full_access = collect(Auth::user()->role->rules)
-            ->whereStrict('object', 'projects')
-            ->whereStrict('action', 'full_access')
-            ->pluck('allow')
-            ->pop();
+        if ($full_access) {
+            return $query->without('users');
+        }
 
-        if (!$full_access) {
-            $user_projects_id = collect(Auth::user()->projects)->pluck('id');
+        $user_projects_id = collect(Auth::user()->projects)->pluck('id');
+
+        if ($relations_access) {
             $attached_users_project_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
                 return collect($val->projects)->pluck('id');
             });
             $projects_id = collect([$user_projects_id, $attached_users_project_id])->collapse()->unique();
-
             $query->whereIn('projects.id', $projects_id);
+        } else {
+            $query->whereIn('projects.id', $user_projects_id);
         }
 
         return $query->without('users');

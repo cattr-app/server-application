@@ -24,6 +24,8 @@ export class ApiService {
     private tokenType?: string = null;
     private hasToken = false;
     private user?: any = null;
+    private attached_users?: any = null;
+    private attached_projects?: any = null;
 
     private storage: LocalStorage = LocalStorage.getStorage();
 
@@ -32,6 +34,8 @@ export class ApiService {
         this.tokenType = this.storage.get('tokenType');
         this.hasToken = !!(this.token && this.tokenType);
         this.user = this.storage.get('user');
+        this.attached_users = this.storage.get('attached_users');
+        this.attached_projects = this.storage.get('attached_projects');
     }
 
     public setToken(token?: string, tokenType?: string, user?: any) {
@@ -47,8 +51,26 @@ export class ApiService {
         this.auth.emit(this.hasToken);
     }
 
+    public setAttachedUsers(attached_users?: any) {
+        this.attached_users = attached_users || null;
+        this.storage.set('attached_users', this.attached_users);
+    }
+
+    public setAttachedProjects(attached_users?: any) {
+        this.attached_projects = attached_users || null;
+        this.storage.set('attached_projects', this.attached_projects);
+    }
+
     public getUser() {
         return this.storage.get('user');
+    }
+
+    public getAttachedUsers() {
+        return this.storage.get('attached_users');
+    }
+
+    public getAttachedProject() {
+        return this.storage.get('attached_projects');
     }
 
     public updateToken() {
@@ -155,6 +177,8 @@ export class ApiService {
 
     public errorCallback(error) {
         if (error.status === 403 && error.error.reason === 'not logined') {
+            this.setAttachedUsers(null);
+            this.setAttachedProjects(null);
             this.setToken(null);
             this.location.replaceState('/');
             this.router.navigateByUrl('/');

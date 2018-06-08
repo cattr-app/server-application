@@ -11,7 +11,6 @@ import {ApiService} from '../../../api/api.service';
 import {RolesService} from '../roles.service';
 import {RulesService} from '../rules.service';
 import {UsersService} from '../../users/users.service';
-import {ActionsService} from '../actions.service';
 import {AllowedActionsService} from '../allowed-actions.service';
 
 
@@ -43,7 +42,6 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
                 activatedRoute: ActivatedRoute,
                 router: Router,
                 protected allowedService: AllowedActionsService,
-                protected actionsService: ActionsService,
                 protected ruleService: RulesService,
                 protected usersService: UsersService,
                 differs: IterableDiffers) {
@@ -61,7 +59,7 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
     ngOnInit() {
         super.ngOnInit();
         this.usersService.getItems(this.UsersUpdate.bind(this));
-        this.actionsService.getItems(this.ActionsUpdate.bind(this));
+        this.ruleService.getActions(this.ActionsUpdate.bind(this));
         this.UserUpdate();
     }
 
@@ -145,7 +143,7 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
             item['id'] = this.sourceRules.length;
             this.sourceRules.push(item);
         }
-        this.allowedService.getItems(this.AllowedUpdate.bind(this), {'role_id': this.id});
+        this.allowedService.getItems(this.AllowedUpdate.bind(this), this.id);
     }
 
     AllowedUpdate(result) {

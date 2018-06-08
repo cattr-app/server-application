@@ -1,28 +1,41 @@
-import {EventEmitter, Injectable, Output, OnInit} from '@angular/core';
-import {ApiService} from "../../api/api.service";
-import {AllowedAction} from "../../models/allowed-action.model";
-import {ItemsService} from "../items.service";
+import {Injectable} from '@angular/core';
+import {ApiService} from '../../api/api.service';
+import {AllowedAction} from '../../models/allowed-action.model';
+import {Item} from '../../models/item.model';
 
 type callbackFunc = (actions: AllowedAction) => void;
 
-
 @Injectable()
-export class AllowedActionsService extends ItemsService {
+export class AllowedActionsService {
 
     allowedActions: AllowedAction[] = [];
     callbacks: callbackFunc[] = [];
 
-
-    constructor(api: ApiService) {
-        super(api);
+    constructor(protected api: ApiService) {
     }
 
     getApiPath() {
-        return 'allowed';
+        return 'roles';
+    }
+
+    getItems(callback, id ?: number) {
+        const itemsArray: Item[] = [];
+        const roleId: any = {'id': id ? id : this.api.getUser().role_id};
+
+        return this.api.send(
+            this.getApiPath() + '/allowed-rules',
+            roleId,
+            (result) => {
+                result.forEach((itemFromApi) => {
+                    itemsArray.push(this.convertFromApi(itemFromApi));
+                });
+
+                callback(itemsArray);
+            });
     }
 
     convertFromApi(itemFromApi) {
-        return new AllowedAction(itemFromApi)
+        return new AllowedAction(itemFromApi);
     }
 
     subscribeOnUpdate(callback: callbackFunc) {
@@ -42,7 +55,7 @@ export class AllowedActionsService extends ItemsService {
             return true;
         }
 
-        if(!this.allowedActions.length) {
+        if (!this.allowedActions.length) {
             return false;
         }
 
@@ -51,8 +64,11 @@ export class AllowedActionsService extends ItemsService {
 
         for (const allowedAction of this.allowedActions) {
 
-            if (allowedAction.object == object &&
-                allowedAction.action == objAction) {
+            if (allowedAction.object === object &&
+                allowedAction.action === objAction) {
+                return true;
+            } else if (allowedAction.object === object &&
+                       allowedAction.action === 'full_access' ) {
                 return true;
             }
         }
@@ -66,7 +82,7 @@ export class AllowedActionsService extends ItemsService {
     setupAllowedList(items) {
         this.allowedActions = items;
 
-        for (let callback of this.callbacks) {
+        for (const callback of this.callbacks) {
             callback(items);
         }
     }

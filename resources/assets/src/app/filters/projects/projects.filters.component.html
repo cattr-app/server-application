@@ -1,0 +1,13 @@
+<div class="col-3" *ngIf="projects.length > 0">
+    <label>Filter by project: </label>
+    <ng-select
+            [items]="projects"
+            [multiple]="true"
+            [closeOnSelect]="false"
+            bindLabel="name"
+            placeholder="Select projects"
+            [(ngModel)]="selectProjects"
+            (change)="onChange($event)"
+    >
+    </ng-select>
+</div>

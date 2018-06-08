@@ -3,7 +3,8 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
 import {AuthRoute} from './tasks-routing.module';
-import {LoginService} from "../../auth/login/login.service";
+import {LoginService} from '../../auth/login/login.service';
+import {TasksService} from './tasks.service';
 
 import {TasksCreateComponent} from './create/tasks.create.component';
 import {TasksEditComponent} from './edit/tasks.edit.component';
@@ -11,9 +12,10 @@ import {TasksShowComponent} from './show/tasks.show.component';
 import {TasksListComponent} from './list/tasks.list.component';
 
 import {HttpClientModule} from '@angular/common/http';
-import {TasksService} from "./tasks.service";
 import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
+import {SharedModule} from '../../shared.module';
+
 
 @NgModule({
     imports: [
@@ -22,7 +24,8 @@ import {GrowlModule} from 'primeng/growl';
         FormsModule,
         HttpClientModule,
         NgxPaginationModule,
-        GrowlModule
+        GrowlModule,
+        SharedModule
     ],
     declarations: [
         TasksCreateComponent,

@@ -186,20 +186,23 @@ class RolesController extends ItemController
     protected function getQuery($withRelations = true): Builder
     {
         $query = parent::getQuery($withRelations);
+        $full_access = Role::can(Auth::user(), 'roles', 'full_access');
+        $relations_access = Role::can(Auth::user(), 'users', 'relations');
 
-        $full_access = collect(Auth::user()->role->rules)
-            ->whereStrict('object', 'roles')
-            ->whereStrict('action', 'full_access')
-            ->pluck('allow')
-            ->pop();
+        if ($full_access) {
+            return $query;
+        }
 
-        if (!$full_access) {
-            $user_role_id = collect(Auth::user()->role_id);
+        $user_role_id = collect(Auth::user()->role_id);
+
+        if ($relations_access) {
             $attached_users_role_id = collect(Auth::user()->attached_users)->flatMap(function($user) {
                 return collect($user->role_id);
             });
             $roles_id = collect([$user_role_id, $attached_users_role_id])->collapse()->unique();
             $query->whereIn('id', $roles_id);
+        } else {
+            $query->whereIn('id', $user_role_id);
         }
 
         return $query;

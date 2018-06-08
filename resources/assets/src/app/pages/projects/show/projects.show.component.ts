@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {Project} from "../../../models/project.model";
-import {ProjectsService} from "../projects.service";
-import {ActivatedRoute} from "@angular/router";
-import {ItemsShowComponent} from "../../items.show.component";
-import {Task} from "../../../models/task.model";
+import {Project} from '../../../models/project.model';
+import {ProjectsService} from '../projects.service';
+import {ActivatedRoute} from '@angular/router';
+import {ItemsShowComponent} from '../../items.show.component';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
 @Component({
     selector: 'app-projects-show',
@@ -17,7 +17,8 @@ export class ProjectsShowComponent extends ItemsShowComponent implements OnInit 
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
-                router: ActivatedRoute) {
-        super(api, projectService, router);
+                router: ActivatedRoute,
+                allowedService: AllowedActionsService) {
+        super(api, projectService, router, allowedService);
     }
 }

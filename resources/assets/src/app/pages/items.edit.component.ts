@@ -1,10 +1,10 @@
-import {Component, OnInit} from '@angular/core';
+import {OnInit} from '@angular/core';
 import {ApiService} from '../api/api.service';
-import {Router,ActivatedRoute} from "@angular/router";
-import {ItemsService} from "./items.service";
-import {Item} from "../models/item.model";
+import {Router, ActivatedRoute} from '@angular/router';
+import {ItemsService} from './items.service';
+import {Item} from '../models/item.model';
 import {Message} from 'primeng/components/common/api';
-import {AllowedActionsService} from "./roles/allowed-actions.service";
+import {AllowedActionsService} from './roles/allowed-actions.service';
 
 export abstract class ItemsEditComponent implements OnInit {
 
@@ -19,7 +19,7 @@ export abstract class ItemsEditComponent implements OnInit {
                 protected itemService: ItemsService,
                 protected activatedRoute: ActivatedRoute,
                 protected router: Router,
-                protected allowedAction: AllowedActionsService,) {
+                protected allowedAction: AllowedActionsService, ) {
     }
 
     ngOnInit() {
@@ -38,7 +38,8 @@ export abstract class ItemsEditComponent implements OnInit {
         this.itemService.editItem(
             this.id,
             this.prepareData(),
-            this.editCallback.bind(this)
+            this.editCallback.bind(this),
+            this.errorCallback.bind(this)
         );
     }
 
@@ -48,6 +49,11 @@ export abstract class ItemsEditComponent implements OnInit {
 
     editCallback(result) {
         this.msgs = [];
-        this.msgs.push({severity:'success', summary:'Success Message', detail:'Item has been updated'});
+        this.msgs.push({severity: 'success', summary: 'Success Message', detail: 'Item has been updated'});
+    }
+
+    errorCallback(result) {
+        this.msgs = [];
+        this.msgs.push({severity: 'error', summary: result.error.error, detail: result.error.reason});
     }
 }

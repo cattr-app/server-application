@@ -1,8 +1,9 @@
-import {Component, OnInit} from '@angular/core';
+import {OnInit} from '@angular/core';
 import {ApiService} from '../api/api.service';
-import {ActivatedRoute} from "@angular/router";
-import {Item} from "../models/item.model";
-import {ItemsService} from "./items.service";
+import {ActivatedRoute} from '@angular/router';
+import {Item} from '../models/item.model';
+import {ItemsService} from './items.service';
+import {AllowedActionsService} from './roles/allowed-actions.service';
 
 export abstract class ItemsShowComponent implements OnInit {
     id: number;
@@ -11,7 +12,8 @@ export abstract class ItemsShowComponent implements OnInit {
 
     constructor(protected api: ApiService,
                 protected itemService: ItemsService,
-                protected router: ActivatedRoute) {
+                protected router: ActivatedRoute,
+                protected allowedAction: AllowedActionsService) {
     }
 
     ngOnInit() {
@@ -24,5 +26,9 @@ export abstract class ItemsShowComponent implements OnInit {
 
     setItem(result) {
         this.item = result;
+    }
+
+    can(action: string ): boolean {
+        return this.allowedAction.can(action);
     }
 }

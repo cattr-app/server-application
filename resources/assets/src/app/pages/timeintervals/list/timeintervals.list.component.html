@@ -4,10 +4,12 @@
             <div class="panel panel-default">
                 <div class="panel-heading">Time Intervals</div>
                 <div class="panel-body">
-                    <a *ngIf="can('/time-intervals/create')" routerLink="/time-intervals/create" class="btn btn-success" title="Add new task">
-                        <i class="fa fa-plus" aria-hidden="true"></i> Add New
-                    </a>
+                    <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
                     <br/>
+                    <!--<a *ngIf="can('/time-intervals/create')" routerLink="/time-intervals/create" class="btn btn-success" title="Add new task">-->
+                        <!--<i class="fa fa-plus" aria-hidden="true"></i> Add New-->
+                    <!--</a>-->
+                    <!--<br/>-->
                     <br/>
                     <div class="table-responsive">
                         <table class="table table-borderless">
@@ -36,12 +38,12 @@
                                             View
                                         </button>
                                     </a>
-                                    <a *ngIf="can('/time-intervals/edit')" [routerLink]="['/time-intervals/edit', timeinterval.id]" title="Edit time interval">
-                                        <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
-                                                                                  aria-hidden="true"></i>
-                                            Edit
-                                        </button>
-                                    </a>
+                                    <!--<a *ngIf="can('/time-intervals/edit')" [routerLink]="['/time-intervals/edit', timeinterval.id]" title="Edit time interval">-->
+                                        <!--<button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"-->
+                                                                                  <!--aria-hidden="true"></i>-->
+                                            <!--Edit-->
+                                        <!--</button>-->
+                                    <!--</a>-->
                                     <a *ngIf="can('/time-intervals/remove')" (click)="openRemoveItemModalWindow(template, timeinterval.id)" title="Delete time interval">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>

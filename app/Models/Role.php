@@ -123,6 +123,10 @@ class Role extends Model
      */
     public static function can($user, $object, $action): bool
     {
+        if (!isset($user->role)) {
+            return false;
+        }
+
         $rule = Rule::where([
             'role_id' => $user->role->id,
             'object' => $object,
