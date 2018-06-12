@@ -62,6 +62,7 @@ class RolesController extends ItemController
     {
         $cls = $this->getItemClass();
         $cls::updateRules();
+
         if ($request->get('user_id')) {
             $request->offsetSet('users.id', $request->get('user_id'));
             $request->offsetUnset('user_id');

@@ -425,7 +425,7 @@ class TimeController extends ItemController
         $filters = $request->all();
         $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
         $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
-        $request->get('task_id') ? $filters['task_id'] = (int) $request->get('task_id') : False;
+        is_int($request->get('task_id')) ? $filters['task_id'] = $request->get('task_id') : False;
         $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
 
         $validator = Validator::make(
@@ -556,8 +556,8 @@ class TimeController extends ItemController
     public function taskUser(Request $request): JsonResponse
     {
         $filters = $request->all();
-        $request->get('user_id') ? $filters['user_id'] = (int) $request->get('user_id') : False; 
-        $request->get('task_id') ? $filters['task_id'] = (int) $request->get('task_id') : False;
+        is_int($request->get('user_id')) ? $filters['user_id'] = $request->get('user_id') : False;
+        is_int($request->get('task_id')) ? $filters['task_id'] = $request->get('task_id') : False;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),

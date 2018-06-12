@@ -182,7 +182,7 @@ class ScreenshotController extends ItemController
     public function dashboard(Request $request): JsonResponse
     {
         $filters = $request->all();
-        (int) $request->get('user_id') ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
+        is_int($request->get('user_id')) ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),

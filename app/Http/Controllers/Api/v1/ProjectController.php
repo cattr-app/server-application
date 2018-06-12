@@ -9,6 +9,7 @@ use Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Route;
 
 /**
  * Class ProjectController
@@ -60,14 +61,14 @@ class ProjectController extends ItemController
      * @apiName GetProjectList
      * @apiGroup Project
      *
-     * @apiParam {Integer}  [id]          `QueryParam` Project ID
-     * @apiParam {Integer}  [user_id]     `QueryParam` Project's Users ID
-     * @apiParam {String}   [name]        `QueryParam` Project Name
-     * @apiParam {String}   [description] `QueryParam` Project Description
-     * @apiParam {Integer}  [company_id]  `QueryParam` Project Company's ID
-     * @apiParam {DateTime} [created_at]  `QueryParam` Project Creation DateTime
-     * @apiParam {DateTime} [updated_at]  `QueryParam` Last Project update DataTime
-     * @apiParam {DateTime} [deleted_at]  `QueryParam` When Project was deleted (null if not)
+     * @apiParam {Integer}  [id]          `QueryParam`                    Project ID
+     * @apiParam {Integer}  [user_id]     `QueryParam`(without relations) Project's Users ID
+     * @apiParam {String}   [name]        `QueryParam`                    Project Name
+     * @apiParam {String}   [description] `QueryParam`                    Project Description
+     * @apiParam {Integer}  [company_id]  `QueryParam`                    Project Company's ID
+     * @apiParam {DateTime} [created_at]  `QueryParam`                    Project Creation DateTime
+     * @apiParam {DateTime} [updated_at]  `QueryParam`                    Last Project update DataTime
+     * @apiParam {DateTime} [deleted_at]  `QueryParam`                    When Project was deleted (null if not)
      *
      * @apiSuccess (200) {Project[]} ProjectList array of Project objects
      *
@@ -77,17 +78,34 @@ class ProjectController extends ItemController
      */
     public function index(Request $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.list'), $request->all());
-        $request->get('user_id') ? $requestData['users.id'] = $request->get('user_id') : False;
-        unset($requestData['user_id']);
+        if ($request->get('user_id')) {
+            $userId = $request->get('user_id');
+            $request->offsetUnset('user_id');
+        }
 
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), $requestData ?: []
+                $this->getQuery(), $request->all() ?: []
             )
         );
+
+        if (isset($userId)) {
+            $itemsQuery->whereHas('users', function ($q) use ($userId) {
+                /** @var Builder $q */
+                $q->where('id', '=', $userId);
+            });
+            $itemsQuery->orWhereHas('tasks', function ($q) use ($userId) {
+                /** @var Builder $q */
+                $q->where('user_id', '=', $userId);
+                $q->orWhereHas('timeIntervals', function ($q) use ($userId) {
+                    /** @var Builder $q */
+                    $q->where('user_id', '=', $userId);
+                });
+            });
+            $itemsQuery->without('users','tasks');
+        }
 
         return response()->json(
             Filter::process(
@@ -129,33 +147,44 @@ class ProjectController extends ItemController
      * @apiGroup Project
      */
 
+
     /**
      * @param bool $withRelations
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = false): Builder
     {
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'projects', 'full_access');
         $relations_access = Role::can(Auth::user(), 'users', 'relations');
+        $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
-            return $query->without('users');
+            return $query;
         }
 
         $user_projects_id = collect(Auth::user()->projects)->pluck('id');
+        $projects_id = collect($user_projects_id);
 
-        if ($relations_access) {
-            $attached_users_project_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
-                return collect($val->projects)->pluck('id');
+        if ($action_method !== 'edit' && $action_method !== 'remove') {
+            $user_tasks_project_id = collect(Auth::user()->tasks)->flatMap(function ($task) {
+                return collect($task->project->id);
             });
-            $projects_id = collect([$user_projects_id, $attached_users_project_id])->collapse()->unique();
-            $query->whereIn('projects.id', $projects_id);
-        } else {
-            $query->whereIn('projects.id', $user_projects_id);
+            $user_time_interval_project_id = collect(Auth::user()->timeIntervals)->flatMap(function ($val) {
+                return collect($val->task->project->id);
+            });
+            $projects_id = collect([$projects_id, $user_tasks_project_id, $user_time_interval_project_id])->collapse();
         }
 
-        return $query->without('users');
+        if ($relations_access) {
+            $attached_users_project_id = collect(Auth::user()->attached_users)->flatMap(function($user) {
+                return collect($user->projects)->pluck('id');
+            });
+            $projects_id = collect([$projects_id, $attached_users_project_id])->collapse()->unique();
+        }
+
+        $query->whereIn('projects.id', $projects_id);
+        return $query;
     }
 }

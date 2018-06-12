@@ -47,9 +47,6 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             if (this.projectId) {
                 filter['project_id'] = ['=', this.projectId];
             }
-            console.log(this.userId);
-            console.log(this.projectId);
-            console.log(filter);
             this.itemService.getItems(this.setItems.bind(this), filter ? filter : {'active': 1});
         }
     }

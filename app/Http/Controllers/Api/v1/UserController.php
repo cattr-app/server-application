@@ -436,54 +436,6 @@ class UserController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/users/project-relations Project Relations
-     * @apiDescription Show attached users to project
-     * @apiVersion 0.1.0
-     * @apiName ProjectRelationsUser
-     * @apiGroup User
-     *
-     * @apiParam {Integer}  project_id Attached Project ID
-
-     * @apiSuccess {Object[]} array        Array of User object
-     * @apiSuccess {Object}   array.object User object
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function projectRelations(Request $request): JsonResponse
-    {
-        $projectId = Filter::process($this->getEventUniqueName('request.item.project_relations'), $request->get('project_id'));
-
-        if (!is_int($projectId) && $projectId <= 0) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.project_relations'),
-                [
-                    'error' => 'Validation fail',
-                    'reason' => 'project_id is invalid',
-                ]),
-                400
-            );
-        }
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(), ['projects.id' => $projectId, 'id' => ['<>', Auth::user()->id]]
-            )
-        );
-
-        /** @var User[] $rules */
-        $users = $itemsQuery->get();
-
-        return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.project_relations'),
-            $users
-        ));
-    }
-
-    /**
      * @param bool $withRelations
      *
      * @return Builder
