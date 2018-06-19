@@ -119,7 +119,32 @@ class TimeIntervalController extends ItemController
      * @apiParam {DateTime} [deleted_at] `QueryParam` When Time Interval was deleted (null if not)
      *
      * @apiSuccess (200) {TimeInterval[]} TimeIntervalList array of Time Interval objects
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
+    public function index(Request $request): JsonResponse
+    {
+        $filters = $request->all();
+        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
+
+        $baseQuery = $this->applyQueryFilter(
+            $this->getQuery(),
+            $filters ?: []
+        );
+
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $baseQuery
+        );
+
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.result'),
+                $itemsQuery->get()
+            )
+        );
+    }
 
     /**
      * @api {post} /api/v1/time-intervals/create Create

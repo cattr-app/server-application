@@ -6,6 +6,8 @@
                 <div class="panel-body">
                     <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
                     <br/>
+                    <app-projects-filters *ngIf="can('/projects/relations')" [(projectId)]="projectId"></app-projects-filters>
+                    <br/>
                     <!--<a *ngIf="can('/time-intervals/create')" routerLink="/time-intervals/create" class="btn btn-success" title="Add new task">-->
                         <!--<i class="fa fa-plus" aria-hidden="true"></i> Add New-->
                     <!--</a>-->

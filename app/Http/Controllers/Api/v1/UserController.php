@@ -423,64 +423,26 @@ class UserController extends ItemController
             $users = User::where('id', '<>', $userId)->get();
         } else {
             /** @var User[] $rules */
-            $users = $userId ? $user->attached_users : $user->attached_to;
+            $user_users = $userId ? collect($user->attached_users) : collect($user->attached_to);
+            $projects_users = [];
+
+            if ($userId) {
+                $projects_users = collect($user->projects)->flatMap(function($project) {
+                   return collect($project->users);
+                })->unique('id');
+            }
+            $users = collect([$user_users, $projects_users])->collapse()->unique();
         }
+
+        $users = collect($users)->filter(function($user, $key) use ($userId) {
+           return $user->id !== $userId;
+        });
 
         return response()->json(Filter::process(
             $this->getEventUniqueName('answer.success.item.relations'),
             $users
         ));
     }
-
-    /**
-     * @api {post} /api/v1/users/project-relations Project Relations
-     * @apiDescription Show attached users to project
-     * @apiVersion 0.1.0
-     * @apiName ProjectRelationsUser
-     * @apiGroup User
-     *
-     * @apiParam {Integer} project_id Attached Project ID
-     *
-     * @apiSuccess {Object[]} array        Array of User object
-     * @apiSuccess {Object}   array.object User object
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function projectRelations(Request $request): JsonResponse
-    {
-        $projectId = is_int($request->get('project_id')) ? $request->get('project_id') : false;
-
-        if ($projectId) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.project_relations'),
-                [
-                    'error' => 'Validation fail',
-                    'reason' => 'project_id is invalid',
-                ]),
-                400
-            );
-        }
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-           $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-           $this->applyQueryFilter(
-               $this->getQuery(), ['projects.id' => $projectId, 'id' => ['<>', Auth::user()->id]]
-           )
-        );
-
-        /** @var User[] $rules */
-        $users = $itemsQuery->get();
-
-        return response()->json(Filter::process(
-                   $this->getEventUniqueName('answer.success.item.project_relations'),
-            $users
-        ));
-    }
-
-    /**
 
     /**
      * @param bool $withRelations
@@ -492,7 +454,7 @@ class UserController extends ItemController
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'users', 'full_access');
         $relations_access = Role::can(Auth::user(), 'users', 'relations');
-        $project_relations_access = Role::can(Auth::user(), 'users', 'project-relations');
+        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
 
         if ($full_access) {
             return $query;

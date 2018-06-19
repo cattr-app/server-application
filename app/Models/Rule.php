@@ -112,7 +112,6 @@ class Rule extends Model
                 'remove' => __('User remove'),
                 'bulk-edit' => __('User multiple edit'),
                 'relations' => __('Attached users list'),
-                'project-relations' => __('Users list attached to project'),
                 'full_access' => __('Users full access'),
             ],
             'rules' => [

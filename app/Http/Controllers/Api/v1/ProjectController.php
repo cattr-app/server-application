@@ -62,13 +62,13 @@ class ProjectController extends ItemController
      * @apiName GetProjectList
      * @apiGroup Project
      *
-     * @apiParam {Integer}  [id]          `QueryParam`                    Project ID
-     * @apiParam {String}   [name]        `QueryParam`                    Project Name
-     * @apiParam {String}   [description] `QueryParam`                    Project Description
-     * @apiParam {Integer}  [company_id]  `QueryParam`                    Project Company's ID
-     * @apiParam {DateTime} [created_at]  `QueryParam`                    Project Creation DateTime
-     * @apiParam {DateTime} [updated_at]  `QueryParam`                    Last Project update DataTime
-     * @apiParam {DateTime} [deleted_at]  `QueryParam`                    When Project was deleted (null if not)
+     * @apiParam {Integer}  [id]          `QueryParam` Project ID
+     * @apiParam {String}   [name]        `QueryParam` Project Name
+     * @apiParam {String}   [description] `QueryParam` Project Description
+     * @apiParam {Integer}  [company_id]  `QueryParam` Project Company's ID
+     * @apiParam {DateTime} [created_at]  `QueryParam` Project Creation DateTime
+     * @apiParam {DateTime} [updated_at]  `QueryParam` Last Project update DataTime
+     * @apiParam {DateTime} [deleted_at]  `QueryParam` When Project was deleted (null if not)
      *
      * @apiSuccess (200) {Project[]} ProjectList array of Project objects
      *
@@ -108,7 +108,6 @@ class ProjectController extends ItemController
      * @apiName DestroyProject
      * @apiGroup Project
      */
-
 
     /**
      * @api {any} /api/v1/projects/relations Relations
@@ -185,7 +184,6 @@ class ProjectController extends ItemController
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'projects', 'full_access');
         $user_relations_access = Role::can(Auth::user(), 'users', 'relations');
-        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
@@ -195,7 +193,7 @@ class ProjectController extends ItemController
         $user_projects_id = collect(Auth::user()->projects)->pluck('id');
         $projects_id = collect($user_projects_id);
 
-        if ($project_relations_access && $action_method !== 'edit' && $action_method !== 'remove') {
+        if ($action_method !== 'edit' && $action_method !== 'remove') {
             $user_tasks_project_id = collect(Auth::user()->tasks)->flatMap(function ($task) {
                 if ($task->project) {
                     return collect($task->project->id);

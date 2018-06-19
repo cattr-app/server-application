@@ -15,8 +15,10 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
 
     itemsArray: Screenshot[] = [];
     p = 1;
-    userId: any = '';
-    differ: any;
+    userId: number = null;
+    projectId: number = null;
+    differUser: any;
+    differProject: any;
 
     constructor(api: ApiService,
                 itemService: ScreenshotsService,
@@ -25,17 +27,28 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
                 differs: IterableDiffers
     ) {
         super(api, itemService, modalService, allowedService);
-        this.differ = differs.find([]).create(null);
+        this.differUser = differs.find([]).create(null);
+        this.differProject = differs.find([]).create(null);
     }
 
     ngOnInit() {
     }
 
     ngDoCheck() {
-        const changeId = this.differ.diff([this.userId]);
+        const changeUserId = this.differUser.diff([this.userId]);
+        const changeProjectId = this.differProject.diff([this.projectId]);
+        const filter = {};
 
-        if (changeId) {
-            this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
+        if (changeUserId || changeProjectId) {
+            if (this.userId) {
+                filter['user_id'] = ['=', this.userId];
+            }
+
+            if (this.projectId) {
+                filter['project_id'] = ['=', this.projectId];
+            }
+
+            this.itemService.getItems(this.setItems.bind(this), filter ? filter : null);
         }
     }
 }

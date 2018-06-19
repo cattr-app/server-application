@@ -64,7 +64,6 @@ Route::group([
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
     $router->post('/users/bulk-edit', 'Api\v1\UserController@bulkEdit');
     $router->any('/users/relations', 'Api\v1\UserController@relations');
-    $router->any('/users/project-relations', 'Api\v1\UserController@projectRelations');
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');

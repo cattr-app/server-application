@@ -57,34 +57,30 @@ class ScreenshotController extends ItemController
      * @apiParam {Integer}  [id]               `QueryParam` Screenshot ID
      * @apiParam {Integer}  [time_interval_id] `QueryParam` Screenshot's Time Interval ID
      * @apiParam {Integer}  [user_id]          `QueryParam` Screenshot's TimeInterval's User ID
+     * @apiParam {Integer}  [project_id]       `QueryParam` Screenshot's TimeInterval's Project ID
      * @apiParam {String}   [path]             `QueryParam` Image path URI
      * @apiParam {DateTime} [created_at]       `QueryParam` Screenshot Creation DateTime
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
      * @apiParam {DateTime} [deleted_at]       `QueryParam` When Screenshot was deleted (null if not)
      *
      * @apiSuccess (200) {Screenshot[]} ScreenshotList array of Screenshot objects
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
-        $filters = $request->all();
-        $request->get('user_id') ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
+        if ($request->get('user_id')) {
+            $request->offsetSet('timeInterval.user_id', $request->get('user_id'));
+            $request->offsetUnset('user_id');
+        }
 
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(),
-            $filters ?: []
-        );
+        if ($request->get('project_id')) {
+            $request->offsetSet('timeInterval.task.project_id', $request->get('project_id'));
+            $request->offsetUnset('project_id');
+        }
 
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery
-        );
-
-        return response()->json(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.item.list.result'),
-                $itemsQuery->get()
-            )
-        );
+        return parent::index($request);
     }
 
     /**
