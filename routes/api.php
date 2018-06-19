@@ -46,6 +46,7 @@ Route::group([
     $router->post('/projects/edit', 'Api\v1\ProjectController@edit');
     $router->any('/projects/show', 'Api\v1\ProjectController@show');
     $router->post('/projects/remove', 'Api\v1\ProjectController@destroy');
+    $router->any('/projects/relations', 'Api\v1\ProjectController@relations');
 
     //Tasks routes
     $router->any('/tasks/list', 'Api\v1\TaskController@index');
@@ -62,8 +63,8 @@ Route::group([
     $router->any('/users/show', 'Api\v1\UserController@show');
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
     $router->post('/users/bulk-edit', 'Api\v1\UserController@bulkEdit');
-    $router->post('/users/relations', 'Api\v1\UserController@relations');
-    $router->post('/users/project-relations', 'Api\v1\UserController@projectRelations');
+    $router->any('/users/relations', 'Api\v1\UserController@relations');
+    $router->any('/users/project-relations', 'Api\v1\UserController@projectRelations');
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
@@ -93,10 +94,10 @@ Route::group([
     $router->post('/roles/edit', 'Api\v1\RolesController@edit');
     $router->any('/roles/show', 'Api\v1\RolesController@show');
     $router->post('/roles/remove', 'Api\v1\RolesController@destroy');
-    $router->post('/roles/allowed-rules', 'Api\v1\RolesController@allowedRules');
+    $router->any('/roles/allowed-rules', 'Api\v1\RolesController@allowedRules');
 
     //Rule routes
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
     $router->post('/rules/bulk-edit', 'Api\v1\RulesController@bulkEdit');
-    $router->post('/rules/actions', 'Api\v1\RulesController@actions');
+    $router->any('/rules/actions', 'Api\v1\RulesController@actions');
 });

@@ -31,6 +31,17 @@ class RoleSeeder extends Seeder
             }
         }
 
+        $rules = collect(Rule::getActionList());
+        foreach (Rule::all() as $rule) {
+            if ($rules->has($rule['object'])) {
+                if (collect($rules[$rule['object']])->has($rule['action'])) {
+                    continue;
+                }
+            }
+            $this->command->getOutput()->writeln("<fg=red>{$rule['object']} {$rule['action']} Not Found (Removed)</>");
+            $rule->forceDelete();
+        }
+
         $this->command->getOutput()->writeln('<fg=green>Base roles has been created</>');
     }
 }

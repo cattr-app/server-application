@@ -58,6 +58,7 @@ class Rule extends Model
                 'show' => __('Project show'),
                 'edit' => __('Project edit'),
                 'remove' => __('Project remove'),
+                'relations' => __('Project list attached to user'),
                 'full_access' => __('Project full access'),
             ],
             'tasks' => [

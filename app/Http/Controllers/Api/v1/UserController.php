@@ -292,9 +292,8 @@ class UserController extends ItemController
         unset($validationRules['password']);
 
         foreach ($requestData['users'] as $user) {
-            $idInt = is_int($user['id']);
 
-            if (!$idInt) {
+            if (!is_int($user['id'])) {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                         'error' => 'Invalid id',
@@ -365,7 +364,7 @@ class UserController extends ItemController
      * @apiName RelationsUser
      * @apiGroup User
      *
-     * @apiParam {Integer} id               User ID
+     * @apiParam {Integer} [id]               User ID
      * @apiParam {Integer} [attached_user_id] Attached User ID
      *
      * @apiSuccess {Object[]} array        Array of User object
@@ -379,17 +378,15 @@ class UserController extends ItemController
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.relations'), $request->all());
         $full_access = Role::can(Auth::user(), 'users', 'full_access');
+        $userId = false;
+        $attachedId = false;
 
         if (isset($requestData['id'])) {
             $userId = is_int($requestData['id']) && $requestData['id'] > 0 ? $requestData['id'] : false;
-        } else {
-            $userId = false;
         }
 
         if (isset($requestData['attached_user_id'])) {
             $attachedId = is_int($requestData['attached_user_id']) && $requestData['attached_user_id'] > 0 ? $requestData['attached_user_id'] : false;
-        } else {
-            $attachedId = false;
         }
 
         if (!$userId && !$attachedId) {
@@ -434,6 +431,56 @@ class UserController extends ItemController
             $users
         ));
     }
+
+    /**
+     * @api {post} /api/v1/users/project-relations Project Relations
+     * @apiDescription Show attached users to project
+     * @apiVersion 0.1.0
+     * @apiName ProjectRelationsUser
+     * @apiGroup User
+     *
+     * @apiParam {Integer} project_id Attached Project ID
+     *
+     * @apiSuccess {Object[]} array        Array of User object
+     * @apiSuccess {Object}   array.object User object
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function projectRelations(Request $request): JsonResponse
+    {
+        $projectId = is_int($request->get('project_id')) ? $request->get('project_id') : false;
+
+        if ($projectId) {
+            return response()->json(Filter::process(
+                $this->getEventUniqueName('answer.error.item.project_relations'),
+                [
+                    'error' => 'Validation fail',
+                    'reason' => 'project_id is invalid',
+                ]),
+                400
+            );
+        }
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+           $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+           $this->applyQueryFilter(
+               $this->getQuery(), ['projects.id' => $projectId, 'id' => ['<>', Auth::user()->id]]
+           )
+        );
+
+        /** @var User[] $rules */
+        $users = $itemsQuery->get();
+
+        return response()->json(Filter::process(
+                   $this->getEventUniqueName('answer.success.item.project_relations'),
+            $users
+        ));
+    }
+
+    /**
 
     /**
      * @param bool $withRelations

@@ -18,8 +18,9 @@ class QueryHelper
      * @param QueryBuilder|EloquentBuilder $query
      * @param array $filter
      * @param Model $model
+     * @param bool $first
      */
-    public function apply($query, array $filter = [], $model)
+    public function apply($query, array $filter = [], $model, $first = true)
     {
         $table = $model->getTable();
         $relations = [];
@@ -69,10 +70,16 @@ class QueryHelper
 
                 /** @var Relation $relationQuery */
                 $relationQuery = $model->{$domain}();
-
-                $query->whereHas($domain, function($q) use ($self, $filters, $relationQuery) {
-                    $self->apply($q, $filters, $relationQuery->getModel());
-                });
+                if (!$first) {
+                    $query->orWhereHas($domain, function ($q) use ($self, $filters, $relationQuery, $first) {
+                        $self->apply($q, $filters, $relationQuery->getModel(), $first);
+                    });
+                } else {
+                    $query->WhereHas($domain, function ($q) use ($self, $filters, $relationQuery, $first) {
+                        $self->apply($q, $filters, $relationQuery->getModel(), $first);
+                    });
+                }
+                $first = false;
             }
         }
     }

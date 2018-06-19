@@ -200,10 +200,10 @@ class TaskController extends ItemController
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'tasks', 'full_access');
         $relations_access = Role::can(Auth::user(), 'users', 'relations');
-        $project_relations_access = Role::can(Auth::user(), 'users', 'project-relations');
+        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
 
         if ($full_access) {
-            return $query;
+            return $query->without($this->getQueryWith());
         }
 
         $user_tasks_id = collect(Auth::user()->tasks)->pluck('id');
@@ -227,7 +227,7 @@ class TaskController extends ItemController
 
         $query->whereIn('tasks.id', $tasks_id);
 
-        return $query->without('users');
+        return $query->without($this->getQueryWith());
     }
 
 }
