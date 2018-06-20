@@ -21,7 +21,7 @@ export class TasksEditComponent extends ItemsEditComponent implements OnInit {
                 activatedRoute: ActivatedRoute,
                 router: Router,
                 allowedService: AllowedActionsService,) {
-        super(api, taskService, activatedRoute, router, allowedService)
+        super(api, taskService, activatedRoute, router, allowedService);
     }
 
     prepareData() {
@@ -32,6 +32,6 @@ export class TasksEditComponent extends ItemsEditComponent implements OnInit {
             'user_id': this.item.user_id,
             'assigned_by': this.item.assigned_by,
             'url': this.item.url
-        }
+        };
     }
 }

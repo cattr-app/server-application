@@ -62,13 +62,14 @@ class ProjectController extends ItemController
      * @apiName GetProjectList
      * @apiGroup Project
      *
-     * @apiParam {Integer}  [id]          `QueryParam` Project ID
-     * @apiParam {String}   [name]        `QueryParam` Project Name
-     * @apiParam {String}   [description] `QueryParam` Project Description
-     * @apiParam {Integer}  [company_id]  `QueryParam` Project Company's ID
-     * @apiParam {DateTime} [created_at]  `QueryParam` Project Creation DateTime
-     * @apiParam {DateTime} [updated_at]  `QueryParam` Last Project update DataTime
-     * @apiParam {DateTime} [deleted_at]  `QueryParam` When Project was deleted (null if not)
+     * @apiParam {Integer}  [id]          `QueryParam`                 Project ID
+     * @apiParam {Integer}  [user_id]     `QueryParam`without relation Project's User ID
+     * @apiParam {String}   [name]        `QueryParam`                 Project Name
+     * @apiParam {String}   [description] `QueryParam`                 Project Description
+     * @apiParam {Integer}  [company_id]  `QueryParam`                 Project Company's ID
+     * @apiParam {DateTime} [created_at]  `QueryParam`                 Project Creation DateTime
+     * @apiParam {DateTime} [updated_at]  `QueryParam`                 Last Project update DataTime
+     * @apiParam {DateTime} [deleted_at]  `QueryParam`                 When Project was deleted (null if not)
      *
      * @apiSuccess (200) {Project[]} ProjectList array of Project objects
      *
@@ -76,6 +77,34 @@ class ProjectController extends ItemController
      *
      * @return JsonResponse
      */
+    public function index(Request $request): JsonResponse
+    {
+        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
+        $full_access = Role::can(Auth::user(), 'projects', 'full_access');
+
+        if ($project_relations_access && $request->get('user_id')) {
+            $usersId = collect($request->get('user_id'))->flatten(0)->filter(function($val) {
+                return is_int($val);
+            });
+            $attachedUsersId = collect(Auth::user()->projects)->flatMap(function($project) {
+                return collect($project->users)->pluck('id');
+            });
+
+            if (!collect($attachedUsersId)->contains($usersId->all()) && !$full_access) {
+                return response()->json(Filter::process(
+                    $this->getEventUniqueName('answer.success.item.relations'),
+                    []
+                ));
+            }
+
+            $request->offsetSet('users.id', $request->get('user_id'));
+            $request->offsetSet('tasks.user_id', $request->get('user_id'));
+            $request->offsetSet('tasks.timeIntervals.user_id', $request->get('user_id'));
+            $request->offsetUnset('user_id');
+        }
+
+        return parent::index($request);
+    }
 
     /**
      * @api {post} /api/v1/projects/create Create
@@ -108,71 +137,6 @@ class ProjectController extends ItemController
      * @apiName DestroyProject
      * @apiGroup Project
      */
-
-    /**
-     * @api {any} /api/v1/projects/relations Relations
-     * @apiDescription Show attached projects to user
-     * @apiVersion 0.1.0
-     * @apiName RelationsProject
-     * @apiGroup Project
-     *
-     * @apiParam {Integer} user_id Attached User ID
-     *
-     * @apiSuccess {Object[]} array        Array of Project object
-     * @apiSuccess {Object}   array.object Project object
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function relations(Request $request): JsonResponse
-    {
-        $userId = is_int($request->get('user_id')) ? $request->get('user_id') : false;
-        $attachedUsersId = collect(Auth::user()->projects)->flatMap(function($project) {
-           return collect($project->users)->pluck('id');
-        });
-
-        if (!$userId) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.relations'),
-                [
-                    'error' => 'Validation fail',
-                    'reason' => 'user_id is invalid',
-                ]),
-                400
-            );
-        }
-
-        if (!collect($attachedUsersId)->contains($userId)) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.success.item.relations'),
-                []
-            ));
-        }
-
-        $filters = [
-            'users.id' => $userId,
-            'tasks.user_id' => $userId,
-            'tasks.timeIntervals.user_id' => $userId
-        ];
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.relations.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(), $filters
-            )
-        );
-
-        /** @var User[] $rules */
-        $projects = $itemsQuery->get();
-
-        return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.relations'),
-            $projects
-        ));
-    }
-
 
     /**
      * @param bool $withRelations

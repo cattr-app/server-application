@@ -630,6 +630,7 @@ class TimeController extends ItemController
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'time', 'full_access');
         $relations_access = Role::can(Auth::user(), 'users', 'relations');
+        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
 
         if ($full_access) {
             return $query;
@@ -638,16 +639,26 @@ class TimeController extends ItemController
         $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
             return collect($val->id);
         });
+        $time_intervals_id = collect([]);
+
+        if ($project_relations_access) {
+            $attached_time_interval_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
+                return collect($project->tasks)->flatMap(function ($task) {
+                    return collect($task->timeIntervals)->pluck('id');
+                });
+            });
+            $time_intervals_id = collect([$attached_time_interval_id_to_project])->collapse();
+        }
 
         if ($relations_access) {
             $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
                 return collect($val->timeIntervals)->pluck('id');
             });
-            $time_intervals_id = collect([$user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
-            $query->whereIn('time_intervals.id', $time_intervals_id);
+            $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
         } else {
-            $query->whereIn('time_intervals.id', $user_time_interval_id);
+            $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id])->collapse()->unique();
         }
+        $query->whereIn('time_intervals.id', $time_intervals_id);
 
         return $query;
     }

@@ -40,6 +40,23 @@ class Project extends Model
     protected $fillable = ['company_id', 'name', 'description'];
 
     /**
+     * Override parent boot and Call deleting event
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function($projects) {
+            /** @var Project $projects */
+            foreach ($projects->tasks()->get() as $task) {
+                $task->delete();
+            }
+        });
+    }
+
+    /**
      * @return BelongsToMany
      */
     public function users(): BelongsToMany

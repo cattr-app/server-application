@@ -185,9 +185,7 @@ abstract class  ItemController extends Controller
             );
         }
 
-        $idInt = is_int($request->get('id'));
-
-        if (!$idInt) {
+        if (!is_int($request->get('id'))) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                     'error' => 'Invalid id',

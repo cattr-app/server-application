@@ -41,7 +41,11 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * Create time interval
+     * @api {post} /api/v1/time-intervals/create Create
+     * @apiDescription Create Time Interval
+     * @apiVersion 0.1.0
+     * @apiName CreateTimeInterval
+     * @apiGroup Time Interval
      *
      * @param Request $request
      * @return JsonResponse
@@ -64,8 +68,9 @@ class TimeIntervalController extends ItemController
 
         if ($validator->fails()) {
             return response()->json(
-                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
                     'error' => 'validation fail',
+                    'reason' => $validator->errors()
                 ]),
                 400
             );
@@ -145,14 +150,6 @@ class TimeIntervalController extends ItemController
             )
         );
     }
-
-    /**
-     * @api {post} /api/v1/time-intervals/create Create
-     * @apiDescription Create Time Interval
-     * @apiVersion 0.1.0
-     * @apiName CreateTimeInterval
-     * @apiGroup Time Interval
-     */
 
     /**
      * @api {post} /api/v1/time-intervals/show Show

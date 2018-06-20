@@ -479,7 +479,7 @@ class UserController extends ItemController
             });
             $users_id = collect([$users_id, $user_id, $attached_users_id])->collapse()->unique();
         } else {
-            $users_id = collect([$users_id, $user_id]);
+            $users_id = collect([$users_id, $user_id])->collapse()->unique();
         }
         $query->whereIn('users.id', $users_id);
 
