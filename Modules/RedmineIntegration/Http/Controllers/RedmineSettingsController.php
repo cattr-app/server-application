@@ -6,9 +6,20 @@ use App\Models\Property;
 use Filter;
 use Illuminate\Http\Request;
 use Validator;
+use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 
+/**
+ * Class RedmineSettingsController
+ *
+ * @package Modules\RedmineIntegration\Http\Controllers
+ */
 class RedmineSettingsController extends AbstractRedmineController
 {
+    /**
+     * Returns validation rules for 'updateSettings' request
+     *
+     * @return array
+     */
     function getValidationRules()
     {
         return [
@@ -17,7 +28,14 @@ class RedmineSettingsController extends AbstractRedmineController
         ];
     }
 
-    public function updateSettings(Request $request)
+    /**
+     * Update user's redmine settings
+     *
+     * @param Request $request
+     * @param UserRepository $userRepository
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function updateSettings(Request $request, UserRepository $userRepository)
     {
         $request = Filter::process('request.redmine.settings.update', $request);
         $user = auth()->user();
@@ -29,7 +47,7 @@ class RedmineSettingsController extends AbstractRedmineController
 
         if ($validator->fails()) {
             return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.redmine.settings.update'), [
+                Filter::process('answer.error.redmine.settings.update', [
                     'error' => 'Validation fail',
                 ]),
                 400
@@ -58,7 +76,6 @@ class RedmineSettingsController extends AbstractRedmineController
                     'entity_id'   => $user->id,
                     'entity_type' => Property::USER_CODE,
                     'name'        => 'REDMINE_KEY',
-
                 ],
                 [
                     'value' => $request->redmine_key
@@ -66,19 +83,34 @@ class RedmineSettingsController extends AbstractRedmineController
             )
         );
 
+        //If user hasn't a redmine id in our system => mark user as NEW
+        $userRedmineId = $userRepository->getUserRedmineId($user->id);
+
+        if (!$userRedmineId) {
+            $userRepository->markAsNew($user->id);
+        }
+
         return response()->json(
             Filter::process('answer.success.redmine.settings.change', 'Updated!'),
             200
         );
     }
 
-    public function getSettings(Request $request)
+    /**
+     * Returns user's redmine settings
+     *
+     * @param Request $request
+     * @param UserRepository $userRepository
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function getSettings(Request $request, UserRepository $userRepository)
     {
-        $user = auth()->user();
+        $userId = auth()->user()->id;
 
         $settingsArray = [
-            'redmine_url'     => $this->getUserRedmineUrl($user->id),
-            'redmine_api_key' => $this->getUserRedmineApiKey($user->id)
+            'redmine_url'     => $userRepository->getUserRedmineUrl($userId),
+            'redmine_api_key' => $userRepository->getUserRedmineApiKey($userId)
         ];
 
         return response()->json(

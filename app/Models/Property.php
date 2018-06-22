@@ -37,4 +37,9 @@ class Property extends Model
      * @var array
      */
     protected $fillable = ['entity_id', 'entity_type', 'name', 'value'];
+
+    public static function getTableName()
+    {
+        return with(new static)->getTable();
+    }
 }

@@ -11,7 +11,7 @@ Route::group(['prefix' => 'redmineintegration', 'namespace' => 'Modules\RedmineI
         Route::post('/projects/synchronize', 'ProjectRedmineController@synchronize');
 
         //Time Entry routes
-        Route::get('/timeentries/create/{id}', 'TimeEntryRedmineController@create');
+        Route::post('/timeentries/create', 'TimeEntryRedmineController@create');
 
         //Redmine Settings routes
         Route::post('/settings/update', 'RedmineSettingsController@updateSettings');
