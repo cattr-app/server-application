@@ -1,6 +1,9 @@
 <?php
 
-Route::group(['prefix' => 'redmineintegration', 'namespace' => 'Modules\RedmineIntegration\Http\Controllers'],
+Route::group([
+    'prefix' => 'redmineintegration',
+    'middleware' => 'auth:api' ,
+    'namespace' => 'Modules\RedmineIntegration\Http\Controllers'],
     function () {
         Route::get('/', 'RedmineIntegrationController@index');
 

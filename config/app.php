@@ -47,9 +47,8 @@ return [
         App\Providers\RouteServiceProvider::class,
         Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
 
-        App\Modules\Test\Module::class,
-        App\Modules\Test2\Module::class,
         Modules\EventListener\Providers\EventListenerServiceProvider::class,
+        Modules\RedmineIntegration\Providers\RedmineIntegrationServiceProvider::class,
     ],
     'aliases' => [
 

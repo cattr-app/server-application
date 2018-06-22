@@ -159,13 +159,13 @@ class ProjectController extends ItemController
 
         if ($action_method !== 'edit' && $action_method !== 'remove') {
             $user_tasks_project_id = collect(Auth::user()->tasks)->flatMap(function ($task) {
-                if ($task->project) {
+                if (isset($task->project)) {
                     return collect($task->project->id);
                 }
                 return null;
             });
             $user_time_interval_project_id = collect(Auth::user()->timeIntervals)->flatMap(function ($val) {
-                if ($val->task->project) {
+                if (isset($val->task->project)) {
                     return collect($val->task->project->id);
                 }
                 return null;

@@ -82,8 +82,11 @@ class SynchronizeTasks extends Command
         $users = User::all();
 
         foreach ($users as $user) {
-            $this->synchronizeUserNewTasks($user->id);
-            $this->synchronizeUserTasks($user->id);
+            try {
+                $this->synchronizeUserNewTasks($user->id);
+                $this->synchronizeUserTasks($user->id);
+            } catch (\Exception $e) {
+            }
         }
     }
 
@@ -138,7 +141,6 @@ class SynchronizeTasks extends Command
     public function synchronizeUserTasks(int $userId): array
     {
         $client = $this->initRedmineClient($userId);
-
         //get current user's id
         $currentRedmineUser = $client->user->getCurrentUser();
         $currentRedmineUserId = $currentRedmineUser['user']['id'];

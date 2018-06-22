@@ -13,10 +13,14 @@ class RedmineClient extends \Redmine\Client
     public function __construct($userId)
     {
         $userRepository = new UserRepository();
-
         $url = $userRepository->getUserRedmineUrl($userId);
         $apiKey = $userRepository->getUserRedmineApiKey($userId);
         $pass = null;
+
+        if (empty($url)) {
+            $e = new \Exception('Empty url');
+            throw $e;
+        }
 
         parent::__construct($url, $apiKey, $pass);
     }
