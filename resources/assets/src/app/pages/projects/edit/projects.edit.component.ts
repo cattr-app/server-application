@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {ProjectsService} from "../projects.service";
+import {ProjectsService} from '../projects.service';
 import {Router, ActivatedRoute} from '@angular/router';
-import {Project} from "../../../models/project.model";
-import {ItemsEditComponent} from "../../items.edit.component";
-import {AllowedActionsService} from "../../roles/allowed-actions.service";
+import {Project} from '../../../models/project.model';
+import {ItemsEditComponent} from '../../items.edit.component';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
 @Component({
     selector: 'app-projects-edit',
@@ -19,19 +19,19 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
                 projectService: ProjectsService,
                 activatedRoute: ActivatedRoute,
                 router: Router,
-                allowedService: AllowedActionsService,) {
+                allowedService: AllowedActionsService, ) {
         super(api, projectService, activatedRoute, router, allowedService);
     }
 
     prepareData() {
         return {
-            'company_id': this.item.company_id,
+            // 'company_id': this.item.company_id,
             'name': this.item.name,
             'description': this.item.description,
-        }
+        };
     }
     getHeader() {
-        return "Edit Project";
+        return 'Edit Project';
     }
 
     getFields() {

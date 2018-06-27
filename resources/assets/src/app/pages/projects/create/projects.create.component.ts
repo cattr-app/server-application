@@ -1,10 +1,10 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {Project} from "../../../models/project.model";
-import {Router} from "@angular/router";
-import {ProjectsService} from "../projects.service";
-import {AllowedActionsService} from "../../roles/allowed-actions.service";
-import {ItemsCreateComponent} from "../../items.create.component";
+import {Project} from '../../../models/project.model';
+import {Router} from '@angular/router';
+import {ProjectsService} from '../projects.service';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
+import {ItemsCreateComponent} from '../../items.create.component';
 
 @Component({
     selector: 'app-projects-create',
@@ -16,25 +16,23 @@ export class ProjectsCreateComponent extends ItemsCreateComponent implements OnI
 
     public item: Project = new Project();
 
-
-
     constructor(api: ApiService,
                 projectService: ProjectsService,
                 router: Router,
-                allowedService: AllowedActionsService,) {
+                allowedService: AllowedActionsService, ) {
         super(api, projectService, router, allowedService);
     }
 
     prepareData() {
         return {
-            'company_id': this.item.company_id,
+            // 'company_id': this.item.company_id,
             'name': this.item.name,
             'description': this.item.description,
-        }
+        };
     }
 
     getHeader() {
-        return "Create New Project";
+        return 'Create New Project';
     }
 
     getFields() {

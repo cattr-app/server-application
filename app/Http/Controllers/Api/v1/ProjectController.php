@@ -33,7 +33,6 @@ class ProjectController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'company_id'  => 'required',
             'name'        => 'required',
             'description' => 'required',
         ];
@@ -81,6 +80,12 @@ class ProjectController extends ItemController
     {
         $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
         $full_access = Role::can(Auth::user(), 'projects', 'full_access');
+        $direct_relation = $request->get('direct_relation') ? $request->get('direct_relation') : false;
+        $request->offsetUnset('direct_relation');
+
+        if ($direct_relation) {
+            $request->offsetSet('id', ['=', collect(Auth::user()->projects)->pluck('id')->toArray()]);
+        }
 
         if ($project_relations_access && $request->get('user_id')) {
             $usersId = collect($request->get('user_id'))->flatten(0)->filter(function($val) {
@@ -97,9 +102,16 @@ class ProjectController extends ItemController
                 ));
             }
 
-            $request->offsetSet('users.id', $request->get('user_id'));
-            $request->offsetSet('tasks.user_id', $request->get('user_id'));
-            $request->offsetSet('tasks.timeIntervals.user_id', $request->get('user_id'));
+            /** show all projects for full access if id in request === user->id */
+            if (collect($usersId)->contains(Auth::user()->id) && $full_access) {
+                true;
+            } else {
+                $request->offsetSet('users.id', $request->get('user_id'));
+                if (!$direct_relation) {
+                    $request->offsetSet('tasks.user_id', $request->get('user_id'));
+                    $request->offsetSet('tasks.timeIntervals.user_id', $request->get('user_id'));
+                }
+            }
             $request->offsetUnset('user_id');
         }
 
@@ -157,7 +169,13 @@ class ProjectController extends ItemController
         $user_projects_id = collect(Auth::user()->projects)->pluck('id');
         $projects_id = collect($user_projects_id);
 
+        /** edit and remove only for directly related users's project */
         if ($action_method !== 'edit' && $action_method !== 'remove') {
+
+            if (count($projects_id) <= 0) {
+                return $query;
+            }
+
             $user_tasks_project_id = collect(Auth::user()->tasks)->flatMap(function ($task) {
                 if (isset($task->project)) {
                     return collect($task->project->id);

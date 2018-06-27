@@ -17,8 +17,8 @@
                         <table class="table table-borderless">
                             <thead>
                             <tr>
-                                <th>Task Id</th>
-                                <th>Project Id</th>
+                                <th>Id</th>
+                                <th>Project</th>
                                 <th>Name</th>
                                 <th>Actions</th>
                             </tr>
@@ -26,7 +26,7 @@
                             <tbody>
                             <tr *ngFor="let task of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{task.id}}</td>
-                                <td>{{task.project_id}}</td>
+                                <td>{{task.project.name}}</td>
                                 <td class="task-name">{{task.task_name}}</td>
                                 <td>
                                     <a *ngIf="can('/tasks/show')" [routerLink]="['/tasks/show', task.id]" title="View project">
@@ -35,13 +35,13 @@
                                             View
                                         </button>
                                     </a>
-                                    <a *ngIf="can('/tasks/edit')" [routerLink]="['/tasks/edit', task.id]" title="Edit project">
+                                    <a *ngIf="can('/tasks/edit') && (directProject && directProject.includes(task.project_id))" [routerLink]="['/tasks/edit', task.id]" title="Edit project">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
                                             Edit
                                         </button>
                                     </a>
-                                    <a *ngIf="can('/tasks/remove')" (click)="openRemoveItemModalWindow(template, task.id)" title="Delete project">
+                                    <a *ngIf="can('/tasks/remove') && (directProject && directProject.includes(task.project_id))" (click)="openRemoveItemModalWindow(template, task.id)" title="Delete project">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
                                             Delete

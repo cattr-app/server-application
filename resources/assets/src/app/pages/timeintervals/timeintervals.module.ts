@@ -17,6 +17,8 @@ import {NgxPaginationModule} from 'ngx-pagination';
 import {LoginService} from '../../auth/login/login.service';
 import {ScreenshotsService} from '../screenshots/screenshots.service';
 import {TimeIntervalsService} from './timeintervals.service';
+import {TasksService} from "../tasks/tasks.service";
+import {UsersService} from "../users/users.service";
 
 @NgModule({
     imports: [
@@ -37,7 +39,9 @@ import {TimeIntervalsService} from './timeintervals.service';
     providers: [
         LoginService,
         TimeIntervalsService,
-        ScreenshotsService
+        ScreenshotsService,
+        TasksService,
+        UsersService
     ]
 })
 

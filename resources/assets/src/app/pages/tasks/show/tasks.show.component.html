@@ -26,24 +26,28 @@
                                     <td>{{ item.id }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Project Id</th>
-                                    <td> {{ item.project_id }}</td>
+                                    <th> Project</th>
+                                    <td> {{ item.project && item.project.name}}</td>
                                 </tr>
                                 <tr>
                                     <th> Name</th>
                                     <td> {{ item.task_name }}</td>
                                 </tr>
                                 <tr>
+                                    <th> Description</th>
+                                    <td> {{ item.description }}</td>
+                                </tr>
+                                <tr>
                                     <th> Active</th>
                                     <td> {{ item.active }}</td>
                                 </tr>
                                 <tr>
-                                    <th> User ID</th>
-                                    <td> {{ item.user_id }}</td>
+                                    <th> User</th>
+                                    <td> {{ item.user && item.user.full_name }}</td>
                                 </tr>
                                 <tr>
                                     <th> Assigned by</th>
-                                    <td> {{ item.assigned_by }}</td>
+                                    <td> {{ item.assigned && item.assigned.full_name }}</td>
                                 </tr>
                                 <tr>
                                     <th> URL</th>

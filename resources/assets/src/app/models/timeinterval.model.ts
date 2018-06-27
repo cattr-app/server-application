@@ -1,4 +1,7 @@
-import {Item} from "./item.model";
+import {Item} from './item.model';
+import {Task} from './task.model';
+import {User} from './user.model';
+import {Screenshot} from './screenshot.model';
 
 export interface TimeIntervalData {
     id: number;
@@ -11,6 +14,9 @@ export interface TimeIntervalData {
     deleted_at?: string;
     created_at?: string;
     updated_at?: string;
+    task?: Task;
+    user?: User;
+    screenshots?: Screenshot[];
 }
 
 export class TimeInterval extends Item {
@@ -24,12 +30,15 @@ export class TimeInterval extends Item {
     public deleted_at?: string;
     public created_at?: string;
     public updated_at?: string;
+    public task?: Task;
+    public user?: User;
+    public screenshots?: Screenshot[];
 
     constructor(data?: TimeIntervalData) {
         super();
 
         if (data) {
-            for (let key in data) {
+            for (const key in data) {
                 this[key] = data[key];
             }
         }

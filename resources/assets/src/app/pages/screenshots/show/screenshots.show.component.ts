@@ -21,4 +21,13 @@ export class ScreenshotsShowComponent extends ItemsShowComponent implements OnIn
                 allowService: AllowedActionsService) {
         super(api, screenshotService, router, allowService);
     }
+
+    ngOnInit() {
+        this.sub = this.router.params.subscribe(params => {
+            this.id = +params['id'];
+        });
+        const filter = {'with': 'timeInterval,timeInterval.task,timeInterval.user'};
+
+        this.itemService.getItem(this.id, this.setItem.bind(this), filter);
+    }
 }

@@ -12,7 +12,7 @@ export abstract class ItemsCreateComponent implements OnInit {
 
     abstract prepareData();
 
-    constructor(private api: ApiService,
+    constructor(protected api: ApiService,
                 private itemService: ItemsService,
                 private router: Router,
                 protected allowedAction: AllowedActionsService,) {

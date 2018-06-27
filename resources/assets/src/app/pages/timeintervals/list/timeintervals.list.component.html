@@ -17,9 +17,9 @@
                         <table class="table table-borderless">
                             <thead>
                             <tr>
-                                <th>Time Interval Id</th>
-                                <th>Task Id</th>
-                                <th>User Id</th>
+                                <th>Id</th>
+                                <th>Task</th>
+                                <th>User</th>
                                 <th>Start at</th>
                                 <th>End at</th>
                                 <th>Actions</th>
@@ -28,8 +28,8 @@
                             <tbody>
                             <tr *ngFor="let timeinterval of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{timeinterval.id}}</td>
-                                <td>{{timeinterval.task_id}}</td>
-                                <td>{{timeinterval.user_id}}</td>
+                                <td>{{timeinterval.task.task_name}}</td>
+                                <td>{{timeinterval.user.full_name}}</td>
                                 <td>{{timeinterval.start_at}}</td>
                                 <td>{{timeinterval.end_at}}</td>
 

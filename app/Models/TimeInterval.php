@@ -41,6 +41,23 @@ class TimeInterval extends Model
     protected $fillable = ['task_id', 'start_at', 'user_id', 'end_at', 'count_mouse', 'count_keyboard'];
 
     /**
+     * Override parent boot and Call deleting event
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function($vals) {
+            /** @var TimeInterval $vals */
+            foreach ($vals->screenshots()->get() as $screen) {
+                $screen->delete();
+            }
+        });
+    }
+
+    /**
      * @return BelongsTo
      */
     public function task(): BelongsTo

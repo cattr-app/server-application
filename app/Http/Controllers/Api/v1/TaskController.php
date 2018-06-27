@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Filter;
 use DateTime;
-
+use Route;
 
 
 /**
@@ -40,7 +40,6 @@ class TaskController extends ItemController
             'active'      => 'required',
             'user_id'     => 'required',
             'assigned_by' => 'required',
-            'url'         => 'required'
         ];
     }
 
@@ -57,9 +56,7 @@ class TaskController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return [
-            'user', 'project', 'assigned',
-        ];
+        return [];
     }
 
     /**
@@ -201,13 +198,14 @@ class TaskController extends ItemController
         $full_access = Role::can(Auth::user(), 'tasks', 'full_access');
         $relations_access = Role::can(Auth::user(), 'users', 'relations');
         $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
+        $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
-            return $query->without($this->getQueryWith());
+            return $query;
         }
 
         $user_tasks_id = collect(Auth::user()->tasks)->pluck('id');
-        $tasks_id = collect([]);
+        $tasks_id = collect([$user_tasks_id])->collapse();
 
         if ($project_relations_access) {
             $attached_task_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
@@ -220,14 +218,20 @@ class TaskController extends ItemController
             $attached_tasks_id_to_users = collect(Auth::user()->attached_users)->flatMap(function($user) {
                 return collect($user->tasks)->pluck('id');
             });
-            $tasks_id = collect([$tasks_id, $user_tasks_id, $attached_tasks_id_to_users])->collapse()->unique();
-        } else {
-            $tasks_id = collect([$tasks_id, $user_tasks_id])->collapse()->unique();
+            $tasks_id = collect([$tasks_id, $attached_tasks_id_to_users])->collapse()->unique();
+        }
+
+        /** edit and remove only for directly related users's project's task */
+        if ($action_method === 'edit' || $action_method === 'remove') {
+            $attached_projects_id = collect(Auth::user()->projects)->pluck('id');
+            $user_project_tasks = collect(Auth::user()->tasks)->filter(function ($val, $key) use($attached_projects_id) {
+               return collect($attached_projects_id)->containsStrict($val['project_id']);
+            });
+            $tasks_id = collect($user_project_tasks)->pluck('id');
         }
 
         $query->whereIn('tasks.id', $tasks_id);
-
-        return $query->without($this->getQueryWith());
+        return $query;
     }
 
 }

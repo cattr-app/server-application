@@ -1,4 +1,5 @@
-import {Item} from "./item.model";
+import {Item} from './item.model';
+import {TimeInterval} from './timeinterval.model';
 
 export interface ScreenshotData {
     id: number;
@@ -7,10 +8,8 @@ export interface ScreenshotData {
     deleted_at?: string;
     created_at?: string;
     updated_at?: string;
+    time_interval?: TimeInterval;
 }
-
-
-
 
 export class Screenshot extends Item {
     public id: number;
@@ -19,25 +18,25 @@ export class Screenshot extends Item {
     public deleted_at?: string;
     public created_at?: string;
     public updated_at?: string;
+    public time_interval?: TimeInterval;
 
     constructor(data?: ScreenshotData) {
         super();
 
         if (data) {
-            for (let key in data) {
+            for (const key in data) {
                 this[key] = data[key];
             }
         }
     }
 }
 
-
 export class ScreenshotsBlock {
 
     constructor(data) {
 
         if (data) {
-            for (let key in data) {
+            for (const key in data) {
                 this[key] = data[key];
             }
         }

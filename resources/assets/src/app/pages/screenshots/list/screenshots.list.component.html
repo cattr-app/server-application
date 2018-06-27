@@ -17,15 +17,19 @@
                         <table class="table table-borderless">
                             <thead>
                             <tr>
-                                <th>Screenshot Id</th>
-                                <th>Time Interval Id</th>
+                                <th>Id</th>
+                                <th>Task</th>
+                                <th>User</th>
+                                <th>Preview</th>
                                 <th>Actions</th>
                             </tr>
                             </thead>
                             <tbody>
                             <tr *ngFor="let screenshot of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{screenshot.id}}</td>
-                                <td>{{screenshot.time_interval_id}}</td>
+                                <td>{{screenshot.time_interval.task.task_name}}</td>
+                                <td>{{screenshot.time_interval.user.full_name}}</td>
+                                <td><img class="preview" src="{{screenshot.path}}"></td>
                                 <td>
                                     <a *ngIf="can('/screenshots/show')" [routerLink]="['/screenshots/show', screenshot.id]" title="View screenshot">
                                         <button class="btn btn-info btn-sm">

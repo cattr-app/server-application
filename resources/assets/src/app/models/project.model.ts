@@ -2,7 +2,7 @@ import {Item} from "./item.model";
 
 export interface ProjectData {
     id: number;
-    company_id?: string;
+    // company_id?: string;
     name?: string;
     description?: string;
     deleted_at?: string;
@@ -12,7 +12,7 @@ export interface ProjectData {
 
 export class Project extends Item {
     public id: number;
-    public company_id?: string;
+    // public company_id?: string;
     public name?: string;
     public description?: string;
     public deleted_at?: string;

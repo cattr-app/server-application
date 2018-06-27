@@ -16,19 +16,6 @@ export class TasksService extends ItemsService {
     }
 
     convertFromApi(itemFromApi) {
-        return new Task(
-            itemFromApi.id,
-            itemFromApi.project_id,
-            itemFromApi.task_name,
-            itemFromApi.description,
-            itemFromApi.active,
-            itemFromApi.user_id,
-            itemFromApi.assigned_by,
-            itemFromApi.url,
-            itemFromApi.created_at,
-            itemFromApi.updated_at,
-            itemFromApi.deleted_at,
-            itemFromApi.total_time,
-        );
+        return new Task(itemFromApi);
     }
 }

@@ -35,6 +35,15 @@ class QueryHelper
             unset($filter['offset']);
         }
 
+        if (isset($filter['with'])) {
+            $with = explode(',', $filter['with']);
+            if ($with) {
+                foreach ($with as $relation) {
+                    $query->with($relation);
+                }
+            }
+        }
+
         foreach ($filter as $key => $param) {
             if (strpos($key, '.') !== False) {
                 $params = explode('.', $key);

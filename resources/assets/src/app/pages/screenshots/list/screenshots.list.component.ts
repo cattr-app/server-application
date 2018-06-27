@@ -37,7 +37,7 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
     ngDoCheck() {
         const changeUserId = this.differUser.diff([this.userId]);
         const changeProjectId = this.differProject.diff([this.projectId]);
-        const filter = {};
+        const filter = {'with': 'timeInterval,timeInterval.task,timeInterval.user'};
 
         if (changeUserId || changeProjectId) {
             if (this.userId) {

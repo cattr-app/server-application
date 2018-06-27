@@ -13,9 +13,18 @@
                     <div class="create-form">
                         <form (ngSubmit)="onSubmit()">
                             <div class="form-group row">
-                                <label class="col-md-2">Project Id</label>
+                                <label class="col-md-2">Project</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="task-company-id" [(ngModel)]="item.project_id">
+                                    <ng-select
+                                            [items]="projects"
+                                            bindLabel="name"
+                                            bindValue="id"
+                                            placeholder="Select project"
+                                            (change)="OnChangeSelectProject($event)"
+                                            [(ngModel)]="selectedProject"
+                                            [ngModelOptions]="{standalone: true}"
+                                    >
+                                    </ng-select>
                                 </div>
                             </div>
                             <div class="form-group row">
@@ -27,21 +36,30 @@
                             <div class="form-group row">
                                 <label class="col-md-2">Description</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="task-description" [(ngModel)]="item.description">
+                                    <textarea rows="5" class="form-control" name="task-description" [(ngModel)]="item.description"></textarea>
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">User Id</label>
+                            <div class="form-group row " *ngIf="users && users.length > 1">
+                                <label class="col-md-2">User</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="task-user-id" [(ngModel)]="item.user_id">
+                                    <ng-select
+                                            [items]="users"
+                                            bindLabel="full_name"
+                                            bindValue="id"
+                                            placeholder="Select user"
+                                            (change)="OnChangeSelectUser($event)"
+                                            [(ngModel)]="selectedUser"
+                                            [ngModelOptions]="{standalone: true}"
+                                    >
+                                    </ng-select>
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Assigned by</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="task-assigned-by" [(ngModel)]="item.assigned_by">
-                                </div>
-                            </div>
+                            <!--<div class="form-group row">-->
+                                <!--<label class="col-md-2">Assigned by</label>-->
+                                <!--<div class="col-md-10">-->
+                                    <!--<input type="text" class="form-control" name="task-assigned-by" [(ngModel)]="item.assigned_by">-->
+                                <!--</div>-->
+                            <!--</div>-->
                             <button type="submit" class="btn btn-primary">Create</button>
                         </form>
                     </div>

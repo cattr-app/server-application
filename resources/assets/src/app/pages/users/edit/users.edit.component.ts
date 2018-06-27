@@ -5,6 +5,8 @@ import {Router, ActivatedRoute} from '@angular/router';
 import {UsersService} from '../users.service';
 import {ItemsEditComponent} from '../../items.edit.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
+import {Role} from '../../../models/role.model';
+import {RolesService} from '../../roles/roles.service';
 
 @Component({
     selector: 'app-users-edit',
@@ -14,12 +16,21 @@ import {AllowedActionsService} from '../../roles/allowed-actions.service';
 export class UsersEditComponent extends ItemsEditComponent implements OnInit {
 
     public item: User = new User();
+    public roles: Role[];
+    public active = [
+        {value: 0, label: 'Inactive'},
+        {value: 1, label: 'Active'},
+    ];
+    public selectedActive: any;
+    public selectedRole: any;
 
     constructor(api: ApiService,
                 userService: UsersService,
                 activatedRoute: ActivatedRoute,
                 router: Router,
-                allowedService: AllowedActionsService, ) {
+                allowedService: AllowedActionsService,
+                protected roleService: RolesService
+    ) {
         super(api, userService, activatedRoute, router, allowedService);
     }
 
@@ -49,5 +60,32 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             'password': this.item.password,
             'role_id': this.item.role_id,
         };
+    }
+
+    ngOnInit() {
+        super.ngOnInit();
+        this.roleService.getItems(this.setRoles.bind(this));
+    }
+
+    setItem(result) {
+        this.item = result;
+        this.selectedActive = this.active.find((i) => i.value === parseInt(result.active, 2));
+        this.selectedRole = result.role_id;
+    }
+
+    setRoles(result) {
+        this.roles = result;
+    }
+
+    OnChangeSelectActive(event) {
+        if (event) {
+            this.item.active = event.value;
+        }
+    }
+
+    OnChangeSelectRole(event) {
+        if (event) {
+            this.item.role_id = event.id;
+        }
     }
 }

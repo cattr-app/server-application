@@ -5,6 +5,7 @@ import {TimeInterval} from '../../../models/timeinterval.model';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {ItemsListComponent} from '../../items.list.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
+import {UsersService} from '../../users/users.service';
 
 @Component({
     selector: 'app-timentervals-list',
@@ -24,7 +25,8 @@ export class TimeIntervalsListComponent extends ItemsListComponent implements On
                 timeIntervalService: TimeIntervalsService,
                 modalService: BsModalService,
                 allowedService: AllowedActionsService,
-                differs: IterableDiffers
+                differs: IterableDiffers,
+                protected userService: UsersService,
     ) {
         super(api, timeIntervalService, modalService, allowedService);
         this.differUser = differs.find([]).create(null);
@@ -37,7 +39,7 @@ export class TimeIntervalsListComponent extends ItemsListComponent implements On
     ngDoCheck() {
         const changeUserId = this.differUser.diff([this.userId]);
         const changeProjectId = this.differProject.diff([this.projectId]);
-        const filter = {};
+        const filter = {'with': 'user,task'};
 
         if (changeUserId || changeProjectId) {
             if (this.userId) {

@@ -5,6 +5,8 @@ import {TasksService} from '../tasks.service';
 import {Task} from '../../../models/task.model';
 import {ItemsShowComponent} from '../../items.show.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
+import {User} from "../../../models/user.model";
+import {Project} from "../../../models/project.model";
 
 @Component({
     selector: 'app-tasks-show',
@@ -21,5 +23,13 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit {
                 allowService: AllowedActionsService
     ) {
         super(api, taskService, router, allowService);
+    }
+
+    ngOnInit() {
+        this.sub = this.router.params.subscribe(params => {
+            this.id = +params['id'];
+        });
+
+        this.itemService.getItem(this.id, this.setItem.bind(this), {'with': 'user,project,assigned'});
     }
 }

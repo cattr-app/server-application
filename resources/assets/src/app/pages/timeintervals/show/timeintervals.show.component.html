@@ -26,12 +26,12 @@
                                     <td>{{ item.id }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Task Id</th>
-                                    <td> {{ item.task_id }}</td>
+                                    <th> Task</th>
+                                    <td> {{ item.task && item.task.task_name }}</td>
                                 </tr>
                                 <tr>
-                                    <th> User Id</th>
-                                    <td> {{ item.user_id }}</td>
+                                    <th> User</th>
+                                    <td> {{ item.user && item.user.full_name }}</td>
                                 </tr>
                                 <tr>
                                     <th> Start At</th>
@@ -61,8 +61,8 @@
                             </table>
                         </div>
                     </div>
-                    <div class="col-md-12" *ngIf="!isEmptyObject(screenshots)">
-                        <img *ngFor="let screenshot of screenshots" src="{{ screenshot.path }}" style="width:100%;">
+                    <div class="col-md-12" *ngIf="!isEmptyObject(item.screenshots)">
+                        <img *ngFor="let screenshot of item.screenshots" src="{{ screenshot.path }}" style="width:100%;">
                     </div>
                 </div>
             </div>

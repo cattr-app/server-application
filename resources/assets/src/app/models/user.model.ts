@@ -1,6 +1,36 @@
-import {Item} from "./item.model";
+import {Item} from './item.model';
 
-export class User extends Item{
+export interface UserData {
+   id: number;
+   full_name: string;
+   first_name: string;
+   last_name: string;
+   email: string;
+   url: string;
+   company_id: number;
+   level: string;
+   payroll_access: number;
+   billing_access: number;
+   avatar: string;
+   screenshots_active: number;
+   manual_time: number;
+   permanent_tasks: number;
+   computer_time_popup: number;
+   poor_time_popup: string;
+   blur_screenshots: number;
+   web_and_app_monitoring: number;
+   webcam_shots: number;
+   screenshots_interval: number;
+   user_role_value: string;
+   active: number;
+   password: string;
+   role_id: number;
+   created_at?: string;
+   updated_at?: string;
+   deleted_at?: string;
+}
+
+export class User extends Item {
     public id: number;
     public full_name: string;
     public first_name: string;
@@ -22,68 +52,20 @@ export class User extends Item{
     public webcam_shots: number;
     public screenshots_interval: number;
     public user_role_value: string;
-    public active: string;
+    public active: number;
     public password: string;
     public role_id: number;
     public created_at?: string;
     public updated_at?: string;
     public deleted_at?: string;
 
-    constructor(id?,
-                full_name?,
-                first_name?,
-                last_name?,
-                email?,
-                url?,
-                company_id?,
-                level?,
-                payroll_access?,
-                billing_access?,
-                avatar?,
-                screenshots_active?,
-                manual_time?,
-                permanent_tasks?,
-                computer_time_popup?,
-                poor_time_popup?,
-                blur_screenshots?,
-                web_and_app_monitoring?,
-                webcam_shots?,
-                screenshots_interval?,
-                user_role_value?,
-                active?,
-                password?,
-                role_id?,
-                createdAt?,
-                updatedAt?,
-                deletedAt?) {
+    constructor(data?: UserData) {
         super();
-        this.id = id;
-        this.full_name = full_name;
-        this.first_name = first_name;
-        this.last_name = last_name;
-        this.email = email;
-        this.url = url;
-        this.company_id = company_id;
-        this.level = level;
-        this.payroll_access = payroll_access;
-        this.billing_access = billing_access;
-        this.avatar = avatar;
-        this.screenshots_active = screenshots_active;
-        this.manual_time = manual_time;
-        this.permanent_tasks = permanent_tasks;
-        this.computer_time_popup = computer_time_popup;
-        this.poor_time_popup = poor_time_popup;
-        this.blur_screenshots = blur_screenshots;
-        this.web_and_app_monitoring = web_and_app_monitoring;
-        this.webcam_shots = webcam_shots;
-        this.screenshots_interval = screenshots_interval;
-        this.user_role_value = user_role_value;
-        this.active = active;
-        this.password = password;
-        this.role_id = role_id;
-        this.created_at = createdAt;
-        this.updated_at = updatedAt;
-        this.deleted_at = deletedAt;
 
+        if (data) {
+            for (const key in data) {
+                this[key] = data[key];
+            }
+        }
     }
 }

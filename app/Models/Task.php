@@ -44,6 +44,23 @@ class Task extends Model
     protected $fillable = ['project_id', 'task_name', 'description', 'active', 'user_id', 'assigned_by', 'url'];
 
     /**
+     * Override parent boot and Call deleting event
+     *
+     * @return void
+     */
+    protected static function boot()
+    {
+        parent::boot();
+
+        static::deleting(function($tasks) {
+            /** @var Task $tasks */
+            foreach ($tasks->timeIntervals()->get() as $val) {
+                $val->delete();
+            }
+        });
+    }
+
+    /**
      * @return BelongsTo
      */
     public function project(): BelongsTo

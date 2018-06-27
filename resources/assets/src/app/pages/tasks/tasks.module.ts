@@ -5,6 +5,7 @@ import {FormsModule} from '@angular/forms';
 import {AuthRoute} from './tasks-routing.module';
 import {LoginService} from '../../auth/login/login.service';
 import {TasksService} from './tasks.service';
+import {UsersService} from '../users/users.service';
 
 import {TasksCreateComponent} from './create/tasks.create.component';
 import {TasksEditComponent} from './edit/tasks.edit.component';
@@ -35,7 +36,8 @@ import {SharedModule} from '../../shared.module';
     ],
     providers: [
         LoginService,
-        TasksService
+        TasksService,
+        UsersService
     ]
 })
 

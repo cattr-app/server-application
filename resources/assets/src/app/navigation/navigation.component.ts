@@ -109,6 +109,7 @@ export class NavigationComponent implements OnInit {
             this.apiService.setToken(null);
             this.apiService.setAttachedUsers(null);
             this.apiService.setAttachedProjects(null);
+            this.apiService.setAllowedActions(null);
             this.location.replaceState('/');
             this.router.navigateByUrl('/');
         };

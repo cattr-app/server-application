@@ -12,6 +12,7 @@ export class AllowedActionsService {
     callbacks: callbackFunc[] = [];
 
     constructor(protected api: ApiService) {
+        this.api.getAllowedActions() ? this.allowedActions = this.api.getAllowedActions() : false;
     }
 
     getApiPath() {
@@ -81,6 +82,7 @@ export class AllowedActionsService {
 
     setupAllowedList(items) {
         this.allowedActions = items;
+        this.api.setAllowedActions(items);
 
         for (const callback of this.callbacks) {
             callback(items);

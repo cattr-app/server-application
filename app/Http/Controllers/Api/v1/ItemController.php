@@ -123,10 +123,9 @@ abstract class  ItemController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $itemId = Filter::process($this->getEventUniqueName('request.item.show'), $request->get('id'));
-        $idInt = is_int($itemId);
+        $itemId = is_int($request->get('id')) ? $request->get('id') : false;
 
-        if (!$idInt) {
+        if (!$itemId) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
                     'error' => 'Validation fail',
@@ -136,16 +135,22 @@ abstract class  ItemController extends Controller
             );
         }
 
+        $filters = [
+            'id' => $itemId
+        ];
+        $request->get('with') ? $filters['with'] = $request->get('with') : false;
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
-                $this->getQuery()
+            $this->applyQueryFilter(
+                $this->getQuery(), $filters ?: []
+            )
         );
 
-        $item = $itemsQuery->find($itemId);
+        $item = $itemsQuery->get();
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item)
+            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item->first())
         );
     }
 
@@ -199,12 +204,14 @@ abstract class  ItemController extends Controller
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), ['id' => $request->get('id')]
+                $this->getQuery()
             )
         );
 
         /** @var \Illuminate\Database\Eloquent\Model $item */
-        $item = $itemsQuery->first();
+        $item = collect($itemsQuery->get())->first(function ($val, $key) use ($request) {
+            return $val['id'] === $request->get('id');
+        });
 
         if (!$item) {
             return response()->json(

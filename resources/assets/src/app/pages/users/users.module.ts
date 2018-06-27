@@ -3,7 +3,8 @@ import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
 import {AuthRoute} from './users-routing.module';
-import {LoginService} from "../../auth/login/login.service";
+import {LoginService} from '../../auth/login/login.service';
+import {RolesService} from '../roles/roles.service';
 
 import {UsersCreateComponent} from './create/users.create.component';
 import {UsersEditComponent} from './edit/users.edit.component';
@@ -11,9 +12,10 @@ import {UsersShowComponent} from './show/users.show.component';
 import {UsersListComponent} from './list/users.list.component';
 
 import {HttpClientModule} from '@angular/common/http';
-import {UsersService} from "./users.service";
+import {UsersService} from './users.service';
 import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
+import {NgSelectModule} from '@ng-select/ng-select';
 
 @NgModule({
     imports: [
@@ -22,7 +24,8 @@ import {GrowlModule} from 'primeng/growl';
         FormsModule,
         HttpClientModule,
         NgxPaginationModule,
-        GrowlModule
+        GrowlModule,
+        NgSelectModule
     ],
     declarations: [
         UsersCreateComponent,
@@ -32,7 +35,8 @@ import {GrowlModule} from 'primeng/growl';
     ],
     providers: [
         LoginService,
-        UsersService
+        UsersService,
+        RolesService
     ]
 })
 

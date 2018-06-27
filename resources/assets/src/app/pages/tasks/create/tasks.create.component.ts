@@ -1,10 +1,14 @@
 import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {Task} from "../../../models/task.model";
-import {Router} from "@angular/router";
-import {TasksService} from "../tasks.service";
-import {ItemsCreateComponent} from "../../items.create.component";
-import {AllowedActionsService} from "../../roles/allowed-actions.service";
+import {Task} from '../../../models/task.model';
+import {Router} from '@angular/router';
+import {TasksService} from '../tasks.service';
+import {ItemsCreateComponent} from '../../items.create.component';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
+import {User} from '../../../models/user.model';
+import {Project} from '../../../models/project.model';
+import {ProjectsService} from '../../projects/projects.service';
+import {UsersService} from '../../users/users.service';
 
 @Component({
     selector: 'app-tasks-create',
@@ -14,12 +18,54 @@ import {AllowedActionsService} from "../../roles/allowed-actions.service";
 export class TasksCreateComponent extends ItemsCreateComponent implements OnInit {
 
     public item: Task = new Task();
+    public projects: Project[];
+    public users: User[];
+    public selectedProject: any = null;
+    public selectedUser: any = null;
 
     constructor(api: ApiService,
                 taskService: TasksService,
                 router: Router,
-                allowedService: AllowedActionsService,) {
+                allowedService: AllowedActionsService,
+                protected projectService: ProjectsService,
+                protected userService: UsersService) {
         super(api, taskService, router, allowedService);
+    }
+
+    ngOnInit() {
+        super.ngOnInit();
+        this.projectService.getItems(this.setProjects.bind(this), this.can('/projects/full_access') ? {} : {'direct_relation': 1});
+        this.userService.getItems(this.setUsers.bind(this));
+    }
+
+    OnChangeSelectProject(result) {
+        if (result) {
+            this.item.project_id = result.id;
+        } else {
+            this.item.project_id = null;
+        }
+    }
+
+    setProjects(result) {
+        this.projects = result;
+    }
+
+    OnChangeSelectUser(result) {
+        if (result) {
+            this.item.user_id = result.id;
+        } else {
+            this.item.user_id = null;
+        }
+    }
+
+    setUsers(result) {
+        this.users = result;
+        if (this.users.length < 2) {
+            const currentUser = this.api.getUser();
+            this.item.user_id = currentUser.id;
+            this.item.assigned_by = currentUser.id;
+        }
+        console.log(this.item);
     }
 
     prepareData() {
@@ -31,6 +77,6 @@ export class TasksCreateComponent extends ItemsCreateComponent implements OnInit
             'user_id': this.item.user_id,
             'assigned_by': this.item.assigned_by,
             'url': this.item.url
-        }
+        };
     }
 }

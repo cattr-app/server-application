@@ -4,7 +4,6 @@
             <div class="panel panel-default">
                 <div class="panel-heading">{{ item.id }}</div>
                 <div class="panel-body">
-
                     <a routerLink="/screenshots/list" title="Back">
                         <button class="btn btn-warning">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -26,12 +25,12 @@
                                     <td>{{ item.id }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Time Interval Id</th>
-                                    <td> {{ item.time_interval_id }}</td>
+                                    <th> User</th>
+                                    <td> {{ item.time_interval && item.time_interval.user.full_name }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Path</th>
-                                    <td> {{ item.path }}</td>
+                                    <th> Task</th>
+                                    <td> {{ item.time_interval && item.time_interval.task.task_name }}</td>
                                 </tr>
                                 <tr>
                                     <th> Created at</th>

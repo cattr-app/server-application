@@ -34,15 +34,15 @@ export abstract class ItemsService {
         );
     }
 
-    getItem(id, callback) {
+    getItem(id, callback, params ?: {}) {
         let item: Item;
+        const ItemParams = {...{'id': id}, ...params};
 
         return this.api.send(
             this.getApiPath() + '/show',
-            {'id': id},
+            ItemParams,
             (taskFromApi) => {
                 item = this.convertFromApi(taskFromApi);
-
                 callback(item);
             });
     }

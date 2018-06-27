@@ -1,4 +1,24 @@
-import {Item} from "./item.model";
+import {Item} from './item.model';
+import {User} from './user.model';
+import {Project} from './project.model';
+
+export interface TaskData {
+    id: number;
+    project_id?: number;
+    task_name?: string;
+    description?: string;
+    active?: number;
+    user_id?: number;
+    assigned_by?: number;
+    url?: string;
+    deleted_at?: string;
+    created_at?: string;
+    updated_at?: string;
+    total_time?: string;
+    user?: User;
+    assigned?: User;
+    project?: Project;
+}
 
 export class Task extends Item {
     public id: number;
@@ -13,20 +33,17 @@ export class Task extends Item {
     public created_at?: string;
     public updated_at?: string;
     public total_time?: string;
+    public user?: User;
+    public assigned?: User;
+    public project?: Project;
 
-    constructor(id?, projectId?, taskName?, description?, active = 1, userId?, assignedBy?, url = "URL", createdAt?, updatedAt?, deletedAt?, total_time?) {
+    constructor(data?: TaskData) {
         super();
-        this.id = id;
-        this.project_id = projectId;
-        this.task_name = taskName;
-        this.description = description;
-        this.active = active;
-        this.user_id = userId;
-        this.assigned_by = assignedBy;
-        this.url = url;
-        this.deleted_at = deletedAt;
-        this.created_at = createdAt;
-        this.updated_at = updatedAt;
-        this.total_time = total_time;
+
+        if (data) {
+            for (let key in data) {
+                this[key] = data[key];
+            }
+        }
     }
 }
