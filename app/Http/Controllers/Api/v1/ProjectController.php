@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
 use App\Models\Role;
-use App\User;
 use Auth;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
@@ -84,7 +83,10 @@ class ProjectController extends ItemController
         $request->offsetUnset('direct_relation');
 
         if ($direct_relation) {
-            $request->offsetSet('id', ['=', collect(Auth::user()->projects)->pluck('id')->toArray()]);
+            $projects = collect(Auth::user()->projects)->pluck('id')->toArray();
+            if (count($projects) > 0) {
+                $request->offsetSet('id', ['=', $projects]);
+            }
         }
 
         if ($project_relations_access && $request->get('user_id')) {
