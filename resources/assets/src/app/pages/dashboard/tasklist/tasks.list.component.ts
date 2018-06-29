@@ -17,7 +17,7 @@ export class TaskListComponent implements OnInit {
         const user: any = this.api.getUser() ? this.api.getUser() : null;
         const params = {
             'user_id': user.id,
-            'limit': 10
+            'with': 'project'
         };
         this.dashboardService.getTasks(this.setTasks.bind(this), params);
     }
@@ -25,7 +25,5 @@ export class TaskListComponent implements OnInit {
     setTasks(result) {
         this.itemsArray = result;
     }
-
-
 
 }

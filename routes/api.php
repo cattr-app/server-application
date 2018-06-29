@@ -47,6 +47,13 @@ Route::group([
     $router->any('/projects/show', 'Api\v1\ProjectController@show');
     $router->post('/projects/remove', 'Api\v1\ProjectController@destroy');
 
+    //Projects Users routes
+    $router->any('/projects-users/list', 'Api\v1\ProjectsUsersController@index');
+    $router->post('/projects-users/create', 'Api\v1\ProjectsUsersController@create');
+    $router->post('/projects-users/bulk-create', 'Api\v1\ProjectsUsersController@bulkCreate');
+    $router->post('/projects-users/remove', 'Api\v1\ProjectsUsersController@destroy');
+    $router->post('/projects-users/bulk-remove', 'Api\v1\ProjectsUsersController@bulkDestroy');
+
     //Tasks routes
     $router->any('/tasks/list', 'Api\v1\TaskController@index');
     $router->any('/tasks/dashboard', 'Api\v1\TaskController@dashboard');

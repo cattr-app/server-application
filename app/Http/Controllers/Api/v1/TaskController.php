@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\Task;
 use App\User;
 use Auth;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
@@ -142,24 +143,23 @@ class TaskController extends ItemController
     public function dashboard(Request $request): JsonResponse
     {
         $filters = $request->all();
-        $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
         is_int($request->get('user_id')) ? $filters['timeIntervals.user_id'] = $request->get('user_id') : False;
+        $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
         $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
-        $filters['timeIntervals.update_at'] = ['>=', $compareDate];
+        $filters['timeIntervals.start_at'] = ['>=', [$compareDate]];
         unset($filters['user_id']);
-
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(False),
-            $filters ?: []
-        );
 
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery
+            $this->applyQueryFilter(
+                $this->getQuery(),
+                $filters ?: []
+            )
         );
 
-        $items = $itemsQuery->with(['TimeIntervals' => function($q) use ($request) {
-            $request->get('user_id') ? $q->where('user_id', '=', $request->get('user_id')) : False;
+        $items = $itemsQuery->with(['timeIntervals' => function ($q) use ($compareDate) {
+            /** @var Builder $q */
+            $q->where('start_at', '>=', $compareDate);
         }])->get()->toArray();
 
         if (collect($items)->isEmpty()) {
@@ -173,13 +173,10 @@ class TaskController extends ItemController
             $totalTime = 0;
 
             foreach ($task['time_intervals'] as $timeInterval) {
-                $end = new DateTime($timeInterval['end_at']);
-                $totalTime += $end->diff(new DateTime($timeInterval['start_at']))->s;
+                $totalTime += abs(Carbon::parse($timeInterval['end_at'])->timestamp - Carbon::parse($timeInterval['start_at'])->timestamp);
             }
-
             $items[$key]['total_time'] = gmdate("H:i:s", $totalTime);
         }
-
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),

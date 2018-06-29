@@ -92,6 +92,7 @@ class UserController extends ItemController
      * @apiParam {DateTime} [created_at]            `QueryParam` User Creation DateTime
      * @apiParam {DateTime} [updated_at]            `QueryParam` Last User data update DataTime
      * @apiParam {DateTime} [deleted_at]            `QueryParam` When User was deleted (null if not)
+     * @apiParam {String}   [timezone]              `QueryParam` User's timezone
      *
      * @apiSuccess (200) {User[]} UserList array of users objects
      */
@@ -142,6 +143,7 @@ class UserController extends ItemController
      * @apiParam {String}  [user_role_value]        ???
      * @apiParam {Boolean} active                   User is active
      * @apiParam {Integer} [role_id]                User's Role ID
+     * @apiParam {String}  [timezone]               User's timezone
      *
      * @param Request $request
      *
@@ -264,6 +266,7 @@ class UserController extends ItemController
      * @apiParam {String}   [users.object.user_role_value]        ???
      * @apiParam {Boolean}  users.object.active                   User is active
      * @apiParam {Integer}  [users.object.role_id]                User's Role ID
+     * @apiParam {String}   [users.object.timezone]               User's timezone
      *
      * @apiSuccess {Object[]} message        Array of User object
      * @apiSuccess {Object}   message.object User object

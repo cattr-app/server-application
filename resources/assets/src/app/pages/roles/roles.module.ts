@@ -1,4 +1,4 @@
-import {NgModule, OnInit} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 import {GrowlModule} from 'primeng/growl';
@@ -17,7 +17,6 @@ import {RolesShowComponent} from './show/roles.show.component';
 import {RolesUsersComponent} from './users/roles.users.component';
 import {NgxPaginationModule} from 'ngx-pagination';
 import {HttpClientModule} from '@angular/common/http';
-import {DualListComponent} from 'angular-dual-listbox';
 
 
 @NgModule({
@@ -36,7 +35,6 @@ import {DualListComponent} from 'angular-dual-listbox';
         RolesEditComponent,
         RolesUsersComponent,
         RolesShowComponent,
-        DualListComponent,
     ],
     providers: [
         LoginService,

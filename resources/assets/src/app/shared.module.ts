@@ -5,6 +5,7 @@ import {NgSelectModule} from '@ng-select/ng-select';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectsService} from './pages/projects/projects.service';
+import {DualListComponent} from 'angular-dual-listbox';
 
 @NgModule({
     imports: [
@@ -15,7 +16,8 @@ import {ProjectsService} from './pages/projects/projects.service';
     ],
     declarations: [
         UsersFiltersComponent,
-        ProjectsFiltersComponent
+        ProjectsFiltersComponent,
+        DualListComponent
     ],
     exports: [
         CommonModule,
@@ -23,7 +25,8 @@ import {ProjectsService} from './pages/projects/projects.service';
         NgSelectModule,
         ReactiveFormsModule,
         UsersFiltersComponent,
-        ProjectsFiltersComponent
+        ProjectsFiltersComponent,
+        DualListComponent
     ],
     providers: [
         ProjectsService

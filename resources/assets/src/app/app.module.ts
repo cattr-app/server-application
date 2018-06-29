@@ -9,6 +9,7 @@ import {AppRoutingModule} from './app-routing.module';
 import {ApiModule} from './api/api.module';
 import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from './shared.module';
+import {MomentModule} from 'ngx-moment';
 
 import {AppComponent} from './app.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
@@ -29,7 +30,8 @@ import {ApiService} from './api/api.service';
         ApiModule.forRoot(),
         ModalModule.forRoot(),
         GrowlModule,
-        SharedModule
+        SharedModule,
+        MomentModule
     ],
     declarations: [
         AppComponent,

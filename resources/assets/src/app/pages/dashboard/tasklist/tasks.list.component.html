@@ -3,14 +3,14 @@
   <thead>
     <tr>
       <th scope="col">Task</th>
-      <th scope="col">Project Id</th>
+      <th scope="col">Project</th>
       <th scope="col">Time</th>
     </tr>
   </thead>
   <tbody>
     <tr  *ngFor="let task of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
       <td>{{task.task_name}}</td>
-      <td>{{task.project_id}}</td>
+      <td>{{task.project && task.project.name}}</td>
       <td>{{task.total_time}}</td>
     </tr>
   </tbody>

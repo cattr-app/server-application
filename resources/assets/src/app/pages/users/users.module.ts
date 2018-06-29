@@ -16,6 +16,7 @@ import {UsersService} from './users.service';
 import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
 import {NgSelectModule} from '@ng-select/ng-select';
+import {TimezonePickerModule} from 'ng2-timezone-selector';
 
 @NgModule({
     imports: [
@@ -25,7 +26,8 @@ import {NgSelectModule} from '@ng-select/ng-select';
         HttpClientModule,
         NgxPaginationModule,
         GrowlModule,
-        NgSelectModule
+        NgSelectModule,
+        TimezonePickerModule
     ],
     declarations: [
         UsersCreateComponent,

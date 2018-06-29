@@ -20,7 +20,8 @@
       "testTsconfig": "tsconfig.spec.json",
       "prefix": "app",
       "styles": [
-        "styles.scss"
+        "styles.scss",
+        "../../../node_modules/select2/dist/css/select2.min.css"
       ],
       "scripts": [],
       "environmentSource": "environments/environment.ts",

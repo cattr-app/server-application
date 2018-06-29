@@ -47,13 +47,38 @@ export abstract class ItemsEditComponent implements OnInit {
         this.item = result;
     }
 
+    errorCallback(result) {
+        this.msgs = [];
+        this.msgs.push({severity: 'error', summary: result.error.error, detail: result.error.reason});
+    }
+
     editCallback(result) {
         this.msgs = [];
         this.msgs.push({severity: 'success', summary: 'Success Message', detail: 'Item has been updated'});
     }
 
-    errorCallback(result) {
-        this.msgs = [];
-        this.msgs.push({severity: 'error', summary: result.error.error, detail: result.error.reason});
+    editBulkCallback(name, results) {
+        const errors = [];
+        for (const msg of results.messages) {
+            if (msg.error) {
+                let reason = '';
+                if (Object.keys(msg.reason).length > 0) {
+                    Object.keys(msg.reason).forEach(function (element, index) {
+                        reason += ' ' + msg.reason[element][0];
+                    });
+                } else {
+                    reason = msg.reason;
+                }
+                errors.push({'error': msg.error, 'reason': reason});
+            }
+        }
+
+        if (errors.length > 0) {
+            for (const err of errors) {
+                this.msgs.push({severity: 'error', summary: name + ' ' + err.error, detail: err.reason});
+            }
+        } else {
+            this.msgs.push({severity: 'success', summary: 'Success', detail:  name + ' has been updated'});
+        }
     }
 }

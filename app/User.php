@@ -41,6 +41,7 @@ use App\Models\Role;
  * @property string $user_role_value
  * @property string $active
  * @property string $password
+ * @property string $timezone
  * @property int $role_id
  * @property string $created_at
  * @property string $updated_at
@@ -90,6 +91,7 @@ class User extends Authenticatable implements JWTSubject
         'user_role_value',
         'active',
         'password',
+        'timezone',
         'role_id',
     ];
 

@@ -24,6 +24,7 @@ export interface UserData {
    user_role_value: string;
    active: number;
    password: string;
+   timezone: string;
    role_id: number;
    created_at?: string;
    updated_at?: string;
@@ -54,6 +55,7 @@ export class User extends Item {
     public user_role_value: string;
     public active: number;
     public password: string;
+    public timezone: string;
     public role_id: number;
     public created_at?: string;
     public updated_at?: string;

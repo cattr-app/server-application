@@ -39,7 +39,9 @@ class QueryHelper
             $with = explode(',', $filter['with']);
             if ($with) {
                 foreach ($with as $relation) {
-                    $query->with($relation);
+                    if (method_exists($model, $relation)) {
+                        $query->with($relation);
+                    }
                 }
             }
         }

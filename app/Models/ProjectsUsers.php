@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -26,6 +27,14 @@ class ProjectsUsers extends Model
      * @var string
      */
     protected $table = 'projects_users';
+
+    protected function setKeysForSaveQuery(Builder $query)
+    {
+        $query
+            ->where('project_id', '=', $this->getAttribute('project_id'))
+            ->where('user_id', '=', $this->getAttribute('user_id'));
+        return $query;
+    }
 
     /**
      * @var array

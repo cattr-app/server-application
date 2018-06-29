@@ -154,6 +154,17 @@
                                 </div>
                             </div>
                             <div class="form-group row">
+                                <label class="col-md-2">timezone</label>
+                                <div class="col-md-10">
+                                    <ng2-timezone-picker
+                                            [(timezone)]="item.timezone"
+                                            showOffset="true"
+                                            placeholder="Select timezone"
+                                            guess="true">
+                                    </ng2-timezone-picker>
+                                </div>
+                            </div>
+                            <div class="form-group row">
                                 <label class="col-md-2">Password</label>
                                 <div class="col-md-10">
                                     <input type="password" class="form-control" name="user-password" [(ngModel)]="item.password">

@@ -1,19 +1,23 @@
-import {Component, IterableDiffers, OnInit} from '@angular/core';
-import {ApiService} from '../../../api/api.service';
-import {ProjectsService} from '../projects.service';
+import {Component, OnInit, IterableDiffers} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
+
+import {User} from '../../../models/user.model';
 import {Project} from '../../../models/project.model';
+
 import {ItemsEditComponent} from '../../items.edit.component';
-import {AllowedActionsService} from '../../roles/allowed-actions.service';
 import {DualListComponent} from 'angular-dual-listbox';
+
+import {ApiService} from '../../../api/api.service';
 import {UsersService} from '../../users/users.service';
+import {AllowedActionsService} from '../../roles/allowed-actions.service';
+import {ProjectsService} from '../projects.service';
 
 @Component({
-    selector: 'app-projects-edit',
-    templateUrl: './projects.edit.component.html',
+    selector: 'app-projects-users',
+    templateUrl: './projects.users.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class ProjectsEditComponent extends ItemsEditComponent implements OnInit {
+export class ProjectsUsersComponent extends ItemsEditComponent implements OnInit {
 
     public item: Project = new Project();
     sourceUsers: any = [];
@@ -30,18 +34,23 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
                 protected projectService: ProjectsService,
                 activatedRoute: ActivatedRoute,
                 router: Router,
-                allowedService: AllowedActionsService,
+                protected allowedService: AllowedActionsService,
                 protected usersService: UsersService,
                 differs: IterableDiffers) {
         super(api, projectService, activatedRoute, router, allowedService);
         this.differUsers = differs.find([]).create(null);
     }
 
+    prepareData() {
+        return {
+            'name': this.item.name,
+        };
+    }
+
     ngOnInit() {
         this.sub = this.activatedRoute.params.subscribe(params => {
             this.id = +params['id'];
         });
-
         this.itemService.getItem(this.id, this.setItem.bind(this), {'with': 'users'});
         this.usersService.getItems(this.UsersUpdate.bind(this));
     }
@@ -53,7 +62,6 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
     }
 
     onSubmit() {
-        super.onSubmit();
         const addUsers = [];
         const removeUsers = [];
         const UserChanges = this.differUsers.diff(this.confirmedUsers);
@@ -86,27 +94,11 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
         }
     }
 
+    errorCallback(result) {
+        this.msgs.push({severity: 'error', summary: result.error.error, detail: result.error.reason});
+    }
+
     UsersUpdate(result) {
         this.sourceUsers = result;
     }
-
-    prepareData() {
-        return {
-            // 'company_id': this.item.company_id,
-            'name': this.item.name,
-            'description': this.item.description,
-        };
-    }
-    getHeader() {
-        return 'Edit Project';
-    }
-
-    getFields() {
-        return [
-            {'label': 'Company Id', 'name': 'project-company-id', 'model': 'company_id'},
-            {'label': 'Name', 'name': 'project-name', 'model': 'name'},
-            {'label': 'Description', 'name': 'project-description', 'model': 'description'},
-        ];
-    }
-
 }

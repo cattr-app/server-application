@@ -31,6 +31,9 @@
                                     <textarea rows="5" class="form-control" name="project-description" [(ngModel)]="item.description"></textarea>
                                 </div>
                             </div>
+                            <dual-list [sort]="keepSorted" [source]="sourceUsers" [key]="key" [filter]="filter"
+                                       [display]="displayUsers" [(destination)]="confirmedUsers" [format]="format" [height]="height"></dual-list>
+                            <br>
                             <button type="submit" class="btn btn-primary">Update</button>
                         </form>
                     </div>

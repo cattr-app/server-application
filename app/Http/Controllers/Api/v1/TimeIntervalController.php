@@ -6,6 +6,7 @@ use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
 use Auth;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -35,8 +36,8 @@ class TimeIntervalController extends ItemController
         return [
             'task_id'  => 'required',
             'user_id'  => 'required',
-            'start_at' => 'required',
-            'end_at'   => 'required',
+            'start_at' => 'date_format:'.DATE_ATOM.'|required',
+            'end_at'   => 'date_format:'.DATE_ATOM.'|required',
         ];
     }
 
@@ -77,6 +78,8 @@ class TimeIntervalController extends ItemController
         }
 
         //create time interval
+        $intervalData['start_at'] = (new Carbon($intervalData['start_at']))->setTimezone('UTC')->toDateTimeString();
+        $intervalData['end_at'] = (new Carbon($intervalData['end_at']))->setTimezone('UTC')->toDateTimeString();
         $timeInterval = Filter::process($this->getEventUniqueName('item.create'), TimeInterval::create($intervalData));
 
         //create screenshot

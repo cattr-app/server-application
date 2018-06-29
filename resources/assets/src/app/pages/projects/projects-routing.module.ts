@@ -4,12 +4,14 @@ import {ProjectsCreateComponent} from './create/projects.create.component';
 import {ProjectsEditComponent} from './edit/projects.edit.component';
 import {ProjectsShowComponent} from './show/projects.show.component';
 import {ProjectsListComponent} from './list/projects.list.component';
+import {ProjectsUsersComponent} from './users/projects.users.component';
 
 export const AuthRoutes: Routes = [
     {path: 'create', component: ProjectsCreateComponent},
     {path: 'edit/:id', component: ProjectsEditComponent},
     {path: 'list', component: ProjectsListComponent},
     {path: 'show/:id', component: ProjectsShowComponent},
+    {path: 'users/:id', component: ProjectsUsersComponent},
     {path: '', redirectTo: 'login', pathMatch: 'full'},
 ];
 

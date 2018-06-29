@@ -61,6 +61,14 @@ class Rule extends Model
                 'relations' => __('Project list attached to user'),
                 'full_access' => __('Project full access'),
             ],
+            'projects-users' => [
+                'list' => __('Project User relation list'),
+                'create' => __('Project User relation create'),
+                'bulk-create' => __('Project User relation multiple create'),
+                'remove' => __('Project User relation remove'),
+                'bulk-remove' => __('Project User relation multiple remove'),
+                'full_access' => __('Project User relation full access'),
+            ],
             'tasks' => [
                 'list' => __('Task list'),
                 'dashboard' => __('Task list at dashboard'),
