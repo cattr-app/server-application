@@ -26,7 +26,7 @@
                             <tbody>
                             <tr *ngFor="let task of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{task.id}}</td>
-                                <td>{{task.project.name}}</td>
+                                <td>{{task.project && task.project.name}}</td>
                                 <td class="task-name">{{task.task_name}}</td>
                                 <td>
                                     <a *ngIf="can('/tasks/show')" [routerLink]="['/tasks/show', task.id]" title="View project">

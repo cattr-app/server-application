@@ -35,6 +35,7 @@ export class DashboardService {
                 'user_id': userId,
                 'limit': limit,
                 'offset': offset,
+                'with': 'timeInterval,timeInterval.task,timeInterval.task.project'
             },
             (result) => {
                 result.forEach((itemFromApi) => {

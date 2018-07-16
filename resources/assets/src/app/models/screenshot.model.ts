@@ -34,12 +34,13 @@ export class Screenshot extends Item {
 export class ScreenshotsBlock {
 
     constructor(data) {
-
         if (data) {
             for (const key in data) {
                 this[key] = data[key];
             }
         }
+
+        this.screenshots = Object.keys(this.screenshots).map(key => this.screenshots[key]);
     }
 
     public screenshots: Screenshot[];

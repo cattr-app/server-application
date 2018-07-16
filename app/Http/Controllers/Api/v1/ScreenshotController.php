@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1;
 use App\Models\Role;
 use App\Models\Screenshot;
 use Auth;
+use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -179,6 +180,9 @@ class ScreenshotController extends ItemController
     {
         $filters = $request->all();
         is_int($request->get('user_id')) ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
+        $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
+        $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
+        $filters['timeInterval.start_at'] = ['>=', [$compareDate]];
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),
@@ -187,7 +191,7 @@ class ScreenshotController extends ItemController
 
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery->orderBy('created_at', 'desc')
+            $baseQuery->orderBy('id', 'desc')
         );
 
         $screenshots = $itemsQuery->get();
@@ -205,8 +209,9 @@ class ScreenshotController extends ItemController
             $hasInterval = false;
             $matches = [];
 
-            preg_match('/(\d{4}-\d{2}-\d{2} \d{2})/', $screenshot->created_at, $matches);
-
+            preg_match('/(\d{4}-\d{2}-\d{2} \d{2})/', $screenshot->timeInterval->start_at, $matches);
+            $minutes = Carbon::parse($screenshot->timeInterval->start_at)->minute;
+            $minutes = $minutes > 9 ? (string)$minutes : '0'.$minutes;
             $hour = $matches[1].':00:00';
 
             foreach ($items as $itemkey => $item) {
@@ -216,16 +221,24 @@ class ScreenshotController extends ItemController
                 }
             }
 
-            if($hasInterval) {
-                $items[$itemkey]['screenshots'][] = $screenshot->toArray();
+            if($hasInterval && isset($itemkey)) {
+                $items[$itemkey]['screenshots'][(int)$minutes{0}] = $screenshot->toArray();
             } else {
-                $items[] = [
+                $arr = [
                     'interval' => $hour,
-                    'screenshots' => [$screenshot],
+                    'screenshots' => [
+                        0 => '',
+                        1 => '',
+                        2 => '',
+                        3 => '',
+                        4 => '',
+                        5 => '',
+                    ]
                 ];
+                $arr['screenshots'][(int)$minutes{0}] = $screenshot->toArray();
+                $items[] = $arr;
             }
         }
-
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),

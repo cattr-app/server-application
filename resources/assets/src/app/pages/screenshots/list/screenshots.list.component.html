@@ -27,8 +27,8 @@
                             <tbody>
                             <tr *ngFor="let screenshot of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{screenshot.id}}</td>
-                                <td>{{screenshot.time_interval.task.task_name}}</td>
-                                <td>{{screenshot.time_interval.user.full_name}}</td>
+                                <td>{{screenshot.time_interval.task && screenshot.time_interval.task.task_name}}</td>
+                                <td>{{screenshot.time_interval.user && screenshot.time_interval.user.full_name}}</td>
                                 <td><img class="preview" src="{{screenshot.path}}"></td>
                                 <td>
                                     <a *ngIf="can('/screenshots/show')" [routerLink]="['/screenshots/show', screenshot.id]" title="View screenshot">

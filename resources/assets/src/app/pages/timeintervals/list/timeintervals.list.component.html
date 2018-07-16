@@ -28,8 +28,8 @@
                             <tbody>
                             <tr *ngFor="let timeinterval of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
                                 <td>{{timeinterval.id}}</td>
-                                <td>{{timeinterval.task.task_name}}</td>
-                                <td>{{timeinterval.user.full_name}}</td>
+                                <td>{{timeinterval.task && timeinterval.task.task_name}}</td>
+                                <td>{{timeinterval.user && timeinterval.user.full_name}}</td>
                                 <td>{{timeinterval.start_at}}</td>
                                 <td>{{timeinterval.end_at}}</td>
 

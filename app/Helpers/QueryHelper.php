@@ -39,8 +39,36 @@ class QueryHelper
             $with = explode(',', $filter['with']);
             if ($with) {
                 foreach ($with as $relation) {
-                    if (method_exists($model, $relation)) {
+                    if (strpos($relation, '.') !== False) {
+                        $params = explode('.', $relation);
+                        $domain = array_shift($params);
+
+                        if (!method_exists($model, $domain)) {
+                            $cls = get_class($model);
+                            throw new \RuntimeException("Unknown relation {$cls}::{$domain}()");
+                        }
+                        /** @var Relation $relationQuery */
+                        $relationQuery = $model->{$domain}();
+
+                        if (is_array($params)) {
+                            while (count($params) > 0) {
+                                $relationModel = $relationQuery->getModel();
+                                $domain = array_shift($params);
+
+                                if (!method_exists($relationModel, $domain)) {
+                                    $cls = get_class($model);
+                                    throw new \RuntimeException("Unknown relation {$cls}::{$domain}()");
+                                }
+
+                                $relationQuery = $relationModel->{$domain}();
+                            }
+                        }
+
                         $query->with($relation);
+                    } else {
+                        if (method_exists($model, $relation)) {
+                            $query->with($relation);
+                        }
                     }
                 }
             }
