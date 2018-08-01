@@ -6,6 +6,7 @@ import {IntegrationsComponent} from "./pages/integrations/integrations.component
 const routes: Routes = [
     {path: 'projects', loadChildren: './pages/projects/projects.module#ProjectsModule'},
     {path: 'tasks', loadChildren: './pages/tasks/tasks.module#TasksModule'},
+    {path: 'statistic', loadChildren: './pages/statistic/statistic.module#StatisticModule'},
     {path: 'users', loadChildren: './pages/users/users.module#UsersModule'},
     {path: 'roles', loadChildren: './pages/roles/roles.module#RolesModule'},
     {path: 'screenshots', loadChildren: './pages/screenshots/screenshots.module#ScreenshotsModule'},
