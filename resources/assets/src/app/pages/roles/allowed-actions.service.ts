@@ -61,7 +61,7 @@ export class AllowedActionsService {
         }
 
         const object = matches[1];
-        const  objAction = matches[2];
+        const objAction = matches[2];
 
         for (const allowedAction of this.allowedActions) {
 
