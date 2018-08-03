@@ -4,6 +4,9 @@ import {NgModule} from '@angular/core';
 import {ModalModule} from 'ngx-bootstrap';
 import {BrowserModule} from '@angular/platform-browser';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
+import {TranslateModule, TranslateLoader, TranslateService} from '@ngx-translate/core';
+import {TranslateHttpLoader} from '@ngx-translate/http-loader';
+import {HttpClientModule, HttpClient} from '@angular/common/http';
 
 import {AppRoutingModule} from './app-routing.module';
 import {ApiModule} from './api/api.module';
@@ -21,6 +24,12 @@ import {AttachedUsersService} from './pages/users/attached-users.service';
 import {AttachedProjectService} from './pages/projects/attached-project.service';
 import {ApiService} from './api/api.service';
 
+
+export function HttpLoaderFactory(http: HttpClient) {
+    return new TranslateHttpLoader(http,'/js/assets/lang/');
+}
+
+
 @NgModule({
     imports: [
         BrowserModule,
@@ -31,7 +40,14 @@ import {ApiService} from './api/api.service';
         ModalModule.forRoot(),
         GrowlModule,
         SharedModule,
-        MomentModule
+        MomentModule,
+        TranslateModule.forRoot({
+            loader: {
+                provide: TranslateLoader,
+                useFactory: HttpLoaderFactory,
+                deps: [HttpClient]
+            }
+        }),
     ],
     declarations: [
         AppComponent,
@@ -44,14 +60,21 @@ import {ApiService} from './api/api.service';
         AttachedUsersService,
         AttachedProjectService,
     ],
-    bootstrap: [AppComponent]
+    bootstrap: [AppComponent],
 })
 export class AppModule {
     constructor(
         protected apiService: ApiService,
         protected router: Router,
         protected location: Location,
+        protected translate: TranslateService,
     ) {
+
+        translate.setDefaultLang('en');
+
+         // the lang to use, if the lang isn't available, it will use the current loader to get them
+        translate.use('en');
+
         this.router.events.subscribe(this.checkPath.bind(this));
     }
 

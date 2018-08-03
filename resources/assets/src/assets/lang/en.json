@@ -1,0 +1,26 @@
+{
+	"navigation": {
+		"dashboard": "Панель приборов",
+	    "login": "Login",
+		"forgot": "Forgot",
+		"reset": "Reset",
+		"register": "Register",
+		"projects": "Projects",
+		"tasks": "Tasks",
+		"users": "Users",
+		"screenshots": "Screenshots",
+		"timeintervals": "Time Intervals",
+		"statistic": "Statistic",
+		"integrations": "Integrations",
+		"role": "Role",
+		"logout": "Logout"
+	},
+	"dashboard": {
+		"usage": "Today time use:",
+		"task": "Task",
+		"project": "Project",
+		"time": "Time",
+		"no-task": "No task for last 24 hours. ¯\\_(ツ)_/¯",
+		"auto-loading": "screenshots auto-loading"
+	}
+}

@@ -4,10 +4,10 @@
             <div *ngIf="item.isLink; then link else action"></div>
 
             <ng-template #link>
-                <a routerLink="/{{item.action}}">{{item.title}}</a>
+                <a routerLink="/{{item.action}}" translate [translateParams]="{kek: 'kukarek'}">{{item.title}}</a>
             </ng-template>
             <ng-template #action>
-                <a href="#" (click)="processLinkAction(item.action)">{{item.title}}</a>
+                <a href="#" (click)="processLinkAction(item.action)" translate>{{item.title}}</a>
             </ng-template>
         </li>
     </ul>

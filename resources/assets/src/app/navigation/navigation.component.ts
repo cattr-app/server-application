@@ -20,23 +20,23 @@ export class NavigationComponent implements OnInit {
     isAuthorized = false;
 
     protected itemsGuest: NavigationLink[] = [
-        {title: 'Login', action: 'auth/login', isLink: true},
-        {title: 'Forgot', action: 'auth/forgot', isLink: true},
-        {title: 'Reset', action: 'auth/reset', isLink: true},
-        {title: 'Register', action: 'auth/register', isLink: true},
+        {title: 'navigation.login', action: 'auth/login', isLink: true},
+        {title: 'navigation.forgot', action: 'auth/forgot', isLink: true},
+        {title: 'navigation.reset', action: 'auth/reset', isLink: true},
+        {title: 'navigation.register', action: 'auth/register', isLink: true},
     ];
 
     protected itemsAuthorized: NavigationLink[] = [
-        {title: 'Dashboard', action: 'dashboard', isLink: true, permissions: [ 'dashboard' ] },
-        {title: 'Projects', action: 'projects/list', isLink: true, permissions: [ 'projects/list' ]},
-        {title: 'Tasks', action: 'tasks/list', isLink: true, permissions: [ 'tasks/list' ]},
-        {title: 'Users', action: 'users/list', isLink: true, permissions: [ 'users/list' ]},
-        {title: 'Screenshots', action: 'screenshots/list', isLink: true, permissions: [ 'screenshots/list' ]},
-        {title: 'Time Intervals', action: 'time-intervals/list', isLink: true, permissions: [ 'time-intervals/list' ]},
-        {title: 'Statistic', action: 'statistic/time', isLink: true, permissions: [ 'users/list', 'time-intervals/list'  ]},
-        {title: 'Integrations', action: 'integrations', isLink: true, permissions: [ 'projects/list' ]},
-        {title: 'Role', action: 'roles/list', isLink: true, permissions: [ 'roles/list' ]},
-        {title: 'Logout', action: 'onLogout', isLink: false},
+        {title: 'navigation.dashboard', action: 'dashboard', isLink: true, permissions: [ 'dashboard' ] },
+        {title: 'navigation.projects', action: 'projects/list', isLink: true, permissions: [ 'projects/list' ]},
+        {title: 'navigation.tasks', action: 'tasks/list', isLink: true, permissions: [ 'tasks/list' ]},
+        {title: 'navigation.users', action: 'users/list', isLink: true, permissions: [ 'users/list' ]},
+        {title: 'navigation.screenshots', action: 'screenshots/list', isLink: true, permissions: [ 'screenshots/list' ]},
+        {title: 'navigation.timeintervals', action: 'time-intervals/list', isLink: true, permissions: [ 'time-intervals/list' ]},
+        {title: 'navigation.statistic', action: 'statistic/time', isLink: true, permissions: [ 'users/list', 'time-intervals/list'  ]},
+        {title: 'navigation.integrations', action: 'integrations', isLink: true, permissions: [ 'projects/list' ]},
+        {title: 'navigation.role', action: 'roles/list', isLink: true, permissions: [ 'roles/list' ]},
+        {title: 'navigation.logout', action: 'onLogout', isLink: false},
     ];
 
     constructor(

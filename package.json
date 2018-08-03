@@ -22,6 +22,8 @@
     "@angular/platform-browser-dynamic": "^5.2.0",
     "@angular/router": "^5.2.0",
     "@ng-select/ng-select": "1.x",
+    "@ngx-translate/core": "9.x",
+    "@ngx-translate/http-loader": "2.x",
     "angular-dual-listbox": "^4.7.0",
     "apidoc": "^0.17.6",
     "bootstrap-sass": "^3.3.7",

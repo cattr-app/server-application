@@ -1,10 +1,10 @@
-<p class="h2">Today time use:</p>
+<p class="h2" translate>dashboard.usage</p>
 <table class="table" *ngIf="itemsArray.length">
   <thead>
     <tr>
-      <th scope="col">Task</th>
-      <th scope="col">Project</th>
-      <th scope="col">Time</th>
+      <th scope="col" translate>dashboard.task</th>
+      <th scope="col" translate>dashboard.project</th>
+      <th scope="col" translate>dashboard.time</th>
     </tr>
   </thead>
   <tbody>
@@ -15,6 +15,4 @@
     </tr>
   </tbody>
 </table>
-<div *ngIf="!itemsArray.length" class="alert alert-info">
-  No task for last 24 hours. ¯\_(ツ)_/¯
-</div>
+<div *ngIf="!itemsArray.length" class="alert alert-info" translate>dashboard.no-task</div>

@@ -12,6 +12,9 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { DashboardComponent } from './dashboard.component';
 import { TaskListComponent } from './tasklist/tasks.list.component';
 import { ScreenshotListComponent } from './screenshotlist/screenshot.list.component';
+import {TranslateModule} from '@ngx-translate/core';
+
+
 
 @NgModule({
   imports: [
@@ -19,16 +22,17 @@ import { ScreenshotListComponent } from './screenshotlist/screenshot.list.compon
     AuthRoute,
     FormsModule,
     HttpClientModule,
-    NgxPaginationModule
+    NgxPaginationModule,
+    TranslateModule,
   ],
   declarations: [
     DashboardComponent,
     TaskListComponent,
-    ScreenshotListComponent
+    ScreenshotListComponent,
   ],
   providers: [
     LoginService,
-    DashboardService
+    DashboardService,
   ]
 })
 
