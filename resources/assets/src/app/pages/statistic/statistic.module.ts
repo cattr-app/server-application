@@ -16,7 +16,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
-
+import {ScheduleModule} from 'primeng/schedule';
 
 @NgModule({
     imports: [
@@ -27,7 +27,7 @@ import {SharedModule} from '../../shared.module';
         NgxPaginationModule,
         GrowlModule,
         SharedModule,
-
+        ScheduleModule,
     ],
     declarations: [
         /**
