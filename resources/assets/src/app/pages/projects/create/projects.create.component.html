@@ -2,12 +2,12 @@
     <div class="row">
         <div class="col col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Create New Project</div>
+                <div class="panel-heading" translate>project.create</div>
                 <div class="panel-body">
                     <a routerLink="/projects/list" title="Back">
                         <button class="btn btn-warning">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                            Back
+                            <span translate>control.back</span>
                         </button>
                     </a>
                     <div class="create-form">
@@ -19,18 +19,18 @@
                                 <!--</div>-->
                             <!--</div>-->
                             <div class="form-group row">
-                                <label class="col-md-2">Name</label>
+                                <label class="col-md-2" translate>project.name</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="project-name" [(ngModel)]="item.name">
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2">Description</label>
+                                <label class="col-md-2" translate>project.description</label>
                                 <div class="col-md-10">
                                     <textarea class="form-control" rows="5" name="project-description" [(ngModel)]="item.description"></textarea>
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Create</button>
+                            <button type="submit" class="btn btn-primary" translate>control.create</button>
                         </form>
                     </div>
                 </div>

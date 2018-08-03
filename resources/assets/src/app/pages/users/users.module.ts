@@ -17,6 +17,7 @@ import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
 import {NgSelectModule} from '@ng-select/ng-select';
 import {TimezonePickerModule} from 'ng2-timezone-selector';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
     imports: [
@@ -27,7 +28,8 @@ import {TimezonePickerModule} from 'ng2-timezone-selector';
         NgxPaginationModule,
         GrowlModule,
         NgSelectModule,
-        TimezonePickerModule
+        TimezonePickerModule,
+        TranslateModule,
     ],
     declarations: [
         UsersCreateComponent,

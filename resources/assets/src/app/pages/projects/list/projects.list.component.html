@@ -2,12 +2,12 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Projects</div>
+                <div class="panel-heading" translate>navigation.projects</div>
                 <div class="panel-body">
                     <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
                     <br/>
                     <a *ngIf="can('/projects/create')" routerLink="/projects/create" class="btn btn-success" title="Add new project">
-                        <i class="fa fa-plus" aria-hidden="true"></i> Add New
+                        <i class="fa fa-plus" aria-hidden="true"></i> <span translate>control.new</span>
                     </a>
                     <br/>
                     <br/>
@@ -15,9 +15,9 @@
                         <table class="table table-borderless">
                             <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>Name</th>
-                                <th>Actions</th>
+                                <th translate>project.id</th>
+                                <th translate>project.name</th>
+                                <th translate>control.actions</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -34,19 +34,19 @@
                                     <a *ngIf="can('/projects-users/full_access')"  [routerLink]="['/projects/users', project.id]" title="Assign users">
                                         <button class="btn btn-primary btn-sm">
                                             <i class="fa fa-users" aria-hidden="true"></i>
-                                            Assign users
+                                            <span translate>control.assign</span>
                                         </button>
                                     </a>
                                     <a *ngIf="can('/projects/edit')" [routerLink]="['/projects/edit', project.id]" title="Edit project">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
-                                            Edit
+                                            <span translate>control.edit</span>
                                         </button>
                                     </a>
                                     <a *ngIf="can('/projects/remove')" (click)="openRemoveItemModalWindow(template, project.id)" title="Delete project">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
-                                            Delete
+                                            <span translate>control.delete</span>
                                         </button>
                                     </a>
                                 </td>
@@ -63,13 +63,13 @@
 
 <ng-template #template>
     <div class="modal-header">
-        <h4 class="modal-title pull-left">Remove this project?</h4>
+        <h4 class="modal-title pull-left" translate>project.remove-question</h4>
         <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body">
-        <button type="button" class="btn btn-default" (click)="removeItem()">Yes</button>
-        <button type="button" class="btn btn-primary" (click)="modalRef.hide()">No</button>
+        <button type="button" class="btn btn-default" (click)="removeItem()" translate>control.yes</button>
+        <button type="button" class="btn btn-primary" (click)="modalRef.hide()" translate>control.no</button>
     </div>
 </ng-template>

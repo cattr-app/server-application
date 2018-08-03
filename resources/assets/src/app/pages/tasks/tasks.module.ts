@@ -16,6 +16,7 @@ import {HttpClientModule} from '@angular/common/http';
 import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
+import {TranslateModule} from '@ngx-translate/core';
 
 
 @NgModule({
@@ -26,7 +27,8 @@ import {SharedModule} from '../../shared.module';
         HttpClientModule,
         NgxPaginationModule,
         GrowlModule,
-        SharedModule
+        SharedModule,
+        TranslateModule,
     ],
     declarations: [
         TasksCreateComponent,

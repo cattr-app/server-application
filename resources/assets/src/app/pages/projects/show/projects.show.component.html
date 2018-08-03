@@ -8,13 +8,13 @@
                     <a routerLink="/projects/list" title="Back">
                         <button class="btn btn-warning">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                            Back
+                            <span translate>control.back</span>
                         </button>
                     </a>
                     <a *ngIf="can('/projects/edit')" [routerLink]="['/projects/edit', item.id]" title="Edit project">
                         <button class="btn btn-primary">
                             <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                            Edit
+                            <span translate>control.edit</span>
                         </button>
                     </a>
                     <div class="show-info">
@@ -22,7 +22,7 @@
                             <table class="table table-borderless">
                                 <tbody>
                                 <tr>
-                                    <th>ID</th>
+                                    <th translate>project.id</th>
                                     <td>{{ item.id }}</td>
                                 </tr>
                                 <!--<tr>-->
@@ -30,19 +30,19 @@
                                     <!--<td> {{ item.company_id }}</td>-->
                                 <!--</tr>-->
                                 <tr>
-                                    <th> Name</th>
+                                    <th translate>project.name</th>
                                     <td> {{ item.name }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Description</th>
+                                    <th translate>project.description</th>
                                     <td> {{ item.description }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Created at</th>
+                                    <th translate>project.created</th>
                                     <td> {{ item.created_at }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Updated at</th>
+                                    <th translate>project.updated</th>
                                     <td> {{ item.updated_at }}</td>
                                 </tr>
                                 </tbody>

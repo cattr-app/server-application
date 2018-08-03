@@ -3,21 +3,21 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Edit users of project {{item.name}}</div>
+                <div class="panel-heading" translate [translateParams]="{name: item.name}">project.edit-users</div>
                 <div class="panel-body">
                     <a routerLink="/projects/list" title="Back">
                         <button class="btn btn-warning">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                            Back
+                            <span translate>control.back</span>
                         </button>
                     </a>
                     <div class="create-form">
                         <form (ngSubmit)="onSubmit()">
-                            <h1>Users</h1>
+                            <h1>project.users</h1>
                             <dual-list [sort]="keepSorted" [source]="sourceUsers" [key]="key" [filter]="filter"
                                        [display]="displayUsers" [(destination)]="confirmedUsers" [format]="format" [height]="height"></dual-list>
                             <br>
-                            <button type="submit" class="btn btn-primary">Update</button>
+                            <button type="submit" class="btn btn-primary"translate>control.update</button>
                         </form>
                     </div>
                 </div>

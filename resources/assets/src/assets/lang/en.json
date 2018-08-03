@@ -22,5 +22,38 @@
 		"time": "Time",
 		"no-task": "No task for last 24 hours. ¯\\_(ツ)_/¯",
 		"auto-loading": "screenshots auto-loading"
+	},
+	"project": {
+		"id": "Id",
+		"name": "Name",
+		"remove-question": "Remove this project?",
+		"create": "Create New Project",
+		"edit": "Edit Project",
+		"description": "Description",
+		"created": "Created at",
+		"updated": "Updated at",
+		"edit-users": "Edit users of project {{name}}",
+		"users": "Users"
+	},
+	"integration": {
+		"redmine": {
+			"title": "Redmine Integration",
+			"apiurl": "Redmine URL",
+			"apikey": "Redmine API key"
+		}
+	},
+	"control": {
+		"actions": "Actions",
+		"new": "Add New",
+		"create": "Create",
+		"update": "Update",
+		"edit": "Edit",
+		"save": "Save",
+		"delete": "Delete",
+		"view": "View",
+		"assign": "Assign users",
+		"yes": "Yes",
+		"no": "No",
+		"back": "Back"
 	}
 }

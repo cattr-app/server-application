@@ -17,6 +17,7 @@ import {RolesShowComponent} from './show/roles.show.component';
 import {RolesUsersComponent} from './users/roles.users.component';
 import {NgxPaginationModule} from 'ngx-pagination';
 import {HttpClientModule} from '@angular/common/http';
+import {TranslateModule} from '@ngx-translate/core';
 
 
 @NgModule({
@@ -27,7 +28,8 @@ import {HttpClientModule} from '@angular/common/http';
         HttpClientModule,
         NgxPaginationModule,
         GrowlModule,
-        SharedModule
+        SharedModule,
+        TranslateModule,
     ],
     declarations: [
         RolesListComponent,

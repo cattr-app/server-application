@@ -19,6 +19,7 @@ import {ScreenshotsService} from '../screenshots/screenshots.service';
 import {TimeIntervalsService} from './timeintervals.service';
 import {TasksService} from "../tasks/tasks.service";
 import {UsersService} from "../users/users.service";
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
     imports: [
@@ -28,7 +29,8 @@ import {UsersService} from "../users/users.service";
         HttpClientModule,
         NgxPaginationModule,
         GrowlModule,
-        SharedModule
+        SharedModule,
+        TranslateModule,
     ],
     declarations: [
         TimeIntervalsCreateComponent,
