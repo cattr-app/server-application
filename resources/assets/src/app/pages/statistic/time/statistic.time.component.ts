@@ -128,9 +128,12 @@ export class StatisticTimeComponent implements OnInit {
             },
         };
 
+        // For debug.
+        const now = moment.utc('2006-04-07');
+
         this.options = {
             defaultView: 'timelineDay',
-            now: '2006-04-07', // For debug.
+            now: now,
             themeSystem: 'bootstrap3',
             views: {
                 timelineDay: {
@@ -153,41 +156,84 @@ export class StatisticTimeComponent implements OnInit {
                 },
                 timelineRange: {
                     type: 'timeline',
-                    duration: { months: 1 },
                     slotDuration: { days: 1 },
+                    visibleRange: {
+                        start: now,
+                        end: now.clone().add(1, 'days'),
+                    },
                     buttonText: 'Date range',
                 },
             },
             viewRender: (view: View, el) => {
-                const $prev = $(`
+                if (view.name === 'timelineRange') {
+                    const dateFrom = view.start;
+                    const dateTo = view.end.subtract(1, 'days');
+
+                    const dateFromStr = dateFrom.format('YYYY-MM-DD');
+                    const $dateFrom = $(`<input type="date" class="form-control" value="${dateFromStr}" />`);
+
+                    const dateToStr = dateTo.format('YYYY-MM-DD');
+                    const $dateTo = $(`<input type="date" class="form-control" value="${dateToStr}" />`);
+
+                    const changeRange = (e) => {
+                        const start = moment.utc($dateFrom.val(), 'YYYY-MM-DD');
+                        let end = moment.utc($dateTo.val(), 'YYYY-MM-DD').add(1, 'days');
+                        if (end.diff(start) <= 0) {
+                            end = start.clone().add(1, 'days');
+                        }
+
+                        this.calendar.gotoDate(start);
+                        this.$calendar.fullCalendar('option', 'visibleRange', {
+                            start: start,
+                            end: end,
+                        });
+                    };
+
+                    $dateFrom.change(changeRange);
+                    $dateTo.change(changeRange);
+
+                    const $dateFromGroup = $('<div class="input-group">');
+                    $dateFromGroup.append($dateFrom);
+
+                    const $dateToGroup = $('<div class="input-group">');
+                    $dateToGroup.append($dateTo);
+
+                    const $center = $('.fc-center', this.$calendar);
+                    $center.addClass('form-inline');
+                    $center.empty();
+                    $center.append($dateFromGroup);
+                    $center.append($dateToGroup);
+                } else {
+                    const $prev = $(`
 <button type="button" class="fc-prev-button btn btn-default" aria-label="prev">
     <span class="glyphicon glyphicon-chevron-left"></span>
 </button>`);
-                $prev.click(e => this.calendar.prev());
-                const $prevWrapper = $('<span class="input-group-btn">').append($prev);
+                    $prev.click(e => this.calendar.prev());
+                    const $prevWrapper = $('<span class="input-group-btn">').append($prev);
 
-                const date = view.start;
-                const dateStr = date.format('YYYY-MM-DD');
-                const dateAttributes = view.name === 'timelineDay' ? '' : 'readonly';
-                const $date = $(`<input type="date" class="form-control" value="${dateStr}" ${dateAttributes} />`);
-                $date.change(e => this.calendar.gotoDate(moment($date.val(), 'YYYY-MM-DD')));
+                    const date = view.start;
+                    const dateStr = date.format('YYYY-MM-DD');
+                    const dateAttributes = view.name === 'timelineDay' ? '' : 'readonly';
+                    const $date = $(`<input type="date" class="form-control" value="${dateStr}" ${dateAttributes} />`);
+                    $date.change(e => this.calendar.gotoDate(moment.utc($date.val(), 'YYYY-MM-DD')));
 
-                const $next = $(`
+                    const $next = $(`
 <button type="button" class="fc-next-button btn btn-default" aria-label="next">
     <span class="glyphicon glyphicon-chevron-right"></span>
 </button>`);
-                $next.click(e => this.calendar.next());
-                const $nextWrapper = $('<span class="input-group-btn">').append($next);
+                    $next.click(e => this.calendar.next());
+                    const $nextWrapper = $('<span class="input-group-btn">').append($next);
 
-                const $dateGroup = $('<div class="input-group">');
-                $dateGroup.append($prevWrapper);
-                $dateGroup.append($date);
-                $dateGroup.append($nextWrapper);
+                    const $dateGroup = $('<div class="input-group">');
+                    $dateGroup.append($prevWrapper);
+                    $dateGroup.append($date);
+                    $dateGroup.append($nextWrapper);
 
-                const $center = $('.fc-center', this.$calendar);
-                $center.addClass('form-inline');
-                $center.empty();
-                $center.append($dateGroup);
+                    const $center = $('.fc-center', this.$calendar);
+                    $center.addClass('form-inline');
+                    $center.empty();
+                    $center.append($dateGroup);
+                }
             },
             refetchResourcesOnNavigate: true,
             resourceColumns: [
