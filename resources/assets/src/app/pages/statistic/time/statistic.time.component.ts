@@ -11,7 +11,8 @@ import * as $ from 'jquery';
 import * as moment from 'moment';
 import 'fullcalendar';
 import 'fullcalendar-scheduler';
-import { EventObjectInput } from 'fullcalendar';
+import { EventObjectInput, View } from 'fullcalendar';
+import { Schedule } from 'primeng/schedule';
 
 @Component({
     selector: 'app-statistic-time',
@@ -20,7 +21,7 @@ import { EventObjectInput } from 'fullcalendar';
 })
 export class StatisticTimeComponent implements OnInit {
     @ViewChild("fileInput") fileInput;
-    @ViewChild('calendar') calendar;
+    @ViewChild('calendar') calendar: Schedule;
 
     public item: Screenshot = new Screenshot();
     public userList: User;
@@ -36,6 +37,10 @@ export class StatisticTimeComponent implements OnInit {
                 private router: Router,
                 allowedService: AllowedActionsService) {
 
+    }
+
+    get $calendar(): JQuery<any> {
+        return $(this.calendar.el.nativeElement).children();
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
@@ -105,8 +110,8 @@ export class StatisticTimeComponent implements OnInit {
         // this.userService.getItems(this.onUsersGet.bind(this));
         // this.timeintervalService.getItems(this.onTimeIntervalGet.bind(this));
         this.header = {
-            left: '',
-            center: 'prev title next',
+            left: false,
+            center: false,
             right: 'timelineDay,timelineWeek,timelineMonth,timelineRange'
         };
 
@@ -153,6 +158,37 @@ export class StatisticTimeComponent implements OnInit {
                     buttonText: 'Date range',
                 },
             },
+            viewRender: (view: View, el) => {
+                const $prev = $(`
+<button type="button" class="fc-prev-button btn btn-default" aria-label="prev">
+    <span class="glyphicon glyphicon-chevron-left"></span>
+</button>`);
+                $prev.click(e => this.calendar.prev());
+                const $prevWrapper = $('<span class="input-group-btn">').append($prev);
+
+                const date = view.start;
+                const dateStr = date.format('YYYY-MM-DD');
+                const dateAttributes = view.name === 'timelineDay' ? '' : 'readonly';
+                const $date = $(`<input type="date" class="form-control" value="${dateStr}" ${dateAttributes} />`);
+                $date.change(e => this.calendar.gotoDate(moment($date.val(), 'YYYY-MM-DD')));
+
+                const $next = $(`
+<button type="button" class="fc-next-button btn btn-default" aria-label="next">
+    <span class="glyphicon glyphicon-chevron-right"></span>
+</button>`);
+                $next.click(e => this.calendar.next());
+                const $nextWrapper = $('<span class="input-group-btn">').append($next);
+
+                const $dateGroup = $('<div class="input-group">');
+                $dateGroup.append($prevWrapper);
+                $dateGroup.append($date);
+                $dateGroup.append($nextWrapper);
+
+                const $center = $('.fc-center', this.$calendar);
+                $center.addClass('form-inline');
+                $center.empty();
+                $center.append($dateGroup);
+            },
             refetchResourcesOnNavigate: true,
             resourceColumns: [
                 {
@@ -162,8 +198,7 @@ export class StatisticTimeComponent implements OnInit {
                 {
                     labelText: 'Time Worked',
                     text: resource => {
-                        const $calendar = $(this.calendar.el.nativeElement).children();
-                        const view = $calendar.fullCalendar('getView');
+                        const view = this.$calendar.fullCalendar('getView');
                         const viewStart = moment.utc(view.start);
                         const viewEnd = moment.utc(view.end);
                         // Get events of the current user in the current view.
@@ -202,19 +237,19 @@ export class StatisticTimeComponent implements OnInit {
             },
             displayEventTime: false,
             eventSources: [eventSource],
-            eventClick: (event, jsEvent, view) => {
+            eventClick: (event, jsEvent, view: View) => {
                 const userId = event.resourceId;
                 /** @todo navigate to the user dashboard. */
                 this.router.navigateByUrl('dashboard');
             },
-            eventRender: (event, el, view) => {
+            eventRender: (event, el, view: View) => {
                 if (view.name !== 'timelineDay') {
                     return false;
                 }
             },
-            eventAfterAllRender: (view) => {
+            eventAfterAllRender: (view: View) => {
                 if (view.name !== 'timelineDay') {
-                    const $calendar = $(this.calendar.el.nativeElement).children();
+                    const $calendar = this.$calendar;
                     const $rows = $('.fc-resource-area tr[data-resource-id]', $calendar);
                     const rows = $.makeArray($rows);
 
