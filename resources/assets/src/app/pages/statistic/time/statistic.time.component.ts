@@ -11,11 +11,12 @@ import * as $ from 'jquery';
 import * as moment from 'moment';
 import 'fullcalendar';
 import 'fullcalendar-scheduler';
+import { EventObjectInput } from 'fullcalendar';
 
 @Component({
     selector: 'app-statistic-time',
     templateUrl: './statistic.time.component.html',
-    styleUrls: ['../../items.component.scss']
+    styleUrls: ['../../items.component.scss', './statistic.time.component.scss']
 })
 export class StatisticTimeComponent implements OnInit {
     @ViewChild("fileInput") fileInput;
@@ -27,13 +28,74 @@ export class StatisticTimeComponent implements OnInit {
 
     header: any;
     options: any;
+    events: EventObjectInput[];
 
     constructor(api: ApiService,
                 private userService: UsersService,
                 private timeintervalService: TimeIntervalsService,
                 private router: Router,
-                allowedService: AllowedActionsService,) {
+                allowedService: AllowedActionsService) {
 
+    }
+
+    fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
+        const params = {
+            'start_at': ['>', start],
+            'end_at': ['<', end],
+        };
+
+        return new Promise<EventObjectInput[]>((resolve) => {
+            this.timeintervalService.getItems((intervals: TimeInterval[]) => {
+                // Combine consecutive intervals into one event.
+                const events = intervals.map(interval => {
+                    return {
+                        id: interval.id,
+                        title: '',
+                        resourceId: interval.user_id,
+                        start: interval.start_at,
+                        end: interval.end_at,
+                    } as EventObjectInput;
+                }).sort((a, b) => {
+                    // Sort by user.
+                    if (a.resourceId !== b.resourceId) {
+                        return a.resourceId - b.resourceId;
+                    }
+                    // Then sort by start time.
+                    const aStart = moment.utc(a.start);
+                    const bStart = moment.utc(b.start);
+                    return aStart.diff(bStart);
+                }).reduce((arr, curr) => {
+                    const count = arr.length;
+                    if (count === 0) {
+                        return [curr];
+                    }
+
+                    // Combine last & current interval if same user and time between less than one second.
+                    const last = arr[count - 1];
+                    const isSameUser = last.resourceId === curr.resourceId;
+
+                    const lastEnd = moment.utc(last.end);
+                    const currStart = moment.utc(curr.start);
+                    const isConsecutive = Math.abs(currStart.diff(lastEnd, 'seconds')) <= 1;
+
+                    if (isSameUser && isConsecutive) {
+                        arr[count - 1] = {
+                            id: last.id,
+                            title: '',
+                            resourceId: curr.resourceId,
+                            start: last.start,
+                            end: curr.end,
+                        };
+                    } else {
+                        arr.push(curr);
+                    }
+
+                    return arr;
+                }, [] as EventObjectInput[]);
+
+                resolve(events);
+            }, params);
+        });
     }
 
     ngOnInit() {
@@ -49,61 +111,22 @@ export class StatisticTimeComponent implements OnInit {
         };
 
         const eventSource = {
-            events: (start, end, timezone, callback) => {
-                const params = {
-                    'start_at': ['>', start],
-                    'end_at': ['<', end],
-                };
-                this.timeintervalService.getItems((intervals: TimeInterval[]) => {
-                    // Combine consecutive intervals into one event.
-                    const events = intervals.map(interval => {
-                        return {
-                            title: '',
-                            resourceId: interval.user_id,
-                            start: interval.start_at,
-                            end: interval.end_at,
-                        };
-                    }).sort((a, b) => {
-                        // Sort by start time.
-                        const aStart = moment(a.start);
-                        const bStart = moment(b.start);
-                        return aStart.diff(bStart);
-                    }).reduce((arr, curr) => {
-                        const count = arr.length;
-                        if (count === 0) {
-                            return [curr];
-                        }
-
-                        // Combine last & current interval if same user and time between less than one second.
-                        const last = arr[count - 1];
-                        const isSameUser = last.resourceId === curr.resourceId;
-
-                        const lastEnd = moment(last.end);
-                        const currStart = moment(curr.start);
-                        const isConsecutive = Math.abs(currStart.diff(lastEnd, 'seconds')) <= 1;
-
-                        if (isSameUser && isConsecutive) {
-                            arr[count - 1] = {
-                                title: '',
-                                resourceId: curr.resourceId,
-                                start: last.start,
-                                end: curr.end,
-                            };
-                        } else {
-                            arr.push(curr);
-                        }
-
-                        return arr;
-                    }, []);
-
+            events: async (start, end, timezone, callback) => {
+                try {
+                    const events = await this.fetchEvents(start, end);
+                    this.events = events;
                     callback(events);
-                }, params);
+                } catch (e) {
+                    console.error(e);
+                    callback([]);
+                }
             },
         };
 
         this.options = {
             defaultView: 'timelineDay',
             now: '2006-04-07', // For debug.
+            themeSystem: 'bootstrap3',
             views: {
                 timelineDay: {
                     type: 'timeline',
@@ -141,26 +164,28 @@ export class StatisticTimeComponent implements OnInit {
                     text: resource => {
                         const $calendar = $(this.calendar.el.nativeElement).children();
                         const view = $calendar.fullCalendar('getView');
+                        const viewStart = moment.utc(view.start);
+                        const viewEnd = moment.utc(view.end);
                         // Get events of the current user in the current view.
-                        const events = $calendar.fullCalendar('clientEvents', event => {
+                        const events = this.events.filter(event => {
                             const isOfCurrentUser = event.resourceId == resource.id;
 
-                            const start = moment(event.start);
-                            const end = moment(event.end);
-                            const viewStart = moment(view.start);
-                            const viewEnd = moment(view.end);
-                            const isInCurrentView = start.diff(viewStart) >= 0 && end.diff(viewEnd) < 0;
+                            const start = moment.utc(event.start);
+                            const isInCurrentView = start.diff(viewStart) >= 0 && start.diff(viewEnd) < 0;
 
                             return isOfCurrentUser && isInCurrentView;
                         });
                         // Calculate sum of an event time.
                         const time = events.map(event => {
-                            const start = moment(event.start);
-                            const end = moment(event.end);
+                            const start = moment.utc(event.start);
+                            const end = moment.utc(event.end);
                             return end.diff(start);
                         }).reduce((sum, value) => sum + value, 0);
                         // Format the duration string.
-                        return time > 0 ? moment.duration(time).humanize() : '-';
+                        const duration = moment.duration(time);
+                        const hours = Math.floor(duration.asHours());
+                        const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
+                        return `${hours}h ${minutes}m`;
                     },
                 },
             ],
@@ -187,56 +212,71 @@ export class StatisticTimeComponent implements OnInit {
                     return false;
                 }
             },
-            dayRender: (date, cell) => {
-                const $calendar = $(this.calendar.el.nativeElement).children();
-                const view = $calendar.fullCalendar('getView');
+            eventAfterAllRender: (view) => {
                 if (view.name !== 'timelineDay') {
-/*                     const $rows = $('.fc-resource-area tr[data-resource-id]', $calendar);
+                    const $calendar = $(this.calendar.el.nativeElement).children();
+                    const $rows = $('.fc-resource-area tr[data-resource-id]', $calendar);
                     const rows = $.makeArray($rows);
-                    const html = rows.map(row => {
-                        const resourceId = $(row).data('resource-id');
-                        // Get events of the current user in the current day.
-                        const events = $calendar.fullCalendar('clientEvents', event => {
-                            const isOfCurrentUser = event.resourceId == resourceId;
 
-                            const start = moment(event.start);
-                            const end = moment(event.end);
-                            const min = moment(date);
-                            const max = min.clone();
-                            max.add(1, 'days');
+                    const $days = $('.fc-day[data-date]', $calendar);
+                    $days.each((index, el) => {
+                        const html = rows.map(row => {
+                            const resourceId = $(row).data('resource-id');
+                            const date = $(el).data('date');
+                            const dayStart = moment.utc(date);
+                            const dayEnd = dayStart.clone();
+                            dayEnd.add(1, 'days');
 
-                            console.log(min);
-                            console.log(max);
+                            // Get events of the current user in the current day.
+                            const events = this.events.filter(event => {
+                                const isOfCurrentUser = event.resourceId == resourceId;
 
-                            const isInCurrentDay = start.diff(min) >= 0 && end.diff(max) < 0;
+                                const start = moment.utc(event.start);
+                                const isInCurrentDay = start.diff(dayStart) >= 0 && start.diff(dayEnd) < 0;
 
-                            return isOfCurrentUser && isInCurrentDay;
-                        });
+                                return isOfCurrentUser && isInCurrentDay;
+                            });
+                            // Calculate time worked per current day.
+                            const timeWorked = events.reduce((acc, event) => {
+                                const start = moment.utc(event.start);
+                                const end = moment.utc(event.end);
+                                return acc + end.diff(start, 'seconds');
+                            }, 0);
+                            const secondsIn24Hours = 24 * 60 * 60;
+                            const progress = timeWorked / secondsIn24Hours;
+                            const percent = Math.round(100 * progress);
+                            // Format the duration string.
+                            const duration = moment.duration(timeWorked, 'seconds');
+                            const hours = Math.floor(duration.asHours());
+                            const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
+                            const timeStr = `${hours}h ${minutes}m`;
 
-                        console.log(events);
+                            // Vertical offset from table top.
+                            const topOffset = $(row).position().top;
+                            const width = $(el).width();
+                            const progressWrapperClass = percent === 0 ? 'progress-wrapper_empty' : '';
 
-                        const progress = 0.5;
-                        const percent = Math.round(100 * progress);
-
-                        return `
-<div class="progress">
-    <div class="progress-bar" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
+                            return `
+<div class="progress-wrapper ${progressWrapperClass}" style="top: ${topOffset}px; width: ${width}px;">
+    <div class="progress">
+        <div class="progress-bar" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
+    </div>
+    <p>${timeStr}</p>
 </div>`;
-                    }).reduce((sum, curr) => sum + curr, '');
-                    $(cell).html(html); */
+                        }).reduce((sum, curr) => sum + curr, '');
+                        $(el).html(html);
+                    });
                 }
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
     }
 
-    protected onUsersGet(userList: User)
-    {
+    protected onUsersGet(userList: User) {
         this.userList = userList;
     }
 
-    protected onTimeIntervalGet(timeintervalList: TimeInterval)
-    {
+    protected onTimeIntervalGet(timeintervalList: TimeInterval) {
         this.timeintervalList = timeintervalList;
     }
 }

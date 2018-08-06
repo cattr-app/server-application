@@ -1,0 +1,23 @@
+::ng-deep .fc-day {
+    .progress-wrapper {
+        position: absolute;
+        text-align: center;
+        background: #fff;
+
+        &_empty {
+            background: #ddd;
+        }
+    }
+
+    .progress, p {
+        margin-bottom: 0;
+    }
+
+    .progress {
+        height: 16px;
+    }
+}
+
+::ng-deep .fc-resource-area td:nth-child(2) {
+    text-align: right;
+}
