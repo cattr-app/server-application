@@ -29,6 +29,9 @@ import {ScheduleModule} from 'primeng/schedule';
         SharedModule,
         ScheduleModule,
     ],
+    exports: [
+        StatisticTimeComponent
+    ],
     declarations: [
         /**
          * @todo add here the other components, except for static for time usage

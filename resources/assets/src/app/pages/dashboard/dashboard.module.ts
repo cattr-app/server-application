@@ -12,6 +12,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { DashboardComponent } from './dashboard.component';
 import { TaskListComponent } from './tasklist/tasks.list.component';
 import { ScreenshotListComponent } from './screenshotlist/screenshot.list.component';
+import { StatisticModule } from '../statistic/statistic.module';
 
 @NgModule({
   imports: [
@@ -19,7 +20,8 @@ import { ScreenshotListComponent } from './screenshotlist/screenshot.list.compon
     AuthRoute,
     FormsModule,
     HttpClientModule,
-    NgxPaginationModule
+    NgxPaginationModule,
+    StatisticModule
   ],
   declarations: [
     DashboardComponent,
