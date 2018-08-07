@@ -103,6 +103,46 @@ export class StatisticTimeComponent implements OnInit {
         });
     }
 
+    calculateTimeWorkedOn(user_id: number, start: moment.Moment, end: moment.Moment) {
+        // Get loaded events of the specified user, started in the selected time range.
+        const events = this.events.filter(event => {
+            const isOfCurrentUser = event.resourceId == user_id;
+
+            const eventStart = moment.utc(event.start);
+            const isInCurrentView = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
+
+            return isOfCurrentUser && isInCurrentView;
+        });
+        // Calculate sum of an event time.
+        return events.map(event => {
+            const start = moment.utc(event.start);
+            const end = moment.utc(event.end);
+            return end.diff(start);
+        }).reduce((sum, value) => sum + value, 0);
+    }
+
+    formatDurationString(time: number) {
+        const duration = moment.duration(time);
+        const hours = Math.floor(duration.asHours());
+        const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
+        return `${hours}h ${minutes}m`;
+    }
+
+    updateTimeWorkedOn() {
+        const view = this.$calendar.fullCalendar('getView');
+        const viewStart = moment.utc(view.start);
+        const viewEnd = moment.utc(view.end);
+        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$calendar);
+        $rows.each((index, row) => {
+            const $row = $(row);
+            const userId = $row.data('resource-id');
+            const timeWorked = this.calculateTimeWorkedOn(userId, viewStart, viewEnd);
+            const timeWorkedString = this.formatDurationString(timeWorked);
+            const $cell = $('td:nth-child(2) .fc-cell-text', $row);
+            $cell.text(timeWorkedString);
+        });
+    }
+
     ngOnInit() {
         /**
          * @todo uncomment it, when data will be fill
@@ -168,7 +208,7 @@ export class StatisticTimeComponent implements OnInit {
             viewRender: (view: View, el) => {
                 if (view.name === 'timelineRange') {
                     const dateFrom = view.start;
-                    const dateTo = view.end.subtract(1, 'days');
+                    const dateTo = view.end.clone().subtract(1, 'days');
 
                     const dateFromStr = dateFrom.format('YYYY-MM-DD');
                     const $dateFrom = $(`<input type="date" class="form-control" value="${dateFromStr}" />`);
@@ -236,7 +276,7 @@ export class StatisticTimeComponent implements OnInit {
                     $center.append($dateGroup);
                 }
             },
-            refetchResourcesOnNavigate: true,
+            refetchResourcesOnNavigate: false,
             resourceColumns: [
                 {
                     labelText: 'Names',
@@ -244,31 +284,7 @@ export class StatisticTimeComponent implements OnInit {
                 },
                 {
                     labelText: 'Time Worked',
-                    text: resource => {
-                        const view = this.$calendar.fullCalendar('getView');
-                        const viewStart = moment.utc(view.start);
-                        const viewEnd = moment.utc(view.end);
-                        // Get events of the current user in the current view.
-                        const events = this.events.filter(event => {
-                            const isOfCurrentUser = event.resourceId == resource.id;
-
-                            const start = moment.utc(event.start);
-                            const isInCurrentView = start.diff(viewStart) >= 0 && start.diff(viewEnd) < 0;
-
-                            return isOfCurrentUser && isInCurrentView;
-                        });
-                        // Calculate sum of an event time.
-                        const time = events.map(event => {
-                            const start = moment.utc(event.start);
-                            const end = moment.utc(event.end);
-                            return end.diff(start);
-                        }).reduce((sum, value) => sum + value, 0);
-                        // Format the duration string.
-                        const duration = moment.duration(time);
-                        const hours = Math.floor(duration.asHours());
-                        const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
-                        return `${hours}h ${minutes}m`;
-                    },
+                    text: () => '',
                 },
             ],
             resources: (callback) => {
@@ -301,54 +317,38 @@ export class StatisticTimeComponent implements OnInit {
                     const rows = $.makeArray($rows);
 
                     const $days = $('.fc-day[data-date]', $calendar);
-                    $days.each((index, el) => {
-                        const html = rows.map(row => {
-                            const resourceId = $(row).data('resource-id');
-                            const date = $(el).data('date');
+                    $days.each((index, dayColumnElement) => {
+                        const date = $(dayColumnElement).data('date');
                             const dayStart = moment.utc(date);
-                            const dayEnd = dayStart.clone();
-                            dayEnd.add(1, 'days');
+                        const dayEnd = dayStart.clone().add(1, 'days');
+                        const columnWidth = $(dayColumnElement).width();
 
-                            // Get events of the current user in the current day.
-                            const events = this.events.filter(event => {
-                                const isOfCurrentUser = event.resourceId == resourceId;
+                        const html = rows.map(userRowElement => {
+                            const userId = $(userRowElement).data('resource-id');
 
-                                const start = moment.utc(event.start);
-                                const isInCurrentDay = start.diff(dayStart) >= 0 && start.diff(dayEnd) < 0;
-
-                                return isOfCurrentUser && isInCurrentDay;
-                            });
-                            // Calculate time worked per current day.
-                            const timeWorked = events.reduce((acc, event) => {
-                                const start = moment.utc(event.start);
-                                const end = moment.utc(event.end);
-                                return acc + end.diff(start, 'seconds');
-                            }, 0);
-                            const secondsIn24Hours = 24 * 60 * 60;
-                            const progress = timeWorked / secondsIn24Hours;
+                            // Calculate time worked by this user per this day.
+                            const timeWorked = this.calculateTimeWorkedOn(userId, dayStart, dayEnd);
+                            const msIn24Hours = 24 * 60 * 60 * 1000;
+                            const progress = timeWorked / msIn24Hours;
                             const percent = Math.round(100 * progress);
-                            // Format the duration string.
-                            const duration = moment.duration(timeWorked, 'seconds');
-                            const hours = Math.floor(duration.asHours());
-                            const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
-                            const timeStr = `${hours}h ${minutes}m`;
+                            const timeWorkedString = this.formatDurationString(timeWorked);
 
-                            // Vertical offset from table top.
-                            const topOffset = $(row).position().top;
-                            const width = $(el).width();
-                            const progressWrapperClass = percent === 0 ? 'progress-wrapper_empty' : '';
+                            const topOffset = $(userRowElement).position().top;
+                            const progressWrapperClass = timeWorked === 0 ? 'progress-wrapper_empty' : '';
 
                             return `
-<div class="progress-wrapper ${progressWrapperClass}" style="top: ${topOffset}px; width: ${width}px;">
+<div class="progress-wrapper ${progressWrapperClass}" style="top: ${topOffset}px; width: ${columnWidth}px;">
     <div class="progress">
         <div class="progress-bar" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
-    <p>${timeStr}</p>
+    <p>${timeWorkedString}</p>
 </div>`;
                         }).reduce((sum, curr) => sum + curr, '');
-                        $(el).html(html);
+                        $(dayColumnElement).html(html);
                     });
                 }
+
+                this.updateTimeWorkedOn();
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
