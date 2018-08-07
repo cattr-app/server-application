@@ -115,6 +115,8 @@ export class StatisticTimeComponent implements OnInit {
             right: 'timelineDay,timelineWeek,timelineMonth,timelineRange'
         };
 
+        this.events = [];
+
         const eventSource = {
             events: async (start, end, timezone, callback) => {
                 try {
