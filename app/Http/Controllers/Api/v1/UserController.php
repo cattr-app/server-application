@@ -48,6 +48,14 @@ class UserController extends ItemController
     }
 
     /**
+     * @return string[]
+     */
+    public function getQueryWith(): array
+    {
+        return ['attached_users'];
+    }
+
+    /**
      * @param array $requestData
      *
      * @return array
