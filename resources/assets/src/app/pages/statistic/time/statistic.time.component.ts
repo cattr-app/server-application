@@ -130,8 +130,7 @@ export class StatisticTimeComponent implements OnInit {
             },
         };
 
-        // For debug.
-        const now = moment.utc('2006-04-07');
+        const now = moment.utc();
 
         this.options = {
             defaultView: 'timelineDay',
