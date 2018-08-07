@@ -8,7 +8,7 @@ import {TimeIntervalsService} from '../../timeintervals/timeintervals.service';
 import {User} from '../../../models/user.model';
 import {TimeInterval} from '../../../models/timeinterval.model';
 import * as $ from 'jquery';
-import * as moment from 'moment';
+import * as moment from 'moment-timezone';
 import 'fullcalendar';
 import 'fullcalendar-scheduler';
 import { EventObjectInput, View } from 'fullcalendar';
@@ -30,8 +30,9 @@ export class StatisticTimeComponent implements OnInit {
     header: any;
     options: any;
     events: EventObjectInput[];
+    timezone: string;
 
-    constructor(api: ApiService,
+    constructor(private api: ApiService,
                 private userService: UsersService,
                 private timeintervalService: TimeIntervalsService,
                 private router: Router,
@@ -57,8 +58,8 @@ export class StatisticTimeComponent implements OnInit {
                         id: interval.id,
                         title: '',
                         resourceId: interval.user_id,
-                        start: interval.start_at,
-                        end: interval.end_at,
+                        start: moment.utc(interval.start_at).tz(this.timezone),
+                        end: moment.utc(interval.end_at).tz(this.timezone),
                     } as EventObjectInput;
                 }).sort((a, b) => {
                     // Sort by user.
@@ -150,6 +151,9 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     ngOnInit() {
+        const user = this.api.getUser() as User;
+        this.timezone = user.timezone;
+
         /**
          * @todo uncomment it, when data will be fill
          */
@@ -181,6 +185,7 @@ export class StatisticTimeComponent implements OnInit {
         this.options = {
             defaultView: 'timelineDay',
             now: now,
+            timezone: this.timezone,
             themeSystem: 'bootstrap3',
             views: {
                 timelineDay: {
@@ -325,7 +330,7 @@ export class StatisticTimeComponent implements OnInit {
                     const $days = $('.fc-day[data-date]', $calendar);
                     $days.each((index, dayColumnElement) => {
                         const date = $(dayColumnElement).data('date');
-                            const dayStart = moment.utc(date);
+                        const dayStart = moment.utc(date);
                         const dayEnd = dayStart.clone().add(1, 'days');
                         const columnWidth = $(dayColumnElement).width();
 

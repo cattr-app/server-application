@@ -28,6 +28,7 @@
       "scripts": [
         "../../../node_modules/jquery/dist/jquery.min.js",
         "../../../node_modules/moment/min/moment.min.js",
+        "../../../node_modules/moment-timezone/builds/moment-timezone-with-data.min.js",
         "../../../node_modules/fullcalendar/dist/fullcalendar.min.js",
         "../../../node_modules/fullcalendar-scheduler/dist/scheduler.min.js"
       ],
