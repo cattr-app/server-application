@@ -5,8 +5,18 @@
     margin: unset;
 }
 
-::ng-deep .fc-resource-area td:nth-child(2) {
-    text-align: right;
+::ng-deep .fc-resource-area {
+    tr[data-resource-id] {
+        background: #fff;
+
+        &.not_worked {
+            background: #eee;
+        }
+    }
+
+    td:nth-child(2) {
+        text-align: right;
+    }
 }
 
 ::ng-deep .fc-day {
@@ -16,7 +26,7 @@
         background: #fff;
 
         &_empty {
-            background: #ddd;
+            background: #eee;
         }
     }
 

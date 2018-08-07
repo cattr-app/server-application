@@ -140,6 +140,12 @@ export class StatisticTimeComponent implements OnInit {
             const timeWorkedString = this.formatDurationString(timeWorked);
             const $cell = $('td:nth-child(2) .fc-cell-text', $row);
             $cell.text(timeWorkedString);
+
+            if (timeWorked === 0) {
+                $row.addClass('not_worked');
+            } else {
+                $row.removeClass('not_worked');
+            }
         });
     }
 
