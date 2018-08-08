@@ -266,11 +266,11 @@ export class StatisticTimeComponent implements OnInit {
             },
             eventAfterAllRender: (view: View) => {
                 if (view.name !== 'timelineDay') {
-                    const $calendar = this.$timeline;
-                    const $rows = $('.fc-resource-area tr[data-resource-id]', $calendar);
+                    const $timeline = this.$timeline;
+                    const $rows = $('.fc-resource-area tr[data-resource-id]', $timeline);
                     const rows = $.makeArray($rows);
 
-                    const $days = $('.fc-day[data-date]', $calendar);
+                    const $days = $('.fc-day[data-date]', $timeline);
                     $days.each((index, dayColumnElement) => {
                         const date = $(dayColumnElement).data('date');
                         const dayStart = (moment as any).tz(date, this.timezone);
@@ -349,5 +349,45 @@ export class StatisticTimeComponent implements OnInit {
             start: start,
             end: end,
         });
+    }
+
+    exportCSV() {
+        const $timeline = this.$timeline;
+
+        const view = $timeline.fullCalendar('getView');
+        const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
+        const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
+
+        const $rows = $('.fc-resource-area tr[data-resource-id]', $timeline);
+        const rows = $.makeArray($rows);
+
+        const $days = $('.fc-day[data-date]', $timeline);
+        const days = $.makeArray($days);
+
+        const header = 'Names,Time Worked,' + days.map(day => {
+            const date = $(day).data('date');
+            return (moment as any).tz(date, this.timezone).format('YYYY-MM-DD');
+        }).join(',') + '\n';
+
+        const lines = rows.map(row => {
+            const userId = $(row).data('resource-id');
+            const user = this.$timeline.fullCalendar('getResourceById', userId);
+
+            const timeWorked = this.calculateTimeWorkedOn(userId, viewStart, viewEnd);
+            const timeWorkedString = this.formatDurationString(timeWorked);
+
+            return user.title + ',' + timeWorkedString + ',' + days.map(day => {
+                const date = $(day).data('date');
+                const dayStart = (moment as any).tz(date, this.timezone);
+                const dayEnd = dayStart.clone().add(1, 'days');
+
+                // Calculate time worked by this user per this day.
+                const timeWorked = this.calculateTimeWorkedOn(userId, dayStart, dayEnd);
+                return this.formatDurationString(timeWorked);
+            }).join(',');
+        });
+
+        const content = 'data:text/csv;charset=utf-8,' + header + lines.join('\n');
+        window.open(encodeURI(content));
     }
 }

@@ -4,11 +4,13 @@
         margin-bottom: 1em;
     }
 
+    &__buttons,
     &__date-wrapper,
-    &__buttons {
+    &__view-buttons {
         display: inline-block;
     }
 
+    &__buttons,
     &__date-wrapper {
         margin-right: 1em;
     }

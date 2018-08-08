@@ -1,5 +1,9 @@
 <div class="statistics">
     <div class="statistics__header">
+        <div class="statistics__buttons btn-group" role="group">
+            <button *ngIf="viewName !== 'timelineDay'" type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
+        </div>
+
         <div *ngIf="viewName !== 'timelineRange'" class="statistics__date-wrapper form-inline">
             <div class="input-group">
                 <span class="input-group-btn">
@@ -34,7 +38,7 @@
             </div>
         </div>
 
-        <div class="statistics__buttons btn-group" role="group">
+        <div class="statistics__view-buttons btn-group" role="group">
             <button type="button" (click)="viewName = 'timelineDay'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineDay'}">Day</button>
             <button type="button" (click)="viewName = 'timelineWeek'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineWeek'}">Week</button>
             <button type="button" (click)="viewName = 'timelineMonth'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineMonth'}">Month</button>
