@@ -153,7 +153,7 @@ export class StatisticTimeComponent implements OnInit {
 
     ngOnInit() {
         const user = this.api.getUser() as User;
-        this.timezone = user.timezone;
+        this.timezone = user.timezone !== null ? user.timezone : 'UTC';
 
         /**
          * @todo uncomment it, when data will be fill
