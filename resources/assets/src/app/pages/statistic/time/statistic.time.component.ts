@@ -66,9 +66,10 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
+        // Add +/- 1 day to avoid issues with timezone.
         const params = {
-            'start_at': ['>', start],
-            'end_at': ['<', end],
+            'start_at': ['>', start.clone().subtract(1, 'day')],
+            'end_at': ['<', end.clone().add(1, 'day')],
         };
 
         return new Promise<EventObjectInput[]>((resolve) => {
@@ -152,8 +153,8 @@ export class StatisticTimeComponent implements OnInit {
 
     updateTimeWorkedOn() {
         const view = this.$timeline.fullCalendar('getView');
-        const viewStart = moment.utc(view.start);
-        const viewEnd = moment.utc(view.end);
+        const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
+        const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
         const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
         $rows.each((index, row) => {
             const $row = $(row);
@@ -272,7 +273,7 @@ export class StatisticTimeComponent implements OnInit {
                     const $days = $('.fc-day[data-date]', $calendar);
                     $days.each((index, dayColumnElement) => {
                         const date = $(dayColumnElement).data('date');
-                        const dayStart = moment.utc(date);
+                        const dayStart = (moment as any).tz(date, this.timezone);
                         const dayEnd = dayStart.clone().add(1, 'days');
                         const columnWidth = $(dayColumnElement).width();
 
