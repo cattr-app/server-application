@@ -8,7 +8,8 @@ import {TimeIntervalsService} from '../../timeintervals/timeintervals.service';
 import {User} from '../../../models/user.model';
 import {TimeInterval} from '../../../models/timeinterval.model';
 import * as $ from 'jquery';
-import * as moment from 'moment-timezone';
+import * as moment from 'moment';
+import 'moment-timezone';
 import 'fullcalendar';
 import 'fullcalendar-scheduler';
 import { EventObjectInput, View } from 'fullcalendar';
@@ -58,8 +59,8 @@ export class StatisticTimeComponent implements OnInit {
                         id: interval.id,
                         title: '',
                         resourceId: interval.user_id,
-                        start: moment.utc(interval.start_at).tz(this.timezone),
-                        end: moment.utc(interval.end_at).tz(this.timezone),
+                        start: (moment.utc(interval.start_at) as any).tz(this.timezone),
+                        end: (moment.utc(interval.end_at) as any).tz(this.timezone),
                     } as EventObjectInput;
                 }).sort((a, b) => {
                     // Sort by user.
