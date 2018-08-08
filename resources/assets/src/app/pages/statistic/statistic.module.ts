@@ -17,6 +17,7 @@ import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
 import {ScheduleModule} from 'primeng/schedule';
+import {DpDatePickerModule} from 'ng2-date-picker';
 
 @NgModule({
     imports: [
@@ -28,6 +29,7 @@ import {ScheduleModule} from 'primeng/schedule';
         GrowlModule,
         SharedModule,
         ScheduleModule,
+        DpDatePickerModule,
     ],
     exports: [
         StatisticTimeComponent

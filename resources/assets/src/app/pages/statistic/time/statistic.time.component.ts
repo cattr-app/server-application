@@ -1,12 +1,11 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
-import {ApiService} from '../../../api/api.service';
-import {Router} from "@angular/router";
-import {Screenshot} from "../../../models/screenshot.model";
-import {AllowedActionsService} from "../../roles/allowed-actions.service";
-import {UsersService} from '../../users/users.service';
-import {TimeIntervalsService} from '../../timeintervals/timeintervals.service';
-import {User} from '../../../models/user.model';
-import {TimeInterval} from '../../../models/timeinterval.model';
+import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { ApiService } from '../../../api/api.service';
+import { Router } from "@angular/router";
+import { AllowedActionsService } from "../../roles/allowed-actions.service";
+import { UsersService } from '../../users/users.service';
+import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
+import { User } from '../../../models/user.model';
+import { TimeInterval } from '../../../models/timeinterval.model';
 import * as $ from 'jquery';
 import * as moment from 'moment';
 import 'moment-timezone';
@@ -21,28 +20,49 @@ import { Schedule } from 'primeng/schedule';
     styleUrls: ['../../items.component.scss', './statistic.time.component.scss']
 })
 export class StatisticTimeComponent implements OnInit {
-    @ViewChild("fileInput") fileInput;
-    @ViewChild('calendar') calendar: Schedule;
+    @ViewChild('timeline') timeline: Schedule;
+    @ViewChild('datePicker') datePicker: ElementRef;
 
-    public item: Screenshot = new Screenshot();
-    public userList: User;
-    public timeintervalList: TimeInterval;
-
-    header: any;
-    options: any;
+    timelineInitialized: boolean = false;
+    timelineOptions: any;
     events: EventObjectInput[];
     timezone: string;
+    datePickerDate: string;
+    datePickerEndDate: string;
 
     constructor(private api: ApiService,
-                private userService: UsersService,
-                private timeintervalService: TimeIntervalsService,
-                private router: Router,
-                allowedService: AllowedActionsService) {
+        private userService: UsersService,
+        private timeintervalService: TimeIntervalsService,
+        private router: Router,
+        allowedService: AllowedActionsService) {
 
     }
 
-    get $calendar(): JQuery<any> {
-        return $(this.calendar.el.nativeElement).children();
+    readonly defaultView = 'timelineDay';
+    readonly datePickerFormat = 'YYYY-MM-DD';
+
+    get $timeline(): JQuery<any> {
+        return $(this.timeline.el.nativeElement).children();
+    }
+
+    get viewName(): string {
+        if (!this.timelineInitialized || !this.$timeline.fullCalendar) {
+            return this.defaultView;
+        }
+
+        return this.$timeline.fullCalendar('getView').name;
+    }
+
+    set viewName(value: string) {
+        this.timeline.changeView(value);
+    }
+
+    get timelineDate(): moment.Moment {
+        return this.timeline.getDate();
+    }
+
+    set timelineDate(value: moment.Moment) {
+        this.timeline.gotoDate(value);
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
@@ -131,10 +151,10 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     updateTimeWorkedOn() {
-        const view = this.$calendar.fullCalendar('getView');
+        const view = this.$timeline.fullCalendar('getView');
         const viewStart = moment.utc(view.start);
         const viewEnd = moment.utc(view.end);
-        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$calendar);
+        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
         $rows.each((index, row) => {
             const $row = $(row);
             const userId = $row.data('resource-id');
@@ -152,21 +172,14 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     ngOnInit() {
+        this.events = [];
+
         const user = this.api.getUser() as User;
         this.timezone = user.timezone !== null ? user.timezone : 'UTC';
 
-        /**
-         * @todo uncomment it, when data will be fill
-         */
-        // this.userService.getItems(this.onUsersGet.bind(this));
-        // this.timeintervalService.getItems(this.onTimeIntervalGet.bind(this));
-        this.header = {
-            left: false,
-            center: false,
-            right: 'timelineDay,timelineWeek,timelineMonth,timelineRange'
-        };
-
-        this.events = [];
+        const now = moment.utc().startOf('day');
+        this.datePickerDate = now.format(this.datePickerFormat);
+        this.datePickerEndDate = now.clone().add(1, 'day').format(this.datePickerFormat);
 
         const eventSource = {
             events: async (start, end, timezone, callback) => {
@@ -181,12 +194,11 @@ export class StatisticTimeComponent implements OnInit {
             },
         };
 
-        const now = moment.utc();
-
-        this.options = {
-            defaultView: 'timelineDay',
+        this.timelineOptions = {
+            defaultView: this.defaultView,
             now: now,
             timezone: this.timezone,
+            firstDay: 1,
             themeSystem: 'bootstrap3',
             views: {
                 timelineDay: {
@@ -211,82 +223,11 @@ export class StatisticTimeComponent implements OnInit {
                     type: 'timeline',
                     slotDuration: { days: 1 },
                     visibleRange: {
-                        start: now,
-                        end: now.clone().add(1, 'days'),
+                        start: moment.utc(),
+                        end: moment.utc().clone().add(1, 'days'),
                     },
                     buttonText: 'Date range',
                 },
-            },
-            viewRender: (view: View, el) => {
-                if (view.name === 'timelineRange') {
-                    const dateFrom = view.start;
-                    const dateTo = view.end.clone().subtract(1, 'days');
-
-                    const dateFromStr = dateFrom.format('YYYY-MM-DD');
-                    const $dateFrom = $(`<input type="date" class="form-control" value="${dateFromStr}" />`);
-
-                    const dateToStr = dateTo.format('YYYY-MM-DD');
-                    const $dateTo = $(`<input type="date" class="form-control" value="${dateToStr}" />`);
-
-                    const changeRange = (e) => {
-                        const start = moment.utc($dateFrom.val(), 'YYYY-MM-DD');
-                        let end = moment.utc($dateTo.val(), 'YYYY-MM-DD').add(1, 'days');
-                        if (end.diff(start) <= 0) {
-                            end = start.clone().add(1, 'days');
-                        }
-
-                        this.calendar.gotoDate(start);
-                        this.$calendar.fullCalendar('option', 'visibleRange', {
-                            start: start,
-                            end: end,
-                        });
-                    };
-
-                    $dateFrom.change(changeRange);
-                    $dateTo.change(changeRange);
-
-                    const $dateFromGroup = $('<div class="input-group">');
-                    $dateFromGroup.append($dateFrom);
-
-                    const $dateToGroup = $('<div class="input-group">');
-                    $dateToGroup.append($dateTo);
-
-                    const $center = $('.fc-center', this.$calendar);
-                    $center.addClass('form-inline');
-                    $center.empty();
-                    $center.append($dateFromGroup);
-                    $center.append($dateToGroup);
-                } else {
-                    const $prev = $(`
-<button type="button" class="fc-prev-button btn btn-default" aria-label="prev">
-    <span class="glyphicon glyphicon-chevron-left"></span>
-</button>`);
-                    $prev.click(e => this.calendar.prev());
-                    const $prevWrapper = $('<span class="input-group-btn">').append($prev);
-
-                    const date = view.start;
-                    const dateStr = date.format('YYYY-MM-DD');
-                    const dateAttributes = view.name === 'timelineDay' ? '' : 'readonly';
-                    const $date = $(`<input type="date" class="form-control" value="${dateStr}" ${dateAttributes} />`);
-                    $date.change(e => this.calendar.gotoDate(moment.utc($date.val(), 'YYYY-MM-DD')));
-
-                    const $next = $(`
-<button type="button" class="fc-next-button btn btn-default" aria-label="next">
-    <span class="glyphicon glyphicon-chevron-right"></span>
-</button>`);
-                    $next.click(e => this.calendar.next());
-                    const $nextWrapper = $('<span class="input-group-btn">').append($next);
-
-                    const $dateGroup = $('<div class="input-group">');
-                    $dateGroup.append($prevWrapper);
-                    $dateGroup.append($date);
-                    $dateGroup.append($nextWrapper);
-
-                    const $center = $('.fc-center', this.$calendar);
-                    $center.addClass('form-inline');
-                    $center.empty();
-                    $center.append($dateGroup);
-                }
             },
             refetchResourcesOnNavigate: false,
             resourceColumns: [
@@ -324,7 +265,7 @@ export class StatisticTimeComponent implements OnInit {
             },
             eventAfterAllRender: (view: View) => {
                 if (view.name !== 'timelineDay') {
-                    const $calendar = this.$calendar;
+                    const $calendar = this.$timeline;
                     const $rows = $('.fc-resource-area tr[data-resource-id]', $calendar);
                     const rows = $.makeArray($rows);
 
@@ -361,16 +302,51 @@ export class StatisticTimeComponent implements OnInit {
                 }
 
                 this.updateTimeWorkedOn();
+
+                this.timelineInitialized = true;
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
     }
 
-    protected onUsersGet(userList: User) {
-        this.userList = userList;
+    datePickerPrev() {
+        this.timeline.prev();
+        this.datePickerDate = this.timelineDate.format(this.datePickerFormat);
+        this.datePickerEndDate = this.timelineDate.clone().add(1, 'day').format(this.datePickerFormat);
     }
 
-    protected onTimeIntervalGet(timeintervalList: TimeInterval) {
-        this.timeintervalList = timeintervalList;
+    datePickerNext() {
+        this.timeline.next();
+        this.datePickerDate = this.timelineDate.format(this.datePickerFormat);
+        this.datePickerEndDate = this.timelineDate.clone().add(1, 'day').format(this.datePickerFormat);
+    }
+
+    datePickerSelect(value: moment.Moment) {
+        if (!this.timelineInitialized) {
+            return;
+        }
+
+        const date = moment.utc(this.datePickerDate);;
+        this.timelineDate = date;
+        this.datePickerEndDate = date.clone().add(1, 'day').format(this.datePickerFormat);
+    }
+
+    datePickerRangeSelect(value: moment.Moment) {
+        if (!this.timelineInitialized) {
+            return;
+        }
+
+        const start = moment.utc(this.datePickerDate);
+        let end = moment.utc(this.datePickerEndDate).add(1, 'day');
+
+        if (end.diff(start) <= 0) {
+            end = start.clone().add(1, 'day');
+        }
+
+        this.timeline.gotoDate(start);
+        this.$timeline.fullCalendar('option', 'visibleRange', {
+            start: start,
+            end: end,
+        });
     }
 }

@@ -32,6 +32,7 @@
     "jquery": "^3.3.1",
     "moment": "^2.18.1",
     "moment-timezone": "^0.5.21",
+    "ng2-date-picker": "^2.10.1",
     "ng2-timezone-selector": "^0.2.4",
     "ngx-bootstrap": "^2.0.2",
     "ngx-moment": "^3.0.1",

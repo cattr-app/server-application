@@ -1,8 +1,25 @@
-::ng-deep .fc-center .input-group button {
-    font-size: 14px;
-    height: unset;
-    padding: 6px 12px;
-    margin: unset;
+.statistics {
+    &__header {
+        float: right;
+        margin-bottom: 1em;
+    }
+
+    &__date-wrapper,
+    &__buttons {
+        display: inline-block;
+    }
+
+    &__date-wrapper {
+        margin-right: 1em;
+    }
+
+    &__timeline {
+        clear: both;
+    }
+}
+
+::ng-deep .dp-popup button {
+    padding: 0;
 }
 
 ::ng-deep .fc-resource-area {
