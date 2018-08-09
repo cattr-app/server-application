@@ -201,7 +201,7 @@ export class StatisticTimeComponent implements OnInit {
             timezone: this.timezone,
             firstDay: 1,
             themeSystem: 'bootstrap3',
-            eventColor: '#51be71',
+            eventColor: '#2ab27b',
             views: {
                 timelineDay: {
                     type: 'timeline',
@@ -328,7 +328,17 @@ export class StatisticTimeComponent implements OnInit {
             return;
         }
 
-        const date = moment.utc(this.datePickerDate);;
+        if (this.viewName === 'timelineWeek') {
+            // Select first day of a week.
+            setTimeout(() => {
+                const startOfWeek = moment.utc(this.datePickerDate).startOf('week').add(1, 'day').format(this.datePickerFormat);
+                if (this.datePickerDate !== startOfWeek) {
+                    this.datePickerDate = startOfWeek;
+                }
+            });
+        }
+
+        const date = moment.utc(this.datePickerDate);
         this.timelineDate = date;
         this.datePickerEndDate = date.clone().add(1, 'day').format(this.datePickerFormat);
     }

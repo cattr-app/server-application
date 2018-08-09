@@ -1,3 +1,6 @@
+@import '../../../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
 .statistics {
     &__header {
         float: right;
@@ -20,56 +23,121 @@
     }
 }
 
-::ng-deep .dp-popup button {
-    padding: 0;
-}
+::ng-deep {
+    /* Date picker styles */
+    $date-picker-border-color: #ddd;
 
-::ng-deep .fc-resource-area {
-    tr[data-resource-id] {
-        background: #fff;
-
-        &.not_worked {
-            background: #eee;
-        }
+    .dp-calendar-nav-container,
+    .dp-calendar-wrapper {
+        border-color: $date-picker-border-color !important;
     }
 
-    td:nth-child(2) {
-        text-align: right;
-    }
-}
+    .dp-weekdays {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-around;
 
-::ng-deep .fc-time-area {
-    /* Overrides for fullcalendar inline styles. */
-    /* Set timeline row height. */
-    tr[data-resource-id] > td > div {
+        border-bottom: 1px solid $date-picker-border-color !important;
+    }
+
+    .dp-calendar-weekday {
+        border: 0 !important;
+    }
+
+    .dp-calendar-nav-container {
         height: 40px !important;
-    }
-    /* Set events height. */
-    .fc-event {
-        height: 35px !important;
-    }
-}
 
-::ng-deep .fc-day {
-    .progress-wrapper {
-        position: absolute;
-        text-align: center;
-        background: #fff;
+        button {
+            @extend .btn;
+            @extend .btn-default;
 
-        &_empty {
-            background: #eee;
+            padding: 3px;
+
+            &[data-hidden="true"] {
+                display: none;
+            }
         }
     }
 
-    .progress, p {
-        margin-bottom: 0;
+    .dp-calendar-wrapper button {
+        @extend .btn;
+        @extend .btn-default;
+
+        padding: 0;
+        margin: 3px;
     }
 
-    .progress {
-        height: 16px;
+    .dp-current-day {
+        @extend .btn;
+        @extend .btn-default;
+    }
 
-        &-bar {
-            background: #51be71;
+    button.dp-calendar-day.dp-selected,
+    button.dp-calendar-month.dp-selected {
+        @extend .btn-primary;
+    }
+
+    .statistics__date-input_week + dp-date-picker .dp-calendar-wrapper {
+        .dp-calendar-week:hover button.dp-calendar-day  {
+            @extend .active;
+        }
+
+        .dp-calendar-week .dp-selected ~ button.dp-calendar-day  {
+            @extend .btn-primary;
+        }
+    }
+
+    /* Fullcalendar styles */
+    .fc-resource-area {
+        /* Resource row */
+        tr[data-resource-id] {
+            background: #fff;
+
+            &.not_worked {
+                background: #eee;
+            }
+        }
+
+        /* Time worked data */
+        td:nth-child(2) {
+            text-align: right;
+        }
+    }
+
+    .fc-time-area {
+        /* Overrides for fullcalendar inline styles. */
+        /* Set timeline row height. */
+        tr[data-resource-id] > td > div {
+            height: 40px !important;
+        }
+        /* Set events height. */
+        .fc-event {
+            height: 35px !important;
+        }
+    }
+
+    .fc-day {
+        /* Day cell progress bar styles */
+        .progress-wrapper {
+            position: absolute;
+            text-align: center;
+            background: #fff;
+
+            &_empty {
+                background: #eee;
+            }
+        }
+
+        .progress, p {
+            margin-bottom: 0;
+        }
+
+        .progress {
+            height: 16px;
+
+            &-bar {
+                background: $brand-success;
+            }
         }
     }
 }
