@@ -1,7 +1,7 @@
 <div class="statistics">
     <div class="statistics__header">
         <div class="statistics__buttons btn-group" role="group">
-            <button *ngIf="viewName !== 'timelineDay'" type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
+            <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
         </div>
 
         <div *ngIf="viewName !== 'timelineRange'" class="statistics__date-wrapper form-inline">
