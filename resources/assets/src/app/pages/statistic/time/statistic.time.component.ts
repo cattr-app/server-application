@@ -213,17 +213,22 @@ export class StatisticTimeComponent implements OnInit {
                     type: 'timeline',
                     duration: { weeks: 1 },
                     slotDuration: { days: 1 },
+                    slotLabelFormat: 'ddd,\nMMM DD,\nYYYY',
                     buttonText: 'Week',
                 },
                 timelineMonth: {
                     type: 'timeline',
                     duration: { months: 1 },
                     slotDuration: { days: 1 },
+                    slotLabelFormat: 'ddd,\nMMM DD,\nYYYY',
+                    slotWidth: 80,
                     buttonText: 'Month',
                 },
                 timelineRange: {
                     type: 'timeline',
                     slotDuration: { days: 1 },
+                    slotLabelFormat: 'ddd,\nMMM DD,\nYYYY',
+                    slotWidth: 80,
                     visibleRange: {
                         start: moment.utc(),
                         end: moment.utc().clone().add(1, 'days'),
@@ -276,7 +281,7 @@ export class StatisticTimeComponent implements OnInit {
                         const date = $(dayColumnElement).data('date');
                         const dayStart = (moment as any).tz(date, this.timezone);
                         const dayEnd = dayStart.clone().add(1, 'days');
-                        const columnWidth = $(dayColumnElement).width();
+                        const columnWidth = $(dayColumnElement).width() - 4;
 
                         const html = rows.map(userRowElement => {
                             const userId = $(userRowElement).data('resource-id');
