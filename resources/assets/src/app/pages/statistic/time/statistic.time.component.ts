@@ -201,6 +201,7 @@ export class StatisticTimeComponent implements OnInit {
             timezone: this.timezone,
             firstDay: 1,
             themeSystem: 'bootstrap3',
+            eventColor: '#51be71',
             views: {
                 timelineDay: {
                     type: 'timeline',

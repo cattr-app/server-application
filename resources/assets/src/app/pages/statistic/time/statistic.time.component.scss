@@ -38,6 +38,18 @@
     }
 }
 
+::ng-deep .fc-time-area {
+    /* Overrides for fullcalendar inline styles. */
+    /* Set timeline row height. */
+    tr[data-resource-id] > td > div {
+        height: 40px !important;
+    }
+    /* Set events height. */
+    .fc-event {
+        height: 35px !important;
+    }
+}
+
 ::ng-deep .fc-day {
     .progress-wrapper {
         position: absolute;
@@ -55,5 +67,9 @@
 
     .progress {
         height: 16px;
+
+        &-bar {
+            background: #51be71;
+        }
     }
 }
