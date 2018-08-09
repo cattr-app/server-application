@@ -18,6 +18,7 @@ import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
 import {ScheduleModule} from 'primeng/schedule';
 import {DpDatePickerModule} from 'ng2-date-picker';
+import {LoadingModule} from 'ngx-loading';
 
 @NgModule({
     imports: [
@@ -30,6 +31,7 @@ import {DpDatePickerModule} from 'ng2-date-picker';
         SharedModule,
         ScheduleModule,
         DpDatePickerModule,
+        LoadingModule,
     ],
     exports: [
         StatisticTimeComponent

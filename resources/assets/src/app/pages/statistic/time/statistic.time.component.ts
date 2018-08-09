@@ -23,6 +23,7 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('timeline') timeline: Schedule;
     @ViewChild('datePicker') datePicker: ElementRef;
 
+    loading: boolean = false;
     timelineInitialized: boolean = false;
     timelineOptions: any;
     events: EventObjectInput[];
@@ -219,6 +220,7 @@ export class StatisticTimeComponent implements OnInit {
         const eventSource = {
             events: async (start, end, timezone, callback) => {
                 try {
+                    setTimeout(() => { this.loading = true; });
                     let events = await this.fetchEvents(start, end);
 
                     // If showing events in the past or future.
@@ -234,6 +236,8 @@ export class StatisticTimeComponent implements OnInit {
                     console.error(e);
                     callback([]);
                 }
+
+                setTimeout(() => { this.loading = false; });
             },
         };
 

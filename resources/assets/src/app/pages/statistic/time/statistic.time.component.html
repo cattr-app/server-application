@@ -50,6 +50,7 @@
     </div>
 
     <div class="statistics__timeline">
+        <ngx-loading [show]="loading"></ngx-loading>
         <p-schedule #timeline [header]="false" [options]="timelineOptions"></p-schedule>
     </div>
 </div>
