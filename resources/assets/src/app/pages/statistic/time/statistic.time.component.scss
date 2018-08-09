@@ -131,6 +131,7 @@
         /* Set timeline row height. */
         tr[data-resource-id] > td > div {
             height: 40px !important;
+            overflow: hidden;
         }
         /* Set events height. */
         .fc-event {
