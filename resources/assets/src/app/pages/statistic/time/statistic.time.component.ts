@@ -219,7 +219,15 @@ export class StatisticTimeComponent implements OnInit {
         const eventSource = {
             events: async (start, end, timezone, callback) => {
                 try {
-                    const events = await this.fetchEvents(start, end);
+                    let events = await this.fetchEvents(start, end);
+
+                    // If showing events in the past or future.
+                    const now = moment.utc();
+                    if (moment.utc(end).diff(now) < 0 || moment.utc(start).diff(now) > 0) {
+                        // Always load current events to show the 'is working now' indicator.
+                        events = events.concat(await this.fetchEvents(now, now));
+                    }
+
                     this.events = events;
                     callback(events);
                 } catch (e) {
