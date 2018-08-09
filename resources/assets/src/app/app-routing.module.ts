@@ -6,6 +6,7 @@ import {IntegrationsComponent} from './pages/integrations/integrations.component
 const routes: Routes = [
     {path: 'projects', loadChildren: './pages/projects/projects.module#ProjectsModule'},
     {path: 'tasks', loadChildren: './pages/tasks/tasks.module#TasksModule'},
+    {path: 'statistic', loadChildren: './pages/statistic/statistic.module#StatisticModule'},
     {path: 'users', loadChildren: './pages/users/users.module#UsersModule'},
     {path: 'roles', loadChildren: './pages/roles/roles.module#RolesModule'},
     {path: 'screenshots', loadChildren: './pages/screenshots/screenshots.module#ScreenshotsModule'},
@@ -14,7 +15,7 @@ const routes: Routes = [
     {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
     {path: 'dashboard', loadChildren: './pages/dashboard/dashboard.module#DashboardModule'},
     {path: 'integrations', component: IntegrationsComponent},
-    {path: 'reportprojects', loadChildren: './pages/reportprojects/reportprojects.module#ReportProjectsModule'}
+    {path: 'report', loadChildren: './pages/report/report.module#ReportModule'}
 ];
 
 @NgModule({

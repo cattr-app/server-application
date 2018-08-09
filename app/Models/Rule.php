@@ -122,6 +122,14 @@ class Rule extends Model
                 'relations' => __('Attached users list'),
                 'full_access' => __('Users full access'),
             ],
+            'attached-users' => [
+                'list' => __('Attached User relation list'),
+                'create' => __('Attached User relation create'),
+                'bulk-create' => __('Attached User relation multiple create'),
+                'remove' => __('Attached User relation remove'),
+                'bulk-remove' => __('Attached User relation multiple remove'),
+                'full_access' => __('Attached User relation full access'),
+            ],
             'rules' => [
                 'edit' => __('Rules edit'),
                 'bulk-edit' => __('Rules multiple edit'),

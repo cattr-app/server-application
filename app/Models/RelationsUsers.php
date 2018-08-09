@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -26,6 +27,14 @@ class RelationsUsers extends Model
      * @var string
      */
     protected $table = 'relations_users';
+
+    protected function setKeysForSaveQuery(Builder $query)
+    {
+        $query
+            ->where('attached_user_id', '=', $this->getAttribute('attached_user_id'))
+            ->where('user_id', '=', $this->getAttribute('user_id'));
+        return $query;
+    }
 
     /**
      * @var array

@@ -8,6 +8,7 @@ interface NavigationLink {
     title: string;
     action: string;
     isLink: boolean;
+    permissions?: string[];
 }
 
 @Component({
@@ -26,15 +27,16 @@ export class NavigationComponent implements OnInit {
     ];
 
     protected itemsAuthorized: NavigationLink[] = [
-        {title: 'Dashboard', action: 'dashboard', isLink: true},
-        {title: 'Projects', action: 'projects/list', isLink: true},
-        {title: 'Report projects', action: 'reportprojects', isLink: true},
-        {title: 'Tasks', action: 'tasks/list', isLink: true},
-        {title: 'Users', action: 'users/list', isLink: true},
-        {title: 'Screenshots', action: 'screenshots/list', isLink: true},
-        {title: 'Time Intervals', action: 'time-intervals/list', isLink: true},
-        {title: 'Integrations', action: 'integrations', isLink: true},
-        {title: 'Role', action: 'roles/list', isLink: true},
+        {title: 'Dashboard', action: 'dashboard', isLink: true, permissions: [ 'dashboard' ] },
+        {title: 'Projects', action: 'projects/list', isLink: true, permissions: [ 'projects/list' ]},
+        {title: 'Tasks', action: 'tasks/list', isLink: true, permissions: [ 'tasks/list' ]},
+        {title: 'Users', action: 'users/list', isLink: true, permissions: [ 'users/list' ]},
+        {title: 'Screenshots', action: 'screenshots/list', isLink: true, permissions: [ 'screenshots/list' ]},
+        {title: 'Time Intervals', action: 'time-intervals/list', isLink: true, permissions: [ 'time-intervals/list' ]},
+        {title: 'Statistic', action: 'statistic/time', isLink: true, permissions: [ 'users/list', 'time-intervals/list'  ]},
+        {title: 'Report', action: 'report/projects', isLink: true, permissions: [ 'users/list', 'time-intervals/list'  ]},
+        {title: 'Integrations', action: 'integrations', isLink: true, permissions: [ 'projects/list' ]},
+        {title: 'Role', action: 'roles/list', isLink: true, permissions: [ 'roles/list' ]},
         {title: 'Logout', action: 'onLogout', isLink: false},
     ];
 
@@ -85,7 +87,21 @@ export class NavigationComponent implements OnInit {
                 continue;
             }
 
-            if (this.allowedService.can(item.action)) {
+
+            if (!item.permissions || !item.permissions.length) {
+                allowedItems.push(item);
+                continue;
+            }
+
+            let allow : boolean = true;
+            for (const APIaction of item.permissions) {
+                if (!this.allowedService.can(APIaction)) {
+                    allow = false;
+                    break;
+                }
+            }
+
+            if (allow) {
                 allowedItems.push(item);
             }
         }

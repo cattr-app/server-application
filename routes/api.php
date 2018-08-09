@@ -71,6 +71,13 @@ Route::group([
     $router->post('/users/bulk-edit', 'Api\v1\UserController@bulkEdit');
     $router->any('/users/relations', 'Api\v1\UserController@relations');
 
+    // Attached Users routes
+    $router->any('/attached-users/list', 'Api\v1\RelationsUsersController@index');
+    $router->post('/attached-users/create', 'Api\v1\RelationsUsersController@create');
+    $router->post('/attached-users/bulk-create', 'Api\v1\RelationsUsersController@bulkCreate');
+    $router->post('/attached-users/remove', 'Api\v1\RelationsUsersController@destroy');
+    $router->post('/attached-users/bulk-remove', 'Api\v1\RelationsUsersController@bulkDestroy');
+
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
     $router->any('/screenshots/dashboard', 'Api\v1\ScreenshotController@dashboard');

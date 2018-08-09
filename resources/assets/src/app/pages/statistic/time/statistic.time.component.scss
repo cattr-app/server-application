@@ -1,0 +1,59 @@
+.statistics {
+    &__header {
+        float: right;
+        margin-bottom: 1em;
+    }
+
+    &__buttons,
+    &__date-wrapper,
+    &__view-buttons {
+        display: inline-block;
+    }
+
+    &__buttons,
+    &__date-wrapper {
+        margin-right: 1em;
+    }
+
+    &__timeline {
+        clear: both;
+    }
+}
+
+::ng-deep .dp-popup button {
+    padding: 0;
+}
+
+::ng-deep .fc-resource-area {
+    tr[data-resource-id] {
+        background: #fff;
+
+        &.not_worked {
+            background: #eee;
+        }
+    }
+
+    td:nth-child(2) {
+        text-align: right;
+    }
+}
+
+::ng-deep .fc-day {
+    .progress-wrapper {
+        position: absolute;
+        text-align: center;
+        background: #fff;
+
+        &_empty {
+            background: #eee;
+        }
+    }
+
+    .progress, p {
+        margin-bottom: 0;
+    }
+
+    .progress {
+        height: 16px;
+    }
+}

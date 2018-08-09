@@ -28,4 +28,26 @@ export class UsersService extends ItemsService {
             errorCallback ? errorCallback : this.api.errorCallback.bind(this)
         );
     }
+
+    createAssignedUsers(items, callback, errorCallback ?: null) {
+        this.api.send(
+            'attached-users/bulk-create',
+            {'relations': items},
+            (result) => {
+                callback(result);
+            },
+            errorCallback ? errorCallback : this.api.errorCallback.bind(this)
+        );
+    }
+
+    removeAssignedUsers(items, callback, errorCallback ?: null) {
+        this.api.send(
+            'attached-users/bulk-remove',
+            {'relations': items},
+            (result) => {
+                callback(result);
+            },
+            errorCallback ? errorCallback : this.api.errorCallback.bind(this)
+        );
+    }
 }
