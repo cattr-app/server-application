@@ -41,11 +41,18 @@
             </div>
         </div>
 
-        <div class="statistics__view-buttons btn-group" role="group">
-            <button type="button" (click)="viewName = 'timelineDay'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineDay'}">Day</button>
-            <button type="button" (click)="viewName = 'timelineWeek'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineWeek'}">Week</button>
-            <button type="button" (click)="viewName = 'timelineMonth'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineMonth'}">Month</button>
-            <button type="button" (click)="viewName = 'timelineRange'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineRange'}">Date Range</button>
+        <div class="statistics__view-buttons btn-group" role="group" (window:mouseup)="switchingView = false">
+            <button type="button" (click)="viewName = 'timelineDay'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineDay' && !switchingView}"
+                (mousedown)="switchingView = true">Day</button>
+
+            <button type="button" (click)="viewName = 'timelineWeek'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineWeek' && !switchingView}"
+                (mousedown)="switchingView = true">Week</button>
+
+            <button type="button" (click)="viewName = 'timelineMonth'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineMonth' && !switchingView}"
+                (mousedown)="switchingView = true">Month</button>
+
+            <button type="button" (click)="viewName = 'timelineRange'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineRange' && !switchingView}"
+                (mousedown)="switchingView = true">Date Range</button>
         </div>
     </div>
 

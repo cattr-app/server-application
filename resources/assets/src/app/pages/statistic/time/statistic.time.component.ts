@@ -24,6 +24,7 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('datePicker') datePicker: ElementRef;
 
     loading: boolean = false;
+    switchingView: boolean = false;
     timelineInitialized: boolean = false;
     timelineOptions: any;
     events: EventObjectInput[];
