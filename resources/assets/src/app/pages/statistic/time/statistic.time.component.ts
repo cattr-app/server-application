@@ -126,16 +126,32 @@ export class StatisticTimeComponent implements OnInit {
         });
     }
 
-    calculateTimeWorkedOn(user_id: number, start: moment.Moment, end: moment.Moment) {
+    getLoadedEventsStartedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
         // Get loaded events of the specified user, started in the selected time range.
-        const events = this.events.filter(event => {
+        return this.events.filter(event => {
             const isOfCurrentUser = event.resourceId == user_id;
 
             const eventStart = moment.utc(event.start);
-            const isInCurrentView = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
+            const isInPeriod = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
 
-            return isOfCurrentUser && isInCurrentView;
+            return isOfCurrentUser && isInPeriod;
         });
+    }
+
+    getLoadedEventsEndedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
+        // Get loaded events of the specified user, started in the selected time range.
+        return this.events.filter(event => {
+            const isOfCurrentUser = event.resourceId == user_id;
+
+            const eventEnd = moment.utc(event.end);
+            const isInPeriod = eventEnd.diff(start) >= 0 && eventEnd.diff(end) < 0;
+
+            return isOfCurrentUser && isInPeriod;
+        });
+    }
+
+    calculateTimeWorkedOn(user_id: number, start: moment.Moment, end: moment.Moment) {
+        const events = this.getLoadedEventsStartedBetween(user_id, start, end);
         // Calculate sum of an event time.
         return events.map(event => {
             const start = moment.utc(event.start);
@@ -151,6 +167,24 @@ export class StatisticTimeComponent implements OnInit {
         return `${hours}h ${minutes}m`;
     }
 
+    updateIsWorkingNow() {
+        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
+        $rows.each((index, row) => {
+            const $row = $(row);
+            const userId = $row.data('resource-id');
+            const end = moment.utc();
+            const start = end.clone().subtract(5, 'minutes');
+            const events = this.getLoadedEventsEndedBetween(userId, start, end);
+            const $cell = $('td:nth-child(1) .fc-cell-text', $row);
+
+            if (events.length > 0) {
+                $cell.addClass('is_working_now');
+            } else {
+                $cell.removeClass('is_working_now');
+            }
+        });
+    }
+
     updateTimeWorkedOn() {
         const view = this.$timeline.fullCalendar('getView');
         const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
@@ -161,7 +195,7 @@ export class StatisticTimeComponent implements OnInit {
             const userId = $row.data('resource-id');
             const timeWorked = this.calculateTimeWorkedOn(userId, viewStart, viewEnd);
             const timeWorkedString = this.formatDurationString(timeWorked);
-            const $cell = $('td:nth-child(2) .fc-cell-text', $row);
+            const $cell = $('td:nth-child(3) .fc-cell-text', $row);
             $cell.text(timeWorkedString);
 
             if (timeWorked === 0) {
@@ -239,6 +273,11 @@ export class StatisticTimeComponent implements OnInit {
             refetchResourcesOnNavigate: false,
             resourceColumns: [
                 {
+                    labelText: '',
+                    text: () => '',
+                    width: '40px',
+                },
+                {
                     labelText: 'Names',
                     field: 'title',
                 },
@@ -308,6 +347,7 @@ export class StatisticTimeComponent implements OnInit {
                     });
                 }
 
+                this.updateIsWorkingNow();
                 this.updateTimeWorkedOn();
 
                 this.timelineInitialized = true;

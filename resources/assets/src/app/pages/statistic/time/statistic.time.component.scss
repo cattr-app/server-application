@@ -98,8 +98,30 @@
             }
         }
 
+        /* Is working now */
+        td:nth-child(1) {
+            .fc-cell-content {
+                text-align: center;
+            }
+
+            .fc-cell-text {
+                display: inline-block;
+                line-height: 1;
+                padding: 0;
+
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: #ddd;
+
+                &.is_working_now {
+                    background: $brand-success;
+                }
+            }
+        }
+
         /* Time worked data */
-        td:nth-child(2) {
+        td:nth-child(3) {
             text-align: right;
         }
     }
