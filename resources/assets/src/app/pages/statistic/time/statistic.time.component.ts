@@ -186,6 +186,16 @@ export class StatisticTimeComponent implements OnInit {
             } else {
                 $row.removeClass('not_worked');
             }
+
+            const end = moment.utc();
+            const start = end.clone().subtract(1, 'day');
+            const lastUserEvents = this.getLoadedEventsEndedBetween(userId, start, end);
+            if (lastUserEvents.length > 0) {
+                const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
+                const eventEnd = moment(lastUserEvent.end);
+                const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
+                $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc()) + '</p>');
+            }
         });
     }
 
@@ -212,7 +222,7 @@ export class StatisticTimeComponent implements OnInit {
                     const now = moment.utc();
                     if (moment.utc(end).diff(now) < 0 || moment.utc(start).diff(now) > 0) {
                         // Always load current events to show the 'is working now' indicator.
-                        events = events.concat(await this.fetchEvents(now.clone().subtract(10, 'minutes'), now));
+                        events = events.concat(await this.fetchEvents(now.clone().subtract(1, 'day'), now));
                     }
 
                     this.events = events;

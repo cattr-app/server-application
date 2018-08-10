@@ -66,6 +66,20 @@
             }
         }
 
+        /* Name data */
+        td:nth-child(2) {
+            .fc-cell-content {
+                overflow: visible;
+            }
+
+            .last-worked {
+                font-size: 10px;
+                position: absolute;
+                bottom: -12px;
+                left: 8px;
+            }
+        }
+
         /* Time worked data */
         td:nth-child(3) {
             text-align: right;
