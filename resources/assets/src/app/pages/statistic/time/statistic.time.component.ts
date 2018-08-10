@@ -137,6 +137,14 @@ export class StatisticTimeComponent implements OnInit {
         });
     }
 
+    refetchEvents() {
+        if (!this.timelineInitialized) {
+            return;
+        }
+
+        this.$timeline.fullCalendar('refetchEvents');
+    }
+
     getLoadedEventsStartedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
         // Get loaded events of the specified user, started in the selected time range.
         return this.events.filter(event => {
@@ -221,7 +229,12 @@ export class StatisticTimeComponent implements OnInit {
         this.events = [];
 
         const user = this.api.getUser() as User;
-        this.timezone = user.timezone !== null ? user.timezone : 'UTC';
+
+        let timezone = localStorage.getItem('statistics-timezone');
+        if (timezone === null) {
+            timezone = user.timezone !== null ? user.timezone : 'UTC';
+        }
+        this.timezone = timezone;
 
         const now = moment.utc().startOf('day');
 
@@ -434,5 +447,11 @@ export class StatisticTimeComponent implements OnInit {
 
         const content = 'data:text/csv;charset=utf-8,' + header.join(',') + '\n' + lines.join('\n');
         window.open(encodeURI(content));
+    }
+
+    setTimezone(timezone: string) {
+        localStorage.setItem('statistics-timezone', timezone);
+        this.timezone = timezone;
+        this.refetchEvents();
     }
 }

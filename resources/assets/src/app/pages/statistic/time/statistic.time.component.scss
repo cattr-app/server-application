@@ -2,17 +2,21 @@
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
 .statistics {
-    &__header {
-        float: right;
+    &__header-line {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
         margin-bottom: 1em;
     }
 
+    &__timezone,
     &__buttons,
     &__view-switcher {
         display: inline-block;
         vertical-align: bottom;
     }
 
+    &__timezone,
     &__buttons {
         margin-right: 1em;
     }
@@ -23,7 +27,12 @@
     }
 }
 
-::ng-deep {
+:host ::ng-deep {
+    .select2-selection {
+        @extend .form-control;
+        height: 36px;
+    }
+
     /* Fullcalendar styles */
     .fc-resource-area {
         /* Resource row */

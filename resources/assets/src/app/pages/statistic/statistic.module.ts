@@ -22,6 +22,7 @@ import {SharedModule} from '../../shared.module';
 import {ScheduleModule} from 'primeng/schedule';
 import {DpDatePickerModule} from 'ng2-date-picker';
 import {LoadingModule} from 'ngx-loading';
+import {TimezonePickerModule} from 'ng2-timezone-selector';
 
 @NgModule({
     imports: [
@@ -35,6 +36,7 @@ import {LoadingModule} from 'ngx-loading';
         ScheduleModule,
         DpDatePickerModule,
         LoadingModule,
+        TimezonePickerModule,
     ],
     exports: [
         StatisticTimeComponent

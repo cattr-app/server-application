@@ -1,10 +1,24 @@
 <div class="statistics">
     <div class="statistics__header">
-        <div class="statistics__buttons btn-group" role="group">
-            <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
+        <div class="statistics__header-line">
+            <div class="statistics__timezone">
+                <ng2-timezone-picker
+                    [(timezone)]="timezone"
+                    showOffset="true"
+                    placeholder="Select timezone"
+                    guess="true"
+                    (change)="setTimezone($event)">
+                </ng2-timezone-picker>
+            </div>
+    
+            <view-switcher class="statistics__view-switcher" (setView)="setView($event)"></view-switcher>
         </div>
 
-        <view-switcher class="statistics__view-switcher" (setView)="setView($event)"></view-switcher>
+        <div class="statistics__header-line">
+            <div class="statistics__buttons btn-group" role="group">
+                <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
+            </div>
+        </div>
     </div>
 
     <div class="statistics__timeline">
