@@ -156,7 +156,7 @@ export class StatisticTimeComponent implements OnInit {
             const $row = $(row);
             const userId = $row.data('resource-id');
             const end = moment.utc();
-            const start = end.clone().subtract(5, 'minutes');
+            const start = end.clone().subtract(10, 'minutes');
             const events = this.getLoadedEventsEndedBetween(userId, start, end);
             const $cell = $('td:nth-child(1) .fc-cell-text', $row);
 
@@ -212,7 +212,7 @@ export class StatisticTimeComponent implements OnInit {
                     const now = moment.utc();
                     if (moment.utc(end).diff(now) < 0 || moment.utc(start).diff(now) > 0) {
                         // Always load current events to show the 'is working now' indicator.
-                        events = events.concat(await this.fetchEvents(now.clone().subtract(5, 'minutes'), now));
+                        events = events.concat(await this.fetchEvents(now.clone().subtract(10, 'minutes'), now));
                     }
 
                     this.events = events;
@@ -275,7 +275,7 @@ export class StatisticTimeComponent implements OnInit {
                     width: '40px',
                 },
                 {
-                    labelText: 'Names',
+                    labelText: 'Name',
                     field: 'title',
                 },
                 {
@@ -339,7 +339,7 @@ export class StatisticTimeComponent implements OnInit {
     </div>
     <p>${timeWorkedString}</p>
 </div>`;
-                        }).reduce((sum, curr) => sum + curr, '');
+                        }).join('');
                         $(dayColumnElement).html(html);
                     });
                 }
@@ -377,7 +377,7 @@ export class StatisticTimeComponent implements OnInit {
         const $days = $('.fc-day[data-date]', $timeline);
         const days = $.makeArray($days);
 
-        let header = ['Names', 'Time Worked'];
+        let header = ['Name', 'Time Worked'];
         if (view.name !== 'timelineDay') {
             const daysLabels = days.map(day => {
                 const date = $(day).data('date');
