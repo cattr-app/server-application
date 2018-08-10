@@ -94,43 +94,7 @@ export class StatisticTimeComponent implements OnInit {
                         start: (moment.utc(interval.start_at) as any).tz(this.timezone),
                         end: (moment.utc(interval.end_at) as any).tz(this.timezone),
                     } as EventObjectInput;
-                }).sort((a, b) => {
-                    // Sort by user.
-                    if (a.resourceId !== b.resourceId) {
-                        return a.resourceId - b.resourceId;
-                    }
-                    // Then sort by start time.
-                    const aStart = moment.utc(a.start);
-                    const bStart = moment.utc(b.start);
-                    return aStart.diff(bStart);
-                }).reduce((arr, curr) => {
-                    const count = arr.length;
-                    if (count === 0) {
-                        return [curr];
-                    }
-
-                    // Combine last & current interval if same user and time between less than one second.
-                    const last = arr[count - 1];
-                    const isSameUser = last.resourceId === curr.resourceId;
-
-                    const lastEnd = moment.utc(last.end);
-                    const currStart = moment.utc(curr.start);
-                    const isConsecutive = Math.abs(currStart.diff(lastEnd, 'seconds')) <= 1;
-
-                    if (isSameUser && isConsecutive) {
-                        arr[count - 1] = {
-                            id: last.id,
-                            title: '',
-                            resourceId: curr.resourceId,
-                            start: last.start,
-                            end: curr.end,
-                        };
-                    } else {
-                        arr.push(curr);
-                    }
-
-                    return arr;
-                }, [] as EventObjectInput[]);
+                });
 
                 resolve(events);
             }, params);
@@ -248,7 +212,7 @@ export class StatisticTimeComponent implements OnInit {
                     const now = moment.utc();
                     if (moment.utc(end).diff(now) < 0 || moment.utc(start).diff(now) > 0) {
                         // Always load current events to show the 'is working now' indicator.
-                        events = events.concat(await this.fetchEvents(now, now));
+                        events = events.concat(await this.fetchEvents(now.clone().subtract(5, 'minutes'), now));
                     }
 
                     this.events = events;
@@ -256,9 +220,8 @@ export class StatisticTimeComponent implements OnInit {
                 } catch (e) {
                     console.error(e);
                     callback([]);
+                    setTimeout(() => { this.loading = false; });
                 }
-
-                setTimeout(() => { this.loading = false; });
             },
         };
 
@@ -385,6 +348,8 @@ export class StatisticTimeComponent implements OnInit {
                 this.updateTimeWorkedOn();
 
                 this.timelineInitialized = true;
+
+                setTimeout(() => { this.loading = false; });
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
