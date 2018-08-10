@@ -8,13 +8,12 @@
     }
 
     &__buttons,
-    &__date-wrapper,
-    &__view-buttons {
+    &__view-switcher {
         display: inline-block;
+        vertical-align: bottom;
     }
 
-    &__buttons,
-    &__date-wrapper {
+    &__buttons {
         margin-right: 1em;
     }
 
@@ -25,69 +24,6 @@
 }
 
 ::ng-deep {
-    /* Date picker styles */
-    $date-picker-border-color: #ddd;
-
-    .dp-calendar-nav-container,
-    .dp-calendar-wrapper {
-        border-color: $date-picker-border-color !important;
-    }
-
-    .dp-weekdays {
-        display: flex;
-        flex-flow: row nowrap;
-        justify-content: space-around;
-
-        border-bottom: 1px solid $date-picker-border-color !important;
-    }
-
-    .dp-calendar-weekday {
-        border: 0 !important;
-    }
-
-    .dp-calendar-nav-container {
-        height: 40px !important;
-
-        button {
-            @extend .btn;
-            @extend .btn-default;
-
-            padding: 3px;
-
-            &[data-hidden="true"] {
-                display: none;
-            }
-        }
-    }
-
-    .dp-calendar-wrapper button {
-        @extend .btn;
-        @extend .btn-default;
-
-        padding: 0;
-        margin: 3px;
-    }
-
-    .dp-current-day {
-        @extend .btn;
-        @extend .btn-default;
-    }
-
-    button.dp-calendar-day.dp-selected,
-    button.dp-calendar-month.dp-selected {
-        @extend .btn-primary;
-    }
-
-    .statistics__date-input_week + dp-date-picker .dp-calendar-wrapper {
-        .dp-calendar-week:hover button.dp-calendar-day  {
-            @extend .active;
-        }
-
-        .dp-calendar-week .dp-selected ~ button.dp-calendar-day  {
-            @extend .btn-primary;
-        }
-    }
-
     /* Fullcalendar styles */
     .fc-resource-area {
         /* Resource row */

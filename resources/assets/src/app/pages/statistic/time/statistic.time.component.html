@@ -4,56 +4,7 @@
             <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
         </div>
 
-        <div *ngIf="viewName !== 'timelineRange'" class="statistics__date-wrapper form-inline">
-            <div class="input-group">
-                <span class="input-group-btn">
-                    <button (click)="datePickerPrev()" type="button" class="btn btn-default" aria-label="prev">
-                        <span class="glyphicon glyphicon-chevron-left"></span>
-                    </button>
-                </span>
-
-                <input *ngIf="viewName === 'timelineDay'" #datePicker type="text" class="statistics__date-input form-control"
-                    [(ngModel)]="datePickerDate" [dpDayPicker]="{ format: datePickerFormat, firstDayOfWeek: 'mo' }" mode="day" (onChange)="datePickerSelect($event)" />
-
-                <input *ngIf="viewName === 'timelineWeek'" #datePicker type="text" class="statistics__date-input statistics__date-input_week form-control"
-                    [(ngModel)]="datePickerDate" [dpDayPicker]="{ format: datePickerFormat, firstDayOfWeek: 'mo' }" mode="day" (onChange)="datePickerSelect($event)" />
-
-                <input *ngIf="viewName === 'timelineMonth'" #datePicker type="text" class="statistics__date-input form-control"
-                    [(ngModel)]="datePickerDate" [dpDayPicker]="{ format: datePickerFormat, firstDayOfWeek: 'mo' }" mode="month" (onChange)="datePickerSelect($event)" />
-
-                <span class="input-group-btn">
-                    <button (click)="datePickerNext()" type="button" class="btn btn-default" aria-label="next">
-                        <span class="glyphicon glyphicon-chevron-right"></span>
-                    </button>
-                </span>
-            </div>
-        </div>
-
-        <div *ngIf="viewName === 'timelineRange'" class="statistics__date-wrapper form-inline">
-            <div class="form-group">
-                <input #datePickerStart type="text" class="statistics__date-input form-control"
-                    [(ngModel)]="datePickerDate" [dpDayPicker]="{ format: datePickerFormat, firstDayOfWeek: 'mo' }" mode="day" (onChange)="datePickerRangeSelect($event)" />
-            </div>
-
-            <div class="form-group">
-                <input #datePickerEnd type="text" class="statistics__date-input form-control"
-                    [(ngModel)]="datePickerEndDate" [dpDayPicker]="{ format: datePickerFormat, firstDayOfWeek: 'mo' }" mode="day" (onChange)="datePickerRangeSelect($event)" />
-            </div>
-        </div>
-
-        <div class="statistics__view-buttons btn-group" role="group" (window:mouseup)="switchingView = false">
-            <button type="button" (click)="viewName = 'timelineDay'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineDay' && !switchingView}"
-                (mousedown)="switchingView = true">Day</button>
-
-            <button type="button" (click)="viewName = 'timelineWeek'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineWeek' && !switchingView}"
-                (mousedown)="switchingView = true">Week</button>
-
-            <button type="button" (click)="viewName = 'timelineMonth'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineMonth' && !switchingView}"
-                (mousedown)="switchingView = true">Month</button>
-
-            <button type="button" (click)="viewName = 'timelineRange'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineRange' && !switchingView}"
-                (mousedown)="switchingView = true">Date Range</button>
-        </div>
+        <view-switcher class="statistics__view-switcher" (setView)="setView($event)"></view-switcher>
     </div>
 
     <div class="statistics__timeline">

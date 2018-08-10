@@ -24,13 +24,10 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('datePicker') datePicker: ElementRef;
 
     loading: boolean = false;
-    switchingView: boolean = false;
     timelineInitialized: boolean = false;
     timelineOptions: any;
     events: EventObjectInput[];
     timezone: string;
-    datePickerDate: string;
-    datePickerEndDate: string;
 
     constructor(private api: ApiService,
         private userService: UsersService,
@@ -56,14 +53,26 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     set viewName(value: string) {
+        if (!this.timelineInitialized) {
+            return;
+        }
+
         this.timeline.changeView(value);
     }
 
     get timelineDate(): moment.Moment {
+        if (!this.timelineInitialized) {
+            return moment.utc();
+        }
+
         return this.timeline.getDate();
     }
 
     set timelineDate(value: moment.Moment) {
+        if (!this.timelineInitialized) {
+            return;
+        }
+
         this.timeline.gotoDate(value);
     }
 
@@ -215,8 +224,6 @@ export class StatisticTimeComponent implements OnInit {
         this.timezone = user.timezone !== null ? user.timezone : 'UTC';
 
         const now = moment.utc().startOf('day');
-        this.datePickerDate = now.format(this.datePickerFormat);
-        this.datePickerEndDate = now.clone().add(1, 'day').format(this.datePickerFormat);
 
         const eventSource = {
             events: async (start, end, timezone, callback) => {
@@ -370,54 +377,12 @@ export class StatisticTimeComponent implements OnInit {
         };
     }
 
-    datePickerPrev() {
-        this.timeline.prev();
-        this.datePickerDate = this.timelineDate.format(this.datePickerFormat);
-        this.datePickerEndDate = this.timelineDate.clone().add(1, 'day').format(this.datePickerFormat);
-    }
-
-    datePickerNext() {
-        this.timeline.next();
-        this.datePickerDate = this.timelineDate.format(this.datePickerFormat);
-        this.datePickerEndDate = this.timelineDate.clone().add(1, 'day').format(this.datePickerFormat);
-    }
-
-    datePickerSelect(value: moment.Moment) {
-        if (!this.timelineInitialized) {
-            return;
-        }
-
-        if (this.viewName === 'timelineWeek') {
-            // Select first day of a week.
-            setTimeout(() => {
-                const startOfWeek = moment.utc(this.datePickerDate).startOf('week').add(1, 'day').format(this.datePickerFormat);
-                if (this.datePickerDate !== startOfWeek) {
-                    this.datePickerDate = startOfWeek;
-                }
-            });
-        }
-
-        const date = moment.utc(this.datePickerDate);
-        this.timelineDate = date;
-        this.datePickerEndDate = date.clone().add(1, 'day').format(this.datePickerFormat);
-    }
-
-    datePickerRangeSelect(value: moment.Moment) {
-        if (!this.timelineInitialized) {
-            return;
-        }
-
-        const start = moment.utc(this.datePickerDate);
-        let end = moment.utc(this.datePickerEndDate).add(1, 'day');
-
-        if (end.diff(start) <= 0) {
-            end = start.clone().add(1, 'day');
-        }
-
+    setView({ view, start, end }: { view: string, start: moment.Moment, end: moment.Moment }) {
+        this.viewName = view;
         this.timeline.gotoDate(start);
         this.$timeline.fullCalendar('option', 'visibleRange', {
             start: start,
-            end: end,
+            end: end.clone().add(1, 'day'),
         });
     }
 
