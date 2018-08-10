@@ -377,11 +377,12 @@ export class StatisticTimeComponent implements OnInit {
         const $days = $('.fc-day[data-date]', $timeline);
         const days = $.makeArray($days);
 
-        let header = ['Name', 'Time Worked'];
+        let header = ['"Name"', '"Time Worked"'];
         if (view.name !== 'timelineDay') {
             const daysLabels = days.map(day => {
                 const date = $(day).data('date');
-                return (moment as any).tz(date, this.timezone).format('YYYY-MM-DD');
+                const dateString = (moment as any).tz(date, this.timezone).format('YYYY-MM-DD');
+                return `"${dateString}"`;
             });
             header = header.concat(daysLabels);
         }
@@ -391,9 +392,9 @@ export class StatisticTimeComponent implements OnInit {
             const user = this.$timeline.fullCalendar('getResourceById', userId);
 
             const timeWorked = this.calculateTimeWorkedOn(userId, viewStart, viewEnd);
-            const timeWorkedString = this.formatDurationString(timeWorked);
+            const timeWorkedHours = moment.duration(timeWorked).asHours().toFixed(2);
 
-            let cells = [user.title, timeWorkedString];
+            let cells = [`"${user.title}"`, `"${timeWorkedHours}"`];
             if (view.name !== 'timelineDay') {
                 const daysData = days.map(day => {
                     const date = $(day).data('date');
@@ -402,7 +403,8 @@ export class StatisticTimeComponent implements OnInit {
 
                     // Calculate time worked by this user per this day.
                     const timeWorked = this.calculateTimeWorkedOn(userId, dayStart, dayEnd);
-                    return this.formatDurationString(timeWorked);
+                    const timeWorkedHours = moment.duration(timeWorked).asHours().toFixed(2);
+                    return `"${timeWorkedHours}"`;
                 });
                 cells = cells.concat(daysData);
             }
