@@ -4,8 +4,10 @@ import { Router } from "@angular/router";
 import { AllowedActionsService } from "../../roles/allowed-actions.service";
 import { UsersService } from '../../users/users.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
+import { ProjectsService } from '../../projects/projects.service';
 import { User } from '../../../models/user.model';
 import { TimeInterval } from '../../../models/timeinterval.model';
+import { Project } from '../../../models/project.model';
 import * as $ from 'jquery';
 import * as moment from 'moment';
 import 'moment-timezone';
@@ -30,13 +32,17 @@ export class ReportProjectsComponent implements OnInit {
     datePickerDate: string;
     datePickerEndDate: string;
 
-    constructor(private api: ApiService,
-        private userService: UsersService,
-        private timeintervalService: TimeIntervalsService,
-        private router: Router,
-        allowedService: AllowedActionsService) {
+    projects: Project[];
+    users: User[];
 
-    }
+    constructor(
+      private api: ApiService,
+      private userService: UsersService,
+      private timeintervalService: TimeIntervalsService,
+      private projectsService: ProjectsService,
+      private router: Router,
+      private allowedService: AllowedActionsService
+    ) { }
 
     readonly defaultView = 'timelineDay';
     readonly datePickerFormat = 'YYYY-MM-DD';
@@ -65,6 +71,36 @@ export class ReportProjectsComponent implements OnInit {
         this.timeline.gotoDate(value);
     }
 
+    /**
+     * [can description]
+     * @param  {string}  action [description]
+     * @return {boolean}        [description]
+     */
+    can(action: string ): boolean {
+      return this.allowedService.can(action);
+    }
+
+    /**
+     * [getProjects description]
+     */
+    getProjects(): void {
+      this.projectsService.getItems((projects: Project[]) => {
+        this.projects = projects;
+      });
+    }
+
+    /**
+     * [getUsers description]
+     * @return {Promise<User[]>} [description]
+     */
+    getUsers(): Promise<User[]> {
+      return new Promise<User[]>((resolve) => {
+        this.userService.getItems((users: User[]) => {
+          this.users = users;
+        });
+      });
+    }
+
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
         // Add +/- 1 day to avoid issues with timezone.
         const params = {
@@ -73,7 +109,7 @@ export class ReportProjectsComponent implements OnInit {
         };
 
         return new Promise<EventObjectInput[]>((resolve) => {
-            this.timeintervalService.getItems((intervals: TimeInterval[]) => {
+            this.projectsService.getItems((intervals: TimeInterval[]) => {
                 // Combine consecutive intervals into one event.
                 const events = intervals.map(interval => {
                     return {
@@ -127,21 +163,21 @@ export class ReportProjectsComponent implements OnInit {
     }
 
     calculateTimeWorkedOn(user_id: number, start: moment.Moment, end: moment.Moment) {
-        // Get loaded events of the specified user, started in the selected time range.
-        const events = this.events.filter(event => {
-            const isOfCurrentUser = event.resourceId == user_id;
+      // Get loaded events of the specified user, started in the selected time range.
+      const events = this.events.filter(event => {
+          const isOfCurrentUser = event.resourceId == user_id;
 
-            const eventStart = moment.utc(event.start);
-            const isInCurrentView = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
+          const eventStart = moment.utc(event.start);
+          const isInCurrentView = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
 
-            return isOfCurrentUser && isInCurrentView;
-        });
-        // Calculate sum of an event time.
-        return events.map(event => {
-            const start = moment.utc(event.start);
-            const end = moment.utc(event.end);
-            return end.diff(start);
-        }).reduce((sum, value) => sum + value, 0);
+          return isOfCurrentUser && isInCurrentView;
+      });
+      // Calculate sum of an event time.
+      return events.map(event => {
+          const start = moment.utc(event.start);
+          const end = moment.utc(event.end);
+          return end.diff(start);
+      }).reduce((sum, value) => sum + value, 0);
     }
 
     formatDurationString(time: number) {
@@ -173,141 +209,121 @@ export class ReportProjectsComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.events = [];
+      this.events = [];
 
-        const user = this.api.getUser() as User;
-        this.timezone = user.timezone !== null ? user.timezone : 'UTC';
+      const user = this.api.getUser() as User;
+      this.timezone = user.timezone !== null ? user.timezone : 'UTC';
 
-        const now = moment.utc().startOf('day');
-        this.datePickerDate = now.format(this.datePickerFormat);
-        this.datePickerEndDate = now.clone().add(1, 'day').format(this.datePickerFormat);
+      const now = moment.utc().startOf('day');
+      this.datePickerDate = now.format(this.datePickerFormat);
+      this.datePickerEndDate = now.clone().add(1, 'day').format(this.datePickerFormat);
 
-        const eventSource = {
-            events: async (start, end, timezone, callback) => {
-                try {
-                    const events = await this.fetchEvents(start, end);
-                    this.events = events;
-                    callback(events);
-                } catch (e) {
-                    console.error(e);
-                    callback([]);
-                }
+      this.getUsers();
+      // this.getProjects();
+
+      const eventSource = {
+        events: async (start, end, timezone, callback) => {
+          try {
+              const events = await this.fetchEvents(start, end);
+              this.events = events;
+              callback(events);
+          } catch (e) {
+              console.error(e);
+              callback([]);
+          }
+        },
+      };
+
+      this.timelineOptions = {
+          defaultView: this.defaultView,
+          now: now,
+          timezone: this.timezone,
+          firstDay: 1,
+          themeSystem: 'bootstrap3',
+          views: {
+              timelineDay: {
+                  type: 'timeline',
+                  duration: { days: 1 },
+                  slotDuration: { hours: 1 },
+                  buttonText: 'Day',
+              },
+              timelineWeek: {
+                  type: 'timeline',
+                  duration: { weeks: 1 },
+                  slotDuration: { days: 1 },
+                  buttonText: 'Week',
+              },
+              timelineMonth: {
+                  type: 'timeline',
+                  duration: { months: 1 },
+                  slotDuration: { days: 1 },
+                  buttonText: 'Month',
+              },
+              timelineRange: {
+                  type: 'timeline',
+                  slotDuration: { days: 1 },
+                  visibleRange: {
+                      start: moment.utc(),
+                      end: moment.utc().clone().add(1, 'days'),
+                  },
+                  buttonText: 'Date range',
+              },
+          },
+          refetchResourcesOnNavigate: false,
+          resourceColumns: [
+            {
+                labelText: 'Projects',
+                field: 'title',
             },
-        };
-
-        this.timelineOptions = {
-            defaultView: this.defaultView,
-            now: now,
-            timezone: this.timezone,
-            firstDay: 1,
-            themeSystem: 'bootstrap3',
-            views: {
-                timelineDay: {
-                    type: 'timeline',
-                    duration: { days: 1 },
-                    slotDuration: { hours: 1 },
-                    buttonText: 'Day',
-                },
-                timelineWeek: {
-                    type: 'timeline',
-                    duration: { weeks: 1 },
-                    slotDuration: { days: 1 },
-                    buttonText: 'Week',
-                },
-                timelineMonth: {
-                    type: 'timeline',
-                    duration: { months: 1 },
-                    slotDuration: { days: 1 },
-                    buttonText: 'Month',
-                },
-                timelineRange: {
-                    type: 'timeline',
-                    slotDuration: { days: 1 },
-                    visibleRange: {
-                        start: moment.utc(),
-                        end: moment.utc().clone().add(1, 'days'),
-                    },
-                    buttonText: 'Date range',
-                },
-            },
-            refetchResourcesOnNavigate: false,
-            resourceColumns: [
+            {
+                labelText: 'Time Worked',
+                text: () => '',
+            }
+          ],
+          resources: [
+            {
+              id: 1,
+              title: 'Excepturi sed qui explicabo.',
+              children: [
                 {
-                    labelText: 'Names',
-                    field: 'title',
-                },
-                {
-                    labelText: 'Time Worked',
-                    text: () => '',
-                },
-            ],
-            resources: (callback) => {
-                this.userService.getItems((users: User[]) => {
-                    const resources = users.map(user => {
-                        return {
-                            id: user.id,
-                            title: user.full_name,
-                        };
-                    });
-                    callback(resources);
-                });
-            },
-            displayEventTime: false,
-            eventSources: [eventSource],
-            eventClick: (event, jsEvent, view: View) => {
-                const userId = event.resourceId;
-                /** @todo navigate to the user dashboard. */
-                this.router.navigateByUrl('dashboard');
-            },
-            eventRender: (event, el, view: View) => {
-                if (view.name !== 'timelineDay') {
-                    return false;
+                  id: 1,
+                  title: 'Albert',
                 }
-            },
-            eventAfterAllRender: (view: View) => {
-                if (view.name !== 'timelineDay') {
-                    const $timeline = this.$timeline;
-                    const $rows = $('.fc-resource-area tr[data-resource-id]', $timeline);
-                    const rows = $.makeArray($rows);
+              ]
+            }
+          ],
+          // get projects
+          // resources: (callback) => {
+            // this.projectsService.getItems((projects: Project[]) => {
+            //   const resources = projects.map(project => {
+            //     return {
+            //         id: project.id,
+            //         title: project.name,
+            //     };
+            //   });
+            //   callback(resources);
+            // });
+          // },
+          displayEventTime: false,
+          eventSources: [eventSource],
+          eventClick: (event, jsEvent, view: View) => {
+              const userId = event.resourceId;
+              /** @todo navigate to the user dashboard. */
+              this.router.navigateByUrl('dashboard');
+          },
+          eventRender: (event, el, view: View) => {
+              if (view.name !== 'timelineDay') {
+                  return false;
+              }
+          },
+          eventAfterAllRender: (view: View) => {
 
-                    const $days = $('.fc-day[data-date]', $timeline);
-                    $days.each((index, dayColumnElement) => {
-                        const date = $(dayColumnElement).data('date');
-                        const dayStart = (moment as any).tz(date, this.timezone);
-                        const dayEnd = dayStart.clone().add(1, 'days');
-                        const columnWidth = $(dayColumnElement).width();
+              this.updateTimeWorkedOn();
 
-                        const html = rows.map(userRowElement => {
-                            const userId = $(userRowElement).data('resource-id');
-
-                            // Calculate time worked by this user per this day.
-                            const timeWorked = this.calculateTimeWorkedOn(userId, dayStart, dayEnd);
-                            const msIn24Hours = 24 * 60 * 60 * 1000;
-                            const progress = timeWorked / msIn24Hours;
-                            const percent = Math.round(100 * progress);
-                            const timeWorkedString = this.formatDurationString(timeWorked);
-
-                            const topOffset = $(userRowElement).position().top;
-                            const progressWrapperClass = timeWorked === 0 ? 'progress-wrapper_empty' : '';
-
-                            return `
-<div class="progress-wrapper ${progressWrapperClass}" style="top: ${topOffset}px; width: ${columnWidth}px;">
-    <div class="progress">
-        <div class="progress-bar" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
-    </div>
-    <p>${timeWorkedString}</p>
-</div>`;
-                        }).reduce((sum, curr) => sum + curr, '');
-                        $(dayColumnElement).html(html);
-                    });
-                }
-
-                this.updateTimeWorkedOn();
-
-                this.timelineInitialized = true;
-            },
-            schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
-        };
+              this.timelineInitialized = true;
+          },
+          schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+      };
     }
 
     datePickerPrev() {

@@ -1,5 +1,11 @@
 <div class="statistics">
     <div class="statistics__header">
+
+      <div class="filter pull-left">
+        <app-projects-filters *ngIf="can('/projects/relations')" [(projectId)]="projectId"></app-projects-filters>
+      </div>
+
+      <div class="pull-right">
         <div class="statistics__buttons btn-group" role="group">
             <button *ngIf="viewName !== 'timelineDay'" type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
         </div>
@@ -44,6 +50,7 @@
             <button type="button" (click)="viewName = 'timelineMonth'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineMonth'}">Month</button>
             <button type="button" (click)="viewName = 'timelineRange'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineRange'}">Date Range</button>
         </div>
+      </div>
     </div>
 
     <div class="statistics__timeline">

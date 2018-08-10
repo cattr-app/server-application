@@ -1,7 +1,13 @@
 .statistics {
     &__header {
-        float: right;
         margin-bottom: 1em;
+        width: 100%;
+        display: flex;
+        align-items: flex-end;
+
+        .filter {
+            width: 50%;
+        }
     }
 
     &__buttons,
@@ -56,4 +62,124 @@
     .progress {
         height: 16px;
     }
+}
+
+.dashboardBox {
+    padding: 0;
+    // border-radius: 4px;
+    margin-bottom: 10px;
+    border: 1px solid #cfd8dc;
+    background: white;
+    // border-radius: 4px;
+    -webkit-border-radius: 4px;
+    -moz-border-radius: 4px;
+}
+
+.reportTableOnlyBottomBorders {
+    border-top: 0;
+}
+
+.reportTable {
+    width: 100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    font-size: 13px;
+    table-layout: fixed;
+    // border-radius: 5px;
+    -webkit-border-radius: 5px;
+    -moz-border-radius: 5px;
+    -ms1-border-radius: 5px;
+}
+
+.report-table-th-alternate th.no-border-right, .report-table-th-alternate th.no-border-right, .reportTable th.no-border-right {
+    border-right: 1px solid transparent !important;
+}
+
+.reportTable th {
+    border: 1px solid #cfd8dc;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+    font-size: 14px;
+    font-weight: bold;
+    padding: 15px 10px;
+}
+
+.td-badge {
+    padding: 0 8px;
+}
+
+#project-table a {
+    text-decoration: none !important;
+}
+
+a.task-link {
+    color: #333;
+    font-weight: bold;
+    padding-left: 15px;
+    outline: none;
+    cursor: pointer;
+}
+
+b.project-user {
+    width: auto !important;
+}
+
+b.project-name-section {
+    font-size: 14px;
+    display: inline-block;
+    padding-left: 5px /*position: relative;*/;
+}
+
+.reportTable td {
+    border-left: none;
+    border-bottom: none;
+}
+.reportTable td {
+    word-wrap: break-word;
+}
+
+table#project-table .timebar.timebar-worktime, div.timebar.timebar-worktime.timebar-percentage {
+    cursor: default;
+}
+.reportTable td {
+    padding: 10px;
+    border: 1px solid #cfd8dc;
+    border-left: none;
+}
+
+.timebar-worktime {
+    background: #51be71;
+    border: 1px solid #28a05d;
+}
+
+.timebar {
+    -webkit-border-radius: 3px;
+    -moz-border-radius: 3px;
+    border-radius: 3px;
+    border-width: 1px;
+    border-style: solid;
+    cursor: pointer;
+}
+
+.indent-left, tr.indent-left td {
+    padding-left: 50px !important;
+}
+
+.project-task-row td {
+    padding: 9px;
+}
+
+.project-task-actions a.task-link {
+    width: 100%;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    margin-left: 5px;
+    display: inline-block;
+    box-sizing: border-box;
+}
+
+.timebar-percentage.timebar {
+    height: 14px;
 }
