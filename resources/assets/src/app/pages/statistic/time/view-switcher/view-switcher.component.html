@@ -1,11 +1,21 @@
+<div class="timezone">
+    <ng2-timezone-picker
+        [(timezone)]="timezone"
+        showOffset="true"
+        placeholder="Select timezone"
+        guess="true"
+        (change)="changeTimezone($event)">
+    </ng2-timezone-picker>
+</div>
+
 <date-selector #dateSelector *ngIf="activeButton === 'timelineDay'"
-    [(date)]="start" (dateChange)="changeDate($event)" [mode]="'day'"></date-selector>
+    [(date)]="start" (dateChange)="changeStartDate($event)" [mode]="'day'"></date-selector>
 
 <date-selector #dateSelector *ngIf="activeButton === 'timelineWeek'"
-    [(date)]="start" (dateChange)="changeDate($event)" [mode]="'week'"></date-selector>
+    [(date)]="start" (dateChange)="changeStartDate($event)" [mode]="'week'"></date-selector>
 
 <date-selector #dateSelector *ngIf="activeButton === 'timelineMonth'"
-    [(date)]="start" (dateChange)="changeDate($event)" [mode]="'month'"></date-selector>
+    [(date)]="start" (dateChange)="changeStartDate($event)" [mode]="'month'"></date-selector>
 
 <date-range-selector #dateRangeSelector *ngIf="activeButton === 'timelineRange'"
     [(startDate)]="start" [(endDate)]="end"

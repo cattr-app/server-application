@@ -15,6 +15,23 @@ import { EventObjectInput, View } from 'fullcalendar';
 import { Schedule } from 'primeng/schedule';
 import { ResourceInput } from 'fullcalendar-scheduler/src/exports';
 import { NgSelectComponent } from '@ng-select/ng-select';
+import { Observable } from 'rxjs/Rx';
+import 'rxjs/operator/map';
+import 'rxjs/operator/share';
+import 'rxjs/operator/switchMap';
+import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
+
+enum UsersSort {
+    NameAsc,
+    NameDesc,
+    TimeWorkedAsc,
+    TimeWorderDesc
+}
+
+interface TimeWorked {
+    id: string,
+    time: number,
+}
 
 @Component({
     selector: 'app-statistic-time',
@@ -25,22 +42,31 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('timeline') timeline: Schedule;
     @ViewChild('datePicker') datePicker: ElementRef;
     @ViewChild('userSelect') userSelect: NgSelectComponent;
+    @ViewChild('viewSwitcher') viewSwitcher: ViewSwitcherComponent;
 
-    loading: boolean = false;
-    usersLoading: boolean = false;
+    loading: boolean = true;
+    usersLoading: boolean = true;
     timelineInitialized: boolean = false;
     timelineOptions: any;
-    events: EventObjectInput[] = [];
-    users: ResourceInput[] = [];
     selectedUserIds: string[] = [];
-    timezone: string;
+    userSort: UsersSort = UsersSort.NameAsc;
+
+    view: ViewData;
+    viewEvents: EventObjectInput[] = [];
+    viewTimeWorked: TimeWorked[] = [];
+    latestEvents: EventObjectInput[] = [];
+    users: ResourceInput[] = [];
+
+    view$: Observable<ViewData>;
+    viewEvents$: Observable<EventObjectInput[]>;
+    viewTimeWorked$: Observable<TimeWorked[]>;
+    latestEvents$: Observable<EventObjectInput[]>;
+    users$: Observable<ResourceInput[]>;
 
     constructor(private api: ApiService,
         private userService: UsersService,
         private timeintervalService: TimeIntervalsService,
-        private router: Router,
-        allowedService: AllowedActionsService) {
-
+        private router: Router) {
     }
 
     readonly defaultView = 'timelineDay';
@@ -48,38 +74,6 @@ export class StatisticTimeComponent implements OnInit {
 
     get $timeline(): JQuery<any> {
         return $(this.timeline.el.nativeElement).children();
-    }
-
-    get viewName(): string {
-        if (!this.timelineInitialized || !this.$timeline.fullCalendar) {
-            return this.defaultView;
-        }
-
-        return this.$timeline.fullCalendar('getView').name;
-    }
-
-    set viewName(value: string) {
-        if (!this.timelineInitialized) {
-            return;
-        }
-
-        this.timeline.changeView(value);
-    }
-
-    get timelineDate(): moment.Moment {
-        if (!this.timelineInitialized) {
-            return moment.utc();
-        }
-
-        return this.timeline.getDate();
-    }
-
-    set timelineDate(value: moment.Moment) {
-        if (!this.timelineInitialized) {
-            return;
-        }
-
-        this.timeline.gotoDate(value);
     }
 
     get selectedUsers(): ResourceInput[] {
@@ -92,22 +86,20 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
-        // Add +/- 1 day to avoid issues with timezone.
         const params = {
-            'start_at': ['>', start.clone().subtract(1, 'day')],
-            'end_at': ['<', end.clone().add(1, 'day')],
+            'start_at': ['>', start],
+            'end_at': ['<', end],
         };
 
         return new Promise<EventObjectInput[]>((resolve) => {
             this.timeintervalService.getItems((intervals: TimeInterval[]) => {
-                // Combine consecutive intervals into one event.
                 const events = intervals.map(interval => {
                     return {
                         id: interval.id,
                         title: '',
                         resourceId: interval.user_id,
-                        start: (moment.utc(interval.start_at) as any).tz(this.timezone),
-                        end: (moment.utc(interval.end_at) as any).tz(this.timezone),
+                        start: (moment.utc(interval.start_at) as any).tz(this.view.timezone),
+                        end: (moment.utc(interval.end_at) as any).tz(this.view.timezone),
                     } as EventObjectInput;
                 });
 
@@ -126,7 +118,7 @@ export class StatisticTimeComponent implements OnInit {
 
     getLoadedEventsStartedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
         // Get loaded events of the specified user, started in the selected time range.
-        return this.events.filter(event => {
+        return this.viewEvents.filter(event => {
             const isOfCurrentUser = event.resourceId == user_id;
 
             const eventStart = moment.utc(event.start);
@@ -138,7 +130,7 @@ export class StatisticTimeComponent implements OnInit {
 
     getLoadedEventsEndedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
         // Get loaded events of the specified user, started in the selected time range.
-        return this.events.filter(event => {
+        return this.viewEvents.filter(event => {
             const isOfCurrentUser = event.resourceId == user_id;
 
             const eventEnd = moment.utc(event.end);
@@ -165,55 +157,6 @@ export class StatisticTimeComponent implements OnInit {
         return `${hours}h ${minutes}m`;
     }
 
-    updateIsWorkingNow() {
-        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
-        $rows.each((index, row) => {
-            const $row = $(row);
-            const userId = $row.data('resource-id');
-            const end = moment.utc();
-            const start = end.clone().subtract(10, 'minutes');
-            const events = this.getLoadedEventsEndedBetween(userId, start, end);
-            const $cell = $('td:nth-child(1) .fc-cell-text', $row);
-
-            if (events.length > 0) {
-                $cell.addClass('is_working_now');
-            } else {
-                $cell.removeClass('is_working_now');
-            }
-        });
-    }
-
-    updateTimeWorkedOn() {
-        const view = this.$timeline.fullCalendar('getView');
-        const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
-        const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
-        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
-        $rows.each((index, row) => {
-            const $row = $(row);
-            const userId = $row.data('resource-id');
-            const timeWorked = this.calculateTimeWorkedOn(userId, viewStart, viewEnd);
-            const timeWorkedString = this.formatDurationString(timeWorked);
-            const $cell = $('td:nth-child(3) .fc-cell-text', $row);
-            $cell.text(timeWorkedString);
-
-            if (timeWorked === 0) {
-                $row.addClass('not_worked');
-            } else {
-                $row.removeClass('not_worked');
-            }
-
-            const end = moment.utc();
-            const start = end.clone().subtract(1, 'day');
-            const lastUserEvents = this.getLoadedEventsEndedBetween(userId, start, end);
-            if (lastUserEvents.length > 0) {
-                const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
-                const eventEnd = moment(lastUserEvent.end);
-                const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
-                $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc()) + '</p>');
-            }
-        });
-    }
-
     fetchResources() {
         return new Promise<ResourceInput[]>(resolve => {
             this.userService.getItems((users: User[]) => {
@@ -229,51 +172,109 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     ngOnInit() {
-        const user = this.api.getUser() as User;
+        this.view = {
+            name: this.defaultView,
+            start: moment.utc(),
+            end: moment.utc().add(1, 'day'),
+            timezone: 'UTC',
+        };
 
-        let timezone = localStorage.getItem('statistics-timezone');
-        if (timezone === null) {
-            timezone = user.timezone !== null ? user.timezone : 'UTC';
-        }
-        this.timezone = timezone;
-
-        const now = moment.utc().startOf('day');
-
-        this.usersLoading = true;
-        this.fetchResources().then(users => {
+        this.users$ = Observable.from(this.fetchResources());
+        this.users$.subscribe(users => {
             this.users = users;
             this.selectedUsers = users;
             this.$timeline.fullCalendar('refetchResources');
             this.usersLoading = false;
         });
 
-        const eventSource = {
-            events: async (start, end, timezone, callback) => {
-                try {
-                    setTimeout(() => { this.loading = true; });
-                    let events = await this.fetchEvents(start, end);
+        this.view$ = this.viewSwitcher.setView.asObservable().distinctUntilChanged((a, b) => {
+            return a.start.unix() === b.start.unix()
+                && a.end.unix() === b.end.unix()
+                && a.name === b.name
+                && a.timezone === b.timezone;
+        }).do(view => {
+            if (this.timelineInitialized) {
+                this.timeline.changeView(view.name);
+                this.timeline.gotoDate(view.start);
+                this.$timeline.fullCalendar('option', 'visibleRange', {
+                    start: view.start,
+                    end: view.end.clone().add(1, 'day'),
+                });
+            }
 
-                    // If showing events in the past or future.
-                    const now = moment.utc();
-                    if (moment.utc(end).diff(now) < 0 || moment.utc(start).diff(now) > 0) {
-                        // Always load current events to show the 'is working now' indicator.
-                        events = events.concat(await this.fetchEvents(now.clone().subtract(1, 'day'), now));
+            this.view = view;
+        });
+
+        this.viewEvents$ = this.view$.switchMap(view => {
+            const offset = (moment as any).tz.zone(this.view.timezone).utcOffset(view.start);
+            const start = view.start.clone().add(offset, 'minutes');
+            const end = view.end.clone().add(offset, 'minutes');
+            return Observable.from(this.fetchEvents(start, end));
+        });
+
+        this.viewEvents$.share().subscribe(events => {
+            this.viewEvents = events;
+            this.$timeline.fullCalendar('refetchEvents');
+            this.setLoading(false);
+        });
+
+        this.viewTimeWorked$ = this.viewEvents$.combineLatest(this.users$, (events, users) => {
+            return users.map(user => {
+                const userEvents = events.filter(event => +event.resourceId === +user.id);
+                const time = userEvents.reduce((sum, event) => {
+                    const start = moment.utc(event.start);
+                    const end = moment.utc(event.end);
+                    return sum + end.diff(start);
+                }, 0);
+
+                return {
+                    id: user.id,
+                    time: time,
+                };
+            });
+        });
+
+        this.viewTimeWorked$.subscribe(data => {
+            this.viewTimeWorked = data;
+            this.showTimeWorkedOn();
+        });
+
+        const now = moment.utc();
+        this.latestEvents$ = Observable.from(this.fetchEvents(now.clone().subtract(10, 'minutes'), now));
+        this.latestEvents$.subscribe(events => {
+            this.latestEvents = events;
+            this.showIsWorkingNow();
+        });
+
+                /*const view = this.$timeline.fullCalendar('getView');
+                const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
+                const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
+
+                const users = this.selectedUsers.sort((a, b) => {
+                    switch (this.userSort) {
+                        case UsersSort.NameAsc:
+                            return a.title.localeCompare(b.title);
+                        case UsersSort.NameDesc:
+                            return b.title.localeCompare(a.title);
+                        case UsersSort.TimeWorkedAsc: {
+                            const aTimeWorked = this.calculateTimeWorkedOn(+a.id, viewStart, viewEnd);
+                            const bTimeWorked = this.calculateTimeWorkedOn(+b.id, viewStart, viewEnd);
+                            return aTimeWorked - bTimeWorked;
+                        }
+                        case UsersSort.TimeWorderDesc: {
+                            const aTimeWorked = this.calculateTimeWorkedOn(+a.id, viewStart, viewEnd);
+                            const bTimeWorked = this.calculateTimeWorkedOn(+b.id, viewStart, viewEnd);
+                            return bTimeWorked - aTimeWorked;
+                        }
+                        default:
+                            return +a.id - +b.id;
                     }
-
-                    this.events = events;
-                    callback(events);
-                } catch (e) {
-                    console.error(e);
-                    callback([]);
-                    setTimeout(() => { this.loading = false; });
-                }
-            },
-        };
+                });*/
 
         this.timelineOptions = {
             defaultView: this.defaultView,
-            now: now,
-            timezone: this.timezone,
+            now: moment.utc().startOf('day'),
+            timezone: 'UTC',
             firstDay: 1,
             themeSystem: 'bootstrap3',
             eventColor: '#2ab27b',
@@ -332,7 +333,7 @@ export class StatisticTimeComponent implements OnInit {
                 callback(this.selectedUsers);
             },
             displayEventTime: false,
-            eventSources: [eventSource],
+            events: (start, end, timezone, callback) => callback(this.viewEvents),
             eventClick: (event, jsEvent, view: View) => {
                 const userId = event.resourceId;
                 /** @todo navigate to the user dashboard. */
@@ -352,7 +353,7 @@ export class StatisticTimeComponent implements OnInit {
                     const $days = $('.fc-day[data-date]', $timeline);
                     $days.each((index, dayColumnElement) => {
                         const date = $(dayColumnElement).data('date');
-                        const dayStart = (moment as any).tz(date, this.timezone);
+                        const dayStart = (moment as any).tz(date, this.view.timezone);
                         const dayEnd = dayStart.clone().add(1, 'days');
                         const columnWidth = $(dayColumnElement).width() - 4;
 
@@ -381,23 +382,54 @@ export class StatisticTimeComponent implements OnInit {
                     });
                 }
 
-                this.updateIsWorkingNow();
-                this.updateTimeWorkedOn();
-
                 this.timelineInitialized = true;
-
-                setTimeout(() => { this.loading = false; });
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
     }
 
-    setView({ view, start, end }: { view: string, start: moment.Moment, end: moment.Moment }) {
-        this.viewName = view;
-        this.timeline.gotoDate(start);
-        this.$timeline.fullCalendar('option', 'visibleRange', {
-            start: start,
-            end: end.clone().add(1, 'day'),
+    showIsWorkingNow() {
+        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
+        $rows.each((index, row) => {
+            const $row = $(row);
+            const userId = $row.data('resource-id');
+            const events = this.latestEvents.filter(event => +event.resourceId === +userId);
+            const $cell = $('td:nth-child(1) .fc-cell-text', $row);
+
+            if (events.length > 0) {
+                $cell.addClass('is_working_now');
+            } else {
+                $cell.removeClass('is_working_now');
+            }
+        });
+    }
+
+    showTimeWorkedOn() {
+        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
+        $rows.each((index, row) => {
+            const $row = $(row);
+            const userId = $row.data('resource-id');
+            const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
+            const time = timeWorked !== undefined ? timeWorked.time : 0;
+            const timeWorkedString = this.formatDurationString(time);
+            const $cell = $('td:nth-child(3) .fc-cell-text', $row);
+            $cell.text(timeWorkedString);
+
+            if (time === 0) {
+                $row.addClass('not_worked');
+            } else {
+                $row.removeClass('not_worked');
+            }
+
+            /*const end = moment.utc();
+            const start = end.clone().subtract(1, 'day');
+            const lastUserEvents = this.getLoadedEventsEndedBetween(userId, start, end);
+            if (lastUserEvents.length > 0) {
+                const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
+                const eventEnd = moment(lastUserEvent.end);
+                const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
+                $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc()) + '</p>');
+            }*/
         });
     }
 
@@ -405,8 +437,8 @@ export class StatisticTimeComponent implements OnInit {
         const $timeline = this.$timeline;
 
         const view = $timeline.fullCalendar('getView');
-        const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
-        const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
+        const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.view.timezone);
+        const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.view.timezone);
 
         const $rows = $('.fc-resource-area tr[data-resource-id]', $timeline);
         const rows = $.makeArray($rows);
@@ -418,7 +450,7 @@ export class StatisticTimeComponent implements OnInit {
         if (view.name !== 'timelineDay') {
             const daysLabels = days.map(day => {
                 const date = $(day).data('date');
-                const dateString = (moment as any).tz(date, this.timezone).format('YYYY-MM-DD');
+                const dateString = (moment as any).tz(date, this.view.timezone).format('YYYY-MM-DD');
                 return `"${dateString}"`;
             });
             header = header.concat(daysLabels);
@@ -435,7 +467,7 @@ export class StatisticTimeComponent implements OnInit {
             if (view.name !== 'timelineDay') {
                 const daysData = days.map(day => {
                     const date = $(day).data('date');
-                    const dayStart = (moment as any).tz(date, this.timezone);
+                    const dayStart = (moment as any).tz(date, this.view.timezone);
                     const dayEnd = dayStart.clone().add(1, 'days');
 
                     // Calculate time worked by this user per this day.
@@ -455,8 +487,12 @@ export class StatisticTimeComponent implements OnInit {
 
     setTimezone(timezone: string) {
         localStorage.setItem('statistics-timezone', timezone);
-        this.timezone = timezone;
+        this.view.timezone = timezone;
         this.refetchEvents();
+    }
+
+    setLoading(loading: boolean = true) {
+        setTimeout(() => this.loading = loading);
     }
 
     selectedUsersChanged() {
