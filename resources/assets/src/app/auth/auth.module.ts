@@ -11,18 +11,21 @@ import {ForgotComponent} from "./forgot/forgot.component";
 import {ResetComponent} from "./reset/reset.component";
 import {ApiService} from "../api/api.service";
 import {Router} from "@angular/router";
+import {TranslateModule} from '@ngx-translate/core';
+
 
 @NgModule({
     imports: [
         CommonModule,
         AuthRoute,
         FormsModule,
-        HttpClientModule
+        HttpClientModule,
+        TranslateModule,
     ],
     declarations: [
         LoginComponent,
         ForgotComponent,
-        ResetComponent
+        ResetComponent,
     ],
     providers: [
         LoginService

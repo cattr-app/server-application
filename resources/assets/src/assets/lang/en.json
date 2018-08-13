@@ -35,12 +35,37 @@
 		"edit-users": "Edit users of project {{name}}",
 		"users": "Users"
 	},
+	"roles": {
+		"list": {
+			"title": "Roles",
+			"remove": "Remove this role?"
+		},
+		"edit": {
+			"title": "Edit role \"{{name}}\""
+		},
+		"useredit": {
+			"title": "Edit users of role \"{{name}}\""
+		},
+		"create": {
+			"title": "Create New Role"
+		},
+		"rolename": "Role name",
+		"rules": "Rules",
+		"users": "Users",
+		"name": "Name",
+		"id": "Id"
+	},
 	"integration": {
 		"redmine": {
 			"title": "Redmine Integration",
 			"apiurl": "Redmine URL",
 			"apikey": "Redmine API key"
 		}
+	},
+	"login": {
+		"submit": "Submit",
+		"password": "Password",
+		"name": "Name"
 	},
 	"control": {
 		"actions": "Actions",

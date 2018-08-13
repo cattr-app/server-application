@@ -2,12 +2,12 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Roles</div>
+                <div class="panel-heading" translate>roles.list.title</div>
                 <div class="panel-body">
                     <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
                     <br/>
                     <a *ngIf="can('/roles/create')" routerLink="/roles/create" class="btn btn-success" title="Add new role">
-                        <i class="fa fa-plus" aria-hidden="true"></i> Add New
+                        <i class="fa fa-plus" aria-hidden="true"></i> <span translate>control.new</span>
                     </a>
                     <br/>
                     <br/>
@@ -15,9 +15,9 @@
                         <table class="table table-borderless">
                             <thead>
                                 <tr>
-                                    <th>Id</th>
-                                    <th>Name</th>
-                                    <th>Actions</th>
+                                    <th translate>roles.list.id</th>
+                                    <th translate>roles.list.name</th>
+                                    <th translate>control.actions</th>
                                 </tr>
                             </thead>
                             <tbody>
@@ -28,25 +28,25 @@
                                         <a *ngIf="can('/roles/show')"  [routerLink]="['/roles/show', role.id]" title="View role">
                                             <button class="btn btn-info btn-sm">
                                                 <i class="fa fa-eye" aria-hidden="true"></i>
-                                                View
+                                                <span translate>control.view</span>
                                             </button>
                                         </a>
                                         <a *ngIf="can('/users/bulk-edit')"  [routerLink]="['/roles/users', role.id]" title="Assign users">
                                             <button class="btn btn-primary btn-sm">
                                                 <i class="fa fa-users" aria-hidden="true"></i>
-                                                Assign users
+                                                <span translate>control.assign</span>
                                             </button>
                                         </a>
                                         <a *ngIf="can('/roles/edit') && user.role_id != role.id"  [routerLink]="['/roles/edit', role.id]" title="Edit role">
                                             <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                       aria-hidden="true"></i>
-                                                Edit
+                                                <span translate>control.edit</span>
                                             </button>
                                         </a>
                                          <a *ngIf="can('/roles/remove')" (click)="openRemoveItemModalWindow(template, role.id)" title="Delete role">
                                             <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                      aria-hidden="true"></i>
-                                                Delete
+                                                <span translate>control.delete</span>
                                             </button>
                                         </a>
                                     </td>
@@ -63,13 +63,13 @@
 
 <ng-template #template>
     <div class="modal-header">
-        <h4 class="modal-title pull-left">Remove this role?</h4>
+        <h4 class="modal-title pull-left" translate>roles.list.remove</h4>
         <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body">
-        <button type="button" class="btn btn-default" (click)="removeItem()">Yes</button>
-        <button type="button" class="btn btn-primary" (click)="modalRef.hide()">No</button>
+        <button type="button" class="btn btn-default" (click)="removeItem()" translate>control.yes</button>
+        <button type="button" class="btn btn-primary" (click)="modalRef.hide()" translate>control.no</button>
     </div>
 </ng-template>
