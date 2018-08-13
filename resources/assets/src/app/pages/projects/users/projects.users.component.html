@@ -13,7 +13,7 @@
                     </a>
                     <div class="create-form">
                         <form (ngSubmit)="onSubmit()">
-                            <h1>project.users</h1>
+                            <h1 translate>field.users</h1>
                             <dual-list [sort]="keepSorted" [source]="sourceUsers" [key]="key" [filter]="filter"
                                        [display]="displayUsers" [(destination)]="confirmedUsers" [format]="format" [height]="height"></dual-list>
                             <br>

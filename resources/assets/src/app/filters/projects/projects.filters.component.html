@@ -1,11 +1,11 @@
 <div class="col-3" *ngIf="projects.length > 0">
-    <label>Filter by project: </label>
+    <label translate>filter.project</label>
     <ng-select
             [items]="projects"
             [multiple]="true"
             [closeOnSelect]="false"
             bindLabel="name"
-            placeholder="Select projects"
+            placeholder="{{ 'filter.select-project' | translate }}"
             [(ngModel)]="selectProjects"
             (change)="onChange($event)"
     >

@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading" translate>roles.list.title</div>
+                <div class="panel-heading" translate>role.list</div>
                 <div class="panel-body">
                     <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
                     <br/>
@@ -15,8 +15,8 @@
                         <table class="table table-borderless">
                             <thead>
                                 <tr>
-                                    <th translate>roles.list.id</th>
-                                    <th translate>roles.list.name</th>
+                                    <th translate>field.id</th>
+                                    <th translate>field.name</th>
                                     <th translate>control.actions</th>
                                 </tr>
                             </thead>
@@ -63,7 +63,7 @@
 
 <ng-template #template>
     <div class="modal-header">
-        <h4 class="modal-title pull-left" translate>roles.list.remove</h4>
+        <h4 class="modal-title pull-left" translate>role.remove</h4>
         <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
             <span aria-hidden="true">&times;</span>
         </button>

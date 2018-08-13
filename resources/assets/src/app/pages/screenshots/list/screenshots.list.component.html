@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Screenshots</div>
+                <div class="panel-heading" translate>screenshot.list</div>
                 <div class="panel-body">
                     <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
                     <br/>
@@ -17,11 +17,11 @@
                         <table class="table table-borderless">
                             <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>Task</th>
-                                <th>User</th>
-                                <th>Preview</th>
-                                <th>Actions</th>
+                                <th translate>field.id</th>
+                                <th translate>field.task</th>
+                                <th translate>field.user</th>
+                                <th translate>control.preview</th>
+                                <th translate>control.actions</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -34,7 +34,7 @@
                                     <a *ngIf="can('/screenshots/show')" [routerLink]="['/screenshots/show', screenshot.id]" title="View screenshot">
                                         <button class="btn btn-info btn-sm">
                                             <i class="fa fa-eye" aria-hidden="true"></i>
-                                            View
+                                            <span translate>control.view</span>
                                         </button>
                                     </a>
                                     <!--<a *ngIf="can('/screenshots/edit')" [routerLink]="['/screenshots/edit', screenshot.id]" title="Edit screenshot">-->
@@ -46,7 +46,7 @@
                                     <a *ngIf="can('/screenshots/remove')" (click)="openRemoveItemModalWindow(template, screenshot.id)" title="Delete screenshot">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
-                                            Delete
+                                            <span translate>control.delete</span>
                                         </button>
                                     </a>
                                 </td>
@@ -62,14 +62,14 @@
 </div>
 <ng-template #template>
     <div class="modal-header">
-        <h4 class="modal-title pull-left">Remove this screenshot?</h4>
+        <h4 class="modal-title pull-left" translate>screenshot.remove</h4>
         <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body">
-        <button type="button" class="btn btn-default" (click)="removeItem()">Yes</button>
-        <button type="button" class="btn btn-primary" (click)="modalRef.hide()">No</button>
+        <button type="button" class="btn btn-default" (click)="removeItem()" translate>control.yes</button>
+        <button type="button" class="btn btn-primary" (click)="modalRef.hide()" translate>control.no</button>
     </div>
 </ng-template>
 

@@ -2,18 +2,18 @@
     <div class="row">
         <div class="col col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Create New Task</div>
+                <div class="panel-heading" translate>task.create</div>
                 <div class="panel-body">
                     <a routerLink="/tasks/list" title="Back">
                         <button class="btn btn-warning">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                            Back
+                            <span translate>control.back</span>
                         </button>
                     </a>
                     <div class="create-form">
                         <form (ngSubmit)="onSubmit()">
                             <div class="form-group row">
-                                <label class="col-md-2">Project</label>
+                                <label class="col-md-2" translate>field.project</label>
                                 <div class="col-md-10">
                                     <ng-select
                                             [items]="projects"
@@ -28,19 +28,19 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2">Name</label>
+                                <label class="col-md-2" translate>field.name</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="task-name" [(ngModel)]="item.task_name">
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2">Description</label>
+                                <label class="col-md-2" translate>field.description</label>
                                 <div class="col-md-10">
                                     <textarea rows="5" class="form-control" name="task-description" [(ngModel)]="item.description"></textarea>
                                 </div>
                             </div>
                             <div class="form-group row " *ngIf="users && users.length > 1">
-                                <label class="col-md-2">User</label>
+                                <label class="col-md-2" translate>field.user</label>
                                 <div class="col-md-10">
                                     <ng-select
                                             [items]="users"
@@ -60,7 +60,7 @@
                                     <!--<input type="text" class="form-control" name="task-assigned-by" [(ngModel)]="item.assigned_by">-->
                                 <!--</div>-->
                             <!--</div>-->
-                            <button type="submit" class="btn btn-primary">Create</button>
+                            <button type="submit" class="btn btn-primary" translate>control.create</button>
                         </form>
                     </div>
                 </div>

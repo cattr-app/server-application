@@ -32,7 +32,6 @@ export class UsersFiltersComponent implements OnInit {
     }
 
     update(user) {
-        user.full_name = '--Me--';
         this.user = user;
     }
 

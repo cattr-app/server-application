@@ -2,14 +2,14 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Tasks</div>
+                <div class="panel-heading" translate>task.list</div>
                 <div class="panel-body">
                     <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
                     <br/>
                     <app-projects-filters *ngIf="can('/projects/relations')" [(projectId)]="projectId"></app-projects-filters>
                     <br/>
                     <a *ngIf="can('/tasks/create')" routerLink="/tasks/create" class="btn btn-success" title="Add new task">
-                        <i class="fa fa-plus" aria-hidden="true"></i> Add New
+                        <i class="fa fa-plus" aria-hidden="true"></i> <span translate>control.new</span>
                     </a>
                     <br/>
                     <br/>
@@ -17,10 +17,10 @@
                         <table class="table table-borderless">
                             <thead>
                             <tr>
-                                <th>Id</th>
-                                <th>Project</th>
-                                <th>Name</th>
-                                <th>Actions</th>
+                                <th translate>field.id</th>
+                                <th translate>field.project</th>
+                                <th translate>field.name</th>
+                                <th translate>control.actions</th>
                             </tr>
                             </thead>
                             <tbody>
@@ -32,19 +32,19 @@
                                     <a *ngIf="can('/tasks/show')" [routerLink]="['/tasks/show', task.id]" title="View project">
                                         <button class="btn btn-info btn-sm">
                                             <i class="fa fa-eye" aria-hidden="true"></i>
-                                            View
+                                            <span translate>control.view</span>
                                         </button>
                                     </a>
                                     <a *ngIf="can('/tasks/edit') && (directProject && directProject.includes(task.project_id))" [routerLink]="['/tasks/edit', task.id]" title="Edit project">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
-                                            Edit
+                                            <span translate>control.edit</span>
                                         </button>
                                     </a>
                                     <a *ngIf="can('/tasks/remove') && (directProject && directProject.includes(task.project_id))" (click)="openRemoveItemModalWindow(template, task.id)" title="Delete project">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
-                                            Delete
+                                            <span translate>control.delete</span>
                                         </button>
                                     </a>
                                 </td>
@@ -60,14 +60,14 @@
 </div>
 <ng-template #template>
     <div class="modal-header">
-        <h4 class="modal-title pull-left">Remove this task?</h4>
+        <h4 class="modal-title pull-left" translate>task.remove</h4>
         <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
             <span aria-hidden="true">&times;</span>
         </button>
     </div>
     <div class="modal-body">
-        <button type="button" class="btn btn-default" (click)="removeItem()">Yes</button>
-        <button type="button" class="btn btn-primary" (click)="modalRef.hide()">No</button>
+        <button type="button" class="btn btn-default" (click)="removeItem()" translate>control.yes</button>
+        <button type="button" class="btn btn-primary" (click)="modalRef.hide()" translate>control.no</button>
     </div>
 </ng-template>
 

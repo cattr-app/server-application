@@ -3,7 +3,7 @@
     <div class="row">
         <div class="col col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">roles.create.title</div>
+                <div class="panel-heading" translate>role.create</div>
                 <div class="panel-body">
                     <a routerLink="/roles/list" title="Back">
                         <button class="btn btn-warning">
@@ -14,13 +14,13 @@
                     <div class="create-form">
                         <form (ngSubmit)="onSubmit()">
                             <div class="form-group row">
-                                <label class="col-md-2" translate>roles.rolename</label>
+                                <label class="col-md-2" translate>role.rolename</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="role-name" [(ngModel)]="item.name">
                                 </div>
                             </div>
                             <div *ngIf="can('/rules/bulk-edit')" class="col-12">
-                                <h1 translate>roles.rules</h1>
+                                <h1 translate>field.rules</h1>
                                 <dual-list [sort]="keepSorted" [source]="sourceRules" [key]="key" [filter]="filter"
                                            [display]="displayRules" [(destination)]="confirmedRules" [format]="format" [height]="height"></dual-list>
                             </div>

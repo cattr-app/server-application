@@ -8,13 +8,13 @@
                     <a routerLink="/users/list" title="Back">
                         <button class="btn btn-warning">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                            Back
+                            <span translate>control.back</span>
                         </button>
                     </a>
                     <a [routerLink]="['/users/edit', item.id]" title="Edit user">
                         <button class="btn btn-primary">
                             <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                            Edit
+                            <span translate>control.edit</span>
                         </button>
                     </a>
                     <div class="user-info">
@@ -22,31 +22,31 @@
                             <table class="table table-borderless">
                                 <tbody>
                                 <tr>
-                                    <th>ID</th>
+                                    <th translate>field.id</th>
                                     <td>{{ item.id }}</td>
                                 </tr>
                                 <tr>
-                                    <th> First Name</th>
+                                    <th translate>field.firstname</th>
                                     <td> {{ item.first_name }}</td>
                                 </tr>
                                 <tr>
-                                    <th>Last Name</th>
+                                    <th translate>field.lastname</th>
                                     <td> {{ item.last_name }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Email</th>
+                                    <th translate>field.email</th>
                                     <td> {{ item.email }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Level</th>
+                                    <th translate>field.level</th>
                                     <td> {{ item.level }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Created at</th>
+                                    <th translate>field.created</th>
                                     <td> {{ item.created_at }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Updated at</th>
+                                    <th translate>field.updated</th>
                                     <td> {{ item.updated_at }}</td>
                                 </tr>
                                 </tbody>

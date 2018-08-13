@@ -73,7 +73,7 @@ export class AppModule {
         translate.setDefaultLang('en');
 
          // the lang to use, if the lang isn't available, it will use the current loader to get them
-        translate.use('en');
+        translate.use('ru');
 
         this.router.events.subscribe(this.checkPath.bind(this));
     }

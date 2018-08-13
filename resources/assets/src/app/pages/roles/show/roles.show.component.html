@@ -22,19 +22,19 @@
                             <table class="table table-borderless">
                                 <tbody>
                                 <tr>
-                                    <th translate>roles.id</th>
+                                    <th translate>field.id</th>
                                     <td>{{ item.id }}</td>
                                 </tr>
                                 <tr>
-                                    <th translate>roles.name</th>
+                                    <th translate>field.name</th>
                                     <td> {{ item.name }}</td>
                                 </tr>
                                 </tbody>
                             </table>
-                            <h1 translate>roles.rules</h1>
+                            <h1 translate>field.rules</h1>
                             <dual-list [sort]="keepSorted" [source]="sourceRules" [key]="key" [filter]="filter" [disabled]="disabled"
                                        [display]="displayRules" [(destination)]="confirmedRules" [format]="format" [height]="height"></dual-list>
-                            <h1 translate>roles.users</h1>
+                            <h1 translate>field.users</h1>
                             <dual-list [sort]="keepSorted" [source]="sourceUsers" [key]="key" [filter]="filter" [disabled]="disabled"
                                        [display]="displayUsers" [(destination)]="confirmedUsers" [format]="format" [height]="height"></dual-list>
                             <br>

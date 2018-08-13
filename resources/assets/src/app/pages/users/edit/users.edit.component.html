@@ -3,36 +3,36 @@
     <div class="row">
         <div class="col col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">Edit {{item.first_name}} {{item.last_name}}</div>
+                <div class="panel-heading" translate [translateParams]="{name: item.first_name + ' ' + item.last_name}">user.edit</div>
                 <div class="panel-body">
                     <a routerLink="/users/list" title="Back">
                         <button class="btn btn-warning">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                            Back
+                            <span translate>control.back</span>
                         </button>
                     </a>
                     <div class="create-form">
                         <form (ngSubmit)="onSubmit()">
                             <div class="form-group row">
-                                <label class="col-md-2">First Name</label>
+                                <label class="col-md-2" translate>field.firstname</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-company-id" [(ngModel)]="item.first_name">
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2">Last Name</label>
+                                <label class="col-md-2" translate>field.lastname</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-name" [(ngModel)]="item.last_name">
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2">Email</label>
+                                <label class="col-md-2" translate>field.email</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-email" [(ngModel)]="item.email">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">URL</label>
+                                <label class="col-md-2" translate>field.url</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-url" [(ngModel)]="item.url">
                                 </div>
@@ -44,91 +44,91 @@
                                 <!--</div>-->
                             <!--</div>-->
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Level</label>
+                                <label class="col-md-2">field.level</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-level" [(ngModel)]="item.level">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Payroll Access</label>
+                                <label class="col-md-2">field.payroll-access</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-payroll-access" [(ngModel)]="item.payroll_access">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Billing Access</label>
+                                <label class="col-md-2">field.billing-access</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-billing-access" [(ngModel)]="item.billing_access">
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2">Avatar</label>
+                                <label class="col-md-2" translate>field.avatar</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-billing-access" [(ngModel)]="item.avatar">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Screenshots Active</label>
+                                <label class="col-md-2" translate>field.screenshots-active</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-screenshots-active" [(ngModel)]="item.screenshots_active">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Manual time</label>
+                                <label class="col-md-2" translate>field.manual-time</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-manual-time" [(ngModel)]="item.manual_time">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Permanent tasks</label>
+                                <label class="col-md-2" translate>field.permanent-tasks</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-permanent-tasks" [(ngModel)]="item.permanent_tasks">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Computer time popup</label>
+                                <label class="col-md-2" translate>field.computer-time-popup</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-computer-time-popup" [(ngModel)]="item.computer_time_popup">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Poor time popup</label>
+                                <label class="col-md-2" translate>field.poor-time-popup</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-poor-time-popup" [(ngModel)]="item.poor_time_popup">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Blur screenshots</label>
+                                <label class="col-md-2" translate>field.blur</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-blur-screenshots" [(ngModel)]="item.blur_screenshots">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Web and app monitoring</label>
+                                <label class="col-md-2" translate>field.monitoring</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-web-and-app-monitoring" [(ngModel)]="item.web_and_app_monitoring">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Webcam Shots</label>
+                                <label class="col-md-2" translate>field.webcam-shots</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-webcam-shots" [(ngModel)]="item.webcam_shots">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Screenshots Interval</label>
+                                <label class="col-md-2" translate>field.screenshots-interval</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-screenshots-interval" [(ngModel)]="item.screenshots_interval">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">User role value</label>
+                                <label class="col-md-2">field.user-role-value</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-user-role-value" [(ngModel)]="item.user_role_value">
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">Active</label>
+                                <label class="col-md-2" translate>field.active</label>
                                 <div class="col-md-10">
                                     <ng-select
                                             [(items)]="active"
@@ -140,7 +140,7 @@
                                 </div>
                             </div>
                             <div class="form-group row" *ngIf="can('/users/full_access') && can('/roles/list')">
-                                <label class="col-md-2">Role</label>
+                                <label class="col-md-2" translate>field.role</label>
                                 <div class="col-md-10">
                                     <ng-select
                                             [(items)]="roles"
@@ -154,7 +154,7 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2">timezone</label>
+                                <label class="col-md-2" translate>field.timezone</label>
                                 <div class="col-md-10">
                                     <ng2-timezone-picker
                                             [(timezone)]="item.timezone"
@@ -165,12 +165,12 @@
                                 </div>
                             </div>
                             <div class="form-group row">
-                                <label class="col-md-2">Password</label>
+                                <label class="col-md-2" translate>field.password</label>
                                 <div class="col-md-10">
                                     <input type="password" class="form-control" name="user-password" [(ngModel)]="item.password">
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">Update</button>
+                            <button type="submit" class="btn btn-primary">control.update</button>
                         </form>
                     </div>
                 </div>

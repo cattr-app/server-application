@@ -7,7 +7,7 @@
                     <a routerLink="/screenshots/list" title="Back">
                         <button class="btn btn-warning">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
-                            Back
+                            <span translate>control.back</span>
                         </button>
                     </a>
                     <!--<a [routerLink]="['/screenshots/edit', item.id]" title="Edit task">-->
@@ -21,23 +21,23 @@
                             <table class="table table-borderless">
                                 <tbody>
                                 <tr>
-                                    <th>ID</th>
+                                    <th translate>field.id</th>
                                     <td>{{ item.id }}</td>
                                 </tr>
                                 <tr>
-                                    <th> User</th>
+                                    <th translate> field.user</th>
                                     <td> {{ item.time_interval && item.time_interval.user.full_name }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Task</th>
+                                    <th translate>field.task</th>
                                     <td> {{ item.time_interval && item.time_interval.task.task_name }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Created at</th>
+                                    <th translate>field.created</th>
                                     <td> {{ item.created_at }}</td>
                                 </tr>
                                 <tr>
-                                    <th> Updated at</th>
+                                    <th translate>field.updated</th>
                                     <td> {{ item.updated_at }}</td>
                                 </tr>
                                 </tbody>
