@@ -13,6 +13,8 @@ import 'fullcalendar';
 import 'fullcalendar-scheduler';
 import { EventObjectInput, View } from 'fullcalendar';
 import { Schedule } from 'primeng/schedule';
+import { ResourceInput } from 'fullcalendar-scheduler/src/exports';
+import { NgSelectComponent } from '@ng-select/ng-select';
 
 @Component({
     selector: 'app-statistic-time',
@@ -22,11 +24,15 @@ import { Schedule } from 'primeng/schedule';
 export class StatisticTimeComponent implements OnInit {
     @ViewChild('timeline') timeline: Schedule;
     @ViewChild('datePicker') datePicker: ElementRef;
+    @ViewChild('userSelect') userSelect: NgSelectComponent;
 
     loading: boolean = false;
+    usersLoading: boolean = false;
     timelineInitialized: boolean = false;
     timelineOptions: any;
-    events: EventObjectInput[];
+    events: EventObjectInput[] = [];
+    users: ResourceInput[] = [];
+    selectedUserIds: string[] = [];
     timezone: string;
 
     constructor(private api: ApiService,
@@ -74,6 +80,15 @@ export class StatisticTimeComponent implements OnInit {
         }
 
         this.timeline.gotoDate(value);
+    }
+
+    get selectedUsers(): ResourceInput[] {
+        const selectedUserIds = this.selectedUserIds;
+        return this.users.filter(user => selectedUserIds.indexOf(user.id) !== -1);
+    }
+
+    set selectedUsers(users: ResourceInput[]) {
+        this.selectedUserIds = users.map(user => user.id);
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
@@ -199,9 +214,21 @@ export class StatisticTimeComponent implements OnInit {
         });
     }
 
-    ngOnInit() {
-        this.events = [];
+    fetchResources() {
+        return new Promise<ResourceInput[]>(resolve => {
+            this.userService.getItems((users: User[]) => {
+                const resources = users.map(user => {
+                    return {
+                        id: user.id.toString(),
+                        title: user.full_name,
+                    };
+                });
+                resolve(resources);
+            });
+        });
+    }
 
+    ngOnInit() {
         const user = this.api.getUser() as User;
 
         let timezone = localStorage.getItem('statistics-timezone');
@@ -211,6 +238,14 @@ export class StatisticTimeComponent implements OnInit {
         this.timezone = timezone;
 
         const now = moment.utc().startOf('day');
+
+        this.usersLoading = true;
+        this.fetchResources().then(users => {
+            this.users = users;
+            this.selectedUsers = users;
+            this.$timeline.fullCalendar('refetchResources');
+            this.usersLoading = false;
+        });
 
         const eventSource = {
             events: async (start, end, timezone, callback) => {
@@ -293,16 +328,8 @@ export class StatisticTimeComponent implements OnInit {
                     text: () => '',
                 },
             ],
-            resources: (callback) => {
-                this.userService.getItems((users: User[]) => {
-                    const resources = users.map(user => {
-                        return {
-                            id: user.id,
-                            title: user.full_name,
-                        };
-                    });
-                    callback(resources);
-                });
+            resources: async (callback) => {
+                callback(this.selectedUsers);
             },
             displayEventTime: false,
             eventSources: [eventSource],
@@ -430,5 +457,13 @@ export class StatisticTimeComponent implements OnInit {
         localStorage.setItem('statistics-timezone', timezone);
         this.timezone = timezone;
         this.refetchEvents();
+    }
+
+    selectedUsersChanged() {
+        if (!this.timelineInitialized) {
+            return;
+        }
+
+        this.$timeline.fullCalendar('refetchResources');
     }
 }

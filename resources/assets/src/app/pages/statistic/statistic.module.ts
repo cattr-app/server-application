@@ -23,6 +23,7 @@ import {ScheduleModule} from 'primeng/schedule';
 import {DpDatePickerModule} from 'ng2-date-picker';
 import {LoadingModule} from 'ngx-loading';
 import {TimezonePickerModule} from 'ng2-timezone-selector';
+import {NgSelectModule} from '@ng-select/ng-select';
 
 @NgModule({
     imports: [
@@ -37,6 +38,7 @@ import {TimezonePickerModule} from 'ng2-timezone-selector';
         DpDatePickerModule,
         LoadingModule,
         TimezonePickerModule,
+        NgSelectModule,
     ],
     exports: [
         StatisticTimeComponent

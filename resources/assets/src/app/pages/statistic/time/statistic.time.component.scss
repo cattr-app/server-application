@@ -17,8 +17,23 @@
     }
 
     &__timezone,
-    &__buttons {
+    &__users {
         margin-right: 1em;
+        width: 33.333%;
+    }
+
+    &__users {
+        position: relative;
+
+        ::ng-deep .ng-value {
+            display: none;
+        }
+    }
+
+    &__user-count {
+        position: absolute;
+        left: 20px;
+        top: 6px;
     }
 
     &__timeline {
