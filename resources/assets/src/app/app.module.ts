@@ -18,6 +18,7 @@ import {AppComponent} from './app.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {NavigationComponent} from './navigation/navigation.component';
 import {IntegrationsComponent} from './pages/integrations/integrations.component';
+import {SettingsComponent} from './pages/settings/settings.component';
 
 import {AllowedActionsService} from './pages/roles/allowed-actions.service';
 import {AttachedUsersService} from './pages/users/attached-users.service';
@@ -54,6 +55,7 @@ export function HttpLoaderFactory(http: HttpClient) {
         DashboardComponent,
         NavigationComponent,
         IntegrationsComponent,
+        SettingsComponent,
     ],
     providers: [
         AllowedActionsService,
@@ -69,11 +71,6 @@ export class AppModule {
         protected location: Location,
         protected translate: TranslateService,
     ) {
-
-        translate.setDefaultLang('en');
-
-         // the lang to use, if the lang isn't available, it will use the current loader to get them
-        translate.use('ru');
 
         this.router.events.subscribe(this.checkPath.bind(this));
     }

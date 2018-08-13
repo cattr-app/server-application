@@ -1,0 +1,29 @@
+<p-growl [(value)]="msgs"></p-growl>
+<div class="container">
+    <div class="row">
+        <div class="col col-md-12">
+            <div class="panel panel-default">
+                <div class="panel-heading" translate>settings.title</div>
+                <div class="panel-body">
+                    <form (ngSubmit)="onSubmit()">
+                        <div class="form-group row">
+                            <label class="col-md-2" translate>settings.lang</label>
+                            <div class="col-md-10">
+                                <ng-select
+                                        [items]="languages"
+                                        bindLabel="title"
+                                        bindValue="code"
+                                        placeholder="{{ 'settings.select-lang' | translate }}"
+                                        [(ngModel)]="language"
+                                        [ngModelOptions]="{standalone: true}"
+                                >
+                                </ng-select>
+                            </div>
+                        </div>
+                        <button type="submit" class="btn btn-primary" translate>control.save</button>
+                    </form>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>

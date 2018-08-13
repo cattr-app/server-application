@@ -2,6 +2,7 @@ import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
 import {IntegrationsComponent} from "./pages/integrations/integrations.component";
+import {SettingsComponent} from "./pages/settings/settings.component";
 
 const routes: Routes = [
     {path: 'projects', loadChildren: './pages/projects/projects.module#ProjectsModule'},
@@ -9,6 +10,7 @@ const routes: Routes = [
     {path: 'statistic', loadChildren: './pages/statistic/statistic.module#StatisticModule'},
     {path: 'users', loadChildren: './pages/users/users.module#UsersModule'},
     {path: 'roles', loadChildren: './pages/roles/roles.module#RolesModule'},
+    {path: 'settings', component: SettingsComponent},
     {path: 'screenshots', loadChildren: './pages/screenshots/screenshots.module#ScreenshotsModule'},
     {path: 'time-intervals', loadChildren: './pages/timeintervals/timeintervals.module#TimeIntervalsModule'},
     {path: 'auth', loadChildren: './auth/auth.module#AuthModule'},

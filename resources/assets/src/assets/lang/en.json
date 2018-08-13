@@ -13,6 +13,7 @@
 		"statistic": "Statistic",
 		"integrations": "Integrations",
 		"role": "Role",
+		"settings": "Settings",
 		"logout": "Logout"
 	},
 	"dashboard": {
@@ -58,6 +59,11 @@
 		"list": "Tasks",
 		"create": "Create New Task",
 		"remove": "Remove this task?"
+	},
+	"settings": {
+		"title": "Settings",
+		"select-lang": "Select language here",
+		"lang": "Language"
 	},
 	"user": {
 		"edit": "Edit user \"{{name}}\"",
