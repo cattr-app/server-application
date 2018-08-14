@@ -9,6 +9,7 @@ import {DualListComponent} from 'angular-dual-listbox';
 import {RulesService} from '../rules.service';
 import {UsersService} from '../../users/users.service';
 import {User} from '../../../models/user.model';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
     selector: 'app-roles-show',
@@ -36,10 +37,16 @@ export class RolesShowComponent extends ItemsShowComponent implements OnInit {
                 roleService: RolesService,
                 router: ActivatedRoute,
                 allowService: AllowedActionsService,
+                translate: TranslateService,
                 protected allowedService: AllowedActionsService,
                 protected usersService: UsersService,
                 protected ruleService: RulesService) {
         super(api, roleService, router, allowService);
+
+        translate.get('control.add').subscribe((res: string) => { this.format.add = res});
+        translate.get('control.remove').subscribe((res: string) => { this.format.remove = res});
+        translate.get('control.all').subscribe((res: string) => { this.format.all = res});
+        translate.get('control.none').subscribe((res: string) => { this.format.none = res});
     }
 
     ngOnInit() {

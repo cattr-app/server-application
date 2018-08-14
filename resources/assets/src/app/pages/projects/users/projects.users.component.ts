@@ -11,6 +11,7 @@ import {ApiService} from '../../../api/api.service';
 import {UsersService} from '../../users/users.service';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
 import {ProjectsService} from '../projects.service';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
     selector: 'app-projects-users',
@@ -34,11 +35,17 @@ export class ProjectsUsersComponent extends ItemsEditComponent implements OnInit
                 protected projectService: ProjectsService,
                 activatedRoute: ActivatedRoute,
                 router: Router,
+                translate: TranslateService,
                 protected allowedService: AllowedActionsService,
                 protected usersService: UsersService,
                 differs: IterableDiffers) {
         super(api, projectService, activatedRoute, router, allowedService);
         this.differUsers = differs.find([]).create(null);
+
+        translate.get('control.add').subscribe((res: string) => { this.format.add = res});
+        translate.get('control.remove').subscribe((res: string) => { this.format.remove = res});
+        translate.get('control.all').subscribe((res: string) => { this.format.all = res});
+        translate.get('control.none').subscribe((res: string) => { this.format.none = res});
     }
 
     prepareData() {

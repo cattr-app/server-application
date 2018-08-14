@@ -72,6 +72,7 @@ export class AppModule {
         protected translate: TranslateService,
     ) {
 
+        translate.setDefaultLang('en');
         this.router.events.subscribe(this.checkPath.bind(this));
     }
 

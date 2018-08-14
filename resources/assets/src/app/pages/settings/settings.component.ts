@@ -24,7 +24,12 @@ export class SettingsComponent implements OnInit {
     constructor(private api: ApiService,
         protected translate: TranslateService
         ) {
-        translate.setDefaultLang('en');
+        let lang = translate.currentLang;
+
+        if (lang == null) {
+            lang = translate.defaultLang;
+        }
+        this.language = lang;
     }
 
     ngOnInit() {

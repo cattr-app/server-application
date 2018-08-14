@@ -91,6 +91,10 @@
 		"yes": "Yes",
 		"no": "No",
 		"preview": "Preview",
+		"add": "Add",
+		"remove": "Remove",
+		"all": "All",
+		"none": "None",
 		"back": "Back"
 	},
 	"field": {

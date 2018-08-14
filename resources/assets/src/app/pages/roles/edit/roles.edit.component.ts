@@ -12,6 +12,7 @@ import {RolesService} from '../roles.service';
 import {RulesService} from '../rules.service';
 import {UsersService} from '../../users/users.service';
 import {AllowedActionsService} from '../allowed-actions.service';
+import {TranslateService} from '@ngx-translate/core';
 
 
 @Component({
@@ -41,6 +42,7 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
                 roleService: RolesService,
                 activatedRoute: ActivatedRoute,
                 router: Router,
+                translate: TranslateService,
                 protected allowedService: AllowedActionsService,
                 protected ruleService: RulesService,
                 protected usersService: UsersService,
@@ -48,6 +50,11 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
         super(api, roleService, activatedRoute, router, allowedService);
         this.differUsers = differs.find([]).create(null);
         this.differRules = differs.find([]).create(null);
+
+        translate.get('control.add').subscribe((res: string) => { this.format.add = res});
+        translate.get('control.remove').subscribe((res: string) => { this.format.remove = res});
+        translate.get('control.all').subscribe((res: string) => { this.format.all = res});
+        translate.get('control.none').subscribe((res: string) => { this.format.none = res});
     }
 
     prepareData() {

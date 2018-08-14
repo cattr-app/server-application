@@ -11,6 +11,7 @@ import {ApiService} from '../../../api/api.service';
 import {RolesService} from '../roles.service';
 import {AllowedActionsService} from '../allowed-actions.service';
 import {RulesService} from '../rules.service';
+import {TranslateService} from '@ngx-translate/core';
 
 
 @Component({
@@ -37,11 +38,17 @@ export class RolesCreateComponent extends ItemsCreateComponent implements OnInit
                 protected roleServ: RolesService,
                 protected myRouter: Router,
                 allowedService: AllowedActionsService,
+                translate: TranslateService,
                 protected usersService: UsersService,
                 protected ruleService: RulesService,
                 differs: IterableDiffers) {
         super(api, roleService, router, allowedService);
         this.differRules = differs.find([]).create(null);
+
+        translate.get('control.add').subscribe((res: string) => { this.format.add = res});
+        translate.get('control.remove').subscribe((res: string) => { this.format.remove = res});
+        translate.get('control.all').subscribe((res: string) => { this.format.all = res});
+        translate.get('control.none').subscribe((res: string) => { this.format.none = res});
     }
 
     prepareData() {

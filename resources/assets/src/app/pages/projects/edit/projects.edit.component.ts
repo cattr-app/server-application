@@ -7,6 +7,7 @@ import {ItemsEditComponent} from '../../items.edit.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
 import {DualListComponent} from 'angular-dual-listbox';
 import {UsersService} from '../../users/users.service';
+import {TranslateService} from '@ngx-translate/core';
 
 @Component({
     selector: 'app-projects-edit',
@@ -31,10 +32,16 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
                 activatedRoute: ActivatedRoute,
                 router: Router,
                 allowedService: AllowedActionsService,
+                translate: TranslateService,
                 protected usersService: UsersService,
                 differs: IterableDiffers) {
         super(api, projectService, activatedRoute, router, allowedService);
         this.differUsers = differs.find([]).create(null);
+
+        translate.get('control.add').subscribe((res: string) => { this.format.add = res});
+        translate.get('control.remove').subscribe((res: string) => { this.format.remove = res});
+        translate.get('control.all').subscribe((res: string) => { this.format.all = res});
+        translate.get('control.none').subscribe((res: string) => { this.format.none = res});
     }
 
     ngOnInit() {
