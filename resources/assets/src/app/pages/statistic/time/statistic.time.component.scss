@@ -55,6 +55,10 @@
 
     /* Fullcalendar styles */
     .fc-resource-area {
+        th .fc-cell-text {
+            cursor: pointer;
+        }
+
         /* Resource row */
         tr[data-resource-id] {
             background: #fff;

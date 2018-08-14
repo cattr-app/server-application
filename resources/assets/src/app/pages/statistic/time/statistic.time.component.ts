@@ -25,7 +25,7 @@ enum UsersSort {
     NameAsc,
     NameDesc,
     TimeWorkedAsc,
-    TimeWorderDesc
+    TimeWorkedDesc
 }
 
 interface TimeWorked {
@@ -45,13 +45,12 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('userSelect') userSelect: NgSelectComponent;
     @ViewChild('viewSwitcher') viewSwitcher: ViewSwitcherComponent;
 
+    selectedUserIds: string[];
+
     loading: boolean = true;
     usersLoading: boolean = true;
     timelineInitialized: boolean = false;
     timelineOptions: any;
-    userSort: UsersSort = UsersSort.NameAsc;
-
-    selectedUserIds: string[];
 
     view: ViewData;
     viewEvents: EventObjectInput[] = [];
@@ -59,6 +58,7 @@ export class StatisticTimeComponent implements OnInit {
     latestEvents: EventObjectInput[] = [];
     users: ResourceInput[] = [];
     selectedUsers: ResourceInput[] = [];
+    sortUsers: UsersSort = UsersSort.NameAsc;
 
     view$: Observable<ViewData>;
     viewEvents$: Observable<EventObjectInput[]>;
@@ -66,6 +66,8 @@ export class StatisticTimeComponent implements OnInit {
     latestEvents$: Observable<EventObjectInput[]>;
     users$: Observable<ResourceInput[]>;
     selectedUsers$: Observable<ResourceInput[]>;
+    sortUsers$: Observable<string>;
+    sortedUsers$: Observable<ResourceInput[]>;
 
     constructor(private api: ApiService,
         private userService: UsersService,
@@ -124,8 +126,8 @@ export class StatisticTimeComponent implements OnInit {
     ngOnInit() {
         this.view = {
             name: this.defaultView,
-            start: moment.utc(),
-            end: moment.utc().add(1, 'day'),
+            start: moment.utc().startOf('day'),
+            end: moment.utc().startOf('day').add(1, 'day'),
             timezone: 'UTC',
         };
 
@@ -133,17 +135,12 @@ export class StatisticTimeComponent implements OnInit {
         this.users$.subscribe(users => {
             this.users = users;
             this.selectedUserIds = users.map(user => user.id);
-            this.$timeline.fullCalendar('refetchResources');
             this.usersLoading = false;
+            console.log('users: ', users);
         });
 
-        this.selectedUsers$ = this.userSelect.changeEvent.asObservable()
-            .map(() => this.userSelect.selectedValues as ResourceInput[])
-            .merge(this.users$);
-        this.selectedUsers$.subscribe(users => {
-            this.selectedUsers = users;
-            this.$timeline.fullCalendar('refetchResources');
-        });
+        this.selectedUsers$ = this.users$.concat(this.userSelect.changeEvent.asObservable() as Observable<ResourceInput[]>).share();
+        this.selectedUsers$.subscribe(users => console.log('selectedUsers: ', users));
 
         this.view$ = this.viewSwitcher.setView.asObservable();
         this.viewEvents$ = this.view$.filter(view => {
@@ -201,7 +198,7 @@ export class StatisticTimeComponent implements OnInit {
                     perDay: perDay,
                 };
             });
-        });
+        }).share();
 
         this.viewTimeWorked$.subscribe(data => {
             this.viewTimeWorked = data;
@@ -216,30 +213,54 @@ export class StatisticTimeComponent implements OnInit {
             this.showIsWorkingNow();
         });
 
-        /*const view = this.$timeline.fullCalendar('getView');
-        const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
-        const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
+        this.sortUsers$ = Observable.fromEvent(this.timeline.el.nativeElement, 'click')
+            .map((event: MouseEvent) => event.target)
+            .filter(element => element instanceof HTMLElement
+                && $(element).hasClass('fc-cell-text')
+                && $(element).parents('td.fc-resource-area th').length > 0)
+            .map(element => $(element).text()).startWith('').share();
+        this.sortUsers$.subscribe(() => console.log('sortUsers'));
 
-        const users = this.selectedUsers.sort((a, b) => {
-            switch (this.userSort) {
-                case UsersSort.NameAsc:
-                    return a.title.localeCompare(b.title);
-                case UsersSort.NameDesc:
-                    return b.title.localeCompare(a.title);
-                case UsersSort.TimeWorkedAsc: {
-                    const aTimeWorked = this.calculateTimeWorkedOn(+a.id, viewStart, viewEnd);
-                    const bTimeWorked = this.calculateTimeWorkedOn(+b.id, viewStart, viewEnd);
-                    return aTimeWorked - bTimeWorked;
+        this.sortedUsers$ = this.sortUsers$.combineLatest(this.selectedUsers$, this.viewTimeWorked$)
+            .map(([sort, users, worked]) => {
+                if (sort === 'Name') {
+                    this.sortUsers = this.sortUsers === UsersSort.NameAsc
+                        ? UsersSort.NameDesc : UsersSort.NameAsc;
+                } else if (sort === 'Time Worked') {
+                    this.sortUsers = this.sortUsers === UsersSort.TimeWorkedDesc
+                        ? UsersSort.TimeWorkedAsc : UsersSort.TimeWorkedDesc;
                 }
-                case UsersSort.TimeWorderDesc: {
-                    const aTimeWorked = this.calculateTimeWorkedOn(+a.id, viewStart, viewEnd);
-                    const bTimeWorked = this.calculateTimeWorkedOn(+b.id, viewStart, viewEnd);
-                    return bTimeWorked - aTimeWorked;
-                }
-                default:
-                    return +a.id - +b.id;
-            }
-        });*/
+
+                return users.sort((a, b) => {
+                    switch (this.sortUsers) {
+                        default:
+                        case UsersSort.NameAsc:
+                            return a.title.localeCompare(b.title);
+                        case UsersSort.NameDesc:
+                            return b.title.localeCompare(a.title);
+                        case UsersSort.TimeWorkedAsc: {
+                            const aTimeWorked = worked.find(item => +item.id === +a.id);
+                            const bTimeWorked = worked.find(item => +item.id === +b.id);
+                            const aTime = aTimeWorked !== undefined ? aTimeWorked.total : 0;
+                            const bTime = bTimeWorked !== undefined ? bTimeWorked.total : 0;
+                            return aTime - bTime;
+                        }
+                        case UsersSort.TimeWorkedDesc: {
+                            const aTimeWorked = worked.find(item => +item.id === +a.id);
+                            const bTimeWorked = worked.find(item => +item.id === +b.id);
+                            const aTime = aTimeWorked !== undefined ? aTimeWorked.total : 0;
+                            const bTime = bTimeWorked !== undefined ? bTimeWorked.total : 0;
+                            return bTime - aTime;
+                        }
+                    }
+                });
+            });
+        this.sortedUsers$ = this.selectedUsers$.concat(this.sortedUsers$).share();
+        this.sortedUsers$.subscribe(users => {
+            this.selectedUsers = users;
+            this.$timeline.fullCalendar('refetchResources');
+            console.log('sortedUsers')
+        });
 
         this.timelineOptions = {
             defaultView: this.defaultView,
