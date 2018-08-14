@@ -10,6 +10,7 @@ import {HttpClientModule, HttpClient} from '@angular/common/http';
 
 import {AppRoutingModule} from './app-routing.module';
 import {ApiModule} from './api/api.module';
+import {LocalStorage} from './api/storage.model';
 import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from './shared.module';
 import {MomentModule} from 'ngx-moment';
@@ -72,7 +73,12 @@ export class AppModule {
         protected translate: TranslateService,
     ) {
 
-        translate.setDefaultLang('en');
+        let lang = LocalStorage.getStorage().get('language');
+
+        if (lang === null) {
+            lang = 'en';
+        }
+        translate.setDefaultLang(lang);
         this.router.events.subscribe(this.checkPath.bind(this));
     }
 

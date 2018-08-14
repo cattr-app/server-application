@@ -2,6 +2,7 @@ import {ApiService} from '../../api/api.service';
 import { Component, OnInit } from '@angular/core';
 import {Message} from 'primeng/components/common/api';
 import {TranslateService} from '@ngx-translate/core';
+import {LocalStorage} from '../../api/storage.model';
 
 
 @Component({
@@ -39,6 +40,7 @@ export class SettingsComponent implements OnInit {
 
         if (typeof this.language != null) {
             this.translate.use(this.language);
+            LocalStorage.getStorage().set('language', this.language);
         }
     }
 
