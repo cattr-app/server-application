@@ -15,3 +15,9 @@ date-selector,
 date-range-selector {
     margin-right: 1em;
 }
+
+.btn-group {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+}

@@ -20,7 +20,7 @@ export class ViewSwitcherComponent implements OnInit {
     @ViewChild('dateRangeSelector') dateRangeSelector: DateRangeSelectorComponent;
 
     start: moment.Moment = moment.utc();
-    end: moment.Moment = moment.utc();
+    end: moment.Moment = moment.utc().add(1, 'day');
 
     timezone: string = 'UTC';
 
@@ -81,7 +81,7 @@ export class ViewSwitcherComponent implements OnInit {
         this.setView.emit({
             name: this.viewName,
             start: this.start,
-            end: this.end,
+            end: this.end.clone().add(1, 'day'),
             timezone: this.timezone,
         });
     }

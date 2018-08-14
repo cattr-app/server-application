@@ -15,6 +15,13 @@
         vertical-align: bottom;
     }
 
+    &__view-switcher {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
+        width: 100%;
+    }
+
     &__users {
         margin-right: 1em;
         width: 33.333%;

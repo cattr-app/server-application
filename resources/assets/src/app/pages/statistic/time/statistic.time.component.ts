@@ -30,7 +30,8 @@ enum UsersSort {
 
 interface TimeWorked {
     id: string,
-    time: number,
+    total: number,
+    perDay: { [date: string]: number },
 }
 
 @Component({
@@ -48,20 +49,23 @@ export class StatisticTimeComponent implements OnInit {
     usersLoading: boolean = true;
     timelineInitialized: boolean = false;
     timelineOptions: any;
-    selectedUserIds: string[] = [];
     userSort: UsersSort = UsersSort.NameAsc;
+
+    selectedUserIds: string[];
 
     view: ViewData;
     viewEvents: EventObjectInput[] = [];
     viewTimeWorked: TimeWorked[] = [];
     latestEvents: EventObjectInput[] = [];
     users: ResourceInput[] = [];
+    selectedUsers: ResourceInput[] = [];
 
     view$: Observable<ViewData>;
     viewEvents$: Observable<EventObjectInput[]>;
     viewTimeWorked$: Observable<TimeWorked[]>;
     latestEvents$: Observable<EventObjectInput[]>;
     users$: Observable<ResourceInput[]>;
+    selectedUsers$: Observable<ResourceInput[]>;
 
     constructor(private api: ApiService,
         private userService: UsersService,
@@ -76,13 +80,8 @@ export class StatisticTimeComponent implements OnInit {
         return $(this.timeline.el.nativeElement).children();
     }
 
-    get selectedUsers(): ResourceInput[] {
-        const selectedUserIds = this.selectedUserIds;
-        return this.users.filter(user => selectedUserIds.indexOf(user.id) !== -1);
-    }
-
-    set selectedUsers(users: ResourceInput[]) {
-        this.selectedUserIds = users.map(user => user.id);
+    get timezoneOffset(): number {
+        return -(moment as any).tz.zone(this.view.timezone).utcOffset(this.view.start);
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
@@ -98,63 +97,14 @@ export class StatisticTimeComponent implements OnInit {
                         id: interval.id,
                         title: '',
                         resourceId: interval.user_id,
-                        start: (moment.utc(interval.start_at) as any).tz(this.view.timezone),
-                        end: (moment.utc(interval.end_at) as any).tz(this.view.timezone),
+                        start: moment.utc(interval.start_at).add(this.timezoneOffset, 'minutes'),
+                        end: moment.utc(interval.end_at).add(this.timezoneOffset, 'minutes'),
                     } as EventObjectInput;
                 });
 
                 resolve(events);
             }, params);
         });
-    }
-
-    refetchEvents() {
-        if (!this.timelineInitialized) {
-            return;
-        }
-
-        this.$timeline.fullCalendar('refetchEvents');
-    }
-
-    getLoadedEventsStartedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
-        // Get loaded events of the specified user, started in the selected time range.
-        return this.viewEvents.filter(event => {
-            const isOfCurrentUser = event.resourceId == user_id;
-
-            const eventStart = moment.utc(event.start);
-            const isInPeriod = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
-
-            return isOfCurrentUser && isInPeriod;
-        });
-    }
-
-    getLoadedEventsEndedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
-        // Get loaded events of the specified user, started in the selected time range.
-        return this.viewEvents.filter(event => {
-            const isOfCurrentUser = event.resourceId == user_id;
-
-            const eventEnd = moment.utc(event.end);
-            const isInPeriod = eventEnd.diff(start) >= 0 && eventEnd.diff(end) < 0;
-
-            return isOfCurrentUser && isInPeriod;
-        });
-    }
-
-    calculateTimeWorkedOn(user_id: number, start: moment.Moment, end: moment.Moment) {
-        const events = this.getLoadedEventsStartedBetween(user_id, start, end);
-        // Calculate sum of an event time.
-        return events.map(event => {
-            const start = moment.utc(event.start);
-            const end = moment.utc(event.end);
-            return end.diff(start);
-        }).reduce((sum, value) => sum + value, 0);
-    }
-
-    formatDurationString(time: number) {
-        const duration = moment.duration(time);
-        const hours = Math.floor(duration.asHours());
-        const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
-        return `${hours}h ${minutes}m`;
     }
 
     fetchResources() {
@@ -179,57 +129,76 @@ export class StatisticTimeComponent implements OnInit {
             timezone: 'UTC',
         };
 
-        this.users$ = Observable.from(this.fetchResources());
+        this.users$ = Observable.from(this.fetchResources()).share();
         this.users$.subscribe(users => {
             this.users = users;
-            this.selectedUsers = users;
+            this.selectedUserIds = users.map(user => user.id);
             this.$timeline.fullCalendar('refetchResources');
             this.usersLoading = false;
         });
 
-        this.view$ = this.viewSwitcher.setView.asObservable().distinctUntilChanged((a, b) => {
-            return a.start.unix() === b.start.unix()
-                && a.end.unix() === b.end.unix()
-                && a.name === b.name
-                && a.timezone === b.timezone;
-        }).do(view => {
-            if (this.timelineInitialized) {
-                this.timeline.changeView(view.name);
-                this.timeline.gotoDate(view.start);
-                this.$timeline.fullCalendar('option', 'visibleRange', {
-                    start: view.start,
-                    end: view.end.clone().add(1, 'day'),
-                });
-            }
+        this.selectedUsers$ = this.userSelect.changeEvent.asObservable()
+            .map(() => this.userSelect.selectedValues as ResourceInput[])
+            .merge(this.users$);
+        this.selectedUsers$.subscribe(users => {
+            this.selectedUsers = users;
+            this.$timeline.fullCalendar('refetchResources');
+        });
 
+        this.view$ = this.viewSwitcher.setView.asObservable();
+        this.viewEvents$ = this.view$.filter(view => {
+            return view.start.unix() !== this.view.start.unix()
+                || view.end.unix() !== this.view.end.unix()
+                || view.name !== this.view.name
+                || view.timezone !== this.view.timezone;
+        }).switchMap(view => {
+            this.setLoading(true);
             this.view = view;
-        });
-
-        this.viewEvents$ = this.view$.switchMap(view => {
-            const offset = (moment as any).tz.zone(this.view.timezone).utcOffset(view.start);
-            const start = view.start.clone().add(offset, 'minutes');
-            const end = view.end.clone().add(offset, 'minutes');
+            const offset = this.timezoneOffset;
+            const start = view.start.clone().subtract(offset, 'minutes');
+            const end = view.end.clone().subtract(offset, 'minutes');
             return Observable.from(this.fetchEvents(start, end));
-        });
+        }).share();
 
-        this.viewEvents$.share().subscribe(events => {
-            this.viewEvents = events;
-            this.$timeline.fullCalendar('refetchEvents');
+        this.viewEvents$.subscribe(events => {
+            setTimeout(() => {
+                this.viewEvents = events;
+                if (this.timelineInitialized) {
+                    this.timeline.changeView(this.view.name);
+                    this.timeline.gotoDate(this.view.start);
+                    this.$timeline.fullCalendar('option', 'visibleRange', {
+                        start: this.view.start,
+                        end: this.view.end,
+                    });
+                }
+                this.$timeline.fullCalendar('refetchEvents');
+            });
             this.setLoading(false);
         });
 
         this.viewTimeWorked$ = this.viewEvents$.combineLatest(this.users$, (events, users) => {
             return users.map(user => {
                 const userEvents = events.filter(event => +event.resourceId === +user.id);
-                const time = userEvents.reduce((sum, event) => {
+                let total = 0;
+                const perDay: { [date: string]: number } = {};
+                for (const event of userEvents) {
                     const start = moment.utc(event.start);
                     const end = moment.utc(event.end);
-                    return sum + end.diff(start);
-                }, 0);
+                    const time = end.diff(start);
+                    total += time;
+
+                    const date = start.format('YYYY-MM-DD');
+                    if (perDay[date] !== undefined) {
+                        perDay[date] += time;
+                    } else {
+                        perDay[date] = time;
+                    }
+                }
 
                 return {
                     id: user.id,
-                    time: time,
+                    total: total,
+                    perDay: perDay,
                 };
             });
         });
@@ -239,37 +208,38 @@ export class StatisticTimeComponent implements OnInit {
             this.showTimeWorkedOn();
         });
 
-        const now = moment.utc();
-        this.latestEvents$ = Observable.from(this.fetchEvents(now.clone().subtract(10, 'minutes'), now));
+        const end = moment.utc();
+        const start = moment.utc().subtract(1, 'day');
+        this.latestEvents$ = Observable.from(this.fetchEvents(start, end));
         this.latestEvents$.subscribe(events => {
             this.latestEvents = events;
             this.showIsWorkingNow();
         });
 
-                /*const view = this.$timeline.fullCalendar('getView');
-                const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
-                const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
+        /*const view = this.$timeline.fullCalendar('getView');
+        const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
+        const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
 
-                const users = this.selectedUsers.sort((a, b) => {
-                    switch (this.userSort) {
-                        case UsersSort.NameAsc:
-                            return a.title.localeCompare(b.title);
-                        case UsersSort.NameDesc:
-                            return b.title.localeCompare(a.title);
-                        case UsersSort.TimeWorkedAsc: {
-                            const aTimeWorked = this.calculateTimeWorkedOn(+a.id, viewStart, viewEnd);
-                            const bTimeWorked = this.calculateTimeWorkedOn(+b.id, viewStart, viewEnd);
-                            return aTimeWorked - bTimeWorked;
-                        }
-                        case UsersSort.TimeWorderDesc: {
-                            const aTimeWorked = this.calculateTimeWorkedOn(+a.id, viewStart, viewEnd);
-                            const bTimeWorked = this.calculateTimeWorkedOn(+b.id, viewStart, viewEnd);
-                            return bTimeWorked - aTimeWorked;
-                        }
-                        default:
-                            return +a.id - +b.id;
-                    }
-                });*/
+        const users = this.selectedUsers.sort((a, b) => {
+            switch (this.userSort) {
+                case UsersSort.NameAsc:
+                    return a.title.localeCompare(b.title);
+                case UsersSort.NameDesc:
+                    return b.title.localeCompare(a.title);
+                case UsersSort.TimeWorkedAsc: {
+                    const aTimeWorked = this.calculateTimeWorkedOn(+a.id, viewStart, viewEnd);
+                    const bTimeWorked = this.calculateTimeWorkedOn(+b.id, viewStart, viewEnd);
+                    return aTimeWorked - bTimeWorked;
+                }
+                case UsersSort.TimeWorderDesc: {
+                    const aTimeWorked = this.calculateTimeWorkedOn(+a.id, viewStart, viewEnd);
+                    const bTimeWorked = this.calculateTimeWorkedOn(+b.id, viewStart, viewEnd);
+                    return bTimeWorked - aTimeWorked;
+                }
+                default:
+                    return +a.id - +b.id;
+            }
+        });*/
 
         this.timelineOptions = {
             defaultView: this.defaultView,
@@ -326,7 +296,11 @@ export class StatisticTimeComponent implements OnInit {
                 },
                 {
                     labelText: 'Time Worked',
-                    text: () => '',
+                    text: (resource: ResourceInput) => {
+                        const timeWorked = this.viewTimeWorked.find(data => +data.id === +resource.id);
+                        const time = timeWorked !== undefined ? timeWorked.total : 0;
+                        return this.formatDurationString(time);
+                    },
                 },
             ],
             resources: async (callback) => {
@@ -353,39 +327,48 @@ export class StatisticTimeComponent implements OnInit {
                     const $days = $('.fc-day[data-date]', $timeline);
                     $days.each((index, dayColumnElement) => {
                         const date = $(dayColumnElement).data('date');
-                        const dayStart = (moment as any).tz(date, this.view.timezone);
-                        const dayEnd = dayStart.clone().add(1, 'days');
                         const columnWidth = $(dayColumnElement).width() - 4;
 
                         const html = rows.map(userRowElement => {
                             const userId = $(userRowElement).data('resource-id');
 
                             // Calculate time worked by this user per this day.
-                            const timeWorked = this.calculateTimeWorkedOn(userId, dayStart, dayEnd);
+                            const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
+                            const time = timeWorked !== undefined && timeWorked.perDay[date] !== undefined
+                                ? timeWorked.perDay[date] : 0;
                             const msIn24Hours = 24 * 60 * 60 * 1000;
-                            const progress = timeWorked / msIn24Hours;
+                            const progress = time / msIn24Hours;
                             const percent = Math.round(100 * progress);
-                            const timeWorkedString = this.formatDurationString(timeWorked);
+                            const timeString = this.formatDurationString(time);
 
                             const topOffset = $(userRowElement).position().top;
-                            const progressWrapperClass = timeWorked === 0 ? 'progress-wrapper_empty' : '';
+                            const progressWrapperClass = time < 10e-3 ? 'progress-wrapper_empty' : '';
 
                             return `
 <div class="progress-wrapper ${progressWrapperClass}" style="top: ${topOffset}px; width: ${columnWidth}px;">
     <div class="progress">
         <div class="progress-bar" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
-    <p>${timeWorkedString}</p>
+    <p>${timeString}</p>
 </div>`;
                         }).join('');
                         $(dayColumnElement).html(html);
                     });
                 }
 
+                this.showIsWorkingNow();
+                this.showTimeWorkedOn();
                 this.timelineInitialized = true;
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
+    }
+
+    formatDurationString(time: number) {
+        const duration = moment.duration(time);
+        const hours = Math.floor(duration.asHours());
+        const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
+        return `${hours}h ${minutes}m`;
     }
 
     showIsWorkingNow() {
@@ -393,7 +376,10 @@ export class StatisticTimeComponent implements OnInit {
         $rows.each((index, row) => {
             const $row = $(row);
             const userId = $row.data('resource-id');
-            const events = this.latestEvents.filter(event => +event.resourceId === +userId);
+
+            const time = moment.utc().subtract(10, 'minutes');
+            const events = this.latestEvents.filter(event => +event.resourceId === +userId
+                && moment.utc(event.end).diff(time) > 0);
             const $cell = $('td:nth-child(1) .fc-cell-text', $row);
 
             if (events.length > 0) {
@@ -410,26 +396,24 @@ export class StatisticTimeComponent implements OnInit {
             const $row = $(row);
             const userId = $row.data('resource-id');
             const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
-            const time = timeWorked !== undefined ? timeWorked.time : 0;
+            const time = timeWorked !== undefined ? timeWorked.total : 0;
             const timeWorkedString = this.formatDurationString(time);
             const $cell = $('td:nth-child(3) .fc-cell-text', $row);
             $cell.text(timeWorkedString);
 
-            if (time === 0) {
+            if (time < 10e-3) {
                 $row.addClass('not_worked');
             } else {
                 $row.removeClass('not_worked');
             }
 
-            /*const end = moment.utc();
-            const start = end.clone().subtract(1, 'day');
-            const lastUserEvents = this.getLoadedEventsEndedBetween(userId, start, end);
+            const lastUserEvents = this.latestEvents.filter(event => +event.resourceId === +userId);
             if (lastUserEvents.length > 0) {
                 const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
                 const eventEnd = moment(lastUserEvent.end);
                 const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
                 $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc()) + '</p>');
-            }*/
+            }
         });
     }
 
@@ -437,8 +421,6 @@ export class StatisticTimeComponent implements OnInit {
         const $timeline = this.$timeline;
 
         const view = $timeline.fullCalendar('getView');
-        const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.view.timezone);
-        const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.view.timezone);
 
         const $rows = $('.fc-resource-area tr[data-resource-id]', $timeline);
         const rows = $.makeArray($rows);
@@ -460,20 +442,21 @@ export class StatisticTimeComponent implements OnInit {
             const userId = $(row).data('resource-id');
             const user = this.$timeline.fullCalendar('getResourceById', userId);
 
-            const timeWorked = this.calculateTimeWorkedOn(userId, viewStart, viewEnd);
-            const timeWorkedHours = moment.duration(timeWorked).asHours().toFixed(2);
+            const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
+            const time = timeWorked !== undefined ? timeWorked.total : 0;
+            const timeHours = moment.duration(time).asHours().toFixed(2);
 
-            let cells = [`"${user.title}"`, `"${timeWorkedHours}"`];
+            let cells = [`"${user.title}"`, `"${timeHours}"`];
             if (view.name !== 'timelineDay') {
                 const daysData = days.map(day => {
                     const date = $(day).data('date');
-                    const dayStart = (moment as any).tz(date, this.view.timezone);
-                    const dayEnd = dayStart.clone().add(1, 'days');
 
                     // Calculate time worked by this user per this day.
-                    const timeWorked = this.calculateTimeWorkedOn(userId, dayStart, dayEnd);
-                    const timeWorkedHours = moment.duration(timeWorked).asHours().toFixed(2);
-                    return `"${timeWorkedHours}"`;
+                    const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
+                    const time = timeWorked !== undefined && timeWorked.perDay[date] !== undefined
+                        ? timeWorked.perDay[date] : 0;
+                    const timeHours = moment.duration(time).asHours().toFixed(2);
+                    return `"${timeHours}"`;
                 });
                 cells = cells.concat(daysData);
             }
@@ -485,21 +468,7 @@ export class StatisticTimeComponent implements OnInit {
         window.open(encodeURI(content));
     }
 
-    setTimezone(timezone: string) {
-        localStorage.setItem('statistics-timezone', timezone);
-        this.view.timezone = timezone;
-        this.refetchEvents();
-    }
-
     setLoading(loading: boolean = true) {
         setTimeout(() => this.loading = loading);
-    }
-
-    selectedUsersChanged() {
-        if (!this.timelineInitialized) {
-            return;
-        }
-
-        this.$timeline.fullCalendar('refetchResources');
     }
 }

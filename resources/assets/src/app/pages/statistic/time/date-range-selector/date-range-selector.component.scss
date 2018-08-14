@@ -1,6 +1,17 @@
 @import '../../../../../variables';
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
+.form-inline {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+}
+
+.form-control {
+    max-width: 150px;
+    margin-right: 1em;
+}
+
 /* Apply bootstrap styles to a datepicker */
 :host ::ng-deep {
     $date-picker-border-color: #ddd;

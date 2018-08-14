@@ -9,10 +9,9 @@
             <div class="statistics__users">
                 <ng-select #userSelect [items]="users" [loading]="usersLoading"
                     bindValue="id" bindLabel="title" [closeOnSelect]="false"
-                    [multiple]="true" [(ngModel)]="selectedUserIds"
-                    (change)="selectedUsersChanged()">
+                    [multiple]="true" [(ngModel)]="selectedUserIds">
                 </ng-select>
-                <span class="statistics__user-count">{{ selectedUserIds.length }} users selected</span>
+                <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
             </div>
 
             <div class="statistics__buttons btn-group" role="group">

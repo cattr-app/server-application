@@ -1,6 +1,10 @@
 @import '../../../../../variables';
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
+.form-control {
+    max-width: 150px;
+}
+
 /* Apply bootstrap styles to a datepicker */
 :host ::ng-deep {
     $date-picker-border-color: #ddd;
