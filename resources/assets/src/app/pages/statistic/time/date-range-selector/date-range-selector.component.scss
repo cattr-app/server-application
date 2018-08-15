@@ -53,7 +53,12 @@
         @extend .btn;
         @extend .btn-default;
 
-        &.dp-selected {
+        &.dp-current-day {
+            @extend .btn-info;
+        }
+
+        &.dp-selected,
+        &.dp-current-day.dp-selected {
             @extend .btn-primary;
         }
 
