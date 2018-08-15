@@ -1,13 +1,13 @@
 <div class="form-inline">
     <div class="form-group">
         <input #startDateInput type="text" class="form-control"
-            [dpDayPicker]="{ format: dateFormat, firstDayOfWeek: 'mo' }" mode="day"
+            [dpDayPicker]="{ format: dateFormat, firstDayOfWeek: 'mo', max: max }" mode="day"
             [(ngModel)]="_startDate" (onChange)="changeStartDate($event)" />
     </div>
 
     <div class="form-group">
         <input #endDateInput type="text" class="form-control"
-            [dpDayPicker]="{ format: dateFormat, firstDayOfWeek: 'mo' }" mode="day"
+            [dpDayPicker]="{ format: dateFormat, firstDayOfWeek: 'mo', max: max }" mode="day"
             [(ngModel)]="_endDate" (onChange)="changeEndDate($event)" />
     </div>
 </div>

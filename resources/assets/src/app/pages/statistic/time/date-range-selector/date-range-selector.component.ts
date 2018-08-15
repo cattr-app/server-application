@@ -20,13 +20,19 @@ export class DateRangeSelectorComponent {
     @Input() endDate: moment.Moment = moment.utc();
     @Output() endDateChange = new EventEmitter<moment.Moment>();
 
+    readonly max: moment.Moment = moment.utc().add(1, 'day');
+
     protected get _startDate(): string {
         return this.startDate.format(this.dateFormat);
     }
 
     protected set _startDate(value: string) {
         if (moment(value, this.dateFormat, true).isValid()) {
-            const date = moment.utc(value).startOf('day');
+            let date = moment.utc(value).startOf('day');
+            if (date.diff(this.max) > 0) {
+                date = this.max.clone();
+            }
+
             if (date.diff(this.endDate) > 0) {
                 this.startDate = this.endDate.clone();
             } else {
@@ -41,7 +47,11 @@ export class DateRangeSelectorComponent {
 
     protected set _endDate(value: string) {
         if (moment(value, this.dateFormat, true).isValid()) {
-            const date = moment.utc(value).startOf('day');
+            let date = moment.utc(value).startOf('day');
+            if (date.diff(this.max) > 0) {
+                date = this.max.clone();
+            }
+
             if (date.diff(this.startDate) < 0) {
                 this.endDate = this.startDate.clone();
             } else {

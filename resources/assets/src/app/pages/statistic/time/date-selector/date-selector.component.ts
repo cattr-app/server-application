@@ -16,18 +16,25 @@ export class DateSelectorComponent {
     @Input() date: moment.Moment = moment.utc();
     @Output() dateChange = new EventEmitter<moment.Moment>();
 
+    readonly max: moment.Moment = moment.utc().add(1, 'day');
+
     protected get _date(): string {
         return this.date.format(this.dateFormat);
     }
 
     protected set _date(value: string) {
         if (moment(value, this.dateFormat, true).isValid()) {
+            let date = moment.utc(value).startOf('day');
+            if (date.diff(this.max) > 0) {
+                date = this.max.clone();
+            }
+
             if (this.mode === 'day') {
-                this.date = moment.utc(value).startOf('day');
+                this.date = date;
             } else if (this.mode === 'week') {
-                this.date = moment.utc(value).startOf('week').add(1, 'day');
+                this.date = date.startOf('week').add(1, 'day');
             } else if (this.mode === 'month') {
-                this.date = moment.utc(value).startOf('month');
+                this.date = date.startOf('month');
             }
         }
     }
