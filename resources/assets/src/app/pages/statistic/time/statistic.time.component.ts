@@ -4,7 +4,6 @@ import {Router} from "@angular/router";
 import {Screenshot} from "../../../models/screenshot.model";
 import {AllowedActionsService} from "../../roles/allowed-actions.service";
 import {UsersService} from '../../users/users.service';
-import {TimeIntervalsService} from '../../timeintervals/timeintervals.service';
 import {User} from '../../../models/user.model';
 import {TimeInterval} from '../../../models/timeinterval.model';
 
@@ -25,7 +24,6 @@ export class StatisticTimeComponent implements OnInit {
 
     constructor(api: ApiService,
                 private userService: UsersService,
-                private timeintervalService: TimeIntervalsService,
                 router: Router,
                 allowedService: AllowedActionsService,) {
 

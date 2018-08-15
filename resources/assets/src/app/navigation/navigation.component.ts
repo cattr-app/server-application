@@ -32,7 +32,6 @@ export class NavigationComponent implements OnInit {
         {title: 'navigation.tasks', action: 'tasks/list', isLink: true, permissions: [ 'tasks/list' ]},
         {title: 'navigation.users', action: 'users/list', isLink: true, permissions: [ 'users/list' ]},
         {title: 'navigation.screenshots', action: 'screenshots/list', isLink: true, permissions: [ 'screenshots/list' ]},
-        // {title: 'navigation.timeintervals', action: 'time-intervals/list', isLink: true, permissions: [ 'time-intervals/list' ]},
         {title: 'navigation.statistic', action: 'statistic/time', isLink: true, permissions: [ 'users/list', 'time-intervals/list'  ]},
         {title: 'navigation.integrations', action: 'integrations', isLink: true, permissions: [ 'projects/list' ]},
         {title: 'navigation.role', action: 'roles/list', isLink: true, permissions: [ 'roles/list' ]},
