@@ -81,7 +81,7 @@ export class ViewSwitcherComponent implements OnInit {
         this.setView.emit({
             name: this.viewName,
             start: this.start,
-            end: this.end.clone().add(1, 'day'),
+            end: this.end,
             timezone: this.timezone,
         });
     }
