@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { ApiService } from '../../../api/api.service';
 import { Router } from "@angular/router";
-import { AllowedActionsService } from "../../roles/allowed-actions.service";
 import { UsersService } from '../../users/users.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
+import { TasksService } from '../../tasks/tasks.service';
 import { User } from '../../../models/user.model';
 import { TimeInterval } from '../../../models/timeinterval.model';
 import * as $ from 'jquery';
@@ -20,6 +20,7 @@ import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
 import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
+import { Task } from '../../../models/task.model';
 
 enum UsersSort {
     NameAsc,
@@ -59,6 +60,7 @@ export class StatisticTimeComponent implements OnInit {
     users: ResourceInput[] = [];
     selectedUsers: ResourceInput[] = [];
     sortUsers: UsersSort = UsersSort.NameAsc;
+    tasks: Task[] = [];
 
     view$: Observable<ViewData>;
     viewEvents$: Observable<EventObjectInput[]>;
@@ -72,6 +74,7 @@ export class StatisticTimeComponent implements OnInit {
     constructor(private api: ApiService,
         private userService: UsersService,
         private timeintervalService: TimeIntervalsService,
+        private taskService: TasksService,
         private router: Router) {
     }
 
@@ -101,6 +104,7 @@ export class StatisticTimeComponent implements OnInit {
                         resourceId: interval.user_id,
                         start: moment.utc(interval.start_at).add(this.timezoneOffset, 'minutes'),
                         end: moment.utc(interval.end_at).add(this.timezoneOffset, 'minutes'),
+                        task_id: interval.task_id,
                     } as EventObjectInput;
                 });
 
@@ -120,6 +124,18 @@ export class StatisticTimeComponent implements OnInit {
                 });
                 resolve(resources);
             });
+        });
+    }
+
+    fetchTasks(ids) {
+        const params = {
+            'id': ['=', ids],
+        };
+
+        return new Promise<Task[]>(resolve => {
+            this.taskService.getItems((tasks: Task[]) => {
+                resolve(tasks);
+            }, params);
         });
     }
 
@@ -201,15 +217,25 @@ export class StatisticTimeComponent implements OnInit {
 
         this.viewTimeWorked$.subscribe(data => {
             this.viewTimeWorked = data;
-            this.showTimeWorkedOn();
+            this.updateResourceInfo();
         });
 
         const end = moment.utc();
-        const start = moment.utc().subtract(1, 'day');
-        this.latestEvents$ = Observable.from(this.fetchEvents(start, end));
+        const start = end.clone().subtract(1, 'day');
+        this.latestEvents$ = Observable.from(this.fetchEvents(start, end)).share();
         this.latestEvents$.subscribe(events => {
             this.latestEvents = events;
-            this.showIsWorkingNow();
+            this.updateResourceInfo();
+        });
+
+        const latestEventsTasks$ = this.latestEvents$.switchMap(events => {
+            const ids = events.map(event => event.task_id);
+            const uniqueIds = Array.from(new Set(ids));
+            return Observable.from(this.fetchTasks(uniqueIds));
+        });
+        latestEventsTasks$.subscribe(tasks => {
+            this.tasks = tasks;
+            this.updateResourceInfo();
         });
 
         this.sortUsers$ = Observable.fromEvent(this.timeline.el.nativeElement, 'click')
@@ -375,25 +401,24 @@ export class StatisticTimeComponent implements OnInit {
                     });
                 }
 
-                this.showIsWorkingNow();
-                this.showTimeWorkedOn();
+                this.updateResourceInfo();
 
                 $('.fc-resource-area th .fc-cell-text').removeClass('sort-asc');
                 $('.fc-resource-area th .fc-cell-text').removeClass('sort-desc');
-    
+
                 switch (this.sortUsers) {
                     case UsersSort.NameAsc:
                         $('.fc-resource-area th:nth-child(2) .fc-cell-text').addClass('sort-asc');
                         break;
-    
+
                     case UsersSort.NameDesc:
                         $('.fc-resource-area th:nth-child(2) .fc-cell-text').addClass('sort-desc');
                         break;
-                    
+
                     case UsersSort.TimeWorkedAsc:
                         $('.fc-resource-area th:nth-child(3) .fc-cell-text').addClass('sort-asc');
                         break;
-    
+
                     case UsersSort.TimeWorkedDesc:
                         $('.fc-resource-area th:nth-child(3) .fc-cell-text').addClass('sort-desc');
                         break;
@@ -412,26 +437,7 @@ export class StatisticTimeComponent implements OnInit {
         return `${hours}h ${minutes}m`;
     }
 
-    showIsWorkingNow() {
-        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
-        $rows.each((index, row) => {
-            const $row = $(row);
-            const userId = $row.data('resource-id');
-
-            const time = moment.utc().subtract(10, 'minutes');
-            const events = this.latestEvents.filter(event => +event.resourceId === +userId
-                && moment.utc(event.end).diff(time) > 0);
-            const $cell = $('td:nth-child(1) .fc-cell-text', $row);
-
-            if (events.length > 0) {
-                $cell.addClass('is_working_now');
-            } else {
-                $cell.removeClass('is_working_now');
-            }
-        });
-    }
-
-    showTimeWorkedOn() {
+    updateResourceInfo() {
         const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
         $rows.each((index, row) => {
             const $row = $(row);
@@ -449,11 +455,31 @@ export class StatisticTimeComponent implements OnInit {
             }
 
             const lastUserEvents = this.latestEvents.filter(event => +event.resourceId === +userId);
-            if (lastUserEvents.length > 0) {
+            const hasWorkedToday = lastUserEvents.length > 0;
+            if (hasWorkedToday) {
                 const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
-                const eventEnd = moment(lastUserEvent.end);
+                const eventEnd = moment.utc(lastUserEvent.end);
                 const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
-                $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc().add(this.timezoneOffset, 'minutes')) + '</p>');
+
+                const $workingNowCell = $('td:nth-child(1) .fc-cell-text', $row);
+                const now = moment.utc().subtract(10, 'minutes');
+                const isWorkingNow = eventEnd.diff(now) > 0;
+                if (isWorkingNow) {
+                    $workingNowCell.addClass('is_working_now');
+
+                    const currentTask = this.tasks.find(task => +task.id === +lastUserEvent.task_id);
+                    if (currentTask !== undefined) {
+                        const maxLength = 20;
+                        const taskName = currentTask.task_name.length > maxLength
+                            ? currentTask.task_name.substring(0, maxLength - 1) + '…'
+                            : currentTask.task_name;
+                        $nameCell.append(`<p class="current-task">${taskName}</p>`);
+                    }
+                } else {
+                    $workingNowCell.removeClass('is_working_now');
+                    const lastWorkedString = eventEnd.from(moment.utc().add(this.timezoneOffset, 'minutes'));
+                    $nameCell.append(`<p class="last-worked">Last worked ${lastWorkedString}</p>`);
+                }
             }
         });
     }

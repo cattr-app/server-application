@@ -110,11 +110,16 @@
                 overflow: visible;
             }
 
-            .last-worked {
+            .last-worked,
+            .current-task {
                 font-size: 10px;
                 position: absolute;
                 bottom: -12px;
                 left: 8px;
+            }
+
+            .current-task {
+                color: $brand-success;
             }
         }
 
