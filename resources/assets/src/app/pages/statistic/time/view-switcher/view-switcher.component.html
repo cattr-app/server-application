@@ -18,9 +18,7 @@
     [(date)]="start" (dateChange)="changeStartDate($event)" [mode]="'month'"></date-selector>
 
 <date-range-selector #dateRangeSelector *ngIf="activeButton === 'timelineRange'"
-    [(startDate)]="start" [(endDate)]="end"
-    (startDateChange)="changeRange(start, end)"
-    (endDateChange)="changeRange(start, end)"></date-range-selector>
+    [(startDate)]="start" [(endDate)]="end" (onApply)="changeRange(start, end)"></date-range-selector>
 
 <div class="btn-group" role="group" (window:mouseup)="userInteraction = false">
     <button type="button" (click)="changeViewName('timelineDay')" class="btn btn-default"

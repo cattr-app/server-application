@@ -5,6 +5,7 @@
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
+    position: relative;
 }
 
 .form-control {
@@ -12,10 +13,30 @@
     margin-right: 1em;
 }
 
+$date-picker-border-color: #ddd;
+
+.popup {
+    position: absolute;
+    top: 100%;
+    width: 544px;
+
+    background: #fff;
+    border: 1px solid $date-picker-border-color;
+    padding: 1em;
+    z-index: 10;
+
+    &__buttons {
+        margin-bottom: 1em;
+        text-align: right;
+    }
+
+    &[data-hidden="true"] {
+        display: none;
+    }
+}
+
 /* Apply bootstrap styles to a datepicker */
 :host ::ng-deep {
-    $date-picker-border-color: #ddd;
-
     .dp-calendar-nav-container,
     .dp-calendar-wrapper {
         border-color: $date-picker-border-color !important;

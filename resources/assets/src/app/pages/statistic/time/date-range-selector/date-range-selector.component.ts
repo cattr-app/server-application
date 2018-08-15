@@ -1,5 +1,4 @@
-import { Component, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
-import { DatePickerDirective } from 'ng2-date-picker';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
 import * as moment from 'moment';
 
 @Component({
@@ -8,9 +7,6 @@ import * as moment from 'moment';
     styleUrls: ['./date-range-selector.component.scss']
 })
 export class DateRangeSelectorComponent {
-    @ViewChild('startDateInput') startDateInput: DatePickerDirective;
-    @ViewChild('endDateInput') endDateInput: DatePickerDirective;
-
     @Input() dateFormat: string = 'YYYY-MM-DD';
     @Input() mode: string = 'day';
 
@@ -20,6 +16,10 @@ export class DateRangeSelectorComponent {
     @Input() endDate: moment.Moment = moment.utc().add(1, 'day');
     @Output() endDateChange = new EventEmitter<moment.Moment>();
 
+    @Output() onApply = new EventEmitter<{}>();
+
+    @Input() isOpened: boolean = true;
+
     readonly max: moment.Moment = moment.utc().add(1, 'day');
 
     protected get _startDate(): string {
@@ -28,17 +28,7 @@ export class DateRangeSelectorComponent {
 
     protected set _startDate(value: string) {
         if (moment(value, this.dateFormat, true).isValid()) {
-            let date = moment.utc(value).startOf('day');
-            if (date.diff(this.max) > 0) {
-                date = this.max.clone();
-            }
-
-            const max = this.endDate.clone().subtract(1, 'day');
-            if (date.diff(max) > 0) {
-                this.startDate = max;
-            } else {
-                this.startDate = date;
-            }
+            this.startDate = moment.utc(value).startOf('day');
         }
     }
 
@@ -48,38 +38,26 @@ export class DateRangeSelectorComponent {
 
     protected set _endDate(value: string) {
         if (moment(value, this.dateFormat, true).isValid()) {
-            let date = moment.utc(value).startOf('day').add(1, 'day');
-            const max = this.max.clone().add(1, 'day');
-            if (date.diff(max) > 0) {
-                date = max;
-            }
-
-            const min = this.startDate.clone().add(1, 'day');
-            if (date.diff(min) < 0) {
-                this.endDate = min;
-            } else {
-                this.endDate = date;
-            }
+            this.endDate = moment.utc(value).add(1, 'day').startOf('day');
         }
     }
 
-    changeStartDate(value) {
-        this.startDateChange.emit(this.startDate);
-        this.endDateChange.emit(this.endDate);
-    }
-
-    changeEndDate(value) {
-        this.startDateChange.emit(this.startDate);
-        this.endDateChange.emit(this.endDate);
-    }
-
     open() {
-        this.startDateInput.api.open();
-        this.endDateInput.api.open();
+        this.isOpened = true;
     }
 
     close() {
-        this.startDateInput.api.close();
-        this.endDateInput.api.close();
+        this.isOpened = false;
+    }
+
+    toggle() {
+        this.isOpened = !this.isOpened;
+    }
+
+    apply() {
+        this.close();
+        this.startDateChange.emit(this.startDate);
+        this.endDateChange.emit(this.endDate);
+        this.onApply.emit();
     }
 }

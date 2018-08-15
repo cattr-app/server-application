@@ -44,62 +44,46 @@ export class ViewSwitcherComponent implements OnInit {
         this.timezone = timezone;
     }
 
-    changeViewName(viewName: string) {
-        this.activeButton = viewName;
-        this.viewName = viewName;
-
+    applyChanges() {
         this.setView.emit({
             name: this.viewName,
             start: this.start,
             end: this.end,
             timezone: this.timezone,
         });
+    }
+
+    changeViewName(viewName: string) {
+        this.activeButton = viewName;
+        if (viewName !== 'timelineRange') {
+            this.viewName = viewName;
+            this.applyChanges();
+        }
     }
 
     changeStartDate(date: moment.Moment) {
         this.start = date;
 
         switch (this.viewName) {
-            default:
             case 'timelineDay': this.end = date.clone().add(1, 'day'); break;
             case 'timelineWeek': this.end = date.clone().add(1, 'week'); break;
             case 'timelineMonth': this.end = date.clone().add(1, 'month'); break;
+            default: break;
         }
 
-        this.setView.emit({
-            name: this.viewName,
-            start: this.start,
-            end: this.end,
-            timezone: this.timezone,
-        });
+        this.applyChanges();
     }
 
     changeRange(start: moment.Moment, end: moment.Moment) {
+        this.viewName = 'timelineRange';
         this.start = start;
         this.end = end;
-
-        this.setView.emit({
-            name: this.viewName,
-            start: this.start,
-            end: this.end,
-            timezone: this.timezone,
-        });
+        this.applyChanges();
     }
 
     changeTimezone(timezone: string) {
         this.timezone = timezone;
         localStorage.setItem('statistics-timezone', timezone);
-
-        this.setView.emit({
-            name: this.viewName,
-            start: this.start,
-            end: this.end,
-            timezone: this.timezone,
-        });
+        this.applyChanges();
     }
-
-    /*showRangeSelector() {
-        this.activeButton = 'timelineRange';
-        this.dateRangeSelector.open();
-    }*/
 }
