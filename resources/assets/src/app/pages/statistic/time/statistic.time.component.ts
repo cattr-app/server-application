@@ -388,7 +388,10 @@ export class StatisticTimeComponent implements OnInit {
                 callback(this.selectedUsers);
             },
             displayEventTime: false,
-            events: (start, end, timezone, callback) => callback(this.viewEvents),
+            events: (start, end, timezone, callback) => {
+                // Load all actual intervals to the fullcalendar only on a day view.
+                callback(this.view.name === 'timelineDay' ? this.viewEvents : []);
+            },
             eventClick: (event, jsEvent, view: View) => {
                 const userId = event.resourceId;
                 /** @todo navigate to the user dashboard. */
