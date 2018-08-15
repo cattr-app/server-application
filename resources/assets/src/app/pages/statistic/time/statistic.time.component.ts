@@ -453,7 +453,7 @@ export class StatisticTimeComponent implements OnInit {
                 const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
                 const eventEnd = moment(lastUserEvent.end);
                 const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
-                $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc()) + '</p>');
+                $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc().add(this.timezoneOffset, 'minutes')) + '</p>');
             }
         });
     }
