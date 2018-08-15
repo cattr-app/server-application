@@ -1,26 +1,33 @@
 import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
-import { ApiService } from '../../../api/api.service';
 import { Router } from "@angular/router";
+import { NgSelectComponent } from '@ng-select/ng-select';
+import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
+
+import { ApiService } from '../../../api/api.service';
 import { UsersService } from '../../users/users.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
 import { TasksService } from '../../tasks/tasks.service';
+import { ProjectsService } from '../../projects/projects.service';
+
 import { User } from '../../../models/user.model';
 import { TimeInterval } from '../../../models/timeinterval.model';
+import { Task } from '../../../models/task.model';
+
 import * as $ from 'jquery';
 import * as moment from 'moment';
 import 'moment-timezone';
+
 import 'fullcalendar';
 import 'fullcalendar-scheduler';
 import { EventObjectInput, View } from 'fullcalendar';
 import { Schedule } from 'primeng/schedule';
 import { ResourceInput } from 'fullcalendar-scheduler/src/exports';
-import { NgSelectComponent } from '@ng-select/ng-select';
+
 import { Observable } from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
-import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
-import { Task } from '../../../models/task.model';
+import { Project } from '../../../models/project.model';
 
 enum UsersSort {
     NameAsc,
@@ -57,15 +64,18 @@ export class StatisticTimeComponent implements OnInit {
     viewEvents: EventObjectInput[] = [];
     viewTimeWorked: TimeWorked[] = [];
     latestEvents: EventObjectInput[] = [];
+    latestEventsTasks: Task[] = [];
+    latestEventsProjects: Project[] = [];
     users: ResourceInput[] = [];
     selectedUsers: ResourceInput[] = [];
     sortUsers: UsersSort = UsersSort.NameAsc;
-    tasks: Task[] = [];
 
     view$: Observable<ViewData>;
     viewEvents$: Observable<EventObjectInput[]>;
     viewTimeWorked$: Observable<TimeWorked[]>;
     latestEvents$: Observable<EventObjectInput[]>;
+    latestEventsTasks$: Observable<Task[]>;
+    latestEventsProjects$: Observable<Project[]>;
     users$: Observable<ResourceInput[]>;
     selectedUsers$: Observable<ResourceInput[]>;
     sortUsers$: Observable<UsersSort>;
@@ -75,6 +85,7 @@ export class StatisticTimeComponent implements OnInit {
         private userService: UsersService,
         private timeintervalService: TimeIntervalsService,
         private taskService: TasksService,
+        private projectService: ProjectsService,
         private router: Router) {
     }
 
@@ -135,6 +146,18 @@ export class StatisticTimeComponent implements OnInit {
         return new Promise<Task[]>(resolve => {
             this.taskService.getItems((tasks: Task[]) => {
                 resolve(tasks);
+            }, params);
+        });
+    }
+
+    fetchProjects(ids) {
+        const params = {
+            'id': ['=', ids],
+        };
+
+        return new Promise<Project[]>(resolve => {
+            this.projectService.getItems((projects: Project[]) => {
+                resolve(projects);
             }, params);
         });
     }
@@ -228,13 +251,23 @@ export class StatisticTimeComponent implements OnInit {
             this.updateResourceInfo();
         });
 
-        const latestEventsTasks$ = this.latestEvents$.switchMap(events => {
+        this.latestEventsTasks$ = this.latestEvents$.switchMap(events => {
             const ids = events.map(event => event.task_id);
             const uniqueIds = Array.from(new Set(ids));
             return Observable.from(this.fetchTasks(uniqueIds));
+        }).share();
+        this.latestEventsTasks$.subscribe(tasks => {
+            this.latestEventsTasks = tasks;
+            this.updateResourceInfo();
         });
-        latestEventsTasks$.subscribe(tasks => {
-            this.tasks = tasks;
+
+        this.latestEventsProjects$ = this.latestEventsTasks$.switchMap(tasks => {
+            const ids = tasks.map(task => task.project_id);
+            const uniqueIds = Array.from(new Set(ids));
+            return Observable.from(this.fetchProjects(uniqueIds));
+        });
+        this.latestEventsProjects$.subscribe(projects => {
+            this.latestEventsProjects = projects;
             this.updateResourceInfo();
         });
 
@@ -329,6 +362,7 @@ export class StatisticTimeComponent implements OnInit {
                 },
             },
             refetchResourcesOnNavigate: false,
+            resourceAreaWidth: '360px',
             resourceColumns: [
                 {
                     labelText: '',
@@ -338,6 +372,7 @@ export class StatisticTimeComponent implements OnInit {
                 {
                     labelText: 'Name',
                     field: 'title',
+                    width: '180px',
                 },
                 {
                     labelText: 'Time Worked',
@@ -346,6 +381,7 @@ export class StatisticTimeComponent implements OnInit {
                         const time = timeWorked !== undefined ? timeWorked.total : 0;
                         return this.formatDurationString(time);
                     },
+                    width: '140px',
                 },
             ],
             resources: async (callback) => {
@@ -460,6 +496,7 @@ export class StatisticTimeComponent implements OnInit {
                 const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
                 const eventEnd = moment.utc(lastUserEvent.end);
                 const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
+                $nameCell.children('.current-task, .last-worked').remove();
 
                 const $workingNowCell = $('td:nth-child(1) .fc-cell-text', $row);
                 const now = moment.utc().subtract(10, 'minutes');
@@ -467,13 +504,23 @@ export class StatisticTimeComponent implements OnInit {
                 if (isWorkingNow) {
                     $workingNowCell.addClass('is_working_now');
 
-                    const currentTask = this.tasks.find(task => +task.id === +lastUserEvent.task_id);
+                    const currentTask = this.latestEventsTasks.find(task => +task.id === +lastUserEvent.task_id);
                     if (currentTask !== undefined) {
                         const maxLength = 20;
                         const taskName = currentTask.task_name.length > maxLength
                             ? currentTask.task_name.substring(0, maxLength - 1) + '…'
                             : currentTask.task_name;
-                        $nameCell.append(`<p class="current-task">${taskName}</p>`);
+
+                        const currentProject = this.latestEventsProjects
+                            .find(proj => +proj.id === +currentTask.project_id);
+                        if (currentProject !== undefined) {
+                            const projectName = currentProject.name.length > maxLength
+                                ? currentProject.name.substring(0, maxLength - 1) + '…'
+                                : currentProject.name;
+                            $nameCell.append(`<p class="current-task">${taskName} (${projectName})</p>`);
+                        } else {
+                            $nameCell.append(`<p class="current-task">${taskName}</p>`);
+                        }
                     }
                 } else {
                     $workingNowCell.removeClass('is_working_now');

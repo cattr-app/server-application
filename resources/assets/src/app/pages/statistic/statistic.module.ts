@@ -25,6 +25,7 @@ import {LoadingModule} from 'ngx-loading';
 import {TimezonePickerModule} from 'ng2-timezone-selector';
 import {NgSelectModule} from '@ng-select/ng-select';
 import { TasksModule } from '../tasks/tasks.module';
+import { ProjectsModule } from '../projects/projects.module';
 
 @NgModule({
     imports: [
@@ -41,6 +42,7 @@ import { TasksModule } from '../tasks/tasks.module';
         TimezonePickerModule,
         NgSelectModule,
         TasksModule,
+        ProjectsModule,
     ],
     exports: [
         StatisticTimeComponent
