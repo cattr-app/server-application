@@ -66,7 +66,7 @@ export class StatisticTimeComponent implements OnInit {
     latestEvents$: Observable<EventObjectInput[]>;
     users$: Observable<ResourceInput[]>;
     selectedUsers$: Observable<ResourceInput[]>;
-    sortUsers$: Observable<string>;
+    sortUsers$: Observable<UsersSort>;
     sortedUsers$: Observable<ResourceInput[]>;
 
     constructor(private api: ApiService,
@@ -136,11 +136,10 @@ export class StatisticTimeComponent implements OnInit {
             this.users = users;
             this.selectedUserIds = users.map(user => user.id);
             this.usersLoading = false;
-            console.log('users: ', users);
         });
 
-        this.selectedUsers$ = this.users$.concat(this.userSelect.changeEvent.asObservable() as Observable<ResourceInput[]>).share();
-        this.selectedUsers$.subscribe(users => console.log('selectedUsers: ', users));
+        const selectUser$ = this.userSelect.changeEvent.asObservable() as Observable<ResourceInput[]>;
+        this.selectedUsers$ = this.users$.concat(selectUser$).share();
 
         this.view$ = this.viewSwitcher.setView.asObservable();
         this.viewEvents$ = this.view$.filter(view => {
@@ -218,11 +217,8 @@ export class StatisticTimeComponent implements OnInit {
             .filter(element => element instanceof HTMLElement
                 && $(element).hasClass('fc-cell-text')
                 && $(element).parents('td.fc-resource-area th').length > 0)
-            .map(element => $(element).text()).startWith('').share();
-        this.sortUsers$.subscribe(() => console.log('sortUsers'));
-
-        this.sortedUsers$ = this.sortUsers$.combineLatest(this.selectedUsers$, this.viewTimeWorked$)
-            .map(([sort, users, worked]) => {
+            .map(element => $(element).text())
+            .map(sort => {
                 if (sort === 'Name') {
                     this.sortUsers = this.sortUsers === UsersSort.NameAsc
                         ? UsersSort.NameDesc : UsersSort.NameAsc;
@@ -230,36 +226,38 @@ export class StatisticTimeComponent implements OnInit {
                     this.sortUsers = this.sortUsers === UsersSort.TimeWorkedDesc
                         ? UsersSort.TimeWorkedAsc : UsersSort.TimeWorkedDesc;
                 }
+                return this.sortUsers;
+            }).startWith(UsersSort.NameAsc).share();
 
-                return users.sort((a, b) => {
-                    switch (this.sortUsers) {
-                        default:
-                        case UsersSort.NameAsc:
-                            return a.title.localeCompare(b.title);
-                        case UsersSort.NameDesc:
-                            return b.title.localeCompare(a.title);
-                        case UsersSort.TimeWorkedAsc: {
-                            const aTimeWorked = worked.find(item => +item.id === +a.id);
-                            const bTimeWorked = worked.find(item => +item.id === +b.id);
-                            const aTime = aTimeWorked !== undefined ? aTimeWorked.total : 0;
-                            const bTime = bTimeWorked !== undefined ? bTimeWorked.total : 0;
-                            return aTime - bTime;
-                        }
-                        case UsersSort.TimeWorkedDesc: {
-                            const aTimeWorked = worked.find(item => +item.id === +a.id);
-                            const bTimeWorked = worked.find(item => +item.id === +b.id);
-                            const aTime = aTimeWorked !== undefined ? aTimeWorked.total : 0;
-                            const bTime = bTimeWorked !== undefined ? bTimeWorked.total : 0;
-                            return bTime - aTime;
-                        }
+        this.sortedUsers$ = this.sortUsers$.combineLatest(this.selectedUsers$, this.viewTimeWorked$, (sort, users, worked) => {
+            return users.sort((a, b) => {
+                switch (sort) {
+                    default:
+                    case UsersSort.NameAsc:
+                        return a.title.localeCompare(b.title);
+                    case UsersSort.NameDesc:
+                        return b.title.localeCompare(a.title);
+                    case UsersSort.TimeWorkedAsc: {
+                        const aTimeWorked = worked.find(item => +item.id === +a.id);
+                        const bTimeWorked = worked.find(item => +item.id === +b.id);
+                        const aTime = aTimeWorked !== undefined ? aTimeWorked.total : 0;
+                        const bTime = bTimeWorked !== undefined ? bTimeWorked.total : 0;
+                        return aTime - bTime;
                     }
-                });
+                    case UsersSort.TimeWorkedDesc: {
+                        const aTimeWorked = worked.find(item => +item.id === +a.id);
+                        const bTimeWorked = worked.find(item => +item.id === +b.id);
+                        const aTime = aTimeWorked !== undefined ? aTimeWorked.total : 0;
+                        const bTime = bTimeWorked !== undefined ? bTimeWorked.total : 0;
+                        return bTime - aTime;
+                    }
+                }
             });
-        this.sortedUsers$ = this.selectedUsers$.concat(this.sortedUsers$).share();
+        }).share();
+
         this.sortedUsers$.subscribe(users => {
             this.selectedUsers = users;
             this.$timeline.fullCalendar('refetchResources');
-            console.log('sortedUsers')
         });
 
         this.timelineOptions = {
@@ -379,6 +377,28 @@ export class StatisticTimeComponent implements OnInit {
 
                 this.showIsWorkingNow();
                 this.showTimeWorkedOn();
+
+                $('.fc-resource-area th .fc-cell-text').removeClass('sort-asc');
+                $('.fc-resource-area th .fc-cell-text').removeClass('sort-desc');
+    
+                switch (this.sortUsers) {
+                    case UsersSort.NameAsc:
+                        $('.fc-resource-area th:nth-child(2) .fc-cell-text').addClass('sort-asc');
+                        break;
+    
+                    case UsersSort.NameDesc:
+                        $('.fc-resource-area th:nth-child(2) .fc-cell-text').addClass('sort-desc');
+                        break;
+                    
+                    case UsersSort.TimeWorkedAsc:
+                        $('.fc-resource-area th:nth-child(3) .fc-cell-text').addClass('sort-asc');
+                        break;
+    
+                    case UsersSort.TimeWorkedDesc:
+                        $('.fc-resource-area th:nth-child(3) .fc-cell-text').addClass('sort-desc');
+                        break;
+                }
+
                 this.timelineInitialized = true;
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',

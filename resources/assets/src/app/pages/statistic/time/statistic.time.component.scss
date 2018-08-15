@@ -57,6 +57,20 @@
     .fc-resource-area {
         th .fc-cell-text {
             cursor: pointer;
+
+            &.sort-asc::after {
+                content: '▲';
+                position: absolute;
+                top: 1px;
+                right: 8px;
+            }
+
+            &.sort-desc::after {
+                content: '▼';
+                position: absolute;
+                top: 3px;
+                right: 8px;
+            }
         }
 
         /* Resource row */
