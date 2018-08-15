@@ -12,6 +12,7 @@ const routes: Routes = [
     {path: 'roles', loadChildren: './pages/roles/roles.module#RolesModule'},
     {path: 'settings', component: SettingsComponent},
     {path: 'screenshots', loadChildren: './pages/screenshots/screenshots.module#ScreenshotsModule'},
+    {path: 'time-intervals', loadChildren: './pages/timeintervals/timeintervals.module#TimeIntervalsModule'},
     {path: 'auth', loadChildren: './auth/auth.module#AuthModule'},
     {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
     {path: 'dashboard', loadChildren: './pages/dashboard/dashboard.module#DashboardModule'},

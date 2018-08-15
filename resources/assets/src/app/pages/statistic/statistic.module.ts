@@ -9,6 +9,7 @@ import {StatisticTimeComponent} from './time/statistic.time.component';
 
 
 import {UsersService} from '../users/users.service';
+import {TimeIntervalsService} from '../timeintervals/timeintervals.service';
 
 
 import {HttpClientModule} from '@angular/common/http';
@@ -38,6 +39,7 @@ import {TranslateModule} from '@ngx-translate/core';
     providers: [
         LoginService,
         UsersService,
+        TimeIntervalsService,
     ]
 })
 
