@@ -552,7 +552,7 @@ export class StatisticTimeComponent implements OnInit {
                 const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
                 const eventEnd = moment.utc(lastUserEvent.end);
                 const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
-                $nameCell.children('.current-task, .last-worked').remove();
+                $nameCell.children('.current-task, .current-proj, .last-worked').remove();
 
                 const $workingNowCell = $('td:nth-child(1) .fc-cell-text', $row);
                 const now = moment.utc().subtract(10, 'minutes');
@@ -562,7 +562,7 @@ export class StatisticTimeComponent implements OnInit {
 
                     const currentTask = this.latestEventsTasks.find(task => +task.id === +lastUserEvent.task_id);
                     if (currentTask !== undefined) {
-                        const maxLength = 20;
+                        const maxLength = 30;
                         const taskName = currentTask.task_name.length > maxLength
                             ? currentTask.task_name.substring(0, maxLength - 1) + '…'
                             : currentTask.task_name;
@@ -573,9 +573,13 @@ export class StatisticTimeComponent implements OnInit {
                             const projectName = currentProject.name.length > maxLength
                                 ? currentProject.name.substring(0, maxLength - 1) + '…'
                                 : currentProject.name;
-                            $nameCell.append(`<p class="current-task">${taskName} (${projectName})</p>`);
+                            $nameCell.append(`
+<p class="current-task">${taskName}</p>
+<p class="current-proj">${projectName}</p>`);
                         } else {
-                            $nameCell.append(`<p class="current-task">${taskName}</p>`);
+                            $nameCell.append(`
+<p class="current-task">${taskName}</p>
+<p class="current-proj"></p>`);
                         }
                     }
                 } else {
