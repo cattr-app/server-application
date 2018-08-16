@@ -45,18 +45,26 @@
         clear: both;
         position: relative;
     }
+}
 
-    #popover {
-        position: absolute;
-    }
+#clickPopover,
+#hoverPopover {
+    position: absolute;
 }
 
 .statistics-popover {
     position: relative;
-    min-height: 100px;
+    width: 250px;
+
+    &_click {
+        .statistics-popover__line:first-child {
+            min-height: 140px;
+        }
+    }
 
     &__line {
         text-align: center;
+        position: relative;
     }
 
     &__link:hover {
@@ -65,7 +73,7 @@
     }
 
     &__image {
-        width: 250px;
+        width: 100%;
         height: auto;
     }
 }

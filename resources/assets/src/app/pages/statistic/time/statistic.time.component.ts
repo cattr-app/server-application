@@ -55,7 +55,8 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('datePicker') datePicker: ElementRef;
     @ViewChild('userSelect') userSelect: NgSelectComponent;
     @ViewChild('viewSwitcher') viewSwitcher: ViewSwitcherComponent;
-    @ViewChild('popover') popover: PopoverDirective;
+    @ViewChild('clickPopover') clickPopover: PopoverDirective;
+    @ViewChild('hoverPopover') hoverPopover: PopoverDirective;
 
     selectedUserIds: string[];
     userSelectItems: {}[];
@@ -63,14 +64,20 @@ export class StatisticTimeComponent implements OnInit {
     loading: boolean = true;
     usersLoading: boolean = true;
     popoverLoading: boolean = true;
-    popoverProject: Project = null;
-    popoverTask: Task = null;
-    popoverScreenshot: Screenshot = null;
+    clickPopoverProject: Project = null;
+    clickPopoverTask: Task = null;
+    clickPopoverScreenshot: Screenshot = null;
+    hoverPopoverProject: Project = null;
+    hoverPopoverTask: Task = null;
+    hoverPopoverEvent: EventObjectInput = null;
+    hoverPopoverTime: number = 0;
     timelineInitialized: boolean = false;
     timelineOptions: any;
 
     view: ViewData;
     viewEvents: EventObjectInput[] = [];
+    viewEventsTasks: Task[] = [];
+    viewEventsProjects: Project[] = [];
     viewTimeWorked: TimeWorked[] = [];
     latestEvents: EventObjectInput[] = [];
     latestEventsTasks: Task[] = [];
@@ -81,6 +88,8 @@ export class StatisticTimeComponent implements OnInit {
 
     view$: Observable<ViewData>;
     viewEvents$: Observable<EventObjectInput[]>;
+    viewEventsTasks$: Observable<Task[]>;
+    viewEventsProjects$: Observable<Project[]>;
     viewTimeWorked$: Observable<TimeWorked[]>;
     latestEvents$: Observable<EventObjectInput[]>;
     latestEventsTasks$: Observable<Task[]>;
@@ -95,9 +104,7 @@ export class StatisticTimeComponent implements OnInit {
         private timeintervalService: TimeIntervalsService,
         private taskService: TasksService,
         private projectService: ProjectsService,
-        private screenshotService: ScreenshotsService,
-        private router: Router,
-        private cdr: ChangeDetectorRef) {
+        private screenshotService: ScreenshotsService) {
     }
 
     readonly defaultView = 'timelineDay';
@@ -111,11 +118,18 @@ export class StatisticTimeComponent implements OnInit {
         return -(moment as any).tz.zone(this.view.timezone).utcOffset(this.view.start);
     }
 
-    get popoverText(): string {
-        const parts = [];
-        parts.push(this.popoverProject !== null ? this.popoverProject.name : '');
-        parts.push(this.popoverTask !== null ? this.popoverTask.task_name : '');
-        return parts.join(' - ');
+    get clickPopoverText(): string {
+        const task = this.clickPopoverProject !== null ? this.clickPopoverProject.name : '';
+        const proj = this.clickPopoverTask !== null ? this.clickPopoverTask.task_name : '';
+        return `${task} (${proj})`;
+    }
+
+    get hoverPopoverText(): string {
+        const task = this.hoverPopoverProject !== null ? this.hoverPopoverProject.name : '';
+        const proj = this.hoverPopoverTask !== null ? this.hoverPopoverTask.task_name : '';
+        const time = this.formatDurationString(this.hoverPopoverTime);
+
+        return `${task} (${proj})<br />${time}`;
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
@@ -230,6 +244,28 @@ export class StatisticTimeComponent implements OnInit {
                 this.$timeline.fullCalendar('refetchEvents');
             });
             this.setLoading(false);
+        });
+
+        this.viewEventsTasks$ = this.viewEvents$.switchMap(events => {
+            if (this.view.name !== 'timelineDay') {
+                return Observable.from([]);
+            }
+
+            const ids = events.map(event => event.task_id);
+            const uniqueIds = Array.from(new Set(ids));
+            return Observable.from(this.fetchTasks(uniqueIds));
+        }).share();
+        this.viewEventsTasks$.subscribe(tasks => {
+            this.viewEventsTasks = tasks;
+        });
+
+        this.viewEventsProjects$ = this.viewEventsTasks$.switchMap(tasks => {
+            const ids = tasks.map(task => task.project_id);
+            const uniqueIds = Array.from(new Set(ids));
+            return Observable.from(this.fetchProjects(uniqueIds));
+        });
+        this.viewEventsProjects$.subscribe(projects => {
+            this.viewEventsProjects = projects;
         });
 
         this.viewTimeWorked$ = this.viewEvents$.combineLatest(this.users$, (events, users) => {
@@ -414,28 +450,32 @@ export class StatisticTimeComponent implements OnInit {
                 callback(this.view.name === 'timelineDay' ? this.viewEvents : []);
             },
             eventClick: (event, jsEvent, view: View) => {
-                this.popover.hide();
+                this.clickPopover.hide();
                 this.popoverLoading = true;
 
-                this.popoverTask = null;
-                this.popoverProject = null;
-                this.popoverScreenshot = null;
+                this.clickPopoverTask = null;
+                this.clickPopoverProject = null;
+                this.clickPopoverScreenshot = null;
 
-                this.taskService.getItem(event.task_id, (task: Task) => {
-                    this.popoverTask = task;
-                    this.projectService.getItem(task.project_id, (project: Project) => {
-                        this.popoverProject = project;
-                    });
-                });
-
-                this.screenshotService.getItems((screenshots: Screenshot[]) => {
-                    this.popoverLoading = false;
-                    if (screenshots.length > 0) {
-                        const screenshot = screenshots[0];
-                        this.popoverScreenshot = screenshot;
+                const task = this.viewEventsTasks.find(task => +task.id === +event.task_id);
+                if (task) {
+                    this.clickPopoverTask = task;
+                    const project = this.viewEventsProjects.find(project => +project.id === +task.project_id);
+                    if (project) {
+                        this.clickPopoverProject = project;
                     }
-                }, {
-                    time_interval_id: event.id,
+                }
+
+                setTimeout(() => {
+                    this.screenshotService.getItems((screenshots: Screenshot[]) => {
+                        this.popoverLoading = false;
+                        if (screenshots.length > 0) {
+                            const screenshot = screenshots[0];
+                            this.clickPopoverScreenshot = screenshot;
+                        }
+                    }, {
+                        time_interval_id: event.id,
+                    });
                 });
 
                 const eventPos = $(jsEvent.currentTarget).offset();
@@ -447,13 +487,79 @@ export class StatisticTimeComponent implements OnInit {
                 const timelineWidth = $('.statistics__timeline').width();
                 const arrowOnRight = timelineWidth - x < width;
 
-                const $popover = $('#popover');
+                const $popover = $('#clickPopover');
                 $popover.css({
                     top: y,
                     left: x + (arrowOnRight ? -1 : 1) * width / 2,
                 });
-                this.popover.containerClass = arrowOnRight ? 'arrow_right' : 'arrow_left';
-                this.popover.show();
+                this.clickPopover.containerClass = arrowOnRight ? 'arrow_right' : 'arrow_left';
+                this.clickPopover.show();
+            },
+            eventMouseover: (event, jsEvent, view) => {
+                this.hoverPopover.hide();
+
+                this.hoverPopoverEvent = event;
+                this.hoverPopoverTask = null;
+                this.hoverPopoverProject = null;
+
+                // Calculate time from last break.
+                const userId = event.resourceId;
+                const events = this.viewEvents.filter(ev => {
+                    return +ev.resourceId === +userId;
+                }).sort((a, b) => {
+                    return moment.utc(a.start).diff(moment.utc(b.start));
+                });
+
+                let total = moment.utc(event.end).diff(moment.utc(event.start));
+                const currentEventIndex = events.findIndex(ev => ev.id === event.id);
+                for (let i = currentEventIndex + 1; i < events.length; ++i) {
+                    const prev = events[i - 1];
+                    const curr = events[i];
+                    if (moment.utc(curr.start).diff(moment.utc(prev.end)) > 1000) {
+                        break;
+                    }
+                    total += moment.utc(curr.end).diff(moment.utc(curr.start));
+                }
+
+                for (let i = currentEventIndex - 1; i >= 0; --i) {
+                    const next = events[i + 1];
+                    const curr = events[i];
+                    if (moment.utc(next.start).diff(moment.utc(curr.end)) > 1000) {
+                        break;
+                    }
+                    total += moment.utc(curr.end).diff(moment.utc(curr.start));
+                }
+
+                this.hoverPopoverTime = total;
+
+                const task = this.viewEventsTasks.find(task => +task.id === +event.task_id);
+                if (task) {
+                    this.hoverPopoverTask = task;
+                    const project = this.viewEventsProjects.find(project => +project.id === +task.project_id);
+                    if (project) {
+                        this.hoverPopoverProject = project;
+                    }
+                }
+
+                const eventPos = $(jsEvent.currentTarget).offset();
+                const timelinePos = $('.statistics__timeline').offset();
+                const x = eventPos.left - timelinePos.left;
+                const y = eventPos.top - timelinePos.top;
+
+                const width = 250;
+                const timelineWidth = $('.statistics__timeline').width();
+                const arrowOnRight = timelineWidth - x < width;
+
+                const $popover = $('#hoverPopover');
+                $popover.css({
+                    top: y,
+                    left: x + (arrowOnRight ? -1 : 1) * width / 2,
+                });
+                this.hoverPopover.containerClass = arrowOnRight ? 'arrow_right' : 'arrow_left';
+                this.hoverPopover.show();
+            },
+            eventMouseout: (event, jsEvent, view) => {
+                this.hoverPopover.hide();
             },
             eventRender: (event, el, view: View) => {
                 if (view.name !== 'timelineDay') {
