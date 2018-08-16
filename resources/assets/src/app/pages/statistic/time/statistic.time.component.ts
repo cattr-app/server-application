@@ -2,12 +2,14 @@ import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
 import { Router } from "@angular/router";
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
+import { PopoverDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../../../api/api.service';
 import { UsersService } from '../../users/users.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
 import { TasksService } from '../../tasks/tasks.service';
 import { ProjectsService } from '../../projects/projects.service';
+import { ScreenshotsService } from '../../screenshots/screenshots.service';
 
 import { User } from '../../../models/user.model';
 import { TimeInterval } from '../../../models/timeinterval.model';
@@ -28,6 +30,7 @@ import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
 import { Project } from '../../../models/project.model';
+import { Screenshot } from '../../../models/screenshot.model';
 
 enum UsersSort {
     NameAsc,
@@ -52,11 +55,16 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('datePicker') datePicker: ElementRef;
     @ViewChild('userSelect') userSelect: NgSelectComponent;
     @ViewChild('viewSwitcher') viewSwitcher: ViewSwitcherComponent;
+    @ViewChild('popover') popover: PopoverDirective;
 
     selectedUserIds: string[];
 
     loading: boolean = true;
     usersLoading: boolean = true;
+    popoverLoading: boolean = true;
+    popoverProject: Project = null;
+    popoverTask: Task = null;
+    popoverScreenshot: Screenshot = null;
     timelineInitialized: boolean = false;
     timelineOptions: any;
 
@@ -86,6 +94,7 @@ export class StatisticTimeComponent implements OnInit {
         private timeintervalService: TimeIntervalsService,
         private taskService: TasksService,
         private projectService: ProjectsService,
+        private screenshotService: ScreenshotsService,
         private router: Router) {
     }
 
@@ -98,6 +107,13 @@ export class StatisticTimeComponent implements OnInit {
 
     get timezoneOffset(): number {
         return -(moment as any).tz.zone(this.view.timezone).utcOffset(this.view.start);
+    }
+
+    get popoverText(): string {
+        const parts = [];
+        parts.push(this.popoverProject !== null ? this.popoverProject.name : '');
+        parts.push(this.popoverTask !== null ? this.popoverTask.task_name : '');
+        return parts.join(' - ');
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
@@ -393,9 +409,38 @@ export class StatisticTimeComponent implements OnInit {
                 callback(this.view.name === 'timelineDay' ? this.viewEvents : []);
             },
             eventClick: (event, jsEvent, view: View) => {
-                const userId = event.resourceId;
-                /** @todo navigate to the user dashboard. */
-                this.router.navigateByUrl('dashboard');
+                this.popover.hide();
+                this.popoverLoading = true;
+
+                this.popoverTask = null;
+                this.popoverProject = null;
+                this.popoverScreenshot = null;
+
+                this.taskService.getItem(event.task_id, (task: Task) => {
+                        this.popoverTask = task;
+                        this.projectService.getItem(task.project_id, (project: Project) => {
+                        this.popoverProject = project;
+                        this.screenshotService.getItems((screenshots: Screenshot[]) => {
+                            this.popoverLoading = false;
+                            if (screenshots.length > 0) {
+                                const screenshot = screenshots[0];
+                                this.popoverScreenshot = screenshot;
+                            }
+                        }, {
+                            time_interval_id: event.id,
+                        });
+                    });
+                });
+
+                const eventPos = $(jsEvent.currentTarget).offset();
+                const timelinePos = $('.statistics__timeline').offset();
+
+                const $popover = $('#popover');
+                $popover.css({
+                    top: eventPos.top - timelinePos.top,
+                    left: eventPos.left - timelinePos.left,
+                });
+                this.popover.show();
             },
             eventRender: (event, el, view: View) => {
                 if (view.name !== 'timelineDay') {

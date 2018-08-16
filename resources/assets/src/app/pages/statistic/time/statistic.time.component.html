@@ -22,6 +22,20 @@
 
     <div class="statistics__timeline">
         <ngx-loading [show]="loading"></ngx-loading>
+        <span #popover="bs-popover" id="popover" [outsideClick]="true" [popover]="popoverTemplate"></span>
         <p-schedule #timeline [header]="false" [options]="timelineOptions"></p-schedule>
     </div>
 </div>
+
+<ng-template #popoverTemplate>
+    <div class="statistics-popover">
+        <ngx-loading [show]="popoverLoading"></ngx-loading>
+        <p class="statistics-popover__line">
+            <img *ngIf="popoverScreenshot !== null" class="statistics-popover__image" [attr.src]="popoverScreenshot.path" />
+        </p>
+
+        <p class="statistics-popover__line">
+            <a *ngIf="popoverTask !== null" class="statistics-popover__link" [attr.href]="'tasks/show/' + popoverTask.id">{{ popoverText }}</a>
+        </p>
+    </div>
+</ng-template>

@@ -26,6 +26,8 @@ import {TimezonePickerModule} from 'ng2-timezone-selector';
 import {NgSelectModule} from '@ng-select/ng-select';
 import { TasksModule } from '../tasks/tasks.module';
 import { ProjectsModule } from '../projects/projects.module';
+import { PopoverModule } from 'ngx-bootstrap';
+import { ScreenshotsModule } from '../screenshots/screenshots.module';
 
 @NgModule({
     imports: [
@@ -43,6 +45,8 @@ import { ProjectsModule } from '../projects/projects.module';
         NgSelectModule,
         TasksModule,
         ProjectsModule,
+        PopoverModule.forRoot(),
+        ScreenshotsModule,
     ],
     exports: [
         StatisticTimeComponent

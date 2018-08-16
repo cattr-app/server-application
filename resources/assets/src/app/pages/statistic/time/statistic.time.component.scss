@@ -45,6 +45,24 @@
         clear: both;
         position: relative;
     }
+
+    #popover {
+        position: absolute;
+    }
+}
+
+.statistics-popover {
+    position: relative;
+    min-height: 100px;
+
+    &__line {
+        text-align: center;
+    }
+
+    &__image {
+        width: 250px;
+        height: auto;
+    }
 }
 
 :host ::ng-deep {
