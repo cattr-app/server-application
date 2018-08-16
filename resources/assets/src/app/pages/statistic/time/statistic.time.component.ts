@@ -435,12 +435,19 @@ export class StatisticTimeComponent implements OnInit {
 
                 const eventPos = $(jsEvent.currentTarget).offset();
                 const timelinePos = $('.statistics__timeline').offset();
+                const x = eventPos.left - timelinePos.left;
+                const y = eventPos.top - timelinePos.top;
+
+                const width = 250;
+                const timelineWidth = $('.statistics__timeline').width();
+                const arrowOnRight = timelineWidth - x < width;
 
                 const $popover = $('#popover');
                 $popover.css({
-                    top: eventPos.top - timelinePos.top,
-                    left: eventPos.left - timelinePos.left,
+                    top: y,
+                    left: x + (arrowOnRight ? -1 : 1) * width / 2,
                 });
+                this.popover.containerClass = arrowOnRight ? 'arrow_right' : 'arrow_left';
                 this.popover.show();
             },
             eventRender: (event, el, view: View) => {

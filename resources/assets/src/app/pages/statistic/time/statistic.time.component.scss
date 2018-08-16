@@ -59,6 +59,11 @@
         text-align: center;
     }
 
+    &__link:hover {
+        color: $link-color;
+        text-decoration: unset;
+    }
+
     &__image {
         width: 250px;
         height: auto;
@@ -197,5 +202,18 @@
                 background: $brand-success;
             }
         }
+    }
+
+    /* Popover */
+    .popover.arrow_left .popover-arrow {
+        margin: 0 !important;
+        left: 2px !important;
+        right: auto;
+    }
+
+    .popover.arrow_right .popover-arrow {
+        margin: 0 !important;
+        left: auto !important;
+        right: 2px;
     }
 }
