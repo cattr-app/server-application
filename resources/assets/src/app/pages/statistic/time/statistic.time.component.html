@@ -7,9 +7,9 @@
 
         <div class="statistics__header-line">
             <div class="statistics__users">
-                <ng-select #userSelect [items]="users" [loading]="usersLoading"
+                <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
                     bindValue="id" bindLabel="title" [closeOnSelect]="false"
-                    [multiple]="true" [(ngModel)]="selectedUserIds">
+                    [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
                 </ng-select>
                 <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
             </div>

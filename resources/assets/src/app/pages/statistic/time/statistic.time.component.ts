@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
 import { Router } from "@angular/router";
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
@@ -14,6 +14,8 @@ import { ScreenshotsService } from '../../screenshots/screenshots.service';
 import { User } from '../../../models/user.model';
 import { TimeInterval } from '../../../models/timeinterval.model';
 import { Task } from '../../../models/task.model';
+import { Project } from '../../../models/project.model';
+import { Screenshot } from '../../../models/screenshot.model';
 
 import * as $ from 'jquery';
 import * as moment from 'moment';
@@ -29,8 +31,6 @@ import { Observable } from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
-import { Project } from '../../../models/project.model';
-import { Screenshot } from '../../../models/screenshot.model';
 
 enum UsersSort {
     NameAsc,
@@ -58,6 +58,7 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('popover') popover: PopoverDirective;
 
     selectedUserIds: string[];
+    userSelectItems: {}[];
 
     loading: boolean = true;
     usersLoading: boolean = true;
@@ -95,7 +96,8 @@ export class StatisticTimeComponent implements OnInit {
         private taskService: TasksService,
         private projectService: ProjectsService,
         private screenshotService: ScreenshotsService,
-        private router: Router) {
+        private router: Router,
+        private cdr: ChangeDetectorRef) {
     }
 
     readonly defaultView = 'timelineDay';
@@ -189,12 +191,15 @@ export class StatisticTimeComponent implements OnInit {
         this.users$ = Observable.from(this.fetchResources()).share();
         this.users$.subscribe(users => {
             this.users = users;
+            this.userSelectItems = [{id: '', title: 'Select all'}, ...users];
             this.selectedUserIds = users.map(user => user.id);
             this.usersLoading = false;
         });
 
         const selectUser$ = this.userSelect.changeEvent.asObservable() as Observable<ResourceInput[]>;
-        this.selectedUsers$ = this.users$.concat(selectUser$).share();
+        this.selectedUsers$ = this.users$.concat(selectUser$.map(users => {
+            return users.filter(user => user.id !== '');
+        })).share();
 
         this.view$ = this.viewSwitcher.setView.asObservable();
         this.viewEvents$ = this.view$.filter(view => {
@@ -520,6 +525,16 @@ export class StatisticTimeComponent implements OnInit {
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
+    }
+
+    userSelected(value) {
+        if (value.id === '') {
+            setTimeout(() => {
+                // Select all.
+                this.selectedUserIds = this.users.map(user => user.id);
+                this.userSelect.changeEvent.emit(this.users);
+            });
+        }
     }
 
     formatDurationString(time: number) {
