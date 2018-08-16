@@ -417,19 +417,20 @@ export class StatisticTimeComponent implements OnInit {
                 this.popoverScreenshot = null;
 
                 this.taskService.getItem(event.task_id, (task: Task) => {
-                        this.popoverTask = task;
-                        this.projectService.getItem(task.project_id, (project: Project) => {
+                    this.popoverTask = task;
+                    this.projectService.getItem(task.project_id, (project: Project) => {
                         this.popoverProject = project;
-                        this.screenshotService.getItems((screenshots: Screenshot[]) => {
-                            this.popoverLoading = false;
-                            if (screenshots.length > 0) {
-                                const screenshot = screenshots[0];
-                                this.popoverScreenshot = screenshot;
-                            }
-                        }, {
-                            time_interval_id: event.id,
-                        });
                     });
+                });
+
+                this.screenshotService.getItems((screenshots: Screenshot[]) => {
+                    this.popoverLoading = false;
+                    if (screenshots.length > 0) {
+                        const screenshot = screenshots[0];
+                        this.popoverScreenshot = screenshot;
+                    }
+                }, {
+                    time_interval_id: event.id,
                 });
 
                 const eventPos = $(jsEvent.currentTarget).offset();
