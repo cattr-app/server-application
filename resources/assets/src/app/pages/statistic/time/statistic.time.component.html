@@ -32,11 +32,16 @@
     <div class="statistics-popover statistics-popover_click">
         <p class="statistics-popover__line">
             <ngx-loading [show]="popoverLoading"></ngx-loading>
-            <img *ngIf="clickPopoverScreenshot !== null" class="statistics-popover__image" [attr.src]="clickPopoverScreenshot.path" />
+            <a *ngIf="clickPopoverScreenshot !== null"
+                [attr.href]="'screenshots/show/' + clickPopoverScreenshot.id">
+                <img class="statistics-popover__image"
+                    [attr.src]="clickPopoverScreenshot.path" />
+            </a>
         </p>
 
         <p class="statistics-popover__line">
-            <a *ngIf="clickPopoverTask !== null" class="statistics-popover__link" [attr.href]="'tasks/show/' + clickPopoverTask.id">{{ clickPopoverText }}</a>
+            <a *ngIf="clickPopoverTask !== null" class="statistics-popover__link"
+                [attr.href]="'tasks/show/' + clickPopoverTask.id">{{ clickPopoverText }}</a>
         </p>
     </div>
 </ng-template>
