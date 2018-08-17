@@ -5,6 +5,23 @@
     max-width: 150px;
 }
 
+.form-inline.week .form-control {
+    max-width: 200px;
+}
+
+.input-group {
+    position: relative;
+}
+
+.end_date {
+    position: absolute;
+    right: 48px;
+    top: 7px;
+    z-index: 10;
+    color: rgb(85, 85, 85);
+    pointer-events: none;
+}
+
 /* Apply bootstrap styles to a datepicker */
 :host ::ng-deep {
     $date-picker-border-color: #ddd;

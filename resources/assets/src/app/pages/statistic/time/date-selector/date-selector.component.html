@@ -10,6 +10,8 @@
             [dpDayPicker]="{ format: _dateFormat, firstDayOfWeek: 'mo', max: max }"
             [mode]="_mode" [(ngModel)]="_date" (onChange)="change($event)" />
 
+        <p class="end_date" [innerHTML]="endDate"></p>
+
         <span class="input-group-btn">
             <button (click)="next()" type="button" class="btn btn-default" aria-label="next">
                 <span class="glyphicon glyphicon-chevron-right"></span>

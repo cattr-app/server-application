@@ -51,6 +51,14 @@ export class DateSelectorComponent {
         return this.mode === 'month' ? 'month' : 'day';
     }
 
+    protected get endDate(): string {
+        if (this.mode === 'week') {
+            return '&ndash; ' + this.date.clone().add(6, 'days').format(this.dateFormat);
+        } else {
+            return '';
+        }
+    }
+
     change(value) {
         this.dateChange.emit(this.date);
     }
