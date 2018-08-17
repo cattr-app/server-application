@@ -685,7 +685,7 @@ export class StatisticTimeComponent implements OnInit {
                 $nameCell.children('.current-task, .current-proj, .last-worked').remove();
 
                 const $workingNowCell = $('td:nth-child(1) .fc-cell-text', $row);
-                const now = moment.utc().subtract(10, 'minutes');
+                const now = moment.utc().add(this.timezoneOffset, 'minutes').subtract(10, 'minutes');
                 const isWorkingNow = eventEnd.diff(now) > 0;
                 if (isWorkingNow) {
                     $workingNowCell.addClass('is_working_now');
