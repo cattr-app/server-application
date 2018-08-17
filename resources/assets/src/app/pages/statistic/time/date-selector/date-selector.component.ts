@@ -18,13 +18,21 @@ export class DateSelectorComponent {
 
     readonly max: moment.Moment = moment.utc().add(1, 'day');
 
+    protected get _dateFormat(): string {
+        if (this.mode === 'month') {
+            return 'YYYY MMMM';
+        }
+
+        return this.dateFormat;
+    }
+
     protected get _date(): string {
-        return this.date.format(this.dateFormat);
+        return this.date.format(this._dateFormat);
     }
 
     protected set _date(value: string) {
-        if (moment(value, this.dateFormat, true).isValid()) {
-            let date = moment.utc(value).startOf('day');
+        if (moment(value, this._dateFormat, true).isValid()) {
+            let date = moment.utc(value, this._dateFormat).startOf('day');
             if (date.diff(this.max) > 0) {
                 date = this.max.clone();
             }
