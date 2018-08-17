@@ -164,7 +164,9 @@
 
             .current-task,
             .current-proj {
-                color: $brand-success;
+                &, & a {
+                    color: $brand-success;
+                }
             }
         }
 

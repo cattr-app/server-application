@@ -693,16 +693,18 @@ export class StatisticTimeComponent implements OnInit {
                     const currentTask = this.latestEventsTasks.find(task => +task.id === +lastUserEvent.task_id);
                     if (currentTask !== undefined) {
                         const taskName = currentTask.task_name;
+                        const taskUrl = 'tasks/show/' + currentTask.id;
                         const currentProject = this.latestEventsProjects
                             .find(proj => +proj.id === +currentTask.project_id);
                         if (currentProject !== undefined) {
                             const projectName = currentProject.name;
+                            const projectUrl = 'projects/show/' + currentProject.id;
                             $nameCell.append(`
-<p class="current-task">${taskName}</p>
-<p class="current-proj">${projectName}</p>`);
+<p class="current-task"><a href="${taskUrl}">${taskName}</a></p>
+<p class="current-proj"><a href="${projectUrl}">${projectName}</a></p>`);
                         } else {
                             $nameCell.append(`
-<p class="current-task">${taskName}</p>
+<p class="current-task"><a href="${taskUrl}">${taskName}</a></p>
 <p class="current-proj"></p>`);
                         }
                     }
