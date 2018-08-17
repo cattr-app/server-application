@@ -149,6 +149,15 @@ export class StatisticTimeComponent implements OnInit {
                         end: moment.utc(interval.end_at).add(this.timezoneOffset, 'minutes'),
                         task_id: interval.task_id,
                     } as EventObjectInput;
+                }).filter(event => {
+                    // Filter events with duration less than one second.
+                    // Zero-duration events breaks fullcalendar.
+                    const end = event.end as moment.Moment;
+                    if (end.diff(event.start) < 1000) {
+                        return false;
+                    }
+
+                    return true;
                 });
 
                 resolve(events);
