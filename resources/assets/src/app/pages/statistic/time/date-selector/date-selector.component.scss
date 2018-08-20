@@ -4,10 +4,11 @@
 .form-control {
     @media (min-width: $screen-sm-min) {
         max-width: 150px;
-    }
 
-    .form-inline.week & {
-        min-width: 240px !important;
+        .form-inline.week & {
+            max-width: unset;
+            min-width: 240px;
+        }
     }
 }
 
