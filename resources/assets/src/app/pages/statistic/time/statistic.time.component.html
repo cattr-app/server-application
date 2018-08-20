@@ -1,11 +1,6 @@
 <div class="statistics">
     <div class="statistics__header">
-        <div class="statistics__header-line">
-            <view-switcher #viewSwitcher class="statistics__view-switcher">
-            </view-switcher>
-        </div>
-
-        <div class="statistics__header-line">
+        <view-switcher #viewSwitcher class="statistics__view-switcher">
             <div class="statistics__users">
                 <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
                     bindValue="id" bindLabel="title" [closeOnSelect]="false"
@@ -17,7 +12,7 @@
             <div class="statistics__buttons btn-group" role="group">
                 <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
             </div>
-        </div>
+        </view-switcher>
     </div>
 
     <div class="statistics__timeline">

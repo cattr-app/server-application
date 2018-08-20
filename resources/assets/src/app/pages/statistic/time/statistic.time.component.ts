@@ -428,7 +428,7 @@ export class StatisticTimeComponent implements OnInit {
                 },
             },
             refetchResourcesOnNavigate: false,
-            resourceAreaWidth: '360px',
+            resourceAreaWidth: '300px',
             resourceColumns: [
                 {
                     labelText: '',
@@ -438,7 +438,7 @@ export class StatisticTimeComponent implements OnInit {
                 {
                     labelText: 'Name',
                     field: 'title',
-                    width: '180px',
+                    width: '140px',
                 },
                 {
                     labelText: 'Time Worked',
@@ -447,7 +447,7 @@ export class StatisticTimeComponent implements OnInit {
                         const time = timeWorked !== undefined ? timeWorked.total : 0;
                         return this.formatDurationString(time);
                     },
-                    width: '140px',
+                    width: '120px',
                 },
             ],
             resources: async (callback) => {

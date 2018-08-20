@@ -5,12 +5,18 @@
     display: flex;
     flex-flow: row nowrap;
     justify-content: space-between;
-    position: relative;
+}
+
+.form-group {
+    & + & {
+        margin-left: 1em;
+    }
 }
 
 .form-control {
-    max-width: 150px;
-    margin-right: 1em;
+    @media (min-width: $screen-sm-min) {
+        max-width: 150px;
+    }
 }
 
 $date-picker-border-color: #ddd;
@@ -18,7 +24,12 @@ $date-picker-border-color: #ddd;
 .popup {
     position: absolute;
     top: 100%;
-    width: 544px;
+    left: 0;
+    width: 284px;
+
+    @media (min-width: $screen-sm-min) {
+        width: 544px;
+    }
 
     background: #fff;
     border: 1px solid $date-picker-border-color;

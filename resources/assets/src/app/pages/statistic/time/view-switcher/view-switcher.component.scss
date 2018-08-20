@@ -1,23 +1,36 @@
-.timezone {
-    display: inline-block;
-    vertical-align: bottom;
-    margin-right: 1em;
-    width: 33.333%;
+@import '../../../../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+:host {
+    position: relative;
 }
 
-date-selector,
-date-range-selector,
-.btn-group {
-    display: inline-block;
-}
-
+.timezone,
 date-selector,
 date-range-selector {
-    margin-right: 1em;
+    display: block;
+    margin-bottom: 1em;
+    width: 100%;
+
+    @media (min-width: $screen-sm-min) {
+        width: unset;
+    }
 }
 
-.btn-group {
+.buttons {
     display: flex;
-    flex-flow: row nowrap;
+    flex-flow: row wrap;
     justify-content: space-between;
+    width: 100%;
+
+    @media (min-width: $screen-sm-min) {
+        display: block;
+        width: unset;
+    }
+}
+
+.button {
+    @extend .btn, .btn-default;
+    flex: 1;
+    margin-bottom: 1em;
 }

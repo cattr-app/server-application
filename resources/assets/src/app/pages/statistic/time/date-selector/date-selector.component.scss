@@ -2,11 +2,9 @@
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
 .form-control {
-    max-width: 150px;
-}
-
-.form-inline.week .form-control {
-    max-width: 200px;
+    @media (min-width: $screen-sm-min) {
+        max-width: 150px;
+    }
 }
 
 .input-group {
