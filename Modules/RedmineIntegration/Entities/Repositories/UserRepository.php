@@ -45,6 +45,21 @@ class UserRepository
     }
 
     /**
+     * Returns user's redmine statuses saved in properties table
+     *
+     * @param $userId User's id in our system
+     * @return array Redmine statuses
+     */
+    public function getUserRedmineStatuses(int $userId): array
+    {
+        $redmineStatusesProperty = Property::where('entity_id', '=', $userId)
+            ->where('entity_type', '=', Property::USER_CODE)
+            ->where('name', '=', 'REDMINE_STATUSES')->first();
+
+        return $redmineStatusesProperty ? unserialize($redmineStatusesProperty->value) : [];
+    }
+
+    /**
      * Returns user's redmine tasks
      *
      * @param int $userId
