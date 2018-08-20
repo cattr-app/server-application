@@ -7,10 +7,11 @@
         </span>
 
         <input #dateInput type="text" class="form-control"
-            [dpDayPicker]="{ format: _dateFormat, firstDayOfWeek: 'mo', max: max }"
-            [mode]="_mode" [(ngModel)]="_date" (onChange)="change($event)" />
+            [(ngModel)]="_inputDate" (click)="datePicker.api.open()" />
 
-        <p class="end_date" [innerHTML]="endDate"></p>
+        <dp-date-picker #datePicker [config]="{ format: dateFormat, firstDayOfWeek: 'mo', max: max }"
+            [mode]="_mode" [(ngModel)]="_date" (onChange)="change($event)">
+        </dp-date-picker>
 
         <span class="input-group-btn">
             <button (click)="next()" type="button" class="btn btn-default" aria-label="next">

@@ -1,5 +1,5 @@
-import { Component, ViewChild, ElementRef, Input, Output, EventEmitter } from '@angular/core';
-import { DatePickerDirective } from 'ng2-date-picker';
+import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, OnInit } from '@angular/core';
+import { DatePickerComponent } from 'ng2-date-picker';
 import * as moment from 'moment';
 
 @Component({
@@ -7,8 +7,9 @@ import * as moment from 'moment';
     templateUrl: './date-selector.component.html',
     styleUrls: ['./date-selector.component.scss']
 })
-export class DateSelectorComponent {
-    @ViewChild('dateInput') dateInput: DatePickerDirective;
+export class DateSelectorComponent implements OnInit {
+    @ViewChild('dateInput') dateInput: ElementRef;
+    @ViewChild('datePicker') datePicker: DatePickerComponent;
 
     @Input() dateFormat: string = 'YYYY-MM-DD';
     @Input() mode: string = 'day';
@@ -18,21 +19,13 @@ export class DateSelectorComponent {
 
     readonly max: moment.Moment = moment.utc().add(1, 'day');
 
-    protected get _dateFormat(): string {
-        if (this.mode === 'month') {
-            return 'YYYY MMMM';
-        }
-
-        return this.dateFormat;
-    }
-
     protected get _date(): string {
-        return this.date.format(this._dateFormat);
+        return this.date.format(this.dateFormat);
     }
 
     protected set _date(value: string) {
-        if (moment(value, this._dateFormat, true).isValid()) {
-            let date = moment.utc(value, this._dateFormat).startOf('day');
+        if (moment(value, this.dateFormat, true).isValid()) {
+            let date = moment.utc(value, this.dateFormat).startOf('day');
             if (date.diff(this.max) > 0) {
                 date = this.max.clone();
             }
@@ -42,6 +35,45 @@ export class DateSelectorComponent {
             } else if (this.mode === 'week') {
                 this.date = date.startOf('week').add(1, 'day');
             } else if (this.mode === 'month') {
+                this.date = date.startOf('month');
+            }
+        }
+    }
+
+    protected get _inputDate(): string {
+        if (this.mode === 'week') {
+            return this.date.format('YYYY-MM-DD') + ' - ' + this.date.clone().add(6, 'days').format('YYYY-MM-DD');
+        } else if (this.mode === 'month') {
+            return this.date.format('YYYY MMMM');
+        } else {
+            return this.date.format(this.dateFormat);
+        }
+    }
+
+    protected set _inputDate(value: string) {
+        if (this.mode === 'day') {
+            if (moment(value, this.dateFormat, true).isValid()) {
+                let date = moment.utc(value, this.dateFormat).startOf('day');
+                if (date.diff(this.max) > 0) {
+                    date = this.max.clone();
+                }
+                this.date = date;
+            }
+        } else if (this.mode === 'week') {
+            const val = value.split(' - ')[0];
+            if (moment(val, this.dateFormat, true).isValid()) {
+                let date = moment.utc(val, this.dateFormat).startOf('day');
+                if (date.diff(this.max) > 0) {
+                    date = this.max.clone();
+                }
+                this.date = date.startOf('week').add(1, 'day');
+            }
+        } else if (this.mode === 'month') {
+            if (moment(value, 'YYYY MMMM', true).isValid()) {
+                let date = moment.utc(value, 'YYYY MMMM').startOf('day');
+                if (date.diff(this.max) > 0) {
+                    date = this.max.clone();
+                }
                 this.date = date.startOf('month');
             }
         }
@@ -57,6 +89,10 @@ export class DateSelectorComponent {
         } else {
             return '';
         }
+    }
+
+    ngOnInit() {
+        this.datePicker.appendToElement = this.dateInput.nativeElement;
     }
 
     change(value) {
