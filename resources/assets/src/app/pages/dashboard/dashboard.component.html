@@ -4,8 +4,14 @@
             <div class="panel panel-default">
                 <div class="panel-heading" translate>navigation.dashboard</div>
                 <div class="panel-body">
-                  <dashboard-tasklist></dashboard-tasklist>
-                  <dashboard-screenshotlist></dashboard-screenshotlist>
+                    <div *ngIf="userIsManager">
+                        <app-statistic-time></app-statistic-time>
+                    </div>
+
+                    <div *ngIf="!userIsManager">
+                        <dashboard-tasklist></dashboard-tasklist>
+                        <dashboard-screenshotlist></dashboard-screenshotlist>
+                    </div>
                 </div>
             </div>
         </div>

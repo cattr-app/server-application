@@ -10,6 +10,7 @@ import {UsersCreateComponent} from './create/users.create.component';
 import {UsersEditComponent} from './edit/users.edit.component';
 import {UsersShowComponent} from './show/users.show.component';
 import {UsersListComponent} from './list/users.list.component';
+import {UsersAttachedUsersComponent} from './users/users.attached-users.component';
 
 import {HttpClientModule} from '@angular/common/http';
 import {UsersService} from './users.service';
@@ -18,6 +19,7 @@ import {GrowlModule} from 'primeng/growl';
 import {NgSelectModule} from '@ng-select/ng-select';
 import {TimezonePickerModule} from 'ng2-timezone-selector';
 import {TranslateModule} from '@ngx-translate/core';
+import {SharedModule} from '../../shared.module';
 
 @NgModule({
     imports: [
@@ -30,12 +32,14 @@ import {TranslateModule} from '@ngx-translate/core';
         NgSelectModule,
         TimezonePickerModule,
         TranslateModule,
+        SharedModule
     ],
     declarations: [
         UsersCreateComponent,
         UsersEditComponent,
         UsersListComponent,
         UsersShowComponent,
+        UsersAttachedUsersComponent,
     ],
     providers: [
         LoginService,

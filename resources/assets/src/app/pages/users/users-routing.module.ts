@@ -4,12 +4,14 @@ import {UsersCreateComponent} from './create/users.create.component';
 import {UsersEditComponent} from './edit/users.edit.component';
 import {UsersShowComponent} from './show/users.show.component';
 import {UsersListComponent} from './list/users.list.component';
+import {UsersAttachedUsersComponent} from './users/users.attached-users.component';
 
 export const AuthRoutes: Routes = [
     {path: 'create', component: UsersCreateComponent},
     {path: 'edit/:id', component: UsersEditComponent},
     {path: 'list', component: UsersListComponent},
     {path: 'show/:id', component: UsersShowComponent},
+    {path: 'attached-users/:id', component: UsersAttachedUsersComponent},
     {path: '', redirectTo: 'login', pathMatch: 'full'},
 ];
 

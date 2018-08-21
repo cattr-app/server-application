@@ -156,6 +156,13 @@ class SynchronizeTasks extends Command
         $changedTasksCounter = 0;
         $synchronizedTasks = [];
 
+        $active_statuses = array_filter($this->userRepo->getUserRedmineStatuses($userId), function ($status) {
+            return $status['is_active'] === true;
+        });
+        $active_status_ids = array_map(function ($status) {
+            return $status['id'];
+        }, $active_statuses);
+
         foreach ($tasks as $taskFromRedmine) {
             $synchronizedTasks[] = $taskFromRedmine['id'];
 
@@ -165,23 +172,26 @@ class SynchronizeTasks extends Command
                 ['value', '=', $taskFromRedmine['id']]
             ])->first();
 
-            //if task already exists => check task's assigned user
+            //if task already exists => check if task's properties is changed
             if ($taskExist != null) {
                 $task = Task::find($taskExist->entity_id);
+                $is_changed = false;
+                $data = [
+                    'task_name'   => $taskFromRedmine['subject'],
+                    'description' => $taskFromRedmine['description'],
+                    'active'      => in_array($taskFromRedmine['status']['id'], $active_status_ids),
+                    'user_id'     => $userId,
+                ];
 
-                //if task assigned to other user in our system => set current user to task's user
-                if ($task->user_id != $userId) {
-                    $task->user_id = $userId;
-                    $task->save();
-
-                    $changedTasksCounter++;
+                foreach ($data as $key => $value) {
+                    if ($task->$key !== $value) {
+                        $task->$key = $value;
+                        $is_changed = true;
+                    }
                 }
 
-                //if task is inactive in our system => activate task in our system
-                if ($task->active == 0) {
-                    $task->active = 1;
+                if ($is_changed) {
                     $task->save();
-
                     $changedTasksCounter++;
                 }
 
@@ -201,7 +211,7 @@ class SynchronizeTasks extends Command
                     'project_id'  => $projectProperty->entity_id,
                     'task_name'   => $taskFromRedmine['subject'],
                     'description' => $taskFromRedmine['description'],
-                    'active'      => $taskFromRedmine['status']['id'],
+                    'active'      => in_array($taskFromRedmine['status']['id'], $active_status_ids),
                     'user_id'     => $userId,
                     'assigned_by' => 1,
                     'url'         => 'url',

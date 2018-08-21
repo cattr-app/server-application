@@ -2,6 +2,12 @@ import {ApiService} from '../../api/api.service';
 import { Component, OnInit } from '@angular/core';
 import {Message} from 'primeng/components/common/api';
 
+interface RedmineStatus {
+    id: number;
+    name: string;
+    is_active: boolean;
+}
+
 @Component({
     selector: 'app-integrations',
     templateUrl: './integrations.component.html',
@@ -12,6 +18,7 @@ export class IntegrationsComponent implements OnInit {
     msgs: Message[] = [];
     redmineUrl : string;
     redmineApiKey : string;
+    redmineStatuses: RedmineStatus[] = [];
 
     constructor(private api: ApiService) { }
 
@@ -20,7 +27,11 @@ export class IntegrationsComponent implements OnInit {
     }
 
     onSubmit() {
-        this.api.sendSettings({'redmine_url': this.redmineUrl, 'redmine_key' : this.redmineApiKey},  this.redmineUpdateCallback.bind(this))
+        this.api.sendSettings({
+            'redmine_url': this.redmineUrl,
+            'redmine_key' : this.redmineApiKey,
+            'redmine_statuses' : this.redmineStatuses,
+        },  this.redmineUpdateCallback.bind(this));
     }
 
     synchronizeProjects() {
@@ -34,6 +45,7 @@ export class IntegrationsComponent implements OnInit {
     getSettingsCallback(result) {
         this.redmineUrl = result.redmine_url;
         this.redmineApiKey = result.redmine_api_key;
+        this.redmineStatuses = result.redmine_statuses;
     }
 
     redmineUpdateCallback(result) {

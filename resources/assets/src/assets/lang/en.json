@@ -111,6 +111,7 @@
 		"user": "User",
 		"project": "Project",
 		"time": "Time",
+		"fullname": "Full Name",
 		"firstname": "First Name",
 		"lastname": "Last Name",
 		"email": "E-mail",
@@ -125,7 +126,7 @@
 		"webcam-shots": "Webcam shots",
 		"screenshots-interval": "Screenshots Interval",
 		"role": "Role",
-		"timezone": "timezone",
+		"timezone": "Timezone",
 		"password": "Password",
 		"id": "Id"
 	}

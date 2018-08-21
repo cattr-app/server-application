@@ -111,6 +111,7 @@
 		"user": "Пользователь",
 		"project": "Проект",
 		"time": "Время",
+		"fullname": "Полное имя",
 		"firstname": "Имя",
 		"lastname": "Фамилия",
 		"email": "E-mail",

@@ -12,9 +12,9 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { DashboardComponent } from './dashboard.component';
 import { TaskListComponent } from './tasklist/tasks.list.component';
 import { ScreenshotListComponent } from './screenshotlist/screenshot.list.component';
+
 import {TranslateModule} from '@ngx-translate/core';
-
-
+import { StatisticModule } from '../statistic/statistic.module';
 
 @NgModule({
   imports: [
@@ -24,6 +24,7 @@ import {TranslateModule} from '@ngx-translate/core';
     HttpClientModule,
     NgxPaginationModule,
     TranslateModule,
+    StatisticModule,
   ],
   declarations: [
     DashboardComponent,

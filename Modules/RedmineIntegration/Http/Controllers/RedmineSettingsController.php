@@ -25,6 +25,7 @@ class RedmineSettingsController extends AbstractRedmineController
         return [
             'redmine_url' => 'required',
             'redmine_key' => 'required',
+            'redmine_statuses' => 'required',
         ];
     }
 
@@ -83,6 +84,17 @@ class RedmineSettingsController extends AbstractRedmineController
             )
         );
 
+        Property::updateOrCreate(
+            [
+                'entity_id'   => $user->id,
+                'entity_type' => Property::USER_CODE,
+                'name'        => 'REDMINE_STATUSES',
+            ],
+            [
+                'value' => serialize($request->redmine_statuses),
+            ]
+        );
+
         //If user hasn't a redmine id in our system => mark user as NEW
         $userRedmineId = $userRepository->getUserRedmineId($user->id);
 
@@ -109,8 +121,9 @@ class RedmineSettingsController extends AbstractRedmineController
         $userId = auth()->user()->id;
 
         $settingsArray = [
-            'redmine_url'     => $userRepository->getUserRedmineUrl($userId),
-            'redmine_api_key' => $userRepository->getUserRedmineApiKey($userId)
+            'redmine_url'      => $userRepository->getUserRedmineUrl($userId),
+            'redmine_api_key'  => $userRepository->getUserRedmineApiKey($userId),
+            'redmine_statuses' => $userRepository->getUserRedmineStatuses($userId),
         ];
 
         return response()->json(
