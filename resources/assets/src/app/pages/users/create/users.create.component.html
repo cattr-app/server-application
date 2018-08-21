@@ -11,11 +11,12 @@
                         </button>
                     </a>
                     <div class="create-form">
-                        <form (ngSubmit)="onSubmit()">
+                        <form (ngSubmit)="onSubmit()" #form="ngForm">
                             <div class="form-group row">
                                 <label class="col-md-2">Full Name</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="full_name?.invalid && (full_name.dirty || full_name.touched)">
+                                    [class.has-error]="full_name?.invalid && (full_name.dirty || full_name.touched)"
+                                    [class.has-success]="full_name?.valid && (full_name.dirty || full_name.touched)">
                                     <input type="text" class="form-control" name="user-full-name"
                                         [(ngModel)]="item.full_name" #full_name="ngModel" required>
                                     <span class="help-block">Required field</span>
@@ -41,9 +42,21 @@
                             <div class="form-group row">
                                 <label class="col-md-2">Email</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="email?.invalid && (email.dirty || email.touched)">
+                                    [class.has-error]="email?.invalid && (email.dirty || email.touched)"
+                                    [class.has-success]="email?.valid && (email.dirty || email.touched)">
                                     <input type="text" class="form-control" name="user-email"
                                         [(ngModel)]="item.email" #email="ngModel" required>
+                                    <span class="help-block">Required field</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-md-2">Password</label>
+                                <div class="col-md-10"
+                                    [class.has-error]="password?.invalid && (password.dirty || password.touched)"
+                                    [class.has-success]="password?.valid && (password.dirty || password.touched)">
+                                    <input type="text" class="form-control" name="user-password"
+                                        [(ngModel)]="item.password" #password="ngModel" required>
                                     <span class="help-block">Required field</span>
                                 </div>
                             </div>
@@ -67,9 +80,13 @@
                             <div class="form-group row">
                                 <label class="col-md-2">Active</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="active?.invalid && (active.dirty || active.touched)">
-                                    <input type="checkbox" class="form-control" name="user-active"
+                                    [class.has-error]="active?.invalid && (active.dirty || active.touched)"
+                                    [class.has-success]="active?.valid && (active.dirty || active.touched)">
+                                    <select class="form-control" name="user-active"
                                         [(ngModel)]="item.active" #active="ngModel" required>
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
                                     <span class="help-block">Required field</span>
                                 </div>
                             </div>
@@ -77,12 +94,13 @@
                             <div class="form-group row">
                                 <label class="col-md-2">Role ID</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="role?.invalid && (role.dirty || role.touched)">
-                                    <input type="text" class="form-control" name="user-role-id"
+                                    [class.has-error]="role?.invalid && (role.dirty || role.touched)"
+                                    [class.has-success]="role?.valid && (role.dirty || role.touched)">
+                                    <select class="form-control" name="user-role-id"
                                         [(ngModel)]="item.role_id" #role="ngModel" required>
-                                    <!--<select class="form-control" name="user-role-id" [(ngModel)]="item.role_id" required>
-                                        <option value="0">Test</option>
-                                    </select>-->
+                                        <option value="" default></option>
+                                        <option *ngFor="let role of roles" [attr.value]="role.id">{{ role.name }}</option>
+                                    </select>
                                     <span class="help-block">Required field</span>
                                 </div>
                             </div>
@@ -90,9 +108,13 @@
                             <div class="form-group row">
                                 <label class="col-md-2">Screenshots Active</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="screenshots?.invalid && (screenshots.dirty || screenshots.touched)">
-                                    <input type="checkbox" class="form-control" name="user-screenshots-active"
-                                        [(ngModel)]="item.screenshots_active" #screenshots="ngModel" required>
+                                    [class.has-error]="screenshots_active?.invalid && (screenshots_active.dirty || screenshots_active.touched)"
+                                    [class.has-success]="screenshots_active?.valid && (screenshots_active.dirty || screenshots_active.touched)">
+                                    <select class="form-control" name="user-screenshots-active"
+                                        [(ngModel)]="item.screenshots_active" #screenshots_active="ngModel" required>
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
                                     <span class="help-block">Required field</span>
                                 </div>
                             </div>
@@ -100,15 +122,19 @@
                             <div class="form-group row">
                                 <label class="col-md-2">Manual time</label>
                                 <div class="col-md-10">
-                                    <input type="checkbox" class="form-control" name="user-manual-time"
-                                        [(ngModel)]="item.manual_time">
+                                    <select class="form-control" name="user-manual-time"
+                                        [(ngModel)]="item.manual_time" #manual_time="ngModel" required>
+                                        <option value="0">No</option>
+                                        <option value="1">Yes</option>
+                                    </select>
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-2">Screenshots Interval</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="screenshots_interval?.invalid && (screenshots_interval.dirty || screenshots_interval.touched)">
+                                    [class.has-error]="screenshots_interval?.invalid && (screenshots_interval.dirty || screenshots_interval.touched)"
+                                    [class.has-success]="screenshots_interval?.valid && (screenshots_interval.dirty || screenshots_interval.touched)">
                                     <input type="text" class="form-control" name="user-screenshots-interval"
                                         [(ngModel)]="item.screenshots_interval" #screenshots_interval="ngModel" required>
                                     <span class="help-block">Required field</span>
@@ -127,79 +153,17 @@
                                 </div>
                             </div>
 
-                            <!--<div class="form-group row">
-                                <label class="col-md-2">Company Id</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-company_id" [(ngModel)]="item.company_id">
-                                </div>
+                            <div *ngIf="form?.invalid" class="alert alert-danger" role="alert">
+                                <p *ngIf="full_name.errors">Full name is required</p>
+                                <p *ngIf="email.errors">Email is required</p>
+                                <p *ngIf="password.errors">Password is required</p>
+                                <p *ngIf="active.errors">Active is required</p>
+                                <p *ngIf="role.errors">Role ID is required</p>
+                                <p *ngIf="screenshots_active.errors">Screenshots Active is required</p>
+                                <p *ngIf="screenshots_interval.errors">Screenshots Interval is required</p>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Level</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-level" [(ngModel)]="item.level">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Payroll Access</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-payroll-access" [(ngModel)]="item.payroll_access">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Billing Access</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-billing-access" [(ngModel)]="item.billing_access">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Permanent tasks</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-permanent-tasks" [(ngModel)]="item.permanent_tasks">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Computer time popup</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-computer-time-popup" [(ngModel)]="item.computer_time_popup">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Poor time popup</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-poor-time-popup" [(ngModel)]="item.poor_time_popup">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Blur screenshots</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-blur-screenshots" [(ngModel)]="item.blur_screenshots">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Web and app monitoring</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-web-and-app-monitoring" [(ngModel)]="item.web_and_app_monitoring">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Webcam Shots</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-webcam-shots" [(ngModel)]="item.webcam_shots">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">User role value</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-user-role-value" [(ngModel)]="item.user_role_value">
-                                </div>
-                            </div>
-                            <div class="form-group row">
-                                <label class="col-md-2">Password</label>
-                                <div class="col-md-10">
-                                    <input type="password" class="form-control" name="user-password" [(ngModel)]="item.password">
-                                </div>
-                            </div>-->
-                            <button type="submit" class="btn btn-primary">Create</button>
+
+                            <button type="submit" class="btn btn-primary" [disabled]="form?.invalid">Create</button>
                         </form>
                     </div>
                 </div>

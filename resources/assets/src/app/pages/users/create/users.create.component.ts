@@ -1,11 +1,12 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {User} from '../../../models/user.model';
 import {Router} from '@angular/router';
 import {UsersService} from '../users.service';
 import {ItemsCreateComponent} from '../../items.create.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
-
+import { RolesService } from '../../roles/roles.service';
+import { Role } from '../../../models/role.model';
 
 @Component({
     selector: 'app-users-create',
@@ -13,21 +14,25 @@ import {AllowedActionsService} from '../../roles/allowed-actions.service';
     styleUrls: ['../../items.component.scss']
 })
 export class UsersCreateComponent extends ItemsCreateComponent implements OnInit {
-
     public item: User = new User();
+    public roles: Role[] = [];
 
     constructor(api: ApiService,
                 userService: UsersService,
                 router: Router,
-                allowedService: AllowedActionsService, ) {
+                allowedService: AllowedActionsService,
+                protected rolesService: RolesService) {
         super(api, userService, router, allowedService);
     }
 
     ngOnInit() {
         super.ngOnInit();
         this.item.manual_time = 0;
-        this.item.screenshots_interval = 500;
+        this.item.screenshots_interval = 300;
         this.item.timezone = '';
+        this.rolesService.getItems(items => {
+            this.roles = items;
+        });
     }
 
     prepareData() {
@@ -44,20 +49,7 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
             'manual_time': this.item.manual_time,
             'screenshots_interval': this.item.screenshots_interval,
             'timezone': this.item.timezone,
-
             'password': this.item.password,
-
-            /*'company_id': this.item.company_id,
-            'level': this.item.level,
-            'payroll_access': this.item.payroll_access,
-            'billing_access': this.item.billing_access,
-            'permanent_tasks': this.item.permanent_tasks,
-            'computer_time_popup': this.item.computer_time_popup,
-            'poor_time_popup': this.item.poor_time_popup,
-            'blur_screenshots': this.item.blur_screenshots,
-            'web_and_app_monitoring': this.item.web_and_app_monitoring,
-            'webcam_shots': this.item.webcam_shots,
-            'user_role_value': this.item.user_role_value,*/
         };
     }
 }
