@@ -397,6 +397,7 @@ export class StatisticTimeComponent implements OnInit {
                     type: 'timeline',
                     duration: { days: 1 },
                     slotDuration: { hours: 1 },
+                    slotWidth: 50,
                     buttonText: 'Day',
                 },
                 timelineWeek: {
@@ -428,7 +429,6 @@ export class StatisticTimeComponent implements OnInit {
                 },
             },
             refetchResourcesOnNavigate: false,
-            resourceAreaWidth: '300px',
             resourceColumns: [
                 {
                     labelText: '',
@@ -438,7 +438,7 @@ export class StatisticTimeComponent implements OnInit {
                 {
                     labelText: 'Name',
                     field: 'title',
-                    width: '140px',
+                    width: '120px',
                 },
                 {
                     labelText: 'Time Worked',
