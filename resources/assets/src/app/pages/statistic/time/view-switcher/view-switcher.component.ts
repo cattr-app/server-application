@@ -22,7 +22,7 @@ export class ViewSwitcherComponent implements OnInit {
     start: moment.Moment = moment.utc();
     end: moment.Moment = moment.utc().add(1, 'day');
 
-    timezone: string = 'UTC';
+    timezone: string = 'Asia/Omsk';
 
     userInteraction: boolean = false;
     viewName: string = 'timelineDay';
@@ -38,7 +38,7 @@ export class ViewSwitcherComponent implements OnInit {
 
         let timezone = localStorage.getItem('statistics-timezone');
         if (timezone === null) {
-            timezone = user.timezone !== null ? user.timezone : 'UTC';
+            timezone = user.timezone !== null ? user.timezone : 'Asia/Omsk';
         }
 
         this.timezone = timezone;
