@@ -170,7 +170,17 @@
                                     <input type="password" class="form-control" name="user-password" [(ngModel)]="item.password">
                                 </div>
                             </div>
-                            <button type="submit" class="btn btn-primary">control.update</button>
+
+                            <div class="form-group row">
+                                <label class="col-md-2" translate>field.projects</label>
+                                <div class="col-md-10">
+                                    <dual-list [source]="projects" [(destination)]="userProjects"
+                                        [format]="dualListFormat" sort="true"
+                                        key="id" filter="true" display="name" height="250px"></dual-list>
+                                </div>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary" translate>control.update</button>
                         </form>
                     </div>
                 </div>
