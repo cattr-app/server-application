@@ -34,8 +34,8 @@
     },
     "scripts": {
         "project:update": [
-            "git pull",
             "@composer update",
+	    "@php artisan migrate",
             "npm install",
             "npm run build",
             "@config:update"
