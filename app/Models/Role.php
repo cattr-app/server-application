@@ -8,6 +8,7 @@ use App\User;
 use Filter;
 use Auth;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
@@ -52,6 +53,14 @@ class Role extends Model
     public function rules(): HasMany
     {
         return $this->hasMany(Rule::class, 'role_id');
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'projects_roles', 'role_id', 'project_id');
     }
 
     /**

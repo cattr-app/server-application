@@ -30,6 +30,14 @@
                                            [display]="displayUsers" [(destination)]="confirmedUsers" [format]="format" [height]="height"></dual-list>
                             </div>
                             <br>
+
+                            <div *ngIf="can('/projects/bulk-edit')" class="col-12">
+                                <h1 translate>field.projects</h1>
+                                <dual-list [sort]="keepSorted" [source]="sourceProjects" [key]="key" [filter]="filter"
+                                           [display]="displayProjects" [(destination)]="confirmedProjects" [format]="format" [height]="height"></dual-list>
+                            </div>
+                            <br>
+
                             <button type="submit" class="btn btn-primary" translate>control.update</button>
                         </form>
                     </div>

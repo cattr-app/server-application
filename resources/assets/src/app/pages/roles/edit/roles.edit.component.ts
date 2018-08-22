@@ -2,6 +2,7 @@ import {Component, OnInit, IterableDiffers} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
 import {Role} from '../../../models/role.model';
+import { Project } from '../../../models/project.model';
 import {User} from '../../../models/user.model';
 
 import {ItemsEditComponent} from '../../items.edit.component';
@@ -13,7 +14,9 @@ import {RulesService} from '../rules.service';
 import {UsersService} from '../../users/users.service';
 import {AllowedActionsService} from '../allowed-actions.service';
 import {TranslateService} from '@ngx-translate/core';
+import { ProjectsService } from '../../projects/projects.service';
 
+type RoleWithProjects = Role & { projects?: Project[] };
 
 @Component({
     selector: 'app-roles-edit',
@@ -22,21 +25,25 @@ import {TranslateService} from '@ngx-translate/core';
 })
 export class RolesEditComponent extends ItemsEditComponent implements OnInit {
 
-    public item: Role = new Role();
+    public item: RoleWithProjects = new Role();
     user: User;
     sourceRules: any = [];
     confirmedRules: any = [];
     sourceUsers: any = [];
     confirmedUsers: any = [];
+    sourceProjects: Project[] = [];
+    confirmedProjects: Project[] = [];
     key = 'id';
-    displayRules: any = 'name';
-    displayUsers: any = 'full_name';
+    displayRules = 'name';
+    displayUsers = 'full_name';
+    displayProjects = 'name';
     keepSorted = true;
     filter = true;
     height = '250px';
     format: any = DualListComponent.DEFAULT_FORMAT;
     differUsers: any;
     differRules: any;
+    differProjects: any;
 
     constructor(api: ApiService,
                 roleService: RolesService,
@@ -45,11 +52,13 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
                 translate: TranslateService,
                 protected allowedService: AllowedActionsService,
                 protected ruleService: RulesService,
+                protected projectsService: ProjectsService,
                 protected usersService: UsersService,
                 differs: IterableDiffers) {
         super(api, roleService, activatedRoute, router, allowedService);
         this.differUsers = differs.find([]).create(null);
         this.differRules = differs.find([]).create(null);
+        this.differProjects = differs.find([]).create(null);
 
         translate.get('control.add').subscribe((res: string) => { this.format.add = res});
         translate.get('control.remove').subscribe((res: string) => { this.format.remove = res});
@@ -64,10 +73,21 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
     }
 
     ngOnInit() {
-        super.ngOnInit();
+        this.sub = this.activatedRoute.params.subscribe(params => {
+            this.id = +params['id'];
+        });
+
+        this.itemService.getItem(this.id, this.setItem.bind(this), {'with': 'projects'});
         this.usersService.getItems(this.UsersUpdate.bind(this));
         this.ruleService.getActions(this.ActionsUpdate.bind(this));
+        this.projectsService.getItems(this.ProjectsUpdate.bind(this));
         this.UserUpdate();
+    }
+
+    setItem(result) {
+        super.setItem(result);
+        this.confirmedProjects = this.item.projects;
+        this.differProjects.diff(this.confirmedProjects);
     }
 
     onSubmit() {
@@ -75,8 +95,11 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
         const id = this.id;
         const rules = [];
         const users = [];
+        const addProjects = [];
+        const removeProjects = [];
         const RulesChanges = this.differRules.diff(this.confirmedRules);
         const UserChanges = this.differUsers.diff(this.confirmedUsers);
+        const ProjectsChanges = this.differProjects.diff(this.confirmedProjects);
 
         if (UserChanges) {
             UserChanges.forEachAddedItem((record) => {
@@ -106,6 +129,30 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
 
         if (rules.length > 0) {
             this.ruleService.editItems(id, rules, this.editBulkCallback.bind(this, 'Rules'), this.errorCallback.bind(this));
+        }
+
+        if (ProjectsChanges) {
+            ProjectsChanges.forEachAddedItem((record) => {
+                addProjects.push({
+                    'role_id': this.id,
+                    'project_id': record.item.id,
+                });
+            });
+
+            ProjectsChanges.forEachRemovedItem((record) => {
+                removeProjects.push({
+                    'role_id': this.id,
+                    'project_id': record.item.id,
+                });
+            });
+        }
+
+        if (addProjects.length > 0) {
+            this.projectsService.createRoles(addProjects, this.editBulkCallback.bind(this, 'Roles'));
+        }
+
+        if (removeProjects.length > 0) {
+            this.projectsService.removeRoles(removeProjects, this.editBulkCallback.bind(this, 'Roles'));
         }
     }
 
@@ -167,5 +214,9 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
                 return user.role_id === id;
             });
         this.differUsers.diff(this.confirmedUsers);
+    }
+
+    ProjectsUpdate(result) {
+        this.sourceProjects = result;
     }
 }

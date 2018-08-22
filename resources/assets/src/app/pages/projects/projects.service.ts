@@ -22,9 +22,7 @@ export class ProjectsService extends ItemsService {
         this.api.send(
             this.getApiPath() + '-users/bulk-create',
             {'relations': items},
-            (result) => {
-                callback(result);
-            },
+            result => callback(result),
             errorCallback ? errorCallback : this.api.errorCallback.bind(this)
         );
     }
@@ -33,11 +31,26 @@ export class ProjectsService extends ItemsService {
         this.api.send(
             this.getApiPath() + '-users/bulk-remove',
             {'relations': items},
-            (result) => {
-                callback(result);
-            },
+            result => callback(result),
             errorCallback ? errorCallback : this.api.errorCallback.bind(this)
         );
     }
 
+    createRoles(items, callback, errorCallback ?: null) {
+        this.api.send(
+            this.getApiPath() + '-roles/bulk-create',
+            {'relations': items},
+            result => callback(result),
+            errorCallback ? errorCallback : this.api.errorCallback.bind(this)
+        );
+    }
+
+    removeRoles(items, callback, errorCallback ?: null) {
+        this.api.send(
+            this.getApiPath() + '-roles/bulk-remove',
+            {'relations': items},
+            result => callback(result),
+            errorCallback ? errorCallback : this.api.errorCallback.bind(this)
+        );
+    }
 }

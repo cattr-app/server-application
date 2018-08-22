@@ -5,6 +5,7 @@ import {AuthRoute} from './projects-routing.module';
 import {UsersService} from '../users/users.service';
 import {LoginService} from '../../auth/login/login.service';
 import {ProjectsService} from './projects.service';
+import { RolesService } from '../roles/roles.service';
 
 import {ProjectsCreateComponent} from './create/projects.create.component';
 import {ProjectsEditComponent} from './edit/projects.edit.component';
@@ -41,6 +42,7 @@ import {TranslateModule} from '@ngx-translate/core';
     providers: [
         LoginService,
         ProjectsService,
+        RolesService,
         UsersService
     ]
 })

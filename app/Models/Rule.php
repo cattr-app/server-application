@@ -69,6 +69,14 @@ class Rule extends Model
                 'bulk-remove' => __('Project User relation multiple remove'),
                 'full_access' => __('Project User relation full access'),
             ],
+            'projects-roles' => [
+                'list' => __('Project Role relation list'),
+                'create' => __('Project Role relation create'),
+                'bulk-create' => __('Project Role relation multiple create'),
+                'remove' => __('Project Role relation remove'),
+                'bulk-remove' => __('Project Role relation multiple remove'),
+                'full_access' => __('Project Role relation full access'),
+            ],
             'tasks' => [
                 'list' => __('Task list'),
                 'dashboard' => __('Task list at dashboard'),

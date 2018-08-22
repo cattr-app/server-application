@@ -65,6 +65,14 @@ class Project extends Model
     }
 
     /**
+     * @return BelongsToMany
+     */
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'projects_roles', 'project_id', 'role_id');
+    }
+
+    /**
      * @return HasMany
      */
     public function tasks(): HasMany
