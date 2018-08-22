@@ -8,68 +8,31 @@
                     <br/>
                     <app-projects-filters *ngIf="can('/projects/relations')" [(projectId)]="projectId"></app-projects-filters>
                     <br/>
-                    <!--<a *ngIf="can('/screenshots/create')" routerLink="/screenshots/create" class="btn btn-success" title="Add new screenshot">-->
-                        <!--<i class="fa fa-plus" aria-hidden="true"></i> Add New-->
-                    <!--</a>-->
-                    <!--<br/>-->
-                    <br/>
-                    <div class="table-responsive">
-                        <table class="table table-borderless">
-                            <thead>
-                            <tr>
-                                <th translate>field.id</th>
-                                <th translate>field.task</th>
-                                <th translate>field.user</th>
-                                <th translate>control.preview</th>
-                                <th translate>control.actions</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr *ngFor="let screenshot of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
-                                <td>{{screenshot.id}}</td>
-                                <td>{{screenshot.time_interval.task && screenshot.time_interval.task.task_name}}</td>
-                                <td>{{screenshot.time_interval.user && screenshot.time_interval.user.full_name}}</td>
-                                <td><img class="preview" src="{{screenshot.path}}"></td>
-                                <td>
-                                    <a *ngIf="can('/screenshots/show')" [routerLink]="['/screenshots/show', screenshot.id]" title="View screenshot">
-                                        <button class="btn btn-info btn-sm">
-                                            <i class="fa fa-eye" aria-hidden="true"></i>
-                                            <span translate>control.view</span>
-                                        </button>
-                                    </a>
-                                    <!--<a *ngIf="can('/screenshots/edit')" [routerLink]="['/screenshots/edit', screenshot.id]" title="Edit screenshot">-->
-                                        <!--<button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"-->
-                                                                                  <!--aria-hidden="true"></i>-->
-                                            <!--Edit-->
-                                        <!--</button>-->
-                                    <!--</a>-->
-                                    <a *ngIf="can('/screenshots/remove')" (click)="openRemoveItemModalWindow(template, screenshot.id)" title="Delete screenshot">
-                                        <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
-                                                                                 aria-hidden="true"></i>
-                                            <span translate>control.delete</span>
-                                        </button>
-                                    </a>
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
-                        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+
+                    <div class="row" *ngFor="let group of itemsChunked">
+                        <div class="col-md-2" *ngFor="let screenshot of group">
+                            <div class="card">
+                                <input type="checkbox" class="select_image">
+                                <img class="card-img-top" src="{{ screenshot.path }}" onerror="this.src='uploads/none.png'" alt="image">
+                                <div class="card-body">
+                                    <p class="card-text">
+                                        <span>{{ screenshot.time_interval && minutes(screenshot.time_interval.start_at) }}</span>
+                                        <span>{{ screenshot.time_interval && screenshot.time_interval.task && screenshot.time_interval.task.task_name }}</span>
+                                        <span>{{ screenshot.time_interval && screenshot.time_interval.task && screenshot.time_interval.task.project && screenshot.time_interval.task.project.name }}</span>
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    <div class="loading" #loading>
+                        <div *ngIf="countFail <= 3">
+                            <p class="h2">...</p>
+                            <p class="h2" translate>dashboard.auto-loading</p>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
-<ng-template #template>
-    <div class="modal-header">
-        <h4 class="modal-title pull-left" translate>screenshot.remove</h4>
-        <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
-            <span aria-hidden="true">&times;</span>
-        </button>
-    </div>
-    <div class="modal-body">
-        <button type="button" class="btn btn-default" (click)="removeItem()" translate>control.yes</button>
-        <button type="button" class="btn btn-primary" (click)="modalRef.hide()" translate>control.no</button>
-    </div>
-</ng-template>
-
