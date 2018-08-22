@@ -22,21 +22,21 @@ export class DateRangeSelectorComponent {
 
     readonly max: moment.Moment = moment.utc().add(1, 'day');
 
-    protected get _startDate(): string {
+    get _startDate(): string {
         return this.startDate.format(this.dateFormat);
     }
 
-    protected set _startDate(value: string) {
+    set _startDate(value: string) {
         if (moment(value, this.dateFormat, true).isValid()) {
             this.startDate = moment.utc(value).startOf('day');
         }
     }
 
-    protected get _endDate(): string {
+    get _endDate(): string {
         return this.endDate.clone().subtract(1, 'day').format(this.dateFormat);
     }
 
-    protected set _endDate(value: string) {
+    set _endDate(value: string) {
         if (moment(value, this.dateFormat, true).isValid()) {
             this.endDate = moment.utc(value).add(1, 'day').startOf('day');
         }

@@ -13,6 +13,7 @@ import {LocalStorage} from '../../api/storage.model';
 
 
 export class SettingsComponent implements OnInit {
+    msgs: Message[] = [];
 
     languages = [
         {'code': 'en', 'title': 'English'},

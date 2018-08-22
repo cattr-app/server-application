@@ -5,7 +5,7 @@ import {NgSelectModule} from '@ng-select/ng-select';
 import {CommonModule} from '@angular/common';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectsService} from './pages/projects/projects.service';
-import {DualListComponent} from 'angular-dual-listbox';
+import {DualListComponent, AngularDualListBoxModule} from 'angular-dual-listbox';
 import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
@@ -15,20 +15,21 @@ import {TranslateModule} from '@ngx-translate/core';
         ReactiveFormsModule,
         NgSelectModule,
         TranslateModule,
+        AngularDualListBoxModule,
     ],
     declarations: [
         UsersFiltersComponent,
         ProjectsFiltersComponent,
-        DualListComponent
     ],
     exports: [
         CommonModule,
         FormsModule,
         NgSelectModule,
+        AngularDualListBoxModule,
         ReactiveFormsModule,
         UsersFiltersComponent,
         ProjectsFiltersComponent,
-        DualListComponent
+        DualListComponent,
     ],
     providers: [
         ProjectsService

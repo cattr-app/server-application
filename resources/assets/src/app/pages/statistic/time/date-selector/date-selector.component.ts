@@ -19,11 +19,11 @@ export class DateSelectorComponent implements OnInit {
 
     readonly max: moment.Moment = moment.utc().add(1, 'day');
 
-    protected get _date(): string {
+    get _date(): string {
         return this.date.format(this.dateFormat);
     }
 
-    protected set _date(value: string) {
+    set _date(value: string) {
         if (moment(value, this.dateFormat, true).isValid()) {
             let date = moment.utc(value, this.dateFormat).startOf('day');
             if (date.diff(this.max) > 0) {
@@ -40,7 +40,7 @@ export class DateSelectorComponent implements OnInit {
         }
     }
 
-    protected get _inputDate(): string {
+    get _inputDate(): string {
         if (this.mode === 'week') {
             return this.date.format('YYYY-MM-DD') + ' - ' + this.date.clone().add(6, 'days').format('YYYY-MM-DD');
         } else if (this.mode === 'month') {
@@ -50,7 +50,7 @@ export class DateSelectorComponent implements OnInit {
         }
     }
 
-    protected set _inputDate(value: string) {
+    set _inputDate(value: string) {
         if (this.mode === 'day') {
             if (moment(value, this.dateFormat, true).isValid()) {
                 let date = moment.utc(value, this.dateFormat).startOf('day');
@@ -79,11 +79,11 @@ export class DateSelectorComponent implements OnInit {
         }
     }
 
-    protected get _mode(): string {
+    get _mode(): string {
         return this.mode === 'month' ? 'month' : 'day';
     }
 
-    protected get endDate(): string {
+    get endDate(): string {
         if (this.mode === 'week') {
             return '&ndash; ' + this.date.clone().add(6, 'days').format(this.dateFormat);
         } else {

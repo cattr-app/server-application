@@ -2,6 +2,7 @@ import {Component, IterableDiffers, OnInit} from '@angular/core';
 
 import {Role} from '../../../models/role.model';
 import {Router} from '@angular/router';
+import { Message } from 'primeng/components/common/api';
 
 import {DualListComponent} from 'angular-dual-listbox';
 import {ItemsCreateComponent} from '../../items.create.component';
@@ -21,6 +22,7 @@ import {TranslateService} from '@ngx-translate/core';
 })
 export class RolesCreateComponent extends ItemsCreateComponent implements OnInit {
 
+    msgs: Message[] = [];
     public item: Role = new Role();
     sourceRules: any = [];
     confirmedRules: any = [];
