@@ -2,7 +2,11 @@
     <div class="statistics__header">
 
       <div class="filter pull-left">
-        <app-projects-filters *ngIf="can('/projects/relations')" [(projectId)]="projectId"></app-projects-filters>
+        <app-projects-filters
+          *ngIf="can('/projects/relations')" 
+          [(projectId)]="projectId"
+          (projectIdChange)="projectIdChanged($event)">
+        </app-projects-filters>
       </div>
 
       <div class="pull-right">

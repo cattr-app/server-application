@@ -1,0 +1,31 @@
+<date-selector #dateSelector *ngIf="activeButton === 'timelineDay'"
+    [(date)]="start" (dateChange)="changeDate($event)" [mode]="'day'"></date-selector>
+
+<date-selector #dateSelector *ngIf="activeButton === 'timelineWeek'"
+    [(date)]="start" (dateChange)="changeDate($event)" [mode]="'week'"></date-selector>
+
+<date-selector #dateSelector *ngIf="activeButton === 'timelineMonth'"
+    [(date)]="start" (dateChange)="changeDate($event)" [mode]="'month'"></date-selector>
+
+<date-range-selector #dateRangeSelector *ngIf="activeButton === 'timelineRange'"
+    [(startDate)]="start" [(endDate)]="end"
+    (startDateChange)="changeRange(start, end)"
+    (endDateChange)="changeRange(start, end)"></date-range-selector>
+
+<div class="btn-group" role="group" (window:mouseup)="userInteraction = false">
+    <button type="button" (click)="changeViewName('timelineDay')" class="btn btn-default"
+        [ngClass]="{'active': activeButton === 'timelineDay' && !userInteraction}"
+        (mousedown)="userInteraction = true">Day</button>
+
+    <button type="button" (click)="changeViewName('timelineWeek')" class="btn btn-default"
+        [ngClass]="{'active': activeButton === 'timelineWeek' && !userInteraction}"
+        (mousedown)="userInteraction = true">Week</button>
+
+    <button type="button" (click)="changeViewName('timelineMonth')" class="btn btn-default"
+        [ngClass]="{'active': activeButton === 'timelineMonth' && !userInteraction}"
+        (mousedown)="userInteraction = true">Month</button>
+
+    <button type="button" (click)="changeViewName('timelineRange')" class="btn btn-default"
+        [ngClass]="{'active': activeButton === 'timelineRange' && !userInteraction}"
+        (mousedown)="userInteraction = true">Date Range</button>
+</div>

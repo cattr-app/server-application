@@ -112,4 +112,14 @@ Route::group([
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
     $router->post('/rules/bulk-edit', 'Api\v1\RulesController@bulkEdit');
     $router->any('/rules/actions', 'Api\v1\RulesController@actions');
+
+
+    // Statistic routes
+    Route::group([
+        'prefix' => 'statistic',
+    ], function(Router $router) {
+        $router->get('/project-report/list', 'Api\v1\Statistic\ProjectReportController@index');
+        $router->get('/project-report/worked', 'Api\v1\Statistic\ProjectReportController@worked');
+        $router->get('/project-report/events', 'Api\v1\Statistic\ProjectReportController@events');
+    });
 });

@@ -6,6 +6,9 @@ import {AuthRoute} from './statistic-routing.module';
 import {LoginService} from '../../auth/login/login.service';
 
 import {StatisticTimeComponent} from './time/statistic.time.component';
+import {DateSelectorComponent} from './time/date-selector/date-selector.component';
+import {DateRangeSelectorComponent} from './time/date-range-selector/date-range-selector.component';
+import {ViewSwitcherComponent} from './time/view-switcher/view-switcher.component';
 
 
 import {UsersService} from '../users/users.service';
@@ -18,6 +21,8 @@ import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
 import {ScheduleModule} from 'primeng/schedule';
 import {DpDatePickerModule} from 'ng2-date-picker';
+import {LoadingModule} from 'ngx-loading';
+import {TimezonePickerModule} from 'ng2-timezone-selector';
 
 @NgModule({
     imports: [
@@ -30,6 +35,8 @@ import {DpDatePickerModule} from 'ng2-date-picker';
         SharedModule,
         ScheduleModule,
         DpDatePickerModule,
+        LoadingModule,
+        TimezonePickerModule,
     ],
     exports: [
         StatisticTimeComponent
@@ -39,6 +46,9 @@ import {DpDatePickerModule} from 'ng2-date-picker';
          * @todo add here the other components, except for static for time usage
          */
         StatisticTimeComponent,
+        DateSelectorComponent,
+        DateRangeSelectorComponent,
+        ViewSwitcherComponent,
     ],
     providers: [
         LoginService,

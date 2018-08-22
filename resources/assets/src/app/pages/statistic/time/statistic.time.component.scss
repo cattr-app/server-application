@@ -1,59 +1,140 @@
+@import '../../../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
 .statistics {
-    &__header {
-        float: right;
+    &__header-line {
+        display: flex;
+        flex-flow: row nowrap;
+        justify-content: space-between;
         margin-bottom: 1em;
     }
 
+    &__timezone,
     &__buttons,
-    &__date-wrapper,
-    &__view-buttons {
+    &__view-switcher {
         display: inline-block;
+        vertical-align: bottom;
     }
 
-    &__buttons,
-    &__date-wrapper {
+    &__timezone,
+    &__buttons {
         margin-right: 1em;
     }
 
     &__timeline {
         clear: both;
+        position: relative;
     }
 }
 
-::ng-deep .dp-popup button {
-    padding: 0;
-}
+:host ::ng-deep {
+    .select2-selection {
+        @extend .form-control;
+        height: 36px;
+    }
 
-::ng-deep .fc-resource-area {
-    tr[data-resource-id] {
-        background: #fff;
+    /* Fullcalendar styles */
+    .fc-resource-area {
+        /* Resource row */
+        tr[data-resource-id] {
+            background: #fff;
 
-        &.not_worked {
-            background: #eee;
+            &.not_worked {
+                background: #eee;
+            }
+        }
+
+        /* Is working now */
+        td:nth-child(1) {
+            .fc-cell-content {
+                text-align: center;
+            }
+
+            .fc-cell-text {
+                display: inline-block;
+                line-height: 1;
+                padding: 0;
+
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: #ddd;
+
+                &.is_working_now {
+                    background: $brand-success;
+                }
+            }
+        }
+
+        /* Name data */
+        td:nth-child(2) {
+            .fc-cell-content {
+                overflow: visible;
+            }
+
+            .last-worked {
+                font-size: 10px;
+                position: absolute;
+                bottom: -12px;
+                left: 8px;
+            }
+        }
+
+        /* Time worked data */
+        td:nth-child(3) {
+            text-align: right;
         }
     }
 
-    td:nth-child(2) {
-        text-align: right;
-    }
-}
+    .fc-time-area {
+        .fc-cell-text {
+            font-size: 13px;
+        }
 
-::ng-deep .fc-day {
-    .progress-wrapper {
-        position: absolute;
-        text-align: center;
-        background: #fff;
-
-        &_empty {
-            background: #eee;
+        /* Overrides for fullcalendar inline styles. */
+        /* Set timeline row height. */
+        tr[data-resource-id] > td > div {
+            height: 40px !important;
+            overflow: hidden;
+        }
+        /* Set events height. */
+        .fc-event {
+            top: 8px !important;
+            height: 18px !important;
         }
     }
 
-    .progress, p {
-        margin-bottom: 0;
+    .fc-timeline-event {
+        border: 0;
+        border-radius: 0;
+        margin: 0;
     }
 
-    .progress {
-        height: 16px;
+    .fc-day {
+        /* Day cell progress bar styles */
+        .progress-wrapper {
+            position: absolute;
+            text-align: center;
+            background: #fff;
+            font-size: 12px;
+            height: 40px;
+            padding: 2px;
+
+            &_empty {
+                background: #eee;
+            }
+        }
+
+        .progress, p {
+            margin-bottom: 0;
+        }
+
+        .progress {
+            height: 16px;
+
+            &-bar {
+                background: $brand-success;
+            }
+        }
     }
 }

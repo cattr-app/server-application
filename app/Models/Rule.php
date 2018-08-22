@@ -135,6 +135,9 @@ class Rule extends Model
                 'bulk-edit' => __('Rules multiple edit'),
                 'actions' => __('Rules actions list'),
             ],
+            'statistic/project-report' => [
+                'list' => __('Attached User relation list'),
+            ],
         ]);
     }
 

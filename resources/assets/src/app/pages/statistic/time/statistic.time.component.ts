@@ -23,12 +23,11 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('timeline') timeline: Schedule;
     @ViewChild('datePicker') datePicker: ElementRef;
 
+    loading: boolean = false;
     timelineInitialized: boolean = false;
     timelineOptions: any;
     events: EventObjectInput[];
     timezone: string;
-    datePickerDate: string;
-    datePickerEndDate: string;
 
     constructor(private api: ApiService,
         private userService: UsersService,
@@ -54,14 +53,26 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     set viewName(value: string) {
+        if (!this.timelineInitialized) {
+            return;
+        }
+
         this.timeline.changeView(value);
     }
 
     get timelineDate(): moment.Moment {
+        if (!this.timelineInitialized) {
+            return moment.utc();
+        }
+
         return this.timeline.getDate();
     }
 
     set timelineDate(value: moment.Moment) {
+        if (!this.timelineInitialized) {
+            return;
+        }
+
         this.timeline.gotoDate(value);
     }
 
@@ -83,59 +94,47 @@ export class StatisticTimeComponent implements OnInit {
                         start: (moment.utc(interval.start_at) as any).tz(this.timezone),
                         end: (moment.utc(interval.end_at) as any).tz(this.timezone),
                     } as EventObjectInput;
-                }).sort((a, b) => {
-                    // Sort by user.
-                    if (a.resourceId !== b.resourceId) {
-                        return a.resourceId - b.resourceId;
-                    }
-                    // Then sort by start time.
-                    const aStart = moment.utc(a.start);
-                    const bStart = moment.utc(b.start);
-                    return aStart.diff(bStart);
-                }).reduce((arr, curr) => {
-                    const count = arr.length;
-                    if (count === 0) {
-                        return [curr];
-                    }
-
-                    // Combine last & current interval if same user and time between less than one second.
-                    const last = arr[count - 1];
-                    const isSameUser = last.resourceId === curr.resourceId;
-
-                    const lastEnd = moment.utc(last.end);
-                    const currStart = moment.utc(curr.start);
-                    const isConsecutive = Math.abs(currStart.diff(lastEnd, 'seconds')) <= 1;
-
-                    if (isSameUser && isConsecutive) {
-                        arr[count - 1] = {
-                            id: last.id,
-                            title: '',
-                            resourceId: curr.resourceId,
-                            start: last.start,
-                            end: curr.end,
-                        };
-                    } else {
-                        arr.push(curr);
-                    }
-
-                    return arr;
-                }, [] as EventObjectInput[]);
+                });
 
                 resolve(events);
             }, params);
         });
     }
 
-    calculateTimeWorkedOn(user_id: number, start: moment.Moment, end: moment.Moment) {
+    refetchEvents() {
+        if (!this.timelineInitialized) {
+            return;
+        }
+
+        this.$timeline.fullCalendar('refetchEvents');
+    }
+
+    getLoadedEventsStartedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
         // Get loaded events of the specified user, started in the selected time range.
-        const events = this.events.filter(event => {
+        return this.events.filter(event => {
             const isOfCurrentUser = event.resourceId == user_id;
 
             const eventStart = moment.utc(event.start);
-            const isInCurrentView = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
+            const isInPeriod = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
 
-            return isOfCurrentUser && isInCurrentView;
+            return isOfCurrentUser && isInPeriod;
         });
+    }
+
+    getLoadedEventsEndedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
+        // Get loaded events of the specified user, started in the selected time range.
+        return this.events.filter(event => {
+            const isOfCurrentUser = event.resourceId == user_id;
+
+            const eventEnd = moment.utc(event.end);
+            const isInPeriod = eventEnd.diff(start) >= 0 && eventEnd.diff(end) < 0;
+
+            return isOfCurrentUser && isInPeriod;
+        });
+    }
+
+    calculateTimeWorkedOn(user_id: number, start: moment.Moment, end: moment.Moment) {
+        const events = this.getLoadedEventsStartedBetween(user_id, start, end);
         // Calculate sum of an event time.
         return events.map(event => {
             const start = moment.utc(event.start);
@@ -151,6 +150,24 @@ export class StatisticTimeComponent implements OnInit {
         return `${hours}h ${minutes}m`;
     }
 
+    updateIsWorkingNow() {
+        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
+        $rows.each((index, row) => {
+            const $row = $(row);
+            const userId = $row.data('resource-id');
+            const end = moment.utc();
+            const start = end.clone().subtract(10, 'minutes');
+            const events = this.getLoadedEventsEndedBetween(userId, start, end);
+            const $cell = $('td:nth-child(1) .fc-cell-text', $row);
+
+            if (events.length > 0) {
+                $cell.addClass('is_working_now');
+            } else {
+                $cell.removeClass('is_working_now');
+            }
+        });
+    }
+
     updateTimeWorkedOn() {
         const view = this.$timeline.fullCalendar('getView');
         const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
@@ -161,13 +178,23 @@ export class StatisticTimeComponent implements OnInit {
             const userId = $row.data('resource-id');
             const timeWorked = this.calculateTimeWorkedOn(userId, viewStart, viewEnd);
             const timeWorkedString = this.formatDurationString(timeWorked);
-            const $cell = $('td:nth-child(2) .fc-cell-text', $row);
+            const $cell = $('td:nth-child(3) .fc-cell-text', $row);
             $cell.text(timeWorkedString);
 
             if (timeWorked === 0) {
                 $row.addClass('not_worked');
             } else {
                 $row.removeClass('not_worked');
+            }
+
+            const end = moment.utc();
+            const start = end.clone().subtract(1, 'day');
+            const lastUserEvents = this.getLoadedEventsEndedBetween(userId, start, end);
+            if (lastUserEvents.length > 0) {
+                const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
+                const eventEnd = moment(lastUserEvent.end);
+                const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
+                $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc()) + '</p>');
             }
         });
     }
@@ -176,21 +203,34 @@ export class StatisticTimeComponent implements OnInit {
         this.events = [];
 
         const user = this.api.getUser() as User;
-        this.timezone = user.timezone !== null ? user.timezone : 'UTC';
+
+        let timezone = localStorage.getItem('statistics-timezone');
+        if (timezone === null) {
+            timezone = user.timezone !== null ? user.timezone : 'UTC';
+        }
+        this.timezone = timezone;
 
         const now = moment.utc().startOf('day');
-        this.datePickerDate = now.format(this.datePickerFormat);
-        this.datePickerEndDate = now.clone().add(1, 'day').format(this.datePickerFormat);
 
         const eventSource = {
             events: async (start, end, timezone, callback) => {
                 try {
-                    const events = await this.fetchEvents(start, end);
+                    setTimeout(() => { this.loading = true; });
+                    let events = await this.fetchEvents(start, end);
+
+                    // If showing events in the past or future.
+                    const now = moment.utc();
+                    if (moment.utc(end).diff(now) < 0 || moment.utc(start).diff(now) > 0) {
+                        // Always load current events to show the 'is working now' indicator.
+                        events = events.concat(await this.fetchEvents(now.clone().subtract(1, 'day'), now));
+                    }
+
                     this.events = events;
                     callback(events);
                 } catch (e) {
                     console.error(e);
                     callback([]);
+                    setTimeout(() => { this.loading = false; });
                 }
             },
         };
@@ -201,6 +241,7 @@ export class StatisticTimeComponent implements OnInit {
             timezone: this.timezone,
             firstDay: 1,
             themeSystem: 'bootstrap3',
+            eventColor: '#2ab27b',
             views: {
                 timelineDay: {
                     type: 'timeline',
@@ -212,17 +253,23 @@ export class StatisticTimeComponent implements OnInit {
                     type: 'timeline',
                     duration: { weeks: 1 },
                     slotDuration: { days: 1 },
+                    slotWidth: 100,
+                    slotLabelFormat: 'ddd, MMM DD',
                     buttonText: 'Week',
                 },
                 timelineMonth: {
                     type: 'timeline',
                     duration: { months: 1 },
                     slotDuration: { days: 1 },
+                    slotLabelFormat: 'ddd, MMM DD',
+                    slotWidth: 100,
                     buttonText: 'Month',
                 },
                 timelineRange: {
                     type: 'timeline',
                     slotDuration: { days: 1 },
+                    slotLabelFormat: 'ddd, MMM DD',
+                    slotWidth: 100,
                     visibleRange: {
                         start: moment.utc(),
                         end: moment.utc().clone().add(1, 'days'),
@@ -233,7 +280,12 @@ export class StatisticTimeComponent implements OnInit {
             refetchResourcesOnNavigate: false,
             resourceColumns: [
                 {
-                    labelText: 'Names',
+                    labelText: '',
+                    text: () => '',
+                    width: '40px',
+                },
+                {
+                    labelText: 'Name',
                     field: 'title',
                 },
                 {
@@ -275,7 +327,7 @@ export class StatisticTimeComponent implements OnInit {
                         const date = $(dayColumnElement).data('date');
                         const dayStart = (moment as any).tz(date, this.timezone);
                         const dayEnd = dayStart.clone().add(1, 'days');
-                        const columnWidth = $(dayColumnElement).width();
+                        const columnWidth = $(dayColumnElement).width() - 4;
 
                         const html = rows.map(userRowElement => {
                             const userId = $(userRowElement).data('resource-id');
@@ -297,57 +349,28 @@ export class StatisticTimeComponent implements OnInit {
     </div>
     <p>${timeWorkedString}</p>
 </div>`;
-                        }).reduce((sum, curr) => sum + curr, '');
+                        }).join('');
                         $(dayColumnElement).html(html);
                     });
                 }
 
+                this.updateIsWorkingNow();
                 this.updateTimeWorkedOn();
 
                 this.timelineInitialized = true;
+
+                setTimeout(() => { this.loading = false; });
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
     }
 
-    datePickerPrev() {
-        this.timeline.prev();
-        this.datePickerDate = this.timelineDate.format(this.datePickerFormat);
-        this.datePickerEndDate = this.timelineDate.clone().add(1, 'day').format(this.datePickerFormat);
-    }
-
-    datePickerNext() {
-        this.timeline.next();
-        this.datePickerDate = this.timelineDate.format(this.datePickerFormat);
-        this.datePickerEndDate = this.timelineDate.clone().add(1, 'day').format(this.datePickerFormat);
-    }
-
-    datePickerSelect(value: moment.Moment) {
-        if (!this.timelineInitialized) {
-            return;
-        }
-
-        const date = moment.utc(this.datePickerDate);;
-        this.timelineDate = date;
-        this.datePickerEndDate = date.clone().add(1, 'day').format(this.datePickerFormat);
-    }
-
-    datePickerRangeSelect(value: moment.Moment) {
-        if (!this.timelineInitialized) {
-            return;
-        }
-
-        const start = moment.utc(this.datePickerDate);
-        let end = moment.utc(this.datePickerEndDate).add(1, 'day');
-
-        if (end.diff(start) <= 0) {
-            end = start.clone().add(1, 'day');
-        }
-
+    setView({ view, start, end }: { view: string, start: moment.Moment, end: moment.Moment }) {
+        this.viewName = view;
         this.timeline.gotoDate(start);
         this.$timeline.fullCalendar('option', 'visibleRange', {
             start: start,
-            end: end,
+            end: end.clone().add(1, 'day'),
         });
     }
 
@@ -364,30 +387,48 @@ export class StatisticTimeComponent implements OnInit {
         const $days = $('.fc-day[data-date]', $timeline);
         const days = $.makeArray($days);
 
-        const header = 'Names,Time Worked,' + days.map(day => {
-            const date = $(day).data('date');
-            return (moment as any).tz(date, this.timezone).format('YYYY-MM-DD');
-        }).join(',') + '\n';
+        let header = ['"Name"', '"Time Worked"'];
+        if (view.name !== 'timelineDay') {
+            const daysLabels = days.map(day => {
+                const date = $(day).data('date');
+                const dateString = (moment as any).tz(date, this.timezone).format('YYYY-MM-DD');
+                return `"${dateString}"`;
+            });
+            header = header.concat(daysLabels);
+        }
 
         const lines = rows.map(row => {
             const userId = $(row).data('resource-id');
             const user = this.$timeline.fullCalendar('getResourceById', userId);
 
             const timeWorked = this.calculateTimeWorkedOn(userId, viewStart, viewEnd);
-            const timeWorkedString = this.formatDurationString(timeWorked);
+            const timeWorkedHours = moment.duration(timeWorked).asHours().toFixed(2);
 
-            return user.title + ',' + timeWorkedString + ',' + days.map(day => {
-                const date = $(day).data('date');
-                const dayStart = (moment as any).tz(date, this.timezone);
-                const dayEnd = dayStart.clone().add(1, 'days');
+            let cells = [`"${user.title}"`, `"${timeWorkedHours}"`];
+            if (view.name !== 'timelineDay') {
+                const daysData = days.map(day => {
+                    const date = $(day).data('date');
+                    const dayStart = (moment as any).tz(date, this.timezone);
+                    const dayEnd = dayStart.clone().add(1, 'days');
 
-                // Calculate time worked by this user per this day.
-                const timeWorked = this.calculateTimeWorkedOn(userId, dayStart, dayEnd);
-                return this.formatDurationString(timeWorked);
-            }).join(',');
+                    // Calculate time worked by this user per this day.
+                    const timeWorked = this.calculateTimeWorkedOn(userId, dayStart, dayEnd);
+                    const timeWorkedHours = moment.duration(timeWorked).asHours().toFixed(2);
+                    return `"${timeWorkedHours}"`;
+                });
+                cells = cells.concat(daysData);
+            }
+
+            return cells.join(',');
         });
 
-        const content = 'data:text/csv;charset=utf-8,' + header + lines.join('\n');
+        const content = 'data:text/csv;charset=utf-8,' + header.join(',') + '\n' + lines.join('\n');
         window.open(encodeURI(content));
+    }
+
+    setTimezone(timezone: string) {
+        localStorage.setItem('statistics-timezone', timezone);
+        this.timezone = timezone;
+        this.refetchEvents();
     }
 }

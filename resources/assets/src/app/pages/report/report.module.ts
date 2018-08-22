@@ -10,6 +10,8 @@ import {ReportProjectsComponent} from './projects/report.projects.component';
 import {UsersService} from '../users/users.service';
 import {TimeIntervalsService} from '../timeintervals/timeintervals.service';
 import {ProjectsService} from '../projects/projects.service';
+import {TasksService} from '../tasks/tasks.service';
+import {ProjectReportService} from './projects/report.projects.service';
 
 import {HttpClientModule} from '@angular/common/http';
 import {NgxPaginationModule} from 'ngx-pagination';
@@ -43,7 +45,9 @@ import {DpDatePickerModule} from 'ng2-date-picker';
         LoginService,
         UsersService,
         TimeIntervalsService,
-        ProjectsService
+        ProjectsService,
+        TasksService,
+        ProjectReportService
     ]
 })
 

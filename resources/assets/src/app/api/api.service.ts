@@ -134,6 +134,16 @@ export class ApiService {
         }).subscribe(callback, errorCallback);
     }
 
+    public sendViaGet(path, params, callback, errorCallback = this.errorCallback.bind(this)) {
+        return this.http.get(`/api/v1/${path}`, {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': this.getAuthString()
+            }),
+            params: params
+        }).subscribe(callback, errorCallback);
+    }
+
     public sendFile(path, data, callback) {
         return this.http.post(`/api/v1/${path}`, data, {
             headers: new HttpHeaders({

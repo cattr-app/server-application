@@ -6,7 +6,7 @@ import {Item} from '../models/item.model';
 export abstract class ItemsService {
 
     abstract convertFromApi(itemFromApi);
-    abstract getApiPath();
+    abstract getApiPath(action ?: string);
 
     constructor(protected api: ApiService) {
     }
@@ -57,6 +57,25 @@ export abstract class ItemsService {
                 result.forEach((itemFromApi) => {
                     itemsArray.push(this.convertFromApi(itemFromApi));
                 });
+
+                callback(itemsArray);
+            });
+    }
+
+    getItemsViaGet(callback, params ?: any, action ?: string) {
+        const itemsArray: Item[] = [];
+
+        return this.api.sendViaGet(
+            this.getApiPath(action),
+            params || [],
+            (result) => {
+                try {
+                    for (let key in result) {
+                       itemsArray.push(this.convertFromApi(result[key])); 
+                    }
+                } catch (e) {
+                    console.error(e.message);
+                }
 
                 callback(itemsArray);
             });
