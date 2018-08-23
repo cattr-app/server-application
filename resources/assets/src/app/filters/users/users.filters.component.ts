@@ -3,6 +3,7 @@ import {ApiService} from '../../api/api.service';
 import {Router} from '@angular/router';
 import { Location } from '@angular/common';
 import {AttachedUsersService} from '../../pages/users/attached-users.service';
+import {LocalStorage} from '../../api/storage.model';
 
 @Component({
     selector: 'app-users-filters',
@@ -29,6 +30,9 @@ export class UsersFiltersComponent implements OnInit {
         this.update(this.apiService.getUser());
         this.attachedUsersService.subscribeOnUpdate(this.onUserUpdate.bind(this));
         this.attachedUsersService.updateAttachedList();
+        if (LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`) === null) {
+            LocalStorage.getStorage().set(`filterByUserIN${ window.location.pathname }`, JSON.stringify(new Set()))
+        }
     }
 
     update(user) {
@@ -42,7 +46,9 @@ export class UsersFiltersComponent implements OnInit {
     onChange($event) {
         if ($event.length > 0) {
             this.userId = $event.map(function(user) {
-               return user.id;
+                let userIdForCurrentFilter = JSON.parse(LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`));
+                userIdForCurrentFilter.add(user.id);
+                return user.id;
             });
         } else {
             this.userId = null;
@@ -62,5 +68,7 @@ export class UsersFiltersComponent implements OnInit {
 
         this.users = attachedItems;
     }
+
+    
 
 }
