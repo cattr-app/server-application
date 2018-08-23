@@ -5,7 +5,16 @@
                 <div class="panel-heading" translate>navigation.dashboard</div>
                 <div class="panel-body">
                     <div *ngIf="userIsManager">
-                        <app-statistic-time></app-statistic-time>
+                        <tabset #tabs>
+                            <tab heading="Own" (select)="onTabSelect($event)">
+                                <dashboard-tasklist></dashboard-tasklist>
+                                <dashboard-screenshotlist></dashboard-screenshotlist>
+                            </tab>
+
+                            <tab heading="Team" (select)="onTabSelect($event)">
+                                <app-statistic-time></app-statistic-time>
+                            </tab>
+                        </tabset>
                     </div>
 
                     <div *ngIf="!userIsManager">
