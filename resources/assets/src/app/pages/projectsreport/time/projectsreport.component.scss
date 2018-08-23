@@ -1,0 +1,250 @@
+@import '../../../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+.statistics {
+    &__header-line,
+    &__view-switcher {
+        display: flex;
+        flex-flow: row wrap;
+        justify-content: space-between;
+        width: 100%;
+    }
+
+    &__users,
+    &__buttons {
+        display: block;
+        margin-bottom: 1em;
+        width: 100%;
+
+        @media (min-width: $screen-sm-min) {
+            width: unset;
+        }
+    }
+
+    &__users {
+        position: relative;
+
+        ::ng-deep .ng-value {
+            display: none;
+        }
+    }
+
+    &__user-count {
+        position: absolute;
+        left: 20px;
+        top: 6px;
+        height: 24px;
+        width: calc(100% - 2 * 20px);
+        overflow: hidden;
+    }
+
+    &__timeline {
+        clear: both;
+        position: relative;
+        width: 100%;
+    }
+}
+
+#clickPopover,
+#hoverPopover {
+    position: absolute;
+}
+
+.statistics-popover {
+    position: relative;
+    width: 250px;
+
+    &_click {
+        .statistics-popover__line:first-child {
+            min-height: 140px;
+        }
+    }
+
+    &__line {
+        text-align: center;
+        position: relative;
+    }
+
+    &__link:hover {
+        color: $link-color;
+        text-decoration: unset;
+    }
+
+    &__image {
+        width: 100%;
+        height: auto;
+    }
+}
+
+:host ::ng-deep {
+    .select2-selection {
+        @extend .form-control;
+        height: 36px;
+    }
+
+    /* Fullcalendar styles */
+    .fc-resource-area {
+        th .fc-cell-text {
+            cursor: pointer;
+
+            &.sort-asc::after {
+                content: '▲';
+                position: absolute;
+                top: 1px;
+                right: 4px;
+            }
+
+            &.sort-desc::after {
+                content: '▼';
+                position: absolute;
+                top: 3px;
+                right: 4px;
+            }
+        }
+
+        /* Time worked header */
+        th:nth-child(3) {
+            font-size: 13px;
+        }
+
+        /* Resource row */
+        tr[data-resource-id] {
+            background: #fff;
+
+            &.not_worked {
+                background: #eee;
+            }
+        }
+
+        td {
+            vertical-align: middle;
+        }
+
+        /* Is working now */
+        td:nth-child(1) {
+            .fc-cell-content {
+                text-align: center;
+            }
+
+            .fc-cell-text {
+                display: inline-block;
+                line-height: 1;
+                padding: 0;
+                margin-top: 14px;
+
+                width: 10px;
+                height: 10px;
+                border-radius: 50%;
+                background: #ddd;
+
+                &.is_working_now {
+                    background: $brand-success;
+                }
+            }
+        }
+
+        /* Name data */
+        td:nth-child(2) {
+            .fc-cell-content {
+                padding: 0 8px;
+                overflow: hidden;
+            }
+
+            .fc-cell-text {
+                padding: 0;
+            }
+
+            .last-worked,
+            .current-task,
+            .current-proj {
+                margin: 0;
+                padding: 0;
+                font-size: 10px;
+                text-overflow: ellipsis;
+                overflow: hidden;
+                margin-right: -6px;
+            }
+
+            .current-task,
+            .current-proj {
+                &, & a {
+                    color: $brand-success;
+                }
+            }
+        }
+
+        /* Time worked data */
+        td:nth-child(3) {
+            text-align: right;
+        }
+    }
+
+    .fc-time-area {
+        .fc-cell-text {
+            font-size: 13px;
+        }
+
+        /* Overrides for fullcalendar inline styles. */
+        /* Set timeline row height. */
+        tr[data-resource-id] > td > div {
+            height: 55px !important;
+            overflow: hidden;
+        }
+        /* Set events height. */
+        .fc-event {
+            top: 8px !important;
+            height: 35px !important;
+        }
+    }
+
+    .fc-timeline-event {
+        border: 0;
+        border-radius: 0;
+        margin: 0;
+
+        .fc-bg {
+            background: transparent;
+        }
+    }
+
+    .fc-day {
+        /* Day cell progress bar styles */
+        .progress-wrapper {
+            position: absolute;
+            text-align: center;
+            background: #fff;
+            font-size: 12px;
+            height: 55px;
+            padding: 2px;
+
+            &_empty {
+                background: #eee;
+            }
+        }
+
+        .progress, p {
+            margin-bottom: 0;
+        }
+
+        .progress {
+            height: 16px;
+
+            &-bar {
+                background: $brand-success;
+            }
+        }
+    }
+
+    /* Popover */
+    .popover.arrow_left .popover-arrow {
+        margin: 0 !important;
+        left: 2px !important;
+        right: auto;
+    }
+
+    .popover.arrow_right .popover-arrow {
+        margin: 0 !important;
+        left: auto !important;
+        right: 2px;
+    }
+}

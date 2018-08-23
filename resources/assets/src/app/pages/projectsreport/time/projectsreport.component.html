@@ -1,0 +1,55 @@
+<div class="statistics">
+  <div class="statistics__header">
+    <view-switcher #viewSwitcher class="statistics__view-switcher">
+      <div class="statistics__users">
+        <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
+                   bindValue="id" bindLabel="title" [closeOnSelect]="false"
+                   [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
+        </ng-select>
+        <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
+      </div>
+      <div class="statistics__users">
+        <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
+                   bindValue="id" bindLabel="title" [closeOnSelect]="false"
+                   [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
+        </ng-select>
+        <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
+      </div>
+
+      <!--<div class="statistics__buttons btn-group" role="group">-->
+      <!--<button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>-->
+      <!--</div>-->
+    </view-switcher>
+  </div>
+
+  <div class="statistics__timeline">
+    <ngx-loading [show]="loading"></ngx-loading>
+    <span #clickPopover="bs-popover" id="clickPopover" [outsideClick]="true" [popover]="clickPopoverTemplate"></span>
+    <span #hoverPopover="bs-popover" id="hoverPopover" [outsideClick]="true" [popover]="hoverPopoverTemplate"></span>
+    <p-schedule #timeline [header]="false" [options]="timelineOptions"></p-schedule>
+  </div>
+</div>
+
+<ng-template #clickPopoverTemplate>
+  <div class="statistics-popover statistics-popover_click">
+    <p class="statistics-popover__line">
+      <ngx-loading [show]="popoverLoading"></ngx-loading>
+      <a *ngIf="clickPopoverScreenshot !== null"
+         [attr.href]="'screenshots/show/' + clickPopoverScreenshot.id">
+        <img class="statistics-popover__image"
+             [attr.src]="clickPopoverScreenshot.path"/>
+      </a>
+    </p>
+
+    <p class="statistics-popover__line">
+      <a *ngIf="clickPopoverTask !== null" class="statistics-popover__link"
+         [attr.href]="'tasks/show/' + clickPopoverTask.id">{{ clickPopoverText }}</a>
+    </p>
+  </div>
+</ng-template>
+
+<ng-template #hoverPopoverTemplate>
+  <div class="statistics-popover statistics-popover_hover">
+    <p class="statistics-popover__line" [innerHTML]="hoverPopoverText"></p>
+  </div>
+</ng-template>
