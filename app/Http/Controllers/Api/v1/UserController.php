@@ -476,9 +476,17 @@ class UserController extends ItemController
 
         if ($project_relations_access) {
             $attached_user_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
-                return collect($project->users)->flatMap(function ($user) {
+                $project_attached_user_ids = collect($project->users)->flatMap(function ($user) {
                     return collect($user->id);
                 });
+
+                $project_related_user_ids = collect($project->tasks)->flatMap(function ($task) {
+                    return collect($task->timeIntervals)->flatMap(function ($interval) {
+                        return collect($interval->user_id);
+                    });
+                });
+
+                return collect([$project_attached_user_ids, $project_related_user_ids])->collapse()->unique();
             });
 
             $users_id = collect([$attached_user_id_to_project])->collapse();
