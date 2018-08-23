@@ -125,6 +125,7 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
             this.itemService.getItems((items) => {
                 if (items.length > 0) {
                     this.setItems(this.itemsArray.concat(items));
+                    this.offset += this.chunksize;
                 } else {
                     this.countFail += 1;
                 }
