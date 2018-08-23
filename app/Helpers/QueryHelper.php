@@ -35,6 +35,16 @@ class QueryHelper
             unset($filter['offset']);
         }
 
+        if (isset($filter['order_by'])) {
+            $order_by = $filter['order_by'];
+            [$column, $dir] = \is_array($order_by) ? $order_by : [$order_by, 'asc'];
+            if (Schema::hasColumn($table, $column)) {
+                $query->orderBy($column, $dir);
+            }
+
+            unset($filter['order_by']);
+        }
+
         if (isset($filter['with'])) {
             $with = explode(',', $filter['with']);
             if ($with) {

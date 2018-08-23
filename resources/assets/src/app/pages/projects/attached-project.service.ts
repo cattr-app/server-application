@@ -43,7 +43,7 @@ export class AttachedProjectService {
         if (storageItems.length > 0) {
             this.setupAttachedList(storageItems);
         } else {
-            this.projectService.getItems(this.setupAttachedList.bind(this), {'user_id': this.api.getUser().id});
+            this.projectService.getItems(this.setupAttachedList.bind(this));
         }
     }
 

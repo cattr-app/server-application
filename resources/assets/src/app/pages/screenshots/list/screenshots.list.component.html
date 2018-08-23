@@ -4,21 +4,22 @@
             <div class="panel panel-default">
                 <div class="panel-heading" translate>screenshot.list</div>
                 <div class="panel-body">
-                    <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
+                    <app-users-filters *ngIf="isManager" [(userId)]="userId"></app-users-filters>
                     <br/>
-                    <app-projects-filters *ngIf="can('/projects/relations')" [(projectId)]="projectId"></app-projects-filters>
+                    <app-projects-filters *ngIf="isManager" [(projectId)]="projectId"></app-projects-filters>
                     <br/>
 
                     <div class="row" *ngFor="let group of itemsChunked">
                         <div class="col-md-2" *ngFor="let screenshot of group">
                             <div class="card">
-                                <input type="checkbox" class="select_image">
+                                <!--<input type="checkbox" class="select_image">-->
                                 <img class="card-img-top" src="{{ screenshot.path }}" onerror="this.src='uploads/none.png'" alt="image">
                                 <div class="card-body">
                                     <p class="card-text">
-                                        <span>{{ screenshot.time_interval && minutes(screenshot.time_interval.start_at) }}</span>
-                                        <span>{{ screenshot.time_interval && screenshot.time_interval.task && screenshot.time_interval.task.task_name }}</span>
-                                        <span>{{ screenshot.time_interval && screenshot.time_interval.task && screenshot.time_interval.task.project && screenshot.time_interval.task.project.name }}</span>
+                                        <span>{{ formatTime(screenshot.time_interval?.start_at) }}</span>
+                                        <span *ngIf="isManager">{{ screenshot.time_interval?.user?.full_name }}</span>
+                                        <span>{{ screenshot.time_interval?.task?.task_name }}</span>
+                                        <span>{{ screenshot.time_interval?.task?.project?.name }}</span>
                                     </p>
                                 </div>
                             </div>

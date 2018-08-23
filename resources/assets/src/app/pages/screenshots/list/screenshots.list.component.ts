@@ -4,11 +4,9 @@ import {ScreenshotsService} from '../screenshots.service';
 import { BsModalService } from 'ngx-bootstrap';
 import { AllowedActionsService } from '../../roles/allowed-actions.service';
 
-import { Screenshot } from '../../../models/screenshot.model';
-
 import { ItemsListComponent } from '../../items.list.component';
-import { splitMatchedQueriesDsl } from '@angular/core/src/view/util';
 
+import * as moment from 'moment';
 @Component({
     selector: 'app-screenshots-list',
     templateUrl: './screenshots.list.component.html',
@@ -41,6 +39,21 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
         }
 
         return this._itemsChunked = result;
+    }
+
+    protected _isManager?: boolean = null;
+    get isManager(): boolean {
+        if (this._isManager !== null) {
+            return this._isManager;
+        }
+
+        const user = this.api.getUser();
+        if (!user) {
+            return this._isManager = false;
+        }
+
+        const managerRoles = [1, 5];
+        return this._isManager = managerRoles.includes(user.role_id);
     }
 
     constructor(protected api: ApiService,
@@ -94,11 +107,12 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
         this._itemsChunked = [];
     }
 
-    minutes(datetime) {
-        const regex = /\d{4}-\d{2}-\d{2} \d{2}:(\d{2}:\d{2})/;
-        const matches = datetime.match(regex);
+    formatTime(datetime?: string) {
+        if (!datetime) {
+            return null;
+        }
 
-        return matches[1];
+        return moment.utc(datetime).format('DD.MM.YYYY HH:mm:ss');
     }
 
     loadNext() {
@@ -107,9 +121,10 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
         }
 
         const params = {
-            'with': 'timeInterval,timeInterval.task,timeInterval.user',
+            'with': 'timeInterval,timeInterval.task,timeInterval.task.project,timeInterval.user',
             'limit': this.chunksize,
             'offset': this.offset,
+            'order_by': ['id', 'desc'],
         };
 
         if (this.userId) {
@@ -122,7 +137,7 @@ export class ScreenshotsListComponent extends ItemsListComponent implements OnIn
 
         this.screenshotLoading = true;
         try {
-            this.itemService.getItems((items) => {
+            this.itemService.getItems(items => {
                 if (items.length > 0) {
                     this.setItems(this.itemsArray.concat(items));
                     this.offset += this.chunksize;
