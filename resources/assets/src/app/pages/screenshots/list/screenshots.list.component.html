@@ -12,14 +12,30 @@
                     <div class="row" *ngFor="let group of itemsChunked">
                         <div class="col-md-2" *ngFor="let screenshot of group">
                             <div class="card">
-                                <!--<input type="checkbox" class="select_image">-->
-                                <img class="card-img-top" src="{{ screenshot.path }}" onerror="this.src='uploads/none.png'" alt="image">
+                                <a [attr.href]="'/screenshots/show/' + screenshot.id" target="_blank">
+                                    <img class="card-img-top" src="{{ screenshot.path }}"
+                                        onerror="this.src='uploads/none.png'" alt="image" />
+                                </a>
+
                                 <div class="card-body">
                                     <p class="card-text">
-                                        <span>{{ formatTime(screenshot.time_interval?.start_at) }}</span>
-                                        <span *ngIf="isManager">{{ screenshot.time_interval?.user?.full_name }}</span>
-                                        <span>{{ screenshot.time_interval?.task?.task_name }}</span>
-                                        <span>{{ screenshot.time_interval?.task?.project?.name }}</span>
+                                        <span class="card-text-line">
+                                            {{ formatTime(screenshot.time_interval?.start_at) }}
+                                        </span>
+
+                                        <span class="card-text-line" *ngIf="isManager">
+                                            {{ screenshot.time_interval?.user?.full_name }}
+                                        </span>
+
+                                        <a class="card-text-line" *ngIf="screenshot.time_interval?.task"
+                                            [attr.href]="'tasks/show/' + screenshot.time_interval.task.id">
+                                            {{ screenshot.time_interval.task.task_name }}
+                                        </a>
+
+                                        <a class="card-text-line" *ngIf="screenshot.time_interval?.task?.project"
+                                            [attr.href]="'projects/show/' + screenshot.time_interval.task.project.id">
+                                            {{ screenshot.time_interval.task.project.name }}
+                                        </a>
                                     </p>
                                 </div>
                             </div>
