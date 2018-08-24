@@ -143,6 +143,12 @@ class Rule extends Model
                 'bulk-edit' => __('Rules multiple edit'),
                 'actions' => __('Rules actions list'),
             ],
+            'project-report' => [
+                'list' => __('Attached User relation list'),
+                'worked' => __(''),
+                'events' => __(''),
+                'resources' => __(''),
+            ],
         ]);
     }
 

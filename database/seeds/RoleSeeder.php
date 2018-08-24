@@ -24,6 +24,11 @@ class RoleSeeder extends Seeder
         Role::updateOrCreate(['id' => 255, 'name' => 'blocked']);
 
         $userAllow = [
+          'project-report' => [
+            'list',
+            'worked',
+            'events'
+          ],
           'projects' => [
               'list',
               'show'

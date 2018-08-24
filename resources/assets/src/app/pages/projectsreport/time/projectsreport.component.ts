@@ -31,6 +31,7 @@ import {Observable} from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
+import {ProjectReportService} from './projectsreport.service';
 
 enum UsersSort {
   NameAsc,
@@ -107,7 +108,8 @@ export class ProjectsreportComponent implements OnInit {
               private timeintervalService: TimeIntervalsService,
               private taskService: TasksService,
               private projectService: ProjectsService,
-              private screenshotService: ScreenshotsService) {
+              private screenshotService: ScreenshotsService,
+              private projectReportService: ProjectReportService) {
   }
 
   readonly defaultView = 'timelineDay';
@@ -207,6 +209,18 @@ export class ProjectsreportComponent implements OnInit {
   }
 
   ngOnInit() {
+    // this.fetchResources().then((users: Object[]) => {
+    //   console.log(users);
+    // });
+    // this.projectReportService.getItems()
+    this.projectReportService.getItemsViaGet(() => {
+
+      //debugger;
+    }, {
+      start_at: moment.utc().startOf('day').subtract(20, 'year').format('YYYY-MM-DD'),
+      end_at: moment.utc().startOf('day').format('YYYY-MM-DD')
+    }, 'events');
+    console.log();
     this.view = {
       name: this.defaultView,
       start: moment.utc().startOf('day'),

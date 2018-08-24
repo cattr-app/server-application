@@ -1,0 +1,63 @@
+<div class="statistics">
+    <div class="statistics__header">
+
+      <div class="filter pull-left">
+        <app-projects-filters
+          *ngIf="can('/projects/relations')" 
+          [(projectId)]="projectId"
+          (projectIdChange)="projectIdChanged($event)">
+        </app-projects-filters>
+      </div>
+
+      <div class="pull-right">
+        <div class="statistics__buttons btn-group" role="group">
+            <button *ngIf="viewName !== 'timelineDay'" type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
+        </div>
+
+        <div *ngIf="viewName !== 'timelineRange'" class="statistics__date-wrapper form-inline">
+            <div class="input-group">
+                <span class="input-group-btn">
+                    <button (click)="datePickerPrev()" type="button" class="btn btn-default" aria-label="prev">
+                        <span class="glyphicon glyphicon-chevron-left"></span>
+                    </button>
+                </span>
+
+                <input *ngIf="viewName === 'timelineDay' || viewName === 'timelineWeek'" #datePicker type="text" class="statistics__date-input form-control"
+                    [(ngModel)]="datePickerDate" [dpDayPicker]="{ format: datePickerFormat, firstDayOfWeek: 'mo' }" mode="day" (onChange)="datePickerSelect($event)" />
+
+                <input *ngIf="viewName === 'timelineMonth'" #datePicker type="text" class="statistics__date-input form-control"
+                    [(ngModel)]="datePickerDate" [dpDayPicker]="{ format: datePickerFormat, firstDayOfWeek: 'mo' }" mode="month" (onChange)="datePickerSelect($event)" />
+
+                <span class="input-group-btn">
+                    <button (click)="datePickerNext()" type="button" class="btn btn-default" aria-label="next">
+                        <span class="glyphicon glyphicon-chevron-right"></span>
+                    </button>
+                </span>
+            </div>
+        </div>
+
+        <div *ngIf="viewName === 'timelineRange'" class="statistics__date-wrapper form-inline">
+            <div class="form-group">
+                <input #datePickerStart type="text" class="statistics__date-input form-control"
+                    [(ngModel)]="datePickerDate" [dpDayPicker]="{ format: datePickerFormat, firstDayOfWeek: 'mo' }" mode="day" (onChange)="datePickerRangeSelect($event)" />
+            </div>
+
+            <div class="form-group">
+                <input #datePickerEnd type="text" class="statistics__date-input form-control"
+                    [(ngModel)]="datePickerEndDate" [dpDayPicker]="{ format: datePickerFormat, firstDayOfWeek: 'mo' }" mode="day" (onChange)="datePickerRangeSelect($event)" />
+            </div>
+        </div>
+
+        <div class="statistics__view-buttons btn-group" role="group">
+            <button type="button" (click)="viewName = 'timelineDay'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineDay'}">Day</button>
+            <button type="button" (click)="viewName = 'timelineWeek'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineWeek'}">Week</button>
+            <button type="button" (click)="viewName = 'timelineMonth'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineMonth'}">Month</button>
+            <button type="button" (click)="viewName = 'timelineRange'" class="btn btn-default" [ngClass]="{'active': viewName === 'timelineRange'}">Date Range</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="statistics__timeline">
+        <p-schedule #timeline [header]="false" [options]="timelineOptions"></p-schedule>
+    </div>
+</div>

@@ -30,6 +30,7 @@ import { TasksModule } from '../tasks/tasks.module';
 import { ProjectsModule } from '../projects/projects.module';
 import { PopoverModule } from 'ngx-bootstrap';
 import { ScreenshotsModule } from '../screenshots/screenshots.module';
+import {ProjectReportService} from './time/projectsreport.service';
 
 @NgModule({
     imports: [
@@ -67,6 +68,7 @@ import { ScreenshotsModule } from '../screenshots/screenshots.module';
         LoginService,
         UsersService,
         TimeIntervalsService,
+        ProjectReportService,
     ]
 })
 
