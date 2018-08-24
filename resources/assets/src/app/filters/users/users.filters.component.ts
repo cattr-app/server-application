@@ -30,9 +30,11 @@ export class UsersFiltersComponent implements OnInit {
         this.update(this.apiService.getUser());
         this.attachedUsersService.subscribeOnUpdate(this.onUserUpdate.bind(this));
         this.attachedUsersService.updateAttachedList();
-        if (LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`) === null) {
-            LocalStorage.getStorage().set(`filterByUserIN${ window.location.pathname }`, JSON.stringify(new Set()))
+        let currentFilter = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);
+        if (currentFilter === null) {
+            LocalStorage.getStorage().set(`filterByUserIN${ window.location.pathname }`, new Array())
         }
+        this.userIdChange.emit(this.userId);
     }
 
     update(user) {
@@ -46,14 +48,34 @@ export class UsersFiltersComponent implements OnInit {
     onChange($event) {
         if ($event.length > 0) {
             this.userId = $event.map(function(user) {
-                let userIdForCurrentFilter = JSON.parse(LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`));
-                userIdForCurrentFilter.add(user.id);
                 return user.id;
             });
         } else {
             this.userId = null;
         }
         this.userIdChange.emit(this.userId);
+
+        let currentFilter = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);        
+        if (this.userId !== null) {
+            console.log("current filter :::", currentFilter, "this.userID :::", this.userId);
+            // element was removed from filter?
+            if (currentFilter.length > this.userId.length) {
+                var diff = this.DiffArrays(currentFilter, this.userId)[0];
+                console.log(diff); 
+                var index = currentFilter.indexOf(diff);
+                if (index !== -1) {
+                    currentFilter.splice(index, 1); //remove
+                } 
+            }
+            currentFilter = new Set(currentFilter);
+            this.userId.forEach(element => {
+                currentFilter.add(element);
+            });
+            currentFilter = Array.from(currentFilter);
+        } else {
+            currentFilter = new Array();
+        }
+        LocalStorage.getStorage().set(`filterByUserIN${ window.location.pathname }`, currentFilter);
     }
 
     updateItems(): void {
@@ -69,6 +91,27 @@ export class UsersFiltersComponent implements OnInit {
         this.users = attachedItems;
     }
 
-    
+    // helper
+    DiffArrays (array1, array2) {
 
+        var a = [], diffArray = [];
+    
+        for (var i = 0; i < array1.length; i++) {
+            a[array1[i]] = true;
+        }
+    
+        for (var i = 0; i < array2.length; i++) {
+            if (a[array2[i]]) {
+                delete a[array2[i]];
+            } else {
+                a[array2[i]] = true;
+            }
+        }
+    
+        for (var k in a) {
+            diffArray.push(+k);
+        }
+    
+        return diffArray;
+    }
 }
