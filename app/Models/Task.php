@@ -26,6 +26,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property TimeInterval[] $timeIntervals
  * @property User[]         $user
+ * @property User[]         $assigned
  * @property Project[]      $project
  */
 class Task extends Model

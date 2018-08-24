@@ -39,6 +39,25 @@ class RolesController extends ItemController
     }
 
     /**
+     * @apiDefine RolesRelations
+     *
+     * @apiParam {String} [with]               For add relation model in response
+     * @apiParam {Object} [users] `QueryParam` Roles's relation users. All params in <a href="#api-User-GetUserList" >@User</a>
+     * @apiParam {Object} [rules] `QueryParam` Roles's relation rules. All params in <a href="#api-Rule-GetRulesActions" >@Rules</a>
+     */
+
+    /**
+     * @apiDefine RolesRelationsExample
+     * @apiParamExample {json} Request-With-Relations-Example:
+     *  {
+     *      "with":               "users,rules,users.tasks",
+     *      "users.tasks.id":     [">", 1],
+     *      "users.tasks.active": 1,
+     *      "users.full_name":    ["like", "%lorem%"]
+     *  }
+     */
+
+    /**
      * @api {post} /api/v1/roles/list List
      * @apiDescription Get list of Roles
      * @apiVersion 0.1.0
@@ -50,9 +69,27 @@ class RolesController extends ItemController
      * @apiParam {String}   [name]        `QueryParam` Role Name
      * @apiParam {DateTime} [created_at]  `QueryParam` Role Creation DateTime
      * @apiParam {DateTime} [updated_at]  `QueryParam` Last Role update DataTime
-     * @apiParam {DateTime} [deleted_at]  `QueryParam` When Role was deleted (null if not)
+     * @apiUse RolesRelations
      *
-     * @apiSuccess (200) {Role[]} Array Array of Role objects
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id":          [">", 1]
+     *      "user_id":     ["=", [1,2,3]],
+     *      "name":        ["like", "%lorem%"],
+     *      "created_at":  [">", "2019-01-01 00:00:00"],
+     *      "updated_at":  ["<", "2019-01-01 00:00:00"]
+     *  }
+     * @apiUse RolesRelationsExample
+     *
+     * @apiSuccess {Object[]} RoleList                  Roles (Array of objects)
+     * @apiSuccess {Object}   RoleList.Role             Role object
+     * @apiSuccess {Integer}  RoleList.Role.id          Role's ID
+     * @apiSuccess {String}   RoleList.Role.name        Role's name
+     * @apiSuccess {DateTime} RoleList.Role.created_at  Role's date time of create
+     * @apiSuccess {DateTime} RoleList.Role.updated_at  Role's date time of update
+     * @apiSuccess {DateTime} RoleList.Role.deleted_at  Role's date time of delete
+     * @apiSuccess {Object[]} RoleList.Role.users       Role's User (Array of objects)
+     * @apiSuccess {Object[]} RoleList.Role.rules       Role's Task (Array of objects)
      *
      * @param Request $request
      *
@@ -77,6 +114,25 @@ class RolesController extends ItemController
      * @apiVersion 0.1.0
      * @apiName CreateRole
      * @apiGroup Role
+     *
+     * @apiParam {String} name Roles's name
+     *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "name": "test"
+     *  }
+     *
+     * @apiSuccess {Object}   res             Response object
+     * @apiSuccess {Integer}  res.id          Role's ID
+     * @apiSuccess {String}   res.name        Role's name
+     * @apiSuccess {DateTime} res.created_at  Role's date time of create
+     * @apiSuccess {DateTime} res.updated_at  Role's date time of update
+     *
+     * @apiUse DefaultCreateErrorResponse
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
      */
 
     /**
@@ -85,6 +141,37 @@ class RolesController extends ItemController
      * @apiVersion 0.1.0
      * @apiName ShowRole
      * @apiGroup Role
+     *
+     * @apiParam {Integer}  id                        Role ID
+     * @apiParam {String}   [name]       `QueryParam` Role's Name
+     * @apiParam {DateTime} [created_at] `QueryParam` Role's date time of create
+     * @apiParam {DateTime} [updated_at] `QueryParam` Role's date time of update
+     * @apiUse RolesRelations
+     *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id":          1,
+     *      "name":        ["like", "%lorem%"],
+     *      "description": ["like", "%lorem%"],
+     *      "created_at":  [">", "2019-01-01 00:00:00"],
+     *      "updated_at":  ["<", "2019-01-01 00:00:00"]
+     *  }
+     * @apiUse RolesRelationsExample
+     *
+     * @apiSuccess {Object}   Role             Role object
+     * @apiSuccess {Integer}  Role.id          Role's ID
+     * @apiSuccess {String}   Role.name        Role's name
+     * @apiSuccess {DateTime} Role.created_at  Role's date time of create
+     * @apiSuccess {DateTime} Role.updated_at  Role's date time of update
+     * @apiSuccess {DateTime} Role.deleted_at  Role's date time of delete
+     * @apiSuccess {Object[]} Role.users       Role's User (Array of objects)
+     * @apiSuccess {Object[]} Role.rules       Role's Task (Array of objects)
+     *
+     * @apiUse DefaultShowErrorResponse
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
      */
 
     /**
@@ -93,14 +180,50 @@ class RolesController extends ItemController
      * @apiVersion 0.1.0
      * @apiName EditRole
      * @apiGroup Role
+     *
+     * @apiParam {Integer} id   Role's ID
+     * @apiParam {String}  name Role's Name
+     *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id": 1,
+     *      "name": "test"
+     *  }
+     *
+     * @apiSuccess {Object}   Role            Role object
+     * @apiSuccess {Integer}  Role.id         Role's ID
+     * @apiSuccess {String}   Role.name       Role's name
+     * @apiSuccess {DateTime} Role.created_at Role's date time of create
+     * @apiSuccess {DateTime} Role.updated_at Role's date time of update
+     * @apiSuccess {DateTime} Role.deleted_at Role's date time of delete
+     *
+     * @apiUse DefaultEditErrorResponse
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
      */
 
     /**
      * @api {post} /api/v1/roles/destroy Destroy
+     * @apiUse DefaultDestroyRequestExample
      * @apiDescription Destroy Role
      * @apiVersion 0.1.0
      * @apiName DestroyRole
      * @apiGroup Role
+     *
+     * @apiParam {String} id Role's ID
+     *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id": 1
+     *  }
+     *
+     * @apiUse DefaultDestroyResponse
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
      */
 
     /**
@@ -112,11 +235,19 @@ class RolesController extends ItemController
      *
      * @apiParam {Integer} id Role's ID
      *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id": 1
+     *  }
+     *
      * @apiSuccess {Object[]} array               Array of Rule objects
      * @apiSuccess {Object}   array.object        Rule object
      * @apiSuccess {String}   array.object.object Object of rule
      * @apiSuccess {String}   array.object.action Action of rule
      * @apiSuccess {String}   array.object.name   Name of rule
+     *
+     * @apiError (Error 400) {String} error  Name of error
+     * @apiError (Error 400) {String} reason Reason of error
      *
      * @param Request $request
      *
@@ -153,6 +284,7 @@ class RolesController extends ItemController
                 $this->getEventUniqueName('answer.error.item.allowed-rules'),
                 [
                     'error' => 'Role not found',
+                    'reason' => 'Invalid Id'
                 ]),
                 400
             );

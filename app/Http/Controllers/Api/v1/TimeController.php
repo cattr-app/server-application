@@ -54,6 +54,7 @@ class TimeController extends ItemController
      * @apiDefine RelationsExample
      * @apiParamExample {json} Request-With-Relations-Example:
      *  {
+     *      "with":           "task,user,screenshots"
      *      "task.id":        [">", 1],
      *      "task.active":    1,
      *      "user.id":        [">", 1],
@@ -65,7 +66,7 @@ class TimeController extends ItemController
     /**
      * Display a total of time.
      *
-     * @api {post} /api/v1/time/total Total
+     * @api {POST|GET} /api/v1/time/total Total
      * @apiParamExample {json} Simple-Request-Example:
      *  {
      *      "user_id":        1,
@@ -99,7 +100,6 @@ class TimeController extends ItemController
      * @apiSuccess {DateTime} end              DateTime of last Time Interval's end_at
      *
      * @param Request $request
-     *
      * @return JsonResponse
      */
     public function total(Request $request): JsonResponse
@@ -150,7 +150,7 @@ class TimeController extends ItemController
     /**
      * Display the project time.
      *
-     * @api {post} /api/v1/time/project Project
+     * @api {POST|GET} /api/v1/time/project Project
      * @apiParamExample {json} Request-Example:
      *  {
      *      "user_id":        1,
@@ -183,8 +183,10 @@ class TimeController extends ItemController
      * @apiSuccess {DateTime} start            Datetime of first Time Interval's start_at
      * @apiSuccess {DateTime} end              DateTime of last Time Interval's end_at
      *
-     * @param Request $request
+     * @apiError (Error 400) {String} error  Name of error
+     * @apiError (Error 400) {String} reason Reason of error
      *
+     * @param Request $request
      * @return JsonResponse
      */
     public function project(Request $request): JsonResponse
@@ -250,7 +252,7 @@ class TimeController extends ItemController
     /**
      * Display the Tasks and its total time.
      *
-     * @api {post} /api/v1/time/tasks Tasks
+     * @api {POST|GET} /api/v1/time/tasks Tasks
      * @apiParamExample {json} Request-Example:
      *  {
      *      "user_id":        1,
@@ -292,7 +294,6 @@ class TimeController extends ItemController
      * @apiSuccess {DateTime} total.end        DateTime of last Time Interval's end_at
      *
      * @param Request $request
-     *
      * @return JsonResponse
      */
     public function tasks(Request $request): JsonResponse
@@ -375,7 +376,7 @@ class TimeController extends ItemController
     /**
      * Display the Task and its total time.
      *
-     * @api {post} /api/v1/time/task Task
+     * @api {POST|GET} /api/v1/time/task Task
      * @apiParamExample {json} Request-Example:
      *  {
      *      "user_id":        1,
@@ -416,8 +417,10 @@ class TimeController extends ItemController
      * @apiSuccess {DateTime} total.start      Datetime of first Time Interval's start_at
      * @apiSuccess {DateTime} total.end        DateTime of last Time Interval's end_at
      *
-     * @param Request $request
+     * @apiError (Error 400) {String} error  Name of error
+     * @apiError (Error 400) {String} reason Reason of error
      *
+     * @param Request $request
      * @return JsonResponse
      */
     public function task(Request $request): JsonResponse
@@ -516,7 +519,7 @@ class TimeController extends ItemController
     /**
      * Display time of user's single task.
      *
-     * @api {post} /api/v1/time/task-user TaskUser
+     * @api {POST|GET} /api/v1/time/task-user TaskUser
      * @apiParamExample {json} Request-Example:
      *  {
      *      "user_id":        1,
@@ -549,8 +552,10 @@ class TimeController extends ItemController
      * @apiSuccess {DateTime} start            Datetime of first Task's Time Interval's start_at
      * @apiSuccess {DateTime} end              DateTime of last Task's Time Interval's end_at
      *
-     * @param Request $request
+     * @apiError (Error 400) {String} error  Name of error
+     * @apiError (Error 400) {String} reason Reason of error
      *
+     * @param Request $request
      * @return JsonResponse
      */
     public function taskUser(Request $request): JsonResponse

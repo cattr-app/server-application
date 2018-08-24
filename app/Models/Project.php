@@ -21,7 +21,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $updated_at
  * @property string $deleted_at
  *
- * @property User $user
+ * @property User $users
  * @property Task[] $tasks
  */
 class Project extends Model

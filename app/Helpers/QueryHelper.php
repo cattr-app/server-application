@@ -49,6 +49,7 @@ class QueryHelper
             $with = explode(',', $filter['with']);
             if ($with) {
                 foreach ($with as $relation) {
+                    $relation = trim($relation);
                     if (strpos($relation, '.') !== False) {
                         $params = explode('.', $relation);
                         $domain = array_shift($params);

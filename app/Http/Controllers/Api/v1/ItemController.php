@@ -77,6 +77,26 @@ abstract class  ItemController extends Controller
     }
 
     /**
+     * @apiDefine DefaultCreateErrorResponse
+     * @apiError (Error 400) {String} error  Name of error
+     * @apiError (Error 400) {String} reason Reason of error
+     */
+
+    /**
+     * @apiDefine DefaultBulkCreateErrorResponse
+     * @apiError (Error 200) {Object[]}  messages               Errors (Array of objects)
+     * @apiError (Error 200) {Object}    messages.object        Error object
+     * @apiError (Error 200) {String}    messages.object.error  Name of error
+     * @apiError (Error 200) {String}    messages.object.reason Reason of error
+     * @apiError (Error 200) {Integer}   messages.object.code   Code of error
+     *
+     * @apiError (Error 400) {Object[]} messages               Errors (Array of objects)
+     * @apiError (Error 400) {Object}   messages.object        Error object
+     * @apiError (Error 400) {String}   messages.object.error  Name of error
+     * @apiError (Error 400) {String}   messages.object.reason Reason of error
+     */
+
+    /**
      * Create item
      *
      * @param Request $request
@@ -95,6 +115,7 @@ abstract class  ItemController extends Controller
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
                     'error' => 'Validation fail',
+                    'reason' => $validator->errors()
                 ]),
                 400
             );
@@ -113,6 +134,12 @@ abstract class  ItemController extends Controller
             ])
         );
     }
+
+    /**
+     * @apiDefine DefaultShowErrorResponse
+     * @apiError (Error 400) {String} error  Name of error
+     * @apiError (Error 400) {String} reason Reason of error
+     */
 
     /**
      * Display the specified resource.
@@ -153,6 +180,26 @@ abstract class  ItemController extends Controller
             Filter::process($this->getEventUniqueName('answer.success.item.show'), $item->first())
         );
     }
+
+    /**
+     * @apiDefine DefaultEditErrorResponse
+     * @apiError (Error 400) {String} error  Name of error
+     * @apiError (Error 400) {String} reason Reason of error
+     */
+
+    /**
+     * @apiDefine DefaultBulkEditErrorResponse
+     * @apiError (Error 200) {Object[]}  messages               Errors (Array of objects)
+     * @apiError (Error 200) {Object}    messages.object        Error object
+     * @apiError (Error 200) {String}    messages.object.error  Name of error
+     * @apiError (Error 200) {String}    messages.object.reason Reason of error
+     * @apiError (Error 200) {Integer}   messages.object.code   Code of error
+     *
+     * @apiError (Error 400) {Object[]} messages               Errors (Array of objects)
+     * @apiError (Error 400) {Object}   messages.object        Error object
+     * @apiError (Error 400) {String}   messages.object.error  Name of error
+     * @apiError (Error 400) {String}   messages.object.reason Reason of error
+     */
 
     /**
      * Show the form for editing the specified resource.
@@ -233,6 +280,34 @@ abstract class  ItemController extends Controller
             ])
         );
     }
+
+    /**
+     * @apiDefine DefaultDestroyRequestExample
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id": 1
+     *  }
+     */
+
+    /**
+    * @apiDefine DefaultDestroyResponse
+    * @apiSuccess {String}    message      Message about success remove
+    * @apiError   (Error 404) ItemNotFound HTTP/1.1 404 Page Not Found
+    */
+
+    /**
+     * @apiDefine DefaultBulkDestroyErrorResponse
+     * @apiError (Error 200) {Object[]}  messages               Errors (Array of objects)
+     * @apiError (Error 200) {Object}    messages.object        Error object
+     * @apiError (Error 200) {String}    messages.object.error  Name of error
+     * @apiError (Error 200) {String}    messages.object.reason Reason of error
+     * @apiError (Error 200) {Integer}   messages.object.code   Code of error
+     *
+     * @apiError (Error 400) {Object[]} messages               Errors (Array of objects)
+     * @apiError (Error 400) {Object}   messages.object        Error object
+     * @apiError (Error 400) {String}   messages.object.error  Name of error
+     * @apiError (Error 400) {String}   messages.object.reason Reason of error
+     */
 
     /**
      * Remove the specified resource from storage.
