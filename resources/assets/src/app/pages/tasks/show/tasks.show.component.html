@@ -4,67 +4,91 @@
             <div class="panel panel-default">
                 <div class="panel-heading">{{ item.id }} - {{ item.task_name }}</div>
                 <div class="panel-body">
-
                     <a routerLink="/tasks/list" title="Back">
                         <button class="btn btn-warning">
                             <i class="fa fa-arrow-left" aria-hidden="true"></i>
                             <span translate>control.back</span>
                         </button>
                     </a>
+
                     <a [routerLink]="['/tasks/edit', item.id]" title="Edit task">
                         <button class="btn btn-primary">
                             <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
                             <span translate>control.edit</span>
                         </button>
                     </a>
+
+                    <a *ngIf="item.url" [attr.href]="item.url" title="View in redmine">
+                        <button class="btn btn-primary">
+                            <span>View in redmine</span>
+                        </button>
+                    </a>
+
                     <div class="show-info">
                         <div class="table-responsive">
                             <table class="table table-borderless">
                                 <tbody>
-                                <tr>
-                                    <th translate>field.id</th>
-                                    <td>{{ item.id }}</td>
-                                </tr>
-                                <tr>
-                                    <th translate>field.project</th>
-                                    <td> {{ item.project && item.project.name}}</td>
-                                </tr>
-                                <tr>
-                                    <th translate>field.name</th>
-                                    <td> {{ item.task_name }}</td>
-                                </tr>
-                                <tr>
-                                    <th translate>field.description</th>
-                                    <td> {{ item.description }}</td>
-                                </tr>
-                                <tr>
-                                    <th translate>field.active</th>
-                                    <td> {{ item.active }}</td>
-                                </tr>
-                                <tr>
-                                    <th translate>field.user</th>
-                                    <td> {{ item.user && item.user.full_name }}</td>
-                                </tr>
-                                <tr>
-                                    <th translate>field.assigned</th>
-                                    <td> {{ item.assigned && item.assigned.full_name }}</td>
-                                </tr>
-                                <tr>
-                                    <th translate>field.url</th>
-                                    <td> {{ item.url }}</td>
-                                </tr>
-                                <tr>
-                                    <th translate>field.created</th>
-                                    <td> {{ item.created_at }}</td>
-                                </tr>
-                                <tr>
-                                    <th translate>field.updated</th>
-                                    <td> {{ item.updated_at }}</td>
-                                </tr>
+                                    <tr>
+                                        <th translate>field.id</th>
+                                        <td>{{ item.id }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th translate>field.project</th>
+                                        <td> {{ item.project && item.project.name}}</td>
+                                    </tr>
+                                    <tr>
+                                        <th translate>field.name</th>
+                                        <td> {{ item.task_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th translate>field.description</th>
+                                        <td> {{ item.description }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th translate>field.active</th>
+                                        <td> {{ item.active }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th translate>field.user</th>
+                                        <td> {{ item.user && item.user.full_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th translate>field.assigned</th>
+                                        <td> {{ item.assigned && item.assigned.full_name }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th translate>field.url</th>
+                                        <td> {{ item.url }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th translate>field.created</th>
+                                        <td> {{ item.created_at }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th translate>field.updated</th>
+                                        <td> {{ item.updated_at }}</td>
+                                    </tr>
+                                    <tr>
+                                        <th>Total time</th>
+                                        <td>{{ formatDurationString(totalTime) }}</td>
+                                    </tr>
                                 </tbody>
                             </table>
                         </div>
                     </div>
+
+                    <accordion>
+                        <accordion-group class="user" *ngFor="let userInfo of users">
+                            <div accordion-heading>
+                                <span class="user__name">{{ userInfo.user.full_name }}</span>
+                                <span class="user__time">{{ formatDurationString(userInfo.time) }}</span>
+                            </div>
+
+                            <screenshot-list [autoload]="false"
+                                [showUser]="false" [showProject]="false" [showTask]="false"
+                                [user_ids]="[userInfo.user.id]" [task_ids]="[item.id]"></screenshot-list>
+                        </accordion-group>
+                    </accordion>
                 </div>
             </div>
         </div>

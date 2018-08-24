@@ -7,6 +7,8 @@ import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {ProjectsService} from './pages/projects/projects.service';
 import {DualListComponent, AngularDualListBoxModule} from 'angular-dual-listbox';
 import {TranslateModule} from '@ngx-translate/core';
+import { ScreenshotListComponent } from './screenshot-list/screenshot-list.component';
+import { ScreenshotsService } from './pages/screenshots/screenshots.service';
 
 @NgModule({
     imports: [
@@ -20,6 +22,7 @@ import {TranslateModule} from '@ngx-translate/core';
     declarations: [
         UsersFiltersComponent,
         ProjectsFiltersComponent,
+        ScreenshotListComponent,
     ],
     exports: [
         CommonModule,
@@ -29,10 +32,12 @@ import {TranslateModule} from '@ngx-translate/core';
         ReactiveFormsModule,
         UsersFiltersComponent,
         ProjectsFiltersComponent,
+        ScreenshotListComponent,
         DualListComponent,
     ],
     providers: [
-        ProjectsService
+        ProjectsService,
+        ScreenshotsService,
     ]
 })
 

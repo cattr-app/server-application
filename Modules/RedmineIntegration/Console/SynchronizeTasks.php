@@ -181,6 +181,7 @@ class SynchronizeTasks extends Command
                     'description' => $taskFromRedmine['description'],
                     'active'      => in_array($taskFromRedmine['status']['id'], $active_status_ids),
                     'user_id'     => $userId,
+                    'url'         => $this->userRepo->getUserRedmineUrl($userId) . '/issues/' . $taskFromRedmine['id'],
                 ];
 
                 foreach ($data as $key => $value) {

@@ -1,4 +1,4 @@
-import {NgModule, OnInit} from '@angular/core';
+import {NgModule} from '@angular/core';
 import {CommonModule} from '@angular/common';
 import {FormsModule} from '@angular/forms';
 
@@ -17,7 +17,7 @@ import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
 import {TranslateModule} from '@ngx-translate/core';
-
+import { AccordionModule } from 'ngx-bootstrap/accordion';
 
 @NgModule({
     imports: [
@@ -29,6 +29,7 @@ import {TranslateModule} from '@ngx-translate/core';
         GrowlModule,
         SharedModule,
         TranslateModule,
+        AccordionModule.forRoot(),
     ],
     declarations: [
         TasksCreateComponent,

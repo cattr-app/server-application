@@ -11,7 +11,6 @@ import {ScreenshotsShowComponent} from './show/screenshots.show.component';
 import {ScreenshotsListComponent} from './list/screenshots.list.component';
 
 import {HttpClientModule} from '@angular/common/http';
-import {ScreenshotsService} from './screenshots.service';
 import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
@@ -36,7 +35,6 @@ import {TranslateModule} from '@ngx-translate/core';
     ],
     providers: [
         LoginService,
-        ScreenshotsService
     ]
 })
 
