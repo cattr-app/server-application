@@ -28,6 +28,7 @@ export class NavigationComponent implements OnInit {
 
     protected itemsAuthorized: NavigationLink[] = [
         {title: 'navigation.dashboard', action: 'dashboard', isLink: true, permissions: [ 'dashboard' ] },
+        {title: 'navigation.projectsreport', action: 'report', isLink: true, permissions: [ 'users/list', 'time-intervals/list'  ]},
         {title: 'navigation.projects', action: 'projects/list', isLink: true, permissions: [ 'projects/list' ]},
         {title: 'navigation.tasks', action: 'tasks/list', isLink: true, permissions: [ 'tasks/list' ]},
         {title: 'navigation.users', action: 'users/list', isLink: true, permissions: [ 'users/list' ]},
