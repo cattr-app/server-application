@@ -2,6 +2,7 @@
 	"navigation": {
 		"dashboard": "Панель приборов",
 	    "login": "Авторизация",
+    "projectsreport": "Отчёт проектов",
 		"forgot": "Забыл пароль",
 		"reset": "Сбросить пароль",
 		"register": "Регистрация",

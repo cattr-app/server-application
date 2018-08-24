@@ -1,7 +1,8 @@
 {
 	"navigation": {
 		"dashboard": "Dashboard",
-	    "login": "Login",
+    "login": "Login",
+    "projectsreport": "Projects report",
 		"forgot": "Forgot",
 		"reset": "Reset",
 		"register": "Register",
