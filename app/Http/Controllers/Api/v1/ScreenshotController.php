@@ -49,6 +49,22 @@ class ScreenshotController extends ItemController
 
 
     /**
+     * @apiDefine ScreenshotRelations
+     *
+     * @apiParam {String} [with]                      For add relation model in response
+     * @apiParam {Object} [timeInterval] `QueryParam` Screenshot's relation timeInterval. All params in <a href="#api-Time_Interval-GetTimeIntervalList" >@Time_Interval</a>
+     */
+
+    /**
+     * @apiDefine ScreenshotRelationsExample
+     * @apiParamExample {json} Request-With-Relations-Example:
+     *  {
+     *      "with":                  "timeInterval,timeInterval.task",
+     *      "timeInterval.tasks.id": [">", 1]
+     *  }
+     */
+
+    /**
      * @api {post} /api/v1/screenshots/list List
      * @apiDescription Get list of Screenshots
      * @apiVersion 0.1.0
@@ -62,9 +78,29 @@ class ScreenshotController extends ItemController
      * @apiParam {String}   [path]             `QueryParam` Image path URI
      * @apiParam {DateTime} [created_at]       `QueryParam` Screenshot Creation DateTime
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
-     * @apiParam {DateTime} [deleted_at]       `QueryParam` When Screenshot was deleted (null if not)
+     * @apiUse ScreenshotRelations
      *
-     * @apiSuccess (200) {Screenshot[]} ScreenshotList array of Screenshot objects
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id":               [">", 1],
+     *      "time_interval_id": ["=", [1,2,3]],
+     *      "user_id":          ["=", [1,2,3]],
+     *      "project_id":       ["=", [1,2,3]],
+     *      "path":             ["like", "%lorem%"],
+     *      "created_at":       [">", "2019-01-01 00:00:00"],
+     *      "updated_at":       ["<", "2019-01-01 00:00:00"]
+     *  }
+     * @apiUse ScreenshotRelationsExample
+     *
+     * @apiSuccess {Object[]} ScreenshotList                             Screenshots (Array of objects)
+     * @apiSuccess {Object}   ScreenshotList.Screenshot                  Screenshot object
+     * @apiSuccess {Integer}  ScreenshotList.Screenshot.id               Screenshot's ID
+     * @apiSuccess {Integer}  ScreenshotList.Screenshot.time_interval_id Screenshot's Time Interval ID
+     * @apiSuccess {String}   ScreenshotList.Screenshot.path             Screenshot's Image path URI
+     * @apiSuccess {DateTime} ScreenshotList.Screenshot.created_at       Screenshot's date time of create
+     * @apiSuccess {DateTime} ScreenshotList.Screenshot.updated_at       Screenshot's date time of update
+     * @apiSuccess {DateTime} ScreenshotList.Screenshot.deleted_at       Screenshot's date time of delete
+     * @apiSuccess {Object}   ScreenshotList.Screenshot.time_interval    Screenshot's Task
      *
      * @param Request $request
      * @return JsonResponse
@@ -93,6 +129,24 @@ class ScreenshotController extends ItemController
      * @apiName CreateScreenshot
      * @apiGroup Screenshot
      *
+     * @apiParam {Integer} time_interval_id  Screenshot's Time Interval ID
+     * @apiParam {Binary}  screenshot        Screenshot file
+     *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "time_interval_id": 1,
+     *      "screenshot": ```binary data```
+     *  }
+     *
+     * @apiSuccess {Object}   Screenshot                  Screenshot object
+     * @apiSuccess {Integer}  Screenshot.id               Screenshot's ID
+     * @apiSuccess {Integer}  Screenshot.time_interval_id Screenshot's Time Interval ID
+     * @apiSuccess {String}   Screenshot.path             Screenshot's Image path URI
+     * @apiSuccess {DateTime} Screenshot.created_at       Screenshot's date time of create
+     * @apiSuccess {DateTime} Screenshot.updated_at       Screenshot's date time of update
+     *
+     * @apiUse DefaultCreateErrorResponse
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -115,6 +169,7 @@ class ScreenshotController extends ItemController
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
                     'error' => 'validation fail',
+                    'reason' => $validator->errors()
                 ]),
                 400
             );
@@ -136,6 +191,37 @@ class ScreenshotController extends ItemController
      * @apiVersion 0.1.0
      * @apiName ShowScreenshot
      * @apiGroup Screenshot
+     *
+     * @apiParam {Integer}  id                              Screenshot ID
+     * @apiParam {Integer}  [time_interval_id] `QueryParam` Screenshot's Time Interval ID
+     * @apiParam {String}   [path]             `QueryParam` Image path URI
+     * @apiParam {DateTime} [created_at]       `QueryParam` Screenshot Creation DateTime
+     * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
+     * @apiUse ScreenshotRelations
+     *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id":               1,
+     *      "time_interval_id": ["=", [1,2,3]],
+     *      "path":             ["like", "%lorem%"],
+     *      "created_at":       [">", "2019-01-01 00:00:00"],
+     *      "updated_at":       ["<", "2019-01-01 00:00:00"]
+     *  }
+     * @apiUse ScreenshotRelationsExample
+     *
+     * @apiSuccess {Object}   Screenshot                  Screenshot object
+     * @apiSuccess {Integer}  Screenshot.id               Screenshot's ID
+     * @apiSuccess {Integer}  Screenshot.time_interval_id Screenshot's Time Interval ID
+     * @apiSuccess {String}   Screenshot.path             Screenshot's Image path URI
+     * @apiSuccess {DateTime} Screenshot.created_at       Screenshot's date time of create
+     * @apiSuccess {DateTime} Screenshot.updated_at       Screenshot's date time of update
+     * @apiSuccess {DateTime} Screenshot.deleted_at       Screenshot's date time of delete
+     * @apiSuccess {Object}   Screenshot.time_interval    Screenshot's Task
+     *
+     * @apiUse DefaultShowErrorResponse
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
 
     /**
@@ -144,15 +230,45 @@ class ScreenshotController extends ItemController
      * @apiVersion 0.1.0
      * @apiName EditScreenshot
      * @apiGroup Screenshot
+     * @apiParam {Integer}  id               Screenshot ID
+     * @apiParam {Integer}  time_interval_id Screenshot's Time Interval ID
+     * @apiParam {String}   path             Image path URI
+     * @apiParam {DateTime} [created_at]     Screenshot Creation DateTime
+     * @apiParam {DateTime} [updated_at]     Last Screenshot data update DataTime
+     *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id":               1,
+     *      "time_interval_id": 2,
+     *      "path":             "test"
+     *  }
+     *
+     * @apiSuccess {Object}   Screenshot                  Screenshot object
+     * @apiSuccess {Integer}  Screenshot.id               Screenshot's ID
+     * @apiSuccess {Integer}  Screenshot.time_interval_id Screenshot's Time Interval ID
+     * @apiSuccess {String}   Screenshot.path             Screenshot's Image path URI
+     * @apiSuccess {DateTime} Screenshot.created_at       Screenshot's date time of create
+     * @apiSuccess {DateTime} Screenshot.updated_at       Screenshot's date time of update
+     * @apiSuccess {DateTime} Screenshot.deleted_at       Screenshot's date time of delete
+     *
+     * @apiUse DefaultEditErrorResponse
+     *
+     * @param Request $request
+     * @return JsonResponse
      */
 
     /**
      * @api {post} /api/v1/screenshots/destroy Destroy
+     * @apiUse DefaultDestroyRequestExample
      * @apiDescription Destroy Screenshot
      * @apiVersion 0.1.0
      * @apiName DestroyScreenshot
      * @apiGroup Screenshot
-     * @apiParam {Integer} [user_id] `QueryParam` Screenshot's User ID
+     *
+     * @apiParam {String} id Screenshot's id
+     *
+     * @apiUse DefaultDestroyResponse
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -164,15 +280,36 @@ class ScreenshotController extends ItemController
      * @apiName GetScreenshotDashboard
      * @apiGroup Screenshot
      *
-     * @apiParam {Integer} [id] `QueryParam` Screenshot ID
-     * @apiParam {Integer} [time_interval_id] `QueryParam` Screenshot's Time Interval ID
-     * @apiParam {Integer} [user_id] `QueryParam` Screenshot's User ID
-     * @apiParam {String} [path] `QueryParam` Image path URI
-     * @apiParam {DateTime} [created_at] `QueryParam` Screenshot Creation DateTime
-     * @apiParam {DateTime} [updated_at] `QueryParam` Last Screenshot data update DataTime
-     * @apiParam {DateTime} [deleted_at] `QueryParam` When Screenshot was deleted (null if not)
+     * @apiParam {Integer}  [id]               `QueryParam` Screenshot ID
+     * @apiParam {Integer}  [time_interval_id] `QueryParam` Screenshot's Time Interval ID
+     * @apiParam {Integer}  [user_id]          `QueryParam` Screenshot's User ID
+     * @apiParam {String}   [path]             `QueryParam` Image path URI
+     * @apiParam {DateTime} [created_at]       `QueryParam` Screenshot Creation DateTime
+     * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
+     * @apiUse ScreenshotRelations
      *
-     * @apiSuccess (200) {Screenshots[]} ScreenshotList array of Screenshot objects and interval
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "id":               1,
+     *      "time_interval_id": ["=", [1,2,3]],
+     *      "user_id":          ["=", [1,2,3]],
+     *      "project_id":       ["=", [1,2,3]],
+     *      "path":             ["like", "%lorem%"],
+     *      "created_at":       [">", "2019-01-01 00:00:00"],
+     *      "updated_at":       ["<", "2019-01-01 00:00:00"]
+     *  }
+     * @apiUse ScreenshotRelationsExample
+     *
+     * @apiSuccess {Object[]} Array                                            Array of objects
+     * @apiSuccess {DateTime} Array.object.interval                            Time of interval
+     * @apiSuccess {Object[]} Array.object.screenshots                         Screenshots of interval (Array of objects, 6 indexes)
+     * @apiSuccess {Integer}  Array.object.screenshots.object.id               Screenshot's ID
+     * @apiSuccess {Integer}  Array.object.screenshots.object.time_interval_id Screenshot's Time Interval ID
+     * @apiSuccess {String}   Array.object.screenshots.object.path             Screenshot's Image path URI
+     * @apiSuccess {DateTime} Array.object.screenshots.object.created_at       Screenshot's date time of create
+     * @apiSuccess {DateTime} Array.object.screenshots.object.updated_at       Screenshot's date time of update
+     * @apiSuccess {DateTime} Array.object.screenshots.object.deleted_at       Screenshot's date time of delete
+     * @apiSuccess {Object}   Array.object.screenshots.object.time_interval    Screenshot's Task
      *
      * @return \Illuminate\Http\JsonResponse
      */

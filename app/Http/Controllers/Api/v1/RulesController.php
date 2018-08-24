@@ -48,6 +48,22 @@ class RulesController extends ItemController
     }
 
     /**
+     * @apiDefine RuleRelations
+     *
+     * @apiParam {String} [with]              For add relation model in response
+     * @apiParam {Object} [role] `QueryParam` Rules's relation role. All params in <a href="#api-Roles-GetRolesList" >@Role</a>
+     */
+
+    /**
+     * @apiDefine RuleRelationsExample
+     * @apiParamExample {json} Request-With-Relations-Example:
+     *  {
+     *      "with":      "role",
+     *      "role.name": ["like", "%lorem%"]
+     *  }
+     */
+
+    /**
      * @api {post} /api/v1/rules/edit Edit
      * @apiDescription Edit Rule
      * @apiVersion 0.1.0
@@ -59,7 +75,17 @@ class RulesController extends ItemController
      * @apiParam {String}  action  Action name
      * @apiParam {Boolean} allow   Allow status
      *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "role_id": 2,
+     *      "object": "projects",
+     *      "action": "create",
+     *      "allow": 1
+     *  }
+     *
      * @apiSuccess {String} message OK
+     *
+     * @apiUse DefaultEditErrorResponse
      *
      * @param Request $request
      *
@@ -117,8 +143,29 @@ class RulesController extends ItemController
      * @apiParam {String}   rules.object.action  Rule's action name
      * @apiParam {Boolean}  rules.object.allow   Rule's allow status
      *
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "rules":
+     *      [
+     *          {
+     *              "role_id": 2,
+     *              "object": "projects",
+     *              "action": "create",
+     *              "allow": 0
+     *          },
+     *          {
+     *              "role_id": 2,
+     *              "object": "projects",
+     *              "action": "list",
+     *              "allow": 0
+     *          }
+     *      ]
+     *  }
+     *
      * @apiSuccess {String[]} messages         Array of string response
      * @apiSuccess {String}   messages.message OK
+     *
+     * @apiUse DefaultEditErrorResponse
      *
      * @param Request $request
      *
@@ -133,9 +180,9 @@ class RulesController extends ItemController
         if (empty($requestData['rules'])) {
             return response()->json(Filter::process(
                 $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'rules is empty'
-                ]),
+                'error' => 'validation fail',
+                'reason' => 'rules is empty'
+            ]),
                 400
             );
         }

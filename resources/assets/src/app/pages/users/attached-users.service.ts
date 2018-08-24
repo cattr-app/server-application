@@ -25,17 +25,15 @@ export class AttachedUsersService {
     }
 
     getItems(callback, id ?: number) {
-        const itemsArray: Item[] = [];
         const userId: any = {'id': id ? id : this.api.getUser().id};
 
         return this.api.send(
             this.getApiPath() + '/relations',
             userId,
             (result) => {
-                result.forEach((itemFromApi) => {
-                    itemsArray.push(this.convertFromApi(itemFromApi));
-                });
-
+                const itemsArray = Object.keys(result)
+                    .map(key => result[key])
+                    .map(this.convertFromApi);
                 callback(itemsArray);
             },
             this.errorCallback.bind(this)

@@ -17,8 +17,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $created_at
  * @property string $updated_at
  *
- * @property User $users
- * @property Rule $Project
+ * @property User    $user
+ * @property Project $project
  */
 class ProjectsUsers extends Model
 {

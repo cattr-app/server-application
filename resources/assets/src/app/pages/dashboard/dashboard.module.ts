@@ -1,4 +1,4 @@
-import { NgModule, OnInit } from '@angular/core';
+import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 
@@ -15,6 +15,7 @@ import { ScreenshotListComponent } from './screenshotlist/screenshot.list.compon
 
 import {TranslateModule} from '@ngx-translate/core';
 import { StatisticModule } from '../statistic/statistic.module';
+import { TabsModule } from 'ngx-bootstrap';
 
 @NgModule({
   imports: [
@@ -25,6 +26,7 @@ import { StatisticModule } from '../statistic/statistic.module';
     NgxPaginationModule,
     TranslateModule,
     StatisticModule,
+    TabsModule.forRoot(),
   ],
   declarations: [
     DashboardComponent,

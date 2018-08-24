@@ -44,16 +44,47 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
+     * @apiDefine ProjectUserRelations
+     * @apiParam {Object} [user]    `QueryParam` ProjectUser's relation user. All params in <a href="#api-User-GetUserList" >@User</a>
+     * @apiParam {Object} [project] `QueryParam` ProjectUser's relation project. All params in <a href="#api-Project-GetProjectList" >@Project</a>
+     */
+
+    /**
+     * @apiDefine ProjectUserRelationsExample
+     * @apiParamExample {json} Request-With-Relations-Example:
+     *  {
+     *      "with":                 "project, user, project.tasks",
+     *      "project.id":           [">", 1],
+     *      "project.tasks.active": 1,
+     *      "user.full_name":       ["like", "%lorem%"]
+     *  }
+     */
+
+    /**
      * @api {any} /api/v1/projects-users/list List
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "user_id":        ["=", [1,2,3]],
+     *      "project_id":     [">", 1]
+     *  }
+     * @apiUse ProjectUserRelationsExample
      * @apiDescription Get list of Projects Users relations
      * @apiVersion 0.1.0
      * @apiName GetProjectUsersList
      * @apiGroup ProjectUsers
      *
-     * @apiParam {Integer} [project_id] `QueryParam` Project ID
-     * @apiParam {Integer} [user_id]    `QueryParam` User ID
+     * @apiParam {Integer} [project_id] `QueryParam` Project-User's Project ID
+     * @apiParam {Integer} [user_id]    `QueryParam` Project-User's User ID
+     * @apiUse ProjectUserRelations
      *
-     * @apiSuccess {ProjectUsers[]} ProjectUsersList array of Project Users objects
+     * @apiSuccess {Objects[]} ProjectUsersList                         Array of Project-Users objects
+     * @apiSuccess {Objects}   ProjectUsersList.ProjectUser             Project-User object
+     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.user_id     Project-User's User ID
+     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.project_id  Project-User's Project ID
+     * @apiSuccess {DateTime}  ProjectUsersList.ProjectUser.created_at  Project-User's date time of create
+     * @apiSuccess {DateTime}  ProjectUsersList.ProjectUser.updated_at  Project-User's date time of update
+     * @apiSuccess {Object}    ProjectUsersList.ProjectUser.user        Project-User's User
+     * @apiSuccess {Object}    ProjectUsersList.ProjectUser.project     Project-User's Project
      *
      * @param Request $request
      *
@@ -62,10 +93,25 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @api {post} /api/v1/projects-users/create Create
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "project_id": 1,
+     *      "user_id": 45
+     *  }
      * @apiDescription Create Project Users relation
      * @apiVersion 0.1.0
      * @apiName CreateProjectUsers
      * @apiGroup ProjectUsers
+     *
+     * @apiParam {Integer} project_id Project-User's Project ID
+     * @apiParam {Integer} user_id    Project-User's User ID
+     *
+     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.user_id     Project-User's User ID
+     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.project_id  Project-User's Project ID
+     * @apiSuccess {DateTime}  ProjectUsersList.ProjectUser.created_at  Project-User's date time of create
+     * @apiSuccess {DateTime}  ProjectUsersList.ProjectUser.updated_at  Project-User's date time of update
+     *
+     * @apiUse DefaultCreateErrorResponse
      *
      * @param Request $request
      * @return JsonResponse
@@ -105,17 +151,38 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @api {post} /api/v1/projects-users/bulk-create BulkCreate
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "relations":
+     *      [
+     *          {
+     *              "project_id":1,
+     *              "user_id":3
+     *          },
+     *          {
+     *              "project_id":1,
+     *              "user_id":2
+     *          }
+     *      ]
+     *  }
      * @apiDescription Multiple Create Project Users relation
      * @apiVersion 0.1.0
      * @apiName BulkCreateProjectUsers
      * @apiGroup ProjectUsers
      *
-     * @apiParam {Relations[]} array                   Array of object Project User relation
-     * @apiParam {Object}      array.object            Object Project User relation
-     * @apiParam {Integer}     array.object.project_id Project ID
-     * @apiParam {Integer}     array.object.user_id    User ID
+     * @apiParam {Object[]} relations                   Project-User relations (Array of object)
+     * @apiParam {Object}   relations.object            Object Project-User relation
+     * @apiParam {Integer}  relations.object.project_id Project-User's Project ID
+     * @apiParam {Integer}  relations.object.user_id    Project-User's User ID
      *
-     * @apiSuccess {Messages[]} array  Array of Project Users objects
+     * @apiSuccess {Object[]} messages                   Project-Users (Array of objects)
+     * @apiSuccess {Object}   messages.object            Project-Users object
+     * @apiSuccess {Integer}  messages.object.user_id    Project-User's User ID
+     * @apiSuccess {Integer}  messages.object.project_id Project-User's Project ID
+     * @apiSuccess {DateTime} messages.object.created_at Project-User's date time of create
+     * @apiSuccess {DateTime} messages.object.updated_at Project-User's date time of update
+     *
+     * @apiUse DefaultBulkCreateErrorResponse
      *
      * @param Request $request
      * @return JsonResponse
@@ -170,9 +237,22 @@ class ProjectsUsersController extends ItemController
     /**
      * @api {post} /api/v1/projects-users/destroy Destroy
      * @apiDescription Destroy Project Users relation
+     * @apiParamExample {json} Simple-Request-Example:
+     *  {
+     *      "project_id":1,
+     *      "user_id":4
+     *  }
      * @apiVersion 0.1.0
      * @apiName DestroyProjectUsers
      * @apiGroup ProjectUsers
+     *
+     * @apiParam {Integer} project_id Project-User's Project ID
+     * @apiParam {Integer} user_id    Project-User's User ID
+     *
+     * @apiSuccess {String} message Message about success item remove
+     *
+     * @apiError (Error 400) {String} error  Name of error
+     * @apiError (Error 400) {String} reason Reason of error
      *
      * @param Request $request
      * @return JsonResponse
@@ -229,18 +309,34 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @api {post} /api/v1/projects-users/bulk-destroy BulkDestroy
+     * @apiParamExample {json} Simple-Request-Example:
+     * {
+     *  "relations":
+     *  [
+     *      {
+     *          "project_id": 1,
+     *          "user_id": 4
+     *      },
+     *      {
+     *          "project_id": 2,
+     *          "user_id": 4
+     *      }
+     *  ]
+     * }
      * @apiDescription Multiple Destroy Project Users relation
      * @apiVersion 0.1.0
      * @apiName BulkDestroyProjectUsers
      * @apiGroup ProjectUsers
      *
-     * @apiParam {Relations[]} array                   Array of object Project User relation
-     * @apiParam {Object}      array.object            Object Project User relation
-     * @apiParam {Integer}     array.object.project_id Project ID
-     * @apiParam {Integer}     array.object.user_id    User ID
+     * @apiParam {Object[]} relations                   Project-User relations (Array of object)
+     * @apiParam {Object}   relations.object            Object Project-User relation
+     * @apiParam {Integer}  relations.object.project_id Project-User's Project ID
+     * @apiParam {Integer}  relations.object.user_id    Project-User's User ID
      *
-     * @apiSuccess {Messages[]} array         Array of Messages object
-     * @apiSuccess {Message}    array.object  Message
+     * @apiSuccess {Object[]} messages        Messages (Array of objects)
+     * @apiSuccess {Object}   messages.object Message about success item remove
+     *
+     * @apiUse DefaultBulkDestroyErrorResponse
      *
      * @param Request $request
      * @return JsonResponse

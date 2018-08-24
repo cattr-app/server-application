@@ -25,8 +25,8 @@ class RelationsUsersController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'user_id'          => 'required',
-            'attached_user_id' => 'required',
+            'user_id'          => 'required|exists:users,id',
+            'attached_user_id' => 'required|exists:users,id',
         ];
     }
 
