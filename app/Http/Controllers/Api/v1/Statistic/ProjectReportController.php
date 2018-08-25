@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\Models\ProjectsUsers;
+use DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\Api\v1\TimeIntervalController;
@@ -31,63 +33,43 @@ class ProjectReportController extends Controller
    * @param  Request $request [description]
    * @return [type]           [description]
    */
-  public function resources($start_at, $end_at)
+  public function resources($start_at, $end_at, $uids, $pids)
   {
-    // get intervals
-    $timeIntervals = TimeInterval::with('task:id,project_id,task_name')->where([
-      ['start_at', '>', $start_at],
-      ['end_at', '<', $end_at]
-    ])->get();
-    $tasks = Task::with('timeIntervals')->get();
-    dd($tasks->toArray());
-//    dd($timeIntervals->toArray());
-    // get users
-    $users_id = $timeIntervals->pluck('user_id')->unique();
-    $users = User::whereIn('id', $users_id)->get()->mapToGroups(function ($user) {
-      return [
-        $user->id => [
-          'id' => $user->id,
-          'title' => $user->full_name
-        ]
-      ];
-    })->toArray();
-
-    // get projects
-    $projects_id = $timeIntervals->pluck('task.project_id')->unique();
-    $projects = Project::whereIn('id', $projects_id)->get()->mapToGroups(function ($project) {
-      return [$project->id => $project->name];
+    $projects = Project::with(['users' => function ($q) use ($start_at, $end_at, $uids) {
+      return $q->with(['tasks' => function ($q) use ($start_at, $end_at) {
+        return $q->with(['timeIntervals' => function ($q) use ($start_at, $end_at) {
+          return $q->where([['start_at', '>', $start_at], ['end_at', '<', $end_at]])
+            ->select('task_id')
+            ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) duration')
+            ->groupBy('task_id');
+        }])->select('id', 'project_id', 'user_id', 'task_name');
+      }])->select('full_name', 'id')->whereIn('id', $uids);
+    }])->whereHas('users', function ($q) use ($start_at, $end_at, $uids) {
+      return $q->whereHas('tasks', function ($q) use ($start_at, $end_at) {
+        return $q->whereHas('timeIntervals', function ($q) use ($start_at, $end_at) {
+          return $q->where([['start_at', '>', $start_at], ['end_at', '<', $end_at]]);
+        });
+      })->whereIn('id', $uids);
+    })->select('id', 'name')
+      ->whereIn('id', $pids)
+      ->get();
+    $projects = $projects->map(function ($project) {
+      $project_time = 0;
+      $project->users = $project->users->map(function ($user) use (&$project_time) {
+        $tasks_time = 0;
+        $user->tasks->each(function ($task) use (&$tasks_time) {
+          $tasks_time += $task->timeIntervals[0]->duration;
+        });
+        $user['tasks_time'] = $tasks_time;
+        $project_time += $tasks_time;
+        return $user;
+      });
+      $project['project_time'] = $project_time;
+      return $project;
     });
-    // resource skeleton
-    $resources = $timeIntervals
-      ->mapToGroups(function ($item) {
-        return [$item->task->project_id => $item->user_id];
-      })
-      ->map(function ($item) {
-        return ['children' => collect($item)->unique()->values()];
-      })
-      ->toArray();
-
-    // dd($resources[29]['children']);
-
-    // handle resources at array level
-    foreach ($resources as $project_id => &$project) {
-      $project['id'] = $project_id;
-      $project['title'] = $projects[$project_id][0];
-      foreach ($project['children'] as $index => $user) {
-        $project['children'][$index] = $users[$user][0];
-      }
-       dd($project);
-      // $project->id = $project_id;
-      // $project->title = $projects[$project_id][0];
-
-      // $children = $project->children->toArray();
-      // foreach ($children as $index => $user) {
-      //     $children = $users[$user][0];
-      // }
-      // $project->children = $children;
-    }
-
-    return response()->json($resources);
+//    dd($projects[0]->users[0]->full_name);
+//    dd($projects->toArray());
+    return response()->json($projects);
   }
 
   /**
@@ -99,7 +81,9 @@ class ProjectReportController extends Controller
   {
     $start_at = $request->input('start_at');
     $end_at = $request->input('end_at');
-    return response()->json($this->resources($start_at, $end_at));
+    return response()->json($this->resources($start_at, $end_at, [1, 2], [1, 2]));
+
+
     $timeIntervals = TimeInterval::with('task:id,project_id')->where([
       ['start_at', '>', $start_at],
       ['end_at', '<', $end_at]
