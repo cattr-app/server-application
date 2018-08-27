@@ -1,5 +1,4 @@
 import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
-import { Router } from "@angular/router";
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
 import { PopoverDirective } from 'ngx-bootstrap';
@@ -215,13 +214,30 @@ export class StatisticTimeComponent implements OnInit {
         this.users$.subscribe(users => {
             this.users = users;
             this.userSelectItems = [{id: '', title: 'Select all'}, ...users];
-            this.selectedUserIds = users.map(user => user.id);
+
+            const userIdsStr = window.sessionStorage.getItem('dashboard-selected-users');
+            const userIds = userIdsStr !== null ? JSON.parse(userIdsStr) : null;
+            if (userIds !== null) {
+                this.selectedUserIds = userIds;
+                setTimeout(() => {
+                    this.userSelect.changeEvent.emit(this.users.filter(user =>
+                        this.selectedUserIds.includes(user.id)));
+                });
+            } else {
+                this.selectedUserIds = users.map(user => user.id);
+            }
+
             this.usersLoading = false;
         });
 
         const selectUser$ = this.userSelect.changeEvent.asObservable() as Observable<ResourceInput[]>;
         this.selectedUsers$ = this.users$.concat(selectUser$.map(users => {
-            return users.filter(user => user.id !== '');
+            users = users.filter(user => user.id !== '');
+
+            const selectedUserIds = users.map(user => user.id);
+            window.sessionStorage.setItem('dashboard-selected-users', JSON.stringify(selectedUserIds));
+
+            return users;
         })).share();
 
         this.view$ = this.viewSwitcher.setView.asObservable();
@@ -429,16 +445,17 @@ export class StatisticTimeComponent implements OnInit {
                 },
             },
             refetchResourcesOnNavigate: false,
+            resourceAreaWidth: '25%',
             resourceColumns: [
                 {
                     labelText: '',
                     text: () => '',
-                    width: '40px',
+                    width: '20px',
                 },
                 {
                     labelText: 'Name',
                     field: 'title',
-                    width: '120px',
+                    //width: '120px',
                 },
                 {
                     labelText: 'Time Worked',
@@ -447,7 +464,7 @@ export class StatisticTimeComponent implements OnInit {
                         const time = timeWorked !== undefined ? timeWorked.total : 0;
                         return this.formatDurationString(time);
                     },
-                    width: '120px',
+                    width: '100px',
                 },
             ],
             resources: async (callback) => {
@@ -694,24 +711,26 @@ export class StatisticTimeComponent implements OnInit {
                     if (currentTask !== undefined) {
                         const taskName = currentTask.task_name;
                         const taskUrl = 'tasks/show/' + currentTask.id;
+                        const $task = $(`<p class="current-task"><a href="${taskUrl}">${taskName}</a></p>`);
+                        $task.attr('title', taskName);
+                        $nameCell.append($task);
+
                         const currentProject = this.latestEventsProjects
                             .find(proj => +proj.id === +currentTask.project_id);
                         if (currentProject !== undefined) {
                             const projectName = currentProject.name;
                             const projectUrl = 'projects/show/' + currentProject.id;
-                            $nameCell.append(`
-<p class="current-task"><a href="${taskUrl}">${taskName}</a></p>
-<p class="current-proj"><a href="${projectUrl}">${projectName}</a></p>`);
-                        } else {
-                            $nameCell.append(`
-<p class="current-task"><a href="${taskUrl}">${taskName}</a></p>
-<p class="current-proj"></p>`);
+                            const $project = $(`<p class="current-proj"><a href="${projectUrl}">${projectName}</a></p>`);
+                            $project.attr('title', projectName);
+                            $nameCell.append($project);
                         }
                     }
                 } else {
                     $workingNowCell.removeClass('is_working_now');
                     const lastWorkedString = eventEnd.from(moment.utc().add(this.timezoneOffset, 'minutes'));
-                    $nameCell.append(`<p class="last-worked">Last worked ${lastWorkedString}</p>`);
+                    const $lastWorked = $(`<p class="last-worked">Last worked ${lastWorkedString}</p>`);
+                    $lastWorked.attr('title', lastWorkedString);
+                    $nameCell.append($lastWorked);
                 }
             }
         });

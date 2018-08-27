@@ -176,12 +176,18 @@ class SynchronizeTasks extends Command
             if ($taskExist != null) {
                 $task = Task::find($taskExist->entity_id);
                 $is_changed = false;
+
+                $user_redmine_url = $this->userRepo->getUserRedmineUrl($userId);
+                if (substr($user_redmine_url, -1) !== '/') {
+                    $user_redmine_url .= '/';
+                }
+
                 $data = [
                     'task_name'   => $taskFromRedmine['subject'],
                     'description' => $taskFromRedmine['description'],
                     'active'      => in_array($taskFromRedmine['status']['id'], $active_status_ids),
                     'user_id'     => $userId,
-                    'url'         => $this->userRepo->getUserRedmineUrl($userId) . '/issues/' . $taskFromRedmine['id'],
+                    'url'         => $user_redmine_url . 'issues/' . $taskFromRedmine['id'],
                 ];
 
                 foreach ($data as $key => $value) {

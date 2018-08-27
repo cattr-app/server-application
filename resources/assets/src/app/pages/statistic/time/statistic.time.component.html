@@ -1,4 +1,8 @@
 <div class="statistics">
+    <div class="statistics__buttons btn-group" role="group">
+        <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
+    </div>
+
     <div class="statistics__header">
         <view-switcher #viewSwitcher class="statistics__view-switcher">
             <div class="statistics__users">
@@ -7,10 +11,6 @@
                     [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
                 </ng-select>
                 <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
-            </div>
-
-            <div class="statistics__buttons btn-group" role="group">
-                <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
             </div>
         </view-switcher>
     </div>
