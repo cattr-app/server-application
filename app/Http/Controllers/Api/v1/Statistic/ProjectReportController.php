@@ -3,14 +3,10 @@
 namespace App\Http\Controllers\Api\v1\Statistic;
 
 use App\Models\ProjectsUsers;
-use DB;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
-use App\Http\Controllers\Api\v1\TimeIntervalController;
-use App\Models\TimeInterval;
-use App\Models\Task;
 use App\Models\Project;
-use App\User;
+use Nwidart\Modules\Collection;
 
 class ProjectReportController extends Controller
 {
@@ -33,32 +29,79 @@ class ProjectReportController extends Controller
    * @param  Request $request [description]
    * @return [type]           [description]
    */
-  public function resources($start_at, $end_at, $uids, $pids)
+  public function resources($uids, $pids, $start_at, $end_at)
   {
-    $projects = Project::with(['users' => function ($q) use ($start_at, $end_at, $uids) {
-      return $q->with(['tasks' => function ($q) use ($start_at, $end_at) {
-        return $q->with(['timeIntervals' => function ($q) use ($start_at, $end_at) {
-          return $q->where([['start_at', '>', $start_at], ['end_at', '<', $end_at]])
-            ->select('task_id')
-            ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) duration')
-            ->groupBy('task_id');
-        }])->select('id', 'project_id', 'user_id', 'task_name');
-      }])->select('full_name', 'id')->whereIn('id', $uids);
-    }])->whereHas('users', function ($q) use ($start_at, $end_at, $uids) {
-      return $q->whereHas('tasks', function ($q) use ($start_at, $end_at) {
-        return $q->whereHas('timeIntervals', function ($q) use ($start_at, $end_at) {
-          return $q->where([['start_at', '>', $start_at], ['end_at', '<', $end_at]]);
-        });
-      })->whereIn('id', $uids);
-    })->select('id', 'name')
-      ->whereIn('id', $pids)
-      ->get();
+    $projects = new Collection();
+    foreach ($pids as $pid) {
+      $project = Project::with(['users' => function ($q) use ($start_at, $end_at, $uids, $pid) {
+        return $q->with(['tasks' => function ($q) use ($start_at, $end_at, $pid) {
+          return $q->with(['timeIntervals' => function ($q) use ($start_at, $end_at) {
+            if ($end_at === '') {
+              $q = $q->where('start_at', $start_at);
+            } else {
+              $q = $q->where([['start_at', '>', $start_at], ['end_at', '<', $end_at]]);
+            }
+            return $q
+              ->select('task_id')
+              ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) duration')
+              ->groupBy('task_id');
+          }])->where('project_id', $pid)->select('id', 'project_id', 'user_id', 'task_name');
+        }])->select('full_name', 'id', 'avatar')
+          ->whereIn('id', $uids);
+      }])
+        ->whereHas('users', function ($q) use ($start_at, $end_at, $uids, $pid) {
+          return $q->whereHas('tasks', function ($q) use ($start_at, $end_at, $pid) {
+            return $q->whereHas('timeIntervals', function ($q) use ($start_at, $end_at) {
+              if ($end_at === '') {
+                $q = $q->where('start_at', '=', $start_at);
+              } else {
+                $q = $q->where([['start_at', '>', $start_at], ['end_at', '<', $end_at]]);
+              }
+              return $q;
+            })->where('project_id', $pid);
+          })->whereIn('id', $uids);
+        })
+        ->select('id', 'name')
+        ->where('id', $pid)
+        ->get();
+      if ($project->count() > 0) {
+        $projects->push($project->first());
+      }
+    }
+//    $projects = Project::query()
+//      ->whereIn('id', $pids)
+//      ->select('id', 'name');
+//    $projects = $projects->get()->map(function ($project) {
+//      $project->load(['users' => function ($q) use ($project) {
+//        return $q->select('id', 'full_name', 'avatar')
+//          ->with(['tasks' => function ($q) use ($project) {
+//            return $q->where('project_id', $project->id)
+//              ->select('id', 'project_id', 'task_name', 'user_id');
+//          }])
+//          ->whereHas('tasks', function ($q) use ($project) {
+//            return $q->where('project_id', $project->id);
+//          });
+//      }]);
+//      $project->filter(function ($project){
+//
+//      });
+//    });
+//    $projects = $projects->map(function ($project) {
+//      $users = $project->users->filter(function ($user){
+//        return $user->id === 1;
+//      });
+//      return $users;
+//    });
+//    dd($projects->toArray());
     $projects = $projects->map(function ($project) {
       $project_time = 0;
       $project->users = $project->users->map(function ($user) use (&$project_time) {
         $tasks_time = 0;
-        $user->tasks->each(function ($task) use (&$tasks_time) {
+        $user->tasks = $user->tasks->map(function ($task) use (&$tasks_time) {
           $tasks_time += $task->timeIntervals[0]->duration;
+          $task['duration'] = $task->timeIntervals[0]->duration;
+//          $task->forget('timeIntervals');
+          return $task;
         });
         $user['tasks_time'] = $tasks_time;
         $project_time += $tasks_time;
@@ -67,9 +110,16 @@ class ProjectReportController extends Controller
       $project['project_time'] = $project_time;
       return $project;
     });
-//    dd($projects[0]->users[0]->full_name);
-//    dd($projects->toArray());
-    return response()->json($projects);
+    $projects = $projects->map(function ($project) {
+      $p = new Collection($project);
+      $p['users'] = $project->users->filter(function ($user) {
+        return $user->tasks->count() > 0;
+      });
+      return $p;
+    });
+    dd($projects->toArray());
+    dd($projects);
+    return $projects;
   }
 
   /**
@@ -77,32 +127,26 @@ class ProjectReportController extends Controller
    * @param  Request $request [description]
    * @return [type]           [description]
    */
-  public function events(Request $request)
+  public function report(Request $request)
   {
-    $start_at = $request->input('start_at');
-    $end_at = $request->input('end_at');
-    return response()->json($this->resources($start_at, $end_at, [1, 2], [1, 2]));
-
-
-    $timeIntervals = TimeInterval::with('task:id,project_id')->where([
-      ['start_at', '>', $start_at],
-      ['end_at', '<', $end_at]
-    ])->get();
-    $events = $timeIntervals->map(function ($item) {
-      return [
-        'id' => $item->id,
-        'title' => '',
-        'resourceId' => [$item->task->project_id, $item->user_id],
-        'start' => (new \DateTime($item->start_at))->format('c'),
-        'end' => (new \DateTime($item->end_at))->format('c')
-      ];
-    });
-
-    return response()->json($events);
+    $start_at = $request->input('start_at') == null ? '' : $request->start_at;
+    $end_at = $request->input('end_at') == null ? '' : $request->end_at;
+    $uids = $request->uids;
+    $pids = $request->pids;
+    return response()->json($this->resources($uids, $pids, $start_at, $end_at));
   }
 
-  public function worked(Request $request)
+  public function projects(Request $request)
   {
-    return response()->json('piu');
+    $uids = $request->uids;
+    $projects = ProjectsUsers::query()
+      ->with(['project' => function ($q) {
+        return $q->select('id', 'name');
+      }])
+      ->whereIn('user_id', $uids)
+      ->get()
+      ->unique('project')
+      ->pluck('project');
+    return response()->json($projects);
   }
 }

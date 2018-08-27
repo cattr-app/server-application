@@ -26,6 +26,7 @@ class RoleSeeder extends Seeder
         $userAllow = [
           'project-report' => [
             'list',
+            'projects',
           ],
           'projects' => [
               'list',
@@ -142,6 +143,7 @@ class RoleSeeder extends Seeder
         $managerAllow = [
             'project-report' => [
                 'list',
+                'projects'
             ],
             'projects' => [
                 'list',

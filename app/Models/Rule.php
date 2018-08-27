@@ -145,9 +145,7 @@ class Rule extends Model
             ],
             'project-report' => [
                 'list' => __('Attached User relation list'),
-                'worked' => __(''),
-                'events' => __(''),
-                'resources' => __(''),
+                'projects' => __('Attached projects to users'),
             ],
         ]);
     }
