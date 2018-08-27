@@ -45,7 +45,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         }
 
         const result = [];
-        const chunkSize = 6;
+        const chunkSize = 12;
         for (let i = 0, len = this.itemsArray.length; i < len; i += chunkSize) {
             result.push(this.itemsArray.slice(i, i + chunkSize));
         }
