@@ -1,4 +1,4 @@
-<div class="row" *ngFor="let group of itemsChunked">
+<div class="screenshots-row row" *ngFor="let group of itemsChunked">
     <div class="screenshot-wrapper col-xs-6 col-sm-4 col-md-3 col-lg-2" *ngFor="let screenshot of group">
         <div class="card">
             <a [attr.href]="'/screenshots/show/' + screenshot.id" target="_blank">

@@ -1,6 +1,11 @@
 @import '../../variables';
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
+.screenshots-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
 .screenshot-wrapper {
     @media (max-width: $screen-xs-min - 1) {
         width: 100%;
