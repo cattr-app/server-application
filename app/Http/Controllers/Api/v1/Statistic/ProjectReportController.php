@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api\v1\Statistic;
 
 use App\Models\ProjectsUsers;
+use App\Models\Task;
+use App\Models\TimeInterval;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
@@ -32,6 +34,18 @@ class ProjectReportController extends Controller
   public function resources($uids, $pids, $start_at, $end_at)
   {
     $projects = new Collection();
+//    $tasks = Task::query()
+//      ->join('time_intervals', 'time_intervals.task_id', 'tasks.id')
+//      ->select('tasks.project_id', 'tasks.task_name', 'time_intervals.task_id')
+//      ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) duration')
+//      ->groupBy('project_id', 'task_name', 'task_id');
+//    foreach ($pids as $pid) {
+//      $project = Project::with(['users' => function ($q) use($task) {
+//        return $q->with($task);
+//      }]);
+//      dd($project->get());
+//    }
+
     foreach ($pids as $pid) {
       $project = Project::with(['users' => function ($q) use ($start_at, $end_at, $uids, $pid) {
         return $q->with(['tasks' => function ($q) use ($start_at, $end_at, $pid) {
@@ -45,8 +59,10 @@ class ProjectReportController extends Controller
               ->select('task_id')
               ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) duration')
               ->groupBy('task_id');
-          }])->where('project_id', $pid)->select('id', 'project_id', 'user_id', 'task_name');
-        }])->select('full_name', 'id', 'avatar')
+          }])->where('project_id', $pid)
+            ->select('id', 'project_id', 'user_id', 'task_name');
+        }])
+          ->select('full_name', 'id', 'avatar')
           ->whereIn('id', $uids);
       }])
         ->whereHas('users', function ($q) use ($start_at, $end_at, $uids, $pid) {
@@ -68,31 +84,6 @@ class ProjectReportController extends Controller
         $projects->push($project->first());
       }
     }
-//    $projects = Project::query()
-//      ->whereIn('id', $pids)
-//      ->select('id', 'name');
-//    $projects = $projects->get()->map(function ($project) {
-//      $project->load(['users' => function ($q) use ($project) {
-//        return $q->select('id', 'full_name', 'avatar')
-//          ->with(['tasks' => function ($q) use ($project) {
-//            return $q->where('project_id', $project->id)
-//              ->select('id', 'project_id', 'task_name', 'user_id');
-//          }])
-//          ->whereHas('tasks', function ($q) use ($project) {
-//            return $q->where('project_id', $project->id);
-//          });
-//      }]);
-//      $project->filter(function ($project){
-//
-//      });
-//    });
-//    $projects = $projects->map(function ($project) {
-//      $users = $project->users->filter(function ($user){
-//        return $user->id === 1;
-//      });
-//      return $users;
-//    });
-//    dd($projects->toArray());
     $projects = $projects->map(function ($project) {
       $project_time = 0;
       $project->users = $project->users->map(function ($user) use (&$project_time) {
@@ -117,8 +108,7 @@ class ProjectReportController extends Controller
       });
       return $p;
     });
-    dd($projects->toArray());
-    dd($projects);
+//    dd($projects->toArray());
     return $projects;
   }
 
