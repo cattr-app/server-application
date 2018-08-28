@@ -116,7 +116,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
             return null;
         }
 
-        return moment.utc(datetime).format('DD.MM.YYYY HH:mm:ss');
+        return moment.utc(datetime).local().format('DD.MM.YYYY HH:mm:ss');
     }
 
     loadNext() {

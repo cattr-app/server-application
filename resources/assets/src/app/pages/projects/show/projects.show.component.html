@@ -54,12 +54,12 @@
 
                     <div class="show-info">
                         <div class="table-responsive">
-                            <table class="table table-borderless">
+                            <table class="table table-borderless table--tasks">
                                 <thead>
-                                    <tr>
-                                        <th>Task</th>
-                                        <th>Last activity</th>
-                                        <th>Total time</th>
+                                    <tr (click)="onTableHeaderClick($event)">
+                                        <th data-order="task">Task</th>
+                                        <th data-order="lastActivity">Last activity</th>
+                                        <th data-order="totalTime">Total time</th>
                                     </tr>
                                 </thead>
 

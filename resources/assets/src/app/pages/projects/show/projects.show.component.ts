@@ -23,15 +23,25 @@ interface TaskInfo {
     totalTime: number;
 }
 
+enum TaskOrder {
+    TaskAsc,
+    TaskDesc,
+    LastActivityAsc,
+    LastActivityDesc,
+    TotalTimeAsc,
+    TotalTimeDesc,
+}
+
 @Component({
     selector: 'app-projects-show',
     templateUrl: './projects.show.component.html',
-    styleUrls: ['../../items.component.scss']
+    styleUrls: ['./projects.show.component.scss', '../../items.component.scss']
 })
 export class ProjectsShowComponent extends ItemsShowComponent implements OnInit {
 
     item: ProjectWithTasks = new Project();
     tasks: TaskInfo[] = [];
+    order: TaskOrder = TaskOrder.LastActivityDesc;
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
@@ -50,7 +60,7 @@ export class ProjectsShowComponent extends ItemsShowComponent implements OnInit 
 
     setItem(project: ProjectWithTasks) {
         super.setItem(project);
-        const tasks = project.tasks.map(task => {
+        this.tasks = project.tasks.map(task => {
             const time = task.time_intervals.reduce((total, interval) => {
                 const start = moment.utc(interval.start_at);
                 const end = moment.utc(interval.end_at);
@@ -68,15 +78,67 @@ export class ProjectsShowComponent extends ItemsShowComponent implements OnInit 
                 totalTime: time,
             }
         });
-        this.tasks = tasks.sort((a, b) => {
-            if (a.lastActivity === null && b.lastActivity === null) {
-                return 0;
-            } else if (a.lastActivity === null && b.lastActivity !== null) {
-                return 1;
-            } else if (a.lastActivity !== null && b.lastActivity === null) {
-                return -1;
-            } else {
-                return b.lastActivity.diff(a.lastActivity);
+
+        this.sort();
+    }
+
+    onTableHeaderClick(e: MouseEvent) {
+        const column = (e.target as HTMLElement).getAttribute('data-order');
+        switch (column) {
+            case 'task': {
+                const order = this.order === TaskOrder.TaskAsc
+                    ? TaskOrder.TaskDesc : TaskOrder.TaskAsc;
+                this.sort(order);
+                break;
+            }
+
+            case 'lastActivity': {
+                const order = this.order === TaskOrder.LastActivityDesc
+                    ? TaskOrder.LastActivityAsc : TaskOrder.LastActivityDesc;
+                this.sort(order);
+                break;
+            }
+
+            case 'totalTime': {
+                const order = this.order === TaskOrder.TotalTimeDesc
+                    ? TaskOrder.TotalTimeAsc : TaskOrder.TotalTimeDesc;
+                this.sort(order);
+                break;
+            }
+
+            default:
+                break;
+        }
+    }
+
+    sort(order: TaskOrder = this.order) {
+        this.order = order;
+        this.tasks = this.tasks.sort((a, b) => {
+            switch (this.order) {
+                case TaskOrder.TaskAsc:
+                    return a.name.localeCompare(b.name);
+
+                case TaskOrder.TaskDesc:
+                    return b.name.localeCompare(a.name);
+
+                case TaskOrder.LastActivityAsc: {
+                    const aLastActivity = a.lastActivity || moment(0);
+                    const bLastActivity = b.lastActivity || moment(0);
+                    return aLastActivity.diff(bLastActivity);
+                }
+
+                default:
+                case TaskOrder.LastActivityDesc: {
+                    const aLastActivity = a.lastActivity || moment(0);
+                    const bLastActivity = b.lastActivity || moment(0);
+                    return bLastActivity.diff(aLastActivity);
+                }
+
+                case TaskOrder.TotalTimeAsc:
+                    return a.totalTime - b.totalTime;
+
+                case TaskOrder.TotalTimeDesc:
+                    return b.totalTime - a.totalTime;
             }
         });
     }

@@ -62,13 +62,13 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit {
         this.users = this.item.time_intervals.reduce((users: UserInfo[], interval) => {
             const user = interval.user;
             const index = users.findIndex(u => u.user.id === user.id);
+            const time = moment.utc(interval.end_at).diff(moment.utc(interval.start_at));
             if (index === -1) {
                 users = users.concat([{
                     user,
-                    time: 0,
+                    time,
                 }]);
             } else {
-                const time = moment.utc(interval.end_at).diff(moment.utc(interval.start_at));
                 users[index].time += time;
             }
             return users;
