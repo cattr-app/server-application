@@ -37,7 +37,6 @@ export class UsersFiltersComponent implements OnInit {
         } else {
           this.selectSavedFilters(currentFilter);
         }
-        this.userIdChange.emit(this.userId);
     }
 
     update(user) {
@@ -93,15 +92,18 @@ export class UsersFiltersComponent implements OnInit {
     }
 
     selectSavedFilters(currentFilter) {
-      var arr = [];
+      var filtered = [];
       for (var i = 0; i < this.users.length; i++) {
-        for (var j =  0; j < currentFilter.length; j++) {
+        for (var j = 0; j < currentFilter.length; j++) {
             if (this.users[i].id == currentFilter[j]) {
-              arr.push(this.users[i]);
+              filtered.push(this.users[i].id);
             }
         }
       }
-      this.selectUsers = arr;
+      for(i = 0; i < filtered.length; i++) { 
+        this.userIdChange.emit(filtered[i]);
+      }
+      this.selectUsers = filtered;
     }
 
     // helper
