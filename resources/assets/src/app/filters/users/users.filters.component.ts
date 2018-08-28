@@ -27,12 +27,15 @@ export class UsersFiltersComponent implements OnInit {
     }
 
     ngOnInit(): void {
+
         this.update(this.apiService.getUser());
         this.attachedUsersService.subscribeOnUpdate(this.onUserUpdate.bind(this));
         this.attachedUsersService.updateAttachedList();
         let currentFilter = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);
         if (currentFilter === null) {
-            LocalStorage.getStorage().set(`filterByUserIN${ window.location.pathname }`, new Array())
+          LocalStorage.getStorage().set(`filterByUserIN${ window.location.pathname }`, new Array())
+        } else {
+          this.selectSavedFilters(currentFilter);
         }
         this.userIdChange.emit(this.userId);
     }
@@ -55,17 +58,15 @@ export class UsersFiltersComponent implements OnInit {
         }
         this.userIdChange.emit(this.userId);
 
-        let currentFilter = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);        
+        let currentFilter = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);
         if (this.userId !== null) {
-            console.log("current filter :::", currentFilter, "this.userID :::", this.userId);
             // element was removed from filter?
             if (currentFilter.length > this.userId.length) {
-                var diff = this.DiffArrays(currentFilter, this.userId)[0];
-                console.log(diff); 
+                var diff = this.diffArrays(currentFilter, this.userId)[0];
                 var index = currentFilter.indexOf(diff);
                 if (index !== -1) {
                     currentFilter.splice(index, 1); //remove
-                } 
+                }
             }
             currentFilter = new Set(currentFilter);
             this.userId.forEach(element => {
@@ -91,15 +92,27 @@ export class UsersFiltersComponent implements OnInit {
         this.users = attachedItems;
     }
 
+    selectSavedFilters(currentFilter) {
+      var arr = [];
+      for (var i = 0; i < this.users.length; i++) {
+        for (var j =  0; j < currentFilter.length; j++) {
+            if (this.users[i].id == currentFilter[j]) {
+              arr.push(this.users[i]);
+            }
+        }
+      }
+      this.selectUsers = arr;
+    }
+
     // helper
-    DiffArrays (array1, array2) {
+    diffArrays (array1, array2) {
 
         var a = [], diffArray = [];
-    
+
         for (var i = 0; i < array1.length; i++) {
             a[array1[i]] = true;
         }
-    
+
         for (var i = 0; i < array2.length; i++) {
             if (a[array2[i]]) {
                 delete a[array2[i]];
@@ -107,11 +120,11 @@ export class UsersFiltersComponent implements OnInit {
                 a[array2[i]] = true;
             }
         }
-    
+
         for (var k in a) {
             diffArray.push(+k);
         }
-    
+
         return diffArray;
     }
 }
