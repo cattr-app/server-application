@@ -10,7 +10,8 @@ import { ApiService } from '../../api/api.service';
 export class DashboardComponent implements OnInit, AfterViewInit {
   @ViewChild('tabs') tabs: TabsetComponent;
 
-  public userIsManager: boolean = false;
+  userIsManager: boolean = false;
+  selectedTab: string = '';
 
   constructor(private api: ApiService) { }
 
@@ -23,16 +24,20 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   ngAfterViewInit() {
     if (this.userIsManager) {
       const tabHeading = localStorage.getItem('dashboard-tab');
-      if (tabHeading) {
+      if (tabHeading !== null) {
         const index = this.tabs.tabs.findIndex(tab => tab.heading === tabHeading);
         if (index !== -1) {
-          setTimeout(() => this.tabs.tabs[index].active = true);
+          setTimeout(() => {
+            this.selectedTab = tabHeading;
+            this.tabs.tabs[index].active = true;
+          });
         }
       }
     }
   }
 
   onTabSelect(tab: TabDirective) {
-    localStorage.setItem('dashboard-tab', tab.heading);
+    this.selectedTab = tab.heading;
+    localStorage.setItem('dashboard-tab', this.selectedTab);
   }
 }

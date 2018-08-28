@@ -49,6 +49,33 @@
                             </table>
                         </div>
                     </div>
+
+                    <a class="btn btn-primary" href="#">More details at projects report</a>
+
+                    <div class="show-info">
+                        <div class="table-responsive">
+                            <table class="table table-borderless table--tasks">
+                                <thead>
+                                    <tr (click)="onTableHeaderClick($event)">
+                                        <th data-order="task">Task</th>
+                                        <th data-order="lastActivity">Last activity</th>
+                                        <th data-order="totalTime">Total time</th>
+                                    </tr>
+                                </thead>
+
+                                <tbody>
+                                    <tr *ngFor="let task of tasks">
+                                        <th scope="row">
+                                            <a [attr.href]="'tasks/show/' + task.id">{{ task.name }}</a>
+                                        </th>
+
+                                        <td>{{ formatTimeString(task.lastActivity) }}</td>
+                                        <td>{{ formatDurationString(task.totalTime) }}</td>
+                                    </tr>
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>

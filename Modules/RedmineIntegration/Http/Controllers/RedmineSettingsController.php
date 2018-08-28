@@ -25,7 +25,7 @@ class RedmineSettingsController extends AbstractRedmineController
         return [
             'redmine_url' => 'required',
             'redmine_key' => 'required',
-            'redmine_statuses' => 'required',
+            //'redmine_statuses' => 'required',
         ];
     }
 

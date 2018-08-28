@@ -1,0 +1,30 @@
+@import '../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+.screenshots-row {
+    display: flex;
+    flex-wrap: wrap;
+}
+
+.screenshot-wrapper {
+    @media (max-width: $screen-xs-min - 1) {
+        width: 100%;
+    }
+}
+
+.card-img-top {
+    width: 14rem;
+    max-height: 100px;
+}
+
+.card-text-line {
+    display: block;
+}
+
+.loading {
+    width: 100%;
+    height: 16rem;
+    margin: 10px 0;
+    text-align: center;
+    clear: both;
+}

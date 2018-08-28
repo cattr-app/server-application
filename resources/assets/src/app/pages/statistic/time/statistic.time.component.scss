@@ -2,7 +2,6 @@
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
 .statistics {
-    &__header-line,
     &__view-switcher {
         display: flex;
         flex-flow: row wrap;
@@ -10,8 +9,7 @@
         width: 100%;
     }
 
-    &__users,
-    &__buttons {
+    &__users {
         display: block;
         margin-bottom: 1em;
         width: 100%;
@@ -42,6 +40,12 @@
         clear: both;
         position: relative;
         width: 100%;
+    }
+
+    &__buttons {
+        position: absolute;
+        top: 0;
+        right: 0;
     }
 }
 
@@ -86,19 +90,22 @@
     .fc-resource-area {
         th .fc-cell-text {
             cursor: pointer;
+            font-stretch: condensed;
 
             &.sort-asc::after {
                 content: '▲';
                 position: absolute;
-                top: 1px;
-                right: 4px;
+                top: 4px;
+                right: 0;
+                font-size: 8px;
             }
 
             &.sort-desc::after {
                 content: '▼';
                 position: absolute;
-                top: 3px;
-                right: 4px;
+                top: 8px;
+                right: 0;
+                font-size: 8px;
             }
         }
 

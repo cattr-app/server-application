@@ -1,0 +1,35 @@
+@import '../../../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+.table {
+    &--task-properties {
+        margin-bottom: 0;
+
+        @media (max-width: $screen-xs-max) {
+            th {
+                width: 150px;
+            }
+        }
+    }
+
+    &--task-description {
+        td {
+            white-space: pre-line;
+        }
+
+        @media (max-width: $screen-xs-max) {
+            th, td {
+                display: block;
+            }
+        }
+    }
+}
+
+.description-wrapper {
+    width: 100%;
+    overflow-x: auto;
+}
+
+.user__time {
+    float: right;
+}

@@ -1,0 +1,40 @@
+<div class="screenshots-row row" *ngFor="let group of itemsChunked">
+    <div class="screenshot-wrapper col-xs-6 col-sm-4 col-md-3 col-lg-2" *ngFor="let screenshot of group">
+        <div class="card">
+            <a [attr.href]="'/screenshots/show/' + screenshot.id" target="_blank">
+                <img class="card-img-top" src="{{ screenshot.path }}" onerror="this.src='uploads/none.png'" alt="image" />
+            </a>
+
+            <div class="card-body">
+                <p class="card-text">
+                    <span class="card-text-line" *ngIf="showDate">
+                        {{ formatTime(screenshot.time_interval?.start_at) }}
+                    </span>
+
+                    <span class="card-text-line" *ngIf="showUser">
+                        {{ screenshot.time_interval?.user?.full_name }}
+                    </span>
+
+                    <a class="card-text-line" *ngIf="showTask && screenshot.time_interval?.task" [attr.href]="'tasks/show/' + screenshot.time_interval.task.id">
+                        {{ screenshot.time_interval.task.task_name }}
+                    </a>
+
+                    <a class="card-text-line" *ngIf="showProject && screenshot.time_interval?.task?.project" [attr.href]="'projects/show/' + screenshot.time_interval.task.project.id">
+                        {{ screenshot.time_interval.task.project.name }}
+                    </a>
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<div *ngIf="autoload" class="loading" #loading>
+    <div *ngIf="countFail <= 3 && !isAllLoaded">
+        <p class="h2">...</p>
+        <p class="h2" translate>dashboard.auto-loading</p>
+    </div>
+</div>
+
+<div *ngIf="!autoload" class="text-center" #loading>
+    <button *ngIf="countFail <= 3 && !isAllLoaded" class="btn btn-primary" (click)="loadNext()">Load more</button>
+</div>
