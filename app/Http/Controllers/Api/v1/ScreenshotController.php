@@ -317,8 +317,7 @@ class ScreenshotController extends ItemController
     {
         $filters = $request->all();
         is_int($request->get('user_id')) ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
-        $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
-        $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
+        $compareDate = date("Y-m-d 00:00:00", time());
         $filters['timeInterval.start_at'] = ['>=', [$compareDate]];
 
         $baseQuery = $this->applyQueryFilter(
