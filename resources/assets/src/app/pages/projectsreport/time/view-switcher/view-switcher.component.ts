@@ -3,12 +3,13 @@ import { DateRangeSelectorComponent } from '../date-range-selector/date-range-se
 import * as moment from 'moment';
 import { ApiService } from '../../../../api/api.service';
 import { User } from '../../../../models/user.model';
+import {DateSelectorComponent} from '../date-selector/date-selector.component';
 
 export interface ViewData {
-    name: string,
-    start: moment.Moment,
-    end: moment.Moment,
-    timezone: string,
+    name: string;
+    start: moment.Moment;
+    end: moment.Moment;
+    timezone: string;
 }
 
 @Component({
@@ -18,16 +19,18 @@ export interface ViewData {
 })
 export class ViewSwitcherComponent implements OnInit {
     @ViewChild('dateRangeSelector') dateRangeSelector: DateRangeSelectorComponent;
+    @ViewChild('dateSelector') dateSelector: DateSelectorComponent;
 
     start: moment.Moment = moment.utc();
     end: moment.Moment = moment.utc().add(1, 'day');
 
-    timezone: string = 'Asia/Omsk';
+    timezone = 'Asia/Omsk';
 
-    userInteraction: boolean = false;
-    viewName: string = 'timelineDay';
-    activeButton: string = 'timelineDay';
+    userInteraction = false;
+    viewName = 'timelineDay';
+    activeButton = 'timelineDay';
 
+    onChange = null;
     @Output() setView = new EventEmitter<ViewData>();
 
     constructor(private api: ApiService) {
