@@ -57,7 +57,7 @@ class ProjectReportController extends Controller
             }
             return $q
               ->select('task_id')
-              ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) duration')
+              ->selectRaw('CONVERT(SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)), SIGNED INTEGER) duration')
               ->groupBy('task_id');
           }])->where('project_id', $pid)
             ->select('id', 'project_id', 'user_id', 'task_name');
@@ -89,9 +89,13 @@ class ProjectReportController extends Controller
       $project->users = $project->users->map(function ($user) use (&$project_time) {
         $tasks_time = 0;
         $user->tasks = $user->tasks->map(function ($task) use (&$tasks_time) {
-          $tasks_time += $task->timeIntervals[0]->duration;
-          $task['duration'] = $task->timeIntervals[0]->duration;
-//          $task->forget('timeIntervals');
+          if (isset($task->timeIntervals[0])) {
+            $tasks_time += $task->timeIntervals[0]->duration;
+            $task['duration'] = $task->timeIntervals[0]->duration;
+          }
+          else {
+            $task['duration'] = 0;
+          }
           return $task;
         });
         $user['tasks_time'] = $tasks_time;

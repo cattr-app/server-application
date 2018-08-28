@@ -1,55 +1,70 @@
-<div class="statistics">
-  <div class="statistics__header">
-    <view-switcher #viewSwitcher class="statistics__view-switcher">
-      <div class="statistics__users" *ngIf="!isManager">
-        <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
-                   bindValue="id" bindLabel="title" [closeOnSelect]="false" (change)="loadProjects()"
-                   [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
-        </ng-select>
-        <span class="statistics__user-count">{{ selectedUserIds.length }} users selected</span>
-      </div>
-      <div class="statistics__users">
-        <ng-select #projectSelect [items]="projectSelectItems" [loading]="projectsLoading"
-                   bindValue="id" bindLabel="title" [closeOnSelect]="false" (change)="loadReport()"
-                   [multiple]="true" [(ngModel)]="selectedProjectIds" (add)="projectSelected($event)">
-        </ng-select>
-        <span class="statistics__user-count">{{ selectedProjectIds.length}} projects selected</span>
-      </div>
+<div class="container">
+  <div class="row">
+    <div class="col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading">Projects Report</div>
+        <div class="panel-body">
+          <div class="reports">
+            <div class="reports__header">
+              <view-switcher #viewSwitcher class="reports__view-switcher">
+                <div class="reports__users" *ngIf="!isManager">
+                  <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
+                              bindValue="id" bindLabel="title" [closeOnSelect]="false" (change)="loadProjects()"
+                              [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
+                  </ng-select>
+                  <span class="reports__user-count">{{ selectedUserIds.length }} users selected</span>
+                </div>
 
-      <!--<div class="statistics__buttons btn-group" role="group">-->
-      <!--<button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>-->
-      <!--</div>-->
-    </view-switcher>
-  </div>
+                <div class="reports__projects">
+                  <ng-select #projectSelect [items]="projectSelectItems" [loading]="projectsLoading"
+                              bindValue="id" bindLabel="title" [closeOnSelect]="false" (change)="loadReport()"
+                              [multiple]="true" [(ngModel)]="selectedProjectIds" (add)="projectSelected($event)">
+                  </ng-select>
+                  <span class="reports__projects-count">{{ selectedProjectIds.length}} projects selected</span>
+                </div>
+              </view-switcher>
+            </div>
 
-  <div class="statistics__timeline">
-    <ngx-loading [show]="loading"></ngx-loading>
-    <span #clickPopover="bs-popover" id="clickPopover" [outsideClick]="true" [popover]="clickPopoverTemplate"></span>
-    <span #hoverPopover="bs-popover" id="hoverPopover" [outsideClick]="true" [popover]="hoverPopoverTemplate"></span>
-    <p-schedule #timeline [events]="report" [header]="false" [options]="timelineOptions"></p-schedule>
+            <div class="reports__report">
+              <ngx-loading [show]="loading"></ngx-loading>
+
+              <table class="reports__project table" *ngFor="let project of report">
+                <thead>
+                  <tr>
+                    <th class="reports__project-name">{{ project.name }}</th>
+                    <th class="reports__project-time">{{ formatDurationString(project.project_time) }}</th>
+                    <th></th>
+                  </tr>
+                </thead>
+
+                <tbody class="reports__user" *ngFor="let user of values(project.users)">
+                  <tr>
+                    <th class="reports__user-name" scope="row">{{ user.full_name }}</th>
+                    <td class="reports__user-time">{{ formatDurationString(user.tasks_time) }}</td>
+                    <td class="reports__user-progress">
+                      <div class="progress">
+                        <div class="progress-bar progress-bar-success"
+                          [style.width.%]="user.tasks_time / project.project_time * 100"></div>
+                      </div>
+                    </td>
+                  </tr>
+
+                  <tr class="reports__task" *ngFor="let task of user.tasks">
+                    <th class="reports__task-name" scope="row">{{ task.task_name }}</th>
+                    <td class="reports__task-time">{{ formatDurationString(task.duration) }}</td>
+                    <td class="reports__task-progress">
+                      <div class="progress">
+                        <div class="progress-bar progress-bar-success"
+                          [style.width.%]="task.duration / project.project_time * 100"></div>
+                      </div>
+                    </td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
-
-<ng-template #clickPopoverTemplate>
-  <div class="statistics-popover statistics-popover_click">
-    <p class="statistics-popover__line">
-      <ngx-loading [show]="popoverLoading"></ngx-loading>
-      <a *ngIf="clickPopoverScreenshot !== null"
-         [attr.href]="'screenshots/show/' + clickPopoverScreenshot.id">
-        <img class="statistics-popover__image"
-             [attr.src]="clickPopoverScreenshot.path"/>
-      </a>
-    </p>
-
-    <p class="statistics-popover__line">
-      <a *ngIf="clickPopoverTask !== null" class="statistics-popover__link"
-         [attr.href]="'tasks/show/' + clickPopoverTask.id">{{ clickPopoverText }}</a>
-    </p>
-  </div>
-</ng-template>
-
-<ng-template #hoverPopoverTemplate>
-  <div class="statistics-popover statistics-popover_hover">
-    <p class="statistics-popover__line" [innerHTML]="hoverPopoverText"></p>
-  </div>
-</ng-template>

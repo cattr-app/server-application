@@ -118,9 +118,9 @@ export class ReportProjectsComponent implements OnInit {
 
       return new Promise<EventObjectInput[]>((resolve) => {
         try {
-          this.projectReportService.getItemsViaGet((events: EventObjectInput[]) => {
+          this.projectReportService.getItems((events: EventObjectInput[]) => {
             resolve(events);
-          }, params, 'events');
+          }, params);//, 'events');
         } catch (e) {
           console.error(e.message);
         }
@@ -134,9 +134,9 @@ export class ReportProjectsComponent implements OnInit {
         'end_at': now.clone().add(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
         'project_id': this.projectId ? ['=', this.projectId] : null,
       };
-      this.projectReportService.getItemsViaGet(() => {
+      /*this.projectReportService.getItems(() => {
         debugger;
-      }, null, 'worked');
+      }, null);*/
       // Add +/- 1 day to avoid issues with timezone.
 
       const eventSource = {
@@ -219,7 +219,7 @@ export class ReportProjectsComponent implements OnInit {
             'type': 'resources'
           };
 
-          this.projectReportService.getItemsViaGet((resources: ResourceInput[]) => {
+          this.projectReportService.getItems((resources: ResourceInput[]) => {
             callback(resources);
           }, params);
         },
