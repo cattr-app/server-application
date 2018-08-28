@@ -7,19 +7,21 @@
           <div class="reports">
             <div class="reports__header">
               <view-switcher #viewSwitcher class="reports__view-switcher">
-                <div class="reports__users" *ngIf="!isManager">
-                  <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
-                              bindValue="id" bindLabel="title" [closeOnSelect]="false" (change)="loadProjects()"
-                              [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
+                <div class="reports__users" *ngIf="isManager">
+                  <ng-select #userSelect [items]="availableUsers" [loading]="usersLoading"
+                             bindValue="id" bindLabel="title" [closeOnSelect]="false"
+                             [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
                   </ng-select>
+
                   <span class="reports__user-count">{{ selectedUserIds.length }} users selected</span>
                 </div>
 
                 <div class="reports__projects">
-                  <ng-select #projectSelect [items]="projectSelectItems" [loading]="projectsLoading"
-                              bindValue="id" bindLabel="title" [closeOnSelect]="false" (change)="loadReport()"
-                              [multiple]="true" [(ngModel)]="selectedProjectIds" (add)="projectSelected($event)">
+                  <ng-select #projectSelect [items]="availableProjects" [loading]="projectsLoading"
+                             bindValue="id" bindLabel="title" [closeOnSelect]="false"
+                             [multiple]="true" [(ngModel)]="selectedProjectIds" (add)="projectSelected($event)">
                   </ng-select>
+
                   <span class="reports__projects-count">{{ selectedProjectIds.length}} projects selected</span>
                 </div>
               </view-switcher>

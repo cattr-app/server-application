@@ -1,13 +1,13 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
 import {NgSelectComponent} from '@ng-select/ng-select';
-import {ViewData, ViewSwitcherComponent} from './view-switcher/view-switcher.component';
+
+import {ViewSwitcherComponent} from './view-switcher/view-switcher.component';
 
 import {ApiService} from '../../../api/api.service';
 import {UsersService} from '../../users/users.service';
 import {ProjectReportService} from './projectsreport.service';
 
 import {User} from '../../../models/user.model';
-import {Project} from '../../../models/project.model';
 
 import * as moment from 'moment';
 import 'moment-timezone';
@@ -16,6 +16,11 @@ import {Observable} from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
+
+interface SelectItem {
+  id: number,
+  title: string,
+}
 
 interface TaskData {
   id: number;
@@ -49,33 +54,23 @@ interface ProjectData {
   templateUrl: './projectsreport.component.html',
   styleUrls: ['../../items.component.scss', './projectsreport.component.scss']
 })
-export class ProjectsreportComponent implements OnInit {
+export class ProjectsreportComponent implements OnInit, AfterViewInit {
   @ViewChild('userSelect') userSelect: NgSelectComponent;
   @ViewChild('projectSelect') projectSelect: NgSelectComponent;
   @ViewChild('viewSwitcher') viewSwitcher: ViewSwitcherComponent;
 
-  start_at: string = null;
-  end_at: string = null;
-  selectedUserIds: number[] = [];
-  userSelectItems: {}[] = [];
-
-  report: ProjectData[] = [];
-
-  isManager = false;
-
-  projects: Project[] = [];
-  projectSelectItems: {}[] = [];
-  selectedProjectIds: number[] = [];
-
+  // Used to show loading indicators.
   loading = true;
   usersLoading = true;
   projectsLoading = true;
 
-  view: ViewData;
-  users: User[] = [];
+  availableUsers: SelectItem[] = [];
+  selectedUserIds: number[] = [];
 
-  view$: Observable<ViewData>;
-  users$: Observable<User[]>;
+  availableProjects: SelectItem[] = [];
+  selectedProjectIds: number[] = [];
+
+  report: ProjectData[] = [];
 
   constructor(private api: ApiService,
               private userService: UsersService,
@@ -85,138 +80,125 @@ export class ProjectsreportComponent implements OnInit {
   readonly defaultView = 'timelineDay';
   readonly formatDate = 'YYYY-MM-DD';
 
-  values = (Object as any).values;
+  ngOnInit() {
+    // Fetch available users from the API.
+    const availableUsers$ = Observable.from(this.fetchUsers()).share();
+    availableUsers$.subscribe(users => {
+      /// Add the 'select all' option.
+      this.availableUsers = [{ id: -1, title: 'Select all' }, ...users];
+      // Select all users initially.
+      setTimeout(() => {
+        this.selectedUserIds = users.map(user => user.id);
+        this.userSelect.changeEvent.emit(users);
+      });
+      this.usersLoading = false;
+    });
+  }
 
-  fetchAttachedUsers() {
-    const uid = this.api.getUser().id;
-    return new Promise<User[]>(resolve => {
-      this.userService.getItem(uid, (users: User[]) => {
-        users = (users as any).attached_users.map(user => {
+  ngAfterViewInit() {
+    const selectedUsers$ = (this.userSelect.changeEvent.asObservable() as Observable<SelectItem[]>)
+      .map(users => users.filter(user => user.id !== -1)).share();
+
+    const availableProjects$ = selectedUsers$.switchMap(users => {
+      const userIds = users.map(user => user.id);
+      return Observable.from(this.fetchProjects(userIds));
+    });
+    availableProjects$.subscribe(projects => {
+      /// Add the 'select all' option.
+      this.availableProjects = [{ id: -1, title: 'Select all' }, ...projects];
+      // Select all users initially.
+      setTimeout(() => {
+        this.selectedProjectIds = projects.map(project => project.id);
+        this.projectSelect.changeEvent.emit(projects);
+      });
+      this.projectsLoading = false;
+    });
+
+    const selectedProjects$ = (this.projectSelect.changeEvent.asObservable() as Observable<SelectItem[]>)
+      .map(projects => projects.filter(project => project.id !== -1)).share();
+
+    const view$ = this.viewSwitcher.setView.asObservable().share();
+
+    const report$ = view$.combineLatest(selectedUsers$, selectedProjects$, (view, users, projects) => {
+      const start = view.start.format(this.formatDate);
+      const end = view.end.format(this.formatDate);
+      const userIds = users.map(user => user.id);
+      const projectIds = projects.map(project => project.id);
+      return { userIds, projectIds, start, end };
+    }).switchMap(data => this.fetchReport(data));
+    report$.subscribe(data => {
+      this.report = data;
+    });
+  }
+
+  // Used in the template to iterate over object values.
+  values: Function = (Object as any).values;
+
+  // Fetches available users from the API.
+  fetchUsers() {
+    return new Promise<SelectItem[]>(resolve => {
+      this.userService.getItems((users: User[]) => {
+        const userData = users.map(user => {
           return {
             id: user.id,
             title: user.full_name,
           };
         });
-        resolve(users);
+
+        resolve(userData);
       });
     });
   }
 
-  userIsManager() {
-    return this.api.getUser().role_id === 5;
-  }
-
-  ngOnInit() {
-    this.view = {
-      name: this.defaultView,
-      start: moment.utc().startOf('day'),
-      end: moment.utc().startOf('day').add(1, 'day'),
-      timezone: 'UTC',
-    };
-    this.viewSwitcher.onChange = this.loadReport;
-
-    this.users$ = Observable.from(this.fetchAttachedUsers()).share();
-    this.users$.subscribe(users => {
-      this.users = users;
-      this.userSelectItems = [{id: -1, title: 'Select all'}, ...users];
-      this.selectedUserIds = users.map(user => user.id);
-      this.usersLoading = false;
-      this.loadProjects().then(() => this.loadReport());
-    });
-
-    this.view$ = this.viewSwitcher.setView.asObservable();
-    this.view$.filter(view => {
-      return view.start.unix() !== this.view.start.unix()
-        || view.end.unix() !== this.view.end.unix()
-        || view.name !== this.view.name
-        || view.timezone !== this.view.timezone;
-    }).subscribe(() => {
-      setTimeout(() => {
-        if (this.viewSwitcher.dateSelector) {
-          const date = this.viewSwitcher.dateSelector._inputDate;
-          const dates = date.match(/^(\d{4}-\d\d-\d\d)( - (\d{4}-\d\d-\d\d))?$/);
-          if (dates) {
-            this.start_at = dates[1];
-            if (dates.length > 1) {
-              this.end_at = dates[3];
-            }
-          } else {
-            this.start_at = moment(this.viewSwitcher.dateSelector._inputDate).subtract(1, 'month').format(this.formatDate);
-            this.end_at = moment(this.viewSwitcher.dateSelector._inputDate).format(this.formatDate);
-          }
-        } else {
-          this.start_at = moment(this.viewSwitcher.dateRangeSelector.startDate).format(this.formatDate);
-          this.end_at = moment(this.viewSwitcher.dateRangeSelector.endDate).format(this.formatDate);
-        }
-        this.loadReport();
-      });
-    });
-  }
-
-  userSelected(value) {
-    if (value.id === -1) {
-      setTimeout(() => {
-        this.selectedUserIds = this.users.map(user => user.id);
-        this.userSelect.changeEvent.emit(this.users);
-      });
-    }
-  }
-
-  projectSelected(value) {
-    if (value.id === -1) {
-      setTimeout(() => {
-        this.selectedProjectIds = this.projects.map(project => project.id);
-        this.projectSelect.changeEvent.emit(this.projects);
-      });
-    }
-  }
-
-  setLoading(loading: boolean = true) {
-    this.loading = loading;
-  }
-
-  loadProjects() {
-    return new Promise(resolve => {
-      if (this.selectedUserIds.length === 0) {
-        this.projects = [];
-        this.projectSelectItems = [];
-        this.selectedProjectIds = [];
-        return;
-      }
-      this.projectReportService.getProjects(this.selectedUserIds).then(projects => {
-        this.projects = (projects as any).map(project => {
+  // Fetches available projects of specified users from the API.
+  fetchProjects(userIds: number[]) {
+    return new Promise<SelectItem[]>(resolve => {
+      this.projectReportService.getProjects(userIds).then(projects => {
+        const projectsData = (projects as any).map(project => {
           return {
             id: project.id,
             title: project.name,
           };
         });
-        this.projectSelectItems = [{id: -1, title: 'Select all'}, ...this.projects];
-        this.selectedProjectIds = this.projects.map(user => user.id);
-        this.projectsLoading = false;
-      }).then(() => {
-        resolve(this.projects);
+
+        resolve(projectsData);
       });
     });
   }
 
-  loadReport() {
-    if (this.selectedProjectIds.indexOf(-1) !== -1) {
-      return;
-    }
-
+  // Fetches report from the API.
+  fetchReport({
+    userIds,
+    projectIds,
+    start,
+    end,
+  } : {
+    userIds: number[],
+    projectIds: number[],
+    start: string,
+    end: string,
+  }) {
     const params = {
-      uids: this.selectedUserIds,
-      pids: this.selectedProjectIds,
-      start_at: this.start_at || '',
-      end_at: this.end_at || '',
+      uids: userIds,
+      pids: projectIds,
+      start_at: start,
+      end_at: end,
       type: 'report',
     };
 
-    this.setLoading(true);
-    this.projectReportService.getItems((report: ProjectData[]) => {
-      this.report = report;
-      this.setLoading(false);
-    }, params);
+    this.loading = true;
+    return new Promise<ProjectData[]>(resolve => {
+      this.projectReportService.getItems((report: ProjectData[]) => {
+        this.loading = false;
+        resolve(report);
+      }, params);
+    });
+  }
+
+  get isManager() {
+    const managerRoles = [1, 5];
+    const userRole = this.api.getUser().role_id;
+    return managerRoles.includes(userRole);
   }
 
   formatDurationString(time: number) {
@@ -224,5 +206,29 @@ export class ProjectsreportComponent implements OnInit {
       const hours = Math.floor(duration.asHours());
       const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
       return `${hours}h ${minutes}m`;
+  }
+
+  // Handles the 'select all' option.
+  userSelected(value) {
+    if (value.id === -1) {
+      setTimeout(() => {
+        // Select all users.
+        const users = this.availableUsers.filter(user => user.id !== -1);
+        this.selectedUserIds = users.map(user => user.id)
+        this.userSelect.changeEvent.emit(users);
+      });
+    }
+  }
+
+  // Handles the 'select all' option.
+  projectSelected(value) {
+    if (value.id === -1) {
+      setTimeout(() => {
+        // Select all projects.
+        const projects = this.availableProjects.filter(project => project.id !== -1);
+        this.selectedProjectIds = projects.map(project => project.id);
+        this.projectSelect.changeEvent.emit(projects);
+      });
+    }
   }
 }
