@@ -1,19 +1,19 @@
 <div class="statistics">
   <div class="statistics__header">
     <view-switcher #viewSwitcher class="statistics__view-switcher">
-      <div class="statistics__users">
+      <div class="statistics__users" *ngIf="!isManager">
         <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
-                   bindValue="id" bindLabel="title" [closeOnSelect]="false"
+                   bindValue="id" bindLabel="title" [closeOnSelect]="false" (change)="loadProjects()"
                    [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
         </ng-select>
-        <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
+        <span class="statistics__user-count">{{ selectedUserIds.length }} users selected</span>
       </div>
       <div class="statistics__users">
-        <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
-                   bindValue="id" bindLabel="title" [closeOnSelect]="false"
-                   [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
+        <ng-select #projectSelect [items]="projectSelectItems" [loading]="projectsLoading"
+                   bindValue="id" bindLabel="title" [closeOnSelect]="false" (change)="loadReport()"
+                   [multiple]="true" [(ngModel)]="selectedProjectIds" (add)="projectSelected($event)">
         </ng-select>
-        <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
+        <span class="statistics__user-count">{{ selectedProjectIds.length}} projects selected</span>
       </div>
 
       <!--<div class="statistics__buttons btn-group" role="group">-->
@@ -26,7 +26,7 @@
     <ngx-loading [show]="loading"></ngx-loading>
     <span #clickPopover="bs-popover" id="clickPopover" [outsideClick]="true" [popover]="clickPopoverTemplate"></span>
     <span #hoverPopover="bs-popover" id="hoverPopover" [outsideClick]="true" [popover]="hoverPopoverTemplate"></span>
-    <p-schedule #timeline [header]="false" [options]="timelineOptions"></p-schedule>
+    <p-schedule #timeline [events]="report" [header]="false" [options]="timelineOptions"></p-schedule>
   </div>
 </div>
 

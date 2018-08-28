@@ -10,8 +10,19 @@ export class ProjectReportService extends ItemsService {
     super(api);
   }
 
-  getApiPath(action: string = 'list') {
-    return `project-report/${action}`;
+  getApiPath() {
+    return `project-report`;
+  }
+
+  getProjects(uids) {
+    const params = {
+      uids: uids
+    };
+    return new Promise((resolve) => {
+      this.api.send(this.getApiPath() + '/projects', params, (result => {
+        resolve(result);
+      }));
+    });
   }
 
   convertFromApi(itemFromApi) {
