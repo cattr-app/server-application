@@ -96,12 +96,12 @@ export class UsersFiltersComponent implements OnInit {
       for (var i = 0; i < this.users.length; i++) {
         for (var j = 0; j < currentFilter.length; j++) {
             if (this.users[i].id == currentFilter[j]) {
-              filtered.push(this.users[i].id);
+              filtered.push(this.users[i]);
             }
         }
       }
       for(i = 0; i < filtered.length; i++) { 
-        this.userIdChange.emit(filtered[i]);
+        this.userIdChange.emit(filtered[i].id);
       }
       this.selectUsers = filtered;
     }
