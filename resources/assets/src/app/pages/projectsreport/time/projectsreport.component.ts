@@ -16,6 +16,7 @@ import {Observable} from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
+import { AllowedActionsService } from '../../roles/allowed-actions.service';
 
 interface SelectItem {
   id: number,
@@ -68,10 +69,11 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
 
   report: ProjectData[] = [];
 
-  constructor(private api: ApiService,
-              private userService: UsersService,
-              private projectReportService: ProjectReportService) {
-  }
+  constructor(protected api: ApiService,
+              protected userService: UsersService,
+              protected projectReportService: ProjectReportService,
+              protected allowedAction: AllowedActionsService,
+  ) {}
 
   readonly defaultView = 'timelineDay';
   readonly formatDate = 'YYYY-MM-DD';
@@ -189,9 +191,7 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
   }
 
   get isManager() {
-    const managerRoles = [1, 5];
-    const userRole = this.api.getUser().role_id;
-    return managerRoles.includes(userRole);
+    return this.allowedAction.can('project-report/manager_access');
   }
 
   formatDurationString(time: number) {

@@ -1,6 +1,7 @@
 import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
 import { TabsetComponent, TabDirective } from 'ngx-bootstrap';
 import { ApiService } from '../../api/api.service';
+import { AllowedActionsService } from '../roles/allowed-actions.service';
 
 @Component({
   selector: 'app-dashboard',
@@ -13,12 +14,13 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   userIsManager: boolean = false;
   selectedTab: string = '';
 
-  constructor(private api: ApiService) { }
+  constructor(
+    protected api: ApiService,
+    protected allowedAction: AllowedActionsService,
+  ) { }
 
   ngOnInit() {
-    const managerRoles = [1, 5];
-    const user = this.api.getUser();
-    this.userIsManager = managerRoles.indexOf(user.role_id) !== -1;
+    this.userIsManager = this.allowedAction.can('dashboard/manager_access');
   }
 
   ngAfterViewInit() {

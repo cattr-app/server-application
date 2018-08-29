@@ -1,5 +1,6 @@
 import {Component} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
+import { AllowedActionsService } from '../../roles/allowed-actions.service';
 
 @Component({
     selector: 'app-screenshots-list',
@@ -21,11 +22,12 @@ export class ScreenshotsListComponent {
             return this._isManager = false;
         }
 
-        const managerRoles = [1, 5];
-        return this._isManager = managerRoles.includes(user.role_id);
+        return this._isManager = this.allowedAction.can('screenshots/manager_access');
     }
 
-    constructor(protected api: ApiService,
+    constructor(
+        protected api: ApiService,
+        protected allowedAction: AllowedActionsService,
     ) {
     }
 }

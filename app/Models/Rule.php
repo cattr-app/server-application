@@ -102,6 +102,7 @@ class Rule extends Model
                 'show' => __('Screenshot show'),
                 'remove' => __('Screenshot remove'),
                 'dashboard' => __('Screenshot list at dashboard'),
+                'manager_access' => __('Screenshots manager access'),
                 'full_access' => __('Screenshots full access'),
             ],
             'time-intervals' => [
@@ -146,6 +147,10 @@ class Rule extends Model
             'project-report' => [
                 'list' => __('Projects report list'),
                 'projects' => __('Projects report related projects'),
+                'manager_access' => __('Projects report manager access'),
+            ],
+            'dashboard' => [
+                'manager_access' => __('Dashboard manager access'),
             ],
         ]);
     }
