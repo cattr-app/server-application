@@ -144,8 +144,8 @@ class Rule extends Model
                 'actions' => __('Rules actions list'),
             ],
             'project-report' => [
-                'list' => __('Attached User relation list'),
-                'projects' => __('Attached projects to users'),
+                'list' => __('Projects report list'),
+                'projects' => __('Projects report related projects'),
             ],
         ]);
     }
