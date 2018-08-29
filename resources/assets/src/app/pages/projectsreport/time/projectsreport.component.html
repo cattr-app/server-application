@@ -7,7 +7,7 @@
           <div class="reports">
             <div class="reports__header">
               <view-switcher #viewSwitcher class="reports__view-switcher">
-                <div class="reports__users" *ngIf="isManager">
+                <div class="reports__users" [attr.data-hidden]="!isManager">
                   <ng-select #userSelect [items]="availableUsers" [loading]="usersLoading"
                              bindValue="id" bindLabel="title" [closeOnSelect]="false"
                              [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">

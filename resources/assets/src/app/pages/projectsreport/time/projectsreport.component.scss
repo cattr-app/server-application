@@ -16,6 +16,10 @@
         width: 100%;
         position: relative;
 
+        &[data-hidden="true"] {
+            display: none;
+        }
+
         ::ng-deep .ng-value {
             display: none;
         }
