@@ -39,7 +39,7 @@
                   </tr>
                 </thead>
 
-                <tbody class="reports__user" *ngFor="let user of values(project.users)">
+                <tbody class="reports__user" *ngFor="let user of project.users">
                   <tr>
                     <th class="reports__user-name" scope="row">{{ user.full_name }}</th>
                     <td class="reports__user-time">{{ formatDurationString(user.tasks_time) }}</td>

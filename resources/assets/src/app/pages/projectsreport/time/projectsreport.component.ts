@@ -38,14 +38,10 @@ interface UserData {
   tasks_time: number;
 };
 
-interface ProjectUsers {
-  [key: number]: UserData;
-}
-
 interface ProjectData {
   id: number;
   name: string;
-  users: ProjectUsers;
+  users: UserData[];
   project_time: number;
 };
 
@@ -130,9 +126,6 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
       this.report = data;
     });
   }
-
-  // Used in the template to iterate over object values.
-  values: Function = (Object as any).values;
 
   // Fetches available users from the API.
   fetchUsers() {
