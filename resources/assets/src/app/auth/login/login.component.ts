@@ -12,6 +12,7 @@ export class LoginComponent implements OnInit {
     @Output() changeTitle: EventEmitter<String> = new EventEmitter<string>();
 
     public model: Login = new Login();
+    error?: string = null;
 
     constructor(
         private loginService: LoginService,
@@ -24,9 +25,15 @@ export class LoginComponent implements OnInit {
     }
 
     public onSubmit() {
-        this.loginService.send(this.model, (result) => {
+        this.error = null;
+        this.loginService.send(this.model, result => {
             this.api.setToken(result.access_token, result.token_type, result.user);
             this.router.navigateByUrl('/');
+        }, error => {
+            console.error(error);
+            if (error.status === 401) {
+                this.error = 'Incorrect password';
+            }
         });
     }
 }

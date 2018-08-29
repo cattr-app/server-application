@@ -1,4 +1,9 @@
 <div class="container">
+    <div class="alert alert-danger" role="alert" *ngIf="error">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="error = null"><span aria-hidden="true">&times;</span></button>
+        {{ error }}
+    </div>
+
     <form (ngSubmit)="onSubmit()"  #loginForm="ngForm">
         <div class="form-group">
             <label for="login" translate>login.name</label>
