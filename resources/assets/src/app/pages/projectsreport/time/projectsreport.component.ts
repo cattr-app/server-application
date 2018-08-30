@@ -224,4 +224,48 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
       });
     }
   }
+
+  exportCSV() {
+    let header = ['"Project"', '"Name"', '"Task"', '"Time Worked"'];
+    let lines = [];
+
+    this.report.forEach(project => {
+      const proj_name = `"${project.name}"`;
+      const time = moment.duration(project.project_time, 'seconds').asHours().toFixed(2);
+      lines.push([proj_name, '""', '""', time].join(','));
+
+      project.users.forEach(user => {
+        const user_name = `"${user.full_name}"`;
+        const time = moment.duration(user.tasks_time, 'seconds').asHours().toFixed(2);
+        lines.push([proj_name, user_name, '""', time].join(','));
+
+        user.tasks.forEach(task => {
+          const task_name = `"${task.task_name}"`;
+          const time = moment.duration(task.duration, 'seconds').asHours().toFixed(2);
+          lines.push([proj_name, user_name, task_name, time].join(','));
+        });
+      });
+    });
+
+    const filename = 'data.csv';
+    const content = header.join(',') + '\n' + lines.join('\n');
+    const blob = new Blob([content], { type: 'text/csv;charset=utf-8;' });
+    if (navigator.msSaveBlob) { // IE 10+
+      navigator.msSaveBlob(blob, filename);
+    } else {
+      const link = document.createElement('a');
+      if (link.download !== undefined) { // feature detection
+        // Browsers that support HTML5 download attribute
+        const url = URL.createObjectURL(blob);
+        link.setAttribute('href', url);
+        link.setAttribute('download', filename);
+        link.style.visibility = 'hidden';
+        document.body.appendChild(link);
+        link.click();
+        document.body.removeChild(link);
+      } else {
+        window.open(encodeURI('data:text/csv;charset=utf-8,' + content));
+      }
+    }
+  }
 }
