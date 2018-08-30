@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use Auth;
 use App\Models\ProjectsUsers;
 use App\Models\Task;
 use App\Models\TimeInterval;
@@ -117,17 +118,28 @@ class ProjectReportController extends Controller
   {
     $uids = $request->uids;
     // Get projects, where specified users is attached.
-    $attached_project_ids = Project::whereHas('users', function ($query) use ($uids) {
+    $users_attached_project_ids = Project::whereHas('users', function ($query) use ($uids) {
       $query->whereIn('id', $uids);
     })->pluck('id');
 
     // Get projects, where specified users have intervals.
-    $related_project_ids = Project::whereHas('tasks.timeIntervals', function ($query) use ($uids) {
+    $users_related_project_ids = Project::whereHas('tasks.timeIntervals', function ($query) use ($uids) {
       $query->whereIn('user_id', $uids);
     })->pluck('id');
 
+    $project_ids = collect([$users_attached_project_ids, $users_related_project_ids])->collapse()->unique();
+
+    // Get projects, directly attached to the current user.
+    $attached_project_ids = Project::whereHas('users', function ($query) use ($uids) {
+      $query->where('id', Auth::user()->id);
+    })->pluck('id');
+
+    // Filter projects by directly attached to the current user, if have attached.
+    if ($attached_project_ids->count() > 0) {
+      $project_ids = $project_ids->intersect($attached_project_ids);
+    }
+
     // Load projects.
-    $project_ids = collect([$attached_project_ids, $related_project_ids])->collapse()->unique();
     $projects = Project::query()->whereIn('id', $project_ids)->get(['id', 'name']);
 
     return response()->json($projects);
