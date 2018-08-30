@@ -437,13 +437,21 @@ class UserController extends ItemController
             /** @var User[] $rules */
             $user_users = $userId ? collect($user->attached_users) : collect($user->attached_to);
             $projects_users = [];
+            $projects_related_users = [];
 
             if ($userId) {
-                $projects_users = collect($user->projects)->flatMap(function($project) {
+                $projects = collect($user->projects);
+
+                $projects_users = $projects->flatMap(function($project) {
                    return collect($project->users);
                 })->unique('id');
+
+                $project_ids = $projects->map(function ($project) { return $project->id; });
+                $projects_related_users = User::whereHas('timeIntervals.task.project', function ($query) use ($project_ids) {
+                    $query->whereIn('id', $project_ids);
+                });
             }
-            $users = collect([$user_users, $projects_users])->collapse()->unique();
+            $users = collect([$user_users, $projects_users, $projects_related_users])->collapse()->unique();
         }
 
         $users = collect($users)->filter(function($user, $key) use ($userId) {
