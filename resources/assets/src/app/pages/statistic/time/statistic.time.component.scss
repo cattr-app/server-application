@@ -111,7 +111,7 @@
 
         /* Time worked header */
         th:nth-child(3) {
-            font-size: 13px;
+            font-size: 12px;
         }
 
         /* Resource row */
@@ -130,10 +130,17 @@
         /* Is working now */
         td:nth-child(1) {
             .fc-cell-content {
+                position: relative;
                 text-align: center;
+                overflow: inherit;
+                padding: 0;
             }
 
             .fc-cell-text {
+                position: absolute;
+                left: 5px;
+                top: 10px;
+
                 display: inline-block;
                 line-height: 1;
                 padding: 0;
@@ -154,10 +161,12 @@
             .fc-cell-content {
                 padding: 0 8px;
                 overflow: hidden;
+                line-height: 100%;
             }
 
             .fc-cell-text {
                 padding: 0;
+                font-size: 12px;
             }
 
             .last-worked,
@@ -187,24 +196,29 @@
         /* Time worked data */
         td:nth-child(3) {
             text-align: right;
+            font-size: 12px;
+
+            .fc-cell-content {
+                padding: 0 8px;
+            }
         }
     }
 
     .fc-time-area {
         .fc-cell-text {
-            font-size: 13px;
+            font-size: 12px;
         }
 
         /* Overrides for fullcalendar inline styles. */
         /* Set timeline row height. */
         tr[data-resource-id] > td > div {
-            height: 40px !important;
+            height: 35px !important;
             overflow: hidden;
         }
         /* Set events height. */
         .fc-event {
             top: 6px !important;
-            height: 25px !important;
+            height: 20px !important;
         }
     }
 
@@ -224,9 +238,9 @@
             position: absolute;
             text-align: center;
             background: #fff;
-            font-size: 12px;
-            height: 40px;
-            padding: 2px;
+            font-size: 11px;
+            height: 35px;
+            padding: 1px 2px;
 
             &_empty {
                 background: #eee;
