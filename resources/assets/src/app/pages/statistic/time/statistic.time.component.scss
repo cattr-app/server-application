@@ -137,7 +137,6 @@
                 display: inline-block;
                 line-height: 1;
                 padding: 0;
-                margin-top: 14px;
 
                 width: 10px;
                 height: 10px;
@@ -178,6 +177,11 @@
                     color: $brand-success;
                 }
             }
+
+            .current-proj {
+                display: inline;
+                margin-left: .5em;
+            }
         }
 
         /* Time worked data */
@@ -194,13 +198,13 @@
         /* Overrides for fullcalendar inline styles. */
         /* Set timeline row height. */
         tr[data-resource-id] > td > div {
-            height: 55px !important;
+            height: 40px !important;
             overflow: hidden;
         }
         /* Set events height. */
         .fc-event {
-            top: 8px !important;
-            height: 35px !important;
+            top: 6px !important;
+            height: 25px !important;
         }
     }
 
@@ -221,7 +225,7 @@
             text-align: center;
             background: #fff;
             font-size: 12px;
-            height: 55px;
+            height: 40px;
             padding: 2px;
 
             &_empty {

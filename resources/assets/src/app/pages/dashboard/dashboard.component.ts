@@ -39,7 +39,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   }
 
   onTabSelect(tab: TabDirective) {
-    this.selectedTab = tab.heading;
-    localStorage.setItem('dashboard-tab', this.selectedTab);
+    if (tab.heading !== undefined) {
+      this.selectedTab = tab.heading;
+      localStorage.setItem('dashboard-tab', this.selectedTab);
+    }
   }
 }

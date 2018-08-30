@@ -709,12 +709,6 @@ export class StatisticTimeComponent implements OnInit {
 
                     const currentTask = this.latestEventsTasks.find(task => +task.id === +lastUserEvent.task_id);
                     if (currentTask !== undefined) {
-                        const taskName = currentTask.task_name;
-                        const taskUrl = 'tasks/show/' + currentTask.id;
-                        const $task = $(`<p class="current-task"><a href="${taskUrl}">${taskName}</a></p>`);
-                        $task.attr('title', taskName);
-                        $nameCell.append($task);
-
                         const currentProject = this.latestEventsProjects
                             .find(proj => +proj.id === +currentTask.project_id);
                         if (currentProject !== undefined) {
@@ -724,6 +718,12 @@ export class StatisticTimeComponent implements OnInit {
                             $project.attr('title', projectName);
                             $nameCell.append($project);
                         }
+
+                        const taskName = currentTask.task_name;
+                        const taskUrl = 'tasks/show/' + currentTask.id;
+                        const $task = $(`<p class="current-task"><a href="${taskUrl}">${taskName}</a></p>`);
+                        $task.attr('title', taskName);
+                        $nameCell.append($task);
                     }
                 } else {
                     $workingNowCell.removeClass('is_working_now');
