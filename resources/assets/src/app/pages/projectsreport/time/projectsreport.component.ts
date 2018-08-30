@@ -37,6 +37,7 @@ interface UserData {
   avatar: string;
   tasks: TaskData[];
   tasks_time: number;
+  expanded?: boolean;
 };
 
 interface ProjectData {
@@ -184,6 +185,15 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
     this.loading = true;
     return new Promise<ProjectData[]>(resolve => {
       this.projectReportService.getItems((report: ProjectData[]) => {
+        // Add data for view to the response.
+        report = report.map(project => {
+          project.users = project.users.map(user => {
+            user.expanded = false;
+            return user;
+          });
+          return project;
+        });
+
         this.loading = false;
         resolve(report);
       }, params);

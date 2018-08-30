@@ -45,8 +45,25 @@
         width: 100%;
     }
 
+    &__user {
+        cursor: pointer;
+    }
+
     &__user-name {
         padding-left: 2em !important;
+
+        &::before {
+            content: '▶';
+            vertical-align: top;
+            margin-right: .5em;
+            font-size: .75em;
+        }
+
+        &--expanded {
+            &::before {
+                content: '◢';
+            }
+        }
     }
 
     &__task-name {

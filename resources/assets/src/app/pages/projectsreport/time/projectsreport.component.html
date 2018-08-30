@@ -34,18 +34,19 @@
             <div class="reports__report">
               <ngx-loading [show]="loading"></ngx-loading>
 
-              <table class="reports__project table" *ngFor="let project of report">
+              <table class="reports__project-wrapper table" *ngFor="let project of report">
                 <thead>
-                  <tr>
+                  <tr class="reports__project">
                     <th class="reports__project-name">{{ project.name }}</th>
                     <th class="reports__project-time">{{ formatDurationString(project.project_time) }}</th>
                     <th></th>
                   </tr>
                 </thead>
 
-                <tbody class="reports__user" *ngFor="let user of project.users">
-                  <tr>
-                    <th class="reports__user-name" scope="row">{{ user.full_name }}</th>
+                <tbody class="reports__user-wrapper" *ngFor="let user of project.users">
+                  <tr class="reports__user" (click)="user.expanded = !user.expanded">
+                    <th class="reports__user-name" scope="row"
+                      [class.reports__user-name--expanded]="user.expanded">{{ user.full_name }}</th>
                     <td class="reports__user-time">{{ formatDurationString(user.tasks_time) }}</td>
                     <td class="reports__user-progress">
                       <div class="progress">
@@ -55,16 +56,18 @@
                     </td>
                   </tr>
 
-                  <tr class="reports__task" *ngFor="let task of user.tasks">
-                    <th class="reports__task-name" scope="row">{{ task.task_name }}</th>
-                    <td class="reports__task-time">{{ formatDurationString(task.duration) }}</td>
-                    <td class="reports__task-progress">
-                      <div class="progress">
-                        <div class="progress-bar progress-bar-success"
-                          [style.width.%]="task.duration / project.project_time * 100"></div>
-                      </div>
-                    </td>
-                  </tr>
+                  <ng-container *ngIf="user.expanded">
+                    <tr class="reports__task" *ngFor="let task of user.tasks">
+                      <th class="reports__task-name" scope="row">{{ task.task_name }}</th>
+                      <td class="reports__task-time">{{ formatDurationString(task.duration) }}</td>
+                      <td class="reports__task-progress">
+                        <div class="progress">
+                          <div class="progress-bar progress-bar-success"
+                            [style.width.%]="task.duration / project.project_time * 100"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  </ng-container>
                 </tbody>
               </table>
             </div>
