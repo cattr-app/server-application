@@ -14,6 +14,13 @@
                     <div class="create-form">
                         <form (ngSubmit)="onSubmit()">
                             <div class="form-group row">
+                                <label class="col-md-2" translate>field.fullname</label>
+                                <div class="col-md-10">
+                                    <input type="text" class="form-control" name="user-full-name" [(ngModel)]="item.full_name">
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
                                 <label class="col-md-2" translate>field.firstname</label>
                                 <div class="col-md-10">
                                     <input type="text" class="form-control" name="user-company-id" [(ngModel)]="item.first_name">

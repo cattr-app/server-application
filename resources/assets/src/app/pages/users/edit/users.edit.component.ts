@@ -49,7 +49,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
 
     prepareData() {
         return {
-            'full_name': this.item.first_name + this.item.last_name,
+            'full_name': this.item.full_name,
             'first_name': this.item.first_name,
             'last_name': this.item.last_name,
             'email': this.item.email,
