@@ -5,6 +5,7 @@ import {ProjectsService} from '../projects.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {ItemsListComponent} from '../../items.list.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
+import { Subscription } from 'rxjs/Rx';
 
 @Component({
     selector: 'app-projects-list',
@@ -17,6 +18,7 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
     p = 1;
     userId: any = '';
     differ: any;
+    request: Subscription = new Subscription();
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
@@ -34,7 +36,10 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
     ngDoCheck() {
         const changeId = this.differ.diff([this.userId]);
         if (changeId) {
-            this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
+            if (this.request.closed !== undefined && !this.request.closed) {
+                this.request.unsubscribe();
+            }
+            this.request = this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
         }
     }
 }
