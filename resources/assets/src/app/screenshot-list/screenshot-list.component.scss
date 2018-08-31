@@ -12,6 +12,17 @@
     }
 }
 
+.screenshot {
+    cursor: pointer;
+}
+
+.screenshot-modal-buttons {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    width: 100%;
+}
+
 .card-img-top {
     width: 14rem;
     max-height: 100px;
@@ -27,4 +38,8 @@
     margin: 10px 0;
     text-align: center;
     clear: both;
+}
+
+.modal {
+    overflow-y: auto;
 }

@@ -1,9 +1,9 @@
 <div class="screenshots-row row" *ngFor="let group of itemsChunked">
     <div class="screenshot-wrapper col-xs-6 col-sm-4 col-md-3 col-lg-2" *ngFor="let screenshot of group">
         <div class="card">
-            <a [attr.href]="'/screenshots/show/' + screenshot.id" target="_blank">
-                <img class="card-img-top" src="{{ screenshot.path }}" onerror="this.src='uploads/none.png'" alt="image" />
-            </a>
+            <img class="screenshot card-img-top" src="{{ screenshot.path }}"
+                onerror="this.src='uploads/none.png'" alt="image"
+                (click)="showModal(screenshot)" />
 
             <div class="card-body">
                 <p class="card-text">
@@ -37,4 +37,67 @@
 
 <div *ngIf="!autoload" class="text-center" #loading>
     <button *ngIf="countFail <= 3 && !isAllLoaded" class="btn btn-primary" (click)="loadNext()">Load more</button>
+</div>
+
+<div class="modal fade" bsModal #screenshotModal="bs-modal" tabindex="-1" role="dialog"
+    (keydown.arrowleft)="showPrev()" (keydown.arrowright)="showNext()">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content" *ngIf="modalScreenshot">
+            <div class="modal-header">
+                <h4 class="modal-title pull-left">Screenshot #{{ modalScreenshot.id }}</h4>
+
+                <button type="button" class="close pull-right" aria-label="Close" (click)="screenshotModal.hide()">
+                    <span aria-hidden="true">&times;</span>
+                </button>
+            </div>
+
+            <div class="modal-body">
+                <div class="row">
+                    <div class="col-md-12">
+                        <a [attr.href]="modalScreenshot.path" target="_blank">
+                            <img src="{{ modalScreenshot.path }}" style="width:100%;">
+                        </a>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <table class="table table-borderless">
+                            <tbody>
+                                <tr *ngIf="modalScreenshot.time_interval">
+                                    <th translate>field.user</th>
+                                    <td>{{ modalScreenshot.time_interval.user.full_name }}</td>
+                                </tr>
+
+                                <tr *ngIf="modalScreenshot.time_interval">
+                                    <th translate>field.task</th>
+                                    <td>{{ modalScreenshot.time_interval.task.task_name }}</td>
+                                </tr>
+
+                                <tr>
+                                    <th translate>field.created</th>
+                                    <td>{{ modalScreenshot.created_at }}</td>
+                                </tr>
+
+                                <tr>
+                                    <th translate>field.updated</th>
+                                    <td>{{ modalScreenshot.updated_at }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <div class="row">
+                    <div class="col-md-12">
+                        <div class="screenshot-modal-buttons">
+                            <button class="btn btn-primary" (click)="showPrev()">&lt;</button>
+                            <a class="btn btn-primary" [attr.href]="modalScreenshot.path" target="_blank">View full image</a>
+                            <button class="btn btn-primary" (click)="showNext()">&gt;</button>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
 </div>

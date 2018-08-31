@@ -1,5 +1,5 @@
-import { Component, DoCheck, IterableDiffers, OnInit, ViewChild, OnDestroy, Input, IterableDiffer } from '@angular/core';
-import { BsModalService } from 'ngx-bootstrap';
+import { Component, DoCheck, IterableDiffers, OnInit, ViewChild, OnDestroy, Input, IterableDiffer, TemplateRef } from '@angular/core';
+import { BsModalService, ModalDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../api/api.service';
 import { ScreenshotsService } from '../pages/screenshots/screenshots.service';
@@ -9,6 +9,7 @@ import { ItemsListComponent } from '../pages/items.list.component';
 import {LocalStorage} from '../api/storage.model';
 
 import * as moment from 'moment';
+import { Screenshot } from '../models/screenshot.model';
 @Component({
     selector: 'screenshot-list',
     templateUrl: './screenshot-list.component.html',
@@ -16,6 +17,7 @@ import * as moment from 'moment';
 })
 export class ScreenshotListComponent extends ItemsListComponent implements OnInit, DoCheck, OnDestroy {
     @ViewChild('loading') loading: any;
+    @ViewChild('screenshotModal') screenshotModal: ModalDirective;
 
     @Input() autoload: boolean = true;
 
@@ -38,6 +40,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     scrollHandler: any = null;
     countFail = 0;
     isAllLoaded = false;
+
+    modalScreenshot?: Screenshot = null;
 
     protected _itemsChunked = [];
     get itemsChunked() {
@@ -170,6 +174,29 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         } catch {
             this.countFail += 1;
             this.screenshotLoading = false;
+        }
+    }
+
+    showModal(screenshot: Screenshot) {
+        this.modalScreenshot = screenshot;
+        this.screenshotModal.show();
+    }
+
+    showPrev() {
+        const items = this.itemsArray as Screenshot[];
+        const index = items.findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+
+        if (index > 0) {
+            this.modalScreenshot = items[index - 1];
+        }
+    }
+
+    showNext() {
+        const items = this.itemsArray as Screenshot[];
+        const index = items.findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+
+        if (index !== -1 && index < items.length - 1) {
+            this.modalScreenshot = items[index + 1];
         }
     }
 }

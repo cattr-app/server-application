@@ -9,6 +9,7 @@ import {DualListComponent, AngularDualListBoxModule} from 'angular-dual-listbox'
 import {TranslateModule} from '@ngx-translate/core';
 import { ScreenshotListComponent } from './screenshot-list/screenshot-list.component';
 import { ScreenshotsService } from './pages/screenshots/screenshots.service';
+import { ModalModule } from 'ngx-bootstrap';
 
 @NgModule({
     imports: [
@@ -18,6 +19,7 @@ import { ScreenshotsService } from './pages/screenshots/screenshots.service';
         NgSelectModule,
         TranslateModule,
         AngularDualListBoxModule,
+        ModalModule,
     ],
     declarations: [
         UsersFiltersComponent,
