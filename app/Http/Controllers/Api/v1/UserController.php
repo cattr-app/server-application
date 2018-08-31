@@ -449,7 +449,7 @@ class UserController extends ItemController
                 $project_ids = $projects->map(function ($project) { return $project->id; });
                 $projects_related_users = User::whereHas('timeIntervals.task.project', function ($query) use ($project_ids) {
                     $query->whereIn('id', $project_ids);
-                });
+                })->get();
             }
             $users = collect([$user_users, $projects_users, $projects_related_users])->collapse()->unique();
         }
