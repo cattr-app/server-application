@@ -6,6 +6,7 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {ItemsListComponent} from '../../items.list.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
 import {ProjectsService} from '../../projects/projects.service';
+import { Subscription } from 'rxjs/Rx';
 
 @Component({
     selector: 'app-tasks-list',
@@ -21,6 +22,8 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
     differUser: any;
     differProject: any;
     directProject: any = [];
+    requestTasks: Subscription = new Subscription();
+    requestProjects: Subscription = new Subscription();
 
     constructor(api: ApiService,
                 taskService: TasksService,
@@ -59,8 +62,14 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             if (this.projectId) {
                 filter['project_id'] = ['=', this.projectId];
             }
-            this.itemService.getItems(this.setItems.bind(this), filter ? filter : {'active': 1});
-            this.projectService.getItems(this.setProjects.bind(this), this.can('/projects/full_access') ? [] : {'direct_relation': 1});
+            if (this.requestTasks.closed !== undefined && !this.requestTasks.closed) {
+                this.requestTasks.unsubscribe();
+            }
+            this.requestTasks = this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
+            if (this.requestProjects.closed !== undefined && !this.requestProjects.closed) {
+                this.requestProjects.unsubscribe();
+            }
+            this.requestProjects = this.projectService.getItems(this.setProjects.bind(this), this.can('/projects/full_access') ? [] : {'direct_relation': 1});
         }
     }
 }

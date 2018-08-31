@@ -18,7 +18,7 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
     p = 1;
     userId: any = '';
     differ: any;
-    request: Subscription = new Subscription();
+    requestProjects: Subscription = new Subscription();
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
@@ -36,10 +36,10 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
     ngDoCheck() {
         const changeId = this.differ.diff([this.userId]);
         if (changeId) {
-            if (this.request.closed !== undefined && !this.request.closed) {
-                this.request.unsubscribe();
+            if (this.requestProjects.closed !== undefined && !this.requestProjects.closed) {
+                this.requestProjects.unsubscribe();
             }
-            this.request = this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
+            this.requestProjects = this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
         }
     }
 }

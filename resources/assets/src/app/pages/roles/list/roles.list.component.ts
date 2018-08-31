@@ -18,7 +18,7 @@ export class RolesListComponent extends ItemsListComponent implements OnInit, Do
     p = 1;
     userId: any = '';
     differ: any;
-    request: Subscription = new Subscription();
+    requestRoles: Subscription = new Subscription();
 
     constructor(
         api: ApiService,
@@ -40,10 +40,10 @@ export class RolesListComponent extends ItemsListComponent implements OnInit, Do
         const changeId = this.differ.diff([this.userId]);
 
         if (changeId) {
-            if (this.request.closed !== undefined && !this.request.closed) {
-                this.request.unsubscribe();
+            if (this.requestRoles.closed !== undefined && !this.requestRoles.closed) {
+                this.requestRoles.unsubscribe();
             }
-            this.request = this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
+            this.requestRoles = this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
         }
     }
 
