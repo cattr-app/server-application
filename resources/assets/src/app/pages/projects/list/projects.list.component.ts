@@ -6,6 +6,7 @@ import {BsModalService} from 'ngx-bootstrap/modal';
 import {ItemsListComponent} from '../../items.list.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
 import { Subscription } from 'rxjs/Rx';
+import {LocalStorage} from '../../../api/storage.model';
 
 @Component({
     selector: 'app-projects-list',
@@ -31,6 +32,10 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
     }
 
     ngOnInit() {
+        let filterByUser = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);
+        if (filterByUser instanceof Array && filterByUser.length > 0) {
+            this.userId = filterByUser;
+        }
     }
 
     ngDoCheck() {
