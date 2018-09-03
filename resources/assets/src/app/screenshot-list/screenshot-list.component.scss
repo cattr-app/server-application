@@ -42,4 +42,27 @@
 
 .modal {
     overflow-y: auto;
+
+    .table {
+        margin-bottom: 0;
+    }
+}
+
+.modal-screenshot-wrapper {
+    position: relative;
+}
+
+.modal-screenshot-nav-left,
+.modal-screenshot-nav-right {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+.modal-screenshot-nav-left {
+    left: 20px;
+}
+
+.modal-screenshot-nav-right {
+    right: 20px;
 }
