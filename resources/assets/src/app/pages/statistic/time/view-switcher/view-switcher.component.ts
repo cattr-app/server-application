@@ -3,6 +3,7 @@ import { DateRangeSelectorComponent } from '../date-range-selector/date-range-se
 import * as moment from 'moment';
 import { ApiService } from '../../../../api/api.service';
 import { User } from '../../../../models/user.model';
+import { LocalStorage } from '../../../../api/storage.model';
 
 export interface ViewData {
     name: string,
@@ -27,6 +28,8 @@ export class ViewSwitcherComponent implements OnInit {
     userInteraction: boolean = false;
     viewName: string = 'timelineDay';
     activeButton: string = 'timelineDay';
+    filterByDate = null;
+    filterByDateRange = null;
 
     @Output() setView = new EventEmitter<ViewData>();
 
@@ -35,6 +38,14 @@ export class ViewSwitcherComponent implements OnInit {
     }
     ngOnInit() {
         const user = this.api.getUser() as User;
+
+        this.filterByDate = LocalStorage.getStorage().get(`filterByDateIN${ window.location.pathname }`);
+        if (this.filterByDate === null) {
+          LocalStorage.getStorage().set(`filterByDateIN${ window.location.pathname }`, this.viewName); 
+        }
+        this.filterByDate = LocalStorage.getStorage().get(`filterByDateIN${ window.location.pathname }`);
+        this.viewName = this.filterByDate;
+        this.activeButton = this.filterByDate;
 
         let timezone = localStorage.getItem('statistics-timezone');
         if (timezone === null) {
@@ -54,11 +65,15 @@ export class ViewSwitcherComponent implements OnInit {
     }
 
     changeViewName(viewName: string) {
+        // this.activeButton = viewName;
+        // if (viewName !== 'timelineRange') {
+        //     this.viewName = viewName;
+        //     this.applyChanges();
+        // }
         this.activeButton = viewName;
-        if (viewName !== 'timelineRange') {
-            this.viewName = viewName;
-            this.applyChanges();
-        }
+        this.viewName = viewName;       
+        this.applyChanges();
+        LocalStorage.getStorage().set(`filterByDateIN${ window.location.pathname }`, this.viewName);
     }
 
     changeStartDate(date: moment.Moment) {
@@ -78,6 +93,8 @@ export class ViewSwitcherComponent implements OnInit {
         this.viewName = 'timelineRange';
         this.start = start;
         this.end = end;
+        this.filterByDateRange = {start: this.start, end: this.end};
+        LocalStorage.getStorage().set(`filterByDateRangeIN${ window.location.pathname }`, this.filterByDateRange);
         this.applyChanges();
     }
 

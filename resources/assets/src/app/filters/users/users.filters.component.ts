@@ -100,9 +100,7 @@ export class UsersFiltersComponent implements OnInit {
             }
         }
       }
-      for(i = 0; i < filtered.length; i++) { 
-        this.userIdChange.emit(filtered[i].id);
-      }
+
       this.selectUsers = filtered;
     }
 
