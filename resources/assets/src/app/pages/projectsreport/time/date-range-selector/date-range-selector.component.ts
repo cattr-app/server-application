@@ -1,5 +1,6 @@
 import { Component, Input, Output, EventEmitter } from '@angular/core';
 import * as moment from 'moment';
+import { LocalStorage } from '../../../../api/storage.model';
 
 @Component({
     selector: 'date-range-selector',
@@ -21,9 +22,15 @@ export class DateRangeSelectorComponent {
     @Input() isOpened: boolean = true;
 
     readonly max: moment.Moment = moment.utc().add(1, 'day');
+    filterByDateRange = null;
 
     get _startDate(): string {
-        return this.startDate.format(this.dateFormat);
+        this.filterByDateRange = LocalStorage.getStorage().get(`filterByDateRangeIN${ window.location.pathname }`)
+        if (this.filterByDateRange === null || this.filterByDateRange['start'] === undefined ) {
+            return this.startDate.format(this.dateFormat);
+        } else {
+            return moment(this.filterByDateRange['start']).format(this.dateFormat); 
+        }
     }
 
     set _startDate(value: string) {
@@ -33,7 +40,12 @@ export class DateRangeSelectorComponent {
     }
 
     get _endDate(): string {
-        return this.endDate.clone().subtract(1, 'day').format(this.dateFormat);
+        this.filterByDateRange = LocalStorage.getStorage().get(`filterByDateRangeIN${ window.location.pathname }`)
+        if (this.filterByDateRange === null || this.filterByDateRange['end'] === undefined ) {
+            return this.startDate.format(this.dateFormat);
+        } else {
+            return moment(this.filterByDateRange['end']).format(this.dateFormat); 
+        }
     }
 
     set _endDate(value: string) {
