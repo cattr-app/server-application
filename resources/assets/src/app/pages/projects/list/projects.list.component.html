@@ -9,8 +9,14 @@
                         <br />
                         <div>
                             <label translate>filter.project</label>
-                            <input type="text" class="form-control" [(ngModel)]="projectName"
-                                (input)="updateProjectName()" />
+                            <p-autoComplete [(ngModel)]="selectedProjects"
+                                [suggestions]="suggestedProjects"
+                                (completeMethod)="searchProject($event)"
+                                (onSelect)="updateSelectedProjects($event)"
+                                (onUnselect)="updateSelectedProjects($event)"
+                                [multiple]="true"
+                                field="name">
+                            </p-autoComplete>
                         </div>
                     </div>
 

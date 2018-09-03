@@ -19,6 +19,7 @@ import {GrowlModule} from 'primeng/growl';
 import {CommonModule} from '@angular/common';
 import {SharedModule} from '../../shared.module';
 import {TranslateModule} from '@ngx-translate/core';
+import {AutoCompleteModule} from 'primeng/autocomplete';
 
 
 @NgModule({
@@ -31,6 +32,7 @@ import {TranslateModule} from '@ngx-translate/core';
         GrowlModule,
         SharedModule,
         TranslateModule,
+        AutoCompleteModule,
     ],
     declarations: [
         ProjectsCreateComponent,

@@ -20,7 +20,11 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
 
     userId = null;
     userDiffer: any;
+
     projectName = '';
+    availableProjects = [];
+    suggestedProjects = [];
+    selectedProjects = [];
 
     filter: { [key: string]: any } = {};
 
@@ -41,6 +45,11 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
         if (filterByUser instanceof Array && filterByUser.length > 0) {
             this.userId = filterByUser;
         }
+
+        this.itemService.getItems(items => {
+            this.availableProjects = items;
+            this.suggestedProjects = items;
+        });
     }
 
     ngDoCheck() {
@@ -57,11 +66,29 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
         }
     }
 
+    searchProject(event) {
+        this.suggestedProjects = this.availableProjects.filter(project =>
+            project.name.toLowerCase().indexOf(event.query.toLowerCase()) !== -1);
+        this.projectName = event.query;
+        this.updateProjectName();
+    }
+
     updateProjectName() {
         if (this.projectName.length) {
             this.filter.name = ['like', '%' + this.projectName + '%'];
         } else {
             delete this.filter.name;
+        }
+
+        this.updateItems();
+    }
+
+    updateSelectedProjects() {
+        if (this.selectedProjects.length) {
+            const ids = this.selectedProjects.map(project => project.id);
+            this.filter.id = ['=', ids];
+        } else {
+            delete this.filter.id;
         }
 
         this.updateItems();
