@@ -6,6 +6,8 @@ import {AllowedActionsService} from '../allowed-actions.service';
 import {BsModalService} from 'ngx-bootstrap/modal';
 import {ItemsListComponent} from '../../items.list.component';
 import {User} from '../../../models/user.model';
+import { Subscription } from 'rxjs/Rx';
+import {LocalStorage} from '../../../api/storage.model';
 
 @Component({
     selector: 'app-roles-list',
@@ -17,6 +19,7 @@ export class RolesListComponent extends ItemsListComponent implements OnInit, Do
     p = 1;
     userId: any = '';
     differ: any;
+    requestRoles: Subscription = new Subscription();
 
     constructor(
         api: ApiService,
@@ -32,13 +35,20 @@ export class RolesListComponent extends ItemsListComponent implements OnInit, Do
 
     ngOnInit() {
         this.UserUpdate();
+        let filterByUser = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);
+        if (filterByUser instanceof Array && filterByUser.length > 0) {
+            this.userId = filterByUser;
+        }
     }
 
     ngDoCheck() {
         const changeId = this.differ.diff([this.userId]);
 
         if (changeId) {
-            this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
+            if (this.requestRoles.closed !== undefined && !this.requestRoles.closed) {
+                this.requestRoles.unsubscribe();
+            }
+            this.requestRoles = this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
         }
     }
 

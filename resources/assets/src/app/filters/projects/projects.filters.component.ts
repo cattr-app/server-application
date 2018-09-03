@@ -88,9 +88,7 @@ export class ProjectsFiltersComponent implements OnInit {
               }
           }
         }
-        for(i = 0; i < filtered.length; i++) { 
-          this.projectIdChange.emit(filtered[i].id);
-        }
+        
         this.selectProjects = filtered;
       }
   
