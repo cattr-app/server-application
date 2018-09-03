@@ -135,10 +135,11 @@ class ProjectController extends ItemController
             });
 
             if (!collect($attachedUsersId)->contains($usersId->all()) && !$full_access) {
-                return response()->json(Filter::process(
-                    $this->getEventUniqueName('answer.success.item.relations'),
-                    []
-                ));
+                // Add filter by projects attached to the current user for the indirectly related projects.
+                $projects = collect(Auth::user()->projects)->pluck('id')->toArray();
+                if (count($projects) > 0) {
+                    $request->offsetSet('tasks.project_id', ['=', $projects]);
+                }
             }
 
             /** show all projects for full access if id in request === user->id */
