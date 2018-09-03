@@ -1,4 +1,4 @@
-import {Component, DoCheck, IterableDiffers, OnInit} from '@angular/core';
+import {Component, DoCheck, IterableDiffers, OnInit, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Project} from '../../../models/project.model';
 import {ProjectsService} from '../projects.service';
@@ -15,8 +15,12 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
 
     itemsArray: Project[] = [];
     p = 1;
-    userId: any = '';
-    differ: any;
+
+    userId = null;
+    userDiffer: any;
+    projectName = '';
+
+    filter: { [key: string]: any } = {};
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
@@ -25,16 +29,37 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
                 differs: IterableDiffers,
                 ) {
         super(api, projectService, modalService, allowedService);
-        this.differ = differs.find([]).create(null);
+        this.userDiffer = differs.find([]).create(null);
     }
 
     ngOnInit() {
     }
 
     ngDoCheck() {
-        const changeId = this.differ.diff([this.userId]);
-        if (changeId) {
-            this.itemService.getItems(this.setItems.bind(this), this.userId ? {'user_id': ['=', this.userId]} : null);
+        const userChanged = this.userDiffer.diff([this.userId]);
+
+        if (userChanged) {
+            if (this.userId) {
+                this.filter.user_id = ['=', this.userId];
+            } else {
+                delete this.filter.user_id;
+            }
+
+            this.updateItems();
         }
+    }
+
+    updateProjectName() {
+        if (this.projectName.length) {
+            this.filter.name = ['like', '%' + this.projectName + '%'];
+        } else {
+            delete this.filter.name;
+        }
+
+        this.updateItems();
+    }
+
+    updateItems() {
+        this.itemService.getItems(this.setItems.bind(this), this.filter);
     }
 }

@@ -4,13 +4,22 @@
             <div class="panel panel-default">
                 <div class="panel-heading" translate>navigation.projects</div>
                 <div class="panel-body">
-                    <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
-                    <br/>
-                    <a *ngIf="can('/projects/create')" routerLink="/projects/create" class="btn btn-success" title="Add new project">
-                        <i class="fa fa-plus" aria-hidden="true"></i> <span translate>control.new</span>
-                    </a>
-                    <br/>
-                    <br/>
+                    <div class="filters">
+                        <app-users-filters *ngIf="can('/users/relations')" [(userId)]="userId"></app-users-filters>
+                        <br />
+                        <div>
+                            <label translate>filter.project</label>
+                            <input type="text" class="form-control" [(ngModel)]="projectName"
+                                (input)="updateProjectName()" />
+                        </div>
+                    </div>
+
+                    <div class="actions" *ngIf="can('/projects/create')">
+                        <a routerLink="/projects/create" class="btn btn-success" title="Add new project">
+                            <i class="fa fa-plus" aria-hidden="true"></i> <span translate>control.new</span>
+                        </a>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-borderless">
                             <thead>
