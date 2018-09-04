@@ -17,13 +17,11 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
 
     itemsArray: Task[] = [];
     p = 1;
-    userId: number = null;
-    projectId: number = null;
+    userId?: number[] = [];
+    projectId?: number[] = [];
     differUser: any;
     differProject: any;
     directProject: any = [];
-    filterByUser: any[];
-    filterByProject: any[];
 
     constructor(api: ApiService,
                 taskService: TasksService,
@@ -38,11 +36,11 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
     }
 
     ngOnInit() {
-        this.filterByUser = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);
-        this.filterByUser instanceof Array ? this.filterByUser : new Array();
-        
-        this.filterByProject = LocalStorage.getStorage().get(`filterByProjectIN${ window.location.pathname }`);
-        this.filterByProject instanceof Array ? this.filterByProject : new Array();
+        const userId = LocalStorage.getStorage().get(`filterByUserIN${window.location.pathname}`);
+        this.userId = userId instanceof Array ? userId : [];
+
+        const projectId = LocalStorage.getStorage().get(`filterByProjectIN${window.location.pathname}`);
+        this.projectId = projectId instanceof Array ? projectId : [];
     }
 
     setProjects(result) {
@@ -57,22 +55,21 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
     ngDoCheck() {
         const changeUserId = this.differUser.diff([this.userId]);
         const changeProjectId = this.differProject.diff([this.projectId]);
-        const filter = {'with': 'project'};
+        const filter = { 'with': 'project' };
 
         if (changeUserId || changeProjectId) {
-            if (this.userId) {
+            if (this.userId && this.userId.length) {
                 filter['user_id'] = ['=', this.userId];
-            } else if (this.filterByProject instanceof Array && this.filterByUser.length > 0) {
-                filter['user_id'] = ['=', this.filterByUser];
             }
 
-            if (this.projectId) {
+            if (this.projectId && this.projectId.length) {
                 filter['project_id'] = ['=', this.projectId];
-            } else if(this.filterByProject instanceof Array && this.filterByProject.length > 0) {
-                filter['project_id'] = ['=', this.filterByProject];
             }
-            this.itemService.getItems(this.setItems.bind(this), filter ? filter : {'active': 1});
-            this.projectService.getItems(this.setProjects.bind(this), this.can('/projects/full_access') ? [] : {'direct_relation': 1});
+
+            this.itemService.getItems(this.setItems.bind(this), filter ? filter : { 'active': 1 });
+            this.projectService.getItems(this.setProjects.bind(this), this.can('/projects/full_access')
+                ? []
+                : { 'direct_relation': 1 });
         }
     }
 }

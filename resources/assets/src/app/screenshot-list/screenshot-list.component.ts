@@ -6,7 +6,6 @@ import { ScreenshotsService } from '../pages/screenshots/screenshots.service';
 import { AllowedActionsService } from '../pages/roles/allowed-actions.service';
 
 import { ItemsListComponent } from '../pages/items.list.component';
-import {LocalStorage} from '../api/storage.model';
 
 import * as moment from 'moment';
 import { Screenshot } from '../models/screenshot.model';
@@ -40,6 +39,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     scrollHandler: any = null;
     countFail = 0;
     isAllLoaded = false;
+    isLoading = false;
 
     modalScreenshot?: Screenshot = null;
 
@@ -136,30 +136,21 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
             'order_by': ['id', 'desc'],
         };
 
-        let filterByUser = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);
-        if (filterByUser instanceof Array && filterByUser.length > 0) {
-            this.user_ids = filterByUser;
-        }
-
-        let filterByProject = LocalStorage.getStorage().get(`filterByProjectIN${ window.location.pathname }`);
-        if (filterByProject instanceof Array && filterByProject.length > 0) {
-            this.project_ids = filterByProject;
-        }
-
-        if (this.user_ids) {
+        if (this.user_ids && this.user_ids.length) {
             params['user_id'] = ['=', this.user_ids];
         }
 
-        if (this.project_ids) {
+        if (this.project_ids && this.project_ids.length) {
             params['project_id'] = ['=', this.project_ids];
         }
 
-        if (this.task_ids) {
+        if (this.task_ids && this.task_ids.length) {
             params['timeInterval.task_id'] = ['=', this.task_ids];
         }
 
         this.screenshotLoading = true;
         try {
+            this.isLoading = true;
             this.itemService.getItems(items => {
                 if (items.length > 0) {
                     this.setItems(this.itemsArray.concat(items));
@@ -170,10 +161,12 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
 
                 this.isAllLoaded = items.length < this.chunksize;
                 this.screenshotLoading = false;
+                this.isLoading = false;
             }, params);
         } catch {
             this.countFail += 1;
             this.screenshotLoading = false;
+            this.isLoading = false;
         }
     }
 
