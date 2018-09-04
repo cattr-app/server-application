@@ -11,7 +11,7 @@ import {LocalStorage} from '../../../api/storage.model';
 @Component({
     selector: 'app-projects-list',
     templateUrl: './projects.list.component.html',
-    styleUrls: ['../../items.component.scss']
+    styleUrls: ['./projects.list.component.scss', '../../items.component.scss']
 })
 export class ProjectsListComponent extends ItemsListComponent implements OnInit, DoCheck {
 

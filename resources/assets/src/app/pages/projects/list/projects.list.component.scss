@@ -1,0 +1,36 @@
+p-autoComplete {
+    display: block;
+}
+
+:host ::ng-deep {
+    .ui-autocomplete-multiple {
+        display: flex;
+        flex-flow: row nowrap;
+        align-items: stretch;
+        font: inherit;
+    }
+
+    .ui-autocomplete-multiple-container {
+        flex: 1;
+        padding: 2px 7px;
+        border-right: 0;
+        font: inherit;
+    }
+
+    .ui-state-focus {
+        box-shadow: none !important;
+    }
+
+    .ui-autocomplete-input-token,
+    .ui-autocomplete-input-token input {
+        font: inherit;
+    }
+
+    .ui-autocomplete-dropdown,
+    .ui-autocomplete-dropdown:hover {
+        background: none !important;
+        border-color: #ccc !important;
+        color: #999 !important;
+        height: unset;
+    }
+}
