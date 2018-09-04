@@ -1,0 +1,129 @@
+# Required to setup next project secret variables:
+# - PRODUCTION_SSH_IP
+# - PRODUCTION_SSH_USER
+# - PRODUCTION_SSH_PASSWORD
+
+# Тot mandatory variables (with defaults):
+# - PRODUCTION_SSH_PATH = /opt/amazing-time
+# - PRODUCTION_SSH_PORT = 22
+# - PRODUCTION_STORAGE_PATH = $PRODUCTION_SSH_PATH/storage
+
+# Folders and files on production
+# - $PRODUCTION_STORAGE_PATH - persistent storage
+# - $PRODUCTION_SSH_PATH - project CD workfolder
+# - --/storage - default persistent storage path (if $PRODUCTION_STORAGE_PATH not setted)
+# - --/builds - builds folder
+# - --/current - symlink to current deployed version
+# - --/.build_id - current build id (for version history)
+# - --/.build_history - history of version changes (for rollback strategy)
+
+# Web server should be settuped to path: $PRODUCTION_SSH_PATH/current/public
+
+stages:
+  - build
+  - pack
+  - deploy
+
+cache:
+  # using single cache volume
+  key: package-cache
+  untracked: true
+  paths:
+    - public/js
+    - public/apidoc
+    - vendor/
+    - build-pack.tar.gz
+
+
+# Build Jobs
+
+build-backend:
+  stage: build
+  tags:
+    - /^release-.*$/
+  only:
+    - master
+  environment:
+    name: production
+  script:
+    - [ -d vendor ] && rm -r vendor
+    - composer install
+
+build-front:
+  stage: build
+  tags:
+    - /^release-.*$/
+  only:
+    - master
+  environment:
+    name: production
+  script:
+    - [ -d node_modules ] && rm -r node_modules
+    - npm install
+    - [ -d public/js ] && rm -r public/js
+    - [ -d apidoc ] && rm -r apidoc
+    - ([ -L public/apidoc ] && unlink public/apidoc) || ([ -d public/apidoc ] && rm -r public/apidoc)
+    - npm run build-prod
+    - npm run api
+    - ([ -L public/apidoc ] && unlink public/apidoc) || ([ -d public/apidoc ] && rm -r public/apidoc)
+    - mv apidoc public
+
+# Create package archive
+
+create-package:
+  stage: pack
+  tags:
+    - /^release-.*$/
+  only:
+    - master
+  environment:
+    name: production
+  script:
+    - ([ -L public/uploads ] && unlink public/uploads) || ([ -d public/uploads ] && rm -r public/uploads)
+    - ([ -L storage ] && unlink storage) || ([ -d storage ] && rm -r storage)
+    - [ -d node_modules ] && rm -r node_modules
+    - [ -f build-pack.tar.gz ] && rm build-pack.tar.gz
+    - mkdir .build-pack
+    - cp -r * .build-pack
+    - tar -czf build-pack.tar.gz .build-pack
+
+# Upload archive to production and setup it
+
+deploy-production:
+  stage: deploy
+  tags:
+    - /^release-.*$/
+  only:
+    - master
+  environment:
+    name: production
+  dependencies:
+    - create-package
+  script:
+  	# Prepare variables
+    - [ "$PRODUCTION_SSH_PATH" == "" ] && PRODUCTION_SSH_PATH="/opt/amazing-time"
+    - [ "$PRODUCTION_SSH_PORT" == "" ] && PRODUCTION_SSH_PORT="22"
+    - [ "$PRODUCTION_STORAGE_PATH" == "" ] && PRODUCTION_STORAGE_PATH="$PRODUCTION_SSH_PATH/storage"
+    - SSHPASS="$PRODUCTION_SSH_PASSWORD"
+    - BUILD_ID="$(date +"%F_%H-%M-%S")_${CI_COMMIT_REF_SLUG}"
+    # Shortcut for ssh cmd
+    - SSHCMD="sshpass -e ssh -p $PRODUCTION_SSH_PORT ${PRODUCTION_SSH_USER}@${PRODUCTION_SSH_IP}"
+    # Copy build package
+    - scp -p $PRODUCTION_SSH_PORT build-pack.tar.gz $PRODUCTION_SSH_IP:$PRODUCTION_SSH_PATH/
+    - $SSHCMD "cd $PRODUCTION_SSH_PATH ; tar -xf build-pack.tar.gz"
+    - $SSHCMD mv $PRODUCTION_SSH_PATH/.build-pack $PRODUCTION_SSH_PATH/builds/$BUILD_ID
+    # Set build to current
+    - $SSHCMD rm $PRODUCTION_SSH_PATH/current
+    - $SSHCMD ln -s $PRODUCTION_SSH_PATH/builds/$BUILD_ID $PRODUCTION_SSH_PATH/current
+    # Link storage to new build
+    - $SSHCMD ln -s $PRODUCTION_STORAGE_PATH $PRODUCTION_SSH_PATH/current/storage
+    # Finish configuration of new build
+    - $SSHCMD "ln -s $PRODUCTION_SSH_PATH/current/storage/app/uploads $PRODUCTION_SSH_PATH/current/public/"
+    # Run migrations
+    - $SSHCMD php $PRODUCTION_SSH_PATH/current/artisan migrate
+    # Archive previous build
+    - PREV_BUILD_ID=$($SSHCMD cat $PRODUCTION_SSH_PATH/.build_id)
+    - $SSHCMD "cd $PRODUCTION_SSH_PATH/builds/ ; tar -czf ${PREV_BUILD_ID}.tar.gz $PREV_BUILD_ID/ && rm -rf $PREV_BUILD_ID/"
+    # Do some history
+    - $SSHCMD "cat $PRODUCTION_SSH_PATH/.build_id >> $PRODUCTION_SSH_PATH/.build_history"
+    - $SSHCMD "echo $BUILD_ID > $PRODUCTION_SSH_PATH/.build_id"
