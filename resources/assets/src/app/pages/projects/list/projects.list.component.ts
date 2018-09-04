@@ -83,7 +83,7 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
         this.updateItems();
     }
 
-    updateSelectedProjects() {
+    updateSelectedProjects(event) {
         if (this.selectedProjects.length) {
             const ids = this.selectedProjects.map(project => project.id);
             this.filter.id = ['=', ids];
