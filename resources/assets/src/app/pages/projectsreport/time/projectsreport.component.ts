@@ -211,6 +211,17 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
       return `${hours}h ${minutes}m`;
   }
 
+  formatDurationStringCSV(time: number) {
+      const duration = moment.duration(time, 'seconds');
+      const hours = Math.floor(duration.asHours());
+      const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
+      const seconds = Math.floor(duration.asSeconds()) - 60 * 60 * hours - 60 * minutes;
+      const hoursStr = (hours > 9 ? '' : '0') + hours;
+      const minutesStr = (minutes > 9 ? '' : '0') + minutes;
+      const secondsStr = (seconds > 9 ? '' : '0') + seconds;
+      return `${hoursStr}:${minutesStr}:${secondsStr}`;
+  }
+
   // Handles the 'select all' option.
   userSelected(value) {
     if (value.id === -1) {
@@ -236,26 +247,30 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
   }
 
   exportCSV() {
-    let header = ['"Project"', '"Name"', '"Task"', '"Time Worked"'];
+    let header = ['"Project"', '"Name"', '"Task"', '"Time"', '"Time (decimal)"'];
     let lines = [];
 
     this.report.forEach(project => {
-      const proj_name = `"${project.name}"`;
-      const time = moment.duration(project.project_time, 'seconds').asHours().toFixed(2);
-      lines.push([proj_name, '""', '""', time].join(','));
+      const proj_name = `"${project.name.replace('"', '""')}"`;
 
       project.users.forEach(user => {
-        const user_name = `"${user.full_name}"`;
-        const time = moment.duration(user.tasks_time, 'seconds').asHours().toFixed(2);
-        lines.push([proj_name, user_name, '""', time].join(','));
+        const user_name = `"${user.full_name.replace('"', '""')}"`;
 
         user.tasks.forEach(task => {
-          const task_name = `"${task.task_name}"`;
-          const time = moment.duration(task.duration, 'seconds').asHours().toFixed(2);
-          lines.push([proj_name, user_name, task_name, time].join(','));
+          const task_name = `"${task.task_name.replace('"', '""')}"`;
+          const time = this.formatDurationStringCSV(task.duration);
+          const duration = moment.duration(task.duration, 'seconds');
+          const timeDecimal = duration.asHours().toFixed(4);
+          lines.push([proj_name, user_name, task_name, `"${time}"`, timeDecimal].join(','));
         });
       });
     });
+
+    const total = this.report.reduce((total, project) => total + project.project_time, 0);
+    const time = this.formatDurationStringCSV(total);
+    const duration = moment.duration(total, 'seconds');
+    const timeDecimal = duration.asHours().toFixed(4);
+    lines.push(['""', '""', '"Total"', `"${time}"`, timeDecimal].join(','));
 
     const filename = 'data.csv';
     const content = header.join(',') + '\n' + lines.join('\n');
