@@ -363,9 +363,11 @@ export class StatisticTimeComponent implements OnInit {
                 if (sort === 'Name') {
                     this.sortUsers = this.sortUsers === UsersSort.NameAsc
                         ? UsersSort.NameDesc : UsersSort.NameAsc;
+                    this.loading = true;
                 } else if (sort === 'Time Worked') {
                     this.sortUsers = this.sortUsers === UsersSort.TimeWorkedDesc
                         ? UsersSort.TimeWorkedAsc : UsersSort.TimeWorkedDesc;
+                    this.loading = true;
                 }
                 return this.sortUsers;
             }).startWith(UsersSort.NameAsc).share();
@@ -654,6 +656,7 @@ export class StatisticTimeComponent implements OnInit {
                 }
 
                 this.timelineInitialized = true;
+                setTimeout(() => this.loading = false);
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
@@ -693,13 +696,21 @@ export class StatisticTimeComponent implements OnInit {
                 $row.removeClass('not_worked');
             }
 
+            const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
+            $nameCell.find('.current-task, .current-proj, .last-worked').remove();
+            if ($('.name', $nameCell).length === 0) {
+                const name = $nameCell.text();
+                $nameCell.empty();
+                const $name = $(`<p class="name">${name}</p>`);
+                $name.attr('title', name);
+                $nameCell.append($name);
+            }
+
             const lastUserEvents = this.latestEvents.filter(event => +event.resourceId === +userId);
             const hasWorkedToday = lastUserEvents.length > 0;
             if (hasWorkedToday) {
                 const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
                 const eventEnd = moment.utc(lastUserEvent.end);
-                const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
-                $nameCell.children('.current-task, .current-proj, .last-worked').remove();
 
                 const $workingNowCell = $('td:nth-child(1) .fc-cell-text', $row);
                 const now = moment.utc().add(this.timezoneOffset, 'minutes').subtract(10, 'minutes');
@@ -714,9 +725,9 @@ export class StatisticTimeComponent implements OnInit {
                         if (currentProject !== undefined) {
                             const projectName = currentProject.name;
                             const projectUrl = 'projects/show/' + currentProject.id;
-                            const $project = $(`<p class="current-proj"><a href="${projectUrl}">${projectName}</a></p>`);
+                            const $project = $(`<span class="current-proj"><a href="${projectUrl}">${projectName}</a></span>`);
                             $project.attr('title', projectName);
-                            $nameCell.append($project);
+                            $nameCell.children('.name').append($project);
                         }
 
                         const taskName = currentTask.task_name;
@@ -727,8 +738,9 @@ export class StatisticTimeComponent implements OnInit {
                     }
                 } else {
                     $workingNowCell.removeClass('is_working_now');
-                    const lastWorkedString = eventEnd.from(moment.utc().add(this.timezoneOffset, 'minutes'));
-                    const $lastWorked = $(`<p class="last-worked">Last worked ${lastWorkedString}</p>`);
+                    const lastWorkedString = 'Last worked '
+                        + eventEnd.from(moment.utc().add(this.timezoneOffset, 'minutes'));
+                    const $lastWorked = $(`<p class="last-worked">${lastWorkedString}</p>`);
                     $lastWorked.attr('title', lastWorkedString);
                     $nameCell.append($lastWorked);
                 }
