@@ -83,7 +83,7 @@ class Role extends Model
 
             foreach ($actionList as $object => $actions) {
                 foreach ($actions as $action => $name) {
-                    $rule = Rule::where([
+                    $rule = Rule::withTrashed()->where([
                         'role_id' => $role->id,
                         'object' => $object,
                         'action' => $action,
@@ -96,6 +96,11 @@ class Role extends Model
                             'action' => $action,
                             'allow' => false,
                         ]);
+                    }
+                    elseif ($rule->trashed()) {
+                        $rule->restore();
+                        $rule->allow = false;
+                        $rule->save();
                     }
                 }
             }
