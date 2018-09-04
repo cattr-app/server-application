@@ -80,6 +80,22 @@ class TimeIntervalController extends ItemController
         //create time interval
         $intervalData['start_at'] = (new Carbon($intervalData['start_at']))->setTimezone('UTC')->toDateTimeString();
         $intervalData['end_at'] = (new Carbon($intervalData['end_at']))->setTimezone('UTC')->toDateTimeString();
+
+        // If interval is already exists, do not create duplicate.
+        $existing = TimeInterval::where([
+            ['user_id', '=', $intervalData['user_id']],
+            ['start_at', '=', $intervalData['start_at']],
+            ['end_at', '=', $intervalData['end_at']],
+        ])->first();
+        if ($existing) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                    'interval' => $existing,
+                ]),
+                200
+            );
+        }
+
         $timeInterval = Filter::process($this->getEventUniqueName('item.create'), TimeInterval::create($intervalData));
 
         //create screenshot
