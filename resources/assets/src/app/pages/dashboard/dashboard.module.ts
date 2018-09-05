@@ -16,6 +16,7 @@ import { ScreenshotListComponent } from './screenshotlist/screenshot.list.compon
 import {TranslateModule} from '@ngx-translate/core';
 import { StatisticModule } from '../statistic/statistic.module';
 import { TabsModule } from 'ngx-bootstrap';
+import { LoadingModule } from 'ngx-loading';
 
 @NgModule({
   imports: [
@@ -27,6 +28,7 @@ import { TabsModule } from 'ngx-bootstrap';
     TranslateModule,
     StatisticModule,
     TabsModule.forRoot(),
+    LoadingModule,
   ],
   declarations: [
     DashboardComponent,
