@@ -1,4 +1,4 @@
-#!/usr/bin/env bash
+#!/bin/bash
 
 BASH_COLOR_BLACK="\033[0;30m"
 BASH_COLOR_RED="\033[0;31m"
@@ -40,13 +40,15 @@ function echo-blue() {
 }
 
 function check-last-code() {
-    RETURN_CODE=$?
+    RETURN_CODE="$?"
 
-    if [ "${RETURN_CODE}" != 0 ] ; then
-        echo-red "[ ERROR ] - $1"
+    if [ "${RETURN_CODE}" != "0" ] ; then
+        echo-red "[ ERROR ] - ${1}"
 
-        if [ "$2" != "" ]; then
-            exit $2
+        if [ "${3}" != "" ] ; then ${3} ; fi
+
+        if [ "${2}" != "" ] ; then
+            exit ${2}
         else
             exit 255
         fi

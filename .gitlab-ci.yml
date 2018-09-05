@@ -37,37 +37,37 @@ cache:
 
 # Build Jobs
 
-#build-backend:
-#  stage: build
-#  only:
-#    variables:
-#      - $CI_COMMIT_TAG =~ /^release-.*/
-#  environment:
-#    name: production
-#  script:
-#    - deploy/01.1.build-composer.sh
-#
-#build-front:
-#  stage: build
-#  only:
-#    variables:
-#      - $CI_COMMIT_TAG =~ /^release-.*/
-#  environment:
-#    name: production
-#  script:
-#    - deploy/01.2.build-npm.sh
-#
-## Create package archive
-#
-#create-package:
-#  stage: pack
-#  only:
-#    variables:
-#      - $CI_COMMIT_TAG =~ /^release-.*/
-#  environment:
-#    name: production
-#  script:
-#    - deploy/02.1.create-package.sh
+build-backend:
+  stage: build
+  only:
+    variables:
+      - $CI_COMMIT_TAG =~ /^release-.*/
+  environment:
+    name: production
+  script:
+    - deploy/01.1.build-composer.sh
+
+build-front:
+  stage: build
+  only:
+    variables:
+      - $CI_COMMIT_TAG =~ /^release-.*/
+  environment:
+    name: production
+  script:
+    - deploy/01.2.build-npm.sh
+
+# Create package archive
+
+create-package:
+  stage: pack
+  only:
+    variables:
+      - $CI_COMMIT_TAG =~ /^release-.*/
+  environment:
+    name: production
+  script:
+    - deploy/02.1.create-package.sh
 
 # Upload archive to production and setup it
 
