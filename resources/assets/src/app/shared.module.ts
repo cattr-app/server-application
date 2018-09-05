@@ -10,6 +10,7 @@ import {TranslateModule} from '@ngx-translate/core';
 import { ScreenshotListComponent } from './screenshot-list/screenshot-list.component';
 import { ScreenshotsService } from './pages/screenshots/screenshots.service';
 import { ModalModule } from 'ngx-bootstrap';
+import { LoadingModule } from 'ngx-loading';
 
 @NgModule({
     imports: [
@@ -20,6 +21,7 @@ import { ModalModule } from 'ngx-bootstrap';
         TranslateModule,
         AngularDualListBoxModule,
         ModalModule,
+        LoadingModule,
     ],
     declarations: [
         UsersFiltersComponent,

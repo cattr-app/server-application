@@ -1,15 +1,16 @@
-import {Component} from '@angular/core';
+import {Component, OnInit} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import { AllowedActionsService } from '../../roles/allowed-actions.service';
+import { LocalStorage } from '../../../api/storage.model';
 
 @Component({
     selector: 'app-screenshots-list',
     templateUrl: './screenshots.list.component.html',
     styleUrls: []
 })
-export class ScreenshotsListComponent {
-    userId: number = null;
-    projectId: number = null;
+export class ScreenshotsListComponent implements OnInit {
+    userId: number[] = [];
+    projectId: number[] = [];
 
     protected _isManager?: boolean = null;
     get isManager(): boolean {
@@ -29,5 +30,17 @@ export class ScreenshotsListComponent {
         protected api: ApiService,
         protected allowedAction: AllowedActionsService,
     ) {
+    }
+
+    ngOnInit() {
+        const filterByUser = LocalStorage.getStorage().get(`filterByUserIN${ window.location.pathname }`);
+        if (filterByUser instanceof Array && filterByUser.length > 0) {
+            this.userId = filterByUser;
+        }
+
+        const filterByProject = LocalStorage.getStorage().get(`filterByProjectIN${ window.location.pathname }`);
+        if (filterByProject instanceof Array && filterByProject.length > 0) {
+            this.projectId = filterByProject;
+        }
     }
 }

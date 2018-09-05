@@ -30,8 +30,7 @@
 
 <div *ngIf="autoload" class="loading" #loading>
     <div *ngIf="countFail <= 3 && !isAllLoaded">
-        <p class="h2">...</p>
-        <p class="h2" translate>dashboard.auto-loading</p>
+        <ngx-loading [show]="isLoading" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
     </div>
 </div>
 
