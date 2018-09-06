@@ -69,10 +69,6 @@
         @extend .btn, .btn-default;
     }
 
-    &__search {
-        @extend .form-control;
-    }
-
     &__selected {
         font-size: 1.2em;
     }

@@ -17,6 +17,7 @@ import {TranslateModule} from '@ngx-translate/core';
 import { StatisticModule } from '../statistic/statistic.module';
 import { TabsModule } from 'ngx-bootstrap';
 import { LoadingModule } from 'ngx-loading';
+import {AutoCompleteModule} from 'primeng/autocomplete';
 
 @NgModule({
   imports: [
@@ -29,6 +30,7 @@ import { LoadingModule } from 'ngx-loading';
     StatisticModule,
     TabsModule.forRoot(),
     LoadingModule,
+    AutoCompleteModule,
   ],
   declarations: [
     DashboardComponent,

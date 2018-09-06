@@ -1,12 +1,18 @@
 import {Component, ViewChild, OnInit, OnDestroy, DoCheck,  KeyValueDiffer, KeyValueDiffers} from '@angular/core';
 
 import {ScreenshotsBlock} from '../../../models/screenshot.model';
+import { Task } from '../../../models/task.model';
+
 
 import {ApiService} from '../../../api/api.service';
 import {DashboardService} from '../dashboard.service';
+import { ScreenshotsService } from '../../screenshots/screenshots.service';
+import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
+import { TasksService } from '../../tasks/tasks.service';
 
 import * as moment from 'moment';
-import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
+
+type SelectItem = Task & { title: string };
 
 @Component({
   selector: 'dashboard-screenshotlist',
@@ -27,7 +33,9 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     selectedDiffer: KeyValueDiffer<number, boolean> = null;
     selectedTime = 0;
 
-    search = '';
+    availableTasks: SelectItem[] = [];
+    suggestedTasks: SelectItem[] = [];
+    search: SelectItem = null;
 
     get selectedTimeStr(): string {
         const duration = moment.duration(this.selectedTime);
@@ -40,30 +48,46 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     constructor(
         protected api: ApiService,
         protected dashboardService: DashboardService,
+        protected screenshotService: ScreenshotsService,
         protected timeIntervalsService: TimeIntervalsService,
+        protected taskService: TasksService,
         differs: KeyValueDiffers,
     ) {
         this.selectedDiffer = differs.find(this.selected).create();
+    }
+
+    getSelectedScreenshots() {
+        // Get selected screenshots.
+        return this.blocks
+            .map(block => {
+                return block.screenshots.filter(screenshot => {
+                    return screenshot.id && this.selected[screenshot.id];
+                });
+            })
+            .reduce((arr, curr) => arr.concat(curr), []);
     }
 
     ngOnInit() {
         this.scrollHandler = this.onScrollDown.bind(this);
         window.addEventListener('scroll', this.scrollHandler, false);
         this.loadNext();
+
+        this.taskService.getItems(result => {
+            this.availableTasks = result.map(task => {
+                task['title'] = `${task.project.name} - ${task.task_name}`;
+                return task;
+            });
+            this.suggestedTasks = this.availableTasks;
+        }, {
+            'with': 'project',
+        });
     }
 
     ngDoCheck() {
         const selectedChanged = this.selectedDiffer.diff(this.selected);
         if (selectedChanged) {
-            this.selectedTime = this.blocks
-                // Get selected screenshots.
-                .map(block => {
-                    return block.screenshots.filter(screenshot => {
-                        return screenshot.id && this.selected[screenshot.id];
-                    });
-                })
-                .reduce((arr, curr) => arr.concat(curr), [])
-                // Calculate total time of intervals of selected screenshots.
+            this.selectedTime = this.getSelectedScreenshots()
+                // Calculate total time of intervals of the selected screenshots.
                 .map(screenshot => {
                     const interval = screenshot.time_interval;
                     const start = moment.utc(interval.start_at);
@@ -131,19 +155,59 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     }
 
     onDelete() {
-        const selectedScreenshotIds = Object.keys(this.selected);
-        this.blocks
-            .map(block => {
-                return block.screenshots.filter(screenshot =>
-                    selectedScreenshotIds.includes('' + screenshot.id));
-            });
-        //console.log(ids);
+        // Get time intervals of selected screenshots.
+        const time_intervals = this.getSelectedScreenshots()
+            .map(screenshot => screenshot.time_interval);
 
-        //this.timeIntervalsService.removeItem();
+        // Delete screenshots & intervals.
+        const results = time_intervals.map(interval => {
+            return new Promise((resolve) => {
+                this.timeIntervalsService.removeItem(interval.id, () => resolve());
+            });
+        });
+
+        Promise.all(results).then(() => {
+            // Reload screenshots.
+            this.blocks = [];
+            this.offset = 0;
+            this.countFail = 0;
+            this.loadNext();
+        });
+    }
+
+    onSearch(event) {
+        this.suggestedTasks = this.availableTasks.filter(task => {
+            const title = task.title.toLowerCase();
+            const query = event.query.toLowerCase();
+            return title.indexOf(query) !== -1;
+        });
     }
 
     onChange() {
-        console.log(this.search);
+        // Get time intervals of selected screenshots.
+        const time_intervals = this.getSelectedScreenshots()
+            .map(screenshot => screenshot.time_interval);
+
+        // Edit intervals.
+        const results = time_intervals.map(interval => {
+            return new Promise((resolve) => {
+                interval.task_id = this.search.id;
+                this.timeIntervalsService.editItem(interval.id, {
+                    task_id: this.search.id,
+                    user_id: interval.user_id,
+                    // ATOM format required by backend.
+                    start_at: moment.utc(interval.start_at).format('YYYY-MM-DD[T]HH:mm:ssZ'),
+                    end_at: moment.utc(interval.end_at).format('YYYY-MM-DD[T]HH:mm:ssZ'),
+                }, () => resolve());
+            });
+        });
+
+        Promise.all(results).then(() => {
+            // Reload screenshots.
+            this.blocks = [];
+            this.offset = 0;
+            this.loadNext();
+        });
     }
 
     formatTime(datetime: string) {

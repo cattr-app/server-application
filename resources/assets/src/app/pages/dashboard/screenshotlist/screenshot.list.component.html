@@ -59,13 +59,17 @@
     </div>
 
     <div class="bottom-panel__right">
-      <button class="bottom-panel__change" [disabled]="!search.length"
+      <button class="bottom-panel__change" [disabled]="!search"
         (click)="onChange()">
         Change project / task
       </button>
 
-      <input type="text" class="bottom-panel__search" [(ngModel)]="search"
-        placeholder="Search..." />
+      <p-autoComplete class="bottom-panel__search" [(ngModel)]="search"
+        [suggestions]="suggestedTasks" field="title"
+        (completeMethod)="onSearch($event)"
+        [forceSelection]="true"
+        placeholder="Search...">
+      </p-autoComplete>
     </div>
   </div>
 </div>
