@@ -2,28 +2,28 @@
   <div class="row" *ngFor="let block of blocks">
     <div class="col-md-11">
       <!-- items start -->
-      <div class="col-md-2" *ngFor="let screenshot of block.screenshots">
+      <div class="col-md-2" *ngFor="let screenshots of block.screenshots">
         <div class="card screenshot">
-          <input type="checkbox" class="select_image" *ngIf="screenshot.id"
-            [checked]="selected[screenshot.id]"
-            (change)="selected[screenshot.id] = !selected[screenshot.id]" />
+          <input type="checkbox" class="select_image" *ngIf="screenshots[0]?.id"
+            [checked]="selected[screenshots[0].id]"
+            (change)="selected[screenshots[0].id] = !selected[screenshots[0].id]" />
 
           <img class="card-img-top"
-            src="{{ screenshot.path ? screenshot.path : 'uploads/none.png' }}"
+            src="{{ screenshots[0]?.path ? screenshots[0].path : 'uploads/none.png' }}"
             onerror="this.src='uploads/none.png'" alt="image" />
 
           <div class="card-body">
-            <p class="card-text" *ngIf="screenshot.time_interval">
-              <span>{{ formatTime(screenshot.time_interval.start_at) }}</span>
+            <p class="card-text" *ngIf="screenshots[0]?.time_interval">
+              <span class="card-text-line">{{ formatTime(screenshots[0].time_interval.start_at) }}</span>
 
-              <a *ngIf="screenshot.time_interval.task"
-                [attr.href]="'/tasks/show/' + screenshot.time_interval.task.id">
-                {{ screenshot.time_interval.task.task_name }}
+              <a class="card-text-line" *ngIf="screenshots[0].time_interval.task"
+                [attr.href]="'/tasks/show/' + screenshots[0].time_interval.task.id">
+                {{ screenshots[0].time_interval.task.task_name }}
               </a>
 
-              <a *ngIf="screenshot.time_interval.task?.project"
-                [attr.href]="'/projects/show/' + screenshot.time_interval.task.project.id">
-                {{ screenshot.time_interval.task.project.name }}
+              <a class="card-text-line" *ngIf="screenshots[0].time_interval.task?.project"
+                [attr.href]="'/projects/show/' + screenshots[0].time_interval.task.project.id">
+                {{ screenshots[0].time_interval.task.project.name }}
               </a>
             </p>
           </div>

@@ -60,10 +60,13 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         // Get selected screenshots.
         return this.blocks
             .map(block => {
-                return block.screenshots.filter(screenshot => {
-                    return screenshot.id && this.selected[screenshot.id];
-                });
+                return block.screenshots
+                    // Get screenshot groups where some screenshots is selected.
+                    .filter(screenshots => screenshots.some(screenshot => this.selected[screenshot.id]))
+                    // Flatten screenshot groups.
+                    .reduce((arr, screenshots) => arr.concat(screenshots), []);
             })
+            // Flatten screenshot blocks.
             .reduce((arr, curr) => arr.concat(curr), []);
     }
 
@@ -147,6 +150,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     onSelectBlock(block: ScreenshotsBlock, select: boolean) {
         block.screenshots
+            .reduce((arr, screenshots) => arr.concat(screenshots), [])
             .filter(screenshot => screenshot.id)
             .map(screenshot => screenshot.id)
             .forEach(id => {

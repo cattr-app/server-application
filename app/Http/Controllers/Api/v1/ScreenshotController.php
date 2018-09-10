@@ -358,20 +358,20 @@ class ScreenshotController extends ItemController
             }
 
             if($hasInterval && isset($itemkey)) {
-                $items[$itemkey]['screenshots'][(int)$minutes{0}] = $screenshot->toArray();
+                $items[$itemkey]['screenshots'][(int)$minutes{0}][] = $screenshot->toArray();
             } else {
                 $arr = [
                     'interval' => $hour,
                     'screenshots' => [
-                        0 => '',
-                        1 => '',
-                        2 => '',
-                        3 => '',
-                        4 => '',
-                        5 => '',
+                        0 => [],
+                        1 => [],
+                        2 => [],
+                        3 => [],
+                        4 => [],
+                        5 => [],
                     ]
                 ];
-                $arr['screenshots'][(int)$minutes{0}] = $screenshot->toArray();
+                $arr['screenshots'][(int)$minutes{0}][] = $screenshot->toArray();
                 $items[] = $arr;
             }
         }
