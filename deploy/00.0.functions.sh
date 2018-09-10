@@ -48,7 +48,9 @@ function check-last-code() {
         if [ "${3}" != "" ] ; then ${3} ; fi
 
         if [ "${2}" != "" ] ; then
-            exit ${2}
+            if [ "${2}" != "skip" ] ; then
+                exit ${2}
+            fi
         else
             exit 255
         fi

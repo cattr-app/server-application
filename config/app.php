@@ -49,6 +49,8 @@ return [
 
         Modules\EventListener\Providers\EventListenerServiceProvider::class,
         Modules\RedmineIntegration\Providers\RedmineIntegrationServiceProvider::class,
+
+        Backup\BackupServiceProvider::class,
     ],
     'aliases' => [
 

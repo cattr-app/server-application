@@ -6,6 +6,7 @@
 /apidoc/*
 /public/apidoc
 /storage/*.key
+/storage/app/backups/*
 /vendor
 /.idea
 /.vagrant
