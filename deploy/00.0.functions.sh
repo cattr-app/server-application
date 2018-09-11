@@ -1,5 +1,9 @@
 #!/bin/bash
 
+#####################
+### Colors output ###
+#####################
+
 BASH_COLOR_BLACK="\033[0;30m"
 BASH_COLOR_RED="\033[0;31m"
 BASH_COLOR_GREEN="\033[0;32m"
@@ -39,6 +43,10 @@ function echo-blue() {
     echo-color "${BASH_COLOR_YELLOW}" "$*"
 }
 
+############################
+### Additional functions ###
+############################
+
 function check-last-code() {
     RETURN_CODE="$?"
 
@@ -48,7 +56,9 @@ function check-last-code() {
         if [ "${3}" != "" ] ; then ${3} ; fi
 
         if [ "${2}" != "" ] ; then
-            exit ${2}
+            if [ "${2}" != "skip" ] ; then
+                exit ${2}
+            fi
         else
             exit 255
         fi

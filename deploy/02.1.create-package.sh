@@ -3,7 +3,7 @@
 DIR="$( cd "$( dirname "${BASH_SOURCE[0]}" )/.." >/dev/null && pwd )"
 cd ${DIR}
 
-source deploy/00.functions.sh
+source deploy/00.0.functions.sh
 
 [ -f build-pack.tar.gz ] && rm build-pack.tar.gz
 

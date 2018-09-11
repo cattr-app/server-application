@@ -43,6 +43,6 @@ export class ScreenshotsBlock {
         this.screenshots = Object.keys(this.screenshots).map(key => this.screenshots[key]);
     }
 
-    public screenshots: Screenshot[];
+    public screenshots: Screenshot[][];
     public time: string;
 }

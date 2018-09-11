@@ -359,10 +359,14 @@ class TaskController extends ItemController
      */
     public function dashboard(Request $request): JsonResponse
     {
+        $timezone = Auth::user()->timezone;
+        if (!$timezone) {
+            $timezone = 'UTC';
+        }
+
         $filters = $request->all();
         is_int($request->get('user_id')) ? $filters['timeIntervals.user_id'] = $request->get('user_id') : False;
-        $YersterdayTimestamp = time() - 60 /* sec */ * 60  /* min */ * 24 /* hours */;
-        $compareDate = date("Y-m-d H:i:s", $YersterdayTimestamp );
+        $compareDate = Carbon::today($timezone)->setTimezone('UTC')->toDateTimeString();
         $filters['timeIntervals.start_at'] = ['>=', [$compareDate]];
         unset($filters['user_id']);
 
