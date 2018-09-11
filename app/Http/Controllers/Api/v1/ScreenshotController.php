@@ -315,9 +315,14 @@ class ScreenshotController extends ItemController
      */
     public function dashboard(Request $request): JsonResponse
     {
+        $timezone = Auth::user()->timezone;
+        if (!$timezone) {
+            $timezone = 'UTC';
+        }
+
         $filters = $request->all();
         is_int($request->get('user_id')) ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
-        $compareDate = date("Y-m-d 00:00:00", time());
+        $compareDate = Carbon::today($timezone)->setTimezone('UTC')->toDateTimeString();
         $filters['timeInterval.start_at'] = ['>=', [$compareDate]];
 
         $baseQuery = $this->applyQueryFilter(
@@ -358,20 +363,20 @@ class ScreenshotController extends ItemController
             }
 
             if($hasInterval && isset($itemkey)) {
-                $items[$itemkey]['screenshots'][(int)$minutes{0}] = $screenshot->toArray();
+                $items[$itemkey]['screenshots'][(int)$minutes{0}][] = $screenshot->toArray();
             } else {
                 $arr = [
                     'interval' => $hour,
                     'screenshots' => [
-                        0 => '',
-                        1 => '',
-                        2 => '',
-                        3 => '',
-                        4 => '',
-                        5 => '',
+                        0 => [],
+                        1 => [],
+                        2 => [],
+                        3 => [],
+                        4 => [],
+                        5 => [],
                     ]
                 ];
-                $arr['screenshots'][(int)$minutes{0}] = $screenshot->toArray();
+                $arr['screenshots'][(int)$minutes{0}][] = $screenshot->toArray();
                 $items[] = $arr;
             }
         }

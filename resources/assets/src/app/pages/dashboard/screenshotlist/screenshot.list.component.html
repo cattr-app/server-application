@@ -1,24 +1,43 @@
 <div class="container-fuild">
+  <ngx-loading [show]="isLoading">
+  </ngx-loading>
+
   <div class="row" *ngFor="let block of blocks">
     <div class="col-md-11">
       <!-- items start -->
-      <div class="col-md-2" *ngFor="let screenshot of block.screenshots">
-        <div class="card">
-          <input type="checkbox" class="select_image">
-          <img class="card-img-top" src="{{ screenshot.path }}" onerror="this.src='uploads/none.png'" alt="image">
+      <div class="col-md-2" *ngFor="let screenshots of block.screenshots">
+        <div class="card screenshot">
+          <input type="checkbox" class="select_image" *ngIf="screenshots[0]?.id"
+            [checked]="selected[screenshots[0].id]"
+            (change)="selected[screenshots[0].id] = !selected[screenshots[0].id]" />
+
+          <img class="card-img-top"
+            src="{{ screenshots[0]?.path ? screenshots[0].path : 'uploads/none.png' }}"
+            onerror="this.src='uploads/none.png'" alt="image" />
+
           <div class="card-body">
-            <p class="card-text">
-              <span>{{ screenshot.time_interval && minutes(screenshot.time_interval.start_at) }}</span>
-              <span>{{ screenshot.time_interval && screenshot.time_interval.task && screenshot.time_interval.task.task_name }}</span>
-              <span>{{ screenshot.time_interval && screenshot.time_interval.task && screenshot.time_interval.task.project && screenshot.time_interval.task.project.name }}</span>
+            <p class="card-text" *ngIf="screenshots[0]?.time_interval">
+              <span class="card-text-line">{{ formatTime(screenshots[0].time_interval.start_at) }}</span>
+
+              <a class="card-text-line" *ngIf="screenshots[0].time_interval.task"
+                [attr.href]="'/tasks/show/' + screenshots[0].time_interval.task.id">
+                {{ screenshots[0].time_interval.task.task_name }}
+              </a>
+
+              <a class="card-text-line" *ngIf="screenshots[0].time_interval.task?.project"
+                [attr.href]="'/projects/show/' + screenshots[0].time_interval.task.project.id">
+                {{ screenshots[0].time_interval.task.project.name }}
+              </a>
             </p>
           </div>
         </div>
       </div>
       <!-- items end  -->
     </div>
+
     <div class="col-md-1">
-      <input type="checkbox" class="select_row">
+      <input type="checkbox" class="select_row"
+        (change)="onSelectBlock(block, $event.target.checked)" />
       <!--{{ hour(block.interval) }}-->
     </div>
   </div>
@@ -26,7 +45,34 @@
 
 <div class="loading" #loading>
   <div *ngIf="countFail <= 3">
-    <p class="h2">...</p>
-    <p class="h2" translate>dashboard.auto-loading</p>
+    <ngx-loading [show]="screenshotLoading"
+      [config]="{ backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd' }">
+    </ngx-loading>
+  </div>
+</div>
+
+<div class="bottom-panel" *ngIf="selectedTime">
+  <div class="bottom-panel__inner">
+    <div class="bottom-panel__left">
+      <span class="bottom-panel__selected">Selected {{ selectedTimeStr }}</span>
+
+      <button class="bottom-panel__delete" (click)="onDelete()">
+        Delete time
+      </button>
+    </div>
+
+    <div class="bottom-panel__right">
+      <button class="bottom-panel__change" [disabled]="!search"
+        (click)="onChange()">
+        Change project / task
+      </button>
+
+      <p-autoComplete class="bottom-panel__search" [(ngModel)]="search"
+        [suggestions]="suggestedTasks" field="title"
+        (completeMethod)="onSearch($event)"
+        [forceSelection]="true"
+        placeholder="Search...">
+      </p-autoComplete>
+    </div>
   </div>
 </div>
