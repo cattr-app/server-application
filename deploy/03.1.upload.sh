@@ -45,7 +45,7 @@ echo-green "Create local ssh key file"
 echo "${DEPLOY_SSH_PASSWORD}" > ${LOCAL_SSH_KEY}
 chmod 600 ${LOCAL_SSH_KEY}
 
-source deploy/00.1.upload-functions.sh
+source deploy/00.1.functions-upload.sh
 
 #####################################
 ### Upload build to remote server ###
