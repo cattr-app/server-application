@@ -1,11 +1,10 @@
-import {Component, ViewChild, OnInit, OnDestroy, DoCheck,  KeyValueDiffer, KeyValueDiffers} from '@angular/core';
+import { Component, ViewChild, OnInit, OnDestroy, DoCheck, KeyValueDiffer, KeyValueDiffers, Output, EventEmitter } from '@angular/core';
 
-import {ScreenshotsBlock} from '../../../models/screenshot.model';
+import { ScreenshotsBlock } from '../../../models/screenshot.model';
 import { Task } from '../../../models/task.model';
 
-
-import {ApiService} from '../../../api/api.service';
-import {DashboardService} from '../dashboard.service';
+import { ApiService } from '../../../api/api.service';
+import { DashboardService } from '../dashboard.service';
 import { ScreenshotsService } from '../../screenshots/screenshots.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
 import { TasksService } from '../../tasks/tasks.service';
@@ -15,13 +14,17 @@ import * as moment from 'moment';
 type SelectItem = Task & { title: string };
 
 @Component({
-  selector: 'dashboard-screenshotlist',
-  templateUrl: './screenshot.list.component.html',
-  styleUrls: ['./screenshot.list.component.scss']
+    selector: 'dashboard-screenshotlist',
+    templateUrl: './screenshot.list.component.html',
+    styleUrls: ['./screenshot.list.component.scss']
 })
 export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
-
     @ViewChild('loading') element: any;
+
+    @Output() onReload = new EventEmitter<{}>();
+
+    isLoading = false;
+
     chunksize = 32;
     offset = 0;
     blocks: ScreenshotsBlock[] = [];
@@ -82,8 +85,8 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
             });
             this.suggestedTasks = this.availableTasks;
         }, {
-            'with': 'project',
-        });
+                'with': 'project',
+            });
     }
 
     ngDoCheck() {
@@ -107,7 +110,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     loadNext() {
         if (this.screenshotLoading || this.countFail > 3) {
-          return;
+            return;
         }
 
         const user: any = this.api.getUser() ? this.api.getUser() : null;
@@ -132,6 +135,17 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         }
 
         this.screenshotLoading = false;
+    }
+
+    reload() {
+        // Reload screenshots.
+        this.blocks = [];
+        this.offset = 0;
+        this.screenshotLoading = false;
+        this.countFail = 0;
+        this.selected = {};
+        this.loadNext();
+        this.onReload.emit();
     }
 
     onScrollDown() {
@@ -159,6 +173,8 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     }
 
     onDelete() {
+        this.isLoading = true;
+
         // Get time intervals of selected screenshots.
         const time_intervals = this.getSelectedScreenshots()
             .map(screenshot => screenshot.time_interval);
@@ -171,11 +187,8 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         });
 
         Promise.all(results).then(() => {
-            // Reload screenshots.
-            this.blocks = [];
-            this.offset = 0;
-            this.countFail = 0;
-            this.loadNext();
+            this.reload();
+            this.isLoading = false;
         });
     }
 
@@ -188,6 +201,8 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     }
 
     onChange() {
+        this.isLoading = true;
+
         // Get time intervals of selected screenshots.
         const time_intervals = this.getSelectedScreenshots()
             .map(screenshot => screenshot.time_interval);
@@ -207,10 +222,8 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         });
 
         Promise.all(results).then(() => {
-            // Reload screenshots.
-            this.blocks = [];
-            this.offset = 0;
-            this.loadNext();
+            this.reload();
+            this.isLoading = false;
         });
     }
 

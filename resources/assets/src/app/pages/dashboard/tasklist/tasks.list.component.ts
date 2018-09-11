@@ -34,12 +34,7 @@ export class TaskListComponent implements OnInit, DoCheck {
     }
 
     ngOnInit() {
-        const user: any = this.api.getUser() ? this.api.getUser() : null;
-        const params = {
-            'user_id': user.id,
-            'with': 'project'
-        };
-        this.dashboardService.getTasks(this.setTasks.bind(this), params);
+        this.reload();
     }
 
     ngDoCheck() {
@@ -53,5 +48,14 @@ export class TaskListComponent implements OnInit, DoCheck {
 
     setTasks(result) {
         this.itemsArray = result;
+    }
+
+    reload() {
+        const user: any = this.api.getUser() ? this.api.getUser() : null;
+        const params = {
+            'user_id': user.id,
+            'with': 'project'
+        };
+        this.dashboardService.getTasks(this.setTasks.bind(this), params);
     }
 }

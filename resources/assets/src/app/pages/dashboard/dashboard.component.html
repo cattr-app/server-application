@@ -6,19 +6,26 @@
                     <div *ngIf="userIsManager">
                         <tabset #tabs>
                             <tab heading="Own" (select)="onTabSelect($event)">
-                                <dashboard-tasklist></dashboard-tasklist>
-                                <dashboard-screenshotlist></dashboard-screenshotlist>
+                                <dashboard-tasklist #tasklist>
+                                </dashboard-tasklist>
+
+                                <dashboard-screenshotlist (onReload)="tasklist.reload()">
+                                </dashboard-screenshotlist>
                             </tab>
 
                             <tab heading="Team" (select)="onTabSelect($event)">
-                                <app-statistic-time></app-statistic-time>
+                                <app-statistic-time>
+                                </app-statistic-time>
                             </tab>
                         </tabset>
                     </div>
 
                     <div *ngIf="!userIsManager">
-                        <dashboard-tasklist></dashboard-tasklist>
-                        <dashboard-screenshotlist></dashboard-screenshotlist>
+                        <dashboard-tasklist #tasklist>
+                        </dashboard-tasklist>
+
+                        <dashboard-screenshotlist (onReload)="tasklist.reload()">
+                        </dashboard-screenshotlist>
                     </div>
                 </div>
             </div>
