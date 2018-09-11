@@ -89,9 +89,9 @@ ssh-exec "Enable maintenance" \
     "${ARTISAN} down --message=\\\"Application Upgrade\\\"" \
     "Can't set maintenance mode" 6
 
-#ssh-exec "Create database backup" \
-#    "${ARTISAN} backup:mysql-dump ${PREV_BUILD_BACKUP_ID}" \
-#    "Can't create backup" 7
+ssh-exec "Create database backup" \
+    "${ARTISAN} backup:mysql-dump ${PREV_BUILD_BACKUP_ID}" \
+    "Can't create backup" 7
 
 ssh-exec "Unlink current build" \
     "if [ -e ${DEPLOY_SSH_PATH}/current ]; then rm ${DEPLOY_SSH_PATH}/current ; fi" \
@@ -113,9 +113,9 @@ ssh-exec-restore "Link .env file to new build" \
     "ln -s ${DEPLOY_SSH_PATH}/.env ${DEPLOY_SSH_PATH}/current/.env" \
     "Can't create link for .env file" 12
 
-#ssh-exec-restore "Run migrations" \
-#    "${ARTISAN} migrate --force" \
-#    "Database Migration failed" 13
+ssh-exec-restore "Run migrations" \
+    "${ARTISAN} migrate --force" \
+    "Database Migration failed" 13
 
 ##############################
 ### Archive previous build ###
