@@ -36,10 +36,12 @@ function ssh-exec() {
     CMD="cmd-exec \"$1\" \"ssh -o StrictHostKeyChecking=no -i ${LOCAL_SSH_KEY} -p ${DEPLOY_SSH_PORT} ${DEPLOY_SSH_USER}@${DEPLOY_SSH_IP} bash -c \\\"${2}\\\"\" \"${3}\" \"${4}\""
 
     if [ "$5" != "" ] ; then
-        ${CMD} "${5}"
+        CMD="$CMD \"$5\""
     else
-        ${CMD} "finish_script"
+        CMD="$CMD \"finish_script\""
     fi
+
+    eval "$CMD"
 }
 
 # Shortcut for ssh command with "restore previous build" fallback command
