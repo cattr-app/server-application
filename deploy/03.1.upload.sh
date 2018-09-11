@@ -86,7 +86,7 @@ fi
 #################################
 
 ssh-exec "Enable maintenance" \
-    "${ARTISAN} down --message=\"Application Upgrade\"" \
+    "${ARTISAN} down --message=\\\"Application Upgrade\\\"" \
     "Can't set maintenance mode" 6
 
 ssh-exec "Create database backup" \
