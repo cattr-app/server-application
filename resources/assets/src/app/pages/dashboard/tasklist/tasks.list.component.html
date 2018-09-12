@@ -1,6 +1,6 @@
 <p class="h2" translate [translateParams]="{time: totalTimeStr}">dashboard.usage</p>
 
-<table class="table" *ngIf="itemsArray.length">
+<table class="table" *ngIf="filteredItems.length">
   <thead>
     <tr>
       <th scope="col" translate>field.task</th>
@@ -10,7 +10,7 @@
   </thead>
 
   <tbody>
-    <tr  *ngFor="let task of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
+    <tr  *ngFor="let task of filteredItems | paginate: { itemsPerPage: 25, currentPage: p }">
       <td>
         <a [attr.href]="'/tasks/show/' + task.id">
           {{task.task_name}}
@@ -28,4 +28,4 @@
   </tbody>
 </table>
 
-<div *ngIf="!itemsArray.length" class="alert alert-info" translate>dashboard.no-task</div>
+<div *ngIf="!filteredItems.length" class="alert alert-info" translate>dashboard.no-task</div>

@@ -1,17 +1,21 @@
-import { Component, ViewChild, OnInit, OnDestroy, DoCheck, KeyValueDiffer, KeyValueDiffers, Output, EventEmitter } from '@angular/core';
+import { Component, ViewChild, OnInit, OnDestroy, DoCheck, KeyValueDiffer, KeyValueDiffers, Output, EventEmitter, TemplateRef } from '@angular/core';
 
 import { ScreenshotsBlock } from '../../../models/screenshot.model';
 import { Task } from '../../../models/task.model';
+import { Project } from '../../../models/project.model';
 
 import { ApiService } from '../../../api/api.service';
 import { DashboardService } from '../dashboard.service';
 import { ScreenshotsService } from '../../screenshots/screenshots.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
 import { TasksService } from '../../tasks/tasks.service';
+import { ProjectsService } from '../../projects/projects.service';
 
+import { BsModalService, BsModalRef } from 'ngx-bootstrap';
 import * as moment from 'moment';
 
 type SelectItem = Task & { title: string };
+type ProjectWithTasks = Project & { tasks: Task[] };
 
 @Component({
     selector: 'dashboard-screenshotlist',
@@ -20,8 +24,10 @@ type SelectItem = Task & { title: string };
 })
 export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     @ViewChild('loading') element: any;
+    @ViewChild('changeTaskModal') changeTaskModal: TemplateRef<any>;
 
     @Output() onReload = new EventEmitter<{}>();
+    @Output() onFilterChanged = new EventEmitter<string|Task>();
 
     isLoading = false;
 
@@ -38,7 +44,12 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     availableTasks: SelectItem[] = [];
     suggestedTasks: SelectItem[] = [];
-    search: SelectItem = null;
+    search: string|SelectItem = null;
+
+    projects: ProjectWithTasks[] = [];
+    selectedProject: ProjectWithTasks = null;
+    selectedTask: Task = null;
+    modalRef: BsModalRef;
 
     get selectedTimeStr(): string {
         const duration = moment.duration(this.selectedTime);
@@ -53,8 +64,10 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         protected dashboardService: DashboardService,
         protected screenshotService: ScreenshotsService,
         protected timeIntervalsService: TimeIntervalsService,
+        protected projectService: ProjectsService,
         protected taskService: TasksService,
         differs: KeyValueDiffers,
+        protected modalService: BsModalService,
     ) {
         this.selectedDiffer = differs.find(this.selected).create();
     }
@@ -78,6 +91,12 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         window.addEventListener('scroll', this.scrollHandler, false);
         this.loadNext();
 
+        this.projectService.getItems(result => {
+            this.projects = result;
+        }, {
+            'with': 'tasks',
+        });
+
         this.taskService.getItems(result => {
             this.availableTasks = result.map(task => {
                 task['title'] = `${task.project.name} - ${task.task_name}`;
@@ -85,8 +104,8 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
             });
             this.suggestedTasks = this.availableTasks;
         }, {
-                'with': 'project',
-            });
+            'with': 'project',
+        });
     }
 
     ngDoCheck() {
@@ -200,7 +219,12 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         });
     }
 
+    onSearchChanged() {
+        this.onFilterChanged.emit(this.search);
+    }
+
     onChange() {
+        this.modalRef.hide();
         this.isLoading = true;
 
         // Get time intervals of selected screenshots.
@@ -210,9 +234,9 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         // Edit intervals.
         const results = time_intervals.map(interval => {
             return new Promise((resolve) => {
-                interval.task_id = this.search.id;
+                interval.task_id = this.selectedTask.id;
                 this.timeIntervalsService.editItem(interval.id, {
-                    task_id: this.search.id,
+                    task_id: this.selectedTask.id,
                     user_id: interval.user_id,
                     // ATOM format required by backend.
                     start_at: moment.utc(interval.start_at).format('YYYY-MM-DD[T]HH:mm:ssZ'),
@@ -224,10 +248,16 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         Promise.all(results).then(() => {
             this.reload();
             this.isLoading = false;
+            this.selectedProject = null;
+            this.selectedTask = null;
         });
     }
 
     formatTime(datetime: string) {
         return moment.utc(datetime).local().format('HH:mm');
+    }
+
+    openModal(modal: TemplateRef<any>) {
+        this.modalRef = this.modalService.show(modal);
     }
 }

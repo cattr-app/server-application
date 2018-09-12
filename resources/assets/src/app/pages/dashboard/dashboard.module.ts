@@ -18,6 +18,7 @@ import { StatisticModule } from '../statistic/statistic.module';
 import { TabsModule } from 'ngx-bootstrap';
 import { LoadingModule } from 'ngx-loading';
 import {AutoCompleteModule} from 'primeng/autocomplete';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
   imports: [
@@ -31,6 +32,7 @@ import {AutoCompleteModule} from 'primeng/autocomplete';
     TabsModule.forRoot(),
     LoadingModule,
     AutoCompleteModule,
+    NgSelectModule,
   ],
   declarations: [
     DashboardComponent,

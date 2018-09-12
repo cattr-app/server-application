@@ -1,20 +1,23 @@
 import { Component, OnInit, IterableDiffer, IterableDiffers, DoCheck } from '@angular/core';
 
-import {Task} from '../../../models/task.model';
+import { Task } from '../../../models/task.model';
 
-import {DashboardService} from '../dashboard.service';
-import {ApiService} from '../../../api/api.service';
+import { DashboardService } from '../dashboard.service';
+import { ApiService } from '../../../api/api.service';
 
 import * as moment from 'moment';
 
 @Component({
-  selector: 'dashboard-tasklist',
-  templateUrl: './tasks.list.component.html'
+    selector: 'dashboard-tasklist',
+    templateUrl: './tasks.list.component.html'
 })
 export class TaskListComponent implements OnInit, DoCheck {
     itemsArray: Task[] = [];
     itemsDiffer: IterableDiffer<Task>;
     totalTime = 0;
+
+    _filter: string|Task = '';
+    filteredItems: Task[] = [];
 
     get totalTimeStr(): string {
         const duration = moment.duration(this.totalTime, 'seconds');
@@ -48,6 +51,7 @@ export class TaskListComponent implements OnInit, DoCheck {
 
     setTasks(result) {
         this.itemsArray = result;
+        this.filter();
     }
 
     reload() {
@@ -57,5 +61,21 @@ export class TaskListComponent implements OnInit, DoCheck {
             'with': 'project'
         };
         this.dashboardService.getTasks(this.setTasks.bind(this), params);
+    }
+
+    filter(filter: string|Task = this._filter) {
+        this._filter = filter;
+        this.filteredItems = this.itemsArray.filter(task => {
+            const taskName = task.task_name.toLowerCase();
+            const projName = task.project.name.toLowerCase();
+
+            if (typeof this._filter === "string") {
+                const filter = this._filter.toLowerCase();
+                return taskName.indexOf(filter) !== -1
+                    || projName.indexOf(filter) !== -1;
+            } else {
+                return +task.id === +this._filter.id;
+            }
+        });
     }
 }
