@@ -1,6 +1,6 @@
 import { Component, ViewChild, OnInit, OnDestroy, DoCheck, KeyValueDiffer, KeyValueDiffers, Output, EventEmitter, TemplateRef } from '@angular/core';
 
-import { ScreenshotsBlock } from '../../../models/screenshot.model';
+import { ScreenshotsBlock, Screenshot } from '../../../models/screenshot.model';
 import { Task } from '../../../models/task.model';
 import { Project } from '../../../models/project.model';
 
@@ -10,7 +10,7 @@ import { ScreenshotsService } from '../../screenshots/screenshots.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
 import { TasksService } from '../../tasks/tasks.service';
 
-import { BsModalService, BsModalRef } from 'ngx-bootstrap';
+import { BsModalService, BsModalRef, ModalDirective } from 'ngx-bootstrap';
 import * as moment from 'moment';
 
 type SelectItem = Task & { title: string };
@@ -24,9 +24,10 @@ type ProjectWithTasks = Project & { tasks: Task[] };
 export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     @ViewChild('loading') element: any;
     @ViewChild('changeTaskModal') changeTaskModal: TemplateRef<any>;
+    @ViewChild('screenshotModal') screenshotModal: ModalDirective;
 
     @Output() onReload = new EventEmitter<{}>();
-    @Output() onFilterChanged = new EventEmitter<string|Task>();
+    @Output() onFilterChanged = new EventEmitter<string | Task>();
 
     isLoading = false;
 
@@ -43,12 +44,13 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     availableTasks: SelectItem[] = [];
     suggestedTasks: SelectItem[] = [];
-    search: string|SelectItem = null;
+    search: string | SelectItem = null;
 
     projects: ProjectWithTasks[] = [];
     selectedProject: ProjectWithTasks = null;
     selectedTask: Task = null;
     modalRef: BsModalRef;
+    modalScreenshot?: Screenshot = null;
 
     get selectedTimeStr(): string {
         const duration = moment.duration(this.selectedTime);
@@ -275,5 +277,10 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     openModal(modal: TemplateRef<any>) {
         this.modalRef = this.modalService.show(modal);
+    }
+
+    openScreenshotModal(screenshot: Screenshot) {
+        this.modalScreenshot = screenshot;
+        this.screenshotModal.show();
     }
 }

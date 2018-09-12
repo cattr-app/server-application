@@ -3,6 +3,7 @@
 
 .screenshot {
     position: relative;
+    cursor: pointer;
 }
 
 .select_image {
@@ -95,4 +96,16 @@
     &__cancel {
         @extend .btn, .btn-danger;
     }
+}
+
+.modal {
+    overflow-y: auto;
+
+    .table {
+        margin-bottom: 0;
+    }
+}
+
+.modal-screenshot-wrapper {
+    position: relative;
 }
