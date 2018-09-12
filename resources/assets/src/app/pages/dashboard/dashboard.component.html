@@ -9,7 +9,9 @@
                                 <dashboard-tasklist #tasklist>
                                 </dashboard-tasklist>
 
-                                <dashboard-screenshotlist (onReload)="tasklist.reload()">
+                                <dashboard-screenshotlist
+                                    (onReload)="tasklist.reload()"
+                                    (onFilterChanged)="tasklist.filter($event)">
                                 </dashboard-screenshotlist>
                             </tab>
 
@@ -24,7 +26,9 @@
                         <dashboard-tasklist #tasklist>
                         </dashboard-tasklist>
 
-                        <dashboard-screenshotlist (onReload)="tasklist.reload()">
+                        <dashboard-screenshotlist
+                            (onReload)="tasklist.reload()"
+                            (onFilterChanged)="tasklist.filter($event)">
                         </dashboard-screenshotlist>
                     </div>
                 </div>
