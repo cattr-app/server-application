@@ -66,11 +66,11 @@ export class TaskListComponent implements OnInit, DoCheck {
     filter(filter: string|Task = this._filter) {
         this._filter = filter;
         this.filteredItems = this.itemsArray.filter(task => {
-            const taskName = task.task_name.toLowerCase();
-            const projName = task.project.name.toLowerCase();
-
             if (typeof this._filter === "string") {
                 const filter = this._filter.toLowerCase();
+                const taskName = task.task_name.toLowerCase();
+                const projName = task.project
+                    ? task.project.name.toLowerCase() : '';
                 return taskName.indexOf(filter) !== -1
                     || projName.indexOf(filter) !== -1;
             } else {

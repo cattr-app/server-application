@@ -91,7 +91,9 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
         this.taskService.getItems(result => {
             this.availableTasks = result.map(task => {
-                task['title'] = `${task.project.name} - ${task.task_name}`;
+                task['title'] = task.project
+                    ? `${task.project.name} - ${task.task_name}`
+                    : task.task_name;
                 return task;
             });
 
@@ -99,6 +101,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
             this.projects = this.availableTasks
                 // Inverse project-task relation.
+                .filter(task => task.project)
                 .map(task => {
                     const project = task.project as ProjectWithTasks;
                     project.tasks = [task];
