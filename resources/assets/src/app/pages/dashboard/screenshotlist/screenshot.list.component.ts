@@ -9,7 +9,6 @@ import { DashboardService } from '../dashboard.service';
 import { ScreenshotsService } from '../../screenshots/screenshots.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
 import { TasksService } from '../../tasks/tasks.service';
-import { ProjectsService } from '../../projects/projects.service';
 
 import { BsModalService, BsModalRef } from 'ngx-bootstrap';
 import * as moment from 'moment';
@@ -64,7 +63,6 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         protected dashboardService: DashboardService,
         protected screenshotService: ScreenshotsService,
         protected timeIntervalsService: TimeIntervalsService,
-        protected projectService: ProjectsService,
         protected taskService: TasksService,
         differs: KeyValueDiffers,
         protected modalService: BsModalService,
@@ -91,18 +89,33 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         window.addEventListener('scroll', this.scrollHandler, false);
         this.loadNext();
 
-        this.projectService.getItems(result => {
-            this.projects = result;
-        }, {
-            'with': 'tasks',
-        });
-
         this.taskService.getItems(result => {
             this.availableTasks = result.map(task => {
                 task['title'] = `${task.project.name} - ${task.task_name}`;
                 return task;
             });
+
             this.suggestedTasks = this.availableTasks;
+
+            this.projects = this.availableTasks
+                // Inverse project-task relation.
+                .map(task => {
+                    const project = task.project as ProjectWithTasks;
+                    project.tasks = [task];
+                    return project;
+                })
+                // Get unique projects.
+                .reduce((arr, curr) => {
+                    const index = arr.findIndex(proj => +proj.id === +curr.id);
+                    if (index === -1) {
+                        arr.push(curr);
+                    } else {
+                        // Join project tasks.
+                        arr[index].tasks = arr[index].tasks.concat(curr.tasks);
+                    }
+
+                    return arr;
+                }, []);
         }, {
             'with': 'project',
         });
