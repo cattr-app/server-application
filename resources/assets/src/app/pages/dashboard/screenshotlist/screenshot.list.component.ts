@@ -10,6 +10,7 @@ import { DashboardService } from '../dashboard.service';
 import { ScreenshotsService } from '../../screenshots/screenshots.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
 import { TasksService } from '../../tasks/tasks.service';
+import { ProjectsService } from '../../projects/projects.service';
 
 import { BsModalService, BsModalRef, ModalDirective } from 'ngx-bootstrap';
 import * as moment from 'moment';
@@ -55,8 +56,9 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         active: 1,
     });
 
-    projects: ProjectWithTasks[] = [];
-    selectedProject: ProjectWithTasks = null;
+    projects: Project[] = [];
+    tasks: Task[] = [];
+    selectedProject: Project = null;
     selectedTask: Task = null;
     modalRef: BsModalRef;
     modalScreenshot?: Screenshot = null;
@@ -74,6 +76,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         protected dashboardService: DashboardService,
         protected screenshotService: ScreenshotsService,
         protected timeIntervalsService: TimeIntervalsService,
+        protected projectService: ProjectsService,
         protected taskService: TasksService,
         differs: KeyValueDiffers,
         protected modalService: BsModalService,
@@ -109,30 +112,12 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
             });
 
             this.suggestedTasks = this.availableTasks;
-
-            this.projects = this.availableTasks
-                // Inverse project-task relation.
-                .filter(task => task.project)
-                .map(task => {
-                    const project = task.project as ProjectWithTasks;
-                    project.tasks = [task];
-                    return project;
-                })
-                // Get unique projects.
-                .reduce((arr, curr) => {
-                    const index = arr.findIndex(proj => +proj.id === +curr.id);
-                    if (index === -1) {
-                        arr.push(curr);
-                    } else {
-                        // Join project tasks.
-                        arr[index].tasks = arr[index].tasks.concat(curr.tasks);
-                    }
-
-                    return arr;
-                }, []);
+            this.tasks = this.availableTasks;
         }, {
             'with': 'project',
         });
+
+        this.projectService.getItems(result => this.projects = result);
 
         this.newTask.user_id = this.api.getUser().id;
         this.newTask.assigned_by = this.newTask.user_id;
@@ -336,12 +321,20 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     changeProject() {
         this.selectedTask = null;
+
+        if (!this.selectedProject) {
+            this.tasks = this.availableTasks;
+        } else {
+            this.taskService.getItems(result => this.tasks = result, {
+                'project_id': this.selectedProject.id,
+            });
+        }
     }
 
     changeTask() {
-        if (this.selectedTask && this.selectedTask.project) {
+        if (this.selectedTask && this.selectedTask.project_id) {
             this.selectedProject = this.projects.find(project =>
-                +project.id === +this.selectedTask.project.id);
+                +project.id === +this.selectedTask.project_id);
         }
     }
 }
