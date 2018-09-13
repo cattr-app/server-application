@@ -66,6 +66,7 @@
     }
 
     &__delete,
+    &__add,
     &__change {
         @extend .btn, .btn-default;
     }
@@ -74,27 +75,10 @@
         font-size: 1.2em;
     }
 
+    &__add,
     &__selected,
     &__change {
         margin-right: 1em;
-    }
-}
-
-.change-modal {
-    &__row {
-        @extend .row;
-
-        &:not(:last-child) {
-            margin-bottom: 1em;
-        }
-    }
-
-    &__submit {
-        @extend .btn, .btn-primary;
-    }
-
-    &__cancel {
-        @extend .btn, .btn-danger;
     }
 }
 
@@ -103,6 +87,26 @@
 
     .table {
         margin-bottom: 0;
+    }
+
+    &__row {
+        @extend .row;
+
+        &:not(:last-child) {
+            margin-bottom: 1em;
+        }
+    }
+
+    &__textarea {
+        resize: vertical;
+    }
+
+    &__submit {
+        @extend .btn, .btn-primary;
+    }
+
+    &__cancel {
+        @extend .btn, .btn-danger;
     }
 }
 
