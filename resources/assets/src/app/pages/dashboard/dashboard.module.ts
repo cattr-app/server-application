@@ -15,7 +15,7 @@ import { ScreenshotListComponent } from './screenshotlist/screenshot.list.compon
 
 import {TranslateModule} from '@ngx-translate/core';
 import { StatisticModule } from '../statistic/statistic.module';
-import { TabsModule } from 'ngx-bootstrap';
+import { TabsModule, ModalModule } from 'ngx-bootstrap';
 import { LoadingModule } from 'ngx-loading';
 import {AutoCompleteModule} from 'primeng/autocomplete';
 import { NgSelectModule } from '@ng-select/ng-select';
@@ -33,6 +33,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
     LoadingModule,
     AutoCompleteModule,
     NgSelectModule,
+    ModalModule,
   ],
   declarations: [
     DashboardComponent,

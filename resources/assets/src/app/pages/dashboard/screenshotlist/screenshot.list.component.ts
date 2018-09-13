@@ -1,8 +1,9 @@
 import { Component, ViewChild, OnInit, OnDestroy, DoCheck, KeyValueDiffer, KeyValueDiffers, Output, EventEmitter, TemplateRef } from '@angular/core';
 
-import { ScreenshotsBlock } from '../../../models/screenshot.model';
+import { ScreenshotsBlock, Screenshot } from '../../../models/screenshot.model';
 import { Task } from '../../../models/task.model';
 import { Project } from '../../../models/project.model';
+import { TimeInterval } from '../../../models/timeinterval.model';
 
 import { ApiService } from '../../../api/api.service';
 import { DashboardService } from '../dashboard.service';
@@ -10,7 +11,7 @@ import { ScreenshotsService } from '../../screenshots/screenshots.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
 import { TasksService } from '../../tasks/tasks.service';
 
-import { BsModalService, BsModalRef } from 'ngx-bootstrap';
+import { BsModalService, BsModalRef, ModalDirective } from 'ngx-bootstrap';
 import * as moment from 'moment';
 
 type SelectItem = Task & { title: string };
@@ -24,9 +25,10 @@ type ProjectWithTasks = Project & { tasks: Task[] };
 export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     @ViewChild('loading') element: any;
     @ViewChild('changeTaskModal') changeTaskModal: TemplateRef<any>;
+    @ViewChild('screenshotModal') screenshotModal: ModalDirective;
 
     @Output() onReload = new EventEmitter<{}>();
-    @Output() onFilterChanged = new EventEmitter<string|Task>();
+    @Output() onFilterChanged = new EventEmitter<string | Task>();
 
     isLoading = false;
 
@@ -43,12 +45,21 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     availableTasks: SelectItem[] = [];
     suggestedTasks: SelectItem[] = [];
-    search: string|SelectItem = null;
+    search: string | SelectItem = null;
+
+    newTask: Task = new Task({
+        id: 0,
+        project_id: null,
+        task_name: '',
+        description: '',
+        active: 1,
+    });
 
     projects: ProjectWithTasks[] = [];
     selectedProject: ProjectWithTasks = null;
     selectedTask: Task = null;
     modalRef: BsModalRef;
+    modalScreenshot?: Screenshot = null;
 
     get selectedTimeStr(): string {
         const duration = moment.duration(this.selectedTime);
@@ -122,6 +133,9 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         }, {
             'with': 'project',
         });
+
+        this.newTask.user_id = this.api.getUser().id;
+        this.newTask.assigned_by = this.newTask.user_id;
     }
 
     ngDoCheck() {
@@ -239,7 +253,55 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         this.onFilterChanged.emit(this.search);
     }
 
-    onChange() {
+    changeTimeIntervalTask(interval: TimeInterval, taskId: number): Promise<{}> {
+        return new Promise((resolve, reject) => {
+            try {
+                this.timeIntervalsService.editItem(interval.id, {
+                    task_id: taskId,
+                    user_id: interval.user_id,
+                    // ATOM format required by backend.
+                    start_at: moment.utc(interval.start_at).format('YYYY-MM-DD[T]HH:mm:ssZ'),
+                    end_at: moment.utc(interval.end_at).format('YYYY-MM-DD[T]HH:mm:ssZ'),
+                }, () => resolve());
+            } catch(e) {
+                reject(e);
+            }
+        });
+    }
+
+    onAddTask() {
+        this.modalRef.hide();
+        this.isLoading = true;
+
+        // Create new task.
+        this.taskService.createItem({
+            'project_id': this.newTask.project_id,
+            'task_name': this.newTask.task_name,
+            'description': this.newTask.description,
+            'active': this.newTask.active,
+            'user_id': this.newTask.user_id,
+            'assigned_by': this.newTask.assigned_by,
+        }, result => {
+            const newTaskId = +result.res.id;
+
+            // Get time intervals of selected screenshots.
+            const time_intervals = this.getSelectedScreenshots()
+                .map(screenshot => screenshot.time_interval);
+
+            // Edit intervals.
+            const results = time_intervals.map(interval =>
+                this.changeTimeIntervalTask(interval, newTaskId));
+
+            Promise.all(results).then(() => {
+                this.reload();
+                this.isLoading = false;
+                this.newTask.task_name = '';
+                this.newTask.description = '';
+            });
+        });
+    }
+
+    onChangeTask() {
         this.modalRef.hide();
         this.isLoading = true;
 
@@ -248,18 +310,8 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
             .map(screenshot => screenshot.time_interval);
 
         // Edit intervals.
-        const results = time_intervals.map(interval => {
-            return new Promise((resolve) => {
-                interval.task_id = this.selectedTask.id;
-                this.timeIntervalsService.editItem(interval.id, {
-                    task_id: this.selectedTask.id,
-                    user_id: interval.user_id,
-                    // ATOM format required by backend.
-                    start_at: moment.utc(interval.start_at).format('YYYY-MM-DD[T]HH:mm:ssZ'),
-                    end_at: moment.utc(interval.end_at).format('YYYY-MM-DD[T]HH:mm:ssZ'),
-                }, () => resolve());
-            });
-        });
+        const results = time_intervals.map(interval =>
+            this.changeTimeIntervalTask(interval, this.selectedTask.id));
 
         Promise.all(results).then(() => {
             this.reload();
@@ -275,5 +327,21 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     openModal(modal: TemplateRef<any>) {
         this.modalRef = this.modalService.show(modal);
+    }
+
+    openScreenshotModal(screenshot: Screenshot) {
+        this.modalScreenshot = screenshot;
+        this.screenshotModal.show();
+    }
+
+    changeProject() {
+        this.selectedTask = null;
+    }
+
+    changeTask() {
+        if (this.selectedTask && this.selectedTask.project) {
+            this.selectedProject = this.projects.find(project =>
+                +project.id === +this.selectedTask.project.id);
+        }
     }
 }

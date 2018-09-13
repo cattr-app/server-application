@@ -3,6 +3,7 @@
 
 .screenshot {
     position: relative;
+    cursor: pointer;
 }
 
 .select_image {
@@ -65,6 +66,7 @@
     }
 
     &__delete,
+    &__add,
     &__change {
         @extend .btn, .btn-default;
     }
@@ -73,19 +75,30 @@
         font-size: 1.2em;
     }
 
+    &__add,
     &__selected,
     &__change {
         margin-right: 1em;
     }
 }
 
-.change-modal {
+.modal {
+    overflow-y: auto;
+
+    .table {
+        margin-bottom: 0;
+    }
+
     &__row {
         @extend .row;
 
         &:not(:last-child) {
             margin-bottom: 1em;
         }
+    }
+
+    &__textarea {
+        resize: vertical;
     }
 
     &__submit {
@@ -95,4 +108,8 @@
     &__cancel {
         @extend .btn, .btn-danger;
     }
+}
+
+.modal-screenshot-wrapper {
+    position: relative;
 }

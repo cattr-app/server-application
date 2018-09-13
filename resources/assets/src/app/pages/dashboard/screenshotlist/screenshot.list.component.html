@@ -6,17 +6,17 @@
     <div class="col-md-11">
       <!-- items start -->
       <div class="col-md-2" *ngFor="let screenshots of block.screenshots">
-        <div class="card screenshot">
-          <input type="checkbox" class="select_image" *ngIf="screenshots[0]?.id"
-            [checked]="selected[screenshots[0].id]"
-            (change)="selected[screenshots[0].id] = !selected[screenshots[0].id]" />
+        <div *ngIf="screenshots[0]" class="card screenshot">
+          <input type="checkbox" class="select_image" *ngIf="screenshots[0].id"
+            (change)="selected[screenshots[0].id] = !selected[screenshots[0].id]"
+            [checked]="selected[screenshots[0].id]" />
 
-          <img class="card-img-top"
-            src="{{ screenshots[0]?.path ? screenshots[0].path : 'uploads/none.png' }}"
+          <img class="card-img-top" (click)="openScreenshotModal(screenshots[0])"
+            [attr.src]="screenshots[0].path ? screenshots[0].path : 'uploads/none.png'"
             onerror="this.src='uploads/none.png'" alt="image" />
 
           <div class="card-body">
-            <p class="card-text" *ngIf="screenshots[0]?.time_interval">
+            <p class="card-text" *ngIf="screenshots[0].time_interval">
               <span class="card-text-line">{{ formatTime(screenshots[0].time_interval.start_at) }}</span>
 
               <a class="card-text-line" *ngIf="screenshots[0].time_interval.task"
@@ -29,6 +29,13 @@
                 {{ screenshots[0].time_interval.task.project.name }}
               </a>
             </p>
+          </div>
+        </div>
+
+        <div *ngIf="!screenshots[0]" class="card">
+          <img class="card-img-top" src="uploads/none.png" alt="image" />
+
+          <div class="card-body">
           </div>
         </div>
       </div>
@@ -62,6 +69,11 @@
     </div>
 
     <div class="bottom-panel__right">
+      <button class="bottom-panel__add"
+        (click)="openModal(addTaskModal)">
+        Add new task
+      </button>
+
       <button class="bottom-panel__change"
         (click)="openModal(changeTaskModal)">
         Change project / task
@@ -78,6 +90,110 @@
   </div>
 </div>
 
+<div class="modal fade" bsModal #screenshotModal="bs-modal" tabindex="-1" role="dialog">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" *ngIf="modalScreenshot">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Screenshot #{{ modalScreenshot.id }}</h4>
+
+        <button type="button" class="close pull-right" aria-label="Close" (click)="screenshotModal.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12 modal-screenshot-wrapper">
+            <a [attr.href]="modalScreenshot.path" target="_blank">
+              <img src="{{ modalScreenshot.path }}" style="width:100%;">
+            </a>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <table class="table table-borderless">
+              <tbody>
+                <tr *ngIf="modalScreenshot.time_interval">
+                  <th translate>field.task</th>
+                  <td>{{ modalScreenshot.time_interval.task.task_name }}</td>
+                </tr>
+
+                <tr>
+                  <th translate>field.created</th>
+                  <td>{{ modalScreenshot.created_at }}</td>
+                </tr>
+
+                <tr>
+                  <th translate>field.updated</th>
+                  <td>{{ modalScreenshot.updated_at }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<ng-template #addTaskModal>
+  <div class="modal-header">
+    <h4 class="modal-title pull-left">Add new task</h4>
+    <button type="button" class="close pull-right" aria-label="Close" (click)="modalRef.hide()">
+      <span aria-hidden="true">&times;</span>
+    </button>
+  </div>
+
+  <div class="modal-body">
+    <div class="modal__row">
+      <label class="col-md-2" translate>field.project</label>
+
+      <div class="col-md-10">
+        <ng-select
+          [items]="projects"
+          bindLabel="name"
+          bindValue="id"
+          placeholder="Select project"
+          (change)="newTask.project_id = $event?.id"
+        >
+        </ng-select>
+      </div>
+    </div>
+
+    <div class="modal__row">
+      <label class="col-md-2" translate>field.name</label>
+
+      <div class="col-md-10">
+        <input type="text" class="form-control" [(ngModel)]="newTask.task_name">
+      </div>
+    </div>
+
+    <div class="modal__row">
+      <label class="col-md-2" translate>field.description</label>
+
+      <div class="col-md-10">
+        <textarea rows="5" class="form-control modal__textarea" [(ngModel)]="newTask.description">
+        </textarea>
+      </div>
+    </div>
+
+    <div class="modal__row">
+      <div class="col-xs-12">
+        <button class="modal__submit"
+          [disabled]="!newTask.project_id || !newTask.task_name || !newTask.description"
+          (click)="onAddTask()">
+          Add
+        </button>
+
+        <button class="modal__cancel" (click)="modalRef.hide()">
+          Cancel
+        </button>
+      </div>
+    </div>
+  </div>
+</ng-template>
+
 <ng-template #changeTaskModal>
   <div class="modal-header">
     <h4 class="modal-title pull-left">Change project / task</h4>
@@ -86,34 +202,34 @@
     </button>
   </div>
 
-  <div class="change-modal modal-body">
-    <div class="change-modal__row">
-        <label class="col-md-2">Project</label>
+  <div class="modal-body">
+    <div class="modal__row">
+      <label class="col-md-2">Project</label>
 
-        <div class="col-md-10">
-          <ng-select [items]="projects"
-            bindLabel="name" (change)="selectedTask = null"
-            [(ngModel)]="selectedProject"></ng-select>
-        </div>
+      <div class="col-md-10">
+        <ng-select [items]="projects"
+          bindLabel="name" (change)="changeProject()"
+          [(ngModel)]="selectedProject"></ng-select>
+      </div>
     </div>
 
-    <div class="change-modal__row">
-        <label class="col-md-2">Task</label>
+    <div class="modal__row">
+      <label class="col-md-2">Task</label>
 
-        <div class="col-md-10">
-          <ng-select [items]="selectedProject?.tasks"
-            bindLabel="task_name"
-            [(ngModel)]="selectedTask"></ng-select>
-        </div>
+      <div class="col-md-10">
+        <ng-select [items]="selectedProject ? selectedProject.tasks : availableTasks"
+          bindLabel="task_name" (change)="changeTask()"
+          [(ngModel)]="selectedTask"></ng-select>
+      </div>
     </div>
 
-    <div class="change-modal__row">
+    <div class="modal__row">
       <div class="col-xs-12">
-        <button class="change-modal__submit" [disabled]="!selectedTask" (click)="onChange()">
+        <button class="modal__submit" [disabled]="!selectedTask" (click)="onChangeTask()">
           Change
         </button>
-    
-        <button class="change-modal__cancel" (click)="modalRef.hide()">
+
+        <button class="modal__cancel" (click)="modalRef.hide()">
           Cancel
         </button>
       </div>
