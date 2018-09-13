@@ -283,4 +283,15 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         this.modalScreenshot = screenshot;
         this.screenshotModal.show();
     }
+
+    changeProject() {
+        this.selectedTask = null;
+    }
+
+    changeTask() {
+        if (this.selectedTask && this.selectedTask.project) {
+            this.selectedProject = this.projects.find(project =>
+                +project.id === +this.selectedTask.project.id);
+        }
+    }
 }

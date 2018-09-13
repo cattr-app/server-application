@@ -142,23 +142,23 @@
 
   <div class="change-modal modal-body">
     <div class="change-modal__row">
-        <label class="col-md-2">Project</label>
+      <label class="col-md-2">Project</label>
 
-        <div class="col-md-10">
-          <ng-select [items]="projects"
-            bindLabel="name" (change)="selectedTask = null"
-            [(ngModel)]="selectedProject"></ng-select>
-        </div>
+      <div class="col-md-10">
+        <ng-select [items]="projects"
+          bindLabel="name" (change)="changeProject()"
+          [(ngModel)]="selectedProject"></ng-select>
+      </div>
     </div>
 
     <div class="change-modal__row">
-        <label class="col-md-2">Task</label>
+      <label class="col-md-2">Task</label>
 
-        <div class="col-md-10">
-          <ng-select [items]="selectedProject?.tasks"
-            bindLabel="task_name"
-            [(ngModel)]="selectedTask"></ng-select>
-        </div>
+      <div class="col-md-10">
+        <ng-select [items]="selectedProject ? selectedProject.tasks : availableTasks"
+          bindLabel="task_name" (change)="changeTask()"
+          [(ngModel)]="selectedTask"></ng-select>
+      </div>
     </div>
 
     <div class="change-modal__row">
