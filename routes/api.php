@@ -124,4 +124,6 @@ Route::group([
     // Statistic routes
       $router->post('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
       $router->post('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
+      $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
+
 });

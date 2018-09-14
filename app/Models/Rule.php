@@ -149,6 +149,9 @@ class Rule extends Model
                 'projects' => __('Projects report related projects'),
                 'manager_access' => __('Projects report manager access'),
             ],
+            'time-duration' => [
+                'list' => __('Time duration list'),
+            ],
             'dashboard' => [
                 'manager_access' => __('Dashboard manager access'),
             ],
