@@ -5,31 +5,55 @@
                 <div class="panel-body">
                     <div *ngIf="userIsManager">
                         <tabset #tabs>
-                            <tab heading="Own" (select)="onTabSelect($event)">
-                                <dashboard-tasklist #tasklist>
+                            <tab heading="Own" (select)="changeTab($event)">
+                                <dashboard-tasklist #taskList>
                                 </dashboard-tasklist>
 
-                                <dashboard-screenshotlist
-                                    (onReload)="tasklist.reload()"
-                                    (onFilterChanged)="tasklist.filter($event)">
+                                <dashboard-screenshotlist #screenshotList
+                                    (onSelectionChanged)="changeSelection($event)">
                                 </dashboard-screenshotlist>
+
+                                <change-task-panel
+                                    *ngIf="selectedIntervals.length || taskFilter"
+                                    [timeIntervals]="selectedIntervals"
+                                    (onFilterChanged)="filter($event)"
+                                    (onIntervalsDeleted)="reload()"
+                                    (onIntervalsChanged)="reload()">
+                                </change-task-panel>
                             </tab>
 
-                            <tab heading="Team" (select)="onTabSelect($event)">
-                                <app-statistic-time>
+                            <tab heading="Team" (select)="changeTab($event)">
+                                <app-statistic-time #statistic
+                                    (onSelectionChanged)="changeSelection($event)">
                                 </app-statistic-time>
+
+                                <change-task-panel
+                                    *ngIf="(selectedIntervals.length || taskFilter)
+                                        && canManageIntervals"
+                                    [timeIntervals]="selectedIntervals"
+                                    (onFilterChanged)="filter($event)"
+                                    (onIntervalsDeleted)="reload()"
+                                    (onIntervalsChanged)="reload()">
+                                </change-task-panel>
                             </tab>
                         </tabset>
                     </div>
 
                     <div *ngIf="!userIsManager">
-                        <dashboard-tasklist #tasklist>
+                        <dashboard-tasklist #taskList>
                         </dashboard-tasklist>
 
-                        <dashboard-screenshotlist
-                            (onReload)="tasklist.reload()"
-                            (onFilterChanged)="tasklist.filter($event)">
+                        <dashboard-screenshotlist #screenshotList
+                            (onSelectionChanged)="changeSelection($event)">
                         </dashboard-screenshotlist>
+
+                        <change-task-panel
+                            *ngIf="selectedIntervals.length || taskFilter"
+                            [timeIntervals]="selectedIntervals"
+                            (onFilterChanged)="filter($event)"
+                            (onIntervalsDeleted)="reload()"
+                            (onIntervalsChanged)="reload()">
+                        </change-task-panel>
                     </div>
                 </div>
             </div>

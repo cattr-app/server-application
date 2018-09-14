@@ -1,6 +1,7 @@
 import { Component, OnInit, IterableDiffer, IterableDiffers, DoCheck } from '@angular/core';
 
 import { Task } from '../../../models/task.model';
+import { Project } from '../../../models/project.model';
 
 import { DashboardService } from '../dashboard.service';
 import { ApiService } from '../../../api/api.service';
@@ -16,7 +17,7 @@ export class TaskListComponent implements OnInit, DoCheck {
     itemsDiffer: IterableDiffer<Task>;
     totalTime = 0;
 
-    _filter: string|Task = '';
+    _filter: string|Task|Project = '';
     filteredItems: Task[] = [];
 
     get totalTimeStr(): string {
@@ -63,7 +64,7 @@ export class TaskListComponent implements OnInit, DoCheck {
         this.dashboardService.getTasks(this.setTasks.bind(this), params);
     }
 
-    filter(filter: string|Task = this._filter) {
+    filter(filter: string|Task|Project = this._filter) {
         this._filter = filter;
         this.filteredItems = this.itemsArray.filter(task => {
             if (typeof this._filter === "string") {
@@ -73,7 +74,9 @@ export class TaskListComponent implements OnInit, DoCheck {
                     ? task.project.name.toLowerCase() : '';
                 return taskName.indexOf(filter) !== -1
                     || projName.indexOf(filter) !== -1;
-            } else {
+            } else if (this._filter instanceof Project) {
+                return +task.project_id === +this._filter.id;
+            } else if (this._filter instanceof Task) {
                 return +task.id === +this._filter.id;
             }
         });

@@ -12,6 +12,7 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { DashboardComponent } from './dashboard.component';
 import { TaskListComponent } from './tasklist/tasks.list.component';
 import { ScreenshotListComponent } from './screenshotlist/screenshot.list.component';
+import { ChangeTaskPanelComponent } from './change-task-panel/change-task-panel.component';
 
 import {TranslateModule} from '@ngx-translate/core';
 import { StatisticModule } from '../statistic/statistic.module';
@@ -39,6 +40,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
     DashboardComponent,
     TaskListComponent,
     ScreenshotListComponent,
+    ChangeTaskPanelComponent,
   ],
   providers: [
     LoginService,

@@ -112,6 +112,7 @@ class Rule extends Model
                 'show' => __('Time interval show'),
                 'remove' => __('Time interval remove'),
                 'full_access' => __('Time intervals full access'),
+                'manager_access' => __('Time intervals manager access'),
             ],
             'time' => [
                 'total' => __('Time total'),
