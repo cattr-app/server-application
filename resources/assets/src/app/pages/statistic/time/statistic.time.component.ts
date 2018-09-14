@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
 import { NgSelectComponent } from '@ng-select/ng-select';
 import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
 import { PopoverDirective } from 'ngx-bootstrap';
@@ -57,8 +57,11 @@ export class StatisticTimeComponent implements OnInit {
     @ViewChild('clickPopover') clickPopover: PopoverDirective;
     @ViewChild('hoverPopover') hoverPopover: PopoverDirective;
 
+    @Output() onSelectionChanged = new EventEmitter<TimeInterval[]>();
+
     selectedUserIds: string[];
     userSelectItems: {}[];
+    selectedIntervals: TimeInterval[] = [];
 
     loading: boolean = true;
     usersLoading: boolean = true;
@@ -98,6 +101,8 @@ export class StatisticTimeComponent implements OnInit {
     sortUsers$: Observable<UsersSort>;
     sortedUsers$: Observable<ResourceInput[]>;
 
+    eventFilter: string|Task|Project = '';
+
     constructor(private api: ApiService,
         private userService: UsersService,
         private timeintervalService: TimeIntervalsService,
@@ -110,6 +115,10 @@ export class StatisticTimeComponent implements OnInit {
     readonly datePickerFormat = 'YYYY-MM-DD';
 
     get $timeline(): JQuery<any> {
+        if (!this.timelineInitialized) {
+            return null;
+        }
+
         return $(this.timeline.el.nativeElement).children();
     }
 
@@ -241,12 +250,12 @@ export class StatisticTimeComponent implements OnInit {
         })).share();
 
         this.view$ = this.viewSwitcher.setView.asObservable();
-        this.viewEvents$ = this.view$.filter(view => {
+        this.viewEvents$ = this.view$/*.filter(view => {
             return view.start.unix() !== this.view.start.unix()
                 || view.end.unix() !== this.view.end.unix()
                 || view.name !== this.view.name
                 || view.timezone !== this.view.timezone;
-        }).switchMap(view => {
+        })*/.switchMap(view => {
             this.setLoading(true);
             this.view = view;
             const offset = this.timezoneOffset;
@@ -265,8 +274,8 @@ export class StatisticTimeComponent implements OnInit {
                         start: this.view.start,
                         end: this.view.end,
                     });
+                    this.$timeline.fullCalendar('refetchEvents');
                 }
-                this.$timeline.fullCalendar('refetchEvents');
             });
             this.setLoading(false);
         });
@@ -400,7 +409,9 @@ export class StatisticTimeComponent implements OnInit {
 
         this.sortedUsers$.subscribe(users => {
             this.selectedUsers = users;
-            this.$timeline.fullCalendar('refetchResources');
+            if (this.$timeline) {
+                this.$timeline.fullCalendar('refetchResources');
+            }
         });
 
         this.timelineOptions = {
@@ -478,12 +489,49 @@ export class StatisticTimeComponent implements OnInit {
                 callback(this.view.name === 'timelineDay' ? this.viewEvents : []);
             },
             eventClick: (event, jsEvent, view: View) => {
+                jsEvent.stopPropagation();
+
                 this.clickPopover.hide();
                 this.popoverLoading = true;
 
                 this.clickPopoverTask = null;
                 this.clickPopoverProject = null;
                 this.clickPopoverScreenshot = null;
+
+                // Get clicked time interval group.
+                const userId = event.resourceId;
+                const events = this.viewEvents.filter(ev => {
+                    return +ev.resourceId === +userId;
+                }).sort((a, b) => {
+                    return moment.utc(a.start).diff(moment.utc(b.start));
+                });
+
+                const intervalIds = [event.id];
+                const currentEventIndex = events.findIndex(ev => ev.id === event.id);
+                for (let i = currentEventIndex + 1; i < events.length; ++i) {
+                    const prev = events[i - 1];
+                    const curr = events[i];
+                    if (moment.utc(curr.start).diff(moment.utc(prev.end)) > 60 * 1000) {
+                        break;
+                    }
+                    intervalIds.push(curr.id);
+                }
+
+                for (let i = currentEventIndex - 1; i >= 0; --i) {
+                    const next = events[i + 1];
+                    const curr = events[i];
+                    if (moment.utc(next.start).diff(moment.utc(curr.end)) > 60 * 1000) {
+                        break;
+                    }
+                    intervalIds.push(curr.id);
+                }
+
+                // Load time intervals.
+                this.timeintervalService.getItems(result => {
+                    this.setSelectedIntervals(result);
+                }, {
+                    id: ['=', intervalIds],
+                });
 
                 const task = this.viewEventsTasks.find(task => +task.id === +event.task_id);
                 if (task) {
@@ -543,7 +591,7 @@ export class StatisticTimeComponent implements OnInit {
                 for (let i = currentEventIndex + 1; i < events.length; ++i) {
                     const prev = events[i - 1];
                     const curr = events[i];
-                    if (moment.utc(curr.start).diff(moment.utc(prev.end)) > 1000) {
+                    if (moment.utc(curr.start).diff(moment.utc(prev.end)) > 60 * 1000) {
                         break;
                     }
                     total += moment.utc(curr.end).diff(moment.utc(curr.start));
@@ -552,7 +600,7 @@ export class StatisticTimeComponent implements OnInit {
                 for (let i = currentEventIndex - 1; i >= 0; --i) {
                     const next = events[i + 1];
                     const curr = events[i];
-                    if (moment.utc(next.start).diff(moment.utc(curr.end)) > 1000) {
+                    if (moment.utc(next.start).diff(moment.utc(curr.end)) > 60 * 1000) {
                         break;
                     }
                     total += moment.utc(curr.end).diff(moment.utc(curr.start));
@@ -593,9 +641,21 @@ export class StatisticTimeComponent implements OnInit {
                 if (view.name !== 'timelineDay') {
                     return false;
                 }
+
+                if (this.eventFilter instanceof Project) {
+                    const task = this.viewEventsTasks.find(task =>
+                        +task.id === +event.task_id);
+                    if (task) {
+                        return +task.project_id === +this.eventFilter.id;
+                    } else {
+                        return false;
+                    }
+                } else if (this.eventFilter instanceof Task) {
+                    return +event.task_id === +this.eventFilter.id;
+                }
             },
             eventAfterAllRender: (view: View) => {
-                if (view.name !== 'timelineDay') {
+                if (view.name !== 'timelineDay' && this.$timeline) {
                     const $timeline = this.$timeline;
                     const $rows = $('.fc-resource-area tr[data-resource-id]', $timeline);
                     const rows = $.makeArray($rows);
@@ -680,6 +740,10 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     updateResourceInfo() {
+        if (!this.$timeline) {
+            return;
+        }
+
         const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
         $rows.each((index, row) => {
             const $row = $(row);
@@ -749,6 +813,10 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     exportCSV() {
+        if (!this.$timeline) {
+            return;
+        }
+
         const $timeline = this.$timeline;
 
         const view = $timeline.fullCalendar('getView');
@@ -819,5 +887,29 @@ export class StatisticTimeComponent implements OnInit {
 
     setLoading(loading: boolean = true) {
         setTimeout(() => this.loading = loading);
+    }
+
+    setSelectedIntervals(intervals: TimeInterval[]) {
+        this.selectedIntervals = intervals;
+        this.onSelectionChanged.emit(intervals);
+    }
+
+    reload() {
+        this.clickPopover.hide();
+        this.hoverPopover.hide();
+        this.selectedIntervals = [];
+        this.viewSwitcher.setView.emit(this.view);
+    }
+
+    filter(filter: string|Task|Project) {
+        if (filter === ''
+            || filter instanceof Task
+            || filter instanceof Project) {
+            this.eventFilter = filter;
+
+            if (this.$timeline) {
+                this.$timeline.fullCalendar('refetchEvents');
+            }
+        }
     }
 }

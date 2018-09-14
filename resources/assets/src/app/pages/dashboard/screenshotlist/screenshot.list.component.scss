@@ -31,57 +31,6 @@
     position: relative;
 }
 
-.bottom-panel {
-    position: fixed;
-    bottom: 0;
-    left: 0;
-    width: 100%;
-
-    background-color: #fff;
-    border-top: 1px solid #d3e0e9;
-    box-shadow: 0 1px 1px rgba(0, 0, 0, 0.05);
-
-    &__inner {
-        @extend .container;
-
-        &::before,
-        &::after {
-            display: none;
-        }
-
-        display: flex;
-        flex-flow: row wrap;
-        justify-content: space-between;
-        align-items: center;
-        padding: 1em 1em 0;
-    }
-
-    &__left,
-    &__right {
-        margin-bottom: 1em;
-
-        display: flex;
-        flex-flow: row nowrap;
-        align-items: center;
-    }
-
-    &__delete,
-    &__add,
-    &__change {
-        @extend .btn, .btn-default;
-    }
-
-    &__selected {
-        font-size: 1.2em;
-    }
-
-    &__add,
-    &__selected,
-    &__change {
-        margin-right: 1em;
-    }
-}
-
 .modal {
     overflow-y: auto;
 
