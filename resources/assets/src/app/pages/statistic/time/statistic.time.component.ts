@@ -135,28 +135,66 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
-        const params = {
-            'start_at': start,
-            'end_at': end,
-        };
 
-        return new Promise<EventObjectInput[]>((resolve) => {
-            this.timeDurationService.getItems((durations: TimeDuration[]) => {
-                const events = durations.map(duration => {
+        let sec_day_diff = Math.abs(end.diff(start) / 1000 - 60 /* sec */ * 60 /* min */ * 24 /* hour */);
 
-                    let end_at = new Date(duration.date);
+        let day_display: boolean = sec_day_diff < 10;
 
-                    end_at.setSeconds(end_at.getSeconds() + duration.duration);
-                    return {
-                        title: '',
-                        resourceId: duration.user_id,
-                        start: moment.utc(duration.date).add(this.timezoneOffset, 'minutes'),
-                        end: moment.utc(end_at).add(this.timezoneOffset, 'minutes'),
-                    } as EventObjectInput;
-                });
-                resolve(events);
-            }, params);
-        });
+        if (day_display) {
+            const params = {
+                'start_at': ['>', start],
+                'end_at': ['<', end],
+            };
+
+            return new Promise<EventObjectInput[]>((resolve) => {
+                this.timeintervalService.getItems((intervals: TimeInterval[]) => {
+                    const events = intervals.map(interval => {
+                        return {
+                            id: interval.id,
+                            title: '',
+                            resourceId: interval.user_id,
+                            start: moment.utc(interval.start_at).add(this.timezoneOffset, 'minutes'),
+                            end: moment.utc(interval.end_at).add(this.timezoneOffset, 'minutes'),
+                            task_id: interval.task_id,
+                        } as EventObjectInput;
+                    }).filter(event => {
+                        // Filter events with duration less than one second.
+                        // Zero-duration events breaks fullcalendar.
+                        const end = event.end as moment.Moment;
+                        if (end.diff(event.start) < 1000) {
+                            return false;
+                        }
+
+                        return true;
+                    });
+
+                    resolve(events);
+                }, params);
+            });
+        } else {
+            const params = {
+                'start_at': start,
+                'end_at': end,
+            };
+
+            return new Promise<EventObjectInput[]>((resolve) => {
+                this.timeDurationService.getItems((durations: TimeDuration[]) => {
+                    const events = durations.map(duration => {
+
+                        let end_at = new Date(duration.date);
+
+                        end_at.setSeconds(end_at.getSeconds() + duration.duration);
+                        return {
+                            title: '',
+                            resourceId: duration.user_id,
+                            start: moment.utc(duration.date).add(this.timezoneOffset, 'minutes'),
+                            end: moment.utc(end_at).add(this.timezoneOffset, 'minutes'),
+                        } as EventObjectInput;
+                    });
+                    resolve(events);
+                }, params);
+            });
+        }
     }
 
     fetchResources() {
