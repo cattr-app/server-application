@@ -84,6 +84,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
   filter(filter: string|Task|Project) {
     this.taskFilter = filter;
     this.taskList.filter(filter);
+    this.screenshotList.filter(filter);
 
     if (this.statistic) {
       this.statistic.filter(filter);

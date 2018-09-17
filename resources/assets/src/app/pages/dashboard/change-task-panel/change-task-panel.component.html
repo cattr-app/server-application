@@ -22,8 +22,8 @@
       <p-autoComplete class="change-task-panel__search" [(ngModel)]="search"
         [suggestions]="searchSuggested" field="title"
         (completeMethod)="onSearch($event)"
-        (onKeyUp)="onSearchChanged()"
-        (onSelect)="onSearchChanged()"
+        (onKeyUp)="onSearchKeyUp($event)"
+        (onSelect)="onSearchSelected()"
         placeholder="Search...">
       </p-autoComplete>
     </div>

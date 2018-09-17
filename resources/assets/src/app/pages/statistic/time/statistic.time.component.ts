@@ -642,7 +642,25 @@ export class StatisticTimeComponent implements OnInit {
                     return false;
                 }
 
-                if (this.eventFilter instanceof Project) {
+                if (typeof this.eventFilter === 'string') {
+                    const filter = this.eventFilter.toUpperCase();
+                    const task = this.viewEventsTasks.find(task =>
+                        +task.id === +event.task_id);
+                    if (task) {
+                        const taskName = task.task_name.toUpperCase();
+                        if (taskName.indexOf(filter) !== -1) {
+                            return true;
+                        }
+
+                        const project = this.viewEventsProjects.find(project =>
+                            +project.id === +task.project_id);
+                        if (project && project.name.toUpperCase().indexOf(filter) !== -1) {
+                            return true;
+                        }
+                    }
+
+                    return false;
+                } else if (this.eventFilter instanceof Project) {
                     const task = this.viewEventsTasks.find(task =>
                         +task.id === +event.task_id);
                     if (task) {
@@ -902,14 +920,10 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     filter(filter: string|Task|Project) {
-        if (filter === ''
-            || filter instanceof Task
-            || filter instanceof Project) {
-            this.eventFilter = filter;
+        this.eventFilter = filter;
 
-            if (this.$timeline) {
-                this.$timeline.fullCalendar('refetchEvents');
-            }
+        if (this.$timeline) {
+            this.$timeline.fullCalendar('refetchEvents');
         }
     }
 }
