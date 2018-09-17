@@ -1,5 +1,5 @@
 <div class="container-fuild">
-  <div class="row" *ngFor="let block of blocks">
+  <div class="row" *ngFor="let block of filteredBlocks">
     <div class="col-md-11">
       <!-- items start -->
       <div class="col-md-2" *ngFor="let screenshots of block.screenshots">
@@ -55,7 +55,8 @@
   </div>
 </div>
 
-<div class="modal fade" bsModal #screenshotModal="bs-modal" tabindex="-1" role="dialog">
+<div class="modal fade" bsModal #screenshotModal="bs-modal" tabindex="-1" role="dialog"
+  (keydown.arrowleft)="prevScreenshot()" (keydown.arrowright)="nextScreenshot()">
   <div class="modal-dialog modal-lg">
     <div class="modal-content" *ngIf="modalScreenshot">
       <div class="modal-header">
@@ -72,6 +73,8 @@
             <a [attr.href]="modalScreenshot.path" target="_blank">
               <img src="{{ modalScreenshot.path }}" style="width:100%;">
             </a>
+            <button class="btn btn-primary modal-screenshot-nav-left" (click)="prevScreenshot()">&lt;</button>
+            <button class="btn btn-primary modal-screenshot-nav-right" (click)="nextScreenshot()">&gt;</button>
           </div>
         </div>
 

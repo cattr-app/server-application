@@ -2,6 +2,8 @@ import { Component, ViewChild, OnInit, OnDestroy, DoCheck, KeyValueDiffer, KeyVa
 
 import { ScreenshotsBlock, Screenshot } from '../../../models/screenshot.model';
 import { TimeInterval } from '../../../models/timeinterval.model';
+import { Task } from '../../../models/task.model';
+import { Project } from '../../../models/project.model';
 
 import { ApiService } from '../../../api/api.service';
 import { DashboardService } from '../dashboard.service';
@@ -28,6 +30,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     chunksize = 32;
     offset = 0;
     blocks: ScreenshotsBlock[] = [];
+    filteredBlocks: ScreenshotsBlock[] = [];
     screenshotLoading = false;
     scrollHandler: any = null;
     countFail = 0;
@@ -35,6 +38,8 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     selected: { [key: number]: boolean } = {};
     selectedDiffer: KeyValueDiffer<number, boolean> = null;
     selectedIntervals: TimeInterval[] = [];
+
+    _filter: string|Task|Project = '';
 
     modalScreenshot?: Screenshot = null;
 
@@ -49,6 +54,17 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         protected modalService: BsModalService,
     ) {
         this.selectedDiffer = differs.find(this.selected).create();
+    }
+
+    getVisibleScreenshots() {
+        return this.blocks
+            .map(block => block.screenshots
+                // Get first screenshot in each group.
+                .map(screenshots => screenshots[0])
+                // Remove empty entries.
+                .filter(screenshot => screenshot))
+            // Flatten screenshot blocks.
+            .reduce((arr, curr) => arr.concat(curr), []);
     }
 
     getSelectedScreenshots() {
@@ -111,6 +127,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
             this.countFail += 1;
         }
 
+        this.filter();
         this.screenshotLoading = false;
     }
 
@@ -122,6 +139,32 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         this.countFail = 0;
         this.selected = {};
         this.loadNext();
+    }
+
+    filter(filter: string|Task|Project = this._filter) {
+        this._filter = filter;
+        this.filteredBlocks = this.blocks.map(block => {
+            const filteredBlock = { ...block };
+            filteredBlock.screenshots = block.screenshots.map(screenshots => screenshots.filter(screenshot => {
+                if (!screenshot.time_interval || !screenshot.time_interval.task) {
+                    return false;
+                }
+
+                if (typeof this._filter === "string") {
+                    const filter = this._filter.toLowerCase();
+                    const taskName = screenshot.time_interval.task.task_name.toLowerCase();
+                    const projName = screenshot.time_interval.task.project
+                        ? screenshot.time_interval.task.project.name.toLowerCase() : '';
+                    return taskName.indexOf(filter) !== -1
+                        || projName.indexOf(filter) !== -1;
+                } else if (this._filter instanceof Project) {
+                    return +screenshot.time_interval.task.project_id === +this._filter.id;
+                } else if (this._filter instanceof Task) {
+                    return +screenshot.time_interval.task.id === +this._filter.id;
+                }
+            }));
+            return filteredBlock;
+        }).filter(block => block.screenshots.some(group => group.length > 0));
     }
 
     onScrollDown() {
@@ -151,6 +194,24 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     openScreenshotModal(screenshot: Screenshot) {
         this.modalScreenshot = screenshot;
         this.screenshotModal.show();
+    }
+
+    prevScreenshot() {
+        const screenshots = this.getVisibleScreenshots();
+        const currentIndex = screenshots
+            .findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+        if (currentIndex > 0) {
+            this.modalScreenshot = screenshots[currentIndex - 1];
+        }
+    }
+
+    nextScreenshot() {
+        const screenshots = this.getVisibleScreenshots();
+        const currentIndex = screenshots
+            .findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+        if (currentIndex !== -1 && currentIndex < screenshots.length - 1) {
+            this.modalScreenshot = screenshots[currentIndex + 1];
+        }
     }
 
     formatTime(datetime: string) {

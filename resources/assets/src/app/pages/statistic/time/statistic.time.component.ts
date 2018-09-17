@@ -38,10 +38,15 @@ enum UsersSort {
     TimeWorkedDesc
 }
 
+interface TimeWorkedDay {
+    total: number;
+    events: EventObjectInput[];
+}
+
 interface TimeWorked {
     id: string,
     total: number,
-    perDay: { [date: string]: number },
+    perDay: { [date: string]: TimeWorkedDay },
 }
 
 @Component({
@@ -149,19 +154,23 @@ export class StatisticTimeComponent implements OnInit {
         return new Promise<EventObjectInput[]>((resolve) => {
             this.timeintervalService.getItems((intervals: TimeInterval[]) => {
                 const events = intervals.map(interval => {
+                    const start = moment.utc(interval.start_at).add(this.timezoneOffset, 'minutes');
+                    const end = moment.utc(interval.end_at).add(this.timezoneOffset, 'minutes');
                     return {
                         id: interval.id,
                         title: '',
                         resourceId: interval.user_id,
-                        start: moment.utc(interval.start_at).add(this.timezoneOffset, 'minutes'),
-                        end: moment.utc(interval.end_at).add(this.timezoneOffset, 'minutes'),
+                        start: start,
+                        end: end,
                         task_id: interval.task_id,
+                        interval,
+                        duration: end.diff(start),
                     } as EventObjectInput;
                 }).filter(event => {
                     // Filter events with duration less than one second.
                     // Zero-duration events breaks fullcalendar.
                     const end = event.end as moment.Moment;
-                    if (end.diff(event.start) < 1000) {
+                    if (event.duration < 1000) {
                         return false;
                     }
 
@@ -250,12 +259,7 @@ export class StatisticTimeComponent implements OnInit {
         })).share();
 
         this.view$ = this.viewSwitcher.setView.asObservable();
-        this.viewEvents$ = this.view$/*.filter(view => {
-            return view.start.unix() !== this.view.start.unix()
-                || view.end.unix() !== this.view.end.unix()
-                || view.name !== this.view.name
-                || view.timezone !== this.view.timezone;
-        })*/.switchMap(view => {
+        this.viewEvents$ = this.view$.switchMap(view => {
             this.setLoading(true);
             this.view = view;
             const offset = this.timezoneOffset;
@@ -281,16 +285,15 @@ export class StatisticTimeComponent implements OnInit {
         });
 
         this.viewEventsTasks$ = this.viewEvents$.switchMap(events => {
-            if (this.view.name !== 'timelineDay') {
-                return Observable.from([]);
-            }
-
             const ids = events.map(event => event.task_id);
             const uniqueIds = Array.from(new Set(ids));
             return Observable.from(this.fetchTasks(uniqueIds));
         }).share();
         this.viewEventsTasks$.subscribe(tasks => {
             this.viewEventsTasks = tasks;
+            if (this.$timeline) {
+                this.$timeline.fullCalendar('refetchEvents');
+            }
         });
 
         this.viewEventsProjects$ = this.viewEventsTasks$.switchMap(tasks => {
@@ -300,24 +303,29 @@ export class StatisticTimeComponent implements OnInit {
         });
         this.viewEventsProjects$.subscribe(projects => {
             this.viewEventsProjects = projects;
+            if (this.$timeline) {
+                this.$timeline.fullCalendar('refetchEvents');
+            }
         });
 
         this.viewTimeWorked$ = this.viewEvents$.combineLatest(this.users$, (events, users) => {
             return users.map(user => {
                 const userEvents = events.filter(event => +event.resourceId === +user.id);
                 let total = 0;
-                const perDay: { [date: string]: number } = {};
+                const perDay: { [date: string]: TimeWorkedDay } = {};
                 for (const event of userEvents) {
                     const start = moment.utc(event.start);
-                    const end = moment.utc(event.end);
-                    const time = end.diff(start);
-                    total += time;
+                    total += event.duration;
 
                     const date = start.format('YYYY-MM-DD');
                     if (perDay[date] !== undefined) {
-                        perDay[date] += time;
+                        perDay[date].total += event.duration;
+                        perDay[date].events.push(event);
                     } else {
-                        perDay[date] = time;
+                        perDay[date] = {
+                            total: event.duration,
+                            events: [event],
+                        };
                     }
                 }
 
@@ -637,22 +645,27 @@ export class StatisticTimeComponent implements OnInit {
             eventMouseout: (event, jsEvent, view) => {
                 this.hoverPopover.hide();
             },
+            dayClick: (date, jsEvent, view, resourceObj) => {
+                if (view.name !== 'timelineDay') {
+                    const userEvents = this.viewEvents
+                        .filter(event => +event.resourceId === +resourceObj.id)
+                        .filter(this.filterEvent.bind(this));
+
+                    const day = date.format('YYYY-MM-DD');
+                    this.selectedIntervals = userEvents.filter(event => {
+                        const start = moment.utc(event.start);
+                        const eventDay = start.format('YYYY-MM-DD');
+                        return eventDay === day;
+                    }).map(event => event.interval);
+                    this.onSelectionChanged.emit(this.selectedIntervals);
+                }
+            },
             eventRender: (event, el, view: View) => {
                 if (view.name !== 'timelineDay') {
                     return false;
                 }
 
-                if (this.eventFilter instanceof Project) {
-                    const task = this.viewEventsTasks.find(task =>
-                        +task.id === +event.task_id);
-                    if (task) {
-                        return +task.project_id === +this.eventFilter.id;
-                    } else {
-                        return false;
-                    }
-                } else if (this.eventFilter instanceof Task) {
-                    return +event.task_id === +this.eventFilter.id;
-                }
+                return this.filterEvent(event);
             },
             eventAfterAllRender: (view: View) => {
                 if (view.name !== 'timelineDay' && this.$timeline) {
@@ -671,7 +684,11 @@ export class StatisticTimeComponent implements OnInit {
                             // Calculate time worked by this user per this day.
                             const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
                             const time = timeWorked !== undefined && timeWorked.perDay[date] !== undefined
-                                ? timeWorked.perDay[date] : 0;
+                                ? timeWorked.perDay[date].events
+                                    .filter(this.filterEvent.bind(this))
+                                    .map(event => event.duration)
+                                    .reduce((total, curr) => total += curr, 0)
+                                : 0;
                             const msIn24Hours = 24 * 60 * 60 * 1000;
                             const progress = time / msIn24Hours;
                             const percent = Math.round(100 * progress);
@@ -853,7 +870,7 @@ export class StatisticTimeComponent implements OnInit {
                     // Calculate time worked by this user per this day.
                     const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
                     const time = timeWorked !== undefined && timeWorked.perDay[date] !== undefined
-                        ? timeWorked.perDay[date] : 0;
+                        ? timeWorked.perDay[date].total : 0;
                     const timeHours = moment.duration(time).asHours().toFixed(2);
                     return `"${timeHours}"`;
                 });
@@ -902,14 +919,41 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     filter(filter: string|Task|Project) {
-        if (filter === ''
-            || filter instanceof Task
-            || filter instanceof Project) {
-            this.eventFilter = filter;
+        this.eventFilter = filter;
+        this.viewSwitcher.setView.emit(this.view);
+    }
 
-            if (this.$timeline) {
-                this.$timeline.fullCalendar('refetchEvents');
+    filterEvent(event: EventObjectInput): boolean {
+        if (typeof this.eventFilter === 'string' && this.eventFilter.length) {
+            const filter = this.eventFilter.toUpperCase();
+            const task = this.viewEventsTasks.find(task =>
+                +task.id === +event.task_id);
+            if (task) {
+                const taskName = task.task_name.toUpperCase();
+                if (taskName.indexOf(filter) !== -1) {
+                    return true;
+                }
+
+                const project = this.viewEventsProjects.find(project =>
+                    +project.id === +task.project_id);
+                if (project && project.name.toUpperCase().indexOf(filter) !== -1) {
+                    return true;
+                }
             }
+
+            return false;
+        } else if (this.eventFilter instanceof Project) {
+            const task = this.viewEventsTasks.find(task =>
+                +task.id === +event.task_id);
+            if (task) {
+                return +task.project_id === +this.eventFilter.id;
+            }
+
+            return false;
+        } else if (this.eventFilter instanceof Task) {
+            return +event.task_id === +this.eventFilter.id;
         }
+
+        return true;
     }
 }

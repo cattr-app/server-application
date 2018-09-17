@@ -134,7 +134,13 @@ export class ChangeTaskPanelComponent implements OnInit, DoCheck {
         });
     }
 
-    onSearchChanged() {
+    onSearchKeyUp(event) {
+        if (event.key === 'Enter') {
+            this.onFilterChanged.emit(this.search);
+        }
+    }
+
+    onSearchSelected() {
         this.onFilterChanged.emit(this.search);
     }
 
