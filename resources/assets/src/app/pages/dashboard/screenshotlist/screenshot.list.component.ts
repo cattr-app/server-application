@@ -56,6 +56,17 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         this.selectedDiffer = differs.find(this.selected).create();
     }
 
+    getScreenshots() {
+        return this.blocks
+            .map(block => block.screenshots
+                // Get all screenshot in each group.
+                .reduce((arr, curr) => arr.concat(curr), [])
+                // Remove empty entries.
+                .filter(screenshot => screenshot))
+            // Flatten screenshot blocks.
+            .reduce((arr, curr) => arr.concat(curr), []);
+    }
+
     getVisibleScreenshots() {
         return this.blocks
             .map(block => block.screenshots
@@ -212,6 +223,28 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         if (currentIndex !== -1 && currentIndex < screenshots.length - 1) {
             this.modalScreenshot = screenshots[currentIndex + 1];
         }
+    }
+
+    deleteScreenshot(screenshot: Screenshot) {
+        this.timeIntervalsService.removeItem(screenshot.time_interval_id, () => {
+            const screenshots = this.getScreenshots();
+            const currentIndex = screenshots
+                .findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+            if (currentIndex !== -1 && currentIndex < screenshots.length - 1) {
+                this.modalScreenshot = screenshots[currentIndex + 1];
+            } else if (currentIndex > 0) {
+                this.modalScreenshot = screenshots[currentIndex - 1];
+            } else {
+                this.screenshotModal.hide();
+            }
+
+            this.blocks.forEach(block => {
+                block.screenshots = block.screenshots.map(group =>
+                    group.filter(scr => +scr.id !== +screenshot.id));
+            });
+
+            this.filter();
+        });
     }
 
     formatTime(datetime: string) {
