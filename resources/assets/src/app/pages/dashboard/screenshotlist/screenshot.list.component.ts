@@ -51,6 +51,17 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         this.selectedDiffer = differs.find(this.selected).create();
     }
 
+    getVisibleScreenshots() {
+        return this.blocks
+            .map(block => block.screenshots
+                // Get first screenshot in each group.
+                .map(screenshots => screenshots[0])
+                // Remove empty entries.
+                .filter(screenshot => screenshot))
+            // Flatten screenshot blocks.
+            .reduce((arr, curr) => arr.concat(curr), []);
+    }
+
     getSelectedScreenshots() {
         // Get selected screenshots.
         return this.blocks
@@ -151,6 +162,24 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     openScreenshotModal(screenshot: Screenshot) {
         this.modalScreenshot = screenshot;
         this.screenshotModal.show();
+    }
+
+    prevScreenshot() {
+        const screenshots = this.getVisibleScreenshots();
+        const currentIndex = screenshots
+            .findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+        if (currentIndex > 0) {
+            this.modalScreenshot = screenshots[currentIndex - 1];
+        }
+    }
+
+    nextScreenshot() {
+        const screenshots = this.getVisibleScreenshots();
+        const currentIndex = screenshots
+            .findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+        if (currentIndex !== -1 && currentIndex < screenshots.length - 1) {
+            this.modalScreenshot = screenshots[currentIndex + 1];
+        }
     }
 
     formatTime(datetime: string) {
