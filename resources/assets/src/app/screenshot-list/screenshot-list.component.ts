@@ -192,4 +192,22 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
             this.modalScreenshot = items[index + 1];
         }
     }
+
+    delete(screenshot: Screenshot) {
+        this.itemService.removeItem(screenshot.id, () => {
+            const items = this.itemsArray as Screenshot[];
+            const index = items.findIndex(scr => scr.id === screenshot.id);
+
+            if (index !== -1 && index < items.length - 1) {
+                this.modalScreenshot = items[index + 1];
+            } else if (index > 0) {
+                this.modalScreenshot = items[index - 1];
+            } else {
+                this.screenshotModal.hide();
+            }
+
+            this.setItems(items.filter(scr => scr.id !== screenshot.id));
+            this.onScrollDown(); // To load new items, if needed.
+        });
+    }
 }
