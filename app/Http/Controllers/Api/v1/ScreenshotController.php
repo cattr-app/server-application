@@ -12,6 +12,8 @@ use Illuminate\Http\Request;
 use Filter;
 use Illuminate\Support\Facades\Input;
 use Validator;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 
 /**
  * Class ScreenshotController
@@ -153,11 +155,19 @@ class ScreenshotController extends ItemController
     public function create(Request $request): JsonResponse
     {
         $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
+        $screenshot = Image::make($path);
+        $thumbnail = $screenshot->resize(280, null, function ($constraint) {
+            $constraint->aspectRatio();
+        });
+        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
+        Storage::put($thumbnailPath, (string) $thumbnail->encode());
+
         $timeIntervalId = is_int($request->get('time_interval_id')) ? $request->get('time_interval_id') : null;
 
         $requestData = [
             'time_interval_id' => $timeIntervalId,
-            'path' => $path
+            'path' => $path,
+            'thumbnail_path' => $thumbnailPath,
         ];
 
         $validator = Validator::make(

@@ -1,7 +1,8 @@
 <div class="screenshots-row row" *ngFor="let group of itemsChunked">
     <div class="screenshot-wrapper col-xs-6 col-sm-4 col-md-3 col-lg-2" *ngFor="let screenshot of group">
         <div class="card">
-            <img class="screenshot card-img-top" src="{{ screenshot.path }}"
+            <img class="screenshot card-img-top"
+                [attr.src]="screenshot.thumbnail_path ? screenshot.thumbnail_path : (screenshot.path ? screenshot.path : 'uploads/none.png')"
                 onerror="this.src='uploads/none.png'" alt="image"
                 (click)="showModal(screenshot)" />
 

@@ -9,7 +9,7 @@
             [checked]="selected[screenshots[0].id]" />
 
           <img class="card-img-top" (click)="openScreenshotModal(screenshots[0])"
-            [attr.src]="screenshots[0].path ? screenshots[0].path : 'uploads/none.png'"
+            [attr.src]="screenshots[0].thumbnail_path ? screenshots[0].thumbnail_path : (screenshots[0].path ? screenshots[0].path : 'uploads/none.png')"
             onerror="this.src='uploads/none.png'" alt="image" />
 
           <div class="card-body">

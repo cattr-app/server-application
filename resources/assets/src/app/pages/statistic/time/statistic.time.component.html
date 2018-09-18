@@ -33,7 +33,7 @@
             <a *ngIf="clickPopoverScreenshot !== null"
                 [attr.href]="'screenshots/show/' + clickPopoverScreenshot.id">
                 <img class="statistics-popover__image"
-                    [attr.src]="clickPopoverScreenshot.path" />
+                    [attr.src]="clickPopoverScreenshot.thumbnail_path ? clickPopoverScreenshot.thumbnail_path : (clickPopoverScreenshot.path ? clickPopoverScreenshot.path : 'uploads/none.png')" />
             </a>
         </p>
 
