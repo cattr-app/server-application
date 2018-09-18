@@ -1,8 +1,8 @@
 {
 	"navigation": {
 		"dashboard": "Dashboard",
-    "login": "Login",
-    "projectsreport": "Projects report",
+    	"login": "Login",
+    	"projectsreport": "Projects report",
 		"forgot": "Forgot",
 		"reset": "Reset",
 		"register": "Register",
@@ -18,7 +18,7 @@
 		"logout": "Logout"
 	},
 	"dashboard": {
-		"usage": "Today time use:",
+		"usage": "Today time use: {{time}}",
 		"no-task": "No task for last 24 hours. ¯\\_(ツ)_/¯",
 		"auto-loading": "screenshots auto-loading"
 	},

@@ -19,6 +19,7 @@ Homestead.yaml
 *.gz
 *.tgz
 *.lock
+!composer.lock
 *-lock.json
 *.phar
 _ide_helper.php

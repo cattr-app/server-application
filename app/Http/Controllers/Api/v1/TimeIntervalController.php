@@ -185,6 +185,81 @@ class TimeIntervalController extends ItemController
      * @apiName EditTimeInterval
      * @apiGroup Time Interval
      */
+    public function edit(Request $request): JsonResponse
+    {
+        $requestData = Filter::process(
+            $this->getEventUniqueName('request.item.edit'),
+            $request->all()
+        );
+
+        $validationRules = $this->getValidationRules();
+        $validationRules['id'] = ['required'];
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.edit'),
+                $validationRules
+            )
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        //create time interval
+        $requestData['start_at'] = (new Carbon($requestData['start_at']))->setTimezone('UTC')->toDateTimeString();
+        $requestData['end_at'] = (new Carbon($requestData['end_at']))->setTimezone('UTC')->toDateTimeString();
+
+        if (!is_int($request->get('id'))) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'Invalid id',
+                    'reason' => 'Id is not integer',
+                ]),
+                400
+            );
+        }
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery()
+            )
+        );
+
+        /** @var \Illuminate\Database\Eloquent\Model $item */
+        $item = collect($itemsQuery->get())->first(function ($val, $key) use ($request) {
+            return $val['id'] === $request->get('id');
+        });
+
+        if (!$item) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'Model fetch fail',
+                    'reason' => 'Model not found',
+                ]),
+                400
+            );
+        }
+
+        $item->fill($this->filterRequestData($requestData));
+        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
+        $item->save();
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'res' => $item,
+            ])
+        );
+    }
 
     /**
      * @api {post} /api/v1/time-intervals/destroy Destroy

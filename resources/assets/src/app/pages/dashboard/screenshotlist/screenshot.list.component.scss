@@ -1,0 +1,83 @@
+@import '../../../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+.screenshot {
+    position: relative;
+    cursor: pointer;
+}
+
+.select_image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0 !important;
+    transform: translate(-50%, -50%);
+}
+
+.card-img-top {
+    width: 14rem;
+    max-height: 100px;
+}
+
+.card-text-line {
+    display: block;
+}
+
+.loading {
+    width: 100%;
+    height: 16rem;
+    margin: 10px 0;
+    text-align: center;
+    position: relative;
+}
+
+.modal {
+    overflow-y: auto;
+
+    .table {
+        margin-bottom: 0;
+    }
+
+    &__row {
+        @extend .row;
+
+        &:not(:last-child) {
+            margin-bottom: 1em;
+        }
+    }
+
+    &__textarea {
+        resize: vertical;
+    }
+
+    &__submit {
+        @extend .btn, .btn-primary;
+    }
+
+    &__cancel {
+        @extend .btn, .btn-danger;
+    }
+}
+
+.modal-screenshot-wrapper {
+    position: relative;
+}
+
+.modal-screenshot-nav-left,
+.modal-screenshot-nav-right {
+    position: absolute;
+    top: 50%;
+    transform: translate(0, -50%);
+}
+
+.modal-screenshot-nav-left {
+    left: 20px;
+}
+
+.modal-screenshot-nav-right {
+    right: 20px;
+}
+
+.modal-screenshot-buttons {
+    margin: 1em 0;
+}

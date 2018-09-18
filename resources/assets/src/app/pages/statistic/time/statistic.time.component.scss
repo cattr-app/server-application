@@ -270,6 +270,10 @@
     }
 
     /* Popover */
+    .popover {
+        z-index: 1010;
+    }
+
     .popover.arrow_left .popover-arrow {
         margin: 0 !important;
         left: 2px !important;

@@ -1,4 +1,4 @@
-<div class="statistics">
+<div class="statistics" (click)="clickPopover.hide()">
     <div class="statistics__buttons btn-group" role="group">
         <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
     </div>
@@ -17,8 +17,11 @@
 
     <div class="statistics__timeline">
         <ngx-loading [show]="loading"></ngx-loading>
-        <span #clickPopover="bs-popover" id="clickPopover" [outsideClick]="true" [popover]="clickPopoverTemplate"></span>
-        <span #hoverPopover="bs-popover" id="hoverPopover" [outsideClick]="true" [popover]="hoverPopoverTemplate"></span>
+        <span #clickPopover="bs-popover" id="clickPopover"
+            [popover]="clickPopoverTemplate"
+            (onHidden)="setSelectedIntervals([])"></span>
+        <span #hoverPopover="bs-popover" id="hoverPopover"
+            [outsideClick]="true" [popover]="hoverPopoverTemplate"></span>
         <p-schedule #timeline [header]="false" [options]="timelineOptions"></p-schedule>
     </div>
 </div>

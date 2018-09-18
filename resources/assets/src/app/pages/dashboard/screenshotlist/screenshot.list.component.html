@@ -1,24 +1,47 @@
 <div class="container-fuild">
-  <div class="row" *ngFor="let block of blocks">
+  <div class="row" *ngFor="let block of filteredBlocks">
     <div class="col-md-11">
       <!-- items start -->
-      <div class="col-md-2" *ngFor="let screenshot of block.screenshots">
-        <div class="card">
-          <input type="checkbox" class="select_image">
-          <img class="card-img-top" src="{{ screenshot.path }}" onerror="this.src='uploads/none.png'" alt="image">
+      <div class="col-md-2" *ngFor="let screenshots of block.screenshots">
+        <div *ngIf="screenshots[0]" class="card screenshot">
+          <input type="checkbox" class="select_image" *ngIf="screenshots[0].id"
+            (change)="selected[screenshots[0].id] = !selected[screenshots[0].id]"
+            [checked]="selected[screenshots[0].id]" />
+
+          <img class="card-img-top" (click)="openScreenshotModal(screenshots[0])"
+            [attr.src]="screenshots[0].path ? screenshots[0].path : 'uploads/none.png'"
+            onerror="this.src='uploads/none.png'" alt="image" />
+
           <div class="card-body">
-            <p class="card-text">
-              <span>{{ screenshot.time_interval && minutes(screenshot.time_interval.start_at) }}</span>
-              <span>{{ screenshot.time_interval && screenshot.time_interval.task && screenshot.time_interval.task.task_name }}</span>
-              <span>{{ screenshot.time_interval && screenshot.time_interval.task && screenshot.time_interval.task.project && screenshot.time_interval.task.project.name }}</span>
+            <p class="card-text" *ngIf="screenshots[0].time_interval">
+              <span class="card-text-line">{{ formatTime(screenshots[0].time_interval.start_at) }}</span>
+
+              <a class="card-text-line" *ngIf="screenshots[0].time_interval.task"
+                [attr.href]="'/tasks/show/' + screenshots[0].time_interval.task.id">
+                {{ screenshots[0].time_interval.task.task_name }}
+              </a>
+
+              <a class="card-text-line" *ngIf="screenshots[0].time_interval.task?.project"
+                [attr.href]="'/projects/show/' + screenshots[0].time_interval.task.project.id">
+                {{ screenshots[0].time_interval.task.project.name }}
+              </a>
             </p>
+          </div>
+        </div>
+
+        <div *ngIf="!screenshots[0]" class="card">
+          <img class="card-img-top" src="uploads/none.png" alt="image" />
+
+          <div class="card-body">
           </div>
         </div>
       </div>
       <!-- items end  -->
     </div>
+
     <div class="col-md-1">
-      <input type="checkbox" class="select_row">
+      <input type="checkbox" class="select_row"
+        (change)="onSelectBlock(block, $event.target.checked)" />
       <!--{{ hour(block.interval) }}-->
     </div>
   </div>
@@ -26,7 +49,67 @@
 
 <div class="loading" #loading>
   <div *ngIf="countFail <= 3">
-    <p class="h2">...</p>
-    <p class="h2" translate>dashboard.auto-loading</p>
+    <ngx-loading [show]="screenshotLoading"
+      [config]="{ backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd' }">
+    </ngx-loading>
+  </div>
+</div>
+
+<div class="modal fade" bsModal #screenshotModal="bs-modal" tabindex="-1" role="dialog"
+  (keydown.arrowleft)="prevScreenshot()" (keydown.arrowright)="nextScreenshot()">
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content" *ngIf="modalScreenshot">
+      <div class="modal-header">
+        <h4 class="modal-title pull-left">Screenshot #{{ modalScreenshot.id }}</h4>
+
+        <button type="button" class="close pull-right" aria-label="Close" (click)="screenshotModal.hide()">
+          <span aria-hidden="true">&times;</span>
+        </button>
+      </div>
+
+      <div class="modal-body">
+        <div class="row">
+          <div class="col-md-12 modal-screenshot-wrapper">
+            <a [attr.href]="modalScreenshot.path" target="_blank">
+              <img src="{{ modalScreenshot.path }}" style="width:100%;">
+            </a>
+            <button class="btn btn-primary modal-screenshot-nav-left" (click)="prevScreenshot()">&lt;</button>
+            <button class="btn btn-primary modal-screenshot-nav-right" (click)="nextScreenshot()">&gt;</button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12 modal-screenshot-buttons">
+            <button class="btn btn-danger btn-sm" (click)="deleteScreenshot(modalScreenshot)">
+              <i aria-hidden="true" class="fa fa-pencil-square-o"></i>
+              Delete
+            </button>
+          </div>
+        </div>
+
+        <div class="row">
+          <div class="col-md-12">
+            <table class="table table-borderless">
+              <tbody>
+                <tr *ngIf="modalScreenshot.time_interval">
+                  <th translate>field.task</th>
+                  <td>{{ modalScreenshot.time_interval.task.task_name }}</td>
+                </tr>
+
+                <tr>
+                  <th translate>field.created</th>
+                  <td>{{ modalScreenshot.created_at }}</td>
+                </tr>
+
+                <tr>
+                  <th translate>field.updated</th>
+                  <td>{{ modalScreenshot.updated_at }}</td>
+                </tr>
+              </tbody>
+            </table>
+          </div>
+        </div>
+      </div>
+    </div>
   </div>
 </div>

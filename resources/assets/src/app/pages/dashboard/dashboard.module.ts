@@ -12,10 +12,14 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { DashboardComponent } from './dashboard.component';
 import { TaskListComponent } from './tasklist/tasks.list.component';
 import { ScreenshotListComponent } from './screenshotlist/screenshot.list.component';
+import { ChangeTaskPanelComponent } from './change-task-panel/change-task-panel.component';
 
 import {TranslateModule} from '@ngx-translate/core';
 import { StatisticModule } from '../statistic/statistic.module';
-import { TabsModule } from 'ngx-bootstrap';
+import { TabsModule, ModalModule } from 'ngx-bootstrap';
+import { LoadingModule } from 'ngx-loading';
+import {AutoCompleteModule} from 'primeng/autocomplete';
+import { NgSelectModule } from '@ng-select/ng-select';
 
 @NgModule({
   imports: [
@@ -27,11 +31,16 @@ import { TabsModule } from 'ngx-bootstrap';
     TranslateModule,
     StatisticModule,
     TabsModule.forRoot(),
+    LoadingModule,
+    AutoCompleteModule,
+    NgSelectModule,
+    ModalModule,
   ],
   declarations: [
     DashboardComponent,
     TaskListComponent,
     ScreenshotListComponent,
+    ChangeTaskPanelComponent,
   ],
   providers: [
     LoginService,
