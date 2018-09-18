@@ -1,16 +1,24 @@
 import {Component, OnInit} from '@angular/core';
+
 import {ApiService} from '../../../api/api.service';
 import { AllowedActionsService } from '../../roles/allowed-actions.service';
+
 import { LocalStorage } from '../../../api/storage.model';
+
+import * as moment from 'moment';
 
 @Component({
     selector: 'app-screenshots-list',
     templateUrl: './screenshots.list.component.html',
-    styleUrls: []
+    styleUrls: ['./screenshots.list.component.scss',],
 })
 export class ScreenshotsListComponent implements OnInit {
     userId: number[] = [];
     projectId: number[] = [];
+    minDate: string = '';
+    maxDate: string = '';
+
+    _maxDate = moment.utc().add(1, 'day');
 
     protected _isManager?: boolean = null;
     get isManager(): boolean {
@@ -42,5 +50,23 @@ export class ScreenshotsListComponent implements OnInit {
         if (filterByProject instanceof Array && filterByProject.length > 0) {
             this.projectId = filterByProject;
         }
+
+        const filterByMaxDate = LocalStorage.getStorage().get(`filterByMaxDateIN${ window.location.pathname }`);
+        if (filterByMaxDate) {
+            this.maxDate = filterByMaxDate;
+        }
+
+        const filterByMinDate = LocalStorage.getStorage().get(`filterByMinDateIN${ window.location.pathname }`);
+        if (filterByMinDate) {
+            this.minDate = filterByMinDate;
+        }
+    }
+
+    maxDateChanged(value) {
+        LocalStorage.getStorage().set(`filterByMaxDateIN${ window.location.pathname }`, this.maxDate || '');
+    }
+
+    minDateChanged(value) {
+        LocalStorage.getStorage().set(`filterByMinDateIN${ window.location.pathname }`, this.minDate || '');
     }
 }
