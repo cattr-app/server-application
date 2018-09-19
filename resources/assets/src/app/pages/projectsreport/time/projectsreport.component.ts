@@ -1,4 +1,5 @@
 import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
+import { ActivatedRoute } from '@angular/router';
 import {NgSelectComponent} from '@ng-select/ng-select';
 
 import {ViewSwitcherComponent} from './view-switcher/view-switcher.component';
@@ -6,6 +7,7 @@ import {ViewSwitcherComponent} from './view-switcher/view-switcher.component';
 import {ApiService} from '../../../api/api.service';
 import {UsersService} from '../../users/users.service';
 import {ProjectReportService} from './projectsreport.service';
+import { AllowedActionsService } from '../../roles/allowed-actions.service';
 
 import {User} from '../../../models/user.model';
 
@@ -16,7 +18,6 @@ import {Observable} from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
-import { AllowedActionsService } from '../../roles/allowed-actions.service';
 
 interface SelectItem {
   id: number,
@@ -74,6 +75,7 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
               protected userService: UsersService,
               protected projectReportService: ProjectReportService,
               protected allowedAction: AllowedActionsService,
+              protected route: ActivatedRoute,
   ) {}
 
   readonly defaultView = 'timelineDay';
@@ -95,6 +97,11 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
   }
 
   ngAfterViewInit() {
+    // Get preselected values from the query.
+    const projectId = this.route.snapshot.queryParamMap.get('project');
+    const startDate = this.route.snapshot.queryParamMap.get('start');
+    const endDate = this.route.snapshot.queryParamMap.get('end');
+
     const selectedUsers$ = (this.userSelect.changeEvent.asObservable() as Observable<SelectItem[]>)
       .map(users => users.filter(user => user.id !== -1)).share();
 
@@ -105,10 +112,21 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
     availableProjects$.subscribe(projects => {
       /// Add the 'select all' option.
       this.availableProjects = [{ id: -1, title: 'Select all' }, ...projects];
-      // Select all users initially.
       setTimeout(() => {
-        this.selectedProjectIds = projects.map(project => project.id);
-        this.projectSelect.changeEvent.emit(projects);
+        if (projectId) {
+          // Select a project specified by the query parameter..
+          this.selectedProjectIds = [+projectId];
+          this.projectSelect.changeEvent.emit([this.availableProjects.find(project => +project.id === +projectId)]);
+        } else {
+          // Select all projects.
+          this.selectedProjectIds = projects.map(project => project.id);
+          this.projectSelect.changeEvent.emit(projects);
+        }
+
+        if (startDate && endDate) {
+          this.viewSwitcher.changeRange(moment.utc(startDate), moment.utc(endDate));
+          this.viewSwitcher.dateRangeSelector.close();
+        }
       });
       this.projectsLoading = false;
     });
