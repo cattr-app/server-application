@@ -1,4 +1,4 @@
-import { Component, DoCheck, IterableDiffers, OnInit, ViewChild, OnDestroy, Input, IterableDiffer, TemplateRef } from '@angular/core';
+import { Component, DoCheck, IterableDiffers, OnInit, ViewChild, OnDestroy, Input, IterableDiffer, SimpleChanges, OnChanges } from '@angular/core';
 import { BsModalService, ModalDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../api/api.service';
@@ -7,14 +7,18 @@ import { AllowedActionsService } from '../pages/roles/allowed-actions.service';
 
 import { ItemsListComponent } from '../pages/items.list.component';
 
-import * as moment from 'moment';
 import { Screenshot } from '../models/screenshot.model';
+import { User } from '../models/user.model';
+
+import * as moment from 'moment';
+import 'moment-timezone';
+
 @Component({
     selector: 'screenshot-list',
     templateUrl: './screenshot-list.component.html',
     styleUrls: ['./screenshot-list.component.scss']
 })
-export class ScreenshotListComponent extends ItemsListComponent implements OnInit, DoCheck, OnDestroy {
+export class ScreenshotListComponent extends ItemsListComponent implements OnInit, DoCheck, OnChanges, OnDestroy {
     @ViewChild('loading') loading: any;
     @ViewChild('screenshotModal') screenshotModal: ModalDirective;
 
@@ -28,6 +32,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     @Input() user_ids?: number[] = null;
     @Input() project_ids?: number[] = null;
     @Input() task_ids?: number[] = null;
+    @Input() max_date: string = '';
+    @Input() min_date: string = '';
 
     differUsers: IterableDiffer<number[]>;
     differProjects: IterableDiffer<number[]>;
@@ -42,6 +48,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     isLoading = false;
 
     modalScreenshot?: Screenshot = null;
+
+    user: User;
 
     protected _itemsChunked = [];
     get itemsChunked() {
@@ -65,6 +73,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         differs: IterableDiffers,
     ) {
         super(api, itemService, modalService, allowedAction);
+        this.user = api.getUser();
         this.differUsers = differs.find([]).create(null);
         this.differProjects = differs.find([]).create(null);
         this.differTasks = differs.find([]).create(null);
@@ -82,11 +91,14 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         const changeTaskIds = this.differTasks.diff([this.task_ids]);
 
         if (changeUserIds || changeProjectIds || changeTaskIds) {
-            this.offset = 0;
-            this.setItems([]);
-            this.countFail = 0;
-            this.isAllLoaded = false;
-            this.loadNext();
+            this.reload();
+        }
+    }
+
+    ngOnChanges(changes: SimpleChanges) {
+        if (changes.min_date && !changes.min_date.firstChange
+            || changes.max_date && !changes.max_date.firstChange) {
+            this.reload();
         }
     }
 
@@ -148,6 +160,23 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
             params['timeInterval.task_id'] = ['=', this.task_ids];
         }
 
+        if (this.max_date && !this.min_date && this.max_date.length) {
+            const date = moment(this.max_date, 'DD-MM-YYYY').utc().add(1, 'day').format('YYYY-MM-DD HH:mm:ss');
+            params['timeInterval.end_at'] = ['<=', date];
+        }
+
+        if (this.min_date && !this.max_date && this.min_date.length) {
+            const date = moment(this.min_date, 'DD-MM-YYYY').utc().format('YYYY-MM-DD HH:mm:ss');
+            params['timeInterval.start_at'] = ['>=', date];
+        }
+
+        if (this.min_date && this.max_date && this.min_date.length && this.max_date.length) {
+            const start = moment(this.min_date, 'DD-MM-YYYY').utc().format('YYYY-MM-DD HH:mm:ss');
+            const end = moment(this.max_date, 'DD-MM-YYYY').utc().add(1, 'day').format('YYYY-MM-DD HH:mm:ss');
+            params['timeInterval.end_at'] = ['>=', start];
+            params['timeInterval.start_at'] = ['<=', end];
+        }
+
         this.screenshotLoading = true;
         try {
             this.isLoading = true;
@@ -168,6 +197,14 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
             this.screenshotLoading = false;
             this.isLoading = false;
         }
+    }
+
+    reload() {
+        this.offset = 0;
+        this.setItems([]);
+        this.countFail = 0;
+        this.isAllLoaded = false;
+        this.loadNext();
     }
 
     showModal(screenshot: Screenshot) {
@@ -191,5 +228,23 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         if (index !== -1 && index < items.length - 1) {
             this.modalScreenshot = items[index + 1];
         }
+    }
+
+    delete(screenshot: Screenshot) {
+        this.itemService.removeItem(screenshot.id, () => {
+            const items = this.itemsArray as Screenshot[];
+            const index = items.findIndex(scr => scr.id === screenshot.id);
+
+            if (index !== -1 && index < items.length - 1) {
+                this.modalScreenshot = items[index + 1];
+            } else if (index > 0) {
+                this.modalScreenshot = items[index - 1];
+            } else {
+                this.screenshotModal.hide();
+            }
+
+            this.setItems(items.filter(scr => scr.id !== screenshot.id));
+            this.onScrollDown(); // To load new items, if needed.
+        });
     }
 }

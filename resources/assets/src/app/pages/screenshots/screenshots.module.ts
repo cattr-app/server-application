@@ -15,6 +15,7 @@ import {NgxPaginationModule} from 'ngx-pagination';
 import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
 import {TranslateModule} from '@ngx-translate/core';
+import { DpDatePickerModule } from 'ng2-date-picker';
 
 @NgModule({
     imports: [
@@ -26,6 +27,7 @@ import {TranslateModule} from '@ngx-translate/core';
         GrowlModule,
         SharedModule,
         TranslateModule,
+        DpDatePickerModule,
     ],
     declarations: [
         ScreenshotsCreateComponent,

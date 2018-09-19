@@ -4,12 +4,25 @@
             <div class="panel panel-default">
                 <div class="panel-heading" translate>screenshot.list</div>
                 <div class="panel-body">
-                    <app-users-filters *ngIf="isManager" [(userId)]="userId"></app-users-filters>
-                    <br/>
-                    <app-projects-filters *ngIf="isManager" [(projectId)]="projectId"></app-projects-filters>
-                    <br/>
+                    <app-users-filters class="filter" *ngIf="isManager" [(userId)]="userId"></app-users-filters>
+                    <app-projects-filters class="filter" *ngIf="isManager" [(projectId)]="projectId"></app-projects-filters>
 
-                    <screenshot-list [showUser]="isManager" [user_ids]="userId" [project_ids]="projectId">
+                    <div class="filter">
+                        <label>Filter by max date:</label>
+                        <input class="form-control" [(ngModel)]="maxDate"
+                            [dpDayPicker]="{ max: _maxDate }"
+                            (onChange)="maxDateChanged($event)" />
+                    </div>
+
+                    <div class="filter">
+                        <label>Filter by min date:</label>
+                        <input class="form-control" [(ngModel)]="minDate"
+                            [dpDayPicker]="{ max: _maxDate }"
+                            (onChange)="minDateChanged($event)" />
+                    </div>
+
+                    <screenshot-list [showUser]="isManager" [user_ids]="userId" [project_ids]="projectId"
+                        [max_date]="maxDate" [min_date]="minDate">
                     </screenshot-list>
                 </div>
             </div>

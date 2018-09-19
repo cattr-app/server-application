@@ -14,6 +14,7 @@
         "appzcoder/crud-generator": "^3.0",
         "barryvdh/laravel-ide-helper": "^2.4",
         "fzaninotto/Faker": "^1.7",
+        "intervention/image": "^2.4",
         "kbsali/redmine-api": "^1.5",
         "laravel/framework": "^5.6",
         "laravel/tinker": "^1.0",

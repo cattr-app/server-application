@@ -12,6 +12,8 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Filter;
 use Validator;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Storage;
 
 /**
  * Class TimeIntervalController
@@ -101,10 +103,17 @@ class TimeIntervalController extends ItemController
         //create screenshot
         if (isset($request->screenshot)) {
             $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
+            $screenshot = Image::make($path);
+            $thumbnail = $screenshot->resize(280, null, function ($constraint) {
+                $constraint->aspectRatio();
+            });
+            $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
+            Storage::put($thumbnailPath, (string) $thumbnail->encode());
 
             $screenshotData = [
                 'time_interval_id' => $timeInterval->id,
-                'path' => $path
+                'path' => $path,
+                'thumbnail_path' => $thumbnailPath,
             ];
 
             $screenshot = Filter::process('item.create.screenshot', Screenshot::create($screenshotData));
