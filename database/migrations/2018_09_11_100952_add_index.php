@@ -45,7 +45,10 @@ class AddIndex extends Migration
                 IF (
                     SELECT 1
                     FROM `time_durations_cache`
-                    WHERE `time_durations_cache`.`date` = `current_date`
+                    WHERE
+                        `time_durations_cache`.`date` = `current_date`
+                        AND
+                        `time_durations_cache`.`user_id` = NEW.`user_id`
                     ) = 1
                 THEN
                     UPDATE `time_durations_cache`
@@ -73,13 +76,33 @@ class AddIndex extends Migration
                     `old_date` = DATE(OLD.`start_at`);
 
                 UPDATE `time_durations_cache`
-                SET `duration` = `duration` - `old_interval`
-                WHERE `date` = `old_date`;
+                SET
+                    `duration` = `duration` - `old_interval`
+                WHERE
+                    `date` = `old_date`
+                    AND
+                    `user_id` = OLD.`user_id`;
 
 
-                UPDATE `time_durations_cache`
-                SET `duration` = `duration` + `new_date`
-                WHERE `date` = `new_date`;
+                IF (
+                    SELECT 1
+                    FROM `time_durations_cache`
+                    WHERE
+                        `time_durations_cache`.`date` = `new_date`
+                        AND
+                        `time_durations_cache`.`user_id` = NEW.`user_id`
+                    ) = 1
+                THEN
+                    UPDATE `time_durations_cache`
+                    SET `duration` = `duration` + `new_interval`
+                    WHERE
+                        `date` = `new_date`
+                        AND
+                        `time_durations_cache`.`user_id` = NEW.`user_id`;
+                ELSE
+                    INSERT INTO `time_durations_cache` (`date`, `duration`, `user_id`)
+                    VALUES (`new_date`, `new_interval`, NEW.`user_id`);
+                END IF;
            END'
        );
 

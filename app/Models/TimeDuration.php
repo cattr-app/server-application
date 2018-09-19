@@ -24,7 +24,7 @@ class TimeDuration extends Model
      * table name from database
      * @var string
      */
-    protected $table = 'time_durations';
+    protected $table = 'time_durations_cache';
 
     /**
      * @return BelongsTo
