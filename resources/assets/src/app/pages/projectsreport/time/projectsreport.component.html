@@ -58,7 +58,12 @@
 
                   <ng-container *ngIf="user.expanded">
                     <tr class="reports__task" *ngFor="let task of user.tasks">
-                      <th class="reports__task-name" scope="row">{{ task.task_name }}</th>
+                      <th class="reports__task-name" scope="row">
+                        <a [attr.href]="'/tasks/show/' + task.id">
+                          {{ task.task_name }}
+                        </a>
+                      </th>
+
                       <td class="reports__task-time">{{ formatDurationString(task.duration) }}</td>
                       <td class="reports__task-progress">
                         <div class="progress">
