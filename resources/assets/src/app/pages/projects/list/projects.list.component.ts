@@ -14,9 +14,14 @@ import {LocalStorage} from '../../../api/storage.model';
     styleUrls: ['./projects.list.component.scss', '../../items.component.scss']
 })
 export class ProjectsListComponent extends ItemsListComponent implements OnInit, DoCheck {
+    @ViewChild('loading') loading: any;
 
     itemsArray: Project[] = [];
-    p = 1;
+    scrollHandler: any = null;
+    isLoading = false;
+    isAllLoaded = false;
+    offset = 0;
+    chunksize = 25;
 
     userId = null;
     userDiffer: any;
@@ -50,6 +55,61 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
             this.availableProjects = items;
             this.suggestedProjects = items;
         });
+
+        this.scrollHandler = this.onScrollDown.bind(this);
+        window.addEventListener('scroll', this.scrollHandler, false);
+        this.loadNext();
+    }
+
+    ngOnDestroy() {
+        window.removeEventListener('scroll', this.scrollHandler, false);
+    }
+
+    loadNext() {
+        if (this.isLoading || this.isAllLoaded) {
+            return;
+        }
+
+        this.isLoading = true;
+
+        const params = {
+            ...this.filter,
+            'limit': this.chunksize,
+            'offset': this.offset,
+            'order_by': 'id',
+        };
+
+        if (this.requestProjects.closed !== undefined && !this.requestProjects.closed) {
+            this.requestProjects.unsubscribe();
+        }
+
+        this.requestProjects = this.itemService.getItems((result: Project[]) => {
+            this.setItems(this.itemsArray.concat(result));
+            this.offset += this.chunksize;
+            this.isLoading = false;
+            this.isAllLoaded = !result.length;
+        }, params);
+    }
+
+    reload() {
+        this.offset = 0;
+        this.isLoading = false;
+        this.isAllLoaded = false;
+        this.setItems([]);
+        this.loadNext();
+    }
+
+    onScrollDown() {
+        const block_Y_position = this.loading.nativeElement.offsetTop;
+        const scroll_Y_top_position = window.scrollY;
+        const windowHeight = window.innerHeight;
+        const bottom_scroll_Y_position = scroll_Y_top_position + windowHeight;
+
+        if (bottom_scroll_Y_position < block_Y_position) { // loading new users doesn't needs
+            return;
+        }
+
+        this.loadNext();
     }
 
     ngDoCheck() {
@@ -62,7 +122,7 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
                 delete this.filter.user_id;
             }
 
-            this.updateItems();
+            this.reload();
         }
     }
 
@@ -80,7 +140,7 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
             delete this.filter.name;
         }
 
-        this.updateItems();
+        this.reload();
     }
 
     updateSelectedProjects() {
@@ -91,14 +151,6 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
             delete this.filter.id;
         }
 
-        this.updateItems();
-    }
-
-    updateItems() {
-        if (this.requestProjects.closed !== undefined && !this.requestProjects.closed) {
-            this.requestProjects.unsubscribe();
-        }
-
-        this.requestProjects = this.itemService.getItems(this.setItems.bind(this), this.filter);
+        this.reload();
     }
 }

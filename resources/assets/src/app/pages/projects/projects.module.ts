@@ -20,7 +20,7 @@ import {CommonModule} from '@angular/common';
 import {SharedModule} from '../../shared.module';
 import {TranslateModule} from '@ngx-translate/core';
 import {AutoCompleteModule} from 'primeng/autocomplete';
-
+import { LoadingModule } from 'ngx-loading';
 
 @NgModule({
     imports: [
@@ -33,6 +33,7 @@ import {AutoCompleteModule} from 'primeng/autocomplete';
         SharedModule,
         TranslateModule,
         AutoCompleteModule,
+        LoadingModule,
     ],
     declarations: [
         ProjectsCreateComponent,
