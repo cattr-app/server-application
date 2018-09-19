@@ -13,6 +13,7 @@ import {ViewSwitcherComponent} from './time/view-switcher/view-switcher.componen
 
 import {UsersService} from '../users/users.service';
 import {TimeIntervalsService} from '../timeintervals/timeintervals.service';
+import {TimeDurationService} from './time/statistic.time.service';
 
 
 import {HttpClientModule} from '@angular/common/http';
@@ -67,6 +68,7 @@ import { ScreenshotsModule } from '../screenshots/screenshots.module';
         LoginService,
         UsersService,
         TimeIntervalsService,
+        TimeDurationService,
     ]
 })
 
