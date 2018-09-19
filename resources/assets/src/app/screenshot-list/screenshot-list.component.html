@@ -62,7 +62,7 @@
                     </div>
                 </div>
 
-                <div class="row">
+                <div class="row" *ngIf="modalScreenshot.time_interval?.user_id === user.id || can('/screenshots/remove_related')">
                     <div class="col-md-12 modal-screenshot-buttons">
                         <button class="btn btn-danger btn-sm" (click)="delete(modalScreenshot)">
                             <i aria-hidden="true" class="fa fa-pencil-square-o"></i>

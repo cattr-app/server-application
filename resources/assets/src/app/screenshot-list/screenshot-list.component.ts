@@ -8,6 +8,7 @@ import { AllowedActionsService } from '../pages/roles/allowed-actions.service';
 import { ItemsListComponent } from '../pages/items.list.component';
 
 import { Screenshot } from '../models/screenshot.model';
+import { User } from '../models/user.model';
 
 import * as moment from 'moment';
 import 'moment-timezone';
@@ -48,6 +49,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
 
     modalScreenshot?: Screenshot = null;
 
+    user: User;
+
     protected _itemsChunked = [];
     get itemsChunked() {
         if (this._itemsChunked.length > 0) {
@@ -70,6 +73,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         differs: IterableDiffers,
     ) {
         super(api, itemService, modalService, allowedAction);
+        this.user = api.getUser();
         this.differUsers = differs.find([]).create(null);
         this.differProjects = differs.find([]).create(null);
         this.differTasks = differs.find([]).create(null);
