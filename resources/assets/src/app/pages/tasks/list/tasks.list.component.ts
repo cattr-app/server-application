@@ -1,4 +1,4 @@
-import {Component, DoCheck, IterableDiffers, OnInit, OnChanges, SimpleChanges} from '@angular/core';
+import {Component, DoCheck, IterableDiffers, OnInit, ViewChild} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {TasksService} from '../tasks.service';
 import {Task} from '../../../models/task.model';
@@ -7,6 +7,7 @@ import {ItemsListComponent} from '../../items.list.component';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
 import {ProjectsService} from '../../projects/projects.service';
 import {LocalStorage} from '../../../api/storage.model';
+import { Subscription } from 'rxjs';
 
 enum TasksOrder {
     IdAsc,
@@ -23,15 +24,21 @@ enum TasksOrder {
     styleUrls: ['./tasks.list.component.scss', '../../items.component.scss']
 })
 export class TasksListComponent extends ItemsListComponent implements OnInit, DoCheck {
+    @ViewChild('loading') loading: any;
 
     itemsArray: Task[] = [];
-    p = 1;
     userId?: number[] = [];
     projectId?: number[] = [];
     differUser: any;
     differProject: any;
     directProject: any = [];
     order: TasksOrder = TasksOrder.IdAsc;
+    scrollHandler: any = null;
+    isLoading = false;
+    isAllLoaded = false;
+    offset = 0;
+    chunksize = 25;
+    requestTasks: Subscription = new Subscription();
 
     constructor(api: ApiService,
                 taskService: TasksService,
@@ -45,14 +52,6 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
         this.differProject = differs.find([]).create(null);
     }
 
-    ngOnInit() {
-        const userId = LocalStorage.getStorage().get(`filterByUserIN${window.location.pathname}`);
-        this.userId = userId instanceof Array ? userId : [];
-
-        const projectId = LocalStorage.getStorage().get(`filterByProjectIN${window.location.pathname}`);
-        this.projectId = projectId instanceof Array ? projectId : [];
-    }
-
     setProjects(result) {
         const items = [];
         result.forEach(function (item) {
@@ -62,37 +61,29 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
         this.directProject = items;
     }
 
-    load() {
-        const filter = {
-            'with': 'project',
-        };
+    ngOnInit() {
+        const userId = LocalStorage.getStorage().get(`filterByUserIN${window.location.pathname}`);
+        this.userId = userId instanceof Array ? userId : [];
 
-        if (this.userId && this.userId.length) {
-            filter['user_id'] = ['=', this.userId];
-        }
+        const projectId = LocalStorage.getStorage().get(`filterByProjectIN${window.location.pathname}`);
+        this.projectId = projectId instanceof Array ? projectId : [];
 
-        if (this.projectId && this.projectId.length) {
-            filter['project_id'] = ['=', this.projectId];
-        }
-
-        this.itemService.getItems(this.setItems.bind(this), filter ? filter : { 'active': 1 });
         this.projectService.getItems(this.setProjects.bind(this), this.can('/projects/full_access')
             ? []
             : { 'direct_relation': 1 });
+
+        this.scrollHandler = this.onScrollDown.bind(this);
+        window.addEventListener('scroll', this.scrollHandler, false);
+        this.loadNext();
     }
 
-    setItems(result: Task[]) {
-        this.itemsArray = result.sort((a, b) => {
-            switch(this.order) {
-                default:
-                case TasksOrder.IdAsc: return a.id - b.id;
-                case TasksOrder.IdDesc: return b.id - a.id;
-                case TasksOrder.ProjectAsc: return a.project.name.localeCompare(b.project.name);
-                case TasksOrder.ProjectDesc: return b.project.name.localeCompare(a.project.name);
-                case TasksOrder.NameAsc: return a.task_name.localeCompare(b.task_name);
-                case TasksOrder.NameDesc: return b.task_name.localeCompare(a.task_name);
-            }
-        });
+    ngDoCheck() {
+        const changeUserId = this.differUser.diff([this.userId]);
+        const changeProjectId = this.differProject.diff([this.projectId]);
+
+        if (changeUserId || changeProjectId) {
+            this.reload();
+        }
     }
 
     setOrder(order: string) {
@@ -102,15 +93,75 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             case 'project': this.order = this.order === TasksOrder.ProjectAsc ? TasksOrder.ProjectDesc : TasksOrder.ProjectAsc; break;
             case 'name': this.order = this.order === TasksOrder.NameAsc ? TasksOrder.NameDesc : TasksOrder.NameAsc; break;
         }
-        this.load();
+
+        this.reload();
     }
 
-    ngDoCheck() {
-        const changeUserId = this.differUser.diff([this.userId]);
-        const changeProjectId = this.differProject.diff([this.projectId]);
+    ngOnDestroy() {
+        window.removeEventListener('scroll', this.scrollHandler, false);
+    }
 
-        if (changeUserId || changeProjectId) {
-            this.load();
+    loadNext() {
+        if (this.isLoading || this.isAllLoaded) {
+            return;
         }
+
+        this.isLoading = true;
+
+        const filter = {
+            'with': 'project',
+            'limit': this.chunksize,
+            'offset': this.offset,
+        };
+
+        switch (this.order) {
+            default:
+            case TasksOrder.IdAsc: filter['order_by'] = 'id'; break;
+            case TasksOrder.IdDesc: filter['order_by'] = ['id', 'desc']; break;
+            //case TasksOrder.ProjectAsc: filter['order_by'] = 'projects.name'; break;
+            //case TasksOrder.ProjectDesc: filter['order_by'] = ['projects.name', 'desc']; break;
+            case TasksOrder.NameAsc: filter['order_by'] = 'task_name'; break;
+            case TasksOrder.NameDesc: filter['order_by'] = ['task_name', 'desc']; break;
+        }
+
+        if (this.userId && this.userId.length) {
+            filter['user_id'] = ['=', this.userId];
+        }
+
+        if (this.projectId && this.projectId.length) {
+            filter['project_id'] = ['=', this.projectId];
+        }
+
+        if (this.requestTasks.closed !== undefined && !this.requestTasks.closed) {
+            this.requestTasks.unsubscribe();
+        }
+
+        this.requestTasks = this.itemService.getItems(result => {
+            this.setItems(this.itemsArray.concat(result));
+            this.offset += this.chunksize;
+            this.isLoading = false;
+            this.isAllLoaded = !result.length;
+        }, filter ? filter : { 'active': 1 });
+    }
+
+    reload() {
+        this.offset = 0;
+        this.isLoading = false;
+        this.isAllLoaded = false;
+        this.setItems([]);
+        this.loadNext();
+    }
+
+    onScrollDown() {
+        const block_Y_position = this.loading.nativeElement.offsetTop;
+        const scroll_Y_top_position = window.scrollY;
+        const windowHeight = window.innerHeight;
+        const bottom_scroll_Y_position = scroll_Y_top_position + windowHeight;
+
+        if (bottom_scroll_Y_position < block_Y_position) { // loading new projects doesn't needs
+            return;
+        }
+
+        this.loadNext();
     }
 }

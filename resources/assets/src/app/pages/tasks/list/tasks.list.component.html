@@ -18,13 +18,13 @@
                             <thead>
                             <tr>
                                 <th><span class="clickable" (click)="setOrder('id')" translate>field.id</span></th>
-                                <th><span class="clickable" (click)="setOrder('project')" translate>field.project</span></th>
+                                <th><span translate>field.project</span></th>
                                 <th><span class="clickable" (click)="setOrder('name')" translate>field.name</span></th>
-                                <th><span class="clickable" translate>control.actions</span></th>
+                                <th translate>control.actions</th>
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let task of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
+                            <tr *ngFor="let task of itemsArray">
                                 <td>{{task.id}}</td>
                                 <td>{{task.project && task.project.name}}</td>
                                 <td class="task-name">{{task.task_name}}</td>
@@ -51,7 +51,10 @@
                             </tr>
                             </tbody>
                         </table>
-                        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+
+                        <div class="loading" #loading *ngIf="!isAllLoaded">
+                            <ngx-loading [show]="isLoading" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
+                        </div>
                     </div>
                 </div>
             </div>

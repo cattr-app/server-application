@@ -1,4 +1,4 @@
-import {Component, DoCheck, IterableDiffers, OnInit, ViewChild, ElementRef, AfterViewInit} from '@angular/core';
+import {Component, DoCheck, IterableDiffers, OnInit, ViewChild, ElementRef, AfterViewInit, OnDestroy} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Project} from '../../../models/project.model';
 import {ProjectsService} from '../projects.service';
@@ -13,7 +13,7 @@ import {LocalStorage} from '../../../api/storage.model';
     templateUrl: './projects.list.component.html',
     styleUrls: ['./projects.list.component.scss', '../../items.component.scss']
 })
-export class ProjectsListComponent extends ItemsListComponent implements OnInit, DoCheck {
+export class ProjectsListComponent extends ItemsListComponent implements OnInit, DoCheck, OnDestroy {
     @ViewChild('loading') loading: any;
 
     itemsArray: Project[] = [];
@@ -105,7 +105,7 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
         const windowHeight = window.innerHeight;
         const bottom_scroll_Y_position = scroll_Y_top_position + windowHeight;
 
-        if (bottom_scroll_Y_position < block_Y_position) { // loading new users doesn't needs
+        if (bottom_scroll_Y_position < block_Y_position) { // loading new projects doesn't needs
             return;
         }
 

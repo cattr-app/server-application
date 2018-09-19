@@ -18,6 +18,7 @@ import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
 import {TranslateModule} from '@ngx-translate/core';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
+import { LoadingModule } from 'ngx-loading';
 
 @NgModule({
     imports: [
@@ -30,6 +31,7 @@ import { AccordionModule } from 'ngx-bootstrap/accordion';
         SharedModule,
         TranslateModule,
         AccordionModule.forRoot(),
+        LoadingModule,
     ],
     declarations: [
         TasksCreateComponent,
