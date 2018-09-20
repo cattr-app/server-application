@@ -125,5 +125,6 @@ Route::group([
       $router->post('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
       $router->post('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
       $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
+      $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
 
 });

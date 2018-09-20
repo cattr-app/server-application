@@ -154,6 +154,9 @@ class Rule extends Model
             'time-duration' => [
                 'list' => __('Time duration list'),
             ],
+            'time-use-report' => [
+                'list' => __('Time use report list'),
+            ],
             'dashboard' => [
                 'manager_access' => __('Dashboard manager access'),
             ],

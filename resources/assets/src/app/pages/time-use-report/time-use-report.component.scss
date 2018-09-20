@@ -1,0 +1,49 @@
+@import '../../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+.report {
+  @extend .row;
+
+  &__user-info {
+    @extend .col-md-2;
+  }
+
+  &__user-name {
+    font-weight: bold;
+  }
+
+  &__user-table-wrapper {
+    @extend .col-md-10;
+  }
+
+  &__user-time {
+    font-size: 2em;
+    font-weight: bold;
+  }
+
+  &__user-table {
+    @extend .table;
+  }
+
+  &__task {
+    font-size: .8em;
+  }
+
+  &__task-name,
+  &__task-project-name {
+    font-weight: bold;
+  }
+
+  &__task-time {
+    width: 100px;
+    text-align: right;
+  }
+
+  &__task-progress {
+    width: 200px;
+
+    .progress {
+        margin: 0;
+    }
+  }
+}
