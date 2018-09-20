@@ -1,8 +1,13 @@
 @import '../../../variables';
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
+.filters {
+  margin-bottom: 1em;
+}
+
 .report {
   @extend .row;
+  position: relative;
 
   &__user-info {
     @extend .col-md-2;
@@ -46,4 +51,8 @@
         margin: 0;
     }
   }
+}
+
+.clickable {
+  cursor: pointer;
 }

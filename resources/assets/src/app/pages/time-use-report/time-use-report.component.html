@@ -7,8 +7,16 @@
         </div>
 
         <div class="panel-body">
-          <div class="report__user" *ngFor="let user of report.users">
-            <div class="report__user-info">
+          <div class="filters">
+            <app-date-range-selector>
+            </app-date-range-selector>
+          </div>
+
+          <div class="report">
+            <ngx-loading [show]="isLoading"></ngx-loading>
+
+            <div class="report__user" *ngFor="let user of report.users">
+              <div class="report__user-info">
                 <div class="report__user-picture-wrapper">
                   <img class="report__user-picture" *ngIf="user.avatar"
                     [attr.src]="user.avatar" />
@@ -17,54 +25,64 @@
                 <div class="report__user-name">
                   {{ user.name }}
                 </div>
-            </div>
+              </div>
 
-            <div class="report__user-table-wrapper">
-              <span class="report__user-time">
-                {{ formatUserTime(user.total_time) }}
-              </span>
+              <div class="report__user-table-wrapper">
+                <span class="report__user-time">
+                  {{ formatUserTime(user.total_time) }}
+                </span>
 
-              <span class="report__user-time-label">
-                Total Time Worked
-              </span>
+                <span class="report__user-time-label">
+                  Total Time Worked
+                </span>
 
-              <table class="report__user-table">
-                <thead>
-                  <tr>
-                    <th scope="col">Task</th>
-                    <th scope="col">Project</th>
-                    <th scope="col">Total Time</th>
-                    <th scope="col"></th>
-                  </tr>
-                </thead>
+                <table class="report__user-table">
+                  <thead>
+                    <tr class="report__tasks-header">
+                      <th scope="col">
+                        <span class="clickable" (click)="setOrder('task')">Task</span>
+                      </th>
 
-                <tbody>
-                  <tr class="report__task" *ngFor="let task of user.tasks">
-                    <td class="report__task-name">
-                      <a [attr.href]="'/tasks/show/' + task.task_id">
-                        {{ task.name }}
-                      </a>
-                    </td>
+                      <th scope="col">
+                        <span class="clickable" (click)="setOrder('project')">Project</span>
+                      </th>
 
-                    <td class="report__task-project-name">
-                      <a [attr.href]="'/projects/show/' + task.project_id">
-                        {{ task.project_name }}
-                      </a>
-                    </td>
+                      <th scope="col">
+                        <span class="clickable" (click)="setOrder('time')">Total Time</span>
+                      </th>
 
-                    <td class="report__task-time">
-                      {{ formatTaskTime(task.total_time) }}
-                    </td>
+                      <th scope="col"></th>
+                    </tr>
+                  </thead>
 
-                    <td class="report__task-progress">
-                      <div class="progress">
-                        <div class="progress-bar progress-bar-success"
-                          [style.width.%]="task.total_time / user.total_time * 100"></div>
-                      </div>
-                    </td>
-                  </tr>
-                </tbody>
-              </table>
+                  <tbody>
+                    <tr class="report__task" *ngFor="let task of user.tasks">
+                      <td class="report__task-name">
+                        <a [attr.href]="'/tasks/show/' + task.task_id">
+                          {{ task.name }}
+                        </a>
+                      </td>
+
+                      <td class="report__task-project-name">
+                        <a [attr.href]="'/projects/show/' + task.project_id">
+                          {{ task.project_name }}
+                        </a>
+                      </td>
+
+                      <td class="report__task-time">
+                        {{ formatTaskTime(task.total_time) }}
+                      </td>
+
+                      <td class="report__task-progress">
+                        <div class="progress">
+                          <div class="progress-bar progress-bar-success"
+                            [style.width.%]="task.total_time / user.total_time * 100"></div>
+                        </div>
+                      </td>
+                    </tr>
+                  </tbody>
+                </table>
+              </div>
             </div>
           </div>
         </div>

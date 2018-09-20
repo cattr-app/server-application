@@ -1,0 +1,43 @@
+<ng-content></ng-content>
+
+<div class="input-group">
+  <span class="input-group-btn">
+    <button type="button" class="btn btn-default" aria-label="prev">
+      <span class="glyphicon glyphicon-chevron-left"></span>
+    </button>
+  </span>
+
+  <input type="text" class="form-control" />
+
+  <span class="input-group-btn">
+    <button type="button" class="btn btn-default" aria-label="next">
+      <span class="glyphicon glyphicon-chevron-right"></span>
+    </button>
+  </span>
+</div>
+
+<div class="buttons" role="group" (window:mouseup)="isActive = false">
+  <button type="button" class="button"
+    [ngClass]="{'active': activeButton === 'day' && !isActive}"
+    (mousedown)="isActive = true" (click)="setMode('day')">
+    Day
+  </button>
+
+  <button type="button" class="button"
+    [ngClass]="{'active': activeButton === 'week' && !isActive}"
+    (mousedown)="isActive = true" (click)="setMode('week')">
+    Week
+  </button>
+
+  <button type="button" class="button"
+    [ngClass]="{'active': activeButton === 'month' && !isActive}"
+    (mousedown)="isActive = true" (click)="setMode('month')">
+    Month
+  </button>
+
+  <button type="button" class="button"
+    [ngClass]="{'active': activeButton === 'range' && !isActive}"
+    (mousedown)="isActive = true" (click)="setMode('range')">
+    Date Range
+  </button>
+</div>

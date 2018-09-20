@@ -1,0 +1,46 @@
+@import '../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+:host {
+  position: relative;
+}
+
+.input-group {
+  position: relative;
+  display: block;
+  margin-bottom: 1em;
+  width: 100%;
+
+  @media (min-width: $screen-sm-min) {
+      width: unset;
+  }
+}
+
+.form-control {
+  @media (min-width: $screen-sm-min) {
+    max-width: 150px;
+
+    .form-inline.week & {
+      max-width: unset;
+      min-width: 240px;
+    }
+  }
+}
+
+.buttons {
+  display: flex;
+  flex-flow: row wrap;
+  justify-content: space-between;
+  width: 100%;
+
+  @media (min-width: $screen-sm-min) {
+    display: block;
+    width: unset;
+  }
+}
+
+.button {
+  @extend .btn, .btn-default;
+  flex: 1;
+  margin-bottom: 1em;
+}

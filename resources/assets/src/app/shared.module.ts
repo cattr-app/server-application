@@ -11,6 +11,7 @@ import { ScreenshotListComponent } from './screenshot-list/screenshot-list.compo
 import { ScreenshotsService } from './pages/screenshots/screenshots.service';
 import { ModalModule } from 'ngx-bootstrap';
 import { LoadingModule } from 'ngx-loading';
+import { DateRangeSelectorComponent } from './date-range-selector/date-range-selector.component';
 
 @NgModule({
     imports: [
@@ -27,6 +28,7 @@ import { LoadingModule } from 'ngx-loading';
         UsersFiltersComponent,
         ProjectsFiltersComponent,
         ScreenshotListComponent,
+        DateRangeSelectorComponent,
     ],
     exports: [
         CommonModule,
@@ -38,6 +40,7 @@ import { LoadingModule } from 'ngx-loading';
         ProjectsFiltersComponent,
         ScreenshotListComponent,
         DualListComponent,
+        DateRangeSelectorComponent,
     ],
     providers: [
         ProjectsService,
