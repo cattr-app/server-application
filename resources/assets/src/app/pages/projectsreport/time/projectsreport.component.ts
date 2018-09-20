@@ -125,6 +125,7 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
 
         if (startDate && endDate) {
           this.viewSwitcher.changeRange(moment.utc(startDate), moment.utc(endDate));
+          this.viewSwitcher.activeButton = 'timelineRange';
           this.viewSwitcher.dateRangeSelector.close();
         }
       });

@@ -118,8 +118,8 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             default:
             case TasksOrder.IdAsc: filter['order_by'] = 'id'; break;
             case TasksOrder.IdDesc: filter['order_by'] = ['id', 'desc']; break;
-            //case TasksOrder.ProjectAsc: filter['order_by'] = 'projects.name'; break;
-            //case TasksOrder.ProjectDesc: filter['order_by'] = ['projects.name', 'desc']; break;
+            case TasksOrder.ProjectAsc: filter['order_by'] = 'projects.name'; break;
+            case TasksOrder.ProjectDesc: filter['order_by'] = ['projects.name', 'desc']; break;
             case TasksOrder.NameAsc: filter['order_by'] = 'task_name'; break;
             case TasksOrder.NameDesc: filter['order_by'] = ['task_name', 'desc']; break;
         }
@@ -140,7 +140,7 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             this.setItems(this.itemsArray.concat(result));
             this.offset += this.chunksize;
             this.isLoading = false;
-            this.isAllLoaded = !result.length;
+            this.isAllLoaded = result.length < this.chunksize;
         }, filter ? filter : { 'active': 1 });
     }
 
@@ -158,7 +158,7 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
         const windowHeight = window.innerHeight;
         const bottom_scroll_Y_position = scroll_Y_top_position + windowHeight;
 
-        if (bottom_scroll_Y_position < block_Y_position) { // loading new projects doesn't needs
+        if (bottom_scroll_Y_position < block_Y_position) { // loading new tasks doesn't needs
             return;
         }
 

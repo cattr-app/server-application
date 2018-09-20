@@ -20,17 +20,18 @@
 
                     <div class="show-info">
                         <div class="row">
+                            <div class="col-sm-12">
+                                <h3 class="task-name">{{ item.task_name }}</h3>
+                            </div>
+                        </div>
+
+                        <div class="row">
                             <div class="col-sm-6">
                                 <table class="table table-borderless table--task-properties">
                                     <tbody>
                                         <tr>
                                             <th translate>field.id</th>
                                             <td>{{ item.id }}</td>
-                                        </tr>
-
-                                        <tr>
-                                            <th translate>field.name</th>
-                                            <td>{{ item.task_name }}</td>
                                         </tr>
 
                                         <tr *ngIf="item.project">

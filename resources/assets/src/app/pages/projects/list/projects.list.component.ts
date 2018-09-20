@@ -87,7 +87,7 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
             this.setItems(this.itemsArray.concat(result));
             this.offset += this.chunksize;
             this.isLoading = false;
-            this.isAllLoaded = !result.length;
+            this.isAllLoaded = result.length < this.chunksize;
         }, params);
     }
 
