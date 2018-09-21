@@ -19,7 +19,7 @@
 
     <div class="popup" [attr.data-hidden]="!isRangePopupOpened">
       <div class="popup__buttons">
-        <button class="popup__button btn btn-default" (click)="applyChanges()">Apply</button>
+        <button class="popup__button btn btn-default" (click)="applyChanges()" translate>control.apply</button>
       </div>
 
       <dp-day-calendar [config]="{ format: 'YYYY-MM-DD', firstDayOfWeek: 'mo', max: max }"
@@ -45,25 +45,25 @@
 <div class="buttons" role="group" (window:mouseup)="isActive = false">
   <button type="button" class="button"
     [ngClass]="{'active': activeButton === 'day' && !isActive}"
-    (mousedown)="isActive = true" (click)="setMode('day')">
-    Day
+    (mousedown)="isActive = true" (click)="setMode('day')" translate>
+    control.day
   </button>
 
   <button type="button" class="button"
     [ngClass]="{'active': activeButton === 'week' && !isActive}"
-    (mousedown)="isActive = true" (click)="setMode('week')">
-    Week
+    (mousedown)="isActive = true" (click)="setMode('week')" translate>
+    control.week
   </button>
 
   <button type="button" class="button"
     [ngClass]="{'active': activeButton === 'month' && !isActive}"
-    (mousedown)="isActive = true" (click)="setMode('month')">
-    Month
+    (mousedown)="isActive = true" (click)="setMode('month')" translate>
+    control.month
   </button>
 
   <button type="button" class="button"
     [ngClass]="{'active': activeButton === 'range' && !isActive}"
-    (mousedown)="isActive = true" (click)="setMode('range')">
-    Date Range
+    (mousedown)="isActive = true" (click)="setMode('range')" translate>
+    control.date-range
   </button>
 </div>

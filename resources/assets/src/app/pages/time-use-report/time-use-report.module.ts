@@ -2,6 +2,7 @@ import { NgModule } from '@angular/core';
 import { CommonModule } from '@angular/common';
 import { FormsModule } from '@angular/forms';
 import { LoadingModule } from 'ngx-loading';
+import { TranslateModule } from '@ngx-translate/core';
 
 import { AuthRoute } from './time-use-report-routing.module';
 import { SharedModule } from '../../shared.module'
@@ -17,6 +18,7 @@ import { TimeUseReportService } from './component/time-use-report.service';
     FormsModule,
     LoadingModule,
     SharedModule,
+    TranslateModule,
   ],
   exports: [
     TimeUseReportComponent,

@@ -6,4 +6,6 @@
     (change)="change($event)">
 </ng-select>
 
-<span class="count">{{ usersSelected.length }} users selected</span>
+<span class="count" translate [translateParams]="{count: usersSelected.length}">
+    control.users-selected
+</span>

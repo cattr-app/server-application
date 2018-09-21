@@ -4,7 +4,7 @@
       <div class="panel panel-default">
         <div class="panel-heading clearfix">
           Projects Report
-          <button class="btn btn-default pull-right" (click)="exportCSV()">Export CSV</button>
+          <button class="btn btn-default pull-right" (click)="exportCSV()" translate>control.export-csv</button>
         </div>
 
         <div class="panel-body">
@@ -20,7 +20,9 @@
                               [multiple]="true" [(ngModel)]="selectedProjectIds" (add)="projectSelected($event)">
                   </ng-select>
 
-                  <span class="reports__projects-count">{{ selectedProjectIds.length}} projects selected</span>
+                  <span class="reports__projects-count" translate [translateParams]="{count: selectedProjectIds.length}">
+                    control.projects-selected
+                  </span>
                 </div>
               </app-date-range-selector>
             </div>

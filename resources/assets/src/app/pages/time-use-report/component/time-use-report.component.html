@@ -2,8 +2,8 @@
   <div class="row">
     <div class="col-md-12">
       <div class="panel panel-default">
-        <div class="panel-heading clearfix">
-          Time Use Report
+        <div class="panel-heading clearfix" translate>
+          time-use-report.title
         </div>
 
         <div class="panel-body">
@@ -35,23 +35,29 @@
                   {{ formatUserTime(user.total_time) }}
                 </span>
 
-                <span class="report__user-time-label">
-                  Total Time Worked
+                <span class="report__user-time-label" translate>
+                  time-use-report.total-time-worked
                 </span>
 
                 <table class="report__user-table">
                   <thead>
                     <tr class="report__tasks-header">
                       <th scope="col">
-                        <span class="clickable" (click)="setOrder('task')">Task</span>
+                        <span class="clickable" (click)="setOrder('task')" translate>
+                            time-use-report.task
+                        </span>
                       </th>
 
                       <th scope="col">
-                        <span class="clickable" (click)="setOrder('project')">Project</span>
+                        <span class="clickable" (click)="setOrder('project')" translate>
+                          time-use-report.project
+                        </span>
                       </th>
 
                       <th scope="col">
-                        <span class="clickable" (click)="setOrder('time')">Total Time</span>
+                        <span class="clickable" (click)="setOrder('time')" translate>
+                          time-use-report.total-time
+                        </span>
                       </th>
 
                       <th scope="col"></th>

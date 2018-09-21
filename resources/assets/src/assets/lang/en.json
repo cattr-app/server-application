@@ -23,6 +23,13 @@
 		"no-task": "No task for last 24 hours. ¯\\_(ツ)_/¯",
 		"auto-loading": "screenshots auto-loading"
 	},
+	"time-use-report": {
+		"title": "Time Use Report",
+		"total-time-worked": "Total Time Worked",
+		"task": "Task",
+		"project": "Project",
+		"total-time": "Total Time"
+	},
 	"project": {
 		"remove-question": "Remove this project?",
 		"create": "Create New Project",
@@ -97,7 +104,15 @@
 		"remove": "Remove",
 		"all": "All",
 		"none": "None",
-		"back": "Back"
+		"back": "Back",
+		"apply": "Apply",
+		"day": "Day",
+		"week": "Week",
+		"month": "Month",
+		"date-range": "Date Range",
+		"export-csv": "Export CSV",
+		"users-selected": "{{count}} users selected",
+		"projects-selected": "{{count}} projects selected"
 	},
 	"field": {
 		"active": "Active",
