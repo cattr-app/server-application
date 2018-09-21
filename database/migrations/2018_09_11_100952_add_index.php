@@ -145,14 +145,14 @@ class AddIndex extends Migration
      */
     public function down()
     {
-        DB::unprepared( 'DROP TRIGGER `time_durations_cache_insert_trigger`' );
-        DB::unprepared( 'DROP TRIGGER `time_durations_cache_update_trigger`' );
-        DB::unprepared( 'DROP TRIGGER `time_durations_cache_delete_trigger`' );
-        DB::unprepared( 'DROP PROCEDURE `time_durations_cache_refresh`' );
+        DB::unprepared( 'DROP TRIGGER IF EXISTS `time_durations_cache_insert_trigger`' );
+        DB::unprepared( 'DROP TRIGGER IF EXISTS `time_durations_cache_update_trigger`' );
+        DB::unprepared( 'DROP TRIGGER IF EXISTS `time_durations_cache_delete_trigger`' );
+        DB::unprepared( 'DROP PROCEDURE IF EXISTS `time_durations_cache_refresh`' );
 
         Schema::dropIfExists('time_durations_cache');
 
-        DB::unprepared( 'DROP VIEW `time_durations`' );
+        DB::unprepared( 'DROP VIEW IF EXISTS `time_durations`' );
 
         Schema::table('time_intervals', function (Blueprint $table) {
             $table->dropIndex('time_intervals_start_at_index');
