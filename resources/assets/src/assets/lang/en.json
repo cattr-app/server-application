@@ -3,6 +3,7 @@
 		"dashboard": "Dashboard",
     	"login": "Login",
     	"projectsreport": "Projects report",
+    	"time-use-report": "Time use report",
 		"forgot": "Forgot",
 		"reset": "Reset",
 		"register": "Register",
@@ -22,11 +23,26 @@
 		"no-task": "No task for last 24 hours. ¯\\_(ツ)_/¯",
 		"auto-loading": "screenshots auto-loading"
 	},
+	"time-use-report": {
+		"title": "Time Use Report",
+		"total-time-worked": "Total Time Worked",
+		"task": "Task",
+		"project": "Project",
+		"total-time": "Total Time"
+	},
 	"project": {
 		"remove-question": "Remove this project?",
 		"create": "Create New Project",
 		"edit": "Edit Project",
+		"select-projects": "Select projects",
+		"show-details": "More details at projects report",
+		"task": "Task",
+		"activity": "Last activity",
+		"total-time": "Total time",
 		"edit-users": "Edit users of project {{name}}"
+	},
+	"project-report": {
+		"title": "Projects Report"
 	},
 	"role": {
 		"list": "Roles",
@@ -41,6 +57,8 @@
 		"edit": "Edit Screenshot",
 		"list": "Screenshots",
 		"path": "Path",
+		"filter-max": "Filter by max date:",
+		"filter-min": "Filter by min date:",
 		"remove": "Remove this screenshot?",
 		"timeintervalid": "Time Interval Id"
 	},
@@ -96,7 +114,17 @@
 		"remove": "Remove",
 		"all": "All",
 		"none": "None",
-		"back": "Back"
+		"back": "Back",
+		"apply": "Apply",
+		"day": "Day",
+		"week": "Week",
+		"month": "Month",
+		"own": "Own",
+		"team": "Team",
+		"date-range": "Date Range",
+		"export-csv": "Export CSV",
+		"user-selected": "{{count}} users selected",
+		"project-selected": "{{count}} projects selected"
 	},
 	"field": {
 		"active": "Active",

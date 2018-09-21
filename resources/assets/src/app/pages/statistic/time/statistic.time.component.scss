@@ -19,23 +19,6 @@
         }
     }
 
-    &__users {
-        position: relative;
-
-        ::ng-deep .ng-value {
-            display: none;
-        }
-    }
-
-    &__user-count {
-        position: absolute;
-        left: 20px;
-        top: 6px;
-        height: 24px;
-        width: calc(100% - 2 * 20px);
-        overflow: hidden;
-    }
-
     &__timeline {
         clear: both;
         position: relative;

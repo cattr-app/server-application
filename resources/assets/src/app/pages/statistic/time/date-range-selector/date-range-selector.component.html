@@ -9,7 +9,7 @@
 
     <div class="popup" [attr.data-hidden]="!isOpened">
         <div class="popup__buttons">
-            <button class="popup__button btn btn-default" (click)="apply()">Apply</button>
+            <button class="popup__button btn btn-default" (click)="apply()" translate>control.apply</button>
         </div>
 
         <dp-day-calendar [config]="{ format: dateFormat, firstDayOfWeek: 'mo', max: max }"

@@ -3,32 +3,28 @@
     <div class="col-md-12">
       <div class="panel panel-default">
         <div class="panel-heading clearfix">
-          Projects Report
-          <button class="btn btn-default pull-right" (click)="exportCSV()">Export CSV</button>
+          <span translate>project-report.title</span>
+          <button class="btn btn-default pull-right" (click)="exportCSV()" translate>control.export-csv</button>
         </div>
 
         <div class="panel-body">
           <div class="reports">
             <div class="reports__header">
-              <view-switcher #viewSwitcher class="reports__view-switcher">
-                <div class="reports__users" [attr.data-hidden]="!isManager">
-                  <ng-select #userSelect [items]="availableUsers" [loading]="usersLoading"
-                             bindValue="id" bindLabel="title" [closeOnSelect]="false"
-                             [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
-                  </ng-select>
-
-                  <span class="reports__user-count">{{ selectedUserIds.length }} users selected</span>
-                </div>
+              <app-date-range-selector #dateRangeSelector>
+                <app-user-selector class="reports__users" [attr.data-hidden]="!isManager" #userSelect>
+                </app-user-selector>
 
                 <div class="reports__projects">
                   <ng-select #projectSelect [items]="availableProjects" [loading]="projectsLoading"
-                             bindValue="id" bindLabel="title" [closeOnSelect]="false"
-                             [multiple]="true" [(ngModel)]="selectedProjectIds" (add)="projectSelected($event)">
+                              bindValue="id" bindLabel="title" [closeOnSelect]="false"
+                              [multiple]="true" [(ngModel)]="selectedProjectIds" (add)="projectSelected($event)">
                   </ng-select>
 
-                  <span class="reports__projects-count">{{ selectedProjectIds.length}} projects selected</span>
+                  <span class="reports__projects-count" translate [translateParams]="{count: selectedProjectIds.length}">
+                    control.project-selected
+                  </span>
                 </div>
-              </view-switcher>
+              </app-date-range-selector>
             </div>
 
             <div class="reports__report">

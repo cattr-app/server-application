@@ -6,10 +6,6 @@ import {AuthRoute} from './projectsreport-routing.module';
 import {LoginService} from '../../auth/login/login.service';
 
 import {ProjectsreportComponent} from './time/projectsreport.component';
-import {DateSelectorComponent} from './time/date-selector/date-selector.component';
-import {DateRangeSelectorComponent} from './time/date-range-selector/date-range-selector.component';
-import {ViewSwitcherComponent} from './time/view-switcher/view-switcher.component';
-
 
 import {UsersService} from '../users/users.service';
 import {TimeIntervalsService} from '../timeintervals/timeintervals.service';
@@ -60,9 +56,6 @@ import {ProjectReportService} from './time/projectsreport.service';
          * @todo add here the other components, except for static for time usage
          */
         ProjectsreportComponent,
-        DateSelectorComponent,
-        DateRangeSelectorComponent,
-        ViewSwitcherComponent,
     ],
     providers: [
         LoginService,

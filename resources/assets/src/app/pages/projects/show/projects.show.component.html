@@ -50,18 +50,19 @@
                         </div>
                     </div>
 
-                    <a class="btn btn-primary" [attr.href]="'/report?project=' + item.id + '&start=' + firstActivity.startOf('day').format('YYYY-MM-DD') + '&end=' + lastActivity.add(1, 'day').startOf('day').format('YYYY-MM-DD')">
-                        More details at projects report
-                    </a>
+                    <a
+                        class="btn btn-primary"
+                        [attr.href]="'/report?project=' + item.id + '&start=' + firstActivity.startOf('day').format('YYYY-MM-DD') + '&end=' + lastActivity.add(1, 'day').startOf('day').format('YYYY-MM-DD')" 
+                        translate>project.show-details</a>
 
                     <div class="show-info">
                         <div class="table-responsive">
                             <table class="table table-borderless table--tasks">
                                 <thead>
                                     <tr (click)="onTableHeaderClick($event)">
-                                        <th data-order="task">Task</th>
-                                        <th data-order="lastActivity">Last activity</th>
-                                        <th data-order="totalTime">Total time</th>
+                                        <th data-order="task" translate>project.task</th>
+                                        <th data-order="lastActivity" translate>project.activity</th>
+                                        <th data-order="totalTime" translate>project.total-time</th>
                                     </tr>
                                 </thead>
 

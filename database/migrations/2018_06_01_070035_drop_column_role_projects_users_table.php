@@ -26,7 +26,7 @@ class DropColumnRoleProjectsUsersTable extends Migration
     public function down()
     {
         Schema::table('projects_users', function (Blueprint $table) {
-            $table->addColumn('string','role');
+            $table->string('role');
         });
     }
 }

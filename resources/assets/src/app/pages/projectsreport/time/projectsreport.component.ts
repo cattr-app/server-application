@@ -1,20 +1,18 @@
-import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
+import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import {NgSelectComponent} from '@ng-select/ng-select';
+import { NgSelectComponent } from '@ng-select/ng-select';
 
-import {ViewSwitcherComponent} from './view-switcher/view-switcher.component';
+import { UserSelectorComponent } from '../../../user-selector/user-selector.component';
+import { DateRangeSelectorComponent } from '../../../date-range-selector/date-range-selector.component';
 
-import {ApiService} from '../../../api/api.service';
-import {UsersService} from '../../users/users.service';
-import {ProjectReportService} from './projectsreport.service';
+import { ApiService } from '../../../api/api.service';
+import { ProjectReportService } from './projectsreport.service';
 import { AllowedActionsService } from '../../roles/allowed-actions.service';
-
-import {User} from '../../../models/user.model';
 
 import * as moment from 'moment';
 import 'moment-timezone';
 
-import {Observable} from 'rxjs/Rx';
+import { Observable } from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
@@ -54,16 +52,14 @@ interface ProjectData {
   styleUrls: ['../../items.component.scss', './projectsreport.component.scss']
 })
 export class ProjectsreportComponent implements OnInit, AfterViewInit {
-  @ViewChild('userSelect') userSelect: NgSelectComponent;
+  @ViewChild('userSelect') userSelect: UserSelectorComponent;
   @ViewChild('projectSelect') projectSelect: NgSelectComponent;
-  @ViewChild('viewSwitcher') viewSwitcher: ViewSwitcherComponent;
+  @ViewChild('dateRangeSelector') dateRangeSelector: DateRangeSelectorComponent;
 
   // Used to show loading indicators.
   loading = true;
-  usersLoading = true;
   projectsLoading = true;
 
-  availableUsers: SelectItem[] = [];
   selectedUserIds: number[] = [];
 
   availableProjects: SelectItem[] = [];
@@ -72,29 +68,15 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
   report: ProjectData[] = [];
 
   constructor(protected api: ApiService,
-              protected userService: UsersService,
-              protected projectReportService: ProjectReportService,
-              protected allowedAction: AllowedActionsService,
-              protected route: ActivatedRoute,
-  ) {}
+    protected projectReportService: ProjectReportService,
+    protected allowedAction: AllowedActionsService,
+    protected route: ActivatedRoute,
+  ) { }
 
   readonly defaultView = 'timelineDay';
   readonly formatDate = 'YYYY-MM-DD';
 
-  ngOnInit() {
-    // Fetch available users from the API.
-    const availableUsers$ = Observable.from(this.fetchUsers()).share();
-    availableUsers$.subscribe(users => {
-      /// Add the 'select all' option.
-      this.availableUsers = [{ id: -1, title: 'Select all' }, ...users];
-      // Select all users initially.
-      setTimeout(() => {
-        this.selectedUserIds = users.map(user => user.id);
-        this.userSelect.changeEvent.emit(users);
-      });
-      this.usersLoading = false;
-    });
-  }
+  ngOnInit() { }
 
   ngAfterViewInit() {
     // Get preselected values from the query.
@@ -102,7 +84,7 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
     const startDate = this.route.snapshot.queryParamMap.get('start');
     const endDate = this.route.snapshot.queryParamMap.get('end');
 
-    const selectedUsers$ = (this.userSelect.changeEvent.asObservable() as Observable<SelectItem[]>)
+    const selectedUsers$ = (this.userSelect.changed.asObservable())
       .map(users => users.filter(user => user.id !== -1)).share();
 
     const availableProjects$ = selectedUsers$.switchMap(users => {
@@ -124,9 +106,9 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
         }
 
         if (startDate && endDate) {
-          this.viewSwitcher.changeRange(moment.utc(startDate), moment.utc(endDate));
-          this.viewSwitcher.activeButton = 'timelineRange';
-          this.viewSwitcher.dateRangeSelector.close();
+          this.dateRangeSelector.setStart(moment.utc(startDate));
+          this.dateRangeSelector.setEnd(moment.utc(endDate));
+          this.dateRangeSelector.activeButton = 'range';
         }
       });
       this.projectsLoading = false;
@@ -135,33 +117,17 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
     const selectedProjects$ = (this.projectSelect.changeEvent.asObservable() as Observable<SelectItem[]>)
       .map(projects => projects.filter(project => project.id !== -1)).share();
 
-    const view$ = this.viewSwitcher.setView.asObservable().share();
+    const range$ = this.dateRangeSelector.rangeChanged.asObservable().share();
 
-    const report$ = view$.combineLatest(selectedUsers$, selectedProjects$, (view, users, projects) => {
-      const start = view.start.format(this.formatDate);
-      const end = view.end.format(this.formatDate);
+    const report$ = range$.combineLatest(selectedUsers$, selectedProjects$, (range, users, projects) => {
+      const start = range.start.format(this.formatDate);
+      const end = range.end.format(this.formatDate);
       const userIds = users.map(user => user.id);
       const projectIds = projects.map(project => project.id);
       return { userIds, projectIds, start, end };
     }).switchMap(data => this.fetchReport(data));
     report$.subscribe(data => {
       this.report = data;
-    });
-  }
-
-  // Fetches available users from the API.
-  fetchUsers() {
-    return new Promise<SelectItem[]>(resolve => {
-      this.userService.getItems((users: User[]) => {
-        const userData = users.map(user => {
-          return {
-            id: user.id,
-            title: user.full_name,
-          };
-        });
-
-        resolve(userData);
-      });
     });
   }
 
@@ -187,12 +153,12 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
     projectIds,
     start,
     end,
-  } : {
-    userIds: number[],
-    projectIds: number[],
-    start: string,
-    end: string,
-  }) {
+  }: {
+      userIds: number[],
+      projectIds: number[],
+      start: string,
+      end: string,
+    }) {
     const params = {
       uids: userIds,
       pids: projectIds,
@@ -224,33 +190,21 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
   }
 
   formatDurationString(time: number) {
-      const duration = moment.duration(time, 'seconds');
-      const hours = Math.floor(duration.asHours());
-      const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
-      return `${hours}h ${minutes}m`;
+    const duration = moment.duration(time, 'seconds');
+    const hours = Math.floor(duration.asHours());
+    const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
+    return `${hours}h ${minutes}m`;
   }
 
   formatDurationStringCSV(time: number) {
-      const duration = moment.duration(time, 'seconds');
-      const hours = Math.floor(duration.asHours());
-      const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
-      const seconds = Math.floor(duration.asSeconds()) - 60 * 60 * hours - 60 * minutes;
-      const hoursStr = (hours > 9 ? '' : '0') + hours;
-      const minutesStr = (minutes > 9 ? '' : '0') + minutes;
-      const secondsStr = (seconds > 9 ? '' : '0') + seconds;
-      return `${hoursStr}:${minutesStr}:${secondsStr}`;
-  }
-
-  // Handles the 'select all' option.
-  userSelected(value) {
-    if (value.id === -1) {
-      setTimeout(() => {
-        // Select all users.
-        const users = this.availableUsers.filter(user => user.id !== -1);
-        this.selectedUserIds = users.map(user => user.id)
-        this.userSelect.changeEvent.emit(users);
-      });
-    }
+    const duration = moment.duration(time, 'seconds');
+    const hours = Math.floor(duration.asHours());
+    const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
+    const seconds = Math.floor(duration.asSeconds()) - 60 * 60 * hours - 60 * minutes;
+    const hoursStr = (hours > 9 ? '' : '0') + hours;
+    const minutesStr = (minutes > 9 ? '' : '0') + minutes;
+    const secondsStr = (seconds > 9 ? '' : '0') + seconds;
+    return `${hoursStr}:${minutesStr}:${secondsStr}`;
   }
 
   // Handles the 'select all' option.

@@ -5,6 +5,7 @@ import { ApiService } from '../../../../api/api.service';
 import { User } from '../../../../models/user.model';
 import { LocalStorage } from '../../../../api/storage.model';
 
+
 export interface ViewData {
     name: string,
     start: moment.Moment,
