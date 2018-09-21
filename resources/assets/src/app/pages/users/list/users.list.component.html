@@ -36,7 +36,7 @@
                                     <a *ngIf="can('/attached-users/full_access')"  [routerLink]="['/users/attached-users', user.id]" title="Assign users">
                                         <button class="btn btn-primary btn-sm">
                                             <i class="fa fa-users" aria-hidden="true"></i>
-                                            Assign users
+                                            <span translate>control.assign</span>
                                         </button>
                                     </a>
                                     <a *ngIf="can('/users/edit')" [routerLink]="['/users/edit', user.id]" title="Edit user">

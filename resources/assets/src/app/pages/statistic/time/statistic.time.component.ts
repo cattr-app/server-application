@@ -27,6 +27,7 @@ import 'fullcalendar-scheduler';
 import { EventObjectInput, View } from 'fullcalendar';
 import { Schedule } from 'primeng/schedule';
 import { ResourceInput } from 'fullcalendar-scheduler/src/exports';
+import {TranslateService} from '@ngx-translate/core';
 
 import { Observable } from 'rxjs/Rx';
 import 'rxjs/operator/map';
@@ -116,7 +117,8 @@ export class StatisticTimeComponent implements OnInit {
         private timeDurationService: TimeDurationService,
         private taskService: TasksService,
         private projectService: ProjectsService,
-        private screenshotService: ScreenshotsService) {
+        private screenshotService: ScreenshotsService,
+        private translate: TranslateService) {
     }
 
     readonly defaultView = 'timelineDay';
@@ -465,6 +467,7 @@ export class StatisticTimeComponent implements OnInit {
             firstDay: 1,
             themeSystem: 'bootstrap3',
             eventColor: '#2ab27b',
+            locale: this.translate.getDefaultLang(),
             views: {
                 timelineDay: {
                     type: 'timeline',

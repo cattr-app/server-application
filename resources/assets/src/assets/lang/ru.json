@@ -26,7 +26,15 @@
 		"remove-question": "Удалить этот проект?",
 		"create": "Создание нового проекта",
 		"edit": "Редактирование проекта",
+		"select-projects": "Выбрать проекты",
+		"show-details": "Детальный отчёт",
+		"task": "Задача",
+		"activity": "Последняя активность",
+		"total-time": "Всё время",
 		"edit-users": "Редактирование пользователей для проекта \"{{name}}\""
+	},
+	"project-report": {
+		"title": "Отчёт по проектам"
 	},
 	"role": {
 		"list": "Роли",
@@ -42,6 +50,8 @@
 		"list": "Скриншоты",
 		"path": "Путь",
 		"remove": "Удалить этот скриншот?",
+		"filter-max": "Не старше чем:",
+		"filter-min": "Не раньше чем:",
 		"timeintervalid": "Time Interval Id"
 	},
 	"integration": {
@@ -96,7 +106,17 @@
 		"remove": "Удалить",
 		"all": "Отметить всё",
 		"none": "Отменить всё",
-		"back": "Назад"
+		"back": "Назад",
+		"apply": "Применить",
+		"day": "День",
+		"week": "Неделя",
+		"month": "Месяц",
+		"own": "Моё",
+		"team": "Команда",
+		"date-range": "Промежуток",
+		"export-csv": "Экспорт CSV",
+		"user-selected": "{{count}} выбрано пользователей",
+		"project-selected": "{{count}} выбрано проектов"
 	},
 	"field": {
 		"active": "Активно",

@@ -9,7 +9,7 @@
         <input #dateInput type="text" class="form-control"
             [(ngModel)]="_inputDate" (click)="datePicker.api.open()" />
 
-        <dp-date-picker #datePicker [config]="{ format: dateFormat, firstDayOfWeek: 'mo', max: max }"
+        <dp-date-picker #datePicker [config]="{ format: dateFormat, firstDayOfWeek: 'mo', max: max, locale: translate.getDefaultLang() }"
             [mode]="_mode" [(ngModel)]="_date" (onChange)="change($event)">
         </dp-date-picker>
 

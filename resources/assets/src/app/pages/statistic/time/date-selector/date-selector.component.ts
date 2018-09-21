@@ -1,6 +1,8 @@
 import { Component, ViewChild, ElementRef, Input, Output, EventEmitter, OnInit } from '@angular/core';
 import { DatePickerComponent } from 'ng2-date-picker';
 import * as moment from 'moment';
+import {TranslateService} from '@ngx-translate/core';
+
 
 @Component({
     selector: 'date-selector',
@@ -18,6 +20,12 @@ export class DateSelectorComponent implements OnInit {
     @Output() dateChange = new EventEmitter<moment.Moment>();
 
     readonly max: moment.Moment = moment.utc().add(1, 'day');
+
+    constructor(
+        protected translate: TranslateService,
+    ) {
+    }
+
 
     get _date(): string {
         return this.date.format(this.dateFormat);

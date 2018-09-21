@@ -1,6 +1,6 @@
 <div class="statistics" (click)="clickPopover.hide()">
     <div class="statistics__buttons btn-group" role="group">
-        <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
+        <button type="button" (click)="exportCSV()" class="btn btn-default" translate>control.export-csv</button>
     </div>
 
     <div class="statistics__header">
@@ -8,9 +8,9 @@
             <div class="statistics__users">
                 <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
                     bindValue="id" bindLabel="title" [closeOnSelect]="false"
-                    [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
+                    [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)" translate>
                 </ng-select>
-                <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
+                <span class="statistics__user-count" translate [translateParams]="{count: selectedUsers.length}">control.user-selected</span>
             </div>
         </view-switcher>
     </div>

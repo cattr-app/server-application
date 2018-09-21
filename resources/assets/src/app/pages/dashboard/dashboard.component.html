@@ -5,7 +5,7 @@
                 <div class="panel-body">
                     <div *ngIf="userIsManager">
                         <tabset #tabs>
-                            <tab heading="Own" (select)="changeTab($event)">
+                            <tab heading="{{'control.own' | translate }}" (select)="changeTab($event)">
                                 <dashboard-tasklist #taskList>
                                 </dashboard-tasklist>
 
@@ -22,7 +22,7 @@
                                 </change-task-panel>
                             </tab>
 
-                            <tab heading="Team" (select)="changeTab($event)">
+                            <tab heading="{{'control.team' | translate }}" (select)="changeTab($event)">
                                 <app-statistic-time #statistic
                                     (onSelectionChanged)="changeSelection($event)">
                                 </app-statistic-time>
