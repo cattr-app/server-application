@@ -1,8 +1,17 @@
-@import '../../../variables';
+@import '../../../../variables';
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
 .filters {
-  margin-bottom: 1em;
+  &__users {
+    display: block;
+    margin-right: 1em;
+    margin-bottom: 1em;
+    width: 100%;
+
+    @media (min-width: $screen-sm-min) {
+      width: unset;
+    }
+  }
 }
 
 .report {

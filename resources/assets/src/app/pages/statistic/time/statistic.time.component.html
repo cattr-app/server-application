@@ -5,13 +5,8 @@
 
     <div class="statistics__header">
         <view-switcher #viewSwitcher class="statistics__view-switcher">
-            <div class="statistics__users">
-                <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
-                    bindValue="id" bindLabel="title" [closeOnSelect]="false"
-                    [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
-                </ng-select>
-                <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
-            </div>
+            <app-user-selector class="statistics__users" #userSelect>
+            </app-user-selector>
         </view-switcher>
     </div>
 

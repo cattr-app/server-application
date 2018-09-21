@@ -1,7 +1,7 @@
 import { ModuleWithProviders } from '@angular/core';
 import { Routes, RouterModule } from '@angular/router';
 
-import { TimeUseReportComponent } from './time-use-report.component';
+import { TimeUseReportComponent } from './component/time-use-report.component';
 
 export const AuthRoutes: Routes = [
     { path: '', component: TimeUseReportComponent },

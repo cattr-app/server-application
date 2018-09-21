@@ -12,6 +12,10 @@ import { ScreenshotsService } from './pages/screenshots/screenshots.service';
 import { ModalModule } from 'ngx-bootstrap';
 import { LoadingModule } from 'ngx-loading';
 import { DateRangeSelectorComponent } from './date-range-selector/date-range-selector.component';
+import { UserSelectorComponent } from './user-selector/user-selector.component';
+import { DpDatePickerModule } from 'ng2-date-picker';
+import { UsersModule } from './pages/users/users.module';
+import { UsersService } from './pages/users/users.service';
 
 @NgModule({
     imports: [
@@ -23,12 +27,14 @@ import { DateRangeSelectorComponent } from './date-range-selector/date-range-sel
         AngularDualListBoxModule,
         ModalModule,
         LoadingModule,
+        DpDatePickerModule,
     ],
     declarations: [
         UsersFiltersComponent,
         ProjectsFiltersComponent,
         ScreenshotListComponent,
         DateRangeSelectorComponent,
+        UserSelectorComponent,
     ],
     exports: [
         CommonModule,
@@ -41,10 +47,12 @@ import { DateRangeSelectorComponent } from './date-range-selector/date-range-sel
         ScreenshotListComponent,
         DualListComponent,
         DateRangeSelectorComponent,
+        UserSelectorComponent,
     ],
     providers: [
         ProjectsService,
         ScreenshotsService,
+        UsersService,
     ]
 })
 

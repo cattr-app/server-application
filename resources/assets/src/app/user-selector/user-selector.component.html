@@ -1,0 +1,9 @@
+<ng-select class="select" bindLabel="full_name"
+    [items]="usersAvailable" [loading]="isLoading"
+    [closeOnSelect]="false" [multiple]="true"
+    [(ngModel)]="usersSelected"
+    (add)="add($event)" (remove)="remove($event)"
+    (change)="change($event)">
+</ng-select>
+
+<span class="count">{{ usersSelected.length }} users selected</span>

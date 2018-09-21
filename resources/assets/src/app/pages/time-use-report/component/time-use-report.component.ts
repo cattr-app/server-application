@@ -3,9 +3,8 @@ import { Component, OnInit, DoCheck, IterableDiffers, IterableDiffer } from '@an
 import * as moment from 'moment';
 
 import { TimeUseReportService } from './time-use-report.service';
-import { UsersService } from '../users/users.service';
 
-import { User } from '../../models/user.model';
+import { User } from '../../../models/user.model';
 
 interface ReportTask {
   task_id: number;
@@ -55,7 +54,6 @@ export class TimeUseReportComponent implements OnInit, DoCheck {
 
   constructor(
     protected service: TimeUseReportService,
-    protected userService: UsersService,
     differs: IterableDiffers,
   ) {
     this.usersDiffer = differs.find(this.users).create();
@@ -77,10 +75,6 @@ export class TimeUseReportComponent implements OnInit, DoCheck {
   }
 
   ngOnInit() {
-    this.userService.getItems((users: User[]) => {
-      this.users = users.map(user => user.id);
-      this.fetchReport();
-    });
   }
 
   ngDoCheck() {
@@ -144,5 +138,15 @@ export class TimeUseReportComponent implements OnInit, DoCheck {
         }
       });
     });
+  }
+
+  setUsers(users: User[]) {
+    this.users = users.map(user => user.id);
+  }
+
+  setRange(start: moment.Moment, end: moment.Moment) {
+    this.start = start;
+    this.end = end;
+    this.fetchReport();
   }
 }

@@ -8,7 +8,10 @@
 
         <div class="panel-body">
           <div class="filters">
-            <app-date-range-selector>
+            <app-date-range-selector (rangeChanged)="setRange($event.start, $event.end)">
+              <app-user-selector class="filters__users"
+                (changed)="setUsers($event)">
+              </app-user-selector>
             </app-date-range-selector>
           </div>
 

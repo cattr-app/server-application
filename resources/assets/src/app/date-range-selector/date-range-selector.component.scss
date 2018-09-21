@@ -2,13 +2,18 @@
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
 :host {
+  display: flex;
+  flex-flow: row wrap;
   position: relative;
+
+  & > * {
+    margin-right: 1em;
+    margin-bottom: 1em;
+  }
 }
 
 .input-group {
   position: relative;
-  display: block;
-  margin-bottom: 1em;
   width: 100%;
 
   @media (min-width: $screen-sm-min) {
@@ -20,7 +25,8 @@
   @media (min-width: $screen-sm-min) {
     max-width: 150px;
 
-    .form-inline.week & {
+    .form-inline.week &,
+    .form-inline.range & {
       max-width: unset;
       min-width: 240px;
     }
@@ -42,5 +48,101 @@
 .button {
   @extend .btn, .btn-default;
   flex: 1;
-  margin-bottom: 1em;
+}
+$date-picker-border-color: #ddd;
+
+.popup {
+    position: absolute;
+    top: 100%;
+    left: 0;
+    width: 284px;
+
+    @media (min-width: $screen-sm-min) {
+        width: 544px;
+    }
+
+    background: #fff;
+    border: 1px solid $date-picker-border-color;
+    padding: 1em;
+    z-index: 10;
+
+    &__buttons {
+        margin-bottom: 1em;
+        text-align: right;
+    }
+
+    &[data-hidden="true"] {
+        display: none;
+    }
+}
+
+/* Apply bootstrap styles to a datepicker */
+:host ::ng-deep {
+  $date-picker-border-color: #ddd;
+
+  .dp-picker-input {
+      display: none;
+  }
+
+  .dp-calendar-nav-container,
+  .dp-calendar-wrapper {
+      border-color: $date-picker-border-color !important;
+  }
+
+  .dp-weekdays {
+      display: flex;
+      flex-flow: row nowrap;
+      justify-content: space-around;
+
+      border-bottom: 1px solid $date-picker-border-color !important;
+  }
+
+  .dp-calendar-weekday {
+      border: 0 !important;
+  }
+
+  .dp-calendar-nav-container {
+      height: 40px !important;
+
+      button {
+          @extend .btn;
+          @extend .btn-default;
+
+          padding: 3px;
+
+          &[data-hidden="true"] {
+              display: none;
+          }
+      }
+  }
+
+  .dp-calendar-day,
+  .dp-calendar-month {
+      @extend .btn;
+      @extend .btn-default;
+
+      &.dp-current-day {
+          @extend .btn-info;
+      }
+
+      &.dp-selected,
+      &.dp-current-day.dp-selected {
+          @extend .btn-primary;
+      }
+
+      padding: 0;
+      margin: 3px;
+  }
+
+  .week .dp-calendar-week {
+      /* Show all days in a week as active */
+      &:hover button.dp-calendar-day  {
+          @extend .active;
+      }
+
+      /* Show all days in a week as selected */
+      .dp-selected ~ button.dp-calendar-day  {
+          @extend .btn-primary;
+      }
+  }
 }

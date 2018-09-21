@@ -1,19 +1,45 @@
 <ng-content></ng-content>
 
-<div class="input-group">
-  <span class="input-group-btn">
-    <button type="button" class="btn btn-default" aria-label="prev">
-      <span class="glyphicon glyphicon-chevron-left"></span>
-    </button>
-  </span>
+<div [class]="'form-inline ' + mode">
+  <div class="input-group">
+    <span class="input-group-btn" *ngIf="mode !== 'range'">
+      <button type="button" class="btn btn-default" aria-label="prev"
+        (click)="selectPrevious()">
+        <span class="glyphicon glyphicon-chevron-left"></span>
+      </button>
+    </span>
 
-  <input type="text" class="form-control" />
+    <input #dateInput type="text" class="form-control" [(ngModel)]="_input"
+      (click)="dateInputClick()" />
 
-  <span class="input-group-btn">
-    <button type="button" class="btn btn-default" aria-label="next">
-      <span class="glyphicon glyphicon-chevron-right"></span>
-    </button>
-  </span>
+    <dp-date-picker #datePicker [config]="{ format: 'YYYY-MM-DD', firstDayOfWeek: 'mo', max: max }"
+        [mode]="_datePickerMode" [ngModel]="start" [displayDate]="start"
+        (onChange)="datePickerChangeStart($event)" (onSelect)="datePickerSelectStart($event)">
+    </dp-date-picker>
+
+    <div class="popup" [attr.data-hidden]="!isRangePopupOpened">
+      <div class="popup__buttons">
+        <button class="popup__button btn btn-default" (click)="applyChanges()">Apply</button>
+      </div>
+
+      <dp-day-calendar [config]="{ format: 'YYYY-MM-DD', firstDayOfWeek: 'mo', max: max }"
+        [ngModel]="start" [displayDate]="start"
+        (onChange)="datePickerChangeStart($event)" (onSelect)="datePickerSelectStart($event)">
+      </dp-day-calendar>
+
+      <dp-day-calendar [config]="{ format: 'YYYY-MM-DD', firstDayOfWeek: 'mo', max: max }"
+        [ngModel]="end" [displayDate]="end"
+        (onChange)="datePickerChangeEnd($event)" (onSelect)="datePickerSelectEnd($event)">
+      </dp-day-calendar>
+    </div>
+
+    <span class="input-group-btn" *ngIf="mode !== 'range'">
+      <button type="button" class="btn btn-default" aria-label="next"
+        (click)="selectNext()">
+        <span class="glyphicon glyphicon-chevron-right"></span>
+      </button>
+    </span>
+  </div>
 </div>
 
 <div class="buttons" role="group" (window:mouseup)="isActive = false">

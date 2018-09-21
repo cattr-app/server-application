@@ -4,12 +4,11 @@ import { FormsModule } from '@angular/forms';
 import { LoadingModule } from 'ngx-loading';
 
 import { AuthRoute } from './time-use-report-routing.module';
-import { SharedModule } from '../../shared.module';
-import { UsersModule } from '../users/users.module';
+import { SharedModule } from '../../shared.module'
 
-import { TimeUseReportComponent } from './time-use-report.component';
+import { TimeUseReportComponent } from './component/time-use-report.component';
 
-import { TimeUseReportService } from './time-use-report.service';
+import { TimeUseReportService } from './component/time-use-report.service';
 
 @NgModule({
   imports: [
@@ -18,7 +17,6 @@ import { TimeUseReportService } from './time-use-report.service';
     FormsModule,
     LoadingModule,
     SharedModule,
-    UsersModule,
   ],
   exports: [
     TimeUseReportComponent,

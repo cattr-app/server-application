@@ -1,6 +1,4 @@
 import { Component, OnInit, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
-import { NgSelectComponent } from '@ng-select/ng-select';
-import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
 import { PopoverDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../../../api/api.service';
@@ -10,6 +8,9 @@ import { TimeDurationService } from './statistic.time.service';
 import { TasksService } from '../../tasks/tasks.service';
 import { ProjectsService } from '../../projects/projects.service';
 import { ScreenshotsService } from '../../screenshots/screenshots.service';
+
+import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
+import { UserSelectorComponent } from '../../../user-selector/user-selector.component';
 
 import { User } from '../../../models/user.model';
 import { TimeInterval } from '../../../models/timeinterval.model';
@@ -59,19 +60,16 @@ interface TimeWorked {
 export class StatisticTimeComponent implements OnInit {
     @ViewChild('timeline') timeline: Schedule;
     @ViewChild('datePicker') datePicker: ElementRef;
-    @ViewChild('userSelect') userSelect: NgSelectComponent;
+    @ViewChild('userSelect') userSelect: UserSelectorComponent;
     @ViewChild('viewSwitcher') viewSwitcher: ViewSwitcherComponent;
     @ViewChild('clickPopover') clickPopover: PopoverDirective;
     @ViewChild('hoverPopover') hoverPopover: PopoverDirective;
 
     @Output() onSelectionChanged = new EventEmitter<TimeInterval[]>();
 
-    selectedUserIds: string[];
-    userSelectItems: {}[];
     selectedIntervals: TimeInterval[] = [];
 
     loading: boolean = true;
-    usersLoading: boolean = true;
     popoverLoading: boolean = true;
     clickPopoverProject: Project = null;
     clickPopoverTask: Task = null;
@@ -103,12 +101,11 @@ export class StatisticTimeComponent implements OnInit {
     latestEvents$: Observable<EventObjectInput[]>;
     latestEventsTasks$: Observable<Task[]>;
     latestEventsProjects$: Observable<Project[]>;
-    users$: Observable<ResourceInput[]>;
     selectedUsers$: Observable<ResourceInput[]>;
     sortUsers$: Observable<UsersSort>;
     sortedUsers$: Observable<ResourceInput[]>;
 
-    eventFilter: string|Task|Project = '';
+    eventFilter: string | Task | Project = '';
 
     constructor(private api: ApiService,
         private userService: UsersService,
@@ -264,35 +261,14 @@ export class StatisticTimeComponent implements OnInit {
             timezone: 'UTC',
         };
 
-        this.users$ = Observable.from(this.fetchResources()).share();
-        this.users$.subscribe(users => {
-            this.users = users;
-            this.userSelectItems = [{id: '', title: 'Select all'}, ...users];
-
-            const userIdsStr = window.sessionStorage.getItem('dashboard-selected-users');
-            const userIds = userIdsStr !== null ? JSON.parse(userIdsStr) : null;
-            if (userIds !== null) {
-                this.selectedUserIds = userIds;
-                setTimeout(() => {
-                    this.userSelect.changeEvent.emit(this.users.filter(user =>
-                        this.selectedUserIds.includes(user.id)));
-                });
-            } else {
-                this.selectedUserIds = users.map(user => user.id);
-            }
-
-            this.usersLoading = false;
-        });
-
-        const selectUser$ = this.userSelect.changeEvent.asObservable() as Observable<ResourceInput[]>;
-        this.selectedUsers$ = this.users$.concat(selectUser$.map(users => {
-            users = users.filter(user => user.id !== '');
-
-            const selectedUserIds = users.map(user => user.id);
-            window.sessionStorage.setItem('dashboard-selected-users', JSON.stringify(selectedUserIds));
-
-            return users;
-        })).share();
+        this.selectedUsers$ = this.userSelect.changed.asObservable().map(users => {
+            return users.map(user => {
+                return {
+                    id: '' + user.id,
+                    title: user.full_name,
+                };
+            });
+        }).share();
 
         this.view$ = this.viewSwitcher.setView.asObservable();
         this.viewEvents$ = this.view$.switchMap(view => {
@@ -344,7 +320,7 @@ export class StatisticTimeComponent implements OnInit {
             }
         });
 
-        this.viewTimeWorked$ = this.viewEvents$.combineLatest(this.users$, (events, users) => {
+        this.viewTimeWorked$ = this.viewEvents$.combineLatest(this.selectedUsers$, (events, users) => {
             return users.map(user => {
                 const userEvents = events.filter(event => +event.resourceId === +user.id);
                 let total = 0;
@@ -574,8 +550,8 @@ export class StatisticTimeComponent implements OnInit {
                 this.timeintervalService.getItems(result => {
                     this.setSelectedIntervals(result);
                 }, {
-                    id: ['=', intervalIds],
-                });
+                        id: ['=', intervalIds],
+                    });
 
                 const task = this.viewEventsTasks.find(task => +task.id === +event.task_id);
                 if (task) {
@@ -594,8 +570,8 @@ export class StatisticTimeComponent implements OnInit {
                             this.clickPopoverScreenshot = screenshot;
                         }
                     }, {
-                        time_interval_id: event.id,
-                    });
+                            time_interval_id: event.id,
+                        });
                 });
 
                 const eventPos = $(jsEvent.currentTarget).offset();
@@ -775,16 +751,6 @@ export class StatisticTimeComponent implements OnInit {
         };
     }
 
-    userSelected(value) {
-        if (value.id === '') {
-            setTimeout(() => {
-                // Select all.
-                this.selectedUserIds = this.users.map(user => user.id);
-                this.userSelect.changeEvent.emit(this.users);
-            });
-        }
-    }
-
     formatDurationString(time: number) {
         const duration = moment.duration(time);
         const hours = Math.floor(duration.asHours());
@@ -954,7 +920,7 @@ export class StatisticTimeComponent implements OnInit {
         this.viewSwitcher.setView.emit(this.view);
     }
 
-    filter(filter: string|Task|Project) {
+    filter(filter: string | Task | Project) {
         this.eventFilter = filter;
         this.viewSwitcher.setView.emit(this.view);
     }
