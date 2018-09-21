@@ -38,7 +38,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let project of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
+                            <tr *ngFor="let project of itemsArray">
                                 <td>{{project.id}}</td>
                                 <td>{{project.name}}</td>
                                 <td>
@@ -70,7 +70,10 @@
                             </tr>
                             </tbody>
                         </table>
-                        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+
+                        <div class="loading" #loading *ngIf="!isAllLoaded">
+                            <ngx-loading [show]="isLoading" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
+                        </div>
                     </div>
                 </div>
             </div>

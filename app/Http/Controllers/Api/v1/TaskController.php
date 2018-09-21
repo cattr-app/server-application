@@ -457,4 +457,22 @@ class TaskController extends ItemController
         return $query;
     }
 
+    protected function applyQueryFilter(Builder $query, array $filter = []): Builder
+    {
+        if (isset($filter['order_by'])) {
+            $order_by = $filter['order_by'];
+            [$column, $dir] = \is_array($order_by) ? $order_by : [$order_by, 'asc'];
+            if ($column === 'projects.name') {
+                // Because Laravel haven't built-in for order by a field in a related table.
+                $query
+                    ->leftJoin('projects', 'tasks.project_id', '=', 'projects.id')
+                    ->orderBy('projects.name', $dir)
+                    ->select('tasks.*');
+
+                unset($filter['order_by']);
+            }
+        }
+
+        return parent::applyQueryFilter($query, $filter);
+    }
 }

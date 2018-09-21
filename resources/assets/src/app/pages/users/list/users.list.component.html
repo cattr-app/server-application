@@ -21,7 +21,7 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let user of itemsArray | paginate: { itemsPerPage: 25, currentPage: p }">
+                            <tr *ngFor="let user of itemsArray">
                                 <td>{{user.id}}</td>
                                 <td>{{user.first_name}}</td>
                                 <td>{{user.last_name}}</td>
@@ -55,13 +55,17 @@
                             </tr>
                             </tbody>
                         </table>
-                        <pagination-controls (pageChange)="p = $event"></pagination-controls>
+
+                        <div class="loading" #loading *ngIf="!isAllLoaded">
+                            <ngx-loading [show]="isLoading" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
+                        </div>
                     </div>
                 </div>
             </div>
         </div>
     </div>
 </div>
+
 <ng-template #template>
     <div class="modal-header">
         <h4 class="modal-title pull-left" translate>user.remove</h4>

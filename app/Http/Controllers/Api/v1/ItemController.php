@@ -389,7 +389,13 @@ abstract class  ItemController extends Controller
         $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls));
 
         if ($softDelete) {
-            $query->whereNull('deleted_at');
+            if (method_exists($cls, 'getTable')) {
+                $table = (new $cls())->getTable();
+                $query->whereNull("$table.deleted_at");
+            }
+            else {
+                $query->whereNull('deleted_at');
+            }
         }
 
         if ($withRelations) {

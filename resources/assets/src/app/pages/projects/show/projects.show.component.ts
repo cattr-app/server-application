@@ -19,6 +19,7 @@ type ProjectWithTasks = Project & { tasks?: TaskWithIntervals[] };
 interface TaskInfo {
     id: number;
     name: string;
+    firstActivity: moment.Moment;
     lastActivity: moment.Moment;
     totalTime: number;
 }
@@ -42,6 +43,8 @@ export class ProjectsShowComponent extends ItemsShowComponent implements OnInit 
     item: ProjectWithTasks = new Project();
     tasks: TaskInfo[] = [];
     order: TaskOrder = TaskOrder.LastActivityDesc;
+    firstActivity: moment.Moment;
+    lastActivity: moment.Moment;
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
@@ -68,16 +71,29 @@ export class ProjectsShowComponent extends ItemsShowComponent implements OnInit 
             }, 0);
 
             const intervals = task.time_intervals.length;
+            const firstInterval = intervals > 0 ? task.time_intervals[0] : null;
             const lastInterval = intervals > 0 ? task.time_intervals[intervals - 1] : null;
+            const firstActivity = firstInterval !== null ? moment.utc(firstInterval.start_at) : null;
             const lastActivity = lastInterval !== null ? moment.utc(lastInterval.end_at) : null;
 
             return {
                 id: task.id,
                 name: task.task_name,
-                lastActivity: lastActivity,
+                firstActivity,
+                lastActivity,
                 totalTime: time,
             }
         });
+
+        this.firstActivity = this.tasks
+            .map(task => task.firstActivity)
+            .filter(interval => interval)
+            .reduce((min, curr) => min.diff(curr) < 0 ? min : curr, moment.utc());
+
+        this.lastActivity = this.tasks
+            .map(task => task.lastActivity)
+            .filter(interval => interval)
+            .reduce((max, curr) => max.diff(curr) > 0 ? max : curr, moment.utc(0));
 
         this.sort();
     }

@@ -20,6 +20,7 @@ import {NgSelectModule} from '@ng-select/ng-select';
 import {TimezonePickerModule} from 'ng2-timezone-selector';
 import {TranslateModule} from '@ngx-translate/core';
 import {SharedModule} from '../../shared.module';
+import { LoadingModule } from 'ngx-loading';
 
 @NgModule({
     imports: [
@@ -32,7 +33,8 @@ import {SharedModule} from '../../shared.module';
         NgSelectModule,
         TimezonePickerModule,
         TranslateModule,
-        SharedModule
+        SharedModule,
+        LoadingModule,
     ],
     declarations: [
         UsersCreateComponent,

@@ -50,7 +50,10 @@
                         </div>
                     </div>
 
-                    <a class="btn btn-primary" href="#" translate>project.show-details</a>
+                    <a
+                        class="btn btn-primary"
+                        [attr.href]="'/report?project=' + item.id + '&start=' + firstActivity.startOf('day').format('YYYY-MM-DD') + '&end=' + lastActivity.add(1, 'day').startOf('day').format('YYYY-MM-DD')" 
+                        translate>project.show-details</a>
 
                     <div class="show-info">
                         <div class="table-responsive">

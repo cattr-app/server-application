@@ -36,6 +36,15 @@ export class ViewSwitcherComponent implements OnInit {
     onChange = null;
     @Output() setView = new EventEmitter<ViewData>();
 
+    get view(): ViewData {
+        return {
+            name: this.viewName,
+            start: this.start,
+            end: this.end,
+            timezone: this.timezone,
+        };
+    }
+
     constructor(private api: ApiService) {
 
     }
@@ -59,12 +68,7 @@ export class ViewSwitcherComponent implements OnInit {
     }
 
     applyChanges() {
-        this.setView.emit({
-            name: this.viewName,
-            start: this.start,
-            end: this.end,
-            timezone: this.timezone,
-        });
+        this.setView.emit(this.view);
     }
 
     changeViewName(viewName: string) {

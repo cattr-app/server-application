@@ -2,7 +2,7 @@
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading">{{ item.id }} - {{ item.task_name }}</div>
+                <div class="panel-heading">Task Details</div>
                 <div class="panel-body">
                     <a class="btn btn-warning" routerLink="/tasks/list" title="Back">
                         <i class="fa fa-arrow-left" aria-hidden="true"></i>
@@ -20,7 +20,13 @@
 
                     <div class="show-info">
                         <div class="row">
-                            <!--<div class="col-sm-4">
+                            <div class="col-sm-12">
+                                <h3 class="task-name">{{ item.task_name }}</h3>
+                            </div>
+                        </div>
+
+                        <div class="row">
+                            <div class="col-sm-6">
                                 <table class="table table-borderless table--task-properties">
                                     <tbody>
                                         <tr>
@@ -28,17 +34,6 @@
                                             <td>{{ item.id }}</td>
                                         </tr>
 
-                                        <tr>
-                                            <th translate>field.name</th>
-                                            <td>{{ item.task_name }}</td>
-                                        </tr>
-                                    </tbody>
-                                </table>
-                            </div>-->
-
-                            <div class="col-sm-6">
-                                <table class="table table-borderless table--task-properties">
-                                    <tbody>
                                         <tr *ngIf="item.project">
                                             <th translate>field.project</th>
                                             <td>

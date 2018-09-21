@@ -1,6 +1,10 @@
 @import '../../../../variables';
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
+.task-name {
+    margin: 0 0 1em;
+}
+
 .table {
     &--task-properties {
         margin-bottom: 0;
