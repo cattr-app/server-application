@@ -9,6 +9,7 @@ const routes: Routes = [
     {path: 'tasks', loadChildren: './pages/tasks/tasks.module#TasksModule'},
     {path: 'statistic', loadChildren: './pages/statistic/statistic.module#StatisticModule'},
     {path: 'report', loadChildren: './pages/projectsreport/projectsreport.module#ProjectsreportModule'},
+    {path: 'time-use-report', loadChildren: './pages/time-use-report/time-use-report.module#TimeUseReportModule'},
     {path: 'users', loadChildren: './pages/users/users.module#UsersModule'},
     {path: 'roles', loadChildren: './pages/roles/roles.module#RolesModule'},
     {path: 'settings', component: SettingsComponent},

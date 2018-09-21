@@ -22,7 +22,7 @@ export class DateSelectorComponent implements OnInit {
     readonly max: moment.Moment = moment.utc().add(1, 'day');
 
     constructor(
-        protected translate: TranslateService,
+        public translate: TranslateService,
     ) {
     }
 

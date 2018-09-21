@@ -3,6 +3,7 @@
 		"dashboard": "Dashboard",
     	"login": "Login",
     	"projectsreport": "Projects report",
+    	"time-use-report": "Time use report",
 		"forgot": "Forgot",
 		"reset": "Reset",
 		"register": "Register",
@@ -21,6 +22,13 @@
 		"usage": "Today time use: {{time}}",
 		"no-task": "No task for last 24 hours. ¯\\_(ツ)_/¯",
 		"auto-loading": "screenshots auto-loading"
+	},
+	"time-use-report": {
+		"title": "Time Use Report",
+		"total-time-worked": "Total Time Worked",
+		"task": "Task",
+		"project": "Project",
+		"total-time": "Total Time"
 	},
 	"project": {
 		"remove-question": "Remove this project?",
