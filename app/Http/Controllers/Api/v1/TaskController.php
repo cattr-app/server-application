@@ -390,11 +390,6 @@ class TaskController extends ItemController
             ));
         }
 
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
-            200
-        );
-
         foreach ($items as $key => $task) {
             $totalTime = 0;
 
