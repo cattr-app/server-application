@@ -36,4 +36,29 @@ V0aCcGCmTIHEIUEqjgaORCMxIC6e0CcguWw6aFjsVMkkIr7g77ZKPJjPZqIyd7sJAgVGoEGv2xsBxqNg
 
     $response->assertStatus(200);
   }
+
+  public function test_Destroy_ExpectPass()
+  {
+    $headers = [
+      'Authorization' => 'Bearer ' . $this->getAdminToken()
+    ];
+
+    $screenshotData = [
+      'time_interval_id' => 1,
+      'screenshot' => 'screnshot_invaleeeeed'
+    ];
+
+    /**
+     * Upload screenshot and get ID
+     */
+    $id = $this->postJson('/api/v1/screenshots/create', $screenshotData, $headers);
+
+    $deleteScreenshotData = [
+      'id' => $id
+    ];
+
+    $response = $this->postJson('/api/v1/screenshots/destroy', $deleteScreenshotData, $headers);
+
+    $response->assertStatus(200);
+  }
 }
