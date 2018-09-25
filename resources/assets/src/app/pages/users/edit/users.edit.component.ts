@@ -19,15 +19,8 @@ type UserWithProjects = User & { projects?: Project[] };
     styleUrls: ['../../items.component.scss']
 })
 export class UsersEditComponent extends ItemsEditComponent implements OnInit {
-
     public item: UserWithProjects = new User();
-    public roles: Role[];
-    public active = [
-        {value: 0, label: 'Inactive'},
-        {value: 1, label: 'Active'},
-    ];
-    public selectedActive: any;
-    public selectedRole: any;
+    public roles: Role[] = [];
 
     projects: Project[];
     userProjects: Project[];
@@ -53,26 +46,15 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             'first_name': this.item.first_name,
             'last_name': this.item.last_name,
             'email': this.item.email,
-            'url': this.item.url,
-            'company_id': this.item.company_id,
-            'level': this.item.level,
-            'payroll_access': this.item.payroll_access,
-            'billing_access': this.item.billing_access,
             'avatar': this.item.avatar,
+            'url': this.item.url,
+            'active': this.item.active,
+            'role_id': this.item.role_id,
             'screenshots_active': this.item.screenshots_active,
             'manual_time': this.item.manual_time,
-            'permanent_tasks': this.item.permanent_tasks,
-            'computer_time_popup': this.item.computer_time_popup,
-            'poor_time_popup': this.item.poor_time_popup,
-            'blur_screenshots': this.item.blur_screenshots,
-            'web_and_app_monitoring': this.item.web_and_app_monitoring,
-            'webcam_shots': this.item.webcam_shots,
             'screenshots_interval': this.item.screenshots_interval,
-            'user_role_value': this.item.user_role_value,
-            'active': this.item.active,
-            'password': this.item.password,
             'timezone': this.item.timezone,
-            'role_id': this.item.role_id,
+            'password': this.item.password,
         };
     }
 
@@ -88,8 +70,6 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
 
     setItem(result) {
         this.item = result;
-        this.selectedActive = this.active.find((i) => i.value === parseInt(result.active, 2));
-        this.selectedRole = result.role_id;
         this.userProjects = this.item.projects;
         this.differProjects.diff(this.userProjects);
     }
@@ -100,18 +80,6 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
 
     setProjects(result) {
         this.projects = result;
-    }
-
-    OnChangeSelectActive(event) {
-        if (event) {
-            this.item.active = event.value;
-        }
-    }
-
-    OnChangeSelectRole(event) {
-        if (event) {
-            this.item.role_id = event.id;
-        }
     }
 
     onSubmit() {

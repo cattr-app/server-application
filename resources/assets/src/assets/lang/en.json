@@ -132,7 +132,8 @@
 		"date-range": "Date Range",
 		"export-csv": "Export CSV",
 		"user-selected": "{{count}} users selected",
-		"project-selected": "{{count}} projects selected"
+		"project-selected": "{{count}} projects selected",
+		"required-field": "Required field"
 	},
 	"field": {
 		"active": "Active",
@@ -162,7 +163,7 @@
 		"blur": "Blur screenshots",
 		"monitoring": "Web and app monitoring",
 		"webcam-shots": "Webcam shots",
-		"screenshots-interval": "Screenshots Interval",
+		"screenshots-interval": "Screenshots Interval (minutes)",
 		"role": "Role",
 		"roles": "Roles",
 		"timezone": "Timezone",

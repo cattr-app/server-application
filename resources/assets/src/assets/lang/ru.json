@@ -132,7 +132,8 @@
 		"date-range": "Промежуток",
 		"export-csv": "Экспорт CSV",
 		"user-selected": "{{count}} выбрано пользователей",
-		"project-selected": "{{count}} выбрано проектов"
+		"project-selected": "{{count}} выбрано проектов",
+		"required-field": "Обязательное поле"
 	},
 	"field": {
 		"active": "Активно",
@@ -159,7 +160,7 @@
 		"blur": "Замыливать скриншоты",
 		"monitoring": "Мониторинг запущенных приложений и открытых сайтов",
 		"webcam-shots": "Скриншоты с вебкамеры",
-		"screenshots-interval": "Интервал снятия скриншотов",
+		"screenshots-interval": "Интервал снятия скриншотов (минуты)",
 		"role": "Роль",
 		"roles": "Роли",
 		"timezone": "Временная зона",

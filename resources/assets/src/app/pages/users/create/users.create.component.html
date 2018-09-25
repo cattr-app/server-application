@@ -19,7 +19,7 @@
                                     [class.has-success]="full_name?.valid && (full_name.dirty || full_name.touched)">
                                     <input type="text" class="form-control" name="user-full-name"
                                         [(ngModel)]="item.full_name" #full_name="ngModel" required>
-                                    <span class="help-block">Required field</span>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
 
@@ -46,7 +46,7 @@
                                     [class.has-success]="email?.valid && (email.dirty || email.touched)">
                                     <input type="text" class="form-control" name="user-email"
                                         [(ngModel)]="item.email" #email="ngModel" required>
-                                    <span class="help-block">Required field</span>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
 
@@ -57,7 +57,7 @@
                                     [class.has-success]="password?.valid && (password.dirty || password.touched)">
                                     <input type="text" class="form-control" name="user-password"
                                         [(ngModel)]="item.password" #password="ngModel" required>
-                                    <span class="help-block">Required field</span>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
 
@@ -84,10 +84,10 @@
                                     [class.has-success]="active?.valid && (active.dirty || active.touched)">
                                     <select class="form-control" name="user-active"
                                         [(ngModel)]="item.active" #active="ngModel" required>
-                                        <option value="0">No</option>
-                                        <option value="1">Yes</option>
+                                        <option value="0" translate>control.no</option>
+                                        <option value="1" translate>control.yes</option>
                                     </select>
-                                    <span class="help-block">Required field</span>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
 
@@ -101,7 +101,7 @@
                                         <option value="" default></option>
                                         <option *ngFor="let role of roles" [attr.value]="role.id">{{ role.name }}</option>
                                     </select>
-                                    <span class="help-block">Required field</span>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
 
@@ -112,10 +112,10 @@
                                     [class.has-success]="screenshots_active?.valid && (screenshots_active.dirty || screenshots_active.touched)">
                                     <select class="form-control" name="user-screenshots-active"
                                         [(ngModel)]="item.screenshots_active" #screenshots_active="ngModel" required>
-                                        <option value="0">No</option>
-                                        <option value="1">Yes</option>
+                                        <option value="0" translate>control.no</option>
+                                        <option value="1" translate>control.yes</option>
                                     </select>
-                                    <span class="help-block">Required field</span>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
 
@@ -124,8 +124,8 @@
                                 <div class="col-md-10">
                                     <select class="form-control" name="user-manual-time"
                                         [(ngModel)]="item.manual_time" #manual_time="ngModel" required>
-                                        <option value="0">No</option>
-                                        <option value="1">Yes</option>
+                                        <option value="0" translate>control.no</option>
+                                        <option value="1" translate>control.yes</option>
                                     </select>
                                 </div>
                             </div>
@@ -137,7 +137,7 @@
                                     [class.has-success]="screenshots_interval?.valid && (screenshots_interval.dirty || screenshots_interval.touched)">
                                     <input type="text" class="form-control" name="user-screenshots-interval"
                                         [(ngModel)]="item.screenshots_interval" #screenshots_interval="ngModel" required>
-                                    <span class="help-block">Required field</span>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
 
