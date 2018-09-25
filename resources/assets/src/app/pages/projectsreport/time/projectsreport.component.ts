@@ -1,9 +1,9 @@
 import { Component, OnInit, ViewChild, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
-import { NgSelectComponent } from '@ng-select/ng-select';
 
 import { UserSelectorComponent } from '../../../user-selector/user-selector.component';
 import { DateRangeSelectorComponent } from '../../../date-range-selector/date-range-selector.component';
+import { ProjectSelectorComponent } from '../../../project-selector/project-selector.component';
 
 import { ApiService } from '../../../api/api.service';
 import { ProjectReportService } from './projectsreport.service';
@@ -11,16 +11,6 @@ import { AllowedActionsService } from '../../roles/allowed-actions.service';
 
 import * as moment from 'moment';
 import 'moment-timezone';
-
-import { Observable } from 'rxjs/Rx';
-import 'rxjs/operator/map';
-import 'rxjs/operator/share';
-import 'rxjs/operator/switchMap';
-
-interface SelectItem {
-  id: number,
-  title: string,
-}
 
 interface TaskData {
   id: number;
@@ -53,17 +43,12 @@ interface ProjectData {
 })
 export class ProjectsreportComponent implements OnInit, AfterViewInit {
   @ViewChild('userSelect') userSelect: UserSelectorComponent;
-  @ViewChild('projectSelect') projectSelect: NgSelectComponent;
+  @ViewChild('projectSelect') projectSelect: ProjectSelectorComponent;
   @ViewChild('dateRangeSelector') dateRangeSelector: DateRangeSelectorComponent;
 
   // Used to show loading indicators.
   loading = true;
   projectsLoading = true;
-
-  selectedUserIds: number[] = [];
-
-  availableProjects: SelectItem[] = [];
-  selectedProjectIds: number[] = [];
 
   report: ProjectData[] = [];
 
@@ -76,45 +61,14 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
   readonly defaultView = 'timelineDay';
   readonly formatDate = 'YYYY-MM-DD';
 
-  ngOnInit() { }
+  ngOnInit() {
+  }
 
   ngAfterViewInit() {
-    // Get preselected values from the query.
-    const projectId = this.route.snapshot.queryParamMap.get('project');
-    const startDate = this.route.snapshot.queryParamMap.get('start');
-    const endDate = this.route.snapshot.queryParamMap.get('end');
-
     const selectedUsers$ = (this.userSelect.changed.asObservable())
       .map(users => users.filter(user => user.id !== -1)).share();
 
-    const availableProjects$ = selectedUsers$.switchMap(users => {
-      const userIds = users.map(user => user.id);
-      return Observable.from(this.fetchProjects(userIds));
-    });
-    availableProjects$.subscribe(projects => {
-      /// Add the 'select all' option.
-      this.availableProjects = [{ id: -1, title: 'Select all' }, ...projects];
-      setTimeout(() => {
-        if (projectId) {
-          // Select a project specified by the query parameter..
-          this.selectedProjectIds = [+projectId];
-          this.projectSelect.changeEvent.emit([this.availableProjects.find(project => +project.id === +projectId)]);
-        } else {
-          // Select all projects.
-          this.selectedProjectIds = projects.map(project => project.id);
-          this.projectSelect.changeEvent.emit(projects);
-        }
-
-        if (startDate && endDate) {
-          this.dateRangeSelector.setStart(moment.utc(startDate));
-          this.dateRangeSelector.setEnd(moment.utc(endDate));
-          this.dateRangeSelector.activeButton = 'range';
-        }
-      });
-      this.projectsLoading = false;
-    });
-
-    const selectedProjects$ = (this.projectSelect.changeEvent.asObservable() as Observable<SelectItem[]>)
+    const selectedProjects$ = (this.projectSelect.changed.asObservable())
       .map(projects => projects.filter(project => project.id !== -1)).share();
 
     const range$ = this.dateRangeSelector.rangeChanged.asObservable().share();
@@ -131,19 +85,24 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
     });
   }
 
-  // Fetches available projects of specified users from the API.
-  fetchProjects(userIds: number[]) {
-    return new Promise<SelectItem[]>(resolve => {
-      this.projectReportService.getProjects(userIds).then(projects => {
-        const projectsData = (projects as any).map(project => {
-          return {
-            id: project.id,
-            title: project.name,
-          };
-        });
+  projectsLoaded(projects: any[]) {
+    // Get preselected values from the query.
+    const projectId = this.route.snapshot.queryParamMap.get('project');
+    const startDate = this.route.snapshot.queryParamMap.get('start');
+    const endDate = this.route.snapshot.queryParamMap.get('end');
 
-        resolve(projectsData);
-      });
+    setTimeout(() => {
+      if (projectId) {
+        // Select a project specified by the query parameter.
+        this.projectSelect.select([+projectId]);
+      }
+
+      if (startDate && endDate) {
+        this.dateRangeSelector.setMode('range');
+        this.dateRangeSelector.setStart(moment.utc(startDate));
+        this.dateRangeSelector.setEnd(moment.utc(endDate));
+        this.dateRangeSelector.applyChanges();
+      }
     });
   }
 
@@ -205,18 +164,6 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
     const minutesStr = (minutes > 9 ? '' : '0') + minutes;
     const secondsStr = (seconds > 9 ? '' : '0') + seconds;
     return `${hoursStr}:${minutesStr}:${secondsStr}`;
-  }
-
-  // Handles the 'select all' option.
-  projectSelected(value) {
-    if (value.id === -1) {
-      setTimeout(() => {
-        // Select all projects.
-        const projects = this.availableProjects.filter(project => project.id !== -1);
-        this.selectedProjectIds = projects.map(project => project.id);
-        this.projectSelect.changeEvent.emit(projects);
-      });
-    }
   }
 
   exportCSV() {

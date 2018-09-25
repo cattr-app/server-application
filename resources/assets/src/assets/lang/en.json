@@ -50,7 +50,15 @@
 		"edit": "Edit role \"{{name}}\"",
 		"edit-users": "Edit users of role \"{{name}}\"",
 		"create": "Create New Role",
-		"rolename": "Role name"
+		"rolename": "Role name",
+		"name": {
+			"root": "Root",
+			"user": "User",
+			"observer": "Observer",
+			"client": "Client",
+			"manager": "Manager",
+			"blocked": "Blocked"
+		}
 	},
 	"screenshot": {
 		"create": "Create New Screenshot",
