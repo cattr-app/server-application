@@ -867,7 +867,7 @@ export class StatisticTimeComponent implements OnInit {
             const time = timeWorked !== undefined ? timeWorked.total : 0;
             const timeHours = moment.duration(time).asHours().toFixed(2);
 
-            let cells = [`"${user.title}"`, `"${timeHours}"`];
+            let cells = [`"${user.title.replace(/"/g, '""')}"`, `"${timeHours}"`];
             if (view.name !== 'timelineDay') {
                 const daysData = days.map(day => {
                     const date = $(day).data('date');
