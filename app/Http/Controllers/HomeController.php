@@ -5,6 +5,7 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\View\View;
+use App\Helpers\FileHelper;
 
 /**
  * Class HomeController
@@ -27,6 +28,10 @@ class HomeController extends Controller
             return response(null, 204);
         }
 
-        return view('welcome');
+        $file_helper = new FileHelper();
+        return view('welcome', [
+            'styles' => $file_helper->getStyles(),
+            'scripts' => $file_helper->getScripts(),
+        ]);
     }
 }
