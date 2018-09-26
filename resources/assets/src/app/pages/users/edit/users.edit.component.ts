@@ -1,15 +1,16 @@
-import {Component, OnInit, IterableDiffers, IterableDiffer} from '@angular/core';
-import {ApiService} from '../../../api/api.service';
-import {User} from '../../../models/user.model';
-import {Router, ActivatedRoute} from '@angular/router';
-import {UsersService} from '../users.service';
-import {ItemsEditComponent} from '../../items.edit.component';
-import {AllowedActionsService} from '../../roles/allowed-actions.service';
-import {Role} from '../../../models/role.model';
-import {RolesService} from '../../roles/roles.service';
+import { Component, OnInit, IterableDiffers, IterableDiffer, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { ApiService } from '../../../api/api.service';
+import { User } from '../../../models/user.model';
+import { Router, ActivatedRoute } from '@angular/router';
+import { UsersService } from '../users.service';
+import { ItemsEditComponent } from '../../items.edit.component';
+import { AllowedActionsService } from '../../roles/allowed-actions.service';
+import { Role } from '../../../models/role.model';
+import { RolesService } from '../../roles/roles.service';
 import { ProjectsService } from '../../projects/projects.service';
 import { Project } from '../../../models/project.model';
 import { DualListComponent } from 'angular-dual-listbox';
+import { TimezonePickerComponent } from 'ng2-timezone-selector';
 
 type UserWithProjects = User & { projects?: Project[] };
 
@@ -19,6 +20,8 @@ type UserWithProjects = User & { projects?: Project[] };
     styleUrls: ['../../items.component.scss']
 })
 export class UsersEditComponent extends ItemsEditComponent implements OnInit {
+    @ViewChild('timezone') timezone: TimezonePickerComponent;
+
     public item: UserWithProjects = new User();
     public roles: Role[] = [];
 
@@ -28,13 +31,14 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
     dualListFormat: any = DualListComponent.DEFAULT_FORMAT;
 
     constructor(api: ApiService,
-                userService: UsersService,
-                activatedRoute: ActivatedRoute,
-                router: Router,
-                allowedService: AllowedActionsService,
-                protected roleService: RolesService,
-                protected projectService: ProjectsService,
-                differs: IterableDiffers
+        userService: UsersService,
+        activatedRoute: ActivatedRoute,
+        router: Router,
+        allowedService: AllowedActionsService,
+        protected roleService: RolesService,
+        protected projectService: ProjectsService,
+        differs: IterableDiffers,
+        protected cdr: ChangeDetectorRef,
     ) {
         super(api, userService, activatedRoute, router, allowedService);
         this.differProjects = differs.find([]).create(null);
@@ -63,9 +67,12 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             this.id = +params['id'];
         });
 
-        this.itemService.getItem(this.id, this.setItem.bind(this), {'with': 'projects'});
+        this.itemService.getItem(this.id, this.setItem.bind(this), { 'with': 'projects' });
         this.roleService.getItems(this.setRoles.bind(this));
         this.projectService.getItems(this.setProjects.bind(this));
+
+        // Needed to avoid 'Expression has changed after it was checked' error in the timezone picker.
+        this.cdr.detectChanges();
     }
 
     setItem(result) {

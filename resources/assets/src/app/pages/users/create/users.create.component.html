@@ -78,7 +78,7 @@
                             </div>
 
                             <div class="form-group row">
-                                <label class="col-md-2" translate>field.active</label>
+                                <label class="col-md-2" translate>field.user-active</label>
                                 <div class="col-md-10"
                                     [class.has-error]="active?.invalid && (active.dirty || active.touched)"
                                     [class.has-success]="active?.valid && (active.dirty || active.touched)">
@@ -154,13 +154,13 @@
                             </div>
 
                             <div *ngIf="form?.invalid" class="alert alert-danger" role="alert">
-                                <p *ngIf="full_name.errors">Full name is required</p>
-                                <p *ngIf="email.errors">Email is required</p>
-                                <p *ngIf="password.errors">Password is required</p>
-                                <p *ngIf="active.errors">Active is required</p>
-                                <p *ngIf="role.errors">Role ID is required</p>
-                                <p *ngIf="screenshots_active.errors">Screenshots Active is required</p>
-                                <p *ngIf="screenshots_interval.errors">Screenshots Interval is required</p>
+                                <p *ngIf="full_name?.errors" translate>control.fullname-required</p>
+                                <p *ngIf="email?.errors" translate>control.email-required</p>
+                                <p *ngIf="password?.errors" translate>control.password-required</p>
+                                <p *ngIf="active?.errors" translate>control.active-required</p>
+                                <p *ngIf="role?.errors" translate>control.role-id-required</p>
+                                <p *ngIf="screenshots_active?.errors" translate>control.screenshots-active-required</p>
+                                <p *ngIf="screenshots_interval?.errors" translate>control.screenshots-interval-required</p>
                             </div>
 
                             <button type="submit" class="btn btn-primary" [disabled]="form?.invalid" translate>control.create</button>

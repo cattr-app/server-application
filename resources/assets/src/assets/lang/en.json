@@ -133,7 +133,14 @@
 		"export-csv": "Export CSV",
 		"user-selected": "{{count}} users selected",
 		"project-selected": "{{count}} projects selected",
-		"required-field": "Required field"
+		"required-field": "Required field",
+		"fullname-required": "Full name field is required",
+		"email-required": "Email field is required",
+		"password-required": "Password field is required",
+		"active-required": "Active field is required",
+		"role-id-required": "Role field is required",
+		"screenshots-active-required": "Screenshots Active field is required",
+		"screenshots-interval-required": "Screenshots Interval field is required"
 	},
 	"field": {
 		"active": "Active",
@@ -157,6 +164,7 @@
 		"avatar": "Avatar",
 		"screenshots-active": "Screenshots Active",
 		"manual-time": "Manual time",
+		"manual-time-title": "Allows user to manually edit time intervals",
 		"permanent-tasks": "Permanent tasks",
 		"computer-time-popup": "Computer time popup",
 		"poor-time-popup": "Poor time popup",
@@ -168,6 +176,7 @@
 		"roles": "Roles",
 		"timezone": "Timezone",
 		"password": "Password",
-		"id": "Id"
+		"id": "Id",
+		"user-active": "Active"
 	}
 }
