@@ -63,4 +63,49 @@ class AuthControllerTest extends TestCase
 
     $response->assertStatus(401);
   }
+
+  public function test_Login_ExpectFail_WrongData()
+  {
+    $auth = [
+      'login'    => 'admin@example.com',
+      'password' => 'inwalidpassword',
+    ];
+
+    $response = $this->postJson('/api/auth/login', $auth);
+
+    $response->assertStatus(401);
+  }
+
+  public function test_Me_ExpectPass()
+  {
+    $headers = [
+      'Authorization' => 'Bearer ' . $this->getAdminToken()
+    ];
+
+    $response = $this->getJson('/api/auth/me', $headers);
+
+    $response->assertStatus(200);
+  }
+
+  public function test_Me_ExpectFail_WrongJWT()
+  {
+    $headers = [
+      'Authorization' => 'Bearer samplewrongjwt'
+    ];
+
+    $response = $this->getJson('/api/auth/me', $headers);
+
+    $response->assertStatus(403);
+  }
+
+  public function test_Refresh_ExpectPass()
+  {
+    $headers = [
+      'Authorization' => 'Bearer ' . $this->getAdminToken()
+    ];
+
+    $response = $this->postJson('/api/auth/refresh', [], $headers);
+
+    $response->assertStatus(200);
+  }
 }
