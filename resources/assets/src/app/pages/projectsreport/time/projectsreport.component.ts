@@ -171,13 +171,13 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
     let lines = [];
 
     this.report.forEach(project => {
-      const proj_name = `"${project.name.replace('"', '""')}"`;
+      const proj_name = `"${project.name.replace(/"/g, '""')}"`;
 
       project.users.forEach(user => {
-        const user_name = `"${user.full_name.replace('"', '""')}"`;
+        const user_name = `"${user.full_name.replace(/"/g, '""')}"`;
 
         user.tasks.forEach(task => {
-          const task_name = `"${task.task_name.replace('"', '""')}"`;
+          const task_name = `"${task.task_name.replace(/"/g, '""')}"`;
           const time = this.formatDurationStringCSV(task.duration);
           const duration = moment.duration(task.duration, 'seconds');
           const timeDecimal = duration.asHours().toFixed(4);
