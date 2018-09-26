@@ -14,8 +14,8 @@ import { LoadingModule } from 'ngx-loading';
 import { DateRangeSelectorComponent } from './date-range-selector/date-range-selector.component';
 import { UserSelectorComponent } from './user-selector/user-selector.component';
 import { DpDatePickerModule } from 'ng2-date-picker';
-import { UsersModule } from './pages/users/users.module';
 import { UsersService } from './pages/users/users.service';
+import { ProjectSelectorComponent } from './project-selector/project-selector.component';
 
 @NgModule({
     imports: [
@@ -35,6 +35,7 @@ import { UsersService } from './pages/users/users.service';
         ScreenshotListComponent,
         DateRangeSelectorComponent,
         UserSelectorComponent,
+        ProjectSelectorComponent,
     ],
     exports: [
         CommonModule,
@@ -48,6 +49,7 @@ import { UsersService } from './pages/users/users.service';
         DualListComponent,
         DateRangeSelectorComponent,
         UserSelectorComponent,
+        ProjectSelectorComponent,
     ],
     providers: [
         ProjectsService,

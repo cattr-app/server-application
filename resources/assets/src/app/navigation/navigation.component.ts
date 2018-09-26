@@ -23,7 +23,6 @@ export class NavigationComponent implements OnInit {
         {title: 'navigation.login', action: 'auth/login', isLink: true},
         {title: 'navigation.forgot', action: 'auth/forgot', isLink: true},
         {title: 'navigation.reset', action: 'auth/reset', isLink: true},
-        {title: 'navigation.register', action: 'auth/register', isLink: true},
     ];
 
     protected itemsAuthorized: NavigationLink[] = [

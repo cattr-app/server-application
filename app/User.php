@@ -39,7 +39,7 @@ use App\Models\Role;
  * @property int $webcam_shots
  * @property int $screenshots_interval
  * @property string $user_role_value
- * @property string $active
+ * @property int $active
  * @property string $password
  * @property string $timezone
  * @property int $role_id

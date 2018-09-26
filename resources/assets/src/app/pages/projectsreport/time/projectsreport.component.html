@@ -14,16 +14,9 @@
                 <app-user-selector class="reports__users" [attr.data-hidden]="!isManager" #userSelect>
                 </app-user-selector>
 
-                <div class="reports__projects">
-                  <ng-select #projectSelect [items]="availableProjects" [loading]="projectsLoading"
-                              bindValue="id" bindLabel="title" [closeOnSelect]="false"
-                              [multiple]="true" [(ngModel)]="selectedProjectIds" (add)="projectSelected($event)">
-                  </ng-select>
-
-                  <span class="reports__projects-count" translate [translateParams]="{count: selectedProjectIds.length}">
-                    control.project-selected
-                  </span>
-                </div>
+                <app-project-selector class="reports__projects" #projectSelect
+                  (loaded)="projectsLoaded($event)">
+                </app-project-selector>
               </app-date-range-selector>
             </div>
 
