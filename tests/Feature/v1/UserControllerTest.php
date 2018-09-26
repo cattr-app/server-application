@@ -23,18 +23,25 @@ class UserControllerTest extends TestCase
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
-    $response = $this->postJson('/api/v1/users/create', [], $headers);
+    $data = [
+      'id'        => 42,
+      'full_name' => 'Captain John Doe',
+      'email'     => 'johndoe@example.com',
+      'active'    => true
+    ];
+
+    $response = $this->postJson('/api/v1/users/create', $data, $headers);
     $response->assertStatus(200);
   }
 
-  public function test_Destroy_ExpectPass()
+  public function test_Destroy_ExpectFail_EmptyId()
   {
     $headers = [
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
     $response = $this->postJson('/api/v1/users/destroy', [], $headers);
-    $response->assertStatus(200);
+    $response->assertStatus(400);
   }
 
   public function test_Edit_ExpectPass()
@@ -83,8 +90,22 @@ class UserControllerTest extends TestCase
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
-    $response = $this->postJson('/api/v1/users/show', [], $headers);
+    $data = [
+      'id' => 1
+    ];
+
+    $response = $this->postJson('/api/v1/users/show', $data, $headers);
     $response->assertStatus(200);
+  }
+
+  public function test_Show_ExpectFail_EmptyId()
+  {
+    $headers = [
+      'Authorization' => 'Bearer ' . $this->getAdminToken()
+    ];
+
+    $response = $this->postJson('/api/v1/users/show', [], $headers);
+    $response->assertStatus(400);
   }
 
   public function test_BulkEdit_ExpectPass()

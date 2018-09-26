@@ -20,8 +20,6 @@ class RoleControllerTest extends TestCase
   {
     parent::setUp();
 
-    // Artisan::call('db:seed', ['--class' => UsersTableSeeder::class]);
-    // Artisan::call('db:seed', ['--class' => RoleSeeder::class]);
     Artisan::call('db:seed');
   }
 

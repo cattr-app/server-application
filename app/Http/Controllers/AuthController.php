@@ -153,6 +153,22 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
+    /**
+     * @api {any} /api/auth/logout Logout
+     * @apiDescription Invalidate JWT
+     * @apiVersion 0.1.0
+     * @apiName Logout
+     * @apiGroup Auth
+     *
+     * @apiSuccess {String}    message    Action result message
+     *
+     * @apiSuccessExample {json} Answer Example:
+     *  {
+     *      "message": "Successfully logged out"
+     *  }
+     *
+     * @return JsonResponse
+     */
     public function logout(): JsonResponse
     {
         auth()->logout();
@@ -220,11 +236,6 @@ class AuthController extends Controller
     * @apiVersion 0.1.0
     * @apiName Refresh
     * @apiGroup Auth
-    *
-    * @apiSuccess {String}     access_token  Token
-    * @apiSuccess {String}     token_type    Token Type
-    * @apiSuccess {String}     expires_in    Token TTL in seconds
-    * @apiSuccess {Array}      user          User Entity
     *
     * @apiUse AuthAnswer
     */

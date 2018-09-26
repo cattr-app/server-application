@@ -50,6 +50,14 @@ class TimeIntervalController extends ItemController
      * @apiName CreateTimeInterval
      * @apiGroup Time Interval
      *
+     * @apiParam {Integer}  task_id   Task ID
+     * @apiParam {Integer}  user_id   User ID
+     * @apiParam {String}   start_at  Interval time start
+     * @apiParam {String}   end_at    Interval time end
+     *
+     * @apiParam {Integer}  [count_mouse]     Mouse events count
+     * @apiParam {Integer}  [count_keyboard]  Keyboard events count
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -276,6 +284,8 @@ class TimeIntervalController extends ItemController
      * @apiVersion 0.1.0
      * @apiName DestroyTimeInterval
      * @apiGroup Time Interval
+     *
+     * @apiParam {Integer}   id Time interval ID
      */
 
     /**

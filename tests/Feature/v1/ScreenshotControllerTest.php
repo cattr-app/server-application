@@ -29,7 +29,7 @@ V0aCcGCmTIHEIUEqjgaORCMxIC6e0CcguWw6aFjsVMkkIr7g77ZKPJjPZqIyd7sJAgVGoEGv2xsBxqNg
 
     $data = [
       'time_interval_id'  => 300,
-      'screenshot'        => base64_decode($imageBase64)
+      'screenshot'        => $imageBase64
     ];
 
     $response = $this->postJson('/api/v1/screenshots/create', $data, $headers);
@@ -44,8 +44,8 @@ V0aCcGCmTIHEIUEqjgaORCMxIC6e0CcguWw6aFjsVMkkIr7g77ZKPJjPZqIyd7sJAgVGoEGv2xsBxqNg
     ];
 
     $screenshotData = [
-      'time_interval_id' => 1,
-      'screenshot' => 'screnshot_invaleeeeed'
+      'time_interval_id'  => 1,
+      'screenshot'        => `screnshot_invaleeeeed`
     ];
 
     /**
