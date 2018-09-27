@@ -220,20 +220,6 @@ export class StatisticTimeComponent implements OnInit {
         }
     }
 
-    fetchResources() {
-        return new Promise<ResourceInput[]>(resolve => {
-            this.userService.getItems((users: User[]) => {
-                const resources = users.map(user => {
-                    return {
-                        id: user.id.toString(),
-                        title: user.full_name,
-                    };
-                });
-                resolve(resources);
-            });
-        });
-    }
-
     fetchTasks(ids) {
         const params = {
             'id': ['=', ids],
@@ -759,6 +745,10 @@ export class StatisticTimeComponent implements OnInit {
 
     setMode(mode: string) {
         this.view = 'timeline' + mode[0].toUpperCase() + mode.slice(1);
+    }
+
+    userFilter(user: User) {
+        return !!user.active;
     }
 
     formatDurationString(time: number) {

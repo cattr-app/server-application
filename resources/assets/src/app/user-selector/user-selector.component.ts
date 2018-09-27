@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
 
 import { UsersService } from '../pages/users/users.service';
 
@@ -20,6 +20,8 @@ export class UserSelectorComponent implements OnInit {
     usersAvailable: UserSelectItem[] = [];
     usersSelected: UserSelectItem[] = [];
 
+    @Input() filter = (user: User) => true;
+
     @Output() added = new EventEmitter<UserSelectItem>();
     @Output() removed = new EventEmitter<UserSelectItem>();
     @Output() changed = new EventEmitter<UserSelectItem[]>();
@@ -33,7 +35,9 @@ export class UserSelectorComponent implements OnInit {
             this.isLoading = true;
 
             this.userService.getItems((users: User[]) => {
-                users = users.sort((a, b) => a.full_name.localeCompare(b.full_name));
+                users = users
+                    .filter(this.filter.bind(this))
+                    .sort((a, b) => a.full_name.localeCompare(b.full_name));
 
                 // Add 'Select all' item.
                 this.usersAvailable = [{ id: 0, full_name: 'Select all' }, ...users];
@@ -46,12 +50,13 @@ export class UserSelectorComponent implements OnInit {
 
     ngOnInit() {
         this.fetchUsers().then(users => {
-            const savedUsers = LocalStorage.getStorage().get(`filterByUserIN${window.location.pathname}`);
-            if (savedUsers) {
-                this.usersSelected = savedUsers;
+            const savedUsersIds = LocalStorage.getStorage().get(`filterByUserIN${window.location.pathname}`);
+            if (savedUsersIds) {
+                this.usersSelected = users.filter(user => savedUsersIds.includes(+user.id));
             } else {
                 this.usersSelected = users;
             }
+            this.usersSelected = this.usersSelected.filter(this.filter.bind(this));
             this.changed.emit(this.usersSelected);
         });
     }
@@ -73,12 +78,16 @@ export class UserSelectorComponent implements OnInit {
     change(users: UserSelectItem[]) {
         if (!users.find(user => +user.id === 0)) {
             this.changed.emit(users);
-            LocalStorage.getStorage().set(`filterByUserIN${window.location.pathname}`, users);
+
+            const userIds = this.usersSelected.map(user => +user.id);
+            LocalStorage.getStorage().set(`filterByUserIN${window.location.pathname}`, userIds);
         } else {
             // Handle 'Select all'.
             this.usersSelected = this.usersAvailable.filter(user => +user.id !== 0);
             this.changed.emit(this.usersSelected);
-            LocalStorage.getStorage().set(`filterByUserIN${window.location.pathname}`, this.usersSelected);
+
+            const userIds = this.usersSelected.map(user => +user.id);
+            LocalStorage.getStorage().set(`filterByUserIN${window.location.pathname}`, userIds);
         }
     }
 }

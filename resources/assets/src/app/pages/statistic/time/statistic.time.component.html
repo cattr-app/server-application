@@ -14,7 +14,8 @@
                 </ng2-timezone-picker>
             </div>
 
-            <app-user-selector class="statistics__users" #userSelect after>
+            <app-user-selector class="statistics__users" #userSelect after
+                [filter]="userFilter">
             </app-user-selector>
         </app-date-range-selector>
     </div>
