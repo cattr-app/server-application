@@ -7,7 +7,7 @@ import { TranslateService } from '@ngx-translate/core';
 
 import { LocalStorage } from '../api/storage.model';
 
-interface Range {
+export interface Range {
     start: moment.Moment;
     end: moment.Moment;
 }
@@ -239,6 +239,16 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
 
         if (this.mode !== 'range') {
             this.applyChanges();
+        }
+    }
+
+    buttonClick(mode: string) {
+        const prevMode = this.mode;
+        this.setMode(mode);
+
+        if (prevMode !== 'day' && mode === 'day') {
+            // Select today when switching to a day view.
+            this.setStart(moment.utc().startOf('day'));
         }
     }
 

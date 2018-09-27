@@ -4,10 +4,19 @@
     </div>
 
     <div class="statistics__header">
-        <view-switcher #viewSwitcher class="statistics__view-switcher">
-            <app-user-selector class="statistics__users" #userSelect>
+        <app-date-range-selector (modeChanged)="setMode($event)" #dateRangeSelector>
+            <div class="timezone">
+                <ng2-timezone-picker
+                    [(timezone)]="timezone"
+                    showOffset="true"
+                    placeholder="Select timezone"
+                    guess="true">
+                </ng2-timezone-picker>
+            </div>
+
+            <app-user-selector class="statistics__users" #userSelect after>
             </app-user-selector>
-        </view-switcher>
+        </app-date-range-selector>
     </div>
 
     <div class="statistics__timeline">

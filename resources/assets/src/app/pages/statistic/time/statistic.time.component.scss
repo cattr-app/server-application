@@ -1,6 +1,17 @@
 @import '../../../../variables';
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
+.timezone {
+    display: block;
+    margin-bottom: 1em;
+    width: 100%;
+
+    @media (min-width: $screen-sm-min) {
+        width: unset;
+        margin-right: 1em;
+    }
+}
+
 .statistics {
     &__view-switcher {
         display: flex;

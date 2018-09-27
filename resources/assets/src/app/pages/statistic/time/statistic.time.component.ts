@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, Output, EventEmitter } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
 import { PopoverDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../../../api/api.service';
@@ -9,8 +9,8 @@ import { TasksService } from '../../tasks/tasks.service';
 import { ProjectsService } from '../../projects/projects.service';
 import { ScreenshotsService } from '../../screenshots/screenshots.service';
 
-import { ViewSwitcherComponent, ViewData } from './view-switcher/view-switcher.component';
 import { UserSelectorComponent } from '../../../user-selector/user-selector.component';
+import { DateRangeSelectorComponent, Range } from '../../../date-range-selector/date-range-selector.component';
 
 import { User } from '../../../models/user.model';
 import { TimeInterval } from '../../../models/timeinterval.model';
@@ -28,7 +28,7 @@ import 'fullcalendar-scheduler';
 import { EventObjectInput, View } from 'fullcalendar';
 import { Schedule } from 'primeng/schedule';
 import { ResourceInput } from 'fullcalendar-scheduler/src/exports';
-import {TranslateService} from '@ngx-translate/core';
+import { TranslateService } from '@ngx-translate/core';
 
 import { Observable } from 'rxjs/Rx';
 import 'rxjs/operator/map';
@@ -60,9 +60,8 @@ interface TimeWorked {
 })
 export class StatisticTimeComponent implements OnInit {
     @ViewChild('timeline') timeline: Schedule;
-    @ViewChild('datePicker') datePicker: ElementRef;
     @ViewChild('userSelect') userSelect: UserSelectorComponent;
-    @ViewChild('viewSwitcher') viewSwitcher: ViewSwitcherComponent;
+    @ViewChild('dateRangeSelector') dateRangeSelector: DateRangeSelectorComponent;
     @ViewChild('clickPopover') clickPopover: PopoverDirective;
     @ViewChild('hoverPopover') hoverPopover: PopoverDirective;
 
@@ -82,7 +81,11 @@ export class StatisticTimeComponent implements OnInit {
     timelineInitialized: boolean = false;
     timelineOptions: any;
 
-    view: ViewData;
+    readonly defaultView = 'timelineDay';
+
+    view: string = this.defaultView;
+    range: Range;
+    timezone: string = '';
     viewEvents: EventObjectInput[] = [];
     viewEventsTasks: Task[] = [];
     viewEventsProjects: Project[] = [];
@@ -94,7 +97,7 @@ export class StatisticTimeComponent implements OnInit {
     selectedUsers: ResourceInput[] = [];
     sortUsers: UsersSort = UsersSort.NameAsc;
 
-    view$: Observable<ViewData>;
+    viewRange$: Observable<Range>;
     viewEvents$: Observable<EventObjectInput[]>;
     viewEventsTasks$: Observable<Task[]>;
     viewEventsProjects$: Observable<Project[]>;
@@ -115,10 +118,10 @@ export class StatisticTimeComponent implements OnInit {
         private taskService: TasksService,
         private projectService: ProjectsService,
         private screenshotService: ScreenshotsService,
-        private translate: TranslateService) {
+        private translate: TranslateService,
+        private cdr: ChangeDetectorRef) {
     }
 
-    readonly defaultView = 'timelineDay';
     readonly datePickerFormat = 'YYYY-MM-DD';
 
     get $timeline(): JQuery<any> {
@@ -130,7 +133,7 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     get timezoneOffset(): number {
-        return -(moment as any).tz.zone(this.view.timezone).utcOffset(this.view.start);
+        return -(moment as any).tz.zone(this.timezone).utcOffset(this.range.start);
     }
 
     get clickPopoverText(): string {
@@ -256,11 +259,9 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     ngOnInit() {
-        this.view = {
-            name: this.defaultView,
+        this.range = {
             start: moment.utc().startOf('day'),
             end: moment.utc().startOf('day').add(1, 'day'),
-            timezone: 'UTC',
         };
 
         this.selectedUsers$ = this.userSelect.changed.asObservable().map(users => {
@@ -272,13 +273,13 @@ export class StatisticTimeComponent implements OnInit {
             });
         }).share();
 
-        this.view$ = this.viewSwitcher.setView.asObservable();
-        this.viewEvents$ = this.view$.switchMap(view => {
+        this.viewRange$ = this.dateRangeSelector.rangeChanged.asObservable();
+        this.viewEvents$ = this.viewRange$.switchMap(range => {
             this.setLoading(true);
-            this.view = view;
+            this.range = range;
             const offset = this.timezoneOffset;
-            const start = view.start.clone().subtract(offset, 'minutes');
-            const end = view.end.clone().subtract(offset, 'minutes');
+            const start = range.start.clone().subtract(offset, 'minutes');
+            const end = range.end.clone().subtract(offset, 'minutes');
             return Observable.from(this.fetchEvents(start, end));
         }).share();
 
@@ -286,11 +287,11 @@ export class StatisticTimeComponent implements OnInit {
             setTimeout(() => {
                 this.viewEvents = events;
                 if (this.timelineInitialized) {
-                    this.timeline.changeView(this.view.name);
-                    this.timeline.gotoDate(this.view.start);
+                    this.timeline.changeView(this.view);
+                    this.timeline.gotoDate(this.range.start);
                     this.$timeline.fullCalendar('option', 'visibleRange', {
-                        start: this.view.start,
-                        end: this.view.end,
+                        start: this.range.start,
+                        end: this.range.end,
                     });
                     this.$timeline.fullCalendar('refetchEvents');
                 }
@@ -509,7 +510,7 @@ export class StatisticTimeComponent implements OnInit {
             displayEventTime: false,
             events: (start, end, timezone, callback) => {
                 // Load all actual intervals to the fullcalendar only on a day view.
-                callback(this.view.name === 'timelineDay' ? this.viewEvents : []);
+                callback(this.view === 'timelineDay' ? this.viewEvents : []);
             },
             eventClick: (event, jsEvent, view: View) => {
                 jsEvent.stopPropagation();
@@ -752,6 +753,12 @@ export class StatisticTimeComponent implements OnInit {
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
+
+        this.cdr.detectChanges();
+    }
+
+    setMode(mode: string) {
+        this.view = 'timeline' + mode[0].toUpperCase() + mode.slice(1);
     }
 
     formatDurationString(time: number) {
@@ -853,7 +860,7 @@ export class StatisticTimeComponent implements OnInit {
         if (view.name !== 'timelineDay') {
             const daysLabels = days.map(day => {
                 const date = $(day).data('date');
-                const dateString = (moment as any).tz(date, this.view.timezone).format('YYYY-MM-DD');
+                const dateString = (moment as any).tz(date, this.timezone).format('YYYY-MM-DD');
                 return `"${dateString}"`;
             });
             header = header.concat(daysLabels);
@@ -920,12 +927,12 @@ export class StatisticTimeComponent implements OnInit {
         this.clickPopover.hide();
         this.hoverPopover.hide();
         this.selectedIntervals = [];
-        this.viewSwitcher.setView.emit(this.view);
+        this.dateRangeSelector.rangeChanged.emit(this.range);
     }
 
     filter(filter: string | Task | Project) {
         this.eventFilter = filter;
-        this.viewSwitcher.setView.emit(this.view);
+        this.dateRangeSelector.rangeChanged.emit(this.range);
     }
 
     filterEvent(event: EventObjectInput): boolean {
