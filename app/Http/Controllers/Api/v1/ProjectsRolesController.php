@@ -63,11 +63,20 @@ class ProjectsRolesController extends ItemController
     /**
      * @api {post} /api/v1/projects-roles/create Create
      * @apiDescription Create Project Roles relation
+     *
      * @apiVersion 0.1.0
+     *
      * @apiName CreateProjectRoles
      * @apiGroup ProjectRoles
      *
+     * @apiUse DefaultBulkCreateErrorResponse
      *
+     * @api
+     *
+     * @apiParamExample {json} Simple-Request Example:
+     *  {
+     *      "id": 1
+     *  }
      *
      * @param Request $request
      * @return JsonResponse
@@ -169,16 +178,22 @@ class ProjectsRolesController extends ItemController
         );
     }
 
-    /**
-     * @api {post} /api/v1/projects-roles/destroy Destroy
-     * @apiDescription Destroy Project Roles relation
-     * @apiVersion 0.1.0
-     * @apiName DestroyProjectRoles
-     * @apiGroup ProjectRoles
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
+  /**
+   * @api {post} /api/v1/projects-roles/destroy Destroy
+   * @apiDescription Destroy Project Roles relation
+   * @apiVersion 0.1.0
+   * @apiName DestroyProjectRoles
+   * @apiGroup ProjectRoles
+   *
+   * @apiUse DefaultDestroyRequestExample
+   * @apiUse DefaultBulkDestroyErrorResponse
+   * @apiUse DefaultDestroyResponse
+   *
+   * @param Request $request
+   * @return JsonResponse
+   *
+   * @throws \Exception
+   */
     public function destroy(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all());

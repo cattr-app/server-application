@@ -297,6 +297,7 @@ abstract class  ItemController extends Controller
 
     /**
      * @apiDefine DefaultBulkDestroyErrorResponse
+     *
      * @apiError (Error 200) {Object[]}  messages               Errors (Array of objects)
      * @apiError (Error 200) {Object}    messages.object        Error object
      * @apiError (Error 200) {String}    messages.object.error  Name of error
