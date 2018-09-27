@@ -12,6 +12,18 @@ use Illuminate\Http\JsonResponse;
  */
 class AuthController extends Controller
 {
+  /**
+   * @apiDefine NotLoggedIn
+   * @apiErrorExample {json} Access Error Example:
+   * {
+      "error": "Access denied",
+      "reason": "not logined"
+   * }
+   *
+   * @apiError (Error 400) {String} error  Name of error
+   * @apiError (Error 400) {String} reason Reason of error
+   */
+
     /**
      * @apiDefine AuthAnswer
      * @apiSuccessExample {json} Answer Example:
@@ -100,6 +112,7 @@ class AuthController extends Controller
     * @api {post} /api/auth/login Login
     * @apiDescription Get a JWT
     *
+    *
     * @apiVersion 0.1.0
     * @apiName Login
     * @apiGroup Auth
@@ -166,6 +179,8 @@ class AuthController extends Controller
      *  {
      *      "message": "Successfully logged out"
      *  }
+     *
+     * @apiUse NotLoggedIn
      *
      * @return JsonResponse
      */

@@ -241,6 +241,8 @@ class UserController extends ItemController
      * @apiVersion 0.1.0
      * @apiName DestroyUser
      * @apiGroup User
+     *
+     * @apiUse DefaultDestroyRequestExample
      */
 
     /**
@@ -279,6 +281,8 @@ class UserController extends ItemController
      *
      * @apiSuccess {Object[]} message        Array of User object
      * @apiSuccess {Object}   message.object User object
+     *
+     * @apiUse DefaultBulkEditErrorResponse
      *
      * @param Request $request
      *
