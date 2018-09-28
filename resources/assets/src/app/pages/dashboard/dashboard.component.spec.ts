@@ -10,21 +10,13 @@ import {Location, LocationStrategy, PathLocationStrategy, APP_BASE_HREF} from '@
 import {AllowedActionsService} from '../roles/allowed-actions.service';
 import {By} from '@angular/platform-browser';
 import {LocalStorage} from '../../api/storage.model';
+import {loadAdminStorage, loadUserStorage} from '../../test-helper/test-helper';
 
-describe('DashboardComponent', () => {
+describe('DashboardComponent(Manager)', () => {
   let fixture, component;
-  const localStorage = LocalStorage.getStorage();
 
   beforeEach(async(() => {
-    localStorage.set('allowed_actions', [{
-      'object': 'dashboard',
-      'action': 'manager_access',
-      'name': 'Dashboard manager access'
-    }, {
-      'object': 'time-intervals',
-      'action': 'full_access',
-      'name': 'Time intervals full access'
-    }]);
+    loadAdminStorage();
     TestBed.configureTestingModule({
       declarations: [DashboardComponent],
       schemas: [NO_ERRORS_SCHEMA],
@@ -42,6 +34,7 @@ describe('DashboardComponent', () => {
       .compileComponents().then(() => {
       fixture = TestBed.createComponent(DashboardComponent);
       component = fixture.componentInstance;
+      fixture.detectChanges();
       // console.log(component.userIsManager);
       // console.log(component.allowedAction.can('dashboard/manager_access'));
     });
@@ -51,15 +44,60 @@ describe('DashboardComponent', () => {
     expect(component).toBeTruthy();
   });
 
-  // it('should has "own" tab', () => {
-  //   component.ngOnInit();
-  //   component.ngAfterViewInit();
-  //   const el  = fixture.debugElement.query(By.all()).nativeElement;
-  //   expect(el.innerHTML).toContain('Own');
-  // });
-  //
-  // it('should has "Team" tab', () => {
-  //   const el  = fixture.debugElement.query(By.all()).nativeElement;
-  //   expect(el.innerHTML).toContain('Team');
-  // });
+  it('should has "own" tab', () => {
+    component.ngOnInit();
+    component.ngAfterViewInit();
+    const el  = fixture.debugElement.query(By.all()).nativeElement;
+    expect(el.innerHTML).toContain('Own');
+  });
+
+  it('should has "Team" tab', () => {
+    const el  = fixture.debugElement.query(By.all()).nativeElement;
+    expect(el.innerHTML).toContain('Team');
+  });
+});
+
+describe('DashboardComponent(User)', () => {
+  let fixture, component;
+  beforeEach(async(() => {
+    loadUserStorage();
+
+    TestBed.configureTestingModule({
+      declarations: [DashboardComponent],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+        ApiService,
+        HttpClient,
+        HttpHandler,
+        {provide: Router, useClass: AppRoutingModule},
+        Location,
+        {provide: LocationStrategy, useClass: PathLocationStrategy},
+        {provide: APP_BASE_HREF, useValue: '/'},
+        AllowedActionsService,
+      ],
+    })
+      .compileComponents().then(() => {
+      fixture = TestBed.createComponent(DashboardComponent);
+      component = fixture.componentInstance;
+      fixture.detectChanges();
+      // console.log(component.userIsManager);
+      // console.log(component.allowedAction.can('dashboard/manager_access'));
+    });
+  }));
+
+  it('should be created', () => {
+    expect(component).toBeTruthy();
+  });
+
+  it('should has not "own" tab', () => {
+    component.ngOnInit();
+    component.ngAfterViewInit();
+    const el  = fixture.debugElement.query(By.all()).nativeElement;
+    expect(el.innerHTML).not.toContain('Own');
+  });
+
+  it('should has not "Team" tab', () => {
+    const el  = fixture.debugElement.query(By.all()).nativeElement;
+    expect(el.innerHTML).not.toContain('Team');
+  });
 });
