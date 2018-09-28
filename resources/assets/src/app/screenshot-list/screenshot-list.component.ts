@@ -162,12 +162,12 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
 
         if (this.max_date && !this.min_date && this.max_date.length) {
             const date = moment(this.max_date, 'DD-MM-YYYY').utc().add(1, 'day').format('YYYY-MM-DD HH:mm:ss');
-            params['timeInterval.end_at'] = ['<=', date];
+            params['timeInterval.start_at'] = ['<=', date];
         }
 
         if (this.min_date && !this.max_date && this.min_date.length) {
             const date = moment(this.min_date, 'DD-MM-YYYY').utc().format('YYYY-MM-DD HH:mm:ss');
-            params['timeInterval.start_at'] = ['>=', date];
+            params['timeInterval.end_at'] = ['>=', date];
         }
 
         if (this.min_date && this.max_date && this.min_date.length && this.max_date.length) {
@@ -246,5 +246,13 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
             this.setItems(items.filter(scr => scr.id !== screenshot.id));
             this.onScrollDown(); // To load new items, if needed.
         });
+    }
+
+    groupTrackFn(i, el) {
+        return i;
+    }
+
+    screenshotTrackFn(i, el: Screenshot) {
+        return el.id;
     }
 }

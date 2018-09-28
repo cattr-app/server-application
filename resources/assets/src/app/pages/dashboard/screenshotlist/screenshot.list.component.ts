@@ -39,7 +39,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     selectedDiffer: KeyValueDiffer<number, boolean> = null;
     selectedIntervals: TimeInterval[] = [];
 
-    _filter: string|Task|Project = '';
+    _filter: string | Task | Project = '';
 
     modalScreenshot?: Screenshot = null;
 
@@ -152,7 +152,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         this.loadNext();
     }
 
-    filter(filter: string|Task|Project = this._filter) {
+    filter(filter: string | Task | Project = this._filter) {
         this._filter = filter;
         this.filteredBlocks = this.blocks.map(block => {
             const filteredBlock = { ...block };
@@ -249,5 +249,13 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     formatTime(datetime: string) {
         return moment.utc(datetime).local().format('HH:mm');
+    }
+
+    blockTrackFn(i, el: Screenshot) {
+        return i;
+    }
+
+    screenshotsTrackFn(i, el: Screenshot) {
+        return i;
     }
 }

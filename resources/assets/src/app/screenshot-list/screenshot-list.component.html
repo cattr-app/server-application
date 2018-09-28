@@ -1,10 +1,10 @@
-<div class="screenshots-row row" *ngFor="let group of itemsChunked">
-    <div class="screenshot-wrapper col-xs-6 col-sm-4 col-md-3 col-lg-2" *ngFor="let screenshot of group">
+<div class="screenshots-row row" *ngFor="let group of itemsChunked; trackBy: groupTrackFn">
+    <div class="screenshot-wrapper col-xs-6 col-sm-4 col-md-3 col-lg-2" *ngFor="let screenshot of group; trackBy: screenshotTrackFn">
         <div class="card">
-            <img class="screenshot card-img-top"
-                [attr.src]="screenshot.thumbnail_path ? screenshot.thumbnail_path : (screenshot.path ? screenshot.path : 'uploads/none.png')"
-                onerror="this.src='uploads/none.png'" alt="image"
-                (click)="showModal(screenshot)" />
+            <app-image class="screenshot card-img-top"
+                [src]="screenshot.thumbnail_path ? screenshot.thumbnail_path : (screenshot.path ? screenshot.path : 'uploads/none.png')"
+                (click)="showModal(screenshot)">
+            </app-image>
 
             <div class="card-body">
                 <p class="card-text">
@@ -55,7 +55,8 @@
                 <div class="row">
                     <div class="col-md-12 modal-screenshot-wrapper">
                         <a [attr.href]="modalScreenshot.path" target="_blank">
-                            <img src="{{ modalScreenshot.path }}" style="width:100%;">
+                            <app-image [src]="modalScreenshot.path" style="width: 100%;">
+                            </app-image>
                         </a>
                         <button class="btn btn-primary modal-screenshot-nav-left" (click)="showPrev()">&lt;</button>
                         <button class="btn btn-primary modal-screenshot-nav-right" (click)="showNext()">&gt;</button>
