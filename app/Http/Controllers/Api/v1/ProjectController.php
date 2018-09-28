@@ -98,6 +98,7 @@ class ProjectController extends ItemController
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
      * @apiUse ProjectRelationsExample
+     * @apiUse NotLoggedIn
      *
      * @apiSuccess {Object[]} ProjectList                     Projects (Array of objects)
      * @apiSuccess {Object}   ProjectList.Project             Project object
@@ -206,6 +207,7 @@ class ProjectController extends ItemController
      * @apiSuccess {DateTime} res.updated_at  Project's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @apiSuccessExample {json} Answer Example:
      * {
@@ -319,6 +321,7 @@ class ProjectController extends ItemController
      * }
      *
      * @apiUse DefaultShowErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -366,6 +369,7 @@ class ProjectController extends ItemController
      * @apiParam {String} id Project's id
      *
      * @apiUse DefaultDestroyResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse

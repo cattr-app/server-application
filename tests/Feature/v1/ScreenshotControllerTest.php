@@ -43,10 +43,12 @@ V0aCcGCmTIHEIUEqjgaORCMxIC6e0CcguWw6aFjsVMkkIr7g77ZKPJjPZqIyd7sJAgVGoEGv2xsBxqNg
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
-    $screenshotData = [
-      'time_interval_id'  => 1,
-      'screenshot'        => `screnshot_invaleeeeed`
-    ];
+    $screenshotData = "{
+  \"screenshot\": ```sample binary data```,
+  \"time_interval_id\": 1
+}";
+
+    $response = $this->post('', '');
 
     /**
      * Upload screenshot and get ID

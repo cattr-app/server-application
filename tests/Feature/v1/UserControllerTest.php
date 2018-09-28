@@ -31,16 +31,22 @@ class UserControllerTest extends TestCase
     ];
 
     $response = $this->postJson('/api/v1/users/create', $data, $headers);
+    echo 'WRONG: ' . $response->content();
+
     $response->assertStatus(200);
   }
 
-  public function test_Destroy_ExpectFail_EmptyId()
+  public function test_Destroy_ExpectFail_WrongId()
   {
     $headers = [
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
-    $response = $this->postJson('/api/v1/users/destroy', [], $headers);
+    $data = [
+      'id' => 'SampleWrongId'
+    ];
+
+    $response = $this->postJson('/api/v1/users/destroy', $data, $headers);
     $response->assertStatus(400);
   }
 

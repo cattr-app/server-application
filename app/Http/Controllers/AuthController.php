@@ -110,7 +110,7 @@ class AuthController extends Controller
 
    /**
     * @api {post} /api/auth/login Login
-    * @apiDescription Get a JWT
+    * @apiDescription Get user JWT
     *
     *
     * @apiVersion 0.1.0
@@ -134,11 +134,7 @@ class AuthController extends Controller
     *  }
     *
     * @apiUse AuthAnswer
-    *
-    * @apiErrorExample {json} Error Example:
-    *   {
-    *     "error": "Unauthorized"
-    *   }
+    * @apiUse NotLoggedIn
     *
     * @return JsonResponse
     */
@@ -195,7 +191,7 @@ class AuthController extends Controller
 
   /**
    * @api {get} /api/auth/me Me
-   * @apiDescription Get authenticated User
+   * @apiDescription Get authenticated User Entity
    *
    * @apiVersion 0.1.0
    * @apiName Me
@@ -206,9 +202,11 @@ class AuthController extends Controller
    * @apiSuccess {String}     expires_in    Token TTL in seconds
    * @apiSuccess {Array}      user          User Entity
    *
+   * @apiUse NotLoggedIn
+   *
    * @apiSuccessExample {json} Answer Example:
    * {
-   *  "id": 1,
+   *   "id": 1,
    *   "full_name": "Admin",
    *   "first_name": "Ad",
    *   "last_name": "Min",
@@ -251,6 +249,8 @@ class AuthController extends Controller
     * @apiVersion 0.1.0
     * @apiName Refresh
     * @apiGroup Auth
+    *
+    * @apiUse NotLoggedIn
     *
     * @apiUse AuthAnswer
     */

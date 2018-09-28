@@ -31,6 +31,8 @@ class TimeIntervalControllerTest extends TestCase
     ];
 
     $response = $this->postJson('/api/v1/time-intervals/create', $data, $headers);
+    echo 'WRONG: ' . $response->content();
+
     $response->assertStatus(200);
   }
 
@@ -38,6 +40,12 @@ class TimeIntervalControllerTest extends TestCase
   {
     $headers = [
       'Authorization' => 'Bearer ' . $this->getAdminToken()
+    ];
+
+    $createResponse = $this->postJson('/api/v1/time-intervals/destroy');
+
+    $data = [
+      'id' => 1
     ];
 
     $response = $this->postJson('/api/v1/time-intervals/destroy', [], $headers);
@@ -71,6 +79,7 @@ class TimeIntervalControllerTest extends TestCase
     ];
 
     $response = $this->postJson('/api/v1/time-intervals/show', [], $headers);
+    echo 'WRONG: ' . $response->content();
 
     $response->assertStatus(200);
   }
