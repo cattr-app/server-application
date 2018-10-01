@@ -1,6 +1,6 @@
 <ng-select #select class="select" bindLabel="name"
     [items]="projectsAvailable" [loading]="isLoading"
-    [closeOnSelect]="false" [multiple]="true"
+    [closeOnSelect]="false" [multiple]="true" [clearSearchOnAdd]="false"
     [(ngModel)]="projectsSelected" [searchFn]="searchFn"
     (add)="add($event)" (remove)="remove($event)"
     (change)="change($event)">

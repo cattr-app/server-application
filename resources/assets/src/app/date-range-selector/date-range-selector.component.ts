@@ -185,7 +185,7 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
             }
         }
 
-        if (this.mode !== 'range') {
+        if (this.mode !== 'range' || !this.isRangePopupOpened) {
             this.applyChanges();
         }
     }
@@ -237,7 +237,7 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
             }
         }
 
-        if (this.mode !== 'range') {
+        if (this.mode !== 'range' || !this.isRangePopupOpened) {
             this.applyChanges();
         }
     }
@@ -271,7 +271,7 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
                 break;
         }
 
-        if (this.mode !== 'range') {
+        if (this.mode !== 'range' || !this.isRangePopupOpened) {
             this.applyChanges();
         }
     }
