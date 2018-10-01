@@ -140,7 +140,9 @@
 		"active-required": "Active field is required",
 		"role-id-required": "Role field is required",
 		"screenshots-active-required": "Screenshots Active field is required",
-		"screenshots-interval-required": "Screenshots Interval field is required"
+		"screenshots-interval-required": "Screenshots Interval field is required",
+		"activate": "Activate",
+		"deactivate": "Deactivate"
 	},
 	"field": {
 		"active": "Active",

@@ -45,6 +45,10 @@
                                             <span translate>control.edit</span>
                                         </button>
                                     </a>
+                                    <button *ngIf="can('/users/edit')" class="btn btn-primary btn-sm" (click)="toggleActive(user)">
+                                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                        <span translate>{{ user.active ? 'control.deactivate' : 'control.activate' }}</span>
+                                    </button>
                                     <a *ngIf="can('/users/remove')" (click)="openRemoveItemModalWindow(template, user.id)" title="Delete user">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
