@@ -71,7 +71,6 @@ class ProjectsRolesController extends ItemController
      *
      * @apiUse DefaultBulkCreateErrorResponse
      *
-     * @api
      *
      * @apiParamExample {json} Simple-Request Example:
      *  {

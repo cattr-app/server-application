@@ -32,6 +32,7 @@ class TimeControllerTest extends TestCase
      * Support GET and POST requests
      */
     $getResponse = $this->getJson('/api/v1/time/project', $headers);
+    echo 'WRONG: ' . var_export($getResponse, true);
     $getResponse->assertStatus(200);
 
     $postResponse = $this->postJson('/api/v1/time/project', [], $headers);

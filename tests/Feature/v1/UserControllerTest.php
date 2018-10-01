@@ -47,6 +47,7 @@ class UserControllerTest extends TestCase
     ];
 
     $response = $this->postJson('/api/v1/users/destroy', $data, $headers);
+    echo 'WRONG: ' . var_export($response, true);
     $response->assertStatus(400);
   }
 

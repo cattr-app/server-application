@@ -48,6 +48,17 @@ class RelationsUsersController extends ItemController
      * @apiParam {Integer} [attached_user_id] `QueryParam` Attached user ID
      * @apiParam {Integer} [user_id]          `QueryParam` User ID
      *
+     * @apiP
+     * [
+     *    {
+     *      "user_id": 1,
+     *      "attached_user_id": 1,
+     *      "created_at": "2018-09-28 13:53:57",
+     *      "updated_at": "2018-09-28 13:53:59"
+     *    }
+     * ]
+     *
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -59,6 +70,27 @@ class RelationsUsersController extends ItemController
      * @apiVersion 0.1.0
      * @apiName CreateAttachedUsers
      * @apiGroup AttachedUsers
+     *
+     * @apiParam user_id Integer User ID
+     * @apiParam attached_user_id Attached to User
+     *
+     * @apiRequestExample {json} Request
+     * {
+     *   "user_id": 1,
+     *   "attached_user_id": 1
+     * }
+     *
+     *
+     * @apiSuccessAnswer {json} Answer Example:
+     * [
+     *   {
+     *     "user_id": 1,
+     *     "attached_user_id": 1,
+     *     "updated_at": "2018-10-01 08:41:37",
+     *     "created_at": "2018-10-01 08:41:37",
+     *     "id": 0
+     *   }
+     * ]
      *
      * @param Request $request
      * @return JsonResponse
@@ -166,6 +198,8 @@ class RelationsUsersController extends ItemController
      * @apiVersion 0.1.0
      * @apiName DestroyAttachedUsers
      * @apiGroup AttachedUsers
+     *
+     * @apiParam {Integer} User Relation ID
      *
      * @param Request $request
      * @return JsonResponse

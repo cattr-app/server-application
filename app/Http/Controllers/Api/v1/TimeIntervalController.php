@@ -23,6 +23,25 @@ use Illuminate\Support\Facades\Storage;
 class TimeIntervalController extends ItemController
 {
     /**
+     * @apiDefine WrongDateTimeFormatStartEndAt
+     *
+     * @apiError (Error 401) {String} Error Error
+     *
+     * @apiErrorExample {json} DateTime validation fail
+     * {
+     *   "error": "validation fail",
+     *     "reason": {
+     *     "start_at": [
+     *       "The start at does not match the format Y-m-d\\TH:i:sP."
+     *     ],
+     *     "end_at": [
+     *       "The end at does not match the format Y-m-d\\TH:i:sP."
+     *     ]
+     *   }
+     * }
+     */
+
+    /**
      * @return string
      */
     public function getItemClass(): string
@@ -50,6 +69,32 @@ class TimeIntervalController extends ItemController
      * @apiName CreateTimeInterval
      * @apiGroup Time Interval
      *
+     * @apiUse NotLoggedIn
+     *
+     * @apiRequestExample {json} Request Example
+     * {
+     *   "task_id": 1,
+     *   "user_id": 1,
+     *   "start_at": "2013-04-12T16:40:00-04:00",
+     *   "end_at": "2013-04-12T16:40:00-04:00"
+     * }
+     *
+     * @apiSuccessExample {json} Answer Example
+     * {
+     *   "interval": {
+     *     "id": 2251,
+     *     "task_id": 1,
+     *     "start_at": "2013-04-12 20:40:00",
+     *     "end_at": "2013-04-12 20:40:00",
+     *     "created_at": "2018-10-01 03:20:59",
+     *     "updated_at": "2018-10-01 03:20:59",
+     *     "deleted_at": null,
+     *     "count_mouse": 0,
+     *     "count_keyboard": 0,
+     *     "user_id": 1
+     *   }
+     * }
+     *
      * @apiParam {Integer}  task_id   Task ID
      * @apiParam {Integer}  user_id   User ID
      * @apiParam {String}   start_at  Interval time start
@@ -57,6 +102,8 @@ class TimeIntervalController extends ItemController
      *
      * @apiParam {Integer}  [count_mouse]     Mouse events count
      * @apiParam {Integer}  [count_keyboard]  Keyboard events count
+     *
+     * @apiUse WrongDateTimeFormatStartEndAt
      *
      * @param Request $request
      * @return JsonResponse
@@ -161,6 +208,8 @@ class TimeIntervalController extends ItemController
      *
      * @apiSuccess (200) {TimeInterval[]} TimeIntervalList array of Time Interval objects
      *
+     * @apiUse NotLoggedIn
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -193,6 +242,29 @@ class TimeIntervalController extends ItemController
      * @apiVersion 0.1.0
      * @apiName ShowTimeInterval
      * @apiGroup Time Interval
+     *
+     * @apiParam {Integer}  id     Time Interval ID
+     *
+     * @apiRequestExample {json} Request Example
+     * {
+     *   "id": 1
+     * }
+     *
+     * @apiSuccessExample {json} Answer Example
+     * {
+     *   "id": 1,
+     *   "task_id": 1,
+     *   "start_at": "2006-05-31 16:15:09",
+     *   "end_at": "2006-05-31 16:20:07",
+     *   "created_at": "2018-09-25 06:15:08",
+     *   "updated_at": "2018-09-25 06:15:08",
+     *   "deleted_at": null,
+     *   "count_mouse": 88,
+     *   "count_keyboard": 127,
+     *   "user_id": 1
+     * }
+     *
+     * @apiUse NotLoggedIn
      */
 
     /**
@@ -201,6 +273,16 @@ class TimeIntervalController extends ItemController
      * @apiVersion 0.1.0
      * @apiName EditTimeInterval
      * @apiGroup Time Interval
+     *
+     * @apiParam {Integer}  id     Time Interval ID
+     * @apiParam {Integer}  [user_id]    Time Interval's User ID
+     * @apiParam {String}   [start_at]   Interval Start DataTime
+     * @apiParam {String}   [end_at]     Interval End DataTime
+     * @apiParam {DateTime} [created_at] Time Interval Creation DateTime
+     * @apiParam {DateTime} [updated_at] Last Time Interval data update DataTime
+     * @apiParam {DateTime} [deleted_at] When Time Interval was deleted (null if not)
+     *
+     * @apiUse NotLoggedIn
      */
     public function edit(Request $request): JsonResponse
     {
@@ -286,6 +368,8 @@ class TimeIntervalController extends ItemController
      * @apiGroup Time Interval
      *
      * @apiParam {Integer}   id Time interval ID
+     *
+     * @apiUse NotLoggedIn
      */
 
     /**

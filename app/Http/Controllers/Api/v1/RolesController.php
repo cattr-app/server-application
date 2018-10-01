@@ -280,7 +280,11 @@ class RolesController extends ItemController
      *
      * @apiUse NotLoggedIn
      *
-     * @todo add error example doc
+     * @apiErrorExample {json} Invalid ID Example:
+     * {
+     *   "error": "Validation fail",
+     *   "reason": "Invalid id"
+     * }
      *
      * @param Request $request
      *

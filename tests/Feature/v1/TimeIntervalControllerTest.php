@@ -26,12 +26,11 @@ class TimeIntervalControllerTest extends TestCase
     $data = [
       'task_id'   => 42,
       'user_id'   => 1,
-      'start_at'  => '2011-07-14T19:43:37+0100',
-      'end_at'    => '2012-07-14T19:43:37+0100'
+      'start_at'  => '2017-05-11T00:00:00+08:00',
+      'end_at'    => '2017-05-11T00:00:00+08:00'
     ];
 
     $response = $this->postJson('/api/v1/time-intervals/create', $data, $headers);
-    echo 'WRONG: ' . $response->content();
 
     $response->assertStatus(200);
   }
@@ -59,6 +58,7 @@ class TimeIntervalControllerTest extends TestCase
     ];
 
     $response = $this->postJson('/api/v1/time-intervals/edit', [], $headers);
+    echo 'WRONG: ' . var_export($response, true);
     $response->assertStatus(200);
   }
 
@@ -78,8 +78,11 @@ class TimeIntervalControllerTest extends TestCase
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
-    $response = $this->postJson('/api/v1/time-intervals/show', [], $headers);
-    echo 'WRONG: ' . $response->content();
+    $data = [
+      'id' => 1
+    ];
+
+    $response = $this->postJson('/api/v1/time-intervals/show', $data, $headers);
 
     $response->assertStatus(200);
   }
