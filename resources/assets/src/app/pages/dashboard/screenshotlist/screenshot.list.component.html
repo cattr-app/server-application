@@ -1,16 +1,17 @@
 <div class="container-fuild">
-  <div class="row" *ngFor="let block of filteredBlocks">
+  <div class="row" *ngFor="let block of filteredBlocks; trackBy: blockTrackFn">
     <div class="col-md-11">
       <!-- items start -->
-      <div class="col-md-2" *ngFor="let screenshots of block.screenshots">
+      <div class="col-md-2" *ngFor="let screenshots of block.screenshots; trackBy: screenshotsTrackFn">
         <div *ngIf="screenshots[0]" class="card screenshot">
           <input type="checkbox" class="select_image" *ngIf="screenshots[0].id"
             (change)="selected[screenshots[0].id] = !selected[screenshots[0].id]"
             [checked]="selected[screenshots[0].id]" />
 
-          <img class="card-img-top" (click)="openScreenshotModal(screenshots[0])"
-            [attr.src]="screenshots[0].thumbnail_path ? screenshots[0].thumbnail_path : (screenshots[0].path ? screenshots[0].path : 'uploads/none.png')"
-            onerror="this.src='uploads/none.png'" alt="image" />
+          <app-image class="card-img-top"
+              [src]="screenshots[0].thumbnail_path ? screenshots[0].thumbnail_path : (screenshots[0].path ? screenshots[0].path : 'uploads/none.png')"
+              (click)="openScreenshotModal(screenshots[0])">
+          </app-image>
 
           <div class="card-body">
             <p class="card-text" *ngIf="screenshots[0].time_interval">
@@ -71,7 +72,8 @@
         <div class="row">
           <div class="col-md-12 modal-screenshot-wrapper">
             <a [attr.href]="modalScreenshot.path" target="_blank">
-              <img src="{{ modalScreenshot.path }}" style="width:100%;">
+              <app-image [src]="modalScreenshot.path" style="width: 100%;">
+              </app-image>
             </a>
             <button class="btn btn-primary modal-screenshot-nav-left" (click)="prevScreenshot()">&lt;</button>
             <button class="btn btn-primary modal-screenshot-nav-right" (click)="nextScreenshot()">&gt;</button>

@@ -37,8 +37,9 @@
             <ngx-loading [show]="popoverLoading"></ngx-loading>
             <a *ngIf="clickPopoverScreenshot !== null"
                 [attr.href]="'screenshots/show/' + clickPopoverScreenshot.id">
-                <img class="statistics-popover__image"
-                    [attr.src]="clickPopoverScreenshot.thumbnail_path ? clickPopoverScreenshot.thumbnail_path : (clickPopoverScreenshot.path ? clickPopoverScreenshot.path : 'uploads/none.png')" />
+                <app-image class="statistics-popover__image"
+                    [src]="clickPopoverScreenshot.thumbnail_path ? clickPopoverScreenshot.thumbnail_path : (clickPopoverScreenshot.path ? clickPopoverScreenshot.path : 'uploads/none.png')">
+                </app-image>
             </a>
         </p>
 

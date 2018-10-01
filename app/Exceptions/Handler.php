@@ -46,7 +46,7 @@ class Handler extends ExceptionHandler
     {
         $path = $request->path();
         if ($request->expectsJson() || strpos($path, 'api/') === 0) {
-            return response()->json($exception, 500);
+            return response()->json(['error' => $exception->getMessage()], 500);
         }
 
         return parent::render($request, $exception);

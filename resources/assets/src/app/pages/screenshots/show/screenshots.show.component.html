@@ -44,9 +44,10 @@
                             </table>
                         </div>
                     </div>
-                    <div class="col-md-12">
+                    <div class="col-md-12" *ngIf="item.path">
                         <a [attr.href]="item.path" target="_blank">
-                            <img src="{{ item.path }}" style="width:100%;">
+                            <app-image [src]="item.path" style="width: 100%;">
+                            </app-image>
                         </a>
                     </div>
                 </div>
