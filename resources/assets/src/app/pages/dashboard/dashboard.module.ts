@@ -20,6 +20,7 @@ import { TabsModule, ModalModule } from 'ngx-bootstrap';
 import { LoadingModule } from 'ngx-loading';
 import {AutoCompleteModule} from 'primeng/autocomplete';
 import { NgSelectModule } from '@ng-select/ng-select';
+import { SharedModule } from '../../shared.module';
 
 @NgModule({
   imports: [
@@ -35,6 +36,7 @@ import { NgSelectModule } from '@ng-select/ng-select';
     AutoCompleteModule,
     NgSelectModule,
     ModalModule,
+    SharedModule,
   ],
   declarations: [
     DashboardComponent,

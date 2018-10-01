@@ -16,6 +16,7 @@ import { UserSelectorComponent } from './user-selector/user-selector.component';
 import { DpDatePickerModule } from 'ng2-date-picker';
 import { UsersService } from './pages/users/users.service';
 import { ProjectSelectorComponent } from './project-selector/project-selector.component';
+import { ImageComponent } from './image/image.component';
 
 @NgModule({
     imports: [
@@ -36,6 +37,7 @@ import { ProjectSelectorComponent } from './project-selector/project-selector.co
         DateRangeSelectorComponent,
         UserSelectorComponent,
         ProjectSelectorComponent,
+        ImageComponent,
     ],
     exports: [
         CommonModule,
@@ -50,6 +52,7 @@ import { ProjectSelectorComponent } from './project-selector/project-selector.co
         DateRangeSelectorComponent,
         UserSelectorComponent,
         ProjectSelectorComponent,
+        ImageComponent,
     ],
     providers: [
         ProjectsService,

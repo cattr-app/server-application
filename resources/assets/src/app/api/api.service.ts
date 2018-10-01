@@ -198,7 +198,7 @@ export class ApiService {
         console.log(error);
     }
 
-    private getAuthString() {
+    public getAuthString() {
         return `${this.tokenType} ${this.token}`;
     }
 }
