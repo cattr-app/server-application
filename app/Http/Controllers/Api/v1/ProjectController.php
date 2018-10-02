@@ -353,6 +353,7 @@ class ProjectController extends ItemController
      * @apiSuccess {DateTime} res.deleted_at  Project's date time of delete
      *
      * @apiUse DefaultEditErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse

@@ -55,6 +55,11 @@ class ProjectsRolesController extends ItemController
      *
      * @apiSuccess {ProjectRoles[]} ProjectRolesList array of Project Role objects
      *
+     * @apiUse NotLoggedIn
+     * @todo: [CRITICAL] fix projects-roles create
+     * @todo: add request example
+     * @todo: add response and params example
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -71,11 +76,21 @@ class ProjectsRolesController extends ItemController
      *
      * @apiUse DefaultBulkCreateErrorResponse
      *
+     * @apiUse NotLoggedIn
+     * @todo: [CRITICAL] find right request params
+     * @todo: add response and error example
      *
      * @apiParamExample {json} Simple-Request Example:
      *  {
-     *      "id": 1
+     *      "id": 1,
+     *      "project_id": 1,
+     *      "role_id": 1
      *  }
+     *
+     * @apiSuccessExample {json} Simple-Response Example:
+     * {
+     *
+     * }
      *
      * @param Request $request
      * @return JsonResponse
@@ -126,6 +141,9 @@ class ProjectsRolesController extends ItemController
      * @apiParam {Integer}     array.object.role_id    Role ID
      *
      * @apiSuccess {Messages[]} array  Array of Project Roles objects
+     *
+     * @apiUse NotLoggedIn
+     * @todo: add request and response example with error
      *
      * @param Request $request
      * @return JsonResponse
@@ -187,6 +205,9 @@ class ProjectsRolesController extends ItemController
    * @apiUse DefaultDestroyRequestExample
    * @apiUse DefaultBulkDestroyErrorResponse
    * @apiUse DefaultDestroyResponse
+   *
+   * @apiUse NotLoggedIn
+   * @todo: add request and response example with error
    *
    * @param Request $request
    * @return JsonResponse

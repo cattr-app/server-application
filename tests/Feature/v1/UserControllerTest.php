@@ -27,11 +27,11 @@ class UserControllerTest extends TestCase
       'id'        => 42,
       'full_name' => 'Captain John Doe',
       'email'     => 'johndoe@example.com',
+      'password'  => 'SomeSuperSecretPasswordMoreThan8OSymbols',
       'active'    => true
     ];
 
     $response = $this->postJson('/api/v1/users/create', $data, $headers);
-    echo 'WRONG: ' . $response->content();
 
     $response->assertStatus(200);
   }
@@ -46,8 +46,7 @@ class UserControllerTest extends TestCase
       'id' => 'SampleWrongId'
     ];
 
-    $response = $this->postJson('/api/v1/users/destroy', $data, $headers);
-    echo 'WRONG: ' . var_export($response, true);
+    $response = $this->postJson('/api/v1/users/remove', $data, $headers);
     $response->assertStatus(400);
   }
 

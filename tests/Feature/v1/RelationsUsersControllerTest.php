@@ -39,7 +39,6 @@ class RelationsUsersControllerTest extends TestCase
     ];
 
     $response = $this->postJson('/api/v1/attached-users/create', $data, $headers);
-    echo 'WRONG: ' . var_export($response->content(), true);
 
     $response->assertStatus(200);
   }
@@ -68,7 +67,6 @@ class RelationsUsersControllerTest extends TestCase
     ];
 
     $response = $this->postJson('/api/v1/attached-users/create', $data, $headers);
-    echo 'WRONG: ' . var_export($response, true);
     $response->assertStatus(200);
   }
 

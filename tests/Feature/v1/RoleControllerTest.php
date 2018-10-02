@@ -89,7 +89,6 @@ class RoleControllerTest extends TestCase
 
     $this->postJson('/api/v1/roles/create', $data, $headers);
     $response = $this->postJson('/api/v1/roles/remove', [], $headers);
-    echo 'WRONG: ' . var_export($response->content(), true);
 
     $response->assertStatus(400);
   }

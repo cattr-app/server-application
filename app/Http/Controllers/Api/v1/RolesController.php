@@ -131,6 +131,7 @@ class RolesController extends ItemController
      * @apiSuccess {DateTime} res.updated_at  Role's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      *
@@ -235,6 +236,7 @@ class RolesController extends ItemController
      *  }
      *
      * @apiUse DefaultDestroyResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      *

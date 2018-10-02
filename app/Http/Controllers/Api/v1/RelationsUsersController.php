@@ -92,6 +92,8 @@ class RelationsUsersController extends ItemController
      *   }
      * ]
      *
+     * @apiUse NotLoggedIn
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -139,6 +141,10 @@ class RelationsUsersController extends ItemController
      * @apiParam {Object}      array.object               Object Attached User relation
      * @apiParam {Integer}     array.object.attached_user Attached User ID
      * @apiParam {Integer}     array.object.user_id       User ID
+     *
+     * @todo: add examples for request and success answer
+     * @todo: add errors and params
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -200,6 +206,22 @@ class RelationsUsersController extends ItemController
      * @apiGroup AttachedUsers
      *
      * @apiParam {Integer} User Relation ID
+     *
+     * @apiParamExample {json} Example Request:
+     * {
+     *   "user_id": 1,
+     *   "attached_user_id": 1
+     * }
+     *
+     * @failExample
+     * {
+     *   "error": "Item has not been removed",
+     *   "reason": "Item not found"
+     * }
+     *
+     * @todo: add examples for request and success answer
+     * @todo: add errors and params
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -266,6 +288,10 @@ class RelationsUsersController extends ItemController
      * @apiParam {Object}      array.object               Object Project User relation
      * @apiParam {Integer}     array.object.attached_user Attached User ID
      * @apiParam {Integer}     array.object.user_id       User ID
+     *
+     * @todo: add examples for request and success answer
+     * @todo: add errors and params
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse

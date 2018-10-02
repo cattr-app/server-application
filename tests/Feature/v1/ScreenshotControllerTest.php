@@ -25,11 +25,10 @@ class ScreenshotControllerTest extends TestCase
 
     $data = [
       'time_interval_id'  => 1,
-      'screenshot'        => ''
+      'screenshot'        => 'qwerty'
     ];
 
     $response = $this->postJson('/api/v1/screenshots/create', $data, $headers);
-    echo 'WRONG: ' . var_export($response->content(), true);
 
     $response->assertStatus(200);
   }
@@ -40,24 +39,21 @@ class ScreenshotControllerTest extends TestCase
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
-    $screenshotData = "{
-  \"screenshot\": ```sample binary data```,
-  \"time_interval_id\": 1
-}";
-
+    $data = [
+      'screenshot'        => 'samplebinarydata',
+      'time_interval_id'  => '1'
+    ];
 
     /**
      * Upload screenshot and get ID
      */
-    $id = $this->postJson('/api/v1/screenshots/create', $screenshotData, $headers);
+    $id = $this->post('/api/v1/screenshots/create', $data, $headers);
 
     $deleteScreenshotData = [
       'id' => $id
     ];
 
-    $response = $this->postJson('/api/v1/screenshots/destroy', $deleteScreenshotData, $headers);
-    echo 'WRONG: ' . var_export($response, true);
-
+    $response = $this->post('/api/v1/screenshots/destroy', $deleteScreenshotData, $headers);
     $response->assertStatus(200);
   }
 }
