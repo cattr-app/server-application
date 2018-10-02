@@ -46,9 +46,13 @@ describe('Projects create component(Manager)', () => {
     expect(component).toBeTruthy();
   }));
 
-  it('contains "name" and "description" fields', async(() => {
-    const el  = fixture.debugElement.query(By.css('form')).nativeElement;
-    expect(el.innerHTML).toContain('project-name');
-    expect(el.innerHTML).toContain('project-description');
+  it('contains "name" field', async(() => {
+    const el = fixture.debugElement.query(By.css('form')).nativeElement;
+    expect(el.innerHTML).toContain('field.name');
+  }));
+
+  it('contains "description" field', async(() => {
+    const el = fixture.debugElement.query(By.css('form')).nativeElement;
+    expect(el.innerHTML).toContain('field.description');
   }));
 });
