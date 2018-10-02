@@ -48,6 +48,17 @@ class RelationsUsersController extends ItemController
      * @apiParam {Integer} [attached_user_id] `QueryParam` Attached user ID
      * @apiParam {Integer} [user_id]          `QueryParam` User ID
      *
+     * @apiP
+     * [
+     *    {
+     *      "user_id": 1,
+     *      "attached_user_id": 1,
+     *      "created_at": "2018-09-28 13:53:57",
+     *      "updated_at": "2018-09-28 13:53:59"
+     *    }
+     * ]
+     *
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -59,6 +70,29 @@ class RelationsUsersController extends ItemController
      * @apiVersion 0.1.0
      * @apiName CreateAttachedUsers
      * @apiGroup AttachedUsers
+     *
+     * @apiParam user_id Integer User ID
+     * @apiParam attached_user_id Attached to User
+     *
+     * @apiRequestExample {json} Request
+     * {
+     *   "user_id": 1,
+     *   "attached_user_id": 1
+     * }
+     *
+     *
+     * @apiSuccessAnswer {json} Answer Example:
+     * [
+     *   {
+     *     "user_id": 1,
+     *     "attached_user_id": 1,
+     *     "updated_at": "2018-10-01 08:41:37",
+     *     "created_at": "2018-10-01 08:41:37",
+     *     "id": 0
+     *   }
+     * ]
+     *
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -107,6 +141,10 @@ class RelationsUsersController extends ItemController
      * @apiParam {Object}      array.object               Object Attached User relation
      * @apiParam {Integer}     array.object.attached_user Attached User ID
      * @apiParam {Integer}     array.object.user_id       User ID
+     *
+     * @todo: add examples for request and success answer
+     * @todo: add errors and params
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -166,6 +204,24 @@ class RelationsUsersController extends ItemController
      * @apiVersion 0.1.0
      * @apiName DestroyAttachedUsers
      * @apiGroup AttachedUsers
+     *
+     * @apiParam {Integer} User Relation ID
+     *
+     * @apiParamExample {json} Example Request:
+     * {
+     *   "user_id": 1,
+     *   "attached_user_id": 1
+     * }
+     *
+     * @failExample
+     * {
+     *   "error": "Item has not been removed",
+     *   "reason": "Item not found"
+     * }
+     *
+     * @todo: add examples for request and success answer
+     * @todo: add errors and params
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -232,6 +288,10 @@ class RelationsUsersController extends ItemController
      * @apiParam {Object}      array.object               Object Project User relation
      * @apiParam {Integer}     array.object.attached_user Attached User ID
      * @apiParam {Integer}     array.object.user_id       User ID
+     *
+     * @todo: add examples for request and success answer
+     * @todo: add errors and params
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse

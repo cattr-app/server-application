@@ -27,20 +27,26 @@ class UserControllerTest extends TestCase
       'id'        => 42,
       'full_name' => 'Captain John Doe',
       'email'     => 'johndoe@example.com',
+      'password'  => 'SomeSuperSecretPasswordMoreThan8OSymbols',
       'active'    => true
     ];
 
     $response = $this->postJson('/api/v1/users/create', $data, $headers);
+
     $response->assertStatus(200);
   }
 
-  public function test_Destroy_ExpectFail_EmptyId()
+  public function test_Destroy_ExpectFail_WrongId()
   {
     $headers = [
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
-    $response = $this->postJson('/api/v1/users/destroy', [], $headers);
+    $data = [
+      'id' => 'SampleWrongId'
+    ];
+
+    $response = $this->postJson('/api/v1/users/remove', $data, $headers);
     $response->assertStatus(400);
   }
 

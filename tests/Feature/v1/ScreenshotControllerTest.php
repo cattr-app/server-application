@@ -23,13 +23,9 @@ class ScreenshotControllerTest extends TestCase
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
-    $imageBase64 = 'R0lGODlhEAAOALMAAOazToeHh0tLS/7LZv/0jvb29t/f3//Ub/
-/ge8WSLf/rhf/3kdbW1mxsbP//mf///yH5BAAAAAAALAAAAAAQAA4AAARe8L1Ekyky67QZ1hLnjM5UUde0ECwLJoExKcpp
-V0aCcGCmTIHEIUEqjgaORCMxIC6e0CcguWw6aFjsVMkkIr7g77ZKPJjPZqIyd7sJAgVGoEGv2xsBxqNgYPj/gAwXEQA7';
-
     $data = [
-      'time_interval_id'  => 300,
-      'screenshot'        => $imageBase64
+      'time_interval_id'  => 1,
+      'screenshot'        => 'qwerty'
     ];
 
     $response = $this->postJson('/api/v1/screenshots/create', $data, $headers);
@@ -43,22 +39,21 @@ V0aCcGCmTIHEIUEqjgaORCMxIC6e0CcguWw6aFjsVMkkIr7g77ZKPJjPZqIyd7sJAgVGoEGv2xsBxqNg
       'Authorization' => 'Bearer ' . $this->getAdminToken()
     ];
 
-    $screenshotData = [
-      'time_interval_id'  => 1,
-      'screenshot'        => `screnshot_invaleeeeed`
+    $data = [
+      'screenshot'        => 'samplebinarydata',
+      'time_interval_id'  => '1'
     ];
 
     /**
      * Upload screenshot and get ID
      */
-    $id = $this->postJson('/api/v1/screenshots/create', $screenshotData, $headers);
+    $id = $this->post('/api/v1/screenshots/create', $data, $headers);
 
     $deleteScreenshotData = [
       'id' => $id
     ];
 
-    $response = $this->postJson('/api/v1/screenshots/destroy', $deleteScreenshotData, $headers);
-
+    $response = $this->post('/api/v1/screenshots/destroy', $deleteScreenshotData, $headers);
     $response->assertStatus(200);
   }
 }

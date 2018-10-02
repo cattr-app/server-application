@@ -65,10 +65,11 @@ class ProjectController extends ItemController
      * @apiDefine ProjectRelationsExample
      * @apiParamExample {json} Request-With-Relations-Example:
      *  {
-     *      "with":            "tasks,users,tasks.timeIntervals"
+     *      "with":            "tasks,users,tasks.timeIntervals",
      *      "tasks.id":        [">", 1],
      *      "tasks.active":    1,
-     *      "users.full_name": ["like", "%lorem%"]
+     *      "users.full_name": ["like", "%lorem%"],
+     *      "id":              1
      *  }
      */
 
@@ -97,6 +98,7 @@ class ProjectController extends ItemController
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
      * @apiUse ProjectRelationsExample
+     * @apiUse NotLoggedIn
      *
      * @apiSuccess {Object[]} ProjectList                     Projects (Array of objects)
      * @apiSuccess {Object}   ProjectList.Project             Project object
@@ -108,6 +110,28 @@ class ProjectController extends ItemController
      * @apiSuccess {DateTime} ProjectList.Project.deleted_at  Project's date time of delete
      * @apiSuccess {Object[]} ProjectList.Project.users       Project's Users (Array of objects)
      * @apiSuccess {Object[]} ProjectList.Project.tasks       Project's Tasks (Array of objects)
+     *
+     * @apiSuccessExample {json} Answer Example:
+     * [
+     *   {
+     *     "id": 1,
+     *     "company_id": 0,
+     *     "name": "Eos est amet sunt ut autem harum.",
+     *     "description": "Dolores rem et sed beatae...",
+     *     "deleted_at": null,
+     *     "created_at": "2018-09-25 06:15:08",
+     *     "updated_at": "2018-09-25 06:15:08"
+     *   },
+     *   {
+     *     "id": 2,
+     *     "company_id": 1,
+     *     "name": "Incidunt officiis.",
+     *     "description": "Quas quam sint vero...",
+     *     "deleted_at": null,
+     *     "created_at": "2018-09-25 06:15:11",
+     *     "updated_at": "2018-09-25 06:15:11"
+     *   }
+     * ]
      *
      * @param Request $request
      * @return JsonResponse
@@ -183,6 +207,18 @@ class ProjectController extends ItemController
      * @apiSuccess {DateTime} res.updated_at  Project's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
+     * @apiUse NotLoggedIn
+     *
+     * @apiSuccessExample {json} Answer Example:
+     * {
+     *   "res": {
+     *     "name": "test",
+     *     "description": "test",
+     *     "updated_at": "2018-09-27 04:55:29",
+     *     "created_at": "2018-09-27 04:55:29",
+     *     "id": 6
+     *   }
+     * }
      *
      * @param Request $request
      * @return JsonResponse
@@ -223,7 +259,69 @@ class ProjectController extends ItemController
      * @apiSuccess {Object[]} Project.users       Project's User (Array of objects)
      * @apiSuccess {Object[]} Project.tasks       Project's Task (Array of objects)
      *
+     * @apiSuccessExample {json} Answer Example:
+     * {
+     *   "id": 1,
+     *   "company_id": 0,
+     *   "name": "Eos est amet sunt ut autem harum.",
+     *   "description": "Dolores rem et sed beatae architecto...",
+     *   "deleted_at": null,
+     *   "created_at": "2018-09-25 06:15:08",
+     *   "updated_at": "2018-09-25 06:15:08"
+     * }
+     *
+     * @apiSuccessExample {json} Answer-Relation Example:
+     * {
+     *   "id": 1,
+     *   "company_id": 0,
+     *   "name": "Eos est amet sunt ut autem harum.",
+     *   "description": "Dolores rem et sed beatae architecto assumenda illum reprehenderit...",
+     *   "deleted_at": null,
+     *   "created_at": "2018-09-25 06:15:08",
+     *   "updated_at": "2018-09-25 06:15:08",
+     *   "tasks": [
+     *   {
+     *   "id": 1,
+     *   "project_id": 1,
+     *   "task_name": "Enim et sit similique.",
+     *   "description": "Adipisci eius qui quia et rerum rem perspiciatis...",
+     *   "active": 1,
+     *   "user_id": 1,
+     *   "assigned_by": 1,
+     *   "url": null,
+     *   "created_at": "2018-09-25 06:15:08",
+     *   "updated_at": "2018-09-25 06:15:08",
+     *   "deleted_at": null,
+     *   "time_intervals": [
+     *     {
+     *     "id": 1,
+     *     "task_id": 1,
+     *     "start_at": "2006-05-31 16:15:09",
+     *     "end_at": "2006-05-31 16:20:07",
+     *     "created_at": "2018-09-25 06:15:08",
+     *     "updated_at": "2018-09-25 06:15:08",
+     *     "deleted_at": null,
+     *     "count_mouse": 88,
+     *     "count_keyboard": 127,
+     *     "user_id": 1
+     *     },
+     *     {
+     *     "id": 2,
+     *     "task_id": 1,
+     *     "start_at": "2006-05-31 16:20:08",
+     *     "end_at": "2006-05-31 16:25:06",
+     *     "created_at": "2018-09-25 06:15:08",
+     *     "updated_at": "2018-09-25 06:15:08",
+     *     "deleted_at": null,
+     *     "count_mouse": 117,
+     *     "count_keyboard": 23,
+     *     "user_id": 1
+     *     },
+     *   ]
+     * }
+     *
      * @apiUse DefaultShowErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -255,6 +353,7 @@ class ProjectController extends ItemController
      * @apiSuccess {DateTime} res.deleted_at  Project's date time of delete
      *
      * @apiUse DefaultEditErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -271,6 +370,7 @@ class ProjectController extends ItemController
      * @apiParam {String} id Project's id
      *
      * @apiUse DefaultDestroyResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse

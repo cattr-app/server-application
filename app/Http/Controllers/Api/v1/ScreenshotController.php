@@ -149,6 +149,7 @@ class ScreenshotController extends ItemController
      * @apiSuccess {DateTime} Screenshot.updated_at       Screenshot's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -230,6 +231,7 @@ class ScreenshotController extends ItemController
      * @apiSuccess {Object}   Screenshot.time_interval    Screenshot's Task
      *
      * @apiUse DefaultShowErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -263,6 +265,7 @@ class ScreenshotController extends ItemController
      * @apiSuccess {DateTime} Screenshot.deleted_at       Screenshot's date time of delete
      *
      * @apiUse DefaultEditErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -310,6 +313,7 @@ class ScreenshotController extends ItemController
      *      "updated_at":       ["<", "2019-01-01 00:00:00"]
      *  }
      * @apiUse ScreenshotRelationsExample
+     * @apiUse NotLoggedIn
      *
      * @apiSuccess {Object[]} Array                                            Array of objects
      * @apiSuccess {DateTime} Array.object.interval                            Time of interval

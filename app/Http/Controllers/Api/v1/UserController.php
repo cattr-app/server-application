@@ -20,6 +20,35 @@ use Illuminate\Http\Request;
 class UserController extends ItemController
 {
     /**
+     * @apiDefine UserModel
+     *
+     * @apiParam {Integer} id                       User ID
+     * @apiParam {String}  full_name                Full Name
+     * @apiParam {String}  [first_name]             First Name
+     * @apiParam {String}  [last_name]              Last Name
+     * @apiParam {String}  email                    E-mail
+     * @apiParam {String}  [url]                    ???
+     * @apiParam {Integer} [company_id]             ???
+     * @apiParam {String}  [level]                  Role access level
+     * @apiParam {Boolean} [payroll_access]         ???
+     * @apiParam {Boolean} [billing_access]         ???
+     * @apiParam {String}  [avatar]                 Avatar image url/uri
+     * @apiParam {Boolean} [screenshots_active]     Screenshots should be captured
+     * @apiParam {Boolean} [manual_time]            Allow manual time edit
+     * @apiParam {Boolean} [permanent_tasks]        ???
+     * @apiParam {Boolean} [computer_time_popup]    ???
+     * @apiParam {Boolean} [poor_time_popup]        ???
+     * @apiParam {Boolean} [blur_screenshots]       ???
+     * @apiParam {Boolean} [web_and_app_monitoring] ???
+     * @apiParam {Boolean} [webcam_shots]           ???
+     * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
+     * @apiParam {String}  [user_role_value]        ???
+     * @apiParam {Boolean} active                   User is active
+     * @apiParam {Integer} [role_id]                User's Role ID
+     * @apiParam {String}  [timezone]               User's timezone
+     */
+
+    /**
      * @return string
      */
     public function getItemClass(): string
@@ -108,10 +137,12 @@ class UserController extends ItemController
 
     /**
      * @api {post} /api/v1/users/create Create
-     * @apiDescription Create User
+     * @apiDescription Create User Entity
      * @apiVersion 0.1.0
      * @apiName CreateUser
      * @apiGroup User
+     *
+     * @apiUse UserModel
      */
 
     /**
@@ -129,30 +160,7 @@ class UserController extends ItemController
      * @apiName EditUser
      * @apiGroup User
      *
-     * @apiParam {Integer} id                       User ID
-     * @apiParam {String}  full_name                Full Name
-     * @apiParam {String}  [first_name]             First Name
-     * @apiParam {String}  [last_name]              Last Name
-     * @apiParam {String}  email                    E-mail
-     * @apiParam {String}  [url]                    ???
-     * @apiParam {Integer} [company_id]             ???
-     * @apiParam {String}  [level]                  Role access level
-     * @apiParam {Boolean} [payroll_access]         ???
-     * @apiParam {Boolean} [billing_access]         ???
-     * @apiParam {String}  [avatar]                 Avatar image url/uri
-     * @apiParam {Boolean} [screenshots_active]     Screenshots should be captured
-     * @apiParam {Boolean} [manual_time]            Allow manual time edit
-     * @apiParam {Boolean} [permanent_tasks]        ???
-     * @apiParam {Boolean} [computer_time_popup]    ???
-     * @apiParam {Boolean} [poor_time_popup]        ???
-     * @apiParam {Boolean} [blur_screenshots]       ???
-     * @apiParam {Boolean} [web_and_app_monitoring] ???
-     * @apiParam {Boolean} [webcam_shots]           ???
-     * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
-     * @apiParam {String}  [user_role_value]        ???
-     * @apiParam {Boolean} active                   User is active
-     * @apiParam {Integer} [role_id]                User's Role ID
-     * @apiParam {String}  [timezone]               User's timezone
+     * @apiUse UserModel
      *
      * @param Request $request
      *
@@ -241,6 +249,8 @@ class UserController extends ItemController
      * @apiVersion 0.1.0
      * @apiName DestroyUser
      * @apiGroup User
+     *
+     * @apiUse DefaultDestroyRequestExample
      */
 
     /**
@@ -279,6 +289,8 @@ class UserController extends ItemController
      *
      * @apiSuccess {Object[]} message        Array of User object
      * @apiSuccess {Object}   message.object User object
+     *
+     * @apiUse DefaultBulkEditErrorResponse
      *
      * @param Request $request
      *

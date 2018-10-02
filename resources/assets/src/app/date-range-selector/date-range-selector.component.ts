@@ -21,7 +21,7 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
     @ViewChild('dateInput') dateInput: ElementRef;
     @ViewChild('datePicker') datePicker: DatePickerComponent;
 
-    @Input() start: moment.Moment = moment.utc().startOf('day');
+    @Input() start: moment.Moment = moment().startOf('day');
     @Input() end: moment.Moment = this.start.clone().add(1, 'day');
     @Input() mode: string = 'day';
 
@@ -30,7 +30,7 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
     @Output() rangeChanged = new EventEmitter<Range>();
     @Output() modeChanged = new EventEmitter<string>();
 
-    readonly max: moment.Moment = moment.utc().add(1, 'day');
+    readonly max: moment.Moment = moment().add(1, 'day');
 
     // May be different to an active mode.
     // Used to make button active as soon as user presses it.
@@ -68,7 +68,7 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
             default:
             case 'day':
                 if (moment(value, 'YYYY-MM-DD', true).isValid()) {
-                    const date = moment.utc(value, 'YYYY-MM-DD').startOf('day');
+                    const date = moment(value, 'YYYY-MM-DD').startOf('day');
                     this.setStart(date);
                 }
                 break;
@@ -76,14 +76,14 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
             case 'week':
                 const val = value.split(' - ')[0];
                 if (moment(val, 'YYYY-MM-DD', true).isValid()) {
-                    const date = moment.utc(val, 'YYYY-MM-DD').startOf('day');
+                    const date = moment(val, 'YYYY-MM-DD').startOf('day');
                     this.setStart(date);
                 }
                 break;
 
             case 'month':
                 if (moment(value, 'YYYY MMMM', true).isValid()) {
-                    const date = moment.utc(value, 'YYYY MMMM').startOf('day');
+                    const date = moment(value, 'YYYY MMMM').startOf('day');
                     this.setStart(date);
                 }
                 break;
@@ -91,11 +91,11 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
             case 'range':
                 const values = value.split(' - ');
                 if (values.length > 0 && moment(values[0], 'YYYY-MM-DD', true).isValid()) {
-                    const date = moment.utc(values[0], 'YYYY-MM-DD').startOf('day');
+                    const date = moment(values[0], 'YYYY-MM-DD').startOf('day');
                     this.setStart(date);
                 }
                 if (values.length > 1 && moment(values[1], 'YYYY-MM-DD', true).isValid()) {
-                    const date = moment.utc(values[1], 'YYYY-MM-DD').startOf('day');
+                    const date = moment(values[1], 'YYYY-MM-DD').startOf('day');
                     this.setEnd(date);
                 }
                 break;
@@ -118,12 +118,14 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
             this.activeButton = savedMode;
         }
 
-        if (savedStart) {
-            this.start = moment.utc(savedStart, 'YYYY-MM-DD');
-        }
+        if (savedMode !== 'day') {
+            if (savedStart) {
+                this.start = moment(savedStart, 'YYYY-MM-DD');
+            }
 
-        if (savedEnd) {
-            this.end = moment.utc(savedEnd, 'YYYY-MM-DD');
+            if (savedEnd) {
+                this.end = moment(savedEnd, 'YYYY-MM-DD');
+            }
         }
 
         if (savedMode || savedStart || savedEnd) {
@@ -248,7 +250,7 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
 
         if (prevMode !== 'day' && mode === 'day') {
             // Select today when switching to a day view.
-            this.setStart(moment.utc().startOf('day'));
+            this.setStart(moment().startOf('day'));
         }
     }
 
