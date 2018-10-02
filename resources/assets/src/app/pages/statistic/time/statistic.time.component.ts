@@ -272,12 +272,15 @@ export class StatisticTimeComponent implements OnInit {
         this.viewEvents$.subscribe(events => {
             setTimeout(() => {
                 this.viewEvents = events;
+                const start = moment.utc(this.range.start.format('YYYY-MM-DD'));
+                const end = moment.utc(this.range.end.format('YYYY-MM-DD'));
+
                 if (this.timelineInitialized) {
                     this.timeline.changeView(this.view);
-                    this.timeline.gotoDate(this.range.start);
+                    this.timeline.gotoDate(start);
                     this.$timeline.fullCalendar('option', 'visibleRange', {
-                        start: this.range.start,
-                        end: this.range.end,
+                        start,
+                        end,
                     });
                     this.$timeline.fullCalendar('refetchEvents');
                 }
