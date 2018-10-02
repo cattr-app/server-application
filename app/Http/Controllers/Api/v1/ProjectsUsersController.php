@@ -86,6 +86,8 @@ class ProjectsUsersController extends ItemController
      * @apiSuccess {Object}    ProjectUsersList.ProjectUser.user        Project-User's User
      * @apiSuccess {Object}    ProjectUsersList.ProjectUser.project     Project-User's Project
      *
+     * @apiUse NotLoggedIn
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -112,6 +114,7 @@ class ProjectsUsersController extends ItemController
      * @apiSuccess {DateTime}  ProjectUsersList.ProjectUser.updated_at  Project-User's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -183,6 +186,7 @@ class ProjectsUsersController extends ItemController
      * @apiSuccess {DateTime} messages.object.updated_at Project-User's date time of update
      *
      * @apiUse DefaultBulkCreateErrorResponse
+     * @apiUse NotLoggedIn
      *
      * @param Request $request
      * @return JsonResponse
@@ -253,6 +257,9 @@ class ProjectsUsersController extends ItemController
      *
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
+     *
+     * @apiUse NotLoggedIn
+     * @todo: add response (error) example
      *
      * @param Request $request
      * @return JsonResponse

@@ -55,6 +55,11 @@ class ProjectsRolesController extends ItemController
      *
      * @apiSuccess {ProjectRoles[]} ProjectRolesList array of Project Role objects
      *
+     * @apiUse NotLoggedIn
+     * @todo: [CRITICAL] fix projects-roles create
+     * @todo: add request example
+     * @todo: add response and params example
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -63,9 +68,29 @@ class ProjectsRolesController extends ItemController
     /**
      * @api {post} /api/v1/projects-roles/create Create
      * @apiDescription Create Project Roles relation
+     *
      * @apiVersion 0.1.0
+     *
      * @apiName CreateProjectRoles
      * @apiGroup ProjectRoles
+     *
+     * @apiUse DefaultBulkCreateErrorResponse
+     *
+     * @apiUse NotLoggedIn
+     * @todo: [CRITICAL] find right request params
+     * @todo: add response and error example
+     *
+     * @apiParamExample {json} Simple-Request Example:
+     *  {
+     *      "id": 1,
+     *      "project_id": 1,
+     *      "role_id": 1
+     *  }
+     *
+     * @apiSuccessExample {json} Simple-Response Example:
+     * {
+     *
+     * }
      *
      * @param Request $request
      * @return JsonResponse
@@ -117,6 +142,9 @@ class ProjectsRolesController extends ItemController
      *
      * @apiSuccess {Messages[]} array  Array of Project Roles objects
      *
+     * @apiUse NotLoggedIn
+     * @todo: add request and response example with error
+     *
      * @param Request $request
      * @return JsonResponse
      */
@@ -167,16 +195,25 @@ class ProjectsRolesController extends ItemController
         );
     }
 
-    /**
-     * @api {post} /api/v1/projects-roles/destroy Destroy
-     * @apiDescription Destroy Project Roles relation
-     * @apiVersion 0.1.0
-     * @apiName DestroyProjectRoles
-     * @apiGroup ProjectRoles
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
+  /**
+   * @api {post} /api/v1/projects-roles/destroy Destroy
+   * @apiDescription Destroy Project Roles relation
+   * @apiVersion 0.1.0
+   * @apiName DestroyProjectRoles
+   * @apiGroup ProjectRoles
+   *
+   * @apiUse DefaultDestroyRequestExample
+   * @apiUse DefaultBulkDestroyErrorResponse
+   * @apiUse DefaultDestroyResponse
+   *
+   * @apiUse NotLoggedIn
+   * @todo: add request and response example with error
+   *
+   * @param Request $request
+   * @return JsonResponse
+   *
+   * @throws \Exception
+   */
     public function destroy(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all());
