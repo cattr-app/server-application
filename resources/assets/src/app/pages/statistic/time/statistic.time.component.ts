@@ -53,6 +53,21 @@ interface TimeWorked {
     perDay: { [date: string]: TimeWorkedDay },
 }
 
+function debounce(f, delay) {
+    let delayed = false;
+    let delayedArgs = null;
+    return (...args) => {
+        delayedArgs = args;
+        if (!delayed) {
+            delayed = true;
+            setTimeout(() => {
+                delayed = false;
+                f.apply(this, delayedArgs);
+            }, delay);
+        }
+    };
+}
+
 @Component({
     selector: 'app-statistic-time',
     templateUrl: './statistic.time.component.html',
@@ -120,6 +135,7 @@ export class StatisticTimeComponent implements OnInit {
         private screenshotService: ScreenshotsService,
         private translate: TranslateService,
         private cdr: ChangeDetectorRef) {
+        this.updateResourceInfo = debounce(this.updateResourceInfo.bind(this), 100);
     }
 
     readonly datePickerFormat = 'YYYY-MM-DD';
@@ -151,12 +167,7 @@ export class StatisticTimeComponent implements OnInit {
     }
 
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
-
-        let sec_day_diff = Math.abs(end.diff(start) / 1000 - 60 /* sec */ * 60 /* min */ * 24 /* hour */);
-
-        let day_display: boolean = sec_day_diff < 10;
-
-        if (day_display) {
+        if (this.view === 'timelineDay') {
             const params = {
                 'start_at': ['>', start],
                 'end_at': ['<', end],
@@ -164,28 +175,24 @@ export class StatisticTimeComponent implements OnInit {
 
             return new Promise<EventObjectInput[]>((resolve) => {
                 this.timeintervalService.getItems((intervals: TimeInterval[]) => {
-                    const events = intervals.map(interval => {
-                        const start = moment.utc(interval.start_at).add(this.timezoneOffset, 'minutes');
-                        const end = moment.utc(interval.end_at).add(this.timezoneOffset, 'minutes');
-                        return {
-                            id: interval.id,
-                            title: '',
-                            resourceId: interval.user_id,
-                            start: start,
-                            end: end,
-                            task_id: interval.task_id,
-                            duration: end.diff(start),
-                        } as EventObjectInput;
-                    }).filter(event => {
+                    const offset = this.timezoneOffset;
+                    const events = intervals
+                        .map(interval => {
+                            const start = moment.utc(interval.start_at).add(offset, 'minutes');
+                            const end = moment.utc(interval.end_at).add(offset, 'minutes');
+                            return {
+                                id: interval.id,
+                                title: '',
+                                resourceId: interval.user_id,
+                                start: start,
+                                end: end,
+                                task_id: interval.task_id,
+                                duration: end.diff(start),
+                            } as EventObjectInput;
+                        })
                         // Filter events with duration less than one second.
                         // Zero-duration events breaks fullcalendar.
-                        const end = event.end as moment.Moment;
-                        if (event.duration < 1000) {
-                            return false;
-                        }
-
-                        return true;
-                    });
+                        .filter(event => event.duration > 1000);
 
                     resolve(events);
                 }, params);
@@ -198,14 +205,10 @@ export class StatisticTimeComponent implements OnInit {
 
             return new Promise<EventObjectInput[]>((resolve) => {
                 this.timeDurationService.getItems((durations: TimeDuration[]) => {
+                    const offset = this.timezoneOffset;
                     const events = durations.map(duration => {
-
-                        let end_at = new Date(duration.date);
-
-                        end_at.setSeconds(end_at.getSeconds() + duration.duration);
-
-                        const start = moment.utc(duration.date).add(this.timezoneOffset, 'minutes');
-                        const end = moment(end_at).add(this.timezoneOffset, 'minutes');
+                        const start = moment.utc(duration.date).add(offset, 'minutes');
+                        const end = start.clone().add(duration.duration, 'seconds');
                         return {
                             title: '',
                             resourceId: duration.user_id,
@@ -260,12 +263,16 @@ export class StatisticTimeComponent implements OnInit {
         }).share();
 
         this.viewRange$ = this.dateRangeSelector.rangeChanged.asObservable();
-        this.viewEvents$ = this.viewRange$.switchMap(range => {
+        this.viewEvents$ = this.viewRange$.filter(range => {
+            return range.start.diff(this.range.start) !== 0
+                || range.end.diff(this.range.end) !== 0;
+        }).switchMap(range => {
             this.setLoading(true);
             this.range = range;
             const offset = this.timezoneOffset;
-            const start = range.start.clone().subtract(offset, 'minutes');
-            const end = range.end.clone().subtract(offset, 'minutes');
+            // Get date only and correct timezone.
+            const start = moment.utc(this.range.start.format('YYYY-MM-DD')).subtract(offset, 'minutes');
+            const end = moment.utc(this.range.end.format('YYYY-MM-DD')).subtract(offset, 'minutes');
             return Observable.from(this.fetchEvents(start, end));
         }).share();
 
@@ -288,28 +295,27 @@ export class StatisticTimeComponent implements OnInit {
             this.setLoading(false);
         });
 
-        this.viewEventsTasks$ = this.viewEvents$.switchMap(events => {
-            const ids = events.map(event => event.task_id);
-            const uniqueIds = Array.from(new Set(ids));
-            return Observable.from(this.fetchTasks(uniqueIds));
-        }).share();
+        this.viewEventsTasks$ = this.viewEvents$
+            // Only needed for a day view.
+            .filter(events => this.view === 'timelineDay')
+            .switchMap(events => {
+                const ids = events.map(event => event.task_id);
+                const uniqueIds = Array.from(new Set(ids));
+                return Observable.from(this.fetchTasks(uniqueIds));
+            })
+            .share();
         this.viewEventsTasks$.subscribe(tasks => {
             this.viewEventsTasks = tasks;
-            if (this.$timeline) {
-                this.$timeline.fullCalendar('refetchEvents');
-            }
         });
 
-        this.viewEventsProjects$ = this.viewEventsTasks$.switchMap(tasks => {
-            const ids = tasks.map(task => task.project_id);
-            const uniqueIds = Array.from(new Set(ids));
-            return Observable.from(this.fetchProjects(uniqueIds));
-        });
+        this.viewEventsProjects$ = this.viewEventsTasks$
+            .switchMap(tasks => {
+                const ids = tasks.map(task => task.project_id);
+                const uniqueIds = Array.from(new Set(ids));
+                return Observable.from(this.fetchProjects(uniqueIds));
+            });
         this.viewEventsProjects$.subscribe(projects => {
             this.viewEventsProjects = projects;
-            if (this.$timeline) {
-                this.$timeline.fullCalendar('refetchEvents');
-            }
         });
 
         this.viewTimeWorked$ = this.viewEvents$.combineLatest(this.selectedUsers$, (events, users) => {
@@ -343,7 +349,6 @@ export class StatisticTimeComponent implements OnInit {
 
         this.viewTimeWorked$.subscribe(data => {
             this.viewTimeWorked = data;
-            this.updateResourceInfo();
         });
 
         const end = moment.utc();
@@ -661,7 +666,8 @@ export class StatisticTimeComponent implements OnInit {
                         const start = moment.utc(event.start);
                         const eventDay = start.format('YYYY-MM-DD');
                         return eventDay === day;
-                    }).map(event => event.interval);
+                    }).map(event => event.interval)
+                        .filter(interval => interval);
                     this.onSelectionChanged.emit(this.selectedIntervals);
                 }
             },
@@ -672,7 +678,7 @@ export class StatisticTimeComponent implements OnInit {
 
                 return this.filterEvent(event);
             },
-            eventAfterAllRender: (view: View) => {
+            viewRender: debounce((view: View) => {
                 if (view.name !== 'timelineDay' && this.$timeline) {
                     const $timeline = this.$timeline;
                     const $rows = $('.fc-resource-area tr[data-resource-id]', $timeline);
@@ -700,17 +706,22 @@ export class StatisticTimeComponent implements OnInit {
                             const timeString = this.formatDurationString(time);
 
                             const topOffset = $(userRowElement).position().top;
-                            const progressWrapperClass = time < 10e-3 ? 'progress-wrapper_empty' : '';
-
-                            return `
-<div class="progress-wrapper ${progressWrapperClass}" style="top: ${topOffset}px; width: ${columnWidth}px;">
+                            const empty = time < 10e-3;
+                            return empty
+                                ? `
+<div class="progress-wrapper progress-wrapper_empty" style="top: ${topOffset}px; width: ${columnWidth}px;">
+    <div class="progress"></div>
+    <p>${timeString}</p>
+</div>` : `
+<div class="progress-wrapper" style="top: ${topOffset}px; width: ${columnWidth}px;">
     <div class="progress">
         <div class="progress-bar" role="progressbar" style="width: ${percent}%" aria-valuenow="${percent}" aria-valuemin="0" aria-valuemax="100"></div>
     </div>
     <p>${timeString}</p>
-</div>`;
+</div>
+`;
                         }).join('');
-                        $(dayColumnElement).html(html);
+                        dayColumnElement.innerHTML = html;
                     });
                 }
 
@@ -737,8 +748,10 @@ export class StatisticTimeComponent implements OnInit {
                         break;
                 }
 
-                this.timelineInitialized = true;
                 setTimeout(() => this.loading = false);
+            }, 250),
+            eventAfterAllRender: (view: View) => {
+                this.timelineInitialized = true;
             },
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
@@ -767,6 +780,7 @@ export class StatisticTimeComponent implements OnInit {
         }
 
         const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
+        const offset = this.timezoneOffset;
         $rows.each((index, row) => {
             const $row = $(row);
             const userId = $row.data('resource-id');
@@ -799,7 +813,7 @@ export class StatisticTimeComponent implements OnInit {
                 const eventEnd = moment.utc(lastUserEvent.end);
 
                 const $workingNowCell = $('td:nth-child(1) .fc-cell-text', $row);
-                const now = moment.utc().add(this.timezoneOffset, 'minutes').subtract(10, 'minutes');
+                const now = moment.utc().add(offset, 'minutes').subtract(10, 'minutes');
                 const isWorkingNow = eventEnd.diff(now) > 0;
                 if (isWorkingNow) {
                     $workingNowCell.addClass('is_working_now');
@@ -825,7 +839,7 @@ export class StatisticTimeComponent implements OnInit {
                 } else {
                     $workingNowCell.removeClass('is_working_now');
                     const lastWorkedString = 'Last worked '
-                        + eventEnd.from(moment.utc().add(this.timezoneOffset, 'minutes'));
+                        + eventEnd.from(moment.utc().add(offset, 'minutes'));
                     const $lastWorked = $(`<p class="last-worked">${lastWorkedString}</p>`);
                     $lastWorked.attr('title', lastWorkedString);
                     $nameCell.append($lastWorked);
@@ -920,12 +934,12 @@ export class StatisticTimeComponent implements OnInit {
         this.clickPopover.hide();
         this.hoverPopover.hide();
         this.selectedIntervals = [];
-        this.dateRangeSelector.rangeChanged.emit(this.range);
+        this.$timeline.fullCalendar('refetchEvents');
     }
 
     filter(filter: string | Task | Project) {
         this.eventFilter = filter;
-        this.dateRangeSelector.rangeChanged.emit(this.range);
+        this.$timeline.fullCalendar('refetchEvents');
     }
 
     filterEvent(event: EventObjectInput): boolean {
