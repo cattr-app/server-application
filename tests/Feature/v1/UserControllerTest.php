@@ -28,10 +28,12 @@ class UserControllerTest extends TestCase
       'full_name' => 'Captain John Doe',
       'email'     => 'johndoe@example.com',
       'password'  => 'SomeSuperSecretPasswordMoreThan8OSymbols',
+      'role_id'   => 1,
       'active'    => true
     ];
 
     $response = $this->postJson('/api/v1/users/create', $data, $headers);
+    echo 'Wrong: ' . var_export($response->content(), true);
 
     $response->assertStatus(200);
   }
@@ -61,6 +63,7 @@ class UserControllerTest extends TestCase
      */
     $data = [
       'id'        => 1,
+      'role_id'   => 1,
       'full_name' => 'Captain Admin Example com',
       'email'     => 'admin@example.com',
       'active'    => true

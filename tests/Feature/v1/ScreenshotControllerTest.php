@@ -25,10 +25,11 @@ class ScreenshotControllerTest extends TestCase
 
     $data = [
       'time_interval_id'  => 1,
-      'screenshot'        => 'qwerty'
+      'screenshot'        => '```binarydata```'
     ];
 
     $response = $this->postJson('/api/v1/screenshots/create', $data, $headers);
+    echo 'Wrong: ' . var_export($response->content(), true);
 
     $response->assertStatus(200);
   }

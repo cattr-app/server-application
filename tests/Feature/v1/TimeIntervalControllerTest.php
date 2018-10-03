@@ -61,11 +61,12 @@ class TimeIntervalControllerTest extends TestCase
       'id'        => 1,
       'task_id'   => 1,
       'user_id'   => 1,
-      'start_at'  => '1991-07-03T12:00:00+02:00',
-      'end_at'    => '1992-07-03T12:00:00+02:00'
+      'start_at'  => '2018-10-03T12:00:00+02:00',
+      'end_at'    => '2018-10-03T12:00:00+02:00'
     ];
 
     $response = $this->postJson('/api/v1/time-intervals/edit', $data, $headers);
+    echo 'Wrong: ' . var_export($response->content(), true);
 
     $response->assertStatus(200);
   }
