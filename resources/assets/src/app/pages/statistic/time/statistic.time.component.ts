@@ -264,8 +264,9 @@ export class StatisticTimeComponent implements OnInit {
             this.setLoading(true);
             this.range = range;
             const offset = this.timezoneOffset;
-            const start = range.start.clone().subtract(offset, 'minutes');
-            const end = range.end.clone().subtract(offset, 'minutes');
+            // Get date only and correct timezone.
+            const start = moment.utc(this.range.start.format('YYYY-MM-DD')).subtract(offset, 'minutes');
+            const end = moment.utc(this.range.end.format('YYYY-MM-DD')).subtract(offset, 'minutes');
             return Observable.from(this.fetchEvents(start, end));
         }).share();
 
