@@ -360,7 +360,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/projects/destroy Destroy
+     * @api {post} /api/v1/projects/remove Destroy
      * @apiUse DefaultDestroyRequestExample
      * @apiDescription Destroy Project
      * @apiVersion 0.1.0
