@@ -6,6 +6,7 @@ use Artisan;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 use UsersTableSeeder;
+use RoleSeeder;
 
 /**
  * Class AuthControllerTest
@@ -19,6 +20,7 @@ class AuthControllerTest extends TestCase
     {
         parent::setUp();
 
+        Artisan::call('db:seed', ['--class' => RoleSeeder::class]);
         Artisan::call('db:seed', ['--class' => UsersTableSeeder::class]);
     }
 
@@ -45,7 +47,7 @@ class AuthControllerTest extends TestCase
         ];
 
         $expectedFields = [
-            "error", "reason"
+            "error"
         ];
 
         $response = $this->postJson('/api/auth/login', $auth);
@@ -61,7 +63,7 @@ class AuthControllerTest extends TestCase
         ];
 
         $expectedFields = [
-            "error", "reason"
+            "error"
         ];
 
         $response = $this->postJson('/api/auth/login', $auth);
@@ -75,7 +77,7 @@ class AuthControllerTest extends TestCase
         $auth = [];
 
         $expectedFields = [
-            "error", "reason"
+            "error"
         ];
 
         $response = $this->postJson('/api/auth/login', $auth);
@@ -92,7 +94,7 @@ class AuthControllerTest extends TestCase
         ];
 
         $expectedFields = [
-            "error", "reason"
+            "error"
         ];
 
         $response = $this->postJson('/api/auth/login', $auth);
