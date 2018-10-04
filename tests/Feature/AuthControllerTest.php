@@ -13,99 +13,99 @@ use UsersTableSeeder;
  */
 class AuthControllerTest extends TestCase
 {
-  use DatabaseMigrations;
+    use DatabaseMigrations;
 
-  public function setUp()
-  {
-    parent::setUp();
+    public function setUp()
+    {
+        parent::setUp();
 
-    Artisan::call('db:seed', ['--class' => UsersTableSeeder::class]);
-  }
+        Artisan::call('db:seed', ['--class' => UsersTableSeeder::class]);
+    }
 
-  public function test_Login_ExpectPass()
-  {
-    $auth = [
-      'login'     => 'admin@example.com',
-      'password'  => 'admin'
-    ];
+    public function test_Login_ExpectPass()
+    {
+        $auth = [
+            'login'     => 'admin@example.com',
+            'password'  => 'admin'
+        ];
 
-    $response = $this->postJson('/api/auth/login', $auth);
-    $response->assertStatus(200);
-  }
+        $response = $this->postJson('/api/auth/login', $auth);
+        $response->assertStatus(200);
+    }
 
-  public function test_Login_ExpectFail_NoPassword()
-  {
-    $auth = [
-      'login' => 'admin@example.com',
-    ];
+    public function test_Login_ExpectFail_NoPassword()
+    {
+        $auth = [
+            'login' => 'admin@example.com',
+        ];
 
-    $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson('/api/auth/login', $auth);
 
-    $response->assertStatus(401);
-  }
+        $response->assertStatus(401);
+    }
 
-  public function test_Login_ExpectFail_NoLogin()
-  {
-    $auth = [
-      'password' => 'admin',
-    ];
+    public function test_Login_ExpectFail_NoLogin()
+    {
+        $auth = [
+            'password' => 'admin',
+        ];
 
-    $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson('/api/auth/login', $auth);
 
-    $response->assertStatus(401);
-  }
+        $response->assertStatus(401);
+    }
 
-  public function test_Login_ExpectFail_NoData()
-  {
-    $auth = [];
+    public function test_Login_ExpectFail_NoData()
+    {
+        $auth = [];
 
-    $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson('/api/auth/login', $auth);
 
-    $response->assertStatus(401);
-  }
+        $response->assertStatus(401);
+    }
 
-  public function test_Login_ExpectFail_WrongData()
-  {
-    $auth = [
-      'login'    => 'admin@example.com',
-      'password' => 'inwalidpassword',
-    ];
+    public function test_Login_ExpectFail_WrongData()
+    {
+        $auth = [
+            'login'    => 'admin@example.com',
+            'password' => 'inwalidpassword',
+        ];
 
-    $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson('/api/auth/login', $auth);
 
-    $response->assertStatus(401);
-  }
+        $response->assertStatus(401);
+    }
 
-  public function test_Me_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+    public function test_Me_ExpectPass()
+    {
+        $headers = [
+            'Authorization' => 'Bearer ' . $this->getAdminToken()
+        ];
 
-    $response = $this->getJson('/api/auth/me', $headers);
+        $response = $this->getJson('/api/auth/me', $headers);
 
-    $response->assertStatus(200);
-  }
+        $response->assertStatus(200);
+    }
 
-  public function test_Me_ExpectFail_WrongJWT()
-  {
-    $headers = [
-      'Authorization' => 'Bearer samplewrongjwt'
-    ];
+    public function test_Me_ExpectFail_WrongJWT()
+    {
+        $headers = [
+            'Authorization' => 'Bearer samplewrongjwt'
+        ];
 
-    $response = $this->getJson('/api/auth/me', $headers);
+        $response = $this->getJson('/api/auth/me', $headers);
 
-    $response->assertStatus(403);
-  }
+        $response->assertStatus(403);
+    }
 
-  public function test_Refresh_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+    public function test_Refresh_ExpectPass()
+    {
+        $headers = [
+            'Authorization' => 'Bearer ' . $this->getAdminToken()
+        ];
 
-    $response = $this->postJson('/api/auth/refresh', [], $headers);
+        $response = $this->postJson('/api/auth/refresh', [], $headers);
 
-    $response->assertStatus(200);
-  }
+        $response->assertStatus(200);
+    }
 }
