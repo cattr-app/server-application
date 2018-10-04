@@ -25,9 +25,16 @@ class ProjectControllerTest extends TestCase
             'description'  => 'Code-monkey development group presents'
         ];
 
+        $expectedFields = [
+            "res" => [
+                "id", "name", "description", 'created_at', 'updated_at'
+            ]
+        ];
+
         $response = $this->postJson('/api/v1/projects/create', $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Destroy_ExpectPass()
@@ -47,8 +54,14 @@ class ProjectControllerTest extends TestCase
             'id' => $createResponse->json('res.id')
         ];
 
-        $response = $this->postJson('/api/v1/projects/destroy', $data, $headers);
+        $expectedFields = [
+            'message'
+        ];
+
+        $response = $this->postJson('/api/v1/projects/remove', $data, $headers);
+
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Edit_ExpectPass()
@@ -70,8 +83,16 @@ class ProjectControllerTest extends TestCase
                 'description'  => 'Code-monkey development group presents with new description'
         ];
 
+        $expectedFields = [
+            "res" => [
+                "id", "name", "description", 'created_at', 'updated_at', 'deleted_at'
+            ]
+        ];
+
         $response = $this->postJson('/api/v1/projects/edit', $data, $headers);
+
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_List_ExpectPass()
@@ -80,8 +101,16 @@ class ProjectControllerTest extends TestCase
             'Authorization' => 'Bearer ' . $this->getAdminToken()
         ];
 
+        $expectedFields = [
+            '*' => [
+                "id", "company_id", "name", "description", "deleted_at", "created_at", "updated_at"
+            ]
+        ];
+
         $response = $this->getJson('/api/v1/projects/list', $headers);
+
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Show_ExpectPass()
@@ -101,8 +130,13 @@ class ProjectControllerTest extends TestCase
             'id' => $createResponse->json('res.id')
         ];
 
+        $expectedFields = [
+            "id", "company_id", "name", "description", 'created_at', 'updated_at'
+        ];
+
         $response = $this->postJson('/api/v1/projects/show', $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 }
