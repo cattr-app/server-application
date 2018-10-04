@@ -32,10 +32,17 @@ class UserControllerTest extends TestCase
             'active'    => true
         ];
 
+        $expectedFields = [
+            "res" => [
+                "full_name", "email", "role_id", "active",
+                "updated_at", "created_at", "id"
+            ]
+        ];
+
         $response = $this->postJson('/api/v1/users/create', $data, $headers);
-        echo 'Wrong: ' . var_export($response->content(), true);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Destroy_ExpectFail_WrongId()
@@ -48,8 +55,14 @@ class UserControllerTest extends TestCase
             'id' => 'SampleWrongId'
         ];
 
+        $expectedFields = [
+            "error", "reason"
+        ];
+
         $response = $this->postJson('/api/v1/users/remove', $data, $headers);
+
         $response->assertStatus(400);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Edit_ExpectPass()
@@ -58,9 +71,6 @@ class UserControllerTest extends TestCase
             'Authorization' => 'Bearer ' . $this->getAdminToken()
         ];
 
-        /**
-         * Customer ID 1 => admin@example.com
-         */
         $data = [
             'id'        => 1,
             'role_id'   => 1,
@@ -68,9 +78,23 @@ class UserControllerTest extends TestCase
             'email'     => 'admin@example.com',
             'active'    => true
         ];
+        $expectedFields = [
+            "res" => [
+                "id","full_name","first_name","last_name","email",
+                "url","company_id","level","payroll_access",
+                "billing_access","avatar","screenshots_active","manual_time",
+                "permanent_tasks","computer_time_popup","poor_time_popup",
+                "blur_screenshots","web_and_app_monitoring","webcam_shots",
+                "screenshots_interval","user_role_value","active",
+                "deleted_at","created_at","updated_at","role_id","timezone",
+                "attached_users"
+            ]
+        ];
 
         $response = $this->postJson('/api/v1/users/edit', $data, $headers);
+
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_List_ExpectPass()
@@ -78,9 +102,21 @@ class UserControllerTest extends TestCase
         $headers = [
             'Authorization' => 'Bearer ' . $this->getAdminToken()
         ];
+        $expectedFields = [
+            "*" => [
+                "id","full_name","first_name","last_name","email","url","company_id",
+                "level","payroll_access","billing_access","avatar","screenshots_active",
+                "manual_time","permanent_tasks","computer_time_popup","poor_time_popup",
+                "blur_screenshots","web_and_app_monitoring","webcam_shots",
+                "screenshots_interval","user_role_value","active","deleted_at","created_at",
+                "updated_at","role_id","timezone","attached_users"
+            ]
+        ];
 
         $response = $this->postJson('/api/v1/users/list', [], $headers);
+        
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Relations_ExpectPass()
@@ -89,8 +125,15 @@ class UserControllerTest extends TestCase
             'Authorization' => 'Bearer ' . $this->getAdminToken()
         ];
 
+        $expectedFields = [
+            
+        ];
+
         $response = $this->postJson('/api/v1/users/list', [], $headers);
         $response->assertStatus(200);
+
+        $response->assertJsonStructure($expectedFields);
+        echo var_export($response->content(), true);
     }
 
     public function test_Show_ExpectPass()
@@ -134,7 +177,25 @@ class UserControllerTest extends TestCase
             ]
         ];
 
+        $expectedFields = [
+            "messages" => [
+                "*" => [
+                    "id", "full_name", "first_name", "last_name",
+                    "email","url","company_id","level",
+                    "payroll_access","billing_access","avatar",
+                    "screenshots_active","manual_time","permanent_tasks",
+                    "computer_time_popup","poor_time_popup","blur_screenshots",
+                    "web_and_app_monitoring","webcam_shots",
+                    "screenshots_interval","user_role_value","active",
+                    "deleted_at","created_at","updated_at","role_id",
+                    "timezone","attached_users"
+                ]
+            ]
+        ];
+
         $response = $this->postJson('/api/v1/users/bulk-edit', $data, $headers);
+
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 }
