@@ -100,7 +100,7 @@ class ProjectUsersControllerTest extends TestCase
             "project_id"    => 1,
             "role_id"       => 1,
         ];
-        $ths->postJson('/api/v1/project-users/create', $createUserData, $headers);
+        $this->postJson('/api/v1/project-users/create', $createUserData, $headers);
 
         $response = $this->getJson('/api/v1/projects-users/list', $headers);
 
