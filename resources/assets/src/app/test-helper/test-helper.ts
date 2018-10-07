@@ -3,6 +3,37 @@ import {LocalStorage} from '../api/storage.model';
 const localStorage = LocalStorage.getStorage();
 
 export function loadAdminStorage() {
+  localStorage.set('attached_users', [
+    {
+      'id': 2,
+      'full_name': 'Attached user',
+      'first_name': 'Attached',
+      'last_name': 'User',
+      'email': 'www@wefef.eru',
+      'url': null,
+      'company_id': null,
+      'level': null,
+      'payroll_access': null,
+      'billing_access': null,
+      'avatar': 'q',
+      'screenshots_active': 1,
+      'manual_time': 0,
+      'permanent_tasks': null,
+      'computer_time_popup': null,
+      'poor_time_popup': null,
+      'blur_screenshots': null,
+      'web_and_app_monitoring': null,
+      'webcam_shots': null,
+      'screenshots_interval': 300,
+      'user_role_value': null,
+      'active': '1',
+      'deleted_at': null,
+      'created_at': '2018-09-03 13:12:49',
+      'updated_at': '2018-09-03 13:12:49',
+      'role_id': 2,
+      'timezone': 'Asia/Almaty'
+    }
+  ]);
   localStorage.set('allowed_actions', [
     {
       'object': 'attached-users',
@@ -406,11 +437,6 @@ export function loadUserStorage() {
     },
     {
       'object': 'projects',
-      'action': 'edit',
-      'name': 'Project edit'
-    },
-    {
-      'object': 'projects',
       'action': 'list',
       'name': 'Project list'
     },
@@ -426,13 +452,13 @@ export function loadUserStorage() {
     },
     {
       'object': 'screenshots',
-      'action': 'dashboard',
-      'name': 'Screenshot list at dashboard'
+      'action': 'create',
+      'name': 'Screenshot create'
     },
     {
       'object': 'screenshots',
-      'action': 'edit',
-      'name': 'Screenshot edit'
+      'action': 'dashboard',
+      'name': 'Screenshot list at dashboard'
     },
     {
       'object': 'screenshots',
@@ -448,6 +474,11 @@ export function loadUserStorage() {
       'object': 'screenshots',
       'action': 'show',
       'name': 'Screenshot show'
+    },
+    {
+      'object': 'tasks',
+      'action': 'create',
+      'name': 'Task create'
     },
     {
       'object': 'tasks',
@@ -501,8 +532,8 @@ export function loadUserStorage() {
     },
     {
       'object': 'time-intervals',
-      'action': 'edit',
-      'name': 'Time interval edit'
+      'action': 'create',
+      'name': 'Time interval create'
     },
     {
       'object': 'time-intervals',
@@ -521,11 +552,6 @@ export function loadUserStorage() {
     },
     {
       'object': 'users',
-      'action': 'bulk-edit',
-      'name': 'User multiple edit'
-    },
-    {
-      'object': 'users',
       'action': 'edit',
       'name': 'User edit'
     },
@@ -533,11 +559,6 @@ export function loadUserStorage() {
       'object': 'users',
       'action': 'list',
       'name': 'User list'
-    },
-    {
-      'object': 'users',
-      'action': 'relations',
-      'name': 'Attached users list'
     },
     {
       'object': 'users',
