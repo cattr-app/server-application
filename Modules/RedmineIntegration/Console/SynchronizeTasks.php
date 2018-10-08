@@ -192,6 +192,18 @@ class SynchronizeTasks extends Command
                     'priority_id' => $taskFromRedmine['priority']['id'],
                 ];
 
+                // Get project related to the task.
+                $projectProperty = Property::where([
+                    ['entity_type', '=', Property::PROJECT_CODE],
+                    ['name', '=', 'REDMINE_ID'],
+                    ['value', '=', $taskFromRedmine['project']['id']]
+                ])->first();
+
+                // If project exists, update task project ID.
+                if ($projectProperty && $projectProperty->entity_id) {
+                    $data['project_id'] = $projectProperty->entity_id;
+                }
+
                 foreach ($data as $key => $value) {
                     if ($task->$key !== $value) {
                         $task->$key = $value;
