@@ -188,6 +188,8 @@ class SynchronizeTasks extends Command
                     'active'      => in_array($taskFromRedmine['status']['id'], $active_status_ids),
                     'user_id'     => $userId,
                     'url'         => $user_redmine_url . 'issues/' . $taskFromRedmine['id'],
+                    'priority'    => $taskFromRedmine['priority']['name'],
+                    'priority_id' => $taskFromRedmine['priority']['id'],
                 ];
 
                 foreach ($data as $key => $value) {
@@ -222,6 +224,8 @@ class SynchronizeTasks extends Command
                     'user_id'     => $userId,
                     'assigned_by' => 1,
                     'url'         => 'url',
+                    'priority'    => $taskFromRedmine['priority']['name'],
+                    'priority_id' => $taskFromRedmine['priority']['id'],
                 ];
 
                 $task = Task::create($taskInfo);

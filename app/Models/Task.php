@@ -42,7 +42,17 @@ class Task extends Model
     /**
      * @var array
      */
-    protected $fillable = ['project_id', 'task_name', 'description', 'active', 'user_id', 'assigned_by', 'url'];
+    protected $fillable = [
+        'project_id',
+        'task_name',
+        'description',
+        'active',
+        'user_id',
+        'assigned_by',
+        'url',
+        'priority',
+        'priority_id',
+    ];
 
     /**
      * Override parent boot and Call deleting event
