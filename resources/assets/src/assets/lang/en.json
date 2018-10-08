@@ -179,6 +179,7 @@
 		"timezone": "Timezone",
 		"password": "Password",
 		"id": "Id",
-		"user-active": "Active"
+		"user-active": "Active",
+		"priority": "Priority"
 	}
 }

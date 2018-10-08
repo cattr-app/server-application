@@ -176,6 +176,7 @@
 		"timezone": "Временная зона",
 		"password": "Пароль",
 		"id": "ID",
-		"user-active": "Активен"
+		"user-active": "Активен",
+		"priority": "Приоритет"
 	}
 }

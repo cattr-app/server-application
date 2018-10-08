@@ -18,6 +18,8 @@ export interface TaskData {
     user?: User;
     assigned?: User;
     project?: Project;
+    priority?: string;
+    priority_id?: number;
 }
 
 export class Task extends Item {
@@ -36,6 +38,8 @@ export class Task extends Item {
     public user?: User;
     public assigned?: User;
     public project?: Project;
+    public priority?: string;
+    public priority_id?: number;
 
     constructor(data?: TaskData) {
         super();
