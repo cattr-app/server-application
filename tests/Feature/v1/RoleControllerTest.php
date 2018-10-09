@@ -5,6 +5,7 @@ namespace Tests\Feature\v1;
 use Artisan;
 use DatabaseSeeder;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use RoleSeeder;
 use Tests\TestCase;
 use UsersTableSeeder;
@@ -15,7 +16,7 @@ use UsersTableSeeder;
  */
 class RoleControllerTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     public function setUp()
     {

@@ -1,18 +1,12 @@
 <?php
 
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ProjectControllerTest extends TestCase
 {
-    use DatabaseMigrations;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
-    }
+    use RefreshDatabase;
 
     public function test_Create_ExpectPass()
     {

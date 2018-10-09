@@ -4,6 +4,7 @@ namespace Tests\Feature;
 
 use Artisan;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 use UsersTableSeeder;
 use RoleSeeder;
@@ -14,15 +15,7 @@ use RoleSeeder;
  */
 class AuthControllerTest extends TestCase
 {
-    use DatabaseMigrations;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        Artisan::call('db:seed', ['--class' => RoleSeeder::class]);
-        Artisan::call('db:seed', ['--class' => UsersTableSeeder::class]);
-    }
+    use RefreshDatabase;
 
     public function test_Login_ExpectPass()
     {
@@ -54,6 +47,8 @@ class AuthControllerTest extends TestCase
 
         $response->assertStatus(401);
         $response->assertJsonStructure($expectedFields);
+
+
     }
 
     public function test_Login_ExpectFail_NoLogin()

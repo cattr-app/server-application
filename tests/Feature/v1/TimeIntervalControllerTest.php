@@ -4,21 +4,29 @@ namespace Tests\Feature\v1;
 
 use Artisan;
 use DatabaseSeeder;
+use DB;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class TimeIntervalControllerTest extends TestCase
 {
-    use DatabaseMigrations;
+    use RefreshDatabase;
 
     public function setUp()
     {
         parent::setUp();
-
+        
         Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
     }
 
-    public function test_Create_ExpectPass()
+    public function tearDown()
+    {
+        // TODO: Add someting amazing
+        parent::tearDown();
+    }
+
+  public function test_Create_ExpectPass()
     {
         $headers = [
             'Authorization' => 'Bearer ' . $this->getAdminToken()

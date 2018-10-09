@@ -4,21 +4,14 @@ namespace Tests\Feature\v1;
 
 use Artisan;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use RoleSeeder;
 use Tests\TestCase;
 use UsersTableSeeder;
 
 class RolesControllerTest extends TestCase
 {
-    use DatabaseMigrations;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        Artisan::call('db:seed', ['--class' => UsersTableSeeder::class]);
-        Artisan::call('db:seed', ['--class' => RoleSeeder::class]);
-    }
+    use RefreshDatabase;
 
     public function test_AllowedRules_ExpectPass()
     {
