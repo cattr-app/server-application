@@ -3,6 +3,7 @@
 namespace Tests\Feature\v1;
 
 use Artisan;
+use DatabaseSeeder;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Tests\TestCase;
 
@@ -14,7 +15,7 @@ class ScreenshotControllerTest extends TestCase
     {
         parent::setUp();
 
-        Artisan::call('db:seed');
+        Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
     }
 
     public function test_Create_ExpectPass()

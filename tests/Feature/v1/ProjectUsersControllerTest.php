@@ -11,7 +11,7 @@ class ProjectUsersControllerTest extends TestCase
     {
         parent::setUp();
 
-        Artisan::call('db:seed');
+        Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
     }
 
     public function test_BulkCreate_ExpectPass()
@@ -29,7 +29,18 @@ class ProjectUsersControllerTest extends TestCase
             ]
         ];
 
+      $expectedFields = [
+          'messages' => [
+              '*' =>
+                  [
+                    'project_id', 'user_id', 'updated_at', 'created_at', 'id'
+                  ]
+          ]
+      ];
+
         $response = $this->postJson('/api/v1/projects-users/bulk-create', $data, $headers);
+
+        echo 'WRONG: ' . var_export($response->content(), true);
 
         $response->assertStatus(200);
     }
@@ -100,13 +111,17 @@ class ProjectUsersControllerTest extends TestCase
             "project_id"    => 1,
             "role_id"       => 1,
         ];
-        $this->postJson('/api/v1/project-users/create', $createUserData, $headers);
+        $x = $this->postJson('/api/v1/project-users/create', $createUserData, $headers);
+
+        echo var_export($x->content(), true);
 
         $response = $this->getJson('/api/v1/projects-users/list', $headers);
 
         $expectedJson = [
-            ''
+            []
         ];
+
+
 
         $response
             ->assertStatus(200)

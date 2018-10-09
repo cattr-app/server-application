@@ -11,7 +11,7 @@ class ProjectControllerTest extends TestCase
     {
         parent::setUp();
 
-        Artisan::call('db:seed');
+        Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
     }
 
     public function test_Create_ExpectPass()
