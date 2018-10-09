@@ -14,7 +14,7 @@ class AddProjectReportView extends Migration
     public function up()
     {
         DB::unprepared('
-            CREATE VIEW `project_report` AS
+            CREATE OR REPLACE VIEW `project_report` AS
             SELECT
                 `time_intervals`.`user_id` as `user_id`,
                 `users`.`full_name` as `user_name`,
