@@ -107,11 +107,19 @@ class TaskListSeeder extends Seeder
         }
     }
 
+    /** @var bool */
+    protected $_isScreenshotDownloaded = false;
+
+    protected $_filePath;
+
     protected function seedScreenshot(TimeInterval $interval, User $user): void
     {
-        $placeholderLink = "http://via.placeholder.com/1600x900/{$this->random_color()}/{$this->random_color()}.png?" . http_build_query([
+        if($this->_isScreenshotDownloaded === false)
+        {
+        $placeholderLink = "http://via.placeholder.com/1600x900/{$this->random_color()}/{$this->random_color()}.png?"
+            . http_build_query([
             'text' => "#{$interval->id} - {$interval->task->task_name}",
-        ]);
+            ]);
 
         $filePath = "uploads/screenshots/{$user->id}_{$interval->task_id}_{$interval->id}.png";
 
@@ -125,18 +133,21 @@ class TaskListSeeder extends Seeder
             $disk->put($filePath, $fileData);
         }
 
+        $this->_filePath = $filePath;
+        }
+
         Screenshot::create([
-            'time_interval_id' => $interval->id,
-            'path' => $filePath,
+        'time_interval_id' => $interval->id,
+        'path' => $this->_filePath,
         ]);
     }
 
-    private function random_color_part(): string
+    protected function random_color_part(): string
     {
         return str_pad( dechex( random_int( 0, 255 ) ), 2, '0', STR_PAD_LEFT);
     }
 
-    private function random_color(): string
+    protected function random_color(): string
     {
         return $this->random_color_part() . $this->random_color_part() . $this->random_color_part();
     }

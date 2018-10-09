@@ -3,6 +3,8 @@
 namespace Tests;
 
 use Artisan;
+use DatabaseSeeder;
+use DatabaseTestsSeeder;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
@@ -12,14 +14,7 @@ abstract class TestCase extends BaseTestCase
   public function setUp()
   {
     parent::setUp();
-    Artisan::call('migrate:reset');
-    Artisan::call('migrate');
-  }
-
-  public function tearDown()
-  {
-    Artisan::call('migrate:reset');
-    parent::tearDown();
+    Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
   }
 
   public function getAdminToken()
