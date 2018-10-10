@@ -57,7 +57,7 @@ class TaskController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return [];
+        return ['priority'];
     }
 
     /**

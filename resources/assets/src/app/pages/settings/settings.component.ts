@@ -10,10 +10,21 @@ interface RedmineStatus {
     is_active: boolean;
 }
 
+interface RedminePriority {
+    id: number;
+    name: string;
+    priority_id: number;
+}
+
+interface Priority {
+    id: number;
+    name: string;
+}
+
 @Component({
     selector: 'app-settings',
     templateUrl: './settings.component.html',
-    styleUrls: ['../../app.component.scss'],
+    styleUrls: ['./settings.component.scss', '../../app.component.scss'],
 })
 export class SettingsComponent {
     msgs: Message[] = [];
@@ -28,6 +39,8 @@ export class SettingsComponent {
     redmineUrl: string;
     redmineApiKey: string;
     redmineStatuses: RedmineStatus[] = [];
+    redminePriorities: RedminePriority[] = [];
+    internalPriorities: Priority[] = [];
 
     constructor(
         private api: ApiService,
@@ -41,6 +54,8 @@ export class SettingsComponent {
             this.redmineUrl = result.redmine_url;
             this.redmineApiKey = result.redmine_api_key;
             this.redmineStatuses = result.redmine_statuses;
+            this.redminePriorities = result.redmine_priorities;
+            this.internalPriorities = result.internal_priorities;
         });
     }
 
@@ -54,6 +69,7 @@ export class SettingsComponent {
             'redmine_url': this.redmineUrl,
             'redmine_key': this.redmineApiKey,
             'redmine_statuses': this.redmineStatuses,
+            'redmine_priorities': this.redminePriorities,
         }, () => {
             this.msgs = [{
                 severity: 'success',

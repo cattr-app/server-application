@@ -91,6 +91,11 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
             \Modules\RedmineIntegration\Console\SynchronizeStatuses::class,
         ]);
 
+        //Register synchronize redmine priorities command
+        $this->commands([
+            \Modules\RedmineIntegration\Console\SynchronizePriorities::class,
+        ]);
+
         //Register synchronize redmine projects command
         $this->commands([
             \Modules\RedmineIntegration\Console\SynchronizeProjects::class,
