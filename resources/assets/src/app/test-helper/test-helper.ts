@@ -34,6 +34,62 @@ export function loadAdminStorage() {
       'timezone': 'Asia/Almaty'
     }
   ]);
+  localStorage.set('attached_projects', [
+    {
+      'id': 1,
+      'company_id': 0,
+      'name': 'Similique harum voluptas ut corporis.',
+      'description': 'Quo vi.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:10:51',
+      'updated_at': '2018-09-03 02:10:51'
+    },
+    {
+      'id': 2,
+      'company_id': 1,
+      'name': 'Omnis nihil rerum vel eum quam.',
+      'description': 'Ducimus voluptas assumenda facere quis. Repellendus commodi nobis ut ullam est.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:10:57',
+      'updated_at': '2018-09-03 02:10:57'
+    },
+    {
+      'id': 3,
+      'company_id': 2,
+      'name': 'Quidem fuga.',
+      'description': 'Voluptas quod nesciunt velit ipsam enim autem reprehenderit.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:14:21',
+      'updated_at': '2018-09-03 02:14:21'
+    },
+    {
+      'id': 4,
+      'company_id': 3,
+      'name': 'Magnam quis saepe aut quae quas.',
+      'description': 'Illo a numquam molestiae explicabo.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:18:25',
+      'updated_at': '2018-09-03 02:18:25'
+    },
+    {
+      'id': 5,
+      'company_id': 4,
+      'name': 'Laboriosam est rerum sit.',
+      'description': 'Voluptatem consequatur fugit pariatur porro voluptatem eum.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:22:26',
+      'updated_at': '2018-09-03 02:22:26'
+    },
+    {
+      'id': 6,
+      'company_id': null,
+      'name': 'dfkhk',
+      'description': 'kjnfdvk',
+      'deleted_at': null,
+      'created_at': '2018-09-24 07:03:10',
+      'updated_at': '2018-09-24 07:03:10'
+    }
+  ]);
   localStorage.set('allowed_actions', [
     {
       'object': 'attached-users',
@@ -421,6 +477,8 @@ export function loadAdminStorage() {
       'timezone': null
     }
   );
+  localStorage.set('token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC8xMjcuMC4wLjE6ODAwMFwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTUzOTAwNjAwNCwiZXhwIjoxNTM5MDA5NjA0LCJuYmYiOjE1MzkwMDYwMDQsImp0aSI6IjZ0TFpXRE02ZlFwYmlCdk8iLCJzdWIiOjEsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.kuhSY8Ae7k5vSHHXelN0gxEcJpYO6268Sv-XA1H47ZI');
+  localStorage.set('tokenType', 'bearer');
 }
 
 export function loadUserStorage() {
@@ -566,6 +624,62 @@ export function loadUserStorage() {
       'name': 'User show'
     }
   ]);
+  localStorage.set('attached_projects', [
+    {
+      'id': 1,
+      'company_id': 0,
+      'name': 'Similique harum voluptas ut corporis.',
+      'description': 'Quo vi.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:10:51',
+      'updated_at': '2018-09-03 02:10:51'
+    },
+    {
+      'id': 2,
+      'company_id': 1,
+      'name': 'Omnis nihil rerum vel eum quam.',
+      'description': 'Ducimus voluptas assumenda facere quis. Repellendus commodi nobis ut ullam est.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:10:57',
+      'updated_at': '2018-09-03 02:10:57'
+    },
+    {
+      'id': 3,
+      'company_id': 2,
+      'name': 'Quidem fuga.',
+      'description': 'Voluptas quod nesciunt velit ipsam enim autem reprehenderit.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:14:21',
+      'updated_at': '2018-09-03 02:14:21'
+    },
+    {
+      'id': 4,
+      'company_id': 3,
+      'name': 'Magnam quis saepe aut quae quas.',
+      'description': 'Illo a numquam molestiae explicabo.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:18:25',
+      'updated_at': '2018-09-03 02:18:25'
+    },
+    {
+      'id': 5,
+      'company_id': 4,
+      'name': 'Laboriosam est rerum sit.',
+      'description': 'Voluptatem consequatur fugit pariatur porro voluptatem eum.',
+      'deleted_at': null,
+      'created_at': '2018-09-03 02:22:26',
+      'updated_at': '2018-09-03 02:22:26'
+    },
+    {
+      'id': 6,
+      'company_id': null,
+      'name': 'dfkhk',
+      'description': 'kjnfdvk',
+      'deleted_at': null,
+      'created_at': '2018-09-24 07:03:10',
+      'updated_at': '2018-09-24 07:03:10'
+    }
+  ]);
   localStorage.set('user',
     {
       'id': 2,
@@ -577,4 +691,6 @@ export function loadUserStorage() {
       'role_id': 2,
     }
   );
+  localStorage.set('token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC8xMjcuMC4wLjE6ODAwMFwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTUzOTAwNjAwNCwiZXhwIjoxNTM5MDA5NjA0LCJuYmYiOjE1MzkwMDYwMDQsImp0aSI6IjZ0TFpXRE02ZlFwYmlCdk8iLCJzdWIiOjEsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.kuhSY8Ae7k5vSHHXelN0gxEcJpYO6268Sv-XA1H47ZI');
+  localStorage.set('tokenType', 'bearer');
 }
