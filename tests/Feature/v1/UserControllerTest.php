@@ -10,15 +10,6 @@ use Tests\TestCase;
 
 class UserControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        // Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
-    }
-
     public function test_Create_ExpectPass()
     {
         $headers = [

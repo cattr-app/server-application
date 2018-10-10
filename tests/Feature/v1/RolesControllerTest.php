@@ -11,8 +11,6 @@ use UsersTableSeeder;
 
 class RolesControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_AllowedRules_ExpectPass()
     {
         $headers = [

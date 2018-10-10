@@ -11,21 +11,6 @@ use Tests\TestCase;
 
 class TimeIntervalControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public function setUp()
-    {
-        parent::setUp();
-        
-        Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
-    }
-
-    public function tearDown()
-    {
-        // TODO: Add someting amazing
-        parent::tearDown();
-    }
-
   public function test_Create_ExpectPass()
     {
         $headers = [

@@ -42,11 +42,11 @@ class TaskListSeeder extends Seeder
 
         $this->command->getOutput()->writeln("<fg=yellow>- Seed data for user #{$user->id}</>");
 
-        for ($i = 0; $i < 5; $i++) {
+        foreach(range(0, 4) as $i) {
             $project = Project::create([
                 'company_id' => $i,
-                'name' => $faker->text(random_int(10, 50)),
-                'description' => $faker->text(random_int(100, 1000)),
+                'name' => $faker->text($i * 10 + 5),
+                'description' => $faker->text($i * 100 + 5),
             ]);
 
             $this->command->getOutput()->writeln("<fg=cyan>- Project #{$project->id}</>");
@@ -59,12 +59,11 @@ class TaskListSeeder extends Seeder
     {
         $faker = $this->faker;
 
-
-        for ($i = 0; $i < 15; $i++) {
+      foreach(range(0, 14) as $i) {
             $task = Task::create([
                 'project_id' => $project->id,
-                'task_name' => $faker->text(random_int(15, 50)),
-                'description' => $faker->text(random_int(100, 1000)),
+                'task_name' => $faker->text(15 + $i),
+                'description' => $faker->text(100 + $i * 15),
                 'active' => true,
                 'user_id' => $user->id,
                 'assigned_by' => $user->id,
@@ -86,7 +85,7 @@ class TaskListSeeder extends Seeder
 
         $time[$user->id] += 3600 * 10;
 
-        for ($i = 0; $i < 30; $i++) {
+        foreach(range(0, 4) as $i) {
 
             $this->command->getOutput()->writeln("<fg=cyan>--- {$task->project->id}.{$task->id}. Interval #{$i}</>");
 
@@ -99,8 +98,8 @@ class TaskListSeeder extends Seeder
                 'user_id' => $user->id,
                 'start_at' => date('Y-m-d H:i:s', $start),
                 'end_at' => date('Y-m-d H:i:s', $end),
-                'count_mouse' => random_int(0, 150),
-                'count_keyboard' => random_int(0, 150)
+                'count_mouse' => 42,
+                'count_keyboard' => 43
             ]);
 
             $this->seedScreenshot($interval, $user);
@@ -133,7 +132,7 @@ class TaskListSeeder extends Seeder
             $disk->put($filePath, $fileData);
         }
 
-        $this->_filePath = $filePath;
+            $this->_filePath = $filePath;
         }
 
         Screenshot::create([

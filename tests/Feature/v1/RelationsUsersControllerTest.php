@@ -10,15 +10,6 @@ use Tests\TestCase;
 
 class RelationsUsersControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
-    public function setUp()
-    {
-        parent::setUp();
-
-        Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
-    }
-
     public function test_List_ExpectPass()
     {
         $headers = [

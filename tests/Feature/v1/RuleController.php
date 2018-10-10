@@ -10,14 +10,7 @@ use Tests\TestCase;
 
 class RuleController  extends TestCase
 {
-    use RefreshDatabase;
 
-    public function setUp()
-    {
-        parent::setUp();
-
-        Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
-    }
 
     public function test_Actions_ExpectPass()
     {
