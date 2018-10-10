@@ -10,13 +10,14 @@ import {AllowedActionsService} from '../allowed-actions.service';
 import {ProjectsService} from '../../projects/projects.service';
 import {By} from '@angular/platform-browser';
 import {loadAdminStorage, loadUserStorage} from '../../../test-helper/test-helper';
-import {BsModalService, ComponentLoaderFactory, PositioningService} from 'ngx-bootstrap';
+import {BsModalService, ComponentLoaderFactory, ModalBackdropComponent, PositioningService} from 'ngx-bootstrap';
 import {AllowedAction} from '../../../models/allowed-action.model';
 import {UsersFiltersComponent} from '../../../filters/users/users.filters.component';
 import {TranslateFakeLoader, TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import {AttachedUsersService} from '../../users/attached-users.service';
 import {ItemsListComponent} from '../../items.list.component';
 import {NgxPaginationModule} from 'ngx-pagination';
+import {ModalModule} from 'ngx-bootstrap';
 import {RolesService} from '../roles.service';
 import {RulesService} from '../rules.service';
 
@@ -27,6 +28,7 @@ describe('Roles list component(Admin)', () => {
       declarations: [RolesListComponent, UsersFiltersComponent],
       schemas: [NO_ERRORS_SCHEMA],
       imports: [
+        ModalModule,
         NgxPaginationModule,
         TranslateModule.forRoot({
           loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
@@ -100,4 +102,16 @@ describe('Roles list component(Admin)', () => {
     const el = fixture.debugElement.queryAll(By.css('tbody>tr'))[0].nativeElement;
     expect(el.innerHTML).not.toContain('control.edit');
   }));
+
+  it('show modal after click `delete` button', async(() => {
+    const del = fixture.debugElement.query(By.css('button.btn-danger')).nativeElement;
+    del.click();
+    const modal = document.getElementsByClassName('modal-dialog')[0];
+    if (modal) {
+      expect(modal.innerHTML).toContain('control.yes');
+    } else {
+      fail('Modal not found');
+    }
+  }));
+
 });
