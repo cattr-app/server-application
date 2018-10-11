@@ -23,6 +23,13 @@ export class TasksCreateComponent extends ItemsCreateComponent implements OnInit
     public selectedProject: any = null;
     public selectedUser: any = null;
 
+    internalPriorities = [
+        { id: 0, name: 'Not set', },
+        { id: 1, name: 'Low', },
+        { id: 2, name: 'Normal', },
+        { id: 3, name: 'High', },
+    ];
+
     constructor(api: ApiService,
                 taskService: TasksService,
                 router: Router,
@@ -30,6 +37,9 @@ export class TasksCreateComponent extends ItemsCreateComponent implements OnInit
                 protected projectService: ProjectsService,
                 protected userService: UsersService) {
         super(api, taskService, router, allowedService);
+        this.item.active = 1;
+        this.item.priority_id = 2;
+        this.item.assigned_by = this.api.getUser().id;
     }
 
     ngOnInit() {
@@ -76,7 +86,8 @@ export class TasksCreateComponent extends ItemsCreateComponent implements OnInit
             'active': this.item.active,
             'user_id': this.item.user_id,
             'assigned_by': this.item.assigned_by,
-            'url': this.item.url
+            'url': this.item.url,
+            'priority_id': this.item.priority_id,
         };
     }
 }

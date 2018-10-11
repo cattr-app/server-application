@@ -27,7 +27,10 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
     protected $listen = [
         'item.create.task' => [
             'Modules\RedmineIntegration\Listeners\IntegrationObserver@taskCreation',
-        ]
+        ],
+        'item.edit.task' => [
+            'Modules\RedmineIntegration\Listeners\IntegrationObserver@taskEdition',
+        ],
     ];
 
     /**
@@ -89,6 +92,11 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         //Register synchronize redmine statuses command
         $this->commands([
             \Modules\RedmineIntegration\Console\SynchronizeStatuses::class,
+        ]);
+
+        //Register synchronize redmine priorities command
+        $this->commands([
+            \Modules\RedmineIntegration\Console\SynchronizePriorities::class,
         ]);
 
         //Register synchronize redmine projects command

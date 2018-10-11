@@ -23,6 +23,13 @@ export class TasksEditComponent extends ItemsEditComponent implements OnInit {
     public selectedProject: any = null;
     public selectedUser: any = null;
 
+    internalPriorities = [
+        { id: 0, name: 'Not set', },
+        { id: 1, name: 'Low', },
+        { id: 2, name: 'Normal', },
+        { id: 3, name: 'High', },
+    ];
+
     constructor(api: ApiService,
                 taskService: TasksService,
                 activatedRoute: ActivatedRoute,
@@ -76,7 +83,8 @@ export class TasksEditComponent extends ItemsEditComponent implements OnInit {
             'active': this.item.active,
             'user_id': this.item.user_id,
             'assigned_by': this.item.assigned_by,
-            'url': this.item.url
+            'url': this.item.url,
+            'priority_id': this.item.priority_id,
         };
     }
 }

@@ -1,0 +1,12 @@
+@import '../../../variables';
+@import "~bootstrap-sass/assets/stylesheets/bootstrap";
+
+.priority {
+    @extend .form-inline;
+
+    margin-bottom: 1em;
+
+    &__label {
+        min-width: 150px;
+    }
+}
