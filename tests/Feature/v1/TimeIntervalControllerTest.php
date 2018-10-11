@@ -18,7 +18,7 @@ class TimeIntervalControllerTest extends TestCase
         ];
 
         $data = [
-            'task_id'   => 42,
+            'task_id'   => 1,
             'user_id'   => 1,
             'start_at'  => '2017-05-11T00:00:00+08:00',
             'end_at'    => '2017-05-11T00:00:00+08:00'
