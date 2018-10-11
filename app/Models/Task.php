@@ -16,6 +16,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $project_id
  * @property int $user_id
  * @property int $assigned_by
+ * @property int $priority_id
  * @property string $task_name
  * @property string $description
  * @property bool $active
@@ -28,6 +29,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property User[]         $user
  * @property User[]         $assigned
  * @property Project[]      $project
+ * @property Priority       $priority
  */
 class Task extends Model
 {
@@ -42,7 +44,16 @@ class Task extends Model
     /**
      * @var array
      */
-    protected $fillable = ['project_id', 'task_name', 'description', 'active', 'user_id', 'assigned_by', 'url'];
+    protected $fillable = [
+        'project_id',
+        'task_name',
+        'description',
+        'active',
+        'user_id',
+        'assigned_by',
+        'url',
+        'priority_id',
+    ];
 
     /**
      * Override parent boot and Call deleting event
@@ -91,6 +102,14 @@ class Task extends Model
     public function timeIntervals(): HasMany
     {
     	return $this->hasMany(TimeInterval::class, 'task_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function priority(): BelongsTo
+    {
+        return $this->belongsTo(Priority::class, 'priority_id');
     }
 
     public static function getTableName()

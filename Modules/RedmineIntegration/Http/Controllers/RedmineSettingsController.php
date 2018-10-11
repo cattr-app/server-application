@@ -2,6 +2,7 @@
 
 namespace Modules\RedmineIntegration\Http\Controllers;
 
+use App\Models\Priority;
 use App\Models\Property;
 use Filter;
 use Illuminate\Http\Request;
@@ -95,6 +96,17 @@ class RedmineSettingsController extends AbstractRedmineController
             ]
         );
 
+        Property::updateOrCreate(
+            [
+                'entity_id'   => $user->id,
+                'entity_type' => Property::USER_CODE,
+                'name'        => 'REDMINE_PRIORITIES',
+            ],
+            [
+                'value' => serialize($request->redmine_priorities),
+            ]
+        );
+
         //If user hasn't a redmine id in our system => mark user as NEW
         $userRedmineId = $userRepository->getUserRedmineId($user->id);
 
@@ -124,6 +136,8 @@ class RedmineSettingsController extends AbstractRedmineController
             'redmine_url'      => $userRepository->getUserRedmineUrl($userId),
             'redmine_api_key'  => $userRepository->getUserRedmineApiKey($userId),
             'redmine_statuses' => $userRepository->getUserRedmineStatuses($userId),
+            'redmine_priorities' => $userRepository->getUserRedminePriorities($userId),
+            'internal_priorities' => Priority::all(),
         ];
 
         return response()->json(

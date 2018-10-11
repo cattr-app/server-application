@@ -6,7 +6,7 @@ import {BrowserModule} from '@angular/platform-browser';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TranslateModule, TranslateLoader, TranslateService} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
-import {HttpClientModule, HttpClient} from '@angular/common/http';
+import {HttpClient} from '@angular/common/http';
 
 import {AppRoutingModule} from './app-routing.module';
 import {ApiModule} from './api/api.module';
@@ -18,7 +18,6 @@ import {MomentModule} from 'ngx-moment';
 import {AppComponent} from './app.component';
 import {DashboardComponent} from './dashboard/dashboard.component';
 import {NavigationComponent} from './navigation/navigation.component';
-import {IntegrationsComponent} from './pages/integrations/integrations.component';
 import {SettingsComponent} from './pages/settings/settings.component';
 
 import {AllowedActionsService} from './pages/roles/allowed-actions.service';
@@ -55,7 +54,6 @@ export function HttpLoaderFactory(http: HttpClient) {
         AppComponent,
         DashboardComponent,
         NavigationComponent,
-        IntegrationsComponent,
         SettingsComponent,
     ],
     providers: [

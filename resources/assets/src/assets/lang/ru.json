@@ -74,7 +74,9 @@
 		"redmine": {
 			"title": "Интеграция с Redmine",
 			"apiurl": "Redmine URL",
-			"apikey": "Redmine API key"
+			"apikey": "Redmine API key",
+			"statuses": "Активные статусы Redmine",
+			"priorities": "Приоритеты Redmine"
 		}
 	},
 	"login": {
@@ -176,6 +178,7 @@
 		"timezone": "Временная зона",
 		"password": "Пароль",
 		"id": "ID",
-		"user-active": "Активен"
+		"user-active": "Активен",
+		"priority": "Приоритет"
 	}
 }
