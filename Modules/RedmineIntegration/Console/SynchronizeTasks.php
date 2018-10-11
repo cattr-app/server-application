@@ -106,7 +106,6 @@ class SynchronizeTasks extends Command
             $redmineTask = $this->createRedmineTask($client, $task);
             $this->taskRepo->setRedmineId($task->id, (int)$redmineTask->id);
             $this->taskRepo->markAsOld($task->id);
-
         }
     }
 
@@ -120,6 +119,19 @@ class SynchronizeTasks extends Command
      */
     public function createRedmineTask(Redmine\Client $client, $task)
     {
+        // Get Redmine priority ID from an internal priority.
+        $priority_id = 2;
+        if (isset($task->priority_id) && $task->priority_id) {
+            $priorities = $this->userRepo->getUserRedminePriorities($task->user_id);
+            $priority = array_first($priorities, function ($priority) use ($task) {
+                return $priority['priority_id'] == $task->priority_id;
+            });
+
+            if (isset($priority)) {
+                $priority_id = $priority['id'];
+            }
+        }
+
         return $client->issue->create(
             [
                 'subject'        => $task->task_name,
@@ -127,7 +139,8 @@ class SynchronizeTasks extends Command
                 'project_id'     => $this->projectRepo->getRedmineProjectId($task->project_id),
                 'author_id'      => $this->userRepo->getUserRedmineId($task->assigned_by),
                 'assigned_to_id' => $this->userRepo->getUserRedmineId($task->user_id),
-                'status_id'      => 1
+                'status_id'      => 1,
+                'priority_id'    => $priority_id,
             ]
         );
     }

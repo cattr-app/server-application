@@ -74,7 +74,9 @@
 		"redmine": {
 			"title": "Redmine Integration",
 			"apiurl": "Redmine URL",
-			"apikey": "Redmine API key"
+			"apikey": "Redmine API key",
+			"statuses": "Redmine active statuses",
+			"priorities": "Redmine priorities"
 		}
 	},
 	"login": {

@@ -74,7 +74,9 @@
 		"redmine": {
 			"title": "Интеграция с Redmine",
 			"apiurl": "Redmine URL",
-			"apikey": "Redmine API key"
+			"apikey": "Redmine API key",
+			"statuses": "Активные статусы Redmine",
+			"priorities": "Приоритеты Redmine"
 		}
 	},
 	"login": {

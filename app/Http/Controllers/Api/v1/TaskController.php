@@ -40,7 +40,6 @@ class TaskController extends ItemController
             'task_name'   => 'required',
             'active'      => 'required',
             'user_id'     => 'required',
-            'assigned_by' => 'required',
         ];
     }
 

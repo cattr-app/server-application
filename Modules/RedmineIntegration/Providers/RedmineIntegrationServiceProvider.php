@@ -27,7 +27,10 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
     protected $listen = [
         'item.create.task' => [
             'Modules\RedmineIntegration\Listeners\IntegrationObserver@taskCreation',
-        ]
+        ],
+        'item.edit.task' => [
+            'Modules\RedmineIntegration\Listeners\IntegrationObserver@taskEdition',
+        ],
     ];
 
     /**

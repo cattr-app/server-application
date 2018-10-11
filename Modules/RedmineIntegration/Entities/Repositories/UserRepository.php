@@ -105,7 +105,8 @@ class UserRepository
                 't.task_name',
                 't.description',
                 't.user_id',
-                't.assigned_by'
+                't.assigned_by',
+                't.priority_id'
             )->join(Task::getTableName() . ' as t', 'prop.entity_id', '=', 't.id')
             ->where('prop.entity_type', '=', Property::TASK_CODE)
             ->where('prop.name', '=', 'NEW')
