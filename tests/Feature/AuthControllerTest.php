@@ -15,8 +15,6 @@ use RoleSeeder;
  */
 class AuthControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_Login_ExpectPass()
     {
         $auth = [

@@ -6,8 +6,6 @@ use Tests\TestCase;
 
 class ProjectControllerTest extends TestCase
 {
-    use RefreshDatabase;
-
     public function test_Create_ExpectPass()
     {
         $headers = [

@@ -10,8 +10,6 @@ use Tests\TestCase;
 
 class RuleController  extends TestCase
 {
-
-
     public function test_Actions_ExpectPass()
     {
         $headers = [

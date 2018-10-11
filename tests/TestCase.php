@@ -2,30 +2,42 @@
 
 namespace Tests;
 
-use Artisan;
-use DatabaseSeeder;
-use DatabaseTestsSeeder;
+use DB;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 abstract class TestCase extends BaseTestCase
 {
-  use CreatesApplication;
+    use CreatesApplication;
 
-  public function setUp()
-  {
-    parent::setUp();
-    Artisan::call('db:seed', ['--class' => DatabaseSeeder::class]);
-  }
+    /**
+     * @throws \Exception
+     */
+    public function setUp()
+    {
+        parent::setUp();
+        DB::beginTransaction();
+    }
 
-  public function getAdminToken()
-  {
-    $auth = [
-      'login'     => 'admin@example.com',
-      'password'  => 'admin'
-    ];
+    /**
+     * @throws \Exception
+     */
+    public function tearDown()
+    {
+        DB::rollback();
+        parent::tearDown();
 
-    $response = $this->postJson('/api/auth/login', $auth);
+    }
 
-    return $response->json('access_token');
-  }
+
+    public function getAdminToken()
+    {
+        $auth = [
+            'login'     => 'admin@example.com',
+            'password'  => 'admin'
+        ];
+
+        $response = $this->postJson('/api/auth/login', $auth);
+
+        return $response->json('access_token');
+    }
 }

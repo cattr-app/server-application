@@ -109,9 +109,7 @@ class ProjectUsersControllerTest extends TestCase
 
         $response = $this->getJson('/api/v1/projects-users/list', $headers);
 
-        $expectedJson = [
-            []
-        ];
+        $expectedJson = [[]];
 
 
 
