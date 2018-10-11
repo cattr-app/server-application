@@ -2,10 +2,6 @@
 
 namespace Tests\Feature\v1;
 
-use Artisan;
-use DatabaseSeeder;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class UserControllerTest extends TestCase
@@ -13,16 +9,16 @@ class UserControllerTest extends TestCase
     public function test_Create_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [
-            'id'        => 42,
-            'full_name' => 'Captain John Doe',
-            'email'     => 'johndoe@example.com',
-            'password'  => 'SomeSuperSecretPasswordMoreThan8OSymbols',
-            'role_id'   => 1,
-            'active'    => true
+            "id"        => 42,
+            "full_name" => "Captain John Doe",
+            "email"     => "johndoe@example.com",
+            "password"  => "SomeSuperSecretPasswordMoreThan8OSymbols",
+            "role_id"   => 1,
+            "active"    => true
         ];
 
         $expectedFields = [
@@ -32,7 +28,7 @@ class UserControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson('/api/v1/users/create', $data, $headers);
+        $response = $this->postJson("/api/v1/users/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -41,18 +37,18 @@ class UserControllerTest extends TestCase
     public function test_Destroy_ExpectFail_WrongId()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [
-            'id' => 'SampleWrongId'
+            "id" => "SampleWrongId"
         ];
 
         $expectedFields = [
             "error", "reason"
         ];
 
-        $response = $this->postJson('/api/v1/users/remove', $data, $headers);
+        $response = $this->postJson("/api/v1/users/remove", $data, $headers);
 
         $response->assertStatus(400);
         $response->assertJsonStructure($expectedFields);
@@ -61,15 +57,15 @@ class UserControllerTest extends TestCase
     public function test_Edit_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [
-            'id'        => 1,
-            'role_id'   => 1,
-            'full_name' => 'Captain Admin Example com',
-            'email'     => 'admin@example.com',
-            'active'    => true
+            "id"        => 1,
+            "role_id"   => 1,
+            "full_name" => "Captain Admin Example com",
+            "email"     => "admin@example.com",
+            "active"    => true
         ];
         $expectedFields = [
             "res" => [
@@ -84,7 +80,7 @@ class UserControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson('/api/v1/users/edit', $data, $headers);
+        $response = $this->postJson("/api/v1/users/edit", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -93,7 +89,7 @@ class UserControllerTest extends TestCase
     public function test_List_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
         $expectedFields = [
             "*" => [
@@ -106,8 +102,8 @@ class UserControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson('/api/v1/users/list', [], $headers);
-        
+        $response = $this->postJson("/api/v1/users/list", [], $headers);
+
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
     }
@@ -115,14 +111,14 @@ class UserControllerTest extends TestCase
     public function test_Relations_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $expectedFields = [
-            
+
         ];
 
-        $response = $this->postJson('/api/v1/users/list', [], $headers);
+        $response = $this->postJson("/api/v1/users/list", [], $headers);
         $response->assertStatus(200);
 
         $response->assertJsonStructure($expectedFields);
@@ -132,40 +128,40 @@ class UserControllerTest extends TestCase
     public function test_Show_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [
-            'id' => 1
+            "id" => 1
         ];
 
-        $response = $this->postJson('/api/v1/users/show', $data, $headers);
+        $response = $this->postJson("/api/v1/users/show", $data, $headers);
         $response->assertStatus(200);
     }
 
     public function test_Show_ExpectFail_EmptyId()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $response = $this->postJson('/api/v1/users/show', [], $headers);
+        $response = $this->postJson("/api/v1/users/show", [], $headers);
         $response->assertStatus(400);
     }
 
     public function test_BulkEdit_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [
-            'users' => [
+            "users" => [
                 [
-                    'id'        => 1,
-                    'full_name' => 'Lol kek cheburek',
-                    'email'     => 'admeen@example.com',
-                    'active'    => true
+                    "id"        => 1,
+                    "full_name" => "Lol kek cheburek",
+                    "email"     => "admeen@example.com",
+                    "active"    => true
                 ],
             ]
         ];
@@ -186,7 +182,7 @@ class UserControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson('/api/v1/users/bulk-edit', $data, $headers);
+        $response = $this->postJson("/api/v1/users/bulk-edit", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);

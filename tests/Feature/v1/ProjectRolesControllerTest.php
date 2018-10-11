@@ -11,7 +11,7 @@ use UsersTableSeeder;
 
 /**
  * Class AuthControllerTest
- * 
+ *
  * @package Tests\Feature
  */
 class ProjectRolesControllerTest extends TestCase
@@ -23,10 +23,10 @@ class ProjectRolesControllerTest extends TestCase
         ];
 
         $data = [
-            'name' => 'Sample'
+            "name" => "Sample"
         ];
 
-        $response = $this->postJson('/api/v1/roles/create', $data, $headers);
+        $response = $this->postJson("/api/v1/roles/create", $data, $headers);
 
         $response->assertStatus(200);
     }
@@ -38,10 +38,10 @@ class ProjectRolesControllerTest extends TestCase
         ];
 
         $data = [
-            'name' => 'Sample'
+            "name" => "Sample"
         ];
 
-        $response = $this->postJson('/api/v1/roles/create', $data, $headers);
+        $response = $this->postJson("/api/v1/roles/create", $data, $headers);
         $id = $response->json();
 
 
@@ -54,7 +54,7 @@ class ProjectRolesControllerTest extends TestCase
             'Authorization' => 'Bearer ' . $this->getAdminToken()
         ];
 
-        $response = $this->postJson('/api/v1/roles/list', [], $headers);
+        $response = $this->postJson("/api/v1/roles/list", [], $headers);
         $response->assertStatus(200);
     }
 }

@@ -19,14 +19,14 @@ class RoleControllerTest extends TestCase
     public function test_Create_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [
-            'name' => 'SampleRightRole'
+            "name" => "SampleRightRole"
         ];
 
-        $response = $this->postJson('/api/v1/roles/create', $data, $headers);
+        $response = $this->postJson("/api/v1/roles/create", $data, $headers);
 
         $response->assertStatus(200);
     }
@@ -34,12 +34,12 @@ class RoleControllerTest extends TestCase
     public function test_Create_ExpectFail_EmptyMail()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [];
 
-        $response = $this->postJson('/api/v1/roles/create', $data, $headers);
+        $response = $this->postJson("/api/v1/roles/create", $data, $headers);
 
         $response->assertStatus(400);
     }
@@ -47,24 +47,24 @@ class RoleControllerTest extends TestCase
     public function test_Destroy_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [
-            'name' => 'SampleRightRole'
+            "name" => "SampleRightRole"
         ];
 
         /**
          * Create role and get ID
          */
-        $roleId = $this->postJson('/api/v1/roles/create', $data, $headers)
-            ->json('res')['id'];
+        $roleId = $this->postJson("/api/v1/roles/create", $data, $headers)
+            ->json("res")["id"];
 
         $destroyData = [
-            'id' => (string)$roleId
+            "id" => (string)$roleId
         ];
 
-        $response = $this->postJson('/api/v1/roles/destroy', $destroyData, $headers);
+        $response = $this->postJson("/api/v1/roles/destroy", $destroyData, $headers);
 
         $response->assertStatus(200);
     }
@@ -72,16 +72,16 @@ class RoleControllerTest extends TestCase
     public function test_Destroy_ExpectFail_EmptyId()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [
-            'name' => 'SampleRightRole'
+            "name" => "SampleRightRole"
         ];
 
 
-        $this->postJson('/api/v1/roles/create', $data, $headers);
-        $response = $this->postJson('/api/v1/roles/remove', [], $headers);
+        $this->postJson("/api/v1/roles/create", $data, $headers);
+        $response = $this->postJson("/api/v1/roles/remove", [], $headers);
 
         $response->assertStatus(400);
     }
@@ -89,22 +89,22 @@ class RoleControllerTest extends TestCase
     public function test_Edit_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $createRoleData = [
-            'name' => 'SampleRightRole'
+            "name" => "SampleRightRole"
         ];
 
-        $roleId = $this->postJson('/api/v1/roles/create', $createRoleData, $headers)
-            ->json('res')['id'];
+        $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
+            ->json("res")["id"];
 
         $editRoleData = [
-            'id'    => $roleId,
-            'name'  => 'YetAnotherRoleName'
+            "id"    => $roleId,
+            "name"  => "YetAnotherRoleName"
         ];
 
-        $response = $this->postJson('/api/v1/roles/edit', $editRoleData, $headers);
+        $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
 
         $response->assertStatus(200);
     }
@@ -112,14 +112,14 @@ class RoleControllerTest extends TestCase
     public function test_Edit_ExpectFail_EmptyId()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $editRoleData = [
-            'name'  => 'YetAnotherRoleName'
+            "name"  => "YetAnotherRoleName"
         ];
 
-        $response = $this->postJson('/api/v1/roles/edit', $editRoleData, $headers);
+        $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
 
         $response->assertStatus(400);
     }
@@ -127,21 +127,21 @@ class RoleControllerTest extends TestCase
     public function test_Edit_ExpectFail_EmptyName()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $createRoleData = [
-            'name' => 'SampleRightRole'
+            "name" => "SampleRightRole"
         ];
 
-        $roleId = $this->postJson('/api/v1/roles/create', $createRoleData, $headers)
-            ->json('res')['id'];
+        $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
+            ->json("res")["id"];
 
         $editRoleData = [
-            'id'    => $roleId
+            "id"    => $roleId
         ];
 
-        $response = $this->postJson('/api/v1/roles/edit', $editRoleData, $headers);
+        $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
 
         $response->assertStatus(400);
     }
@@ -149,21 +149,21 @@ class RoleControllerTest extends TestCase
     public function test_Show_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $createRoleData = [
-            'name' => 'SampleRightRole'
+            "name" => "SampleRightRole"
         ];
 
-        $roleId = $this->postJson('/api/v1/roles/create', $createRoleData, $headers)
-            ->json('res')['id'];
+        $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
+            ->json("res")["id"];
 
         $showRoleData = [
-            'id'    => $roleId,
+            "id"    => $roleId,
         ];
 
-        $response = $this->postJson('/api/v1/roles/show', $showRoleData, $headers);
+        $response = $this->postJson("/api/v1/roles/show", $showRoleData, $headers);
 
         $response->assertStatus(200);
     }
@@ -171,10 +171,10 @@ class RoleControllerTest extends TestCase
     public function test_Show_ExpectFail_EmptyId()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $response = $this->postJson('/api/v1/roles/show', [], $headers);
+        $response = $this->postJson("/api/v1/roles/show", [], $headers);
 
         $response->assertStatus(400);
     }

@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class ProjectControllerTest extends TestCase
@@ -13,17 +11,17 @@ class ProjectControllerTest extends TestCase
         ];
 
         $data = [
-            'name'         => 'SampleOriginalProjectName',
-            'description'  => 'Code-monkey development group presents'
+            'name'         => "SampleOriginalProjectName",
+            'description'  => "Code-monkey development group presents"
         ];
 
         $expectedFields = [
             "res" => [
-                "id", "name", "description", 'created_at', 'updated_at'
+                "id", "name", "description", "created_at", "updated_at"
             ]
         ];
 
-        $response = $this->postJson('/api/v1/projects/create', $data, $headers);
+        $response = $this->postJson("/api/v1/projects/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -36,8 +34,8 @@ class ProjectControllerTest extends TestCase
         ];
 
         $createData = [
-            'name'         => 'SampleOriginalProjectName',
-            'description'  => 'Code-monkey development group presents'
+            "name"         => "SampleOriginalProjectName",
+            "description"  => "Code-monkey development group presents"
         ];
 
         $createResponse = $this->postJson('/api/v1/projects/create', $createData, $headers);
@@ -50,7 +48,7 @@ class ProjectControllerTest extends TestCase
             'message'
         ];
 
-        $response = $this->postJson('/api/v1/projects/remove', $data, $headers);
+        $response = $this->postJson("/api/v1/projects/remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -63,16 +61,16 @@ class ProjectControllerTest extends TestCase
         ];
 
         $createData = [
-            'name'         => 'SampleOriginalProjectName',
-            'description'  => 'Code-monkey development group presents'
+            "name"         => "SampleOriginalProjectName",
+            "description"  => "Code-monkey development group presents"
         ];
 
         $createResponse = $this->postJson('/api/v1/projects/create', $createData, $headers);
 
         $data = [
-            'id' => $createResponse->json('res.id'),
-                'name'         => 'SampleOriginalProjectNameButEdited',
-                'description'  => 'Code-monkey development group presents with new description'
+            "id" => $createResponse->json('res.id'),
+            "name"         => "SampleOriginalProjectNameButEdited",
+            "description"  => "Code-monkey development group presents with new description"
         ];
 
         $expectedFields = [
@@ -81,7 +79,7 @@ class ProjectControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson('/api/v1/projects/edit', $data, $headers);
+        $response = $this->postJson("/api/v1/projects/edit", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -94,12 +92,12 @@ class ProjectControllerTest extends TestCase
         ];
 
         $expectedFields = [
-            '*' => [
+            "*" => [
                 "id", "company_id", "name", "description", "deleted_at", "created_at", "updated_at"
             ]
         ];
 
-        $response = $this->getJson('/api/v1/projects/list', $headers);
+        $response = $this->getJson("/api/v1/projects/list", $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -112,21 +110,21 @@ class ProjectControllerTest extends TestCase
         ];
 
         $createData = [
-            'name'         => 'SampleOriginalProjectName',
-            'description'  => 'Code-monkey development group presents'
+            "name"         => "SampleOriginalProjectName",
+            "description"  => "Code-monkey development group presents"
         ];
 
-        $createResponse = $this->postJson('/api/v1/projects/create', $createData, $headers);
+        $createResponse = $this->postJson("/api/v1/projects/create", $createData, $headers);
 
         $data = [
-            'id' => $createResponse->json('res.id')
+            "id" => $createResponse->json("res.id")
         ];
 
         $expectedFields = [
             "id", "company_id", "name", "description", 'created_at', 'updated_at'
         ];
 
-        $response = $this->postJson('/api/v1/projects/show', $data, $headers);
+        $response = $this->postJson("/api/v1/projects/show", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);

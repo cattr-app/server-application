@@ -2,12 +2,7 @@
 
 namespace Tests\Feature;
 
-use Artisan;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
-use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
-use UsersTableSeeder;
-use RoleSeeder;
 
 /**
  * Class AuthControllerTest
@@ -18,15 +13,15 @@ class AuthControllerTest extends TestCase
     public function test_Login_ExpectPass()
     {
         $auth = [
-            'login'     => 'admin@example.com',
-            'password'  => 'admin'
+            "login"     => "admin@example.com",
+            "password"  => "admin"
         ];
 
         $expectedFields = [
             "access_token", "token_type", "expires_in", "user"
         ];
 
-        $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson("/api/auth/login", $auth);
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
     }
@@ -34,14 +29,14 @@ class AuthControllerTest extends TestCase
     public function test_Login_ExpectFail_NoPassword()
     {
         $auth = [
-            'login' => 'admin@example.com',
+            "login" => "admin@example.com",
         ];
 
         $expectedFields = [
             "error"
         ];
 
-        $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson("/api/auth/login", $auth);
 
         $response->assertStatus(401);
         $response->assertJsonStructure($expectedFields);
@@ -52,14 +47,14 @@ class AuthControllerTest extends TestCase
     public function test_Login_ExpectFail_NoLogin()
     {
         $auth = [
-            'password' => 'admin',
+            "password" => "admin",
         ];
 
         $expectedFields = [
             "error"
         ];
 
-        $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson("/api/auth/login", $auth);
 
         $response->assertStatus(401);
         $response->assertJsonStructure($expectedFields);
@@ -73,7 +68,7 @@ class AuthControllerTest extends TestCase
             "error"
         ];
 
-        $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson("/api/auth/login", $auth);
 
         $response->assertStatus(401);
         $response->assertJsonStructure($expectedFields);
@@ -82,15 +77,15 @@ class AuthControllerTest extends TestCase
     public function test_Login_ExpectFail_WrongData()
     {
         $auth = [
-            'login'    => 'admin@example.com',
-            'password' => 'inwalidpassword',
+            "login"    => "admin@example.com",
+            "password" => "inwalidpassword",
         ];
 
         $expectedFields = [
             "error"
         ];
 
-        $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson("/api/auth/login", $auth);
 
         $response->assertStatus(401);
         $response->assertJsonStructure($expectedFields);
@@ -99,7 +94,7 @@ class AuthControllerTest extends TestCase
     public function test_Me_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $expectedFields = [
@@ -112,7 +107,7 @@ class AuthControllerTest extends TestCase
             "role_id","timezone"
         ];
 
-        $response = $this->getJson('/api/auth/me', $headers);
+        $response = $this->getJson("/api/auth/me", $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -121,14 +116,14 @@ class AuthControllerTest extends TestCase
     public function test_Me_ExpectFail_WrongJWT()
     {
         $headers = [
-            'Authorization' => 'Bearer samplewrongjwt'
+            "Authorization" => "Bearer samplewrongjwt"
         ];
 
         $expectedFields = [
             "error", "reason"
         ];
 
-        $response = $this->getJson('/api/auth/me', $headers);
+        $response = $this->getJson("/api/auth/me", $headers);
 
         $response->assertStatus(403);
         $response->assertJsonStructure($expectedFields);
@@ -137,14 +132,14 @@ class AuthControllerTest extends TestCase
     public function test_Refresh_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
-        ];
-        
-       $expectedFields = [
-            'access_token', 'token_type', 'expires_in', 'user'
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $response = $this->postJson('/api/auth/refresh', [], $headers);
+        $expectedFields = [
+            "access_token", "token_type", "expires_in", "user"
+        ];
+
+        $response = $this->postJson("/api/auth/refresh", [], $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
