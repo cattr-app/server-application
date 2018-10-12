@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Helpers\CatHelper;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class AuthController
@@ -108,6 +110,46 @@ class AuthController extends Controller
         ]);
     }
 
+    protected function invalidateToken(Request $request)
+    {
+        $auth = explode(' ', $request->header('Authorization'));
+        if (!empty($auth) && count($auth) > 1 && $auth[0] == 'bearer') {
+            $token = $auth[1];
+
+            DB::table('tokens')->where([
+                ['user_id', auth()->user()->id],
+                ['token', $token],
+            ])->delete();
+        }
+    }
+
+    /**
+     * @param null|string $except
+     */
+    protected function invalidateAllTokens($except = null)
+    {
+        $conditions = [
+            ['user_id', auth()->user()->id],
+        ];
+
+        if (isset($except)) {
+            $conditions[] = ['token', '!=', $except];
+        }
+
+        DB::table('tokens')->where($conditions)->delete();
+    }
+
+    protected function setToken(string $token)
+    {
+        $expires_timestamp = time() + 60 * auth()->factory()->getTTL();
+
+        DB::table('tokens')->insert([
+            'user_id' => auth()->user()->id,
+            'token' => $token,
+            'expires_at' => date('Y-m-d H:i:s', $expires_timestamp),
+        ]);
+    }
+
    /**
     * @api {post} /api/auth/login Login
     * @apiDescription Get user JWT
@@ -154,15 +196,13 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        $this->setToken($token);
         return $this->respondWithToken($token);
     }
 
     /**
      * Log the user out (Invalidate the token).
      *
-     * @return JsonResponse
-     */
-    /**
      * @api {any} /api/auth/logout Logout
      * @apiDescription Invalidate JWT
      * @apiVersion 0.1.0
@@ -180,12 +220,54 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function logout(): JsonResponse
+    public function logout(Request $request): JsonResponse
     {
+        $this->invalidateToken($request);
         auth()->logout();
 
         return response()->json([
             'message' => 'Successfully logged out'
+        ]);
+    }
+
+    /**
+     * Log the user out (Invalidate all tokens).
+     *
+     * @api {any} /api/auth/logout Logout
+     * @apiDescription Invalidate JWT
+     * @apiVersion 0.1.0
+     * @apiName Logout
+     * @apiGroup Auth
+     *
+     * @apiParamExample {json} Request Example:
+     *  {
+     *      "token": "eyJ0eXAiOiJKV1QiLCJhbGciO..."
+     *  }
+     *
+     * @apiSuccess {String}    message    Action result message
+     *
+     * @apiSuccessExample {json} Answer Example:
+     *  {
+     *      "message": "Successfully ended all sessions"
+     *  }
+     *
+     * @apiUse NotLoggedIn
+     *
+     * @return JsonResponse
+     */
+    public function logoutAll(Request $request): JsonResponse
+    {
+        $token = $request->json()->get('token');
+        if (isset($token)) {
+            $this->invalidateAllTokens($token);
+        }
+        else {
+            $this->invalidateAllTokens();
+            auth()->logout();
+        }
+
+        return response()->json([
+            'message' => 'Successfully logged out',
         ]);
     }
 
@@ -256,7 +338,10 @@ class AuthController extends Controller
     */
     public function refresh(): JsonResponse
     {
-        return $this->respondWithToken(auth()->refresh());
+        $this->invalidateToken($request);
+        $token = auth()->refresh();
+        $this->setToken($token);
+        return $this->respondWithToken($token);
     }
 
     /**

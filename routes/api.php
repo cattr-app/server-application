@@ -32,6 +32,7 @@ Route::group([
     $router->any('ping', 'AuthController@ping');
     $router->post('login', 'AuthController@login');
     $router->any('logout', 'AuthController@logout');
+    $router->any('logout-all', 'AuthController@logoutAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
 });
