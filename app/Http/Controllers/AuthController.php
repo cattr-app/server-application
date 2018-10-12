@@ -12,17 +12,22 @@ use Illuminate\Http\JsonResponse;
  */
 class AuthController extends Controller
 {
-  /**
-   * @apiDefine NotLoggedIn
-   * @apiErrorExample {json} Access Error Example:
-   * {
-      "error": "Access denied",
-      "reason": "not logined"
-   * }
-   *
-   * @apiError (Error 400) {String} error  Name of error
-   * @apiError (Error 400) {String} reason Reason of error
-   */
+    /**
+     * @apiDefine NotLoggedIn
+     * @apiErrorExample {json} Access Error Example:
+     * {
+     *    "error": "Access denied",
+    "reason": "not logined"
+     * }
+     *
+     * @apiErrorExample {json} Access Error Example:
+     * {
+     *    "error": "Unauthorized"
+     * }
+     *
+     * @apiError (Error 400) {String} error  Name of error
+     * @apiError (Error 400) {String} reason Reason of error
+     */
 
     /**
      * @apiDefine AuthAnswer
@@ -108,36 +113,36 @@ class AuthController extends Controller
         ]);
     }
 
-   /**
-    * @api {post} /api/auth/login Login
-    * @apiDescription Get user JWT
-    *
-    *
-    * @apiVersion 0.1.0
-    * @apiName Login
-    * @apiGroup Auth
-    *
-    * @apiParam {String}   login       User login
-    * @apiParam {Integer}  password    User password
-    *
-    * @apiSuccess {String}     access_token  Token
-    * @apiSuccess {String}     token_type    Token Type
-    * @apiSuccess {String}     expires_in    Token TTL in seconds
-    * @apiSuccess {Array}      user          User Entity
-    *
-    * @apiError (Error 401) {String} Error Error
-    *
-    * @apiParamExample {json} Request Example:
-    *  {
-    *      "login":      "johndoe@example.com",
-    *      "password":   "amazingpassword",
-    *  }
-    *
-    * @apiUse AuthAnswer
-    * @apiUse NotLoggedIn
-    *
-    * @return JsonResponse
-    */
+    /**
+     * @api {post} /api/auth/login Login
+     * @apiDescription Get user JWT
+     *
+     *
+     * @apiVersion 0.1.0
+     * @apiName Login
+     * @apiGroup Auth
+     *
+     * @apiParam {String}   login       User login
+     * @apiParam {Integer}  password    User password
+     *
+     * @apiSuccess {String}     access_token  Token
+     * @apiSuccess {String}     token_type    Token Type
+     * @apiSuccess {String}     expires_in    Token TTL in seconds
+     * @apiSuccess {Array}      user          User Entity
+     *
+     * @apiError (Error 401) {String} Error Error
+     *
+     * @apiParamExample {json} Request Example:
+     *  {
+     *      "login":      "johndoe@example.com",
+     *      "password":   "amazingpassword",
+     *  }
+     *
+     * @apiUse AuthAnswer
+     * @apiUse NotLoggedIn
+     *
+     * @return JsonResponse
+     */
     public function login(): JsonResponse
     {
         $credentials = request([
@@ -189,71 +194,71 @@ class AuthController extends Controller
         ]);
     }
 
-  /**
-   * @api {get} /api/auth/me Me
-   * @apiDescription Get authenticated User Entity
-   *
-   * @apiVersion 0.1.0
-   * @apiName Me
-   * @apiGroup Auth
-   *
-   * @apiSuccess {String}     access_token  Token
-   * @apiSuccess {String}     token_type    Token Type
-   * @apiSuccess {String}     expires_in    Token TTL in seconds
-   * @apiSuccess {Array}      user          User Entity
-   *
-   * @apiUse NotLoggedIn
-   *
-   * @apiSuccessExample {json} Answer Example:
-   * {
-   *   "id": 1,
-   *   "full_name": "Admin",
-   *   "first_name": "Ad",
-   *   "last_name": "Min",
-   *   "email": "admin@example.com",
-   *   "url": "",
-   *   "company_id": 1,
-   *   "level": "admin",
-   *   "payroll_access": 1,
-   *   "billing_access": 1,
-   *   "avatar": "",
-   *   "screenshots_active": 1,
-   *   "manual_time": 0,
-   *   "permanent_tasks": 0,
-   *   "computer_time_popup": 300,
-   *   "poor_time_popup": "",
-   *   "blur_screenshots": 0,
-   *   "web_and_app_monitoring": 1,
-   *   "webcam_shots": 0,
-   *   "screenshots_interval": 9,
-   *   "user_role_value": "",
-   *   "active": "active",
-   *   "deleted_at": null,
-   *   "created_at": "2018-09-25 06:15:08",
-   *   "updated_at": "2018-09-25 06:15:08",
-   *   "role_id": 1,
-   *   "timezone": null
-   * }
-   *
-   * @return JsonResponse
-   */
-  public function me(): JsonResponse
-  {
-    return response()->json(auth()->user());
-  }
+    /**
+     * @api {get} /api/auth/me Me
+     * @apiDescription Get authenticated User Entity
+     *
+     * @apiVersion 0.1.0
+     * @apiName Me
+     * @apiGroup Auth
+     *
+     * @apiSuccess {String}     access_token  Token
+     * @apiSuccess {String}     token_type    Token Type
+     * @apiSuccess {String}     expires_in    Token TTL in seconds
+     * @apiSuccess {Array}      user          User Entity
+     *
+     * @apiUse NotLoggedIn
+     *
+     * @apiSuccessExample {json} Answer Example:
+     * {
+     *     "id": 1,
+     *     "full_name": "Admin",
+     *     "first_name": "Ad",
+     *     "last_name": "Min",
+     *     "email": "admin@example.com",
+     *     "url": "",
+     *     "company_id": 1,
+     *     "level": "admin",
+     *     "payroll_access": 1,
+     *     "billing_access": 1,
+     *     "avatar": "",
+     *     "screenshots_active": 1,
+     *     "manual_time": 0,
+     *     "permanent_tasks": 0,
+     *     "computer_time_popup": 300,
+     *     "poor_time_popup": "",
+     *     "blur_screenshots": 0,
+     *     "web_and_app_monitoring": 1,
+     *     "webcam_shots": 0,
+     *     "screenshots_interval": 9,
+     *     "user_role_value": "",
+     *     "active": "active",
+     *     "deleted_at": null,
+     *     "created_at": "2018-09-25 06:15:08",
+     *     "updated_at": "2018-09-25 06:15:08",
+     *     "role_id": 1,
+     *     "timezone": null
+     * }
+     *
+     * @return JsonResponse
+     */
+    public function me(): JsonResponse
+    {
+        return response()->json(auth()->user());
+    }
 
-   /**
-    * @api {post} /api/auth/refresh Refresh
-    * @apiDescription Refresh JWT
-    *
-    * @apiVersion 0.1.0
-    * @apiName Refresh
-    * @apiGroup Auth
-    *
-    * @apiUse NotLoggedIn
-    *
-    * @apiUse AuthAnswer
-    */
+    /**
+     * @api {post} /api/auth/refresh Refresh
+     * @apiDescription Refresh JWT
+     *
+     * @apiVersion 0.1.0
+     * @apiName Refresh
+     * @apiGroup Auth
+     *
+     * @apiUse NotLoggedIn
+     *
+     * @apiUse AuthAnswer
+     */
     public function refresh(): JsonResponse
     {
         return $this->respondWithToken(auth()->refresh());

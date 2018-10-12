@@ -81,6 +81,17 @@ class RolesController extends ItemController
      *  }
      * @apiUse RolesRelationsExample
      *
+     * @apiSuccessExample {json} Simple response example
+     * [
+     *   {
+     *     "id": 256,
+     *     "name": "test",
+     *     "deleted_at": null,
+     *     "created_at": "2018-10-12 11:44:08",
+     *     "updated_at": "2018-10-12 11:44:08"
+     *   }
+     * ]
+     *
      * @apiSuccess {Object[]} RoleList                  Roles (Array of objects)
      * @apiSuccess {Object}   RoleList.Role             Role object
      * @apiSuccess {Integer}  RoleList.Role.id          Role's ID
@@ -123,6 +134,16 @@ class RolesController extends ItemController
      *  {
      *      "name": "test"
      *  }
+     *
+     * @apiSuccessExample {json} Answer Example:
+     * {
+     *   "res": {
+     *     "name": "test",
+     *     "updated_at": "2018-10-12 11:44:08",
+     *     "created_at": "2018-10-12 11:44:08",
+     *     "id": 256
+     *    }
+     * }
      *
      * @apiSuccess {Object}   res             Response object
      * @apiSuccess {Integer}  res.id          Role's ID

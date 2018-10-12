@@ -227,6 +227,25 @@ class RulesController extends ItemController
      * @apiName GetRulesActions
      * @apiGroup Rule
      *
+     * @apiSuccessExample {json} Response example
+     * [
+     *   {
+     *     "object": "projects",
+     *     "action": "list",
+     *     "name": "Project list"
+     *   },
+     *   {
+     *     "object": "projects",
+     *     "action": "create",
+     *     "name": "Project create"
+     *   },
+     *   {
+     *     "object": "projects",
+     *     "action": "show",
+     *     "name": "Project show"
+     *   }
+     * ]
+     *
      * @apiSuccess (200) {Object[]} actions               Array of Action objects
      * @apiSuccess (200) {Object}   actions.action        Action object
      * @apiSuccess (200) {String}   actions.action.object Object of action

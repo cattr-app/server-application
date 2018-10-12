@@ -207,6 +207,9 @@ class ProjectsRolesController extends ItemController
    * @apiUse DefaultDestroyResponse
    *
    * @apiUse NotLoggedIn
+   *
+   *
+   *
    * @todo: add request and response example with error
    *
    * @param Request $request

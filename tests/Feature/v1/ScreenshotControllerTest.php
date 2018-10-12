@@ -15,11 +15,10 @@ class ScreenshotControllerTest extends TestCase
 
         $data = [
             "time_interval_id"  => 1,
-            "screenshot"        => UploadedFile::fake()->image("avatar.jpg")
+            UploadedFile::fake()->image("avatar.jpg")
         ];
 
         $response = $this->postJson("/api/v1/screenshots/create", $data, $headers);
-        echo var_export(UploadedFile::fake()->image("avatar.jpg"));
 
         $response->assertStatus(200);
     }
