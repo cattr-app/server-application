@@ -88,7 +88,6 @@ class TimeIntervalController extends ItemController
      *     "end_at": "2013-04-12 20:40:00",
      *     "created_at": "2018-10-01 03:20:59",
      *     "updated_at": "2018-10-01 03:20:59",
-     *     "deleted_at": null,
      *     "count_mouse": 0,
      *     "count_keyboard": 0,
      *     "user_id": 1
@@ -208,6 +207,23 @@ class TimeIntervalController extends ItemController
      *
      * @apiSuccess (200) {TimeInterval[]} TimeIntervalList array of Time Interval objects
      *
+     * @apiSuccessExample {json} Answer Example:
+     * {
+     *      {
+     *          "id":1,
+     *          "task_id":1,
+     *          "start_at":"2006-06-20 15:54:40",
+     *          "end_at":"2006-06-20 15:59:38",
+     *          "created_at":"2018-10-15 05:54:39",
+     *          "updated_at":"2018-10-15 05:54:39",
+     *          "deleted_at":null,
+     *          "count_mouse":42,
+     *          "count_keyboard":43,
+     *          "user_id":1
+     *      },
+     *      ...
+     * }
+     *
      * @apiUse NotLoggedIn
      *
      * @param Request $request
@@ -281,6 +297,25 @@ class TimeIntervalController extends ItemController
      * @apiParam {DateTime} [created_at] Time Interval Creation DateTime
      * @apiParam {DateTime} [updated_at] Last Time Interval data update DataTime
      * @apiParam {DateTime} [deleted_at] When Time Interval was deleted (null if not)
+     *
+     * @apiSuccessExample {json} Answer example
+     *
+     *  {
+     *  "res":
+     *      {
+     *          "id":1,
+     *          "task_id":1,
+     *          "start_at":"2018-10-03 10:00:00",
+     *          "end_at":"2018-10-03 10:00:00",
+     *          "created_at":"2018-10-15 05:50:39",
+     *          "updated_at":"2018-10-15 05:50:43",
+     *          "deleted_at":null,
+     *          "count_mouse":42,
+     *          "count_keyboard":43,
+     *          "user_id":1
+     *      }
+     * }
+     *
      *
      * @apiUse NotLoggedIn
      */
@@ -361,13 +396,18 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/time-intervals/destroy Destroy
+     * @api {post} /api/v1/time-intervals/remove Destroy
      * @apiDescription Destroy Time Interval
      * @apiVersion 0.1.0
      * @apiName DestroyTimeInterval
      * @apiGroup Time Interval
      *
      * @apiParam {Integer}   id Time interval ID
+     *
+     * @apiSuccessResponse {json} Answer Example
+     * {
+     *   "message":"Item has been removed"
+     * }
      *
      * @apiUse NotLoggedIn
      */
