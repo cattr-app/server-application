@@ -25,7 +25,7 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
                 ->where('expires_at', '>', time())
                 ->first();
             if (!isset($token)) {
-                //return response()->json(['error' => 'Access denied', 'reason' => 'token blacklisted'], 403);
+                return response()->json(['error' => 'Access denied', 'reason' => 'not logined'], 403);
             }
         }
 
