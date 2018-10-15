@@ -67,8 +67,8 @@ class RolesController extends ItemController
      * @apiParam {Integer}  [id]          `QueryParam` Role ID
      * @apiParam {Integer}  [user_id]     `QueryParam` Role's Users ID
      * @apiParam {String}   [name]        `QueryParam` Role Name
-     * @apiParam {DateTime} [created_at]  `QueryParam` Role Creation DateTime
-     * @apiParam {DateTime} [updated_at]  `QueryParam` Last Role update DataTime
+     * @apiParam {String} [created_at]  `QueryParam` Role Creation DateTime
+     * @apiParam {String} [updated_at]  `QueryParam` Last Role update DataTime
      * @apiUse RolesRelations
      *
      * @apiParamExample {json} Simple-Request-Example:
@@ -96,13 +96,13 @@ class RolesController extends ItemController
      * @apiSuccess {Object}   RoleList.Role             Role object
      * @apiSuccess {Integer}  RoleList.Role.id          Role's ID
      * @apiSuccess {String}   RoleList.Role.name        Role's name
-     * @apiSuccess {DateTime} RoleList.Role.created_at  Role's date time of create
-     * @apiSuccess {DateTime} RoleList.Role.updated_at  Role's date time of update
-     * @apiSuccess {DateTime} RoleList.Role.deleted_at  Role's date time of delete
+     * @apiSuccess {String}   RoleList.Role.created_at  Role's date time of create
+     * @apiSuccess {String}   RoleList.Role.updated_at  Role's date time of update
+     * @apiSuccess {String}   RoleList.Role.deleted_at  Role's date time of delete
      * @apiSuccess {Object[]} RoleList.Role.users       Role's User (Array of objects)
      * @apiSuccess {Object[]} RoleList.Role.rules       Role's Task (Array of objects)
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      *
@@ -148,11 +148,11 @@ class RolesController extends ItemController
      * @apiSuccess {Object}   res             Response object
      * @apiSuccess {Integer}  res.id          Role's ID
      * @apiSuccess {String}   res.name        Role's name
-     * @apiSuccess {DateTime} res.created_at  Role's date time of create
-     * @apiSuccess {DateTime} res.updated_at  Role's date time of update
+     * @apiSuccess {String}   res.created_at  Role's date time of create
+     * @apiSuccess {String}   res.updated_at  Role's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      *
@@ -203,7 +203,7 @@ class RolesController extends ItemController
      * }
      *
      * @apiUse DefaultShowErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      *
@@ -229,12 +229,12 @@ class RolesController extends ItemController
      * @apiSuccess {Object}   Role            Role object
      * @apiSuccess {Integer}  Role.id         Role's ID
      * @apiSuccess {String}   Role.name       Role's name
-     * @apiSuccess {DateTime} Role.created_at Role's date time of create
-     * @apiSuccess {DateTime} Role.updated_at Role's date time of update
-     * @apiSuccess {DateTime} Role.deleted_at Role's date time of delete
+     * @apiSuccess {String}   Role.created_at Role's date time of create
+     * @apiSuccess {String}   Role.updated_at Role's date time of update
+     * @apiSuccess {String}   Role.deleted_at Role's date time of delete
      *
      * @apiUse DefaultEditErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      *
@@ -257,7 +257,7 @@ class RolesController extends ItemController
      *  }
      *
      * @apiUse DefaultDestroyResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      *
@@ -301,7 +301,7 @@ class RolesController extends ItemController
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @apiErrorExample {json} Invalid ID Example:
      * {

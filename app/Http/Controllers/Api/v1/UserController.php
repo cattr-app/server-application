@@ -127,12 +127,12 @@ class UserController extends ItemController
      * @apiParam {String}   [user_role_value]       `QueryParam` ???
      * @apiParam {Boolean}  [active]                             User is active
      * @apiParam {Integer}  [role_id]               `QueryParam` User's Role ID
-     * @apiParam {DateTime} [created_at]            `QueryParam` User Creation DateTime
-     * @apiParam {DateTime} [updated_at]            `QueryParam` Last User data update DataTime
-     * @apiParam {DateTime} [deleted_at]            `QueryParam` When User was deleted (null if not)
+     * @apiParam {String}   [created_at]            `QueryParam` User Creation DateTime
+     * @apiParam {String}   [updated_at]            `QueryParam` Last User data update DataTime
+     * @apiParam {String}   [deleted_at]            `QueryParam` When User was deleted (null if not)
      * @apiParam {String}   [timezone]              `QueryParam` User's timezone
      *
-     * @apiSuccess (200) {User[]} UserList array of users objects
+     * @apiSuccess (200) {Object[]} User entities
      */
 
     /**

@@ -93,7 +93,9 @@ class ScreenshotController extends ItemController
      *      "created_at":       [">", "2019-01-01 00:00:00"],
      *      "updated_at":       ["<", "2019-01-01 00:00:00"]
      *  }
+     *
      * @apiUse ScreenshotRelationsExample
+     * @apiUser UnauthorizedError
      *
      * @apiSuccess {Object[]} ScreenshotList                             Screenshots (Array of objects)
      * @apiSuccess {Object}   ScreenshotList.Screenshot                  Screenshot object
@@ -149,7 +151,7 @@ class ScreenshotController extends ItemController
      * @apiSuccess {DateTime} Screenshot.updated_at       Screenshot's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -231,7 +233,7 @@ class ScreenshotController extends ItemController
      * @apiSuccess {Object}   Screenshot.time_interval    Screenshot's Task
      *
      * @apiUse DefaultShowErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -249,7 +251,7 @@ class ScreenshotController extends ItemController
      * @apiParam {DateTime} [created_at]     Screenshot Creation DateTime
      * @apiParam {DateTime} [updated_at]     Last Screenshot data update DataTime
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple-Request-Example
      *  {
      *      "id":               1,
      *      "time_interval_id": 2,
@@ -265,7 +267,7 @@ class ScreenshotController extends ItemController
      * @apiSuccess {DateTime} Screenshot.deleted_at       Screenshot's date time of delete
      *
      * @apiUse DefaultEditErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -313,7 +315,7 @@ class ScreenshotController extends ItemController
      *      "updated_at":       ["<", "2019-01-01 00:00:00"]
      *  }
      * @apiUse ScreenshotRelationsExample
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @apiSuccess {Object[]} Array                                            Array of objects
      * @apiSuccess {DateTime} Array.object.interval                            Time of interval
@@ -321,9 +323,9 @@ class ScreenshotController extends ItemController
      * @apiSuccess {Integer}  Array.object.screenshots.object.id               Screenshot's ID
      * @apiSuccess {Integer}  Array.object.screenshots.object.time_interval_id Screenshot's Time Interval ID
      * @apiSuccess {String}   Array.object.screenshots.object.path             Screenshot's Image path URI
-     * @apiSuccess {DateTime} Array.object.screenshots.object.created_at       Screenshot's date time of create
-     * @apiSuccess {DateTime} Array.object.screenshots.object.updated_at       Screenshot's date time of update
-     * @apiSuccess {DateTime} Array.object.screenshots.object.deleted_at       Screenshot's date time of delete
+     * @apiSuccess {String}   Array.object.screenshots.object.created_at       Screenshot's date time of create
+     * @apiSuccess {String}   Array.object.screenshots.object.updated_at       Screenshot's date time of update
+     * @apiSuccess {String}   Array.object.screenshots.object.deleted_at       Screenshot's date time of delete
      * @apiSuccess {Object}   Array.object.screenshots.object.time_interval    Screenshot's Task
      *
      * @return \Illuminate\Http\JsonResponse

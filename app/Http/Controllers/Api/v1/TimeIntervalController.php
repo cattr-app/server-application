@@ -69,7 +69,7 @@ class TimeIntervalController extends ItemController
      * @apiName CreateTimeInterval
      * @apiGroup Time Interval
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @apiRequestExample {json} Request Example
      * {
@@ -201,9 +201,9 @@ class TimeIntervalController extends ItemController
      * @apiParam {Integer}  [user_id]    `QueryParam` Time Interval's User ID
      * @apiParam {String}   [start_at]   `QueryParam` Interval Start DataTime
      * @apiParam {String}   [end_at]     `QueryParam` Interval End DataTime
-     * @apiParam {DateTime} [created_at] `QueryParam` Time Interval Creation DateTime
-     * @apiParam {DateTime} [updated_at] `QueryParam` Last Time Interval data update DataTime
-     * @apiParam {DateTime} [deleted_at] `QueryParam` When Time Interval was deleted (null if not)
+     * @apiParam {String}   [created_at] `QueryParam` Time Interval Creation DateTime
+     * @apiParam {String}   [updated_at] `QueryParam` Last Time Interval data update DataTime
+     * @apiParam {String}   [deleted_at] `QueryParam` When Time Interval was deleted (null if not)
      *
      * @apiSuccess (200) {TimeInterval[]} TimeIntervalList array of Time Interval objects
      *
@@ -224,7 +224,7 @@ class TimeIntervalController extends ItemController
      *      ...
      * }
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -280,7 +280,7 @@ class TimeIntervalController extends ItemController
      *   "user_id": 1
      * }
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      */
 
     /**
@@ -294,9 +294,9 @@ class TimeIntervalController extends ItemController
      * @apiParam {Integer}  [user_id]    Time Interval's User ID
      * @apiParam {String}   [start_at]   Interval Start DataTime
      * @apiParam {String}   [end_at]     Interval End DataTime
-     * @apiParam {DateTime} [created_at] Time Interval Creation DateTime
-     * @apiParam {DateTime} [updated_at] Last Time Interval data update DataTime
-     * @apiParam {DateTime} [deleted_at] When Time Interval was deleted (null if not)
+     * @apiParam {String}   [created_at] Time Interval Creation DateTime
+     * @apiParam {String}   [updated_at] Last Time Interval data update DataTime
+     * @apiParam {String}   [deleted_at] When Time Interval was deleted (null if not)
      *
      * @apiSuccessExample {json} Answer example
      *
@@ -317,7 +317,7 @@ class TimeIntervalController extends ItemController
      * }
      *
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      */
     public function edit(Request $request): JsonResponse
     {
@@ -409,7 +409,7 @@ class TimeIntervalController extends ItemController
      *   "message":"Item has been removed"
      * }
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      */
 
     /**

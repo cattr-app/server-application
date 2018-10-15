@@ -86,7 +86,7 @@ class RulesController extends ItemController
      * @apiSuccess {String} message OK
      *
      * @apiUse DefaultEditErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      *
@@ -167,7 +167,7 @@ class RulesController extends ItemController
      * @apiSuccess {String}   messages.message OK
      *
      * @apiUse DefaultEditErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      *
@@ -252,7 +252,7 @@ class RulesController extends ItemController
      * @apiSuccess (200) {String}   actions.action.action Action of action
      * @apiSuccess (200) {String}   actions.action.string Name of action
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      *
