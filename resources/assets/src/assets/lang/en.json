@@ -143,6 +143,7 @@
 		"role-id-required": "Role field is required",
 		"screenshots-active-required": "Screenshots Active field is required",
 		"screenshots-interval-required": "Screenshots Interval field is required",
+		"computer-time-popup-required": "User inactive time field is required",
 		"activate": "Activate",
 		"deactivate": "Deactivate"
 	},
@@ -170,7 +171,8 @@
 		"manual-time": "Manual time",
 		"manual-time-title": "Allows user to manually edit time intervals",
 		"permanent-tasks": "Permanent tasks",
-		"computer-time-popup": "Computer time popup",
+		"computer-time-popup": "User inactive time (minutes)",
+		"computer-time-popup-title": "Time after which the user is considered inactive",
 		"poor-time-popup": "Poor time popup",
 		"blur": "Blur screenshots",
 		"monitoring": "Web and app monitoring",

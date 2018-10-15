@@ -28,7 +28,8 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
     ngOnInit() {
         super.ngOnInit();
         this.item.manual_time = 0;
-        this.item.screenshots_interval = 300;
+        this.item.screenshots_interval = 5;
+        this.item.computer_time_popup = 5;
         this.item.timezone = '';
         this.rolesService.getItems(items => {
             this.roles = items;
@@ -48,6 +49,7 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
             'screenshots_active': this.item.screenshots_active,
             'manual_time': this.item.manual_time,
             'screenshots_interval': this.item.screenshots_interval,
+            "computer_time_popup": this.item.computer_time_popup,
             'timezone': this.item.timezone,
             'password': this.item.password,
         };
