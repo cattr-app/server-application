@@ -186,7 +186,7 @@ class AuthController extends Controller
     *  }
     *
     * @apiUse AuthAnswer
-    * @apiUse NotLoggedIn
+    * @apiUse UnauthorizedError
     *
     * @return JsonResponse
     */
@@ -261,7 +261,7 @@ class AuthController extends Controller
      *      "message": "Successfully ended all sessions"
      *  }
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @return JsonResponse
      */
@@ -294,7 +294,7 @@ class AuthController extends Controller
    * @apiSuccess {String}     expires_in    Token TTL in seconds
    * @apiSuccess {Array}      user          User Entity
    *
-   * @apiUse NotLoggedIn
+   * @apiUse UnauthorizedError
    *
    * @apiSuccessExample {json} Answer Example:
    * {
