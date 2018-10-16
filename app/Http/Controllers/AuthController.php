@@ -14,20 +14,29 @@ use Illuminate\Support\Facades\DB;
  */
 class AuthController extends Controller
 {
-  /**
-   * @apiDefine NotLoggedIn
-   * @apiErrorExample {json} Access Error Example:
-   * {
-      "error": "Access denied",
-      "reason": "not logined"
-   * }
-   *
-   * @apiError (Error 400) {String} error  Name of error
-   * @apiError (Error 400) {String} reason Reason of error
-   */
+    /**
+     * @apiDefine UnauthorizedError
+     *
+     * @apiErrorExample {json} Access Error Example:
+     * {
+     *    "error":      "Access denied",
+     *    "reason":     "not logged in",
+     *    "error_code": "ERR_NO_AUTH"
+     * }
+     *
+     * @apiErrorExample {json} Access Error Example:
+     * {
+     *    "error": "Unauthorized"
+     * }
+     *
+     * @apiError (Error 400) {String} error         Error name
+     * @apiError (Error 400) {String} reason        Error description
+     * @apiError (Error 400) {String} error_core    Error code
+     */
 
     /**
      * @apiDefine AuthAnswer
+     *
      * @apiSuccessExample {json} Answer Example:
      *  {
      *      {
@@ -82,6 +91,7 @@ class AuthController extends Controller
     /**
      * @api {any} /api/auth/ping Ping
      * @apiDescription Get API status
+     *
      * @apiVersion 0.1.0
      * @apiName Ping
      * @apiGroup Auth
@@ -176,7 +186,7 @@ class AuthController extends Controller
     *  }
     *
     * @apiUse AuthAnswer
-    * @apiUse NotLoggedIn
+    * @apiUse UnauthorizedError
     *
     * @return JsonResponse
     */
@@ -216,7 +226,7 @@ class AuthController extends Controller
      *      "message": "Successfully logged out"
      *  }
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @return JsonResponse
      */
@@ -251,7 +261,7 @@ class AuthController extends Controller
      *      "message": "Successfully ended all sessions"
      *  }
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @return JsonResponse
      */
@@ -284,7 +294,7 @@ class AuthController extends Controller
    * @apiSuccess {String}     expires_in    Token TTL in seconds
    * @apiSuccess {Array}      user          User Entity
    *
-   * @apiUse NotLoggedIn
+   * @apiUse UnauthorizedError
    *
    * @apiSuccessExample {json} Answer Example:
    * {
@@ -324,19 +334,19 @@ class AuthController extends Controller
     return response()->json(auth()->user());
   }
 
-   /**
-    * @api {post} /api/auth/refresh Refresh
-    * @apiDescription Refresh JWT
-    *
-    * @apiVersion 0.1.0
-    * @apiName Refresh
-    * @apiGroup Auth
-    *
-    * @apiUse NotLoggedIn
-    *
-    * @apiUse AuthAnswer
-    */
-    public function refresh(): JsonResponse
+    /**
+     * @api {post} /api/auth/refresh Refresh
+     * @apiDescription Refresh JWT
+     *
+     * @apiVersion 0.1.0
+     * @apiName Refresh
+     * @apiGroup Auth
+     *
+     * @apiUse UnauthorizedError
+     *
+     * @apiUse AuthAnswer
+     */
+    public function refresh(Request $request): JsonResponse
     {
         $this->invalidateToken($request);
         $token = auth()->refresh();

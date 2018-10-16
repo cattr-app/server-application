@@ -344,9 +344,9 @@ class TaskController extends ItemController
      * @apiSuccess {String}   Array.object.task_name      Task's name
      * @apiSuccess {String}   Array.object.description    Task's description
      * @apiSuccess {String}   Array.object.url            Task's url
-     * @apiSuccess {DateTime} Array.object.created_at     Task's date time of create
-     * @apiSuccess {DateTime} Array.object.updated_at     Task's date time of update
-     * @apiSuccess {DateTime} Array.object.deleted_at     Task's date time of delete
+     * @apiSuccess {String}   Array.object.created_at     Task's date time of create
+     * @apiSuccess {String}   Array.object.updated_at     Task's date time of update
+     * @apiSuccess {String}   Array.object.deleted_at     Task's date time of delete
      * @apiSuccess {Time}     Array.object.total_time     Task's total time
      * @apiSuccess {Object[]} Array.object.time_intervals Task's User (Array of objects)
      * @apiSuccess {Object[]} Array.object.user           Task's User object

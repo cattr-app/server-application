@@ -78,6 +78,7 @@ abstract class  ItemController extends Controller
 
     /**
      * @apiDefine DefaultCreateErrorResponse
+     *
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
      */
@@ -183,6 +184,7 @@ abstract class  ItemController extends Controller
 
     /**
      * @apiDefine DefaultEditErrorResponse
+     *
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
      */
@@ -283,7 +285,8 @@ abstract class  ItemController extends Controller
 
     /**
      * @apiDefine DefaultDestroyRequestExample
-     * @apiParamExample {json} Simple-Request-Example:
+     *
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1
      *  }

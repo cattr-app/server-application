@@ -81,12 +81,12 @@ class ProjectsUsersController extends ItemController
      * @apiSuccess {Objects}   ProjectUsersList.ProjectUser             Project-User object
      * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.user_id     Project-User's User ID
      * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.project_id  Project-User's Project ID
-     * @apiSuccess {DateTime}  ProjectUsersList.ProjectUser.created_at  Project-User's date time of create
-     * @apiSuccess {DateTime}  ProjectUsersList.ProjectUser.updated_at  Project-User's date time of update
+     * @apiSuccess {String}    ProjectUsersList.ProjectUser.created_at  Project-User's date time of create
+     * @apiSuccess {String}    ProjectUsersList.ProjectUser.updated_at  Project-User's date time of update
      * @apiSuccess {Object}    ProjectUsersList.ProjectUser.user        Project-User's User
      * @apiSuccess {Object}    ProjectUsersList.ProjectUser.project     Project-User's Project
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      *
@@ -110,11 +110,11 @@ class ProjectsUsersController extends ItemController
      *
      * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.user_id     Project-User's User ID
      * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.project_id  Project-User's Project ID
-     * @apiSuccess {DateTime}  ProjectUsersList.ProjectUser.created_at  Project-User's date time of create
-     * @apiSuccess {DateTime}  ProjectUsersList.ProjectUser.updated_at  Project-User's date time of update
+     * @apiSuccess {String}    ProjectUsersList.ProjectUser.created_at  Project-User's date time of create
+     * @apiSuccess {String}    ProjectUsersList.ProjectUser.updated_at  Project-User's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -182,11 +182,11 @@ class ProjectsUsersController extends ItemController
      * @apiSuccess {Object}   messages.object            Project-Users object
      * @apiSuccess {Integer}  messages.object.user_id    Project-User's User ID
      * @apiSuccess {Integer}  messages.object.project_id Project-User's Project ID
-     * @apiSuccess {DateTime} messages.object.created_at Project-User's date time of create
-     * @apiSuccess {DateTime} messages.object.updated_at Project-User's date time of update
+     * @apiSuccess {String}   messages.object.created_at Project-User's date time of create
+     * @apiSuccess {String}   messages.object.updated_at Project-User's date time of update
      *
      * @apiUse DefaultBulkCreateErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -258,7 +258,7 @@ class ProjectsUsersController extends ItemController
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      * @todo: add response (error) example
      *
      * @param Request $request

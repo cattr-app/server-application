@@ -3,111 +3,104 @@
 namespace Tests\Feature\v1;
 
 use Artisan;
+use DatabaseSeeder;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use Tests\TestCase;
 
 class TimeControllerTest extends TestCase
 {
-  use DatabaseMigrations;
+    public function test_Project_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-  public function setUp()
-  {
-    parent::setUp();
+        $data = [
+            "project_id" => "1",
+        ];
 
-    Artisan::call('db:seed');
-  }
+        /**
+         * Support GET and POST requests
+         */
+        $getResponse = $this->getJson("/api/v1/time/project?project_id=1", $headers);
+        $getResponse->assertStatus(200);
 
-  public function test_Project_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+        $postResponse = $this->postJson("/api/v1/time/project", $data, $headers);
+        $postResponse->assertStatus(200);
+    }
 
-    $data = [
-      'project_id' => '1',
-    ];
+    public function test_Task_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    /**
-     * Support GET and POST requests
-     */
-    $getResponse = $this->getJson('/api/v1/time/project?project_id=1', $headers);
-    $getResponse->assertStatus(200);
+        $data = [
+            "task_id" => "1",
+        ];
 
-    $postResponse = $this->postJson('/api/v1/time/project', $data, $headers);
-    $postResponse->assertStatus(200);
-  }
+        /**
+         * Support GET and POST requests
+         */
+        $getResponse = $this->getJson("/api/v1/time/task?task_id=1", $headers);
+        $getResponse->assertStatus(200);
 
-  public function test_Task_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+        $postResponse = $this->postJson("/api/v1/time/task", $data, $headers);
+        $postResponse->assertStatus(200);
+    }
 
-    $data = [
-      'task_id' => '1',
-    ];
+    public function test_TaskUser_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    /**
-     * Support GET and POST requests
-     */
-    $getResponse = $this->getJson('/api/v1/time/task?task_id=1', $headers);
-    $getResponse->assertStatus(200);
+        $data = [
+            "task_id" => "1",
+            "user_id" => "1",
+        ];
 
-    $postResponse = $this->postJson('/api/v1/time/task', $data, $headers);
-    $postResponse->assertStatus(200);
-  }
+        /**
+         * Support GET and POST requests
+         */
+        $getResponse = $this->getJson("/api/v1/time/task-user?task_id=1&user_id=1", $headers);
+        $getResponse->assertStatus(200);
 
-  public function test_TaskUser_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+        $postResponse = $this->postJson("/api/v1/time/task-user", $data, $headers);
+        $postResponse->assertStatus(200);
+    }
 
-    $data = [
-      'task_id' => '1',
-      'user_id' => '1',
-    ];
+    public function test_Tasks_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    /**
-     * Support GET and POST requests
-     */
-    $getResponse = $this->getJson('/api/v1/time/task-user?task_id=1&user_id=1', $headers);
-    $getResponse->assertStatus(200);
+        /**
+         * Support GET and POST requests
+         */
+        $getResponse = $this->getJson("/api/v1/time/tasks", $headers);
+        $getResponse->assertStatus(200);
 
-    $postResponse = $this->postJson('/api/v1/time/task-user', $data, $headers);
-    $postResponse->assertStatus(200);
-  }
+        $postResponse = $this->postJson("/api/v1/time/tasks", [], $headers);
+        $postResponse->assertStatus(200);
+    }
 
-  public function test_Tasks_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+    public function test_Total_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    /**
-     * Support GET and POST requests
-     */
-    $getResponse = $this->getJson('/api/v1/time/tasks', $headers);
-    $getResponse->assertStatus(200);
+        /**
+         * Support GET and POST requests
+         */
+        $getResponse = $this->getJson("/api/v1/time/total", $headers);
+        $getResponse->assertStatus(200);
 
-    $postResponse = $this->postJson('/api/v1/time/tasks', [], $headers);
-    $postResponse->assertStatus(200);
-  }
-
-  public function test_Total_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
-
-    /**
-     * Support GET and POST requests
-     */
-    $getResponse = $this->getJson('/api/v1/time/total', $headers);
-    $getResponse->assertStatus(200);
-
-    $postResponse = $this->postJson('/api/v1/time/total', [], $headers);
-    $postResponse->assertStatus(200);
-  }
+        $postResponse = $this->postJson("/api/v1/time/total", [], $headers);
+        $postResponse->assertStatus(200);
+    }
 
 }
