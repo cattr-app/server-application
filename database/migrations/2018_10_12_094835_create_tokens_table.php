@@ -13,13 +13,15 @@ class CreateTokensTable extends Migration
      */
     public function up()
     {
-        Schema::create('tokens', function (Blueprint $table) {
-            $table->integer('user_id');
-            $table->string('token', 512);
-            $table->dateTime('expires_at');
+        if (!Schema::hasTable('tokens')) {
+            Schema::create('tokens', function (Blueprint $table) {
+                $table->integer('user_id');
+                $table->string('token', 512);
+                $table->dateTime('expires_at');
 
-            $table->primary(['user_id', 'token']);
-        });
+                $table->primary(['user_id', 'token']);
+            });
+        }
     }
 
     /**
