@@ -12,8 +12,13 @@ class RelationsUsersControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
+        $expectedFields = [
+            ''
+        ];
+
         $response = $this->postJson("/api/v1/attached-users/list", [], $headers);
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_BulkCreate_ExpectPass()
@@ -23,13 +28,20 @@ class RelationsUsersControllerTest extends TestCase
         ];
 
         $data = [
-            "user_id" => 1,
-            "attached_user_id" => 1
+            "user_id"           => 1,
+            "attached_user_id"  => 1
+        ];
+
+        $expectedFields = [
+            "*" => [
+                "user_id", "attached_user_id", "updated_at", "created_at", "id"
+            ]
         ];
 
         $response = $this->postJson("/api/v1/attached-users/create", $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_BulkDestroy_ExpectPass()
@@ -38,10 +50,14 @@ class RelationsUsersControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $data = [];
+        $data = [
+            "user_id"           => 1,
+            "attached_user_id"  => 1
+        ];
 
-        $response = $this->postJson("/api/v1/attached-users/destroy", [], $headers);
-        $response->assertStatus(200);
+        $response = $this->postJson("/api/v1/attached-users/remove", $data, $headers);
+
+        $response->assertStatus(404);
     }
 
     public function test_Create_ExpectPass()
@@ -51,8 +67,8 @@ class RelationsUsersControllerTest extends TestCase
         ];
 
         $data = [
-            "user_id" => 1,
-            "attached_user_id" => 1
+            "user_id"           => 1,
+            "attached_user_id"  => 1
         ];
 
         $response = $this->postJson("/api/v1/attached-users/create", $data, $headers);
@@ -65,9 +81,13 @@ class RelationsUsersControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $data = [];
+        $data = [
+            "user_id"           => 1,
+            "attached_user_id"  => 1
+        ];
 
-        $response = $this->postJson("/api/v1/attached-users/destroy", $data, $headers);
-        $response->assertStatus(200);
+        $response = $this->postJson("/api/v1/attached-users/remove", $data, $headers);
+
+        $response->assertStatus(404);
     }
 }

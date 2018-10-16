@@ -194,7 +194,7 @@ class ProjectController extends ItemController
      * @apiParam {String}  name         Project's name
      * @apiParam {String}  description  Project's description
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "name": "test",
      *      "description": "test"
@@ -227,7 +227,7 @@ class ProjectController extends ItemController
 
     /**
      * @api {any} /api/v1/projects/show Show
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          1,
      *      "user_id":     ["=", [1,2,3]],
@@ -260,7 +260,7 @@ class ProjectController extends ItemController
      * @apiSuccess {Object[]} Project.users       Project's User (Array of objects)
      * @apiSuccess {Object[]} Project.tasks       Project's Task (Array of objects)
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccessExample {json} Answer Example
      * {
      *   "id": 1,
      *   "company_id": 0,
@@ -271,7 +271,7 @@ class ProjectController extends ItemController
      *   "updated_at": "2018-09-25 06:15:08"
      * }
      *
-     * @apiSuccessExample {json} Answer-Relation Example:
+     * @apiSuccessExample {json} Answer Relation Example
      * {
      *   "id": 1,
      *   "company_id": 0,
@@ -330,7 +330,7 @@ class ProjectController extends ItemController
 
     /**
      * @api {post} /api/v1/projects/edit Edit
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1,
      *      "name": "test",

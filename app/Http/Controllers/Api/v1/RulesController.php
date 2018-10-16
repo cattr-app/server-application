@@ -75,7 +75,7 @@ class RulesController extends ItemController
      * @apiParam {String}  action  Action name
      * @apiParam {Boolean} allow   Allow status
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "role_id": 2,
      *      "object": "projects",
@@ -91,6 +91,7 @@ class RulesController extends ItemController
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws \Throwable
      */
     public function edit(Request $request): JsonResponse
     {
@@ -144,7 +145,7 @@ class RulesController extends ItemController
      * @apiParam {String}   rules.object.action  Rule's action name
      * @apiParam {Boolean}  rules.object.allow   Rule's allow status
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "rules":
      *      [
@@ -172,6 +173,7 @@ class RulesController extends ItemController
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws \Throwable
      */
     public function bulkEdit(Request $request): JsonResponse
     {

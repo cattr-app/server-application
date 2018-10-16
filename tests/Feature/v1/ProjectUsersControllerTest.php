@@ -23,8 +23,7 @@ class ProjectUsersControllerTest extends TestCase
 
         $expectedFields = [
             "messages" => [
-                "*" =>
-                    [
+                "*" => [
                         "project_id", "user_id", "updated_at", "created_at", "id"
                     ]
             ]
@@ -32,9 +31,8 @@ class ProjectUsersControllerTest extends TestCase
 
         $response = $this->postJson("/api/v1/projects-users/bulk-create", $data, $headers);
 
-        echo "WRONG: " . var_export($response->content(), true);
-
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_BulkDestroy_ExpectPass()
