@@ -3,7 +3,9 @@
 namespace Tests\Feature\v1;
 
 use Artisan;
+use DatabaseSeeder;
 use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Foundation\Testing\RefreshDatabase;
 use RoleSeeder;
 use Tests\TestCase;
 use UsersTableSeeder;
@@ -14,175 +16,166 @@ use UsersTableSeeder;
  */
 class RoleControllerTest extends TestCase
 {
-  use DatabaseMigrations;
+    public function test_Create_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-  public function setUp()
-  {
-    parent::setUp();
+        $data = [
+            "name" => "SampleRightRole"
+        ];
 
-    Artisan::call('db:seed');
-  }
+        $response = $this->postJson("/api/v1/roles/create", $data, $headers);
 
-  public function test_Create_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+        $response->assertStatus(200);
+    }
 
-    $data = [
-      'name' => 'SampleRightRole'
-    ];
+    public function test_Create_ExpectFail_EmptyMail()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    $response = $this->postJson('/api/v1/roles/create', $data, $headers);
+        $data = [];
 
-    $response->assertStatus(200);
-  }
+        $response = $this->postJson("/api/v1/roles/create", $data, $headers);
 
-  public function test_Create_ExpectFail_EmptyMail()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+        $response->assertStatus(400);
+    }
 
-    $data = [];
+    public function test_Destroy_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    $response = $this->postJson('/api/v1/roles/create', $data, $headers);
+        $data = [
+            "name" => "SampleRightRole"
+        ];
 
-    $response->assertStatus(400);
-  }
+        /**
+         * Create role and get ID
+         */
+        $roleId = $this->postJson("/api/v1/roles/create", $data, $headers)
+            ->json("res")["id"];
 
-  public function test_Destroy_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+        $destroyData = [
+            "id" => (string)$roleId
+        ];
 
-    $data = [
-      'name' => 'SampleRightRole'
-    ];
+        $response = $this->postJson("/api/v1/roles/destroy", $destroyData, $headers);
 
-    /**
-     * Create role and get ID
-     */
-    $roleId = $this->postJson('/api/v1/roles/create', $data, $headers)
-      ->json('res')['id'];
+        $response->assertStatus(200);
+    }
 
-    $destroyData = [
-      'id' => (string)$roleId
-    ];
+    public function test_Destroy_ExpectFail_EmptyId()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    $response = $this->postJson('/api/v1/roles/destroy', $destroyData, $headers);
-
-    $response->assertStatus(200);
-  }
-
-  public function test_Destroy_ExpectFail_EmptyId()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
-
-    $data = [
-      'name' => 'SampleRightRole'
-    ];
+        $data = [
+            "name" => "SampleRightRole"
+        ];
 
 
-    $this->postJson('/api/v1/roles/create', $data, $headers);
-    $response = $this->postJson('/api/v1/roles/remove', [], $headers);
+        $this->postJson("/api/v1/roles/create", $data, $headers);
+        $response = $this->postJson("/api/v1/roles/remove", [], $headers);
 
-    $response->assertStatus(400);
-  }
+        $response->assertStatus(400);
+    }
 
-  public function test_Edit_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+    public function test_Edit_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    $createRoleData = [
-      'name' => 'SampleRightRole'
-    ];
+        $createRoleData = [
+            "name" => "SampleRightRole"
+        ];
 
-    $roleId = $this->postJson('/api/v1/roles/create', $createRoleData, $headers)
-      ->json('res')['id'];
+        $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
+            ->json("res")["id"];
 
-    $editRoleData = [
-      'id'    => $roleId,
-      'name'  => 'YetAnotherRoleName'
-    ];
+        $editRoleData = [
+            "id"    => $roleId,
+            "name"  => "YetAnotherRoleName"
+        ];
 
-    $response = $this->postJson('/api/v1/roles/edit', $editRoleData, $headers);
+        $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
 
-    $response->assertStatus(200);
-  }
+        $response->assertStatus(200);
+    }
 
-  public function test_Edit_ExpectFail_EmptyId()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+    public function test_Edit_ExpectFail_EmptyId()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    $editRoleData = [
-      'name'  => 'YetAnotherRoleName'
-    ];
+        $editRoleData = [
+            "name"  => "YetAnotherRoleName"
+        ];
 
-    $response = $this->postJson('/api/v1/roles/edit', $editRoleData, $headers);
+        $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
 
-    $response->assertStatus(400);
-  }
+        $response->assertStatus(400);
+    }
 
-  public function test_Edit_ExpectFail_EmptyName()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+    public function test_Edit_ExpectFail_EmptyName()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    $createRoleData = [
-      'name' => 'SampleRightRole'
-    ];
+        $createRoleData = [
+            "name" => "SampleRightRole"
+        ];
 
-    $roleId = $this->postJson('/api/v1/roles/create', $createRoleData, $headers)
-      ->json('res')['id'];
+        $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
+            ->json("res")["id"];
 
-    $editRoleData = [
-      'id'    => $roleId
-    ];
+        $editRoleData = [
+            "id"    => $roleId
+        ];
 
-    $response = $this->postJson('/api/v1/roles/edit', $editRoleData, $headers);
+        $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
 
-    $response->assertStatus(400);
-  }
+        $response->assertStatus(400);
+    }
 
-  public function test_Show_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+    public function test_Show_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    $createRoleData = [
-      'name' => 'SampleRightRole'
-    ];
+        $createRoleData = [
+            "name" => "SampleRightRole"
+        ];
 
-    $roleId = $this->postJson('/api/v1/roles/create', $createRoleData, $headers)
-      ->json('res')['id'];
+        $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
+            ->json("res")["id"];
 
-    $showRoleData = [
-      'id'    => $roleId,
-    ];
+        $showRoleData = [
+            "id"    => $roleId,
+        ];
 
-    $response = $this->postJson('/api/v1/roles/show', $showRoleData, $headers);
+        $response = $this->postJson("/api/v1/roles/show", $showRoleData, $headers);
 
-    $response->assertStatus(200);
-  }
+        $response->assertStatus(200);
+    }
 
-  public function test_Show_ExpectFail_EmptyId()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+    public function test_Show_ExpectFail_EmptyId()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    $response = $this->postJson('/api/v1/roles/show', [], $headers);
+        $response = $this->postJson("/api/v1/roles/show", [], $headers);
 
-    $response->assertStatus(400);
-  }
+        $response->assertStatus(400);
+    }
 }

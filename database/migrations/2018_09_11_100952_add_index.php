@@ -19,7 +19,7 @@ class AddIndex extends Migration
             $table->index(['end_at', 'start_at']);
         });
 
-        DB::unprepared('CREATE VIEW `time_durations` AS SELECT DATE(`start_at`) AS `date`, SUM(TIME_TO_SEC(TIMEDIFF(`end_at`, `start_at`))) AS `duration`, `user_id` FROM `time_intervals` GROUP BY `date`,`user_id` ');
+        DB::unprepared('CREATE OR REPLACE VIEW `time_durations` AS SELECT DATE(`start_at`) AS `date`, SUM(TIME_TO_SEC(TIMEDIFF(`end_at`, `start_at`))) AS `duration`, `user_id` FROM `time_intervals` GROUP BY `date`,`user_id` ');
 
 
 
@@ -123,6 +123,7 @@ class AddIndex extends Migration
        );
 
 
+        DB::unprepared('DROP PROCEDURE IF EXISTS `time_durations_cache_refresh`;');
         DB::unprepared('CREATE PROCEDURE `time_durations_cache_refresh` ()
             BEGIN
                 DELETE FROM `time_durations_cache`;

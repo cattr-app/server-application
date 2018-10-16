@@ -92,7 +92,7 @@ class RelationsUsersController extends ItemController
      *   }
      * ]
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -144,7 +144,7 @@ class RelationsUsersController extends ItemController
      *
      * @todo: add examples for request and success answer
      * @todo: add errors and params
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -221,7 +221,7 @@ class RelationsUsersController extends ItemController
      *
      * @todo: add examples for request and success answer
      * @todo: add errors and params
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -292,7 +292,7 @@ class RelationsUsersController extends ItemController
      *
      * @todo: add examples for request and success answer
      * @todo: add errors and params
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse

@@ -55,7 +55,7 @@ class ProjectsRolesController extends ItemController
      *
      * @apiSuccess {ProjectRoles[]} ProjectRolesList array of Project Role objects
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      * @todo: [CRITICAL] fix projects-roles create
      * @todo: add request example
      * @todo: add response and params example
@@ -76,7 +76,7 @@ class ProjectsRolesController extends ItemController
      *
      * @apiUse DefaultBulkCreateErrorResponse
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      * @todo: [CRITICAL] find right request params
      * @todo: add response and error example
      *
@@ -142,7 +142,7 @@ class ProjectsRolesController extends ItemController
      *
      * @apiSuccess {Messages[]} array  Array of Project Roles objects
      *
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      * @todo: add request and response example with error
      *
      * @param Request $request
@@ -206,7 +206,10 @@ class ProjectsRolesController extends ItemController
    * @apiUse DefaultBulkDestroyErrorResponse
    * @apiUse DefaultDestroyResponse
    *
-   * @apiUse NotLoggedIn
+   * @apiUse UnauthorizedError
+   *
+   *
+   *
    * @todo: add request and response example with error
    *
    * @param Request $request

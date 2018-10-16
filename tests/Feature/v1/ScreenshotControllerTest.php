@@ -2,58 +2,48 @@
 
 namespace Tests\Feature\v1;
 
-use Artisan;
-use Illuminate\Foundation\Testing\DatabaseMigrations;
+use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
 class ScreenshotControllerTest extends TestCase
 {
-  use DatabaseMigrations;
+    public function test_Create_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-  public function setUp()
-  {
-    parent::setUp();
+        $data = [
+            "time_interval_id"  => 1,
+            UploadedFile::fake()->image("avatar.jpg")
+        ];
 
-    Artisan::call('db:seed');
-  }
+        $response = $this->postJson("/api/v1/screenshots/create", $data, $headers);
 
-  public function test_Create_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+        $response->assertStatus(200);
+    }
 
-    $data = [
-      'time_interval_id'  => 1,
-      'screenshot'        => 'qwerty'
-    ];
+    public function test_Destroy_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
 
-    $response = $this->postJson('/api/v1/screenshots/create', $data, $headers);
+        $data = [
+            "screenshot"        => "samplebinarydata",
+            "time_interval_id"  => "1"
+        ];
 
-    $response->assertStatus(200);
-  }
+        /**
+         * Upload screenshot and get ID
+         */
+        $id = $this->post("/api/v1/screenshots/create", $data, $headers);
 
-  public function test_Destroy_ExpectPass()
-  {
-    $headers = [
-      'Authorization' => 'Bearer ' . $this->getAdminToken()
-    ];
+        $deleteScreenshotData = [
+            "id" => $id
+        ];
 
-    $data = [
-      'screenshot'        => 'samplebinarydata',
-      'time_interval_id'  => '1'
-    ];
-
-    /**
-     * Upload screenshot and get ID
-     */
-    $id = $this->post('/api/v1/screenshots/create', $data, $headers);
-
-    $deleteScreenshotData = [
-      'id' => $id
-    ];
-
-    $response = $this->post('/api/v1/screenshots/destroy', $deleteScreenshotData, $headers);
-    $response->assertStatus(200);
-  }
+        $response = $this->post("/api/v1/screenshots/destroy", $deleteScreenshotData, $headers);
+        $response->assertStatus(200);
+    }
 }

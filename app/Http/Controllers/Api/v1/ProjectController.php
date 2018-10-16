@@ -84,8 +84,9 @@ class ProjectController extends ItemController
      * @apiParam {Integer}  [user_id]     `QueryParam` Project's User ID
      * @apiParam {String}   [name]        `QueryParam` Project's name
      * @apiParam {String}   [description] `QueryParam` Project's description
-     * @apiParam {DateTime} [created_at]  `QueryParam` Project's date time of create
-     * @apiParam {DateTime} [updated_at]  `QueryParam` Project's date time of update
+     * @apiParam {String}   [created_at]  `QueryParam` Project's date time of create
+     * @apiParam {String}   [updated_at]  `QueryParam` Project's date time of update
+     *
      * @apiUse ProjectRelations
      *
      * @apiParamExample {json} Simple-Request-Example:
@@ -98,16 +99,16 @@ class ProjectController extends ItemController
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
      * @apiUse ProjectRelationsExample
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @apiSuccess {Object[]} ProjectList                     Projects (Array of objects)
      * @apiSuccess {Object}   ProjectList.Project             Project object
      * @apiSuccess {Integer}  ProjectList.Project.id          Project's ID
      * @apiSuccess {String}   ProjectList.Project.name        Project's name
      * @apiSuccess {String}   ProjectList.Project.description Project's description
-     * @apiSuccess {DateTime} ProjectList.Project.created_at  Project's date time of create
-     * @apiSuccess {DateTime} ProjectList.Project.updated_at  Project's date time of update
-     * @apiSuccess {DateTime} ProjectList.Project.deleted_at  Project's date time of delete
+     * @apiSuccess {String}   ProjectList.Project.created_at  Project's date time of create
+     * @apiSuccess {String}   ProjectList.Project.updated_at  Project's date time of update
+     * @apiSuccess {String}   ProjectList.Project.deleted_at  Project's date time of delete
      * @apiSuccess {Object[]} ProjectList.Project.users       Project's Users (Array of objects)
      * @apiSuccess {Object[]} ProjectList.Project.tasks       Project's Tasks (Array of objects)
      *
@@ -193,7 +194,7 @@ class ProjectController extends ItemController
      * @apiParam {String}  name         Project's name
      * @apiParam {String}  description  Project's description
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "name": "test",
      *      "description": "test"
@@ -203,11 +204,11 @@ class ProjectController extends ItemController
      * @apiSuccess {Integer}  res.id          Project's ID
      * @apiSuccess {String}   res.name        Project's name
      * @apiSuccess {String}   res.description Project's description
-     * @apiSuccess {DateTime} res.created_at  Project's date time of create
-     * @apiSuccess {DateTime} res.updated_at  Project's date time of update
+     * @apiSuccess {String}   res.created_at  Project's date time of create
+     * @apiSuccess {String}   res.updated_at  Project's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @apiSuccessExample {json} Answer Example:
      * {
@@ -226,7 +227,7 @@ class ProjectController extends ItemController
 
     /**
      * @api {any} /api/v1/projects/show Show
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          1,
      *      "user_id":     ["=", [1,2,3]],
@@ -245,21 +246,21 @@ class ProjectController extends ItemController
      * @apiParam {Integer}  [user_id]     `QueryParam` Project's User ID
      * @apiParam {String}   [name]        `QueryParam` Project's name
      * @apiParam {String}   [description] `QueryParam` Project's description
-     * @apiParam {DateTime} [created_at]  `QueryParam` Project's date time of create
-     * @apiParam {DateTime} [updated_at]  `QueryParam` Project's date time of update
+     * @apiParam {String}   [created_at]  `QueryParam` Project's date time of create
+     * @apiParam {String}   [updated_at]  `QueryParam` Project's date time of update
      * @apiUse ProjectRelations
      *
      * @apiSuccess {Object}   Project             Project object
      * @apiSuccess {Integer}  Project.id          Project's ID
      * @apiSuccess {String}   Project.name        Project's name
      * @apiSuccess {String}   Project.description Project's description
-     * @apiSuccess {DateTime} Project.created_at  Project's date time of create
-     * @apiSuccess {DateTime} Project.updated_at  Project's date time of update
-     * @apiSuccess {DateTime} Project.deleted_at  Project's date time of delete
+     * @apiSuccess {String}   Project.created_at  Project's date time of create
+     * @apiSuccess {String}   Project.updated_at  Project's date time of update
+     * @apiSuccess {String}   Project.deleted_at  Project's date time of delete
      * @apiSuccess {Object[]} Project.users       Project's User (Array of objects)
      * @apiSuccess {Object[]} Project.tasks       Project's Task (Array of objects)
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccessExample {json} Answer Example
      * {
      *   "id": 1,
      *   "company_id": 0,
@@ -270,7 +271,7 @@ class ProjectController extends ItemController
      *   "updated_at": "2018-09-25 06:15:08"
      * }
      *
-     * @apiSuccessExample {json} Answer-Relation Example:
+     * @apiSuccessExample {json} Answer Relation Example
      * {
      *   "id": 1,
      *   "company_id": 0,
@@ -321,7 +322,7 @@ class ProjectController extends ItemController
      * }
      *
      * @apiUse DefaultShowErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -329,7 +330,7 @@ class ProjectController extends ItemController
 
     /**
      * @api {post} /api/v1/projects/edit Edit
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1,
      *      "name": "test",
@@ -348,19 +349,19 @@ class ProjectController extends ItemController
      * @apiSuccess {Integer}  res.id          Project's ID
      * @apiSuccess {String}   res.name        Project's name
      * @apiSuccess {String}   res.description Project's description
-     * @apiSuccess {DateTime} res.created_at  Project's date time of create
-     * @apiSuccess {DateTime} res.updated_at  Project's date time of update
-     * @apiSuccess {DateTime} res.deleted_at  Project's date time of delete
+     * @apiSuccess {String}   res.created_at  Project's date time of create
+     * @apiSuccess {String}   res.updated_at  Project's date time of update
+     * @apiSuccess {String}   res.deleted_at  Project's date time of delete
      *
      * @apiUse DefaultEditErrorResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/projects/destroy Destroy
+     * @api {post} /api/v1/projects/remove Destroy
      * @apiUse DefaultDestroyRequestExample
      * @apiDescription Destroy Project
      * @apiVersion 0.1.0
@@ -370,7 +371,7 @@ class ProjectController extends ItemController
      * @apiParam {String} id Project's id
      *
      * @apiUse DefaultDestroyResponse
-     * @apiUse NotLoggedIn
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
