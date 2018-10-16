@@ -346,7 +346,7 @@ class AuthController extends Controller
      *
      * @apiUse AuthAnswer
      */
-    public function refresh(): JsonResponse
+    public function refresh(Request $request): JsonResponse
     {
         $this->invalidateToken($request);
         $token = auth()->refresh();
