@@ -68,6 +68,7 @@ class TaskListSeeder extends Seeder
                 'active' => true,
                 'user_id' => $user->id,
                 'assigned_by' => $user->id,
+                'priority_id' => 2, // Normal
             ]);
 
             $this->command->getOutput()->writeln("<fg=cyan>-- {$project->id}. Task #{$task->id}</>");
