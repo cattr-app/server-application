@@ -120,7 +120,10 @@
                             </div>
 
                             <div class="form-group row">
-                                <label class="col-md-2" translate>field.manual-time</label>
+                                <label class="col-md-2">
+                                    <abbr title="{{ 'field.manual-time-title' | translate }}"
+                                        translate>field.manual-time</abbr>
+                                </label>
                                 <div class="col-md-10">
                                     <select class="form-control" name="user-manual-time"
                                         [(ngModel)]="item.manual_time" #manual_time="ngModel" required>
@@ -137,6 +140,20 @@
                                     [class.has-success]="screenshots_interval?.valid && (screenshots_interval.dirty || screenshots_interval.touched)">
                                     <input type="text" class="form-control" name="user-screenshots-interval"
                                         [(ngModel)]="item.screenshots_interval" #screenshots_interval="ngModel" required>
+                                    <span class="help-block" translate>control.required-field</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row" *ngIf="can('/users/full_access')">
+                                <label class="col-md-2" translate>
+                                    <abbr title="{{ 'field.computer-time-popup-title' | translate }}"
+                                        translate>field.computer-time-popup</abbr>
+                                </label>
+                                <div class="col-md-10"
+                                    [class.has-error]="computer_time_popup?.invalid && (computer_time_popup.dirty || computer_time_popup.touched)"
+                                    [class.has-success]="computer_time_popup?.valid && (computer_time_popup.dirty || computer_time_popup.touched)">
+                                    <input type="text" class="form-control" name="user-computer-time-popup"
+                                        [(ngModel)]="item.computer_time_popup" #computer_time_popup="ngModel" required>
                                     <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
@@ -161,6 +178,7 @@
                                 <p *ngIf="role?.errors" translate>control.role-id-required</p>
                                 <p *ngIf="screenshots_active?.errors" translate>control.screenshots-active-required</p>
                                 <p *ngIf="screenshots_interval?.errors" translate>control.screenshots-interval-required</p>
+                                <p *ngIf="computer_time_popup?.errors" translate>control.computer-time-popup-required</p>
                             </div>
 
                             <button type="submit" class="btn btn-primary" [disabled]="form?.invalid" translate>control.create</button>

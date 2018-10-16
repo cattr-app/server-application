@@ -57,6 +57,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             'screenshots_active': this.item.screenshots_active,
             'manual_time': this.item.manual_time,
             'screenshots_interval': this.item.screenshots_interval,
+            "computer_time_popup": this.item.computer_time_popup,
             'timezone': this.item.timezone,
             'password': this.item.password,
         };

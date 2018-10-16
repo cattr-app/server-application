@@ -1,7 +1,6 @@
 import {NgModule} from '@angular/core';
 import {RouterModule, Routes} from '@angular/router';
 
-import {IntegrationsComponent} from "./pages/integrations/integrations.component";
 import {SettingsComponent} from "./pages/settings/settings.component";
 
 const routes: Routes = [
@@ -17,7 +16,6 @@ const routes: Routes = [
     {path: 'auth', loadChildren: './auth/auth.module#AuthModule'},
     {path: '', redirectTo: '/dashboard', pathMatch: 'full'},
     {path: 'dashboard', loadChildren: './pages/dashboard/dashboard.module#DashboardModule'},
-    {path: 'integrations', component: IntegrationsComponent}
 ];
 
 @NgModule({

@@ -4,6 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Helpers\CatHelper;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class AuthController
@@ -118,35 +120,76 @@ class AuthController extends Controller
         ]);
     }
 
+    protected function invalidateToken(Request $request)
+    {
+        $auth = explode(' ', $request->header('Authorization'));
+        if (!empty($auth) && count($auth) > 1 && $auth[0] == 'bearer') {
+            $token = $auth[1];
+
+            DB::table('tokens')->where([
+                ['user_id', auth()->user()->id],
+                ['token', $token],
+            ])->delete();
+        }
+    }
+
     /**
-     * @api {post} /api/auth/login Login
-     * @apiDescription Get user JWT
-     *
-     * @apiVersion 0.1.0
-     * @apiName Login
-     * @apiGroup Auth
-     *
-     * @apiParam {String}   login       User login
-     * @apiParam {Integer}  password    User password
-     *
-     * @apiSuccess {String}     access_token  Token
-     * @apiSuccess {String}     token_type    Token Type
-     * @apiSuccess {String}     expires_in    Token TTL in seconds
-     * @apiSuccess {Array}      user          User Entity
-     *
-     * @apiError (Error 401) {String} Error Error
-     *
-     * @apiParamExample {json} Request Example:
-     *  {
-     *      "login":      "johndoe@example.com",
-     *      "password":   "amazingpassword",
-     *  }
-     *
-     * @apiUse AuthAnswer
-     * @apiUse UnauthorizedError
-     *
-     * @return JsonResponse
+     * @param null|string $except
      */
+    protected function invalidateAllTokens($except = null)
+    {
+        $conditions = [
+            ['user_id', auth()->user()->id],
+        ];
+
+        if (isset($except)) {
+            $conditions[] = ['token', '!=', $except];
+        }
+
+        DB::table('tokens')->where($conditions)->delete();
+    }
+
+    protected function setToken(string $token)
+    {
+        $expires_timestamp = time() + 60 * auth()->factory()->getTTL();
+
+        DB::table('tokens')->insert([
+            'user_id' => auth()->user()->id,
+            'token' => $token,
+            'expires_at' => date('Y-m-d H:i:s', $expires_timestamp),
+        ]);
+    }
+
+   /**
+    * @api {post} /api/auth/login Login
+    * @apiDescription Get user JWT
+    *
+    *
+    * @apiVersion 0.1.0
+    * @apiName Login
+    * @apiGroup Auth
+    *
+    * @apiParam {String}   login       User login
+    * @apiParam {Integer}  password    User password
+    *
+    * @apiSuccess {String}     access_token  Token
+    * @apiSuccess {String}     token_type    Token Type
+    * @apiSuccess {String}     expires_in    Token TTL in seconds
+    * @apiSuccess {Array}      user          User Entity
+    *
+    * @apiError (Error 401) {String} Error Error
+    *
+    * @apiParamExample {json} Request Example:
+    *  {
+    *      "login":      "johndoe@example.com",
+    *      "password":   "amazingpassword",
+    *  }
+    *
+    * @apiUse AuthAnswer
+    * @apiUse NotLoggedIn
+    *
+    * @return JsonResponse
+    */
     public function login(): JsonResponse
     {
         $credentials = request([
@@ -163,6 +206,7 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        $this->setToken($token);
         return $this->respondWithToken($token);
     }
 
@@ -186,8 +230,9 @@ class AuthController extends Controller
      *
      * @return JsonResponse
      */
-    public function logout(): JsonResponse
+    public function logout(Request $request): JsonResponse
     {
+        $this->invalidateToken($request);
         auth()->logout();
 
         return response()->json([
@@ -196,57 +241,98 @@ class AuthController extends Controller
     }
 
     /**
-     * @api {get} /api/auth/me Me
-     * @apiDescription Get authenticated User Entity
+     * Log the user out (Invalidate all tokens).
      *
+     * @api {any} /api/auth/logout Logout
+     * @apiDescription Invalidate JWT
      * @apiVersion 0.1.0
-     * @apiName Me
+     * @apiName Logout
      * @apiGroup Auth
      *
-     * @apiSuccess {String}     access_token  Token
-     * @apiSuccess {String}     token_type    Token Type
-     * @apiSuccess {String}     expires_in    Token TTL in seconds
-     * @apiSuccess {Array}      user          User Entity
+     * @apiParamExample {json} Request Example:
+     *  {
+     *      "token": "eyJ0eXAiOiJKV1QiLCJhbGciO..."
+     *  }
      *
-     * @apiUse UnauthorizedError
+     * @apiSuccess {String}    message    Action result message
      *
      * @apiSuccessExample {json} Answer Example:
-     * {
-     *     "id": 1,
-     *     "full_name": "Admin",
-     *     "first_name": "Ad",
-     *     "last_name": "Min",
-     *     "email": "admin@example.com",
-     *     "url": "",
-     *     "company_id": 1,
-     *     "level": "admin",
-     *     "payroll_access": 1,
-     *     "billing_access": 1,
-     *     "avatar": "",
-     *     "screenshots_active": 1,
-     *     "manual_time": 0,
-     *     "permanent_tasks": 0,
-     *     "computer_time_popup": 300,
-     *     "poor_time_popup": "",
-     *     "blur_screenshots": 0,
-     *     "web_and_app_monitoring": 1,
-     *     "webcam_shots": 0,
-     *     "screenshots_interval": 9,
-     *     "user_role_value": "",
-     *     "active": "active",
-     *     "deleted_at": null,
-     *     "created_at": "2018-09-25 06:15:08",
-     *     "updated_at": "2018-09-25 06:15:08",
-     *     "role_id": 1,
-     *     "timezone": null
-     * }
+     *  {
+     *      "message": "Successfully ended all sessions"
+     *  }
+     *
+     * @apiUse NotLoggedIn
      *
      * @return JsonResponse
      */
-    public function me(): JsonResponse
+    public function logoutAll(Request $request): JsonResponse
     {
-        return response()->json(auth()->user());
+        $token = $request->json()->get('token');
+        if (isset($token)) {
+            $this->invalidateAllTokens($token);
+        }
+        else {
+            $this->invalidateAllTokens();
+            auth()->logout();
+        }
+
+        return response()->json([
+            'message' => 'Successfully logged out',
+        ]);
     }
+
+  /**
+   * @api {get} /api/auth/me Me
+   * @apiDescription Get authenticated User Entity
+   *
+   * @apiVersion 0.1.0
+   * @apiName Me
+   * @apiGroup Auth
+   *
+   * @apiSuccess {String}     access_token  Token
+   * @apiSuccess {String}     token_type    Token Type
+   * @apiSuccess {String}     expires_in    Token TTL in seconds
+   * @apiSuccess {Array}      user          User Entity
+   *
+   * @apiUse NotLoggedIn
+   *
+   * @apiSuccessExample {json} Answer Example:
+   * {
+   *   "id": 1,
+   *   "full_name": "Admin",
+   *   "first_name": "Ad",
+   *   "last_name": "Min",
+   *   "email": "admin@example.com",
+   *   "url": "",
+   *   "company_id": 1,
+   *   "level": "admin",
+   *   "payroll_access": 1,
+   *   "billing_access": 1,
+   *   "avatar": "",
+   *   "screenshots_active": 1,
+   *   "manual_time": 0,
+   *   "permanent_tasks": 0,
+   *   "computer_time_popup": 300,
+   *   "poor_time_popup": "",
+   *   "blur_screenshots": 0,
+   *   "web_and_app_monitoring": 1,
+   *   "webcam_shots": 0,
+   *   "screenshots_interval": 9,
+   *   "user_role_value": "",
+   *   "active": "active",
+   *   "deleted_at": null,
+   *   "created_at": "2018-09-25 06:15:08",
+   *   "updated_at": "2018-09-25 06:15:08",
+   *   "role_id": 1,
+   *   "timezone": null
+   * }
+   *
+   * @return JsonResponse
+   */
+  public function me(): JsonResponse
+  {
+    return response()->json(auth()->user());
+  }
 
     /**
      * @api {post} /api/auth/refresh Refresh
@@ -262,7 +348,10 @@ class AuthController extends Controller
      */
     public function refresh(): JsonResponse
     {
-        return $this->respondWithToken(auth()->refresh());
+        $this->invalidateToken($request);
+        $token = auth()->refresh();
+        $this->setToken($token);
+        return $this->respondWithToken($token);
     }
 
     /**

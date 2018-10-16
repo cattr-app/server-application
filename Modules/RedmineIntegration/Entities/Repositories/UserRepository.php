@@ -60,6 +60,21 @@ class UserRepository
     }
 
     /**
+     * Returns user's redmine priorities saved in properties table
+     *
+     * @param $userId User's id in our system
+     * @return array Redmine priorities
+     */
+    public function getUserRedminePriorities(int $userId): array
+    {
+        $redminePrioritiesProperty = Property::where('entity_id', '=', $userId)
+            ->where('entity_type', '=', Property::USER_CODE)
+            ->where('name', '=', 'REDMINE_PRIORITIES')->first();
+
+        return $redminePrioritiesProperty ? unserialize($redminePrioritiesProperty->value) : [];
+    }
+
+    /**
      * Returns user's redmine tasks
      *
      * @param int $userId
@@ -90,7 +105,8 @@ class UserRepository
                 't.task_name',
                 't.description',
                 't.user_id',
-                't.assigned_by'
+                't.assigned_by',
+                't.priority_id'
             )->join(Task::getTableName() . ' as t', 'prop.entity_id', '=', 't.id')
             ->where('prop.entity_type', '=', Property::TASK_CODE)
             ->where('prop.name', '=', 'NEW')

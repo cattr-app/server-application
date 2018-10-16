@@ -86,6 +86,11 @@
                                             <th>Total time</th>
                                             <td>{{ formatDurationString(totalTime) }}</td>
                                         </tr>
+
+                                        <tr *ngIf="item.priority">
+                                            <th translate>field.priority</th>
+                                            <td>{{ item.priority.name }}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>

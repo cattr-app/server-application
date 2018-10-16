@@ -256,7 +256,8 @@ class ProjectsRolesController extends ItemController
                 Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                     'error' => 'Item has not been removed',
                     'reason' => 'Item not found'
-                ])
+                ]),
+                404
             );
         }
 

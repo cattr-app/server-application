@@ -16,7 +16,11 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
         $users = User::all();
 
         foreach ($users as $user) {
-            $this->synchronizeUserProjects($user->id);
+            try {
+                $this->synchronizeUserProjects($user->id);
+            }
+            catch (\Exception $e) {
+            }
         }
     }
 

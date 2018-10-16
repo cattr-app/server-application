@@ -55,6 +55,19 @@
                                     </ng-select>
                                 </div>
                             </div>
+
+                            <div class="form-group row">
+                                <label class="col-md-2" translate>field.priority</label>
+                                <div class="col-md-10">
+                                    <select class="form-control" name="priority"
+                                        [(ngModel)]="item.priority_id">
+                                        <option *ngFor="let priority of internalPriorities" [value]="priority.id">
+                                            {{ priority.name }}
+                                        </option>
+                                    </select>
+                                </div>
+                            </div>
+
                             <!--<div class="form-group row">-->
                                 <!--<label class="col-md-2">Assigned by</label>-->
                                 <!--<div class="col-md-10">-->
