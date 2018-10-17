@@ -63,7 +63,7 @@ class ProjectController extends ItemController
 
     /**
      * @apiDefine ProjectRelationsExample
-     * @apiParamExample {json} Request-With-Relations-Example:
+     * @apiParamExample {json} Request With Relations Example
      *  {
      *      "with":            "tasks,users,tasks.timeIntervals",
      *      "tasks.id":        [">", 1],
@@ -89,7 +89,7 @@ class ProjectController extends ItemController
      *
      * @apiUse ProjectRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          [">", 1]
      *      "user_id":     ["=", [1,2,3]],
@@ -101,7 +101,7 @@ class ProjectController extends ItemController
      * @apiUse ProjectRelationsExample
      * @apiUse UnauthorizedError
      *
-     * @apiSuccess {Object[]} ProjectList                     Projects (Array of objects)
+     * @apiSuccess {Object[]} ProjectList                     Projects
      * @apiSuccess {Object}   ProjectList.Project             Project object
      * @apiSuccess {Integer}  ProjectList.Project.id          Project's ID
      * @apiSuccess {String}   ProjectList.Project.name        Project's name
@@ -112,7 +112,7 @@ class ProjectController extends ItemController
      * @apiSuccess {Object[]} ProjectList.Project.users       Project's Users (Array of objects)
      * @apiSuccess {Object[]} ProjectList.Project.tasks       Project's Tasks (Array of objects)
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccessExample {json} Answer Example
      * [
      *   {
      *     "id": 1,
@@ -210,7 +210,7 @@ class ProjectController extends ItemController
      * @apiUse DefaultCreateErrorResponse
      * @apiUse UnauthorizedError
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccessExample {json} Answer Example
      * {
      *   "res": {
      *     "name": "test",
