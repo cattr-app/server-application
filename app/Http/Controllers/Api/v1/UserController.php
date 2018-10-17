@@ -43,7 +43,7 @@ class UserController extends ItemController
      * @apiParam {Boolean} [webcam_shots]           ???
      * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
      * @apiParam {String}  [user_role_value]        ???
-     * @apiParam {Boolean} active                   User is active
+     * @apiParam {Boolean} active                   Is User active
      * @apiParam {Integer} [role_id]                User's Role ID
      * @apiParam {String}  [timezone]               User's timezone
      */
@@ -244,7 +244,7 @@ class UserController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/users/destroy Destroy
+     * @api {post} /api/v1/users/remove Destroy
      * @apiDescription Destroy User
      * @apiVersion 0.1.0
      * @apiName DestroyUser
