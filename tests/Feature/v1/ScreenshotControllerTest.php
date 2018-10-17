@@ -2,6 +2,7 @@
 
 namespace Tests\Feature\v1;
 
+use Faker\Provider\Image;
 use Illuminate\Http\UploadedFile;
 use Tests\TestCase;
 
@@ -13,12 +14,18 @@ class ScreenshotControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
+        $datafile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
+            base_path('tests/sample-desktop.jpg'), 'sample-desktop.jpg',
+            'image/jpg', null, null, false
+        );
+
         $data = [
             "time_interval_id"  => 1,
-            UploadedFile::fake()->image("avatar.jpg")
+            "screenshot" => Image::image('tests/sample-desktop.jpg') /* UploadedFile::fake()->image("avatar.jpg") */
         ];
 
         $response = $this->postJson("/api/v1/screenshots/create", $data, $headers);
+        echo var_export($response->content(), true);
 
         $response->assertStatus(200);
     }
@@ -43,7 +50,7 @@ class ScreenshotControllerTest extends TestCase
             "id" => $id
         ];
 
-        $response = $this->post("/api/v1/screenshots/destroy", $deleteScreenshotData, $headers);
+        $response = $this->post("/api/v1/screenshots/remove", $deleteScreenshotData, $headers);
         $response->assertStatus(200);
     }
 }
