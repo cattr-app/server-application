@@ -48,7 +48,7 @@ class RolesController extends ItemController
 
     /**
      * @apiDefine RolesRelationsExample
-     * @apiParamExample {json} Request-With-Relations-Example:
+     * @apiParamExample {json} Request With Relations Example
      *  {
      *      "with":               "users,rules,users.tasks",
      *      "users.tasks.id":     [">", 1],
@@ -71,7 +71,7 @@ class RolesController extends ItemController
      * @apiParam {String} [updated_at]  `QueryParam` Last Role update DataTime
      * @apiUse RolesRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          [">", 1]
      *      "user_id":     ["=", [1,2,3]],
@@ -94,13 +94,13 @@ class RolesController extends ItemController
      *
      * @apiSuccess {Object[]} RoleList                  Roles (Array of objects)
      * @apiSuccess {Object}   RoleList.Role             Role object
-     * @apiSuccess {Integer}  RoleList.Role.id          Role's ID
-     * @apiSuccess {String}   RoleList.Role.name        Role's name
-     * @apiSuccess {String}   RoleList.Role.created_at  Role's date time of create
-     * @apiSuccess {String}   RoleList.Role.updated_at  Role's date time of update
-     * @apiSuccess {String}   RoleList.Role.deleted_at  Role's date time of delete
-     * @apiSuccess {Object[]} RoleList.Role.users       Role's User (Array of objects)
-     * @apiSuccess {Object[]} RoleList.Role.rules       Role's Task (Array of objects)
+     * @apiSuccess {Integer}  RoleList.Role.id          Role ID
+     * @apiSuccess {String}   RoleList.Role.name        Role name
+     * @apiSuccess {String}   RoleList.Role.created_at  Role date time of create
+     * @apiSuccess {String}   RoleList.Role.updated_at  Role date time of update
+     * @apiSuccess {String}   RoleList.Role.deleted_at  Role date time of delete
+     * @apiSuccess {Object[]} RoleList.Role.users       Role User (Array of objects)
+     * @apiSuccess {Object[]} RoleList.Role.rules       Role Task (Array of objects)
      *
      * @apiUse UnauthorizedError
      *
@@ -130,12 +130,12 @@ class RolesController extends ItemController
      *
      * @apiParam {String} name Roles's name
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "name": "test"
      *  }
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccessExample {json} Answer Example
      * {
      *   "res": {
      *     "name": "test",
@@ -173,7 +173,7 @@ class RolesController extends ItemController
      *
      * @apiUse RolesRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          1,
      *      "name":        ["like", "%lorem%"],
@@ -193,7 +193,7 @@ class RolesController extends ItemController
      * @apiSuccess {Object[]} Role.users       Role User (Array of entities)
      * @apiSuccess {Object[]} Role.rules       Role Task (Array of entities)
      *
-     * @apiSuccessExample {json} Answer Relations Example:
+     * @apiSuccessExample {json} Answer Relations Example
      * {
      *   "id": 1,
      *   "name": "root",
@@ -220,7 +220,7 @@ class RolesController extends ItemController
      * @apiParam {Integer} id   Role ID
      * @apiParam {String}  name Role Name
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1,
      *      "name": "test"
@@ -251,7 +251,7 @@ class RolesController extends ItemController
      *
      * @apiParam {Integer} id Role ID
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1
      *  }
@@ -271,9 +271,9 @@ class RolesController extends ItemController
      * @apiName GetRulesAllowedActionList
      * @apiGroup Roles
      *
-     * @apiParam {Integer} id Role's ID
+     * @apiParam {Integer} id Role ID
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1
      *  }
@@ -284,7 +284,7 @@ class RolesController extends ItemController
      * @apiSuccess {String}   array.object.action Action of rule
      * @apiSuccess {String}   array.object.name   Name of rule
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccessExample {json} Answer Example
      * [
      *   {
      *     "object": "attached-users",
@@ -303,7 +303,7 @@ class RolesController extends ItemController
      *
      * @apiUse UnauthorizedError
      *
-     * @apiErrorExample {json} Invalid ID Example:
+     * @apiErrorExample {json} Invalid ID Example
      * {
      *   "error": "Validation fail",
      *   "reason": "Invalid id"
