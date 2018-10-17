@@ -75,21 +75,38 @@ class ProjectsRolesController extends ItemController
      * @apiGroup ProjectRoles
      *
      * @apiUse DefaultBulkCreateErrorResponse
-     *
      * @apiUse UnauthorizedError
-     * @todo: [CRITICAL] find right request params
+     *
      * @todo: add response and error example
      *
-     * @apiParamExample {json} Simple-Request Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
-     *      "id": 1,
      *      "project_id": 1,
      *      "role_id": 1
      *  }
      *
-     * @apiSuccessExample {json} Simple-Response Example:
-     * {
+     * @apiSuccessExample {json} Simple Response Example
+     * [
+     *   {
+     *     "project_id": 1,
+     *     "role_id": 1,
+     *     "updated_at": "2018-10-17 08:28:18",
+     *     "created_at": "2018-10-17 08:28:18",
+     *     "id": 0
+     *   }
+     * ]
      *
+     * @apiErrorExample {json} Error Example
+     * {
+     *   "error": "Validation fail",
+     *   "reason": {
+     *     "project_id": [
+     *       "The selected project id is invalid."
+     *     ],
+     *     "role_id": [
+     *       "The selected role id is invalid."
+     *     ]
+     *   }
      * }
      *
      * @param Request $request
@@ -196,7 +213,7 @@ class ProjectsRolesController extends ItemController
     }
 
   /**
-   * @api {post} /api/v1/projects-roles/destroy Destroy
+   * @api {post} /api/v1/projects-roles/remove Destroy
    * @apiDescription Destroy Project Roles relation
    * @apiVersion 0.1.0
    * @apiName DestroyProjectRoles
@@ -207,7 +224,6 @@ class ProjectsRolesController extends ItemController
    * @apiUse DefaultDestroyResponse
    *
    * @apiUse UnauthorizedError
-   *
    *
    *
    * @todo: add request and response example with error
@@ -269,7 +285,7 @@ class ProjectsRolesController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/projects-roles/bulk-destroy BulkDestroy
+     * @api {post} /api/v1/projects-roles/bulk-remove BulkDestroy
      * @apiDescription Multiple Destroy Project Roles relation
      * @apiVersion 0.1.0
      * @apiName BulkDestroyProjectRoles
