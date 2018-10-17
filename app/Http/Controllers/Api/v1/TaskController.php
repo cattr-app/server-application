@@ -71,7 +71,7 @@ class TaskController extends ItemController
 
     /**
      * @apiDefine TaskRelationsExample
-     * @apiParamExample {json} Request-With-Relations-Example:
+     * @apiParamExample {json} Request With Relations Example
      *  {
      *      "with":                "project,user,timeIntervals,assigned"
      *      "user.id":             [">", 1],
@@ -101,7 +101,7 @@ class TaskController extends ItemController
      * @apiParam {DateTime} [updated_at]  `QueryParam` Last Task update DataTime
      * @apiUse TaskRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          [">", 1]
      *      "project_id":  ["=", [1,2,3]],
@@ -114,6 +114,7 @@ class TaskController extends ItemController
      *      "created_at":  [">", "2019-01-01 00:00:00"],
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
+     *
      * @apiUse TaskRelationsExample
      *
      * @apiSuccess {Object[]} TaskList                     Tasks (Array of objects)
@@ -152,7 +153,7 @@ class TaskController extends ItemController
      * @apiParam {Integer} [user_id]     Task's User
      * @apiParam {Integer} [assigned_by] User who assigned task
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "project_id":"163",
      *      "task_name":"retr",
@@ -199,7 +200,7 @@ class TaskController extends ItemController
      * @apiParam {DateTime} [updated_at]  `QueryParam` Last Task update DataTime
      * @apiUse TaskRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          1,
      *      "project_id":  ["=", [1,2,3]],
@@ -222,9 +223,9 @@ class TaskController extends ItemController
      * @apiSuccess {String}   Task.task_name      Task's name
      * @apiSuccess {String}   Task.description    Task's description
      * @apiSuccess {String}   Task.url            Task's url
-     * @apiSuccess {DateTime} Task.created_at     Task's date time of create
-     * @apiSuccess {DateTime} Task.updated_at     Task's date time of update
-     * @apiSuccess {DateTime} Task.deleted_at     Task's date time of delete
+     * @apiSuccess {String}   Task.created_at     Task's date time of create
+     * @apiSuccess {String}   Task.updated_at     Task's date time of update
+     * @apiSuccess {String}   Task.deleted_at     Task's date time of delete
      * @apiSuccess {Object[]} Task.time_intervals Task's User (Array of objects)
      * @apiSuccess {Object[]} Task.user           Task's User object
      * @apiSuccess {Object[]} Task.assigned       Task's assigned User object
@@ -253,7 +254,7 @@ class TaskController extends ItemController
      * @apiParam {Integer}  assigned_by User who assigned task
      * @apiUse TaskRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple-Request Example
      *  {
      *      "id":          1,
      *      "project_id":  2,
@@ -274,9 +275,9 @@ class TaskController extends ItemController
      * @apiSuccess {String}   res.task_name      Task's name
      * @apiSuccess {String}   res.description    Task's description
      * @apiSuccess {String}   res.url            Task's url
-     * @apiSuccess {DateTime} res.created_at     Task's date time of create
-     * @apiSuccess {DateTime} res.updated_at     Task's date time of update
-     * @apiSuccess {DateTime} res.deleted_at     Task's date time of delete
+     * @apiSuccess {String}   res.created_at     Task's date time of create
+     * @apiSuccess {String}   res.updated_at     Task's date time of update
+     * @apiSuccess {String}   res.deleted_at     Task's date time of delete
      *
      * @apiUse DefaultEditErrorResponse
      *
@@ -285,16 +286,15 @@ class TaskController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/tasks/destroy Destroy
+     * @api {post} /api/v1/tasks/remove Destroy
      * @apiDescription Destroy Task
      * @apiVersion 0.1.0
      * @apiName DestroyTask
      * @apiGroup Task
      *
-     * @apiParam {String} id Task's id
+     * @apiParam {String} id Task Id
      *
      * @apiUse DefaultDestroyRequestExample
-     *
      * @apiUse DefaultDestroyResponse
      *
      * @param Request $request
@@ -316,11 +316,11 @@ class TaskController extends ItemController
      * @apiParam {Boolean}  [active]                   Active/Inactive Task
      * @apiParam {Integer}  [user_id]     `QueryParam` Task's User
      * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
-     * @apiParam {DateTime} [created_at]  `QueryParam` Task Creation DateTime
-     * @apiParam {DateTime} [updated_at]  `QueryParam` Last Task update DataTime
+     * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
+     * @apiParam {String}   [updated_at]  `QueryParam` Last Task update DataTime
      * @apiUse TaskRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          [">", 1]
      *      "project_id":  ["=", [1,2,3]],
