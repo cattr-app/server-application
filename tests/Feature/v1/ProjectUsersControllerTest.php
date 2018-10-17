@@ -51,7 +51,7 @@ class ProjectUsersControllerTest extends TestCase
         ];
 
         $this->postJson("/api/v1/projects-users/bulk-create", $data, $headers);
-        $response = $this->postJson("/api/v1/projects-users/bulk-destroy", $data, $headers);
+        $response = $this->postJson("/api/v1/projects-users/bulk-remove", $data, $headers);
 
         $response->assertStatus(200);
     }
