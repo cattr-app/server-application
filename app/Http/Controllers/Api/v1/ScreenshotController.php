@@ -83,7 +83,7 @@ class ScreenshotController extends ItemController
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
      * @apiUse ScreenshotRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":               [">", 1],
      *      "time_interval_id": ["=", [1,2,3]],
@@ -137,7 +137,7 @@ class ScreenshotController extends ItemController
      * @apiParam {Integer} time_interval_id  Screenshot's Time Interval ID
      * @apiParam {Binary}  screenshot        Screenshot file
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple-Request Example
      *  {
      *      "time_interval_id": 1,
      *      "screenshot": ```binary data```
@@ -213,7 +213,7 @@ class ScreenshotController extends ItemController
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
      * @apiUse ScreenshotRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":               1,
      *      "time_interval_id": ["=", [1,2,3]],
@@ -251,7 +251,7 @@ class ScreenshotController extends ItemController
      * @apiParam {DateTime} [created_at]     Screenshot Creation DateTime
      * @apiParam {DateTime} [updated_at]     Last Screenshot data update DataTime
      *
-     * @apiParamExample {json} Simple-Request-Example
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":               1,
      *      "time_interval_id": 2,
@@ -274,7 +274,7 @@ class ScreenshotController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/screenshots/destroy Destroy
+     * @api {post} /api/v1/screenshots/remove Destroy
      * @apiUse DefaultDestroyRequestExample
      * @apiDescription Destroy Screenshot
      * @apiVersion 0.1.0
@@ -304,7 +304,7 @@ class ScreenshotController extends ItemController
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
      * @apiUse ScreenshotRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":               1,
      *      "time_interval_id": ["=", [1,2,3]],
