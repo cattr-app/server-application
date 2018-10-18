@@ -48,7 +48,7 @@ class RelationsUsersController extends ItemController
      * @apiParam {Integer} [attached_user_id] `QueryParam` Attached user ID
      * @apiParam {Integer} [user_id]          `QueryParam` User ID
      *
-     * @apiP
+     * @apiSuccessExample {json} Success Response Example
      * [
      *    {
      *      "user_id": 1,
@@ -66,6 +66,7 @@ class RelationsUsersController extends ItemController
 
     /**
      * @api {post} /api/v1/attached-users/create Create
+     *
      * @apiDescription Create Attached Users relation
      * @apiVersion 0.1.0
      * @apiName CreateAttachedUsers
@@ -74,14 +75,14 @@ class RelationsUsersController extends ItemController
      * @apiParam user_id Integer User ID
      * @apiParam attached_user_id Attached to User
      *
-     * @apiRequestExample {json} Request
+     * @apiParamExample {json} Request Example
      * {
      *   "user_id": 1,
      *   "attached_user_id": 1
      * }
      *
      *
-     * @apiSuccessAnswer {json} Answer Example:
+     * @apiSuccessAnswer {json} Answer Example
      * [
      *   {
      *     "user_id": 1,
@@ -143,7 +144,15 @@ class RelationsUsersController extends ItemController
      * @apiParam {Integer}     array.object.user_id       User ID
      *
      * @todo: add examples for request and success answer
+     * @apiRequestExample {json} Request Example
+     * [
+     *    {
+     *       ""
+     *    }
+     * ]
+     *
      * @todo: add errors and params
+     *
      * @apiUse UnauthorizedError
      *
      * @param Request $request
@@ -207,13 +216,13 @@ class RelationsUsersController extends ItemController
      *
      * @apiParam {Integer} User Relation ID
      *
-     * @apiParamExample {json} Example Request:
+     * @apiParamExample {json} Request Example
      * {
      *   "user_id": 1,
      *   "attached_user_id": 1
      * }
      *
-     * @failExample
+     * @apiErrorExample {json} Error Response Example
      * {
      *   "error": "Item has not been removed",
      *   "reason": "Item not found"
@@ -221,6 +230,7 @@ class RelationsUsersController extends ItemController
      *
      * @todo: add examples for request and success answer
      * @todo: add errors and params
+     *
      * @apiUse UnauthorizedError
      *
      * @param Request $request
@@ -279,7 +289,7 @@ class RelationsUsersController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/attached-users/bulk-destroy BulkDestroy
+     * @api {post} /api/v1/attached-users/bulk-remove BulkDestroy
      * @apiDescription Multiple Destroy Attached Users relation
      * @apiVersion 0.1.0
      * @apiName BulkDestroyAttachedUsers
@@ -291,7 +301,19 @@ class RelationsUsersController extends ItemController
      * @apiParam {Integer}     array.object.user_id       User ID
      *
      * @todo: add examples for request and success answer
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *      ""
+     * }
+     *
      * @todo: add errors and params
+     *
+     * @apiErrorExample {json} Error Response Example
+     * {
+     *
+     * }
+     *
      * @apiUse UnauthorizedError
      *
      * @param Request $request
