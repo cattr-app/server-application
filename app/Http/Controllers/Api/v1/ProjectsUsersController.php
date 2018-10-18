@@ -197,16 +197,34 @@ class ProjectsUsersController extends ItemController
         $result = [];
 
         if (empty($requestData['relations'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'relations is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations is empty',
+                ]),
                 400
             );
         }
 
-        foreach ($requestData['relations'] as $relation) {
+        $relations = $requestData['relations'];
+        if (!is_array($relations)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations should be an array',
+                ]),
+                400
+            );
+        }
+
+        $allowed_fields = array_flip([
+            'project_id',
+            'user_id',
+        ]);
+
+        foreach ($relations as $relation) {
+            $relation = array_intersect_key($relation, $allowed_fields);
+
             $validator = Validator::make(
                 $relation,
                 Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
@@ -228,6 +246,7 @@ class ProjectsUsersController extends ItemController
                 $cls::firstOrCreate($this->filterRequestData($relation))
             );
 
+            unset($item['id']);
             $result[] = $item;
         }
 
@@ -355,16 +374,27 @@ class ProjectsUsersController extends ItemController
         $result = [];
 
         if (empty($requestData['relations'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'relations is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations is empty',
+                ]),
                 400
             );
         }
 
-        foreach ($requestData['relations'] as $relation) {
+        $relations = $requestData['relations'];
+        if (!is_array($relations)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations should be an array',
+                ]),
+                400
+            );
+        }
+
+        foreach ($relations as $relation) {
             /** @var Builder $itemsQuery */
             $itemsQuery = Filter::process(
                 $this->getEventUniqueName('answer.success.item.query.prepare'),

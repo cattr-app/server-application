@@ -154,16 +154,34 @@ class ProjectsRolesController extends ItemController
         $result = [];
 
         if (empty($requestData['relations'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'relations is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations is empty',
+                ]),
                 400
             );
         }
 
-        foreach ($requestData['relations'] as $relation) {
+        $relations = $requestData['relations'];
+        if (!is_array($relations)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations should be an array',
+                ]),
+                400
+            );
+        }
+
+        $allowed_fields = array_flip([
+            'project_id',
+            'role_id',
+        ]);
+
+        foreach ($relations as $relation) {
+            $relation = array_intersect_key($relation, $allowed_fields);
+
             $validator = Validator::make(
                 $relation,
                 Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
@@ -185,6 +203,7 @@ class ProjectsRolesController extends ItemController
                 $cls::firstOrCreate($this->filterRequestData($relation))
             );
 
+            unset($item['id']);
             $result[] = $item;
         }
 
@@ -292,16 +311,27 @@ class ProjectsRolesController extends ItemController
         $result = [];
 
         if (empty($requestData['relations'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
                     'error' => 'validation fail',
-                    'reason' => 'relations is empty'
+                    'reason' => 'relations is empty',
                 ]),
                 400
             );
         }
 
-        foreach ($requestData['relations'] as $relation) {
+        $relations = $requestData['relations'];
+        if (!is_array($relations)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations should be an array',
+                ]),
+                400
+            );
+        }
+
+        foreach ($relations as $relation) {
             /** @var Builder $itemsQuery */
             $itemsQuery = Filter::process(
                 $this->getEventUniqueName('answer.success.item.query.prepare'),
@@ -320,9 +350,9 @@ class ProjectsRolesController extends ItemController
 
             if ($validator->fails()) {
                 $result[] = [
-                        'error' => 'Validation fail',
-                        'reason' => $validator->errors(),
-                        'code' =>400
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors(),
+                    'code' => 400,
                 ];
                 continue;
             }

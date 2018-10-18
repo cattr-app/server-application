@@ -302,11 +302,22 @@ class UserController extends ItemController
         $result = [];
 
         if (empty($requestData['users'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'users is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'users is empty',
+                ]),
+                400
+            );
+        }
+
+        $users = $requestData['users'];
+        if (!is_array($users)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'users should be an array',
+                ]),
                 400
             );
         }
@@ -315,9 +326,8 @@ class UserController extends ItemController
         $validationRules['id'] = 'required';
         unset($validationRules['password']);
 
-        foreach ($requestData['users'] as $user) {
-
-            if (!is_int($user['id'])) {
+        foreach ($users as $user) {
+            if (!isset($user['id']) || !is_int($user['id'])) {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                         'error' => 'Invalid id',

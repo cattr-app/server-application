@@ -182,16 +182,27 @@ class RulesController extends ItemController
         Role::updateRules();
 
         if (empty($requestData['rules'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'rules is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'rules is empty',
+                ]),
                 400
             );
         }
 
-        foreach ($requestData['rules'] as $rule) {
+        $rules = $requestData['rules'];
+        if (!is_array($rules)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'rules should be an array',
+                ]),
+                400
+            );
+        }
+
+        foreach ($rules as $rule) {
             $validator = Validator::make(
                 $rule,
                 Filter::process($this->getEventUniqueName('validation.item.edit'), $this->getValidationRules())
