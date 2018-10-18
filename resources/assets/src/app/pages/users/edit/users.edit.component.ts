@@ -11,6 +11,7 @@ import { ProjectsService } from '../../projects/projects.service';
 import { Project } from '../../../models/project.model';
 import { DualListComponent } from 'angular-dual-listbox';
 import { TimezonePickerComponent } from 'ng2-timezone-selector';
+import {LocalStorage} from '../../../api/storage.model';
 
 type UserWithProjects = User & { projects?: Project[] };
 
@@ -29,6 +30,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
     userProjects: Project[];
     differProjects: IterableDiffer<Project>;
     dualListFormat: any = DualListComponent.DEFAULT_FORMAT;
+    authorizedUser: User;
 
     constructor(api: ApiService,
         userService: UsersService,
@@ -71,7 +73,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
         this.itemService.getItem(this.id, this.setItem.bind(this), { 'with': 'projects' });
         this.roleService.getItems(this.setRoles.bind(this));
         this.projectService.getItems(this.setProjects.bind(this));
-
+        this.authorizedUser = LocalStorage.getStorage().get("user");
         // Needed to avoid 'Expression has changed after it was checked' error in the timezone picker.
         this.cdr.detectChanges();
     }
