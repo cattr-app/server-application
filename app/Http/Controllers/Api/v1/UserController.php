@@ -64,7 +64,7 @@ class UserController extends ItemController
         return [
             'full_name'              => 'required',
             'email'                  => 'required|unique:users,email',
-            'active'                 => 'required',
+            'active'                 => 'required|boolean',
             'password'               => 'required',
         ];
     }
