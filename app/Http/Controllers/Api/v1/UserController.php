@@ -43,7 +43,7 @@ class UserController extends ItemController
      * @apiParam {Boolean} [webcam_shots]           ???
      * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
      * @apiParam {String}  [user_role_value]        ???
-     * @apiParam {Boolean} active                   User is active
+     * @apiParam {Boolean} active                   Is User active
      * @apiParam {Integer} [role_id]                User's Role ID
      * @apiParam {String}  [timezone]               User's timezone
      */
@@ -142,6 +142,29 @@ class UserController extends ItemController
      * @apiName CreateUser
      * @apiGroup User
      *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "full_name": "John Doe",
+     *   "email": "johndoe@example.com",
+     *   "active": "1",
+     *   "password": "secretpassword",
+     *   "role_id": "3"
+     * }
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "res": {
+     *     "full_name": "John Doe",
+     *     "email": "johndoe@example.com",
+     *     "active": "1",
+     *     "role_id": "1",
+     *     "updated_at": "2018-10-18 09:06:36",
+     *     "created_at": "2018-10-18 09:06:36",
+     *     "id": 3
+     *   }
+     * }
+     *
+     *
      * @apiUse UserModel
      */
 
@@ -151,6 +174,44 @@ class UserController extends ItemController
      * @apiVersion 0.1.0
      * @apiName ShowUser
      * @apiGroup User
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *  "id": 1
+     * }
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "id": 1,
+     *   "full_name": "Admin",
+     *   "first_name": "Ad",
+     *   "last_name": "Min",
+     *   "email": "admin@example.com",
+     *   "url": "",
+     *   "company_id": 1,
+     *    "level": "admin",
+     *   "payroll_access": 1,
+     *   "billing_access": 1,
+     *   "avatar": "",
+     *   "screenshots_active": 1,
+     *   "manual_time": 0,
+     *   "permanent_tasks": 0,
+     *   "computer_time_popup": 300,
+     *   "poor_time_popup": "",
+     *   "blur_screenshots": 0,
+     *   "web_and_app_monitoring": 1,
+     *   "webcam_shots": 0,
+     *   "screenshots_interval": 9,
+     *   "user_role_value": "",
+     *   "active": 1,
+     *   "deleted_at": null,
+     *   "created_at": "2018-10-18 09:36:22",
+     *   "updated_at": "2018-10-18 09:36:22",
+     *   "role_id": 1,
+     *   "timezone": null,
+     *   "attached_users": []
+     *  }
+     *
      */
 
     /**
@@ -159,6 +220,48 @@ class UserController extends ItemController
      * @apiVersion 0.1.0
      * @apiName EditUser
      * @apiGroup User
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "id": 1,
+     *   "full_name": "Jonni Tree",
+     *   "email": "gook@tree.com",
+     *   "active": "1"
+     * }
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "res": {
+     *      "id": 1,
+     *      "full_name": "Jonni Tree",
+     *      "first_name": "Ad",
+     *      "last_name": "Min",
+     *       "email": "gook@tree.com",
+     *       "url": "",
+     *       "company_id": 1,
+     *       "level": "admin",
+     *       "payroll_access": 1,
+     *       "billing_access": 1,
+     *       "avatar": "",
+     *       "screenshots_active": 1,
+     *       "manual_time": 0,
+     *       "permanent_tasks": 0,
+     *       "computer_time_popup": 300,
+     *       "poor_time_popup": "",
+     *       "blur_screenshots": 0,
+     *       "web_and_app_monitoring": 1,
+     *       "webcam_shots": 0,
+     *       "screenshots_interval": 9,
+     *       "user_role_value": "",
+     *       "active": "1",
+     *       "deleted_at": null,
+     *       "created_at": "2018-10-18 09:36:22",
+     *       "updated_at": "2018-10-18 11:04:50",
+     *       "role_id": 1,
+     *       "timezone": null,
+     *       "attached_users": []
+     *     }
+     *   }
      *
      * @apiUse UserModel
      *
@@ -244,11 +347,16 @@ class UserController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/users/destroy Destroy
+     * @api {post} /api/v1/users/remove Destroy
      * @apiDescription Destroy User
      * @apiVersion 0.1.0
      * @apiName DestroyUser
      * @apiGroup User
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "message": "Item has been removed"
+     * }
      *
      * @apiUse DefaultDestroyRequestExample
      */

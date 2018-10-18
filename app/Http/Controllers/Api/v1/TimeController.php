@@ -67,7 +67,7 @@ class TimeController extends ItemController
      * Display a total of time.
      *
      * @api {POST|GET} /api/v1/time/total Total
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "user_id":        1,
      *      "task_id":        ["=", [1,2,3]],

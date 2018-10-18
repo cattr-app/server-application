@@ -191,13 +191,13 @@ abstract class  ItemController extends Controller
 
     /**
      * @apiDefine DefaultBulkEditErrorResponse
-     * @apiError (Error 200) {Object[]}  messages               Errors (Array of objects)
+     * @apiError (Error 200) {Object[]}  messages               Errors
      * @apiError (Error 200) {Object}    messages.object        Error object
      * @apiError (Error 200) {String}    messages.object.error  Name of error
      * @apiError (Error 200) {String}    messages.object.reason Reason of error
      * @apiError (Error 200) {Integer}   messages.object.code   Code of error
      *
-     * @apiError (Error 400) {Object[]} messages               Errors (Array of objects)
+     * @apiError (Error 400) {Object[]} messages               Errors
      * @apiError (Error 400) {Object}   messages.object        Error object
      * @apiError (Error 400) {String}   messages.object.error  Name of error
      * @apiError (Error 400) {String}   messages.object.reason Reason of error

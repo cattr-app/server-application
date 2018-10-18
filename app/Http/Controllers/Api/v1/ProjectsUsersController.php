@@ -51,7 +51,7 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @apiDefine ProjectUserRelationsExample
-     * @apiParamExample {json} Request-With-Relations-Example:
+     * @apiParamExample {json} Request With Relations Example
      *  {
      *      "with":                 "project, user, project.tasks",
      *      "project.id":           [">", 1],
@@ -62,7 +62,7 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @api {any} /api/v1/projects-users/list List
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "user_id":        ["=", [1,2,3]],
      *      "project_id":     [">", 1]
@@ -95,7 +95,7 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @api {post} /api/v1/projects-users/create Create
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "project_id": 1,
      *      "user_id": 45
@@ -154,7 +154,7 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @api {post} /api/v1/projects-users/bulk-create BulkCreate
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "relations":
      *      [
@@ -184,6 +184,25 @@ class ProjectsUsersController extends ItemController
      * @apiSuccess {Integer}  messages.object.project_id Project-User's Project ID
      * @apiSuccess {String}   messages.object.created_at Project-User's date time of create
      * @apiSuccess {String}   messages.object.updated_at Project-User's date time of update
+     *
+     * @apiSuccessExample {json} Simple Response Example
+     * {
+     *   "messages": [
+     *     {
+     *       "project_id": 1,
+     *       "user_id": 3,
+     *       "updated_at": "2018-10-17 03:58:05",
+     *       "created_at": "2018-10-17 03:58:05",
+     *       "id": 0
+     *     },
+     *     {
+     *       "project_id": 1,
+     *       "user_id": 2,
+     *       "created_at": "2018-10-17 03:58:05",
+     *       "updated_at": "2018-10-17 03:58:05"
+     *     }
+     *   ]
+     * }
      *
      * @apiUse DefaultBulkCreateErrorResponse
      * @apiUse UnauthorizedError
@@ -258,9 +277,9 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/projects-users/destroy Destroy
+     * @api {post} /api/v1/projects-users/remove Destroy
      * @apiDescription Destroy Project Users relation
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "project_id":1,
      *      "user_id":4
@@ -274,11 +293,21 @@ class ProjectsUsersController extends ItemController
      *
      * @apiSuccess {String} message Message about success item remove
      *
+     * @apiSuccessExample {json} Simple Response Example
+     * {
+     *    "message": "Item has been removed"
+     * }
+     *
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
      *
      * @apiUse UnauthorizedError
-     * @todo: add response (error) example
+     *
+     * @apiErrorExample {json} Simple Error Example
+     * {
+     *   "error": "Item has not been removed",
+     *   "reason": "Item not found"
+     * }
      *
      * @param Request $request
      * @return JsonResponse
@@ -335,8 +364,8 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/projects-users/bulk-destroy BulkDestroy
-     * @apiParamExample {json} Simple-Request-Example:
+     * @api {post} /api/v1/projects-users/bulk-remove BulkDestroy
+     * @apiParamExample {json} Simple Request Example
      * {
      *  "relations":
      *  [
@@ -355,13 +384,13 @@ class ProjectsUsersController extends ItemController
      * @apiName BulkDestroyProjectUsers
      * @apiGroup ProjectUsers
      *
-     * @apiParam {Object[]} relations                   Project-User relations (Array of object)
+     * @apiParam {Object[]} relations                   Project-User relations
      * @apiParam {Object}   relations.object            Object Project-User relation
      * @apiParam {Integer}  relations.object.project_id Project-User's Project ID
      * @apiParam {Integer}  relations.object.user_id    Project-User's User ID
      *
-     * @apiSuccess {Object[]} messages        Messages (Array of objects)
-     * @apiSuccess {Object}   messages.object Message about success item remove
+     * @apiSuccess {Object[]} messages        Messages
+     * @apiSuccess {Object}   messages.object Item removal message status
      *
      * @apiUse DefaultBulkDestroyErrorResponse
      *
