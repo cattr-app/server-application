@@ -14,11 +14,6 @@ class ScreenshotControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $datafile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
-            base_path('tests/sample-desktop.jpg'), 'sample-desktop.jpg',
-            'image/jpg', null, null, false
-        );
-
         $data = [
             "time_interval_id"  => 1,
             // "screenshot" => Image::image('tests/sample-desktop.jpg') /* UploadedFile::fake()->image("avatar.jpg") */

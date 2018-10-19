@@ -24,7 +24,7 @@ class ProjectUsersControllerTest extends TestCase
         $expectedFields = [
             "messages" => [
                 "*" => [
-                        "project_id", "user_id", "updated_at", "created_at", "id"
+                        "project_id", "user_id", "updated_at", "created_at"
                     ]
             ]
         ];
@@ -50,10 +50,15 @@ class ProjectUsersControllerTest extends TestCase
             ]
         ];
 
+        $expectedFields = [
+            "messages"
+        ];
+
         $this->postJson("/api/v1/projects-users/bulk-create", $data, $headers);
         $response = $this->postJson("/api/v1/projects-users/bulk-remove", $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Create_ExpectPass()
@@ -67,9 +72,16 @@ class ProjectUsersControllerTest extends TestCase
             "user_id"     => 1
         ];
 
+        $expectedFields = [
+            "*" => [
+                "project_id", "user_id", "updated_at", "created_at"
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/projects-users/create", $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Destroy_ExpectPass()
@@ -83,34 +95,44 @@ class ProjectUsersControllerTest extends TestCase
             "user_id"     => 1
         ];
 
+        $expectedFields = [
+            "message"
+        ];
+
         $this->postJson("/api/v1/projects-users/create", $data, $headers);
-        $response = $this->postJson("/api/v1/projects-users/destroy", $data, $headers);
+        $response = $this->postJson("/api/v1/projects-users/remove", $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
+    // @todo: check is right
     public function test_List_ExpectPass()
     {
         $headers = [
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        // Add user
-        $createUserData = [
+        $createData = [
             "id"            => 1,
             "project_id"    => 1,
             "role_id"       => 1,
         ];
-        $x = $this->postJson("/api/v1/project-users/create", $createUserData, $headers);
 
-        echo var_export($x->content(), true);
+        $expectedFields = [
+            "*" => [
+                "project_id", "user_id", "updated_at", "created_at"
+            ]
+        ];
+
+        $createResponse = $this->postJson("/api/v1/project-users/create", $createData, $headers);
+
+        dd($createResponse->content());
 
         $response = $this->getJson("/api/v1/projects-users/list", $headers);
 
-        $expectedJson = [[]];
+        dd($response->content());
 
-        $response
-            ->assertStatus(200)
-            ->assertJson($expectedJson);
+        $response->assertStatus(200);
     }
 }

@@ -6,23 +6,6 @@ use Tests\TestCase;
 
 class RelationsUsersControllerTest extends TestCase
 {
-    public function test_List_ExpectPass()
-    {
-        $headers = [
-            "Authorization" => "Bearer " . $this->getAdminToken()
-        ];
-
-        $expectedFields = [
-            "*" => [
-                "user_id", "attached_user_id", "created_at", "updated_at"
-            ]
-        ];
-
-        $response = $this->postJson("/api/v1/attached-users/list", [], $headers);
-        $response->assertStatus(200);
-        $response->assertJsonStructure($expectedFields);
-    }
-
     public function test_BulkCreate_ExpectPass()
     {
         $headers = [
@@ -53,15 +36,27 @@ class RelationsUsersControllerTest extends TestCase
         ];
 
         $data = [
-            "user_id"           => 1,
-            "attached_user_id"  => 1
+           "relations" => [
+              [
+                  "user_id"           => 1,
+                  "attached_user_id"  => 1
+              ]
+           ]
         ];
 
-        $response = $this->postJson("/api/v1/attached-users/remove", $data, $headers);
+        $expectedFields = [
+            "messages" => [
+                "*" => [
+                    "message"
+                ]
+            ]
+        ];
 
-        // @todo: check is test right
-        $response->assertJsonStructure();
-        // $response->assertStatus(404);
+        $this->postJson("/api/v1/attached-users/bulk-create", $data, $headers);
+
+        $response = $this->postJson("/api/v1/attached-users/bulk-remove", $data, $headers);
+        $response->assertJsonStructure($expectedFields);
+        $response->assertStatus(200);
     }
 
     public function test_Create_ExpectPass()
@@ -75,8 +70,15 @@ class RelationsUsersControllerTest extends TestCase
             "attached_user_id"  => 1
         ];
 
+        $expectedFields = [
+            "*" => [
+                "user_id", "attached_user_id", "updated_at", "created_at"
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/attached-users/create", $data, $headers);
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Destroy_ExpectPass()
@@ -90,10 +92,31 @@ class RelationsUsersControllerTest extends TestCase
             "attached_user_id"  => 1
         ];
 
+        $expectedFields = [
+            "message"
+        ];
+
+        $this->postJson("/api/v1/attached-users/create", $data, $headers);
         $response = $this->postJson("/api/v1/attached-users/remove", $data, $headers);
 
-        // @todo: check is test right
-        $this->markTestSkipped('Not finished yet.');
-        $response->assertStatus(404);
+        $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
+    }
+
+    public function test_List_ExpectPass()
+    {
+        $headers = [
+            "Authorization" => "Bearer " . $this->getAdminToken()
+        ];
+
+        $expectedFields = [
+            "*" => [
+                "user_id", "attached_user_id", "created_at", "updated_at"
+            ]
+        ];
+
+        $response = $this->postJson("/api/v1/attached-users/list", [], $headers);
+        $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 }

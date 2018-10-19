@@ -26,9 +26,16 @@ class RoleControllerTest extends TestCase
             "name" => "SampleRightRole"
         ];
 
+        $expectedFields = [
+            "res" => [
+                "name", "updated_at", "created_at", "id"
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/roles/create", $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Create_ExpectFail_EmptyMail()
@@ -39,9 +46,16 @@ class RoleControllerTest extends TestCase
 
         $data = [];
 
+        $expectedFields = [
+            "error", "reason" => [
+                "name"
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/roles/create", $data, $headers);
 
         $response->assertStatus(400);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Destroy_ExpectPass()
@@ -50,23 +64,25 @@ class RoleControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $data = [
+        $createData = [
             "name" => "SampleRightRole"
         ];
 
-        /**
-         * Create role and get ID
-         */
-        $roleId = $this->postJson("/api/v1/roles/create", $data, $headers)
+        $roleId = $this->postJson("/api/v1/roles/create", $createData, $headers)
             ->json("res")["id"];
 
-        $destroyData = [
-            "id" => (string)$roleId
+        $data = [
+            "id" => $roleId
         ];
 
-        $response = $this->postJson("/api/v1/roles/destroy", $destroyData, $headers);
+        $expectedFields = [
+            "message"
+        ];
+
+        $response = $this->postJson("/api/v1/roles/remove", $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Destroy_ExpectFail_EmptyId()
@@ -79,11 +95,15 @@ class RoleControllerTest extends TestCase
             "name" => "SampleRightRole"
         ];
 
+        $expectedFields = [
+            "error", "reason"
+        ];
 
         $this->postJson("/api/v1/roles/create", $data, $headers);
         $response = $this->postJson("/api/v1/roles/remove", [], $headers);
 
         $response->assertStatus(400);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Edit_ExpectPass()
@@ -94,6 +114,12 @@ class RoleControllerTest extends TestCase
 
         $createRoleData = [
             "name" => "SampleRightRole"
+        ];
+
+        $expectedFields = [
+            "res" => [
+                "id", "name", "deleted_at", "created_at", "updated_at"
+            ]
         ];
 
         $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
@@ -107,6 +133,7 @@ class RoleControllerTest extends TestCase
         $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Edit_ExpectFail_EmptyId()
@@ -119,9 +146,16 @@ class RoleControllerTest extends TestCase
             "name"  => "YetAnotherRoleName"
         ];
 
+        $expectedFields = [
+            "error", "reason" => [
+                "id"
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
 
         $response->assertStatus(400);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Edit_ExpectFail_EmptyName()
@@ -142,7 +176,6 @@ class RoleControllerTest extends TestCase
         ];
 
         $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
-
         $response->assertStatus(400);
     }
 
