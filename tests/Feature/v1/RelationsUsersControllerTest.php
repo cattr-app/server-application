@@ -13,17 +13,23 @@ class RelationsUsersControllerTest extends TestCase
         ];
 
         $data = [
-            "user_id"           => 1,
-            "attached_user_id"  => 1
-        ];
-
-        $expectedFields = [
-            "*" => [
-                "user_id", "attached_user_id", "updated_at", "created_at", "id"
+            "relations" => [
+                [
+                    "user_id"           => 1,
+                    "attached_user_id"  => 1,
+                ]
             ]
         ];
 
-        $response = $this->postJson("/api/v1/attached-users/create", $data, $headers);
+        $expectedFields = [
+            "messages" => [
+                "*" => [
+                    "user_id", "attached_user_id", "updated_at", "created_at"
+                ]
+            ]
+        ];
+
+        $response = $this->postJson("/api/v1/attached-users/bulk-create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -89,7 +95,7 @@ class RelationsUsersControllerTest extends TestCase
 
         $data = [
             "user_id"           => 1,
-            "attached_user_id"  => 1
+            "attached_user_id"  => 1,
         ];
 
         $expectedFields = [
