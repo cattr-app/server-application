@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\v1;
 
-use Faker\Provider\Image;
 use Illuminate\Http\UploadedFile;
+use Intervention\Image\Image;
 use Tests\TestCase;
 
 class ScreenshotControllerTest extends TestCase
@@ -14,14 +14,16 @@ class ScreenshotControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
+        $screenPath = "../../pic/TestsSetup.png";
+
         $data = [
             "time_interval_id"  => 1,
-            // "screenshot" => Image::image('tests/sample-desktop.jpg') /* UploadedFile::fake()->image("avatar.jpg") */
+            "screenshot"        => new UploadedFile($screenPath, basename($screenPath))
         ];
+
 
         $response = $this->postJson("/api/v1/screenshots/create", $data, $headers);
 
-        $this->markTestSkipped('Not finished yet.');
         $response->assertStatus(200);
     }
 

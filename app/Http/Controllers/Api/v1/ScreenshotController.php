@@ -158,12 +158,20 @@ class ScreenshotController extends ItemController
      */
     public function create(Request $request): JsonResponse
     {
-        $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
+        $screenStorePath = $request->screenshot->store('uploads/screenshots');
+        $absoluteStorePath = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, Storage::disk()->path($screenStorePath));
+
+        $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
+
         $screenshot = Image::make($path);
+
         $thumbnail = $screenshot->resize(280, null, function ($constraint) {
             $constraint->aspectRatio();
         });
-        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
+
+        $ds = DIRECTORY_SEPARATOR;
+
+        $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs", $screenStorePath);
         Storage::put($thumbnailPath, (string) $thumbnail->encode());
 
         $timeIntervalId = is_int($request->get('time_interval_id')) ? $request->get('time_interval_id') : null;
