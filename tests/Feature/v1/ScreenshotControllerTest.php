@@ -14,7 +14,8 @@ class ScreenshotControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $screenPath = "../../pic/TestsSetup.png";
+        $ds = DIRECTORY_SEPARATOR;
+        $screenPath = __DIR__ . "{$ds}..{$ds}..{$ds}pic{$ds}TestsSetup.png";
 
         $data = [
             "time_interval_id"  => 1,
@@ -33,8 +34,11 @@ class ScreenshotControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
+        $ds = DIRECTORY_SEPARATOR;
+        $screenPath = __DIR__ . "{$ds}..{$ds}..{$ds}pic{$ds}TestsSetup.png";
+
         $data = [
-            "screenshot"        => "samplebinarydata",
+            "screenshot"        => new UploadedFile($screenPath, basename($screenPath)),
             "time_interval_id"  => "1"
         ];
 
