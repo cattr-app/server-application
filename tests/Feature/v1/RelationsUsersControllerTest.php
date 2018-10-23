@@ -29,10 +29,20 @@ class RelationsUsersControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            "messages" => [
+                [
+                    "user_id" => 1,
+                    "attached_user_id" => 1
+                ]
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/attached-users/bulk-create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_BulkDestroy_ExpectPass()
@@ -58,10 +68,20 @@ class RelationsUsersControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            "messages" => [
+                [
+                    "message" => "Item has been removed"
+                ]
+            ]
+        ];
+
         $this->postJson("/api/v1/attached-users/bulk-create", $data, $headers);
 
         $response = $this->postJson("/api/v1/attached-users/bulk-remove", $data, $headers);
+
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
         $response->assertStatus(200);
     }
 
@@ -82,9 +102,18 @@ class RelationsUsersControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            [
+                "user_id"          => 1,
+                "attached_user_id" => 1,
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/attached-users/create", $data, $headers);
+
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_Destroy_ExpectPass()
@@ -102,11 +131,16 @@ class RelationsUsersControllerTest extends TestCase
             "message"
         ];
 
+        $expectedJson = [
+            "message" => "Item has been removed"
+        ];
+
         $this->postJson("/api/v1/attached-users/create", $data, $headers);
         $response = $this->postJson("/api/v1/attached-users/remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_List_ExpectPass()
@@ -121,8 +155,24 @@ class RelationsUsersControllerTest extends TestCase
             ]
         ];
 
+        $createData = [
+            "user_id"           => 1,
+            "attached_user_id"  => 1
+        ];
+
+        $expectedJson = [
+            [
+                "user_id" => 1,
+                "attached_user_id" => 1
+            ]
+        ];
+
+        $this->postJson("/api/v1/attached-users/create", $createData, $headers);
+
         $response = $this->postJson("/api/v1/attached-users/list", [], $headers);
+
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 }
