@@ -128,7 +128,22 @@ class ProjectRolesControllerTest extends TestCase
             'Authorization' => 'Bearer ' . $this->getAdminToken()
         ];
 
-        $response = $this->postJson("/api/v1/project-roles/list", [], $headers);
+        $createData = [
+            "project_id"    => 1,
+            "role_id"       => 1,
+        ];
+
+        $expectedFields = [
+            "*" => [
+                "project_id", "role_id", "created_at", "updated_at"
+            ]
+        ];
+
+        $this->postJson("/api/v1/projects-roles/create", $createData, $headers);
+
+        $response = $this->postJson("/api/v1/projects-roles/list", [], $headers);
+
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 }
