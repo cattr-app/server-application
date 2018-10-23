@@ -7,12 +7,12 @@ class ProjectControllerTest extends TestCase
     public function test_Create_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $data = [
-            'name'         => "SampleOriginalProjectName",
-            'description'  => "Code-monkey development group presents"
+            "name"         => "SampleOriginalProjectName",
+            "description"  => "Code-monkey development group presents"
         ];
 
         $expectedFields = [
@@ -30,7 +30,7 @@ class ProjectControllerTest extends TestCase
     public function test_Destroy_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
         $createData = [
@@ -38,14 +38,14 @@ class ProjectControllerTest extends TestCase
             "description"  => "Code-monkey development group presents"
         ];
 
-        $createResponse = $this->postJson('/api/v1/projects/create', $createData, $headers);
+        $createResponse = $this->postJson("/api/v1/projects/create", $createData, $headers);
 
         $data = [
-            'id' => $createResponse->json('res.id')
+            "id" => $createResponse->json("res.id")
         ];
 
         $expectedFields = [
-            'message'
+            "message"
         ];
 
         $response = $this->postJson("/api/v1/projects/remove", $data, $headers);
@@ -57,7 +57,7 @@ class ProjectControllerTest extends TestCase
     public function test_Edit_ExpectPass()
     {
         $headers = [
-            'Authorization' => 'Bearer ' . $this->getAdminToken()
+            'Authorization' => "Bearer " . $this->getAdminToken()
         ];
 
         $createData = [
@@ -68,7 +68,7 @@ class ProjectControllerTest extends TestCase
         $createResponse = $this->postJson('/api/v1/projects/create', $createData, $headers);
 
         $data = [
-            "id" => $createResponse->json('res.id'),
+            "id"           => $createResponse->json("res.id"),
             "name"         => "SampleOriginalProjectNameButEdited",
             "description"  => "Code-monkey development group presents with new description"
         ];
