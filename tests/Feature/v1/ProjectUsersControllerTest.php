@@ -113,26 +113,15 @@ class ProjectUsersControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $createData = [
-            "id"            => 1,
-            "project_id"    => 1,
-            "role_id"       => 1,
-        ];
-
         $expectedFields = [
             "*" => [
                 "project_id", "user_id", "updated_at", "created_at"
             ]
         ];
 
-        $createResponse = $this->postJson("/api/v1/project-users/create", $createData, $headers);
-
-        dd($createResponse->content());
-
         $response = $this->getJson("/api/v1/projects-users/list", $headers);
 
-        dd($response->content());
-
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 }
