@@ -21,10 +21,18 @@ class ProjectControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            "res" => [
+                "name"        => "SampleOriginalProjectName",
+                "description" => "Code-monkey development group presents"
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/projects/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_Destroy_ExpectPass()
@@ -48,10 +56,15 @@ class ProjectControllerTest extends TestCase
             "message"
         ];
 
+        $expectedJson = [
+            "message" => "Item has been removed"
+        ];
+
         $response = $this->postJson("/api/v1/projects/remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_Edit_ExpectPass()
@@ -79,10 +92,20 @@ class ProjectControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            "res" => [
+                "company_id"  => null,
+                "name"        => "SampleOriginalProjectNameButEdited",
+                "description" => "Code-monkey development group presents with new description",
+                "deleted_at"  => null
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/projects/edit", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_List_ExpectPass()
