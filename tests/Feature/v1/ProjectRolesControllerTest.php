@@ -29,8 +29,8 @@ class ProjectRolesControllerTest extends TestCase
                     "role_id"       => 1
                 ],
                 [
-                    "project_id"    => 2,
-                    "role_id"       => 1
+                    "project_id"    => 777,
+                    "role_id"       => 5981
                 ]
             ]
         ];
@@ -43,10 +43,28 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            "messages" =>[
+                [
+                    "project_id" => 1,
+                    "role_id"    => 1
+                ],
+                [
+                    "error" => "Validation fail",
+                    "reason" => [
+                        "project_id" => ["The selected project id is invalid."],
+                        "role_id"    => ["The selected role id is invalid."]
+                    ]
+                ],
+                "code" => 400
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/projects-roles/bulk-create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_BulkDestroy_ExpectPass()
@@ -60,14 +78,27 @@ class ProjectRolesControllerTest extends TestCase
                 [
                     "project_id"    => 1,
                     "role_id"       => 1
+                ],
+                [
+                    "project_id"    => 777,
+                    "role_id"       => 5981
                 ]
             ]
         ];
 
-        $expectedFields = [
+        // @todo: check which item was deleted
+        $expectedJson = [
             "messages" => [
-                "*" => [
-                    "message"
+                [
+                    "message" => "Item has been removed"
+                ],
+                [
+                    "error"     => "Validation fail",
+                    "reason"    => [
+                        "project_id" => ["The selected project id is invalid."],
+                        "role_id"    => ["The selected role id is invalid."]
+                    ],
+                    "code" => 400
                 ]
             ]
         ];
@@ -76,7 +107,7 @@ class ProjectRolesControllerTest extends TestCase
         $response = $this->postJson("/api/v1/projects-roles/bulk-remove", $data, $headers);
 
         $response->assertStatus(200);
-        $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_Create_ExpectPass()
@@ -96,7 +127,13 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
+        /*$expectedJson = [
+            ""
+        ];*/
+
         $response = $this->postJson("/api/v1/projects-roles/create", $data, $headers);
+
+        dd($response->content());
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -115,11 +152,16 @@ class ProjectRolesControllerTest extends TestCase
 
         $expectedFields = ["message"];
 
+        $expectedJson = [
+            "message" => "Item has been removed"
+        ];
+
         $this->postJson("/api/v1/projects-roles/create", $data, $headers);
         $response = $this->postJson("/api/v1/projects-roles/remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_List_ExpectPass()
@@ -139,11 +181,19 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            [
+                "project_id" => 1,
+                "role_id"    => 1
+            ]
+        ];
+
         $this->postJson("/api/v1/projects-roles/create", $createData, $headers);
 
         $response = $this->postJson("/api/v1/projects-roles/list", [], $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 }
