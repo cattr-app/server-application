@@ -29,10 +29,20 @@ class ProjectUsersControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            "messages" => [
+                [
+                    "project_id" => 1,
+                    "user_id"    => 1,
+                ]
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/projects-users/bulk-create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_BulkDestroy_ExpectPass()
@@ -54,11 +64,20 @@ class ProjectUsersControllerTest extends TestCase
             "messages"
         ];
 
+        $expectedJson = [
+            "messages" => [
+                [
+                    "message" => "Item has been removed"
+                ]
+            ]
+        ];
+
         $this->postJson("/api/v1/projects-users/bulk-create", $data, $headers);
         $response = $this->postJson("/api/v1/projects-users/bulk-remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_Create_ExpectPass()
@@ -78,10 +97,18 @@ class ProjectUsersControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            [
+                "project_id" => 1,
+                "user_id"    => 1,
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/projects-users/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_Destroy_ExpectPass()
@@ -119,9 +146,24 @@ class ProjectUsersControllerTest extends TestCase
             ]
         ];
 
+        $expectedJson = [
+            [
+                "project_id" => 1,
+                "user_id"    => 1,
+            ]
+        ];
+
+        $createData = [
+            "project_id"  => 1,
+            "user_id"     => 1
+        ];
+
+        $this->postJson("/api/v1/projects-users/create", $createData, $headers);
+
         $response = $this->getJson("/api/v1/projects-users/list", $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 }
