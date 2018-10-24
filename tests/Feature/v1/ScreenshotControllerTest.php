@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\v1;
 
-use Faker\Provider\Image;
 use Illuminate\Http\UploadedFile;
+use Intervention\Image\Image;
 use Tests\TestCase;
 
 class ScreenshotControllerTest extends TestCase
@@ -14,20 +14,23 @@ class ScreenshotControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $datafile = new \Symfony\Component\HttpFoundation\File\UploadedFile(
-            base_path('tests/sample-desktop.jpg'), 'sample-desktop.jpg',
-            'image/jpg', null, null, false
-        );
+        $ds = DIRECTORY_SEPARATOR;
+        $screenPath = __DIR__ . "{$ds}..{$ds}..{$ds}pic{$ds}TestsSetup.png";
 
         $data = [
             "time_interval_id"  => 1,
-            // "screenshot" => Image::image('tests/sample-desktop.jpg') /* UploadedFile::fake()->image("avatar.jpg") */
+            "screenshot"        => new UploadedFile($screenPath, basename($screenPath))
+        ];
+
+        $expectedFields = [
+            "res" => [
+                "time_interval_id", "path", "thumbnail_path", "updated_at", "created_at", "id"
+            ]
         ];
 
         $response = $this->postJson("/api/v1/screenshots/create", $data, $headers);
-
-        $this->markTestSkipped('Not finished yet.');
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
     public function test_Destroy_ExpectPass()
@@ -36,15 +39,22 @@ class ScreenshotControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
+        $ds = DIRECTORY_SEPARATOR;
+        $screenPath = __DIR__ . "{$ds}..{$ds}..{$ds}pic{$ds}TestsSetup.png";
+
         $data = [
-            "screenshot"        => "samplebinarydata",
-            "time_interval_id"  => "1"
+            "time_interval_id"  => 1,
+            "screenshot"        => new UploadedFile($screenPath, basename($screenPath))
+        ];
+
+        $expectedFields = [
+            "message"
         ];
 
         /**
          * Upload screenshot and get ID
          */
-        $id = $this->post("/api/v1/screenshots/create", $data, $headers);
+        $id = $this->post("/api/v1/screenshots/create", $data, $headers)->json("res.id");
 
         $deleteScreenshotData = [
             "id" => $id
@@ -52,9 +62,7 @@ class ScreenshotControllerTest extends TestCase
 
         $response = $this->post("/api/v1/screenshots/remove", $deleteScreenshotData, $headers);
 
-        // @todo: check is test right
-        $this->markTestSkipped('Not finished yet.');
-
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 }
