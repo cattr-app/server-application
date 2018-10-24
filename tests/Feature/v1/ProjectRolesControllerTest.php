@@ -35,14 +35,6 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
-        $expectedFields = [
-            "messages" => [
-                "*" => [
-                    "project_id", "role_id", "updated_at", "created_at"
-                ]
-            ]
-        ];
-
         $expectedJson = [
             "messages" =>[
                 [
@@ -54,16 +46,15 @@ class ProjectRolesControllerTest extends TestCase
                     "reason" => [
                         "project_id" => ["The selected project id is invalid."],
                         "role_id"    => ["The selected role id is invalid."]
-                    ]
-                ],
-                "code" => 400
+                    ],
+                    "code" => 400
+                ]
             ]
         ];
 
         $response = $this->postJson("/api/v1/projects-roles/bulk-create", $data, $headers);
 
         $response->assertStatus(200);
-        $response->assertJsonStructure($expectedFields);
         $response->assertJson($expectedJson);
     }
 
@@ -86,7 +77,6 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
-        // @todo: check which item was deleted
         $expectedJson = [
             "messages" => [
                 [
@@ -127,16 +117,18 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
-        /*$expectedJson = [
-            ""
-        ];*/
+        $expectedJson = [
+            [
+                "project_id" => 1,
+                "role_id"    => 1,
+            ]
+        ];
 
         $response = $this->postJson("/api/v1/projects-roles/create", $data, $headers);
 
-        dd($response->content());
-
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_Destroy_ExpectPass()
