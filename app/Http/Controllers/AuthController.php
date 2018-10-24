@@ -125,11 +125,13 @@ class AuthController extends Controller
         $auth = explode(' ', $request->header('Authorization'));
         if (!empty($auth) && count($auth) > 1 && $auth[0] == 'bearer') {
             $token = $auth[1];
-
-            DB::table('tokens')->where([
-                ['user_id', auth()->user()->id],
-                ['token', $token],
-            ])->delete();
+            $user = auth()->user();
+            if (isset($user)) {
+                DB::table('tokens')->where([
+                    ['user_id', auth()->user()->id],
+                    ['token', $token],
+                ])->delete();
+            }
         }
     }
 

@@ -8,7 +8,8 @@
     "build-prod": "ng build --prod --output-hashing=none",
     "watch-prod": "ng build --prod --output-hashing=none --watch",
     "update": "[ -e composer.phar ] && php composer.phar run project:update || composer run project:update",
-    "api": "php -r \"if (!file_exists(__DIR__.'/public/apidoc')) { mkdir(__DIR__.'/apidoc') ; symlink(__DIR__.'/apidoc/', __DIR__.'/public/apidoc'); }\" ; node node_modules/apidoc/bin/apidoc -i app/Http/Controllers/ -o apidoc"
+    "api": "php -r \"if (!file_exists(__DIR__.'/public/apidoc')) { mkdir(__DIR__.'/apidoc') ; symlink(__DIR__.'/apidoc/', __DIR__.'/public/apidoc'); }\" ; node node_modules/apidoc/bin/apidoc -i app/Http/Controllers/ -o apidoc",
+    "api-nsl": "node node_modules/apidoc/bin/apidoc -i app/Http/Controllers/ -o apidoc"
   },
   "private": true,
   "dependencies": {

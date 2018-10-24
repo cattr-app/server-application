@@ -122,7 +122,6 @@ class UserControllerTest extends TestCase
         $response->assertStatus(200);
 
         $response->assertJsonStructure($expectedFields);
-        echo var_export($response->content(), true);
     }
 
     public function test_Show_ExpectPass()

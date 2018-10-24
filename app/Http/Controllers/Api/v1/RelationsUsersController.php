@@ -143,15 +143,27 @@ class RelationsUsersController extends ItemController
      * @apiParam {Integer}     array.object.attached_user_id Attached User ID
      * @apiParam {Integer}     array.object.user_id          User ID
      *
-     * @todo: add examples for request and success answer
-     * @apiRequestExample {json} Request Example
-     * [
-     *    {
-     *       ""
-     *    }
-     * ]
+     * @apiParamExample {json} Request Example
+     * {
+     *   "relations": [
+     *     {
+     *       "user_id": "1",
+     *       "attached_user_id": "1"
+     *     }
+     *   ]
+     * }
      *
-     * @todo: add errors and params
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "messages": [
+     *     {
+     *       "user_id": "1",
+     *       "attached_user_id": "1",
+     *       "updated_at": "2018-10-22 06:56:23",
+     *       "created_at": "2018-10-22 06:56:23"
+     *     }
+     *   ]
+     * }
      *
      * @apiUse UnauthorizedError
      *
@@ -317,14 +329,26 @@ class RelationsUsersController extends ItemController
      * @apiParam {Integer}     array.object.attached_user_id Attached User ID
      * @apiParam {Integer}     array.object.user_id          User ID
      *
-     * @todo: add examples for request and success answer
-     *
      * @apiParamExample {json} Request Example
      * {
-     *      ""
+     *   "relations": [
+     *     {
+     *       "user_id": "1",
+     *       "attached_user_id": "1"
+     *     }
+     *   ]
      * }
      *
-     * @todo: add errors and params
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "messages": [
+     *     {
+     *       "message": "Item has been removed"
+     *     }
+     *   ]
+     * }
+     *
+     * @todo: add errors
      *
      * @apiErrorExample {json} Error Response Example
      * {
@@ -335,6 +359,7 @@ class RelationsUsersController extends ItemController
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws \Exception
      */
     public function bulkDestroy(Request $request) : JsonResponse
     {
