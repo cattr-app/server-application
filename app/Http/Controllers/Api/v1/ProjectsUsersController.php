@@ -311,6 +311,8 @@ class ProjectsUsersController extends ItemController
      *
      * @param Request $request
      * @return JsonResponse
+     *
+     * @throws \Exception
      */
     public function destroy(Request $request): JsonResponse
     {
@@ -396,6 +398,8 @@ class ProjectsUsersController extends ItemController
      *
      * @param Request $request
      * @return JsonResponse
+     *
+     * @throws \Exception
      */
     public function bulkDestroy(Request $request): JsonResponse
     {
