@@ -44,7 +44,7 @@ class ProjectsRolesController extends ItemController
     }
 
     /**
-     * @api {any} /api/v1/projects-roles/list List
+     * @api {get} /api/v1/projects-roles/list List
      * @apiDescription Get list of Projects Roles relations
      * @apiVersion 0.1.0
      * @apiName GetProjectRolesList
@@ -53,12 +53,27 @@ class ProjectsRolesController extends ItemController
      * @apiParam {Integer} [project_id] `QueryParam` Project ID
      * @apiParam {Integer} [role_id]    `QueryParam` Role ID
      *
-     * @apiSuccess {ProjectRoles[]} ProjectRolesList array of Project Role objects
+     * @apiSuccess {Object[]} ProjectRolesList ProjectRoles
      *
      * @apiUse UnauthorizedError
-     * @todo: [CRITICAL] fix projects-roles create
+     *
      * @todo: add request example
-     * @todo: add response and params example
+     *
+     * @apiSuccessExample {json} Response example
+     * [
+     *   {
+     *     "project_id": 1,
+     *     "role_id": 1,
+     *     "created_at": "2018-10-25 08:41:35",
+     *     "updated_at": "2018-10-25 08:41:35"
+     *   }
+     * ]
+     *
+     * @apiParamExample {json} Request example
+     * {
+     *   "": "",
+     *   "": ""
+     * }
      *
      * @param Request $request
      *
@@ -78,6 +93,19 @@ class ProjectsRolesController extends ItemController
      * @apiUse UnauthorizedError
      *
      * @todo: add response and error example
+     *
+     * @apiErrorExample {json} Error example
+     * {
+     *   "error": "Validation fail",
+     *     "reason": {
+     *       "project_id": [
+     *         "The selected project id is invalid."
+     *     ],
+     *     "role_id": [
+     *       "The selected role id is invalid."
+     *     ]
+     *   }
+     * }
      *
      * @apiParamExample {json} Simple Request Example
      *  {
