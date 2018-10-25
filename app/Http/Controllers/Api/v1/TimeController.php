@@ -171,17 +171,17 @@ class TimeController extends ItemController
      * @apiParam {Integer[]} [tasks_id]       `QueryParam` TimeInterval's Task ID
      * @apiParam {Integer}   project_id       `QueryParam` TimeInterval's Task's Project ID
      * @apiParam {Integer}   [user_id]        `QueryParam` TimeInterval's Task's User ID
-     * @apiParam {DateTime}  [start_at]                    TimeInterval Start DataTime
-     * @apiParam {DateTime}  [end_at]                      TimeInterval End DataTime
+     * @apiParam {String}    [start_at]                    TimeInterval Start DataTime
+     * @apiParam {String}    [end_at]                      TimeInterval End DataTime
      * @apiParam {Integer}   [count_mouse]    `QueryParam` TimeInterval Count mouse
      * @apiParam {Integer}   [count_keyboard] `QueryParam` TimeInterval Count keyboard
      * @apiParam {Integer}   [id]             `QueryParam` TimeInterval ID
      * @apiUse Relations
      *
-     * @apiSuccess {DateTime} current_datetime Current datetime of server
+     * @apiSuccess {String}   current_datetime Current datetime of server
      * @apiSuccess {Integer}  time             Total time of project in seconds
-     * @apiSuccess {DateTime} start            Datetime of first Time Interval's start_at
-     * @apiSuccess {DateTime} end              DateTime of last Time Interval's end_at
+     * @apiSuccess {String}   start            Datetime of first Time Interval's start_at
+     * @apiSuccess {String}   end              DateTime of last Time Interval's end_at
      *
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
@@ -270,28 +270,28 @@ class TimeController extends ItemController
      * @apiName GetTimeByTasks
      * @apiGroup Time
      *
-     * @apiParam {Integer[]} [tasks_id]       `QueryParam` TimeInterval's Task ID
-     * @apiParam {Integer}   [project_id]     `QueryParam` TimeInterval's Task's Project ID
-     * @apiParam {Integer}   [user_id]        `QueryParam` TimeInterval's Task's User ID
-     * @apiParam {DateTime}  [start_at]                    TimeInterval Start DataTime
-     * @apiParam {DateTime}  [end_at]                      TimeInterval End DataTime
+     * @apiParam {Integer[]} [tasks_id]       `QueryParam` TimeInterval Task id
+     * @apiParam {Integer}   [project_id]     `QueryParam` TimeInterval Task Project id
+     * @apiParam {Integer}   [user_id]        `QueryParam` TimeInterval Task User id
+     * @apiParam {String}    [start_at]                    TimeInterval Start DataTime
+     * @apiParam {String}    [end_at]                      TimeInterval End DataTime
      * @apiParam {Integer}   [count_mouse]    `QueryParam` TimeInterval Count mouse
      * @apiParam {Integer}   [count_keyboard] `QueryParam` TimeInterval Count keyboard
      * @apiParam {Integer}   [id]             `QueryParam` TimeInterval ID
      * @apiUse Relations
      *
-     * @apiSuccess {DateTime} current_datetime Current datetime of server
+     * @apiSuccess {String}   current_datetime Current datetime of server
      * @apiSuccess {Object[]} tasks            Array of objects Task
      * @apiSuccess {Integer}  tasks.id         Tasks's ID
      * @apiSuccess {Integer}  tasks.user_id    Tasks's User ID
      * @apiSuccess {Integer}  tasks.project_id Tasks's Project ID
      * @apiSuccess {Integer}  tasks.time       Tasks's total time in seconds
-     * @apiSuccess {DateTime} tasks.start      Datetime of first Tasks's Time Interval's start_at
-     * @apiSuccess {DateTime} tasks.end        Datetime of last Tasks's Time Interval's end_at
-     * @apiSuccess {Total[]}  total            Array of total tasks time
+     * @apiSuccess {String}   tasks.start      Datetime of first Tasks's Time Interval's start_at
+     * @apiSuccess {String}   tasks.end        Datetime of last Tasks's Time Interval's end_at
+     * @apiSuccess {Object[]} total            Array of total tasks time
      * @apiSuccess {Integer}  total.time       Total time of tasks in seconds
-     * @apiSuccess {DateTime} total.start      Datetime of first Time Interval's start_at
-     * @apiSuccess {DateTime} total.end        DateTime of last Time Interval's end_at
+     * @apiSuccess {String}   total.start      Datetime of first Time Interval's start_at
+     * @apiSuccess {String}   total.end        DateTime of last Time Interval's end_at
      *
      * @param Request $request
      * @return JsonResponse
@@ -394,28 +394,28 @@ class TimeController extends ItemController
      * @apiName GetTimeBySingleTask
      * @apiGroup Time
      *
-     * @apiParam {Integer}  task_id                       TimeInterval's Task ID
-     * @apiParam {Integer}  [project_id]     `QueryParam` TimeInterval's Task's Project ID
-     * @apiParam {Integer}  [user_id]        `QueryParam` TimeInterval's Task's User ID
-     * @apiParam {DateTime} [start_at]                    TimeInterval Start DataTime
-     * @apiParam {DateTime} [end_at]                      TimeInterval End DataTime
+     * @apiParam {Integer}  task_id                       TimeInterval Task id
+     * @apiParam {Integer}  [project_id]     `QueryParam` TimeInterval Task Project id
+     * @apiParam {Integer}  [user_id]        `QueryParam` TimeInterval Task User id
+     * @apiParam {String}   [start_at]                    TimeInterval Start DataTime
+     * @apiParam {String}   [end_at]                      TimeInterval End DataTime
      * @apiParam {Integer}  [count_mouse]    `QueryParam` TimeInterval Count mouse
      * @apiParam {Integer}  [count_keyboard] `QueryParam` TimeInterval Count keyboard
-     * @apiParam {Integer}  [id]             `QueryParam` TimeInterval ID
+     * @apiParam {Integer}  [id]             `QueryParam` TimeInterval id
      * @apiUse Relations
      *
-     * @apiSuccess {DateTime} current_datetime Current datetime of server
+     * @apiSuccess {String}   current_datetime Current datetime of server
      * @apiSuccess {Object[]} tasks            Array of objects Task
-     * @apiSuccess {Integer}  tasks.id         Tasks's ID
-     * @apiSuccess {Integer}  tasks.user_id    Tasks's User ID
-     * @apiSuccess {Integer}  tasks.project_id Tasks's Project ID
+     * @apiSuccess {Integer}  tasks.id         Tasks id
+     * @apiSuccess {Integer}  tasks.user_id    Tasks User id
+     * @apiSuccess {Integer}  tasks.project_id Tasks Project id
      * @apiSuccess {Integer}  tasks.time       Tasks's total time in seconds
-     * @apiSuccess {DateTime} tasks.start      Datetime of first Tasks's Time Interval's start_at
-     * @apiSuccess {DateTime} tasks.end        Datetime of last Tasks's Time Interval's end_at
-     * @apiSuccess {Total[]}  total            Array of total tasks time
+     * @apiSuccess {String}   tasks.start      Datetime of first Tasks's Time Interval's start_at
+     * @apiSuccess {String}   tasks.end        Datetime of last Tasks's Time Interval's end_at
+     * @apiSuccess {Object[]} total            Array of total tasks time
      * @apiSuccess {Integer}  total.time       Total time of tasks in seconds
-     * @apiSuccess {DateTime} total.start      Datetime of first Time Interval's start_at
-     * @apiSuccess {DateTime} total.end        DateTime of last Time Interval's end_at
+     * @apiSuccess {String}   total.start      Datetime of first Time Interval's start_at
+     * @apiSuccess {String}   total.end        DateTime of last Time Interval's end_at
      *
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
@@ -536,21 +536,21 @@ class TimeController extends ItemController
      * @apiName GetTimeBySingleTaskAndUser
      * @apiGroup Time
      *
-     * @apiParam {Integer}  task_id                       TimeInterval's Task ID
-     * @apiParam {Integer}  user_id                       TimeInterval's Task's User ID
-     * @apiParam {DateTime} [start_at]       `QueryParam` TimeInterval Start DataTime
-     * @apiParam {DateTime} [end_at]         `QueryParam` TimeInterval End DataTime
+     * @apiParam {Integer}  task_id                       TimeInterval Task ID
+     * @apiParam {Integer}  user_id                       TimeInterval Task User ID
+     * @apiParam {String}   [start_at]       `QueryParam` TimeInterval Start DataTime
+     * @apiParam {String}   [end_at]         `QueryParam` TimeInterval End DataTime
      * @apiParam {Integer}  [count_mouse]    `QueryParam` TimeInterval Count mouse
      * @apiParam {Integer}  [count_keyboard] `QueryParam` TimeInterval Count keyboard
      * @apiParam {Integer}  [id]             `QueryParam` TimeInterval ID
      * @apiUse Relations
      *
      * @apiSuccess {DateTime} current_datetime Current datetime of server
-     * @apiSuccess {Integer}  id               Task's ID
-     * @apiSuccess {Integer}  user_id          Task's User's ID
+     * @apiSuccess {Integer}  id               Task id
+     * @apiSuccess {Integer}  user_id          Task's User id
      * @apiSuccess {Integer}  time             Total time of task in seconds
-     * @apiSuccess {DateTime} start            Datetime of first Task's Time Interval's start_at
-     * @apiSuccess {DateTime} end              DateTime of last Task's Time Interval's end_at
+     * @apiSuccess {String}   start            Datetime of first Task's Time Interval's start_at
+     * @apiSuccess {String}   end              DateTime of last Task's Time Interval's end_at
      *
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
