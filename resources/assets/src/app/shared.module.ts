@@ -11,6 +11,12 @@ import { ScreenshotListComponent } from './screenshot-list/screenshot-list.compo
 import { ScreenshotsService } from './pages/screenshots/screenshots.service';
 import { ModalModule } from 'ngx-bootstrap';
 import { LoadingModule } from 'ngx-loading';
+import { DateRangeSelectorComponent } from './date-range-selector/date-range-selector.component';
+import { UserSelectorComponent } from './user-selector/user-selector.component';
+import { DpDatePickerModule } from 'ng2-date-picker';
+import { UsersService } from './pages/users/users.service';
+import { ProjectSelectorComponent } from './project-selector/project-selector.component';
+import { ImageComponent } from './image/image.component';
 
 @NgModule({
     imports: [
@@ -22,11 +28,16 @@ import { LoadingModule } from 'ngx-loading';
         AngularDualListBoxModule,
         ModalModule,
         LoadingModule,
+        DpDatePickerModule,
     ],
     declarations: [
         UsersFiltersComponent,
         ProjectsFiltersComponent,
         ScreenshotListComponent,
+        DateRangeSelectorComponent,
+        UserSelectorComponent,
+        ProjectSelectorComponent,
+        ImageComponent,
     ],
     exports: [
         CommonModule,
@@ -38,10 +49,15 @@ import { LoadingModule } from 'ngx-loading';
         ProjectsFiltersComponent,
         ScreenshotListComponent,
         DualListComponent,
+        DateRangeSelectorComponent,
+        UserSelectorComponent,
+        ProjectSelectorComponent,
+        ImageComponent,
     ],
     providers: [
         ProjectsService,
         ScreenshotsService,
+        UsersService,
     ]
 })
 

@@ -23,18 +23,16 @@ export class NavigationComponent implements OnInit {
         {title: 'navigation.login', action: 'auth/login', isLink: true},
         {title: 'navigation.forgot', action: 'auth/forgot', isLink: true},
         {title: 'navigation.reset', action: 'auth/reset', isLink: true},
-        {title: 'navigation.register', action: 'auth/register', isLink: true},
     ];
 
     protected itemsAuthorized: NavigationLink[] = [
         {title: 'navigation.dashboard', action: 'dashboard', isLink: true, permissions: [ 'dashboard' ] },
         {title: 'navigation.projectsreport', action: 'report', isLink: true, permissions: [ 'users/list', 'time-intervals/list'  ]},
+        {title: 'navigation.time-use-report', action: 'time-use-report', isLink: true, permissions: [ 'users/list', 'time-intervals/list'  ]},
         {title: 'navigation.projects', action: 'projects/list', isLink: true, permissions: [ 'projects/list' ]},
         {title: 'navigation.tasks', action: 'tasks/list', isLink: true, permissions: [ 'tasks/list' ]},
         {title: 'navigation.users', action: 'users/list', isLink: true, permissions: [ 'users/list' ]},
         {title: 'navigation.screenshots', action: 'screenshots/list', isLink: true, permissions: [ 'screenshots/list' ]},
-        // {title: 'navigation.timeintervals', action: 'time-intervals/list', isLink: true, permissions: [ 'time-intervals/list' ]},
-        {title: 'navigation.integrations', action: 'integrations', isLink: true, permissions: [ 'projects/list' ]},
         {title: 'navigation.role', action: 'roles/list', isLink: true, permissions: [ 'roles/list' ]},
         {title: 'navigation.settings', action: 'settings', isLink: true},
         {title: 'navigation.logout', action: 'onLogout', isLink: false},

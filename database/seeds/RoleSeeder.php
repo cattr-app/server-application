@@ -57,11 +57,18 @@ class RoleSeeder extends Seeder
               'tasks',
               'total'
           ],
+          'time-duration' => [
+              'list',
+          ],
           'time-intervals' => [
               'create',
+              'edit',
               'list',
               'remove',
               'show'
+          ],
+          'time-use-report' => [
+              'list',
           ],
           'users' => [
               'edit',
@@ -141,9 +148,13 @@ class RoleSeeder extends Seeder
             ]
         ];
         $managerAllow = [
+            'dashboard' => [
+                'manager_access',
+            ],
             'project-report' => [
                 'list',
-                'projects'
+                'projects',
+                'manager_access',
             ],
             'projects' => [
                 'list',
@@ -158,7 +169,8 @@ class RoleSeeder extends Seeder
                 'list',
                 'edit',
                 'remove',
-                'show'
+                'show',
+                'manager_access',
             ],
             'tasks' => [
                 'dashboard',
@@ -174,11 +186,18 @@ class RoleSeeder extends Seeder
                 'tasks',
                 'total'
             ],
+            'time-duration' => [
+              'list',
+            ],
             'time-intervals' => [
                 'list',
                 'edit',
                 'remove',
-                'show'
+                'show',
+                'manager_access'
+            ],
+            'time-use-report' => [
+              'list',
             ],
             'users' => [
                 'list',

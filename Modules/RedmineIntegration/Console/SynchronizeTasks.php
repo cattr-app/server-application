@@ -106,7 +106,6 @@ class SynchronizeTasks extends Command
             $redmineTask = $this->createRedmineTask($client, $task);
             $this->taskRepo->setRedmineId($task->id, (int)$redmineTask->id);
             $this->taskRepo->markAsOld($task->id);
-
         }
     }
 
@@ -120,6 +119,19 @@ class SynchronizeTasks extends Command
      */
     public function createRedmineTask(Redmine\Client $client, $task)
     {
+        // Get Redmine priority ID from an internal priority.
+        $priority_id = 2;
+        if (isset($task->priority_id) && $task->priority_id) {
+            $priorities = $this->userRepo->getUserRedminePriorities($task->user_id);
+            $priority = array_first($priorities, function ($priority) use ($task) {
+                return $priority['priority_id'] == $task->priority_id;
+            });
+
+            if (isset($priority)) {
+                $priority_id = $priority['id'];
+            }
+        }
+
         return $client->issue->create(
             [
                 'subject'        => $task->task_name,
@@ -127,7 +139,8 @@ class SynchronizeTasks extends Command
                 'project_id'     => $this->projectRepo->getRedmineProjectId($task->project_id),
                 'author_id'      => $this->userRepo->getUserRedmineId($task->assigned_by),
                 'assigned_to_id' => $this->userRepo->getUserRedmineId($task->user_id),
-                'status_id'      => 1
+                'status_id'      => 1,
+                'priority_id'    => $priority_id,
             ]
         );
     }
@@ -163,6 +176,8 @@ class SynchronizeTasks extends Command
             return $status['id'];
         }, $active_statuses);
 
+        $priorities = $this->userRepo->getUserRedminePriorities($userId);
+
         foreach ($tasks as $taskFromRedmine) {
             $synchronizedTasks[] = $taskFromRedmine['id'];
 
@@ -182,13 +197,32 @@ class SynchronizeTasks extends Command
                     $user_redmine_url .= '/';
                 }
 
+                // Get internal priority ID from a Redmine priority.
+                $priority = array_first($priorities, function ($priority) use ($taskFromRedmine) {
+                    return $priority['id'] === $taskFromRedmine['priority']['id'];
+                });
+                $priority_id = isset($priority) ? $priority['priority_id'] : 0;
+
                 $data = [
                     'task_name'   => $taskFromRedmine['subject'],
                     'description' => $taskFromRedmine['description'],
                     'active'      => in_array($taskFromRedmine['status']['id'], $active_status_ids),
                     'user_id'     => $userId,
                     'url'         => $user_redmine_url . 'issues/' . $taskFromRedmine['id'],
+                    'priority_id' => $priority_id,
                 ];
+
+                // Get project related to the task.
+                $projectProperty = Property::where([
+                    ['entity_type', '=', Property::PROJECT_CODE],
+                    ['name', '=', 'REDMINE_ID'],
+                    ['value', '=', $taskFromRedmine['project']['id']]
+                ])->first();
+
+                // If project exists, update task project ID.
+                if ($projectProperty && $projectProperty->entity_id) {
+                    $data['project_id'] = $projectProperty->entity_id;
+                }
 
                 foreach ($data as $key => $value) {
                     if ($task->$key !== $value) {
@@ -213,6 +247,12 @@ class SynchronizeTasks extends Command
 
             //if task's project exists in our system => add task
             if ($projectProperty && $projectProperty->entity_id) {
+                // Get internal priority ID from a Redmine priority.
+                $priority = array_first($priorities, function ($priority) use ($taskFromRedmine) {
+                    return $priority['id'] === $taskFromRedmine['priority']['id'];
+                });
+                $priority_id = isset($priority) ? $priority['priority_id'] : 0;
+
                 //TODO: add assigned_by from our system
                 $taskInfo = [
                     'project_id'  => $projectProperty->entity_id,
@@ -222,6 +262,7 @@ class SynchronizeTasks extends Command
                     'user_id'     => $userId,
                     'assigned_by' => 1,
                     'url'         => 'url',
+                    'priority_id' => $priority_id,
                 ];
 
                 $task = Task::create($taskInfo);

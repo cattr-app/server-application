@@ -80,4 +80,14 @@ export class UsersListComponent extends ItemsListComponent implements OnInit {
 
         this.loadNext();
     }
+
+    toggleActive(user: User) {
+        this.itemService.editItem(user.id, {
+            ...user,
+            active: !user.active,
+        }, result => {
+            // On success update display.
+            user.active = +!user.active;
+        });
+    }
 }

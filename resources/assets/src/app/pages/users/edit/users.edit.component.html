@@ -12,158 +12,154 @@
                         </button>
                     </a>
                     <div class="create-form">
-                        <form (ngSubmit)="onSubmit()">
+                        <form (ngSubmit)="onSubmit()" #form="ngForm">
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.fullname</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-full-name" [(ngModel)]="item.full_name">
+                                <div class="col-md-10"
+                                    [class.has-error]="full_name?.invalid && (full_name.dirty || full_name.touched)"
+                                    [class.has-success]="full_name?.valid && (full_name.dirty || full_name.touched)">
+                                    <input type="text" class="form-control" name="user-full-name"
+                                        [(ngModel)]="item.full_name" #full_name="ngModel" required>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.firstname</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-company-id" [(ngModel)]="item.first_name">
+                                    <input type="text" class="form-control" name="user-first-name"
+                                        [(ngModel)]="item.first_name">
                                 </div>
                             </div>
+
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.lastname</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-name" [(ngModel)]="item.last_name">
+                                    <input type="text" class="form-control" name="user-last-name"
+                                        [(ngModel)]="item.last_name">
                                 </div>
                             </div>
+
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.email</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-email" [(ngModel)]="item.email">
+                                <div class="col-md-10"
+                                    [class.has-error]="email?.invalid && (email.dirty || email.touched)"
+                                    [class.has-success]="email?.valid && (email.dirty || email.touched)">
+                                    <input type="text" class="form-control" name="user-email"
+                                        [(ngModel)]="item.email" #email="ngModel" required>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.url</label>
+
+                            <div class="form-group row">
+                                <label class="col-md-2" translate>field.password</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-url" [(ngModel)]="item.url">
+                                    <input type="password" class="form-control" name="user-password"
+                                        [(ngModel)]="item.password" #password="ngModel">
                                 </div>
                             </div>
-                            <!--<div class="form-group row" >-->
-                                <!--<label class="col-md-2">Company Id</label>-->
-                                <!--<div class="col-md-10">-->
-                                    <!--<input type="text" class="form-control" name="user-company_id" [(ngModel)]="item.company_id">-->
-                                <!--</div>-->
-                            <!--</div>-->
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">field.level</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-level" [(ngModel)]="item.level">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">field.payroll-access</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-payroll-access" [(ngModel)]="item.payroll_access">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">field.billing-access</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-billing-access" [(ngModel)]="item.billing_access">
-                                </div>
-                            </div>
+
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.avatar</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-billing-access" [(ngModel)]="item.avatar">
+                                    <input type="text" class="form-control" name="user-avatar"
+                                        [(ngModel)]="item.avatar">
                                 </div>
                             </div>
+
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.screenshots-active</label>
+                                <label class="col-md-2" translate>field.url</label>
                                 <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-screenshots-active" [(ngModel)]="item.screenshots_active">
+                                    <input type="text" class="form-control" name="user-url"
+                                        [(ngModel)]="item.url">
                                 </div>
                             </div>
+
                             <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.manual-time</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-manual-time" [(ngModel)]="item.manual_time">
+                                <label class="col-md-2" translate>field.user-active</label>
+                                <div class="col-md-10"
+                                    [class.has-error]="active?.invalid && (active.dirty || active.touched)"
+                                    [class.has-success]="active?.valid && (active.dirty || active.touched)">
+                                    <select class="form-control" name="user-active"
+                                        [(ngModel)]="item.active" #active="ngModel" required>
+                                        <option value="0" translate>control.no</option>
+                                        <option value="1" translate>control.yes</option>
+                                    </select>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.permanent-tasks</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-permanent-tasks" [(ngModel)]="item.permanent_tasks">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.computer-time-popup</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-computer-time-popup" [(ngModel)]="item.computer_time_popup">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.poor-time-popup</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-poor-time-popup" [(ngModel)]="item.poor_time_popup">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.blur</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-blur-screenshots" [(ngModel)]="item.blur_screenshots">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.monitoring</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-web-and-app-monitoring" [(ngModel)]="item.web_and_app_monitoring">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.webcam-shots</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-webcam-shots" [(ngModel)]="item.webcam_shots">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.screenshots-interval</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-screenshots-interval" [(ngModel)]="item.screenshots_interval">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2">field.user-role-value</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-user-role-value" [(ngModel)]="item.user_role_value">
-                                </div>
-                            </div>
-                            <div class="form-group row" *ngIf="can('/users/full_access')">
-                                <label class="col-md-2" translate>field.active</label>
-                                <div class="col-md-10">
-                                    <ng-select
-                                            [(items)]="active"
-                                            (change)="OnChangeSelectActive($event)"
-                                            [(ngModel)]="selectedActive"
-                                            [ngModelOptions]="{standalone: true}"
-                                    >
-                                    </ng-select>
-                                </div>
-                            </div>
+
                             <div class="form-group row" *ngIf="can('/users/full_access') && can('/roles/list')">
                                 <label class="col-md-2" translate>field.role</label>
-                                <div class="col-md-10">
-                                    <ng-select
-                                            [(items)]="roles"
-                                            bindLabel="name"
-                                            bindValue="id"
-                                            (change)="OnChangeSelectRole($event)"
-                                            [(ngModel)]="selectedRole"
-                                            [ngModelOptions]="{standalone: true}"
-                                    >
-                                    </ng-select>
+                                <div class="col-md-10"
+                                    [class.has-error]="role?.invalid && (role.dirty || role.touched)"
+                                    [class.has-success]="role?.valid && (role.dirty || role.touched)">
+                                    <select class="form-control" name="user-role-id"
+                                        [(ngModel)]="item.role_id" #role="ngModel" required>
+                                        <option *ngFor="let role of roles" [value]="role.id">{{ role.name }}</option>
+                                    </select>
+                                    <span class="help-block" translate>control.required-field</span>
                                 </div>
                             </div>
+
+                            <div class="form-group row" *ngIf="can('/users/full_access')">
+                                <label class="col-md-2" translate>field.screenshots-active</label>
+                                <div class="col-md-10"
+                                    [class.has-error]="screenshots_active?.invalid && (screenshots_active.dirty || screenshots_active.touched)"
+                                    [class.has-success]="screenshots_active?.valid && (screenshots_active.dirty || screenshots_active.touched)">
+                                    <select class="form-control" name="user-screenshots-active"
+                                        [(ngModel)]="item.screenshots_active" #screenshots_active="ngModel" required>
+                                        <option value="0" translate>control.no</option>
+                                        <option value="1" translate>control.yes</option>
+                                    </select>
+                                    <span class="help-block" translate>control.required-field</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row" *ngIf="can('/users/full_access')">
+                                <label class="col-md-2">
+                                    <abbr title="{{ 'field.manual-time-title' | translate }}"
+                                        translate>field.manual-time</abbr>
+                                </label>
+                                <div class="col-md-10">
+                                    <select class="form-control" name="user-manual-time"
+                                        [(ngModel)]="item.manual_time" #manual_time="ngModel" required>
+                                        <option value="0" translate>control.no</option>
+                                        <option value="1" translate>control.yes</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            <div class="form-group row" *ngIf="can('/users/full_access')">
+                                <label class="col-md-2" translate>field.screenshots-interval</label>
+                                <div class="col-md-10"
+                                    [class.has-error]="screenshots_interval?.invalid && (screenshots_interval.dirty || screenshots_interval.touched)"
+                                    [class.has-success]="screenshots_interval?.valid && (screenshots_interval.dirty || screenshots_interval.touched)">
+                                    <input type="text" class="form-control" name="user-screenshots-interval"
+                                        [(ngModel)]="item.screenshots_interval" #screenshots_interval="ngModel" required>
+                                    <span class="help-block" translate>control.required-field</span>
+                                </div>
+                            </div>
+
+                            <div class="form-group row" *ngIf="can('/users/full_access')">
+                                <label class="col-md-2" translate>
+                                    <abbr title="{{ 'field.computer-time-popup-title' | translate }}"
+                                        translate>field.computer-time-popup</abbr>
+                                </label>
+                                <div class="col-md-10"
+                                    [class.has-error]="computer_time_popup?.invalid && (computer_time_popup.dirty || computer_time_popup.touched)"
+                                    [class.has-success]="computer_time_popup?.valid && (computer_time_popup.dirty || computer_time_popup.touched)">
+                                    <input type="text" class="form-control" name="user-computer-time-popup"
+                                        [(ngModel)]="item.computer_time_popup" #computer_time_popup="ngModel" required>
+                                    <span class="help-block" translate>control.required-field</span>
+                                </div>
+                            </div>
+
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.timezone</label>
                                 <div class="col-md-10">
                                     <ng2-timezone-picker
+                                            #timezone
                                             [(timezone)]="item.timezone"
                                             showOffset="true"
                                             placeholder="Select timezone"
@@ -171,14 +167,8 @@
                                     </ng2-timezone-picker>
                                 </div>
                             </div>
-                            <div class="form-group row">
-                                <label class="col-md-2" translate>field.password</label>
-                                <div class="col-md-10">
-                                    <input type="password" class="form-control" name="user-password" [(ngModel)]="item.password">
-                                </div>
-                            </div>
 
-                            <div class="form-group row">
+                            <div *ngIf="authorizedUser.role_id === 1" class="form-group row">
                                 <label class="col-md-2" translate>field.projects</label>
                                 <div class="col-md-10">
                                     <dual-list [source]="projects" [(destination)]="userProjects"
@@ -187,7 +177,18 @@
                                 </div>
                             </div>
 
-                            <button type="submit" class="btn btn-primary" translate>control.update</button>
+                            <div *ngIf="form?.invalid" class="alert alert-danger" role="alert">
+                                <p *ngIf="full_name?.errors" translate>control.fullname-required</p>
+                                <p *ngIf="email?.errors" translate>control.email-required</p>
+                                <p *ngIf="active?.errors" translate>control.active-required</p>
+                                <p *ngIf="role?.errors" translate>control.role-id-required</p>
+                                <p *ngIf="screenshots_active?.errors" translate>control.screenshots-active-required</p>
+                                <p *ngIf="screenshots_interval?.errors" translate>control.screenshots-interval-required</p>
+                                <p *ngIf="computer_time_popup?.errors" translate>control.computer-time-popup-required</p>
+                            </div>
+
+                            <button type="submit" class="btn btn-primary"
+                                [disabled]="form?.invalid" translate>control.update</button>
                         </form>
                     </div>
                 </div>

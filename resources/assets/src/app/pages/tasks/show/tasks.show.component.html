@@ -86,6 +86,11 @@
                                             <th>Total time</th>
                                             <td>{{ formatDurationString(totalTime) }}</td>
                                         </tr>
+
+                                        <tr *ngIf="item.priority">
+                                            <th translate>field.priority</th>
+                                            <td>{{ item.priority.name }}</td>
+                                        </tr>
                                     </tbody>
                                 </table>
                             </div>
@@ -107,13 +112,13 @@
                         </div>
 
                         <accordion>
-                            <accordion-group class="user" *ngFor="let userInfo of users">
+                            <accordion-group #accordionGroup class="user" *ngFor="let userInfo of users">
                                 <div accordion-heading>
                                     <span class="user__name">{{ userInfo.user.full_name }}</span>
                                     <span class="user__time">{{ formatDurationString(userInfo.time) }}</span>
                                 </div>
 
-                                <screenshot-list [autoload]="false"
+                                <screenshot-list [autoload]="accordionGroup.isOpen"
                                     [showUser]="false" [showProject]="false" [showTask]="false"
                                     [user_ids]="[userInfo.user.id]" [task_ids]="[item.id]"></screenshot-list>
                             </accordion-group>

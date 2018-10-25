@@ -83,7 +83,7 @@ class ScreenshotController extends ItemController
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
      * @apiUse ScreenshotRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":               [">", 1],
      *      "time_interval_id": ["=", [1,2,3]],
@@ -93,7 +93,9 @@ class ScreenshotController extends ItemController
      *      "created_at":       [">", "2019-01-01 00:00:00"],
      *      "updated_at":       ["<", "2019-01-01 00:00:00"]
      *  }
+     *
      * @apiUse ScreenshotRelationsExample
+     * @apiUser UnauthorizedError
      *
      * @apiSuccess {Object[]} ScreenshotList                             Screenshots (Array of objects)
      * @apiSuccess {Object}   ScreenshotList.Screenshot                  Screenshot object
@@ -135,7 +137,7 @@ class ScreenshotController extends ItemController
      * @apiParam {Integer} time_interval_id  Screenshot's Time Interval ID
      * @apiParam {Binary}  screenshot        Screenshot file
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple-Request Example
      *  {
      *      "time_interval_id": 1,
      *      "screenshot": ```binary data```
@@ -149,18 +151,27 @@ class ScreenshotController extends ItemController
      * @apiSuccess {DateTime} Screenshot.updated_at       Screenshot's date time of update
      *
      * @apiUse DefaultCreateErrorResponse
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
      */
     public function create(Request $request): JsonResponse
     {
-        $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
+        $screenStorePath = $request->screenshot->store('uploads/screenshots');
+        $absoluteStorePath = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, Storage::disk()->path($screenStorePath));
+
+        $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
+
         $screenshot = Image::make($path);
+
         $thumbnail = $screenshot->resize(280, null, function ($constraint) {
             $constraint->aspectRatio();
         });
-        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
+
+        $ds = DIRECTORY_SEPARATOR;
+
+        $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs", $screenStorePath);
         Storage::put($thumbnailPath, (string) $thumbnail->encode());
 
         $timeIntervalId = is_int($request->get('time_interval_id')) ? $request->get('time_interval_id') : null;
@@ -210,7 +221,7 @@ class ScreenshotController extends ItemController
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
      * @apiUse ScreenshotRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":               1,
      *      "time_interval_id": ["=", [1,2,3]],
@@ -230,6 +241,7 @@ class ScreenshotController extends ItemController
      * @apiSuccess {Object}   Screenshot.time_interval    Screenshot's Task
      *
      * @apiUse DefaultShowErrorResponse
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
@@ -247,7 +259,7 @@ class ScreenshotController extends ItemController
      * @apiParam {DateTime} [created_at]     Screenshot Creation DateTime
      * @apiParam {DateTime} [updated_at]     Last Screenshot data update DataTime
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":               1,
      *      "time_interval_id": 2,
@@ -263,13 +275,14 @@ class ScreenshotController extends ItemController
      * @apiSuccess {DateTime} Screenshot.deleted_at       Screenshot's date time of delete
      *
      * @apiUse DefaultEditErrorResponse
+     * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/screenshots/destroy Destroy
+     * @api {post} /api/v1/screenshots/remove Destroy
      * @apiUse DefaultDestroyRequestExample
      * @apiDescription Destroy Screenshot
      * @apiVersion 0.1.0
@@ -299,7 +312,7 @@ class ScreenshotController extends ItemController
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
      * @apiUse ScreenshotRelations
      *
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":               1,
      *      "time_interval_id": ["=", [1,2,3]],
@@ -310,6 +323,7 @@ class ScreenshotController extends ItemController
      *      "updated_at":       ["<", "2019-01-01 00:00:00"]
      *  }
      * @apiUse ScreenshotRelationsExample
+     * @apiUse UnauthorizedError
      *
      * @apiSuccess {Object[]} Array                                            Array of objects
      * @apiSuccess {DateTime} Array.object.interval                            Time of interval
@@ -317,9 +331,9 @@ class ScreenshotController extends ItemController
      * @apiSuccess {Integer}  Array.object.screenshots.object.id               Screenshot's ID
      * @apiSuccess {Integer}  Array.object.screenshots.object.time_interval_id Screenshot's Time Interval ID
      * @apiSuccess {String}   Array.object.screenshots.object.path             Screenshot's Image path URI
-     * @apiSuccess {DateTime} Array.object.screenshots.object.created_at       Screenshot's date time of create
-     * @apiSuccess {DateTime} Array.object.screenshots.object.updated_at       Screenshot's date time of update
-     * @apiSuccess {DateTime} Array.object.screenshots.object.deleted_at       Screenshot's date time of delete
+     * @apiSuccess {String}   Array.object.screenshots.object.created_at       Screenshot's date time of create
+     * @apiSuccess {String}   Array.object.screenshots.object.updated_at       Screenshot's date time of update
+     * @apiSuccess {String}   Array.object.screenshots.object.deleted_at       Screenshot's date time of delete
      * @apiSuccess {Object}   Array.object.screenshots.object.time_interval    Screenshot's Task
      *
      * @return \Illuminate\Http\JsonResponse

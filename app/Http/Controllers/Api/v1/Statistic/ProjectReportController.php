@@ -12,6 +12,7 @@ use App\Models\Project;
 use App\Models\TimeDuration;
 use Nwidart\Modules\Collection;
 use App\User;
+use DB;
 
 class ProjectReportController extends Controller
 {
@@ -36,69 +37,63 @@ class ProjectReportController extends Controller
      */
     public function resources($uids, $pids, $start_at, $end_at)
     {
-        $projects = array_map(function ($project_id) use ($uids, $start_at, $end_at) {
-            $project = Project::where('id', $project_id)->select('id', 'name')->first();
 
-            // Load users with data.
-            $users = User::whereIn('id', $uids)
-                ->with(['tasks' => function ($query) use ($project_id, $start_at, $end_at) {
-                    $query
-                        ->with(['timeIntervals' => function ($query) use ($start_at, $end_at) {
-                            $query->where([['start_at', '>', $start_at], ['end_at', '<', $end_at]])
-                                ->select('task_id')
-                                ->selectRaw('CONVERT(SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)), SIGNED INTEGER) duration')
-                                ->groupBy('task_id');
-                        }])
-                        ->where('project_id', $project_id)
-                        ->select('id', 'project_id', 'user_id', 'task_name');
-                }])
-                ->get(['id', 'full_name', 'avatar']);
+        $projectReports = DB::table('project_report')
+            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))
+            ->whereIn('user_id', $uids)
+            ->whereIn('project_id', $pids)
+            ->where('date', '>=', $start_at)
+            ->where('date', '<', $end_at)
+            ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
+            ->get();
 
-            // Process data.
-            $users = array_map(function ($user) {
-                $tasks = array_map(function ($task) {
-                    $task_data = (array)$task;
-                    $task_data['duration'] = !empty($task_data['time_intervals']) ? $task_data['time_intervals'][0]['duration'] : 0;
-                    unset($task_data['time_intervals']);
-                    return $task_data;
-                }, $user['tasks']);
+        $projects = [];
 
-                $tasks = array_filter($tasks, function ($task) {
-                    return $task['duration'] > 0;
-                });
 
-                $tasks_time = array_reduce($tasks, function ($sum, $task) {
-                    return $sum + $task['duration'];
-                }, 0);
+        foreach ($projectReports as $projectReport) {
 
-                $user_data = (array)$user;
-                $user_data['tasks'] = array_values($tasks);
-                $user_data['tasks_time'] = $tasks_time;
-                return $user_data;
-            }, $users->toArray());
+            $project_id = $projectReport->project_id;
+            $user_id = $projectReport->user_id;
 
-            $users = array_filter($users, function ($user) {
-                return $user['tasks_time'] > 0;
-            });
+            if (!isset($projects[$project_id])) {
+                $projects[$project_id] = [
+                    'id' => $project_id,
+                    'name' => $projectReport->project_name,
+                    'users' => [],
+                    'project_time' => 0,
+                ];
+            }
 
-            $project_time = array_reduce($users, function ($sum, $user) {
-                return $sum + $user['tasks_time'];
-            }, 0);
+            if (!isset($projects[$project_id]['users'][$user_id])) {
+                $projects[$project_id]['users'][$user_id] = [
+                    'id' => $user_id,
+                    'full_name' => $projectReport->user_name,
+                    'tasks' => [],
+                    'tasks_time' => 0,
+                ];
+            }
 
-            $project_data = [
-                'id' => $project['id'],
-                'name' => $project['name'],
-                'users' => array_values($users),
-                'project_time' => $project_time,
+
+            $projects[$project_id]['users'][$user_id]['tasks'][] = [
+                'id' => $projectReport->task_id,
+                'project_id' => $projectReport->project_id,
+                'user_id' => $projectReport->user_id,
+                'task_name' => $projectReport->task_name,
+                'duration' => (int)$projectReport->duration,
             ];
-            return $project_data;
-        }, $pids);
 
-        $projects = array_filter($projects, function ($project) {
-            return $project['project_time'] > 0;
-        });
+            $projects[$project_id]['users'][$user_id]['tasks_time'] += $projectReport->duration;
+            $projects[$project_id]['project_time'] += $projectReport->duration;
+        }
 
-        return array_values($projects);
+
+        foreach ($projects as $project_id => $project) {
+            $projects[$project_id]['users'] =  array_values($project['users']);
+        }
+
+        $projects = array_values($projects);
+
+        return $projects;
     }
 
     /**

@@ -67,7 +67,7 @@ class TimeController extends ItemController
      * Display a total of time.
      *
      * @api {POST|GET} /api/v1/time/total Total
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "user_id":        1,
      *      "task_id":        ["=", [1,2,3]],
@@ -87,14 +87,14 @@ class TimeController extends ItemController
      * @apiParam {Integer[]} [tasks_id]       `QueryParam` TimeInterval's Task ID
      * @apiParam {Integer}   [project_id]     `QueryParam` TimeInterval's Task's Project ID
      * @apiParam {Integer}   [user_id]        `QueryParam` TimeInterval's Task's User ID
-     * @apiParam {DateTime}  [start_at]                    TimeInterval Start DataTime
-     * @apiParam {DateTime}  [end_at]                      TimeInterval End DataTime
+     * @apiParam {String}    [start_at]                    TimeInterval Start DataTime
+     * @apiParam {String}    [end_at]                      TimeInterval End DataTime
      * @apiParam {Integer}   [count_mouse]    `QueryParam` TimeInterval Count mouse
      * @apiParam {Integer}   [count_keyboard] `QueryParam` TimeInterval Count keyboard
      * @apiParam {Integer}   [id]             `QueryParam` TimeInterval ID
      * @apiUse Relations
      *
-     * @apiSuccess {DateTime} current_datetime Current datetime of server
+     * @apiSuccess {String}   current_datetime Current datetime of server
      * @apiSuccess {Integer}  time             Total time in seconds
      * @apiSuccess {DateTime} start            Datetime of first Time Interval's start_at
      * @apiSuccess {DateTime} end              DateTime of last Time Interval's end_at

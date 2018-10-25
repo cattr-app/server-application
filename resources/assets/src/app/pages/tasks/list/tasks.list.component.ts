@@ -16,6 +16,8 @@ enum TasksOrder {
     ProjectDesc,
     NameAsc,
     NameDesc,
+    PriorityAsc,
+    PriorityDesc,
 }
 
 @Component({
@@ -89,9 +91,25 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
     setOrder(order: string) {
         switch (order) {
             default:
-            case 'id': this.order = this.order === TasksOrder.IdAsc ? TasksOrder.IdDesc : TasksOrder.IdAsc; break;
-            case 'project': this.order = this.order === TasksOrder.ProjectAsc ? TasksOrder.ProjectDesc : TasksOrder.ProjectAsc; break;
-            case 'name': this.order = this.order === TasksOrder.NameAsc ? TasksOrder.NameDesc : TasksOrder.NameAsc; break;
+            case 'id':
+                this.order = this.order === TasksOrder.IdAsc
+                    ? TasksOrder.IdDesc : TasksOrder.IdAsc;
+                break;
+
+            case 'project':
+                this.order = this.order === TasksOrder.ProjectAsc
+                    ? TasksOrder.ProjectDesc : TasksOrder.ProjectAsc;
+                break;
+
+            case 'name':
+                this.order = this.order === TasksOrder.NameAsc
+                    ? TasksOrder.NameDesc : TasksOrder.NameAsc;
+                break;
+
+            case 'priority':
+                this.order = this.order === TasksOrder.PriorityDesc
+                    ? TasksOrder.PriorityAsc : TasksOrder.PriorityDesc;
+                break;
         }
 
         this.reload();
@@ -112,6 +130,7 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             'with': 'project',
             'limit': this.chunksize,
             'offset': this.offset,
+            'active': 1,
         };
 
         switch (this.order) {
@@ -122,6 +141,8 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             case TasksOrder.ProjectDesc: filter['order_by'] = ['projects.name', 'desc']; break;
             case TasksOrder.NameAsc: filter['order_by'] = 'task_name'; break;
             case TasksOrder.NameDesc: filter['order_by'] = ['task_name', 'desc']; break;
+            case TasksOrder.PriorityAsc: filter['order_by'] = 'priority_id'; break;
+            case TasksOrder.PriorityDesc: filter['order_by'] = ['priority_id', 'desc']; break;
         }
 
         if (this.userId && this.userId.length) {
@@ -141,7 +162,7 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             this.offset += this.chunksize;
             this.isLoading = false;
             this.isAllLoaded = result.length < this.chunksize;
-        }, filter ? filter : { 'active': 1 });
+        }, filter);
     }
 
     reload() {

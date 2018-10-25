@@ -1,18 +1,23 @@
 <div class="statistics" (click)="clickPopover.hide()">
     <div class="statistics__buttons btn-group" role="group">
-        <button type="button" (click)="exportCSV()" class="btn btn-default">Export CSV</button>
+        <button type="button" (click)="exportCSV()" class="btn btn-default" translate>control.export-csv</button>
     </div>
 
     <div class="statistics__header">
-        <view-switcher #viewSwitcher class="statistics__view-switcher">
-            <div class="statistics__users">
-                <ng-select #userSelect [items]="userSelectItems" [loading]="usersLoading"
-                    bindValue="id" bindLabel="title" [closeOnSelect]="false"
-                    [multiple]="true" [(ngModel)]="selectedUserIds" (add)="userSelected($event)">
-                </ng-select>
-                <span class="statistics__user-count">{{ selectedUsers.length }} users selected</span>
+        <app-date-range-selector (modeChanged)="setMode($event)" #dateRangeSelector>
+            <div class="timezone">
+                <ng2-timezone-picker
+                    [(timezone)]="timezone"
+                    showOffset="true"
+                    placeholder="Select timezone"
+                    guess="true">
+                </ng2-timezone-picker>
             </div>
-        </view-switcher>
+
+            <app-user-selector class="statistics__users" #userSelect after
+                [filter]="userFilter">
+            </app-user-selector>
+        </app-date-range-selector>
     </div>
 
     <div class="statistics__timeline">
@@ -32,8 +37,9 @@
             <ngx-loading [show]="popoverLoading"></ngx-loading>
             <a *ngIf="clickPopoverScreenshot !== null"
                 [attr.href]="'screenshots/show/' + clickPopoverScreenshot.id">
-                <img class="statistics-popover__image"
-                    [attr.src]="clickPopoverScreenshot.thumbnail_path ? clickPopoverScreenshot.thumbnail_path : (clickPopoverScreenshot.path ? clickPopoverScreenshot.path : 'uploads/none.png')" />
+                <app-image class="statistics-popover__image"
+                    [src]="clickPopoverScreenshot.thumbnail_path ? clickPopoverScreenshot.thumbnail_path : (clickPopoverScreenshot.path ? clickPopoverScreenshot.path : 'uploads/none.png')">
+                </app-image>
             </a>
         </p>
 

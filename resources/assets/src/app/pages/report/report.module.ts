@@ -19,6 +19,7 @@ import {GrowlModule} from 'primeng/growl';
 import {SharedModule} from '../../shared.module';
 import {ScheduleModule} from 'primeng/schedule';
 import {DpDatePickerModule} from 'ng2-date-picker';
+import {TranslateModule} from '@ngx-translate/core';
 
 @NgModule({
     imports: [
@@ -31,6 +32,7 @@ import {DpDatePickerModule} from 'ng2-date-picker';
         SharedModule,
         ScheduleModule,
         DpDatePickerModule,
+        TranslateModule,
     ],
     exports: [
         ReportProjectsComponent

@@ -32,6 +32,7 @@ Route::group([
     $router->any('ping', 'AuthController@ping');
     $router->post('login', 'AuthController@login');
     $router->any('logout', 'AuthController@logout');
+    $router->any('logout-all', 'AuthController@logoutAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
 });
@@ -125,5 +126,6 @@ Route::group([
       $router->post('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
       $router->post('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
       $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
+      $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
 
 });

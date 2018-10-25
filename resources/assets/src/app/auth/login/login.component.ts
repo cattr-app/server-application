@@ -30,9 +30,12 @@ export class LoginComponent implements OnInit {
             this.api.setToken(result.access_token, result.token_type, result.user);
             this.router.navigateByUrl('/');
         }, error => {
-            console.error(error);
             if (error.status === 401) {
                 this.error = 'Incorrect password';
+            } else if (error.status === 0) {
+                this.error = 'Connection problem';
+            } else {
+                this.error = error.statusText;
             }
         });
     }

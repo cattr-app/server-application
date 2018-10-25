@@ -3,6 +3,7 @@
 		"dashboard": "Dashboard",
     	"login": "Login",
     	"projectsreport": "Projects report",
+    	"time-use-report": "Time use report",
 		"forgot": "Forgot",
 		"reset": "Reset",
 		"register": "Register",
@@ -22,11 +23,26 @@
 		"no-task": "No task for last 24 hours. ¯\\_(ツ)_/¯",
 		"auto-loading": "screenshots auto-loading"
 	},
+	"time-use-report": {
+		"title": "Time Use Report",
+		"total-time-worked": "Total Time Worked",
+		"task": "Task",
+		"project": "Project",
+		"total-time": "Total Time"
+	},
 	"project": {
 		"remove-question": "Remove this project?",
 		"create": "Create New Project",
 		"edit": "Edit Project",
+		"select-projects": "Select projects",
+		"show-details": "More details at projects report",
+		"task": "Task",
+		"activity": "Last activity",
+		"total-time": "Total time",
 		"edit-users": "Edit users of project {{name}}"
+	},
+	"project-report": {
+		"title": "Projects Report"
 	},
 	"role": {
 		"list": "Roles",
@@ -34,13 +50,23 @@
 		"edit": "Edit role \"{{name}}\"",
 		"edit-users": "Edit users of role \"{{name}}\"",
 		"create": "Create New Role",
-		"rolename": "Role name"
+		"rolename": "Role name",
+		"name": {
+			"root": "Root",
+			"user": "User",
+			"observer": "Observer",
+			"client": "Client",
+			"manager": "Manager",
+			"blocked": "Blocked"
+		}
 	},
 	"screenshot": {
 		"create": "Create New Screenshot",
 		"edit": "Edit Screenshot",
 		"list": "Screenshots",
 		"path": "Path",
+		"filter-max": "Filter by max date:",
+		"filter-min": "Filter by min date:",
 		"remove": "Remove this screenshot?",
 		"timeintervalid": "Time Interval Id"
 	},
@@ -48,7 +74,9 @@
 		"redmine": {
 			"title": "Redmine Integration",
 			"apiurl": "Redmine URL",
-			"apikey": "Redmine API key"
+			"apikey": "Redmine API key",
+			"statuses": "Redmine active statuses",
+			"priorities": "Redmine priorities"
 		}
 	},
 	"login": {
@@ -96,7 +124,28 @@
 		"remove": "Remove",
 		"all": "All",
 		"none": "None",
-		"back": "Back"
+		"back": "Back",
+		"apply": "Apply",
+		"day": "Day",
+		"week": "Week",
+		"month": "Month",
+		"own": "Own",
+		"team": "Team",
+		"date-range": "Date Range",
+		"export-csv": "Export CSV",
+		"user-selected": "{{count}} users selected",
+		"project-selected": "{{count}} projects selected",
+		"required-field": "Required field",
+		"fullname-required": "Full name field is required",
+		"email-required": "Email field is required",
+		"password-required": "Password field is required",
+		"active-required": "Active field is required",
+		"role-id-required": "Role field is required",
+		"screenshots-active-required": "Screenshots Active field is required",
+		"screenshots-interval-required": "Screenshots Interval field is required",
+		"computer-time-popup-required": "User inactive time field is required",
+		"activate": "Activate",
+		"deactivate": "Deactivate"
 	},
 	"field": {
 		"active": "Active",
@@ -120,17 +169,21 @@
 		"avatar": "Avatar",
 		"screenshots-active": "Screenshots Active",
 		"manual-time": "Manual time",
+		"manual-time-title": "Allows user to manually edit time intervals",
 		"permanent-tasks": "Permanent tasks",
-		"computer-time-popup": "Computer time popup",
+		"computer-time-popup": "User inactive time (minutes)",
+		"computer-time-popup-title": "Time after which the user is considered inactive",
 		"poor-time-popup": "Poor time popup",
 		"blur": "Blur screenshots",
 		"monitoring": "Web and app monitoring",
 		"webcam-shots": "Webcam shots",
-		"screenshots-interval": "Screenshots Interval",
+		"screenshots-interval": "Screenshots Interval (minutes)",
 		"role": "Role",
 		"roles": "Roles",
 		"timezone": "Timezone",
 		"password": "Password",
-		"id": "Id"
+		"id": "Id",
+		"user-active": "Active",
+		"priority": "Priority"
 	}
 }

@@ -8,15 +8,15 @@
         <link rel="icon" href="/js/favicon.ico" type="image/x-icon">
         <title>Amazing Time</title>
 
-        <link rel="stylesheet" href="/js/styles.bundle.css" />
+    @foreach ($styles as $style)
+        <link rel="stylesheet" href="/js/{{ $style }}" />
+    @endforeach
     </head>
     <body>
         <app-root></app-root>
 
-        <script type="text/javascript" src="/js/inline.bundle.js"></script>
-        <script type="text/javascript" src="/js/polyfills.bundle.js"></script>
-        <script type="text/javascript" src="/js/styles.bundle.js"></script>
-        <script type="text/javascript" src="/js/vendor.bundle.js"></script>
-        <script type="text/javascript" src="/js/main.bundle.js"></script></body>
+    @foreach ($scripts as $script)
+        <script type="text/javascript" src="/js/{{ $script }}"></script>
+    @endforeach
     </body>
 </html>

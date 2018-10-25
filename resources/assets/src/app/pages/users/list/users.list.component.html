@@ -36,7 +36,7 @@
                                     <a *ngIf="can('/attached-users/full_access')"  [routerLink]="['/users/attached-users', user.id]" title="Assign users">
                                         <button class="btn btn-primary btn-sm">
                                             <i class="fa fa-users" aria-hidden="true"></i>
-                                            Assign users
+                                            <span translate>control.assign</span>
                                         </button>
                                     </a>
                                     <a *ngIf="can('/users/edit')" [routerLink]="['/users/edit', user.id]" title="Edit user">
@@ -45,6 +45,10 @@
                                             <span translate>control.edit</span>
                                         </button>
                                     </a>
+                                    <button *ngIf="can('/users/edit')" class="btn btn-primary btn-sm" (click)="toggleActive(user)">
+                                        <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
+                                        <span translate>{{ user.active ? 'control.deactivate' : 'control.activate' }}</span>
+                                    </button>
                                     <a *ngIf="can('/users/remove')" (click)="openRemoveItemModalWindow(template, user.id)" title="Delete user">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
                                                                                  aria-hidden="true"></i>
@@ -56,7 +60,7 @@
                             </tbody>
                         </table>
 
-                        <div class="loading" #loading *ngIf="!isAllLoaded">
+                        <div class="loading" #loading>
                             <ngx-loading [show]="isLoading" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
                         </div>
                     </div>

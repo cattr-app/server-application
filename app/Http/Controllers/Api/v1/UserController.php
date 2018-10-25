@@ -20,6 +20,35 @@ use Illuminate\Http\Request;
 class UserController extends ItemController
 {
     /**
+     * @apiDefine UserModel
+     *
+     * @apiParam {Integer} id                       User ID
+     * @apiParam {String}  full_name                Full Name
+     * @apiParam {String}  [first_name]             First Name
+     * @apiParam {String}  [last_name]              Last Name
+     * @apiParam {String}  email                    E-mail
+     * @apiParam {String}  [url]                    ???
+     * @apiParam {Integer} [company_id]             ???
+     * @apiParam {String}  [level]                  Role access level
+     * @apiParam {Boolean} [payroll_access]         ???
+     * @apiParam {Boolean} [billing_access]         ???
+     * @apiParam {String}  [avatar]                 Avatar image url/uri
+     * @apiParam {Boolean} [screenshots_active]     Screenshots should be captured
+     * @apiParam {Boolean} [manual_time]            Allow manual time edit
+     * @apiParam {Boolean} [permanent_tasks]        ???
+     * @apiParam {Boolean} [computer_time_popup]    ???
+     * @apiParam {Boolean} [poor_time_popup]        ???
+     * @apiParam {Boolean} [blur_screenshots]       ???
+     * @apiParam {Boolean} [web_and_app_monitoring] ???
+     * @apiParam {Boolean} [webcam_shots]           ???
+     * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
+     * @apiParam {String}  [user_role_value]        ???
+     * @apiParam {Boolean} active                   Is User active
+     * @apiParam {Integer} [role_id]                User's Role ID
+     * @apiParam {String}  [timezone]               User's timezone
+     */
+
+    /**
      * @return string
      */
     public function getItemClass(): string
@@ -35,7 +64,7 @@ class UserController extends ItemController
         return [
             'full_name'              => 'required',
             'email'                  => 'required|unique:users,email',
-            'active'                 => 'required',
+            'active'                 => 'required|boolean',
             'password'               => 'required',
         ];
     }
@@ -98,20 +127,45 @@ class UserController extends ItemController
      * @apiParam {String}   [user_role_value]       `QueryParam` ???
      * @apiParam {Boolean}  [active]                             User is active
      * @apiParam {Integer}  [role_id]               `QueryParam` User's Role ID
-     * @apiParam {DateTime} [created_at]            `QueryParam` User Creation DateTime
-     * @apiParam {DateTime} [updated_at]            `QueryParam` Last User data update DataTime
-     * @apiParam {DateTime} [deleted_at]            `QueryParam` When User was deleted (null if not)
+     * @apiParam {String}   [created_at]            `QueryParam` User Creation DateTime
+     * @apiParam {String}   [updated_at]            `QueryParam` Last User data update DataTime
+     * @apiParam {String}   [deleted_at]            `QueryParam` When User was deleted (null if not)
      * @apiParam {String}   [timezone]              `QueryParam` User's timezone
      *
-     * @apiSuccess (200) {User[]} UserList array of users objects
+     * @apiSuccess (200) {Object[]} User entities
      */
 
     /**
      * @api {post} /api/v1/users/create Create
-     * @apiDescription Create User
+     * @apiDescription Create User Entity
      * @apiVersion 0.1.0
      * @apiName CreateUser
      * @apiGroup User
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "full_name": "John Doe",
+     *   "email": "johndoe@example.com",
+     *   "active": "1",
+     *   "password": "secretpassword",
+     *   "role_id": "3"
+     * }
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "res": {
+     *     "full_name": "John Doe",
+     *     "email": "johndoe@example.com",
+     *     "active": "1",
+     *     "role_id": "1",
+     *     "updated_at": "2018-10-18 09:06:36",
+     *     "created_at": "2018-10-18 09:06:36",
+     *     "id": 3
+     *   }
+     * }
+     *
+     *
+     * @apiUse UserModel
      */
 
     /**
@@ -120,6 +174,44 @@ class UserController extends ItemController
      * @apiVersion 0.1.0
      * @apiName ShowUser
      * @apiGroup User
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *  "id": 1
+     * }
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "id": 1,
+     *   "full_name": "Admin",
+     *   "first_name": "Ad",
+     *   "last_name": "Min",
+     *   "email": "admin@example.com",
+     *   "url": "",
+     *   "company_id": 1,
+     *    "level": "admin",
+     *   "payroll_access": 1,
+     *   "billing_access": 1,
+     *   "avatar": "",
+     *   "screenshots_active": 1,
+     *   "manual_time": 0,
+     *   "permanent_tasks": 0,
+     *   "computer_time_popup": 300,
+     *   "poor_time_popup": "",
+     *   "blur_screenshots": 0,
+     *   "web_and_app_monitoring": 1,
+     *   "webcam_shots": 0,
+     *   "screenshots_interval": 9,
+     *   "user_role_value": "",
+     *   "active": 1,
+     *   "deleted_at": null,
+     *   "created_at": "2018-10-18 09:36:22",
+     *   "updated_at": "2018-10-18 09:36:22",
+     *   "role_id": 1,
+     *   "timezone": null,
+     *   "attached_users": []
+     *  }
+     *
      */
 
     /**
@@ -129,30 +221,49 @@ class UserController extends ItemController
      * @apiName EditUser
      * @apiGroup User
      *
-     * @apiParam {Integer} id                       User ID
-     * @apiParam {String}  full_name                Full Name
-     * @apiParam {String}  [first_name]             First Name
-     * @apiParam {String}  [last_name]              Last Name
-     * @apiParam {String}  email                    E-mail
-     * @apiParam {String}  [url]                    ???
-     * @apiParam {Integer} [company_id]             ???
-     * @apiParam {String}  [level]                  Role access level
-     * @apiParam {Boolean} [payroll_access]         ???
-     * @apiParam {Boolean} [billing_access]         ???
-     * @apiParam {String}  [avatar]                 Avatar image url/uri
-     * @apiParam {Boolean} [screenshots_active]     Screenshots should be captured
-     * @apiParam {Boolean} [manual_time]            Allow manual time edit
-     * @apiParam {Boolean} [permanent_tasks]        ???
-     * @apiParam {Boolean} [computer_time_popup]    ???
-     * @apiParam {Boolean} [poor_time_popup]        ???
-     * @apiParam {Boolean} [blur_screenshots]       ???
-     * @apiParam {Boolean} [web_and_app_monitoring] ???
-     * @apiParam {Boolean} [webcam_shots]           ???
-     * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
-     * @apiParam {String}  [user_role_value]        ???
-     * @apiParam {Boolean} active                   User is active
-     * @apiParam {Integer} [role_id]                User's Role ID
-     * @apiParam {String}  [timezone]               User's timezone
+     * @apiParamExample {json} Request Example
+     * {
+     *   "id": 1,
+     *   "full_name": "Jonni Tree",
+     *   "email": "gook@tree.com",
+     *   "active": "1"
+     * }
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "res": {
+     *      "id": 1,
+     *      "full_name": "Jonni Tree",
+     *      "first_name": "Ad",
+     *      "last_name": "Min",
+     *       "email": "gook@tree.com",
+     *       "url": "",
+     *       "company_id": 1,
+     *       "level": "admin",
+     *       "payroll_access": 1,
+     *       "billing_access": 1,
+     *       "avatar": "",
+     *       "screenshots_active": 1,
+     *       "manual_time": 0,
+     *       "permanent_tasks": 0,
+     *       "computer_time_popup": 300,
+     *       "poor_time_popup": "",
+     *       "blur_screenshots": 0,
+     *       "web_and_app_monitoring": 1,
+     *       "webcam_shots": 0,
+     *       "screenshots_interval": 9,
+     *       "user_role_value": "",
+     *       "active": "1",
+     *       "deleted_at": null,
+     *       "created_at": "2018-10-18 09:36:22",
+     *       "updated_at": "2018-10-18 11:04:50",
+     *       "role_id": 1,
+     *       "timezone": null,
+     *       "attached_users": []
+     *     }
+     *   }
+     *
+     * @apiUse UserModel
      *
      * @param Request $request
      *
@@ -236,11 +347,18 @@ class UserController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/users/destroy Destroy
+     * @api {post} /api/v1/users/remove Destroy
      * @apiDescription Destroy User
      * @apiVersion 0.1.0
      * @apiName DestroyUser
      * @apiGroup User
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "message": "Item has been removed"
+     * }
+     *
+     * @apiUse DefaultDestroyRequestExample
      */
 
     /**
@@ -280,6 +398,8 @@ class UserController extends ItemController
      * @apiSuccess {Object[]} message        Array of User object
      * @apiSuccess {Object}   message.object User object
      *
+     * @apiUse DefaultBulkEditErrorResponse
+     *
      * @param Request $request
      *
      * @return JsonResponse
@@ -290,11 +410,22 @@ class UserController extends ItemController
         $result = [];
 
         if (empty($requestData['users'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'users is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'users is empty',
+                ]),
+                400
+            );
+        }
+
+        $users = $requestData['users'];
+        if (!is_array($users)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'users should be an array',
+                ]),
                 400
             );
         }
@@ -303,9 +434,8 @@ class UserController extends ItemController
         $validationRules['id'] = 'required';
         unset($validationRules['password']);
 
-        foreach ($requestData['users'] as $user) {
-
-            if (!is_int($user['id'])) {
+        foreach ($users as $user) {
+            if (!isset($user['id']) || !is_int($user['id'])) {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                         'error' => 'Invalid id',

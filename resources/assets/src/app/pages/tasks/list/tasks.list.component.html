@@ -20,6 +20,7 @@
                                 <th><span class="clickable" (click)="setOrder('id')" translate>field.id</span></th>
                                 <th><span class="clickable" (click)="setOrder('project')" translate>field.project</span></th>
                                 <th><span class="clickable" (click)="setOrder('name')" translate>field.name</span></th>
+                                <th><span class="clickable" (click)="setOrder('priority')" translate>field.priority</span></th>
                                 <th translate>control.actions</th>
                             </tr>
                             </thead>
@@ -28,6 +29,7 @@
                                 <td>{{task.id}}</td>
                                 <td>{{task.project && task.project.name}}</td>
                                 <td class="task-name">{{task.task_name}}</td>
+                                <td>{{task.priority && task.priority.name}}</td>
                                 <td>
                                     <a *ngIf="can('/tasks/show')" [routerLink]="['/tasks/show', task.id]" title="View project">
                                         <button class="btn btn-info btn-sm">
@@ -52,7 +54,7 @@
                             </tbody>
                         </table>
 
-                        <div class="loading" #loading *ngIf="!isAllLoaded">
+                        <div class="loading" #loading>
                             <ngx-loading [show]="isLoading" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
                         </div>
                     </div>
