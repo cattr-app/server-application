@@ -80,8 +80,7 @@
 		}
 	},
 	"login": {
-		"submit": "Submit",
-		"name": "Name"
+		"submit": "Submit"
 	},
 	"task": {
 		"edit": "Edit task",
