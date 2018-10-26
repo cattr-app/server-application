@@ -180,12 +180,12 @@ class ProjectsRolesController extends ItemController
      * @apiName BulkCreateProjectRoles
      * @apiGroup ProjectRoles
      *
-     * @apiParam {Relations[]} array                   Array of object Project Role relation
-     * @apiParam {Object}      array.object            Object Project Role relation
-     * @apiParam {Integer}     array.object.project_id Project ID
-     * @apiParam {Integer}     array.object.role_id    Role ID
+     * @apiParam {Object[]}    array                   Project Roles
+     * @apiParam {Object}      array.object            ProjectRole
+     * @apiParam {Integer}     array.object.project_id Project id
+     * @apiParam {Integer}     array.object.role_id    Role id
      *
-     * @apiSuccess {Messages[]} array  Array of Project Roles objects
+     * @apiSuccess {Messages[]} array                  Project Roles objects
      *
      * @apiUse UnauthorizedError
      * @todo: add request and response example with error
@@ -260,11 +260,29 @@ class ProjectsRolesController extends ItemController
     }
 
   /**
-   * @api {post} /api/v1/projects-roles/remove Destroy
+   * @api {remove, post} /api/v1/projects-roles/remove Destroy
    * @apiDescription Destroy Project Roles relation
    * @apiVersion 0.1.0
    * @apiName DestroyProjectRoles
    * @apiGroup ProjectRoles
+   *
+   * @apiParam      {Object}   object               `QueryParam`
+   * @apiParam      {Integer}  object.project_id    `QueryParam`
+   * @apiParam      {Integer}  object.role_id       `QueryParam`
+   *
+   * @apiParamExample {json} Request example
+   * {
+   *    "project_id": 1,
+   *    "role_id": 1
+   * }
+   *
+   * @apiSuccess    {Object}   object           message
+   * @apiSuccess    {String}   object.message   body
+   *
+   * @apiSuccessExample {json} Response example
+   * {
+   *    "message": "Item has been removed"
+   * }
    *
    * @apiUse DefaultDestroyRequestExample
    * @apiUse DefaultBulkDestroyErrorResponse
@@ -272,7 +290,7 @@ class ProjectsRolesController extends ItemController
    *
    * @apiUse UnauthorizedError
    *
-   *
+   * @
    * @todo: add request and response example with error
    *
    * @param Request $request
@@ -338,16 +356,17 @@ class ProjectsRolesController extends ItemController
      * @apiName BulkDestroyProjectRoles
      * @apiGroup ProjectRoles
      *
-     * @apiParam {Relations[]} array                   Array of object Project Role relation
-     * @apiParam {Object}      array.object            Object Project Role relation
-     * @apiParam {Integer}     array.object.project_id Project ID
-     * @apiParam {Integer}     array.object.role_id    Role ID
+     * @apiParam   {Object[]}  array                   ProjectRoles
+     * @apiParam   {Object}    array.object            Project Role relation
+     * @apiParam   {Integer}   array.object.project_id Project id
+     * @apiParam   {Integer}   array.object.role_id    Role id
      *
-     * @apiSuccess {Messages[]} array         Array of Messages object
-     * @apiSuccess {Message}    array.object  Message
+     * @apiSuccess {Object[]}  array                   Messages
+     * @apiSuccess {Object}    array.object            Message
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws \Exception
      */
     public function bulkDestroy(Request $request): JsonResponse
     {
