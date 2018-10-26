@@ -94,8 +94,8 @@ class TimeIntervalController extends ItemController
      *   }
      * }
      *
-     * @apiParam {Integer}  task_id   Task ID
-     * @apiParam {Integer}  user_id   User ID
+     * @apiParam {Integer}  task_id   Task id
+     * @apiParam {Integer}  user_id   User id
      * @apiParam {String}   start_at  Interval time start
      * @apiParam {String}   end_at    Interval time end
      *
@@ -196,9 +196,9 @@ class TimeIntervalController extends ItemController
      * @apiName GetTimeIntervalList
      * @apiGroup Time Interval
      *
-     * @apiParam {Integer}  [id]         `QueryParam` Time Interval ID
-     * @apiParam {Integer}  [task_id]    `QueryParam` Time Interval's Task ID
-     * @apiParam {Integer}  [user_id]    `QueryParam` Time Interval's User ID
+     * @apiParam {Integer}  [id]         `QueryParam` Time Interval id
+     * @apiParam {Integer}  [task_id]    `QueryParam` Time Interval's Task id
+     * @apiParam {Integer}  [user_id]    `QueryParam` Time Interval's User id
      * @apiParam {String}   [start_at]   `QueryParam` Interval Start DataTime
      * @apiParam {String}   [end_at]     `QueryParam` Interval End DataTime
      * @apiParam {String}   [created_at] `QueryParam` Time Interval Creation DateTime
@@ -290,8 +290,8 @@ class TimeIntervalController extends ItemController
      * @apiName EditTimeInterval
      * @apiGroup Time Interval
      *
-     * @apiParam {Integer}  id     Time Interval ID
-     * @apiParam {Integer}  [user_id]    Time Interval's User ID
+     * @apiParam {Integer}  id           Time Interval id
+     * @apiParam {Integer}  [user_id]    Time Interval's User id
      * @apiParam {String}   [start_at]   Interval Start DataTime
      * @apiParam {String}   [end_at]     Interval End DataTime
      * @apiParam {String}   [created_at] Time Interval Creation DateTime
@@ -402,7 +402,7 @@ class TimeIntervalController extends ItemController
      * @apiName DestroyTimeInterval
      * @apiGroup Time Interval
      *
-     * @apiParam {Integer}   id Time interval ID
+     * @apiParam {Integer}   id Time interval id
      *
      * @apiSuccessResponse {json} Answer Example
      * {
