@@ -44,8 +44,8 @@ class UserController extends ItemController
      * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
      * @apiParam {String}  [user_role_value]        ???
      * @apiParam {Boolean} active                   Is User active
-     * @apiParam {Integer} [role_id]                User's Role ID
-     * @apiParam {String}  [timezone]               User's timezone
+     * @apiParam {Integer} [role_id]                User Role id
+     * @apiParam {String}  [timezone]               User timezone
      */
 
     /**
@@ -132,7 +132,7 @@ class UserController extends ItemController
      * @apiParam {String}   [deleted_at]            `QueryParam` When User was deleted (null if not)
      * @apiParam {String}   [timezone]              `QueryParam` User's timezone
      *
-     * @apiSuccess (200) {Object[]} User entities
+     * @apiSuccess (200) {Object[]} Users
      */
 
     /**
@@ -150,6 +150,8 @@ class UserController extends ItemController
      *   "password": "secretpassword",
      *   "role_id": "3"
      * }
+     *
+     *
      *
      * @apiSuccessExample {json} Response Example
      * {
@@ -177,7 +179,7 @@ class UserController extends ItemController
      *
      * @apiParamExample {json} Request Example
      * {
-     *  "id": 1
+     *   "id": 1
      * }
      *
      * @apiSuccessExample {json} Response Example
@@ -347,11 +349,13 @@ class UserController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/users/remove Destroy
+     * @api {delete} /api/v1/users/remove Destroy
      * @apiDescription Destroy User
      * @apiVersion 0.1.0
      * @apiName DestroyUser
      * @apiGroup User
+     *
+     * @apiSuccess {string} message User destroy status
      *
      * @apiSuccessExample {json} Response Example
      * {
@@ -392,8 +396,8 @@ class UserController extends ItemController
      * @apiParam {Integer}  [users.object.screenshots_interval]   Screenshots creation interval (seconds)
      * @apiParam {String}   [users.object.user_role_value]        ???
      * @apiParam {Boolean}  users.object.active                   User is active
-     * @apiParam {Integer}  [users.object.role_id]                User's Role ID
-     * @apiParam {String}   [users.object.timezone]               User's timezone
+     * @apiParam {Integer}  [users.object.role_id]                User Role id
+     * @apiParam {String}   [users.object.timezone]               User timezone
      *
      * @apiSuccess {Object[]} message        Array of User object
      * @apiSuccess {Object}   message.object User object
