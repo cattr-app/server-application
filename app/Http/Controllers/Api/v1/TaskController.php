@@ -94,11 +94,11 @@ class TaskController extends ItemController
      * @apiParam {String}   [task_name]   `QueryParam` Task Name
      * @apiParam {String}   [description] `QueryParam` Task Description
      * @apiParam {String}   [url]         `QueryParam` Task Url
-     * @apiParam {Boolean}  [active]                   Active/Inactive Task
-     * @apiParam {Integer}  [user_id]     `QueryParam` Task's User
+     * @apiParam {Boolean}  [active]                   Is Task active
+     * @apiParam {Integer}  [user_id]     `QueryParam` Task User
      * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
-     * @apiParam {DateTime} [created_at]  `QueryParam` Task Creation DateTime
-     * @apiParam {DateTime} [updated_at]  `QueryParam` Last Task update DataTime
+     * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
+     * @apiParam {String}   [updated_at]  `QueryParam` Last Task update DataTime
      * @apiUse TaskRelations
      *
      * @apiParamExample {json} Simple Request Example
@@ -117,22 +117,22 @@ class TaskController extends ItemController
      *
      * @apiUse TaskRelationsExample
      *
-     * @apiSuccess {Object[]} TaskList                     Tasks (Array of objects)
-     * @apiSuccess {Object}   TaskList.Task                Task object
-     * @apiSuccess {Integer}  TaskList.Task.id             Task's ID
-     * @apiSuccess {Integer}  TaskList.Task.project_id     Task's Project ID
-     * @apiSuccess {Integer}  TaskList.Task.user_id        Task's User ID
-     * @apiSuccess {Integer}  TaskList.Task.active         Task's active status
-     * @apiSuccess {String}   TaskList.Task.task_name      Task's name
-     * @apiSuccess {String}   TaskList.Task.description    Task's description
-     * @apiSuccess {String}   TaskList.Task.url            Task's url
-     * @apiSuccess {DateTime} TaskList.Task.created_at     Task's date time of create
-     * @apiSuccess {DateTime} TaskList.Task.updated_at     Task's date time of update
-     * @apiSuccess {DateTime} TaskList.Task.deleted_at     Task's date time of delete
-     * @apiSuccess {Object[]} TaskList.Task.time_intervals Task's User (Array of objects)
-     * @apiSuccess {Object[]} TaskList.Task.user           Task's User object
-     * @apiSuccess {Object[]} TaskList.Task.assigned       Task's assigned User object
-     * @apiSuccess {Object[]} TaskList.Task.project        Task's Project object
+     * @apiSuccess {Object[]} TaskList                     Tasks
+     * @apiSuccess {Object}   TaskList.Task                Task
+     * @apiSuccess {Integer}  TaskList.Task.id             Task ID
+     * @apiSuccess {Integer}  TaskList.Task.project_id     Task Project ID
+     * @apiSuccess {Integer}  TaskList.Task.user_id        Task User ID
+     * @apiSuccess {Integer}  TaskList.Task.active         Task active status
+     * @apiSuccess {String}   TaskList.Task.task_name      Task name
+     * @apiSuccess {String}   TaskList.Task.description    Task description
+     * @apiSuccess {String}   TaskList.Task.url            Task url
+     * @apiSuccess {DateTime} TaskList.Task.created_at     Task date time of create
+     * @apiSuccess {DateTime} TaskList.Task.updated_at     Task date time of update
+     * @apiSuccess {DateTime} TaskList.Task.deleted_at     Task date time of delete
+     * @apiSuccess {Object[]} TaskList.Task.time_intervals Task Time intervals
+     * @apiSuccess {Object[]} TaskList.Task.user           Task User object
+     * @apiSuccess {Object[]} TaskList.Task.assigned       Task assigned User object
+     * @apiSuccess {Object[]} TaskList.Task.project        Task Project object
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
@@ -165,15 +165,15 @@ class TaskController extends ItemController
      *  }
      *
      * @apiSuccess {Object}   res                Task object
-     * @apiSuccess {Integer}  res.id             Task's ID
-     * @apiSuccess {Integer}  res.project_id     Task's Project ID
-     * @apiSuccess {Integer}  res.user_id        Task's User ID
-     * @apiSuccess {Integer}  res.active         Task's active status
-     * @apiSuccess {String}   res.task_name      Task's name
-     * @apiSuccess {String}   res.description    Task's description
-     * @apiSuccess {String}   res.url            Task's url
-     * @apiSuccess {DateTime} res.created_at     Task's date time of create
-     * @apiSuccess {DateTime} res.updated_at     Task's date time of update
+     * @apiSuccess {Integer}  res.id             Task ID
+     * @apiSuccess {Integer}  res.project_id     Task Project ID
+     * @apiSuccess {Integer}  res.user_id        Task User ID
+     * @apiSuccess {Integer}  res.active         Task active status
+     * @apiSuccess {String}   res.task_name      Task name
+     * @apiSuccess {String}   res.description    Task description
+     * @apiSuccess {String}   res.url            Task url
+     * @apiSuccess {String}   res.created_at     Task date time of create
+     * @apiSuccess {String}   res.updated_at     Task date time of update
      *
      * @apiUse DefaultCreateErrorResponse
      *
@@ -215,7 +215,7 @@ class TaskController extends ItemController
      *  }
      * @apiUse TaskRelationsExample
      *
-     * @apiSuccess {Object}   Task                Task object
+     * @apiSuccess {Object}   Task                Task
      * @apiSuccess {Integer}  Task.id             Task id
      * @apiSuccess {Integer}  Task.project_id     Task Project id
      * @apiSuccess {Integer}  Task.user_id        Task User id
