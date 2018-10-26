@@ -31,7 +31,7 @@ export class NavigationComponent implements OnInit {
         {title: 'navigation.time-use-report', action: 'time-use-report', isLink: true, permissions: [ 'users/list', 'time-intervals/list'  ]},
         {title: 'navigation.projects', action: 'projects/list', isLink: true, permissions: [ 'projects/list' ]},
         {title: 'navigation.tasks', action: 'tasks/list', isLink: true, permissions: [ 'tasks/list' ]},
-        {title: 'navigation.users', action: 'users/list', isLink: true, permissions: [ 'users/list' ]},
+        {title: 'navigation.users', action: 'users/list', isLink: true, permissions: [ 'users/full_access' ]},
         {title: 'navigation.screenshots', action: 'screenshots/list', isLink: true, permissions: [ 'screenshots/list' ]},
         {title: 'navigation.role', action: 'roles/list', isLink: true, permissions: [ 'roles/list' ]},
         {title: 'navigation.settings', action: 'settings', isLink: true},
