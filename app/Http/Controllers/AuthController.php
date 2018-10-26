@@ -29,9 +29,9 @@ class AuthController extends Controller
      *    "error": "Unauthorized"
      * }
      *
-     * @apiError (Error 400) {String} error         Error name
-     * @apiError (Error 400) {String} reason        Error description
-     * @apiError (Error 400) {String} error_core    Error code
+     * @apiError (Error 403) {String} error         Error name
+     * @apiError (Error 403) {String} reason        Error description
+     * @apiError (Error 403) {String} error_core    Error code
      */
 
     /**
@@ -104,7 +104,7 @@ class AuthController extends Controller
      *  {
      *      "status": 200,
      *      "error":  false,
-     *      "cat":    '(=ㅇ༝ㅇ=)',
+     *      "cat":    '(=ㅇ༝ㅇ=)'
      *  }
      *
      * @return JsonResponse
