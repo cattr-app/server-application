@@ -259,11 +259,11 @@ class RulesController extends ItemController
      *   }
      * ]
      *
-     * @apiSuccess (200) {Object[]} actions               Array of Action objects
-     * @apiSuccess (200) {Object}   actions.action        Action object
-     * @apiSuccess (200) {String}   actions.action.object Object of action
-     * @apiSuccess (200) {String}   actions.action.action Action of action
-     * @apiSuccess (200) {String}   actions.action.string Name of action
+     * @apiSuccess (200) {Object[]} actions               Actions
+     * @apiSuccess (200) {Object}   actions.action        Applied to
+     * @apiSuccess (200) {String}   actions.action.object Applied action
+     * @apiSuccess (200) {String}   actions.action.action Action type
+     * @apiSuccess (200) {String}   actions.action.string Action name
      *
      * @apiUse UnauthorizedError
      *
