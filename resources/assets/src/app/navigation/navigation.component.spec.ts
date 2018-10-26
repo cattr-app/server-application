@@ -56,6 +56,10 @@ describe('Navigation component(Admin)', () => {
     expect(nav.innerHTML).toContain('navigation.projectsreport');
   }));
 
+  it('has menu item "projects time-use-report"', async(() => {
+    expect(nav.innerHTML).toContain('navigation.time-use-report');
+  }));
+
   it('has menu item "projects"', async(() => {
     expect(nav.innerHTML).toContain('navigation.projects');
   }));
@@ -70,10 +74,6 @@ describe('Navigation component(Admin)', () => {
 
   it('has menu item "screenshots"', async(() => {
     expect(nav.innerHTML).toContain('navigation.screenshots');
-  }));
-
-  it('has menu item "integrations"', async(() => {
-    expect(nav.innerHTML).toContain('navigation.integrations');
   }));
 
   it('has menu item "role"', async(() => {
@@ -132,6 +132,10 @@ describe('Navigation component(User)', () => {
     expect(nav.innerHTML).toContain('navigation.projectsreport');
   }));
 
+  it('has menu item "projects time-use-report"', async(() => {
+    expect(nav.innerHTML).toContain('navigation.time-use-report');
+  }));
+
   it('has menu item "projects"', async(() => {
     expect(nav.innerHTML).toContain('navigation.projects');
   }));
@@ -146,10 +150,6 @@ describe('Navigation component(User)', () => {
 
   it('has menu item "screenshots"', async(() => {
     expect(nav.innerHTML).toContain('navigation.screenshots');
-  }));
-
-  it('has menu item "integrations"', async(() => {
-    expect(nav.innerHTML).toContain('navigation.integrations');
   }));
 
   it('has not menu item "role"', async(() => {
