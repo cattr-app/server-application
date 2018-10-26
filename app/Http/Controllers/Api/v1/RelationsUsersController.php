@@ -39,14 +39,16 @@ class RelationsUsersController extends ItemController
     }
 
     /**
-     * @api {any} /api/v1/attached-users/list List
+     * @api {get} /api/v1/attached-users/list?attached_user_id=:attached_user_id&user_id=:user_id List
      * @apiDescription Get list of Attached Users relations
      * @apiVersion 0.1.0
      * @apiName GetAttachedUsersList
      * @apiGroup AttachedUsers
      *
-     * @apiParam {Integer} [attached_user_id] `QueryParam` Attached user ID
-     * @apiParam {Integer} [user_id]          `QueryParam` User ID
+     * @apiParam {Integer} [attached_user_id] `QueryParam` Attached user id
+     * @apiParam {Integer} [user_id]          `QueryParam` User id
+     *
+     * @apiSuccess (200) {Object[]} AttachedUsers AttachedUsers entities
      *
      * @apiSuccessExample {json} Success Response Example
      * [
@@ -57,7 +59,6 @@ class RelationsUsersController extends ItemController
      *      "updated_at": "2018-09-28 13:53:59"
      *    }
      * ]
-     *
      *
      * @param Request $request
      *
@@ -72,7 +73,7 @@ class RelationsUsersController extends ItemController
      * @apiName CreateAttachedUsers
      * @apiGroup AttachedUsers
      *
-     * @apiParam user_id Integer User ID
+     * @apiParam user_id Integer User id
      * @apiParam attached_user_id Attached to User
      *
      * @apiParamExample {json} Request Example
@@ -81,17 +82,21 @@ class RelationsUsersController extends ItemController
      *   "attached_user_id": 1
      * }
      *
+     * @apiSuccess (200) {Integer} user_id              User id
+     * @apiSuccess (200) {Integer} attached_user_id     Attached to User id
+     * @apiSuccess (200) {String}  updated_at           DateTime of AttachedUser entity last update
+     * @apiSuccess (200) {String}  created_at           DateTime of AttachedUser entity creation
      *
-     * @apiSuccessAnswer {json} Answer Example
-     * [
-     *   {
-     *     "user_id": 1,
-     *     "attached_user_id": 1,
-     *     "updated_at": "2018-10-01 08:41:37",
-     *     "created_at": "2018-10-01 08:41:37",
-     *     "id": 0
-     *   }
-     * ]
+     *
+     * @apiSuccessAnswer {json} Success-Response:
+     *   [
+     *     {
+     *       "user_id": 1,
+     *       "attached_user_id": 1,
+     *       "updated_at": "2018-10-01 08:41:37",
+     *       "created_at": "2018-10-01 08:41:37"
+     *     }
+     *   ]
      *
      * @apiUse UnauthorizedError
      *
@@ -138,10 +143,10 @@ class RelationsUsersController extends ItemController
      * @apiName BulkCreateAttachedUsers
      * @apiGroup AttachedUsers
      *
-     * @apiParam {Relations[]} array                         Array of object Attached User relation
+     * @apiParam {Object[]}    array                         Relations
      * @apiParam {Object}      array.object                  Object Attached User relation
-     * @apiParam {Integer}     array.object.attached_user_id Attached User ID
-     * @apiParam {Integer}     array.object.user_id          User ID
+     * @apiParam {Integer}     array.object.attached_user_id Attached User id
+     * @apiParam {Integer}     array.object.user_id          User id
      *
      * @apiParamExample {json} Request Example
      * {
@@ -152,6 +157,12 @@ class RelationsUsersController extends ItemController
      *     }
      *   ]
      * }
+     *
+     * @apiParamSuccess {Object[]} messages                     AttachedUser entities
+     * @apiParamSuccess {Integer}  messages.user_id             User id
+     * @apiParamSuccess {String}   messages.attached_user_id    Attached User id
+     * @apiParamSuccess {String}   messages.updated_at          Last relation update
+     * @apiParamSuccess {String}   messages.created_at          When relation was created
      *
      * @apiSuccessExample {json} Response Example
      * {
@@ -237,13 +248,14 @@ class RelationsUsersController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/attached-users/remove Destroy
+     * @api {delete} /api/v1/attached-users/remove Destroy
      * @apiDescription Destroy Attached Users relation
      * @apiVersion 0.1.0
      * @apiName DestroyAttachedUsers
      * @apiGroup AttachedUsers
      *
-     * @apiParam {Integer} User Relation ID
+     * @apiParam {Integer} user_id          User id
+     * @apiParam {Integer} attached_user_id Relation User id
      *
      * @apiParamExample {json} Request Example
      * {
@@ -251,19 +263,27 @@ class RelationsUsersController extends ItemController
      *   "attached_user_id": 1
      * }
      *
-     * @apiErrorExample {json} Error Response Example
+     * @apiSuccessParam {String} message Action status
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "message": "Item has been removed"
+     * }
+     *
+     * @apiErrorParam (400) {String}  error   Error title
+     * @apiErrorParam (400) {String}  reason  Error reason
+     *
+     * @apiErrorExample (400) {json} Error Response Example
      * {
      *   "error": "Item has not been removed",
      *   "reason": "Item not found"
      * }
      *
-     * @todo: add examples for request and success answer
-     * @todo: add errors and params
-     *
      * @apiUse UnauthorizedError
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws \Exception
      */
     public function destroy(Request $request) : JsonResponse
     {
@@ -318,16 +338,16 @@ class RelationsUsersController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/attached-users/bulk-remove BulkDestroy
+     * @api {delete, post} /api/v1/attached-users/bulk-remove BulkDestroy
      * @apiDescription Multiple Destroy Attached Users relation
      * @apiVersion 0.1.0
      * @apiName BulkDestroyAttachedUsers
      * @apiGroup AttachedUsers
      *
-     * @apiParam {Relations[]} array                         Array of object Project User relation
-     * @apiParam {Object}      array.object                  Object Project User relation
-     * @apiParam {Integer}     array.object.attached_user_id Attached User ID
-     * @apiParam {Integer}     array.object.user_id          User ID
+     * @apiParam {Object[]}    array                         AttachedUsers
+     * @apiParam {Object}      array.object                  Project User
+     * @apiParam {Integer}     array.object.attached_user_id Attached User id
+     * @apiParam {Integer}     array.object.user_id          User id
      *
      * @apiParamExample {json} Request Example
      * {
@@ -339,6 +359,8 @@ class RelationsUsersController extends ItemController
      *   ]
      * }
      *
+     * @apiSuccessParam (200)
+     *
      * @apiSuccessExample {json} Response Example
      * {
      *   "messages": [
@@ -348,11 +370,19 @@ class RelationsUsersController extends ItemController
      *   ]
      * }
      *
-     * @todo: add errors
+     * @apiError (404)    object[]   Errors messages
+     * @apiError (404)    object     Error
+     * @apiError (404)    object.    Error title
+     * @apiError (404)    messages.  Error reason
      *
-     * @apiErrorExample {json} Error Response Example
+     * @apiErrorExample (404) {json} Errors Response Example
      * {
-     *
+     *   "messages": [
+     *     {
+     *       "error": "Item has not been removed",
+     *       "reason": "Item not found"
+     *     }
+     *   ]
      * }
      *
      * @apiUse UnauthorizedError
