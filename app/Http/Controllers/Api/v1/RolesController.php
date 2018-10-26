@@ -67,8 +67,8 @@ class RolesController extends ItemController
      * @apiParam {Integer}  [id]          `QueryParam` Role ID
      * @apiParam {Integer}  [user_id]     `QueryParam` Role's Users ID
      * @apiParam {String}   [name]        `QueryParam` Role Name
-     * @apiParam {String} [created_at]  `QueryParam` Role Creation DateTime
-     * @apiParam {String} [updated_at]  `QueryParam` Last Role update DataTime
+     * @apiParam {String} [created_at]    `QueryParam` Role Creation DateTime
+     * @apiParam {String} [updated_at]    `QueryParam` Last Role update DataTime
      * @apiUse RolesRelations
      *
      * @apiParamExample {json} Simple Request Example
@@ -92,15 +92,15 @@ class RolesController extends ItemController
      *   }
      * ]
      *
-     * @apiSuccess {Object[]} RoleList                  Roles (Array of objects)
+     * @apiSuccess {Object[]} RoleList                  Roles
      * @apiSuccess {Object}   RoleList.Role             Role object
      * @apiSuccess {Integer}  RoleList.Role.id          Role ID
      * @apiSuccess {String}   RoleList.Role.name        Role name
      * @apiSuccess {String}   RoleList.Role.created_at  Role date time of create
      * @apiSuccess {String}   RoleList.Role.updated_at  Role date time of update
      * @apiSuccess {String}   RoleList.Role.deleted_at  Role date time of delete
-     * @apiSuccess {Object[]} RoleList.Role.users       Role User (Array of objects)
-     * @apiSuccess {Object[]} RoleList.Role.rules       Role Task (Array of objects)
+     * @apiSuccess {Object[]} RoleList.Role.users       Role User
+     * @apiSuccess {Object[]} RoleList.Role.rules       Role Task
      *
      * @apiUse UnauthorizedError
      *
@@ -146,10 +146,10 @@ class RolesController extends ItemController
      * }
      *
      * @apiSuccess {Object}   res             Response object
-     * @apiSuccess {Integer}  res.id          Role's ID
-     * @apiSuccess {String}   res.name        Role's name
-     * @apiSuccess {String}   res.created_at  Role's date time of create
-     * @apiSuccess {String}   res.updated_at  Role's date time of update
+     * @apiSuccess {Integer}  res.id          Role ID
+     * @apiSuccess {String}   res.name        Role name
+     * @apiSuccess {String}   res.created_at  Role date time of create
+     * @apiSuccess {String}   res.updated_at  Role date time of update
      *
      * @apiUse DefaultCreateErrorResponse
      * @apiUse UnauthorizedError
@@ -166,7 +166,7 @@ class RolesController extends ItemController
      * @apiName ShowRole
      * @apiGroup Role
      *
-     * @apiParam {Integer}    id                        Role ID
+     * @apiParam {Integer}    id                        Role id
      * @apiParam {String}     [name]       `QueryParam` Role Name
      * @apiParam {String}     [created_at] `QueryParam` Role date time of create
      * @apiParam {String}     [updated_at] `QueryParam` Role date time of update
@@ -185,13 +185,13 @@ class RolesController extends ItemController
      * @apiUse RolesRelationsExample
      *
      * @apiSuccess {Object}   Role             Role object
-     * @apiSuccess {Integer}  Role.id          Role ID
+     * @apiSuccess {Integer}  Role.id          Role id
      * @apiSuccess {String}   Role.name        Role name
      * @apiSuccess {String}   Role.created_at  Role date time of create
      * @apiSuccess {String}   Role.updated_at  Role date time of update
      * @apiSuccess {String}   Role.deleted_at  Role date time of delete
-     * @apiSuccess {Object[]} Role.users       Role User (Array of entities)
-     * @apiSuccess {Object[]} Role.rules       Role Task (Array of entities)
+     * @apiSuccess {Object[]} Role.users       Role User
+     * @apiSuccess {Object[]} Role.rules       Role Task
      *
      * @apiSuccessExample {json} Answer Relations Example
      * {
@@ -227,11 +227,11 @@ class RolesController extends ItemController
      *  }
      *
      * @apiSuccess {Object}   Role            Role object
-     * @apiSuccess {Integer}  Role.id         Role's ID
-     * @apiSuccess {String}   Role.name       Role's name
-     * @apiSuccess {String}   Role.created_at Role's date time of create
-     * @apiSuccess {String}   Role.updated_at Role's date time of update
-     * @apiSuccess {String}   Role.deleted_at Role's date time of delete
+     * @apiSuccess {Integer}  Role.id         Role ID
+     * @apiSuccess {String}   Role.name       Role name
+     * @apiSuccess {String}   Role.created_at Role date time of create
+     * @apiSuccess {String}   Role.updated_at Role date time of update
+     * @apiSuccess {String}   Role.deleted_at Role date time of delete
      *
      * @apiUse DefaultEditErrorResponse
      * @apiUse UnauthorizedError
@@ -303,7 +303,7 @@ class RolesController extends ItemController
      *
      * @apiUse UnauthorizedError
      *
-     * @apiErrorExample {json} Invalid ID Example
+     * @apiErrorExample {json} Invalid id Example
      * {
      *   "error": "Validation fail",
      *   "reason": "Invalid id"

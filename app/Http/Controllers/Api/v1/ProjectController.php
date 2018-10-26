@@ -80,12 +80,12 @@ class ProjectController extends ItemController
      * @apiName GetProjectList
      * @apiGroup Project
      *
-     * @apiParam {Integer}  [id]          `QueryParam` Project ID
-     * @apiParam {Integer}  [user_id]     `QueryParam` Project's User ID
-     * @apiParam {String}   [name]        `QueryParam` Project's name
-     * @apiParam {String}   [description] `QueryParam` Project's description
-     * @apiParam {String}   [created_at]  `QueryParam` Project's date time of create
-     * @apiParam {String}   [updated_at]  `QueryParam` Project's date time of update
+     * @apiParam {Integer}  [id]          `QueryParam` Project id
+     * @apiParam {Integer}  [user_id]     `QueryParam` Project User id
+     * @apiParam {String}   [name]        `QueryParam` Project name
+     * @apiParam {String}   [description] `QueryParam` Project description
+     * @apiParam {String}   [created_at]  `QueryParam` Project date time of create
+     * @apiParam {String}   [updated_at]  `QueryParam` Project date time of update
      *
      * @apiUse ProjectRelations
      *
@@ -103,14 +103,14 @@ class ProjectController extends ItemController
      *
      * @apiSuccess {Object[]} ProjectList                     Projects
      * @apiSuccess {Object}   ProjectList.Project             Project object
-     * @apiSuccess {Integer}  ProjectList.Project.id          Project's ID
-     * @apiSuccess {String}   ProjectList.Project.name        Project's name
-     * @apiSuccess {String}   ProjectList.Project.description Project's description
-     * @apiSuccess {String}   ProjectList.Project.created_at  Project's date time of create
-     * @apiSuccess {String}   ProjectList.Project.updated_at  Project's date time of update
-     * @apiSuccess {String}   ProjectList.Project.deleted_at  Project's date time of delete
-     * @apiSuccess {Object[]} ProjectList.Project.users       Project's Users (Array of objects)
-     * @apiSuccess {Object[]} ProjectList.Project.tasks       Project's Tasks (Array of objects)
+     * @apiSuccess {Integer}  ProjectList.Project.id          Project id
+     * @apiSuccess {String}   ProjectList.Project.name        Project name
+     * @apiSuccess {String}   ProjectList.Project.description Project description
+     * @apiSuccess {String}   ProjectList.Project.created_at  Project date time of create
+     * @apiSuccess {String}   ProjectList.Project.updated_at  Project date time of update
+     * @apiSuccess {String}   ProjectList.Project.deleted_at  Project date time of delete
+     * @apiSuccess {Object[]} ProjectList.Project.users       Project Users
+     * @apiSuccess {Object[]} ProjectList.Project.tasks       Project Tasks
      *
      * @apiSuccessExample {json} Answer Example
      * [
@@ -191,21 +191,21 @@ class ProjectController extends ItemController
      * @apiName CreateProject
      * @apiGroup Project
      *
-     * @apiParam {String}  name         Project's name
-     * @apiParam {String}  description  Project's description
+     * @apiParam {String}  name         Project name
+     * @apiParam {String}  description  Project description
      *
      * @apiParamExample {json} Simple Request Example
      *  {
-     *      "name": "test",
-     *      "description": "test"
+     *      "name": "SampleOriginalProjectName",
+     *      "description": "Code-monkey development group presents"
      *  }
      *
-     * @apiSuccess {Object}   res             Response object
-     * @apiSuccess {Integer}  res.id          Project's ID
-     * @apiSuccess {String}   res.name        Project's name
-     * @apiSuccess {String}   res.description Project's description
-     * @apiSuccess {String}   res.created_at  Project's date time of create
-     * @apiSuccess {String}   res.updated_at  Project's date time of update
+     * @apiSuccess {Object}   res             Response
+     * @apiSuccess {Integer}  res.id          Project id
+     * @apiSuccess {String}   res.name        Project name
+     * @apiSuccess {String}   res.description Project description
+     * @apiSuccess {String}   res.created_at  Project date time of create
+     * @apiSuccess {String}   res.updated_at  Project date time of update
      *
      * @apiUse DefaultCreateErrorResponse
      * @apiUse UnauthorizedError
@@ -213,8 +213,8 @@ class ProjectController extends ItemController
      * @apiSuccessExample {json} Answer Example
      * {
      *   "res": {
-     *     "name": "test",
-     *     "description": "test",
+     *     "name": "SampleOriginalProjectName",
+     *     "description": "Code-monkey development group presents",
      *     "updated_at": "2018-09-27 04:55:29",
      *     "created_at": "2018-09-27 04:55:29",
      *     "id": 6
@@ -242,23 +242,23 @@ class ProjectController extends ItemController
      * @apiName ShowProject
      * @apiGroup Project
      *
-     * @apiParam {Integer}  id            `QueryParam` Project ID
-     * @apiParam {Integer}  [user_id]     `QueryParam` Project's User ID
-     * @apiParam {String}   [name]        `QueryParam` Project's name
-     * @apiParam {String}   [description] `QueryParam` Project's description
-     * @apiParam {String}   [created_at]  `QueryParam` Project's date time of create
-     * @apiParam {String}   [updated_at]  `QueryParam` Project's date time of update
+     * @apiParam {Integer}  id            `QueryParam` Project id
+     * @apiParam {Integer}  [user_id]     `QueryParam` Project User id
+     * @apiParam {String}   [name]        `QueryParam` Project name
+     * @apiParam {String}   [description] `QueryParam` Project description
+     * @apiParam {String}   [created_at]  `QueryParam` Project date time of create
+     * @apiParam {String}   [updated_at]  `QueryParam` Project date time of update
      * @apiUse ProjectRelations
      *
      * @apiSuccess {Object}   Project             Project object
-     * @apiSuccess {Integer}  Project.id          Project's ID
-     * @apiSuccess {String}   Project.name        Project's name
-     * @apiSuccess {String}   Project.description Project's description
-     * @apiSuccess {String}   Project.created_at  Project's date time of create
-     * @apiSuccess {String}   Project.updated_at  Project's date time of update
-     * @apiSuccess {String}   Project.deleted_at  Project's date time of delete
-     * @apiSuccess {Object[]} Project.users       Project's User (Array of objects)
-     * @apiSuccess {Object[]} Project.tasks       Project's Task (Array of objects)
+     * @apiSuccess {Integer}  Project.id          Project id
+     * @apiSuccess {String}   Project.name        Project name
+     * @apiSuccess {String}   Project.description Project description
+     * @apiSuccess {String}   Project.created_at  Project date time of create
+     * @apiSuccess {String}   Project.updated_at  Project date time of update
+     * @apiSuccess {String}   Project.deleted_at  Project date time of delete
+     * @apiSuccess {Object[]} Project.users       Project User
+     * @apiSuccess {Object[]} Project.tasks       Project Task
      *
      * @apiSuccessExample {json} Answer Example
      * {
@@ -329,29 +329,30 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/projects/edit Edit
+     * @api {put} /api/v1/projects/edit Edit
      * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1,
      *      "name": "test",
      *      "description": "test"
      *  }
+     *
      * @apiDescription Edit Project
      * @apiVersion 0.1.0
      * @apiName EditProject
      * @apiGroup Project
      *
-     * @apiParam {String}  id           Project's id
-     * @apiParam {String}  name         Project's name
-     * @apiParam {String}  description  Project's description
+     * @apiParam {String}  id           Project id
+     * @apiParam {String}  name         Project name
+     * @apiParam {String}  description  Project description
      *
      * @apiSuccess {Object}   res             Response object
-     * @apiSuccess {Integer}  res.id          Project's ID
-     * @apiSuccess {String}   res.name        Project's name
-     * @apiSuccess {String}   res.description Project's description
-     * @apiSuccess {String}   res.created_at  Project's date time of create
-     * @apiSuccess {String}   res.updated_at  Project's date time of update
-     * @apiSuccess {String}   res.deleted_at  Project's date time of delete
+     * @apiSuccess {Integer}  res.id          Project id
+     * @apiSuccess {String}   res.name        Project name
+     * @apiSuccess {String}   res.description Project description
+     * @apiSuccess {String}   res.created_at  Project date time of create
+     * @apiSuccess {String}   res.updated_at  Project date time of update
+     * @apiSuccess {String}   res.deleted_at  Project date time of delete
      *
      * @apiUse DefaultEditErrorResponse
      * @apiUse UnauthorizedError
@@ -368,7 +369,7 @@ class ProjectController extends ItemController
      * @apiName DestroyProject
      * @apiGroup Project
      *
-     * @apiParam {String} id Project's id
+     * @apiParam {String} id Project id
      *
      * @apiUse DefaultDestroyResponse
      * @apiUse UnauthorizedError
