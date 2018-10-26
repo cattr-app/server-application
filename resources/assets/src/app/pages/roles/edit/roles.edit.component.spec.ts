@@ -1,6 +1,6 @@
 import {TestBed, async} from '@angular/core/testing';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
-import {RolesEditComponent} from './roles.Edit.component';
+import {RolesEditComponent} from './roles.edit.component';
 import {ApiService} from '../../../api/api.service';
 import {HttpClient, HttpHandler} from '@angular/common/http';
 import {ActivatedRoute, Router} from '@angular/router';
