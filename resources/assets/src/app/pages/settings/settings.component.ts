@@ -1,81 +1,52 @@
+import {Component, ViewChild, AfterViewInit} from '@angular/core';
+import { TabsetComponent, TabDirective } from 'ngx-bootstrap';
+
 import { ApiService } from '../../api/api.service';
-import { Component, OnInit } from '@angular/core';
-import { Message } from 'primeng/components/common/api';
-import { TranslateService } from '@ngx-translate/core';
-import { LocalStorage } from '../../api/storage.model';
+import { AllowedActionsService } from '../roles/allowed-actions.service';
 
-interface RedmineStatus {
-    id: number;
-    name: string;
-    is_active: boolean;
-}
+import { TimeInterval } from '../../models/timeinterval.model';
+import { Project } from '../../models/project.model';
+import { Task } from '../../models/task.model';
 
-interface RedminePriority {
-    id: number;
-    name: string;
-    priority_id: number;
-}
-
-interface Priority {
-    id: number;
-    name: string;
-}
+import { GeneralComponent } from './tabs/settings.tabs.general.component';
+import { IntegrationComponent } from './tabs/settings.tabs.integration.component';
+import { UserSettingsComponent } from './tabs/settings.tabs.user.component';
 
 @Component({
     selector: 'app-settings',
     templateUrl: './settings.component.html',
-    styleUrls: ['./settings.component.scss', '../../app.component.scss'],
+    styleUrls: ['./settings.component.css']
 })
-export class SettingsComponent {
-    msgs: Message[] = [];
+export class SettingsComponent implements AfterViewInit {
+    @ViewChild('tabs') tabs: TabsetComponent;
+    @ViewChild('general') general: GeneralComponent;
+    @ViewChild('integration') integration: IntegrationComponent;
+    @ViewChild('userSettings') userSettings: UserSettingsComponent;
 
-    languages = [
-        { 'code': 'en', 'title': 'English' },
-        { 'code': 'ru', 'title': 'Русский' },
-        { 'code': 'dk', 'title': 'Dansk' },
-    ];
-    language: string = 'en';
-
-    redmineUrl: string;
-    redmineApiKey: string;
-    redmineStatuses: RedmineStatus[] = [];
-    redminePriorities: RedminePriority[] = [];
-    internalPriorities: Priority[] = [];
+    selectedTab: string = '';
 
     constructor(
-        private api: ApiService,
-        protected translate: TranslateService,
-    ) {
-        this.language = translate.currentLang
-            ? translate.currentLang
-            : translate.defaultLang;
+        protected api: ApiService,
+    ) { }
 
-        this.api.getSettings([], result => {
-            this.redmineUrl = result.redmine_url;
-            this.redmineApiKey = result.redmine_api_key;
-            this.redmineStatuses = result.redmine_statuses;
-            this.redminePriorities = result.redmine_priorities;
-            this.internalPriorities = result.internal_priorities;
-        });
+
+    ngAfterViewInit() {
+        const tabHeading = localStorage.getItem('settings-tab');
+        if (tabHeading !== null) {
+            const index = this.tabs.tabs.findIndex(tab => tab.heading === tabHeading);
+            if (index !== -1) {
+                setTimeout(() => {
+                    this.selectedTab = tabHeading;
+                    this.tabs.tabs[index].active = true;
+                });
+            }
+        }
     }
 
-    onSubmit() {
-        if (typeof this.language != null) {
-            this.translate.use(this.language);
-            LocalStorage.getStorage().set('language', this.language);
+    changeTab(tab: TabDirective) {
+        if (tab.heading !== undefined) {
+            this.selectedTab = tab.heading;
+            localStorage.setItem('settings-tab', this.selectedTab);
         }
-
-        this.api.sendSettings({
-            'redmine_url': this.redmineUrl,
-            'redmine_key': this.redmineApiKey,
-            'redmine_statuses': this.redmineStatuses,
-            'redmine_priorities': this.redminePriorities,
-        }, () => {
-            this.msgs = [{
-                severity: 'success',
-                summary: 'Success Message',
-                detail: 'Settings have been updated',
-            }];
-        });
     }
 }

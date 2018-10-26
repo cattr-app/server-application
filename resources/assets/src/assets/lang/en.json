@@ -91,7 +91,9 @@
 	},
 	"settings": {
 		"title": "Settings",
+		"general": "General",
 		"select-lang": "Select language here",
+		"user": "Account",
 		"lang": "Language"
 	},
 	"user": {
