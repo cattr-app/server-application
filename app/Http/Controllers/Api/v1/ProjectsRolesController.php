@@ -60,19 +60,21 @@ class ProjectsRolesController extends ItemController
      * @todo: add request example
      *
      * @apiSuccessExample {json} Response example
-     * [
-     *   {
-     *     "project_id": 1,
-     *     "role_id": 1,
-     *     "created_at": "2018-10-25 08:41:35",
-     *     "updated_at": "2018-10-25 08:41:35"
-     *   }
-     * ]
+     * {
+     *   [
+     *     {
+     *       "project_id": 1,
+     *       "role_id": 1,
+     *       "created_at": "2018-10-25 08:41:35",
+     *       "updated_at": "2018-10-25 08:41:35"
+     *     }
+     *   ]
+     * }
      *
      * @apiParamExample {json} Request example
      * {
-     *   "": "",
-     *   "": ""
+     *   "project_id": 1,
+     *   "role_id": 1
      * }
      *
      * @param Request $request
@@ -180,12 +182,51 @@ class ProjectsRolesController extends ItemController
      * @apiName BulkCreateProjectRoles
      * @apiGroup ProjectRoles
      *
-     * @apiParam {Object[]}    array                   Project Roles
-     * @apiParam {Object}      array.object            ProjectRole
-     * @apiParam {Integer}     array.object.project_id Project id
-     * @apiParam {Integer}     array.object.role_id    Role id
+     * @apiParamExample {json} Request example
+     * {
+     *   "relations": [
+     *     {
+     *       "project_id": 1,
+     *       "role_id": 1
+     *     }
+     *   ]
+     * }
      *
-     * @apiSuccess {Messages[]} array                  Project Roles objects
+     * @apiSuccessExample {json} Response example
+     * {
+     *
+     * }
+     *
+     * @apiSuccess {Object[]}  messages                        Project Roles messages
+     * @apiSuccess {Object}    messages.object                 Project Role
+     * @apiSuccess {Integer}   messages.object.project_id      Project id
+     * @apiSuccess {Integer}   messages.object.role_id         Project Role id
+     * @apiSuccess {String}    messages.object.updated_at      Project Role last update datetime
+     * @apiSuccess {String}    messages.object.created_at      Project Role creation datetime
+     *
+     * @apiErrorExample {json} Error response example
+     * {
+     *   "messages": [
+     *     {
+     *       "error": "Validation fail",
+     *       "reason": {
+     *         "project_id": [
+     *           "The selected project id is invalid."
+     *         ],
+     *         "role_id": [
+     *           "The selected role id is invalid."
+     *         ]
+     *     },
+     *     "code": 400
+     *   }
+     *   ]
+     * }
+     *
+     * @apiParam   {Object[]}  array                   Project Roles
+     * @apiParam   {Object}    array.object            ProjectRole
+     * @apiParam   {Integer}   array.object.project_id Project id
+     * @apiParam   {Integer}   array.object.role_id    Role id
+     *
      *
      * @apiUse UnauthorizedError
      * @todo: add request and response example with error
@@ -290,8 +331,28 @@ class ProjectsRolesController extends ItemController
    *
    * @apiUse UnauthorizedError
    *
-   * @
-   * @todo: add request and response example with error
+   *
+   * @apiErrorExample (403) {json} Not allowed action example
+   * {
+   *   "error": "Access denied to projects-roles/remove",
+   *   "reason": "action is not allowed"
+   * }
+   *
+   * @apiError {String} error  Error
+   * @apiError {String} reason Reason
+   *
+   * @apiErrorExample (400) {json} Validation fail example
+   * {
+   *   "error": "Validation fail",
+   *   "reason": {
+   *     "project_id": [
+   *       "The selected project id is invalid."
+   *     ],
+   *     "role_id": [
+   *       "The selected role id is invalid."
+   *     ]
+   *   }
+   * }
    *
    * @param Request $request
    * @return JsonResponse

@@ -52,7 +52,7 @@ class TimeController extends ItemController
 
     /**
      * @apiDefine RelationsExample
-     * @apiParamExample {json} Request-With-Relations-Example:
+     * @apiParamExample {json} Request With Relations Example
      *  {
      *      "with":           "task,user,screenshots"
      *      "task.id":        [">", 1],
@@ -67,7 +67,7 @@ class TimeController extends ItemController
      * Display a total of time.
      *
      * @api {POST|GET} /api/v1/time/total Total
-     * @apiParamExample {json} Simple Request Example
+     * @apiParamExample {json} Request Example
      *  {
      *      "user_id":        1,
      *      "task_id":        ["=", [1,2,3]],
@@ -96,8 +96,8 @@ class TimeController extends ItemController
      *
      * @apiSuccess {String}   current_datetime Current datetime of server
      * @apiSuccess {Integer}  time             Total time in seconds
-     * @apiSuccess {DateTime} start            Datetime of first Time Interval's start_at
-     * @apiSuccess {DateTime} end              DateTime of last Time Interval's end_at
+     * @apiSuccess {String}   start            Datetime of first Time Interval start_at
+     * @apiSuccess {String}   end              DateTime of last Time Interval end_at
      *
      * @param Request $request
      * @return JsonResponse

@@ -396,7 +396,7 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/time-intervals/remove Destroy
+     * @api {delete, post} /api/v1/time-intervals/remove Destroy
      * @apiDescription Destroy Time Interval
      * @apiVersion 0.1.0
      * @apiName DestroyTimeInterval

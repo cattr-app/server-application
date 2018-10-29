@@ -158,11 +158,11 @@ class RelationsUsersController extends ItemController
      *   ]
      * }
      *
-     * @apiParamSuccess {Object[]} messages                     AttachedUser entities
-     * @apiParamSuccess {Integer}  messages.user_id             User id
-     * @apiParamSuccess {String}   messages.attached_user_id    Attached User id
-     * @apiParamSuccess {String}   messages.updated_at          Last relation update
-     * @apiParamSuccess {String}   messages.created_at          When relation was created
+     * @apiSuccess {Object[]} messages                     AttachedUser entities
+     * @apiSuccess {Integer}  messages.user_id             User id
+     * @apiSuccess {String}   messages.attached_user_id    Attached User id
+     * @apiSuccess {String}   messages.updated_at          Last relation update
+     * @apiSuccess {String}   messages.created_at          When relation was created
      *
      * @apiSuccessExample {json} Response Example
      * {
@@ -359,7 +359,9 @@ class RelationsUsersController extends ItemController
      *   ]
      * }
      *
-     * @apiSuccessParam (200)
+     * @apiSuccess {Object[]} messages               Messages
+     * @apiSuccess {Object}   message                Message
+     * @apiSuccess {String}   message.message        Status
      *
      * @apiSuccessExample {json} Response Example
      * {
@@ -370,10 +372,10 @@ class RelationsUsersController extends ItemController
      *   ]
      * }
      *
-     * @apiError (404)    object[]   Errors messages
-     * @apiError (404)    object     Error
-     * @apiError (404)    object.    Error title
-     * @apiError (404)    messages.  Error reason
+     * @apiError (404)  {Object[]} messages                 Messages
+     * @apiError (404)  {Object}   messages.message         Message
+     * @apiError (404)  {String}   messages.message.error   Error title
+     * @apiError (404)  {String}   messages.message.reason  Error reason
      *
      * @apiErrorExample (404) {json} Errors Response Example
      * {

@@ -77,8 +77,8 @@ class ProjectsUsersController extends ItemController
      * @apiParam {Integer} [user_id]    `QueryParam` Project-User User id
      * @apiUse ProjectUserRelations
      *
-     * @apiSuccess {Objects[]} ProjectUsersList                         Array of Project-Users objects
-     * @apiSuccess {Objects}   ProjectUsersList.ProjectUser             Project-User
+     * @apiSuccess {Object[]}  ProjectUsersList                          Project-Users
+     * @apiSuccess {Object}    ProjectUsersList.ProjectUser             Project-User
      * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.user_id     Project-User User id
      * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.project_id  Project-User Project id
      * @apiSuccess {String}    ProjectUsersList.ProjectUser.created_at  Project-User date time of create
@@ -105,8 +105,8 @@ class ProjectsUsersController extends ItemController
      * @apiName CreateProjectUsers
      * @apiGroup ProjectUsers
      *
-     * @apiParam   {Integer}   project_id              Project-User Project ID
-     * @apiParam   {Integer}   user_id                 Project-User User ID
+     * @apiParam   {Integer}   project_id              Project-User Project id
+     * @apiParam   {Integer}   user_id                 Project-User User id
      *
      * @apiSuccess {Integer}   array.object.user_id     Project-User User id
      * @apiSuccess {Integer}   array.object.project_id  Project-User Project id
@@ -168,6 +168,7 @@ class ProjectsUsersController extends ItemController
      *          }
      *      ]
      *  }
+     *
      * @apiDescription Multiple Create Project Users relation
      * @apiVersion 0.1.0
      * @apiName BulkCreateProjectUsers
@@ -175,13 +176,13 @@ class ProjectsUsersController extends ItemController
      *
      * @apiParam {Object[]} relations                   Project-User relations
      * @apiParam {Object}   relations.object            Object Project-User relation
-     * @apiParam {Integer}  relations.object.project_id Project-User Project ID
-     * @apiParam {Integer}  relations.object.user_id    Project-User User ID
+     * @apiParam {Integer}  relations.object.project_id Project-User Project id
+     * @apiParam {Integer}  relations.object.user_id    Project-User User id
      *
      * @apiSuccess {Object[]} messages                   Project-Users
-     * @apiSuccess {Object}   messages.object            Project-Users object
-     * @apiSuccess {Integer}  messages.object.user_id    Project-User User ID
-     * @apiSuccess {Integer}  messages.object.project_id Project-Users Project ID
+     * @apiSuccess {Object}   messages.object            Project-User
+     * @apiSuccess {Integer}  messages.object.user_id    Project-User User id
+     * @apiSuccess {Integer}  messages.object.project_id Project-User Project id
      * @apiSuccess {String}   messages.object.created_at Project-User date time of create
      * @apiSuccess {String}   messages.object.updated_at Project-User date time of update
      *
@@ -277,7 +278,7 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/projects-users/remove Destroy
+     * @api {delete, post} /api/v1/projects-users/remove Destroy
      * @apiDescription Destroy Project Users relation
      * @apiParamExample {json} Simple Request Example
      *  {

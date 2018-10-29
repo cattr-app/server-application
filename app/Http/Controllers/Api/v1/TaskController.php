@@ -119,16 +119,16 @@ class TaskController extends ItemController
      *
      * @apiSuccess {Object[]} TaskList                     Tasks
      * @apiSuccess {Object}   TaskList.Task                Task
-     * @apiSuccess {Integer}  TaskList.Task.id             Task ID
-     * @apiSuccess {Integer}  TaskList.Task.project_id     Task Project ID
-     * @apiSuccess {Integer}  TaskList.Task.user_id        Task User ID
-     * @apiSuccess {Integer}  TaskList.Task.active         Task active status
+     * @apiSuccess {Integer}  TaskList.Task.id             Task id
+     * @apiSuccess {Integer}  TaskList.Task.project_id     Task Project id
+     * @apiSuccess {Integer}  TaskList.Task.user_id        Task User id
+     * @apiSuccess {Integer}  TaskList.Task.active         Task is active
      * @apiSuccess {String}   TaskList.Task.task_name      Task name
      * @apiSuccess {String}   TaskList.Task.description    Task description
      * @apiSuccess {String}   TaskList.Task.url            Task url
-     * @apiSuccess {DateTime} TaskList.Task.created_at     Task date time of create
-     * @apiSuccess {DateTime} TaskList.Task.updated_at     Task date time of update
-     * @apiSuccess {DateTime} TaskList.Task.deleted_at     Task date time of delete
+     * @apiSuccess {String}   TaskList.Task.created_at     Task date time of create
+     * @apiSuccess {String}   TaskList.Task.updated_at     Task date time of update
+     * @apiSuccess {String}   TaskList.Task.deleted_at     Task date time of delete
      * @apiSuccess {Object[]} TaskList.Task.time_intervals Task Time intervals
      * @apiSuccess {Object[]} TaskList.Task.user           Task User object
      * @apiSuccess {Object[]} TaskList.Task.assigned       Task assigned User object
@@ -150,7 +150,7 @@ class TaskController extends ItemController
      * @apiParam {String}  [description] Task Description
      * @apiParam {String}  url           Task Url
      * @apiParam {Boolean} [active]      Active/Inactive Task
-     * @apiParam {Integer} [user_id]     Task's User
+     * @apiParam {Integer} [user_id]     Task User
      * @apiParam {Integer} [assigned_by] User who assigned task
      *
      * @apiParamExample {json} Simple Request Example
@@ -229,7 +229,7 @@ class TaskController extends ItemController
      * @apiSuccess {Object[]} Task.time_intervals Task Users
      * @apiSuccess {Object[]} Task.user           Task User object
      * @apiSuccess {Object[]} Task.assigned       Task assigned User object
-     * @apiSuccess {Object[]} Task.project        Task Project object
+     * @apiSuccess {Object[]} Task.project        Task Project
      *
      * @apiUse DefaultShowErrorResponse
      *
@@ -335,7 +335,7 @@ class TaskController extends ItemController
      *  }
      * @apiUse TaskRelationsExample
      *
-     * @apiSuccess {Object[]} array                       Array of objects
+     * @apiSuccess {Object[]} array                       Tasks
      * @apiSuccess {Object}   array.object                Task object
      * @apiSuccess {Integer}  array.object.id             Task ID
      * @apiSuccess {Integer}  array.object.project_id     Task Project ID
@@ -348,10 +348,10 @@ class TaskController extends ItemController
      * @apiSuccess {String}   array.object.updated_at     Task date time of update
      * @apiSuccess {String}   array.object.deleted_at     Task date time of delete
      * @apiSuccess {Time}     array.object.total_time     Task total time
-     * @apiSuccess {Object[]} array.object.time_intervals Task Users
-     * @apiSuccess {Object[]} array.object.user           Task User object
-     * @apiSuccess {Object[]} array.object.assigned       Task assigned User object
-     * @apiSuccess {Object[]} array.object.project        Task Project object
+     * @apiSuccess {Object[]} array.object.time_intervals Task TimeIntervals
+     * @apiSuccess {Object}   array.object.user           Task User object
+     * @apiSuccess {Object[]} array.object.assigned       Task assigned User
+     * @apiSuccess {Object}   array.object.project        Task Project
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse

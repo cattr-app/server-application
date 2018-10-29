@@ -74,7 +74,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {any} /api/v1/projects/list List
+     * @api {get, post} /api/v1/projects/list List
      * @apiDescription Get list of Projects
      * @apiVersion 0.1.0
      * @apiName GetProjectList
@@ -226,7 +226,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {any} /api/v1/projects/show Show
+     * @api {get, post} /api/v1/projects/show Show
      * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          1,
@@ -329,7 +329,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {put} /api/v1/projects/edit Edit
+     * @api {put, post} /api/v1/projects/edit Edit
      * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1,

@@ -70,7 +70,7 @@ class RulesController extends ItemController
      * @apiName EditRule
      * @apiGroup Rule
      *
-     * @apiParam {Integer} role_id Role's ID
+     * @apiParam {Integer} role_id Role id
      * @apiParam {String}  object  Object name
      * @apiParam {String}  action  Action name
      * @apiParam {Boolean} allow   Allow status
@@ -138,12 +138,12 @@ class RulesController extends ItemController
      * @apiName bulkEditRules
      * @apiGroup Rule
      *
-     * @apiParam {Object[]} rules                Array of objects Rule
-     * @apiParam {Object}   rules.object         Rule object
-     * @apiParam {Integer}  rules.object.role_id Rule's Role's ID
-     * @apiParam {String}   rules.object.object  Rule's object name
-     * @apiParam {String}   rules.object.action  Rule's action name
-     * @apiParam {Boolean}  rules.object.allow   Rule's allow status
+     * @apiParam {Object[]} rules                Rules
+     * @apiParam {Object}   rules.object         Rule
+     * @apiParam {Integer}  rules.object.role_id Role id
+     * @apiParam {String}   rules.object.object  Rule object name
+     * @apiParam {String}   rules.object.action  Rule action name
+     * @apiParam {Boolean}  rules.object.allow   Rule allow status
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -164,8 +164,13 @@ class RulesController extends ItemController
      *      ]
      *  }
      *
-     * @apiSuccess {String[]} messages         Array of string response
+     * @apiSuccess {String[]} messages         Messages
      * @apiSuccess {String}   messages.message OK
+     *
+     * @apiSuccessExample {json} Response example
+     * {
+     * timeInterval,timeInterval.task
+     * }
      *
      * @apiUse DefaultEditErrorResponse
      * @apiUse UnauthorizedError

@@ -177,10 +177,20 @@ class UserController extends ItemController
      * @apiName ShowUser
      * @apiGroup User
      *
+     * @apiParam {Integer} id   User id
+     *
      * @apiParamExample {json} Request Example
      * {
      *   "id": 1
      * }
+     *
+     * @apiSuccess {Object}  object             User
+     * @apiSuccess {Integer} object.id          User id
+     * @apiSuccess {String}  object.full_name   User full name
+     * @apiSuccess {String}  object.last_name   User first name
+     * @apiSuccess {String}  object.email       User email
+     * @apiSuccess {String}  object.url         User url
+     * @apiSuccess {Integer} object.role_id     User role id
      *
      * @apiSuccessExample {json} Response Example
      * {
@@ -217,7 +227,7 @@ class UserController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/users/edit Edit
+     * @api {put, post} /api/v1/users/edit Edit
      * @apiDescription Edit User
      * @apiVersion 0.1.0
      * @apiName EditUser
@@ -372,9 +382,9 @@ class UserController extends ItemController
      * @apiName bulkEditUsers
      * @apiGroup User
      *
-     * @apiParam {Object[]} users                                 Array of objects User
-     * @apiParam {Object}   users.object                          User object
-     * @apiParam {Integer}  users.object.id                       User ID
+     * @apiParam {Object[]} users                                 Users
+     * @apiParam {Object}   users.object                          User
+     * @apiParam {Integer}  users.object.id                       User id
      * @apiParam {String}   users.object.full_name                Full Name
      * @apiParam {String}   [users.object.first_name]             First Name
      * @apiParam {String}   [users.object.last_name]              Last Name
@@ -399,8 +409,8 @@ class UserController extends ItemController
      * @apiParam {Integer}  [users.object.role_id]                User Role id
      * @apiParam {String}   [users.object.timezone]               User timezone
      *
-     * @apiSuccess {Object[]} message        Array of User object
-     * @apiSuccess {Object}   message.object User object
+     * @apiSuccess {Object[]} message        Users
+     * @apiSuccess {Object}   message.object User
      *
      * @apiUse DefaultBulkEditErrorResponse
      *
@@ -504,17 +514,28 @@ class UserController extends ItemController
 
 
     /**
-     * @api {post} /api/v1/users/relations Relations
+     * @api {get, post} /api/v1/users/relations Relations
      * @apiDescription Show attached users and to whom the user is attached
      * @apiVersion 0.1.0
      * @apiName RelationsUser
      * @apiGroup User
      *
-     * @apiParam {Integer} [id]               User ID
-     * @apiParam {Integer} [attached_user_id] Attached User ID
+     * @apiErrorExample Wrong id
+     * {
+     *   "error": "Validation fail",
+     *   "reason": "id and attached_user_id is invalid"
+     * }
      *
-     * @apiSuccess {Object[]} array        Array of User object
-     * @apiSuccess {Object}   array.object User object
+     * @apiSuccessExample {json} Response example
+     * {
+     *
+     * }
+     *
+     * @apiParam {Integer} [id]               User id
+     * @apiParam {Integer} [attached_user_id] Attached User id
+     *
+     * @apiSuccess {Object[]} array        Users
+     * @apiSuccess {Object}   array.object User
      *
      * @param Request $request
      *

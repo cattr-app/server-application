@@ -242,7 +242,7 @@ class RolesController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/roles/destroy Destroy
+     * @api {post} /api/v1/roles/remove Destroy
      * @apiUse DefaultDestroyRequestExample
      * @apiDescription Destroy Role
      * @apiVersion 0.1.0

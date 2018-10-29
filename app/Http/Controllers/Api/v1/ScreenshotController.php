@@ -328,13 +328,13 @@ class ScreenshotController extends ItemController
      * @apiSuccess {Object[]} Array                                            Array of objects
      * @apiSuccess {String}   Array.object.interval                            Time of interval
      * @apiSuccess {Object[]} Array.object.screenshots                         Screenshots of interval (Array of objects, 6 indexes)
-     * @apiSuccess {Integer}  Array.object.screenshots.object.id               Screenshot's ID
-     * @apiSuccess {Integer}  Array.object.screenshots.object.time_interval_id Screenshot's Time Interval ID
-     * @apiSuccess {String}   Array.object.screenshots.object.path             Screenshot's Image path URI
-     * @apiSuccess {String}   Array.object.screenshots.object.created_at       Screenshot's date time of create
-     * @apiSuccess {String}   Array.object.screenshots.object.updated_at       Screenshot's date time of update
-     * @apiSuccess {String}   Array.object.screenshots.object.deleted_at       Screenshot's date time of delete
-     * @apiSuccess {Object}   Array.object.screenshots.object.time_interval    Screenshot's Task
+     * @apiSuccess {Integer}  Array.object.screenshots.object.id               Screenshot ID
+     * @apiSuccess {Integer}  Array.object.screenshots.object.time_interval_id Screenshot Time Interval ID
+     * @apiSuccess {String}   Array.object.screenshots.object.path             Screenshot Image path URI
+     * @apiSuccess {String}   Array.object.screenshots.object.created_at       Screenshot date time of create
+     * @apiSuccess {String}   Array.object.screenshots.object.updated_at       Screenshot date time of update
+     * @apiSuccess {String}   Array.object.screenshots.object.deleted_at       Screenshot date time of delete
+     * @apiSuccess {Object}   Array.object.screenshots.object.time_interval    Screenshot Task
      *
      * @param Request $request
      * @return \Illuminate\Http\JsonResponse
