@@ -11,6 +11,7 @@ import {AllowedActionsService} from '../roles/allowed-actions.service';
 import {By} from '@angular/platform-browser';
 import {LocalStorage} from '../../api/storage.model';
 import {loadAdminStorage, loadUserStorage} from '../../test-helper/test-helper';
+import {TranslateFakeLoader, TranslateLoader, TranslateModule} from '@ngx-translate/core';
 
 describe('DashboardComponent(Manager)', () => {
   let fixture, component;
@@ -18,6 +19,11 @@ describe('DashboardComponent(Manager)', () => {
   beforeEach(async(() => {
     loadAdminStorage();
     TestBed.configureTestingModule({
+      imports: [
+        TranslateModule.forRoot({
+          loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
+        }),
+      ],
       declarations: [DashboardComponent],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
@@ -35,8 +41,6 @@ describe('DashboardComponent(Manager)', () => {
       fixture = TestBed.createComponent(DashboardComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
-      // console.log(component.userIsManager);
-      // console.log(component.allowedAction.can('dashboard/manager_access'));
     });
   }));
 
@@ -63,6 +67,11 @@ describe('DashboardComponent(User)', () => {
     loadUserStorage();
 
     TestBed.configureTestingModule({
+      imports: [
+        TranslateModule.forRoot({
+          loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
+        }),
+      ],
       declarations: [DashboardComponent],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
@@ -80,8 +89,6 @@ describe('DashboardComponent(User)', () => {
       fixture = TestBed.createComponent(DashboardComponent);
       component = fixture.componentInstance;
       fixture.detectChanges();
-      // console.log(component.userIsManager);
-      // console.log(component.allowedAction.can('dashboard/manager_access'));
     });
   }));
 

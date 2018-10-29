@@ -175,12 +175,12 @@ describe('Screenshots list component(Admin)', () => {
 
   it('has a filter by max date', async(() => {
     const el = fixture.debugElement.queryAll(By.css('.filter'))[2].nativeElement;
-    expect(el.innerHTML).toContain('Filter by max date');
+    expect(el.innerHTML).toContain('screenshot.filter-max');
   }));
 
   it('has a filter by min date', async(() => {
     const el = fixture.debugElement.queryAll(By.css('.filter'))[3].nativeElement;
-    expect(el.innerHTML).toContain('Filter by min date');
+    expect(el.innerHTML).toContain('screenshot.filter-min');
   }));
 
   it('has a screenshot image', async(() => {
@@ -196,12 +196,6 @@ describe('Screenshots list component(Admin)', () => {
   it('has a link to project', async(() => {
     const el = fixture.debugElement.query(By.css('.card-body')).nativeElement;
     expect(el.innerHTML).toContain('ProjectName');
-  }));
-
-  it('has a screenshot image', async(() => {
-    const el = fixture.debugElement.query(By.css('img.screenshot')).nativeElement;
-
-    expect(el.innerHTML).not.toBeUndefined();
   }));
 });
 
@@ -268,12 +262,12 @@ describe('Screenshots list component(User)', () => {
 
   it('has a filter by max date', async(() => {
     const el = fixture.debugElement.queryAll(By.css('.filter'))[0].nativeElement;
-    expect(el.innerHTML).toContain('Filter by max date');
+    expect(el.innerHTML).toContain('screenshot.filter-max');
   }));
 
   it('has a filter by min date', async(() => {
     const el = fixture.debugElement.queryAll(By.css('.filter'))[1].nativeElement;
-    expect(el.innerHTML).toContain('Filter by min date');
+    expect(el.innerHTML).toContain('screenshot.filter-min');
   }));
 
   it('has a screenshot image', async(() => {

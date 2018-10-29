@@ -12,6 +12,7 @@ import {By} from '@angular/platform-browser';
 import {loadAdminStorage, loadUserStorage} from '../../../test-helper/test-helper';
 import {BsModalService, ComponentLoaderFactory, PositioningService} from 'ngx-bootstrap';
 import {AllowedAction} from '../../../models/allowed-action.model';
+import {TranslateFakeLoader, TranslateLoader, TranslateModule} from '@ngx-translate/core';
 
 class ProjectsListComponentMock extends ProjectsListComponent {
 
@@ -40,6 +41,11 @@ describe('Projects list component(Manager)', () => {
   let component, fixture;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      imports: [
+        TranslateModule.forRoot({
+          loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
+        }),
+      ],
       declarations: [ProjectsListComponentMock, ],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
@@ -104,6 +110,11 @@ describe('Projects list component(User)', () => {
   let component, fixture;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
+      imports: [
+        TranslateModule.forRoot({
+          loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
+        }),
+      ],
       declarations: [ProjectsListComponentMock, ],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
