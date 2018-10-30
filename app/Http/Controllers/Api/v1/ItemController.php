@@ -185,17 +185,21 @@ abstract class  ItemController extends Controller
     /**
      * @apiDefine DefaultEditErrorResponse
      *
-     * @apiError (Error 400) {String} error  Name of error
-     * @apiError (Error 400) {String} reason Reason of error
+     * @apiError (Error 400) {String} error  Error name
+     * @apiError (Error 400) {String} reason Reason
      */
 
     /**
      * @apiDefine DefaultBulkEditErrorResponse
+     *
+     * Yes, we send errors with 200 HTTP status-code, because 207 use WebDAV
+     * and REST API have some architecture problems
+     *
      * @apiError (Error 200) {Object[]}  messages               Errors
      * @apiError (Error 200) {Object}    messages.object        Error
-     * @apiError (Error 200) {String}    messages.object.error  Name of error
-     * @apiError (Error 200) {String}    messages.object.reason Reason of error
-     * @apiError (Error 200) {Integer}   messages.object.code   Code of error
+     * @apiError (Error 200) {String}    messages.object.error  Error name
+     * @apiError (Error 200) {String}    messages.object.reason Reason
+     * @apiError (Error 200) {Integer}   messages.object.code   Error Status-Code
      *
      * @apiError (Error 400) {Object[]} messages               Errors
      * @apiError (Error 400) {Object}   messages.object        Error

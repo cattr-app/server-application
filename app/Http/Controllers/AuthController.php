@@ -31,11 +31,16 @@ class AuthController extends Controller
      *
      * @apiError (Error 403) {String} error         Error name
      * @apiError (Error 403) {String} reason        Error description
-     * @apiError (Error 403) {String} error_core    Error code
+     * @apiError (Error 403) {String} error_code    Error code
      */
 
     /**
      * @apiDefine AuthAnswer
+     *
+     * @apiSuccess {String}     access_token  Token
+     * @apiSuccess {String}     token_type    Token Type
+     * @apiSuccess {String}     expires_in    Token TTL in seconds
+     * @apiSuccess {Array}      user          User Entity
      *
      * @apiSuccessExample {json} Answer Example
      *  {

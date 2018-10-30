@@ -102,7 +102,7 @@ class ProjectController extends ItemController
      * @apiUse UnauthorizedError
      *
      * @apiSuccess {Object[]} ProjectList                     Projects
-     * @apiSuccess {Object}   ProjectList.Project             Project object
+     * @apiSuccess {Object}   ProjectList.Project             Project
      * @apiSuccess {Integer}  ProjectList.Project.id          Project id
      * @apiSuccess {String}   ProjectList.Project.name        Project name
      * @apiSuccess {String}   ProjectList.Project.description Project description

@@ -338,6 +338,11 @@ class ProjectsRolesController extends ItemController
    *   "reason": "action is not allowed"
    * }
    *
+   *  @apiErrorExample (404) {json} Not found example
+   * {
+   *   "error": "No query results for model [App\\User]."
+   * }
+   *
    * @apiError {String} error  Error
    * @apiError {String} reason Reason
    *

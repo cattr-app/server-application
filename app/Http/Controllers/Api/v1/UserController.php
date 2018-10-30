@@ -151,6 +151,13 @@ class UserController extends ItemController
      *   "role_id": "3"
      * }
      *
+     * @apiSuccess {Object} res User
+     * @apiSuccess {Object} res.full_name   User
+     * @apiSuccess {Object} res.email       Email
+     * @apiSuccess {Object} res.active      Is user active
+     * @apiSuccess {Object} res.role_id     User role id
+     * @apiSuccess {Object} res.updated_at  User last update datetime
+     * @apiSuccess {Object} res.created_at  User registration datetime
      *
      *
      * @apiSuccessExample {json} Response Example
@@ -165,7 +172,6 @@ class UserController extends ItemController
      *     "id": 3
      *   }
      * }
-     *
      *
      * @apiUse UserModel
      */
@@ -233,6 +239,7 @@ class UserController extends ItemController
      * @apiName EditUser
      * @apiGroup User
      *
+     *
      * @apiParamExample {json} Request Example
      * {
      *   "id": 1,
@@ -240,6 +247,8 @@ class UserController extends ItemController
      *   "email": "gook@tree.com",
      *   "active": "1"
      * }
+     *
+     * @apiSuccess {Object} res   User
      *
      * @apiSuccessExample {json} Response Example
      * {
@@ -359,7 +368,7 @@ class UserController extends ItemController
     }
 
     /**
-     * @api {delete} /api/v1/users/remove Destroy
+     * @api {delete, post} /api/v1/users/remove Destroy
      * @apiDescription Destroy User
      * @apiVersion 0.1.0
      * @apiName DestroyUser
@@ -528,7 +537,7 @@ class UserController extends ItemController
      *
      * @apiSuccessExample {json} Response example
      * {
-     *
+     *    "": ""
      * }
      *
      * @apiParam {Integer} [id]               User id
