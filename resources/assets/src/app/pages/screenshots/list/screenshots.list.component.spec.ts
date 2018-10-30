@@ -26,11 +26,14 @@ import {ScreenshotListComponent} from '../../../screenshot-list/screenshot-list.
 import {ModalModule} from 'ngx-bootstrap';
 
 class MockScreenshotListComponent extends ScreenshotListComponent {
+  
+  pathToNonePng: string = 'http://127.0.0.1:8000/uploads/none.png';
+  
   setItems(a) {
     super.setItems([{
       'id': 2218,
       'time_interval_id': 2218,
-      'path': 'http://127.0.0.1:8000/uploads/none.png',
+      'path': this.pathToNonePng,
       'created_at': '2018-09-03 02:26:09',
       'updated_at': '2018-09-03 02:26:09',
       'deleted_at': null,
@@ -100,17 +103,6 @@ class MockScreenshotListComponent extends ScreenshotListComponent {
     }]);
   }
 
-  // reload() {
-  //   this.offset = 0;
-  //   this.setItems([]);
-  //   this.countFail = 0;
-  //   this.isAllLoaded = false;
-  //   this.loadNext();
-  // }
-  //
-  // loadNext() {
-  //   return;
-  // }
 }
 
 describe('Screenshots list component(Admin)', () => {
@@ -184,8 +176,8 @@ describe('Screenshots list component(Admin)', () => {
   }));
 
   it('has a screenshot image', async(() => {
-    const el = fixture.debugElement.query(By.css('img.screenshot')).nativeElement;
-    expect(el.innerHTML).not.toBeUndefined();
+    const el = fixture.debugElement.query(By.css('.screenshot.card-img-top'));
+    expect(el.properties.src).toContain('none.png');
   }));
 
   it('has a link to task', async(() => {
@@ -271,8 +263,8 @@ describe('Screenshots list component(User)', () => {
   }));
 
   it('has a screenshot image', async(() => {
-    const el = fixture.debugElement.query(By.css('img.screenshot')).nativeElement;
-    expect(el.innerHTML).not.toBeUndefined();
+    const el = fixture.debugElement.query(By.css('.screenshot.card-img-top'));
+    expect(el.properties.src).toContain('none.png');
   }));
 
   it('has a link to task', async(() => {
