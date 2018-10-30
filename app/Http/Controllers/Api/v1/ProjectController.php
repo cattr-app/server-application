@@ -74,7 +74,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {any} /api/v1/projects/list List
+     * @api {get, post} /api/v1/projects/list List
      * @apiDescription Get list of Projects
      * @apiVersion 0.1.0
      * @apiName GetProjectList
@@ -102,7 +102,7 @@ class ProjectController extends ItemController
      * @apiUse UnauthorizedError
      *
      * @apiSuccess {Object[]} ProjectList                     Projects
-     * @apiSuccess {Object}   ProjectList.Project             Project object
+     * @apiSuccess {Object}   ProjectList.Project             Project
      * @apiSuccess {Integer}  ProjectList.Project.id          Project id
      * @apiSuccess {String}   ProjectList.Project.name        Project name
      * @apiSuccess {String}   ProjectList.Project.description Project description
@@ -226,7 +226,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {any} /api/v1/projects/show Show
+     * @api {get, post} /api/v1/projects/show Show
      * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          1,
@@ -257,8 +257,8 @@ class ProjectController extends ItemController
      * @apiSuccess {String}   Project.created_at  Project date time of create
      * @apiSuccess {String}   Project.updated_at  Project date time of update
      * @apiSuccess {String}   Project.deleted_at  Project date time of delete
-     * @apiSuccess {Object[]} Project.users       Project User
-     * @apiSuccess {Object[]} Project.tasks       Project Task
+     * @apiSuccess {Object[]} Project.users       Project Users
+     * @apiSuccess {Object[]} Project.tasks       Project Tasks
      *
      * @apiSuccessExample {json} Answer Example
      * {
@@ -295,29 +295,29 @@ class ProjectController extends ItemController
      *   "deleted_at": null,
      *   "time_intervals": [
      *     {
-     *     "id": 1,
-     *     "task_id": 1,
-     *     "start_at": "2006-05-31 16:15:09",
-     *     "end_at": "2006-05-31 16:20:07",
-     *     "created_at": "2018-09-25 06:15:08",
-     *     "updated_at": "2018-09-25 06:15:08",
-     *     "deleted_at": null,
-     *     "count_mouse": 88,
-     *     "count_keyboard": 127,
-     *     "user_id": 1
+     *       "id": 1,
+     *       "task_id": 1,
+     *       "start_at": "2006-05-31 16:15:09",
+     *       "end_at": "2006-05-31 16:20:07",
+     *       "created_at": "2018-09-25 06:15:08",
+     *       "updated_at": "2018-09-25 06:15:08",
+     *       "deleted_at": null,
+     *       "count_mouse": 88,
+     *       "count_keyboard": 127,
+     *       "user_id": 1
      *     },
      *     {
-     *     "id": 2,
-     *     "task_id": 1,
-     *     "start_at": "2006-05-31 16:20:08",
-     *     "end_at": "2006-05-31 16:25:06",
-     *     "created_at": "2018-09-25 06:15:08",
-     *     "updated_at": "2018-09-25 06:15:08",
-     *     "deleted_at": null,
-     *     "count_mouse": 117,
-     *     "count_keyboard": 23,
-     *     "user_id": 1
-     *     },
+     *       "id": 2,
+     *       "task_id": 1,
+     *       "start_at": "2006-05-31 16:20:08",
+     *       "end_at": "2006-05-31 16:25:06",
+     *       "created_at": "2018-09-25 06:15:08",
+     *       "updated_at": "2018-09-25 06:15:08",
+     *       "deleted_at": null,
+     *       "count_mouse": 117,
+     *       "count_keyboard": 23,
+     *       "user_id": 1
+     *     }
      *   ]
      * }
      *
@@ -329,7 +329,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {put} /api/v1/projects/edit Edit
+     * @api {put, post} /api/v1/projects/edit Edit
      * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1,
@@ -362,7 +362,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/projects/remove Destroy
+     * @api {delete, post} /api/v1/projects/remove Destroy
      * @apiUse DefaultDestroyRequestExample
      * @apiDescription Destroy Project
      * @apiVersion 0.1.0
