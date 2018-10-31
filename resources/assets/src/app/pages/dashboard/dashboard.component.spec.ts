@@ -12,17 +12,18 @@ import {By} from '@angular/platform-browser';
 import {LocalStorage} from '../../api/storage.model';
 import {loadAdminStorage, loadUserStorage} from '../../test-helper/test-helper';
 import {TranslateFakeLoader, TranslateLoader, TranslateModule} from '@ngx-translate/core';
+import { TabsModule } from 'ngx-bootstrap/tabs';
 
 describe('DashboardComponent(Manager)', () => {
   let fixture, component;
-
+  
   beforeEach(async(() => {
     loadAdminStorage();
     TestBed.configureTestingModule({
       imports: [
         TranslateModule.forRoot({
           loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
-        }),
+        }), TabsModule.forRoot(),
       ],
       declarations: [DashboardComponent],
       schemas: [NO_ERRORS_SCHEMA],
@@ -52,12 +53,12 @@ describe('DashboardComponent(Manager)', () => {
     component.ngOnInit();
     component.ngAfterViewInit();
     const el  = fixture.debugElement.query(By.all()).nativeElement;
-    expect(el.innerHTML).toContain('Own');
+    expect(el.innerHTML).toContain('control.own');
   });
 
   it('should has "Team" tab', () => {
     const el  = fixture.debugElement.query(By.all()).nativeElement;
-    expect(el.innerHTML).toContain('Team');
+    expect(el.innerHTML).toContain('control.team');
   });
 });
 
@@ -70,7 +71,7 @@ describe('DashboardComponent(User)', () => {
       imports: [
         TranslateModule.forRoot({
           loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
-        }),
+        }), TabsModule.forRoot(),
       ],
       declarations: [DashboardComponent],
       schemas: [NO_ERRORS_SCHEMA],
@@ -100,11 +101,11 @@ describe('DashboardComponent(User)', () => {
     component.ngOnInit();
     component.ngAfterViewInit();
     const el  = fixture.debugElement.query(By.all()).nativeElement;
-    expect(el.innerHTML).not.toContain('Own');
+    expect(el.innerHTML).not.toContain('control.own');
   });
 
-  it('should has not "Team" tab', () => {
+  it('should has not "team" statistic tab', () => {
     const el  = fixture.debugElement.query(By.all()).nativeElement;
-    expect(el.innerHTML).not.toContain('Team');
+    expect(el.innerHTML).not.toContain('control.team');
   });
 });
