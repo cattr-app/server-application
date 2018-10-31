@@ -117,6 +117,10 @@ ssh-exec-restore "Run migrations" \
     "${ARTISAN} migrate --force" \
     "Database Migration failed" 13
 
+ssh-exec "Regenerate user rules" \
+    "${ARTISAN} db:seed --class=RoleSeeder" \
+    "Can't regenerate rules" 15
+
 ##############################
 ### Archive previous build ###
 ##############################

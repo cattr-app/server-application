@@ -80,8 +80,7 @@
 		}
 	},
 	"login": {
-		"submit": "Submit",
-		"name": "Name"
+		"submit": "Submit"
 	},
 	"task": {
 		"edit": "Edit task",
@@ -91,7 +90,9 @@
 	},
 	"settings": {
 		"title": "Settings",
+		"general": "General",
 		"select-lang": "Select language here",
+		"user": "Account",
 		"lang": "Language"
 	},
 	"user": {

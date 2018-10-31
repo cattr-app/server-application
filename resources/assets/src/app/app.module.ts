@@ -16,9 +16,7 @@ import {SharedModule} from './shared.module';
 import {MomentModule} from 'ngx-moment';
 
 import {AppComponent} from './app.component';
-import {DashboardComponent} from './dashboard/dashboard.component';
 import {NavigationComponent} from './navigation/navigation.component';
-import {SettingsComponent} from './pages/settings/settings.component';
 
 import {AllowedActionsService} from './pages/roles/allowed-actions.service';
 import {AttachedUsersService} from './pages/users/attached-users.service';
@@ -52,9 +50,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     ],
     declarations: [
         AppComponent,
-        DashboardComponent,
         NavigationComponent,
-        SettingsComponent,
     ],
     providers: [
         AllowedActionsService,
