@@ -15,11 +15,12 @@ class CreateTokensTable extends Migration
     {
         if (!Schema::hasTable('tokens')) {
             Schema::create('tokens', function (Blueprint $table) {
+                $table->increments('id');
                 $table->integer('user_id');
                 $table->string('token', 512);
                 $table->dateTime('expires_at');
 
-                $table->primary(['user_id', 'token']);
+                //$table->primary(['user_id', 'token']);
             });
         }
     }
