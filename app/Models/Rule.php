@@ -145,6 +145,7 @@ class Rule extends Model
                 'edit' => __('Rules edit'),
                 'bulk-edit' => __('Rules multiple edit'),
                 'actions' => __('Rules actions list'),
+                'full_access' => __('Rules full access'),
             ],
             'project-report' => [
                 'list' => __('Projects report list'),
