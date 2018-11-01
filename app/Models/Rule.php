@@ -101,7 +101,7 @@ class Rule extends Model
                 'edit' => __('Screenshot edit'),
                 'show' => __('Screenshot show'),
                 'remove' => __('Screenshot remove'),
-                'remove_related' => _('Remove screenshots of related users'),
+                'remove_related' => __('Remove screenshots of related users'),
                 'dashboard' => __('Screenshot list at dashboard'),
                 'manager_access' => __('Screenshots manager access'),
                 'full_access' => __('Screenshots full access'),

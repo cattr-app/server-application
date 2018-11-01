@@ -144,11 +144,11 @@ class ScreenshotController extends ItemController
      *  }
      *
      * @apiSuccess {Object}   Screenshot                  Screenshot object
-     * @apiSuccess {Integer}  Screenshot.id               Screenshot's ID
-     * @apiSuccess {Integer}  Screenshot.time_interval_id Screenshot's Time Interval ID
-     * @apiSuccess {String}   Screenshot.path             Screenshot's Image path URI
-     * @apiSuccess {DateTime} Screenshot.created_at       Screenshot's date time of create
-     * @apiSuccess {DateTime} Screenshot.updated_at       Screenshot's date time of update
+     * @apiSuccess {Integer}  Screenshot.id               Screenshot id
+     * @apiSuccess {Integer}  Screenshot.time_interval_id Screenshot Time Interval id
+     * @apiSuccess {String}   Screenshot.path             Screenshot Image path URI
+     * @apiSuccess {String}   Screenshot.created_at       Screenshot date time of create
+     * @apiSuccess {String}   Screenshot.updated_at       Screenshot date time of update
      *
      * @apiUse DefaultCreateErrorResponse
      * @apiUse UnauthorizedError
@@ -214,11 +214,11 @@ class ScreenshotController extends ItemController
      * @apiName ShowScreenshot
      * @apiGroup Screenshot
      *
-     * @apiParam {Integer}  id                              Screenshot ID
-     * @apiParam {Integer}  [time_interval_id] `QueryParam` Screenshot's Time Interval ID
+     * @apiParam {Integer}  id                              Screenshot id
+     * @apiParam {Integer}  [time_interval_id] `QueryParam` Screenshot Time Interval id
      * @apiParam {String}   [path]             `QueryParam` Image path URI
-     * @apiParam {DateTime} [created_at]       `QueryParam` Screenshot Creation DateTime
-     * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
+     * @apiParam {String}   [created_at]       `QueryParam` Screenshot Creation DateTime
+     * @apiParam {String}   [updated_at]       `QueryParam` Last Screenshot data update DataTime
      * @apiUse ScreenshotRelations
      *
      * @apiParamExample {json} Simple Request Example
@@ -232,13 +232,13 @@ class ScreenshotController extends ItemController
      * @apiUse ScreenshotRelationsExample
      *
      * @apiSuccess {Object}   Screenshot                  Screenshot object
-     * @apiSuccess {Integer}  Screenshot.id               Screenshot's ID
-     * @apiSuccess {Integer}  Screenshot.time_interval_id Screenshot's Time Interval ID
-     * @apiSuccess {String}   Screenshot.path             Screenshot's Image path URI
-     * @apiSuccess {DateTime} Screenshot.created_at       Screenshot's date time of create
-     * @apiSuccess {DateTime} Screenshot.updated_at       Screenshot's date time of update
-     * @apiSuccess {DateTime} Screenshot.deleted_at       Screenshot's date time of delete
-     * @apiSuccess {Object}   Screenshot.time_interval    Screenshot's Task
+     * @apiSuccess {Integer}  Screenshot.id               Screenshot id
+     * @apiSuccess {Integer}  Screenshot.time_interval_id Screenshot Time Interval id
+     * @apiSuccess {String}   Screenshot.path             Screenshot Image path URI
+     * @apiSuccess {String}   Screenshot.created_at       Screenshot date time of create
+     * @apiSuccess {String}   Screenshot.updated_at       Screenshot date time of update
+     * @apiSuccess {String}   Screenshot.deleted_at       Screenshot date time of delete
+     * @apiSuccess {Object}   Screenshot.time_interval    Screenshot Task
      *
      * @apiUse DefaultShowErrorResponse
      * @apiUse UnauthorizedError
@@ -253,8 +253,8 @@ class ScreenshotController extends ItemController
      * @apiVersion 0.1.0
      * @apiName EditScreenshot
      * @apiGroup Screenshot
-     * @apiParam {Integer}  id               Screenshot ID
-     * @apiParam {Integer}  time_interval_id Screenshot's Time Interval ID
+     * @apiParam {Integer}  id               Screenshot id
+     * @apiParam {Integer}  time_interval_id Screenshot Time Interval id
      * @apiParam {String}   path             Image path URI
      * @apiParam {DateTime} [created_at]     Screenshot Creation DateTime
      * @apiParam {DateTime} [updated_at]     Last Screenshot data update DataTime
@@ -267,12 +267,12 @@ class ScreenshotController extends ItemController
      *  }
      *
      * @apiSuccess {Object}   Screenshot                  Screenshot object
-     * @apiSuccess {Integer}  Screenshot.id               Screenshot's ID
-     * @apiSuccess {Integer}  Screenshot.time_interval_id Screenshot's Time Interval ID
-     * @apiSuccess {String}   Screenshot.path             Screenshot's Image path URI
-     * @apiSuccess {DateTime} Screenshot.created_at       Screenshot's date time of create
-     * @apiSuccess {DateTime} Screenshot.updated_at       Screenshot's date time of update
-     * @apiSuccess {DateTime} Screenshot.deleted_at       Screenshot's date time of delete
+     * @apiSuccess {Integer}  Screenshot.id               Screenshot ID
+     * @apiSuccess {Integer}  Screenshot.time_interval_id Screenshot Time Interval ID
+     * @apiSuccess {String}   Screenshot.path             Screenshot Image path URI
+     * @apiSuccess {String}   Screenshot.created_at       Screenshot date time of create
+     * @apiSuccess {String}   Screenshot.updated_at       Screenshot date time of update
+     * @apiSuccess {String}   Screenshot.deleted_at       Screenshot date time of delete
      *
      * @apiUse DefaultEditErrorResponse
      * @apiUse UnauthorizedError
@@ -289,7 +289,7 @@ class ScreenshotController extends ItemController
      * @apiName DestroyScreenshot
      * @apiGroup Screenshot
      *
-     * @apiParam {String} id Screenshot's id
+     * @apiParam {String} id Screenshot id
      *
      * @apiUse DefaultDestroyResponse
      *
@@ -326,16 +326,17 @@ class ScreenshotController extends ItemController
      * @apiUse UnauthorizedError
      *
      * @apiSuccess {Object[]} Array                                            Array of objects
-     * @apiSuccess {DateTime} Array.object.interval                            Time of interval
+     * @apiSuccess {String}   Array.object.interval                            Time of interval
      * @apiSuccess {Object[]} Array.object.screenshots                         Screenshots of interval (Array of objects, 6 indexes)
-     * @apiSuccess {Integer}  Array.object.screenshots.object.id               Screenshot's ID
-     * @apiSuccess {Integer}  Array.object.screenshots.object.time_interval_id Screenshot's Time Interval ID
-     * @apiSuccess {String}   Array.object.screenshots.object.path             Screenshot's Image path URI
-     * @apiSuccess {String}   Array.object.screenshots.object.created_at       Screenshot's date time of create
-     * @apiSuccess {String}   Array.object.screenshots.object.updated_at       Screenshot's date time of update
-     * @apiSuccess {String}   Array.object.screenshots.object.deleted_at       Screenshot's date time of delete
-     * @apiSuccess {Object}   Array.object.screenshots.object.time_interval    Screenshot's Task
+     * @apiSuccess {Integer}  Array.object.screenshots.object.id               Screenshot ID
+     * @apiSuccess {Integer}  Array.object.screenshots.object.time_interval_id Screenshot Time Interval ID
+     * @apiSuccess {String}   Array.object.screenshots.object.path             Screenshot Image path URI
+     * @apiSuccess {String}   Array.object.screenshots.object.created_at       Screenshot date time of create
+     * @apiSuccess {String}   Array.object.screenshots.object.updated_at       Screenshot date time of update
+     * @apiSuccess {String}   Array.object.screenshots.object.deleted_at       Screenshot date time of delete
+     * @apiSuccess {Object}   Array.object.screenshots.object.time_interval    Screenshot Task
      *
+     * @param Request $request
      * @return \Illuminate\Http\JsonResponse
      */
     public function dashboard(Request $request): JsonResponse

@@ -242,14 +242,14 @@ class RolesController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/roles/destroy Destroy
+     * @api {post} /api/v1/roles/remove Destroy
      * @apiUse DefaultDestroyRequestExample
      * @apiDescription Destroy Role
      * @apiVersion 0.1.0
      * @apiName DestroyRole
      * @apiGroup Role
      *
-     * @apiParam {Integer} id Role ID
+     * @apiParam {Integer} id Role id
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -266,20 +266,20 @@ class RolesController extends ItemController
 
     /**
      * @api {post} /api/v1/roles/allowed-rules AllowedRules
-     * @apiDescription Get Rule's allowed action list
+     * @apiDescription Get Rule allowed action list
      * @apiVersion 0.1.0
      * @apiName GetRulesAllowedActionList
      * @apiGroup Roles
      *
-     * @apiParam {Integer} id Role ID
+     * @apiParam {Integer} id Role id
      *
      * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1
      *  }
      *
-     * @apiSuccess {Object[]} array               Array of Rule objects
-     * @apiSuccess {Object}   array.object        Rule object
+     * @apiSuccess {Object[]} array               Rules
+     * @apiSuccess {Object}   array.object        Rule
      * @apiSuccess {String}   array.object.object Object of rule
      * @apiSuccess {String}   array.object.action Action of rule
      * @apiSuccess {String}   array.object.name   Name of rule
