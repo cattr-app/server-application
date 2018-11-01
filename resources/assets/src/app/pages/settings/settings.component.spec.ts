@@ -15,6 +15,7 @@ import {ApiService} from '../../api/api.service';
 import {FormsModule} from '@angular/forms';
 import {NG_SELECT_DEFAULT_CONFIG, NgSelectModule} from '@ng-select/ng-select';
 import {AppComponent} from '../../app.component';
+import { TabsModule } from 'ngx-bootstrap/tabs';
 
 describe('Settings component', () => {
   let component, fixture;
@@ -27,7 +28,7 @@ describe('Settings component', () => {
         NgxPaginationModule,
         TranslateModule.forRoot({
           loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
-        }),
+        }), TabsModule.forRoot(),
       ],
       providers: [
         ApiService,
@@ -57,14 +58,19 @@ describe('Settings component', () => {
     expect(component).toBeTruthy();
   }));
 
-  it('has a title', async(() => {
-    const el = fixture.debugElement.query(By.css('.panel')).nativeElement;
-    expect(el.innerHTML).toContain('settings.title');
+  it('has a General tab', async(() => {
+  const el = fixture.debugElement.query(By.css(".tab-container")).nativeElement;
+    console.log(el);
+    expect(el.innerHTML).toContain('settings.general');
   }));
 
-  it('has a save button', async(() => {
-    console.log(component.languages);
-    const el = fixture.debugElement.query(By.css('button[type="submit"]')).nativeElement;
-    expect(el.innerHTML).toContain('control.save');
+  it('has a Redmine Integration tab', async(() => {
+    const el = fixture.debugElement.query(By.css(".tab-container")).nativeElement;
+    expect(el.innerHTML).toContain('integration.redmine.title');
+  }));
+
+  it('has a Account tab', async(() => {
+    const el = fixture.debugElement.query(By.css(".tab-container")).nativeElement;
+    expect(el.innerHTML).toContain('settings.user');
   }));
 });
