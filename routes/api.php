@@ -35,12 +35,18 @@ Route::group([
     $router->any('logout-all', 'AuthController@logoutAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
+
+    $router->get('/register/{key}', 'RegistrationController@getForm');
+    $router->post('/register/{key}', 'RegistrationController@postForm');
 });
 
 Route::group([
     'middleware' => 'auth:api',
     'prefix' => 'v1',
 ], function (Router $router) {
+    // Register routes
+    $router->post('/register/create', 'RegistrationController@create');
+
     //Projects routes
     $router->any('/projects/list', 'Api\v1\ProjectController@index');
     $router->post('/projects/create', 'Api\v1\ProjectController@create');

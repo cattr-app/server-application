@@ -52,6 +52,9 @@ class Rule extends Model
     public static function getActionList(): array
     {
         return \Filter::process('role.actions.list', [
+            'register' => [
+                'create' => __('Register user'),
+            ],
             'projects' => [
                 'list' => __('Project list'),
                 'create' => __('Project create'),

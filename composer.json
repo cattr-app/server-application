@@ -20,7 +20,8 @@
         "laravel/tinker": "^1.0",
         "nwidart/laravel-modules": "^3.0",
         "paulvl/backup": "3.*",
-        "tymon/jwt-auth": " 1.0.0-rc.2"
+        "tymon/jwt-auth": " 1.0.0-rc.2",
+        "webpatser/laravel-uuid": "^3.0"
     },
     "require-dev": {
         "phpunit/phpunit": "^7.0",
