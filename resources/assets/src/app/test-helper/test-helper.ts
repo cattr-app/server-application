@@ -480,6 +480,7 @@ export function loadAdminStorage() {
   );
   localStorage.set('token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC8xMjcuMC4wLjE6ODAwMFwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTUzOTAwNjAwNCwiZXhwIjoxNTM5MDA5NjA0LCJuYmYiOjE1MzkwMDYwMDQsImp0aSI6IjZ0TFpXRE02ZlFwYmlCdk8iLCJzdWIiOjEsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.kuhSY8Ae7k5vSHHXelN0gxEcJpYO6268Sv-XA1H47ZI');
   localStorage.set('tokenType', 'bearer');
+  localStorage.set('settings-tab', 'Account'); 
 }
 
 export function loadUserStorage() {
@@ -695,6 +696,7 @@ export function loadUserStorage() {
   );
   localStorage.set('token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC8xMjcuMC4wLjE6ODAwMFwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTUzOTAwNjAwNCwiZXhwIjoxNTM5MDA5NjA0LCJuYmYiOjE1MzkwMDYwMDQsImp0aSI6IjZ0TFpXRE02ZlFwYmlCdk8iLCJzdWIiOjEsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.kuhSY8Ae7k5vSHHXelN0gxEcJpYO6268Sv-XA1H47ZI');
   localStorage.set('tokenType', 'bearer');
+  localStorage.set('settings-tab', 'Account');
 }
 
 export function loadManagerStorage() {
@@ -1133,8 +1135,9 @@ export function loadManagerStorage() {
       "updated_at":"2018-10-18 00:25:49",
       "role_id":5,
       "timezone":"Asia/Novosibirsk"
-    } 
+      } 
     );
     localStorage.set('token', "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9hbWF6aW5nLXRpbWUubG9jOjgwMDBcL2FwaVwvYXV0aFwvbG9naW4iLCJpYXQiOjE1NDA1MzY4NjMsImV4cCI6MTU0MDU0MDQ2MywibmJmIjoxNTQwNTM2ODYzLCJqdGkiOiJWODdMZkRLeG1vTURDWk9YIiwic3ViIjoxMiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSJ9.Z2uK4u2rUGADHyHr2Q6yvZ0KoPjToAgDYxYc9z884X0");
     localStorage.set('tokenType', 'bearer');
+    localStorage.set('settings-tab', 'Account');
   }
