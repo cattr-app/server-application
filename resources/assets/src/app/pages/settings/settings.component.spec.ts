@@ -76,7 +76,6 @@ describe('Settings component (User)', () => {
 
   it('load saved in local storage tab', async(() => {
     LocalStorage.getStorage().set("settings-tab", "Account");
-    component.ngAfterContentInit();
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css("a.nav-link.active")).nativeElement;
     expect(el.innerHTML).toContain("settings.user");
@@ -86,7 +85,6 @@ describe('Settings component (User)', () => {
     LocalStorage.getStorage().set("settings-tab", "General");
     fixture.detectChanges();
     let allElements = fixture.debugElement.queryAll(By.css("a.nav-link"));
-    let activeElements = allElements.filter(el => el.nativeElement.className.includes("active"));
     let noActiveElements = allElements.filter(el => !el.nativeElement.className.includes("active"));
     let el;
     while (noActiveElements.length > 0) {
@@ -156,7 +154,6 @@ describe('Settings component (Manager)', () => {
 
   it('load saved in local storage tab', async(() => {
     LocalStorage.getStorage().set("settings-tab", "Account");
-    component.ngAfterContentInit();
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css("a.nav-link.active")).nativeElement;
     expect(el.innerHTML).toContain("settings.user");
@@ -166,7 +163,6 @@ describe('Settings component (Manager)', () => {
     LocalStorage.getStorage().set("settings-tab", "General");
     fixture.detectChanges();
     let allElements = fixture.debugElement.queryAll(By.css("a.nav-link"));
-    let activeElements = allElements.filter(el => el.nativeElement.className.includes("active"));
     let noActiveElements = allElements.filter(el => !el.nativeElement.className.includes("active"));
     let el;
     while (noActiveElements.length > 0) {
@@ -236,7 +232,6 @@ describe('Settings component (Admin)', () => {
 
   it('load saved in local storage tab', async(() => {
     LocalStorage.getStorage().set("settings-tab", "Account");
-    component.ngAfterContentInit();
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css("a.nav-link.active")).nativeElement;
     expect(el.innerHTML).toContain("settings.user");
@@ -246,7 +241,6 @@ describe('Settings component (Admin)', () => {
     LocalStorage.getStorage().set("settings-tab", "General");
     fixture.detectChanges();
     let allElements = fixture.debugElement.queryAll(By.css("a.nav-link"));
-    let activeElements = allElements.filter(el => el.nativeElement.className.includes("active"));
     let noActiveElements = allElements.filter(el => !el.nativeElement.className.includes("active"));
     let el;
     while (noActiveElements.length > 0) {

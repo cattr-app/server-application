@@ -60,6 +60,27 @@ describe('DashboardComponent(Admin)', () => {
     const el  = fixture.debugElement.query(By.all()).nativeElement;
     expect(el.innerHTML).toContain('control.team');
   });
+
+  it('load saved in local storage tab', async(() => {
+    LocalStorage.getStorage().set("settings-tab", "Own");
+    fixture.detectChanges();
+    const el = fixture.debugElement.query(By.css("a.nav-link.active")).nativeElement;
+    expect(el.innerHTML).toContain("control.own");
+  }));
+
+  it('tabs is clickable', async(() => {
+    LocalStorage.getStorage().set("dashboard-tab", "Own");
+    fixture.detectChanges();
+    let allElements = fixture.debugElement.queryAll(By.css("a.nav-link"));
+    let noActiveElements = allElements.filter(el => !el.nativeElement.className.includes("active"));
+    let el;
+    while (noActiveElements.length > 0) {
+      el = noActiveElements.shift();
+      el.nativeElement.click();
+      fixture.detectChanges();
+      expect(fixture.debugElement.query(By.css("a.nav-link.active")).nativeElement.innerHTML).toContain(el.nativeElement.innerHTML);
+    }
+  }));
 });
 
 describe('DashboardComponent(Manager)', () => {
@@ -108,6 +129,27 @@ describe('DashboardComponent(Manager)', () => {
     const el  = fixture.debugElement.query(By.all()).nativeElement;
     expect(el.innerHTML).toContain('control.team');
   });
+
+  it('load saved in local storage tab', async(() => {
+    LocalStorage.getStorage().set("settings-tab", "Own");
+    fixture.detectChanges();
+    const el = fixture.debugElement.query(By.css("a.nav-link.active")).nativeElement;
+    expect(el.innerHTML).toContain("control.own");
+  }));
+
+  it('tabs is clickable', async(() => {
+    LocalStorage.getStorage().set("dashboard-tab", "Own");
+    fixture.detectChanges();
+    let allElements = fixture.debugElement.queryAll(By.css("a.nav-link"));
+    let noActiveElements = allElements.filter(el => !el.nativeElement.className.includes("active"));
+    let el;
+    while (noActiveElements.length > 0) {
+      el = noActiveElements.shift();
+      el.nativeElement.click();
+      fixture.detectChanges();
+      expect(fixture.debugElement.query(By.css("a.nav-link.active")).nativeElement.innerHTML).toContain(el.nativeElement.innerHTML);
+    }
+  }));
 });
 
 describe('DashboardComponent(User)', () => {
