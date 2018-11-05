@@ -62,10 +62,10 @@ describe('DashboardComponent(Admin)', () => {
   });
 
   it('load saved in local storage tab', async(() => {
-    LocalStorage.getStorage().set("settings-tab", "Own");
+    LocalStorage.getStorage().set("settings-tab", "Team");
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css("a.nav-link.active")).nativeElement;
-    expect(el.innerHTML).toContain("control.own");
+    expect(el.innerHTML).toContain("control.team");
   }));
 
   it('tabs is clickable', async(() => {
@@ -131,10 +131,10 @@ describe('DashboardComponent(Manager)', () => {
   });
 
   it('load saved in local storage tab', async(() => {
-    LocalStorage.getStorage().set("settings-tab", "Own");
+    LocalStorage.getStorage().set("settings-tab", "Team");
     fixture.detectChanges();
     const el = fixture.debugElement.query(By.css("a.nav-link.active")).nativeElement;
-    expect(el.innerHTML).toContain("control.own");
+    expect(el.innerHTML).toContain("control.team");
   }));
 
   it('tabs is clickable', async(() => {

@@ -58,11 +58,15 @@ describe('General component in Settings (User)', () => {
     expect(component).toBeTruthy();
   }));
 
-  it('general settings contains language settings', async(() => {
-    const el = fixture.debugElement.query(By.css("form")).nativeElement;
-      expect(el.innerHTML).toContain('settings.lang');
-      expect(el.innerHTML).toContain('settings.select-lang');
-      expect(el.innerHTML).toContain('control.save');
+  it('has language settings', async(() => {
+    const el = fixture.debugElement.query(By.css("ng-select")).nativeElement;
+    expect(el).not.toBeNull();
+    expect(el.innerHTML).toContain("settings.select-lang");
+  }));
+
+  it('has submit button', async(() => {
+    const el = fixture.debugElement.query(By.css("[type='submit']")).nativeElement;
+    expect(el.innerHTML).not.toBeNull();
   }));
 });
 
@@ -107,11 +111,15 @@ describe('General component in Settings (Manager)', () => {
     expect(component).toBeTruthy();
   }));
 
-  it('general settings contains language settings', async(() => {
-    const el = fixture.debugElement.query(By.css("form")).nativeElement;
-      expect(el.innerHTML).toContain('settings.lang');
-      expect(el.innerHTML).toContain('settings.select-lang');
-      expect(el.innerHTML).toContain('control.save');
+  it('has language settings', async(() => {
+    const el = fixture.debugElement.query(By.css("ng-select")).nativeElement;
+    expect(el).not.toBeNull();
+    expect(el.innerHTML).toContain("settings.select-lang");
+  }));
+
+  it('has submit button', async(() => {
+    const el = fixture.debugElement.query(By.css("[type='submit']")).nativeElement;
+    expect(el.innerHTML).not.toBeNull();
   }));
 });
 
@@ -156,11 +164,14 @@ describe('General component in Settings (Admin)', () => {
     expect(component).toBeTruthy();
   }));
 
-  it('general settings contains language settings', async(() => {
-    const el = fixture.debugElement.query(By.css("form")).nativeElement;
-      expect(el.innerHTML).toContain('settings.lang');
-      expect(el.innerHTML).toContain('settings.select-lang');
-      expect(el.innerHTML).toContain('control.save');
+  it('has language settings', async(() => {
+    const el = fixture.debugElement.query(By.css("ng-select")).nativeElement;
+    expect(el).not.toBeNull();
+    expect(el.innerHTML).toContain("settings.select-lang");
   }));
 
+  it('has submit button', async(() => {
+    const el = fixture.debugElement.query(By.css("[type='submit']")).nativeElement;
+    expect(el.innerHTML).not.toBeNull();
+  }));
 });
