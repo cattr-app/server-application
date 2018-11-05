@@ -99,7 +99,8 @@
 		"edit": "Edit user \"{{name}}\"",
 		"create": "Create new user",
 		"remove": "Remove this user?",
-		"list": "Users"
+		"list": "Users",
+		"invite": "Invite user"
 	},
 	"filter": {
 		"project": "Filter by project: ",
@@ -146,7 +147,8 @@
 		"screenshots-interval-required": "Screenshots Interval field is required",
 		"computer-time-popup-required": "User inactive time field is required",
 		"activate": "Activate",
-		"deactivate": "Deactivate"
+		"deactivate": "Deactivate",
+		"invite-user": "Invite user"
 	},
 	"field": {
 		"active": "Active",

@@ -1,6 +1,7 @@
 import {ModuleWithProviders} from '@angular/core';
 import {Routes, RouterModule} from '@angular/router';
 import {UsersCreateComponent} from './create/users.create.component';
+import { UsersInviteComponent } from './invite/users.invite.component';
 import {UsersEditComponent} from './edit/users.edit.component';
 import {UsersShowComponent} from './show/users.show.component';
 import {UsersListComponent} from './list/users.list.component';
@@ -8,6 +9,7 @@ import {UsersAttachedUsersComponent} from './users/users.attached-users.componen
 
 export const AuthRoutes: Routes = [
     {path: 'create', component: UsersCreateComponent},
+    {path: 'invite', component: UsersInviteComponent},
     {path: 'edit/:id', component: UsersEditComponent},
     {path: 'list', component: UsersListComponent},
     {path: 'show/:id', component: UsersShowComponent},

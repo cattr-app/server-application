@@ -2,14 +2,17 @@
 
 namespace App\Http\Controllers;
 
+use App\Mail\Registration as RegistrationMail;
 use App\Models\Registration;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
 use Webpatser\Uuid\Uuid;
 
 class RegistrationController extends Controller
 {
+    // One hour.
     const EXPIRATION_TIME = 60 * 60;
 
     /**
@@ -41,14 +44,23 @@ class RegistrationController extends Controller
         if (!isset($email)) {
             return response()->json([
                 'error' => 'Email is required',
-            ], 401);
+            ], 400);
         }
 
         $user = User::where('email', $email)->first();
         if (isset($user)) {
             return response()->json([
                 'error' => 'User with this email is already exists',
-            ], 401);
+            ], 400);
+        }
+
+        $registration = Registration::where('email', $email)
+            ->where('expires_at', '>=', time())
+            ->first();
+        if (isset($registration)) {
+            return response()->json([
+                'error' => 'E-Mail to this address is already sent',
+            ], 400);
         }
 
         $registration = Registration::firstOrCreate([
@@ -58,7 +70,7 @@ class RegistrationController extends Controller
             'expires_at' => time() + static::EXPIRATION_TIME,
         ]);
 
-        /** @todo: send link to email */
+        Mail::to($email)->send(new RegistrationMail($registration->key));
 
         return response()->json([
             'key' => $registration->key,
@@ -66,7 +78,20 @@ class RegistrationController extends Controller
     }
 
     /**
-     * Returns a data for the registration form by registration token.
+     * Returns a data for the registration form by a registration token.
+     *
+     * @api {get} /api/auth/register/{key} Get
+     * @apiName GetRegistration
+     * @apiGroup Registration
+     * @apiDescription Returns registration form data by a registration token
+     * @apiVersion 0.1.0
+     *
+     * @apiSuccess {String} email Registration e-mail
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "email": "test@example.com"
+     * }
      */
     public function getForm($key): JsonResponse
     {

@@ -7,6 +7,7 @@ import {LoginService} from '../../auth/login/login.service';
 import {RolesService} from '../roles/roles.service';
 
 import {UsersCreateComponent} from './create/users.create.component';
+import {UsersInviteComponent} from './invite/users.invite.component';
 import {UsersEditComponent} from './edit/users.edit.component';
 import {UsersShowComponent} from './show/users.show.component';
 import {UsersListComponent} from './list/users.list.component';
@@ -38,6 +39,7 @@ import { LoadingModule } from 'ngx-loading';
     ],
     declarations: [
         UsersCreateComponent,
+        UsersInviteComponent,
         UsersEditComponent,
         UsersListComponent,
         UsersShowComponent,

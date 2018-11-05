@@ -4,11 +4,16 @@
             <div class="panel panel-default">
                 <div class="panel-heading" translate>user.list</div>
                 <div class="panel-body">
-                    <a *ngIf="can('/users/create')" routerLink="/users/create" class="btn btn-success" title="Add new user">
-                        <i class="fa fa-plus" aria-hidden="true"></i> <span translate>control.new</span>
-                    </a>
-                    <br/>
-                    <br/>
+                    <div class="actions">
+                        <a *ngIf="can('/users/create')" routerLink="/users/create" class="btn btn-success" title="Add new user">
+                            <i class="fa fa-plus" aria-hidden="true"></i> <span translate>control.new</span>
+                        </a>
+
+                        <a *ngIf="can('/register/create')" routerLink="/users/invite" class="btn btn-success" title="Invite user">
+                            <i class="fa fa-plus" aria-hidden="true"></i> <span translate>control.invite-user</span>
+                        </a>
+                    </div>
+
                     <div class="table-responsive">
                         <table class="table table-borderless">
                             <thead>
