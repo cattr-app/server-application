@@ -114,6 +114,7 @@ class RegistrationController extends Controller
      */
     public function postForm(Request $request, $key): JsonResponse
     {
+        $data = $request->json();
         $registration = Registration::where('key', $key)
             ->where('expires_at', '>=', time())
             ->first();
@@ -123,12 +124,30 @@ class RegistrationController extends Controller
             ], 404);
         }
 
-        /** @todo: create user */
+        if ($data->get('email') != $registration->email) {
+            return response()->json([
+                'error' => 'Email mismatch',
+            ], 400);
+        }
+
+        $user = User::create([
+            'full_name' => $data->get('fullName'),
+            'first_name' => $data->get('firstName'),
+            'last_name' => $data->get('lastName'),
+            'email' => $data->get('email'),
+            'password' => bcrypt($data->get('password')),
+            'role_id' => 2,
+            'active' => true,
+            'manual_time' => false,
+            'screenshots_active' => true,
+            'computer_time_popup' => 5,
+            'screenshots_interval' => 5,
+        ]);
 
         $registration->delete();
 
         return response()->json([
-            'user_id' => 0,
+            'user_id' => $user->id,
         ]);
     }
 }

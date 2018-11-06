@@ -20,7 +20,7 @@ class Registration extends Mailable
      * @return void
      */
     public function __construct($key) {
-        $this->url = Url::to("register/$key");
+        $this->url = Url::to("auth/register/$key");
     }
 
     /**
