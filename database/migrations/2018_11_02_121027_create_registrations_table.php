@@ -19,7 +19,7 @@ class CreateRegistrationsTable extends Migration
             Schema::create('registrations', function (Blueprint $table) {
                 $table->increments('id');
                 $table->uuid('key')->unique();
-                $table->string('email')->unique();
+                $table->string('email');
                 $table->dateTime('expires_at');
             });
         }
