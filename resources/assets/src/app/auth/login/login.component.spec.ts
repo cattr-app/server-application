@@ -1,3 +1,11 @@
+/*
+ 
+FIXME: 
+ 
+1) Fix test has error msg
+
+*/
+
 import {TestBed, async} from '@angular/core/testing';
 import {NO_ERRORS_SCHEMA} from '@angular/core';
 import {ApiService} from '../../api/api.service';
@@ -56,14 +64,15 @@ describe('Login component', () => {
     expect(fixture.debugElement.query(By.css("button[type='submit']"))).not.toBeNull();
   }));
 
-  xit('has error message if submit empty form', async(() => {
+  xit('has error message if submited incorrect data', async(() => {
     const form = fixture.debugElement.query(By.css("form"));
-    console.log(form);
+    const submitBtn = fixture.debugElement.query(By.css("button[type='submit']")).nativeElement;
     const submitEvent =  form.listeners.filter(event => event.name == "submit").shift();
-    console.log(submitEvent);
     submitEvent.callback.call();
-    fixture.detectChanges();
+    // submitBtn.click();
+    // fixture.detectChanges();
+    // console.log(component);
     console.log(fixture.debugElement.query(By.all()).nativeElement);
-    expect(fixture.debugElement.query(By.css(".alert")).nativeElement).not.toBeNull();
+    expect(fixture.debugElement.query(By.css(".alert"))).not.toBeNull();
   }));
 });
