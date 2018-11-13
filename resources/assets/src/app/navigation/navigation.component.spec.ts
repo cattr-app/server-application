@@ -47,6 +47,18 @@ describe('Navigation component(Admin)', () => {
     expect(component).toBeTruthy();
   }));
 
+  it('has menu item "login"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.login');
+  }));
+
+  it('has menu item "forgot"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.forgot');
+  }));
+
+  it('has menu item "reset"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.reset');
+  }));
+
   it('has menu item "dashboard"', async(() => {
     expect(nav.innerHTML).toContain('navigation.dashboard');
   }));
@@ -122,6 +134,18 @@ describe('Navigation component(Manager)', () => {
     expect(component).toBeTruthy();
   }));
 
+  it('has menu item "login"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.login');
+  }));
+
+  it('has menu item "forgot"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.forgot');
+  }));
+
+  it('has menu item "reset"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.reset');
+  }));
+
   it('has menu item "dashboard"', async(() => {
     expect(nav.innerHTML).toContain('navigation.dashboard');
   }));
@@ -190,12 +214,23 @@ describe('Navigation component(User)', () => {
       component.setAuth(true);
       fixture.detectChanges();
       nav = fixture.debugElement.query(By.all()).nativeElement;
-      console.log(nav);
     });
   }));
 
   it('should be created', async(() => {
     expect(component).toBeTruthy();
+  }));
+
+  it('has menu item "login"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.login');
+  }));
+
+  it('has menu item "forgot"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.forgot');
+  }));
+
+  it('has menu item "reset"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.reset');
   }));
 
   it('has menu item "dashboard"', async(() => {
@@ -236,5 +271,92 @@ describe('Navigation component(User)', () => {
 
   it('has menu item "logout"', async(() => {
     expect(nav.innerHTML).toContain('navigation.logout');
+  }));
+});
+
+describe('Navigation component(Unauthorized)', () => {
+  let component, fixture;
+  let nav;
+
+  beforeEach(async(() => {
+    TestBed.configureTestingModule({
+      declarations: [NavigationComponent, ],
+      schemas: [NO_ERRORS_SCHEMA],
+      providers: [
+        ApiService,
+        HttpClient,
+        HttpHandler,
+        {provide: Router, useClass: AppRoutingModule},
+        Location,
+        {provide: LocationStrategy, useClass: PathLocationStrategy},
+        {provide: APP_BASE_HREF, useValue: '/'},
+        AllowedActionsService,
+        ProjectsService
+      ]
+    })
+      .compileComponents().then(() => {
+      fixture = TestBed.createComponent(NavigationComponent);
+      component = fixture.debugElement.componentInstance;
+      component.setAuth(false);
+      LocalStorage.getStorage().clear();
+      fixture.detectChanges();
+      nav = fixture.debugElement.query(By.all()).nativeElement;
+    });
+  }));
+
+  it('should be created', async(() => {
+    expect(component).toBeTruthy();
+  }));
+
+  it('has menu item "login"', async(() => {
+    expect(nav.innerHTML).toContain('navigation.login');
+  }));
+
+  it('has menu item "forgot"', async(() => {
+    expect(nav.innerHTML).toContain('navigation.forgot');
+  }));
+
+  it('has menu item "reset"', async(() => {
+    expect(nav.innerHTML).toContain('navigation.reset');
+  }));
+
+  it('has not menu item "dashboard"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.dashboard');
+  }));
+
+  it('has not menu item "projects report"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.projectsreport');
+  }));
+
+  it('has not menu item "projects time-use-report"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.time-use-report');
+  }));
+
+  it('has not menu item "projects"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.projects');
+  }));
+
+  it('has not menu item "tasks"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.tasks');
+  }));
+
+  it('has not menu item "users"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.users');
+  }));
+
+  it('has not menu item "screenshots"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.screenshots');
+  }));
+
+  it('has not menu item "role"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.role');
+  }));
+
+  it('has not menu item "settings"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.settings');
+  }));
+
+  it('has not menu item "logout"', async(() => {
+    expect(nav.innerHTML).not.toContain('navigation.logout');
   }));
 });
