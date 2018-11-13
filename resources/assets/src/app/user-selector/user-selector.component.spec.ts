@@ -13,7 +13,7 @@ import { LocalStorage } from '../api/storage.model';
 import { UsersService } from '../pages/users/users.service';
 import {NgSelectModule} from '@ng-select/ng-select'
 
-fdescribe('User-selector component', () => {
+describe('User-selector component', () => {
     let component, fixture;
 
     beforeEach(async(() => {
