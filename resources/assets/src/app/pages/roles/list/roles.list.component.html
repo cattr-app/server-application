@@ -37,7 +37,7 @@
                                                 <span translate>control.assign</span>
                                             </button>
                                         </a>
-                                        <a *ngIf="can('/roles/edit') && user.role_id != role.id"  [routerLink]="['/roles/edit', role.id]" title="Edit role">
+                                        <a *ngIf="can('/roles/edit') && user.role_id != role.id || can('rules/full_access')"  [routerLink]="['/roles/edit', role.id]" title="Edit role">
                                             <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                       aria-hidden="true"></i>
                                                 <span translate>control.edit</span>

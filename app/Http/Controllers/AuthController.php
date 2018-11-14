@@ -17,27 +17,32 @@ class AuthController extends Controller
     /**
      * @apiDefine UnauthorizedError
      *
-     * @apiErrorExample {json} Access Error Example:
+     * @apiErrorExample {json} Access Error Example
      * {
      *    "error":      "Access denied",
      *    "reason":     "not logged in",
      *    "error_code": "ERR_NO_AUTH"
      * }
      *
-     * @apiErrorExample {json} Access Error Example:
+     * @apiErrorExample {json} Access Error Example
      * {
      *    "error": "Unauthorized"
      * }
      *
-     * @apiError (Error 400) {String} error         Error name
-     * @apiError (Error 400) {String} reason        Error description
-     * @apiError (Error 400) {String} error_core    Error code
+     * @apiError (Error 403) {String} error         Error name
+     * @apiError (Error 403) {String} reason        Error description
+     * @apiError (Error 403) {String} error_code    Error code
      */
 
     /**
      * @apiDefine AuthAnswer
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccess {String}     access_token  Token
+     * @apiSuccess {String}     token_type    Token Type
+     * @apiSuccess {String}     expires_in    Token TTL in seconds
+     * @apiSuccess {Array}      user          User Entity
+     *
+     * @apiSuccessExample {json} Answer Example
      *  {
      *      {
      *        "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciO...",
@@ -100,11 +105,11 @@ class AuthController extends Controller
      * @apiSuccess {Boolean}   error  Error
      * @apiSuccess {String}    cat    Sample Cat
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccessExample {json} Answer Example
      *  {
      *      "status": 200,
      *      "error":  false,
-     *      "cat":    '(=ㅇ༝ㅇ=)',
+     *      "cat":    '(=ㅇ༝ㅇ=)'
      *  }
      *
      * @return JsonResponse
@@ -125,11 +130,13 @@ class AuthController extends Controller
         $auth = explode(' ', $request->header('Authorization'));
         if (!empty($auth) && count($auth) > 1 && $auth[0] == 'bearer') {
             $token = $auth[1];
-
-            DB::table('tokens')->where([
-                ['user_id', auth()->user()->id],
-                ['token', $token],
-            ])->delete();
+            $user = auth()->user();
+            if (isset($user)) {
+                DB::table('tokens')->where([
+                    ['user_id', auth()->user()->id],
+                    ['token', $token],
+                ])->delete();
+            }
         }
     }
 
@@ -179,7 +186,7 @@ class AuthController extends Controller
     *
     * @apiError (Error 401) {String} Error Error
     *
-    * @apiParamExample {json} Request Example:
+    * @apiParamExample {json} Request Example
     *  {
     *      "login":      "johndoe@example.com",
     *      "password":   "amazingpassword",
@@ -221,7 +228,7 @@ class AuthController extends Controller
      *
      * @apiSuccess {String}    message    Action result message
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccessExample {json} Answer Example
      *  {
      *      "message": "Successfully logged out"
      *  }
@@ -249,14 +256,14 @@ class AuthController extends Controller
      * @apiName Logout
      * @apiGroup Auth
      *
-     * @apiParamExample {json} Request Example:
+     * @apiParamExample {json} Request Example
      *  {
      *      "token": "eyJ0eXAiOiJKV1QiLCJhbGciO..."
      *  }
      *
      * @apiSuccess {String}    message    Action result message
      *
-     * @apiSuccessExample {json} Answer Example:
+     * @apiSuccessExample {json} Answer Example
      *  {
      *      "message": "Successfully ended all sessions"
      *  }
@@ -296,7 +303,7 @@ class AuthController extends Controller
    *
    * @apiUse UnauthorizedError
    *
-   * @apiSuccessExample {json} Answer Example:
+   * @apiSuccessExample {json} Answer Example
    * {
    *   "id": 1,
    *   "full_name": "Admin",

@@ -1,0 +1,97 @@
+<div class="container">
+  <div class="row">
+    <div class="col col-md-12">
+      <div class="panel panel-default">
+        <div class="panel-heading" translate>user.create</div>
+
+        <div class="panel-body">
+          <div class="alert alert-danger" role="alert" *ngIf="error">
+            <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="error = null">
+              <span aria-hidden="true">&times;</span>
+            </button>
+
+            {{ error }}
+          </div>
+
+          <ngx-loading [show]="loading"></ngx-loading>
+
+          <form (ngSubmit)="onSubmit()" #form="ngForm" *ngIf="data && showForm">
+            <div class="form-group row">
+              <label class="col-md-2" translate>field.email</label>
+
+              <div class="col-md-10">
+                <input type="text" class="form-control" name="user-email"
+                  [(ngModel)]="data.email" readonly>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-md-2" translate>field.fullname</label>
+
+              <div class="col-md-10"
+                [class.has-error]="full_name?.invalid && (full_name.dirty || full_name.touched)"
+                [class.has-success]="full_name?.valid && (full_name.dirty || full_name.touched)">
+                <input type="text" class="form-control" name="user-full-name"
+                  [(ngModel)]="data.fullName" #full_name="ngModel" required>
+
+                <span class="help-block" translate>control.required-field</span>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-md-2" translate>field.firstname</label>
+
+              <div class="col-md-10">
+                <input type="text" class="form-control" name="user-first-name"
+                  [(ngModel)]="data.firstName">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-md-2" translate>field.lastname</label>
+
+              <div class="col-md-10">
+                <input type="text" class="form-control" name="user-last-name"
+                  [(ngModel)]="data.lastName">
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-md-2" translate>field.password</label>
+
+              <div class="col-md-10"
+                [class.has-error]="passwordEl?.invalid && (passwordEl.dirty || passwordEl.touched)"
+                [class.has-success]="passwordEl?.valid && (passwordEl.dirty || passwordEl.touched)">
+                <input type="text" class="form-control" name="user-password"
+                  [(ngModel)]="data.password" #passwordEl="ngModel" required>
+
+                <span class="help-block" translate>control.required-field</span>
+              </div>
+            </div>
+
+            <div class="form-group row">
+              <label class="col-md-2" translate>field.timezone</label>
+              <div class="col-md-10">
+                <ng2-timezone-picker
+                  [(timezone)]="data.timezone"
+                  showOffset="true"
+                  placeholder="Select timezone"
+                  guess="true">
+                </ng2-timezone-picker>
+              </div>
+            </div>
+
+            <div *ngIf="form?.invalid" class="alert alert-danger" role="alert">
+              <p *ngIf="full_name?.errors" translate>control.fullname-required</p>
+              <p *ngIf="passwordEl?.errors" translate>control.password-required</p>
+            </div>
+
+            <button type="submit" class="btn btn-primary" [disabled]="form?.invalid" translate>
+              control.create
+            </button>
+          </form>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>

@@ -94,8 +94,8 @@ class TimeIntervalController extends ItemController
      *   }
      * }
      *
-     * @apiParam {Integer}  task_id   Task ID
-     * @apiParam {Integer}  user_id   User ID
+     * @apiParam {Integer}  task_id   Task id
+     * @apiParam {Integer}  user_id   User id
      * @apiParam {String}   start_at  Interval time start
      * @apiParam {String}   end_at    Interval time end
      *
@@ -196,16 +196,16 @@ class TimeIntervalController extends ItemController
      * @apiName GetTimeIntervalList
      * @apiGroup Time Interval
      *
-     * @apiParam {Integer}  [id]         `QueryParam` Time Interval ID
-     * @apiParam {Integer}  [task_id]    `QueryParam` Time Interval's Task ID
-     * @apiParam {Integer}  [user_id]    `QueryParam` Time Interval's User ID
+     * @apiParam {Integer}  [id]         `QueryParam` Time Interval id
+     * @apiParam {Integer}  [task_id]    `QueryParam` Time Interval Task id
+     * @apiParam {Integer}  [user_id]    `QueryParam` Time Interval User id
      * @apiParam {String}   [start_at]   `QueryParam` Interval Start DataTime
      * @apiParam {String}   [end_at]     `QueryParam` Interval End DataTime
      * @apiParam {String}   [created_at] `QueryParam` Time Interval Creation DateTime
      * @apiParam {String}   [updated_at] `QueryParam` Last Time Interval data update DataTime
      * @apiParam {String}   [deleted_at] `QueryParam` When Time Interval was deleted (null if not)
      *
-     * @apiSuccess (200) {TimeInterval[]} TimeIntervalList array of Time Interval objects
+     * @apiSuccess (200) {Object[]} TimeIntervalList Time Intervals
      *
      * @apiSuccessExample {json} Answer Example:
      * {
@@ -259,12 +259,15 @@ class TimeIntervalController extends ItemController
      * @apiName ShowTimeInterval
      * @apiGroup Time Interval
      *
-     * @apiParam {Integer}  id     Time Interval ID
+     * @apiParam {Integer}  id     Time Interval id
      *
      * @apiRequestExample {json} Request Example
      * {
      *   "id": 1
      * }
+     *
+     * @apiSuccess {Object}  object TimeInterval
+     * @apiSuccess {Integer} object.id
      *
      * @apiSuccessExample {json} Answer Example
      * {
@@ -290,30 +293,38 @@ class TimeIntervalController extends ItemController
      * @apiName EditTimeInterval
      * @apiGroup Time Interval
      *
-     * @apiParam {Integer}  id     Time Interval ID
-     * @apiParam {Integer}  [user_id]    Time Interval's User ID
+     * @apiParam {Integer}  id           Time Interval id
+     * @apiParam {Integer}  [user_id]    Time Interval User id
      * @apiParam {String}   [start_at]   Interval Start DataTime
      * @apiParam {String}   [end_at]     Interval End DataTime
      * @apiParam {String}   [created_at] Time Interval Creation DateTime
      * @apiParam {String}   [updated_at] Last Time Interval data update DataTime
      * @apiParam {String}   [deleted_at] When Time Interval was deleted (null if not)
      *
-     * @apiSuccessExample {json} Answer example
+     * @apiSuccess {Object} res                 TimeInterval
+     * @apiSuccess {Object} res.id              TimeInterval id
+     * @apiSuccess {Object} res.user_id.        User id
+     * @apiSuccess {Object} res.start_at        Start datetime
+     * @apiSuccess {Object} res.end_at          End datetime
+     * @apiSuccess {Object} res.created_at      TimeInterval
+     * @apiSuccess {Object} res.deleted_at      TimeInterval
      *
-     *  {
-     *  "res":
-     *      {
-     *          "id":1,
-     *          "task_id":1,
-     *          "start_at":"2018-10-03 10:00:00",
-     *          "end_at":"2018-10-03 10:00:00",
-     *          "created_at":"2018-10-15 05:50:39",
-     *          "updated_at":"2018-10-15 05:50:43",
-     *          "deleted_at":null,
-     *          "count_mouse":42,
-     *          "count_keyboard":43,
-     *          "user_id":1
-     *      }
+     *
+     * @apiSuccessExample {json} Answer example
+     * {
+     * "res":
+     *   {
+     *     "id":1,
+     *     "task_id":1,
+     *     "start_at":"2018-10-03 10:00:00",
+     *     "end_at":"2018-10-03 10:00:00",
+     *     "created_at":"2018-10-15 05:50:39",
+     *     "updated_at":"2018-10-15 05:50:43",
+     *     "deleted_at":null,
+     *     "count_mouse":42,
+     *     "count_keyboard":43,
+     *     "user_id":1
+     *   }
      * }
      *
      *
@@ -396,15 +407,17 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/time-intervals/remove Destroy
+     * @api {delete, post} /api/v1/time-intervals/remove Destroy
      * @apiDescription Destroy Time Interval
      * @apiVersion 0.1.0
      * @apiName DestroyTimeInterval
      * @apiGroup Time Interval
      *
-     * @apiParam {Integer}   id Time interval ID
+     * @apiParam {Integer}   id Time interval id
      *
-     * @apiSuccessResponse {json} Answer Example
+     * @apiSuccess {String} message Message
+     *
+     * @apiSuccessExample {json} Answer Example
      * {
      *   "message":"Item has been removed"
      * }

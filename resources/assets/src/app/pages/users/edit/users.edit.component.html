@@ -168,7 +168,7 @@
                                 </div>
                             </div>
 
-                            <div class="form-group row">
+                            <div *ngIf="authorizedUser.role_id === 1" class="form-group row">
                                 <label class="col-md-2" translate>field.projects</label>
                                 <div class="col-md-10">
                                     <dual-list [source]="projects" [(destination)]="userProjects"

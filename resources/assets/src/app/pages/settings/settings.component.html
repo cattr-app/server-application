@@ -1,74 +1,28 @@
-<p-growl [(value)]="msgs"></p-growl>
 <div class="container">
     <div class="row">
-        <div class="col col-md-12">
+        <div class="col-md-12">
             <div class="panel panel-default">
-                <div class="panel-heading" translate>settings.title</div>
                 <div class="panel-body">
-                    <form (ngSubmit)="onSubmit()">
-                        <div class="form-group row">
-                            <label class="col-md-2" translate>settings.lang</label>
-                            <div class="col-md-10">
-                                <ng-select
-                                    [items]="languages"
-                                    bindLabel="title"
-                                    bindValue="code"
-                                    placeholder="{{ 'settings.select-lang' | translate }}"
-                                    [(ngModel)]="language"
-                                    [ngModelOptions]="{standalone: true}"
-                                >
-                                </ng-select>
-                            </div>
-                        </div>
+                    <tabset #tabs>
+                        <tab heading="{{'settings.general' | translate }}" (select)="changeTab($event)">
+                            <settings-general #general>
+                            </settings-general>
+                        </tab>
 
-                        <div class="form-group row">
-                            <label class="col-md-2" translate>integration.redmine.apiurl</label>
-                            <div class="col-md-10">
-                                <input type="text" class="form-control" name="redmine-url"
-                                    [(ngModel)]="redmineUrl">
-                            </div>
-                        </div>
 
-                        <div class="form-group row">
-                            <label class="col-md-2" translate>integration.redmine.apikey</label>
-                            <div class="col-md-10">
-                                <input type="text" class="form-control" name="redmine-api-key"
-                                    [(ngModel)]="redmineApiKey">
-                            </div>
-                        </div>
+                        <tab heading="{{'integration.redmine.title' | translate }}" (select)="changeTab($event)">
+                            <settings-integration #integration>
+                            </settings-integration>
+                        </tab>
 
-                        <div class="form-group row">
-                            <label class="col-md-2" translate>integration.redmine.statuses</label>
-                            <div class="col-md-10">
-                                <label class="checkbox-inline" *ngFor="let status of redmineStatuses">
-                                    <input type="checkbox" name="status" [checked]="status.is_active"
-                                        (change)="status.is_active = !status.is_active" />
-                                    {{ status.name }}
-                                </label>
-                            </div>
-                        </div>
 
-                        <div class="form-group row">
-                            <label class="col-md-2" translate>integration.redmine.priorities</label>
-                            <div class="col-md-10">
-                                <div class="priority" *ngFor="let redminePriority of redminePriorities">
-                                    <label class="priority__label" for="priority[{{ redminePriority.id }}]">
-                                        {{ redminePriority.name }}
-                                    </label>
+                        <tab heading="{{'settings.user' | translate }}" (select)="changeTab($event)">
+                            <settings-user #userSettings>
+                            </settings-user>
+                        </tab>
+                    </tabset>
 
-                                    <select class="form-control" id="priority[{{ redminePriority.id }}]"
-                                        name="priority[{{ redminePriority.id }}]"
-                                        [(ngModel)]="redminePriority.priority_id">
-                                        <option *ngFor="let priority of internalPriorities" [value]="priority.id">
-                                            {{ priority.name }}
-                                        </option>
-                                    </select>
-                                </div>
-                            </div>
-                        </div>
 
-                        <button type="submit" class="btn btn-primary" translate>control.save</button>
-                    </form>
                 </div>
             </div>
         </div>

@@ -24,8 +24,17 @@ class ProjectUsersControllerTest extends TestCase
         $expectedFields = [
             "messages" => [
                 "*" => [
-                        "project_id", "user_id", "updated_at", "created_at", "id"
+                        "project_id", "user_id", "updated_at", "created_at"
                     ]
+            ]
+        ];
+
+        $expectedJson = [
+            "messages" => [
+                [
+                    "project_id" => 1,
+                    "user_id"    => 1,
+                ]
             ]
         ];
 
@@ -33,6 +42,7 @@ class ProjectUsersControllerTest extends TestCase
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_BulkDestroy_ExpectPass()
@@ -50,10 +60,24 @@ class ProjectUsersControllerTest extends TestCase
             ]
         ];
 
+        $expectedFields = [
+            "messages"
+        ];
+
+        $expectedJson = [
+            "messages" => [
+                [
+                    "message" => "Item has been removed"
+                ]
+            ]
+        ];
+
         $this->postJson("/api/v1/projects-users/bulk-create", $data, $headers);
-        $response = $this->postJson("/api/v1/projects-users/bulk-destroy", $data, $headers);
+        $response = $this->postJson("/api/v1/projects-users/bulk-remove", $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_Create_ExpectPass()
@@ -67,9 +91,24 @@ class ProjectUsersControllerTest extends TestCase
             "user_id"     => 1
         ];
 
+        $expectedFields = [
+            "*" => [
+                "project_id", "user_id", "updated_at", "created_at"
+            ]
+        ];
+
+        $expectedJson = [
+            [
+                "project_id" => 1,
+                "user_id"    => 1,
+            ]
+        ];
+
         $response = $this->postJson("/api/v1/projects-users/create", $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 
     public function test_Destroy_ExpectPass()
@@ -83,34 +122,48 @@ class ProjectUsersControllerTest extends TestCase
             "user_id"     => 1
         ];
 
+        $expectedFields = [
+            "message"
+        ];
+
         $this->postJson("/api/v1/projects-users/create", $data, $headers);
-        $response = $this->postJson("/api/v1/projects-users/destroy", $data, $headers);
+        $response = $this->postJson("/api/v1/projects-users/remove", $data, $headers);
 
         $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
     }
 
+    // @todo: check is right
     public function test_List_ExpectPass()
     {
         $headers = [
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        // Add user
-        $createUserData = [
-            "id"            => 1,
-            "project_id"    => 1,
-            "role_id"       => 1,
+        $expectedFields = [
+            "*" => [
+                "project_id", "user_id", "updated_at", "created_at"
+            ]
         ];
-        $x = $this->postJson("/api/v1/project-users/create", $createUserData, $headers);
 
-        echo var_export($x->content(), true);
+        $expectedJson = [
+            [
+                "project_id" => 1,
+                "user_id"    => 1,
+            ]
+        ];
+
+        $createData = [
+            "project_id"  => 1,
+            "user_id"     => 1
+        ];
+
+        $this->postJson("/api/v1/projects-users/create", $createData, $headers);
 
         $response = $this->getJson("/api/v1/projects-users/list", $headers);
 
-        $expectedJson = [[]];
-
-        $response
-            ->assertStatus(200)
-            ->assertJson($expectedJson);
+        $response->assertStatus(200);
+        $response->assertJsonStructure($expectedFields);
+        $response->assertJson($expectedJson);
     }
 }

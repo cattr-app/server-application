@@ -17,6 +17,7 @@ import { DpDatePickerModule } from 'ng2-date-picker';
 import { UsersService } from './pages/users/users.service';
 import { ProjectSelectorComponent } from './project-selector/project-selector.component';
 import { ImageComponent } from './image/image.component';
+import { RegistrationService } from './registration.service';
 
 @NgModule({
     imports: [
@@ -58,6 +59,7 @@ import { ImageComponent } from './image/image.component';
         ProjectsService,
         ScreenshotsService,
         UsersService,
+        RegistrationService,
     ]
 })
 

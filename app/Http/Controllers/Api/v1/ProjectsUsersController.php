@@ -51,7 +51,7 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @apiDefine ProjectUserRelationsExample
-     * @apiParamExample {json} Request-With-Relations-Example:
+     * @apiParamExample {json} Request With Relations Example
      *  {
      *      "with":                 "project, user, project.tasks",
      *      "project.id":           [">", 1],
@@ -62,7 +62,7 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @api {any} /api/v1/projects-users/list List
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "user_id":        ["=", [1,2,3]],
      *      "project_id":     [">", 1]
@@ -73,18 +73,18 @@ class ProjectsUsersController extends ItemController
      * @apiName GetProjectUsersList
      * @apiGroup ProjectUsers
      *
-     * @apiParam {Integer} [project_id] `QueryParam` Project-User's Project ID
-     * @apiParam {Integer} [user_id]    `QueryParam` Project-User's User ID
+     * @apiParam {Integer} [project_id] `QueryParam` Project-User Project id
+     * @apiParam {Integer} [user_id]    `QueryParam` Project-User User id
      * @apiUse ProjectUserRelations
      *
-     * @apiSuccess {Objects[]} ProjectUsersList                         Array of Project-Users objects
-     * @apiSuccess {Objects}   ProjectUsersList.ProjectUser             Project-User object
-     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.user_id     Project-User's User ID
-     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.project_id  Project-User's Project ID
-     * @apiSuccess {String}    ProjectUsersList.ProjectUser.created_at  Project-User's date time of create
-     * @apiSuccess {String}    ProjectUsersList.ProjectUser.updated_at  Project-User's date time of update
-     * @apiSuccess {Object}    ProjectUsersList.ProjectUser.user        Project-User's User
-     * @apiSuccess {Object}    ProjectUsersList.ProjectUser.project     Project-User's Project
+     * @apiSuccess {Object[]}  ProjectUsersList                          Project-Users
+     * @apiSuccess {Object}    ProjectUsersList.ProjectUser             Project-User
+     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.user_id     Project-User User id
+     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.project_id  Project-User Project id
+     * @apiSuccess {String}    ProjectUsersList.ProjectUser.created_at  Project-User date time of create
+     * @apiSuccess {String}    ProjectUsersList.ProjectUser.updated_at  Project-User date time of update
+     * @apiSuccess {Object}    ProjectUsersList.ProjectUser.user        Project-User User
+     * @apiSuccess {Object}    ProjectUsersList.ProjectUser.project     Project-User Project
      *
      * @apiUse UnauthorizedError
      *
@@ -95,7 +95,7 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @api {post} /api/v1/projects-users/create Create
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "project_id": 1,
      *      "user_id": 45
@@ -105,13 +105,13 @@ class ProjectsUsersController extends ItemController
      * @apiName CreateProjectUsers
      * @apiGroup ProjectUsers
      *
-     * @apiParam {Integer} project_id Project-User's Project ID
-     * @apiParam {Integer} user_id    Project-User's User ID
+     * @apiParam   {Integer}   project_id              Project-User Project id
+     * @apiParam   {Integer}   user_id                 Project-User User id
      *
-     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.user_id     Project-User's User ID
-     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.project_id  Project-User's Project ID
-     * @apiSuccess {String}    ProjectUsersList.ProjectUser.created_at  Project-User's date time of create
-     * @apiSuccess {String}    ProjectUsersList.ProjectUser.updated_at  Project-User's date time of update
+     * @apiSuccess {Integer}   array.object.user_id     Project-User User id
+     * @apiSuccess {Integer}   array.object.project_id  Project-User Project id
+     * @apiSuccess {String}    array.object.created_at  Project-User date time of create
+     * @apiSuccess {String}    array.object.updated_at  Project-User date time of update
      *
      * @apiUse DefaultCreateErrorResponse
      * @apiUse UnauthorizedError
@@ -154,7 +154,7 @@ class ProjectsUsersController extends ItemController
 
     /**
      * @api {post} /api/v1/projects-users/bulk-create BulkCreate
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "relations":
      *      [
@@ -168,22 +168,42 @@ class ProjectsUsersController extends ItemController
      *          }
      *      ]
      *  }
+     *
      * @apiDescription Multiple Create Project Users relation
      * @apiVersion 0.1.0
      * @apiName BulkCreateProjectUsers
      * @apiGroup ProjectUsers
      *
-     * @apiParam {Object[]} relations                   Project-User relations (Array of object)
+     * @apiParam {Object[]} relations                   Project-User relations
      * @apiParam {Object}   relations.object            Object Project-User relation
-     * @apiParam {Integer}  relations.object.project_id Project-User's Project ID
-     * @apiParam {Integer}  relations.object.user_id    Project-User's User ID
+     * @apiParam {Integer}  relations.object.project_id Project-User Project id
+     * @apiParam {Integer}  relations.object.user_id    Project-User User id
      *
-     * @apiSuccess {Object[]} messages                   Project-Users (Array of objects)
-     * @apiSuccess {Object}   messages.object            Project-Users object
-     * @apiSuccess {Integer}  messages.object.user_id    Project-User's User ID
-     * @apiSuccess {Integer}  messages.object.project_id Project-User's Project ID
-     * @apiSuccess {String}   messages.object.created_at Project-User's date time of create
-     * @apiSuccess {String}   messages.object.updated_at Project-User's date time of update
+     * @apiSuccess {Object[]} messages                   Project-Users
+     * @apiSuccess {Object}   messages.object            Project-User
+     * @apiSuccess {Integer}  messages.object.user_id    Project-User User id
+     * @apiSuccess {Integer}  messages.object.project_id Project-User Project id
+     * @apiSuccess {String}   messages.object.created_at Project-User date time of create
+     * @apiSuccess {String}   messages.object.updated_at Project-User date time of update
+     *
+     * @apiSuccessExample {json} Simple Response Example
+     * {
+     *   "messages": [
+     *     {
+     *       "project_id": 1,
+     *       "user_id": 3,
+     *       "updated_at": "2018-10-17 03:58:05",
+     *       "created_at": "2018-10-17 03:58:05",
+     *       "id": 0
+     *     },
+     *     {
+     *       "project_id": 1,
+     *       "user_id": 2,
+     *       "created_at": "2018-10-17 03:58:05",
+     *       "updated_at": "2018-10-17 03:58:05"
+     *     }
+     *   ]
+     * }
      *
      * @apiUse DefaultBulkCreateErrorResponse
      * @apiUse UnauthorizedError
@@ -197,16 +217,34 @@ class ProjectsUsersController extends ItemController
         $result = [];
 
         if (empty($requestData['relations'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'relations is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations is empty',
+                ]),
                 400
             );
         }
 
-        foreach ($requestData['relations'] as $relation) {
+        $relations = $requestData['relations'];
+        if (!is_array($relations)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations should be an array',
+                ]),
+                400
+            );
+        }
+
+        $allowed_fields = array_flip([
+            'project_id',
+            'user_id',
+        ]);
+
+        foreach ($relations as $relation) {
+            $relation = array_intersect_key($relation, $allowed_fields);
+
             $validator = Validator::make(
                 $relation,
                 Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
@@ -228,6 +266,7 @@ class ProjectsUsersController extends ItemController
                 $cls::firstOrCreate($this->filterRequestData($relation))
             );
 
+            unset($item['id']);
             $result[] = $item;
         }
 
@@ -239,9 +278,9 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/projects-users/destroy Destroy
+     * @api {delete, post} /api/v1/projects-users/remove Destroy
      * @apiDescription Destroy Project Users relation
-     * @apiParamExample {json} Simple-Request-Example:
+     * @apiParamExample {json} Simple Request Example
      *  {
      *      "project_id":1,
      *      "user_id":4
@@ -250,19 +289,31 @@ class ProjectsUsersController extends ItemController
      * @apiName DestroyProjectUsers
      * @apiGroup ProjectUsers
      *
-     * @apiParam {Integer} project_id Project-User's Project ID
-     * @apiParam {Integer} user_id    Project-User's User ID
+     * @apiParam             {Integer} project_id           Project-User Project id
+     * @apiParam             {Integer} user_id              Project-User User id
      *
      * @apiSuccess {String} message Message about success item remove
      *
-     * @apiError (Error 400) {String} error  Name of error
-     * @apiError (Error 400) {String} reason Reason of error
+     * @apiSuccessExample {json} Simple Response Example
+     * {
+     *    "message": "Item has been removed"
+     * }
+     *
+     * @apiError (Error 400) {String} error     Name of error
+     * @apiError (Error 400) {String} reason    Reason of error
      *
      * @apiUse UnauthorizedError
-     * @todo: add response (error) example
+     *
+     * @apiErrorExample {json} Simple Error Example
+     * {
+     *   "error": "Item has not been removed",
+     *   "reason": "Item not found"
+     * }
      *
      * @param Request $request
      * @return JsonResponse
+     *
+     * @throws \Exception
      */
     public function destroy(Request $request): JsonResponse
     {
@@ -303,7 +354,8 @@ class ProjectsUsersController extends ItemController
                 Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                     'error' => 'Item has not been removed',
                     'reason' => 'Item not found'
-                ])
+                ]),
+                404
             );
         }
 
@@ -315,8 +367,8 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/projects-users/bulk-destroy BulkDestroy
-     * @apiParamExample {json} Simple-Request-Example:
+     * @api {post} /api/v1/projects-users/bulk-remove BulkDestroy
+     * @apiParamExample {json} Simple Request Example
      * {
      *  "relations":
      *  [
@@ -335,18 +387,20 @@ class ProjectsUsersController extends ItemController
      * @apiName BulkDestroyProjectUsers
      * @apiGroup ProjectUsers
      *
-     * @apiParam {Object[]} relations                   Project-User relations (Array of object)
-     * @apiParam {Object}   relations.object            Object Project-User relation
-     * @apiParam {Integer}  relations.object.project_id Project-User's Project ID
-     * @apiParam {Integer}  relations.object.user_id    Project-User's User ID
+     * @apiParam    {Object[]} relations                    Project-User relations
+     * @apiParam    {Object}   relations.object             Object Project-User relation
+     * @apiParam    {Integer}  relations.object.project_id  Project-User Project id
+     * @apiParam    {Integer}  relations.object.user_id     Project-User User id
      *
-     * @apiSuccess {Object[]} messages        Messages (Array of objects)
-     * @apiSuccess {Object}   messages.object Message about success item remove
+     * @apiSuccess  {Object[]} messages                     Messages
+     * @apiSuccess  {Object}   messages.object Item removal Message status
      *
      * @apiUse DefaultBulkDestroyErrorResponse
      *
      * @param Request $request
      * @return JsonResponse
+     *
+     * @throws \Exception
      */
     public function bulkDestroy(Request $request): JsonResponse
     {
@@ -354,16 +408,27 @@ class ProjectsUsersController extends ItemController
         $result = [];
 
         if (empty($requestData['relations'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'relations is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations is empty',
+                ]),
                 400
             );
         }
 
-        foreach ($requestData['relations'] as $relation) {
+        $relations = $requestData['relations'];
+        if (!is_array($relations)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'relations should be an array',
+                ]),
+                400
+            );
+        }
+
+        foreach ($relations as $relation) {
             /** @var Builder $itemsQuery */
             $itemsQuery = Filter::process(
                 $this->getEventUniqueName('answer.success.item.query.prepare'),
@@ -382,9 +447,9 @@ class ProjectsUsersController extends ItemController
 
             if ($validator->fails()) {
                 $result[] = [
-                        'error' => 'Validation fail',
-                        'reason' => $validator->errors(),
-                        'code' =>400
+                        'error'     => 'Validation fail',
+                        'reason'    => $validator->errors(),
+                        'code'      =>  400
                 ];
                 continue;
             }

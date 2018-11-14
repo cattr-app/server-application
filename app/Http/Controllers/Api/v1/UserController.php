@@ -43,9 +43,9 @@ class UserController extends ItemController
      * @apiParam {Boolean} [webcam_shots]           ???
      * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
      * @apiParam {String}  [user_role_value]        ???
-     * @apiParam {Boolean} active                   User is active
-     * @apiParam {Integer} [role_id]                User's Role ID
-     * @apiParam {String}  [timezone]               User's timezone
+     * @apiParam {Boolean} active                   Is User active
+     * @apiParam {Integer} [role_id]                User Role id
+     * @apiParam {String}  [timezone]               User timezone
      */
 
     /**
@@ -64,7 +64,7 @@ class UserController extends ItemController
         return [
             'full_name'              => 'required',
             'email'                  => 'required|unique:users,email',
-            'active'                 => 'required',
+            'active'                 => 'required|boolean',
             'password'               => 'required',
         ];
     }
@@ -132,7 +132,7 @@ class UserController extends ItemController
      * @apiParam {String}   [deleted_at]            `QueryParam` When User was deleted (null if not)
      * @apiParam {String}   [timezone]              `QueryParam` User's timezone
      *
-     * @apiSuccess (200) {Object[]} User entities
+     * @apiSuccess (200) {Object[]} Users
      */
 
     /**
@@ -141,6 +141,37 @@ class UserController extends ItemController
      * @apiVersion 0.1.0
      * @apiName CreateUser
      * @apiGroup User
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "full_name": "John Doe",
+     *   "email": "johndoe@example.com",
+     *   "active": "1",
+     *   "password": "secretpassword",
+     *   "role_id": "3"
+     * }
+     *
+     * @apiSuccess {Object} res User
+     * @apiSuccess {Object} res.full_name   User
+     * @apiSuccess {Object} res.email       Email
+     * @apiSuccess {Object} res.active      Is user active
+     * @apiSuccess {Object} res.role_id     User role id
+     * @apiSuccess {Object} res.updated_at  User last update datetime
+     * @apiSuccess {Object} res.created_at  User registration datetime
+     *
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "res": {
+     *     "full_name": "John Doe",
+     *     "email": "johndoe@example.com",
+     *     "active": "1",
+     *     "role_id": "1",
+     *     "updated_at": "2018-10-18 09:06:36",
+     *     "created_at": "2018-10-18 09:06:36",
+     *     "id": 3
+     *   }
+     * }
      *
      * @apiUse UserModel
      */
@@ -151,14 +182,107 @@ class UserController extends ItemController
      * @apiVersion 0.1.0
      * @apiName ShowUser
      * @apiGroup User
+     *
+     * @apiParam {Integer} id   User id
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "id": 1
+     * }
+     *
+     * @apiSuccess {Object}  object             User
+     * @apiSuccess {Integer} object.id          User id
+     * @apiSuccess {String}  object.full_name   User full name
+     * @apiSuccess {String}  object.last_name   User first name
+     * @apiSuccess {String}  object.email       User email
+     * @apiSuccess {String}  object.url         User url
+     * @apiSuccess {Integer} object.role_id     User role id
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "id": 1,
+     *   "full_name": "Admin",
+     *   "first_name": "Ad",
+     *   "last_name": "Min",
+     *   "email": "admin@example.com",
+     *   "url": "",
+     *   "company_id": 1,
+     *    "level": "admin",
+     *   "payroll_access": 1,
+     *   "billing_access": 1,
+     *   "avatar": "",
+     *   "screenshots_active": 1,
+     *   "manual_time": 0,
+     *   "permanent_tasks": 0,
+     *   "computer_time_popup": 300,
+     *   "poor_time_popup": "",
+     *   "blur_screenshots": 0,
+     *   "web_and_app_monitoring": 1,
+     *   "webcam_shots": 0,
+     *   "screenshots_interval": 9,
+     *   "user_role_value": "",
+     *   "active": 1,
+     *   "deleted_at": null,
+     *   "created_at": "2018-10-18 09:36:22",
+     *   "updated_at": "2018-10-18 09:36:22",
+     *   "role_id": 1,
+     *   "timezone": null,
+     *   "attached_users": []
+     *  }
+     *
      */
 
     /**
-     * @api {post} /api/v1/users/edit Edit
+     * @api {put, post} /api/v1/users/edit Edit
      * @apiDescription Edit User
      * @apiVersion 0.1.0
      * @apiName EditUser
      * @apiGroup User
+     *
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "id": 1,
+     *   "full_name": "Jonni Tree",
+     *   "email": "gook@tree.com",
+     *   "active": "1"
+     * }
+     *
+     * @apiSuccess {Object} res   User
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "res": {
+     *      "id": 1,
+     *      "full_name": "Jonni Tree",
+     *      "first_name": "Ad",
+     *      "last_name": "Min",
+     *       "email": "gook@tree.com",
+     *       "url": "",
+     *       "company_id": 1,
+     *       "level": "admin",
+     *       "payroll_access": 1,
+     *       "billing_access": 1,
+     *       "avatar": "",
+     *       "screenshots_active": 1,
+     *       "manual_time": 0,
+     *       "permanent_tasks": 0,
+     *       "computer_time_popup": 300,
+     *       "poor_time_popup": "",
+     *       "blur_screenshots": 0,
+     *       "web_and_app_monitoring": 1,
+     *       "webcam_shots": 0,
+     *       "screenshots_interval": 9,
+     *       "user_role_value": "",
+     *       "active": "1",
+     *       "deleted_at": null,
+     *       "created_at": "2018-10-18 09:36:22",
+     *       "updated_at": "2018-10-18 11:04:50",
+     *       "role_id": 1,
+     *       "timezone": null,
+     *       "attached_users": []
+     *     }
+     *   }
      *
      * @apiUse UserModel
      *
@@ -244,11 +368,18 @@ class UserController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/users/destroy Destroy
+     * @api {delete, post} /api/v1/users/remove Destroy
      * @apiDescription Destroy User
      * @apiVersion 0.1.0
      * @apiName DestroyUser
      * @apiGroup User
+     *
+     * @apiSuccess {string} message User destroy status
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "message": "Item has been removed"
+     * }
      *
      * @apiUse DefaultDestroyRequestExample
      */
@@ -260,9 +391,9 @@ class UserController extends ItemController
      * @apiName bulkEditUsers
      * @apiGroup User
      *
-     * @apiParam {Object[]} users                                 Array of objects User
-     * @apiParam {Object}   users.object                          User object
-     * @apiParam {Integer}  users.object.id                       User ID
+     * @apiParam {Object[]} users                                 Users
+     * @apiParam {Object}   users.object                          User
+     * @apiParam {Integer}  users.object.id                       User id
      * @apiParam {String}   users.object.full_name                Full Name
      * @apiParam {String}   [users.object.first_name]             First Name
      * @apiParam {String}   [users.object.last_name]              Last Name
@@ -284,11 +415,11 @@ class UserController extends ItemController
      * @apiParam {Integer}  [users.object.screenshots_interval]   Screenshots creation interval (seconds)
      * @apiParam {String}   [users.object.user_role_value]        ???
      * @apiParam {Boolean}  users.object.active                   User is active
-     * @apiParam {Integer}  [users.object.role_id]                User's Role ID
-     * @apiParam {String}   [users.object.timezone]               User's timezone
+     * @apiParam {Integer}  [users.object.role_id]                User Role id
+     * @apiParam {String}   [users.object.timezone]               User timezone
      *
-     * @apiSuccess {Object[]} message        Array of User object
-     * @apiSuccess {Object}   message.object User object
+     * @apiSuccess {Object[]} message        Users
+     * @apiSuccess {Object}   message.object User
      *
      * @apiUse DefaultBulkEditErrorResponse
      *
@@ -302,11 +433,22 @@ class UserController extends ItemController
         $result = [];
 
         if (empty($requestData['users'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'users is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'users is empty',
+                ]),
+                400
+            );
+        }
+
+        $users = $requestData['users'];
+        if (!is_array($users)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'users should be an array',
+                ]),
                 400
             );
         }
@@ -315,9 +457,8 @@ class UserController extends ItemController
         $validationRules['id'] = 'required';
         unset($validationRules['password']);
 
-        foreach ($requestData['users'] as $user) {
-
-            if (!is_int($user['id'])) {
+        foreach ($users as $user) {
+            if (!isset($user['id']) || !is_int($user['id'])) {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                         'error' => 'Invalid id',
@@ -382,17 +523,28 @@ class UserController extends ItemController
 
 
     /**
-     * @api {post} /api/v1/users/relations Relations
+     * @api {get, post} /api/v1/users/relations Relations
      * @apiDescription Show attached users and to whom the user is attached
      * @apiVersion 0.1.0
      * @apiName RelationsUser
      * @apiGroup User
      *
-     * @apiParam {Integer} [id]               User ID
-     * @apiParam {Integer} [attached_user_id] Attached User ID
+     * @apiErrorExample Wrong id
+     * {
+     *   "error": "Validation fail",
+     *   "reason": "id and attached_user_id is invalid"
+     * }
      *
-     * @apiSuccess {Object[]} array        Array of User object
-     * @apiSuccess {Object}   array.object User object
+     * @apiSuccessExample {json} Response example
+     * {
+     *    "": ""
+     * }
+     *
+     * @apiParam {Integer} [id]               User id
+     * @apiParam {Integer} [attached_user_id] Attached User id
+     *
+     * @apiSuccess {Object[]} array        Users
+     * @apiSuccess {Object}   array.object User
      *
      * @param Request $request
      *

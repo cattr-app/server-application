@@ -187,7 +187,7 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
 
     UserUpdate() {
         this.user = this.api.getUser();
-        if (this.id === this.user.role_id) {
+        if (this.id === this.user.role_id && !this.can('rules/full_access')) {
             this.router.navigateByUrl('/roles/list');
         }
     }

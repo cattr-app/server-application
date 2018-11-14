@@ -108,22 +108,25 @@ class Role extends Model
     }
 
     /**
-     * @param $rule_id
+     * @param $role_id
      * @param $object
      * @param $action
      * @param $allow
      * @return bool
      */
-    public static function updateAllow($rule_id, $object, $action, $allow): bool
+    public static function updateAllow($role_id, $object, $action, $allow): bool
     {
         $rule = Rule::where([
-            'role_id' => $rule_id,
+            'role_id' => $role_id,
             'object' => $object,
             'action' => $action,
         ])->first();
 
+        $user = Auth::user();
+
         throw_if(!$rule, new \Exception('rule does not exist', 400));
-        throw_if(Auth::user()->role_id === $rule->role_id, new \Exception('you cannot change your own privileges', 403));
+        throw_if($user->role_id === $rule->role_id && !static::can($user, 'rules', 'full_access'), new \Exception('you cannot change your own privileges', 403));
+        throw_if($role_id === 1 && $object === 'rules' && $action === 'full_access', new \Exception('you cannot change rule management for root', 403));
 
         $rule->allow = $allow;
         return $rule->save();

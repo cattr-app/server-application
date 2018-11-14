@@ -130,6 +130,7 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             'with': 'project',
             'limit': this.chunksize,
             'offset': this.offset,
+            'active': 1,
         };
 
         switch (this.order) {
@@ -161,7 +162,7 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
             this.offset += this.chunksize;
             this.isLoading = false;
             this.isAllLoaded = result.length < this.chunksize;
-        }, filter ? filter : { 'active': 1 });
+        }, filter);
     }
 
     reload() {

@@ -70,7 +70,7 @@ class RulesController extends ItemController
      * @apiName EditRule
      * @apiGroup Rule
      *
-     * @apiParam {Integer} role_id Role's ID
+     * @apiParam {Integer} role_id Role id
      * @apiParam {String}  object  Object name
      * @apiParam {String}  action  Action name
      * @apiParam {Boolean} allow   Allow status
@@ -138,12 +138,12 @@ class RulesController extends ItemController
      * @apiName bulkEditRules
      * @apiGroup Rule
      *
-     * @apiParam {Object[]} rules                Array of objects Rule
-     * @apiParam {Object}   rules.object         Rule object
-     * @apiParam {Integer}  rules.object.role_id Rule's Role's ID
-     * @apiParam {String}   rules.object.object  Rule's object name
-     * @apiParam {String}   rules.object.action  Rule's action name
-     * @apiParam {Boolean}  rules.object.allow   Rule's allow status
+     * @apiParam {Object[]} rules                Rules
+     * @apiParam {Object}   rules.object         Rule
+     * @apiParam {Integer}  rules.object.role_id Role id
+     * @apiParam {String}   rules.object.object  Rule object name
+     * @apiParam {String}   rules.object.action  Rule action name
+     * @apiParam {Boolean}  rules.object.allow   Rule allow status
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -164,8 +164,13 @@ class RulesController extends ItemController
      *      ]
      *  }
      *
-     * @apiSuccess {String[]} messages         Array of string response
+     * @apiSuccess {String[]} messages         Messages
      * @apiSuccess {String}   messages.message OK
+     *
+     * @apiSuccessExample {json} Response example
+     * {
+     * timeInterval,timeInterval.task
+     * }
      *
      * @apiUse DefaultEditErrorResponse
      * @apiUse UnauthorizedError
@@ -182,16 +187,27 @@ class RulesController extends ItemController
         Role::updateRules();
 
         if (empty($requestData['rules'])) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                'error' => 'validation fail',
-                'reason' => 'rules is empty'
-            ]),
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'rules is empty',
+                ]),
                 400
             );
         }
 
-        foreach ($requestData['rules'] as $rule) {
+        $rules = $requestData['rules'];
+        if (!is_array($rules)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'rules should be an array',
+                ]),
+                400
+            );
+        }
+
+        foreach ($rules as $rule) {
             $validator = Validator::make(
                 $rule,
                 Filter::process($this->getEventUniqueName('validation.item.edit'), $this->getValidationRules())
@@ -248,11 +264,11 @@ class RulesController extends ItemController
      *   }
      * ]
      *
-     * @apiSuccess (200) {Object[]} actions               Array of Action objects
-     * @apiSuccess (200) {Object}   actions.action        Action object
-     * @apiSuccess (200) {String}   actions.action.object Object of action
-     * @apiSuccess (200) {String}   actions.action.action Action of action
-     * @apiSuccess (200) {String}   actions.action.string Name of action
+     * @apiSuccess (200) {Object[]} actions               Actions
+     * @apiSuccess (200) {Object}   actions.action        Applied to
+     * @apiSuccess (200) {String}   actions.action.object Applied action
+     * @apiSuccess (200) {String}   actions.action.action Action type
+     * @apiSuccess (200) {String}   actions.action.string Action name
      *
      * @apiUse UnauthorizedError
      *
