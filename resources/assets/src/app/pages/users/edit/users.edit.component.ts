@@ -52,8 +52,6 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             'first_name': this.item.first_name,
             'last_name': this.item.last_name,
             'email': this.item.email,
-            'avatar': this.item.avatar,
-            'url': this.item.url,
             'active': this.item.active,
             'role_id': this.item.role_id,
             'screenshots_active': this.item.screenshots_active,
