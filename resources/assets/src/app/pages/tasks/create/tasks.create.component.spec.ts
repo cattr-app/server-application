@@ -15,8 +15,76 @@ import { TranslateFakeLoader, TranslateLoader, TranslateModule } from '@ngx-tran
 import { ProjectsService } from '../../projects/projects.service';
 import { Task } from '../../../models/task.model';
 import { UsersService } from '../../users/users.service';
+import { User, UserData } from '../../../models/user.model';
 
-describe('Tasks create component(Admin)', () => {
+
+class TasksCreateMockComponent extends TasksCreateComponent {
+  reloadUsersList(empty: boolean = false) {
+    if (empty) {
+      this.users = [];      
+    } else {
+      this.users = [new User(
+        {
+          id: 1,
+          full_name: 'Fullname 1',
+          first_name: 'full 1',
+          last_name: 'name 1',
+          email: 'email@example1.com',
+          url: '',
+          company_id: 2,
+          level: 'string',
+          payroll_access: 0,
+          billing_access: 0,
+          avatar: 'string',
+          screenshots_active: 0,
+          manual_time: 0,
+          permanent_tasks: 0,
+          computer_time_popup: 0,
+          poor_time_popup: '0',
+          blur_screenshots: 0,
+          web_and_app_monitoring: 0,
+          webcam_shots: 0,
+          screenshots_interval: 0,
+          user_role_value: 'string',
+          active: 0,
+          password: 'string',
+          timezone: 'string',
+          role_id: 2,
+     }),
+
+     new User({
+      id: 2,
+      full_name: 'Fullname 2',
+      first_name: 'full 2',
+      last_name: 'name 2',
+      email: 'email@example2.com',
+      url: '',
+      company_id: 2,
+      level: 'string',
+      payroll_access: 0,
+      billing_access: 0,
+      avatar: 'string',
+      screenshots_active: 0,
+      manual_time: 0,
+      permanent_tasks: 0,
+      computer_time_popup: 0,
+      poor_time_popup: '0',
+      blur_screenshots: 0,
+      web_and_app_monitoring: 0,
+      webcam_shots: 0,
+      screenshots_interval: 0,
+      user_role_value: 'string',
+      active: 0,
+      password: 'string',
+      timezone: 'string',
+      role_id: 2,
+    })
+    ];
+    }
+  }
+}
+
+describe('Tasks create component (Admin))', () => {
   let component, fixture;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -25,7 +93,7 @@ describe('Tasks create component(Admin)', () => {
           loader: { provide: TranslateLoader, useClass: TranslateFakeLoader }
         }),
       ],
-      declarations: [TasksCreateComponent,],
+      declarations: [TasksCreateMockComponent,],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
         ApiService,
@@ -46,7 +114,7 @@ describe('Tasks create component(Admin)', () => {
     })
       .compileComponents().then(() => {
         loadAdminStorage();
-        fixture = TestBed.createComponent(TasksCreateComponent);
+        fixture = TestBed.createComponent(TasksCreateMockComponent);
         component = fixture.debugElement.componentInstance;
         fixture.detectChanges();
       });
@@ -86,11 +154,19 @@ describe('Tasks create component(Admin)', () => {
     expect(el.parent.parent.nativeElement.innerHTML).toContain("field.priority");
   }));
 
-  xit('has selector user', async(() => {
-    console.log(fixture.debugElement.nativeElement);
+  it('has selector \'user\' if has users', async(() => {
+    component.reloadUsersList();
+    fixture.detectChanges();
     let el = fixture.debugElement.query(By.css("ng-select[placeholder='Select user']"));
     expect(el).not.toBeNull();    
     expect(el.parent.parent.nativeElement.innerHTML).toContain("field.user");
+  }));
+
+  it('has not selector \'user\' if has not users', async(() => {
+    component.reloadUsersList(true);
+    fixture.detectChanges();
+    let el = fixture.debugElement.query(By.css("ng-select[placeholder='Select user']"));
+    expect(el).toBeNull();    
   }));
 
   it('has submit button', async(() => {
@@ -99,7 +175,7 @@ describe('Tasks create component(Admin)', () => {
   }));
 });
 
-describe('Tasks list component(Manager)', () => {
+describe('Tasks create component (Manager)', () => {
   let component, fixture;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -108,7 +184,7 @@ describe('Tasks list component(Manager)', () => {
           loader: { provide: TranslateLoader, useClass: TranslateFakeLoader }
         }),
       ],
-      declarations: [TasksCreateComponent,],
+      declarations: [TasksCreateMockComponent,],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
         ApiService,
@@ -129,7 +205,7 @@ describe('Tasks list component(Manager)', () => {
     })
       .compileComponents().then(() => {
         loadManagerStorage();
-        fixture = TestBed.createComponent(TasksCreateComponent);
+        fixture = TestBed.createComponent(TasksCreateMockComponent);
         component = fixture.debugElement.componentInstance;
         fixture.detectChanges();
       });
@@ -169,11 +245,19 @@ describe('Tasks list component(Manager)', () => {
     expect(el.parent.parent.nativeElement.innerHTML).toContain("field.priority");
   }));
 
-  xit('has selector user', async(() => {
-    console.log(fixture.debugElement.nativeElement);
+  it('has selector \'user\' if has users', async(() => {
+    component.reloadUsersList();
+    fixture.detectChanges();
     let el = fixture.debugElement.query(By.css("ng-select[placeholder='Select user']"));
     expect(el).not.toBeNull();    
     expect(el.parent.parent.nativeElement.innerHTML).toContain("field.user");
+  }));
+
+  it('has not selector \'user\' if has not users', async(() => {
+    component.reloadUsersList(true);
+    fixture.detectChanges();
+    let el = fixture.debugElement.query(By.css("ng-select[placeholder='Select user']"));
+    expect(el).toBeNull();    
   }));
 
   it('has submit button', async(() => {
@@ -182,7 +266,7 @@ describe('Tasks list component(Manager)', () => {
   }));
 });
 
-describe('Tasks list component(User)', () => {
+describe('Tasks create component (User)', () => {
   let component, fixture;
   beforeEach(async(() => {
     TestBed.configureTestingModule({
@@ -191,7 +275,7 @@ describe('Tasks list component(User)', () => {
           loader: { provide: TranslateLoader, useClass: TranslateFakeLoader }
         }),
       ],
-      declarations: [TasksCreateComponent,],
+      declarations: [TasksCreateMockComponent,],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
         ApiService,
@@ -212,7 +296,7 @@ describe('Tasks list component(User)', () => {
     })
       .compileComponents().then(() => {
         loadUserStorage();
-        fixture = TestBed.createComponent(TasksCreateComponent);
+        fixture = TestBed.createComponent(TasksCreateMockComponent);
         component = fixture.debugElement.componentInstance;
         fixture.detectChanges();
       });
@@ -252,11 +336,19 @@ describe('Tasks list component(User)', () => {
     expect(el.parent.parent.nativeElement.innerHTML).toContain("field.priority");
   }));
 
-  xit('has selector user', async(() => {
-    console.log(fixture.debugElement.nativeElement);
+  it('has selector \'user\' if has users', async(() => {
+    component.reloadUsersList();
+    fixture.detectChanges();
     let el = fixture.debugElement.query(By.css("ng-select[placeholder='Select user']"));
     expect(el).not.toBeNull();    
     expect(el.parent.parent.nativeElement.innerHTML).toContain("field.user");
+  }));
+
+  it('has not selector \'user\' if has not users', async(() => {
+    component.reloadUsersList(true);
+    fixture.detectChanges();
+    let el = fixture.debugElement.query(By.css("ng-select[placeholder='Select user']"));
+    expect(el).toBeNull();    
   }));
 
   it('has submit button', async(() => {
