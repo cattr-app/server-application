@@ -1,18 +1,15 @@
-import {Component, IterableDiffers, OnInit} from '@angular/core';
-
-import {Role} from '../../../models/role.model';
-import {Router} from '@angular/router';
+import { Component, IterableDiffers, OnInit } from '@angular/core';
+import { TranslateService } from '@ngx-translate/core';
+import { Router } from '@angular/router';
+import { DualListComponent } from 'angular-dual-listbox';
+import { Role } from '../../../models/role.model';
 import { Message } from 'primeng/components/common/api';
-
-import {DualListComponent} from 'angular-dual-listbox';
 import {ItemsCreateComponent} from '../../items.create.component';
-
-import {UsersService} from '../../users/users.service';
-import {ApiService} from '../../../api/api.service';
-import {RolesService} from '../roles.service';
-import {AllowedActionsService} from '../allowed-actions.service';
-import {RulesService} from '../rules.service';
-import {TranslateService} from '@ngx-translate/core';
+import { UsersService } from '../../users/users.service';
+import { ApiService } from '../../../api/api.service';
+import { RolesService } from '../roles.service';
+import { AllowedActionsService } from '../allowed-actions.service';
+import { RulesService } from '../rules.service';
 
 
 @Component({
