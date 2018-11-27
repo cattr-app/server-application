@@ -23,7 +23,7 @@ import { Project } from '../../../models/project.model';
 class TasksShowMockComponent extends TasksShowComponent {
   reloadTask(empty: boolean = false) {
     if (empty) {
-      this.item = null;
+      this.item = new Task();
     }
     else {
       this.item = this.getTaskMock();
@@ -42,11 +42,11 @@ class TasksShowMockComponent extends TasksShowComponent {
         assigned_by: 21,
         url: 'https://redmine.amazingcat.net/issues/6212',
         deleted_at: '',
-        created_at: '',
-        updated_at: '',
+        created_at:"2018-08-07 00:00:00",
+        updated_at:"2018-08-08 00:00:00",
         total_time: '',
-        user: new User(),
-        assigned: new User(),
+        user: this.getUserMock(),
+        assigned: this.getUserMock(),
         project: this.getProjectMock(),
         priority: { id: 1, name: 'Low' },
         priority_id: 1
@@ -66,6 +66,67 @@ class TasksShowMockComponent extends TasksShowComponent {
         users: [new User()]
       }
     );
+  }
+
+  getUserMock() {
+    return new User({
+      id: 21,
+      full_name: "User full name",
+      first_name: "User first name",
+      last_name: "User last name",
+      email: "example@example.com",
+      url: null,
+      company_id: 2,
+      level: null,
+      payroll_access: null,
+      billing_access: null,
+      avatar: null,
+      screenshots_active: 1,
+      manual_time: 300,
+      permanent_tasks: null,
+      computer_time_popup: 300,
+      poor_time_popup: "300",
+      blur_screenshots: 300,
+      web_and_app_monitoring: 300,
+      webcam_shots: 300,
+      screenshots_interval: 300,
+      user_role_value: "some role",
+      active: 1,
+      password: "string",
+      timezone: "string",
+      role_id: 2
+   })
+  }
+
+  reloadUsers(empty: boolean = false) {
+    if (empty) {
+      this.users = [];
+    }
+    else {
+      this.users = this.getUsersMock();
+    }
+  }
+
+  getUsersMock() {
+    return [
+      {
+        user: this.getUserMock(),
+        time: 1000 * 3600, // 1 h
+      },
+      {
+        user: this.getUserMock(),
+        time: 2200,
+      },
+    ];
+  }
+
+  reloadTotalTime(empty: boolean = false) {
+    if (empty) {
+      this.totalTime = 0;
+    }
+    else {
+      this.totalTime = 1000 * 3600 * 1.5;
+    }
   }
 }
 
@@ -159,25 +220,189 @@ describe('Tasks show component (Admin))', () => {
     component.reloadTask();
     fixture.detectChanges();
     let tableRows = fixture.debugElement.queryAll(By.css("tr"));
-    expect(tableRows).not.toBe([]);
+    expect(tableRows.length).toBeGreaterThan(0);
     let tableRowId = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.id"));
-    expect(tableRowId).not.toBe([]);
+    expect(tableRowId.length).toBeGreaterThan(0);
     tableRowId = tableRowId.shift();
     expect(tableRowId.nativeElement.innerHTML).toContain(component.item.id);
   }));
 
-  it('has field project', async(() => {
+  it('has field project (if setted project)', async(() => {
     component.reloadTask();
     fixture.detectChanges();
     let tableRows = fixture.debugElement.queryAll(By.css("tr"));
-    expect(tableRows).not.toBe([]);
+    expect(tableRows.length).toBeGreaterThan(0);
     let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.project"));
-    expect(tableRowProject).not.toBe([]);
+    expect(tableRowProject.length).toBeGreaterThan(0);
     tableRowProject = tableRowProject.shift();
     let projectLink = tableRowProject.query(By.css("a"));
     expect(projectLink).not.toBeNull();
     expect(projectLink.properties.href).toEqual(`/projects/show/${component.item.project.id}`);
     expect(projectLink.nativeElement.innerHTML).toContain(component.item.project.name);
+  }));
+
+  it('has not field project (if unsetted project)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.project"));
+    expect(tableRowProject.length).toBe(0);
+  }));
+
+  it('has field active (active)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.active"));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain("Yes");
+    expect(tableRowActive.nativeElement.innerHTML).not.toContain("No");
+  }));
+
+  it('has field active (no active)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.active"));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain("No");
+    expect(tableRowActive.nativeElement.innerHTML).not.toContain("Yes");
+  }));
+
+  it('has field user (if setted user)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.user"));
+    expect(tableRowProject.length).toBeGreaterThan(0);
+    tableRowProject = tableRowProject.shift();
+    let projectLink = tableRowProject.query(By.css("a"));
+    expect(projectLink).not.toBeNull();
+    expect(projectLink.properties.href).toEqual(`/users/show/${component.item.user.id}`);
+    expect(projectLink.nativeElement.innerHTML).toContain(component.item.user.full_name);
+  }));
+
+  it('has not field user (if unsetted user)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.user"));
+    expect(tableRowProject.length).toBe(0);
+  }));
+
+  it('has field assigned (if setted assigned)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.assigned"));
+    expect(tableRowProject.length).toBeGreaterThan(0);
+    tableRowProject = tableRowProject.shift();
+    let projectLink = tableRowProject.query(By.css("a"));
+    expect(projectLink).not.toBeNull();
+    expect(projectLink.properties.href).toEqual(`/users/show/${component.item.assigned.id}`);
+    expect(projectLink.nativeElement.innerHTML).toContain(component.item.assigned.full_name);
+  }));
+
+  it('has not field assigned (if unsetted assigned)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.assigned"));
+    expect(tableRowProject.length).toBe(0);
+  }));
+
+  it('has field created', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowCreated = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.created"));
+    expect(tableRowCreated.length).toBeGreaterThan(0);
+    tableRowCreated = tableRowCreated.shift();
+    expect(tableRowCreated.nativeElement.innerHTML).toContain(component.item.created_at);
+  }));
+
+  it('has field updated', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowUpdated = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.updated"));
+    expect(tableRowUpdated.length).toBeGreaterThan(0);
+    tableRowUpdated = tableRowUpdated.shift();
+    expect(tableRowUpdated.nativeElement.innerHTML).toContain(component.item.updated_at);
+  }));
+
+  it('has field total time', async(() => {
+    component.reloadTask();
+    component.reloadTotalTime();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowUpdated = tableRows.filter(row => row.nativeElement.innerHTML.includes("Total time"));
+    expect(tableRowUpdated.length).toBeGreaterThan(0);
+    tableRowUpdated = tableRowUpdated.shift();
+    expect(tableRowUpdated.nativeElement.innerHTML).toContain("1h 30m");
+  }));
+
+  it('has field priority (if setted priority)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowPriority = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.priority"));
+    expect(tableRowPriority.length).toBeGreaterThan(0);
+    tableRowPriority = tableRowPriority.shift();
+    expect(tableRowPriority.nativeElement.innerHTML).toContain(component.item.priority.name);
+  }));
+
+  it('has not field priority (if unsetted priority)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowPriority = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.priority"));
+    expect(tableRowPriority.length).toBeGreaterThan(0);
+  }));
+
+  it('has field description', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.description"));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain(component.item.description);
+  }));
+
+  it('has users info (if setted users)', async(() => {
+    component.reloadTask();
+    component.reloadUsers();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("accordion-group"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let InfoAboutFirstUser = component.users[0];
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes(InfoAboutFirstUser.user.full_name));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain("1h");
+  }));
+
+  it('has users info (if unsetted users)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("accordion-group"));
+    expect(tableRows.length).toBe(0);
   }));
 });
 
@@ -271,25 +496,189 @@ describe('Tasks show component (Manager)', () => {
     component.reloadTask();
     fixture.detectChanges();
     let tableRows = fixture.debugElement.queryAll(By.css("tr"));
-    expect(tableRows).not.toBe([]);
+    expect(tableRows.length).toBeGreaterThan(0);
     let tableRowId = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.id"));
-    expect(tableRowId).not.toBe([]);
+    expect(tableRowId.length).toBeGreaterThan(0);
     tableRowId = tableRowId.shift();
     expect(tableRowId.nativeElement.innerHTML).toContain(component.item.id);
   }));
 
-  it('has field project', async(() => {
+  it('has field project (if setted project)', async(() => {
     component.reloadTask();
     fixture.detectChanges();
     let tableRows = fixture.debugElement.queryAll(By.css("tr"));
-    expect(tableRows).not.toBe([]);
+    expect(tableRows.length).toBeGreaterThan(0);
     let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.project"));
-    expect(tableRowProject).not.toBe([]);
+    expect(tableRowProject.length).toBeGreaterThan(0);
     tableRowProject = tableRowProject.shift();
     let projectLink = tableRowProject.query(By.css("a"));
     expect(projectLink).not.toBeNull();
     expect(projectLink.properties.href).toEqual(`/projects/show/${component.item.project.id}`);
     expect(projectLink.nativeElement.innerHTML).toContain(component.item.project.name);
+  }));
+
+  it('has not field project (if unsetted project)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.project"));
+    expect(tableRowProject.length).toBe(0);
+  }));
+
+  it('has field active (active)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.active"));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain("Yes");
+    expect(tableRowActive.nativeElement.innerHTML).not.toContain("No");
+  }));
+
+  it('has field active (no active)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.active"));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain("No");
+    expect(tableRowActive.nativeElement.innerHTML).not.toContain("Yes");
+  }));
+
+  it('has field user (if setted user)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.user"));
+    expect(tableRowProject.length).toBeGreaterThan(0);
+    tableRowProject = tableRowProject.shift();
+    let projectLink = tableRowProject.query(By.css("a"));
+    expect(projectLink).not.toBeNull();
+    expect(projectLink.properties.href).toEqual(`/users/show/${component.item.user.id}`);
+    expect(projectLink.nativeElement.innerHTML).toContain(component.item.user.full_name);
+  }));
+
+  it('has not field user (if unsetted user)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.user"));
+    expect(tableRowProject.length).toBe(0);
+  }));
+
+  it('has field assigned (if setted assigned)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.assigned"));
+    expect(tableRowProject.length).toBeGreaterThan(0);
+    tableRowProject = tableRowProject.shift();
+    let projectLink = tableRowProject.query(By.css("a"));
+    expect(projectLink).not.toBeNull();
+    expect(projectLink.properties.href).toEqual(`/users/show/${component.item.assigned.id}`);
+    expect(projectLink.nativeElement.innerHTML).toContain(component.item.assigned.full_name);
+  }));
+
+  it('has not field assigned (if unsetted assigned)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.assigned"));
+    expect(tableRowProject.length).toBe(0);
+  }));
+
+  it('has field created', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowCreated = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.created"));
+    expect(tableRowCreated.length).toBeGreaterThan(0);
+    tableRowCreated = tableRowCreated.shift();
+    expect(tableRowCreated.nativeElement.innerHTML).toContain(component.item.created_at);
+  }));
+
+  it('has field updated', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowUpdated = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.updated"));
+    expect(tableRowUpdated.length).toBeGreaterThan(0);
+    tableRowUpdated = tableRowUpdated.shift();
+    expect(tableRowUpdated.nativeElement.innerHTML).toContain(component.item.updated_at);
+  }));
+
+  it('has field total time', async(() => {
+    component.reloadTask();
+    component.reloadTotalTime();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowUpdated = tableRows.filter(row => row.nativeElement.innerHTML.includes("Total time"));
+    expect(tableRowUpdated.length).toBeGreaterThan(0);
+    tableRowUpdated = tableRowUpdated.shift();
+    expect(tableRowUpdated.nativeElement.innerHTML).toContain("1h 30m");
+  }));
+
+  it('has field priority (if setted priority)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowPriority = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.priority"));
+    expect(tableRowPriority.length).toBeGreaterThan(0);
+    tableRowPriority = tableRowPriority.shift();
+    expect(tableRowPriority.nativeElement.innerHTML).toContain(component.item.priority.name);
+  }));
+
+  it('has not field priority (if unsetted priority)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowPriority = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.priority"));
+    expect(tableRowPriority.length).toBeGreaterThan(0);
+  }));
+
+  it('has field description', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.description"));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain(component.item.description);
+  }));
+
+  it('has users info (if setted users)', async(() => {
+    component.reloadTask();
+    component.reloadUsers();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("accordion-group"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let InfoAboutFirstUser = component.users[0];
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes(InfoAboutFirstUser.user.full_name));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain("1h");
+  }));
+
+  it('has users info (if unsetted users)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("accordion-group"));
+    expect(tableRows.length).toBe(0);
   }));
 });
 
@@ -383,24 +772,188 @@ describe('Tasks show component (User)', () => {
     component.reloadTask();
     fixture.detectChanges();
     let tableRows = fixture.debugElement.queryAll(By.css("tr"));
-    expect(tableRows).not.toBe([]);
+    expect(tableRows.length).toBeGreaterThan(0);
     let tableRowId = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.id"));
-    expect(tableRowId).not.toBe([]);
+    expect(tableRowId.length).toBeGreaterThan(0);
     tableRowId = tableRowId.shift();
     expect(tableRowId.nativeElement.innerHTML).toContain(component.item.id);
   }));
 
-  it('has field project', async(() => {
+  it('has field project (if setted project)', async(() => {
     component.reloadTask();
     fixture.detectChanges();
     let tableRows = fixture.debugElement.queryAll(By.css("tr"));
-    expect(tableRows).not.toBe([]);
+    expect(tableRows.length).toBeGreaterThan(0);
     let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.project"));
-    expect(tableRowProject).not.toBe([]);
+    expect(tableRowProject.length).toBeGreaterThan(0);
     tableRowProject = tableRowProject.shift();
     let projectLink = tableRowProject.query(By.css("a"));
     expect(projectLink).not.toBeNull();
     expect(projectLink.properties.href).toEqual(`/projects/show/${component.item.project.id}`);
     expect(projectLink.nativeElement.innerHTML).toContain(component.item.project.name);
   }));
+
+  it('has not field project (if unsetted project)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.project"));
+    expect(tableRowProject.length).toBe(0);
+  }));
+
+  it('has field active (active)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.active"));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain("Yes");
+    expect(tableRowActive.nativeElement.innerHTML).not.toContain("No");
+  }));
+
+  it('has field active (no active)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.active"));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain("No");
+    expect(tableRowActive.nativeElement.innerHTML).not.toContain("Yes");
+  }));
+
+  it('has field user (if setted user)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.user"));
+    expect(tableRowProject.length).toBeGreaterThan(0);
+    tableRowProject = tableRowProject.shift();
+    let projectLink = tableRowProject.query(By.css("a"));
+    expect(projectLink).not.toBeNull();
+    expect(projectLink.properties.href).toEqual(`/users/show/${component.item.user.id}`);
+    expect(projectLink.nativeElement.innerHTML).toContain(component.item.user.full_name);
+  }));
+
+  it('has not field user (if unsetted user)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.user"));
+    expect(tableRowProject.length).toBe(0);
+  }));
+
+  it('has field assigned (if setted assigned)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.assigned"));
+    expect(tableRowProject.length).toBeGreaterThan(0);
+    tableRowProject = tableRowProject.shift();
+    let projectLink = tableRowProject.query(By.css("a"));
+    expect(projectLink).not.toBeNull();
+    expect(projectLink.properties.href).toEqual(`/users/show/${component.item.assigned.id}`);
+    expect(projectLink.nativeElement.innerHTML).toContain(component.item.assigned.full_name);
+  }));
+
+  it('has not field assigned (if unsetted assigned)', async(() => {
+    component.reloadTask(true);
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowProject = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.assigned"));
+    expect(tableRowProject.length).toBe(0);
+  }));
+
+  it('has field created', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowCreated = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.created"));
+    expect(tableRowCreated.length).toBeGreaterThan(0);
+    tableRowCreated = tableRowCreated.shift();
+    expect(tableRowCreated.nativeElement.innerHTML).toContain(component.item.created_at);
+  }));
+
+  it('has field updated', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowUpdated = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.updated"));
+    expect(tableRowUpdated.length).toBeGreaterThan(0);
+    tableRowUpdated = tableRowUpdated.shift();
+    expect(tableRowUpdated.nativeElement.innerHTML).toContain(component.item.updated_at);
+  }));
+
+  it('has field total time', async(() => {
+    component.reloadTask();
+    component.reloadTotalTime();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowUpdated = tableRows.filter(row => row.nativeElement.innerHTML.includes("Total time"));
+    expect(tableRowUpdated.length).toBeGreaterThan(0);
+    tableRowUpdated = tableRowUpdated.shift();
+    expect(tableRowUpdated.nativeElement.innerHTML).toContain("1h 30m");
+  }));
+
+  it('has field priority (if setted priority)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowPriority = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.priority"));
+    expect(tableRowPriority.length).toBeGreaterThan(0);
+    tableRowPriority = tableRowPriority.shift();
+    expect(tableRowPriority.nativeElement.innerHTML).toContain(component.item.priority.name);
+  }));
+
+  it('has not field priority (if unsetted priority)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowPriority = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.priority"));
+    expect(tableRowPriority.length).toBeGreaterThan(0);
+  }));
+
+  it('has field description', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("tr"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes("field.description"));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain(component.item.description);
+  }));
+
+  it('has users info (if setted users)', async(() => {
+    component.reloadTask();
+    component.reloadUsers();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("accordion-group"));
+    expect(tableRows.length).toBeGreaterThan(0);
+    let InfoAboutFirstUser = component.users[0];
+    let tableRowActive = tableRows.filter(row => row.nativeElement.innerHTML.includes(InfoAboutFirstUser.user.full_name));
+    expect(tableRowActive.length).toBeGreaterThan(0);
+    tableRowActive = tableRowActive.shift();
+    expect(tableRowActive.nativeElement.innerHTML).toContain("1h");
+  }));
+
+  it('has users info (if unsetted users)', async(() => {
+    component.reloadTask();
+    fixture.detectChanges();
+    let tableRows = fixture.debugElement.queryAll(By.css("accordion-group"));
+    expect(tableRows.length).toBe(0);
+  }));  
 });
