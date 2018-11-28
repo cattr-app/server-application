@@ -1,9 +1,7 @@
 /*
     TODO:
-    1) Check links (task & project)
-    2) Check work with date filters
-    3) Check work with user filter
-    4) Check ordering (tasks / projects / time)
+    1) Check work with date filters ???
+    2) Check work with user filter ???
 */
 import { async, ComponentFixture, TestBed } from '@angular/core/testing';
 import { TimeUseReportComponent } from './time-use-report.component';
@@ -12,7 +10,7 @@ import {ApiService} from '../../../api/api.service';
 import {HttpClient, HttpHandler} from '@angular/common/http';
 import {Router} from '@angular/router';
 import {AppRoutingModule} from '../../../app-routing.module';
-import {Location, LocationStrategy, PathLocationStrategy, APP_BASE_HREF} from '@angular/common';
+import {Location, LocationStrategy, PathLocationStrategy, APP_BASE_HREF, CommonModule} from '@angular/common';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
 import {By} from '@angular/platform-browser';
 import {LocalStorage} from '../../../api/storage.model';
@@ -20,6 +18,14 @@ import {loadAdminStorage, loadUserStorage, loadManagerStorage} from '../../../te
 import {TranslateFakeLoader, TranslateLoader, TranslateModule} from '@ngx-translate/core';
 import { TabsModule } from 'ngx-bootstrap/tabs';
 import {TimeUseReportService} from './time-use-report.service';
+import { FormsModule } from '@angular/forms';
+import { SharedModule } from '../../../shared.module';
+import { LoadingModule } from 'ngx-loading';
+import { DateRangeSelectorComponent } from '../../../date-range-selector/date-range-selector.component';
+import { UserSelectorComponent } from '../../../user-selector/user-selector.component';
+import { UsersService } from '../../users/users.service';
+import { NgSelectModule, NgSelectComponent } from '@ng-select/ng-select';
+import { DpDatePickerModule } from 'ng2-date-picker';
 
 class TimeUseReportMockComponent extends TimeUseReportComponent {
 
@@ -49,7 +55,7 @@ class TimeUseReportMockComponent extends TimeUseReportComponent {
             {
                 name: "task view page",
                 project_id: 6,
-                project_name: "Amazing Time",
+                project_name: "A Amazing Time",
                 task_id: 147,
                 total_time: 1500
             },
@@ -57,7 +63,7 @@ class TimeUseReportMockComponent extends TimeUseReportComponent {
             {
                 name: "Update screenshots view",
                 project_id: 6,
-                project_name: "Amazing Time",
+                project_name: "B Amazing Time",
                 task_id: 152,
                 total_time: 3332
             },
@@ -65,7 +71,7 @@ class TimeUseReportMockComponent extends TimeUseReportComponent {
             {
                 name: "Update project page",
                 project_id: 6,
-                project_name: "Amazing Time",
+                project_name: "b Amazing Time",
                 task_id: 153,
                 total_time: 1078
             }
@@ -83,6 +89,19 @@ class TimeUseReportMockComponent extends TimeUseReportComponent {
 
 describe('Time Use Report component (Admin)', () => {
   let fixture, component;
+  const compareTimeAsStr = function(t1, t2) {
+    let [h1, m1, s1] = t1.split(':');
+    const d1 = new Date().setHours(h1, m1, s1);
+    let [h2, m2, s2] = t2.split(':');    
+    const d2 = new Date().setHours(h2, m2, s2);
+    let _return = 0;
+    if (d1 > d2)
+      _return = 1;
+    else if(d1 < d2)
+      _return = -1;
+    
+    return _return;
+  }
   
   beforeEach(async(() => {
     loadAdminStorage();
@@ -90,9 +109,9 @@ describe('Time Use Report component (Admin)', () => {
       imports: [
         TranslateModule.forRoot({
           loader: {provide: TranslateLoader, useClass: TranslateFakeLoader}
-        }), TabsModule.forRoot(),
+        }), TabsModule.forRoot(), FormsModule, DpDatePickerModule, NgSelectModule,
       ],
-      declarations: [TimeUseReportMockComponent],
+      declarations: [TimeUseReportMockComponent, DateRangeSelectorComponent, UserSelectorComponent],
       schemas: [NO_ERRORS_SCHEMA],
       providers: [
         ApiService,
@@ -104,6 +123,10 @@ describe('Time Use Report component (Admin)', () => {
         {provide: APP_BASE_HREF, useValue: '/'},
         AllowedActionsService,
         TimeUseReportService,
+        SharedModule,
+        CommonModule,
+        LoadingModule,
+        UsersService,
       ],
     })
       .compileComponents().then(() => {
@@ -118,11 +141,11 @@ describe('Time Use Report component (Admin)', () => {
   });
 
   it('report info should be not empty if report not empty', () => {
-      component.reloadReport();
-      fixture.detectChanges();
-      const elementsReportUserInfo = fixture.debugElement.queryAll(By.css("div.report__user"));
-      expect(elementsReportUserInfo.length).toBeGreaterThan(0);
-    });
+    component.reloadReport();
+    fixture.detectChanges();
+    const elementsReportUserInfo = fixture.debugElement.queryAll(By.css("div.report__user"));
+    expect(elementsReportUserInfo.length).toBeGreaterThan(0);
+  });
 
   it('report info should be empty if report empty', () => {
     component.reloadReport(true);
@@ -160,11 +183,216 @@ describe('Time Use Report component (Admin)', () => {
     const containerForTimeUseOfFirstUser = firstUserReportInfo.query(By.css("span.report__user-time"));
     expect(containerForTimeUseOfFirstUser.nativeElement.innerHTML).toContain("1h 38m"); 
   });
+
+  it('tasks should be order by time ASC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(compareTimeAsStr);
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTime = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.total-time")
+      );
+    expect(elementOrderedByTime.length).toBeGreaterThan(0);
+    elementOrderedByTime = elementOrderedByTime.shift();
+    let clickEventForElementOrderedByTime = elementOrderedByTime.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTime.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTime = clickEventForElementOrderedByTime.shift();
+    clickEventForElementOrderedByTime.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim());
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by time DESC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(compareTimeAsStr);
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTime = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.total-time")
+      );
+    expect(elementOrderedByTime.length).toBeGreaterThan(0);
+    elementOrderedByTime = elementOrderedByTime.shift();
+    let clickEventForElementOrderedByTime = elementOrderedByTime.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTime.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTime = clickEventForElementOrderedByTime.shift();
+    clickEventForElementOrderedByTime.callback.call();
+    clickEventForElementOrderedByTime.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .reverse();
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by task-name ASC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.task")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim());
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by task-name DESC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.task")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .reverse();
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by project-name ASC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.project")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim());
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by project-name DESC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.project")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .reverse();
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  
+  xit('should be apply date-range filter', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    console.log(fixture.debugElement.nativeElement);
+    const buttonsDate = fixture.debugElement.queryAll(By.css("div.buttons > button"));
+    let btn = buttonsDate.filter(button => button.nativeElement.innerHTML.includes("control.date-range")).shift();
+    let clickEvent = btn.listeners.filter(event => event.name == 'click').shift();
+    clickEvent.callback.call();    
+    fixture.detectChanges();
+    const input = fixture.debugElement.query(By.css("input[type='text']"));
+    clickEvent = input.listeners.filter(event => event.name == 'click').shift();
+    clickEvent.callback.call();
+    fixture.detectChanges();
+  });
 });
 
 describe('Time Use Report component (Manager)', () => {
   let fixture, component;
-  
+  const compareTimeAsStr = function(t1, t2) {
+    let [h1, m1, s1] = t1.split(':');
+    const d1 = new Date().setHours(h1, m1, s1);
+    let [h2, m2, s2] = t2.split(':');    
+    const d2 = new Date().setHours(h2, m2, s2);
+    let _return = 0;
+    if (d1 > d2)
+      _return = 1;
+    else if(d1 < d2)
+      _return = -1;
+    
+    return _return;
+  }
+
   beforeEach(async(() => {
     loadManagerStorage();
     TestBed.configureTestingModule({
@@ -241,10 +469,201 @@ describe('Time Use Report component (Manager)', () => {
     const containerForTimeUseOfFirstUser = firstUserReportInfo.query(By.css("span.report__user-time"));
     expect(containerForTimeUseOfFirstUser.nativeElement.innerHTML).toContain("1h 38m"); 
   });
+
+  it('tasks should be order by time ASC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(compareTimeAsStr);
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTime = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.total-time")
+      );
+    expect(elementOrderedByTime.length).toBeGreaterThan(0);
+    elementOrderedByTime = elementOrderedByTime.shift();
+    let clickEventForElementOrderedByTime = elementOrderedByTime.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTime.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTime = clickEventForElementOrderedByTime.shift();
+    clickEventForElementOrderedByTime.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim());
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by time DESC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(compareTimeAsStr);
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTime = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.total-time")
+      );
+    expect(elementOrderedByTime.length).toBeGreaterThan(0);
+    elementOrderedByTime = elementOrderedByTime.shift();
+    let clickEventForElementOrderedByTime = elementOrderedByTime.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTime.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTime = clickEventForElementOrderedByTime.shift();
+    clickEventForElementOrderedByTime.callback.call();
+    clickEventForElementOrderedByTime.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .reverse();
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by task-name ASC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.task")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim());
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by task-name DESC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.task")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .reverse();
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by project-name ASC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.project")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim());
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by project-name DESC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.project")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .reverse();
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
 });
 
 describe('Time Use Report component (User)', () => {
   let fixture, component;
+  const compareTimeAsStr = function(t1, t2) {
+    let [h1, m1, s1] = t1.split(':');
+    const d1 = new Date().setHours(h1, m1, s1);
+    let [h2, m2, s2] = t2.split(':');    
+    const d2 = new Date().setHours(h2, m2, s2);
+    let _return = 0;
+    if (d1 > d2)
+      _return = 1;
+    else if(d1 < d2)
+      _return = -1;
+    
+    return _return;
+  }
+
   beforeEach(async(() => {
     loadUserStorage();
 
@@ -322,4 +741,182 @@ describe('Time Use Report component (User)', () => {
     const containerForTimeUseOfFirstUser = firstUserReportInfo.query(By.css("span.report__user-time"));
     expect(containerForTimeUseOfFirstUser.nativeElement.innerHTML).toContain("1h 38m"); 
   });
+
+
+  it('tasks should be order by time ASC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(compareTimeAsStr);
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTime = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.total-time")
+      );
+    expect(elementOrderedByTime.length).toBeGreaterThan(0);
+    elementOrderedByTime = elementOrderedByTime.shift();
+    let clickEventForElementOrderedByTime = elementOrderedByTime.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTime.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTime = clickEventForElementOrderedByTime.shift();
+    clickEventForElementOrderedByTime.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim());
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by time DESC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(compareTimeAsStr);
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTime = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.total-time")
+      );
+    expect(elementOrderedByTime.length).toBeGreaterThan(0);
+    elementOrderedByTime = elementOrderedByTime.shift();
+    let clickEventForElementOrderedByTime = elementOrderedByTime.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTime.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTime = clickEventForElementOrderedByTime.shift();
+    clickEventForElementOrderedByTime.callback.call();
+    clickEventForElementOrderedByTime.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-time"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .reverse();
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by task-name ASC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.task")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim());
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by task-name DESC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.task")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .reverse();
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by project-name ASC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.project")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim());
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
+  it('tasks should be order by project-name DESC', () => {
+    component.reloadReport();
+    fixture.detectChanges();
+    const infoAboutFirstUser = fixture.debugElement.query(By.css("div.report__user"));
+    expect(infoAboutFirstUser).not.toBeNull();
+    const shouldBe = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .sort(function(s1, s2) {
+      return s1.localeCompare(s2);
+    });
+    expect(shouldBe).not.toBeNull();
+    const orderedElements = infoAboutFirstUser.queryAll(By.css("th > span.clickable"));
+    expect(orderedElements.length).toBeGreaterThan(0);
+    let elementOrderedByTaskName = orderedElements.filter(
+      element => element.nativeElement.innerHTML.includes("time-use-report.project")
+      );
+    expect(elementOrderedByTaskName.length).toBeGreaterThan(0);
+    elementOrderedByTaskName = elementOrderedByTaskName.shift();
+    let clickEventForElementOrderedByTaskName = elementOrderedByTaskName.listeners.filter(event => event.name == "click");
+    expect(clickEventForElementOrderedByTaskName.length).toBeGreaterThan(0);
+    clickEventForElementOrderedByTaskName = clickEventForElementOrderedByTaskName.shift();
+    clickEventForElementOrderedByTaskName.callback.call();
+    clickEventForElementOrderedByTaskName.callback.call();
+    fixture.detectChanges();
+    const asIs = infoAboutFirstUser.queryAll(By.css("tr.report__task > td.report__task-project-name > a"))
+    .map(td => td.nativeElement.innerHTML.trim())
+    .reverse();
+    expect(asIs).not.toBeNull();
+    expect(shouldBe).toEqual(asIs);
+  });
+
 });
