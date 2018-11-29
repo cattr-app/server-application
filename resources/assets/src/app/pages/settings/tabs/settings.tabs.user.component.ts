@@ -52,6 +52,13 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
 
 
      ngOnInit() {
+        this.item.manual_time = 0;
+        this.item.active = 0;
+        this.item.screenshots_active = 0;
+        this.item.screenshots_interval = 5;
+        this.item.computer_time_popup = 5;
+        this.item.timezone = '';
+
         this.id = this.api.getUser().id;
         this.itemService.getItem(this.id, this.setItem.bind(this), { 'with': 'projects' });
         this.roleService.getItems(this.setRoles.bind(this));
