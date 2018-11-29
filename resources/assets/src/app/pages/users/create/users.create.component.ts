@@ -28,6 +28,8 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
     ngOnInit() {
         super.ngOnInit();
         this.item.manual_time = 0;
+        this.item.active = 0;
+        this.item.screenshots_active = 0;
         this.item.screenshots_interval = 5;
         this.item.computer_time_popup = 5;
         this.item.timezone = '';
@@ -37,6 +39,7 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
     }
 
     prepareData() {
+
         return {
             'full_name': this.item.full_name,
             'first_name': this.item.first_name,

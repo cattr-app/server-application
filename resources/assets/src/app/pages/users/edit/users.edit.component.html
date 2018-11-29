@@ -80,11 +80,13 @@
                                 <div class="col-md-10"
                                     [class.has-error]="isDisplayError(active)"
                                     [class.has-success]="isDisplaySuccess(active)">
-                                    <select class="form-control" name="user-active"
-                                        [(ngModel)]="item.active" #active="ngModel" required>
-                                        <option value="0" translate>control.no</option>
-                                        <option value="1" translate>control.yes</option>
-                                    </select>
+                                    <input
+                                        type="checkbox"
+                                        name="user-active"
+                                        [(ngModel)]="item.active"
+                                        #active="ngModel"
+                                        ng-true-value="1"
+                                        ng-false-value="0">
                                     <span class="help-block" translate>control.required-field</span>
                                 </div>
                                 <div class="col-md-12">
@@ -123,11 +125,13 @@
                                 <div class="col-md-10"
                                     [class.has-error]="isDisplayError(screenshots_active)"
                                     [class.has-success]="isDisplaySuccess(screenshots_active)">
-                                    <select class="form-control" name="user-screenshots-active"
-                                        [(ngModel)]="item.screenshots_active" #screenshots_active="ngModel" required>
-                                        <option value="0" translate>control.no</option>
-                                        <option value="1" translate>control.yes</option>
-                                    </select>
+                                    <input
+                                        type="checkbox"
+                                        name="user-screenshots-active"
+                                        [(ngModel)]="item.screenshots_active"
+                                        #screenshots_active="ngModel"
+                                        ng-true-value="1"
+                                        ng-false-value="0">
                                     <span class="help-block" translate>control.required-field</span>
                                 </div>
                                 <div class="col-md-12">
@@ -146,11 +150,13 @@
                                         translate>field.manual-time</abbr>
                                 </label>
                                 <div class="col-md-10">
-                                    <select class="form-control" name="user-manual-time"
-                                        [(ngModel)]="item.manual_time" #manual_time="ngModel" required>
-                                        <option value="0" translate>control.no</option>
-                                        <option value="1" translate>control.yes</option>
-                                    </select>
+                                    <input
+                                        type="checkbox"
+                                        name="user-manual-time"
+                                        [(ngModel)]="item.manual_time"
+                                        #manual_time="ngModel"
+                                        ng-true-value="1"
+                                        ng-false-value="0">
                                 </div>
                                 <div class="col-md-12">
                                     <div
