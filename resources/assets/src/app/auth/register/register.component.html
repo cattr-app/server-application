@@ -81,9 +81,9 @@
               </div>
             </div>
 
-            <div *ngIf="form?.invalid" class="alert alert-danger" role="alert">
-              <p *ngIf="full_name?.errors" translate>control.fullname-required</p>
-              <p *ngIf="passwordEl?.errors" translate>control.password-required</p>
+            <div *ngIf="form?.invalid && (full_name.dirty || full_name.touched || passwordEl.dirty || passwordEl.touched)" class="alert alert-danger" role="alert">
+              <p *ngIf="full_name?.errors && (full_name.dirty || full_name.touched)" translate>control.fullname-required</p>
+              <p *ngIf="passwordEl?.errors && (passwordEl.dirty || passwordEl.touched)" translate>control.password-required</p>
             </div>
 
             <button type="submit" class="btn btn-primary" [disabled]="form?.invalid" translate>
