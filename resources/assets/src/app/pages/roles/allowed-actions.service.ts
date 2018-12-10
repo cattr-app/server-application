@@ -77,6 +77,7 @@ export class AllowedActionsService {
     }
 
     updateAllowedList() {
+        this.setupAllowedList([]);
         this.getItems(this.setupAllowedList.bind(this));
     }
 

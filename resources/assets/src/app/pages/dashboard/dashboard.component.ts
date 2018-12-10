@@ -52,8 +52,10 @@ export class DashboardComponent implements OnInit, AfterViewInit {
                 const index = this.tabs.tabs.findIndex(tab => tab.heading === tabHeading);
                 if (index !== -1) {
                     setTimeout(() => {
-                        this.selectedTab = tabHeading;
-                        this.tabs.tabs[index].active = true;
+                        if (typeof this.tabs !== 'undefined') {
+                            this.selectedTab = tabHeading;
+                            this.tabs.tabs[index].active = true;
+                        }
                     });
                 }
             }
@@ -77,9 +79,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     }
 
     reload() {
-        this.userIsManager = this.allowedAction.can('dashboard/manager_access');
-        this.canManageIntervals = this.allowedAction.can('time-intervals/manager_access');
-
         this.taskList.reload();
         this.screenshotList.reload();
 
