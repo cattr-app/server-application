@@ -123,12 +123,26 @@ class UserRepository
      */
     public function markAsNew(int $userId)
     {
-        Property::create([
+        $query = Property::where([
             'entity_id'   => $userId,
             'entity_type' => Property::USER_CODE,
             'name'        => 'NEW',
-            'value'       => 1
         ]);
+
+
+        if ($query->exists()) {
+            $query->update([
+                'value'       => 1
+            ]);
+        } else {
+            Property::create([
+                'entity_id'   => $userId,
+                'entity_type' => Property::USER_CODE,
+                'name'        => 'NEW',
+                'value'       => 1
+            ]);
+        }
+
     }
 
     /**
