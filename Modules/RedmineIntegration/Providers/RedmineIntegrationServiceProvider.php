@@ -31,6 +31,15 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         'item.edit.task' => [
             'Modules\RedmineIntegration\Listeners\IntegrationObserver@taskEdition',
         ],
+        'answer.success.item.show.user' => [
+            'Modules\RedmineIntegration\Listeners\IntegrationObserver@userShow',
+        ],
+        'answer.success.item.edit.user' => [
+            'Modules\RedmineIntegration\Listeners\IntegrationObserver@userAfterEdition',
+        ],
+        'answer.success.item.create.user' => [
+            'Modules\RedmineIntegration\Listeners\IntegrationObserver@userAfterEdition',
+        ],
     ];
 
     /**
@@ -107,6 +116,11 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         //Register synchronize redmine users command
         $this->commands([
             \Modules\RedmineIntegration\Console\SynchronizeUsers::class,
+        ]);
+
+        //Register synchronize redmine time command
+        $this->commands([
+            \Modules\RedmineIntegration\Console\SynchronizeTime::class,
         ]);
     }
 

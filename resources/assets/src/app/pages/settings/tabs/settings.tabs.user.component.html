@@ -107,6 +107,22 @@
             </div>
         </div>
 
+
+        <div class="form-group row">
+            <label class="col-md-2" translate>field.redmine-sync</label>
+            <div class="col-md-10"
+                [class.has-error]="isDisplayError(redmine_sync)"
+                [class.has-success]="isDisplaySuccess(redmine_sync)">
+                <input
+                    type="checkbox"
+                    name="user-redmine-sync"
+                    [(ngModel)]="item.redmine_sync"
+                    #redmine_sync="ngModel"
+                    ng-true-value="1"
+                    ng-false-value="0">
+            </div>
+        </div>
+
         <div class="form-group row" *ngIf="can('/users/full_access')">
             <label class="col-md-2" translate>field.screenshots-active</label>
             <div class="col-md-10"

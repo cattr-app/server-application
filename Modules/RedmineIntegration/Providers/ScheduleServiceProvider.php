@@ -23,6 +23,7 @@ class ScheduleServiceProvider extends ServiceProvider
             $schedule->command('redmine-synchronize:priorities')->cron('*/15 * * * *')->withoutOverlapping();
             $schedule->command('redmine-synchronize:projects')->cron('*/15 * * * *')->withoutOverlapping();
             $schedule->command('redmine-synchronize:tasks')->cron('*/15 * * * *')->withoutOverlapping();
+            $schedule->command('redmine-synchronize:time')->cron('0 * * * *')->withoutOverlapping();
         });
     }
 

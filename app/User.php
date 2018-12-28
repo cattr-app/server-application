@@ -4,6 +4,7 @@ namespace App;
 
 use App\Models\Task;
 use App\Models\TimeInterval;
+use App\Models\Property;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -180,5 +181,13 @@ class User extends Authenticatable implements JWTSubject
     public function timeIntervals(): HasMany
     {
         return $this->hasMany(TimeInterval::class, 'user_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function properties(): HasMany
+    {
+        return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::USER_CODE);
     }
 }

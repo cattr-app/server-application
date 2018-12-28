@@ -94,6 +94,7 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
             'manual_time': this.item.manual_time,
             'screenshots_interval': this.item.screenshots_interval,
             "computer_time_popup": this.item.computer_time_popup,
+            "redmine_sync": this.item.redmine_sync,
             'timezone': this.item.timezone,
             'password': this.item.password,
         };

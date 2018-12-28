@@ -29,6 +29,7 @@ export interface UserData {
    created_at?: string;
    updated_at?: string;
    deleted_at?: string;
+   redmine_sync?: number;
    attached_users?: User[];
 }
 
@@ -61,6 +62,7 @@ export class User extends Item {
     public created_at?: string;
     public updated_at?: string;
     public deleted_at?: string;
+    public redmine_sync?: number;
     public attached_users?: User[];
 
     constructor(data?: UserData) {

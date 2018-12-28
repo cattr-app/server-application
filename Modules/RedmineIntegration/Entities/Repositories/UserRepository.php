@@ -4,6 +4,7 @@ namespace Modules\RedmineIntegration\Entities\Repositories;
 
 use App\Models\Property;
 use App\Models\Task;
+use App\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
@@ -14,6 +15,12 @@ use Illuminate\Support\Facades\DB;
  */
 class UserRepository
 {
+
+    /**
+     * user property name for checkbox "send time in redmine"
+     */
+    public const TIME_SEND_PROPERTY = 'REDMINE_SEND_TIME';
+
     /**
      * Returns user's redmine url saved in properties table
      *
@@ -203,4 +210,71 @@ class UserRepository
             ->where('name', '=', 'NEW')
             ->where('value', '=', '1')->get();
     }
+
+    /**
+     * Returns users, who has turned on redmine time sending
+     *
+     * @return Collection
+     */
+    public function getSendTimeUsers()
+    {
+        return User::query()
+        ->whereHas('properties', function ($propertyQuery) {
+            $propertyQuery->where('name', '=', UserRepository::TIME_SEND_PROPERTY);
+            $propertyQuery->where('value', '=', '1');
+        })
+        ->get();
+    }
+
+
+    /**
+     * Check is user has turned on redmine time sending
+     *
+     * @param $userId integer
+     * @return boolean
+     */
+    public function isUserSendTime($userId)
+    {
+        return Property::where([
+            'entity_id'     => $userId,
+            'entity_type'   => Property::USER_CODE,
+            'name'          => UserRepository::TIME_SEND_PROPERTY,
+            'value'         => '1',
+        ])->exists();
+    }
+
+
+    /**
+     * set user turned on (or not) redmine time sending
+     *
+     * @param $userId integer
+     * @param $enabled boolean
+     */
+    public function setUserSendTime($userId, $enabled)
+    {
+
+        $enabled = ($enabled) ? '1' : '0';
+
+
+        $query = Property::where([
+            'entity_id'     => $userId,
+            'entity_type'   => Property::USER_CODE,
+            'name'          => UserRepository::TIME_SEND_PROPERTY,
+        ]);
+
+
+        if ($query->exists()) {
+            $query->update([
+                'value' => $enabled,
+            ]);
+        } else {
+            Property::create([
+                'entity_id'   => $userId,
+                'entity_type' => Property::USER_CODE,
+                'name'        => UserRepository::TIME_SEND_PROPERTY,
+                'value'       => $enabled
+            ]);
+        }
+    }
+
 }

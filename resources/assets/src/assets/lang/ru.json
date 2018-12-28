@@ -185,6 +185,7 @@
 		"password": "Пароль",
 		"id": "ID",
 		"user-active": "Активен",
+		"redmine-sync": "Синхронизировать время с redmine",
 		"priority": "Приоритет"
 	}
 }

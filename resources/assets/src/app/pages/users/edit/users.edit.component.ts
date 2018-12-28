@@ -60,6 +60,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             "computer_time_popup": this.item.computer_time_popup,
             'timezone': this.item.timezone,
             'password': this.item.password,
+            'redmine_sync': this.item.redmine_sync,
         };
     }
 

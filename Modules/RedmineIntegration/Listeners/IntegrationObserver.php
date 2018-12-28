@@ -10,6 +10,7 @@ use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Models\RedmineClient;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Illuminate\Support\Facades\Log;
+use App\User;
 
 /**
  * Class IntegrationObserver
@@ -73,6 +74,46 @@ class IntegrationObserver
 
         return $task;
     }
+
+
+    /**
+     * Observe user after edition
+     *
+     * @param $user
+     * @return mixed
+     */
+    public function userAfterEdition($json)
+    {
+
+        $user = User::where('email', $json['res']->email)->first();
+
+        $userId = $user->id;
+
+
+        $sync = request()->input('redmine_sync');
+        $sync  = $sync ? 1 : 0;
+
+        /**
+         * @todo: add rule, who can change that and who can not
+         */
+        $this->userRepo->setUserSendTime($userId, $sync);
+        $json['res']->redmine_sync = $sync;
+        return $json;
+    }
+
+
+    /**
+     * Observe user show
+     *
+     * @param $user
+     * @return mixed
+     */
+    public function userShow($user)
+    {
+        $user->redmine_sync = $this->userRepo->isUserSendTime($user->id);
+        return $user;
+    }
+
 
     /**
      * Observe task edition

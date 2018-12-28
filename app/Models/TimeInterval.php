@@ -80,4 +80,12 @@ class TimeInterval extends Model
     {
     	return $this->hasMany(Screenshot::class, 'time_interval_id');
     }
+
+    /**
+     * @return HasMany
+     */
+    public function properties(): HasMany
+    {
+        return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::TIME_INTERVAL_CODE);
+    }
 }

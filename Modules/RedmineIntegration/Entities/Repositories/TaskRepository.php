@@ -18,11 +18,16 @@ class TaskRepository
      */
     public function getRedmineTaskId(int $taskId)
     {
-        $taskRedmineIdProperty = Property::where([
+        $query = Property::where([
             ['entity_id', '=', $taskId],
             ['entity_type', '=', Property::TASK_CODE],
             ['name', '=', 'REDMINE_ID']
-        ])->first();
+        ]);
+
+        if (!$query->exists()) {
+            return null;
+        }
+        $taskRedmineIdProperty = $query->first();
 
         return $taskRedmineIdProperty->value;
     }
