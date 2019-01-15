@@ -25,6 +25,15 @@ export class ProjectReportService extends ItemsService {
     });
   }
 
+  getTaskDates(uid, tid, start_at, end_at) {
+    const params = { uid, start_at, end_at };
+    return new Promise<{ date: string, duration: number }[]>((resolve) => {
+      this.api.send(`${this.getApiPath()}/list/tasks/${tid}`, params, (result => {
+        resolve(result);
+      }));
+    });
+  }
+
   convertFromApi(itemFromApi) {
     return itemFromApi;
   }
