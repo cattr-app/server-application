@@ -52,8 +52,6 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             'first_name': this.item.first_name,
             'last_name': this.item.last_name,
             'email': this.item.email,
-            'avatar': this.item.avatar,
-            'url': this.item.url,
             'active': this.item.active,
             'role_id': this.item.role_id,
             'screenshots_active': this.item.screenshots_active,
@@ -62,6 +60,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             "computer_time_popup": this.item.computer_time_popup,
             'timezone': this.item.timezone,
             'password': this.item.password,
+            'redmine_sync': this.item.redmine_sync,
         };
     }
 

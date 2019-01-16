@@ -168,4 +168,24 @@ class ProjectReportController extends Controller
 
         return response()->json($projects);
     }
+
+    /**
+     * Returns durations per date for a task.
+     */
+    public function task($id, Request $request)
+    {
+        $uid = $request->uid;
+        $start_at = $request->input('start_at') == null ? '' : $request->start_at;
+        $end_at = $request->input('end_at') == null ? '' : $request->end_at;
+
+        $report = DB::table('project_report')
+            ->select('date', DB::raw('CAST(duration AS UNSIGNED) AS duration'))
+            ->where('task_id', $id)
+            ->where('user_id', $uid)
+            ->where('date', '>=', $start_at)
+            ->where('date', '<', $end_at)
+            ->get(['date', 'duration']);
+
+        return response()->json($report);
+    }
 }

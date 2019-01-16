@@ -15,11 +15,19 @@
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.fullname</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="full_name?.invalid && (full_name.dirty || full_name.touched)"
-                                    [class.has-success]="full_name?.valid && (full_name.dirty || full_name.touched)">
+                                    [class.has-error]="isDisplayError(full_name)"
+                                    [class.has-success]="isDisplaySuccess(full_name)">
                                     <input type="text" class="form-control" name="user-full-name"
                                         [(ngModel)]="item.full_name" #full_name="ngModel" required>
                                     <span class="help-block" translate>control.required-field</span>
+                                </div>
+                                <div class="col-md-12">
+                                    <div
+                                        *ngIf="isDisplayError(full_name)"
+                                        class="alert alert-danger"
+                                        role="alert">
+                                        <p translate>control.fullname-required</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -42,60 +50,70 @@
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.email</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="email?.invalid && (email.dirty || email.touched)"
-                                    [class.has-success]="email?.valid && (email.dirty || email.touched)">
+                                    [class.has-error]="isDisplayError(email)"
+                                    [class.has-success]="isDisplaySuccess(email)">
                                     <input type="text" class="form-control" name="user-email"
                                         [(ngModel)]="item.email" #email="ngModel" required>
                                     <span class="help-block" translate>control.required-field</span>
+                                </div>
+                                <div class="col-md-12">
+                                    <div
+                                        *ngIf="email?.invalid && (email.dirty || email.touched)"
+                                        class="alert alert-danger"
+                                        role="alert">
+                                        <p translate>control.email-required</p>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.password</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="password?.invalid && (password.dirty || password.touched)"
-                                    [class.has-success]="password?.valid && (password.dirty || password.touched)">
+                                    [class.has-error]="isDisplayError(password)"
+                                    [class.has-success]="isDisplaySuccess(password)">
                                     <input type="text" class="form-control" name="user-password"
                                         [(ngModel)]="item.password" #password="ngModel" required>
                                     <span class="help-block" translate>control.required-field</span>
                                 </div>
-                            </div>
-
-                            <div class="form-group row">
-                                <label class="col-md-2" translate>field.avatar</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-avatar"
-                                        [(ngModel)]="item.avatar">
-                                </div>
-                            </div>
-
-                            <div class="form-group row">
-                                <label class="col-md-2" translate>field.url</label>
-                                <div class="col-md-10">
-                                    <input type="text" class="form-control" name="user-url"
-                                        [(ngModel)]="item.url">
+                                <div class="col-md-12">
+                                    <div
+                                        *ngIf="isDisplayError(password)"
+                                        class="alert alert-danger"
+                                        role="alert">
+                                        <p translate>control.password-required</p>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.user-active</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="active?.invalid && (active.dirty || active.touched)"
-                                    [class.has-success]="active?.valid && (active.dirty || active.touched)">
-                                    <select class="form-control" name="user-active"
-                                        [(ngModel)]="item.active" #active="ngModel" required>
-                                        <option value="0" translate>control.no</option>
-                                        <option value="1" translate>control.yes</option>
-                                    </select>
+                                    [class.has-error]="isDisplayError(active)"
+                                    [class.has-success]="isDisplaySuccess(active)">
+                                    <input
+                                        type="checkbox"
+                                        name="user-active"
+                                        [(ngModel)]="item.active"
+                                        #active="ngModel"
+                                        ng-true-value="1"
+                                        ng-false-value="0">
                                     <span class="help-block" translate>control.required-field</span>
+                                </div>
+                                <div class="col-md-12">
+                                    <div
+                                        *ngIf="isDisplayError(active)"
+                                        class="alert alert-danger"
+                                        role="alert">
+                                        <p translate>control.active-required</p>
+                                    </div>
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.role</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="role?.invalid && (role.dirty || role.touched)"
-                                    [class.has-success]="role?.valid && (role.dirty || role.touched)">
+                                    [class.has-error]="isDisplayError(role)"
+                                    [class.has-success]="isDisplaySuccess(role)">
                                     <select class="form-control" name="user-role-id"
                                         [(ngModel)]="item.role_id" #role="ngModel" required>
                                         <option value="" default></option>
@@ -103,19 +121,52 @@
                                     </select>
                                     <span class="help-block" translate>control.required-field</span>
                                 </div>
+                                <div class="col-md-12">
+                                    <div
+                                        *ngIf="isDisplayError(role)"
+                                        class="alert alert-danger"
+                                        role="alert">
+                                        <p translate>control.role-id-required</p>
+                                    </div>
+                                </div>
+                            </div>
+
+                            <div class="form-group row">
+                                <label class="col-md-2" translate>field.redmine-sync</label>
+                                <div class="col-md-10"
+                                    [class.has-error]="isDisplayError(redmine_sync)"
+                                    [class.has-success]="isDisplaySuccess(redmine_sync)">
+                                    <input
+                                        type="checkbox"
+                                        name="user-redmine-sync"
+                                        [(ngModel)]="item.redmine_sync"
+                                        #redmine_sync="ngModel"
+                                        ng-true-value="1"
+                                        ng-false-value="0">
+                                </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.screenshots-active</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="screenshots_active?.invalid && (screenshots_active.dirty || screenshots_active.touched)"
-                                    [class.has-success]="screenshots_active?.valid && (screenshots_active.dirty || screenshots_active.touched)">
-                                    <select class="form-control" name="user-screenshots-active"
-                                        [(ngModel)]="item.screenshots_active" #screenshots_active="ngModel" required>
-                                        <option value="0" translate>control.no</option>
-                                        <option value="1" translate>control.yes</option>
-                                    </select>
+                                    [class.has-error]="isDisplayError(screenshots_active)"
+                                    [class.has-success]="isDisplaySuccess(screenshots_active)">
+                                    <input
+                                        type="checkbox"
+                                        name="user-screenshots-active"
+                                        [(ngModel)]="item.screenshots_active"
+                                        #screenshots_active="ngModel"
+                                        ng-true-value="1"
+                                        ng-false-value="0">
                                     <span class="help-block" translate>control.required-field</span>
+                                </div>
+                                <div class="col-md-12">
+                                    <div
+                                        *ngIf="isDisplayError(screenshots_active)"
+                                        class="alert alert-danger"
+                                        role="alert">
+                                        <p translate>control.screenshots-active-required</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -125,22 +176,32 @@
                                         translate>field.manual-time</abbr>
                                 </label>
                                 <div class="col-md-10">
-                                    <select class="form-control" name="user-manual-time"
-                                        [(ngModel)]="item.manual_time" #manual_time="ngModel" required>
-                                        <option value="0" translate>control.no</option>
-                                        <option value="1" translate>control.yes</option>
-                                    </select>
+                                    <input
+                                        type="checkbox"
+                                        name="user-manual-time"
+                                        [(ngModel)]="item.manual_time"
+                                        #manual_time="ngModel"
+                                        ng-true-value="1"
+                                        ng-false-value="0">
                                 </div>
                             </div>
 
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.screenshots-interval</label>
                                 <div class="col-md-10"
-                                    [class.has-error]="screenshots_interval?.invalid && (screenshots_interval.dirty || screenshots_interval.touched)"
-                                    [class.has-success]="screenshots_interval?.valid && (screenshots_interval.dirty || screenshots_interval.touched)">
+                                    [class.has-error]="isDisplayError(screenshots_interval)"
+                                    [class.has-success]="isDisplaySuccess(screenshots_interval)">
                                     <input type="text" class="form-control" name="user-screenshots-interval"
                                         [(ngModel)]="item.screenshots_interval" #screenshots_interval="ngModel" required>
                                     <span class="help-block" translate>control.required-field</span>
+                                </div>
+                                <div class="col-md-12">
+                                    <div
+                                        *ngIf="isDisplayError(screenshots_interval)"
+                                        class="alert alert-danger"
+                                        role="alert">
+                                        <p translate>control.screenshots-interval-required</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -150,11 +211,19 @@
                                         translate>field.computer-time-popup</abbr>
                                 </label>
                                 <div class="col-md-10"
-                                    [class.has-error]="computer_time_popup?.invalid && (computer_time_popup.dirty || computer_time_popup.touched)"
-                                    [class.has-success]="computer_time_popup?.valid && (computer_time_popup.dirty || computer_time_popup.touched)">
+                                    [class.has-error]="isDisplayError(computer_time_popup)"
+                                    [class.has-success]="isDisplaySuccess(computer_time_popup)">
                                     <input type="text" class="form-control" name="user-computer-time-popup"
                                         [(ngModel)]="item.computer_time_popup" #computer_time_popup="ngModel" required>
                                     <span class="help-block" translate>control.required-field</span>
+                                </div>
+                                <div class="col-md-12">
+                                    <div
+                                        *ngIf="isDisplayError(computer_time_popup)"
+                                        class="alert alert-danger"
+                                        role="alert">
+                                        <p translate>control.computer-time-popup-required</p>
+                                    </div>
                                 </div>
                             </div>
 
@@ -168,17 +237,6 @@
                                         guess="true">
                                     </ng2-timezone-picker>
                                 </div>
-                            </div>
-
-                            <div *ngIf="form?.invalid" class="alert alert-danger" role="alert">
-                                <p *ngIf="full_name?.errors" translate>control.fullname-required</p>
-                                <p *ngIf="email?.errors" translate>control.email-required</p>
-                                <p *ngIf="password?.errors" translate>control.password-required</p>
-                                <p *ngIf="active?.errors" translate>control.active-required</p>
-                                <p *ngIf="role?.errors" translate>control.role-id-required</p>
-                                <p *ngIf="screenshots_active?.errors" translate>control.screenshots-active-required</p>
-                                <p *ngIf="screenshots_interval?.errors" translate>control.screenshots-interval-required</p>
-                                <p *ngIf="computer_time_popup?.errors" translate>control.computer-time-popup-required</p>
                             </div>
 
                             <button type="submit" class="btn btn-primary" [disabled]="form?.invalid" translate>control.create</button>

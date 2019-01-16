@@ -5,6 +5,7 @@ import {ItemsService} from './items.service';
 import {Item} from '../models/item.model';
 import {Message} from 'primeng/components/common/api';
 import {AllowedActionsService} from './roles/allowed-actions.service';
+import { NgModel } from '@angular/forms';
 
 export abstract class ItemsEditComponent implements OnInit {
 
@@ -80,5 +81,13 @@ export abstract class ItemsEditComponent implements OnInit {
         } else {
             this.msgs.push({severity: 'success', summary: 'Success', detail:  name + ' has been updated'});
         }
+    }
+
+    isDisplayError(model: NgModel) : boolean {
+        return model.invalid && (model.dirty || model.touched);
+    }
+
+    isDisplaySuccess(model: NgModel) : boolean {
+        return model.valid && (model.dirty || model.touched);
     }
 }

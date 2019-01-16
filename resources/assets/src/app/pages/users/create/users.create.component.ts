@@ -28,6 +28,8 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
     ngOnInit() {
         super.ngOnInit();
         this.item.manual_time = 0;
+        this.item.active = 0;
+        this.item.screenshots_active = 0;
         this.item.screenshots_interval = 5;
         this.item.computer_time_popup = 5;
         this.item.timezone = '';
@@ -37,13 +39,12 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
     }
 
     prepareData() {
+
         return {
             'full_name': this.item.full_name,
             'first_name': this.item.first_name,
             'last_name': this.item.last_name,
             'email': this.item.email,
-            'avatar': this.item.avatar,
-            'url': this.item.url,
             'active': this.item.active,
             'role_id': this.item.role_id,
             'screenshots_active': this.item.screenshots_active,
@@ -52,6 +53,7 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
             "computer_time_popup": this.item.computer_time_popup,
             'timezone': this.item.timezone,
             'password': this.item.password,
+            'redmine_sync': this.item.redmine_sync,
         };
     }
 }

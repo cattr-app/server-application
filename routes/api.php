@@ -129,9 +129,9 @@ Route::group([
 
 
     // Statistic routes
-      $router->post('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
-      $router->post('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
-      $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
-      $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
-
+    $router->post('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
+    $router->post('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
+    $router->post('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
+    $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
+    $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
 });

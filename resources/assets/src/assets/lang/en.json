@@ -187,6 +187,7 @@
 		"password": "Password",
 		"id": "Id",
 		"user-active": "Active",
+		"redmine-sync": "redmine time sync",
 		"priority": "Priority"
 	}
 }

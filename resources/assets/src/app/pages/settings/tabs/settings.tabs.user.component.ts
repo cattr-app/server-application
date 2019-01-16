@@ -52,6 +52,13 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
 
 
      ngOnInit() {
+        this.item.manual_time = 0;
+        this.item.active = 0;
+        this.item.screenshots_active = 0;
+        this.item.screenshots_interval = 5;
+        this.item.computer_time_popup = 5;
+        this.item.timezone = '';
+
         this.id = this.api.getUser().id;
         this.itemService.getItem(this.id, this.setItem.bind(this), { 'with': 'projects' });
         this.roleService.getItems(this.setRoles.bind(this));
@@ -81,14 +88,13 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
             'first_name': this.item.first_name,
             'last_name': this.item.last_name,
             'email': this.item.email,
-            'avatar': this.item.avatar,
-            'url': this.item.url,
             'active': this.item.active,
             'role_id': this.item.role_id,
             'screenshots_active': this.item.screenshots_active,
             'manual_time': this.item.manual_time,
             'screenshots_interval': this.item.screenshots_interval,
             "computer_time_popup": this.item.computer_time_popup,
+            "redmine_sync": this.item.redmine_sync,
             'timezone': this.item.timezone,
             'password': this.item.password,
         };
