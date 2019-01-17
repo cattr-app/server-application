@@ -21,7 +21,7 @@ export class AllowedActionsService {
 
     getItems(callback, id ?: number) {
         const itemsArray: Item[] = [];
-        const roleId: any = {'id': id ? id : this.api.getUser().role_id};
+        const roleId: any = {'id': id ? +id : +this.api.getUser().role_id};
 
         return this.api.send(
             this.getApiPath() + '/allowed-rules',
