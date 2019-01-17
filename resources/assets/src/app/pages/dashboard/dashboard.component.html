@@ -1,11 +1,11 @@
-<div [class]="selectedTab === 'Team' ? 'container-fluid' : 'container'">
+<div [class]="selectedTab === tabTeam ? 'container-fluid' : 'container'">
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div *ngIf="userIsManager">
                         <tabset #tabs>
-                            <tab heading="{{'control.own' | translate }}" (select)="changeTab($event)">
+                            <tab #tabOwn heading="{{'control.own' | translate }}" (select)="changeTab($event)">
                                 <dashboard-tasklist #taskList>
                                 </dashboard-tasklist>
 
@@ -22,7 +22,7 @@
                                 </change-task-panel>
                             </tab>
 
-                            <tab heading="{{'control.team' | translate }}" (select)="changeTab($event)">
+                            <tab #tabTeam heading="{{'control.team' | translate }}" (select)="changeTab($event)">
                                 <app-statistic-time #statistic
                                     (onSelectionChanged)="changeSelection($event)">
                                 </app-statistic-time>

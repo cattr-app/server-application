@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
+import {Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef} from '@angular/core';
 import { TabsetComponent, TabDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../../api/api.service';
@@ -20,11 +20,13 @@ import { StatisticTimeComponent } from '../statistic/time/statistic.time.compone
 export class DashboardComponent implements OnInit, AfterViewInit {
     @ViewChild('tabs') tabs: TabsetComponent;
     @ViewChild('taskList') taskList: TaskListComponent;
+    @ViewChild('tabOwn', {read: TabDirective}) tabOwn: TabDirective;
+    @ViewChild('tabTeam', {read: TabDirective}) tabTeam: TabDirective;
     @ViewChild('screenshotList') screenshotList: ScreenshotListComponent;
     @ViewChild('statistic') statistic: StatisticTimeComponent;
 
     userIsManager: boolean = false;
-    selectedTab: string = '';
+    selectedTab: TabDirective = null;
     selectedIntervals: TimeInterval[] = [];
     taskFilter: string|Project|Task = '';
     canManageIntervals: boolean = false;
@@ -32,6 +34,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     constructor(
         protected api: ApiService,
         protected allowedAction: AllowedActionsService,
+        protected cdr: ChangeDetectorRef,
     ) { }
 
     ngOnInit() {
@@ -43,32 +46,27 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     allowedUpdated() {
         this.userIsManager = this.allowedAction.can('dashboard/manager_access');
         this.canManageIntervals = this.allowedAction.can('time-intervals/manager_access');
+
+        setTimeout(() => {
+            if (this.userIsManager && this.tabTeam) {
+                this.tabTeam.active = true;
+            }
+        });
     }
 
     ngAfterViewInit() {
-        if (this.userIsManager) {
-            const tabHeading = localStorage.getItem('dashboard-tab');
-            if (tabHeading !== null) {
-                const index = this.tabs.tabs.findIndex(tab => tab.heading === tabHeading);
-                if (index !== -1) {
-                    setTimeout(() => {
-                        if (typeof this.tabs !== 'undefined') {
-                            this.selectedTab = tabHeading;
-                            this.tabs.tabs[index].active = true;
-                        }
-                    });
-                }
-            }
+        if (this.userIsManager && this.tabTeam) {
+            this.tabTeam.active = true;
         }
+
+        this.cdr.detectChanges();
     }
 
     changeTab(tab: TabDirective) {
         if (tab.heading !== undefined) {
-            this.selectedTab = tab.heading;
+            this.selectedTab = tab;
             this.selectedIntervals = [];
             this.reload();
-
-            localStorage.setItem('dashboard-tab', this.selectedTab);
         }
     }
 
