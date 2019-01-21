@@ -281,7 +281,10 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             const startStr = this.range.start.format('YYYY-MM-DD');
             const endStr = this.range.end.format('YYYY-MM-DD');
             const start = moment.utc(startStr).subtract(offset, 'minutes');
-            const end = moment.utc(endStr).subtract(offset, 'minutes');
+            let end = moment.utc(endStr).subtract(offset, 'minutes');
+            if (this.view === 'timelineRange') {
+                end.add(1, 'day');
+            }
 
             this.router.navigate([], {
                 relativeTo: this.activatedRoute,
@@ -301,7 +304,10 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             setTimeout(() => {
                 this.viewEvents = events;
                 const start = moment.utc(this.range.start.format('YYYY-MM-DD'));
-                const end = moment.utc(this.range.end.format('YYYY-MM-DD'));
+                let end = moment.utc(this.range.end.format('YYYY-MM-DD'));
+                if (this.view === 'timelineRange') {
+                    end.add(1, 'day');
+                }
 
                 if (this.timelineInitialized) {
                     this.timeline.changeView(this.view);
