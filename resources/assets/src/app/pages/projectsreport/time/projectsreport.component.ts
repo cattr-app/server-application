@@ -185,14 +185,14 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
   }
 
   formatDurationString(time: number) {
-    const duration = moment.duration(time, 'seconds');
+    const duration = moment.duration(+time, 'seconds');
     const hours = Math.floor(duration.asHours());
     const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
     return `${hours}h ${minutes}m`;
   }
 
   formatDurationStringCSV(time: number) {
-    const duration = moment.duration(time, 'seconds');
+    const duration = moment.duration(+time, 'seconds');
     const hours = Math.floor(duration.asHours());
     const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
     const seconds = Math.floor(duration.asSeconds()) - 60 * 60 * hours - 60 * minutes;

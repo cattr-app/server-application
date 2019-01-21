@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Output, EventEmitter, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter, ChangeDetectorRef, OnDestroy } from '@angular/core';
 import { PopoverDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../../../api/api.service';
@@ -30,10 +30,11 @@ import { Schedule } from 'primeng/schedule';
 import { ResourceInput } from 'fullcalendar-scheduler/src/exports';
 import { TranslateService } from '@ngx-translate/core';
 
-import { Observable } from 'rxjs/Rx';
+import { Observable, Subject } from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
+import { Router, ActivatedRoute } from '@angular/router';
 
 enum UsersSort {
     NameAsc,
@@ -73,7 +74,7 @@ function debounce(f, delay) {
     templateUrl: './statistic.time.component.html',
     styleUrls: ['../../items.component.scss', './statistic.time.component.scss']
 })
-export class StatisticTimeComponent implements OnInit {
+export class StatisticTimeComponent implements OnInit, OnDestroy {
     @ViewChild('timeline') timeline: Schedule;
     @ViewChild('userSelect') userSelect: UserSelectorComponent;
     @ViewChild('dateRangeSelector') dateRangeSelector: DateRangeSelectorComponent;
@@ -95,6 +96,7 @@ export class StatisticTimeComponent implements OnInit {
     hoverPopoverTime: number = 0;
     timelineInitialized: boolean = false;
     timelineOptions: any;
+    updateInterval: any = null;
 
     readonly defaultView = 'timelineDay';
 
@@ -112,6 +114,7 @@ export class StatisticTimeComponent implements OnInit {
     selectedUsers: ResourceInput[] = [];
     sortUsers: UsersSort = UsersSort.NameAsc;
 
+    update$ = new Subject<Range>();
     viewRange$: Observable<Range>;
     viewEvents$: Observable<EventObjectInput[]>;
     viewEventsTasks$: Observable<Task[]>;
@@ -134,7 +137,10 @@ export class StatisticTimeComponent implements OnInit {
         private projectService: ProjectsService,
         private screenshotService: ScreenshotsService,
         private translate: TranslateService,
-        private cdr: ChangeDetectorRef) {
+        private cdr: ChangeDetectorRef,
+        private router: Router,
+        private activatedRoute: ActivatedRoute,
+    ) {
         this.updateResourceInfo = debounce(this.updateResourceInfo.bind(this), 100);
     }
 
@@ -266,13 +272,31 @@ export class StatisticTimeComponent implements OnInit {
         this.viewEvents$ = this.viewRange$.filter(range => {
             return range.start.diff(this.range.start) !== 0
                 || range.end.diff(this.range.end) !== 0;
-        }).switchMap(range => {
+        }).merge(this.update$).switchMap(range => {
             this.setLoading(true);
             this.range = range;
+
             const offset = this.timezoneOffset;
             // Get date only and correct timezone.
-            const start = moment.utc(this.range.start.format('YYYY-MM-DD')).subtract(offset, 'minutes');
-            const end = moment.utc(this.range.end.format('YYYY-MM-DD')).subtract(offset, 'minutes');
+            const startStr = this.range.start.format('YYYY-MM-DD');
+            const endStr = this.range.end.format('YYYY-MM-DD');
+            const start = moment.utc(startStr).subtract(offset, 'minutes');
+            let end = moment.utc(endStr).subtract(offset, 'minutes');
+            if (this.view === 'timelineRange') {
+                end.add(1, 'day');
+            }
+
+            this.router.navigate([], {
+                relativeTo: this.activatedRoute,
+                queryParams: {
+                    start: startStr,
+                    end: endStr,
+                    range: this.dateRangeSelector.mode,
+                },
+                queryParamsHandling: 'merge',
+                replaceUrl: true,
+            });
+
             return Observable.from(this.fetchEvents(start, end));
         }).share();
 
@@ -280,7 +304,10 @@ export class StatisticTimeComponent implements OnInit {
             setTimeout(() => {
                 this.viewEvents = events;
                 const start = moment.utc(this.range.start.format('YYYY-MM-DD'));
-                const end = moment.utc(this.range.end.format('YYYY-MM-DD'));
+                let end = moment.utc(this.range.end.format('YYYY-MM-DD'));
+                if (this.view === 'timelineRange') {
+                    end.add(1, 'day');
+                }
 
                 if (this.timelineInitialized) {
                     this.timeline.changeView(this.view);
@@ -351,9 +378,11 @@ export class StatisticTimeComponent implements OnInit {
             this.viewTimeWorked = data;
         });
 
-        const end = moment.utc();
-        const start = end.clone().subtract(1, 'day');
-        this.latestEvents$ = Observable.from(this.fetchEvents(start, end)).share();
+        this.latestEvents$ = this.update$.startWith(this.range).switchMap(() => {
+            const end = moment.utc();
+            const start = end.clone().subtract(1, 'day');
+            return Observable.from(this.fetchEvents(start, end));
+        }).share();
         this.latestEvents$.subscribe(events => {
             this.latestEvents = events;
             this.updateResourceInfo();
@@ -756,7 +785,22 @@ export class StatisticTimeComponent implements OnInit {
             schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
         };
 
+        this.updateInterval = setInterval(() => {
+            const offset = this.timezoneOffset;
+            const start = this.range.start.format('YYYY-MM-DD');
+            const today = moment.utc().add(offset, 'minutes').format('YYYY-MM-DD');
+            if (this.view === 'timelineDay' && start === today) {
+                this.update();
+            }
+        }, 60 * 1000);
+
         this.cdr.detectChanges();
+    }
+
+    ngOnDestroy() {
+        if (this.updateInterval) {
+            clearInterval(this.updateInterval);
+        }
     }
 
     setMode(mode: string) {
@@ -974,5 +1018,9 @@ export class StatisticTimeComponent implements OnInit {
         }
 
         return true;
+    }
+
+    update() {
+        this.update$.next(this.range);
     }
 }

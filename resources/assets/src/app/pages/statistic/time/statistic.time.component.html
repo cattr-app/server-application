@@ -36,7 +36,7 @@
         <p class="statistics-popover__line">
             <ngx-loading [show]="popoverLoading"></ngx-loading>
             <a *ngIf="clickPopoverScreenshot !== null"
-                [attr.href]="'screenshots/show/' + clickPopoverScreenshot.id">
+                [routerLink]="['/screenshots/show', clickPopoverScreenshot.id]">
                 <app-image class="statistics-popover__image"
                     [src]="clickPopoverScreenshot.thumbnail_path ? clickPopoverScreenshot.thumbnail_path : (clickPopoverScreenshot.path ? clickPopoverScreenshot.path : 'uploads/none.png')">
                 </app-image>
@@ -45,7 +45,7 @@
 
         <p class="statistics-popover__line">
             <a *ngIf="clickPopoverTask !== null" class="statistics-popover__link"
-                [attr.href]="'tasks/show/' + clickPopoverTask.id">{{ clickPopoverText }}</a>
+                [routerLink]="['/tasks/show', clickPopoverTask.id]">{{ clickPopoverText }}</a>
         </p>
     </div>
 </ng-template>

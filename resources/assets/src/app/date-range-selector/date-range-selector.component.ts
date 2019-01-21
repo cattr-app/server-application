@@ -6,6 +6,7 @@ import * as moment from 'moment';
 import { TranslateService } from '@ngx-translate/core';
 
 import { LocalStorage } from '../api/storage.model';
+import { ActivatedRoute } from '@angular/router';
 
 export interface Range {
     start: moment.Moment;
@@ -108,28 +109,47 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
 
     constructor(
         public translate: TranslateService,
+        private activatedRoute: ActivatedRoute,
     ) {
-        const savedMode = LocalStorage.getStorage().get(`filterByDateRangeModeIN${window.location.pathname}`);
-        const savedStart = LocalStorage.getStorage().get(`filterByDateRangeStartIN${window.location.pathname}`);
-        const savedEnd = LocalStorage.getStorage().get(`filterByDateRangeEndIN${window.location.pathname}`);
-
-        if (savedMode) {
-            this.mode = savedMode;
-            this.activeButton = savedMode;
-        }
-
-        if (savedMode !== 'day') {
-            if (savedStart) {
-                this.start = moment(savedStart, 'YYYY-MM-DD');
+        const params = this.activatedRoute.snapshot.queryParams;
+        if (params.start || params.end || params.range) {
+            if (params.range) {
+                this.mode = params.range;
+                this.activeButton = params.range;
             }
 
-            if (savedEnd) {
-                this.end = moment(savedEnd, 'YYYY-MM-DD');
+            if (params.start) {
+                this.start = moment(params.start, 'YYYY-MM-DD');
             }
-        }
 
-        if (savedMode || savedStart || savedEnd) {
+            if (params.end) {
+                this.end = moment(params.end, 'YYYY-MM-DD');
+            }
+
             this.applyChanges();
+        } else {
+            const savedMode = LocalStorage.getStorage().get(`filterByDateRangeModeIN${window.location.pathname}`);
+            const savedStart = LocalStorage.getStorage().get(`filterByDateRangeStartIN${window.location.pathname}`);
+            const savedEnd = LocalStorage.getStorage().get(`filterByDateRangeEndIN${window.location.pathname}`);
+
+            if (savedMode) {
+                this.mode = savedMode;
+                this.activeButton = savedMode;
+            }
+
+            if (savedMode !== 'day') {
+                if (savedStart) {
+                    this.start = moment(savedStart, 'YYYY-MM-DD');
+                }
+
+                if (savedEnd) {
+                    this.end = moment(savedEnd, 'YYYY-MM-DD');
+                }
+            }
+
+            if (savedMode || savedStart || savedEnd) {
+                this.applyChanges();
+            }
         }
     }
 
