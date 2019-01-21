@@ -26,3 +26,30 @@ tabset {
 tab {
     padding-top: 1em;
 }
+
+.manager-panel {
+    position: relative;
+}
+
+.header-buttons {
+    position: absolute;
+    top: 0;
+    right: 0;
+    z-index: 1;
+}
+
+.user-statistic {
+    position: relative;
+}
+
+.statistics-users {
+    display: block;
+    margin-bottom: 1em;
+    width: 100%;
+}
+
+@media (min-width: 768px) {
+    .statistics-users {
+        width: unset;
+    }
+}

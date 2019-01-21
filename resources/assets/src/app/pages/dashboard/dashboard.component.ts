@@ -7,9 +7,11 @@ import { AllowedActionsService } from '../roles/allowed-actions.service';
 import { TimeInterval } from '../../models/timeinterval.model';
 import { Project } from '../../models/project.model';
 import { Task } from '../../models/task.model';
+import { User } from '../../models/user.model';
 
 import { TaskListComponent } from './tasklist/tasks.list.component';
 import { ScreenshotListComponent } from './screenshotlist/screenshot.list.component';
+import { UserSelectorComponent } from '../../user-selector/user-selector.component';
 import { StatisticTimeComponent } from '../statistic/time/statistic.time.component';
 
 @Component({
@@ -23,6 +25,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     @ViewChild('tabOwn', {read: TabDirective}) tabOwn: TabDirective;
     @ViewChild('tabTeam', {read: TabDirective}) tabTeam: TabDirective;
     @ViewChild('screenshotList') screenshotList: ScreenshotListComponent;
+    @ViewChild('userSelect') userSelect: UserSelectorComponent;
+    @ViewChild('userStatistic') userStatistic: StatisticTimeComponent;
     @ViewChild('statistic') statistic: StatisticTimeComponent;
 
     userIsManager: boolean = false;
@@ -30,6 +34,16 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     selectedIntervals: TimeInterval[] = [];
     taskFilter: string|Project|Task = '';
     canManageIntervals: boolean = false;
+    currentUser: User = null;
+    selectedUsers: User[] = [];
+
+    get isOnTeamTab() {
+        return this.selectedTab === this.tabTeam;
+    }
+
+    get user() {
+        return [this.currentUser];
+    }
 
     constructor(
         protected api: ApiService,
@@ -38,6 +52,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     ) { }
 
     ngOnInit() {
+        this.currentUser = this.api.getUser();
         this.allowedUpdated();
         let allowedCallback = this.allowedUpdated.bind(this);
         this.allowedAction.subscribeOnUpdate(allowedCallback);
@@ -95,5 +110,9 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         if (this.statistic) {
             this.statistic.filter(filter);
         }
+    }
+
+    userFilter(user: User) {
+        return !!user.active;
     }
 }

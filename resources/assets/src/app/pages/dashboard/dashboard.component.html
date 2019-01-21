@@ -1,11 +1,19 @@
-<div [class]="selectedTab === tabTeam ? 'container-fluid' : 'container'">
+<div [class]="isOnTeamTab ? 'container-fluid' : 'container'">
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <div *ngIf="userIsManager">
+                    <div class="manager-panel" *ngIf="userIsManager">
+                        <div class="header-buttons btn-group" role="group" *ngIf="isOnTeamTab">
+                            <button type="button" (click)="statistic.exportCSV()" class="btn btn-default" translate>control.export-csv</button>
+                        </div>
+
                         <tabset #tabs>
                             <tab #tabOwn heading="{{'control.own' | translate }}" (select)="changeTab($event)">
+                                <app-statistic-time #userStatistic class="user-statistic"
+                                    [users]="user" [height]="80">
+                                </app-statistic-time>
+
                                 <dashboard-tasklist #taskList>
                                 </dashboard-tasklist>
 
@@ -23,8 +31,11 @@
                             </tab>
 
                             <tab #tabTeam heading="{{'control.team' | translate }}" (select)="changeTab($event)">
-                                <app-statistic-time #statistic
+                                <app-statistic-time #statistic [users]="selectedUsers"
                                     (onSelectionChanged)="changeSelection($event)">
+                                    <app-user-selector class="statistics-users" #userSelect
+                                        [filter]="userFilter" (changed)="selectedUsers = $event">
+                                    </app-user-selector>
                                 </app-statistic-time>
 
                                 <change-task-panel
@@ -39,7 +50,11 @@
                         </tabset>
                     </div>
 
-                    <div *ngIf="!userIsManager">
+                    <div class="user-panel" *ngIf="!userIsManager">
+                        <app-statistic-time #userStatistic class="user-statistic"
+                            [users]="user" [height]="80">
+                        </app-statistic-time>
+
                         <dashboard-tasklist #taskList>
                         </dashboard-tasklist>
 
