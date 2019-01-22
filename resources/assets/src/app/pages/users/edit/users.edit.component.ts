@@ -61,6 +61,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             'timezone': this.item.timezone,
             'password': this.item.password,
             'redmine_sync': this.item.redmine_sync,
+            'important': this.item.important,
         };
     }
 

@@ -186,6 +186,8 @@
 		"id": "ID",
 		"user-active": "Активен",
 		"redmine-sync": "Синхронизировать время с redmine",
-		"priority": "Приоритет"
+		"priority": "Приоритет",
+		"important": "Important",
+		"important-title": "Связанные скриншоты не должны удаляться автоматически"
 	}
 }

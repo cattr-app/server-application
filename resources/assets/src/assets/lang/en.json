@@ -188,6 +188,8 @@
 		"id": "Id",
 		"user-active": "Active",
 		"redmine-sync": "redmine time sync",
-		"priority": "Priority"
+		"priority": "Priority",
+		"important": "Important",
+		"important-title": "Related screenshots should not be deleted automatically"
 	}
 }
