@@ -10,6 +10,7 @@ export interface ScreenshotData {
     created_at?: string;
     updated_at?: string;
     time_interval?: TimeInterval;
+    important?: boolean;
 }
 
 export class Screenshot extends Item {
@@ -21,6 +22,7 @@ export class Screenshot extends Item {
     public created_at?: string;
     public updated_at?: string;
     public time_interval?: TimeInterval;
+    public important?: boolean;
 
     constructor(data?: ScreenshotData) {
         super();
