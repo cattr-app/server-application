@@ -85,6 +85,7 @@ export class TasksEditComponent extends ItemsEditComponent implements OnInit {
             'assigned_by': this.item.assigned_by,
             'url': this.item.url,
             'priority_id': this.item.priority_id,
+            'important': this.item.important,
         };
     }
 }

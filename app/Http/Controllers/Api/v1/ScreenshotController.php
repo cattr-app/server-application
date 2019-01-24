@@ -149,6 +149,7 @@ class ScreenshotController extends ItemController
      * @apiSuccess {String}   Screenshot.path             Screenshot Image path URI
      * @apiSuccess {String}   Screenshot.created_at       Screenshot date time of create
      * @apiSuccess {String}   Screenshot.updated_at       Screenshot date time of update
+     * @apiSuccess {Boolean}  Screenshot.important        Screenshot important flag
      *
      * @apiUse DefaultCreateErrorResponse
      * @apiUse UnauthorizedError

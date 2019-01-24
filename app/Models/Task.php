@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ * @property bool $important
  *
  * @property TimeInterval[] $timeIntervals
  * @property User[]         $user
@@ -53,6 +54,7 @@ class Task extends Model
         'assigned_by',
         'url',
         'priority_id',
+        'important',
     ];
 
     /**

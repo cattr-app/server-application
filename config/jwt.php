@@ -6,7 +6,7 @@ return [
         'private' => env('JWT_PRIVATE_KEY'),
         'passphrase' => env('JWT_PASSPHRASE'),
     ],
-    'ttl' => env('JWT_TTL', 60),
+    'ttl' => env('JWT_TTL', 24 * 60),
     'refresh_ttl' => env('JWT_REFRESH_TTL', 20160),
     'algo' => env('JWT_ALGO', 'HS256'),
     'required_claims' => [

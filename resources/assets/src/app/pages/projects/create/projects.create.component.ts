@@ -28,6 +28,7 @@ export class ProjectsCreateComponent extends ItemsCreateComponent implements OnI
             // 'company_id': this.item.company_id,
             'name': this.item.name,
             'description': this.item.description,
+            'important': this.item.important,
         };
     }
 

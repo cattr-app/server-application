@@ -47,6 +47,7 @@ use App\Models\Role;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ * @property bool $important
  *
  * @property Role           $role
  * @property Project[]      $projects
@@ -94,6 +95,7 @@ class User extends Authenticatable implements JWTSubject
         'password',
         'timezone',
         'role_id',
+        'important',
     ];
 
 

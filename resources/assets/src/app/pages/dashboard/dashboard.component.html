@@ -3,58 +3,62 @@
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <div *ngIf="userIsManager">
-                        <tabset #tabs>
-                            <tab #tabOwn heading="{{'control.own' | translate }}" (select)="changeTab($event)">
-                                <dashboard-tasklist #taskList>
-                                </dashboard-tasklist>
-
-                                <dashboard-screenshotlist #screenshotList
-                                    (onSelectionChanged)="changeSelection($event)">
-                                </dashboard-screenshotlist>
-
-                                <change-task-panel
-                                    *ngIf="selectedIntervals.length || taskFilter"
-                                    [timeIntervals]="selectedIntervals"
-                                    (onFilterChanged)="filter($event)"
-                                    (onIntervalsDeleted)="reload()"
-                                    (onIntervalsChanged)="reload()">
-                                </change-task-panel>
-                            </tab>
-
-                            <tab #tabTeam heading="{{'control.team' | translate }}" (select)="changeTab($event)">
-                                <app-statistic-time #statistic
-                                    (onSelectionChanged)="changeSelection($event)">
-                                </app-statistic-time>
-
-                                <change-task-panel
-                                    *ngIf="(selectedIntervals.length || taskFilter)
-                                        && canManageIntervals"
-                                    [timeIntervals]="selectedIntervals"
-                                    (onFilterChanged)="filter($event)"
-                                    (onIntervalsDeleted)="reload()"
-                                    (onIntervalsChanged)="reload()">
-                                </change-task-panel>
-                            </tab>
-                        </tabset>
+                    <div class="header-buttons btn-group" role="group" *ngIf="selectedTab === tabTeam">
+                        <button type="button" (click)="statistic.exportCSV()" class="btn btn-default" translate>control.export-csv</button>
                     </div>
 
-                    <div *ngIf="!userIsManager">
-                        <dashboard-tasklist #taskList>
-                        </dashboard-tasklist>
+                    <tabset #tabs>
+                        <tab #tabOwn heading="{{'control.own' | translate }}" (select)="changeTab($event)">
+                            <dashboard-tasklist #taskList>
+                            </dashboard-tasklist>
 
-                        <dashboard-screenshotlist #screenshotList
-                            (onSelectionChanged)="changeSelection($event)">
-                        </dashboard-screenshotlist>
+                            <dashboard-screenshotlist #screenshotList
+                                (onSelectionChanged)="changeSelection($event)">
+                            </dashboard-screenshotlist>
 
-                        <change-task-panel
-                            *ngIf="selectedIntervals.length || taskFilter"
-                            [timeIntervals]="selectedIntervals"
-                            (onFilterChanged)="filter($event)"
-                            (onIntervalsDeleted)="reload()"
-                            (onIntervalsChanged)="reload()">
-                        </change-task-panel>
-                    </div>
+                            <change-task-panel
+                                *ngIf="selectedIntervals.length || taskFilter"
+                                [timeIntervals]="selectedIntervals"
+                                (onFilterChanged)="filter($event)"
+                                (onIntervalsDeleted)="reload()"
+                                (onIntervalsChanged)="reload()">
+                            </change-task-panel>
+                        </tab>
+
+                        <tab #tabTeam heading="{{'control.team' | translate }}"
+                            (select)="changeTab($event)" *ngIf="userIsManager">
+                            <app-statistic-time #statistic [users]="selectedUsers"
+                                (onSelectionChanged)="changeSelection($event)">
+                                <app-user-selector class="statistics-users" #userSelect
+                                    [filter]="userFilter" (changed)="selectedUsers = $event">
+                                </app-user-selector>
+                            </app-statistic-time>
+
+                            <change-task-panel
+                                *ngIf="(selectedIntervals.length || taskFilter)
+                                    && canManageIntervals"
+                                [timeIntervals]="selectedIntervals"
+                                (onFilterChanged)="filter($event)"
+                                (onIntervalsDeleted)="reload()"
+                                (onIntervalsChanged)="reload()">
+                            </change-task-panel>
+                        </tab>
+
+                        <tab #tabTimeline heading="{{'control.timeline' | translate }}"
+                            (select)="changeTab($event)" *ngIf="!userIsManager">
+                            <app-statistic-time #statistic [users]="[currentUser]" [height]="80">
+                            </app-statistic-time>
+
+                            <change-task-panel
+                                *ngIf="(selectedIntervals.length || taskFilter)
+                                    && canManageIntervals"
+                                [timeIntervals]="selectedIntervals"
+                                (onFilterChanged)="filter($event)"
+                                (onIntervalsDeleted)="reload()"
+                                (onIntervalsChanged)="reload()">
+                            </change-task-panel>
+                        </tab>
+                    </tabset>
                 </div>
             </div>
         </div>

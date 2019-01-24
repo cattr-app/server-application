@@ -148,7 +148,8 @@
 		"computer-time-popup-required": "Поле \"Время неактивности пользователя\" обязательно для заполнения",
 		"activate": "Активировать",
 		"deactivate": "Деактивировать",
-		"invite-user": "Пригласить пользователя"
+		"invite-user": "Пригласить пользователя",
+		"timeline": "Timeline"
 	},
 	"field": {
 		"active": "Активно",
@@ -186,6 +187,8 @@
 		"id": "ID",
 		"user-active": "Активен",
 		"redmine-sync": "Синхронизировать время с redmine",
-		"priority": "Приоритет"
+		"priority": "Приоритет",
+		"important": "Important",
+		"important-title": "Связанные скриншоты не должны удаляться автоматически"
 	}
 }

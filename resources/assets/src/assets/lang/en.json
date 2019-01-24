@@ -148,7 +148,8 @@
 		"computer-time-popup-required": "User inactive time field is required",
 		"activate": "Activate",
 		"deactivate": "Deactivate",
-		"invite-user": "Invite user"
+		"invite-user": "Invite user",
+		"timeline": "Timeline"
 	},
 	"field": {
 		"active": "Active",
@@ -188,6 +189,8 @@
 		"id": "Id",
 		"user-active": "Active",
 		"redmine-sync": "redmine time sync",
-		"priority": "Priority"
+		"priority": "Priority",
+		"important": "Important",
+		"important-title": "Related screenshots should not be deleted automatically"
 	}
 }

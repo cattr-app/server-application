@@ -8,7 +8,7 @@ import {ScreenshotsShowComponent} from './show/screenshots.show.component';
 
 export const AuthRoutes: Routes = [
     // {path: 'create', component: ScreenshotsCreateComponent},
-    // {path: 'edit/:id', component: ScreenshotsEditComponent},
+    {path: 'edit/:id', component: ScreenshotsEditComponent},
     {path: 'list', component: ScreenshotsListComponent},
     {path: 'show/:id', component: ScreenshotsShowComponent},
     {path: '', redirectTo: 'login', pathMatch: 'full'},
