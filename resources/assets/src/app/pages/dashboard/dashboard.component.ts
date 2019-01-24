@@ -13,6 +13,7 @@ import { TaskListComponent } from './tasklist/tasks.list.component';
 import { ScreenshotListComponent } from './screenshotlist/screenshot.list.component';
 import { UserSelectorComponent } from '../../user-selector/user-selector.component';
 import { StatisticTimeComponent } from '../statistic/time/statistic.time.component';
+import { UsersService } from '../users/users.service';
 
 @Component({
     selector: 'app-dashboard',
@@ -26,7 +27,6 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     @ViewChild('tabTeam', {read: TabDirective}) tabTeam: TabDirective;
     @ViewChild('screenshotList') screenshotList: ScreenshotListComponent;
     @ViewChild('userSelect') userSelect: UserSelectorComponent;
-    @ViewChild('userStatistic') userStatistic: StatisticTimeComponent;
     @ViewChild('statistic') statistic: StatisticTimeComponent;
 
     userIsManager: boolean = false;
@@ -37,22 +37,19 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     currentUser: User = null;
     selectedUsers: User[] = [];
 
-    get isOnTeamTab() {
-        return this.selectedTab === this.tabTeam;
-    }
-
-    get user() {
-        return [this.currentUser];
-    }
-
     constructor(
         protected api: ApiService,
         protected allowedAction: AllowedActionsService,
         protected cdr: ChangeDetectorRef,
+        protected userService: UsersService,
     ) { }
 
     ngOnInit() {
-        this.currentUser = this.api.getUser();
+        const user = this.api.getUser();
+        this.userService.getItem(user.id, user => {
+            this.currentUser = user;
+        });
+
         this.allowedUpdated();
         let allowedCallback = this.allowedUpdated.bind(this);
         this.allowedAction.subscribeOnUpdate(allowedCallback);
@@ -96,7 +93,7 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.screenshotList.reload();
 
         if (this.statistic) {
-            this.statistic.reload();
+            this.statistic.update();
         }
 
         this.filter('');

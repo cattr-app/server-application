@@ -148,7 +148,8 @@
 		"computer-time-popup-required": "User inactive time field is required",
 		"activate": "Activate",
 		"deactivate": "Deactivate",
-		"invite-user": "Invite user"
+		"invite-user": "Invite user",
+		"timeline": "Timeline"
 	},
 	"field": {
 		"active": "Active",

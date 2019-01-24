@@ -211,6 +211,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             const params = {
                 'start_at': start,
                 'end_at': end,
+                'uids': this.selectedUsers.map(user => user.id),
             };
 
             return new Promise<EventObjectInput[]>((resolve) => {
