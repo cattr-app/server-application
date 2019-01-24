@@ -10,6 +10,7 @@ export interface ProjectData {
     created_at?: string;
     updated_at?: string;
     users?: User[];
+    important?: boolean;
 }
 
 export class Project extends Item {
@@ -21,6 +22,7 @@ export class Project extends Item {
     public created_at?: string;
     public updated_at?: string;
     public users?: User[];
+    public important?: boolean;
 
     constructor(data?: ProjectData) {
         super();

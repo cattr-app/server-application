@@ -63,11 +63,19 @@
                     </div>
                 </div>
 
-                <div class="row" *ngIf="modalScreenshot.time_interval?.user_id === user.id || can('/screenshots/remove_related')">
+                <div class="row">
                     <div class="col-md-12 modal-screenshot-buttons">
-                        <button class="btn btn-danger btn-sm" (click)="delete(modalScreenshot)">
+                        <a class="btn btn-primary btn-sm" *ngIf="can('/screenshots/edit')"
+                            [routerLink]="['/screenshots/edit', modalScreenshot.id]">
                             <i aria-hidden="true" class="fa fa-pencil-square-o"></i>
-                            Delete
+                            <span translate>control.edit</span>
+                        </a>
+
+                        <button class="btn btn-danger btn-sm"
+                            *ngIf="modalScreenshot.time_interval?.user_id === user.id || can('/screenshots/remove_related')"
+                            (click)="delete(modalScreenshot)">
+                            <i aria-hidden="true" class="fa fa-pencil-square-o"></i>
+                            <span translate>control.delete</span>
                         </button>
                     </div>
                 </div>

@@ -144,6 +144,7 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
             // 'company_id': this.item.company_id,
             'name': this.item.name,
             'description': this.item.description,
+            'important': this.item.important,
         };
     }
     getHeader() {

@@ -105,20 +105,24 @@ class ProjectReportController extends Controller
     {
         $start_at = is_null($request->input('start_at')) ? '' : $request->start_at;
         $end_at = is_null($request->input('end_at')) ? '' : $request->end_at;
-
+        $uids = $request->uids;
 
         $days = TimeDuration::query();
-
 
         if ($start_at) {
             $timestamp = strtotime($start_at);
             $date = date('Y-m-d', $timestamp);
             $days->where('date', '>=', $date);
         }
+
         if ($end_at) {
             $timestamp = strtotime($end_at);
             $date = date('Y-m-d', $timestamp);
             $days->where('date', '<=', $date);
+        }
+
+        if (!empty($uids)) {
+            $days->whereIn('user_id', $uids);
         }
 
         return response()->json($days->get());

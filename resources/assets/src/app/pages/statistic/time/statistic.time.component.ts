@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, Output, EventEmitter, ChangeDetectorRef, OnDestroy } from '@angular/core';
+import { Component, OnInit, ViewChild, Output, EventEmitter, ChangeDetectorRef, OnDestroy, Input } from '@angular/core';
 import { PopoverDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../../../api/api.service';
@@ -9,7 +9,6 @@ import { TasksService } from '../../tasks/tasks.service';
 import { ProjectsService } from '../../projects/projects.service';
 import { ScreenshotsService } from '../../screenshots/screenshots.service';
 
-import { UserSelectorComponent } from '../../../user-selector/user-selector.component';
 import { DateRangeSelectorComponent, Range } from '../../../date-range-selector/date-range-selector.component';
 
 import { User } from '../../../models/user.model';
@@ -76,10 +75,16 @@ function debounce(f, delay) {
 })
 export class StatisticTimeComponent implements OnInit, OnDestroy {
     @ViewChild('timeline') timeline: Schedule;
-    @ViewChild('userSelect') userSelect: UserSelectorComponent;
     @ViewChild('dateRangeSelector') dateRangeSelector: DateRangeSelectorComponent;
     @ViewChild('clickPopover') clickPopover: PopoverDirective;
     @ViewChild('hoverPopover') hoverPopover: PopoverDirective;
+
+    protected readonly usersSubj = new Subject<User[]>();
+    @Input() set users(value: User[]) {
+        this.usersSubj.next(value);
+    }
+
+    @Input() height: number | string = null;
 
     @Output() onSelectionChanged = new EventEmitter<TimeInterval[]>();
 
@@ -110,7 +115,6 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
     latestEvents: EventObjectInput[] = [];
     latestEventsTasks: Task[] = [];
     latestEventsProjects: Project[] = [];
-    users: ResourceInput[] = [];
     selectedUsers: ResourceInput[] = [];
     sortUsers: UsersSort = UsersSort.NameAsc;
 
@@ -207,6 +211,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             const params = {
                 'start_at': start,
                 'end_at': end,
+                'uids': this.selectedUsers.map(user => user.id),
             };
 
             return new Promise<EventObjectInput[]>((resolve) => {
@@ -259,7 +264,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             end: moment.utc().startOf('day').add(1, 'day'),
         };
 
-        this.selectedUsers$ = this.userSelect.changed.asObservable().map(users => {
+        this.selectedUsers$ = this.usersSubj.asObservable().map(users => {
             return users.map(user => {
                 return {
                     id: '' + user.id,
@@ -468,6 +473,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             themeSystem: 'bootstrap3',
             eventColor: '#2ab27b',
             locale: this.translate.getDefaultLang(),
+            height: this.height,
             views: {
                 timelineDay: {
                     type: 'timeline',
@@ -805,10 +811,6 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
 
     setMode(mode: string) {
         this.view = 'timeline' + mode[0].toUpperCase() + mode.slice(1);
-    }
-
-    userFilter(user: User) {
-        return !!user.active;
     }
 
     formatDurationString(time: number) {

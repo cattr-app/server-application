@@ -18,6 +18,7 @@ import { UsersService } from './pages/users/users.service';
 import { ProjectSelectorComponent } from './project-selector/project-selector.component';
 import { ImageComponent } from './image/image.component';
 import { RegistrationService } from './registration.service';
+import { RouterModule } from '@angular/router';
 
 @NgModule({
     imports: [
@@ -30,6 +31,7 @@ import { RegistrationService } from './registration.service';
         ModalModule,
         LoadingModule,
         DpDatePickerModule,
+        RouterModule,
     ],
     declarations: [
         UsersFiltersComponent,

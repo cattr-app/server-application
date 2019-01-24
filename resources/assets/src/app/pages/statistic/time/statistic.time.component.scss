@@ -20,26 +20,10 @@
         width: 100%;
     }
 
-    &__users {
-        display: block;
-        margin-bottom: 1em;
-        width: 100%;
-
-        @media (min-width: $screen-sm-min) {
-            width: unset;
-        }
-    }
-
     &__timeline {
         clear: both;
         position: relative;
         width: 100%;
-    }
-
-    &__buttons {
-        position: absolute;
-        top: 0;
-        right: 0;
     }
 }
 

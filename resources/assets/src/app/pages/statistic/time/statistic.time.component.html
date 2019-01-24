@@ -1,8 +1,4 @@
 <div class="statistics" (click)="clickPopover.hide()">
-    <div class="statistics__buttons btn-group" role="group">
-        <button type="button" (click)="exportCSV()" class="btn btn-default" translate>control.export-csv</button>
-    </div>
-
     <div class="statistics__header">
         <app-date-range-selector (modeChanged)="setMode($event)" #dateRangeSelector>
             <div class="timezone">
@@ -14,9 +10,7 @@
                 </ng2-timezone-picker>
             </div>
 
-            <app-user-selector class="statistics__users" #userSelect after
-                [filter]="userFilter">
-            </app-user-selector>
+            <ng-content after></ng-content>
         </app-date-range-selector>
     </div>
 
