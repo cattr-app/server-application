@@ -25,13 +25,9 @@
                             </change-task-panel>
                         </tab>
 
-                        <tab #tabTeam heading="{{'control.team' | translate }}"
-                            (select)="changeTab($event)" *ngIf="userIsManager">
-                            <app-statistic-time #statistic [users]="selectedUsers"
-                                (onSelectionChanged)="changeSelection($event)">
-                                <app-user-selector class="statistics-users" #userSelect
-                                    [filter]="userFilter" (changed)="selectedUsers = $event">
-                                </app-user-selector>
+                        <tab #tabTimeline heading="{{'control.timeline' | translate }}"
+                            (select)="changeTab($event)">
+                            <app-statistic-time #statistic [users]="[currentUser]" [height]="80">
                             </app-statistic-time>
 
                             <change-task-panel
@@ -44,9 +40,13 @@
                             </change-task-panel>
                         </tab>
 
-                        <tab #tabTimeline heading="{{'control.timeline' | translate }}"
-                            (select)="changeTab($event)" *ngIf="!userIsManager">
-                            <app-statistic-time #statistic [users]="[currentUser]" [height]="80">
+                        <tab #tabTeam heading="{{'control.team' | translate }}"
+                            (select)="changeTab($event)" *ngIf="userIsManager">
+                            <app-statistic-time #statistic [users]="selectedUsers"
+                                (onSelectionChanged)="changeSelection($event)">
+                                <app-user-selector class="statistics-users" #userSelect
+                                    [filter]="userFilter" (changed)="selectedUsers = $event">
+                                </app-user-selector>
                             </app-statistic-time>
 
                             <change-task-panel

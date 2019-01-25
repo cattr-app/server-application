@@ -135,6 +135,7 @@ class Rule extends Model
                 'bulk-edit' => __('User multiple edit'),
                 'relations' => __('Attached users list'),
                 'full_access' => __('Users full access'),
+                'manager_access' => __('Users manager access'),
             ],
             'attached-users' => [
                 'list' => __('Attached User relation list'),
