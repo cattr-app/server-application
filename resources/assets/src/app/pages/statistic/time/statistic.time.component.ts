@@ -1,19 +1,15 @@
-import { Component, OnInit, ViewChild, Output, EventEmitter, ChangeDetectorRef, OnDestroy, Input } from '@angular/core';
-import { PopoverDirective } from 'ngx-bootstrap';
+import { Component, OnInit, ViewChild, Output, EventEmitter, ChangeDetectorRef, OnDestroy, Input, ElementRef } from '@angular/core';
+import { Router, ActivatedRoute } from '@angular/router';
 
-import { ApiService } from '../../../api/api.service';
-import { UsersService } from '../../users/users.service';
 import { TimeIntervalsService } from '../../timeintervals/timeintervals.service';
-import { TimeDurationService } from './statistic.time.service';
-import { TasksService } from '../../tasks/tasks.service';
-import { ProjectsService } from '../../projects/projects.service';
 import { ScreenshotsService } from '../../screenshots/screenshots.service';
+import { TranslateService } from '@ngx-translate/core';
 
 import { DateRangeSelectorComponent, Range } from '../../../date-range-selector/date-range-selector.component';
+import { PopoverDirective } from 'ngx-bootstrap';
 
 import { User } from '../../../models/user.model';
 import { TimeInterval } from '../../../models/timeinterval.model';
-import { TimeDuration } from '../../../models/timeduration.model';
 import { Task } from '../../../models/task.model';
 import { Project } from '../../../models/project.model';
 import { Screenshot } from '../../../models/screenshot.model';
@@ -25,15 +21,14 @@ import 'moment-timezone';
 import 'fullcalendar';
 import 'fullcalendar-scheduler';
 import { EventObjectInput, View } from 'fullcalendar';
-import { Schedule } from 'primeng/schedule';
 import { ResourceInput } from 'fullcalendar-scheduler/src/exports';
-import { TranslateService } from '@ngx-translate/core';
+import { Schedule } from 'primeng/schedule';
 
 import { Observable, Subject } from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
-import { Router, ActivatedRoute } from '@angular/router';
+import { StatisticTimeService } from './statistic.time.service';
 
 enum UsersSort {
     NameAsc,
@@ -74,6 +69,7 @@ function debounce(f, delay) {
     styleUrls: ['../../items.component.scss', './statistic.time.component.scss']
 })
 export class StatisticTimeComponent implements OnInit, OnDestroy {
+    @ViewChild('timelineWrapper') timelineWrapper: ElementRef;
     @ViewChild('timeline') timeline: Schedule;
     @ViewChild('dateRangeSelector') dateRangeSelector: DateRangeSelectorComponent;
     @ViewChild('clickPopover') clickPopover: PopoverDirective;
@@ -133,13 +129,10 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
 
     eventFilter: string | Task | Project = '';
 
-    constructor(private api: ApiService,
-        private userService: UsersService,
+    constructor(
         private timeintervalService: TimeIntervalsService,
-        private timeDurationService: TimeDurationService,
-        private taskService: TasksService,
-        private projectService: ProjectsService,
         private screenshotService: ScreenshotsService,
+        private service: StatisticTimeService,
         private translate: TranslateService,
         private cdr: ChangeDetectorRef,
         private router: Router,
@@ -159,7 +152,11 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
     }
 
     get timezoneOffset(): number {
-        return -(moment as any).tz.zone(this.timezone).utcOffset(this.range.start);
+        if (this.timezone) {
+            return -(moment as any).tz.zone(this.timezone).utcOffset(this.range.start);
+        } else {
+            return 0;
+        }
     }
 
     get clickPopoverText(): string {
@@ -174,88 +171,6 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         const time = this.formatDurationString(this.hoverPopoverTime);
 
         return `${task} (${proj})<br />${time}`;
-    }
-
-    fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
-        if (this.view === 'timelineDay') {
-            const params = {
-                'start_at': ['>', start],
-                'end_at': ['<', end],
-            };
-
-            return new Promise<EventObjectInput[]>((resolve) => {
-                this.timeintervalService.getItems((intervals: TimeInterval[]) => {
-                    const offset = this.timezoneOffset;
-                    const events = intervals
-                        .map(interval => {
-                            const start = moment.utc(interval.start_at).add(offset, 'minutes');
-                            const end = moment.utc(interval.end_at).add(offset, 'minutes');
-                            return {
-                                id: interval.id,
-                                title: '',
-                                resourceId: interval.user_id,
-                                start: start,
-                                end: end,
-                                task_id: interval.task_id,
-                                duration: end.diff(start),
-                            } as EventObjectInput;
-                        })
-                        // Filter events with duration less than one second.
-                        // Zero-duration events breaks fullcalendar.
-                        .filter(event => event.duration > 1000);
-
-                    resolve(events);
-                }, params);
-            });
-        } else {
-            const params = {
-                'start_at': start,
-                'end_at': end,
-                'uids': this.selectedUsers.map(user => user.id),
-            };
-
-            return new Promise<EventObjectInput[]>((resolve) => {
-                this.timeDurationService.getItems((durations: TimeDuration[]) => {
-                    const offset = this.timezoneOffset;
-                    const events = durations.map(duration => {
-                        const start = moment.utc(duration.date).add(offset, 'minutes');
-                        const end = start.clone().add(duration.duration, 'seconds');
-                        return {
-                            title: '',
-                            resourceId: duration.user_id,
-                            start: start,
-                            end: end,
-                            duration: end.diff(start),
-                        } as EventObjectInput;
-                    });
-                    resolve(events);
-                }, params);
-            });
-        }
-    }
-
-    fetchTasks(ids) {
-        const params = {
-            'id': ['=', ids],
-        };
-
-        return new Promise<Task[]>(resolve => {
-            this.taskService.getItems((tasks: Task[]) => {
-                resolve(tasks);
-            }, params);
-        });
-    }
-
-    fetchProjects(ids) {
-        const params = {
-            'id': ['=', ids],
-        };
-
-        return new Promise<Project[]>(resolve => {
-            this.projectService.getItems((projects: Project[]) => {
-                resolve(projects);
-            }, params);
-        });
     }
 
     ngOnInit() {
@@ -302,7 +217,12 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 replaceUrl: true,
             });
 
-            return Observable.from(this.fetchEvents(start, end));
+            if (this.view === 'timelineDay') {
+                return Observable.from(this.service.getEvents(offset, start, end));
+            } else {
+                const uids = this.selectedUsers.map(user => +user.id);
+                return Observable.from(this.service.getDays(offset, uids, start, end));
+            }
         }).share();
 
         this.viewEvents$.subscribe(events => {
@@ -316,12 +236,11 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
 
                 if (this.timelineInitialized) {
                     this.timeline.changeView(this.view);
-                    this.timeline.gotoDate(start);
                     this.$timeline.fullCalendar('option', 'visibleRange', {
                         start,
                         end,
                     });
-                    this.$timeline.fullCalendar('refetchEvents');
+                    this.timeline.gotoDate(start);
                 }
             });
             this.setLoading(false);
@@ -333,7 +252,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             .switchMap(events => {
                 const ids = events.map(event => event.task_id);
                 const uniqueIds = Array.from(new Set(ids));
-                return Observable.from(this.fetchTasks(uniqueIds));
+                return Observable.from(this.service.getTasks(uniqueIds));
             })
             .share();
         this.viewEventsTasks$.subscribe(tasks => {
@@ -344,7 +263,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             .switchMap(tasks => {
                 const ids = tasks.map(task => task.project_id);
                 const uniqueIds = Array.from(new Set(ids));
-                return Observable.from(this.fetchProjects(uniqueIds));
+                return Observable.from(this.service.getProjects(uniqueIds));
             });
         this.viewEventsProjects$.subscribe(projects => {
             this.viewEventsProjects = projects;
@@ -386,7 +305,14 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         this.latestEvents$ = this.update$.startWith(this.range).switchMap(() => {
             const end = moment.utc();
             const start = end.clone().subtract(1, 'day');
-            return Observable.from(this.fetchEvents(start, end));
+            const offset = this.timezoneOffset;
+
+            if (this.view === 'timelineDay') {
+                return Observable.from(this.service.getEvents(offset, start, end));
+            } else {
+                const uids = this.selectedUsers.map(user => +user.id);
+                return Observable.from(this.service.getDays(offset, uids, start, end));
+            }
         }).share();
         this.latestEvents$.subscribe(events => {
             this.latestEvents = events;
@@ -396,7 +322,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         this.latestEventsTasks$ = this.latestEvents$.switchMap(events => {
             const ids = events.map(event => event.task_id);
             const uniqueIds = Array.from(new Set(ids));
-            return Observable.from(this.fetchTasks(uniqueIds));
+            return Observable.from(this.service.getTasks(uniqueIds));
         }).share();
         this.latestEventsTasks$.subscribe(tasks => {
             this.latestEventsTasks = tasks;
@@ -406,7 +332,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         this.latestEventsProjects$ = this.latestEventsTasks$.switchMap(tasks => {
             const ids = tasks.map(task => task.project_id);
             const uniqueIds = Array.from(new Set(ids));
-            return Observable.from(this.fetchProjects(uniqueIds));
+            return Observable.from(this.service.getProjects(uniqueIds));
         });
         this.latestEventsProjects$.subscribe(projects => {
             this.latestEventsProjects = projects;
@@ -460,9 +386,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
 
         this.sortedUsers$.subscribe(users => {
             this.selectedUsers = users;
-            if (this.$timeline) {
-                this.$timeline.fullCalendar('refetchResources');
-            }
+            this.$timeline.fullCalendar('refetchResources');
         });
 
         this.timelineOptions = {
@@ -537,10 +461,6 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 callback(this.selectedUsers);
             },
             displayEventTime: false,
-            events: (start, end, timezone, callback) => {
-                // Load all actual intervals to the fullcalendar only on a day view.
-                callback(this.view === 'timelineDay' ? this.viewEvents : []);
-            },
             eventClick: (event, jsEvent, view: View) => {
                 jsEvent.stopPropagation();
 
@@ -607,16 +527,17 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                         });
                 });
 
+                const $parent = $(this.timelineWrapper.nativeElement);
                 const eventPos = $(jsEvent.currentTarget).offset();
-                const timelinePos = $('.statistics__timeline').offset();
+                const timelinePos = $parent.offset();
                 const x = eventPos.left - timelinePos.left;
                 const y = eventPos.top - timelinePos.top;
 
                 const width = 250;
-                const timelineWidth = $('.statistics__timeline').width();
+                const timelineWidth = $parent.width();
                 const arrowOnRight = timelineWidth - x < width;
 
-                const $popover = $('#clickPopover');
+                const $popover = $('#clickPopover', $parent);
                 $popover.css({
                     top: y,
                     left: x + (arrowOnRight ? -1 : 1) * width / 2,
@@ -670,16 +591,17 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                     }
                 }
 
+                const $parent = $(this.timelineWrapper.nativeElement);
                 const eventPos = $(jsEvent.currentTarget).offset();
-                const timelinePos = $('.statistics__timeline').offset();
+                const timelinePos = $parent.offset();
                 const x = eventPos.left - timelinePos.left;
                 const y = eventPos.top - timelinePos.top;
 
                 const width = 250;
-                const timelineWidth = $('.statistics__timeline').width();
+                const timelineWidth = $parent.width();
                 const arrowOnRight = timelineWidth - x < width;
 
-                const $popover = $('#hoverPopover');
+                const $popover = $('#hoverPopover', $parent);
                 $popover.css({
                     top: y,
                     left: x + (arrowOnRight ? -1 : 1) * width / 2,
@@ -980,12 +902,12 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         this.clickPopover.hide();
         this.hoverPopover.hide();
         this.selectedIntervals = [];
-        this.$timeline.fullCalendar('refetchEvents');
+        this.viewEvents = [...this.viewEvents];
     }
 
     filter(filter: string | Task | Project) {
         this.eventFilter = filter;
-        this.$timeline.fullCalendar('refetchEvents');
+        this.viewEvents = [...this.viewEvents];
     }
 
     filterEvent(event: EventObjectInput): boolean {

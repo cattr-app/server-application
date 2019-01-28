@@ -10,7 +10,7 @@ import {StatisticTimeComponent} from './time/statistic.time.component';
 
 import {UsersService} from '../users/users.service';
 import {TimeIntervalsService} from '../timeintervals/timeintervals.service';
-import {TimeDurationService} from './time/statistic.time.service';
+import {TimeDurationService, StatisticTimeService} from './time/statistic.time.service';
 
 
 import {HttpClientModule} from '@angular/common/http';
@@ -63,6 +63,7 @@ import { ScreenshotsModule } from '../screenshots/screenshots.module';
         UsersService,
         TimeIntervalsService,
         TimeDurationService,
+        StatisticTimeService,
     ]
 })
 

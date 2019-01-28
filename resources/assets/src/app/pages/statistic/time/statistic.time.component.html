@@ -14,14 +14,18 @@
         </app-date-range-selector>
     </div>
 
-    <div class="statistics__timeline">
+    <div #timelineWrapper class="statistics__timeline">
         <ngx-loading [show]="loading"></ngx-loading>
         <span #clickPopover="bs-popover" id="clickPopover"
             [popover]="clickPopoverTemplate"
             (onHidden)="setSelectedIntervals([])"></span>
         <span #hoverPopover="bs-popover" id="hoverPopover"
             [outsideClick]="true" [popover]="hoverPopoverTemplate"></span>
-        <p-schedule #timeline [header]="false" [options]="timelineOptions"></p-schedule>
+        <p-schedule #timeline
+            [header]="false"
+            [events]="view === 'timelineDay' ? viewEvents : []"
+            [options]="timelineOptions">
+        </p-schedule>
     </div>
 </div>
 
