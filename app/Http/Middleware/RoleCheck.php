@@ -25,6 +25,10 @@ class RoleCheck
             $object = $matches[1];
             $action = $matches[2];
 
+            if ($object === 'time-intervals' && $action === 'dashboard') {
+                $action = 'list';
+            }
+
             if (!Role::can(Auth::user(),$object , $action) && !Role::can(Auth::user(), $object, 'full_access')) {
                 return response()->json(['error' => "Access denied to $object/$action", 'reason' => 'action is not allowed'], 403);
             }

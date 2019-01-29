@@ -106,6 +106,7 @@ Route::group([
     $router->post('/time-intervals/edit', 'Api\v1\TimeIntervalController@edit');
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
+    $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
 
     //Time routes
     $router->any('/time/total', 'Api\v1\TimeController@total');

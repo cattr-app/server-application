@@ -33,58 +33,165 @@ export class TimeDurationService extends ItemsService {
 
 }
 
+interface Interval {
+    id: number;
+    task_id: number;
+    project_id: number;
+    duration: number;
+    start_at: string;
+    end_at: string;
+}
+
+interface UserIntervals {
+    user_id: number;
+    intervals: Interval[];
+    duration: number;
+}
+
+interface DashboardIntervals {
+    userIntervals: {
+        [user_id: number]: UserIntervals;
+    };
+}
+
+interface UserEvents {
+    events: EventObjectInput[];
+}
+
+interface DashboardEvents {
+    userEvents: {
+        [user_id: number]: UserEvents;
+    };
+}
+
 @Injectable()
 export class StatisticTimeService {
-    protected readonly eventsCache: { [key: string]: EventObjectInput[] } = {};
+    protected readonly intervalsCache: { [date: string]: DashboardIntervals } = {};
+    protected readonly eventsCache: { [date: string]: DashboardEvents } = {};
+    protected readonly taskCache: { [id: number]: Task } = {};
+    protected readonly projectCache: { [id: number]: Project } = {};
 
     constructor(
-        private timeintervalService: TimeIntervalsService,
+        private api: ApiService,
+        private timeIntervalService: TimeIntervalsService,
         private timeDurationService: TimeDurationService,
         private taskService: TasksService,
         private projectService: ProjectsService,
     ) { }
 
-    protected loadEvents(timezoneOffset: number, start: Moment, end: Moment): Promise<EventObjectInput[]> {
-        const params = {
-            'start_at': ['>', start],
-            'end_at': ['<', end],
-        };
+    protected fetchIntervals(callback, params?: any) {
+        return this.api.send(
+            'time-intervals/dashboard',
+            params ? params : [],
+            result => callback(result),
+        );
+    }
 
-        return new Promise<EventObjectInput[]>((resolve) => {
-            this.timeintervalService.getItems((intervals: TimeInterval[]) => {
-                const offset = timezoneOffset;
-                const events = intervals
-                    .map(interval => {
-                        const start = moment.utc(interval.start_at).add(offset, 'minutes');
-                        const end = moment.utc(interval.end_at).add(offset, 'minutes');
-                        return {
-                            id: interval.id,
-                            title: '',
-                            resourceId: interval.user_id,
-                            start: start,
-                            end: end,
-                            task_id: interval.task_id,
-                            duration: end.diff(start),
-                        } as EventObjectInput;
-                    })
-                    // Filter events with duration less than one second.
-                    // Zero-duration events breaks fullcalendar.
-                    .filter(event => event.duration > 1000);
+    protected loadIntervals(uids: number[], date: Moment) {
+        return new Promise<DashboardIntervals>((resolve) => {
+            const dateStr = date.format('YYYY-MM-DD');
+            const dates = {
+                'start_at': date,
+                'end_at': date.clone().add(1, 'day'),
+            };
+            const loaded = this.intervalsCache[dateStr];
+            if (!loaded) {
+                const params = {
+                    ...dates,
+                    'user_ids': uids,
+                };
+                this.fetchIntervals((report: DashboardIntervals) => {
+                    this.intervalsCache[dateStr] = report;
+                    resolve(report);
+                }, params);
+            } else {
+                const loadedUids = Object.keys(loaded.userIntervals);
+                const notLoadedUids = uids.filter(uid => loadedUids.indexOf(uid.toString()) === -1);
 
-                resolve(events);
-            }, params);
+                // If intervals for all users are loaded.
+                if (!notLoadedUids.length) {
+                    resolve(loaded);
+                    return;
+                }
+
+                const params = {
+                    ...dates,
+                    'user_ids': notLoadedUids,
+                };
+                this.fetchIntervals((report: DashboardIntervals) => {
+                    this.intervalsCache[dateStr].userIntervals = {
+                        ...loaded.userIntervals,
+                        ...report.userIntervals,
+                    };
+
+                    resolve(this.intervalsCache[dateStr]);
+                }, params);
+            }
         });
     }
 
-    async getEvents(timezoneOffset: number, start: Moment, end: Moment): Promise<EventObjectInput[]> {
-        const startStr = start.format('YYYY-MM-DD');
-        const endStr = start.format('YYYY-MM-DD');
-        const key = `${startStr}-${endStr}`;
-        if (!this.eventsCache[key]) {
-            this.eventsCache[key] = await this.loadEvents(timezoneOffset, start, end);
-        }
+    intervalsToEvents(group: UserIntervals, timezoneOffset: number): UserEvents {
+        const events = group.intervals
+            .map(interval => {
+                const start = moment.utc(interval.start_at).add(timezoneOffset, 'minutes');
+                const end = moment.utc(interval.end_at).add(timezoneOffset, 'minutes');
+                return {
+                    id: interval.id,
+                    resourceId: group.user_id,
+                    task_id: interval.task_id,
+                    project_id: interval.project_id,
+                    start: start,
+                    end: end,
+                    duration: end.diff(start), //1000 * interval.duration,
+                    title: '',
+                } as EventObjectInput;
+            })
+            .reduce((events, current) => {
+                if (!events.length) {
+                    return [current];
+                }
 
-        return this.eventsCache[key];
+                const last = events[events.length - 1];
+                if ((current.start as Moment).diff(last.end) <= 1000) {
+                    events.pop();
+                    events.push({
+                        ...last,
+                        end: current.end,
+                        duration: last.duration + current.duration,
+                    });
+                } else {
+                    events.push(current);
+                }
+
+                return events;
+            }, [])
+            .filter(event => event.duration > 1000);
+        return { events };
+    }
+
+    async getEvents(timezoneOffset: number, uids: number[], date: Moment): Promise<EventObjectInput[]> {
+        const intervals = await this.loadIntervals(uids, date);
+        return uids.map(uid => {
+            const intervalGroup = intervals.userIntervals[uid];
+            if (!intervalGroup) {
+                return [];
+            }
+
+            const dateStr = date.format('YYYY-MM-DD');
+            if (!this.eventsCache[dateStr]) {
+                this.eventsCache[dateStr] = {
+                    userEvents: [],
+                };
+            }
+
+            if (!this.eventsCache[dateStr].userEvents[uid]) {
+                this.eventsCache[dateStr].userEvents[uid] = this.intervalsToEvents(intervalGroup, timezoneOffset);
+            }
+
+            return this.eventsCache[dateStr].userEvents[uid].events;
+        }).reduce((intervals, userIntervals) => {
+            return [...intervals, ...userIntervals];
+        }, []);
     }
 
     getDays(timezoneOffset: number, uids: number[], start: Moment, end: Moment): Promise<EventObjectInput[]> {
@@ -113,27 +220,49 @@ export class StatisticTimeService {
         });
     }
 
-    getTasks(ids) {
-        const params = {
-            'id': ['=', ids],
-        };
+    async getTasks(ids: number[]) {
+        const loadedIds = Object.keys(this.taskCache);
+        const notLoadedIds = ids.filter(id => loadedIds.indexOf(id.toString()) === -1);
+        if (!notLoadedIds.length) {
+            return ids
+                .map(id => this.taskCache[id])
+                .filter(task => task);
+        }
 
-        return new Promise<Task[]>(resolve => {
+        const params = {
+            'id': ['=', notLoadedIds],
+        };
+        const tasks = await new Promise<Task[]>(resolve => {
             this.taskService.getItems((tasks: Task[]) => {
                 resolve(tasks);
             }, params);
         });
+        tasks.forEach(task => this.taskCache[task.id] = task);
+        return ids
+            .map(id => this.taskCache[id])
+            .filter(task => task);
     }
 
-    getProjects(ids) {
-        const params = {
-            'id': ['=', ids],
-        };
+    async getProjects(ids: number[]) {
+        const loadedIds = Object.keys(this.projectCache);
+        const notLoadedIds = ids.filter(id => loadedIds.indexOf(id.toString()) === -1);
+        if (!notLoadedIds.length) {
+            return ids
+                .map(id => this.projectCache[id])
+                .filter(proj => proj);
+        }
 
-        return new Promise<Project[]>(resolve => {
+        const params = {
+            'id': ['=', notLoadedIds],
+        };
+        const projects = await new Promise<Project[]>(resolve => {
             this.projectService.getItems((projects: Project[]) => {
                 resolve(projects);
             }, params);
         });
+        projects.forEach(proj => this.projectCache[proj.id] = proj);
+        return ids
+            .map(id => this.projectCache[id])
+            .filter(proj => proj);
     }
 }

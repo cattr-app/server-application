@@ -114,7 +114,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
     selectedUsers: ResourceInput[] = [];
     sortUsers: UsersSort = UsersSort.NameAsc;
 
-    update$ = new Subject<Range>();
+    update$ = new Subject<{range: Range, users: ResourceInput[]}>();
     viewRange$: Observable<Range>;
     viewEvents$: Observable<EventObjectInput[]>;
     viewEventsTasks$: Observable<Task[]>;
@@ -186,13 +186,15 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                     title: user.full_name,
                 };
             });
-        }).share();
+        }).filter(users => users.length > 0).share();
 
         this.viewRange$ = this.dateRangeSelector.rangeChanged.asObservable();
-        this.viewEvents$ = this.viewRange$.filter(range => {
+        this.viewEvents$ = this.viewRange$.combineLatest(this.selectedUsers$, (range, users) => {
+            return {range, users};
+        }).filter(({range, users}) => {
             return range.start.diff(this.range.start) !== 0
                 || range.end.diff(this.range.end) !== 0;
-        }).merge(this.update$).switchMap(range => {
+        }).merge(this.update$).switchMap(({range, users}) => {
             this.setLoading(true);
             this.range = range;
 
@@ -217,10 +219,10 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 replaceUrl: true,
             });
 
+            const uids = users.map(user => +user.id);
             if (this.view === 'timelineDay') {
-                return Observable.from(this.service.getEvents(offset, start, end));
+                return Observable.from(this.service.getEvents(offset, uids, start));
             } else {
-                const uids = this.selectedUsers.map(user => +user.id);
                 return Observable.from(this.service.getDays(offset, uids, start, end));
             }
         }).share();
@@ -302,15 +304,14 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             this.viewTimeWorked = data;
         });
 
-        this.latestEvents$ = this.update$.startWith(this.range).switchMap(() => {
-            const end = moment.utc();
-            const start = end.clone().subtract(1, 'day');
+        this.latestEvents$ = this.update$.startWith({ range: this.range, users: [] }).switchMap(({range, users}) => {
+            const start = moment.utc().startOf('day');
+            const end = start.clone().add(1, 'day');
             const offset = this.timezoneOffset;
-
+            const uids = users.map(user => +user.id);
             if (this.view === 'timelineDay') {
-                return Observable.from(this.service.getEvents(offset, start, end));
+                return Observable.from(this.service.getEvents(offset, uids, start));
             } else {
-                const uids = this.selectedUsers.map(user => +user.id);
                 return Observable.from(this.service.getDays(offset, uids, start, end));
             }
         }).share();
@@ -945,6 +946,6 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
     }
 
     update() {
-        this.update$.next(this.range);
+        this.update$.next({ range: this.range, users: this.selectedUsers });
     }
 }
