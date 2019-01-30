@@ -87,7 +87,7 @@ export class StatisticTimeService {
         );
     }
 
-    protected loadIntervals(uids: number[], date: Moment) {
+    protected loadIntervals(uids: number[], date: Moment, forceReload: boolean = false) {
         return new Promise<DashboardIntervals>((resolve) => {
             const dateStr = date.format('YYYY-MM-DD');
             const dates = {
@@ -95,7 +95,7 @@ export class StatisticTimeService {
                 'end_at': date.clone().add(1, 'day'),
             };
             const loaded = this.intervalsCache[dateStr];
-            if (!loaded) {
+            if (forceReload || !loaded) {
                 const params = {
                     ...dates,
                     'user_ids': uids,
@@ -142,7 +142,7 @@ export class StatisticTimeService {
                     project_id: interval.project_id,
                     start: start,
                     end: end,
-                    duration: end.diff(start), //1000 * interval.duration,
+                    duration: interval.duration,
                     title: '',
                 } as EventObjectInput;
             })
@@ -153,12 +153,11 @@ export class StatisticTimeService {
 
                 const last = events[events.length - 1];
                 if ((current.start as Moment).diff(last.end) <= 1000) {
-                    events.pop();
-                    events.push({
+                    events[events.length - 1] = {
                         ...last,
                         end: current.end,
                         duration: last.duration + current.duration,
-                    });
+                    };
                 } else {
                     events.push(current);
                 }
@@ -169,8 +168,13 @@ export class StatisticTimeService {
         return { events };
     }
 
-    async getEvents(timezoneOffset: number, uids: number[], date: Moment): Promise<EventObjectInput[]> {
-        const intervals = await this.loadIntervals(uids, date);
+    async getEvents(
+        timezoneOffset: number,
+        uids: number[],
+        date: Moment,
+        forceReload: boolean = false,
+    ): Promise<EventObjectInput[]> {
+        const intervals = await this.loadIntervals(uids, date, forceReload);
         return uids.map(uid => {
             const intervalGroup = intervals.userIntervals[uid];
             if (!intervalGroup) {
@@ -184,13 +188,13 @@ export class StatisticTimeService {
                 };
             }
 
-            if (!this.eventsCache[dateStr].userEvents[uid]) {
+            if (forceReload || !this.eventsCache[dateStr].userEvents[uid]) {
                 this.eventsCache[dateStr].userEvents[uid] = this.intervalsToEvents(intervalGroup, timezoneOffset);
             }
 
             return this.eventsCache[dateStr].userEvents[uid].events;
         }).reduce((intervals, userIntervals) => {
-            return [...intervals, ...userIntervals];
+            return intervals.concat(userIntervals);
         }, []);
     }
 
@@ -222,7 +226,7 @@ export class StatisticTimeService {
 
     async getTasks(ids: number[]) {
         const loadedIds = Object.keys(this.taskCache);
-        const notLoadedIds = ids.filter(id => loadedIds.indexOf(id.toString()) === -1);
+        const notLoadedIds = ids.filter(id => id && loadedIds.indexOf(id.toString()) === -1);
         if (!notLoadedIds.length) {
             return ids
                 .map(id => this.taskCache[id])
@@ -245,7 +249,7 @@ export class StatisticTimeService {
 
     async getProjects(ids: number[]) {
         const loadedIds = Object.keys(this.projectCache);
-        const notLoadedIds = ids.filter(id => loadedIds.indexOf(id.toString()) === -1);
+        const notLoadedIds = ids.filter(id => id && loadedIds.indexOf(id.toString()) === -1);
         if (!notLoadedIds.length) {
             return ids
                 .map(id => this.projectCache[id])

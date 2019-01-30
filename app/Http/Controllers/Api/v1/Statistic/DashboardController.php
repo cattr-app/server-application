@@ -22,7 +22,8 @@ class DashboardController extends Controller
         $end_at = $request->input('end_at');
 
         $intervals = DB::table('time_intervals AS i')->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-            ->select('i.user_id', 'i.id', 'i.task_id', 't.project_id', 'i.start_at', 'i.end_at', DB::raw('(i.end_at - i.start_at) as duration'))
+            ->select('i.user_id', 'i.id', 'i.task_id', 't.project_id', 'i.start_at', 'i.end_at',
+                DB::raw('1000 * TIMESTAMPDIFF(SECOND, i.start_at, i.end_at) as duration'))
             ->whereIn('i.user_id', $user_ids)
             ->where('i.start_at', '>=', $start_at)
             ->where('i.start_at', '<', $end_at)

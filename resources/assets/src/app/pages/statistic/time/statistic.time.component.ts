@@ -221,7 +221,8 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
 
             const uids = users.map(user => +user.id);
             if (this.view === 'timelineDay') {
-                return Observable.from(this.service.getEvents(offset, uids, start));
+                const forceUpdate = startStr === moment().format('YYYY-MM-DD');
+                return Observable.from(this.service.getEvents(offset, uids, start, forceUpdate));
             } else {
                 return Observable.from(this.service.getDays(offset, uids, start, end));
             }
@@ -304,20 +305,22 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             this.viewTimeWorked = data;
         });
 
-        this.latestEvents$ = this.update$.startWith({ range: this.range, users: [] }).switchMap(({range, users}) => {
+        this.latestEvents$ = this.viewRange$.combineLatest(this.selectedUsers$, (range, users) => {
+            return {range, users};
+        }).merge(this.update$).switchMap(({range, users}) => {
             const start = moment.utc().startOf('day');
             const end = start.clone().add(1, 'day');
             const offset = this.timezoneOffset;
             const uids = users.map(user => +user.id);
             if (this.view === 'timelineDay') {
-                return Observable.from(this.service.getEvents(offset, uids, start));
+                return Observable.from(this.service.getEvents(offset, uids, start, true));
             } else {
                 return Observable.from(this.service.getDays(offset, uids, start, end));
             }
         }).share();
         this.latestEvents$.subscribe(events => {
             this.latestEvents = events;
-            this.updateResourceInfo();
+            this.updateResourceInfo(events);
         });
 
         this.latestEventsTasks$ = this.latestEvents$.switchMap(events => {
@@ -327,7 +330,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         }).share();
         this.latestEventsTasks$.subscribe(tasks => {
             this.latestEventsTasks = tasks;
-            this.updateResourceInfo();
+            this.updateResourceInfo(this.latestEvents);
         });
 
         this.latestEventsProjects$ = this.latestEventsTasks$.switchMap(tasks => {
@@ -337,7 +340,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         });
         this.latestEventsProjects$.subscribe(projects => {
             this.latestEventsProjects = projects;
-            this.updateResourceInfo();
+            this.updateResourceInfo(this.latestEvents);
         });
 
         this.sortUsers$ = Observable.fromEvent(this.timeline.el.nativeElement, 'click')
@@ -683,7 +686,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                     });
                 }
 
-                this.updateResourceInfo();
+                this.updateResourceInfo(this.latestEvents);
 
                 $('.fc-resource-area th .fc-cell-text').removeClass('sort-asc');
                 $('.fc-resource-area th .fc-cell-text').removeClass('sort-desc');
@@ -743,7 +746,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         return `${hours}h ${minutes}m`;
     }
 
-    updateResourceInfo() {
+    updateResourceInfo(latestEvents) {
         if (!this.$timeline) {
             return;
         }
@@ -775,7 +778,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 $nameCell.append($name);
             }
 
-            const lastUserEvents = this.latestEvents.filter(event => +event.resourceId === +userId);
+            const lastUserEvents = latestEvents.filter(event => +event.resourceId === +userId);
             const hasWorkedToday = lastUserEvents.length > 0;
             if (hasWorkedToday) {
                 const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
@@ -903,12 +906,12 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         this.clickPopover.hide();
         this.hoverPopover.hide();
         this.selectedIntervals = [];
-        this.viewEvents = [...this.viewEvents];
+        this.viewEvents = this.viewEvents.slice();
     }
 
     filter(filter: string | Task | Project) {
         this.eventFilter = filter;
-        this.viewEvents = [...this.viewEvents];
+        this.viewEvents = this.viewEvents.slice();
     }
 
     filterEvent(event: EventObjectInput): boolean {
