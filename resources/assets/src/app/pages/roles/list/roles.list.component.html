@@ -31,7 +31,7 @@
                                                 <span translate>control.view</span>
                                             </button>
                                         </a>
-                                        <a *ngIf="can('/users/bulk-edit')"  [routerLink]="['/roles/users', role.id]" title="Assign users">
+                                        <a *ngIf="can('/roles/show') && can('/users/bulk-edit')"  [routerLink]="['/roles/users', role.id]" title="Assign users">
                                             <button class="btn btn-primary btn-sm">
                                                 <i class="fa fa-users" aria-hidden="true"></i>
                                                 <span translate>control.assign</span>
