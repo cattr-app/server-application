@@ -5,8 +5,9 @@
   display: flex;
   flex-flow: row wrap;
   position: relative;
+  align-items: center;
 
-  & > * {
+  & ::ng-deep > * {
     margin-right: 1em;
     margin-bottom: 1em;
   }

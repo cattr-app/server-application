@@ -11,11 +11,15 @@
             </div>
 
             <ng-content after></ng-content>
+
+            <div after [hidden]="!loading">
+                <span class="loader"></span>
+                <span>Loading...</span>
+            </div>
         </app-date-range-selector>
     </div>
 
     <div #timelineWrapper class="statistics__timeline">
-        <ngx-loading [show]="loading"></ngx-loading>
         <span #clickPopover="bs-popover" id="clickPopover"
             [popover]="clickPopoverTemplate"
             (onHidden)="setSelectedIntervals([])"></span>

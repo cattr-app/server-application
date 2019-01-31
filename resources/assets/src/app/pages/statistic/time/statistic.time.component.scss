@@ -8,6 +8,7 @@
 
     @media (min-width: $screen-sm-min) {
         width: unset;
+        max-width: 340px;
         margin-right: 1em;
     }
 }
@@ -263,4 +264,23 @@
         left: auto !important;
         right: 2px;
     }
+}
+
+.loader {
+    display: inline-block;
+    box-sizing: border-box;
+    border: 4px solid $laravel-border-color;
+    border-top: 4px solid $brand-primary;
+    border-radius: 50%;
+    width: 24px;
+    height: 24px;
+    margin-right: 0.5em;
+    vertical-align: middle;
+    animation: spin 2s linear infinite;
+}
+
+@keyframes spin {
+    0% { transform: rotate(0deg); }
+    50% { transform: rotate(180deg); }
+    100% { transform: rotate(360deg); }
 }
