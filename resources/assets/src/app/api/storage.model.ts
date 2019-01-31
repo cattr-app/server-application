@@ -29,4 +29,8 @@ export class LocalStorage {
     set(key: string, value: any) {
         this.localStorage.setItem(key, JSON.stringify(value));
     }
+
+    clear() {
+        this.localStorage.clear();
+    }
 }
