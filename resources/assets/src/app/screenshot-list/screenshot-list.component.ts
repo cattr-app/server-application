@@ -24,6 +24,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
 
     @Input() autoload: boolean = true;
 
+    @Input() showTime: boolean = false;
     @Input() showDate: boolean = true;
     @Input() showUser: boolean = true;
     @Input() showProject: boolean = true;
@@ -34,6 +35,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     @Input() task_ids?: number[] = null;
     @Input() max_date: string = '';
     @Input() min_date: string = '';
+    @Input() date_output_format: string = 'DD.MM.YYYY HH:mm:ss';
 
     differUsers: IterableDiffer<number[]>;
     differProjects: IterableDiffer<number[]>;
@@ -128,12 +130,12 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         this._itemsChunked = [];
     }
 
-    formatTime(datetime?: string) {
+    formatDate(datetime?: string) {
         if (!datetime) {
             return null;
         }
 
-        return moment.utc(datetime).local().format('DD.MM.YYYY HH:mm:ss');
+        return moment.utc(datetime).local().format(this.date_output_format);
     }
 
     loadNext() {

@@ -9,7 +9,7 @@
             <div class="card-body">
                 <p class="card-text">
                     <span class="card-text-line" *ngIf="showDate">
-                        {{ formatTime(screenshot.time_interval?.start_at) }}
+                        {{ formatDate(screenshot.time_interval?.start_at) }}
                     </span>
 
                     <span class="card-text-line" *ngIf="showUser">
@@ -29,10 +29,8 @@
     </div>
 </div>
 
-<div *ngIf="autoload" class="loading" #loading>
-    <div *ngIf="countFail <= 3 && !isAllLoaded">
-        <ngx-loading [show]="isLoading" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
-    </div>
+<div *ngIf="autoload" [hidden]="countFail > 3 || isAllLoaded" class="loading" #loading>
+    <ngx-loading [show]="true" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
 </div>
 
 <div *ngIf="!autoload" class="text-center" #loading>

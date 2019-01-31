@@ -37,3 +37,26 @@
 .user__time {
     float: right;
 }
+
+.screenshots {
+    &__date {
+        font-weight: normal;
+
+        &::before {
+            content: '▶';
+            vertical-align: top;
+            margin-right: .5em;
+            font-size: .75em;
+        }
+
+        &--expanded {
+            &::before {
+                content: '◢';
+            }
+        }
+    }
+
+    &__time {
+        text-align: right;
+    }
+}
