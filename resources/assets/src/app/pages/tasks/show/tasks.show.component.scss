@@ -34,6 +34,25 @@
     overflow-x: auto;
 }
 
+.activity {
+    margin-bottom: 22px;
+
+    &__title {
+        margin: 8px;
+        line-height: 1.6;
+        font-size: 14px;
+        font-weight: bolder;
+    }
+
+    &__graph-wrapper {
+        overflow-x: auto;
+    }
+
+    &__tooltip-text {
+        margin: 0;
+    }
+}
+
 .user__time {
     float: right;
 }

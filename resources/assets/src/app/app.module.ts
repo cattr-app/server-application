@@ -3,6 +3,7 @@ import {Router} from '@angular/router';
 import {NgModule} from '@angular/core';
 import {ModalModule} from 'ngx-bootstrap';
 import {BrowserModule} from '@angular/platform-browser';
+import { BrowserAnimationsModule } from '@angular/platform-browser/animations';
 import {FormsModule, ReactiveFormsModule} from '@angular/forms';
 import {TranslateModule, TranslateLoader, TranslateService} from '@ngx-translate/core';
 import {TranslateHttpLoader} from '@ngx-translate/http-loader';
@@ -32,6 +33,7 @@ export function HttpLoaderFactory(http: HttpClient) {
 @NgModule({
     imports: [
         BrowserModule,
+        BrowserAnimationsModule,
         FormsModule,
         ReactiveFormsModule,
         AppRoutingModule,

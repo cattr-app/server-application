@@ -111,6 +111,32 @@
                             </div>
                         </div>
 
+                        <div class="row activity">
+                            <div class="col-sm-12">
+                                <h4 class="activity__title">Activity</h4>
+                                <div class="activity__graph-wrapper">
+                                    <ngx-charts-bar-vertical-stacked
+                                        [results]="graph"
+                                        [view]="[max(200, 100 * graph.length), 400]"
+                                        [scheme]="colorScheme"
+                                        [gradient]="false"
+                                        [xAxis]="true"
+                                        [yAxis]="true"
+                                        [legend]="false"
+                                        [showXAxisLabel]="true"
+                                        [showYAxisLabel]="true"
+                                        [xAxisLabel]="'Date'"
+                                        [yAxisLabel]="'Time'"
+                                        [yAxisTickFormatting]="formatDurationString">
+                                        <ng-template #tooltipTemplate let-model="model">
+                                            <p class="activity__tooltip-text">{{ model.name }}</p>
+                                            <p class="activity__tooltip-text">{{ formatDurationString(model.value) }}</p>
+                                        </ng-template>
+                                    </ngx-charts-bar-vertical-stacked>
+                                </div>
+                            </div>
+                        </div>
+
                         <accordion>
                             <accordion-group #accordionGroup class="user" *ngFor="let userInfo of users">
                                 <div accordion-heading>

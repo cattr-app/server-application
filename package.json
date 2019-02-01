@@ -25,6 +25,7 @@
     "@ng-select/ng-select": "1.x",
     "@ngx-translate/core": "^9.1.1",
     "@ngx-translate/http-loader": "^2.0.1",
+    "@swimlane/ngx-charts": "^10.0.0",
     "angular-dual-listbox": "^4.7.0",
     "apidoc": "^0.17.6",
     "bootstrap-sass": "^3.3.7",

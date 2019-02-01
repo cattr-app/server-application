@@ -33,11 +33,17 @@ interface UserInfo {
     styleUrls: ['./tasks.show.component.scss', '../../items.component.scss']
 })
 export class TasksShowComponent extends ItemsShowComponent implements OnInit {
-    public item: TaskWithIntervals = new Task();
-    public users: UserInfo[] = [];
-    public totalTime: number = 0;
+    item: TaskWithIntervals = new Task();
+    users: UserInfo[] = [];
+    totalTime: number = 0;
 
     readonly objectKeys = Object.keys;
+    readonly max = Math.max;
+
+    graph: any[] = [];
+    colorScheme = {
+        domain: ['#3097D1'],
+    };
 
     constructor(api: ApiService,
         taskService: TasksService,
@@ -58,7 +64,7 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit {
     }
 
     formatDurationString(time: number) {
-        const duration = moment.duration(time);
+        const duration = moment.duration(+time);
         const hours = Math.floor(duration.asHours());
         const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
         return `${hours}h ${minutes}m`;
@@ -105,5 +111,40 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit {
         this.totalTime = this.users.reduce((sum, userInfo) => {
             return sum + userInfo.time;
         }, 0);
+
+        this.graph = this.item.time_intervals.reduce((graph, interval) => {
+            const start = moment.utc(interval.start_at);
+            const end = moment.utc(interval.end_at);
+            const time = end.diff(start);
+
+            const user_id = interval.user_id;
+            const name = interval.user.full_name;
+
+            const date = start.format('YYYY-MM-DD');
+            const dateIndex = graph.findIndex(item => item.name === date);
+            if (dateIndex !== -1) {
+                const userIndex = graph[dateIndex].series
+                    .findIndex(item => item.user_id === user_id);
+                if (userIndex !== -1) {
+                    graph[dateIndex].series[userIndex].value += time;
+                } else {
+                    graph[dateIndex].series.push({
+                        user_id,
+                        name,
+                        value: time,
+                    });
+                }
+            } else {
+                graph.push({
+                    name: date,
+                    series: [{
+                        user_id,
+                        name,
+                        value: time,
+                    }],
+                });
+            }
+            return graph;
+        }, []);
     }
 }
