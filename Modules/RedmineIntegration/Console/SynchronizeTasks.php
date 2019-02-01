@@ -253,6 +253,11 @@ class SynchronizeTasks extends Command
                 });
                 $priority_id = isset($priority) ? $priority['priority_id'] : 0;
 
+                $user_redmine_url = $this->userRepo->getUserRedmineUrl($userId);
+                if (substr($user_redmine_url, -1) !== '/') {
+                    $user_redmine_url .= '/';
+                }
+
                 //TODO: add assigned_by from our system
                 $taskInfo = [
                     'project_id'  => $projectProperty->entity_id,
@@ -261,7 +266,7 @@ class SynchronizeTasks extends Command
                     'active'      => in_array($taskFromRedmine['status']['id'], $active_status_ids),
                     'user_id'     => $userId,
                     'assigned_by' => 1,
-                    'url'         => 'url',
+                    'url'         => $user_redmine_url . 'issues/' . $taskFromRedmine['id'],
                     'priority_id' => $priority_id,
                 ];
 
