@@ -1,4 +1,4 @@
-import { Component, OnInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import * as moment from 'moment';
@@ -16,6 +16,7 @@ import { TimeInterval } from '../../../models/timeinterval.model';
 type TaskWithIntervals = Task & { time_intervals?: TimeInterval[] };
 
 interface UserInfo {
+    user_id: number;
     user: User;
     time: number;
     perDate: {
@@ -32,14 +33,16 @@ interface UserInfo {
     templateUrl: './tasks.show.component.html',
     styleUrls: ['./tasks.show.component.scss', '../../items.component.scss']
 })
-export class TasksShowComponent extends ItemsShowComponent implements OnInit {
+export class TasksShowComponent extends ItemsShowComponent implements OnInit, AfterViewInit {
+    @ViewChild('graphWrapper') graphWrapper: ElementRef;
+
     item: TaskWithIntervals = new Task();
     users: UserInfo[] = [];
     totalTime: number = 0;
 
     readonly objectKeys = Object.keys;
-    readonly max = Math.max;
 
+    graphSize: any[] = [400, 400];
     graph: any[] = [];
     colorScheme = {
         domain: ['#3097D1'],
@@ -63,6 +66,18 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit {
         });
     }
 
+    protected updateGraphWidth() {
+        const containerWidth = this.graphWrapper.nativeElement.offsetWidth;
+        const padding = 150;
+        let lineWidth = (containerWidth - padding) / this.graph.length;
+        lineWidth = Math.max(Math.min(lineWidth, 80), 20);
+        this.graphSize[0] = lineWidth * this.graph.length + padding;
+    }
+
+    ngAfterViewInit() {
+        this.updateGraphWidth();
+    }
+
     formatDurationString(time: number) {
         const duration = moment.duration(+time);
         const hours = Math.floor(duration.asHours());
@@ -74,15 +89,15 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit {
         this.item = result;
 
         this.users = this.item.time_intervals.reduce((users: UserInfo[], interval) => {
-            const user = interval.user;
-            const index = users.findIndex(u => u.user.id === user.id);
+            const index = users.findIndex(u => u.user_id === interval.user_id);
             const end = moment.utc(interval.end_at);
             const start = moment.utc(interval.start_at);
             const time = end.diff(start);
             const date = start.format('DD-MM-YYYY');
             if (index === -1) {
                 users.push({
-                    user,
+                    user_id: interval.user_id,
+                    user: interval.user,
                     time,
                     perDate: {
                         [date]: {
@@ -118,7 +133,7 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit {
             const time = end.diff(start);
 
             const user_id = interval.user_id;
-            const name = interval.user.full_name;
+            const name = interval.user ? interval.user.full_name : '';
 
             const date = start.format('YYYY-MM-DD');
             const dateIndex = graph.findIndex(item => item.name === date);
@@ -144,7 +159,10 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit {
                     }],
                 });
             }
+
             return graph;
         }, []);
+
+        setTimeout(this.updateGraphWidth.bind(this));
     }
 }

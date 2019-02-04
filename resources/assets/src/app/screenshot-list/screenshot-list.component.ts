@@ -1,4 +1,4 @@
-import { Component, DoCheck, IterableDiffers, OnInit, ViewChild, OnDestroy, Input, IterableDiffer, SimpleChanges, OnChanges } from '@angular/core';
+import { Component, DoCheck, IterableDiffers, OnInit, ViewChild, OnDestroy, Input, IterableDiffer, SimpleChanges, OnChanges, Output, EventEmitter } from '@angular/core';
 import { BsModalService, ModalDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../api/api.service';
@@ -9,6 +9,7 @@ import { ItemsListComponent } from '../pages/items.list.component';
 
 import { Screenshot } from '../models/screenshot.model';
 import { User } from '../models/user.model';
+import { TimeInterval } from '../models/timeinterval.model';
 
 import * as moment from 'moment';
 import 'moment-timezone';
@@ -37,6 +38,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     @Input() min_date: string = '';
     @Input() date_output_format: string = 'DD.MM.YYYY HH:mm:ss';
 
+    @Output() onSelectionChanged = new EventEmitter<TimeInterval[]>();
+
     differUsers: IterableDiffer<number[]>;
     differProjects: IterableDiffer<number[]>;
     differTasks: IterableDiffer<number[]>;
@@ -48,6 +51,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     countFail = 0;
     isAllLoaded = false;
     isLoading = false;
+
+    selected: { [key: number]: boolean } = {};
 
     modalScreenshot?: Screenshot = null;
 

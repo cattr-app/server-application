@@ -17,8 +17,10 @@ import { DpDatePickerModule } from 'ng2-date-picker';
 import { UsersService } from './pages/users/users.service';
 import { ProjectSelectorComponent } from './project-selector/project-selector.component';
 import { ImageComponent } from './image/image.component';
+import { ChangeTaskPanelComponent } from './change-task-panel/change-task-panel.component';
 import { RegistrationService } from './registration.service';
 import { RouterModule } from '@angular/router';
+import {AutoCompleteModule} from 'primeng/autocomplete';
 
 @NgModule({
     imports: [
@@ -32,6 +34,7 @@ import { RouterModule } from '@angular/router';
         LoadingModule,
         DpDatePickerModule,
         RouterModule,
+        AutoCompleteModule,
     ],
     declarations: [
         UsersFiltersComponent,
@@ -41,6 +44,7 @@ import { RouterModule } from '@angular/router';
         UserSelectorComponent,
         ProjectSelectorComponent,
         ImageComponent,
+        ChangeTaskPanelComponent,
     ],
     exports: [
         CommonModule,
@@ -56,6 +60,7 @@ import { RouterModule } from '@angular/router';
         UserSelectorComponent,
         ProjectSelectorComponent,
         ImageComponent,
+        ChangeTaskPanelComponent,
     ],
     providers: [
         ProjectsService,

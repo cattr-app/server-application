@@ -1,13 +1,13 @@
 import { Component, ViewChild, OnInit, DoCheck, Output, EventEmitter, TemplateRef, Input, IterableDiffer, IterableDiffers } from '@angular/core';
 
-import { Task } from '../../../models/task.model';
-import { Project } from '../../../models/project.model';
-import { TimeInterval } from '../../../models/timeinterval.model';
+import { Task } from '../models/task.model';
+import { Project } from '../models/project.model';
+import { TimeInterval } from '../models/timeinterval.model';
 
-import { ApiService } from '../../../api/api.service';
-import { TimeIntervalsService } from '../../../pages/timeintervals/timeintervals.service';
-import { TasksService } from '../../../pages/tasks/tasks.service';
-import { ProjectsService } from '../../../pages/projects/projects.service';
+import { ApiService } from '../api/api.service';
+import { TimeIntervalsService } from '../pages/timeintervals/timeintervals.service';
+import { TasksService } from '../pages/tasks/tasks.service';
+import { ProjectsService } from '../pages/projects/projects.service';
 
 import { BsModalService, BsModalRef } from 'ngx-bootstrap';
 import * as moment from 'moment';

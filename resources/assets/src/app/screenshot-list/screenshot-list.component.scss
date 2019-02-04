@@ -13,6 +13,7 @@
 }
 
 .screenshot {
+    position: relative;
     cursor: pointer;
 }
 
@@ -23,6 +24,10 @@
     width: 100%;
 }
 
+.card {
+    position: relative;
+}
+
 .card-img-top {
     width: 14rem;
     max-height: 100px;
@@ -30,6 +35,15 @@
 
 .card-text-line {
     display: block;
+}
+
+.select-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0 !important;
+    transform: translate(-50%, -50%);
+    z-index: 1;
 }
 
 .loading {

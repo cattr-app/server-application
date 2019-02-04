@@ -12,13 +12,11 @@ import { NgxPaginationModule } from 'ngx-pagination';
 import { DashboardComponent } from './dashboard.component';
 import { TaskListComponent } from './tasklist/tasks.list.component';
 import { ScreenshotListComponent } from './screenshotlist/screenshot.list.component';
-import { ChangeTaskPanelComponent } from './change-task-panel/change-task-panel.component';
 
 import {TranslateModule} from '@ngx-translate/core';
 import { StatisticModule } from '../statistic/statistic.module';
 import { TabsModule, ModalModule } from 'ngx-bootstrap';
 import { LoadingModule } from 'ngx-loading';
-import {AutoCompleteModule} from 'primeng/autocomplete';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SharedModule } from '../../shared.module';
 
@@ -33,7 +31,6 @@ import { SharedModule } from '../../shared.module';
     StatisticModule,
     TabsModule.forRoot(),
     LoadingModule,
-    AutoCompleteModule,
     NgSelectModule,
     ModalModule,
     SharedModule,
@@ -42,7 +39,6 @@ import { SharedModule } from '../../shared.module';
     DashboardComponent,
     TaskListComponent,
     ScreenshotListComponent,
-    ChangeTaskPanelComponent,
   ],
   providers: [
     LoginService,

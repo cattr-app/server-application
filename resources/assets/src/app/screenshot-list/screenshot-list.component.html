@@ -1,6 +1,10 @@
 <div class="screenshots-row row" *ngFor="let group of itemsChunked; trackBy: groupTrackFn">
     <div class="screenshot-wrapper col-xs-6 col-sm-4 col-md-3 col-lg-2" *ngFor="let screenshot of group; trackBy: screenshotTrackFn">
         <div class="card">
+            <input type="checkbox" class="select-image" *ngIf="screenshot.id"
+                (change)="selected[screenshot.id] = !selected[screenshot.id]"
+                [checked]="selected[screenshot.id]" />
+
             <app-image class="screenshot card-img-top"
                 [src]="screenshot.thumbnail_path ? screenshot.thumbnail_path : (screenshot.path ? screenshot.path : 'uploads/none.png')"
                 (click)="showModal(screenshot)">
@@ -89,7 +93,11 @@
 
                                 <tr *ngIf="modalScreenshot.time_interval">
                                     <th translate>field.task</th>
-                                    <td>{{ modalScreenshot.time_interval.task.task_name }}</td>
+                                    <td>
+                                        <a [routerLink]="['/tasks/show', modalScreenshot.time_interval.task.id]">
+                                            {{ modalScreenshot.time_interval.task.task_name }}
+                                        </a>
+                                    </td>
                                 </tr>
 
                                 <tr>
