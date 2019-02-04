@@ -111,13 +111,13 @@
                             </div>
                         </div>
 
-                        <div class="row activity">
+                        <div class="row activity" *ngIf="graph.length">
                             <div class="col-sm-12">
                                 <h4 class="activity__title">Activity</h4>
                                 <div class="activity__graph-wrapper">
                                     <ngx-charts-bar-vertical-stacked
                                         [results]="graph"
-                                        [view]="[max(200, 100 * graph.length), 400]"
+                                        [view]="[max(400, 80 * graph.length), 400]"
                                         [scheme]="colorScheme"
                                         [gradient]="false"
                                         [xAxis]="true"
