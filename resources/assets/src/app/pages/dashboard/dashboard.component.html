@@ -4,7 +4,7 @@
             <div class="panel panel-default">
                 <div class="panel-body">
                     <div class="header-buttons btn-group" role="group" *ngIf="selectedTab === tabTeam">
-                        <button type="button" (click)="statistic.exportCSV()" class="btn btn-default" translate>control.export-csv</button>
+                        <button type="button" (click)="teamStatistic.exportCSV()" class="btn btn-default" translate>control.export-csv</button>
                     </div>
 
                     <tabset #tabs>
@@ -27,7 +27,7 @@
 
                         <tab #tabTimeline heading="{{'control.timeline' | translate }}"
                             (select)="changeTab($event)">
-                            <app-statistic-time #statistic [users]="[currentUser]" [height]="80">
+                            <app-statistic-time #userStatistic [users]="[currentUser]" [height]="80">
                             </app-statistic-time>
 
                             <change-task-panel
@@ -42,7 +42,7 @@
 
                         <tab #tabTeam heading="{{'control.team' | translate }}"
                             (select)="changeTab($event)" *ngIf="userIsManager">
-                            <app-statistic-time #statistic [users]="selectedUsers"
+                            <app-statistic-time #teamStatistic [users]="selectedUsers"
                                 (onSelectionChanged)="changeSelection($event)">
                                 <app-user-selector class="statistics-users" #userSelect
                                     [filter]="userFilter" (changed)="selectedUsers = $event">

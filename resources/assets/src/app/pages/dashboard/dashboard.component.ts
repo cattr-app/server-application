@@ -27,7 +27,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     @ViewChild('tabTeam', {read: TabDirective}) tabTeam: TabDirective;
     @ViewChild('screenshotList') screenshotList: ScreenshotListComponent;
     @ViewChild('userSelect') userSelect: UserSelectorComponent;
-    @ViewChild('statistic') statistic: StatisticTimeComponent;
+    @ViewChild('userStatistic') userStatistic: StatisticTimeComponent;
+    @ViewChild('teamStatistic') teamStatistic: StatisticTimeComponent;
 
     userIsManager: boolean = false;
     selectedTab: TabDirective = null;
@@ -92,8 +93,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.taskList.reload();
         this.screenshotList.reload();
 
-        if (this.statistic) {
-            this.statistic.update();
+        if (this.teamStatistic) {
+            this.teamStatistic.update();
         }
 
         this.filter('');
@@ -104,8 +105,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.taskList.filter(filter);
         this.screenshotList.filter(filter);
 
-        if (this.statistic) {
-            this.statistic.filter(filter);
+        if (this.teamStatistic) {
+            this.teamStatistic.filter(filter);
         }
     }
 
