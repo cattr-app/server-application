@@ -279,9 +279,14 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 const perDay: { [date: string]: TimeWorkedDay } = {};
                 for (const event of userEvents) {
                     const start = moment.utc(event.start);
+                    if (start.diff(this.range.start) < 0) {
+                        continue;
+                    }
+
                     total += event.duration;
 
                     const date = start.format('YYYY-MM-DD');
+
                     if (perDay[date] !== undefined) {
                         perDay[date].total += event.duration;
                         perDay[date].events.push(event);
