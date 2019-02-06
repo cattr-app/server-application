@@ -22,6 +22,8 @@ type SelectItem = (Project | Task) & { title: string };
 export class ChangeTaskPanelComponent implements OnInit, DoCheck {
     @ViewChild('changeTaskModal') changeTaskModal: TemplateRef<any>;
 
+    @Input() showSearch: boolean = true;
+
     @Input() timeIntervals: TimeInterval[] = [];
 
     @Output() onFilterChanged = new EventEmitter<string | Task | Project>();
@@ -64,7 +66,7 @@ export class ChangeTaskPanelComponent implements OnInit, DoCheck {
         protected timeIntervalsService: TimeIntervalsService,
         protected projectService: ProjectsService,
         protected taskService: TasksService,
-        differs: IterableDiffers,
+        protected differs: IterableDiffers,
         protected modalService: BsModalService,
     ) {
         this.differ = differs.find(this.timeIntervals).create();
@@ -172,6 +174,7 @@ export class ChangeTaskPanelComponent implements OnInit, DoCheck {
             'active': this.newTask.active,
             'user_id': this.newTask.user_id,
             'assigned_by': this.newTask.assigned_by,
+            'priority_id': 2,
         }, result => {
             const newTaskId = +result.res.id;
 

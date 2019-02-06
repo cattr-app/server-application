@@ -1,4 +1,4 @@
-import { Component, DoCheck, IterableDiffers, OnInit, ViewChild, OnDestroy, Input, IterableDiffer, SimpleChanges, OnChanges, Output, EventEmitter } from '@angular/core';
+import { Component, DoCheck, IterableDiffers, OnInit, ViewChild, OnDestroy, Input, IterableDiffer, SimpleChanges, OnChanges, Output, EventEmitter, KeyValueDiffer, KeyValueDiffers } from '@angular/core';
 import { BsModalService, ModalDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../api/api.service';
@@ -23,6 +23,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     @ViewChild('loading') loading: any;
     @ViewChild('screenshotModal') screenshotModal: ModalDirective;
 
+    @Input() initialLoad: boolean = true;
     @Input() autoload: boolean = true;
 
     @Input() showTime: boolean = false;
@@ -30,6 +31,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     @Input() showUser: boolean = true;
     @Input() showProject: boolean = true;
     @Input() showTask: boolean = true;
+    @Input() showSelection: boolean = false;
 
     @Input() user_ids?: number[] = null;
     @Input() project_ids?: number[] = null;
@@ -53,6 +55,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     isLoading = false;
 
     selected: { [key: number]: boolean } = {};
+    selectedDiffer: KeyValueDiffer<number, boolean> = null;
+    selectedIntervals: TimeInterval[] = [];
 
     modalScreenshot?: Screenshot = null;
 
@@ -77,19 +81,28 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         protected itemService: ScreenshotsService,
         protected modalService: BsModalService,
         protected allowedAction: AllowedActionsService,
-        differs: IterableDiffers,
+        protected differs: IterableDiffers,
+        protected kvDiffers: KeyValueDiffers,
     ) {
         super(api, itemService, modalService, allowedAction);
         this.user = api.getUser();
         this.differUsers = differs.find([]).create(null);
         this.differProjects = differs.find([]).create(null);
         this.differTasks = differs.find([]).create(null);
+        this.selectedDiffer = kvDiffers.find(this.selected).create();
     }
 
     ngOnInit() {
         this.scrollHandler = this.onScrollDown.bind(this);
         window.addEventListener('scroll', this.scrollHandler, false);
-        this.loadNext();
+        if (this.initialLoad || this.autoload) {
+            this.loadNext();
+        }
+    }
+
+    protected getSelectedScreenshots() {
+        const screenshots = this.itemsArray as Screenshot[];
+        return screenshots.filter(item => this.selected[item.id]);
     }
 
     ngDoCheck() {
@@ -100,11 +113,20 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         if (changeUserIds || changeProjectIds || changeTaskIds) {
             this.reload();
         }
+
+        const selectedChanged = this.selectedDiffer.diff(this.selected);
+        if (selectedChanged) {
+            this.selectedIntervals = this.getSelectedScreenshots()
+                // Get time intervals of the selected screenshots.
+                .map(screenshot => screenshot.time_interval);
+            this.onSelectionChanged.emit(this.selectedIntervals);
+        }
     }
 
     ngOnChanges(changes: SimpleChanges) {
         if (changes.min_date && !changes.min_date.firstChange
-            || changes.max_date && !changes.max_date.firstChange) {
+            || changes.max_date && !changes.max_date.firstChange
+            || changes.autoload && !changes.autoload.firstChange) {
             this.reload();
         }
     }
@@ -211,7 +233,9 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         this.setItems([]);
         this.countFail = 0;
         this.isAllLoaded = false;
-        this.loadNext();
+        if (this.initialLoad || this.autoload) {
+            this.loadNext();
+        }
     }
 
     showModal(screenshot: Screenshot) {

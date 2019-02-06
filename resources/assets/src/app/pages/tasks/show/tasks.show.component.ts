@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
+import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef, ViewChildren, QueryList } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import * as moment from 'moment';
@@ -12,6 +12,7 @@ import { ItemsShowComponent } from '../../items.show.component';
 import { Task } from '../../../models/task.model';
 import { User } from "../../../models/user.model";
 import { TimeInterval } from '../../../models/timeinterval.model';
+import { ScreenshotListComponent } from '../../../screenshot-list/screenshot-list.component';
 
 type TaskWithIntervals = Task & { time_intervals?: TimeInterval[] };
 
@@ -34,6 +35,7 @@ interface UserInfo {
     styleUrls: ['./tasks.show.component.scss', '../../items.component.scss']
 })
 export class TasksShowComponent extends ItemsShowComponent implements OnInit, AfterViewInit {
+    @ViewChildren('screenshotLists') screenshotLists: QueryList<ScreenshotListComponent>;
     @ViewChild('graphWrapper') graphWrapper: ElementRef;
 
     item: TaskWithIntervals = new Task();
@@ -42,16 +44,23 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit, Af
 
     readonly objectKeys = Object.keys;
 
-    graphSize: any[] = [400, 400];
+    graphSize: number[] = [400, 400];
     graph: any[] = [];
     colorScheme = {
         domain: ['#3097D1'],
     };
 
-    constructor(api: ApiService,
-        taskService: TasksService,
-        router: ActivatedRoute,
-        allowService: AllowedActionsService
+    selectedIntervalsByDate: {
+        [date: string]: TimeInterval[]
+    } = {};
+    selectedIntervals: TimeInterval[] = [];
+
+    constructor(
+        protected api: ApiService,
+        protected taskService: TasksService,
+        protected router: ActivatedRoute,
+        protected allowService: AllowedActionsService,
+        protected cdr: ChangeDetectorRef,
     ) {
         super(api, taskService, router, allowService);
     }
@@ -164,5 +173,21 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit, Af
         }, []);
 
         setTimeout(this.updateGraphWidth.bind(this));
+    }
+
+    can(action: string): boolean {
+        return this.allowedAction.can(action);
+    }
+
+    onSelectionChanged(date: string, intervals: TimeInterval[]) {
+        this.selectedIntervalsByDate[date] = intervals;
+        this.selectedIntervals = Object.keys(this.selectedIntervalsByDate)
+            .map(date => this.selectedIntervalsByDate[date])
+            .reduce((total, current) => total.concat(current), []);
+        this.cdr.detectChanges();
+    }
+
+    reload() {
+        this.screenshotLists.forEach(screenshotList => screenshotList.reload());
     }
 }

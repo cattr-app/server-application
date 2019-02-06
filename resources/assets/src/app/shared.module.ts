@@ -21,6 +21,7 @@ import { ChangeTaskPanelComponent } from './change-task-panel/change-task-panel.
 import { RegistrationService } from './registration.service';
 import { RouterModule } from '@angular/router';
 import {AutoCompleteModule} from 'primeng/autocomplete';
+import { TimeIntervalsService } from './pages/timeintervals/timeintervals.service';
 
 @NgModule({
     imports: [
@@ -67,6 +68,7 @@ import {AutoCompleteModule} from 'primeng/autocomplete';
         ScreenshotsService,
         UsersService,
         RegistrationService,
+        TimeIntervalsService,
     ]
 })
 

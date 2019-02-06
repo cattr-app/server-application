@@ -158,12 +158,16 @@
                                                 <td class="screenshots__time">{{ formatDurationString(userInfo.perDate[date].time) }}</td>
                                             </tr>
 
-                                            <tr *ngIf="userInfo.perDate[date].expanded">
+                                            <tr [hidden]="!userInfo.perDate[date].expanded">
                                                 <td colspan="2">
-                                                    <screenshot-list [min_date]="date" [max_date]="date"
+                                                    <screenshot-list #screenshotLists
+                                                        [min_date]="date" [max_date]="date"
                                                         [showUser]="false" [showProject]="false"
+                                                        [showSelection]="can('time-intervals/manager_access')"
                                                         [showTask]="false" [date_output_format]="'HH:mm:ss'"
-                                                        [user_ids]="[userInfo.user_id]" [task_ids]="[item.id]">
+                                                        [user_ids]="[userInfo.user_id]" [task_ids]="[item.id]"
+                                                        [initialLoad]="false" [autoload]="userInfo.perDate[date].expanded"
+                                                        (onSelectionChanged)="onSelectionChanged(date, $event)">
                                                     </screenshot-list>
                                                 </td>
                                             </tr>
@@ -172,6 +176,15 @@
                                 </table>
                             </accordion-group>
                         </accordion>
+
+                        <change-task-panel
+                            *ngIf="selectedIntervals.length
+                                && can('time-intervals/manager_access')"
+                            [timeIntervals]="selectedIntervals"
+                            [showSearch]="false"
+                            (onIntervalsDeleted)="reload()"
+                            (onIntervalsChanged)="reload()">
+                        </change-task-panel>
                     </div>
                 </div>
             </div>
