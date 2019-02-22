@@ -27,12 +27,13 @@
 
                         <tab #tabTimeline heading="{{'control.timeline' | translate }}"
                             (select)="changeTab($event)">
-                            <app-statistic-time #userStatistic [users]="[currentUser]" [height]="80">
+                            <app-statistic-time #userStatistic
+                                [users]="[currentUser]" [height]="80"
+                                (onSelectionChanged)="changeSelection($event)">
                             </app-statistic-time>
 
                             <change-task-panel
-                                *ngIf="(selectedIntervals.length || taskFilter)
-                                    && canManageIntervals"
+                                *ngIf="selectedIntervals.length || taskFilter"
                                 [timeIntervals]="selectedIntervals"
                                 (onFilterChanged)="filter($event)"
                                 (onIntervalsDeleted)="reload()"

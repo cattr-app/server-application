@@ -488,32 +488,34 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                     return moment.utc(a.start).diff(moment.utc(b.start));
                 });
 
-                const intervalIds = [event.id];
+                let intervalIds = [...event.interval_ids];
                 const currentEventIndex = events.findIndex(ev => ev.id === event.id);
                 for (let i = currentEventIndex + 1; i < events.length; ++i) {
                     const prev = events[i - 1];
                     const curr = events[i];
-                    if (moment.utc(curr.start).diff(moment.utc(prev.end)) > 60 * 1000) {
+                    if (moment.utc(curr.start).diff(moment.utc(prev.end)) > 60 * 1000
+                        || curr.task_id !== prev.task_id) {
                         break;
                     }
-                    intervalIds.push(curr.id);
+                    intervalIds = intervalIds.concat(curr.interval_ids);
                 }
 
                 for (let i = currentEventIndex - 1; i >= 0; --i) {
                     const next = events[i + 1];
                     const curr = events[i];
-                    if (moment.utc(next.start).diff(moment.utc(curr.end)) > 60 * 1000) {
+                    if (moment.utc(next.start).diff(moment.utc(curr.end)) > 60 * 1000
+                        || next.task_id !== curr.task_id) {
                         break;
                     }
-                    intervalIds.push(curr.id);
+                    intervalIds = intervalIds.concat(curr.interval_ids);
                 }
 
                 // Load time intervals.
                 this.timeintervalService.getItems(result => {
                     this.setSelectedIntervals(result);
                 }, {
-                        id: ['=', intervalIds],
-                    });
+                    id: ['=', intervalIds],
+                });
 
                 const task = this.viewEventsTasks.find(task => +task.id === +event.task_id);
                 if (task) {
@@ -532,8 +534,8 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                             this.clickPopoverScreenshot = screenshot;
                         }
                     }, {
-                            time_interval_id: event.id,
-                        });
+                        time_interval_id: event.id,
+                    });
                 });
 
                 const $parent = $(this.timelineWrapper.nativeElement);
@@ -574,7 +576,8 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 for (let i = currentEventIndex + 1; i < events.length; ++i) {
                     const prev = events[i - 1];
                     const curr = events[i];
-                    if (moment.utc(curr.start).diff(moment.utc(prev.end)) > 60 * 1000) {
+                    if (moment.utc(curr.start).diff(moment.utc(prev.end)) > 60 * 1000
+                        || curr.task_id !== prev.task_id) {
                         break;
                     }
                     total += moment.utc(curr.end).diff(moment.utc(curr.start));
@@ -583,7 +586,8 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 for (let i = currentEventIndex - 1; i >= 0; --i) {
                     const next = events[i + 1];
                     const curr = events[i];
-                    if (moment.utc(next.start).diff(moment.utc(curr.end)) > 60 * 1000) {
+                    if (moment.utc(next.start).diff(moment.utc(curr.end)) > 60 * 1000
+                        || next.task_id !== curr.task_id) {
                         break;
                     }
                     total += moment.utc(curr.end).diff(moment.utc(curr.start));

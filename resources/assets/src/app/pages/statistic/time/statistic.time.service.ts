@@ -140,6 +140,9 @@ export class StatisticTimeService {
                     resourceId: group.user_id,
                     task_id: interval.task_id,
                     project_id: interval.project_id,
+                    interval_ids: [
+                        interval.id,
+                    ],
                     start: start,
                     end: end,
                     duration: interval.duration,
@@ -152,9 +155,14 @@ export class StatisticTimeService {
                 }
 
                 const last = events[events.length - 1];
-                if ((current.start as Moment).diff(last.end) <= 1000) {
+                if ((current.start as Moment).diff(last.end) <= 1000
+                    && current.task_id === last.task_id) {
                     events[events.length - 1] = {
                         ...last,
+                        interval_ids: [
+                            ...last.interval_ids,
+                            ...current.interval_ids,
+                        ],
                         end: current.end,
                         duration: last.duration + current.duration,
                     };

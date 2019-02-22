@@ -163,7 +163,7 @@
                                                     <screenshot-list #screenshotLists
                                                         [min_date]="date" [max_date]="date"
                                                         [showUser]="false" [showProject]="false"
-                                                        [showSelection]="can('time-intervals/manager_access')"
+                                                        [showSelection]="canEdit(userInfo)"
                                                         [showTask]="false" [date_output_format]="'HH:mm:ss'"
                                                         [user_ids]="[userInfo.user_id]" [task_ids]="[item.id]"
                                                         [initialLoad]="false" [autoload]="userInfo.perDate[date].expanded"
@@ -178,8 +178,7 @@
                         </accordion>
 
                         <change-task-panel
-                            *ngIf="selectedIntervals.length
-                                && can('time-intervals/manager_access')"
+                            *ngIf="selectedIntervals.length"
                             [timeIntervals]="selectedIntervals"
                             [showSearch]="false"
                             (onIntervalsDeleted)="reload()"

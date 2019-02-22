@@ -179,6 +179,15 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit, Af
         return this.allowedAction.can(action);
     }
 
+    canEdit(owner: UserInfo) {
+        const user = this.api.getUser();
+        if (+owner.user_id === +user.id) {
+            return true;
+        }
+
+        return this.can('time-intervals/manager_access');
+    }
+
     onSelectionChanged(date: string, intervals: TimeInterval[]) {
         this.selectedIntervalsByDate[date] = intervals;
         this.selectedIntervals = Object.keys(this.selectedIntervalsByDate)
