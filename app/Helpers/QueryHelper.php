@@ -101,7 +101,7 @@ class QueryHelper
                 if (Schema::hasColumn($table, $key)) {
                     [$operator, $value] = \is_array($param) ? $param : ['=', $param];
 
-                    if (\is_array($value) && $operator === '=' && $operator === 'in') {
+                    if (\is_array($value) && $operator === '=') {
                         $query->whereIn($key, $value);
                     } elseif($operator == "in") {
                         $inArgs = \is_array($value) ? $value : [$value];
