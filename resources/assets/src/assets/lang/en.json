@@ -188,6 +188,9 @@
 		"id": "Id",
 		"user-active": "Active",
 		"redmine-sync": "redmine time sync",
+		"redmine-active-status": "Redmine active status",
+		"redmine-deactive-status": "Redmine deactive status",
+		"redmine-ignore-statuses": "Redmine ignore statuses",
 		"priority": "Priority"
 	}
 }

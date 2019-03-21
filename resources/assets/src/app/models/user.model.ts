@@ -30,6 +30,9 @@ export interface UserData {
    updated_at?: string;
    deleted_at?: string;
    redmine_sync?: number;
+   redmine_active_status?: number;
+   redmine_deactive_status?: number;
+   redmine_ignore_statuses?: number[];
    attached_users?: User[];
 }
 
@@ -59,6 +62,9 @@ export class User extends Item {
     public password: string;
     public timezone: string;
     public role_id: number;
+    public redmine_active_status: number;
+    public redmine_deactive_status: number;
+    public redmine_ignore_statuses: number[] = [];
     public created_at?: string;
     public updated_at?: string;
     public deleted_at?: string;

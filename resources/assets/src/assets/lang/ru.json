@@ -186,6 +186,9 @@
 		"id": "ID",
 		"user-active": "Активен",
 		"redmine-sync": "Синхронизировать время с redmine",
+		"redmine-active-status": "Статус активной таски",
+		"redmine-deactive-status": "Статус неактивной таски",
+		"redmine-ignore-statuses": "Неизменяемые статусы тасок",
 		"priority": "Приоритет"
 	}
 }

@@ -22,6 +22,21 @@ class UserRepository
     public const TIME_SEND_PROPERTY = 'REDMINE_SEND_TIME';
 
     /**
+     * user property name for select active status id
+     */
+    public const ACTIVE_STATUS_PROPERTY = 'REDMINE_ACTIVE_STATUS_ID';
+
+    /**
+     * user property name for select deactive status id
+     */
+    public const DEACTIVE_STATUS_PROPERTY = 'REDMINE_DEACTIVE_STATUS_ID';
+
+    /**
+     * user property name for select ignore status ids
+     */
+    public const IGNORE_STATUS_PROPERTY = 'REDMINE_IGNORE_STATUSES';
+
+    /**
      * Returns user's redmine url saved in properties table
      *
      * @param $userId User's id in our system
@@ -274,6 +289,129 @@ class UserRepository
                 'name'        => UserRepository::TIME_SEND_PROPERTY,
                 'value'       => $enabled
             ]);
+        }
+    }
+
+    /**
+     * get active task status id from userId
+     * @param string $userId
+     * @return string
+     */
+    public function getActiveStatusId($userId)
+    {
+        return $this->getProperty($userId, UserRepository::ACTIVE_STATUS_PROPERTY);
+    }
+
+    /**
+     * set active task status id for userId
+     * @param string $userId
+     * @param string $status_id
+     * @return string
+     */
+    public function setActiveStatusId($userId, $status_id)
+    {
+        return $this->setProperty($userId, UserRepository::ACTIVE_STATUS_PROPERTY, $status_id);
+    }
+
+    /**
+     * get deactive task status id from userId
+     * @param string $userId
+     * @return string
+     */
+    public function getDeactiveStatusId($userId)
+    {
+        return $this->getProperty($userId, UserRepository::DEACTIVE_STATUS_PROPERTY);
+    }
+
+    /**
+     * set deactive task status id for userId
+     * @param string $userId
+     * @param string $status_id
+     * @return string
+     */
+    public function setDeactiveStatusId($userId, $status_id)
+    {
+        return $this->setProperty($userId, UserRepository::DEACTIVE_STATUS_PROPERTY, $status_id);
+    }
+
+    /**
+     * get user task status ids which will not be changed after task syncronisation
+     * @param string $userId
+     * @return string
+     */
+    public function getIgnoreStatuses($userId)
+    {
+        $jsonStatuses = $this->getProperty($userId, UserRepository::IGNORE_STATUS_PROPERTY, '[]');
+        return json_decode($jsonStatuses, 1);
+    }
+
+    /**
+     * set user task status ids which will not be changed after task syncronisation
+     * @param string $userId
+     * @param array $statuses
+     * @return string
+     */
+    public function setIgnoreStatuses($userId,array $statuses)
+    {
+        if (empty($statuses)) {
+            $jsonStatuses = '';
+        } else {
+            $jsonStatuses = json_encode($statuses);
+        }
+        return $this->setProperty($userId, UserRepository::IGNORE_STATUS_PROPERTY, $jsonStatuses);
+    }
+
+
+    /**
+     * get property from userId
+     * @param string $userId
+     * @param string $propertyName
+     * @param string $retOnUnset optional
+     * @return string
+     */
+    protected function getProperty($userId, string $propertyName, string $retOnUnset = '')
+    {
+        $property = Property::where([
+            'entity_id'     => $userId,
+            'entity_type'   => Property::USER_CODE,
+            'name'          => $propertyName,
+        ])->first();
+
+        if ($property) {
+            return $property->value;
+        }
+
+        return $retOnUnset;
+    }
+
+    /**
+     * set property for userId
+     * @param string $userId
+     * @param string $propertyName
+     * @param mixed $value
+     */
+    protected function setProperty($userId, string $propertyName, $value)
+    {
+        $property = Property::where([
+            'entity_id'     => $userId,
+            'entity_type'   => Property::USER_CODE,
+            'name'          => $propertyName,
+        ])->first();
+
+        $val_len = strlen($value);
+
+        if (!$property && $val_len) {
+            Property::create([
+                'entity_id'   => $userId,
+                'entity_type' => Property::USER_CODE,
+                'name'        => $propertyName,
+                'value'       => $value,
+            ]);
+        } elseif ($property && $val_len) {
+            $property->value = $value;
+            $property->save();
+        } elseif ($property && !$val_len) {
+            $property->delete();
         }
     }
 

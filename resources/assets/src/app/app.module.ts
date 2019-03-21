@@ -19,6 +19,7 @@ import {AppComponent} from './app.component';
 import {NavigationComponent} from './navigation/navigation.component';
 
 import {AllowedActionsService} from './pages/roles/allowed-actions.service';
+import {RedmineService} from './pages/users/redmine.service';
 import {AttachedUsersService} from './pages/users/attached-users.service';
 import {AttachedProjectService} from './pages/projects/attached-project.service';
 import {ApiService} from './api/api.service';
@@ -54,6 +55,7 @@ export function HttpLoaderFactory(http: HttpClient) {
     ],
     providers: [
         AllowedActionsService,
+        RedmineService,
         AttachedUsersService,
         AttachedProjectService,
     ],

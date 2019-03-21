@@ -40,6 +40,9 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         'answer.success.item.create.user' => [
             'Modules\RedmineIntegration\Listeners\IntegrationObserver@userAfterEdition',
         ],
+        'role.actions.list' => [
+            'Modules\RedmineIntegration\Listeners\IntegrationObserver@rulesHook',
+        ],
     ];
 
     /**

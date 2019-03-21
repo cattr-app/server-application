@@ -91,13 +91,24 @@ class IntegrationObserver
 
 
         $sync = request()->input('redmine_sync');
+        $redmine_active_status = request()->input('redmine_active_status');
+        $redmine_deactive_status = request()->input('redmine_deactive_status');
+        $redmine_ignore_statuses = request()->input('redmine_ignore_statuses');
         $sync  = $sync ? 1 : 0;
 
         /**
          * @todo: add rule, who can change that and who can not
          */
         $this->userRepo->setUserSendTime($userId, $sync);
+        $this->userRepo->setActiveStatusId($userId, $redmine_active_status);
+        $this->userRepo->setDeactiveStatusId($userId, $redmine_deactive_status);
+        $this->userRepo->setIgnoreStatuses($userId, $redmine_ignore_statuses);
+
+
         $json['res']->redmine_sync = $sync;
+        $json['res']->redmine_active_status = $redmine_active_status;
+        $json['res']->redmine_deactive_status = $redmine_deactive_status;
+        $json['res']->redmine_ignore_statuses = $redmine_ignore_statuses;
         return $json;
     }
 
@@ -111,6 +122,9 @@ class IntegrationObserver
     public function userShow($user)
     {
         $user->redmine_sync = $this->userRepo->isUserSendTime($user->id);
+        $user->redmine_active_status = $this->userRepo->getActiveStatusId($user->id);
+        $user->redmine_deactive_status = $this->userRepo->getDeactiveStatusId($user->id);
+        $user->redmine_ignore_statuses = $this->userRepo->getIgnoreStatuses($user->id);
         return $user;
     }
 
@@ -153,6 +167,15 @@ class IntegrationObserver
         }
 
         return $task;
+    }
+
+    public function rulesHook($rules)
+    {
+        $rules['redmine'] = [
+            'statuses' => __('Get redmine avaliable statuses'),
+        ];
+
+        return $rules;
     }
 
 }
