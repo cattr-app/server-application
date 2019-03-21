@@ -43,7 +43,7 @@ class ProjectReportController extends Controller
             ->whereIn('user_id', $uids)
             ->whereIn('project_id', $pids)
             ->where('date', '>=', $start_at)
-            ->where('date', '<', $end_at)
+            ->where('date', '<=', $end_at)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
             ->get();
 
