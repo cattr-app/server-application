@@ -74,6 +74,9 @@ class RoleSeeder extends Seeder
               'edit',
               'list',
               'show'
+          ],
+          'redmine' => [
+              'statuses'
           ]
         ];
         $observerAllow = [
@@ -145,7 +148,10 @@ class RoleSeeder extends Seeder
                 'list',
                 'show',
                 'relations',
-            ]
+            ],
+            'redmine' => [
+              'statuses'
+          ]
         ];
         $managerAllow = [
             'dashboard' => [
@@ -207,7 +213,10 @@ class RoleSeeder extends Seeder
                 'relations',
                 'show',
                 'manager_access',
-            ]
+            ],
+            'redmine' => [
+              'statuses'
+          ]
         ];
 
         $this->addRules(1, Rule::getActionList());

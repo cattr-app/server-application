@@ -175,7 +175,7 @@ class IntegrationObserver
     public function rulesHook($rules)
     {
         $rules['redmine'] = [
-            'statuses' => __('Get redmine avaliable statuses'),
+            'statuses' => __('Redmine get avaliable statuses'),
         ];
 
         return $rules;
