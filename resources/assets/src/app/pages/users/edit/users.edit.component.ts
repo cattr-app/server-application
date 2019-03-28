@@ -30,11 +30,11 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
 
     projects: Project[];
     userProjects: Project[];
-    redmineStatuses: RedmineStatus[] = [];
     differProjects: IterableDiffer<Project>;
     dualListFormat: any = DualListComponent.DEFAULT_FORMAT;
     authorizedUser: User;
-    redmineIgnoreStatuses: boolean[];
+    redmineStatuses: RedmineStatus[] = [];
+    redmineIgnoreStatuses: boolean[] = [];
 
 
     constructor(api: ApiService,
@@ -81,6 +81,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             'redmine_sync': this.item.redmine_sync,
             'redmine_active_status': this.item.redmine_active_status,
             'redmine_deactive_status': this.item.redmine_deactive_status,
+            'redmine_online_timeout': this.item.redmine_online_timeout,
             'redmine_ignore_statuses': statuses,
         };
     }

@@ -39,14 +39,12 @@ class RedmineIntegrationController extends AbstractRedmineController
      */
     public function getStatuses(): JsonResponse
     {
-
         $userId = Auth::user()->id;
         $statuses = $this->userRepo->getUserRedmineStatuses($userId);
 
-
         return response()->json(
             $statuses,
-            200
+            200,
         );
     }
 

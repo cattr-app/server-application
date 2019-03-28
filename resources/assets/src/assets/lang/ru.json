@@ -186,9 +186,13 @@
 		"id": "ID",
 		"user-active": "Активен",
 		"redmine-sync": "Синхронизировать время с redmine",
-		"redmine-active-status": "Статус активной таски",
-		"redmine-deactive-status": "Статус неактивной таски",
-		"redmine-ignore-statuses": "Неизменяемые статусы тасок",
+		"redmine-active-status": "Статус активной задачи",
+		"redmine-deactive-status": "Статус неактивной задачи",
+		"redmine-ignore-statuses": "Неизменяемые статусы задач",
+		"redmine-online-timeout": "Таймаут для последней активности задачи",
+		"redmine-unlimited": "Без задержки",
+		"redmine-minutes": "{{minutes}} минут",
+		"redmine-hours": "{{hours}} часов",
 		"priority": "Приоритет"
 	}
 }

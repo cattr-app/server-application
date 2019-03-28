@@ -191,6 +191,10 @@
 		"redmine-active-status": "Redmine active status",
 		"redmine-deactive-status": "Redmine deactive status",
 		"redmine-ignore-statuses": "Redmine ignore statuses",
+		"redmine-online-timeout": "Redmine active tasks timeout",
+		"redmine-unlimited": "unlimited",
+		"redmine-minutes": "{{minutes}} minutes",
+		"redmine-hours": "{{hours}} hours",
 		"priority": "Priority"
 	}
 }

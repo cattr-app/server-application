@@ -37,6 +37,11 @@ class UserRepository
     public const IGNORE_STATUS_PROPERTY = 'REDMINE_IGNORE_STATUSES';
 
     /**
+     * user property name for select online timeout
+     */
+    public const ONLINE_TIMEOUT_PROPERTY = 'REDMINE_ONLINE_TIMEOUT';
+
+    /**
      * Returns user's redmine url saved in properties table
      *
      * @param $userId User's id in our system
@@ -299,7 +304,7 @@ class UserRepository
      */
     public function getActiveStatusId($userId)
     {
-        return $this->getProperty($userId, UserRepository::ACTIVE_STATUS_PROPERTY);
+        return $this->getProperty($userId, static::ACTIVE_STATUS_PROPERTY);
     }
 
     /**
@@ -310,7 +315,7 @@ class UserRepository
      */
     public function setActiveStatusId($userId, $status_id)
     {
-        return $this->setProperty($userId, UserRepository::ACTIVE_STATUS_PROPERTY, $status_id);
+        return $this->setProperty($userId, static::ACTIVE_STATUS_PROPERTY, $status_id);
     }
 
     /**
@@ -320,7 +325,7 @@ class UserRepository
      */
     public function getDeactiveStatusId($userId)
     {
-        return $this->getProperty($userId, UserRepository::DEACTIVE_STATUS_PROPERTY);
+        return $this->getProperty($userId, static::DEACTIVE_STATUS_PROPERTY);
     }
 
     /**
@@ -331,7 +336,7 @@ class UserRepository
      */
     public function setDeactiveStatusId($userId, $status_id)
     {
-        return $this->setProperty($userId, UserRepository::DEACTIVE_STATUS_PROPERTY, $status_id);
+        return $this->setProperty($userId, static::DEACTIVE_STATUS_PROPERTY, $status_id);
     }
 
     /**
@@ -341,14 +346,16 @@ class UserRepository
      */
     public function getIgnoreStatuses($userId)
     {
-        $jsonStatuses = $this->getProperty($userId, UserRepository::IGNORE_STATUS_PROPERTY, '[]');
+        $jsonStatuses = $this->getProperty($userId, static::IGNORE_STATUS_PROPERTY, '[]');
         return json_decode($jsonStatuses, 1);
     }
 
     /**
      * set user task status ids which will not be changed after task syncronisation
+     *
      * @param string $userId
      * @param array $statuses
+     *
      * @return string
      */
     public function setIgnoreStatuses($userId,array $statuses)
@@ -358,12 +365,34 @@ class UserRepository
         } else {
             $jsonStatuses = json_encode($statuses);
         }
-        return $this->setProperty($userId, UserRepository::IGNORE_STATUS_PROPERTY, $jsonStatuses);
+        return $this->setProperty($userId, static::IGNORE_STATUS_PROPERTY, $jsonStatuses);
     }
 
+    /**
+     * get timeout for last task activity for user $userId
+     *
+     * @param string $userId
+     *
+     * @return string
+     */
+    public function getOnlineTimeout($userId)
+    {
+        return $this->getProperty($userId, static::ONLINE_TIMEOUT_PROPERTY);
+    }
 
     /**
-     * get property from userId
+     * set timeout $timeout for last task activity for user $userId
+     *
+     * @param string $userId
+     * @param int $timeout
+     */
+    public function setOnlineTimeout($userId, $timeout)
+    {
+        return $this->setProperty($userId, static::ONLINE_TIMEOUT_PROPERTY, $timeout);
+    }
+
+    /**
+     * get timeout for last task activity for user $userId
      * @param string $userId
      * @param string $propertyName
      * @param string $retOnUnset optional
@@ -392,27 +421,24 @@ class UserRepository
      */
     protected function setProperty($userId, string $propertyName, $value)
     {
-        $property = Property::where([
+        $params = [
             'entity_id'     => $userId,
             'entity_type'   => Property::USER_CODE,
             'name'          => $propertyName,
-        ])->first();
+        ];
 
-        $val_len = strlen($value);
+        $property = Property::where($params)->first();
 
-        if (!$property && $val_len) {
-            Property::create([
-                'entity_id'   => $userId,
-                'entity_type' => Property::USER_CODE,
-                'name'        => $propertyName,
-                'value'       => $value,
-            ]);
-        } elseif ($property && $val_len) {
+        if (!$value) {
+            $value = '';
+        }
+
+        if (!$property) {
+            $params['value'] = $value;
+            Property::create($params);
+        } else {
             $property->value = $value;
             $property->save();
-        } elseif ($property && !$val_len) {
-            $property->delete();
         }
     }
-
 }

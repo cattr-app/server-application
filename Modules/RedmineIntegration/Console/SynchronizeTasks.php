@@ -11,6 +11,7 @@ use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Models\RedmineClient;
+use Modules\RedmineIntegration\Models\TimeActivity;
 use Redmine;
 
 /**
@@ -85,9 +86,123 @@ class SynchronizeTasks extends Command
             try {
                 $this->synchronizeUserNewTasks($user->id);
                 $this->synchronizeUserTasks($user->id);
+                $this->synchronizeUserActivity($user->id);
             } catch (\Exception $e) {
             }
         }
+    }
+
+    /**
+     * Synchronize user task activity for userId
+     *
+     * @param int $userId
+     *
+     * @return
+     */
+    public function synchronizeUserActivity(int $userId)
+    {
+        $userRepo = $this->userRepo;
+        $taskRepo = $this->taskRepo;
+        $client = $this->initRedmineClient($userId);
+        $activeStatusId = $userRepo->getActiveStatusId($userId);
+        $deactiveStatusId = $userRepo->getDeactiveStatusId($userId);
+        $ignoreStatuses = $userRepo->getIgnoreStatuses($userId);
+        $timeout = $userRepo->getOnlineTimeout($userId);
+        $timeActivity = $this->userTimeActivity($userId, $timeout);
+        $unactiveTasks = $this->unactiveTasks($userId, $timeActivity);
+
+
+        if ($activeStatusId && $timeActivity) {
+            $activeTaskId = $timeActivity->task_id;
+            $activeIssueId = $taskRepo->getRedmineTaskId($activeTaskId);
+            $currentStatusId = $taskRepo->getRedmineStatusId($activeTaskId);
+
+
+            if ($activeIssueId && !$this->isIgnoreStatus($currentStatusId, $ignoreStatuses)) {
+                if ($currentStatusId != $activeStatusId) {
+                    $client->issue->update($activeIssueId, ['status_id' => $activeStatusId]);
+                    $taskRepo->setRedmineStatusId($activeTaskId, $activeStatusId);
+                }
+            }
+        }
+
+        if ($deactiveStatusId) {
+            foreach ($unactiveTasks as $task) { // is there any way to do it somehow else?
+                $currentStatusId = $taskRepo->getRedmineStatusId($task->id);
+                $issueId = $taskRepo->getRedmineTaskId($task->id);
+                if ($issueId && !$this->isIgnoreStatus($currentStatusId, $ignoreStatuses)) {
+                    if ($currentStatusId != $deactiveStatusId) {
+                        $client->issue->update($issueId, ['status_id' => $deactiveStatusId]);
+                        $taskRepo->setRedmineStatusId($task->id, $deactiveStatusId);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * get array of unactive tasks for $userId except for $timeActivity
+     *
+     * @param string $userId
+     * @param TimeActivity|null $timeActivity
+     *
+     * @return Collection of Task
+     */
+    protected function unactiveTasks(string $userId, $timeActivity)
+    {
+        $unactiveTaskQuery = Task::query()
+            ->where('user_id', $userId)
+            ->where('active', true);
+
+
+        if ($timeActivity) {
+            $unactiveTaskQuery->where('id', '!=', $timeActivity->task_id);
+        }
+
+        return $unactiveTaskQuery->get();
+    }
+
+    /**
+     * is status $redmineStatusId inside ignore array $ignoreStatuses
+     *
+     * @param string $redmineStatusId
+     * @param array|null $ignoreStatuses
+     *
+     * @return boolean
+     */
+    protected function isIgnoreStatus(string $redmineStatusId, $ignoreStatuses)
+    {
+        if (!$redmineStatusId) {
+            return false;
+        }
+
+        if (!is_array($ignoreStatuses)) {
+            return false;
+        }
+
+        return in_array($redmineStatusId, $ignoreStatuses);
+    }
+
+    /**
+     * get last user time activity
+     *
+     * @param string $userId
+     *
+     * @return TimeActivity|null
+     */
+    protected function userTimeActivity(string $userId, $timeout)
+    {
+
+        $query = TimeActivity::where('user_id', $userId);
+
+        if ($timeout) {
+            $onlineTimestamp = time() /* now */ - $timeout; // timestamp when task counting as in progress
+            $onlineDatetime = date('Y-m-d H:i:s', $onlineTimestamp);
+
+            $query->where('last_time_activity', '>', $onlineDatetime);
+        }
+
+        return $query->first();
     }
 
     /**
@@ -229,6 +344,14 @@ class SynchronizeTasks extends Command
                         $task->$key = $value;
                         $is_changed = true;
                     }
+                }
+
+                $storedStatusId = $this->taskRepo->getRedmineStatusId($task->id);
+                $redmineStatusId = $taskFromRedmine['status']['id'];
+
+                if ($redmineStatusId != $storedStatusId) {
+                    $this->taskRepo->setRedmineStatusId($task->id, $redmineStatusId);
+                    $is_changed = true;
                 }
 
                 if ($is_changed) {

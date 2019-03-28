@@ -32,6 +32,7 @@ export interface UserData {
    redmine_sync?: number;
    redmine_active_status?: number;
    redmine_deactive_status?: number;
+   redmine_online_timeout?: number;
    redmine_ignore_statuses?: number[];
    attached_users?: User[];
 }
@@ -64,6 +65,7 @@ export class User extends Item {
     public role_id: number;
     public redmine_active_status: number;
     public redmine_deactive_status: number;
+    public redmine_online_timeout: number;
     public redmine_ignore_statuses: number[] = [];
     public created_at?: string;
     public updated_at?: string;

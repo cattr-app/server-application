@@ -13,6 +13,8 @@ import { UsersService } from '../../users/users.service';
 import { RolesService } from '../../roles/roles.service';
 import { ProjectsService } from '../../projects/projects.service';
 import { AllowedActionsService } from '../../roles/allowed-actions.service';
+import { RedmineStatus } from '../../../models/redmine-status.model';
+import { RedmineService } from '../../users/redmine.service';
 
 
 type UserWithProjects = User & { projects?: Project[] };
@@ -32,6 +34,8 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
     roles: Role[] = [];
     differProjects: IterableDiffer<Project>;
     dualListFormat: any = DualListComponent.DEFAULT_FORMAT;
+    redmineStatuses: RedmineStatus[] = [];
+    redmineIgnoreStatuses: boolean[] = [];
 
 
     constructor(
@@ -40,6 +44,7 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
         protected projectService: ProjectsService,
         protected roleService: RolesService,
         protected cdr: ChangeDetectorRef,
+        protected redmineService: RedmineService,
         userService: UsersService,
         activatedRoute: ActivatedRoute,
         router: Router,
@@ -63,12 +68,23 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
         this.itemService.getItem(this.id, this.setItem.bind(this), { 'with': 'projects' });
         this.roleService.getItems(this.setRoles.bind(this));
         this.projectService.getItems(this.setProjects.bind(this));
+        this.redmineService.getStatuses(this.setRedmineStatuses.bind(this));
         this.cdr.detectChanges();
     }
 
+    setRedmineStatuses(redmineStatuses) {
+        this.redmineStatuses = redmineStatuses;
+    }
 
     setItem(result) {
         this.item = result;
+
+        this.redmineIgnoreStatuses = [];
+
+        for (let status of this.item.redmine_ignore_statuses) {
+            this.redmineIgnoreStatuses[status] = true;
+        }
+
         this.userProjects = this.item.projects;
         this.differProjects.diff(this.userProjects);
     }
@@ -83,6 +99,19 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
 
 
     prepareData() {
+
+        let statuses: number[] = [];
+
+
+        for (let status_id in this.redmineIgnoreStatuses) {
+            if (this.redmineIgnoreStatuses[status_id]) {
+                statuses.push(Number(status_id));
+            }
+        }
+
+        this.item.redmine_ignore_statuses = statuses;
+
+
         return {
             'full_name': this.item.full_name,
             'first_name': this.item.first_name,
@@ -94,9 +123,13 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
             'manual_time': this.item.manual_time,
             'screenshots_interval': this.item.screenshots_interval,
             "computer_time_popup": this.item.computer_time_popup,
-            "redmine_sync": this.item.redmine_sync,
             'timezone': this.item.timezone,
             'password': this.item.password,
+            'redmine_sync': this.item.redmine_sync,
+            'redmine_active_status': this.item.redmine_active_status,
+            'redmine_deactive_status': this.item.redmine_deactive_status,
+            'redmine_online_timeout': this.item.redmine_online_timeout,
+            'redmine_ignore_statuses': statuses,
         };
     }
 
