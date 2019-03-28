@@ -18,6 +18,8 @@ interface TaskData {
   user_id: number;
   task_name: string;
   duration: number;
+  dates: { date: string, duration: number }[];
+  expanded?: boolean;
 };
 
 interface UserData {
@@ -132,6 +134,11 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
         // Add data for view to the response.
         report = report.map(project => {
           project.users = project.users.map(user => {
+            user.tasks = user.tasks.map(task => {
+              task.dates = [];
+              task.expanded = false;
+              return task;
+            });
             user.expanded = false;
             return user;
           });
@@ -144,19 +151,48 @@ export class ProjectsreportComponent implements OnInit, AfterViewInit {
     });
   }
 
+  fetchTaskDates({
+    uid,
+    tid,
+    start,
+    end,
+  }: {
+      uid: number,
+      tid: number,
+      start: string,
+      end: string,
+    }) {
+    return this.projectReportService.getTaskDates(uid, tid, start, end);
+  }
+
+  async expandTask(task: TaskData) {
+    task.expanded = !task.expanded;
+
+    if (task.expanded && !task.dates.length) {
+      const dates = await this.fetchTaskDates({
+        uid: task.user_id,
+        tid: task.id,
+        start: this.dateRangeSelector.start.format(this.formatDate),
+        end: this.dateRangeSelector.end.format(this.formatDate),
+      });
+
+      task.dates = dates;
+    }
+  }
+
   get isManager() {
     return this.allowedAction.can('project-report/manager_access');
   }
 
   formatDurationString(time: number) {
-    const duration = moment.duration(time, 'seconds');
+    const duration = moment.duration(+time, 'seconds');
     const hours = Math.floor(duration.asHours());
     const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
     return `${hours}h ${minutes}m`;
   }
 
   formatDurationStringCSV(time: number) {
-    const duration = moment.duration(time, 'seconds');
+    const duration = moment.duration(+time, 'seconds');
     const hours = Math.floor(duration.asHours());
     const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
     const seconds = Math.floor(duration.asSeconds()) - 60 * 60 * hours - 60 * minutes;

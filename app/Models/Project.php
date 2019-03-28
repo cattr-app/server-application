@@ -20,6 +20,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ * @property bool $important
  *
  * @property User $users
  * @property Task[] $tasks
@@ -37,7 +38,12 @@ class Project extends Model
     /**
      * @var array
      */
-    protected $fillable = ['company_id', 'name', 'description'];
+    protected $fillable = [
+        'company_id',
+        'name',
+        'description',
+        'important',
+    ];
 
     /**
      * Override parent boot and Call deleting event

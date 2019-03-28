@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ * @property bool $important
  *
  * @property TimeInterval $timeInterval
  */
@@ -34,7 +35,12 @@ class Screenshot extends Model
     /**
      * @var array
      */
-    protected $fillable = ['time_interval_id', 'path', 'thumbnail_path'];
+    protected $fillable = [
+        'time_interval_id',
+        'path',
+        'thumbnail_path',
+        'important',
+    ];
 
     /**
      * @return BelongsTo

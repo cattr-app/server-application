@@ -22,6 +22,7 @@ class QueryHelper
      */
     public function apply($query, array $filter = [], $model, $first = true)
     {
+
         $table = $model->getTable();
         $relations = [];
 
@@ -102,6 +103,9 @@ class QueryHelper
 
                     if (\is_array($value) && $operator === '=') {
                         $query->whereIn($key, $value);
+                    } elseif($operator == "in") {
+                        $inArgs = \is_array($value) ? $value : [$value];
+                        $query->whereIn($key, $inArgs);
                     } else {
                         $query->where($key, $operator, $value);
                     }

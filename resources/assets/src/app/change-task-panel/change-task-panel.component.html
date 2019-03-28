@@ -19,7 +19,8 @@
         Change project / task
       </button>
 
-      <p-autoComplete class="change-task-panel__search" [(ngModel)]="search"
+      <p-autoComplete *ngIf="showSearch" class="change-task-panel__search"
+        [(ngModel)]="search"
         [suggestions]="searchSuggested" field="title"
         (completeMethod)="onSearch($event)"
         (onKeyUp)="onSearchKeyUp($event)"

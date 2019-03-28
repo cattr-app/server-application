@@ -106,6 +106,7 @@ Route::group([
     $router->post('/time-intervals/edit', 'Api\v1\TimeIntervalController@edit');
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
+    $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
 
     //Time routes
     $router->any('/time/total', 'Api\v1\TimeController@total');
@@ -129,9 +130,9 @@ Route::group([
 
 
     // Statistic routes
-      $router->post('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
-      $router->post('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
-      $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
-      $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
-
+    $router->post('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
+    $router->post('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
+    $router->post('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
+    $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
+    $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
 });

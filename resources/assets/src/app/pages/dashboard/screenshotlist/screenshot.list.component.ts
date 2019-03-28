@@ -50,7 +50,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         protected timeIntervalsService: TimeIntervalsService,
         protected projectService: ProjectsService,
         protected taskService: TasksService,
-        differs: KeyValueDiffers,
+        protected differs: KeyValueDiffers,
         protected modalService: BsModalService,
     ) {
         this.selectedDiffer = differs.find(this.selected).create();

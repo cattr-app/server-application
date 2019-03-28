@@ -26,7 +26,8 @@ export class ScreenshotsEditComponent extends ItemsEditComponent implements OnIn
     prepareData() {
         return {
             'time_interval_id': this.item.time_interval_id,
-            'path': this.item.path
+            'path': this.item.path,
+            'important': this.item.important,
         }
     }
 }

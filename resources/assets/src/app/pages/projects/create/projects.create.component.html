@@ -24,12 +24,30 @@
                                     <input type="text" class="form-control" name="project-name" [(ngModel)]="item.name">
                                 </div>
                             </div>
+
                             <div class="form-group row">
                                 <label class="col-md-2" translate>field.description</label>
                                 <div class="col-md-10">
                                     <textarea class="form-control" rows="5" name="project-description" [(ngModel)]="item.description"></textarea>
                                 </div>
                             </div>
+
+                            <div class="form-group row">
+                                <label class="col-md-2" translate>
+                                    <abbr title="{{ 'field.important-title' | translate }}"
+                                        translate>field.important</abbr>
+                                </label>
+                                <div class="col-md-10">
+                                    <input
+                                        type="checkbox"
+                                        name="important"
+                                        [(ngModel)]="item.important"
+                                        #important="ngModel"
+                                        ng-true-value="1"
+                                        ng-false-value="0">
+                                </div>
+                            </div>
+
                             <button type="submit" class="btn btn-primary" translate>control.create</button>
                         </form>
                     </div>

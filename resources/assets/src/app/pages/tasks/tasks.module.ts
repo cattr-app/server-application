@@ -19,6 +19,7 @@ import {SharedModule} from '../../shared.module';
 import {TranslateModule} from '@ngx-translate/core';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 import { LoadingModule } from 'ngx-loading';
+import { NgxChartsModule } from '@swimlane/ngx-charts';
 
 @NgModule({
     imports: [
@@ -32,6 +33,7 @@ import { LoadingModule } from 'ngx-loading';
         TranslateModule,
         AccordionModule.forRoot(),
         LoadingModule,
+        NgxChartsModule,
     ],
     declarations: [
         TasksCreateComponent,

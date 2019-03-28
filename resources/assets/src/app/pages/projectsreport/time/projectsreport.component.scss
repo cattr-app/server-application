@@ -46,13 +46,21 @@
         width: 100%;
     }
 
-    &__user {
+    &__user,
+    &__task {
         cursor: pointer;
     }
 
     &__user-name {
         padding-left: 2em !important;
+    }
 
+    &__task-name {
+        padding-left: 4em !important;
+    }
+
+    &__user-name,
+    &__task-name {
         &::before {
             content: '▶';
             vertical-align: top;
@@ -67,19 +75,26 @@
         }
     }
 
-    &__task-name {
-        padding-left: 4em !important;
+    &__date-date {
+        width: 100px;
     }
 
     &__project-time,
     &__user-time,
-    &__task-time {
+    &__task-time,
+    &__date-time {
         width: 100px;
         text-align: right;
     }
 
+    &__date-time {
+        padding-right: 32px !important;
+    }
+
     &__task-name,
-    &__task-time {
+    &__task-time,
+    &__date-date,
+    &__date-time {
         font-size: .8em;
     }
 

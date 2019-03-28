@@ -51,7 +51,7 @@
                                         <tr *ngIf="item.user">
                                             <th translate>field.user</th>
                                             <td>
-                                                <a href="/users/show/{{ item.user.id }}">
+                                                <a href="/users/show/{{ item.user_id }}">
                                                     {{ item.user.full_name }}
                                                 </a>
                                             </td>
@@ -111,18 +111,79 @@
                             </div>
                         </div>
 
+                        <div class="row activity">
+                            <div class="col-sm-12">
+                                <h4 class="activity__title" [hidden]="!graph.length">Activity</h4>
+                                <div class="activity__graph-wrapper" #graphWrapper>
+                                    <ngx-charts-bar-vertical-stacked
+                                        [results]="graph"
+                                        [view]="graphSize"
+                                        [scheme]="colorScheme"
+                                        [gradient]="false"
+                                        [xAxis]="true"
+                                        [yAxis]="true"
+                                        [legend]="false"
+                                        [showXAxisLabel]="true"
+                                        [showYAxisLabel]="true"
+                                        [xAxisLabel]="'Date'"
+                                        [yAxisLabel]="'Time'"
+                                        [yAxisTickFormatting]="formatDurationString"
+                                        [hidden]="!graph.length">
+                                        <ng-template #tooltipTemplate let-model="model">
+                                            <p class="activity__tooltip-text">{{ model.name }}</p>
+                                            <p class="activity__tooltip-text">{{ formatDurationString(model.value) }}</p>
+                                        </ng-template>
+                                    </ngx-charts-bar-vertical-stacked>
+                                </div>
+                            </div>
+                        </div>
+
                         <accordion>
                             <accordion-group #accordionGroup class="user" *ngFor="let userInfo of users">
                                 <div accordion-heading>
-                                    <span class="user__name">{{ userInfo.user.full_name }}</span>
+                                    <span class="user__name">{{ userInfo.user?.full_name }}</span>
                                     <span class="user__time">{{ formatDurationString(userInfo.time) }}</span>
                                 </div>
 
-                                <screenshot-list [autoload]="accordionGroup.isOpen"
-                                    [showUser]="false" [showProject]="false" [showTask]="false"
-                                    [user_ids]="[userInfo.user.id]" [task_ids]="[item.id]"></screenshot-list>
+                                <table class="screenshots table">
+                                    <tbody>
+                                        <ng-container *ngFor="let date of objectKeys(userInfo.perDate)">
+                                            <tr class="screenshots__group"
+                                                (click)="userInfo.perDate[date].expanded = !userInfo.perDate[date].expanded">
+                                                <th scope="row" class="screenshots__date"
+                                                    [class.screenshots__date--expanded]="userInfo.perDate[date].expanded">
+                                                    {{ userInfo.perDate[date].formattedDate }}
+                                                </th>
+
+                                                <td class="screenshots__time">{{ formatDurationString(userInfo.perDate[date].time) }}</td>
+                                            </tr>
+
+                                            <tr [hidden]="!userInfo.perDate[date].expanded">
+                                                <td colspan="2">
+                                                    <screenshot-list #screenshotLists
+                                                        [min_date]="date" [max_date]="date"
+                                                        [showUser]="false" [showProject]="false"
+                                                        [showSelection]="canEdit(userInfo)"
+                                                        [showTask]="false" [date_output_format]="'HH:mm:ss'"
+                                                        [user_ids]="[userInfo.user_id]" [task_ids]="[item.id]"
+                                                        [initialLoad]="false" [autoload]="userInfo.perDate[date].expanded"
+                                                        (onSelectionChanged)="onSelectionChanged(date, $event)">
+                                                    </screenshot-list>
+                                                </td>
+                                            </tr>
+                                        </ng-container>
+                                    </tbody>
+                                </table>
                             </accordion-group>
                         </accordion>
+
+                        <change-task-panel
+                            *ngIf="selectedIntervals.length"
+                            [timeIntervals]="selectedIntervals"
+                            [showSearch]="false"
+                            (onIntervalsDeleted)="reload()"
+                            (onIntervalsChanged)="reload()">
+                        </change-task-panel>
                     </div>
                 </div>
             </div>

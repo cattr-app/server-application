@@ -40,14 +40,17 @@ export class IntegrationComponent {
     constructor(
         private api: ApiService,
     ) {
-
-        api.getSettings([], result => {
-            this.redmineUrl = result.redmine_url;
-            this.redmineApiKey = result.redmine_api_key;
-            this.redmineStatuses = result.redmine_statuses;
-            this.redminePriorities = result.redmine_priorities;
-            this.internalPriorities = result.internal_priorities;
-        });
+        try {
+            api.getSettings([], result => {
+                this.redmineUrl = result.redmine_url;
+                this.redmineApiKey = result.redmine_api_key;
+                this.redmineStatuses = result.redmine_statuses;
+                this.redminePriorities = result.redmine_priorities;
+                this.internalPriorities = result.internal_priorities;
+            });
+        } catch(err) {
+            console.log(err)
+        }
     }
 
     onSubmit() {

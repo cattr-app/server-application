@@ -35,6 +35,7 @@ export interface UserData {
    redmine_online_timeout?: number;
    redmine_ignore_statuses?: number[];
    attached_users?: User[];
+   important?: boolean;
 }
 
 export class User extends Item {
@@ -72,6 +73,7 @@ export class User extends Item {
     public deleted_at?: string;
     public redmine_sync?: number;
     public attached_users?: User[];
+    public important?: boolean;
 
     constructor(data?: UserData) {
         super();

@@ -162,7 +162,8 @@ class RoleSeeder extends Seeder
                 'show'
             ],
             'roles' => [
-                'allowed-rules'
+                'list',
+                'allowed-rules',
             ],
             'screenshots' => [
                 'dashboard',
@@ -205,6 +206,7 @@ class RoleSeeder extends Seeder
                 'bulk-edit',
                 'relations',
                 'show',
+                'manager_access',
             ]
         ];
 

@@ -83,6 +83,7 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
             'redmine_deactive_status': this.item.redmine_deactive_status,
             'redmine_online_timeout': this.item.redmine_online_timeout,
             'redmine_ignore_statuses': statuses,
+            'important': this.item.important,
         };
     }
 

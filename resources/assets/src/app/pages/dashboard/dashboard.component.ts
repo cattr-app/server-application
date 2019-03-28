@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild, AfterViewInit} from '@angular/core';
+import {Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef} from '@angular/core';
 import { TabsetComponent, TabDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../../api/api.service';
@@ -7,10 +7,13 @@ import { AllowedActionsService } from '../roles/allowed-actions.service';
 import { TimeInterval } from '../../models/timeinterval.model';
 import { Project } from '../../models/project.model';
 import { Task } from '../../models/task.model';
+import { User } from '../../models/user.model';
 
 import { TaskListComponent } from './tasklist/tasks.list.component';
 import { ScreenshotListComponent } from './screenshotlist/screenshot.list.component';
+import { UserSelectorComponent } from '../../user-selector/user-selector.component';
 import { StatisticTimeComponent } from '../statistic/time/statistic.time.component';
+import { UsersService } from '../users/users.service';
 
 @Component({
     selector: 'app-dashboard',
@@ -20,21 +23,34 @@ import { StatisticTimeComponent } from '../statistic/time/statistic.time.compone
 export class DashboardComponent implements OnInit, AfterViewInit {
     @ViewChild('tabs') tabs: TabsetComponent;
     @ViewChild('taskList') taskList: TaskListComponent;
+    @ViewChild('tabOwn', {read: TabDirective}) tabOwn: TabDirective;
+    @ViewChild('tabTeam', {read: TabDirective}) tabTeam: TabDirective;
     @ViewChild('screenshotList') screenshotList: ScreenshotListComponent;
-    @ViewChild('statistic') statistic: StatisticTimeComponent;
+    @ViewChild('userSelect') userSelect: UserSelectorComponent;
+    @ViewChild('userStatistic') userStatistic: StatisticTimeComponent;
+    @ViewChild('teamStatistic') teamStatistic: StatisticTimeComponent;
 
     userIsManager: boolean = false;
-    selectedTab: string = '';
+    selectedTab: TabDirective = null;
     selectedIntervals: TimeInterval[] = [];
     taskFilter: string|Project|Task = '';
     canManageIntervals: boolean = false;
+    currentUser: User = null;
+    selectedUsers: User[] = [];
 
     constructor(
         protected api: ApiService,
         protected allowedAction: AllowedActionsService,
+        protected cdr: ChangeDetectorRef,
+        protected userService: UsersService,
     ) { }
 
     ngOnInit() {
+        const user = this.api.getUser();
+        this.userService.getItem(user.id, user => {
+            this.currentUser = user;
+        });
+
         this.allowedUpdated();
         let allowedCallback = this.allowedUpdated.bind(this);
         this.allowedAction.subscribeOnUpdate(allowedCallback);
@@ -43,32 +59,27 @@ export class DashboardComponent implements OnInit, AfterViewInit {
     allowedUpdated() {
         this.userIsManager = this.allowedAction.can('dashboard/manager_access');
         this.canManageIntervals = this.allowedAction.can('time-intervals/manager_access');
+
+        setTimeout(() => {
+            if (this.userIsManager && this.tabTeam) {
+                this.tabTeam.active = true;
+            }
+        });
     }
 
     ngAfterViewInit() {
-        if (this.userIsManager) {
-            const tabHeading = localStorage.getItem('dashboard-tab');
-            if (tabHeading !== null) {
-                const index = this.tabs.tabs.findIndex(tab => tab.heading === tabHeading);
-                if (index !== -1) {
-                    setTimeout(() => {
-                        if (typeof this.tabs !== 'undefined') {
-                            this.selectedTab = tabHeading;
-                            this.tabs.tabs[index].active = true;
-                        }
-                    });
-                }
-            }
+        if (this.userIsManager && this.tabTeam) {
+            this.tabTeam.active = true;
         }
+
+        this.cdr.detectChanges();
     }
 
     changeTab(tab: TabDirective) {
         if (tab.heading !== undefined) {
-            this.selectedTab = tab.heading;
+            this.selectedTab = tab;
             this.selectedIntervals = [];
             this.reload();
-
-            localStorage.setItem('dashboard-tab', this.selectedTab);
         }
     }
 
@@ -82,8 +93,8 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.taskList.reload();
         this.screenshotList.reload();
 
-        if (this.statistic) {
-            this.statistic.reload();
+        if (this.teamStatistic) {
+            this.teamStatistic.update();
         }
 
         this.filter('');
@@ -94,8 +105,12 @@ export class DashboardComponent implements OnInit, AfterViewInit {
         this.taskList.filter(filter);
         this.screenshotList.filter(filter);
 
-        if (this.statistic) {
-            this.statistic.filter(filter);
+        if (this.teamStatistic) {
+            this.teamStatistic.filter(filter);
         }
+    }
+
+    userFilter(user: User) {
+        return !!user.active;
     }
 }

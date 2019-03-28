@@ -250,13 +250,13 @@ class TimeController extends ItemController
     }
 
     /**
-     * Display the Tasks and its total time.
+     * Display the Tasks and theirs total time.
      *
      * @api {POST|GET} /api/v1/time/tasks Tasks
      * @apiParamExample {json} Request-Example:
      *  {
      *      "user_id":        1,
-     *      "task_id":        [">", 1],
+     *      "task_id":        1 OR [1, 2, n] (multiple choice can be only achieved with POST),
      *      "project_id":     2,
      *      "start_at":       "2005-01-01 00:00:00",
      *      "end_at":         "2019-01-01 00:00:00",
@@ -302,6 +302,7 @@ class TimeController extends ItemController
         $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
         $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
         $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
+        $request->get('task_id') ? $filters['task_id'] = ['in', $request->get('task_id')] : False;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),

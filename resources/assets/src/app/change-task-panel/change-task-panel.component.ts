@@ -1,13 +1,13 @@
 import { Component, ViewChild, OnInit, DoCheck, Output, EventEmitter, TemplateRef, Input, IterableDiffer, IterableDiffers } from '@angular/core';
 
-import { Task } from '../../../models/task.model';
-import { Project } from '../../../models/project.model';
-import { TimeInterval } from '../../../models/timeinterval.model';
+import { Task } from '../models/task.model';
+import { Project } from '../models/project.model';
+import { TimeInterval } from '../models/timeinterval.model';
 
-import { ApiService } from '../../../api/api.service';
-import { TimeIntervalsService } from '../../../pages/timeintervals/timeintervals.service';
-import { TasksService } from '../../../pages/tasks/tasks.service';
-import { ProjectsService } from '../../../pages/projects/projects.service';
+import { ApiService } from '../api/api.service';
+import { TimeIntervalsService } from '../pages/timeintervals/timeintervals.service';
+import { TasksService } from '../pages/tasks/tasks.service';
+import { ProjectsService } from '../pages/projects/projects.service';
 
 import { BsModalService, BsModalRef } from 'ngx-bootstrap';
 import * as moment from 'moment';
@@ -21,6 +21,8 @@ type SelectItem = (Project | Task) & { title: string };
 })
 export class ChangeTaskPanelComponent implements OnInit, DoCheck {
     @ViewChild('changeTaskModal') changeTaskModal: TemplateRef<any>;
+
+    @Input() showSearch: boolean = true;
 
     @Input() timeIntervals: TimeInterval[] = [];
 
@@ -64,7 +66,7 @@ export class ChangeTaskPanelComponent implements OnInit, DoCheck {
         protected timeIntervalsService: TimeIntervalsService,
         protected projectService: ProjectsService,
         protected taskService: TasksService,
-        differs: IterableDiffers,
+        protected differs: IterableDiffers,
         protected modalService: BsModalService,
     ) {
         this.differ = differs.find(this.timeIntervals).create();
@@ -172,6 +174,7 @@ export class ChangeTaskPanelComponent implements OnInit, DoCheck {
             'active': this.newTask.active,
             'user_id': this.newTask.user_id,
             'assigned_by': this.newTask.assigned_by,
+            'priority_id': 2,
         }, result => {
             const newTaskId = +result.res.id;
 

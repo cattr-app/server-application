@@ -1,6 +1,10 @@
 <div class="screenshots-row row" *ngFor="let group of itemsChunked; trackBy: groupTrackFn">
     <div class="screenshot-wrapper col-xs-6 col-sm-4 col-md-3 col-lg-2" *ngFor="let screenshot of group; trackBy: screenshotTrackFn">
         <div class="card">
+            <input type="checkbox" class="select-image" *ngIf="showSelection && screenshot.id"
+                (change)="selected[screenshot.id] = !selected[screenshot.id]"
+                [checked]="selected[screenshot.id]" />
+
             <app-image class="screenshot card-img-top"
                 [src]="screenshot.thumbnail_path ? screenshot.thumbnail_path : (screenshot.path ? screenshot.path : 'uploads/none.png')"
                 (click)="showModal(screenshot)">
@@ -9,7 +13,7 @@
             <div class="card-body">
                 <p class="card-text">
                     <span class="card-text-line" *ngIf="showDate">
-                        {{ formatTime(screenshot.time_interval?.start_at) }}
+                        {{ formatDate(screenshot.time_interval?.start_at) }}
                     </span>
 
                     <span class="card-text-line" *ngIf="showUser">
@@ -29,10 +33,8 @@
     </div>
 </div>
 
-<div *ngIf="autoload" class="loading" #loading>
-    <div *ngIf="countFail <= 3 && !isAllLoaded">
-        <ngx-loading [show]="isLoading" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
-    </div>
+<div *ngIf="autoload" [hidden]="countFail > 3 || isAllLoaded" class="loading" #loading>
+    <ngx-loading [show]="true" [config]="{backdropBackgroundColour: 'transparent', primaryColour: '#ddd', secondaryColour: '#ddd', tertiaryColour: '#ddd'}"></ngx-loading>
 </div>
 
 <div *ngIf="!autoload" class="text-center" #loading>
@@ -63,11 +65,19 @@
                     </div>
                 </div>
 
-                <div class="row" *ngIf="modalScreenshot.time_interval?.user_id === user.id || can('/screenshots/remove_related')">
+                <div class="row">
                     <div class="col-md-12 modal-screenshot-buttons">
-                        <button class="btn btn-danger btn-sm" (click)="delete(modalScreenshot)">
+                        <a class="btn btn-primary btn-sm" *ngIf="can('/screenshots/edit')"
+                            [routerLink]="['/screenshots/edit', modalScreenshot.id]">
                             <i aria-hidden="true" class="fa fa-pencil-square-o"></i>
-                            Delete
+                            <span translate>control.edit</span>
+                        </a>
+
+                        <button class="btn btn-danger btn-sm"
+                            *ngIf="modalScreenshot.time_interval?.user_id === user.id || can('/screenshots/remove_related')"
+                            (click)="delete(modalScreenshot)">
+                            <i aria-hidden="true" class="fa fa-pencil-square-o"></i>
+                            <span translate>control.delete</span>
                         </button>
                     </div>
                 </div>
@@ -83,7 +93,11 @@
 
                                 <tr *ngIf="modalScreenshot.time_interval">
                                     <th translate>field.task</th>
-                                    <td>{{ modalScreenshot.time_interval.task.task_name }}</td>
+                                    <td>
+                                        <a [routerLink]="['/tasks/show', modalScreenshot.time_interval.task.id]">
+                                            {{ modalScreenshot.time_interval.task.task_name }}
+                                        </a>
+                                    </td>
                                 </tr>
 
                                 <tr>

@@ -43,7 +43,7 @@ class ProjectReportController extends Controller
             ->whereIn('user_id', $uids)
             ->whereIn('project_id', $pids)
             ->where('date', '>=', $start_at)
-            ->where('date', '<', $end_at)
+            ->where('date', '<=', $end_at)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
             ->get();
 
@@ -105,20 +105,24 @@ class ProjectReportController extends Controller
     {
         $start_at = is_null($request->input('start_at')) ? '' : $request->start_at;
         $end_at = is_null($request->input('end_at')) ? '' : $request->end_at;
-
+        $uids = $request->uids;
 
         $days = TimeDuration::query();
-
 
         if ($start_at) {
             $timestamp = strtotime($start_at);
             $date = date('Y-m-d', $timestamp);
             $days->where('date', '>=', $date);
         }
+
         if ($end_at) {
             $timestamp = strtotime($end_at);
             $date = date('Y-m-d', $timestamp);
             $days->where('date', '<=', $date);
+        }
+
+        if (!empty($uids)) {
+            $days->whereIn('user_id', $uids);
         }
 
         return response()->json($days->get());
@@ -167,5 +171,25 @@ class ProjectReportController extends Controller
         $projects = Project::query()->whereIn('id', $project_ids)->get(['id', 'name']);
 
         return response()->json($projects);
+    }
+
+    /**
+     * Returns durations per date for a task.
+     */
+    public function task($id, Request $request)
+    {
+        $uid = $request->uid;
+        $start_at = $request->input('start_at') == null ? '' : $request->start_at;
+        $end_at = $request->input('end_at') == null ? '' : $request->end_at;
+
+        $report = DB::table('project_report')
+            ->select('date', DB::raw('CAST(duration AS UNSIGNED) AS duration'))
+            ->where('task_id', $id)
+            ->where('user_id', $uid)
+            ->where('date', '>=', $start_at)
+            ->where('date', '<', $end_at)
+            ->get(['date', 'duration']);
+
+        return response()->json($report);
     }
 }

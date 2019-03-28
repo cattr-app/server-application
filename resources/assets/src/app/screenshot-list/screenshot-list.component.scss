@@ -13,6 +13,7 @@
 }
 
 .screenshot {
+    position: relative;
     cursor: pointer;
 }
 
@@ -21,6 +22,10 @@
     flex-flow: row nowrap;
     justify-content: space-between;
     width: 100%;
+}
+
+.card {
+    position: relative;
 }
 
 .card-img-top {
@@ -32,9 +37,17 @@
     display: block;
 }
 
+.select-image {
+    position: absolute;
+    top: 0;
+    left: 0;
+    margin: 0 !important;
+    transform: translate(-50%, -50%);
+    z-index: 1;
+}
+
 .loading {
     width: 100%;
-    height: 16rem;
     margin: 10px 0;
     text-align: center;
     clear: both;
