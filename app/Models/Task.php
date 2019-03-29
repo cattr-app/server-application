@@ -19,7 +19,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property int $priority_id
  * @property string $task_name
  * @property string $description
- * @property bool $active
+ * @property int $active
  * @property string $url
  * @property string $created_at
  * @property string $updated_at

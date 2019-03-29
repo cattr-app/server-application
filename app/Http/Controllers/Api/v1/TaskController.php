@@ -94,7 +94,7 @@ class TaskController extends ItemController
      * @apiParam {String}   [task_name]   `QueryParam` Task Name
      * @apiParam {String}   [description] `QueryParam` Task Description
      * @apiParam {String}   [url]         `QueryParam` Task Url
-     * @apiParam {Boolean}  [active]                   Is Task active
+     * @apiParam {Integer}  [active]                   Is Task active. Available value: {0,1}
      * @apiParam {Integer}  [user_id]     `QueryParam` Task User
      * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
      * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
@@ -149,7 +149,7 @@ class TaskController extends ItemController
      * @apiParam {String}  [task_name]   Task Name
      * @apiParam {String}  [description] Task Description
      * @apiParam {String}  url           Task Url
-     * @apiParam {Boolean} [active]      Active/Inactive Task
+     * @apiParam {Integer} [active]      Active/Inactive Task. Available value: {0,1}
      * @apiParam {Integer} [user_id]     Task User
      * @apiParam {Integer} [assigned_by] User who assigned task
      *
@@ -193,7 +193,7 @@ class TaskController extends ItemController
      * @apiParam {String}   [task_name]   `QueryParam` Task Name
      * @apiParam {String}   [description] `QueryParam` Task Description
      * @apiParam {String}   [url]         `QueryParam` Task Url
-     * @apiParam {Boolean}  [active]                   Is Task active
+     * @apiParam {Integer}  [active]                   Is Task active. Available value: {0,1}
      * @apiParam {Integer}  [user_id]     `QueryParam` Task's User
      * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
      * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
@@ -249,7 +249,7 @@ class TaskController extends ItemController
      * @apiParam {String}   task_name   Task Name
      * @apiParam {String}   description Task Description
      * @apiParam {String}   [url]       Task Url
-     * @apiParam {Boolean}  active      Is Task active
+     * @apiParam {Integer}  active      Is Task active. Available value: {0,1}
      * @apiParam {Integer}  user_id     Task User
      * @apiParam {Integer}  assigned_by User who assigned task
      * @apiUse TaskRelations
@@ -313,7 +313,7 @@ class TaskController extends ItemController
      * @apiParam {String}   [task_name]   `QueryParam` Task Name
      * @apiParam {String}   [description] `QueryParam` Task Description
      * @apiParam {String}   [url]         `QueryParam` Task Url
-     * @apiParam {Boolean}  [active]                   Active/Inactive Task
+     * @apiParam {Integer}  [active]                   Active/Inactive Task. Available value: {0,1}
      * @apiParam {Integer}  [user_id]     `QueryParam` Task's User
      * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
      * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
