@@ -46,5 +46,111 @@
         </div>
     </div>
 
+
+
+
+
+
+
+
+
+
+
+    <div class="form-group row">
+        <label class="col-md-2" translate>field.redmine-sync</label>
+        <div class="col-md-10"
+            [class.has-error]="isDisplayError(redmine_sync_input)"
+            [class.has-success]="isDisplaySuccess(redmine_sync_input)">
+            <input
+                type="checkbox"
+                name="user-redmine-sync"
+                [(ngModel)]="redmine_sync"
+                #redmine_sync_input="ngModel"
+                ng-true-value="1"
+                ng-false-value="0">
+        </div>
+    </div>
+
+
+
+
+
+    <div class="form-group row">
+        <label class="col-md-2" translate>field.redmine-active-status</label>
+        <div class="col-md-10"
+            [class.has-error]="isDisplayError(redmine_active_status_select)"
+            [class.has-success]="isDisplaySuccess(redmine_active_status_select)">
+            <select class="form-control" name="redmine_active_status_select"
+                [(ngModel)]="redmine_active_status" #redmine_active_status_select="ngModel">
+                <option value=""></option>
+                <option *ngFor="let redmineStatus of redmineStatuses" [value]="redmineStatus.id">{{ redmineStatus.name }}</option>
+            </select>
+        </div>
+    </div>
+
+    <div class="form-group row">
+        <label class="col-md-2" translate>field.redmine-deactive-status</label>
+        <div class="col-md-10"
+            [class.has-error]="isDisplayError(redmine_deactive_status_select)"
+            [class.has-success]="isDisplaySuccess(redmine_deactive_status_select)">
+            <select class="form-control" name="redmine_deactive_status_select"
+                [(ngModel)]="redmine_deactive_status" #redmine_deactive_status_select="ngModel">
+                <option value=""></option>
+                <option *ngFor="let redmineStatus of redmineStatuses" [value]="redmineStatus.id">{{ redmineStatus.name }}</option>
+            </select>
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <label class="col-md-2" translate>field.redmine-ignore-statuses</label>
+        <div *ngFor="let redmineStatus of redmineStatuses"
+            class="col-md-1"
+            [class.has-error]="isDisplayError(redmine_ignore_statuses + redmineStatus.id)"
+            [class.has-success]="isDisplaySuccess(redmine_ignore_statuses + redmineStatus.id)">
+            <input
+                type="checkbox"
+                name="redmine-ignore-statuses-{{redmineStatus.id}}"
+                [(ngModel)]="redmineIgnoreStatuses[redmineStatus.id]"
+                #redmine_ignore_statuses{{redmineStatus.id}}="ngModel"
+                ng-true-value="1"
+                ng-false-value="0">
+            <span class="help-block" translate>{{ redmineStatus.name }}</span>
+        </div>
+    </div>
+
+
+    <div class="form-group row">
+        <label class="col-md-2" translate>field.redmine-online-timeout</label>
+        <div class="col-md-10"
+            [class.has-error]="isDisplayError(redmine_online_timeout_select)"
+            [class.has-success]="isDisplaySuccess(redmine_online_timeout_select)">
+            <select class="form-control" name="redmine_online_timeout_select"
+                [(ngModel)]="redmine_online_timeout" #redmine_online_timeout_select="ngModel">
+                <option value=""        translate [translateParams]="{kek: 'kukarek'}">field.redmine-unlimited</option>
+                <option value="600"     translate [translateParams]="{minutes: 10}">field.redmine-minutes</option>
+                <option value="900"     translate [translateParams]="{minutes: 15}">field.redmine-minutes</option>
+                <option value="1800"    translate [translateParams]="{minutes: 30}">field.redmine-minutes</option>
+                <option value="3600"    translate [translateParams]="{hours: 1}">field.redmine-hours</option>
+                <option value="7200"    translate [translateParams]="{hours: 2}">field.redmine-hours</option>
+                <option value="10800"   translate [translateParams]="{hours: 3}">field.redmine-hours</option>
+                <option value="18000"   translate [translateParams]="{hours: 5}">field.redmine-hours</option>
+                <option value="28800"   translate [translateParams]="{hours: 8}">field.redmine-hours</option>
+                <option value="86400"   translate [translateParams]="{hours: 24}">field.redmine-hours</option>
+            </select>
+        </div>
+    </div>
+
+
+
+
+
+
+
+
+
+
+
+
     <button type="submit" class="btn btn-primary" translate>control.save</button>
 </form>

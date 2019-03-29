@@ -4,6 +4,7 @@ import { Task } from '../../../models/task.model';
 import { Project } from '../../../models/project.model';
 import { Message } from 'primeng/components/common/api';
 import { ApiService } from '../../../api/api.service';
+import { NgModel } from '@angular/forms';
 
 
 interface RedmineStatus {
@@ -37,6 +38,15 @@ export class IntegrationComponent {
     internalPriorities: Priority[] = [];
     msgs: Message[] = [];
 
+    redmine_sync: boolean;
+    redmine_active_status: number;
+    redmine_deactive_status: number;
+    redmineIgnoreStatuses: number[] = [];
+    redmine_online_timeout: number;
+
+
+
+
     constructor(
         private api: ApiService,
     ) {
@@ -47,6 +57,7 @@ export class IntegrationComponent {
                 this.redmineStatuses = result.redmine_statuses;
                 this.redminePriorities = result.redmine_priorities;
                 this.internalPriorities = result.internal_priorities;
+                console.log(result);
             });
         } catch(err) {
             console.log(err)
@@ -66,5 +77,13 @@ export class IntegrationComponent {
                 detail: 'Settings have been updated',
             }];
         });
+    }
+
+    isDisplayError(model: NgModel) : boolean {
+        return model.invalid && (model.dirty || model.touched);
+    }
+
+    isDisplaySuccess(model: NgModel) : boolean {
+        return model.valid && (model.dirty || model.touched);
     }
 }
