@@ -44,7 +44,7 @@ class RedmineIntegrationController extends AbstractRedmineController
 
         return response()->json(
             $statuses,
-            200,
+            200
         );
     }
 
