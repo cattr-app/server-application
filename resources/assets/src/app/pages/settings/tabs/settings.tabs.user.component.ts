@@ -13,8 +13,6 @@ import { UsersService } from '../../users/users.service';
 import { RolesService } from '../../roles/roles.service';
 import { ProjectsService } from '../../projects/projects.service';
 import { AllowedActionsService } from '../../roles/allowed-actions.service';
-import { RedmineStatus } from '../../../models/redmine-status.model';
-import { RedmineService } from '../../users/redmine.service';
 
 
 type UserWithProjects = User & { projects?: Project[] };
@@ -34,7 +32,6 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
     roles: Role[] = [];
     differProjects: IterableDiffer<Project>;
     dualListFormat: any = DualListComponent.DEFAULT_FORMAT;
-    redmineStatuses: RedmineStatus[] = [];
     redmineIgnoreStatuses: boolean[] = [];
 
 
@@ -44,7 +41,6 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
         protected projectService: ProjectsService,
         protected roleService: RolesService,
         protected cdr: ChangeDetectorRef,
-        protected redmineService: RedmineService,
         userService: UsersService,
         activatedRoute: ActivatedRoute,
         router: Router,
@@ -68,12 +64,7 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
         this.itemService.getItem(this.id, this.setItem.bind(this), { 'with': 'projects' });
         this.roleService.getItems(this.setRoles.bind(this));
         this.projectService.getItems(this.setProjects.bind(this));
-        this.redmineService.getStatuses(this.setRedmineStatuses.bind(this));
         this.cdr.detectChanges();
-    }
-
-    setRedmineStatuses(redmineStatuses) {
-        this.redmineStatuses = redmineStatuses;
     }
 
     setItem(result) {
@@ -125,11 +116,6 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
             "computer_time_popup": this.item.computer_time_popup,
             'timezone': this.item.timezone,
             'password': this.item.password,
-            'redmine_sync': this.item.redmine_sync,
-            'redmine_active_status': this.item.redmine_active_status,
-            'redmine_deactive_status': this.item.redmine_deactive_status,
-            'redmine_online_timeout': this.item.redmine_online_timeout,
-            'redmine_ignore_statuses': statuses,
         };
     }
 

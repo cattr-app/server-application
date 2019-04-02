@@ -87,30 +87,6 @@ class IntegrationObserver
 
         $user = User::where('email', $json['res']->email)->first();
 
-        $userId = $user->id;
-
-
-        $sync = request()->input('redmine_sync');
-        $redmine_active_status = request()->input('redmine_active_status');
-        $redmine_deactive_status = request()->input('redmine_deactive_status');
-        $redmine_ignore_statuses = request()->input('redmine_ignore_statuses');
-        $redmine_online_timeout = request()->input('redmine_online_timeout');
-        $sync  = $sync ? 1 : 0;
-
-
-
-        $this->userRepo->setUserSendTime($userId, $sync);
-        $this->userRepo->setActiveStatusId($userId, $redmine_active_status);
-        $this->userRepo->setDeactiveStatusId($userId, $redmine_deactive_status);
-        $this->userRepo->setIgnoreStatuses($userId, $redmine_ignore_statuses);
-        $this->userRepo->setOnlineTimeout($userId, $redmine_online_timeout);
-
-
-        $json['res']->redmine_sync = $sync;
-        $json['res']->redmine_active_status = $redmine_active_status;
-        $json['res']->redmine_deactive_status = $redmine_deactive_status;
-        $json['res']->redmine_ignore_statuses = $redmine_ignore_statuses;
-        $json['res']->redmine_online_timeout = $redmine_online_timeout;
         return $json;
     }
 
@@ -123,11 +99,6 @@ class IntegrationObserver
      */
     public function userShow($user)
     {
-        $user->redmine_sync = $this->userRepo->isUserSendTime($user->id);
-        $user->redmine_active_status = $this->userRepo->getActiveStatusId($user->id);
-        $user->redmine_deactive_status = $this->userRepo->getDeactiveStatusId($user->id);
-        $user->redmine_ignore_statuses = $this->userRepo->getIgnoreStatuses($user->id);
-        $user->redmine_online_timeout = $this->userRepo->getOnlineTimeout($user->id);
         return $user;
     }
 
@@ -174,10 +145,6 @@ class IntegrationObserver
 
     public function rulesHook($rules)
     {
-        $rules['redmine'] = [
-            'statuses' => __('Redmine get avaliable statuses'),
-        ];
-
         return $rules;
     }
 

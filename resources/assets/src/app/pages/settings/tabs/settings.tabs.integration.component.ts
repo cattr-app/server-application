@@ -41,7 +41,7 @@ export class IntegrationComponent {
     redmine_sync: boolean;
     redmine_active_status: number;
     redmine_deactive_status: number;
-    redmineIgnoreStatuses: number[] = [];
+    redmineIgnoreStatuses: boolean[] = [];
     redmine_online_timeout: number;
 
 
@@ -57,6 +57,18 @@ export class IntegrationComponent {
                 this.redmineStatuses = result.redmine_statuses;
                 this.redminePriorities = result.redmine_priorities;
                 this.internalPriorities = result.internal_priorities;
+                this.redmine_active_status = result.redmine_active_status;
+                this.redmine_deactive_status = result.redmine_deactive_status;
+                this.redmine_online_timeout = result.redmine_online_timeout;
+                this.redmine_sync = result.redmine_sync;
+
+                this.redmineIgnoreStatuses = [];
+
+                for (let status of result.redmine_ignore_statuses) {
+                    this.redmineIgnoreStatuses[status] = true;
+                }
+
+
                 console.log(result);
             });
         } catch(err) {
@@ -65,11 +77,24 @@ export class IntegrationComponent {
     }
 
     onSubmit() {
+        let statuses: number[] = [];
+
+        for (let status_id in this.redmineIgnoreStatuses) {
+            if (this.redmineIgnoreStatuses[status_id]) {
+                statuses.push(Number(status_id));
+            }
+        }
+
         this.api.sendSettings({
             'redmine_url': this.redmineUrl,
             'redmine_key': this.redmineApiKey,
             'redmine_statuses': this.redmineStatuses,
             'redmine_priorities': this.redminePriorities,
+            'redmine_active_status': this.redmine_active_status,
+            'redmine_deactive_status': this.redmine_deactive_status,
+            'redmine_ignore_statuses': statuses,
+            'redmine_online_timeout': this.redmine_online_timeout,
+            'redmine_sync': this.redmine_sync,
         }, () => {
             this.msgs = [{
                 severity: 'success',

@@ -106,13 +106,13 @@
         <label class="col-md-2" translate>field.redmine-ignore-statuses</label>
         <div *ngFor="let redmineStatus of redmineStatuses"
             class="col-md-1"
-            [class.has-error]="isDisplayError(redmine_ignore_statuses + redmineStatus.id)"
-            [class.has-success]="isDisplaySuccess(redmine_ignore_statuses + redmineStatus.id)">
+            [class.has-error]="isDisplayError(redmine_ignore_statuses + redmineStatus.id + '_input')"
+            [class.has-success]="isDisplaySuccess(redmine_ignore_statuses + redmineStatus.id + '_input')">
             <input
                 type="checkbox"
                 name="redmine-ignore-statuses-{{redmineStatus.id}}"
                 [(ngModel)]="redmineIgnoreStatuses[redmineStatus.id]"
-                #redmine_ignore_statuses{{redmineStatus.id}}="ngModel"
+                #redmine_ignore_statuses{{redmineStatus.id}}_input="ngModel"
                 ng-true-value="1"
                 ng-false-value="0">
             <span class="help-block" translate>{{ redmineStatus.name }}</span>

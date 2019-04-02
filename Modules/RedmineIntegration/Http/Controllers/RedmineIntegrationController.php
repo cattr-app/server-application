@@ -32,23 +32,6 @@ class RedmineIntegrationController extends AbstractRedmineController
     }
 
 
-    /**
-     * get Redmine available task statuses
-     *
-     * @return JsonResponse
-     */
-    public function getStatuses(): JsonResponse
-    {
-        $userId = Auth::user()->id;
-        $statuses = $this->userRepo->getUserRedmineStatuses($userId);
-
-        return response()->json(
-            $statuses,
-            200
-        );
-    }
-
-
     public function initRedmineClient(int $userId): Redmine\Client
     {
         $client = new RedmineClient($userId);

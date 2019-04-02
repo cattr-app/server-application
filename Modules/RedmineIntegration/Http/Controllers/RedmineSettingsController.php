@@ -107,6 +107,12 @@ class RedmineSettingsController extends AbstractRedmineController
             ]
         );
 
+        $userRepository->setUserSendTime($user->id, $request->redmine_sync);
+        $userRepository->setActiveStatusId($user->id, $request->redmine_active_status);
+        $userRepository->setDeactiveStatusId($user->id, $request->redmine_deactive_status);
+        $userRepository->setIgnoreStatuses($user->id, $request->redmine_ignore_statuses);
+        $userRepository->setOnlineTimeout($user->id, $request->redmine_online_timeout);
+
         //If user hasn't a redmine id in our system => mark user as NEW
         $userRedmineId = $userRepository->getUserRedmineId($user->id);
 
@@ -138,6 +144,12 @@ class RedmineSettingsController extends AbstractRedmineController
             'redmine_statuses' => $userRepository->getUserRedmineStatuses($userId),
             'redmine_priorities' => $userRepository->getUserRedminePriorities($userId),
             'internal_priorities' => Priority::all(),
+
+            'redmine_sync' => $userRepository->isUserSendTime($userId),
+            'redmine_active_status' => $userRepository->getActiveStatusId($userId),
+            'redmine_deactive_status' => $userRepository->getDeactiveStatusId($userId),
+            'redmine_ignore_statuses' => $userRepository->getIgnoreStatuses($userId),
+            'redmine_online_timeout' => $userRepository->getOnlineTimeout($userId),
         ];
 
         return response()->json(
