@@ -41,7 +41,8 @@ export class IntegrationComponent {
     redmine_sync: boolean;
     redmine_active_status: number;
     redmine_deactive_status: number;
-    redmineIgnoreStatuses: boolean[] = [];
+    redmineActivateStatuses: boolean[] = [];
+    redmineDeactivateStatuses: boolean[] = [];
     redmine_online_timeout: number;
 
 
@@ -62,11 +63,8 @@ export class IntegrationComponent {
                 this.redmine_online_timeout = result.redmine_online_timeout;
                 this.redmine_sync = result.redmine_sync;
 
-                this.redmineIgnoreStatuses = [];
-
-                for (let status of result.redmine_ignore_statuses) {
-                    this.redmineIgnoreStatuses[status] = true;
-                }
+                this.redmineActivateStatuses = this.toInputCheckboxArray(result.redmine_activate_statuses);
+                this.redmineDeactivateStatuses = this.toInputCheckboxArray(result.redmine_deactivate_statuses);
 
 
                 console.log(result);
@@ -77,14 +75,6 @@ export class IntegrationComponent {
     }
 
     onSubmit() {
-        let statuses: number[] = [];
-
-        for (let status_id in this.redmineIgnoreStatuses) {
-            if (this.redmineIgnoreStatuses[status_id]) {
-                statuses.push(Number(status_id));
-            }
-        }
-
         this.api.sendSettings({
             'redmine_url': this.redmineUrl,
             'redmine_key': this.redmineApiKey,
@@ -92,7 +82,8 @@ export class IntegrationComponent {
             'redmine_priorities': this.redminePriorities,
             'redmine_active_status': this.redmine_active_status,
             'redmine_deactive_status': this.redmine_deactive_status,
-            'redmine_ignore_statuses': statuses,
+            'redmine_activate_statuses': this.fromInputCheckboxArray(this.redmineActivateStatuses),
+            'redmine_deactivate_statuses': this.fromInputCheckboxArray(this.redmineDeactivateStatuses),
             'redmine_online_timeout': this.redmine_online_timeout,
             'redmine_sync': this.redmine_sync,
         }, () => {
@@ -102,6 +93,28 @@ export class IntegrationComponent {
                 detail: 'Settings have been updated',
             }];
         });
+    }
+
+    protected toInputCheckboxArray(input) : boolean[] {
+        let ret: boolean[] = [];
+
+        for (let key of input) {
+            ret[key] = true;
+        }
+
+        return ret;
+    }
+
+    protected fromInputCheckboxArray(input): number[] {
+        let ret: number[] = [];
+
+        for (let id in input) {
+            if (input[id]) {
+                ret.push(Number(id));
+            }
+        }
+
+        return ret;
     }
 
     isDisplayError(model: NgModel) : boolean {

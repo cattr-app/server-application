@@ -32,9 +32,14 @@ class UserRepository
     public const DEACTIVE_STATUS_PROPERTY = 'REDMINE_DEACTIVE_STATUS_ID';
 
     /**
-     * user property name for select ignore status ids
+     * user property name for select activate status ids
      */
-    public const IGNORE_STATUS_PROPERTY = 'REDMINE_IGNORE_STATUSES';
+    public const ACTIVATE_STATUSES_PROPERTY = 'REDMINE_ACTIVATE_STATUSES';
+
+    /**
+     * user property name for select deactivate status ids
+     */
+    public const DEACTIVATE_STATUSES_PROPERTY = 'REDMINE_DEACTIVATE_STATUSES';
 
     /**
      * user property name for select online timeout
@@ -340,32 +345,61 @@ class UserRepository
     }
 
     /**
-     * get user task status ids which will not be changed after task syncronisation
+     * get user task status ids which will be set as active after task syncronisation
      * @param string $userId
      * @return string
      */
-    public function getIgnoreStatuses($userId)
+    public function getActivateStatuses($userId)
     {
-        $jsonStatuses = $this->getProperty($userId, static::IGNORE_STATUS_PROPERTY, '[]');
+        $jsonStatuses = $this->getProperty($userId, static::ACTIVATE_STATUSES_PROPERTY, '[]');
         return json_decode($jsonStatuses, 1);
     }
 
     /**
-     * set user task status ids which will not be changed after task syncronisation
+     * set user task status ids which will be set as active after task syncronisation
      *
      * @param string $userId
      * @param array $statuses
      *
      * @return string
      */
-    public function setIgnoreStatuses($userId,array $statuses)
+    public function setActivateStatuses($userId,array $statuses)
     {
         if (empty($statuses)) {
             $jsonStatuses = '';
         } else {
             $jsonStatuses = json_encode($statuses);
         }
-        return $this->setProperty($userId, static::IGNORE_STATUS_PROPERTY, $jsonStatuses);
+        return $this->setProperty($userId, static::ACTIVATE_STATUSES_PROPERTY, $jsonStatuses);
+    }
+
+    /**
+     * get user task status ids which will be set as inactive after task syncronisation
+     * @param string $userId
+     * @return string
+     */
+    public function getDeactivateStatuses($userId)
+    {
+        $jsonStatuses = $this->getProperty($userId, static::DEACTIVATE_STATUSES_PROPERTY, '[]');
+        return json_decode($jsonStatuses, 1);
+    }
+
+    /**
+     * set user task status ids which will be set as inactive after task syncronisation
+     *
+     * @param string $userId
+     * @param array $statuses
+     *
+     * @return string
+     */
+    public function setDeactivateStatuses($userId,array $statuses)
+    {
+        if (empty($statuses)) {
+            $jsonStatuses = '';
+        } else {
+            $jsonStatuses = json_encode($statuses);
+        }
+        return $this->setProperty($userId, static::DEACTIVATE_STATUSES_PROPERTY, $jsonStatuses);
     }
 
     /**

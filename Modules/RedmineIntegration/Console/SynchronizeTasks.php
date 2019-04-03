@@ -106,7 +106,8 @@ class SynchronizeTasks extends Command
         $client = $this->initRedmineClient($userId);
         $activeStatusId = $userRepo->getActiveStatusId($userId);
         $deactiveStatusId = $userRepo->getDeactiveStatusId($userId);
-        $ignoreStatuses = $userRepo->getIgnoreStatuses($userId);
+        $activateStatuses = $userRepo->getActivateStatuses($userId);
+        $deactivateStatuses = $userRepo->getDeactivateStatuses($userId);
         $timeout = $userRepo->getOnlineTimeout($userId);
         $timeActivity = $this->userTimeActivity($userId, $timeout);
         $unactiveTasks = $this->unactiveTasks($userId, $timeActivity);
@@ -116,9 +117,7 @@ class SynchronizeTasks extends Command
             $activeTaskId = $timeActivity->task_id;
             $activeIssueId = $taskRepo->getRedmineTaskId($activeTaskId);
             $currentStatusId = $taskRepo->getRedmineStatusId($activeTaskId);
-
-
-            if ($activeIssueId && !$this->isIgnoreStatus($currentStatusId, $ignoreStatuses)) {
+            if ($activeIssueId && $this->isInList($currentStatusId, $activateStatuses)) {
                 if ($currentStatusId != $activeStatusId) {
                     $client->issue->update($activeIssueId, ['status_id' => $activeStatusId]);
                     $taskRepo->setRedmineStatusId($activeTaskId, $activeStatusId);
@@ -130,7 +129,7 @@ class SynchronizeTasks extends Command
             foreach ($unactiveTasks as $task) { // is there any way to do it somehow else?
                 $currentStatusId = $taskRepo->getRedmineStatusId($task->id);
                 $issueId = $taskRepo->getRedmineTaskId($task->id);
-                if ($issueId && !$this->isIgnoreStatus($currentStatusId, $ignoreStatuses)) {
+                if ($issueId && $this->isInList($currentStatusId, $deactivateStatuses)) {
                     if ($currentStatusId != $deactiveStatusId) {
                         $client->issue->update($issueId, ['status_id' => $deactiveStatusId]);
                         $taskRepo->setRedmineStatusId($task->id, $deactiveStatusId);
@@ -163,24 +162,24 @@ class SynchronizeTasks extends Command
     }
 
     /**
-     * is status $redmineStatusId inside ignore array $ignoreStatuses
+     * is status $redmineStatusId inside array $statusesList
      *
      * @param string $redmineStatusId
-     * @param array|null $ignoreStatuses
+     * @param array|null $statusesList
      *
      * @return boolean
      */
-    protected function isIgnoreStatus(string $redmineStatusId, $ignoreStatuses)
+    protected function isInList(string $redmineStatusId, $statusesList)
     {
         if (!$redmineStatusId) {
             return false;
         }
 
-        if (!is_array($ignoreStatuses)) {
+        if (!is_array($statusesList)) {
             return false;
         }
 
-        return in_array($redmineStatusId, $ignoreStatuses);
+        return in_array($redmineStatusId, $statusesList);
     }
 
     /**
