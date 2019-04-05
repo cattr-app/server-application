@@ -5,6 +5,8 @@ namespace App\Http\Controllers\Api\v1;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
+use App\Rules\BetweenDate;
+use App\User;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
@@ -49,16 +51,35 @@ class TimeIntervalController extends ItemController
         return TimeInterval::class;
     }
 
+
     /**
+     * @param int $user_id
+     * @param string $start_at
      * @return array
      */
-    public function getValidationRules(): array
+    public function getValidationRules(int $user_id = 0, string $start_at = ''): array
     {
+        $user = User::find($user_id);
+
+
+        $end_at_rules = [
+            'date_format:'.DATE_ATOM,
+            'required',
+        ];
+
+        if ($user) {
+            $timeOffset = $user->screenshots_interval /* min */ * 60 /* sec */;
+            $beforeTimestamp = strtotime($start_at) + $timeOffset;
+            $beforeDate = date(DATE_ATOM, $beforeTimestamp);
+
+            $end_at_rules[] = new BetweenDate($start_at, $beforeDate);
+        }
+
         return [
             'task_id'  => 'required',
             'user_id'  => 'required',
             'start_at' => 'date_format:'.DATE_ATOM.'|required',
-            'end_at'   => 'date_format:'.DATE_ATOM.'|required',
+            'end_at'   => $end_at_rules,
         ];
     }
 
@@ -120,7 +141,12 @@ class TimeIntervalController extends ItemController
 
         $validator = Validator::make(
             $intervalData,
-            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+            Filter::process(
+                $this->getEventUniqueName('validation.item.create'),
+                $this->getValidationRules(
+                    $intervalData['user_id'] ?? 0,
+                    $intervalData['start_at'] ?? '',
+                ))
         );
 
         if ($validator->fails()) {
@@ -337,7 +363,7 @@ class TimeIntervalController extends ItemController
             $request->all()
         );
 
-        $validationRules = $this->getValidationRules();
+        $validationRules = $this->getValidationRules($requestData['user_id'], $requestData['start_at']);
         $validationRules['id'] = ['required'];
 
         $validator = Validator::make(
