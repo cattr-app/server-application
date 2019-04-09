@@ -1,7 +1,8 @@
-import { Component, ViewChild, IterableDiffer, OnInit, ChangeDetectorRef, IterableDiffers } from '@angular/core';
+import { Component, ViewChild, IterableDiffer, OnInit, ChangeDetectorRef, IterableDiffers, Output, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DualListComponent } from 'angular-dual-listbox';
 import { TimezonePickerComponent } from 'ng2-timezone-selector';
+import { Message } from 'primeng/components/common/api';
 import { ItemsEditComponent } from '../../items.edit.component';
 
 import { User } from '../../../models/user.model';
@@ -34,6 +35,7 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
     dualListFormat: any = DualListComponent.DEFAULT_FORMAT;
     redmineIgnoreStatuses: boolean[] = [];
 
+    @Output() message: EventEmitter<Message> = new EventEmitter<Message>();
 
     constructor(
         protected api: ApiService,
@@ -86,6 +88,14 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
 
     setProjects(result) {
         this.projects = result;
+    }
+
+    errorCallback(result) {
+        this.message.emit({severity: 'error', summary: result.error.error, detail: result.error.reason});
+    }
+
+    editCallback(result) {
+        this.message.emit({severity: 'success', summary: 'Success Message', detail: 'Settings have been updated'});
     }
 
 

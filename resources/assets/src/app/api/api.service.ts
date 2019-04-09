@@ -142,13 +142,13 @@ export class ApiService {
         }).subscribe(callback);
     }
 
-    public sendSettings(data, callback) {
+    public sendSettings(data, callback, errorCallback = this.errorCallback.bind(this)) {
         return this.http.post(`/redmineintegration/settings/update`, data, {
             headers: new HttpHeaders({
                 'Content-Type': 'application/json',
                 'Authorization': this.getAuthString()
             })
-        }).subscribe(callback);
+        }).subscribe(callback, errorCallback);
     }
 
     public getSettings(data, callback) {

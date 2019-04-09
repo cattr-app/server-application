@@ -1,12 +1,8 @@
 import {Component, ViewChild, AfterViewInit} from '@angular/core';
 import { TabsetComponent, TabDirective } from 'ngx-bootstrap';
+import {Message} from 'primeng/components/common/api';
 
 import { ApiService } from '../../api/api.service';
-import { AllowedActionsService } from '../roles/allowed-actions.service';
-
-import { TimeInterval } from '../../models/timeinterval.model';
-import { Project } from '../../models/project.model';
-import { Task } from '../../models/task.model';
 
 import { GeneralComponent } from './tabs/settings.tabs.general.component';
 import { IntegrationComponent } from './tabs/settings.tabs.integration.component';
@@ -24,6 +20,7 @@ export class SettingsComponent implements AfterViewInit {
     @ViewChild('userSettings') userSettings: UserSettingsComponent;
 
     selectedTab: string = '';
+    msgs: Message[] = [];
 
     constructor(
         protected api: ApiService,
@@ -48,5 +45,9 @@ export class SettingsComponent implements AfterViewInit {
             this.selectedTab = tab.heading;
             localStorage.setItem('settings-tab', this.selectedTab);
         }
+    }
+
+    onMessage(message: Message) {
+        this.msgs = [message];
     }
 }

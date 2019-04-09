@@ -1,10 +1,8 @@
-import { Component } from '@angular/core';
+import { Component, Output, EventEmitter } from '@angular/core';
+import { NgModel } from '@angular/forms';
 
-import { Task } from '../../../models/task.model';
-import { Project } from '../../../models/project.model';
 import { Message } from 'primeng/components/common/api';
 import { ApiService } from '../../../api/api.service';
-import { NgModel } from '@angular/forms';
 
 
 interface RedmineStatus {
@@ -36,7 +34,6 @@ export class IntegrationComponent {
     redmineStatuses: RedmineStatus[] = [];
     redminePriorities: RedminePriority[] = [];
     internalPriorities: Priority[] = [];
-    msgs: Message[] = [];
 
     redmine_sync: boolean;
     redmine_active_status: number;
@@ -45,8 +42,7 @@ export class IntegrationComponent {
     redmineDeactivateStatuses: boolean[] = [];
     redmine_online_timeout: number;
 
-
-
+    @Output() message: EventEmitter<Message> = new EventEmitter<Message>();
 
     constructor(
         private api: ApiService,
@@ -87,19 +83,27 @@ export class IntegrationComponent {
             'redmine_online_timeout': this.redmine_online_timeout,
             'redmine_sync': this.redmine_sync,
         }, () => {
-            this.msgs = [{
+            this.message.emit({
                 severity: 'success',
                 summary: 'Success Message',
                 detail: 'Settings have been updated',
-            }];
+            });
+        }, (result) => {
+            this.message.emit({
+                severity: 'error',
+                summary: result.error.error,
+                detail: result.error.reason,
+            });
         });
     }
 
     protected toInputCheckboxArray(input) : boolean[] {
         let ret: boolean[] = [];
 
-        for (let key of input) {
-            ret[key] = true;
+        if (input) {
+            for (let key of input) {
+                ret[key] = true;
+            }
         }
 
         return ret;

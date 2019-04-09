@@ -1,3 +1,5 @@
+<p-growl [(value)]="msgs"></p-growl>
+
 <div class="container">
     <div class="row">
         <div class="col-md-12">
@@ -5,24 +7,22 @@
                 <div class="panel-body">
                     <tabset #tabs>
                         <tab heading="{{'settings.general' | translate }}" (select)="changeTab($event)">
-                            <settings-general #general>
+                            <settings-general #general (message)="onMessage($event)">
                             </settings-general>
                         </tab>
 
 
                         <tab heading="{{'integration.redmine.title' | translate }}" (select)="changeTab($event)">
-                            <settings-integration #integration>
+                            <settings-integration #integration (message)="onMessage($event)">
                             </settings-integration>
                         </tab>
 
 
                         <tab heading="{{'settings.user' | translate }}" (select)="changeTab($event)">
-                            <settings-user #userSettings>
+                            <settings-user #userSettings (message)="onMessage($event)">
                             </settings-user>
                         </tab>
                     </tabset>
-
-
                 </div>
             </div>
         </div>

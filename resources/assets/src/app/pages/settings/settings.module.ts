@@ -17,6 +17,7 @@ import { LoadingModule } from 'ngx-loading';
 import {AutoCompleteModule} from 'primeng/autocomplete';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SharedModule } from '../../shared.module';
+import { GrowlModule } from 'primeng/growl';
 
 @NgModule({
     imports: [
@@ -34,6 +35,7 @@ import { SharedModule } from '../../shared.module';
         ModalModule,
         SharedModule,
         TimezonePickerModule,
+        GrowlModule,
     ],
     declarations: [
         SettingsComponent,
