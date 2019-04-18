@@ -143,6 +143,9 @@ export class StatisticTimeService {
                     interval_ids: [
                         interval.id,
                     ],
+                    intervals: [
+                        interval,
+                    ],
                     start: start,
                     end: end,
                     duration: interval.duration,
@@ -162,6 +165,10 @@ export class StatisticTimeService {
                         interval_ids: [
                             ...last.interval_ids,
                             ...current.interval_ids,
+                        ],
+                        intervals: [
+                            ...last.intervals,
+                            ...current.intervals,
                         ],
                         end: current.end,
                         duration: last.duration + current.duration,

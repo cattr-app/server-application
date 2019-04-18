@@ -24,7 +24,7 @@ import { EventObjectInput, View } from 'fullcalendar';
 import { ResourceInput } from 'fullcalendar-scheduler/src/exports';
 import { Schedule } from 'primeng/schedule';
 
-import { Observable, Subject } from 'rxjs/Rx';
+import { Observable, Subject, BehaviorSubject } from 'rxjs/Rx';
 import 'rxjs/operator/map';
 import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
@@ -75,9 +75,13 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
     @ViewChild('clickPopover') clickPopover: PopoverDirective;
     @ViewChild('hoverPopover') hoverPopover: PopoverDirective;
 
-    protected readonly usersSubj = new Subject<User[]>();
+    protected readonly usersSubj = new BehaviorSubject<User[]>([]);
     @Input() set users(value: User[]) {
         this.usersSubj.next(value);
+    }
+
+    get users() {
+        return this.usersSubj.getValue();
     }
 
     @Input() height: number | string = null;
@@ -180,7 +184,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         };
 
         this.selectedUsers$ = this.usersSubj.asObservable().map(users => {
-            return users.map(user => {
+            return users.filter(user => user).map(user => {
                 return {
                     id: '' + user.id,
                     title: user.full_name,
@@ -314,14 +318,9 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             return {range, users};
         }).merge(this.update$).switchMap(({range, users}) => {
             const start = moment.utc().startOf('day');
-            const end = start.clone().add(1, 'day');
             const offset = this.timezoneOffset;
             const uids = users.map(user => +user.id);
-            if (this.view === 'timelineDay') {
-                return Observable.from(this.service.getEvents(offset, uids, start, true));
-            } else {
-                return Observable.from(this.service.getDays(offset, uids, start, end));
-            }
+            return Observable.from(this.service.getEvents(offset, uids, start, true));
         }).share();
         this.latestEvents$.subscribe(events => {
             this.latestEvents = events;
@@ -790,12 +789,30 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             const lastUserEvents = latestEvents.filter(event => +event.resourceId === +userId);
             const hasWorkedToday = lastUserEvents.length > 0;
             if (hasWorkedToday) {
+                let isWorkingNow = false;
+                const threshold = 5;
+
+                let screenshotsInterval = 60 * 5;
+                const user = this.users.find(u => +u.id === +userId);
+                if (user && user.screenshots_interval) {
+                    screenshotsInterval = 60 * user.screenshots_interval;
+                }
+
+                // Check time since last user activity
                 const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
                 const eventEnd = moment.utc(lastUserEvent.end);
+                const now = moment.utc().add(offset, 'minutes');
+                if (now.diff(eventEnd, 'seconds') < screenshotsInterval + threshold) {
+                    // If last interval is less than user screenshots_interval,
+                    // then tracker probably have stopped
+                    const lastInterval = lastUserEvent.intervals[lastUserEvent.intervals.length - 1];
+                    const intervalStart = moment.utc(lastInterval.start_at);
+                    const intervalEnd = moment.utc(lastInterval.end_at);
+                    const duration = intervalEnd.diff(intervalStart, 'seconds');
+                    isWorkingNow = duration >= screenshotsInterval - threshold;
+                }
 
                 const $workingNowCell = $('td:nth-child(1) .fc-cell-text', $row);
-                const now = moment.utc().add(offset, 'minutes').subtract(10, 'minutes');
-                const isWorkingNow = eventEnd.diff(now) > 0;
                 if (isWorkingNow) {
                     $workingNowCell.addClass('is_working_now');
 
