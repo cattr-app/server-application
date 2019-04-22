@@ -156,8 +156,9 @@ class SynchronizeTime extends Command
 
             $ret = $client->time_entry->create([
                 'issue_id'  => $issue_id,
-                'spent_on' => $date,
+                'spent_on'  => $date,
                 'hours'     => $hours,
+                'comments'  => 'Upload from Amazing Time',
             ]);
 
             $issent = isset($ret->id);
