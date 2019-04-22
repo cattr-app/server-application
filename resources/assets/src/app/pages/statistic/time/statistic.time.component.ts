@@ -38,14 +38,16 @@ enum UsersSort {
 }
 
 interface TimeWorkedDay {
-    total: number;
-    events: EventObjectInput[];
+    total: number
+    events: EventObjectInput[]
 }
 
 interface TimeWorked {
-    id: string,
-    total: number,
-    perDay: { [date: string]: TimeWorkedDay },
+    id: string
+    total: number
+    perDay: {
+        [date: string]: TimeWorkedDay
+    }
 }
 
 function debounce(f, delay) {
@@ -397,6 +399,27 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             this.$timeline.fullCalendar('refetchResources');
         });
 
+        let index = 0;
+
+        const eventColors = [
+            '#22bb77',
+            '#449999',
+            '#11dd66',
+            '#449988',
+            '#00cc55',
+            '#5588aa',
+        ];
+
+        const getEventColor = () => {
+            let currentIndex = index++;
+
+            if (currentIndex >= eventColors.length) {
+                currentIndex = index = 0;
+            }
+
+            return eventColors[currentIndex];
+        };
+
         this.timelineOptions = {
             defaultView: this.defaultView,
             now: moment.utc().startOf('day'),
@@ -453,7 +476,6 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 {
                     labelText: 'Name',
                     field: 'title',
-                    //width: '120px',
                 },
                 {
                     labelText: 'Time Worked',
@@ -645,6 +667,11 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                     return false;
                 }
 
+                $(el).css({
+                    backgroundColor: getEventColor(),
+                });
+
+
                 return this.filterEvent(event);
             },
             viewRender: debounce((view: View) => {
@@ -654,11 +681,12 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                     const rows = $.makeArray($rows);
 
                     const $days = $('.fc-day[data-date]', $timeline);
+
                     $days.each((index, dayColumnElement) => {
                         const date = $(dayColumnElement).data('date');
                         const columnWidth = $(dayColumnElement).width() - 4;
 
-                        const html = rows.map(userRowElement => {
+                        dayColumnElement.innerHTML = rows.map(userRowElement => {
                             const userId = $(userRowElement).data('resource-id');
 
                             // Calculate time worked by this user per this day.
@@ -690,7 +718,6 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
 </div>
 `;
                         }).join('');
-                        dayColumnElement.innerHTML = html;
                     });
                 }
 
