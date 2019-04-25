@@ -1,4 +1,4 @@
-import {Component, DoCheck, IterableDiffers, OnInit, ViewChild} from '@angular/core';
+import {Component, DoCheck, IterableDiffers, OnInit, OnDestroy, ViewChild} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {TasksService} from '../tasks.service';
 import {Task} from '../../../models/task.model';
@@ -25,7 +25,7 @@ enum TasksOrder {
     templateUrl: './tasks.list.component.html',
     styleUrls: ['./tasks.list.component.scss', '../../items.component.scss']
 })
-export class TasksListComponent extends ItemsListComponent implements OnInit, DoCheck {
+export class TasksListComponent extends ItemsListComponent implements OnInit, OnDestroy, DoCheck {
     @ViewChild('loading') loading: any;
 
     itemsArray: Task[] = [];
@@ -115,8 +115,37 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, Do
         this.reload();
     }
 
+
+    cleanupParams() : string[] {
+        return [
+            'loading',
+            'itemsArray',
+            'userId',
+            'projectId',
+            'differUser',
+            'differProject',
+            'directProject',
+            'order',
+            'scrollHandler',
+            'isLoading',
+            'isAllLoaded',
+            'offset',
+            'chunksize',
+            'requestTasks',
+            'api',
+            'taskService',
+            'modalService',
+            'allowedService',
+            'projectService',
+        ];
+    }
+
     ngOnDestroy() {
         window.removeEventListener('scroll', this.scrollHandler, false);
+
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 
     loadNext() {

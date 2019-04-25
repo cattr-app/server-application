@@ -1,4 +1,4 @@
-import { Component, OnInit, DoCheck, IterableDiffers, IterableDiffer } from '@angular/core';
+import { Component, OnInit, OnDestroy, DoCheck, IterableDiffers, IterableDiffer } from '@angular/core';
 
 import * as moment from 'moment';
 
@@ -40,7 +40,7 @@ enum TaskOrder {
   templateUrl: './time-use-report.component.html',
   styleUrls: ['./time-use-report.component.scss']
 })
-export class TimeUseReportComponent implements OnInit, DoCheck {
+export class TimeUseReportComponent implements OnInit, OnDestroy, DoCheck {
   users: number[] = [];
   usersDiffer: IterableDiffer<number> = null;
 
@@ -76,6 +76,26 @@ export class TimeUseReportComponent implements OnInit, DoCheck {
 
   ngOnInit() {
   }
+
+  cleanupParams() : string[] {
+        return [
+          'users',
+          'usersDiffer',
+          'start',
+          'end',
+          'range',
+          'isLoading',
+          'report',
+          'order',
+          'service',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
+    }
 
   ngDoCheck() {
     const usersChanges = this.usersDiffer.diff(this.users);

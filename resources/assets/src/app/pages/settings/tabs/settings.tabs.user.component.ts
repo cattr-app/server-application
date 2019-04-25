@@ -1,4 +1,4 @@
-import { Component, ViewChild, IterableDiffer, OnInit, ChangeDetectorRef, IterableDiffers, Output, EventEmitter } from '@angular/core';
+import { Component, ViewChild, IterableDiffer, OnInit, OnDestroy, ChangeDetectorRef, IterableDiffers, Output, EventEmitter } from '@angular/core';
 import { Router, ActivatedRoute } from '@angular/router';
 import { DualListComponent } from 'angular-dual-listbox';
 import { TimezonePickerComponent } from 'ng2-timezone-selector';
@@ -24,7 +24,7 @@ type UserWithProjects = User & { projects?: Project[] };
     selector: 'settings-user',
     templateUrl: './settings.tabs.user.component.html'
 })
-export class UserSettingsComponent extends ItemsEditComponent implements OnInit {
+export class UserSettingsComponent extends ItemsEditComponent implements OnInit, OnDestroy {
     @ViewChild('timezone') timezone: TimezonePickerComponent;
 
     public item: UserWithProjects = new User();
@@ -157,6 +157,35 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit 
 
         if (removeProjects.length > 0) {
             this.projectService.removeUsers(removeProjects, this.editBulkCallback.bind(this, 'Projects'));
+        }
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'timezone',
+            'item',
+            'projects',
+            'userProjects',
+            'roles',
+            'differProjects',
+            'dualListFormat',
+            'redmineIgnoreStatuses',
+            'message',
+            'api',
+            'allowedAction',
+            'projectService',
+            'roleService',
+            'cdr',
+            'userService',
+            'activatedRoute',
+            'router',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
         }
     }
 

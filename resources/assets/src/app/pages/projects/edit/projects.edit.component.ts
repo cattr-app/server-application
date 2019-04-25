@@ -1,4 +1,4 @@
-import {Component, IterableDiffers, OnInit, IterableDiffer} from '@angular/core';
+import {Component, IterableDiffers, OnInit, OnDestroy, IterableDiffer} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 import {DualListComponent} from 'angular-dual-listbox';
 import {TranslateService} from '@ngx-translate/core';
@@ -22,7 +22,7 @@ type ProjectWithRoles = Project & { roles?: Role[] };
     templateUrl: './projects.edit.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class ProjectsEditComponent extends ItemsEditComponent implements OnInit {
+export class ProjectsEditComponent extends ItemsEditComponent implements OnInit, OnDestroy {
     public item: ProjectWithRoles = new Project();
 
     format: any = DualListComponent.DEFAULT_FORMAT;
@@ -157,5 +157,32 @@ export class ProjectsEditComponent extends ItemsEditComponent implements OnInit 
             {'label': 'Name', 'name': 'project-name', 'model': 'name'},
             {'label': 'Description', 'name': 'project-description', 'model': 'description'},
         ];
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'format',
+            'users',
+            'attachedUsers',
+            'differUsers',
+            'roles',
+            'attachedRoles',
+            'differRoles',
+            'api',
+            'projectService',
+            'activatedRoute',
+            'router',
+            'allowedService',
+            'usersService',
+            'rolesService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

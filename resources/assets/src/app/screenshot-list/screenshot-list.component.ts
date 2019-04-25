@@ -131,8 +131,57 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         }
     }
 
+    cleanupParams() : string[] {
+        return [
+            'loading',
+            'screenshotModal',
+            'initialLoad',
+            'autoload',
+            'showTime',
+            'showDate',
+            'showUser',
+            'showProject',
+            'showTask',
+            'showSelection',
+            'user_ids',
+            'project_ids',
+            'task_ids',
+            'max_date',
+            'min_date',
+            'date_output_format',
+            'onSelectionChanged',
+            'differUsers',
+            'differProjects',
+            'differTasks',
+            'chunksize',
+            'offset',
+            'screenshotLoading',
+            'scrollHandler',
+            'countFail',
+            'isAllLoaded',
+            'isLoading',
+            'selected',
+            'selectedDiffer',
+            'selectedIntervals',
+            'modalScreenshot',
+            'user',
+            '_itemsChunked',
+            'api',
+            'itemService',
+            'modalService',
+            'allowedAction',
+            'differs',
+            'kvDiffers',
+        ];
+    }
+
+
     ngOnDestroy() {
         window.removeEventListener('scroll', this.scrollHandler, false);
+
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 
     onScrollDown() {

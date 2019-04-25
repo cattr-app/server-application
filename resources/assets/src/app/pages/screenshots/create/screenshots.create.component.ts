@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, OnDestroy, ViewChild} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Router} from "@angular/router";
 import {ScreenshotsService} from "../screenshots.service";
@@ -11,7 +11,7 @@ import {AllowedActionsService} from "../../roles/allowed-actions.service";
     templateUrl: './screenshots.create.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class ScreenshotsCreateComponent extends ItemsCreateComponent implements OnInit {
+export class ScreenshotsCreateComponent extends ItemsCreateComponent implements OnInit, OnDestroy {
     @ViewChild("fileInput") fileInput;
 
     public item: Screenshot = new Screenshot();
@@ -34,5 +34,24 @@ export class ScreenshotsCreateComponent extends ItemsCreateComponent implements 
         formData.append('time_interval_id', this.item.time_interval_id.toString());
 
         return formData;
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'fileInput',
+            'item',
+            'screenshotService',
+            'api',
+            'screenshotService',
+            'router',
+            'allowedService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

@@ -1,4 +1,4 @@
-import { Component, IterableDiffers, OnInit } from '@angular/core';
+import { Component, IterableDiffers, OnInit, OnDestroy } from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import { Router } from '@angular/router';
 import { DualListComponent } from 'angular-dual-listbox';
@@ -17,7 +17,7 @@ import { RulesService } from '../rules.service';
     templateUrl: './roles.create.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class RolesCreateComponent extends ItemsCreateComponent implements OnInit {
+export class RolesCreateComponent extends ItemsCreateComponent implements OnInit, OnDestroy {
 
     msgs: Message[] = [];
     public item: Role = new Role();
@@ -95,6 +95,37 @@ export class RolesCreateComponent extends ItemsCreateComponent implements OnInit
         for (const item of result) {
             item['id'] = this.sourceRules.length;
             this.sourceRules.push(item);
+        }
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'msgs',
+            'item',
+            'sourceRules',
+            'confirmedRules',
+            'key',
+            'displayRules',
+            'keepSorted',
+            'filter',
+            'height',
+            'format',
+            'differRules',
+            'api',
+            'roleService',
+            'router',
+            'roleServ',
+            'myRouter',
+            'allowedService',
+            'usersService',
+            'ruleService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
         }
     }
 }

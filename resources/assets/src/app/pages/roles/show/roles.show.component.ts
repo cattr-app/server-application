@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Role} from '../../../models/role.model';
 import {RolesService} from '../roles.service';
@@ -16,7 +16,7 @@ import {TranslateService} from '@ngx-translate/core';
     templateUrl: './roles.show.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class RolesShowComponent extends ItemsShowComponent implements OnInit {
+export class RolesShowComponent extends ItemsShowComponent implements OnInit, OnDestroy {
 
     public item: Role = new Role();
     user: User;
@@ -38,7 +38,6 @@ export class RolesShowComponent extends ItemsShowComponent implements OnInit {
                 router: ActivatedRoute,
                 allowService: AllowedActionsService,
                 translate: TranslateService,
-                protected allowedService: AllowedActionsService,
                 protected usersService: UsersService,
                 protected ruleService: RulesService) {
         super(api, roleService, router, allowService);
@@ -61,7 +60,7 @@ export class RolesShowComponent extends ItemsShowComponent implements OnInit {
     }
 
     can(action: string ): boolean {
-        return this.allowedService.can(action);
+        return this.allowedAction.can(action);
     }
 
     editCallback(result) {
@@ -74,7 +73,7 @@ export class RolesShowComponent extends ItemsShowComponent implements OnInit {
             item['id'] = this.sourceRules.length;
             this.sourceRules.push(item);
         }
-        this.allowedService.getItems(this.AllowedUpdate.bind(this), this.id);
+        this.allowedAction.getItems(this.AllowedUpdate.bind(this), this.id);
     }
 
     AllowedUpdate(result) {
@@ -89,5 +88,38 @@ export class RolesShowComponent extends ItemsShowComponent implements OnInit {
         this.confirmedUsers = this.sourceUsers.filter(function (user) {
             return user.role_id === id;
         });
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'user',
+            'sourceRules',
+            'confirmedRules',
+            'sourceUsers',
+            'confirmedUsers',
+            'key',
+            'displayRules',
+            'displayUsers',
+            'keepSorted',
+            'filter',
+            'height',
+            'disabled',
+            'format',
+            'api',
+            'roleService',
+            'router',
+            'allowService',
+            'allowedService',
+            'usersService',
+            'ruleService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

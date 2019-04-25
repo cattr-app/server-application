@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import { TranslateService } from '@ngx-translate/core';
 import {ApiService} from '../../../api/api.service';
 import {ActivatedRoute} from '@angular/router';
@@ -15,7 +15,7 @@ type UserWithRole = User & { role?: Role };
     templateUrl: './users.show.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class UsersShowComponent extends ItemsShowComponent implements OnInit {
+export class UsersShowComponent extends ItemsShowComponent implements OnInit, OnDestroy {
 
     public item: UserWithRole = new User();
     public roleName = '';
@@ -47,6 +47,26 @@ export class UsersShowComponent extends ItemsShowComponent implements OnInit {
                 // Just use role name, if it is not translated.
                 this.roleName = !value.startsWith('role.name.') ? value : result.role.name;
             });
+        }
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'roleName',
+            'api',
+            'userService',
+            'router',
+            'allowService',
+            'translate',
+        ];
+    }
+
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
         }
     }
 }

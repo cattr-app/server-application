@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, OnDestroy, ViewChild} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 
 import {BsModalService} from 'ngx-bootstrap/modal';
@@ -12,7 +12,7 @@ import {AllowedActionsService} from "../../roles/allowed-actions.service";
     templateUrl: './users.list.component.html',
     styleUrls: ['./users.list.component.scss', '../../items.component.scss']
 })
-export class UsersListComponent extends ItemsListComponent implements OnInit {
+export class UsersListComponent extends ItemsListComponent implements OnInit, OnDestroy {
     @ViewChild('loading') loading: any;
 
     itemsArray: User[] = [];
@@ -35,8 +35,30 @@ export class UsersListComponent extends ItemsListComponent implements OnInit {
         this.loadNext();
     }
 
+
+    cleanupParams() : string[] {
+        return [
+            'loading',
+            'itemsArray',
+            'scrollHandler',
+            'isLoading',
+            'isAllLoaded',
+            'offset',
+            'chunksize',
+            'api',
+            'userService',
+            'modalService',
+            'allowedService',
+        ];
+    }
+
+
     ngOnDestroy() {
         window.removeEventListener('scroll', this.scrollHandler, false);
+
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 
     loadNext() {

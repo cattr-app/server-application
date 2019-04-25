@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild, AfterViewInit, ChangeDetectorRef} from '@angular/core';
+import {Component, OnInit, OnDestroy, ViewChild, AfterViewInit, ChangeDetectorRef} from '@angular/core';
 import { TabsetComponent, TabDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../../api/api.service';
@@ -20,7 +20,7 @@ import { UsersService } from '../users/users.service';
     templateUrl: './dashboard.component.html',
     styleUrls: ['./dashboard.component.css']
 })
-export class DashboardComponent implements OnInit, AfterViewInit {
+export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('tabs') tabs: TabsetComponent;
     @ViewChild('taskList') taskList: TaskListComponent;
     @ViewChild('tabOwn', {read: TabDirective}) tabOwn: TabDirective;
@@ -112,5 +112,35 @@ export class DashboardComponent implements OnInit, AfterViewInit {
 
     userFilter(user: User) {
         return !!user.active;
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'api',
+            'allowedAction',
+            'cdr',
+            'userService',
+            'tabs',
+            'taskList',
+            'tabOwn',
+            'tabTeam',
+            'screenshotList',
+            'userSelect',
+            'userStatistic',
+            'teamStatistic',
+            'userIsManager',
+            'selectedTab',
+            'selectedIntervals',
+            'taskFilter',
+            'currentUser',
+            'selectedUsers',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

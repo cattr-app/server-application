@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ActivatedRoute} from '@angular/router';
 
 import {ApiService} from '../../../api/api.service';
@@ -38,7 +38,7 @@ enum TaskOrder {
     templateUrl: './projects.show.component.html',
     styleUrls: ['./projects.show.component.scss', '../../items.component.scss']
 })
-export class ProjectsShowComponent extends ItemsShowComponent implements OnInit {
+export class ProjectsShowComponent extends ItemsShowComponent implements OnInit, OnDestroy {
 
     item: ProjectWithTasks = new Project();
     tasks: TaskInfo[] = [];
@@ -168,5 +168,26 @@ export class ProjectsShowComponent extends ItemsShowComponent implements OnInit 
         const hours = Math.floor(duration.asHours());
         const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
         return `${hours}h ${minutes}m`;
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'tasks',
+            'order',
+            'firstActivity',
+            'lastActivity',
+            'api',
+            'projectService',
+            'router',
+            'allowedService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

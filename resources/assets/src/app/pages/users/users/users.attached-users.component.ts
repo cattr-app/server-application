@@ -1,4 +1,4 @@
-import {Component, OnInit, IterableDiffers} from '@angular/core';
+import {Component, OnInit, OnDestroy, IterableDiffers} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
 import {User} from '../../../models/user.model';
@@ -15,7 +15,7 @@ import {AllowedActionsService} from '../../roles/allowed-actions.service';
     templateUrl: './users.attached-users.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class UsersAttachedUsersComponent extends ItemsEditComponent implements OnInit {
+export class UsersAttachedUsersComponent extends ItemsEditComponent implements OnInit, OnDestroy {
 
     public item: User = new User();
     sourceUsers: any = [];
@@ -88,6 +88,34 @@ export class UsersAttachedUsersComponent extends ItemsEditComponent implements O
 
         if (removeUsers.length > 0) {
             this.usersService.removeAssignedUsers(removeUsers, this.editBulkCallback.bind(this, 'Users'));
+        }
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'sourceUsers',
+            'confirmedUsers',
+            'key',
+            'displayUsers',
+            'keepSorted',
+            'filter',
+            'height',
+            'format',
+            'differUsers',
+            'api',
+            'activatedRoute',
+            'router',
+            'allowedService',
+            'usersService',
+        ];
+    }
+
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
         }
     }
 

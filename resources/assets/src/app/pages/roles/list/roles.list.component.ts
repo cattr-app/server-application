@@ -1,4 +1,4 @@
-import {Component, DoCheck, IterableDiffers, OnInit} from '@angular/core';
+import {Component, DoCheck, IterableDiffers, OnInit, OnDestroy} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {RolesService} from '../roles.service';
 import {RulesService} from '../rules.service';
@@ -14,7 +14,7 @@ import {LocalStorage} from '../../../api/storage.model';
     templateUrl: './roles.list.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class RolesListComponent extends ItemsListComponent implements OnInit, DoCheck {
+export class RolesListComponent extends ItemsListComponent implements OnInit, OnDestroy, DoCheck {
     user: User;
     p = 1;
     userId: any = '';
@@ -54,5 +54,27 @@ export class RolesListComponent extends ItemsListComponent implements OnInit, Do
 
     UserUpdate() {
         this.user = this.api.getUser();
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'user',
+            'p',
+            'userId',
+            'differ',
+            'requestRoles',
+            'api',
+            'roleService',
+            'modalService',
+            'ruleService',
+            'allowedService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

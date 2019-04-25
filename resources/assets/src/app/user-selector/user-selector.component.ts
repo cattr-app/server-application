@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, Input } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, Input } from '@angular/core';
 
 import { UsersService } from '../pages/users/users.service';
 
@@ -15,7 +15,7 @@ interface UserSelectItem {
     templateUrl: './user-selector.component.html',
     styleUrls: ['./user-selector.component.scss']
 })
-export class UserSelectorComponent implements OnInit {
+export class UserSelectorComponent implements OnInit, OnDestroy {
     isLoading: boolean = true;
     usersAvailable: UserSelectItem[] = [];
     usersSelected: UserSelectItem[] = [];
@@ -88,6 +88,25 @@ export class UserSelectorComponent implements OnInit {
 
             const userIds = this.usersSelected.map(user => +user.id);
             LocalStorage.getStorage().set(`filterByUserIN${window.location.pathname}`, userIds);
+        }
+    }
+
+    cleanupParams() : string[] {
+        return [
+            'isLoading',
+            'usersAvailable',
+            'usersSelected',
+            'filter',
+            'added',
+            'removed',
+            'changed',
+            'userService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
         }
     }
 }

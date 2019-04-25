@@ -1,4 +1,4 @@
-import {Component, OnInit, ViewChild} from '@angular/core';
+import {Component, OnInit, OnDestroy, ViewChild} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {User} from '../../../models/user.model';
 import {Router} from '@angular/router';
@@ -13,7 +13,7 @@ import { Role } from '../../../models/role.model';
     templateUrl: './users.create.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class UsersCreateComponent extends ItemsCreateComponent implements OnInit {
+export class UsersCreateComponent extends ItemsCreateComponent implements OnInit, OnDestroy {
     public item: User = new User();
     public roles: Role[] = [];
 
@@ -56,5 +56,23 @@ export class UsersCreateComponent extends ItemsCreateComponent implements OnInit
             'redmine_sync': this.item.redmine_sync,
             'important': this.item.important,
         };
+    }
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'roles',
+            'api',
+            'userService',
+            'router',
+            'allowedService',
+            'rolesService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

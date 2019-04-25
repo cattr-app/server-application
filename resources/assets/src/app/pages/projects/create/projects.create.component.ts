@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Project} from '../../../models/project.model';
 import {Router} from '@angular/router';
@@ -12,7 +12,7 @@ import {ItemsCreateComponent} from '../../items.create.component';
     styleUrls: ['../../items.component.scss']
 })
 
-export class ProjectsCreateComponent extends ItemsCreateComponent implements OnInit {
+export class ProjectsCreateComponent extends ItemsCreateComponent implements OnInit, OnDestroy {
 
     public item: Project = new Project();
 
@@ -44,5 +44,21 @@ export class ProjectsCreateComponent extends ItemsCreateComponent implements OnI
         ];
     }
 
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'api',
+            'itemService',
+            'router',
+            'allowedAction',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
+    }
 
 }

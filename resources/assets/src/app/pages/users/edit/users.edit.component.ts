@@ -1,4 +1,4 @@
-import { Component, OnInit, IterableDiffers, IterableDiffer, ViewChild, ChangeDetectorRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, IterableDiffers, IterableDiffer, ViewChild, ChangeDetectorRef } from '@angular/core';
 import { ApiService } from '../../../api/api.service';
 import { User } from '../../../models/user.model';
 import { Router, ActivatedRoute } from '@angular/router';
@@ -20,7 +20,7 @@ type UserWithProjects = User & { projects?: Project[] };
     templateUrl: './users.edit.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class UsersEditComponent extends ItemsEditComponent implements OnInit {
+export class UsersEditComponent extends ItemsEditComponent implements OnInit, OnDestroy {
     @ViewChild('timezone') timezone: TimezonePickerComponent;
 
     public item: UserWithProjects = new User();
@@ -120,6 +120,33 @@ export class UsersEditComponent extends ItemsEditComponent implements OnInit {
 
         if (removeProjects.length > 0) {
             this.projectService.removeUsers(removeProjects, this.editBulkCallback.bind(this, 'Projects'));
+        }
+    }
+
+    cleanupParams() : string[] {
+        return [
+            'timezone',
+            'item',
+            'roles',
+            'projects',
+            'userProjects',
+            'differProjects',
+            'dualListFormat',
+            'authorizedUser',
+            'api',
+            'userService',
+            'activatedRoute',
+            'router',
+            'allowedService',
+            'roleService',
+            'projectService',
+            'cdr',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
         }
     }
 }

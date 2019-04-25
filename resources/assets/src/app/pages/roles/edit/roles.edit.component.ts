@@ -1,4 +1,4 @@
-import {Component, OnInit, IterableDiffers} from '@angular/core';
+import {Component, OnInit, OnDestroy, IterableDiffers} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
 import {Role} from '../../../models/role.model';
@@ -23,7 +23,7 @@ type RoleWithProjects = Role & { projects?: Project[] };
     templateUrl: './roles.edit.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class RolesEditComponent extends ItemsEditComponent implements OnInit {
+export class RolesEditComponent extends ItemsEditComponent implements OnInit, OnDestroy {
 
     public item: RoleWithProjects = new Role();
     user: User;
@@ -218,5 +218,44 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit {
 
     ProjectsUpdate(result) {
         this.sourceProjects = result;
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'user',
+            'sourceRules',
+            'confirmedRules',
+            'sourceUsers',
+            'confirmedUsers',
+            'sourceProjects',
+            'confirmedProjects',
+            'key',
+            'displayRules',
+            'displayUsers',
+            'displayProjects',
+            'keepSorted',
+            'filter',
+            'height',
+            'format',
+            'differUsers',
+            'differRules',
+            'differProjects',
+            'api',
+            'roleService',
+            'activatedRoute',
+            'router',
+            'allowedService',
+            'ruleService',
+            'projectsService',
+            'usersService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

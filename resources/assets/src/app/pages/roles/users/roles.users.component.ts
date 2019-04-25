@@ -1,4 +1,4 @@
-import {Component, OnInit, IterableDiffers} from '@angular/core';
+import {Component, OnInit, OnDestroy, IterableDiffers} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
 import {Role} from '../../../models/role.model';
@@ -19,7 +19,7 @@ import {TranslateService} from '@ngx-translate/core';
     templateUrl: './roles.users.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class RolesUsersComponent extends ItemsEditComponent implements OnInit {
+export class RolesUsersComponent extends ItemsEditComponent implements OnInit, OnDestroy {
 
     public item: Role = new Role();
     user: User;
@@ -119,5 +119,34 @@ export class RolesUsersComponent extends ItemsEditComponent implements OnInit {
             return user.role_id === id;
         });
         this.differUsers.diff(this.confirmedUsers);
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'user',
+            'sourceUsers',
+            'confirmedUsers',
+            'key',
+            'displayUsers',
+            'keepSorted',
+            'filter',
+            'height',
+            'format',
+            'differUsers',
+            'api',
+            'roleService',
+            'activatedRoute',
+            'router',
+            'allowedService',
+            'usersService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

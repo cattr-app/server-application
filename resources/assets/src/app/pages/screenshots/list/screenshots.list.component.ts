@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 
 import {ApiService} from '../../../api/api.service';
 import { AllowedActionsService } from '../../roles/allowed-actions.service';
@@ -12,7 +12,7 @@ import * as moment from 'moment';
     templateUrl: './screenshots.list.component.html',
     styleUrls: ['./screenshots.list.component.scss',],
 })
-export class ScreenshotsListComponent implements OnInit {
+export class ScreenshotsListComponent implements OnInit, OnDestroy {
     userId: number[] = [];
     projectId: number[] = [];
     minDate: string = '';
@@ -68,5 +68,24 @@ export class ScreenshotsListComponent implements OnInit {
 
     minDateChanged(value) {
         LocalStorage.getStorage().set(`filterByMinDateIN${ window.location.pathname }`, this.minDate || '');
+    }
+
+    cleanupParams() : string[] {
+        return [
+            'userId',
+            'projectId',
+            'minDate',
+            'maxDate',
+            '_maxDate',
+            '_isManager',
+            'api',
+            'allowedAction',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

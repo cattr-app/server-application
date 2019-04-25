@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Task} from '../../../models/task.model';
 import {Router, ActivatedRoute} from '@angular/router';
@@ -15,7 +15,7 @@ import {User} from '../../../models/user.model';
     templateUrl: './tasks.edit.component.html',
     styleUrls: ['../../items.component.scss'],
 })
-export class TasksEditComponent extends ItemsEditComponent implements OnInit {
+export class TasksEditComponent extends ItemsEditComponent implements OnInit, OnDestroy {
 
     public item: Task = new Task();
     public projects: Project[];
@@ -74,6 +74,31 @@ export class TasksEditComponent extends ItemsEditComponent implements OnInit {
 
     setUsers(result) {
         this.users = result;
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'projects',
+            'users',
+            'selectedProject',
+            'selectedUser',
+            'internalPriorities',
+            'api',
+            'taskService',
+            'activatedRoute',
+            'router',
+            'allowedService',
+            'projectService',
+            'userService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 
     prepareData() {

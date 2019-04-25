@@ -1,4 +1,4 @@
-import {Component, OnInit, IterableDiffers} from '@angular/core';
+import {Component, OnInit, OnDestroy, IterableDiffers} from '@angular/core';
 import {Router, ActivatedRoute} from '@angular/router';
 
 import {User} from '../../../models/user.model';
@@ -18,7 +18,7 @@ import {TranslateService} from '@ngx-translate/core';
     templateUrl: './projects.users.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class ProjectsUsersComponent extends ItemsEditComponent implements OnInit {
+export class ProjectsUsersComponent extends ItemsEditComponent implements OnInit, OnDestroy {
 
     public item: Project = new Project();
     sourceUsers: any = [];
@@ -107,5 +107,18 @@ export class ProjectsUsersComponent extends ItemsEditComponent implements OnInit
 
     UsersUpdate(result) {
         this.sourceUsers = result;
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

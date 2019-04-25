@@ -61,10 +61,6 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
         this.loadNext();
     }
 
-    ngOnDestroy() {
-        window.removeEventListener('scroll', this.scrollHandler, false);
-    }
-
     loadNext() {
         if (this.isLoading || this.isAllLoaded) {
             return;
@@ -152,5 +148,39 @@ export class ProjectsListComponent extends ItemsListComponent implements OnInit,
         }
 
         this.reload();
+    }
+
+
+
+
+    cleanupParams() : string[] {
+        return [
+            'loading',
+            'itemsArray',
+            'scrollHandler',
+            'isLoading',
+            'isAllLoaded',
+            'offset',
+            'chunksize',
+            'userId',
+            'userDiffer',
+            'projectName',
+            'availableProjects',
+            'suggestedProjects',
+            'selectedProjects',
+            'filter',
+            'requestProjects',
+            'api',
+            'projectService',
+            'modalService',
+            'allowedService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
+        window.removeEventListener('scroll', this.scrollHandler, false);
     }
 }

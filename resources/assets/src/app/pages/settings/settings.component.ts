@@ -1,4 +1,4 @@
-import {Component, ViewChild, AfterViewInit} from '@angular/core';
+import {Component, ViewChild, AfterViewInit, OnDestroy} from '@angular/core';
 import { TabsetComponent, TabDirective } from 'ngx-bootstrap';
 import {Message} from 'primeng/components/common/api';
 
@@ -13,7 +13,7 @@ import { UserSettingsComponent } from './tabs/settings.tabs.user.component';
     templateUrl: './settings.component.html',
     styleUrls: ['./settings.component.css']
 })
-export class SettingsComponent implements AfterViewInit {
+export class SettingsComponent implements AfterViewInit, OnDestroy {
     @ViewChild('tabs') tabs: TabsetComponent;
     @ViewChild('general') general: GeneralComponent;
     @ViewChild('integration') integration: IntegrationComponent;
@@ -49,5 +49,24 @@ export class SettingsComponent implements AfterViewInit {
 
     onMessage(message: Message) {
         this.msgs = [message];
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'tabs',
+            'general',
+            'integration',
+            'userSettings',
+            'selectedTab',
+            'msgs',
+            'api',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

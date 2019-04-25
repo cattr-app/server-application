@@ -1,4 +1,4 @@
-import { Component, OnInit, IterableDiffer, IterableDiffers, DoCheck } from '@angular/core';
+import { Component, OnInit, OnDestroy, IterableDiffer, IterableDiffers, DoCheck } from '@angular/core';
 
 import { Task } from '../../../models/task.model';
 import { Project } from '../../../models/project.model';
@@ -12,7 +12,7 @@ import * as moment from 'moment';
     selector: 'dashboard-tasklist',
     templateUrl: './tasks.list.component.html'
 })
-export class TaskListComponent implements OnInit, DoCheck {
+export class TaskListComponent implements OnInit, OnDestroy, DoCheck {
     itemsArray: Task[] = [];
     itemsDiffer: IterableDiffer<Task>;
     totalTime = 0;
@@ -80,5 +80,24 @@ export class TaskListComponent implements OnInit, DoCheck {
                 return +task.id === +this._filter.id;
             }
         });
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'itemsArray',
+            'itemsDiffer',
+            'totalTime',
+            '_filter',
+            'filteredItems',
+            'api',
+            'dashboardService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

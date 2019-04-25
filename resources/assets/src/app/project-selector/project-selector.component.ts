@@ -1,4 +1,4 @@
-import { Component, OnInit, Output, EventEmitter, ViewChild } from '@angular/core';
+import { Component, OnInit, OnDestroy, Output, EventEmitter, ViewChild } from '@angular/core';
 import { NgSelectComponent } from '@ng-select/ng-select';
 
 import { ProjectsService } from '../pages/projects/projects.service';
@@ -16,7 +16,7 @@ interface ProjectSelectItem {
     templateUrl: './project-selector.component.html',
     styleUrls: ['./project-selector.component.scss']
 })
-export class ProjectSelectorComponent implements OnInit {
+export class ProjectSelectorComponent implements OnInit, OnDestroy {
     @ViewChild('select') _select: NgSelectComponent;
 
     isLoading: boolean = true;
@@ -113,6 +113,29 @@ export class ProjectSelectorComponent implements OnInit {
 
             this.changed.emit(this.projectsSelected);
             LocalStorage.getStorage().set(`filterByProjectIN${window.location.pathname}`, this.projectsSelected);
+        }
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            '_select',
+            'isLoading',
+            'projectsAvailable',
+            'projectsSelected',
+            'searchFn',
+            'loaded',
+            'added',
+            'removed',
+            'changed',
+            'projectsService',
+        ];
+    }
+
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
         }
     }
 }

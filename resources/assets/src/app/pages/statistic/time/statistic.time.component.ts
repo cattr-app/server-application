@@ -737,11 +737,72 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         this.cdr.detectChanges();
     }
 
+
+    cleanupParams() : string[] {
+        return [
+            'timelineWrapper',
+            'timeline',
+            'dateRangeSelector',
+            'clickPopover',
+            'hoverPopover',
+            'selectedIntervals',
+            'loading',
+            'popoverLoading',
+            'clickPopoverProject',
+            'clickPopoverTask',
+            'clickPopoverScreenshot',
+            'hoverPopoverProject',
+            'hoverPopoverTask',
+            'hoverPopoverEvent',
+            'hoverPopoverTime',
+            'timelineInitialized',
+            'timelineOptions',
+            'updateInterval',
+            'view',
+            'range',
+            'timezone',
+            'viewEvents',
+            'viewEventsTasks',
+            'viewEventsProjects',
+            'viewTimeWorked',
+            'latestEvents',
+            'latestEventsTasks',
+            'latestEventsProjects',
+            'selectedUsers',
+            'sortUsers',
+            'update$',
+            'viewRange$',
+            'viewEvents$',
+            'viewEventsTasks$',
+            'viewEventsProjects$',
+            'viewTimeWorked$',
+            'latestEvents$',
+            'latestEventsTasks$',
+            'latestEventsProjects$',
+            'selectedUsers$',
+            'sortUsers$',
+            'sortedUsers$',
+            'eventFilter',
+            'timeintervalService',
+            'screenshotService',
+            'service',
+            'translate',
+            'cdr',
+            'router',
+            'activatedRoute',
+        ];
+    }
+
     ngOnDestroy() {
         if (this.updateInterval) {
             clearInterval(this.updateInterval);
         }
+
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
+
 
     setMode(mode: string) {
         this.view = 'timeline' + mode[0].toUpperCase() + mode.slice(1);

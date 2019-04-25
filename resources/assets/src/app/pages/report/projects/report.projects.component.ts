@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef } from '@angular/core';
 import { ApiService } from '../../../api/api.service';
 import { Router } from "@angular/router";
 import { AllowedActionsService } from "../../roles/allowed-actions.service";
@@ -25,7 +25,7 @@ import { ResourceInput } from 'fullcalendar-scheduler/src/types/input-types';
     templateUrl: './report.projects.component.html',
     styleUrls: ['../../items.component.scss', './report.projects.component.scss']
 })
-export class ReportProjectsComponent implements OnInit {
+export class ReportProjectsComponent implements OnInit, OnDestroy {
     @ViewChild('timeline') timeline: Schedule;
     @ViewChild('datePicker') datePicker: ElementRef;
 
@@ -45,14 +45,14 @@ export class ReportProjectsComponent implements OnInit {
     timeIntervals: TimeInterval[];
 
     constructor(
-      private api: ApiService,
-      private userService: UsersService,
-      private timeIntervalService: TimeIntervalsService,
-      private projectReportService: ProjectReportService,
-      private projectsService: ProjectsService,
-      private tasksService: TasksService,
-      private router: Router,
-      private allowedService: AllowedActionsService
+        private api: ApiService,
+        private userService: UsersService,
+        private timeIntervalService: TimeIntervalsService,
+        private projectReportService: ProjectReportService,
+        private projectsService: ProjectsService,
+        private tasksService: TasksService,
+        private router: Router,
+        private allowedService: AllowedActionsService
     ) { }
 
     readonly defaultView = 'timelineDay';
@@ -87,230 +87,226 @@ export class ReportProjectsComponent implements OnInit {
      * @param {[type]} projectId [description]
      */
     projectIdChanged(projectId) {
-      this.projectId = projectId;
-      this.refetchEvents();
+        this.projectId = projectId;
+        this.refetchEvents();
     }
 
     /**
      * [can description]
-     * @param  {string}  action [description]
-     * @return {boolean}        [description]
+     * @param    {string}    action [description]
+     * @return {boolean}            [description]
      */
     can(action: string ): boolean {
-      return this.allowedService.can(action);
+        return this.allowedService.can(action);
     }
 
     /**
      * [fetchIntervals description]
-     * @param  {moment.Moment}               start [description]
-     * @param  {moment.Moment}               end   [description]
-     * @return {Promise<EventObjectInput[]>}       [description]
+     * @param    {moment.Moment}                start [description]
+     * @param    {moment.Moment}                end   [description]
+     * @return {Promise<EventObjectInput[]>}          [description]
      */
     fetchEvents(start: moment.Moment, end: moment.Moment): Promise<EventObjectInput[]> {
-      // Add +/- 1 day to avoid issues with timezone.
-      const now = moment.utc().startOf('day').subtract('days', 8);
+        // Add +/- 1 day to avoid issues with timezone.
+        const now = moment.utc().startOf('day').subtract('days', 8);
 
-      const params = {
-        'start_at': now.clone().subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
-        'end_at': now.clone().add(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
-        'project_id': this.projectId ? ['=', this.projectId] : null
-      };
+        const params = {
+            'start_at': now.clone().subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
+            'end_at': now.clone().add(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
+            'project_id': this.projectId ? ['=', this.projectId] : null
+        };
 
-      return new Promise<EventObjectInput[]>((resolve) => {
-        try {
-          this.projectReportService.getItems((events: EventObjectInput[]) => {
-            resolve(events);
-          }, params);//, 'events');
-        } catch (e) {
-          console.error(e.message);
-        }
-      });
+        return new Promise<EventObjectInput[]>((resolve) => {
+            try {
+                this.projectReportService.getItems((events: EventObjectInput[]) => {
+                    resolve(events);
+                }, params);//, 'events');
+            } catch (e) {
+                console.error(e.message);
+            }
+        });
     }
 
     ngOnInit() {
-      const now = moment.utc().startOf('day').subtract('days', 8);
-      const params = {
-        'start_at': now.clone().subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
-        'end_at': now.clone().add(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
-        'project_id': this.projectId ? ['=', this.projectId] : null,
-      };
-      /*this.projectReportService.getItems(() => {
-        debugger;
-      }, null);*/
-      // Add +/- 1 day to avoid issues with timezone.
-
-      const eventSource = {
-        events: async (start, end, timezone, callback) => {
-          try {
-            setTimeout(() => { this.loading = true; });
-            let events = await this.fetchEvents(start, end);
-
-            // If showing events in the past or future.
-            // const now = moment.utc();
-            // if (moment.utc(end).diff(now) < 0 || moment.utc(start).diff(now) > 0) {
-            //     // Always load current events to show the 'is working now' indicator.
-            //     events = events.concat(await this.fetchEvents(now.clone().subtract(1, 'day'), now));
-            // }
-
-            this.events = events;
-            callback(events);
-          } catch (e) {
-            console.error(e);
-            callback([]);
-            setTimeout(() => { this.loading = false; });
-          }
-        }
-      };
-
-      this.timelineOptions = {
-        defaultView: this.defaultView,
-        now: now,
-        timezone: this.timezone,
-        firstDay: 1,
-        themeSystem: 'bootstrap3',
-        views: {
-            timelineDay: {
-                type: 'timeline',
-                duration: { days: 1 },
-                slotDuration: { hours: 1 },
-                buttonText: 'Day',
-            },
-            timelineWeek: {
-                type: 'timeline',
-                duration: { weeks: 1 },
-                slotDuration: { days: 1 },
-                buttonText: 'Week',
-            },
-            timelineMonth: {
-                type: 'timeline',
-                duration: { months: 1 },
-                slotDuration: { days: 1 },
-                buttonText: 'Month',
-            },
-            timelineRange: {
-                type: 'timeline',
-                slotDuration: { days: 1 },
-                visibleRange: {
-                    start: moment.utc(),
-                    end: moment.utc().clone().add(1, 'days'),
-                },
-                buttonText: 'Date range',
-            },
-        },
-        refetchResourcesOnNavigate: false,
-        resourceColumns: [
-          {
-              labelText: 'Projects',
-              field: 'title',
-          },
-          {
-              labelText: 'Time Worked',
-              text: () => '',
-          }
-        ],
-        resources: (callback) => {
-          // Add +/- 1 day to avoid issues with timezone.
-          const now = moment.utc().startOf('day').subtract('days', 6);
-
-          const params = {
+        const now = moment.utc().startOf('day').subtract('days', 8);
+        const params = {
             'start_at': now.clone().subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
             'end_at': now.clone().add(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
             'project_id': this.projectId ? ['=', this.projectId] : null,
-            'type': 'resources'
-          };
+        };
+        /*this.projectReportService.getItems(() => {
+            debugger;
+        }, null);*/
+        // Add +/- 1 day to avoid issues with timezone.
 
-          this.projectReportService.getItems((resources: ResourceInput[]) => {
-            callback(resources);
-          }, params);
-        },
-        displayEventTime: false,
-        eventSources: [eventSource],
-        eventClick: (event, jsEvent, view: View) => {
-          const userId = event.resourceId;
-          /** @todo navigate to the user dashboard. */
-          this.router.navigateByUrl('dashboard');
-        },
-        eventRender: (event, el, view: View) => {
-          if (view.name !== 'timelineDay') {
-              return false;
-          }
-        },
-          eventAfterAllRender: (view: View) => {
+        const eventSource = {
+            events: async (start, end, timezone, callback) => {
+                try {
+                    setTimeout(() => { this.loading = true; });
+                    let events = await this.fetchEvents(start, end);
 
-            this.updateIsWorkingNow();
-            this.updateTimeWorkedOn();
+                    // If showing events in the past or future.
+                    // const now = moment.utc();
+                    // if (moment.utc(end).diff(now) < 0 || moment.utc(start).diff(now) > 0) {
+                    //         // Always load current events to show the 'is working now' indicator.
+                    //         events = events.concat(await this.fetchEvents(now.clone().subtract(1, 'day'), now));
+                    // }
 
-            this.timelineInitialized = true;
+                    this.events = events;
+                    callback(events);
+                } catch (e) {
+                    console.error(e);
+                    callback([]);
+                    setTimeout(() => { this.loading = false; });
+                }
+            }
+        };
 
-            setTimeout(() => { this.loading = false; });
-          },
-          schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
-      };
-      
-      // this.projectReportService.getItems((intervals: string) => {
-      //     }, params);
+        this.timelineOptions = {
+            defaultView: this.defaultView,
+            now: now,
+            timezone: this.timezone,
+            firstDay: 1,
+            themeSystem: 'bootstrap3',
+            views: {
+                    timelineDay: {
+                        type: 'timeline',
+                        duration: { days: 1 },
+                        slotDuration: { hours: 1 },
+                        buttonText: 'Day',
+                    },
+                    timelineWeek: {
+                        type: 'timeline',
+                        duration: { weeks: 1 },
+                        slotDuration: { days: 1 },
+                        buttonText: 'Week',
+                    },
+                    timelineMonth: {
+                        type: 'timeline',
+                        duration: { months: 1 },
+                        slotDuration: { days: 1 },
+                        buttonText: 'Month',
+                    },
+                    timelineRange: {
+                        type: 'timeline',
+                        slotDuration: { days: 1 },
+                        visibleRange: {
+                            start: moment.utc(),
+                            end: moment.utc().clone().add(1, 'days'),
+                        },
+                        buttonText: 'Date range',
+                    },
+            },
+            refetchResourcesOnNavigate: false,
+            resourceColumns: [
+                {
+                    labelText: 'Projects',
+                    field: 'title',
+                },
+                {
+                    labelText: 'Time Worked',
+                    text: () => '',
+                }
+            ],
+            resources: (callback) => {
+                // Add +/- 1 day to avoid issues with timezone.
+                const now = moment.utc().startOf('day').subtract('days', 6);
+
+                const params = {
+                    'start_at': now.clone().subtract(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
+                    'end_at': now.clone().add(1, 'day').format('YYYY-MM-DD HH:mm:ss'),
+                    'project_id': this.projectId ? ['=', this.projectId] : null,
+                    'type': 'resources'
+                };
+
+                this.projectReportService.getItems((resources: ResourceInput[]) => {
+                    callback(resources);
+                }, params);
+            },
+            displayEventTime: false,
+            eventSources: [eventSource],
+            eventClick: (event, jsEvent, view: View) => {
+                const userId = event.resourceId;
+                /** @todo navigate to the user dashboard. */
+                this.router.navigateByUrl('dashboard');
+            },
+            eventRender: (event, el, view: View) => {
+                if (view.name !== 'timelineDay') {
+                        return false;
+                }
+            },
+            eventAfterAllRender: (view: View) => {
+                this.updateIsWorkingNow();
+                this.updateTimeWorkedOn();
+                this.timelineInitialized = true;
+                setTimeout(() => { this.loading = false; });
+            },
+            schedulerLicenseKey: 'CC-Attribution-NonCommercial-NoDerivatives',
+        };
+        // this.projectReportService.getItems((intervals: string) => {
+        //         }, params);
     }
 
     updateIsWorkingNow() {
-      const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
+        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
 
-      $rows.each((index, row) => {
-        const $row = $(row);
-        const resourceId = $row.data('resource-id');
-        const end = moment.utc();
-        const start = end.clone().subtract(10, 'minutes');
-        const events = this.getLoadedEventsEndedBetween(resourceId, start, end);
-        const $cell = $('td:nth-child(1) .fc-cell-text', $row);
+        $rows.each((index, row) => {
+            const $row = $(row);
+            const resourceId = $row.data('resource-id');
+            const end = moment.utc();
+            const start = end.clone().subtract(10, 'minutes');
+            const events = this.getLoadedEventsEndedBetween(resourceId, start, end);
+            const $cell = $('td:nth-child(1) .fc-cell-text', $row);
 
-        if (events.length > 0) {
-            $cell.addClass('is_working_now');
-        } else {
-            $cell.removeClass('is_working_now');
-        }
-      });
+            if (events.length > 0) {
+                $cell.addClass('is_working_now');
+            } else {
+                $cell.removeClass('is_working_now');
+            }
+        });
     }
 
     getLoadedEventsEndedBetween(user_id: number, start: moment.Moment, end: moment.Moment) {
-      // Get loaded events of the specified user, started in the selected time range.
-      return this.events.filter(event => {
-        const isOfCurrentUser = event.resourceId == user_id;
+        // Get loaded events of the specified user, started in the selected time range.
+        return this.events.filter(event => {
+            const isOfCurrentUser = event.resourceId == user_id;
 
-        const eventEnd = moment.utc(event.end);
-        const isInPeriod = eventEnd.diff(start) >= 0 && eventEnd.diff(end) < 0;
+            const eventEnd = moment.utc(event.end);
+            const isInPeriod = eventEnd.diff(start) >= 0 && eventEnd.diff(end) < 0;
 
-        return isOfCurrentUser && isInPeriod;
-      });
+            return isOfCurrentUser && isInPeriod;
+        });
     }
 
     updateTimeWorkedOn() {
-      const view = this.$timeline.fullCalendar('getView');
-      const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
-      const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
-      const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
-      $rows.each((index, row) => {
-          const $row = $(row);
-          const resourceId = $row.data('resource-id');
-          const timeWorked = this.calculateTimeWorkedOn(resourceId, viewStart, viewEnd);
-          const timeWorkedString = this.formatDurationString(timeWorked);
-          const $cell = $('td:nth-child(3) .fc-cell-text', $row);
-          $cell.text(timeWorkedString);
+        const view = this.$timeline.fullCalendar('getView');
+        const viewStart = (moment as any).tz(view.start.format('YYYY-MM-DD'), this.timezone);
+        const viewEnd = (moment as any).tz(view.end.format('YYYY-MM-DD'), this.timezone);
+        const $rows = $('.fc-resource-area tr[data-resource-id]', this.$timeline);
+        $rows.each((index, row) => {
+            const $row = $(row);
+            const resourceId = $row.data('resource-id');
+            const timeWorked = this.calculateTimeWorkedOn(resourceId, viewStart, viewEnd);
+            const timeWorkedString = this.formatDurationString(timeWorked);
+            const $cell = $('td:nth-child(3) .fc-cell-text', $row);
+            $cell.text(timeWorkedString);
 
-          if (timeWorked === 0) {
-              $row.addClass('not_worked');
-          } else {
-              $row.removeClass('not_worked');
-          }
+            if (timeWorked === 0) {
+                $row.addClass('not_worked');
+            } else {
+                $row.removeClass('not_worked');
+            }
 
-          const end = moment.utc();
-          const start = end.clone().subtract(1, 'day');
-          const lastUserEvents = this.getLoadedEventsEndedBetween(resourceId, start, end);
-          if (lastUserEvents.length > 0) {
-              const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
-              const eventEnd = moment(lastUserEvent.end);
-              const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
-              $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc()) + '</p>');
-          }
-      });
+            const end = moment.utc();
+            const start = end.clone().subtract(1, 'day');
+            const lastUserEvents = this.getLoadedEventsEndedBetween(resourceId, start, end);
+            if (lastUserEvents.length > 0) {
+                const lastUserEvent = lastUserEvents[lastUserEvents.length - 1];
+                const eventEnd = moment(lastUserEvent.end);
+                const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
+                $nameCell.append('<p class="last-worked">Last worked ' + eventEnd.from(moment.utc()) + '</p>');
+            }
+        });
     }
 
     calculateTimeWorkedOn(resoourceId: number, start: moment.Moment, end: moment.Moment) {
@@ -328,12 +324,12 @@ export class ReportProjectsComponent implements OnInit {
         // Get loaded events of the specified user, started in the selected time range.
         // debugger;
         return this.events.filter(event => {
-            const isOfCurrentUser = event.resourceId.indexOf(resourceId) !== -1
+        const isOfCurrentUser = event.resourceId.indexOf(resourceId) !== -1
 
-            const eventStart = moment.utc(event.start);
-            const isInPeriod = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
+        const eventStart = moment.utc(event.start);
+        const isInPeriod = eventStart.diff(start) >= 0 && eventStart.diff(end) < 0;
 
-            return isOfCurrentUser && isInPeriod;
+        return isOfCurrentUser && isInPeriod;
         });
     }
 
@@ -357,39 +353,74 @@ export class ReportProjectsComponent implements OnInit {
     }
 
     datePickerSelect(value: moment.Moment) {
-      if (!this.timelineInitialized) {
-        return;
-      }
+        if (!this.timelineInitialized) {
+            return;
+        }
 
-      const date = moment.utc(this.datePickerDate);;
-      this.timelineDate = date;
-      this.datePickerEndDate = date.clone().add(1, 'day').format(this.datePickerFormat);
+        const date = moment.utc(this.datePickerDate);;
+        this.timelineDate = date;
+        this.datePickerEndDate = date.clone().add(1, 'day').format(this.datePickerFormat);
     }
 
     datePickerRangeSelect(value: moment.Moment) {
-      if (!this.timelineInitialized) {
-        return;
-      }
+        if (!this.timelineInitialized) {
+            return;
+        }
 
-      const start = moment.utc(this.datePickerDate);
-      let end = moment.utc(this.datePickerEndDate).add(1, 'day');
+        const start = moment.utc(this.datePickerDate);
+        let end = moment.utc(this.datePickerEndDate).add(1, 'day');
 
-      if (end.diff(start) <= 0) {
-        end = start.clone().add(1, 'day');
-      }
+        if (end.diff(start) <= 0) {
+            end = start.clone().add(1, 'day');
+        }
 
-      this.timeline.gotoDate(start);
-      this.$timeline.fullCalendar('option', 'visibleRange', {
-        start: start,
-        end: end,
-      });
+        this.timeline.gotoDate(start);
+        this.$timeline.fullCalendar('option', 'visibleRange', {
+            start: start,
+            end: end,
+        });
     }
 
-  refetchEvents() {
-    // if (!this.timelineInitialized) {
-    //   return;
-    // }
+    refetchEvents() {
+        // if (!this.timelineInitialized) {
+        //     return;
+        // }
 
-    this.$timeline.fullCalendar('refetchEvents');
-  }  
+        this.$timeline.fullCalendar('refetchEvents');
+    }
+
+    cleanupParams() : string[] {
+        return [
+            'timeline',
+            'datePicker',
+            'timelineInitialized',
+            'timelineOptions',
+            'events',
+            'resources',
+            'timezone',
+            'datePickerDate',
+            'datePickerEndDate',
+            'projectId',
+            'loading',
+            'projects',
+            'users',
+            'tasks',
+            'timeIntervals',
+            'api',
+            'userService',
+            'timeIntervalService',
+            'projectReportService',
+            'projectsService',
+            'tasksService',
+            'router',
+            'allowedService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
+    }
+
 }

@@ -1,4 +1,4 @@
-import { Component, OnInit, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef, ViewChildren, QueryList } from '@angular/core';
+import { Component, OnInit, OnDestroy, ViewChild, ElementRef, AfterViewInit, ChangeDetectorRef, ViewChildren, QueryList } from '@angular/core';
 import { ActivatedRoute } from '@angular/router';
 
 import * as moment from 'moment';
@@ -34,7 +34,7 @@ interface UserInfo {
     templateUrl: './tasks.show.component.html',
     styleUrls: ['./tasks.show.component.scss', '../../items.component.scss']
 })
-export class TasksShowComponent extends ItemsShowComponent implements OnInit, AfterViewInit {
+export class TasksShowComponent extends ItemsShowComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChildren('screenshotLists') screenshotLists: QueryList<ScreenshotListComponent>;
     @ViewChild('graphWrapper') graphWrapper: ElementRef;
 
@@ -198,5 +198,33 @@ export class TasksShowComponent extends ItemsShowComponent implements OnInit, Af
 
     reload() {
         this.screenshotLists.forEach(screenshotList => screenshotList.reload());
+    }
+
+
+
+    cleanupParams() : string[] {
+        return [
+            'screenshotLists',
+            'graphWrapper',
+            'item',
+            'users',
+            'totalTime',
+            'graphSize',
+            'graph',
+            'colorScheme',
+            'selectedIntervalsByDate',
+            'selectedIntervals',
+            'api',
+            'taskService',
+            'router',
+            'allowService',
+            'cdr',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

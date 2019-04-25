@@ -1,4 +1,4 @@
-import {Component, OnInit} from '@angular/core';
+import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
 import {Task} from '../../../models/task.model';
 import {Router} from '@angular/router';
@@ -15,7 +15,7 @@ import {UsersService} from '../../users/users.service';
     templateUrl: './tasks.create.component.html',
     styleUrls: ['../../items.component.scss']
 })
-export class TasksCreateComponent extends ItemsCreateComponent implements OnInit {
+export class TasksCreateComponent extends ItemsCreateComponent implements OnInit, OnDestroy {
 
     public item: Task = new Task();
     public projects: Project[];
@@ -46,6 +46,29 @@ export class TasksCreateComponent extends ItemsCreateComponent implements OnInit
         super.ngOnInit();
         this.projectService.getItems(this.setProjects.bind(this), this.can('/projects/full_access') ? {} : {'direct_relation': 1});
         this.userService.getItems(this.setUsers.bind(this));
+    }
+
+    cleanupParams() : string[] {
+        return [
+            'item',
+            'projects',
+            'users',
+            'selectedProject',
+            'selectedUser',
+            'internalPriorities',
+            'api',
+            'taskService',
+            'router',
+            'allowedService',
+            'projectService',
+            'userService',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 
     OnChangeSelectProject(result) {

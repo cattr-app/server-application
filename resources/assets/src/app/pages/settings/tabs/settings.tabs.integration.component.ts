@@ -1,4 +1,4 @@
-import { Component, Output, EventEmitter } from '@angular/core';
+import { Component, Output, EventEmitter, OnDestroy } from '@angular/core';
 import { NgModel } from '@angular/forms';
 
 import { Message } from 'primeng/components/common/api';
@@ -27,7 +27,7 @@ interface Priority {
     selector: 'settings-integration',
     templateUrl: './settings.tabs.integration.component.html'
 })
-export class IntegrationComponent {
+export class IntegrationComponent implements OnDestroy {
 
     redmineUrl: string;
     redmineApiKey: string;
@@ -127,5 +127,30 @@ export class IntegrationComponent {
 
     isDisplaySuccess(model: NgModel) : boolean {
         return model.valid && (model.dirty || model.touched);
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'redmineUrl',
+            'redmineApiKey',
+            'redmineStatuses',
+            'redminePriorities',
+            'internalPriorities',
+            'redmine_sync',
+            'redmine_active_status',
+            'redmine_deactive_status',
+            'redmineActivateStatuses',
+            'redmineDeactivateStatuses',
+            'redmine_online_timeout',
+            'message',
+            'api',
+        ];
+    }
+
+    ngOnDestroy() {
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }

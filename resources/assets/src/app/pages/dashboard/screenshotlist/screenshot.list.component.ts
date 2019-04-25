@@ -108,10 +108,6 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         }
     }
 
-    ngOnDestroy() {
-        window.removeEventListener('scroll', this.scrollHandler, false);
-    }
-
     loadNext() {
         if (this.screenshotLoading || this.countFail > 3) {
             return;
@@ -257,5 +253,43 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
 
     screenshotsTrackFn(i, el: Screenshot) {
         return i;
+    }
+
+
+    cleanupParams() : string[] {
+        return [
+            'element',
+            'changeTaskModal',
+            'screenshotModal',
+            'onSelectionChanged',
+            'chunksize',
+            'offset',
+            'blocks',
+            'filteredBlocks',
+            'screenshotLoading',
+            'scrollHandler',
+            'countFail',
+            'selected',
+            'selectedDiffer',
+            'selectedIntervals',
+            '_filter',
+            'modalScreenshot',
+            'api',
+            'dashboardService',
+            'screenshotService',
+            'timeIntervalsService',
+            'projectService',
+            'taskService',
+            'differs',
+            'modalService',
+        ];
+    }
+
+    ngOnDestroy() {
+        window.removeEventListener('scroll', this.scrollHandler, false);
+
+        for (let param of this.cleanupParams()) {
+            delete this[param];
+        }
     }
 }
