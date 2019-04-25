@@ -136,3 +136,7 @@ Route::group([
     $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
     $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
 });
+
+Route::any('/{any1?}/{any2?}/{any3?}/{any4?}/{any5?}', static function() {
+    throw new \Illuminate\Database\Eloquent\ModelNotFoundException("Route not found");
+});

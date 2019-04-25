@@ -52,7 +52,17 @@ class Handler extends ExceptionHandler
                 $status_code = 404;
             }
 
-            return response()->json(['error' => $exception->getMessage()], $status_code);
+            $data = [
+                'error' => $exception->getMessage(),
+            ];
+
+            if (config('app.debug')) {
+                $data['code'] = $exception->getCode();
+                $data['class'] = get_class($exception);
+                $data['trace'] = explode("\n", $exception->getTraceAsString());
+            }
+
+            return response()->json($data, $status_code);
         }
 
         return parent::render($request, $exception);
