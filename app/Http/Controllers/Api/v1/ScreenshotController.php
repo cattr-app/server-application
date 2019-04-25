@@ -175,7 +175,7 @@ class ScreenshotController extends ItemController
         $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs", $screenStorePath);
         Storage::put($thumbnailPath, (string) $thumbnail->encode());
 
-        $timeIntervalId = is_int($request->get('time_interval_id')) ? $request->get('time_interval_id') : null;
+        $timeIntervalId = ((int) $request->get('time_interval_id')) ?: null;
 
         $requestData = [
             'time_interval_id' => $timeIntervalId,
@@ -191,8 +191,10 @@ class ScreenshotController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'validation fail',
-                    'reason' => $validator->errors()
+                    [
+                        'error' => 'validation fail',
+                        'reason' => $validator->errors()
+                    ]
                 ]),
                 400
             );

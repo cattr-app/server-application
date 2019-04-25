@@ -46,8 +46,10 @@ class Handler extends ExceptionHandler
     public function render($request, Exception $exception)
     {
         $path = $request->path();
+
         if ($request->expectsJson() || strpos($path, 'api/') === 0) {
             $status_code = 500;
+
             if ($exception instanceof ModelNotFoundException) {
                 $status_code = 404;
             }
@@ -57,8 +59,8 @@ class Handler extends ExceptionHandler
             ];
 
             if (config('app.debug')) {
-                $data['code'] = $exception->getCode();
                 $data['class'] = get_class($exception);
+                $data['code'] = $exception->getCode();
                 $data['trace'] = explode("\n", $exception->getTraceAsString());
             }
 
