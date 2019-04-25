@@ -145,7 +145,7 @@ class TimeIntervalController extends ItemController
                 $this->getEventUniqueName('validation.item.create'),
                 $this->getValidationRules(
                     $intervalData['user_id'] ?? 0,
-                    $intervalData['start_at'] ?? '',
+                    $intervalData['start_at'] ?? ''
                 ))
         );
 
