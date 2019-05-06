@@ -2,7 +2,7 @@ import { Component, DoCheck, IterableDiffers, OnInit, ViewChild, OnDestroy, Inpu
 import { BsModalService, ModalDirective } from 'ngx-bootstrap';
 
 import { ApiService } from '../api/api.service';
-import { ScreenshotsService } from '../pages/screenshots/screenshots.service';
+import { TimeIntervalsService } from '../pages/timeintervals/timeintervals.service';
 import { AllowedActionsService } from '../pages/roles/allowed-actions.service';
 
 import { ItemsListComponent } from '../pages/items.list.component';
@@ -13,6 +13,7 @@ import { TimeInterval } from '../models/timeinterval.model';
 
 import * as moment from 'moment';
 import 'moment-timezone';
+import { ScreenshotsService } from '../pages/screenshots/screenshots.service';
 
 @Component({
     selector: 'screenshot-list',
@@ -78,13 +79,14 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     }
 
     constructor(protected api: ApiService,
-        protected itemService: ScreenshotsService,
+        protected intervalService: TimeIntervalsService,
+        protected screenshotService: ScreenshotsService,
         protected modalService: BsModalService,
         protected allowedAction: AllowedActionsService,
         protected differs: IterableDiffers,
         protected kvDiffers: KeyValueDiffers,
     ) {
-        super(api, itemService, modalService, allowedAction);
+        super(api, intervalService, modalService, allowedAction);
         this.user = api.getUser();
         this.differUsers = differs.find([]).create(null);
         this.differProjects = differs.find([]).create(null);
@@ -167,7 +169,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
             'user',
             '_itemsChunked',
             'api',
-            'itemService',
+            'intervalService',
+            'screenshotService',
             'modalService',
             'allowedAction',
             'differs',
@@ -220,7 +223,7 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         }
 
         const params = {
-            'with': 'timeInterval,timeInterval.task,timeInterval.task.project,timeInterval.user',
+            'with': 'screenshots,task,task.project,user',
             'limit': this.chunksize,
             'offset': this.offset,
             'order_by': ['id', 'desc'],
@@ -235,38 +238,55 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         }
 
         if (this.task_ids && this.task_ids.length) {
-            params['timeInterval.task_id'] = ['=', this.task_ids];
+            params['task_id'] = ['=', this.task_ids];
         }
 
         if (this.max_date && !this.min_date && this.max_date.length) {
             const date = moment(this.max_date, 'DD-MM-YYYY').utc().add(1, 'day').format('YYYY-MM-DD HH:mm:ss');
-            params['timeInterval.start_at'] = ['<=', date];
+            params['start_at'] = ['<=', date];
         }
 
         if (this.min_date && !this.max_date && this.min_date.length) {
             const date = moment(this.min_date, 'DD-MM-YYYY').utc().format('YYYY-MM-DD HH:mm:ss');
-            params['timeInterval.end_at'] = ['>=', date];
+            params['end_at'] = ['>=', date];
         }
 
         if (this.min_date && this.max_date && this.min_date.length && this.max_date.length) {
             const start = moment(this.min_date, 'DD-MM-YYYY').utc().format('YYYY-MM-DD HH:mm:ss');
             const end = moment(this.max_date, 'DD-MM-YYYY').utc().add(1, 'day').format('YYYY-MM-DD HH:mm:ss');
-            params['timeInterval.end_at'] = ['>=', start];
-            params['timeInterval.start_at'] = ['<=', end];
+            params['end_at'] = ['>=', start];
+            params['start_at'] = ['<=', end];
         }
 
         this.screenshotLoading = true;
         try {
             this.isLoading = true;
-            this.itemService.getItems(items => {
-                if (items.length > 0) {
-                    this.setItems(this.itemsArray.concat(items));
+            this.intervalService.getItems((intervals: TimeInterval[]) => {
+                if (intervals.length > 0) {
+                    const screenshots = intervals.reduce((total, interval) => {
+                        if (interval.screenshots.length) {
+                            const intervalScreenshots = interval.screenshots.map(screenshot => {
+                                screenshot.time_interval = interval;
+                                return screenshot;
+                            });
+                            return total.concat(intervalScreenshots);
+                        } else {
+                            // Add empty screenshot to the screenshot list, if interval haven't screenshots.
+                            const screenshot = new Screenshot({
+                                id: 0,
+                                time_interval: interval,
+                                path: '',
+                            });
+                            return total.concat([screenshot]);
+                        }
+                    }, []);
+                    this.setItems(this.itemsArray.concat(screenshots));
                     this.offset += this.chunksize;
                 } else {
                     this.countFail += 1;
                 }
 
-                this.isAllLoaded = items.length < this.chunksize;
+                this.isAllLoaded = intervals.length < this.chunksize;
                 this.screenshotLoading = false;
                 this.isLoading = false;
             }, params);
@@ -294,7 +314,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
 
     showPrev() {
         const items = this.itemsArray as Screenshot[];
-        const index = items.findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+        const index = items.findIndex(screenshot => screenshot.time_interval.id
+            === this.modalScreenshot.time_interval.id);
 
         if (index > 0) {
             this.modalScreenshot = items[index - 1];
@@ -303,7 +324,8 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
 
     showNext() {
         const items = this.itemsArray as Screenshot[];
-        const index = items.findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+        const index = items.findIndex(screenshot => screenshot.time_interval.id
+            === this.modalScreenshot.time_interval.id);
 
         if (index !== -1 && index < items.length - 1) {
             this.modalScreenshot = items[index + 1];
@@ -311,9 +333,11 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
     }
 
     delete(screenshot: Screenshot) {
-        this.itemService.removeItem(screenshot.id, () => {
+        this.screenshotService.removeItem(screenshot.id, () => {
             const items = this.itemsArray as Screenshot[];
             const index = items.findIndex(scr => scr.id === screenshot.id);
+            screenshot.path = '';
+            screenshot.thumbnail_path = '';
 
             if (index !== -1 && index < items.length - 1) {
                 this.modalScreenshot = items[index + 1];
@@ -322,9 +346,6 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
             } else {
                 this.screenshotModal.hide();
             }
-
-            this.setItems(items.filter(scr => scr.id !== screenshot.id));
-            this.onScrollDown(); // To load new items, if needed.
         });
     }
 

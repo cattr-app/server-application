@@ -46,7 +46,7 @@
     <div class="modal-dialog modal-lg">
         <div class="modal-content" *ngIf="modalScreenshot">
             <div class="modal-header">
-                <h4 class="modal-title pull-left">Screenshot #{{ modalScreenshot.id }}</h4>
+                <h4 class="modal-title pull-left">Screenshot <span *ngIf="modalScreenshot.id">#{{ modalScreenshot.id }}</span></h4>
 
                 <button type="button" class="close pull-right" aria-label="Close" (click)="screenshotModal.hide()">
                     <span aria-hidden="true">&times;</span>
