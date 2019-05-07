@@ -167,6 +167,23 @@ class AuthController extends Controller
         ]);
     }
 
+    protected function validateRecaptcha(string $token): bool
+    {
+        $privKey = env('RECAPTCHA_PRIVATE');
+        if (empty($privKey)) {
+            return true;
+        }
+
+        $client = new \GuzzleHttp\Client();
+        $response = $client->post('https://www.google.com/recaptcha/api/siteverify', [
+            'form_params' => [
+                'secret'   => $privKey,
+                'response' => $token,
+            ],
+        ]);
+        return json_decode($response->getBody(), true)['success'];
+    }
+
    /**
     * @api {post} /api/auth/login Login
     * @apiDescription Get user JWT
@@ -197,8 +214,15 @@ class AuthController extends Controller
     *
     * @return JsonResponse
     */
-    public function login(): JsonResponse
+    public function login(Request $request): JsonResponse
     {
+        // Ignore captcha validation for the desktop client
+        if (substr($request->header('user-agent', ''), 0, 6) !== 'khttp/') {
+            if (!$this->validateRecaptcha(request('recaptcha', ''))) {
+                return response()->json(['error' => 'Unauthorized'], 401);
+            }
+        }
+
         $credentials = request([
             'login',
             'password'
@@ -209,6 +233,7 @@ class AuthController extends Controller
             'password' => $credentials['password'] ?? null,
         ];
 
+        /** @var string $token */
         if (!$token = auth()->attempt($data)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }

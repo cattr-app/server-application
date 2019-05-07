@@ -14,6 +14,8 @@ export class LoginComponent implements OnInit {
     public model: Login = new Login();
     error?: string = null;
 
+    public siteKey = '6LetAqIUAAAAAGZ_DCjOP_XHVrd8rswRuZMH6quz';
+
     constructor(
         private loginService: LoginService,
         private api: ApiService,
@@ -31,12 +33,16 @@ export class LoginComponent implements OnInit {
             this.router.navigateByUrl('/');
         }, error => {
             if (error.status === 401) {
-                this.error = 'Incorrect password';
+                this.error = 'Incorrect password or captcha';
             } else if (error.status === 0) {
                 this.error = 'Connection problem';
             } else {
                 this.error = error.statusText;
             }
         });
+    }
+
+    public captchaResolved(token: string) {
+        this.model.recaptcha = token;
     }
 }
