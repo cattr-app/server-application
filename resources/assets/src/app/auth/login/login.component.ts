@@ -12,7 +12,7 @@ export class LoginComponent implements OnInit {
     @Output() changeTitle: EventEmitter<String> = new EventEmitter<string>();
 
     public model: Login = new Login();
-    error?: string = null;
+    public error?: string = null;
 
     public siteKey = (window as any).recaptcha_pubkey || '';
 

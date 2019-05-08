@@ -11,6 +11,12 @@
         </div>
 
         <div class="form-group">
+          <label translate>field.new-password</label>
+          <input type="password" class="form-control" name="password"
+            [(ngModel)]="model.password" #passwordEl="ngModel" required>
+        </div>
+
+        <div class="form-group">
             <re-captcha [siteKey]="siteKey" (resolved)="captchaResolved($event)"></re-captcha>
         </div>
 

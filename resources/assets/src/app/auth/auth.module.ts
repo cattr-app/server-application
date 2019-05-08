@@ -11,11 +11,13 @@ import {LoadingModule} from 'ngx-loading';
 import {AuthRoute} from './auth-routing.module';
 
 import {LoginComponent} from './login/login.component';
-import {ForgotComponent} from "./forgot/forgot.component";
 import {ResetComponent} from "./reset/reset.component";
+import { ConfirmResetComponent } from './comfirm-reset/confirm-reset.component';
 import {RegisterComponent} from './register/register.component';
 
 import {LoginService} from "./login/login.service";
+import { ResetService } from './reset/reset.service';
+import { ConfirmResetService } from './comfirm-reset/confirm-reset.service';
 
 @NgModule({
     imports: [
@@ -30,12 +32,14 @@ import {LoginService} from "./login/login.service";
     ],
     declarations: [
         LoginComponent,
-        ForgotComponent,
         ResetComponent,
+        ConfirmResetComponent,
         RegisterComponent,
     ],
     providers: [
         LoginService,
+        ResetService,
+        ConfirmResetService,
     ]
 })
 export class AuthModule {

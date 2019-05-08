@@ -14,6 +14,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\Project;
 use App\Models\Role;
+use Illuminate\Contracts\Auth\CanResetPassword;
 
 /**
  * Class User
@@ -55,9 +56,9 @@ use App\Models\Role;
  * @property TimeInterval[] $timeIntervals
  * @property User[]         $attached_users
  */
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
-    use Notifiable, SoftDeletes;
+    use Notifiable, SoftDeletes, \Illuminate\Auth\Passwords\CanResetPassword;
 
     /**
      * table name from database

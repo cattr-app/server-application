@@ -21,7 +21,6 @@ export class NavigationComponent implements OnInit {
 
     protected itemsGuest: NavigationLink[] = [
         {title: 'navigation.login', action: 'auth/login', isLink: true},
-        {title: 'navigation.forgot', action: 'auth/forgot', isLink: true},
         {title: 'navigation.reset', action: 'auth/reset', isLink: true},
     ];
 

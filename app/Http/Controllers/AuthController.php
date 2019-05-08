@@ -3,9 +3,10 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CatHelper;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Http\{Request, Response, JsonResponse};
+use Illuminate\Support\Facades\{Auth, DB, Hash, Password};
+use Illuminate\Support\Str;
 
 /**
  * Class AuthController
@@ -89,7 +90,7 @@ class AuthController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api', [
-            'except' => ['login', 'refresh']
+            'except' => ['login', 'refresh', 'sendReset', 'getReset', 'reset']
         ]);
     }
 
@@ -194,7 +195,8 @@ class AuthController extends Controller
     * @apiGroup Auth
     *
     * @apiParam {String}   login       User login
-    * @apiParam {Integer}  password    User password
+    * @apiParam {String}   password    User password
+    * @apiParam {String}   recaptcha   Recaptcha token
     *
     * @apiSuccess {String}     access_token  Token
     * @apiSuccess {String}     token_type    Token Type
@@ -207,6 +209,7 @@ class AuthController extends Controller
     *  {
     *      "login":      "johndoe@example.com",
     *      "password":   "amazingpassword",
+    *      "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
     *  }
     *
     * @apiUse AuthAnswer
@@ -401,5 +404,139 @@ class AuthController extends Controller
             'expires_in' => auth()->factory()->getTTL() * 60,
             'user' => auth()->user()
         ]);
+    }
+
+    /**
+     * Get the broker to be used during password reset.
+     *
+     * @return \Illuminate\Contracts\Auth\PasswordBroker
+     */
+    protected function broker()
+    {
+        return Password::broker();
+    }
+
+    /**
+     * Get the guard to be used during password reset.
+     *
+     * @return \Illuminate\Contracts\Auth\StatefulGuard
+     */
+    protected function guard()
+    {
+        return Auth::guard();
+    }
+
+    /**
+     * @api {post} /api/auth/send-reset Send reset e-mail
+     * @apiDescription Get user JWT
+     *
+     *
+     * @apiVersion 0.1.0
+     * @apiName Send reset
+     * @apiGroup Auth
+     *
+     * @apiParam {String}   login       User login
+     * @apiParam {String}   recaptcha   Recaptcha token
+     *
+     * @apiError (Error 401) {String} Error Error
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *      "login":      "johndoe@example.com",
+     *      "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *  }
+     *
+     * @apiUse AuthAnswer
+     * @apiUse UnauthorizedError
+     *
+     * @return Response|JsonResponse
+     */
+    public function sendReset()
+    {
+        if (!$this->validateRecaptcha(request('recaptcha', ''))) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $credentials = [
+            'email' => request('login', ''),
+        ];
+
+        $this->broker()->sendResetLink($credentials);
+
+        return new Response('', 204);
+    }
+
+    /**
+     * Redirects user to the reset password confirmation form in the frontend.
+     *
+     * @param string $token
+     *
+     * @return RedirectResponse
+     */
+    public function getReset(Request $request, $token)
+    {
+        return redirect("auth/confirm-reset/$token");
+    }
+
+    /**
+     * @api {post} /api/auth/reset Reset
+     * @apiDescription Get user JWT
+     *
+     *
+     * @apiVersion 0.1.0
+     * @apiName Reset
+     * @apiGroup Auth
+     *
+     * @apiParam {String}   login       User login
+     * @apiParam {String}   token       Password reset token
+     * @apiParam {String}   password    User password
+     * @apiParam {String}   recaptcha   Recaptcha token
+     *
+     * @apiSuccess {String}     access_token  Token
+     * @apiSuccess {String}     token_type    Token Type
+     * @apiSuccess {String}     expires_in    Token TTL in seconds
+     * @apiSuccess {Array}      user          User Entity
+     *
+     * @apiError (Error 401) {String} Error Error
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *      "login":      "johndoe@example.com",
+     *      "token":      "16184cf3b2510464a53c0e573c75740540fe...",
+     *      "password":   "amazingpassword",
+     *      "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *  }
+     *
+     * @apiUse AuthAnswer
+     * @apiUse UnauthorizedError
+     *
+     * @return JsonResponse
+     */
+    public function reset()
+    {
+        if (!$this->validateRecaptcha(request('recaptcha', ''))) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $data = request(['token', 'password']);
+        $data['email'] = request('login');
+        $data['password_confirmation'] = $data['password'];
+        $response = $this->broker()->reset(
+            $data,
+            function ($user, $password) {
+                $user->password = Hash::make($password);
+                $user->setRememberToken(Str::random(60));
+                $user->save();
+                event(new PasswordReset($user));
+                $this->guard()->login($user);
+            }
+        );
+        if ($response !== Password::PASSWORD_RESET) {
+            return response()->json(['error' => 'Unauthorized'], 401);
+        }
+
+        $token = auth()->refresh();
+        $this->setToken($token);
+        return $this->respondWithToken($token);
     }
 }
