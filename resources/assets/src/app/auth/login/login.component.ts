@@ -14,7 +14,7 @@ export class LoginComponent implements OnInit {
     public model: Login = new Login();
     error?: string = null;
 
-    public siteKey = '6LetAqIUAAAAAGZ_DCjOP_XHVrd8rswRuZMH6quz';
+    public siteKey = (window as any).recaptcha_pubkey || '';
 
     constructor(
         private loginService: LoginService,

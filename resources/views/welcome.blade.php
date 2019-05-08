@@ -16,6 +16,9 @@
         <app-root></app-root>
 
         <script type="text/javascript" src="https://www.google.com/recaptcha/api.js" async defer></script>
+        <script type="text/javascript">
+            window.recaptcha_pubkey = '{{ env('RECAPTCHA_PUBLIC') }}';
+        </script>
     @foreach ($scripts as $script)
         <script type="text/javascript" src="/js/{{ $script }}"></script>
     @endforeach
