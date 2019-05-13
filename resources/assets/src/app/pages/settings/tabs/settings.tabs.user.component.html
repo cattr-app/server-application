@@ -133,8 +133,8 @@
 
         <div class="form-group row" *ngIf="can('/users/full_access')">
             <label class="col-md-2">
-                <abbr title="{{ 'field.manual-time-title' | translate }}"
-                    translate>field.manual-time</abbr>
+                <span class="has-tooltip" tooltip="{{ 'field.manual-time-title' | translate }}"
+                    translate>field.manual-time</span>
             </label>
             <div class="col-md-10">
                 <input
@@ -168,8 +168,8 @@
 
         <div class="form-group row" *ngIf="can('/users/full_access')">
             <label class="col-md-2" translate>
-                <abbr title="{{ 'field.computer-time-popup-title' | translate }}"
-                    translate>field.computer-time-popup</abbr>
+                <span class="has-tooltip" tooltip="{{ 'field.computer-time-popup-title' | translate }}"
+                    translate>field.computer-time-popup</span>
             </label>
             <div class="col-md-10"
                 [class.has-error]="isDisplayError(computer_time_popup)"

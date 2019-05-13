@@ -22,6 +22,7 @@ import {TimezonePickerModule} from 'ng2-timezone-selector';
 import {TranslateModule} from '@ngx-translate/core';
 import {SharedModule} from '../../shared.module';
 import { LoadingModule } from 'ngx-loading';
+import { TooltipModule } from 'ngx-bootstrap';
 
 @NgModule({
     imports: [
@@ -36,6 +37,7 @@ import { LoadingModule } from 'ngx-loading';
         TranslateModule,
         SharedModule,
         LoadingModule,
+        TooltipModule.forRoot(),
     ],
     declarations: [
         UsersCreateComponent,

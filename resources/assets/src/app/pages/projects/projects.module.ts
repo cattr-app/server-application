@@ -21,6 +21,7 @@ import {SharedModule} from '../../shared.module';
 import {TranslateModule} from '@ngx-translate/core';
 import {AutoCompleteModule} from 'primeng/autocomplete';
 import { LoadingModule } from 'ngx-loading';
+import { TooltipModule } from 'ngx-bootstrap';
 
 @NgModule({
     imports: [
@@ -34,6 +35,7 @@ import { LoadingModule } from 'ngx-loading';
         TranslateModule,
         AutoCompleteModule,
         LoadingModule,
+        TooltipModule.forRoot(),
     ],
     declarations: [
         ProjectsCreateComponent,

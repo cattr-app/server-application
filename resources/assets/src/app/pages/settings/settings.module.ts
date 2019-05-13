@@ -18,6 +18,7 @@ import {AutoCompleteModule} from 'primeng/autocomplete';
 import { NgSelectModule } from '@ng-select/ng-select';
 import { SharedModule } from '../../shared.module';
 import { GrowlModule } from 'primeng/growl';
+import { TooltipModule } from 'ngx-bootstrap';
 
 @NgModule({
     imports: [
@@ -36,6 +37,7 @@ import { GrowlModule } from 'primeng/growl';
         SharedModule,
         TimezonePickerModule,
         GrowlModule,
+        TooltipModule.forRoot(),
     ],
     declarations: [
         SettingsComponent,

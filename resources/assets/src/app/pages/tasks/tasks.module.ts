@@ -20,6 +20,7 @@ import {TranslateModule} from '@ngx-translate/core';
 import { AccordionModule } from 'ngx-bootstrap/accordion';
 import { LoadingModule } from 'ngx-loading';
 import { NgxChartsModule } from '@swimlane/ngx-charts';
+import { TooltipModule } from 'ngx-bootstrap';
 
 @NgModule({
     imports: [
@@ -34,6 +35,7 @@ import { NgxChartsModule } from '@swimlane/ngx-charts';
         AccordionModule.forRoot(),
         LoadingModule,
         NgxChartsModule,
+        TooltipModule.forRoot(),
     ],
     declarations: [
         TasksCreateComponent,

@@ -22,7 +22,8 @@ type UserWithProjects = User & { projects?: Project[] };
 
 @Component({
     selector: 'settings-user',
-    templateUrl: './settings.tabs.user.component.html'
+    templateUrl: './settings.tabs.user.component.html',
+    styleUrls: ['../../items.component.scss'],
 })
 export class UserSettingsComponent extends ItemsEditComponent implements OnInit, OnDestroy {
     @ViewChild('timezone') timezone: TimezonePickerComponent;
