@@ -8,6 +8,7 @@ use Filter;
 use Illuminate\Http\Request;
 use Validator;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
+use Modules\RedmineIntegration\Models\RedmineClient;
 
 /**
  * Class RedmineSettingsController
@@ -153,6 +154,30 @@ class RedmineSettingsController extends AbstractRedmineController
             'redmine_deactivate_statuses' => $userRepository->getDeactivateStatuses($userId),
             'redmine_online_timeout' => $userRepository->getOnlineTimeout($userId),
         ];
+
+        // Return default priorities and statuses if it is not saved
+        if (!empty($userRepository->getUserRedmineUrl($userId))) {
+            if (empty($settingsArray['redmine_statuses'])) {
+                $client = new RedmineClient($userId);
+                $settingsArray['redmine_statuses'] = array_map(function ($status) {
+                    $status['is_active'] = !isset($status['is_closed']);
+                    return $status;
+                }, $client->issue_status->all()['issue_statuses']);
+            }
+    
+            if (empty($settingsArray['redmine_priorities'])) {
+                $client = new RedmineClient($userId);
+                $settingsArray['redmine_priorities'] = array_map(function ($priority) {
+                    if (Priority::find($priority['id'])) {
+                        $priority['priority_id'] = $priority['id'];
+                    } else {
+                        $priority['priority_id'] = Priority::max('id');
+                    }
+    
+                    return $priority;
+                }, $client->issue_priority->all()['issue_priorities']);
+            }
+        }
 
         return response()->json(
             $settingsArray,

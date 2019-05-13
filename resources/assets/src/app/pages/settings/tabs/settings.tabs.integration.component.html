@@ -4,7 +4,8 @@
         <label class="col-md-2" translate>integration.redmine.apiurl</label>
         <div class="col-md-10">
             <input type="text" class="form-control" name="redmine-url"
-                [(ngModel)]="redmineUrl">
+                [(ngModel)]="redmineUrl" required>
+            <span class="help-block" translate>control.required-field</span>
         </div>
     </div>
 
@@ -12,7 +13,8 @@
         <label class="col-md-2" translate>integration.redmine.apikey</label>
         <div class="col-md-10">
             <input type="text" class="form-control" name="redmine-api-key"
-                [(ngModel)]="redmineApiKey">
+                [(ngModel)]="redmineApiKey" required>
+            <span class="help-block" translate>control.required-field</span>
         </div>
     </div>
 

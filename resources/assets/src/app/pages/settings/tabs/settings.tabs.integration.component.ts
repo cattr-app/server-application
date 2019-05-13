@@ -47,8 +47,40 @@ export class IntegrationComponent implements OnDestroy {
     constructor(
         private api: ApiService,
     ) {
+        this.loadSettings();
+    }
+
+    onSubmit() {
+        this.api.sendSettings({
+            'redmine_url': this.redmineUrl,
+            'redmine_key': this.redmineApiKey,
+            'redmine_statuses': this.redmineStatuses,
+            'redmine_priorities': this.redminePriorities,
+            'redmine_active_status': this.redmine_active_status,
+            'redmine_deactive_status': this.redmine_deactive_status,
+            'redmine_activate_statuses': this.fromInputCheckboxArray(this.redmineActivateStatuses),
+            'redmine_deactivate_statuses': this.fromInputCheckboxArray(this.redmineDeactivateStatuses),
+            'redmine_online_timeout': this.redmine_online_timeout,
+            'redmine_sync': this.redmine_sync,
+        }, () => {
+            this.loadSettings();
+            this.message.emit({
+                severity: 'success',
+                summary: 'Success Message',
+                detail: 'Settings have been updated',
+            });
+        }, (result) => {
+            this.message.emit({
+                severity: 'error',
+                summary: result.error.error,
+                detail: result.error.reason,
+            });
+        });
+    }
+
+    protected loadSettings() {
         try {
-            api.getSettings([], result => {
+            this.api.getSettings([], result => {
                 this.redmineUrl = result.redmine_url;
                 this.redmineApiKey = result.redmine_api_key;
                 this.redmineStatuses = result.redmine_statuses;
@@ -68,33 +100,6 @@ export class IntegrationComponent implements OnDestroy {
         } catch(err) {
             console.log(err)
         }
-    }
-
-    onSubmit() {
-        this.api.sendSettings({
-            'redmine_url': this.redmineUrl,
-            'redmine_key': this.redmineApiKey,
-            'redmine_statuses': this.redmineStatuses,
-            'redmine_priorities': this.redminePriorities,
-            'redmine_active_status': this.redmine_active_status,
-            'redmine_deactive_status': this.redmine_deactive_status,
-            'redmine_activate_statuses': this.fromInputCheckboxArray(this.redmineActivateStatuses),
-            'redmine_deactivate_statuses': this.fromInputCheckboxArray(this.redmineDeactivateStatuses),
-            'redmine_online_timeout': this.redmine_online_timeout,
-            'redmine_sync': this.redmine_sync,
-        }, () => {
-            this.message.emit({
-                severity: 'success',
-                summary: 'Success Message',
-                detail: 'Settings have been updated',
-            });
-        }, (result) => {
-            this.message.emit({
-                severity: 'error',
-                summary: result.error.error,
-                detail: result.error.reason,
-            });
-        });
     }
 
     protected toInputCheckboxArray(input) : boolean[] {
