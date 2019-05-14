@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\User;
 use App\Helpers\CatHelper;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\{Request, Response, JsonResponse};
@@ -453,17 +454,25 @@ class AuthController extends Controller
      */
     public function sendReset()
     {
-        if (!$this->validateRecaptcha(request('recaptcha', ''))) {
+        $captcha = request('recaptcha', '');
+        if (!$this->validateRecaptcha($captcha)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
-        $credentials = [
-            'email' => request('login', ''),
-        ];
+        $email = request('login', '');
+        $user = User::where(['email' => $email])->first();
+        if (!isset($user)) {
+            return response()->json([
+                'error' => 'User with such email isn’t found',
+            ], 404);
+        }
 
+        $credentials = ['email' => $email];
         $this->broker()->sendResetLink($credentials);
 
-        return new Response('', 204);
+        return response()->json([
+            'message' => 'Link for restore password has been sent to your email.',
+        ], 200);
     }
 
     /**

@@ -1,4 +1,9 @@
 <div class="container">
+    <div class="alert alert-success" role="alert" *ngIf="message">
+        <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="message = null"><span aria-hidden="true">&times;</span></button>
+        {{ message }}
+    </div>
+
     <div class="alert alert-danger" role="alert" *ngIf="error">
         <button type="button" class="close" data-dismiss="alert" aria-label="Close" (click)="error = null"><span aria-hidden="true">&times;</span></button>
         {{ error }}
@@ -11,7 +16,7 @@
         </div>
 
         <div class="form-group">
-            <re-captcha [siteKey]="siteKey" (resolved)="captchaResolved($event)"></re-captcha>
+            <re-captcha #captcha [siteKey]="siteKey" (resolved)="captchaResolved($event)"></re-captcha>
         </div>
 
         <button type="submit" class="btn btn-primary" translate>login.submit</button>

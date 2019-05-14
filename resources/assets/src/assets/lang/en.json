@@ -81,6 +81,12 @@
 	"login": {
 		"submit": "Submit"
 	},
+	"reset": {
+		"user-not-found": "User with such email isn’t found",
+		"invalid-captcha": "Incorrect captcha",
+		"connection-problem": "Connection problem",
+		"sent": "Link for restore password has been sent to your email."
+	},
 	"task": {
 		"edit": "Edit task",
 		"list": "Tasks",
