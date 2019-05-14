@@ -106,10 +106,11 @@ export class UsersListComponent extends ItemsListComponent implements OnInit, On
     toggleActive(user: User) {
         this.itemService.editItem(user.id, {
             ...user,
-            active: !user.active,
+            // Sometimes server returns number as string, so convert it to number first
+            active: !+user.active,
         }, result => {
             // On success update display.
-            user.active = +!user.active;
+            user.active = +result.res.active;
         });
     }
 }

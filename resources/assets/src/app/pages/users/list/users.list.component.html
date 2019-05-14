@@ -26,7 +26,8 @@
                             </tr>
                             </thead>
                             <tbody>
-                            <tr *ngFor="let user of itemsArray">
+                            <tr class="user" [class.user--active]="+user.active" [class.user--inactive]="!+user.active"
+                                *ngFor="let user of itemsArray">
                                 <td>{{user.id}}</td>
                                 <td>{{user.first_name}}</td>
                                 <td>{{user.last_name}}</td>
@@ -52,7 +53,7 @@
                                     </a>
                                     <button *ngIf="can('/users/edit')" class="btn btn-primary btn-sm" (click)="toggleActive(user)">
                                         <i class="fa fa-pencil-square-o" aria-hidden="true"></i>
-                                        <span translate>{{ user.active ? 'control.deactivate' : 'control.activate' }}</span>
+                                        <span translate>{{ +user.active ? 'control.deactivate' : 'control.activate' }}</span>
                                     </button>
                                     <a *ngIf="can('/users/remove')" (click)="openRemoveItemModalWindow(template, user.id)" title="Delete user">
                                         <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
