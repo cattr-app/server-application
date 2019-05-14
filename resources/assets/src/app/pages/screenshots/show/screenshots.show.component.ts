@@ -1,6 +1,6 @@
 import {Component, OnInit, OnDestroy} from '@angular/core';
 import {ApiService} from '../../../api/api.service';
-import {ActivatedRoute} from '@angular/router';
+import {ActivatedRoute, Router} from '@angular/router';
 import {ScreenshotsService} from '../screenshots.service';
 import {ItemsShowComponent} from '../../items.show.component';
 import {Screenshot} from '../../../models/screenshot.model';
@@ -17,13 +17,14 @@ export class ScreenshotsShowComponent extends ItemsShowComponent implements OnIn
 
     constructor(api: ApiService,
                 screenshotService: ScreenshotsService,
-                router: ActivatedRoute,
-                allowService: AllowedActionsService) {
-        super(api, screenshotService, router, allowService);
+                route: ActivatedRoute,
+                allowService: AllowedActionsService,
+                private router: Router) {
+        super(api, screenshotService, route, allowService);
     }
 
     ngOnInit() {
-        this.sub = this.router.params.subscribe(params => {
+        this.sub = this.route.params.subscribe(params => {
             this.id = +params['id'];
         });
         const filter = {'with': 'timeInterval,timeInterval.task,timeInterval.user'};
@@ -31,6 +32,11 @@ export class ScreenshotsShowComponent extends ItemsShowComponent implements OnIn
         this.itemService.getItem(this.id, this.setItem.bind(this), filter);
     }
 
+    delete() {
+        this.itemService.removeItem(this.id, () => {
+            this.router.navigate(['/screenshots/list']);
+        });
+    }
 
     cleanupParams() : string[] {
         return [

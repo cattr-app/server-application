@@ -48,13 +48,13 @@ export class ProjectsShowComponent extends ItemsShowComponent implements OnInit,
 
     constructor(api: ApiService,
                 projectService: ProjectsService,
-                router: ActivatedRoute,
+                route: ActivatedRoute,
                 allowedService: AllowedActionsService) {
-        super(api, projectService, router, allowedService);
+        super(api, projectService, route, allowedService);
     }
 
     ngOnInit() {
-        this.sub = this.router.params.subscribe(params => {
+        this.sub = this.route.params.subscribe(params => {
             this.id = +params['id'];
         });
 

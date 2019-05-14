@@ -12,12 +12,12 @@ export abstract class ItemsShowComponent implements OnInit {
 
     constructor(protected api: ApiService,
                 protected itemService: ItemsService,
-                protected router: ActivatedRoute,
+                protected route: ActivatedRoute,
                 protected allowedAction: AllowedActionsService) {
     }
 
     ngOnInit() {
-        this.sub = this.router.params.subscribe(params => {
+        this.sub = this.route.params.subscribe(params => {
             this.id = +params['id'];
         });
 

@@ -22,15 +22,15 @@ export class UsersShowComponent extends ItemsShowComponent implements OnInit, On
 
     constructor(api: ApiService,
                 userService: UsersService,
-                router: ActivatedRoute,
+                route: ActivatedRoute,
                 allowService: AllowedActionsService,
                 protected translate: TranslateService,
     ) {
-        super(api, userService, router, allowService);
+        super(api, userService, route, allowService);
     }
 
     ngOnInit() {
-        this.sub = this.router.params.subscribe(params => {
+        this.sub = this.route.params.subscribe(params => {
             this.id = +params['id'];
         });
 
