@@ -24,6 +24,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     @ViewChild('tabs') tabs: TabsetComponent;
     @ViewChild('taskList') taskList: TaskListComponent;
     @ViewChild('tabOwn', {read: TabDirective}) tabOwn: TabDirective;
+    @ViewChild('tabTimeline', {read: TabDirective}) tabTimeline: TabDirective;
     @ViewChild('tabTeam', {read: TabDirective}) tabTeam: TabDirective;
     @ViewChild('screenshotList') screenshotList: ScreenshotListComponent;
     @ViewChild('userSelect') userSelect: UserSelectorComponent;
@@ -76,7 +77,7 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
     }
 
     changeTab(tab: TabDirective) {
-        if (tab.heading !== undefined) {
+        if (tab) {
             this.selectedTab = tab;
             this.selectedIntervals = [];
             this.reload();

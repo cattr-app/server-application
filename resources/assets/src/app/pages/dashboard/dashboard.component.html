@@ -1,14 +1,16 @@
-<div [class]="selectedTab === tabTeam ? 'container-fluid' : 'container'">
+<div [class]="selectedTab && selectedTab.id === 'team' ? 'container-fluid' : 'container'">
     <div class="row">
         <div class="col-md-12">
             <div class="panel panel-default">
                 <div class="panel-body">
-                    <div class="header-buttons btn-group" role="group" *ngIf="selectedTab === tabTeam">
-                        <button type="button" (click)="teamStatistic.exportCSV()" class="btn btn-default" translate>control.export-csv</button>
+                    <div class="header-buttons btn-group" role="group">
+                        <button *ngIf="selectedTab && selectedTab.id === 'timeline'" type="button" (click)="userStatistic.exportCSV()" class="btn btn-default" translate>control.export-csv</button>
+                        <button *ngIf="selectedTab && selectedTab.id === 'team'"  type="button" (click)="teamStatistic.exportCSV()" class="btn btn-default" translate>control.export-csv</button>
                     </div>
 
                     <tabset #tabs>
-                        <tab #tabOwn heading="{{'control.own' | translate }}" (select)="changeTab($event)">
+                        <tab #tabOwn id="own" heading="{{'control.own' | translate }}"
+                            (select)="changeTab($event)">
                             <dashboard-tasklist #taskList>
                             </dashboard-tasklist>
 
@@ -25,7 +27,7 @@
                             </change-task-panel>
                         </tab>
 
-                        <tab #tabTimeline heading="{{'control.timeline' | translate }}"
+                        <tab #tabTimeline id="timeline" heading="{{'control.timeline' | translate }}"
                             (select)="changeTab($event)">
                             <app-statistic-time #userStatistic
                                 [users]="[currentUser]" [height]="80"
@@ -41,7 +43,7 @@
                             </change-task-panel>
                         </tab>
 
-                        <tab #tabTeam heading="{{'control.team' | translate }}"
+                        <tab #tabTeam id="team" heading="{{'control.team' | translate }}"
                             (select)="changeTab($event)" *ngIf="userIsManager">
                             <app-statistic-time #teamStatistic [users]="selectedUsers"
                                 (onSelectionChanged)="changeSelection($event)">
