@@ -19,7 +19,8 @@
 
     <div class="popup" [attr.data-hidden]="!isRangePopupOpened">
       <div class="popup__buttons">
-        <button class="popup__button btn btn-default" (click)="applyChanges()" translate>control.apply</button>
+        <button class="popup__apply btn btn-default" (click)="applyChanges()" translate>control.apply</button>
+        <button class="popup__today btn btn-default" (click)="today()">Today</button>
       </div>
 
       <dp-day-calendar [config]="{ format: 'YYYY-MM-DD', firstDayOfWeek: 'mo', max: max, locale: translate.getDefaultLang() }"

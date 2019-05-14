@@ -70,6 +70,22 @@ $date-picker-border-color: #ddd;
     &__buttons {
         margin-bottom: 1em;
         text-align: right;
+        position: relative;
+    }
+
+    &__today {
+      position: absolute;
+      bottom: -3.5em;
+      right: 5em;
+      height: 2em;
+      line-height: 1;
+      text-align: center;
+      vertical-align: middle;
+      z-index: 1;
+    }
+    
+    dp-day-calendar {
+      vertical-align: top;
     }
 
     &[data-hidden="true"] {

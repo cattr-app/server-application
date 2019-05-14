@@ -378,4 +378,8 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
         LocalStorage.getStorage().set(`filterByDateRangeStartIN${window.location.pathname}`, this.start.format('YYYY-MM-DD'));
         LocalStorage.getStorage().set(`filterByDateRangeEndIN${window.location.pathname}`, this.end.format('YYYY-MM-DD'));
     }
+
+    today() {
+        this.setEnd(moment().startOf('day'));
+    }
 }
