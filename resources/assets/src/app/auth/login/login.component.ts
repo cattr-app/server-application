@@ -1,14 +1,18 @@
-import {Component, EventEmitter, OnInit, Output} from '@angular/core';
+import {Component, EventEmitter, OnInit, Output, ViewChild} from '@angular/core';
+import {Router} from "@angular/router";
+import { RecaptchaComponent } from 'ng-recaptcha';
+
 import {LoginService} from "./login.service";
 import {Login} from "./login.model";
 import {ApiService} from "../../api/api.service";
-import {Router} from "@angular/router";
 
 @Component({
     selector: 'app-login',
     templateUrl: './login.component.html',
 })
 export class LoginComponent implements OnInit {
+    @ViewChild('captcha') captcha: RecaptchaComponent;
+
     @Output() changeTitle: EventEmitter<String> = new EventEmitter<string>();
 
     public model: Login = new Login();
@@ -32,6 +36,7 @@ export class LoginComponent implements OnInit {
             this.api.setToken(result.access_token, result.token_type, result.user);
             this.router.navigateByUrl('/');
         }, error => {
+            this.captcha.reset();
             if (error.status === 401) {
                 this.error = 'Incorrect password or captcha';
             } else if (error.status === 0) {

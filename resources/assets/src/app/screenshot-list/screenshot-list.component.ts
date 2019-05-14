@@ -252,8 +252,13 @@ export class ScreenshotListComponent extends ItemsListComponent implements OnIni
         }
 
         if (this.min_date && this.max_date && this.min_date.length && this.max_date.length) {
-            const start = moment(this.min_date, 'DD-MM-YYYY').utc().format('YYYY-MM-DD HH:mm:ss');
-            const end = moment(this.max_date, 'DD-MM-YYYY').utc().add(1, 'day').format('YYYY-MM-DD HH:mm:ss');
+            let startDate = moment(this.min_date, 'DD-MM-YYYY').utc();
+            let endDate = moment(this.max_date, 'DD-MM-YYYY').utc().add(1, 'day');
+            if (startDate.diff(endDate) > 0) {
+                [startDate, endDate] = [endDate, startDate];
+            }
+            const start = startDate.format('YYYY-MM-DD HH:mm:ss');
+            const end = endDate.format('YYYY-MM-DD HH:mm:ss');
             params['end_at'] = ['>=', start];
             params['start_at'] = ['<=', end];
         }
