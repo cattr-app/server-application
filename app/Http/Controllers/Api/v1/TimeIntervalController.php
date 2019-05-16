@@ -63,7 +63,7 @@ class TimeIntervalController extends ItemController
 
 
         $end_at_rules = [
-            'date_format:'.DATE_ATOM,
+            'date',
             'required',
         ];
 
@@ -78,7 +78,7 @@ class TimeIntervalController extends ItemController
         return [
             'task_id'  => 'required',
             'user_id'  => 'required',
-            'start_at' => 'date_format:'.DATE_ATOM.'|required',
+            'start_at' => 'date|required',
             'end_at'   => $end_at_rules,
         ];
     }

@@ -3,6 +3,7 @@
 namespace Tests\Feature\v1;
 
 use Tests\TestCase;
+use Illuminate\Support\Carbon;
 
 class TimeIntervalControllerTest extends TestCase
 {
@@ -15,8 +16,8 @@ class TimeIntervalControllerTest extends TestCase
         $data = [
             "task_id"   => 1,
             "user_id"   => 1,
-            "start_at"  => "2017-05-11T00:00:00+08:00",
-            "end_at"    => "2017-05-11T00:00:00+08:00"
+            "start_at"  => Carbon::now()->format('Y-m-d\\TH:i:s\\Z'),
+            "end_at"    => Carbon::now()->addMinutes(1)->format('Y-m-d\\TH:i:s\\Z')
         ];
 
         $expectedFields = [
@@ -43,8 +44,8 @@ class TimeIntervalControllerTest extends TestCase
         $createData = [
             "task_id"   => 1,
             "user_id"   => 1,
-            "start_at"  => "2017-05-11T00:00:00+08:00",
-            "end_at"    => "2017-05-11T00:00:00+08:00"
+            "start_at"  => Carbon::now()->format('Y-m-d\\TH:i:s\\Z'),
+            "end_at"    => Carbon::now()->addMinutes(1)->format('Y-m-d\\TH:i:s\\Z')
         ];
 
         $createResponse = $this->postJson("/api/v1/time-intervals/create", $createData, $headers);
@@ -73,8 +74,8 @@ class TimeIntervalControllerTest extends TestCase
             "id"        => 1,
             "task_id"   => 1,
             "user_id"   => 1,
-            "start_at"  => "2018-10-03T12:00:00+02:00",
-            "end_at"    => "2018-10-03T12:00:00+02:00"
+            "start_at"  => Carbon::now()->format('Y-m-d\\TH:i:s\\Z'),
+            "end_at"    => Carbon::now()->addMinutes(1)->format('Y-m-d\\TH:i:s\\Z')
         ];
 
         $expectedFields = [
