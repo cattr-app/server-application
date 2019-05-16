@@ -179,7 +179,7 @@ class ScreenshotController extends ItemController
 
         $requestData = [
             'time_interval_id' => $timeIntervalId,
-            'path' => $path,
+            'path' => $screenStorePath,
             'thumbnail_path' => $thumbnailPath,
         ];
 
