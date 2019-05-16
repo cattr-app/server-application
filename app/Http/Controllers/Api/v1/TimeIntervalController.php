@@ -76,8 +76,8 @@ class TimeIntervalController extends ItemController
         }
 
         return [
-            'task_id'  => 'required',
-            'user_id'  => 'required',
+            'task_id'  => 'exists:tasks,id|required',
+            'user_id'  => 'exists:users,id|required',
             'start_at' => 'date|required',
             'end_at'   => $end_at_rules,
         ];

@@ -37,7 +37,7 @@ class ScreenshotController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'time_interval_id' => 'required',
+            'time_interval_id' => 'exists:time_intervals,id|required',
             'path'             => 'required',
         ];
     }
@@ -159,6 +159,18 @@ class ScreenshotController extends ItemController
      */
     public function create(Request $request): JsonResponse
     {
+        if (!isset($request->screenshot)) {
+            return response()->json(
+                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
+                    [
+                        'error' => 'validation fail',
+                        'reason' => 'screenshot is required',
+                    ]
+                ]),
+                400
+            );
+        }
+
         $screenStorePath = $request->screenshot->store('uploads/screenshots');
         $absoluteStorePath = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, Storage::disk()->path($screenStorePath));
 

@@ -14,7 +14,6 @@ use Filter;
 use DateTime;
 use Route;
 
-
 /**
  * Class TaskController
  *
@@ -36,10 +35,11 @@ class TaskController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'project_id'  => 'required',
+            'project_id'  => 'exists:projects,id|required',
             'task_name'   => 'required',
             'active'      => 'required',
-            'user_id'     => 'required',
+            'user_id'     => 'exists:users,id|required',
+            'priority_id' => 'exists:priorities,id|required',
         ];
     }
 
@@ -152,6 +152,7 @@ class TaskController extends ItemController
      * @apiParam {Integer} [active]      Active/Inactive Task. Available value: {0,1}
      * @apiParam {Integer} [user_id]     Task User
      * @apiParam {Integer} [assigned_by] User who assigned task
+     * @apiParam {Integer} [priority_id] Task Priority ID
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -161,7 +162,8 @@ class TaskController extends ItemController
      *      "active":1,
      *      "user_id":"3",
      *      "assigned_by":"1",
-     *      "url":"URL"
+     *      "url":"URL",
+     *      "priority_id": 1
      *  }
      *
      * @apiSuccess {Object}   res                Task object
@@ -252,6 +254,7 @@ class TaskController extends ItemController
      * @apiParam {Integer}  active      Is Task active. Available value: {0,1}
      * @apiParam {Integer}  user_id     Task User
      * @apiParam {Integer}  assigned_by User who assigned task
+     * @apiParam {Integer}  priority_id Task Priority ID
      * @apiUse TaskRelations
      *
      * @apiParamExample {json} Simple Request Example
@@ -263,7 +266,8 @@ class TaskController extends ItemController
      *      "assigned_by": 2,
      *      "task_name":   "lorem",
      *      "description": "test",
-     *      "url":         "url"
+     *      "url":         "url",
+     *      "priority_id": 1
      *  }
      * @apiUse TaskRelationsExample
      *
