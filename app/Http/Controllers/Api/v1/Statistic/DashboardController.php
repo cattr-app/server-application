@@ -27,6 +27,7 @@ class DashboardController extends Controller
             ->whereIn('i.user_id', $user_ids)
             ->where('i.start_at', '>=', $start_at)
             ->where('i.start_at', '<', $end_at)
+            ->whereNull('i.deleted_at')
             ->orderBy('i.start_at')
             ->get();
 

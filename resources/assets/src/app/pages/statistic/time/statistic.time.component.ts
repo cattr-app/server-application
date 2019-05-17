@@ -227,7 +227,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
 
             const uids = users.map(user => +user.id);
             if (this.view === 'timelineDay') {
-                const forceUpdate = startStr === moment().format('YYYY-MM-DD');
+                const forceUpdate = true; // startStr === moment().format('YYYY-MM-DD');
                 return Observable.from(this.service.getEvents(offset, uids, start, forceUpdate));
             } else {
                 return Observable.from(this.service.getDays(offset, uids, start, end));

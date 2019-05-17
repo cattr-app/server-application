@@ -114,17 +114,10 @@ export class ChangeTaskPanelComponent implements OnInit, DoCheck {
 
     onDelete() {
         this.isLoading = true;
-
-        // Delete screenshots & intervals.
-        const results = this.timeIntervals.map(interval => {
-            return new Promise((resolve) => {
-                this.timeIntervalsService.removeItem(interval.id, () => resolve());
-            });
-        });
-
-        Promise.all(results).then(() => {
-            this.isLoading = false;
-            this.onIntervalsDeleted.emit();
+        const ids = this.timeIntervals.map(interval => interval.id);
+        this.timeIntervalsService.removeItems(ids, () => {
+          this.isLoading = false;
+          this.onIntervalsDeleted.emit();
         });
     }
 

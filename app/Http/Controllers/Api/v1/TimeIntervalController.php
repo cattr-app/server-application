@@ -452,6 +452,132 @@ class TimeIntervalController extends ItemController
      */
 
     /**
+     * @api {delete, post} /api/v1/time-intervals/bulk-remove BulkDestroy
+     * @apiDescription Multiple Destroy TimeInterval
+     * @apiVersion 0.1.0
+     * @apiName BulkDestroyTimeInterval
+     * @apiGroup Time Interval
+     *
+     * @apiParam {Object[]}    array              Time Intervals
+     * @apiParam {Object}      array.object       Time Interval
+     * @apiParam {Integer}     array.object.id    Time Interval id
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "intervals": [
+     *     {
+     *       "id": "1"
+     *     }
+     *   ]
+     * }
+     *
+     * @apiSuccess {Object[]} messages               Messages
+     * @apiSuccess {Object}   message                Message
+     * @apiSuccess {String}   message.message        Status
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "messages": [
+     *     {
+     *       "message": "Item has been removed"
+     *     }
+     *   ]
+     * }
+     *
+     * @apiError (404)  {Object[]} messages                 Messages
+     * @apiError (404)  {Object}   messages.message         Message
+     * @apiError (404)  {String}   messages.message.error   Error title
+     * @apiError (404)  {String}   messages.message.reason  Error reason
+     *
+     * @apiErrorExample (404) {json} Errors Response Example
+     * {
+     *   "messages": [
+     *     {
+     *       "error": "Item has not been removed",
+     *       "reason": "Item not found"
+     *     }
+     *   ]
+     * }
+     *
+     * @apiUse UnauthorizedError
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    public function bulkDestroy(Request $request) : JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all());
+        $result = [];
+
+        if (empty($requestData['intervals'])) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'intervals is empty',
+                ]),
+                400
+            );
+        }
+
+        $intervals = $requestData['intervals'];
+        if (!is_array($intervals)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => 'intervals should be an array',
+                ]),
+                400
+            );
+        }
+
+        foreach ($intervals as $interval) {
+            /** @var Builder $itemsQuery */
+            $itemsQuery = Filter::process(
+                $this->getEventUniqueName('answer.success.item.query.prepare'),
+                $this->applyQueryFilter(
+                    $this->getQuery(),
+                    $interval
+                )
+            );
+
+            $validator = Validator::make(
+                $interval,
+                Filter::process(
+                    $this->getEventUniqueName('validation.item.edit'),
+                    ['id' => 'exists:time_intervals,id|required']
+                )
+            );
+
+            if ($validator->fails()) {
+                $result[] = [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors(),
+                    'code' => 400
+                ];
+                continue;
+            }
+
+            /** @var \Illuminate\Database\Eloquent\Model $item */
+            $item = $itemsQuery->first();
+            if ($item && $item->delete()) {
+                $result[] = ['message' => 'Item has been removed'];
+            } else {
+                $result[] = [
+                    'error' => 'Item has not been removed',
+                    'reason' => 'Item not found'
+                ];
+            }
+        }
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
+                'messages' => $result
+            ])
+        );
+    }
+
+    /**
      * @param bool $withRelations
      *
      * @return Builder
