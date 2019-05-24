@@ -75,6 +75,11 @@
         }
     }
 
+    &__loading {
+      position: relative;
+      height: 35px;
+    }
+
     &__date-date {
         width: 100px;
     }

@@ -6,6 +6,9 @@ import {ItemsShowComponent} from '../../items.show.component';
 import {Screenshot} from '../../../models/screenshot.model';
 import {AllowedActionsService} from '../../roles/allowed-actions.service';
 
+import * as moment from 'moment';
+import 'moment-timezone';
+
 @Component({
     selector: 'app-screenshots-show',
     templateUrl: './screenshots.show.component.html',
@@ -36,6 +39,14 @@ export class ScreenshotsShowComponent extends ItemsShowComponent implements OnIn
         this.itemService.removeItem(this.id, () => {
             this.router.navigate(['/screenshots/list']);
         });
+    }
+
+    formatDate(datetime?: string) {
+        if (!datetime) {
+            return null;
+        }
+
+        return moment.utc(datetime).local().format('DD.MM.YYYY HH:mm:ss');
     }
 
     cleanupParams() : string[] {

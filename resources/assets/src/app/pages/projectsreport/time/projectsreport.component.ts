@@ -20,6 +20,7 @@ interface TaskData {
     duration: number;
     dates: { date: string, duration: number }[];
     expanded?: boolean;
+    loading?: boolean;
 };
 
 interface UserData {
@@ -169,6 +170,7 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
         task.expanded = !task.expanded;
 
         if (task.expanded && !task.dates.length) {
+            task.loading = true;
             const dates = await this.fetchTaskDates({
                 uid: task.user_id,
                 tid: task.id,
@@ -176,6 +178,7 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
                 end: this.dateRangeSelector.end.format(this.formatDate),
             });
 
+            task.loading = false;
             task.dates = dates;
         }
     }

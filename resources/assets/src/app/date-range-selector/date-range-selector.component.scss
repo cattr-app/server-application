@@ -50,6 +50,7 @@
   @extend .btn, .btn-default;
   flex: 1;
 }
+
 $date-picker-border-color: #ddd;
 
 .popup {
@@ -59,7 +60,7 @@ $date-picker-border-color: #ddd;
     width: 284px;
 
     @media (min-width: $screen-sm-min) {
-        width: 544px;
+        width: 460px;
     }
 
     background: #fff;
@@ -76,14 +77,15 @@ $date-picker-border-color: #ddd;
     &__today {
       position: absolute;
       bottom: -3.5em;
-      right: 5em;
+      right: 4em;
       height: 2em;
       line-height: 1;
       text-align: center;
       vertical-align: middle;
       z-index: 1;
+      border: 0;
     }
-    
+
     dp-day-calendar {
       vertical-align: top;
     }
@@ -106,6 +108,12 @@ $date-picker-border-color: #ddd;
       border-color: $date-picker-border-color !important;
   }
 
+  .dp-nav-header-btn,
+  .dp-calendar-nav-left,
+  .dp-calendar-nav-right {
+    border: 0 !important;
+  }
+
   .dp-weekdays {
       display: flex;
       flex-flow: row nowrap;
@@ -116,6 +124,7 @@ $date-picker-border-color: #ddd;
 
   .dp-calendar-weekday {
       border: 0 !important;
+      font-size: 0.8em;
   }
 
   .dp-calendar-nav-container {
@@ -138,7 +147,13 @@ $date-picker-border-color: #ddd;
       @extend .btn;
       @extend .btn-default;
 
-      &.dp-current-day {
+      &.in-range {
+        background: rgb(193, 223, 240);
+        color: #636b6f;
+      }
+
+      &.dp-current-day,
+      &.dp-current-day.in-range {
           @extend .btn-info;
       }
 
@@ -147,8 +162,11 @@ $date-picker-border-color: #ddd;
           @extend .btn-primary;
       }
 
+      border: 0;
+      border-radius: 0;
+      box-shadow: none !important;
       padding: 0;
-      margin: 3px;
+      margin: 0;
   }
 
   .week .dp-calendar-week {

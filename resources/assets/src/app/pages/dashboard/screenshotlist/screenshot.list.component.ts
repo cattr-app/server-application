@@ -247,6 +247,14 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         return moment.utc(datetime).local().format('HH:mm');
     }
 
+    formatDate(datetime?: string) {
+        if (!datetime) {
+            return null;
+        }
+
+        return moment.utc(datetime).local().format('DD.MM.YYYY HH:mm:ss');
+    }
+
     blockTrackFn(i, el: Screenshot) {
         return i;
     }

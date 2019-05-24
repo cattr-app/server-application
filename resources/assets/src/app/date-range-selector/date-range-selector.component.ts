@@ -1,5 +1,5 @@
 import { Component, OnInit, Input, Output, EventEmitter, ViewChild, ElementRef, AfterViewInit } from '@angular/core';
-import { DatePickerComponent } from 'ng2-date-picker';
+import { DatePickerComponent, DayCalendarComponent } from 'ng2-date-picker';
 
 import * as moment from 'moment';
 
@@ -21,6 +21,8 @@ export interface Range {
 export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
     @ViewChild('dateInput') dateInput: ElementRef;
     @ViewChild('datePicker') datePicker: DatePickerComponent;
+    @ViewChild('startDatePicker') startDatePicker: DayCalendarComponent;
+    @ViewChild('endDatePicker') endDatePicker: DayCalendarComponent;
 
     @Input() start: moment.Moment = moment().startOf('day');
     @Input() end: moment.Moment = this.start.clone().add(1, 'day');
@@ -111,6 +113,8 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
         public translate: TranslateService,
         private activatedRoute: ActivatedRoute,
     ) {
+        this.dayClass = this.dayClass.bind(this);
+
         const params = this.activatedRoute.snapshot.queryParams;
         if (params.start || params.end || params.range) {
             if (params.range) {
@@ -350,6 +354,11 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
         if (value.date) {
             this.setStart(value.date);
         }
+
+        // Force end picker redraw
+        if (this.end) {
+            this.setEnd(this.end.clone());
+        }
     }
 
     datePickerChangeEnd(value) {
@@ -361,6 +370,11 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
     datePickerSelectEnd(value) {
         if (value.date) {
             this.setEnd(value.date);
+        }
+
+        // Force start picker redraw
+        if (this.start) {
+            this.setStart(this.start.clone());
         }
     }
 
@@ -381,5 +395,13 @@ export class DateRangeSelectorComponent implements OnInit, AfterViewInit {
 
     today() {
         this.setEnd(moment().startOf('day'));
+    }
+
+    dayClass(date: moment.Moment) {
+        const start = this.startDatePicker.selected[0];
+        const end = this.endDatePicker.selected[0];
+        if (start && end && start.diff(date) <= 0 && end.diff(date) >= 0) {
+            return 'in-range';
+        }
     }
 }

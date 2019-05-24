@@ -67,6 +67,14 @@
                         </td>
                       </tr>
 
+                      <ng-container *ngIf="task.loading">
+                        <tr>
+                          <td class="reports__loading" colspan="4">
+                            <ngx-loading [show]="true"></ngx-loading>
+                          </td>
+                        </tr>
+                      </ng-container>
+
                       <ng-container *ngIf="task.expanded">
                         <tr class="reports__date" *ngFor="let date of task.dates">
                           <th scope="row"></th>
