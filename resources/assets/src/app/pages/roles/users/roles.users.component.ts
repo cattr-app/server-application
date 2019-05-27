@@ -25,6 +25,7 @@ export class RolesUsersComponent extends ItemsEditComponent implements OnInit, O
     user: User;
     sourceUsers: any = [];
     confirmedUsers: any = [];
+    initialConfirmedUsers: any = [];
     key = 'id';
     displayUsers: any = 'full_name';
     keepSorted = true;
@@ -62,6 +63,15 @@ export class RolesUsersComponent extends ItemsEditComponent implements OnInit, O
         this.usersService.getItems(this.UsersUpdate.bind(this));
     }
 
+    changeUsers() {
+      const confirmedUsers = Array.from(new Set([...this.confirmedUsers, ...this.initialConfirmedUsers]));
+      if (confirmedUsers.length !== this.confirmedUsers.length) {
+        this.msgs.push({severity: 'error', summary: 'Error', detail: "Can't remove role. Use user edit page to change role"});
+      }
+
+      this.confirmedUsers = confirmedUsers;
+    }
+
     onSubmit() {
         const id = this.id;
         const users = [];
@@ -70,10 +80,6 @@ export class RolesUsersComponent extends ItemsEditComponent implements OnInit, O
         if (UserChanges) {
             UserChanges.forEachAddedItem((record) => {
                 record.item.role_id = id;
-                users.push(record.item);
-            });
-            UserChanges.forEachRemovedItem((record) => {
-                record.item.role_id = null;
                 users.push(record.item);
             });
         }
@@ -116,8 +122,9 @@ export class RolesUsersComponent extends ItemsEditComponent implements OnInit, O
         this.sourceUsers = result;
         const id = this.id;
         this.confirmedUsers = this.sourceUsers.filter(function (user) {
-            return user.role_id === id;
+            return +user.role_id === +id;
         });
+        this.initialConfirmedUsers = [...this.confirmedUsers];
         this.differUsers.diff(this.confirmedUsers);
     }
 

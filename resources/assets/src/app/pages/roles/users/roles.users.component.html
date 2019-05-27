@@ -15,7 +15,7 @@
                         <form (ngSubmit)="onSubmit()">
                             <h1 translate>field.users</h1>
                             <dual-list [sort]="keepSorted" [source]="sourceUsers" [key]="key" [filter]="filter"
-                                       [display]="displayUsers" [(destination)]="confirmedUsers" [format]="format" [height]="height"></dual-list>
+                                       [display]="displayUsers" [(destination)]="confirmedUsers" (destinationChange)="changeUsers($event)" [format]="format" [height]="height"></dual-list>
                             <br>
                             <button type="submit" class="btn btn-primary" translate>control.update</button>
                         </form>

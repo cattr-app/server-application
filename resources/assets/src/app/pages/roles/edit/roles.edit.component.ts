@@ -31,6 +31,7 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit, On
     confirmedRules: any = [];
     sourceUsers: any = [];
     confirmedUsers: any = [];
+    initialConfirmedUsers: any = [];
     sourceProjects: Project[] = [];
     confirmedProjects: Project[] = [];
     key = 'id';
@@ -84,6 +85,15 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit, On
         this.UserUpdate();
     }
 
+    changeUsers() {
+      const confirmedUsers = Array.from(new Set([...this.confirmedUsers, ...this.initialConfirmedUsers]));
+      if (confirmedUsers.length !== this.confirmedUsers.length) {
+        this.msgs.push({severity: 'error', summary: 'Error', detail: "Can't remove role. Use user edit page to change role"});
+      }
+
+      this.confirmedUsers = confirmedUsers;
+    }
+
     setItem(result) {
         super.setItem(result);
         this.confirmedProjects = this.item.projects;
@@ -104,10 +114,6 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit, On
         if (UserChanges) {
             UserChanges.forEachAddedItem((record) => {
                 record.item.role_id = id;
-                users.push(record.item);
-            });
-            UserChanges.forEachRemovedItem((record) => {
-                record.item.role_id = null;
                 users.push(record.item);
             });
         }
@@ -187,7 +193,7 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit, On
 
     UserUpdate() {
         this.user = this.api.getUser();
-        if (this.id === this.user.role_id && !this.can('rules/full_access')) {
+        if (+this.id === +this.user.role_id && !this.can('rules/full_access')) {
             this.router.navigateByUrl('/roles/list');
         }
     }
@@ -211,8 +217,9 @@ export class RolesEditComponent extends ItemsEditComponent implements OnInit, On
         this.sourceUsers = result;
         const id = this.id;
         this.confirmedUsers = this.sourceUsers.filter(function (user) {
-                return user.role_id === id;
+                return +user.role_id === +id;
             });
+        this.initialConfirmedUsers = [...this.confirmedUsers];
         this.differUsers.diff(this.confirmedUsers);
     }
 
