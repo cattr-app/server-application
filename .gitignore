@@ -21,9 +21,11 @@ Homestead.yaml
 *.lock
 !composer.lock
 *-lock.json
+!package-lock.json
 *.phar
 _ide_helper.php
 .phpstorm.meta.php
 config/crudgenerator.php
 resources/crud-generator/
 coverage/
+*.sql
