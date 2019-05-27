@@ -42,6 +42,7 @@ class ProjectReportController extends Controller
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))
             ->whereIn('user_id', $uids)
             ->whereIn('project_id', $pids)
+            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->where('date', '>=', $start_at)
             ->where('date', '<', $end_at)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')

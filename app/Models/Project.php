@@ -85,4 +85,53 @@ class Project extends Model
     {
         return $this->hasMany(Task::class, 'project_id');
     }
+
+    /**
+     * @param User $user
+     *
+     * @return int[]
+     */
+    public static function getUserRelatedProjectIds($user): array {
+        $full_access = Role::can($user, 'projects', 'full_access');
+        $user_relations_access = Role::can($user, 'users', 'relations');
+
+        if ($full_access) {
+            return static::all(['id'])->toArray();
+        }
+
+        $user_project_ids = collect($user->projects)->pluck('id');
+        $project_ids = collect($user_project_ids);
+
+        if (count($project_ids) <= 0) {
+            return static::all(['id'])->toArray();
+        }
+
+        $user_tasks_project_id = collect($user->tasks)->flatMap(function ($task) {
+            if (isset($task->project)) {
+                return collect($task->project->id);
+            }
+
+            return null;
+        });
+
+        $user_time_interval_project_id = collect($user->timeIntervals)->flatMap(function ($val) {
+            if (isset($val->task->project)) {
+                return collect($val->task->project->id);
+            }
+
+            return null;
+        });
+
+        $project_ids = collect([$project_ids, $user_tasks_project_id, $user_time_interval_project_id])->collapse();
+
+        if ($user_relations_access) {
+            $attached_users_project_ids = collect($user->attached_users)->flatMap(function($user) {
+                return collect($user->projects)->pluck('id');
+            });
+
+            $project_ids = collect([$project_ids, $attached_users_project_ids])->collapse()->unique();
+        }
+
+        return $project_ids->toArray();
+    }
 }

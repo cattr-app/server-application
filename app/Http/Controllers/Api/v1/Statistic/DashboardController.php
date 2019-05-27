@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use Auth;
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use App\User;
 use Illuminate\Http\Request;
 use DB;
@@ -27,6 +29,7 @@ class DashboardController extends Controller
             ->whereIn('i.user_id', $user_ids)
             ->where('i.start_at', '>=', $start_at)
             ->where('i.start_at', '<', $end_at)
+            ->whereIn('t.project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->whereNull('i.deleted_at')
             ->orderBy('i.start_at')
             ->get();
