@@ -94,6 +94,10 @@ export class DashboardComponent implements OnInit, OnDestroy, AfterViewInit {
         this.taskList.reload();
         this.screenshotList.reload();
 
+        if (this.userStatistic) {
+            this.userStatistic.update();
+        }
+
         if (this.teamStatistic) {
             this.teamStatistic.update();
         }

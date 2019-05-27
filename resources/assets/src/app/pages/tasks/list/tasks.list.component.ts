@@ -57,7 +57,7 @@ export class TasksListComponent extends ItemsListComponent implements OnInit, On
     setProjects(result) {
         const items = [];
         result.forEach(function (item) {
-            items.push(item.id);
+            items.push(+item.id);
             return item;
         });
         this.directProject = items;

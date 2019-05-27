@@ -79,13 +79,15 @@
 		}
 	},
 	"login": {
-		"submit": "Submit"
+		"submit": "Log in"
 	},
 	"reset": {
 		"user-not-found": "User with such email isn’t found",
 		"invalid-captcha": "Incorrect captcha",
 		"connection-problem": "Connection problem",
-		"sent": "Link for restore password has been sent to your email."
+		"sent": "Link for restore password has been sent to your email.",
+		"submit": "Reset",
+		"save": "Save"
 	},
 	"task": {
 		"edit": "Edit task",

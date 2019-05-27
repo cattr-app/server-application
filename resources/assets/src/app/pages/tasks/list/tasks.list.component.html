@@ -30,21 +30,21 @@
                                 <td>{{task.project && task.project.name}}</td>
                                 <td class="task-name">{{task.task_name}}</td>
                                 <td>{{task.priority && task.priority.name}}</td>
-                                <td>
+                                <td class="task-actions">
                                     <a *ngIf="can('/tasks/show')" [routerLink]="['/tasks/show', task.id]" title="View project">
                                         <button class="btn btn-info btn-sm">
                                             <i class="fa fa-eye" aria-hidden="true"></i>
                                             <span translate>control.view</span>
                                         </button>
                                     </a>
-                                    <a *ngIf="can('/tasks/edit') && (directProject && directProject.includes(task.project_id))" [routerLink]="['/tasks/edit', task.id]" title="Edit project">
+                                    <a *ngIf="can('/tasks/edit') && (directProject && directProject.includes(+task.project_id))" [routerLink]="['/tasks/edit', task.id]" title="Edit project">
                                         <button class="btn btn-primary btn-sm"><i class="fa fa-pencil-square-o"
                                                                                   aria-hidden="true"></i>
                                             <span translate>control.edit</span>
                                         </button>
                                     </a>
-                                    <a *ngIf="can('/tasks/remove') && (directProject && directProject.includes(task.project_id))" (click)="openRemoveItemModalWindow(template, task.id)" title="Delete project">
-                                        <button class="btn btn-danger btn-sm"><i class="fa fa-pencil-square-o"
+                                    <a *ngIf="can('/tasks/remove') && (directProject && directProject.includes(+task.project_id))" (click)="openRemoveItemModalWindow(template, task.id)" title="Delete project">
+                                        <button class="btn btn-danger btn-sm"><i class="fa fa-trash"
                                                                                  aria-hidden="true"></i>
                                             <span translate>control.delete</span>
                                         </button>
