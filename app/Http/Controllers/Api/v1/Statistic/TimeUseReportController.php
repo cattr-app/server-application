@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\v1\Statistic;
 
 use App\Http\Controllers\Controller;
+use App\Models\Project;
 use App\User;
+use Auth;
 use Illuminate\Http\Request;
 use DB;
 
@@ -26,6 +28,7 @@ class TimeUseReportController extends Controller
         $projectReports = DB::table('project_report')
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))
             ->whereIn('user_id', $user_ids)
+            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->where('date', '>=', $start_at)
             ->where('date', '<', $end_at)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
@@ -34,7 +37,6 @@ class TimeUseReportController extends Controller
         $users = [];
 
         foreach ($projectReports as $projectReport) {
-
             $project_id = $projectReport->project_id;
             $user_id = $projectReport->user_id;
             $duration = (int)$projectReport->duration;
