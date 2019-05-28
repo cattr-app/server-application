@@ -9,7 +9,7 @@ import {RegisterComponent} from './register/register.component';
 export const AuthRoutes: Routes = [
     {path: 'login', component: LoginComponent},
     {path: 'reset', component: ResetComponent},
-    {path: 'confirm-reset/:token', component: ConfirmResetComponent},
+    {path: 'confirm-reset', component: ConfirmResetComponent},
     {path: 'register/:key', component: RegisterComponent},
     {path: '', redirectTo: 'login', pathMatch: 'full'},
 ];

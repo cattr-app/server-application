@@ -478,13 +478,13 @@ class AuthController extends Controller
     /**
      * Redirects user to the reset password confirmation form in the frontend.
      *
-     * @param string $token
-     *
      * @return RedirectResponse
      */
-    public function getReset(Request $request, $token)
+    public function getReset(Request $request)
     {
-        return redirect("auth/confirm-reset/$token");
+        $token = $request->query('token');
+        $email = $request->query('email');
+        return redirect("auth/confirm-reset?token=$token&email=$email");
     }
 
     /**

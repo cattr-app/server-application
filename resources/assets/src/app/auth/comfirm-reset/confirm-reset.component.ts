@@ -30,8 +30,9 @@ export class ConfirmResetComponent implements OnInit, OnDestroy {
     ngOnInit() {
         this.changeTitle.emit("Reset password");
 
-        this.routeSub = this.route.params.subscribe(params => {
+        this.routeSub = this.route.queryParams.subscribe(params => {
             this.model.token = params['token'];
+            this.model.login = params['email'];
         });
     }
 
@@ -46,7 +47,7 @@ export class ConfirmResetComponent implements OnInit, OnDestroy {
             this.router.navigateByUrl('/');
         }, error => {
             if (error.status === 401) {
-                this.error = 'Incorrect email or captcha';
+                this.error = 'Incorrect captcha';
             } else if (error.status === 0) {
                 this.error = 'Connection problem';
             } else {

@@ -2,6 +2,7 @@
 
 namespace App;
 
+use App\Mail\ResetPassword;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\Property;
@@ -58,7 +59,7 @@ use Illuminate\Contracts\Auth\CanResetPassword;
  */
 class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
-    use Notifiable, SoftDeletes, \Illuminate\Auth\Passwords\CanResetPassword;
+    use Notifiable, SoftDeletes;
 
     /**
      * table name from database
@@ -192,5 +193,26 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     public function properties(): HasMany
     {
         return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::USER_CODE);
+    }
+
+    /**
+     * Get the e-mail address where password reset links are sent.
+     *
+     * @return string
+     */
+    public function getEmailForPasswordReset()
+    {
+        return $this->email;
+    }
+
+    /**
+     * Send the password reset notification.
+     *
+     * @param  string  $token
+     * @return void
+     */
+    public function sendPasswordResetNotification($token)
+    {
+        $this->notify(new ResetPassword($this->email, $token));
     }
 }
