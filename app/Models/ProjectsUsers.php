@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property User    $user
  * @property Project $project
  */
-class ProjectsUsers extends Model
+class ProjectsUsers extends AbstractModel
 {
     /**
      * table name from database

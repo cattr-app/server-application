@@ -52,7 +52,6 @@ class ProjectReportController extends Controller
 
 
         foreach ($projectReports as $projectReport) {
-
             $project_id = $projectReport->project_id;
             $user_id = $projectReport->user_id;
 
@@ -108,7 +107,11 @@ class ProjectReportController extends Controller
         $end_at = is_null($request->input('end_at')) ? '' : $request->end_at;
         $uids = $request->uids;
 
-        $days = TimeDuration::query();
+        $days = DB::table('project_report')
+            ->select('user_id', 'date', DB::raw('SUM(duration) as duration'))
+            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
+            ->groupBy('user_id', 'date')
+        ;
 
         if ($start_at) {
             $timestamp = strtotime($start_at);
@@ -140,6 +143,7 @@ class ProjectReportController extends Controller
         $end_at = $request->input('end_at') == null ? '' : $request->end_at;
         $uids = $request->uids;
         $pids = $request->pids;
+
         return response()->json($this->resources($uids, $pids, $start_at, $end_at));
     }
 

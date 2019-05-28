@@ -2,6 +2,7 @@
 
 return [
     'default' => env('CACHE_DRIVER', 'file'),
+
     'stores' => [
         'array' => [
             'driver' => 'array',
@@ -23,5 +24,6 @@ return [
             'connection' => 'default',
         ],
     ],
-    'prefix' => 'laravel',
+
+    'prefix' =>  preg_replace('#[^a-zA-Z0-9_\-]#', '_', env('APP_NAME', 'laravel')),
 ];

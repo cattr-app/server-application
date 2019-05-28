@@ -9,6 +9,7 @@ use App\Rules\BetweenDate;
 use App\User;
 use Auth;
 use Carbon\Carbon;
+use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -584,39 +585,41 @@ class TimeIntervalController extends ItemController
      */
     protected function getQuery($withRelations = true): Builder
     {
+        /** @var User $user */
+        $user = Auth::user();
+
         $query = parent::getQuery($withRelations);
-        $full_access = Role::can(Auth::user(), 'time-intervals', 'full_access');
-        $relations_access = Role::can(Auth::user(), 'users', 'relations');
-        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
+        $full_access = $user->allowed('time-intervals', 'full_access');
 
         if ($full_access) {
             return $query;
         }
 
-        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
-            return collect($val->id);
-        });
-        $time_intervals_id = collect([]);
+        $query->where(static function (EloquentJoinBuilder $query) use ($user) {
+            $query->where('user_id', '=', $user->id);
 
-        if ($project_relations_access) {
-            $attached_time_interval_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
-                return collect($project->tasks)->flatMap(function ($task) {
-                    return collect($task->timeIntervals)->pluck('id');
+            if ($user->allowed('projects', 'relations')) {
+                $query->joinRelations('task.project');
+                $query->orWhereHas('task.project', static function (EloquentJoinBuilder $query) use ($user) {
+                    $query
+                        ->select('id')
+                        ->whereIn('id', $user->projects->map(static function ($project) {
+                            return $project->id;
+                        }))
+                        ->limit(1)
+                    ;
                 });
-            });
-            $time_intervals_id = collect([$attached_time_interval_id_to_project])->collapse();
-        }
+            }
 
-        if ($relations_access) {
-            $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
-                return collect($val->timeIntervals)->pluck('id');
-            });
-            $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
-        } else {
-            $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id])->collapse()->unique();
-        }
-
-        $query->whereIn('time_intervals.id', $time_intervals_id);
+            if ($user->allowed('users', 'relations')) {
+                $query->orWhereIn(
+                    'user_id',
+                    $user->attached_users->map(static function ($attachedUser) {
+                        return $attachedUser->id;
+                    })
+                );
+            }
+        });
 
         return $query;
     }

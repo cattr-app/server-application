@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property Role $role
  */
-class Rule extends Model
+class Rule extends AbstractModel
 {
     use SoftDeletes;
 

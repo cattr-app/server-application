@@ -3,9 +3,13 @@
 namespace App;
 
 use App\Mail\ResetPassword;
+use App\Models\ProjectsUsers;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\Property;
+use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
+use Fico7489\Laravel\EloquentJoin\Traits\EloquentJoin;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -16,6 +20,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\Project;
 use App\Models\Role;
 use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class User
@@ -50,14 +55,15 @@ use Illuminate\Contracts\Auth\CanResetPassword;
  * @property bool $important
  *
  * @property Role           $role
- * @property Project[]      $projects
- * @property Task[]         $tasks
- * @property TimeInterval[] $timeIntervals
- * @property User[]         $attached_users
+ * @property Project[]|Collection $projects
+ * @property Task[]|Collection $tasks
+ * @property TimeInterval[]|Collection $timeIntervals
+ * @property User[]|Collection $attached_users
  */
 class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
     use Notifiable, SoftDeletes;
+    use EloquentJoin;
 
     /**
      * table name from database
@@ -152,6 +158,14 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     }
 
     /**
+     * @return HasMany
+     */
+    public function projectsRelation(): HasMany
+    {
+        return $this->hasMany(ProjectsUsers::class, 'user_id', 'id');
+    }
+
+    /**
      * @return BelongsToMany
      */
     public function attached_users(): BelongsToMany
@@ -192,6 +206,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     }
 
     /**
+     *
      * Get the e-mail address where password reset links are sent.
      *
      * @return string
@@ -210,5 +225,23 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     public function sendPasswordResetNotification($token)
     {
         $this->notify(new ResetPassword($this->email, $token));
+    }
+
+    /**
+     * @return Builder|EloquentJoinBuilder
+     */
+    public static function joinQuery()
+    {
+        return static::query();
+    }
+
+    /**
+     * @param string $object
+     * @param string $action
+     * @return bool
+     */
+    public function allowed(string $object, string $action): bool
+    {
+        return Role::can($this, $object, $action);
     }
 }
