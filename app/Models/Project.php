@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property User $users
  * @property Task[] $tasks
  */
-class Project extends Model
+class Project extends AbstractModel
 {
     use SoftDeletes;
 

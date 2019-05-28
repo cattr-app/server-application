@@ -9,6 +9,10 @@ use Auth;
 use Illuminate\Http\Request;
 use DB;
 
+/**
+ * Class TimeUseReportController
+ * @package App\Http\Controllers\Api\v1\Statistic
+ */
 class TimeUseReportController extends Controller
 {
     /**
@@ -22,8 +26,6 @@ class TimeUseReportController extends Controller
         $user_ids = $request->input('user_ids');
         $start_at = $request->input('start_at');
         $end_at = $request->input('end_at');
-
-
 
         $projectReports = DB::table('project_report')
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))

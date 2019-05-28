@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property User[] $users
  * @property Rule[] $rules
  */
-class Role extends Model
+class Role extends AbstractModel
 {
     use SoftDeletes;
 

@@ -25,7 +25,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property User $user
  * @property Screenshot[] $screenshots
  */
-class TimeInterval extends Model
+class TimeInterval extends AbstractModel
 {
     use SoftDeletes;
 

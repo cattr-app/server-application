@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\Project;
 use App\Models\Role;
 use Auth;
 use Filter;
@@ -636,49 +637,52 @@ class UserController extends ItemController
      */
     protected function getQuery($withRelations = true): Builder
     {
+        /** @var User $user */
+        $user = Auth::user();
+
         $query = parent::getQuery($withRelations);
-        $full_access = Role::can(Auth::user(), 'users', 'full_access');
-        $relations_access = Role::can(Auth::user(), 'users', 'relations');
-        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
+        $full_access = $user->allowed('users', 'full_access');
 
         if ($full_access) {
             return $query;
         }
 
-        $user_id = collect(Auth::user()->id);
+        $relations_access = $user->allowed('users', 'relations');
+        $project_relations_access = $user->allowed('projects', 'relations');
+        $action_method = Route::getCurrentRoute()->getActionMethod();
+
+        $user_id = collect($user->id);
         $users_id = collect([]);
 
         /** edit and remove only for directly related users */
         if ($action_method !== 'edit' && $action_method !== 'remove') {
             if ($project_relations_access) {
-                $attached_user_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
-                    $project_attached_user_ids = collect($project->users)->flatMap(function ($user) {
-                        return collect($user->id);
-                    });
-
-                    $project_related_user_ids = collect($project->tasks)->flatMap(function ($task) {
-                        return collect($task->timeIntervals)->flatMap(function ($interval) {
-                            return collect($interval->user_id);
-                        });
-                    });
-
-                    return collect([$project_attached_user_ids, $project_related_user_ids])->collapse()->unique();
+                $projectIDs = $user->projects->map(static function ($project) {
+                    return $project->id;
                 });
 
-                $users_id = collect([$attached_user_id_to_project])->collapse();
+                $usersAssignedToProjectsIDs = User::joinQuery()
+                    ->whereInJoin('projectsRelation.project.id', $projectIDs)
+                    ->pluck('users.id')
+                ;
+
+                $projectsUsersIDs = User::joinQuery()
+                    ->whereInJoin('timeIntervals.task.project.id', $projectIDs)
+                    ->pluck('users.id')
+                ;
+
+                $users_id = collect([$usersAssignedToProjectsIDs, $projectsUsersIDs])->collapse()->unique();
             }
         }
 
-        if ($relations_access) {
-            $attached_users_id = collect(Auth::user()->attached_users)->flatMap(function($user) {
-                return collect($user->id);
-            });
-            $users_id = collect([$users_id, $user_id, $attached_users_id])->collapse()->unique();
-        } else {
-            $users_id = collect([$users_id, $user_id])->collapse()->unique();
-        }
-        $query->whereIn('users.id', $users_id);
+        $attached_users_id = $relations_access ? $user->attached_users->map(static function($user) {
+            return $user->id;
+        }) : collect([]);
+
+        $query->whereIn(
+            'users.id',
+            collect([$users_id, $user_id, $attached_users_id])->collapse()->unique()
+        );
 
         return $query;
     }

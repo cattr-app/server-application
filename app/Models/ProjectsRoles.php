@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property Role $role
  * @property Project $project
  */
-class ProjectsRoles extends Model
+class ProjectsRoles extends AbstractModel
 {
     /**
      * table name from database
