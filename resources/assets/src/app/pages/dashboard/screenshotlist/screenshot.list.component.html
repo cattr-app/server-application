@@ -2,38 +2,38 @@
   <div class="row" *ngFor="let block of filteredBlocks; trackBy: blockTrackFn">
     <div class="col-md-11">
       <!-- items start -->
-      <div class="col-md-2" *ngFor="let screenshots of block.screenshots; trackBy: screenshotsTrackFn">
-        <div *ngIf="screenshots[0]" class="card screenshot">
-          <input type="checkbox" class="select_image" *ngIf="screenshots[0].id"
-            (change)="selected[screenshots[0].id] = !selected[screenshots[0].id]"
-            [checked]="selected[screenshots[0].id]" />
+      <div class="col-md-2" *ngFor="let intervals of block.intervals; trackBy: screenshotsTrackFn">
+        <div *ngIf="intervals[0]" class="card" [class.screenshot]="intervals[0] && intervals[0].screenshots[0]">
+          <input type="checkbox" class="select_image" *ngIf="intervals[0].id"
+            (change)="selected[intervals[0].id] = !selected[intervals[0].id]"
+            [checked]="selected[intervals[0].id]" />
 
-          <app-image class="card-img-top"
-              [src]="screenshots[0].thumbnail_path ? screenshots[0].thumbnail_path : (screenshots[0].path ? screenshots[0].path : 'uploads/none.png')"
-              (click)="openScreenshotModal(screenshots[0])">
+          <app-image *ngIf="intervals[0] && intervals[0].screenshots[0]" class="card-img-top"
+              [src]="intervals[0].screenshots[0].thumbnail_path ? intervals[0].screenshots[0].thumbnail_path : (intervals[0].screenshots[0].path ? intervals[0].screenshots[0].path : 'uploads/none.png')"
+              (click)="openScreenshotModal(intervals[0].screenshots[0])">
           </app-image>
 
-          <div class="card-body">
-            <p class="card-text" *ngIf="screenshots[0].time_interval">
-              <span class="card-text-line">{{ formatTime(screenshots[0].time_interval.start_at) }}</span>
+          <img *ngIf="!intervals[0].screenshots[0]" class="card-img-top" src="uploads/none.png" alt="image" />
 
-              <a class="card-text-line" *ngIf="screenshots[0].time_interval.task"
-                [attr.href]="'/tasks/show/' + screenshots[0].time_interval.task.id">
-                {{ screenshots[0].time_interval.task.task_name }}
+          <div class="card-body">
+            <p class="card-text" *ngIf="intervals[0]">
+              <span class="card-text-line">{{ formatTime(intervals[0].start_at) }}</span>
+
+              <a class="card-text-line" *ngIf="intervals[0].task"
+                [attr.href]="'/tasks/show/' + intervals[0].task.id">
+                {{ intervals[0].task.task_name }}
               </a>
 
-              <a class="card-text-line" *ngIf="screenshots[0].time_interval.task?.project"
-                [attr.href]="'/projects/show/' + screenshots[0].time_interval.task.project.id">
-                {{ screenshots[0].time_interval.task.project.name }}
+              <a class="card-text-line" *ngIf="intervals[0].task?.project"
+                [attr.href]="'/projects/show/' + intervals[0].task.project.id">
+                {{ intervals[0].task.project.name }}
               </a>
             </p>
           </div>
         </div>
 
-        <div *ngIf="!screenshots[0]" class="card">
-          <img class="card-img-top" src="uploads/none.png" alt="image" />
-
-          <div class="card-body">
+        <div *ngIf="!intervals[0]" class="card">
+          <div class="card-body empty-slot">
           </div>
         </div>
       </div>

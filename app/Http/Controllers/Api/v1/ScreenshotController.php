@@ -15,6 +15,9 @@ use Validator;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
+use App\Models\TimeInterval;
+use App\Helpers\QueryHelper;
 
 /**
  * Class ScreenshotController
@@ -362,13 +365,17 @@ class ScreenshotController extends ItemController
         }
 
         $filters = $request->all();
-        is_int($request->get('user_id')) ? $filters['timeInterval.user_id'] = $request->get('user_id') : False;
+        unset($filters['with']);
+        is_int($request->get('user_id')) ? $filters['user_id'] = $request->get('user_id') : False;
         $compareDate = Carbon::today($timezone)->setTimezone('UTC')->toDateTimeString();
-        $filters['timeInterval.start_at'] = ['>=', [$compareDate]];
+        $filters['start_at'] = ['>=', [$compareDate]];
 
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(),
-            $filters ?: []
+        $query = TimeInterval::with(['screenshots', 'task', 'task.project']);
+        $helper = new QueryHelper();
+        $helper->apply($query, $filters ?: [], new TimeInterval());
+        $baseQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.filter'),
+            $query
         );
 
         $itemsQuery = Filter::process(
@@ -376,9 +383,9 @@ class ScreenshotController extends ItemController
             $baseQuery->orderBy('id', 'desc')
         );
 
-        $screenshots = $itemsQuery->get();
+        $intervals = $itemsQuery->get();
 
-        if (collect($screenshots)->isEmpty()) {
+        if (collect($intervals)->isEmpty()) {
             return response()->json(Filter::process(
                 $this->getEventUniqueName('answer.success.item.list'),
                 []
@@ -387,12 +394,12 @@ class ScreenshotController extends ItemController
 
         $items = [];
 
-        foreach ($screenshots as $screenshot) {
+        foreach ($intervals as $interval) {
             $hasInterval = false;
             $matches = [];
 
-            preg_match('/(\d{4}-\d{2}-\d{2} \d{2})/', $screenshot->timeInterval->start_at, $matches);
-            $minutes = Carbon::parse($screenshot->timeInterval->start_at)->minute;
+            preg_match('/(\d{4}-\d{2}-\d{2} \d{2})/', $interval->start_at, $matches);
+            $minutes = Carbon::parse($interval->start_at)->minute;
             $minutes = $minutes > 9 ? (string)$minutes : '0'.$minutes;
             $hour = $matches[1].':00:00';
 
@@ -404,20 +411,21 @@ class ScreenshotController extends ItemController
             }
 
             if($hasInterval && isset($itemkey)) {
-                $items[$itemkey]['screenshots'][(int)$minutes{0}][] = $screenshot->toArray();
+                $items[$itemkey]['intervals'][(int)$minutes{0}][] = $interval->toArray();
             } else {
                 $arr = [
                     'interval' => $hour,
-                    'screenshots' => [
+                    'intervals' => [
                         0 => [],
                         1 => [],
                         2 => [],
                         3 => [],
                         4 => [],
                         5 => [],
-                    ]
+                    ],
                 ];
-                $arr['screenshots'][(int)$minutes{0}][] = $screenshot->toArray();
+
+                $arr['intervals'][(int)$minutes{0}][] = $interval->toArray();
                 $items[] = $arr;
             }
         }

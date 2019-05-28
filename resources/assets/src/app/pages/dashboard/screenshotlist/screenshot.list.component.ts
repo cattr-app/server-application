@@ -56,37 +56,37 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         this.selectedDiffer = differs.find(this.selected).create();
     }
 
-    getScreenshots() {
+    getIntervals() {
         return this.blocks
-            .map(block => block.screenshots
-                // Get all screenshot in each group.
+            .map(block => block.intervals
+                // Get all interval in each group.
                 .reduce((arr, curr) => arr.concat(curr), [])
                 // Remove empty entries.
-                .filter(screenshot => screenshot))
-            // Flatten screenshot blocks.
+                .filter(interval => interval))
+            // Flatten interval blocks.
             .reduce((arr, curr) => arr.concat(curr), []);
     }
 
-    getVisibleScreenshots() {
+    getVisibleIntervals() {
         return this.blocks
-            .map(block => block.screenshots
-                // Get first screenshot in each group.
-                .map(screenshots => screenshots[0])
+            .map(block => block.intervals
+                // Get first interval in each group.
+                .map(intervals => intervals[0])
                 // Remove empty entries.
-                .filter(screenshot => screenshot))
-            // Flatten screenshot blocks.
+                .filter(interval => interval))
+            // Flatten interval blocks.
             .reduce((arr, curr) => arr.concat(curr), []);
     }
 
-    getSelectedScreenshots() {
-        // Get selected screenshots.
+    getSelectedIntervals() {
+        // Get selected intervals.
         return this.blocks
             .map(block => {
-                return block.screenshots
-                    // Get screenshot groups where some screenshots is selected.
-                    .filter(screenshots => screenshots.some(screenshot => this.selected[screenshot.id]))
-                    // Flatten screenshot groups.
-                    .reduce((arr, screenshots) => arr.concat(screenshots), []);
+                return block.intervals
+                    // Get interval groups where some intervals is selected.
+                    .filter(intervals => intervals.some(interval => this.selected[interval.id]))
+                    // Flatten interval groups.
+                    .reduce((arr, intervals) => arr.concat(intervals), []);
             })
             // Flatten screenshot blocks.
             .reduce((arr, curr) => arr.concat(curr), []);
@@ -101,9 +101,7 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     ngDoCheck() {
         const selectedChanged = this.selectedDiffer.diff(this.selected);
         if (selectedChanged) {
-            this.selectedIntervals = this.getSelectedScreenshots()
-                // Get time intervals of the selected screenshots.
-                .map(screenshot => screenshot.time_interval);
+            this.selectedIntervals = this.getSelectedIntervals();
             this.onSelectionChanged.emit(this.selectedIntervals);
         }
     }
@@ -152,26 +150,26 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
         this._filter = filter;
         this.filteredBlocks = this.blocks.map(block => {
             const filteredBlock = { ...block };
-            filteredBlock.screenshots = block.screenshots.map(screenshots => screenshots.filter(screenshot => {
-                if (!screenshot.time_interval || !screenshot.time_interval.task) {
+            filteredBlock.intervals = block.intervals.map(intervals => intervals.filter(interval => {
+                if (!interval || !interval.task) {
                     return false;
                 }
 
                 if (typeof this._filter === "string") {
                     const filter = this._filter.toLowerCase();
-                    const taskName = screenshot.time_interval.task.task_name.toLowerCase();
-                    const projName = screenshot.time_interval.task.project
-                        ? screenshot.time_interval.task.project.name.toLowerCase() : '';
+                    const taskName = interval.task.task_name.toLowerCase();
+                    const projName = interval.task.project
+                        ? interval.task.project.name.toLowerCase() : '';
                     return taskName.indexOf(filter) !== -1
                         || projName.indexOf(filter) !== -1;
                 } else if (this._filter instanceof Project) {
-                    return +screenshot.time_interval.task.project_id === +this._filter.id;
+                    return +interval.task.project_id === +this._filter.id;
                 } else if (this._filter instanceof Task) {
-                    return +screenshot.time_interval.task.id === +this._filter.id;
+                    return +interval.task.id === +this._filter.id;
                 }
             }));
             return filteredBlock;
-        }).filter(block => block.screenshots.some(group => group.length > 0));
+        }).filter(block => block.intervals.some(group => group.length > 0));
     }
 
     onScrollDown() {
@@ -189,10 +187,10 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     }
 
     onSelectBlock(block: ScreenshotsBlock, select: boolean) {
-        block.screenshots
-            .reduce((arr, screenshots) => arr.concat(screenshots), [])
-            .filter(screenshot => screenshot.id)
-            .map(screenshot => screenshot.id)
+        block.intervals
+            .reduce((arr, intervals) => arr.concat(intervals), [])
+            .filter(interval => interval.id)
+            .map(interval => interval.id)
             .forEach(id => {
                 this.selected[id] = select;
             });
@@ -204,38 +202,38 @@ export class ScreenshotListComponent implements OnInit, DoCheck, OnDestroy {
     }
 
     prevScreenshot() {
-        const screenshots = this.getVisibleScreenshots();
-        const currentIndex = screenshots
-            .findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
+        const intervals = this.getVisibleIntervals().filter(interval => interval.screenshots.length);
+        const currentIndex = intervals
+            .findIndex(interval => +interval.id === +this.modalScreenshot.time_interval_id);
         if (currentIndex > 0) {
-            this.modalScreenshot = screenshots[currentIndex - 1];
+            this.modalScreenshot = intervals[currentIndex - 1].screenshots[0];
         }
     }
 
     nextScreenshot() {
-        const screenshots = this.getVisibleScreenshots();
-        const currentIndex = screenshots
-            .findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
-        if (currentIndex !== -1 && currentIndex < screenshots.length - 1) {
-            this.modalScreenshot = screenshots[currentIndex + 1];
+        const intervals = this.getVisibleIntervals().filter(interval => interval.screenshots.length);
+        const currentIndex = intervals
+            .findIndex(interval => +interval.id === +this.modalScreenshot.time_interval_id);
+        if (currentIndex !== -1 && currentIndex < intervals.length - 1) {
+            this.modalScreenshot = intervals[currentIndex + 1].screenshots[0];
         }
     }
 
     deleteScreenshot(screenshot: Screenshot) {
         this.timeIntervalsService.removeItem(screenshot.time_interval_id, () => {
-            const screenshots = this.getScreenshots();
-            const currentIndex = screenshots
-                .findIndex(screenshot => screenshot.id === this.modalScreenshot.id);
-            if (currentIndex !== -1 && currentIndex < screenshots.length - 1) {
-                this.modalScreenshot = screenshots[currentIndex + 1];
+            const intervals = this.getIntervals();
+            const currentIndex = intervals
+                .findIndex(interval => +interval.id === +this.modalScreenshot.time_interval_id);
+            if (currentIndex !== -1 && currentIndex < intervals.length - 1) {
+                this.modalScreenshot = intervals[currentIndex + 1].screenshots[0];
             } else if (currentIndex > 0) {
-                this.modalScreenshot = screenshots[currentIndex - 1];
+                this.modalScreenshot = intervals[currentIndex - 1].screenshots[0];
             } else {
                 this.screenshotModal.hide();
             }
 
             this.blocks.forEach(block => {
-                block.screenshots = block.screenshots.map(group =>
+                block.intervals = block.intervals.map(group =>
                     group.filter(scr => +scr.id !== +screenshot.id));
             });
 

@@ -44,9 +44,9 @@ export class ScreenshotsBlock {
             }
         }
 
-        this.screenshots = Object.keys(this.screenshots).map(key => this.screenshots[key]);
+        this.intervals = Object.keys(this.intervals).map(key => this.intervals[key]);
     }
 
-    public screenshots: Screenshot[][];
+    public intervals: TimeInterval[][];
     public time: string;
 }

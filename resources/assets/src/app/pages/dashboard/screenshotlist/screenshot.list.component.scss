@@ -1,8 +1,11 @@
 @import '../../../../variables';
 @import "~bootstrap-sass/assets/stylesheets/bootstrap";
 
-.screenshot {
+.card {
     position: relative;
+}
+
+.screenshot {
     cursor: pointer;
 }
 
@@ -21,6 +24,12 @@
 
 .card-text-line {
     display: block;
+}
+
+.empty-slot {
+    min-height: 62px;
+    box-sizing: border-box;
+    border: 2px dashed #ccc;
 }
 
 .loading {
