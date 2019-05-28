@@ -58,7 +58,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property Role           $role
  * @property Project[]|Collection $projects
  * @property Task[]|Collection $tasks
- * @property TimeInterval[]Collection| $timeIntervals
+ * @property TimeInterval[]|Collection $timeIntervals
  * @property User[]|Collection $attached_users
  */
 class User extends Authenticatable implements JWTSubject, CanResetPassword
@@ -214,5 +214,15 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     public static function joinQuery()
     {
         return static::query();
+    }
+
+    /**
+     * @param string $object
+     * @param string $action
+     * @return bool
+     */
+    public function allowed(string $object, string $action): bool
+    {
+        return Role::can($this, $object, $action);
     }
 }

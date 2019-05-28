@@ -641,14 +641,14 @@ class UserController extends ItemController
         $user = Auth::user();
 
         $query = parent::getQuery($withRelations);
-        $full_access = Role::can($user, 'users', 'full_access');
+        $full_access = $user->allowed('users', 'full_access');
 
         if ($full_access) {
             return $query;
         }
 
-        $relations_access = Role::can($user, 'users', 'relations');
-        $project_relations_access = Role::can($user, 'projects', 'relations');
+        $relations_access = $user->allowed('users', 'relations');
+        $project_relations_access = $user->allowed('projects', 'relations');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
         $user_id = collect($user->id);
