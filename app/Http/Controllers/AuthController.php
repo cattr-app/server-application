@@ -91,7 +91,7 @@ class AuthController extends Controller
     public function __construct()
     {
         $this->middleware('auth:api', [
-            'except' => ['login', 'refresh', 'sendReset', 'getReset', 'reset']
+            'except' => ['check', 'login', 'refresh', 'sendReset', 'getReset', 'reset']
         ]);
     }
 
@@ -124,6 +124,33 @@ class AuthController extends Controller
             'status' => 200,
             'error' => false,
             'cat' => $helper->getCat(),
+        ]);
+    }
+
+    /**
+     * @api {any} /api/auth/check Check
+     * @apiDescription Check API status
+     *
+     * @apiVersion 0.1.0
+     * @apiName Check
+     * @apiGroup Auth
+     *
+     * @apiSuccess {Integer}   code API HTTP-code status
+     * @apiSuccess {Boolean}   amazingtime
+     *
+     * @apiSuccessExample {json} Answer Example
+     *  {
+     *      "code": 200,
+     *      "amazingtime": true,
+     *  }
+     *
+     * @return JsonResponse
+     */
+    public function check(): JsonResponse
+    {
+        return response()->json([
+            'code' => 200,
+            'amazingtime' => true,
         ]);
     }
 

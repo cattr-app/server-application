@@ -30,6 +30,7 @@ Route::group([
     'prefix' => 'auth',
 ], function(Router $router) {
     $router->any('ping', 'AuthController@ping');
+    $router->any('check', 'AuthController@check');
     $router->post('login', 'AuthController@login');
     $router->any('logout', 'AuthController@logout');
     $router->any('logout-all', 'AuthController@logoutAll');

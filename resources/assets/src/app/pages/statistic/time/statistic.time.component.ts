@@ -469,11 +469,6 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             resourceAreaWidth: '25%',
             resourceColumns: [
                 {
-                    labelText: '',
-                    text: () => '',
-                    width: '20px',
-                },
-                {
                     labelText: 'Name',
                     field: 'title',
                 },
@@ -728,19 +723,19 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
 
                 switch (this.sortUsers) {
                     case UsersSort.NameAsc:
-                        $('.fc-resource-area th:nth-child(2) .fc-cell-text').addClass('sort-asc');
+                        $('.fc-resource-area th:nth-child(1) .fc-cell-text').addClass('sort-asc');
                         break;
 
                     case UsersSort.NameDesc:
-                        $('.fc-resource-area th:nth-child(2) .fc-cell-text').addClass('sort-desc');
+                        $('.fc-resource-area th:nth-child(1) .fc-cell-text').addClass('sort-desc');
                         break;
 
                     case UsersSort.TimeWorkedAsc:
-                        $('.fc-resource-area th:nth-child(3) .fc-cell-text').addClass('sort-asc');
+                        $('.fc-resource-area th:nth-child(2) .fc-cell-text').addClass('sort-asc');
                         break;
 
                     case UsersSort.TimeWorkedDesc:
-                        $('.fc-resource-area th:nth-child(3) .fc-cell-text').addClass('sort-desc');
+                        $('.fc-resource-area th:nth-child(2) .fc-cell-text').addClass('sort-desc');
                         break;
                 }
 
@@ -855,7 +850,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
             const time = timeWorked !== undefined ? timeWorked.total : 0;
             const timeWorkedString = this.formatDurationString(time);
-            const $cell = $('td:nth-child(3) .fc-cell-text', $row);
+            const $cell = $('td:nth-child(2) .fc-cell-text', $row);
             $cell.text(timeWorkedString);
 
             if (time < 10e-3) {
@@ -864,7 +859,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 $row.removeClass('not_worked');
             }
 
-            const $nameCell = $('td:nth-child(2) .fc-cell-text', $row);
+            const $nameCell = $('td:nth-child(1) .fc-cell-text', $row);
             $nameCell.find('.current-task, .current-proj, .last-worked').remove();
             if ($('.name', $nameCell).length === 0) {
                 const name = $nameCell.text();
@@ -900,10 +895,7 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                     isWorkingNow = duration >= screenshotsInterval - threshold;
                 }
 
-                const $workingNowCell = $('td:nth-child(1) .fc-cell-text', $row);
                 if (isWorkingNow) {
-                    $workingNowCell.addClass('is_working_now');
-
                     const currentTask = this.latestEventsTasks.find(task => +task.id === +lastUserEvent.task_id);
                     if (currentTask !== undefined) {
                         const currentProject = this.latestEventsProjects
@@ -923,7 +915,6 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                         $nameCell.append($task);
                     }
                 } else {
-                    $workingNowCell.removeClass('is_working_now');
                     const lastWorkedString = 'Last worked '
                         + eventEnd.from(moment.utc().add(offset, 'minutes'));
                     const $lastWorked = $(`<p class="last-worked">${lastWorkedString}</p>`);

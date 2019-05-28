@@ -70,6 +70,7 @@ export class TimeUseReportComponent implements OnInit, OnDestroy, DoCheck {
 
     this.service.getItems((result: Report[]) => {
       this.report = result.length ? result[0] : { users: [] };
+      this.sort();
       this.isLoading = false;
     }, params);
   }
@@ -126,6 +127,22 @@ export class TimeUseReportComponent implements OnInit, OnDestroy, DoCheck {
     return `${hours}:${minutesStr}:${secondsStr}`;
   }
 
+  protected sort() {
+    this.report.users.map(user => {
+      user.tasks = user.tasks.sort((a, b) => {
+        switch (this.order) {
+          case TaskOrder.TaskAsc: return a.name.localeCompare(b.name);
+          case TaskOrder.TaskDesc: return b.name.localeCompare(a.name);
+          case TaskOrder.ProjectAsc: return a.project_name.localeCompare(b.project_name);
+          case TaskOrder.ProjectDesc: return b.project_name.localeCompare(a.project_name);
+          case TaskOrder.TimeAsc: return a.total_time - b.total_time;
+          default:
+          case TaskOrder.TimeDesc: return b.total_time - a.total_time;
+        }
+      });
+    });
+  }
+
   setOrder(column: string) {
     switch (column) {
       case 'task':
@@ -145,19 +162,7 @@ export class TimeUseReportComponent implements OnInit, OnDestroy, DoCheck {
         break;
     }
 
-    this.report.users.map(user => {
-      user.tasks = user.tasks.sort((a, b) => {
-        switch (this.order) {
-          case TaskOrder.TaskAsc: return a.name.localeCompare(b.name);
-          case TaskOrder.TaskDesc: return b.name.localeCompare(a.name);
-          case TaskOrder.ProjectAsc: return a.project_name.localeCompare(b.project_name);
-          case TaskOrder.ProjectDesc: return b.project_name.localeCompare(a.project_name);
-          case TaskOrder.TimeAsc: return a.total_time - b.total_time;
-          default:
-          case TaskOrder.TimeDesc: return b.total_time - a.total_time;
-        }
-      });
-    });
+    this.sort();
   }
 
   setUsers(users: User[]) {
