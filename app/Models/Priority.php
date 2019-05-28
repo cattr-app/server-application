@@ -2,9 +2,11 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
-
-class Priority extends Model
+/**
+ * Class Priority
+ * @package App\Models
+ */
+class Priority extends AbstractModel
 {
 	/**
      * table name from database

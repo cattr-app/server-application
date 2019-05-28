@@ -2,9 +2,13 @@
 
 namespace App;
 
+use App\Models\ProjectsUsers;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\Property;
+use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
+use Fico7489\Laravel\EloquentJoin\Traits\EloquentJoin;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -15,6 +19,7 @@ use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\Project;
 use App\Models\Role;
 use Illuminate\Contracts\Auth\CanResetPassword;
+use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class User
@@ -51,14 +56,15 @@ use Illuminate\Contracts\Auth\CanResetPassword;
  * @property bool $important
  *
  * @property Role           $role
- * @property Project[]      $projects
- * @property Task[]         $tasks
- * @property TimeInterval[] $timeIntervals
- * @property User[]         $attached_users
+ * @property Project[]|Collection $projects
+ * @property Task[]|Collection $tasks
+ * @property TimeInterval[]Collection| $timeIntervals
+ * @property User[]|Collection $attached_users
  */
 class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
     use Notifiable, SoftDeletes, \Illuminate\Auth\Passwords\CanResetPassword;
+    use EloquentJoin;
 
     /**
      * table name from database
@@ -155,6 +161,14 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     }
 
     /**
+     * @return HasMany
+     */
+    public function projectsRelation(): HasMany
+    {
+        return $this->hasMany(ProjectsUsers::class, 'user_id', 'id');
+    }
+
+    /**
      * @return BelongsToMany
      */
     public function attached_users(): BelongsToMany
@@ -192,5 +206,13 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     public function properties(): HasMany
     {
         return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::USER_CODE);
+    }
+
+    /**
+     * @return Builder|EloquentJoinBuilder
+     */
+    public static function joinQuery()
+    {
+        return static::query();
     }
 }

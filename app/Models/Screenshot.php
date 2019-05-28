@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  *
  * @property TimeInterval $timeInterval
  */
-class Screenshot extends Model
+class Screenshot extends AbstractModel
 {
     use SoftDeletes;
 

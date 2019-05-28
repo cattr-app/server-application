@@ -18,7 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $updated_at
  * @property string $deleted_at
  */
-class Property extends Model
+class Property extends AbstractModel
 {
     use SoftDeletes;
 

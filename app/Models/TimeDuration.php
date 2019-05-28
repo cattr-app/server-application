@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 
  * @property User $user
  */
-class TimeDuration extends Model
+class TimeDuration extends AbstractModel
 {
 	/**
      * table name from database

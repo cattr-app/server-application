@@ -32,7 +32,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Project[]      $project
  * @property Priority       $priority
  */
-class Task extends Model
+class Task extends AbstractModel
 {
     use SoftDeletes;
 
