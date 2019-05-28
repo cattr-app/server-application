@@ -72,20 +72,6 @@ describe('UserSettingsComponent component in Settings (User)', () => {
     const divRow = input.parent.parent;
     expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.fullname');
   }));
-  
-  it('has a firstname', async(() => {
-    const input = fixture.debugElement.query(By.css("input[name='user-first-name'][type='text']"));
-    expect(input).not.toBeNull();
-    const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.firstname');
-  }));
-
-  it('has a lastname', async(() => {
-    const input = fixture.debugElement.query(By.css("input[name='user-last-name'][type='text']"));
-    expect(input).not.toBeNull();
-    const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.lastname');
-  }));
 
   it('has a email', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-email'][type='text'][required]"));
@@ -93,26 +79,26 @@ describe('UserSettingsComponent component in Settings (User)', () => {
     const divRow = input.parent.parent;
     expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.email');
   }));
-  
+
   it('has a password', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-password'][type='password']"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.password'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.password');
    }));
 
   it('has a avatar', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-avatar'][type='file']"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.avatar'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.avatar');
   }));
 
   it('has a URL', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-url'][type='text']"));
     expect(input).toBeNull();
   }));
-  
+
   it('has a user active', async(() => {
     const input = fixture.debugElement.query(By.css("select[name='user-active'][required]"));
     expect(input).toBeNull();
@@ -127,7 +113,7 @@ describe('UserSettingsComponent component in Settings (User)', () => {
     const input = fixture.debugElement.query(By.css("select[name='user-screenshots-active'][required]"));
     expect(input).toBeNull();
   }));
-  
+
   it('has a manual-time', async(() => {
     const input = fixture.debugElement.query(By.css("select[name='user-manual-time'][required]"));
     expect(input).toBeNull();
@@ -207,20 +193,6 @@ describe('UserSettingsComponent component in Settings (Manager)', () => {
     const divRow = input.parent.parent;
     expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.fullname');
   }));
-  
-  it('has a firstname', async(() => {
-    const input = fixture.debugElement.query(By.css("input[name='user-first-name'][type='text']"));
-    expect(input).not.toBeNull();
-    const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.firstname');
-  }));
-
-  it('has a lastname', async(() => {
-    const input = fixture.debugElement.query(By.css("input[name='user-last-name'][type='text']"));
-    expect(input).not.toBeNull();
-    const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.lastname');
-  }));
 
   it('has a email', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-email'][type='text'][required]"));
@@ -228,26 +200,26 @@ describe('UserSettingsComponent component in Settings (Manager)', () => {
     const divRow = input.parent.parent;
     expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.email');
   }));
-  
+
   it('has a password', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-password'][type='password']"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.password'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.password');
    }));
 
   it('has a avatar', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-avatar'][type='file']"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.avatar'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.avatar');
   }));
 
   it('has a URL', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-url'][type='text']"));
     expect(input).toBeNull();
   }));
-  
+
   it('has a user active', async(() => {
     const input = fixture.debugElement.query(By.css("select[name='user-active'][required]"));
     expect(input).toBeNull();
@@ -262,7 +234,7 @@ describe('UserSettingsComponent component in Settings (Manager)', () => {
     const input = fixture.debugElement.query(By.css("select[name='user-screenshots-active'][required]"));
     expect(input).toBeNull();
   }));
-  
+
   it('has a manual-time', async(() => {
     const input = fixture.debugElement.query(By.css("select[name='user-manual-time'][required]"));
     expect(input).toBeNull();
@@ -342,20 +314,6 @@ describe('UserSettingsComponent component in Settings (Admin)', () => {
     const divRow = input.parent.parent;
     expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.fullname');
   }));
-  
-  it('has a firstname', async(() => {
-    const input = fixture.debugElement.query(By.css("input[name='user-first-name'][type='text']"));
-    expect(input).not.toBeNull();
-    const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.firstname');
-  }));
-
-  it('has a lastname', async(() => {
-    const input = fixture.debugElement.query(By.css("input[name='user-last-name'][type='text']"));
-    expect(input).not.toBeNull();
-    const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.lastname');
-  }));
 
   it('has a email', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-email'][type='text'][required]"));
@@ -363,49 +321,49 @@ describe('UserSettingsComponent component in Settings (Admin)', () => {
     const divRow = input.parent.parent;
     expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.email');
   }));
-  
+
   it('has a password', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-password'][type='password']"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.password'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.password');
    }));
 
   it('has a avatar', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-avatar'][type='file']"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.avatar'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.avatar');
   }));
 
   it('has a URL', async(() => {
     const input = fixture.debugElement.query(By.css("input[name='user-url'][type='text']"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.url'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.url');
   }));
-  
+
   it('has a user active', async(() => {
     const input = fixture.debugElement.query(By.css("select[name='user-active'][required]"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.user-active'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.user-active');
   }));
 
   it('has a role', async(() => {
     const input = fixture.debugElement.query(By.css("select[name='user-role-id'][required]"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.role'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.role');
   }));
 
   it('has a screenshots-active', async(() => {
     const input = fixture.debugElement.query(By.css("select[name='user-screenshots-active'][required]"));
     expect(input).not.toBeNull();
     const divRow = input.parent.parent;
-    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.screenshots-active'); 
+    expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.screenshots-active');
   }));
-  
+
   it('has a manual-time', async(() => {
     const input = fixture.debugElement.query(By.css("select[name='user-manual-time'][required]"));
     expect(input).not.toBeNull();
@@ -426,7 +384,7 @@ describe('UserSettingsComponent component in Settings (Admin)', () => {
     const divRow = input.parent.parent;
     expect(divRow.query(By.css("label")).nativeElement.innerHTML).toContain('field.computer-time-popup');
   }));
-  
+
   it('has a timezone', async(() => {
     const input = fixture.debugElement.query(By.css("ng2-timezone-picker"));
     expect(input).not.toBeNull();

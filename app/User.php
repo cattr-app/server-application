@@ -23,8 +23,6 @@ use Illuminate\Contracts\Auth\CanResetPassword;
  *
  * @property int $id
  * @property string $full_name
- * @property string $first_name
- * @property string $last_name
  * @property string $email
  * @property string $url
  * @property int $company_id
@@ -74,8 +72,6 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
      */
     protected $fillable = [
         'full_name',
-        'first_name',
-        'last_name',
         'email',
         'url',
         'company_id',

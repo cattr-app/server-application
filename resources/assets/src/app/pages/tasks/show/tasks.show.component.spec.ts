@@ -72,8 +72,6 @@ class TasksShowMockComponent extends TasksShowComponent {
     return new User({
       id: 21,
       full_name: "User full name",
-      first_name: "User first name",
-      last_name: "User last name",
       email: "example@example.com",
       url: null,
       company_id: 2,
@@ -955,5 +953,5 @@ describe('Tasks show component (User)', () => {
     fixture.detectChanges();
     let tableRows = fixture.debugElement.queryAll(By.css("accordion-group"));
     expect(tableRows.length).toBe(0);
-  }));  
+  }));
 });

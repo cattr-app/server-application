@@ -98,7 +98,7 @@ class AuthControllerTest extends TestCase
         ];
 
         $expectedFields = [
-            "id","full_name","first_name","last_name","email","url",
+            "id","full_name","email","url",
             "company_id","level","payroll_access","billing_access",
             "avatar","screenshots_active","manual_time","permanent_tasks",
             "computer_time_popup","poor_time_popup","blur_screenshots",

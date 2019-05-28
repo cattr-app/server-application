@@ -19,8 +19,7 @@
                             <thead>
                             <tr>
                                 <th translate>field.id</th>
-                                <th translate>field.firstname</th>
-                                <th translate>field.lastname</th>
+                                <th translate>field.fullname</th>
                                 <th translate>field.email</th>
                                 <th translate>control.actions</th>
                             </tr>
@@ -29,8 +28,7 @@
                             <tr class="user" [class.user--active]="+user.active" [class.user--inactive]="!+user.active"
                                 *ngFor="let user of itemsArray">
                                 <td>{{user.id}}</td>
-                                <td>{{user.first_name}}</td>
-                                <td>{{user.last_name}}</td>
+                                <td>{{user.full_name}}</td>
                                 <td>{{user.email}}</td>
                                 <td>
                                     <a *ngIf="can('/users/show')" [routerLink]="['/users/show', user.id]" title="View user">

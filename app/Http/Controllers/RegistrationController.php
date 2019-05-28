@@ -132,8 +132,6 @@ class RegistrationController extends Controller
 
         $user = User::create([
             'full_name' => $data->get('fullName'),
-            'first_name' => $data->get('firstName'),
-            'last_name' => $data->get('lastName'),
             'email' => $data->get('email'),
             'password' => bcrypt($data->get('password')),
             'role_id' => 2,

@@ -8,8 +8,6 @@ export function loadAdminStorage() {
     {
       'id': 2,
       'full_name': 'Attached user',
-      'first_name': 'Attached',
-      'last_name': 'User',
       'email': 'www@wefef.eru',
       'url': null,
       'company_id': null,
@@ -467,8 +465,6 @@ export function loadAdminStorage() {
     {
       'id': 1,
       'full_name': 'Admin',
-      'first_name': 'Ad',
-      'last_name': 'Min',
       'email': 'admin@example.com',
       'level': 'admin',
       'user_role_value': '1',
@@ -480,7 +476,7 @@ export function loadAdminStorage() {
   );
   localStorage.set('token', 'eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC8xMjcuMC4wLjE6ODAwMFwvYXBpXC9hdXRoXC9sb2dpbiIsImlhdCI6MTUzOTAwNjAwNCwiZXhwIjoxNTM5MDA5NjA0LCJuYmYiOjE1MzkwMDYwMDQsImp0aSI6IjZ0TFpXRE02ZlFwYmlCdk8iLCJzdWIiOjEsInBydiI6Ijg3ZTBhZjFlZjlmZDE1ODEyZmRlYzk3MTUzYTE0ZTBiMDQ3NTQ2YWEifQ.kuhSY8Ae7k5vSHHXelN0gxEcJpYO6268Sv-XA1H47ZI');
   localStorage.set('tokenType', 'bearer');
-  localStorage.set('settings-tab', 'Account'); 
+  localStorage.set('settings-tab', 'Account');
 }
 
 export function loadUserStorage() {
@@ -687,8 +683,6 @@ export function loadUserStorage() {
     {
       'id': 2,
       'full_name': 'User',
-      'first_name': 'user',
-      'last_name': 'user',
       'email': 'www@wefef.eru',
       'active': '1',
       'role_id': 2,
@@ -705,8 +699,6 @@ export function loadManagerStorage() {
         {
           "id":13,
           "full_name":"User 1",
-          "first_name":"User 1",
-          "last_name":null,
           "email":"user1@example.com",
           "url":null,
           "company_id":1,
@@ -735,11 +727,9 @@ export function loadManagerStorage() {
             "user_id":13
           }
         },
-        
+
         {"id":22,
         "full_name":"manager2",
-        "first_name":"manager",
-        "last_name":"2",
         "email":"manager2@example.com",
         "url":null,
         "company_id":null,
@@ -768,12 +758,10 @@ export function loadManagerStorage() {
           "user_id":22
         }
       },
-      
+
       {
         "id":1,
         "full_name":"Ad Min",
-        "first_name":"Ad",
-        "last_name":"Min",
         "email":"admin@example.com",
         "url":null,
         "company_id":1,
@@ -797,12 +785,10 @@ export function loadManagerStorage() {
         "updated_at":"2018-08-31 10:38:15",
         "role_id":1,"timezone":"Asia/Omsk"
       },
-      
+
       {
         "id":13,
         "full_name":"User 1",
-        "first_name":"User 1",
-        "last_name":null,
         "email":"user1@example.com",
         "url":null,
         "company_id":1,
@@ -827,12 +813,10 @@ export function loadManagerStorage() {
         "role_id":2,
         "timezone":"Asia/Novosibirsk"
       },
-      
+
       {
         "id":14,
         "full_name":"User 2",
-        "first_name":"User 2",
-        "last_name":null,
         "email":"user2@example.com",
         "url":null,"company_id":1,
         "level":null,"payroll_access":1,
@@ -855,12 +839,10 @@ export function loadManagerStorage() {
         "role_id":2,
         "timezone":"Asia/Novosibirsk"
       },
-      
+
       {
         "id":19,
         "full_name":"Alexander Yanchuk",
-        "first_name":"Alexander",
-        "last_name":"Yanchuk",
         "email":"alexanderyanchuk95@gmail.com",
         "url":null,
         "company_id":null,
@@ -896,7 +878,7 @@ export function loadManagerStorage() {
         "created_at":"2018-08-07 04:51:08",
         "updated_at":"2018-08-07 04:51:08"
       },
-    
+
       {
         "id":6,
         "company_id":4,
@@ -913,205 +895,203 @@ export function loadManagerStorage() {
         "action":"list",
         "name":"Attached User relation list"
       },
-      
+
       {
         "object":"dashboard",
         "action":"manager_access",
         "name":"Dashboard manager access"
       },
-      
+
       {
         "object":"project-report",
         "action":"list",
         "name":"Projects report list"
       },
-      
+
       {
         "object":"project-report",
         "action":"manager_access",
         "name":"Projects report manager access"
       },
-      
+
       {
         "object":"project-report",
         "action":"projects",
         "name":"Projects report related projects"
       },
-      
+
       {
         "object":"projects",
         "action":"list",
         "name":"Project list"
       },
-      
+
       {
         "object":"projects",
         "action":"relations",
         "name":"Project list attached to user"
       },
-      
+
       {
         "object":"projects",
         "action":"show",
         "name":"Project show"
       },
-      
+
       {
         "object":"projects-roles",
         "action":"list",
         "name":"Project Role relation list"
       },
-      
+
       {
         "object":"projects-users",
         "action":"list",
         "name":"Project User relation list"
       },
-      
+
       {
         "object":"roles",
         "action":"allowed-rules",
         "name":"Role allowed rule list"
       },
-      
+
       {
         "object":"roles",
         "action":"list",
         "name":"Role list"
       },
-      
+
       {
         "object":"screenshots",
         "action":"dashboard",
         "name":"Screenshot list at dashboard"
       },
-      
+
       {
         "object":"screenshots",
         "action":"edit",
         "name":"Screenshot edit"
       },
-      
+
       {
         "object":"screenshots",
         "action":"list",
         "name":"Screenshot list"
       },
-      
+
       {
         "object":"screenshots",
         "action":"manager_access",
         "name":"Screenshots manager access"
       },
-      
+
       {
         "object":"screenshots",
         "action":"remove",
         "name":"Screenshot remove"
       },
-      
+
       {
         "object":"screenshots",
         "action":"show",
         "name":"Screenshot show"
       },
-      
+
       {
         "object":"tasks",
         "action":"dashboard",
         "name":"Task list at dashboard"
       },
-      
+
       {
         "object":"tasks",
         "action":"list",
         "name":"Task list"
       },
-      
+
       {
         "object":"tasks",
         "action":"show",
         "name":"Task show"
       },
-      
+
       {
         "object":"time",
         "action":"project",
         "name":"Time by project"
       },
-      
+
       {
         "object":"time",
         "action":"task",
         "name":"Time by single task"
       },
-      
+
       {
         "object":"time",
         "action":"task-user",
         "name":"Time by single task and user"
       },
-      
+
       {
         "object":"time",
         "action":"tasks",
         "name":"Time by tasks"
       },
-      
+
       {
         "object":"time-duration",
         "action":"list",
         "name":"Time duration list"
       },
-      
+
       {
         "object":"time-intervals",
         "action":"list",
         "name":"Time interval list"
       },
-      
+
       {
         "object":"time-intervals",
         "action":"manager_access",
         "name":"Time intervals manager access"
       },
-      
+
       {
         "object":"time-intervals",
         "action":"show",
         "name":"Time interval show"
       },
-      
+
       {
         "object":"time-use-report",
         "action":"list",
         "name":"Time use report list"
       },
-     
+
       {
         "object":"users",
         "action":"list",
         "name":"User list"
       },
-      
+
       {
         "object":"users",
         "action":"relations",
         "name":"Attached users list"
       },
-      
+
       {
         "object":"users",
         "action":"show",
         "name":"User show"
       }
     ]);
-    localStorage.set('user', 
+    localStorage.set('user',
     {
       "id":12,
       "full_name":"Manager",
-      "first_name":"Manager",
-      "last_name":null,
       "email":"manager@example.com",
       "url":null,
       "company_id":1,
@@ -1135,7 +1115,7 @@ export function loadManagerStorage() {
       "updated_at":"2018-10-18 00:25:49",
       "role_id":5,
       "timezone":"Asia/Novosibirsk"
-      } 
+      }
     );
     localStorage.set('token', "eyJ0eXAiOiJKV1QiLCJhbGciOiJIUzI1NiJ9.eyJpc3MiOiJodHRwOlwvXC9hbWF6aW5nLXRpbWUubG9jOjgwMDBcL2FwaVwvYXV0aFwvbG9naW4iLCJpYXQiOjE1NDA1MzY4NjMsImV4cCI6MTU0MDU0MDQ2MywibmJmIjoxNTQwNTM2ODYzLCJqdGkiOiJWODdMZkRLeG1vTURDWk9YIiwic3ViIjoxMiwicHJ2IjoiODdlMGFmMWVmOWZkMTU4MTJmZGVjOTcxNTNhMTRlMGIwNDc1NDZhYSJ9.Z2uK4u2rUGADHyHr2Q6yvZ0KoPjToAgDYxYc9z884X0");
     localStorage.set('tokenType', 'bearer');

@@ -6,8 +6,6 @@ import { ApiService } from "./api/api.service";
 export class RegistrationFormData {
     email: string = '';
     fullName: string = '';
-    firstName: string = '';
-    lastName: string = '';
     password: string = '';
     timeZone: string = '';
 }

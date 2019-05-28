@@ -27,8 +27,6 @@ class TasksEditMockComponent extends TasksEditComponent {
         {
           id: 1,
           full_name: 'Fullname 1',
-          first_name: 'full 1',
-          last_name: 'name 1',
           email: 'email@example1.com',
           url: '',
           company_id: 2,
@@ -55,8 +53,6 @@ class TasksEditMockComponent extends TasksEditComponent {
       new User({
         id: 2,
         full_name: 'Fullname 2',
-        first_name: 'full 2',
-        last_name: 'name 2',
         email: 'email@example2.com',
         url: '',
         company_id: 2,

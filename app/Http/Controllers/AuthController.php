@@ -53,8 +53,6 @@ class AuthController extends Controller
      *         "user": {
      *           "id": 42,
      *           "full_name": "Captain",
-     *           "first_name": "John",
-     *           "last_name": "Doe",
      *           "email": "johndoe@example.com",
      *           "url": "",
      *           "company_id": 41,
@@ -363,8 +361,6 @@ class AuthController extends Controller
    * {
    *   "id": 1,
    *   "full_name": "Admin",
-   *   "first_name": "Ad",
-   *   "last_name": "Min",
    *   "email": "admin@example.com",
    *   "url": "",
    *   "company_id": 1,

@@ -20,8 +20,6 @@ class UsersTableSeeder extends Seeder
 
         User::updateOrCreate([
             'full_name'              => 'Admin',
-            'first_name'             => 'Ad',
-            'last_name'              => 'Min',
             'email'                  => $login,
             'url'                    => '',
             'company_id'             => 1,

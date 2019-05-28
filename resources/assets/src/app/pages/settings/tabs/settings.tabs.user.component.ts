@@ -116,8 +116,6 @@ export class UserSettingsComponent extends ItemsEditComponent implements OnInit,
 
         return {
             'full_name': this.item.full_name,
-            'first_name': this.item.first_name,
-            'last_name': this.item.last_name,
             'email': this.item.email,
             'active': this.item.active,
             'role_id': this.item.role_id,

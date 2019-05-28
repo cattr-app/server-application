@@ -24,8 +24,6 @@ class UserController extends ItemController
      *
      * @apiParam {Integer} id                       User ID
      * @apiParam {String}  full_name                Full Name
-     * @apiParam {String}  [first_name]             First Name
-     * @apiParam {String}  [last_name]              Last Name
      * @apiParam {String}  email                    E-mail
      * @apiParam {String}  [url]                    ???
      * @apiParam {Integer} [company_id]             ???
@@ -107,8 +105,6 @@ class UserController extends ItemController
      *
      * @apiParam {Integer}  [id]                    `QueryParam` User ID
      * @apiParam {String}   [full_name]             `QueryParam` Full Name
-     * @apiParam {String}   [first_name]            `QueryParam` First Name
-     * @apiParam {String}   [last_name]             `QueryParam` Last Name
      * @apiParam {String}   [email]                 `QueryParam` E-mail
      * @apiParam {String}   [url]                   `QueryParam` ???
      * @apiParam {Integer}  [company_id]            `QueryParam` ???
@@ -194,7 +190,6 @@ class UserController extends ItemController
      * @apiSuccess {Object}  object             User
      * @apiSuccess {Integer} object.id          User id
      * @apiSuccess {String}  object.full_name   User full name
-     * @apiSuccess {String}  object.last_name   User first name
      * @apiSuccess {String}  object.email       User email
      * @apiSuccess {String}  object.url         User url
      * @apiSuccess {Integer} object.role_id     User role id
@@ -203,8 +198,6 @@ class UserController extends ItemController
      * {
      *   "id": 1,
      *   "full_name": "Admin",
-     *   "first_name": "Ad",
-     *   "last_name": "Min",
      *   "email": "admin@example.com",
      *   "url": "",
      *   "company_id": 1,
@@ -256,8 +249,6 @@ class UserController extends ItemController
      *   "res": {
      *      "id": 1,
      *      "full_name": "Jonni Tree",
-     *      "first_name": "Ad",
-     *      "last_name": "Min",
      *       "email": "gook@tree.com",
      *       "url": "",
      *       "company_id": 1,
@@ -396,8 +387,6 @@ class UserController extends ItemController
      * @apiParam {Object}   users.object                          User
      * @apiParam {Integer}  users.object.id                       User id
      * @apiParam {String}   users.object.full_name                Full Name
-     * @apiParam {String}   [users.object.first_name]             First Name
-     * @apiParam {String}   [users.object.last_name]              Last Name
      * @apiParam {String}   users.object.email                    E-mail
      * @apiParam {String}   [users.object.url]                    ???
      * @apiParam {Integer}  [users.object.company_id]             ???

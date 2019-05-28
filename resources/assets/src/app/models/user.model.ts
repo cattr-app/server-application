@@ -3,8 +3,6 @@ import {Item} from './item.model';
 export interface UserData {
    id: number;
    full_name: string;
-   first_name: string;
-   last_name: string;
    email: string;
    url: string;
    company_id: number;
@@ -41,8 +39,6 @@ export interface UserData {
 export class User extends Item {
     public id: number;
     public full_name: string;
-    public first_name: string;
-    public last_name: string;
     public email: string;
     public url: string;
     public company_id: number;

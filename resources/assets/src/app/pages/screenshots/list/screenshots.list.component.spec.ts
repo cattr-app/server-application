@@ -26,9 +26,9 @@ import {ScreenshotListComponent} from '../../../screenshot-list/screenshot-list.
 import {ModalModule} from 'ngx-bootstrap';
 
 class MockScreenshotListComponent extends ScreenshotListComponent {
-  
+
   pathToNonePng: string = 'http://127.0.0.1:8000/uploads/none.png';
-  
+
   setItems(a) {
     super.setItems([{
       'id': 2218,
@@ -73,8 +73,6 @@ class MockScreenshotListComponent extends ScreenshotListComponent {
         'user': {
           'id': 1,
           'full_name': 'Admin',
-          'first_name': 'Ad',
-          'last_name': 'Min',
           'email': 'admin@example.com',
           'url': null,
           'company_id': 1,
