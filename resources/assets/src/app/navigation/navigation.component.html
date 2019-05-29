@@ -1,14 +1,10 @@
-<nav class="navbar">
-    <ul class="nav nav-pills">
-        <li *ngFor="let item of items" class="nav-item" routerLinkActive="active">
-            <div *ngIf="item.isLink; then link else action"></div>
-
-            <ng-template #link>
-                <a routerLink="/{{item.action}}" translate [translateParams]="{kek: 'kukarek'}">{{item.title}}</a>
-            </ng-template>
-            <ng-template #action>
-                <a href="#" (click)="processLinkAction(item.action)" translate>{{item.title}}</a>
-            </ng-template>
-        </li>
-    </ul>
+<nav class="navbar navbar-default navbar-static-top">
+    <div class="container-fluid">
+        <ul class="nav navbar-nav">
+            <li *ngFor="let item of items" routerLinkActive="active">
+                <a *ngIf="item.isLink" routerLink="/{{item.action}}" translate>{{item.title}}</a>
+                <a *ngIf="!item.isLink" href="#" (click)="processLinkAction(item.action)" translate>{{item.title}}</a>
+            </li>
+        </ul>
+    </div>
 </nav>

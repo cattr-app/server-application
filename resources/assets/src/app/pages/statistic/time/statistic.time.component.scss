@@ -65,26 +65,33 @@
         height: 36px;
     }
 
+    .select2-container--default .select2-selection--single .select2-selection__arrow {
+        top: 0;
+        height: 100%;
+    }
+
     /* Fullcalendar styles */
     .fc-resource-area {
-        th .fc-cell-text {
-            cursor: pointer;
-            font-stretch: condensed;
+        th {
+            .fc-cell-text {
+                cursor: pointer;
+                font-stretch: condensed;
+                display: flex;
+                align-items: center;
 
-            &.sort-asc::after {
-                content: '▲';
-                position: absolute;
-                top: 4px;
-                right: 0;
-                font-size: 8px;
-            }
+                &.sort-asc::after {
+                    content: '▲';
+                    position: absolute;
+                    right: 2px;
+                    font-size: 8px;
+                }
 
-            &.sort-desc::after {
-                content: '▼';
-                position: absolute;
-                top: 8px;
-                right: 0;
-                font-size: 8px;
+                &.sort-desc::after {
+                    content: '▼';
+                    position: absolute;
+                    right: 2px;
+                    font-size: 8px;
+                }
             }
         }
 
