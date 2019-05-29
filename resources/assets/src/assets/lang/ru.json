@@ -142,6 +142,7 @@
 		"team": "Команда",
 		"date-range": "Промежуток",
 		"export-csv": "Экспорт CSV",
+		"export-xlsx": "Экспорт XLSX",
 		"user-selected": "{{count}} выбрано пользователей",
 		"project-selected": "{{count}} выбрано проектов",
 		"required-field": "Обязательное поле",

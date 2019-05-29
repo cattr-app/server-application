@@ -12,6 +12,8 @@ import { AllowedActionsService } from '../../roles/allowed-actions.service';
 import * as moment from 'moment';
 import 'moment-timezone';
 
+import * as XLSX from 'xlsx';
+
 interface TaskData {
     id: number;
     project_id: number;
@@ -253,6 +255,57 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
         }
     }
 
+    exportXLSX() {
+        const data = [];
+
+        const header = ['Project', 'Name', 'Task', 'Time', 'Time (decimal)'];
+        data.push(header);
+
+        this.report.forEach(project => {
+            const proj_name = project.name;
+
+            project.users.forEach(user => {
+                const user_name = user.full_name;
+
+                user.tasks.forEach(task => {
+                    const task_name = task.task_name;
+                    const time = this.formatDurationStringCSV(task.duration);
+                    const duration = moment.duration(task.duration, 'seconds');
+                    const timeDecimal = duration.asHours();
+                    data.push([proj_name, user_name, task_name, time, timeDecimal]);
+                });
+            });
+        });
+
+        const total = this.report.reduce((total, project) => total + project.project_time, 0);
+        const time = this.formatDurationStringCSV(total);
+        const duration = moment.duration(total, 'seconds');
+        const timeDecimal = duration.asHours();
+        data.push(['', '', 'Total', time, timeDecimal]);
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+
+        // Set columns width
+        ws['!cols'] = [
+            { wch: 40 },
+            { wch: 25 },
+            { wch: 100 },
+            { wch: 10 },
+            { wch: 15 },
+        ];
+
+        // Format numbers
+        const cellNames = Object.keys(ws).filter(key => !key.startsWith('!'));
+        cellNames.map(name => ws[name]).forEach(cell => {
+            if (cell.t === 'n') {
+                cell.z = '0.0000';
+            }
+        });
+
+        XLSX.utils.book_append_sheet(wb, ws);
+        XLSX.writeFile(wb, 'wb.xlsx');
+    }
 
     cleanupParams() : string[] {
         return [

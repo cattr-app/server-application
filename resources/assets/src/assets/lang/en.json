@@ -142,6 +142,7 @@
 		"team": "Team",
 		"date-range": "Date Range",
 		"export-csv": "Export CSV",
+		"export-xlsx": "Export XLSX",
 		"user-selected": "{{count}} users selected",
 		"project-selected": "{{count}} projects selected",
 		"required-field": "Required field",

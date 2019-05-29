@@ -30,6 +30,8 @@ import 'rxjs/operator/share';
 import 'rxjs/operator/switchMap';
 import { StatisticTimeService } from './statistic.time.service';
 
+import * as XLSX from 'xlsx';
+
 enum UsersSort {
     NameAsc,
     NameDesc,
@@ -996,6 +998,81 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
                 window.open(encodeURI('data:text/csv;charset=utf-8,' + content));
             }
         }
+    }
+
+    exportXLSX() {
+        if (!this.$timeline) {
+            return;
+        }
+
+        const $timeline = this.$timeline;
+
+        const view = $timeline.fullCalendar('getView');
+
+        const $rows = $('.fc-resource-area tr[data-resource-id]', $timeline);
+        const rows = $.makeArray($rows);
+
+        const $days = $('.fc-day[data-date]', $timeline);
+        const days = $.makeArray($days);
+
+        let header = ['Name', 'Time Worked'];
+        if (view.name !== 'timelineDay') {
+            const daysLabels = days.map(day => {
+                const date = $(day).data('date');
+                return (moment as any).tz(date, this.timezone).format('YYYY-MM-DD');
+            });
+            header = header.concat(daysLabels);
+        }
+
+        const data = [];
+        data.push(header);
+
+        rows.forEach(row => {
+            const userId = $(row).data('resource-id');
+            const user = this.$timeline.fullCalendar('getResourceById', userId);
+
+            const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
+            const time = timeWorked !== undefined ? timeWorked.total : 0;
+            const timeHours = moment.duration(time).asHours();
+
+            let cells = [user.title, timeHours];
+            if (view.name !== 'timelineDay') {
+                const daysData = days.map(day => {
+                    const date = $(day).data('date');
+
+                    // Calculate time worked by this user per this day.
+                    const timeWorked = this.viewTimeWorked.find(item => +item.id === +userId);
+                    const time = timeWorked !== undefined && timeWorked.perDay[date] !== undefined
+                        ? timeWorked.perDay[date].total : 0;
+                    return moment.duration(time).asHours();
+                });
+                cells = cells.concat(daysData);
+            }
+
+            data.push(cells);
+        });
+
+        const wb = XLSX.utils.book_new();
+        const ws = XLSX.utils.aoa_to_sheet(data);
+
+        // Set columns width
+        ws['!cols'] = [];
+        ws['!cols'].push({ wch: 25 });
+        ws['!cols'].push({ wch: 15 });
+        for (let i = 0; i < days.length; ++i) {
+            ws['!cols'].push({ wch: 10 });
+        }
+
+        // Format numbers
+        const cellNames = Object.keys(ws).filter(key => !key.startsWith('!'));
+        cellNames.map(name => ws[name]).forEach(cell => {
+            if (cell.t === 'n') {
+                cell.z = '0.00';
+            }
+        });
+
+        XLSX.utils.book_append_sheet(wb, ws);
+        XLSX.writeFile(wb, 'wb.xlsx');
     }
 
     setLoading(loading: boolean = true) {
