@@ -14,6 +14,10 @@ import 'moment-timezone';
 
 import * as XLSX from 'xlsx';
 
+import * as jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { font } from '../../../../Roboto-Regular';
+
 interface TaskData {
     id: number;
     project_id: number;
@@ -118,11 +122,11 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
         start,
         end,
     }: {
-            userIds: number[],
-            projectIds: number[],
-            start: string,
-            end: string,
-        }) {
+        userIds: number[],
+        projectIds: number[],
+        start: string,
+        end: string,
+    }) {
         const params = {
             uids: userIds,
             pids: projectIds,
@@ -160,11 +164,11 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
         start,
         end,
     }: {
-            uid: number,
-            tid: number,
-            start: string,
-            end: string,
-        }) {
+        uid: number,
+        tid: number,
+        start: string,
+        end: string,
+    }) {
         return this.projectReportService.getTaskDates(uid, tid, start, end);
     }
 
@@ -196,7 +200,7 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
         return `${hours}h ${minutes}m`;
     }
 
-    formatDurationStringCSV(time: number) {
+    formatDurationStringForExport(time: number) {
         const duration = moment.duration(+time, 'seconds');
         const hours = Math.floor(duration.asHours());
         const minutes = Math.floor(duration.asMinutes()) - 60 * hours;
@@ -219,7 +223,7 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
 
                 user.tasks.forEach(task => {
                     const task_name = `"${task.task_name.replace(/"/g, '""')}"`;
-                    const time = this.formatDurationStringCSV(task.duration);
+                    const time = this.formatDurationStringForExport(task.duration);
                     const duration = moment.duration(task.duration, 'seconds');
                     const timeDecimal = duration.asHours().toFixed(4);
                     lines.push([proj_name, user_name, task_name, `"${time}"`, timeDecimal].join(','));
@@ -228,7 +232,7 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
         });
 
         const total = this.report.reduce((total, project) => total + project.project_time, 0);
-        const time = this.formatDurationStringCSV(total);
+        const time = this.formatDurationStringForExport(total);
         const duration = moment.duration(total, 'seconds');
         const timeDecimal = duration.asHours().toFixed(4);
         lines.push(['""', '""', '"Total"', `"${time}"`, timeDecimal].join(','));
@@ -255,11 +259,9 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
         }
     }
 
-    exportXLSX() {
-        const data = [];
-
+    protected export() {
         const header = ['Project', 'Name', 'Task', 'Time', 'Time (decimal)'];
-        data.push(header);
+        const data = [];
 
         this.report.forEach(project => {
             const proj_name = project.name;
@@ -269,7 +271,7 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
 
                 user.tasks.forEach(task => {
                     const task_name = task.task_name;
-                    const time = this.formatDurationStringCSV(task.duration);
+                    const time = this.formatDurationStringForExport(task.duration);
                     const duration = moment.duration(task.duration, 'seconds');
                     const timeDecimal = duration.asHours();
                     data.push([proj_name, user_name, task_name, time, timeDecimal]);
@@ -278,13 +280,21 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
         });
 
         const total = this.report.reduce((total, project) => total + project.project_time, 0);
-        const time = this.formatDurationStringCSV(total);
+        const time = this.formatDurationStringForExport(total);
         const duration = moment.duration(total, 'seconds');
         const timeDecimal = duration.asHours();
         data.push(['', '', 'Total', time, timeDecimal]);
 
+        return {
+            header,
+            data,
+        };
+    }
+
+    exportXLSX() {
+        const { header, data } = this.export();
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(data);
+        const ws = XLSX.utils.aoa_to_sheet([header, ...data]);
 
         // Set columns width
         ws['!cols'] = [
@@ -307,19 +317,50 @@ export class ProjectsreportComponent implements OnInit, OnDestroy, AfterViewInit
         XLSX.writeFile(wb, 'wb.xlsx');
     }
 
-    cleanupParams() : string[] {
+    exportPDF() {
+        const { header, data } = this.export();
+
+        // Format time decimal
+        data.forEach(row => {
+            if (isFinite(row[4])) {
+                row[4] = row[4].toFixed(4);
+            }
+        });
+
+        const doc = new jsPDF();
+        doc.addFileToVFS('Roboto-Regular.ttf', font);
+        doc.addFont('Roboto-Regular.ttf', 'Roboto-Regular', 'normal');
+        doc.setFont('Roboto-Regular');
+        (doc as any).autoTable({
+            head: [header],
+            body: data,
+            styles: {
+                font: 'Roboto-Regular',
+            },
+            columnStyles: {
+                0: { minCellWidth: 50 },
+                1: { minCellWidth: 40 },
+                2: { minCellWidth: 50 },
+                3: { minCellWidth: 20 },
+                4: { minCellWidth: 30 },
+            },
+        });
+        doc.save('table.pdf');
+    }
+
+    cleanupParams(): string[] {
         return [
 
-                'userSelect',
-                'projectSelect',
-                'dateRangeSelector',
-                'loading',
-                'projectsLoading',
-                'report',
-                'api',
-                'projectReportService',
-                'allowedAction',
-                'route',
+            'userSelect',
+            'projectSelect',
+            'dateRangeSelector',
+            'loading',
+            'projectsLoading',
+            'report',
+            'api',
+            'projectReportService',
+            'allowedAction',
+            'route',
         ];
     }
 

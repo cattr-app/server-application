@@ -143,6 +143,7 @@
 		"date-range": "Date Range",
 		"export-csv": "Export CSV",
 		"export-xlsx": "Export XLSX",
+		"export-pdf": "Export PDF",
 		"user-selected": "{{count}} users selected",
 		"project-selected": "{{count}} projects selected",
 		"required-field": "Required field",

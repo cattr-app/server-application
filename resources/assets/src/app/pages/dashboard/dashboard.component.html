@@ -6,8 +6,10 @@
                     <div class="header-buttons btn-group" role="group">
                         <button *ngIf="selectedTab && selectedTab.id === 'timeline'" type="button" (click)="userStatistic.exportCSV()" class="btn btn-default" translate>control.export-csv</button>
                         <button *ngIf="selectedTab && selectedTab.id === 'timeline'" type="button" (click)="userStatistic.exportXLSX()" class="btn btn-default" translate>control.export-xlsx</button>
+                        <!--<button *ngIf="selectedTab && selectedTab.id === 'timeline'" type="button" (click)="userStatistic.exportPDF()" class="btn btn-default" translate>control.export-pdf</button>-->
                         <button *ngIf="selectedTab && selectedTab.id === 'team'"  type="button" (click)="teamStatistic.exportCSV()" class="btn btn-default" translate>control.export-csv</button>
                         <button *ngIf="selectedTab && selectedTab.id === 'team'"  type="button" (click)="teamStatistic.exportXLSX()" class="btn btn-default" translate>control.export-xlsx</button>
+                        <!--<button *ngIf="selectedTab && selectedTab.id === 'team'"  type="button" (click)="teamStatistic.exportPDF()" class="btn btn-default" translate>control.export-pdf</button>-->
                     </div>
 
                     <tabset #tabs>

@@ -32,6 +32,10 @@ import { StatisticTimeService } from './statistic.time.service';
 
 import * as XLSX from 'xlsx';
 
+import * as jsPDF from 'jspdf';
+import 'jspdf-autotable';
+import { font } from '../../../../Roboto-Regular';
+
 enum UsersSort {
     NameAsc,
     NameDesc,
@@ -1000,10 +1004,13 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         }
     }
 
-    exportXLSX() {
+    protected export() {
         if (!this.$timeline) {
-            return;
+            return { header: [], data: [] };
         }
+
+        const header = ['Name', 'Time Worked'];
+        const data = [];
 
         const $timeline = this.$timeline;
 
@@ -1015,17 +1022,13 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
         const $days = $('.fc-day[data-date]', $timeline);
         const days = $.makeArray($days);
 
-        let header = ['Name', 'Time Worked'];
         if (view.name !== 'timelineDay') {
             const daysLabels = days.map(day => {
                 const date = $(day).data('date');
                 return (moment as any).tz(date, this.timezone).format('YYYY-MM-DD');
             });
-            header = header.concat(daysLabels);
+            header.push(...daysLabels);
         }
-
-        const data = [];
-        data.push(header);
 
         rows.forEach(row => {
             const userId = $(row).data('resource-id');
@@ -1052,14 +1055,23 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
             data.push(cells);
         });
 
+        return { header, data };
+    }
+
+    exportXLSX() {
+        const { header, data } = this.export();
+
+        const $timeline = this.$timeline;
+        const $days = $('.fc-day[data-date]', $timeline);
+
         const wb = XLSX.utils.book_new();
-        const ws = XLSX.utils.aoa_to_sheet(data);
+        const ws = XLSX.utils.aoa_to_sheet([header, ...data]);
 
         // Set columns width
         ws['!cols'] = [];
         ws['!cols'].push({ wch: 25 });
         ws['!cols'].push({ wch: 15 });
-        for (let i = 0; i < days.length; ++i) {
+        for (let i = 0; i < $days.length; ++i) {
             ws['!cols'].push({ wch: 10 });
         }
 
@@ -1073,6 +1085,37 @@ export class StatisticTimeComponent implements OnInit, OnDestroy {
 
         XLSX.utils.book_append_sheet(wb, ws);
         XLSX.writeFile(wb, 'wb.xlsx');
+    }
+
+    exportPDF() {
+        const { header, data } = this.export();
+        data.forEach(row => {
+            for (let i = 1; i < row.length; ++i) {
+                if (isFinite(row[i])) {
+                    row[i] = row[i].toFixed(2);
+                }
+            }
+        });
+
+        const doc = new jsPDF({
+            orientation: 'landscape',
+        });
+        doc.addFileToVFS('Roboto-Regular.ttf', font);
+        doc.addFont('Roboto-Regular.ttf', 'Roboto-Regular', 'normal');
+        doc.setFont('Roboto-Regular');
+        (doc as any).autoTable({
+            head: [header],
+            body: data,
+            styles: {
+                font: 'Roboto-Regular',
+                fontSize: 8,
+                minCellWidth: 15,
+            },
+            columnStyles: {
+                0: { minCellWidth: 30 },
+            },
+        });
+        doc.save('table.pdf');
     }
 
     setLoading(loading: boolean = true) {
