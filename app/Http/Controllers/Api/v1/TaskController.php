@@ -362,10 +362,13 @@ class TaskController extends ItemController
      */
     public function dashboard(Request $request): JsonResponse
     {
-        $timezone = Auth::user()->timezone;
+        $user = Auth::user();
+        $timezone = $user->timezone;
         if (!$timezone) {
             $timezone = 'UTC';
         }
+
+        $uid = $user->id;
 
         $filters = $request->all();
         is_int($request->get('user_id')) ? $filters['timeIntervals.user_id'] = $request->get('user_id') : False;
@@ -381,9 +384,10 @@ class TaskController extends ItemController
             )
         );
 
-        $items = $itemsQuery->with(['timeIntervals' => function ($q) use ($compareDate) {
+        $items = $itemsQuery->with(['timeIntervals' => function ($q) use ($compareDate, $uid) {
             /** @var Builder $q */
             $q->where('start_at', '>=', $compareDate);
+            $q->where('user_id', $uid);
         }])->get()->toArray();
 
         if (collect($items)->isEmpty()) {
