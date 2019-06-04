@@ -76,6 +76,11 @@
 			"apikey": "Redmine API key",
 			"statuses": "Redmine active statuses",
 			"priorities": "Redmine priorities"
+		},
+		"gitlab": {
+          "title": "GitLab Integration",
+          "url": "GitLab Url",
+          "apikey": "GitLab API key"
 		}
 	},
 	"login": {

@@ -2,7 +2,7 @@ import {EventEmitter, Injectable, Output} from '@angular/core';
 import {HttpClient, HttpHeaders} from '@angular/common/http';
 import {LocalStorage} from './storage.model';
 import {Router} from '@angular/router';
-import { Location } from '@angular/common';
+import {Location} from '@angular/common';
 
 interface TokenResponse {
     access_token?: string;
@@ -93,7 +93,7 @@ export class ApiService {
 
         return this.http.post('/api/auth/refresh', [], {
             headers: new HttpHeaders({
-                'Content-Type':  'application/json',
+                'Content-Type': 'application/json',
                 'Authorization': this.getAuthString()
             })
         }).subscribe(f.bind(this));
@@ -106,7 +106,7 @@ export class ApiService {
 
         return this.http.post('/api/auth/logout', [], {
             headers: new HttpHeaders({
-                'Content-Type':  'application/json',
+                'Content-Type': 'application/json',
                 'Authorization': this.getAuthString()
             })
         }).subscribe(callback, errorCallback);
@@ -119,7 +119,7 @@ export class ApiService {
 
         return this.http.get('/api/auth/ping', {
             headers: new HttpHeaders({
-                'Content-Type':  'application/json',
+                'Content-Type': 'application/json',
                 'Authorization': this.getAuthString()
             })
         }).subscribe(callback);
@@ -142,7 +142,7 @@ export class ApiService {
         }).subscribe(callback);
     }
 
-    public sendSettings(data, callback, errorCallback = this.errorCallback.bind(this)) {
+    public sendRedmineSettings(data, callback, errorCallback = this.errorCallback.bind(this)) {
         return this.http.post(`/redmineintegration/settings/update`, data, {
             headers: new HttpHeaders({
                 'Content-Type': 'application/json',
@@ -151,13 +151,31 @@ export class ApiService {
         }).subscribe(callback, errorCallback);
     }
 
-    public getSettings(data, callback) {
+    public getRedmineSettings(data, callback) {
         return this.http.post(`/redmineintegration/settings/get`, data, {
             headers: new HttpHeaders({
                 'Content-Type': 'application/json',
                 'Authorization': this.getAuthString()
             })
         }).subscribe(callback);
+    }
+
+    public getGitlabSettings(data, callback) {
+        return this.http.post(`/gitlabintegration/settings/get`, data, {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(callback);
+    }
+
+    public sendGitlabSettings(data, callback, errorCallback = this.errorCallback.bind(this)) {
+        return this.http.post(`/gitlabintegration/settings/set`, data, {
+            headers: new HttpHeaders({
+                'Content-Type': 'application/json',
+                'Authorization': this.getAuthString()
+            })
+        }).subscribe(callback, errorCallback);
     }
 
     public sendSynchronizeProjects(data, callback) {

@@ -1,0 +1,15 @@
+{
+  "name": "GitlabIntegration",
+  "alias": "gitlabintegration",
+  "description": "GitLab Integration",
+  "keywords": [],
+  "active": 1,
+  "order": 0,
+  "providers": [
+  ],
+  "aliases": {},
+  "files": [
+    "start.php"
+  ],
+  "requires": []
+}

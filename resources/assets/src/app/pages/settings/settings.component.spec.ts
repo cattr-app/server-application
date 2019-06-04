@@ -66,7 +66,7 @@ describe('Settings component (User)', () => {
 
   it('has a Redmine Integration tab', async(() => {
     const el = fixture.debugElement.query(By.css(".tab-container")).nativeElement;
-    expect(el.innerHTML).toContain('integration.redmine.title');
+    expect(el.innerHTML).toContain('integrationRedmine.redmine.title');
   }));
 
   it('has a Account tab', async(() => {
@@ -144,7 +144,7 @@ describe('Settings component (Manager)', () => {
 
   it('has a Redmine Integration tab', async(() => {
     const el = fixture.debugElement.query(By.css(".tab-container")).nativeElement;
-    expect(el.innerHTML).toContain('integration.redmine.title');
+    expect(el.innerHTML).toContain('integrationRedmine.redmine.title');
   }));
 
   it('has a Account tab', async(() => {
@@ -222,7 +222,7 @@ describe('Settings component (Admin)', () => {
 
   it('has a Redmine Integration tab', async(() => {
     const el = fixture.debugElement.query(By.css(".tab-container")).nativeElement;
-    expect(el.innerHTML).toContain('integration.redmine.title');
+    expect(el.innerHTML).toContain('integrationRedmine.redmine.title');
   }));
 
   it('has a Account tab', async(() => {

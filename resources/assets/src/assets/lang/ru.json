@@ -76,6 +76,11 @@
 			"apikey": "Redmine API key",
 			"statuses": "Активные статусы Redmine",
 			"priorities": "Приоритеты Redmine"
+		},
+		"gitlab": {
+			"title": "Интеграция с GitLab",
+			"url": "GitLab Url",
+			"apikey": "GitLab API key"
 		}
 	},
 	"login": {

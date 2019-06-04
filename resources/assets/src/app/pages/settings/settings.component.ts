@@ -1,12 +1,13 @@
 import {Component, ViewChild, AfterViewInit, OnDestroy} from '@angular/core';
-import { TabsetComponent, TabDirective } from 'ngx-bootstrap';
+import {TabsetComponent, TabDirective} from 'ngx-bootstrap';
 import {Message} from 'primeng/components/common/api';
 
-import { ApiService } from '../../api/api.service';
+import {ApiService} from '../../api/api.service';
 
-import { GeneralComponent } from './tabs/settings.tabs.general.component';
-import { IntegrationComponent } from './tabs/settings.tabs.integration.component';
-import { UserSettingsComponent } from './tabs/settings.tabs.user.component';
+import {GeneralComponent} from './tabs/settings.tabs.general.component';
+import {IntegrationRedmineComponent} from './tabs/settings.tabs.integration-redmine.component';
+import {IntegrationGitlabComponent} from './tabs/settings.tabs.integration-gitlab.component';
+import {UserSettingsComponent} from './tabs/settings.tabs.user.component';
 
 @Component({
     selector: 'app-settings',
@@ -16,15 +17,15 @@ import { UserSettingsComponent } from './tabs/settings.tabs.user.component';
 export class SettingsComponent implements AfterViewInit, OnDestroy {
     @ViewChild('tabs') tabs: TabsetComponent;
     @ViewChild('general') general: GeneralComponent;
-    @ViewChild('integration') integration: IntegrationComponent;
+    @ViewChild('integrationRedmine') integrationRedmine: IntegrationRedmineComponent;
+    @ViewChild('integrationGitlab') integrationGitlab: IntegrationGitlabComponent;
     @ViewChild('userSettings') userSettings: UserSettingsComponent;
 
-    selectedTab: string = '';
+    selectedTab = '';
     msgs: Message[] = [];
 
-    constructor(
-        protected api: ApiService,
-    ) { }
+    constructor(protected api: ApiService) {
+    }
 
 
     ngAfterViewInit() {
@@ -52,11 +53,12 @@ export class SettingsComponent implements AfterViewInit, OnDestroy {
     }
 
 
-    cleanupParams() : string[] {
+    cleanupParams(): string[] {
         return [
             'tabs',
             'general',
-            'integration',
+            'integrationRedmine',
+            'integrationGitlab',
             'userSettings',
             'selectedTab',
             'msgs',
@@ -65,7 +67,7 @@ export class SettingsComponent implements AfterViewInit, OnDestroy {
     }
 
     ngOnDestroy() {
-        for (let param of this.cleanupParams()) {
+        for (const param of this.cleanupParams()) {
             delete this[param];
         }
     }

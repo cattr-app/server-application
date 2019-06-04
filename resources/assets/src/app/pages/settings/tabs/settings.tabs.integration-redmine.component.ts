@@ -1,8 +1,8 @@
-import { Component, Output, EventEmitter, OnDestroy } from '@angular/core';
-import { NgModel } from '@angular/forms';
+import {Component, Output, EventEmitter, OnDestroy} from '@angular/core';
+import {NgModel} from '@angular/forms';
 
-import { Message } from 'primeng/components/common/api';
-import { ApiService } from '../../../api/api.service';
+import {Message} from 'primeng/components/common/api';
+import {ApiService} from '../../../api/api.service';
 
 
 interface RedmineStatus {
@@ -24,10 +24,10 @@ interface Priority {
 
 
 @Component({
-    selector: 'settings-integration',
-    templateUrl: './settings.tabs.integration.component.html'
+    selector: 'app-settings-integration-redmine',
+    templateUrl: './settings.tabs.integration-redmine.component.html'
 })
-export class IntegrationComponent implements OnDestroy {
+export class IntegrationRedmineComponent implements OnDestroy {
 
     redmineUrl: string;
     redmineApiKey: string;
@@ -44,14 +44,12 @@ export class IntegrationComponent implements OnDestroy {
 
     @Output() message: EventEmitter<Message> = new EventEmitter<Message>();
 
-    constructor(
-        private api: ApiService,
-    ) {
+    constructor(private api: ApiService,) {
         this.loadSettings();
     }
 
     onSubmit() {
-        this.api.sendSettings({
+        this.api.sendRedmineSettings({
             'redmine_url': this.redmineUrl,
             'redmine_key': this.redmineApiKey,
             'redmine_statuses': this.redmineStatuses,
@@ -80,7 +78,7 @@ export class IntegrationComponent implements OnDestroy {
 
     protected loadSettings() {
         try {
-            this.api.getSettings([], result => {
+            this.api.getRedmineSettings([], result => {
                 this.redmineUrl = result.redmine_url;
                 this.redmineApiKey = result.redmine_api_key;
                 this.redmineStatuses = result.redmine_statuses;
@@ -93,20 +91,17 @@ export class IntegrationComponent implements OnDestroy {
 
                 this.redmineActivateStatuses = this.toInputCheckboxArray(result.redmine_activate_statuses);
                 this.redmineDeactivateStatuses = this.toInputCheckboxArray(result.redmine_deactivate_statuses);
-
-
-                console.log(result);
             });
-        } catch(err) {
-            console.log(err)
+        } catch (err) {
+            console.error(err);
         }
     }
 
-    protected toInputCheckboxArray(input) : boolean[] {
-        let ret: boolean[] = [];
+    protected toInputCheckboxArray(input): boolean[] {
+        const ret: boolean[] = [];
 
         if (input) {
-            for (let key of input) {
+            for (const key of input) {
                 ret[key] = true;
             }
         }
@@ -115,9 +110,9 @@ export class IntegrationComponent implements OnDestroy {
     }
 
     protected fromInputCheckboxArray(input): number[] {
-        let ret: number[] = [];
+        const ret: number[] = [];
 
-        for (let id in input) {
+        for (const id in input) {
             if (input[id]) {
                 ret.push(Number(id));
             }
@@ -126,16 +121,16 @@ export class IntegrationComponent implements OnDestroy {
         return ret;
     }
 
-    isDisplayError(model: NgModel) : boolean {
+    isDisplayError(model: NgModel): boolean {
         return model.invalid && (model.dirty || model.touched);
     }
 
-    isDisplaySuccess(model: NgModel) : boolean {
+    isDisplaySuccess(model: NgModel): boolean {
         return model.valid && (model.dirty || model.touched);
     }
 
 
-    cleanupParams() : string[] {
+    cleanupParams(): string[] {
         return [
             'redmineUrl',
             'redmineApiKey',
@@ -154,7 +149,7 @@ export class IntegrationComponent implements OnDestroy {
     }
 
     ngOnDestroy() {
-        for (let param of this.cleanupParams()) {
+        for (const param of this.cleanupParams()) {
             delete this[param];
         }
     }
