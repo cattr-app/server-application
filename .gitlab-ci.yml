@@ -56,8 +56,7 @@ build-front:
   only:
     variables:
       - $CI_COMMIT_TAG =~ /^(development|stage|release)-.*/
-  script:
-    - deploy/01.2.build-npm.sh
+    script:
 
 ##############################
 ### Create package archive ###

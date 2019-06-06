@@ -1,9 +1,8 @@
-# Amazing Time Core Application
+# Amazing Time Backend Application
 
 ## Installation
 
 ```
-npm install -g @angular/cli@1.7.1
 composer install
 composer run-script config:init
 ```
@@ -21,11 +20,6 @@ local server by default will be run as <http://127.0.0.1:8000>
 ```
 php artisan serve
 ```
-
-## Build
-
-- `ng build` - build public
-- `ng build -w` - build public and watch changes
 
 ## Migrations
 
