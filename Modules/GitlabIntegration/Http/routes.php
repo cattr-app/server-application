@@ -1,5 +1,4 @@
 <?php
-
 \Illuminate\Support\Facades\Route::group([
     'prefix' => 'gitlabintegration',
     'middleware' => 'auth:api',

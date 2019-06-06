@@ -156,7 +156,7 @@ class RedmineSettingsController extends AbstractRedmineController
         ];
 
         // Return default priorities and statuses if it is not saved
-        if (!empty($userRepository->getUserRedmineUrl($userId))) {
+        /*if (!empty($userRepository->getUserRedmineUrl($userId))) {
             if (empty($settingsArray['redmine_statuses'])) {
                 $client = new RedmineClient($userId);
                 $settingsArray['redmine_statuses'] = array_map(function ($status) {
@@ -177,7 +177,7 @@ class RedmineSettingsController extends AbstractRedmineController
                     return $priority;
                 }, $client->issue_priority->all()['issue_priorities']);
             }
-        }
+        }*/
 
         return response()->json(
             $settingsArray,

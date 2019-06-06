@@ -26,9 +26,20 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
 
 Route::group([
+    'prefix' => 'uploads'
+], function (Router $router) {
+    $router->group([
+        'prefix' => 'screenshots'
+    ], function (Router $router) {
+        $router->get('{screenshot}', 'ScreenshotController@screenshot');
+        $router->get('thumbs/{screenshot}', 'ScreenshotController@thumbnail');
+    });
+});
+
+Route::group([
     'middleware' => 'api',
     'prefix' => 'auth',
-], function(Router $router) {
+], function (Router $router) {
     $router->any('ping', 'AuthController@ping');
     $router->any('check', 'AuthController@check');
     $router->post('login', 'AuthController@login');
@@ -140,8 +151,4 @@ Route::group([
     $router->post('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
     $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
     $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
-});
-
-Route::any('/{any1?}/{any2?}/{any3?}/{any4?}/{any5?}', static function() {
-    throw new \Illuminate\Database\Eloquent\ModelNotFoundException("Route not found");
 });

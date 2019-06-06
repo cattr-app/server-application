@@ -1,26 +1,23 @@
 <?php
-use Illuminate\Routing\Router;
-
 Route::group([
     'prefix' => 'redmineintegration',
-    'middleware' => 'auth:api' ,
+    'middleware' => 'auth:api',
     'namespace' => 'Modules\RedmineIntegration\Http\Controllers'],
-    function () {
-        Route::get('/', 'RedmineIntegrationController@index');
+    function (\Illuminate\Routing\Router $router) {
+        $router->get('/', 'RedmineIntegrationController@index');
 
         // Task routes
-        Route::post('/tasks/synchronize', 'TaskRedmineController@synchronize');
+        $router->post('/tasks/synchronize', 'TaskRedmineController@synchronize');
 
         //Project routes
-        Route::post('/projects/synchronize', 'ProjectRedmineController@synchronize');
+        $router->post('/projects/synchronize', 'ProjectRedmineController@synchronize');
 
         //Time Entry routes
-        Route::post('/timeentries/create', 'TimeEntryRedmineController@create');
+        $router->post('/timeentries/create', 'TimeEntryRedmineController@create');
 
         //Redmine Settings routes
-        Route::post('/settings/update', 'RedmineSettingsController@updateSettings');
-        Route::post('/settings/get', 'RedmineSettingsController@getSettings');
-
+        $router->post('/settings/update', 'RedmineSettingsController@updateSettings');
+        $router->post('/settings/get', 'RedmineSettingsController@getSettings');
     });
 
 
