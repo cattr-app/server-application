@@ -13,6 +13,7 @@
     "php": ">=7.1",
     "ext-pdo": "*",
     "appzcoder/crud-generator": "3.0.8",
+    "barryvdh/laravel-cors": "^0.11.3",
     "barryvdh/laravel-ide-helper": "2.5.1",
     "fico7489/laravel-eloquent-join": "4.0.7",
     "fzaninotto/Faker": "^1.7",
