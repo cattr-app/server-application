@@ -64,6 +64,7 @@ Route::group([
 
     //Projects routes
     $router->any('/projects/list', 'Api\v1\ProjectController@index');
+    $router->any('/projects/count', 'Api\v1\ProjectController@count');
     $router->post('/projects/create', 'Api\v1\ProjectController@create');
     $router->post('/projects/edit', 'Api\v1\ProjectController@edit');
     $router->any('/projects/show', 'Api\v1\ProjectController@show');
@@ -71,6 +72,7 @@ Route::group([
 
     //Projects Users routes
     $router->any('/projects-users/list', 'Api\v1\ProjectsUsersController@index');
+    $router->any('/projects-users/count', 'Api\v1\ProjectsUsersController@count');
     $router->post('/projects-users/create', 'Api\v1\ProjectsUsersController@create');
     $router->post('/projects-users/bulk-create', 'Api\v1\ProjectsUsersController@bulkCreate');
     $router->post('/projects-users/remove', 'Api\v1\ProjectsUsersController@destroy');
@@ -78,6 +80,7 @@ Route::group([
 
     //Projects Roles routes
     $router->any('/projects-roles/list', 'Api\v1\ProjectsRolesController@index');
+    $router->any('/projects-roles/count', 'Api\v1\ProjectsRolesController@count');
     $router->post('/projects-roles/create', 'Api\v1\ProjectsRolesController@create');
     $router->post('/projects-roles/bulk-create', 'Api\v1\ProjectsRolesController@bulkCreate');
     $router->post('/projects-roles/remove', 'Api\v1\ProjectsRolesController@destroy');
@@ -85,6 +88,7 @@ Route::group([
 
     //Tasks routes
     $router->any('/tasks/list', 'Api\v1\TaskController@index');
+    $router->any('/tasks/count', 'Api\v1\TaskController@count');
     $router->any('/tasks/dashboard', 'Api\v1\TaskController@dashboard');
     $router->post('/tasks/create', 'Api\v1\TaskController@create');
     $router->post('/tasks/edit', 'Api\v1\TaskController@edit');
@@ -93,6 +97,7 @@ Route::group([
 
     //Users routes
     $router->any('/users/list', 'Api\v1\UserController@index');
+    $router->any('/users/count', 'Api\v1\UserController@count');
     $router->post('/users/create', 'Api\v1\UserController@create');
     $router->post('/users/edit', 'Api\v1\UserController@edit');
     $router->any('/users/show', 'Api\v1\UserController@show');
@@ -102,6 +107,7 @@ Route::group([
 
     // Attached Users routes
     $router->any('/attached-users/list', 'Api\v1\RelationsUsersController@index');
+    $router->any('/attached-users/count', 'Api\v1\RelationsUsersController@count');
     $router->post('/attached-users/create', 'Api\v1\RelationsUsersController@create');
     $router->post('/attached-users/bulk-create', 'Api\v1\RelationsUsersController@bulkCreate');
     $router->post('/attached-users/remove', 'Api\v1\RelationsUsersController@destroy');
@@ -109,6 +115,7 @@ Route::group([
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
+    $router->any('/screenshots/count', 'Api\v1\ScreenshotController@count');
     $router->any('/screenshots/dashboard', 'Api\v1\ScreenshotController@dashboard');
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
@@ -117,6 +124,7 @@ Route::group([
 
     //Time Intervals routes
     $router->any('/time-intervals/list', 'Api\v1\TimeIntervalController@index');
+    $router->any('/time-intervals/count', 'Api\v1\TimeIntervalController@count');
     $router->post('/time-intervals/create', 'Api\v1\TimeIntervalController@create');
     $router->post('/time-intervals/edit', 'Api\v1\TimeIntervalController@edit');
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
@@ -133,6 +141,7 @@ Route::group([
 
     //Role routes
     $router->any('/roles/list', 'Api\v1\RolesController@index');
+    $router->any('/roles/count', 'Api\v1\RolesController@count');
     $router->post('/roles/create', 'Api\v1\RolesController@create');
     $router->post('/roles/edit', 'Api\v1\RolesController@edit');
     $router->any('/roles/show', 'Api\v1\RolesController@show');
@@ -140,6 +149,8 @@ Route::group([
     $router->any('/roles/allowed-rules', 'Api\v1\RolesController@allowedRules');
 
     //Rule routes
+    $router->any('/rules/list', 'Api\v1\RulesController@index');
+    $router->any('/rules/count', 'Api\v1\RulesController@count');
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
     $router->post('/rules/bulk-edit', 'Api\v1\RulesController@bulkEdit');
     $router->any('/rules/actions', 'Api\v1\RulesController@actions');

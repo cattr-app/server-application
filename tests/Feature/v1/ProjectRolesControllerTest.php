@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RoleSeeder;
 use Tests\TestCase;
-use UsersTableSeeder;
+use AdminTableSeeder;
 
 /**
  * Class AuthControllerTest
