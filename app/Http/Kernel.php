@@ -2,6 +2,7 @@
 
 namespace App\Http;
 
+use App\Http\Middleware\CorsMiddleware;
 use Illuminate\Foundation\Http\Kernel as HttpKernel;
 
 class Kernel extends HttpKernel
@@ -19,7 +20,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\RoleCheck::class,
-        \Barryvdh\Cors\HandleCors::class
+        CorsMiddleware::class
     ];
 
     /**
