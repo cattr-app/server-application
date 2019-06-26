@@ -84,10 +84,18 @@ abstract class  ItemController extends Controller
      */
     public function count(Request $request): JsonResponse
     {
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), $request->all() ?: []
+            )
+        );
+
         return response()->json([
             'total' => Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.count.query.prepare'),
-                $this->getQuery()
+                $itemsQuery->get()
             )->count()
         ]);
     }
