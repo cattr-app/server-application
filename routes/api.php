@@ -69,6 +69,7 @@ Route::group([
     $router->post('/projects/edit', 'Api\v1\ProjectController@edit');
     $router->any('/projects/show', 'Api\v1\ProjectController@show');
     $router->post('/projects/remove', 'Api\v1\ProjectController@destroy');
+    $router->any('/projects/tasks', 'Api\v1\ProjectController@tasks');
 
     //Projects Users routes
     $router->any('/projects-users/list', 'Api\v1\ProjectsUsersController@index');

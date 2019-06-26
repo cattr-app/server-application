@@ -96,14 +96,14 @@ class Project extends AbstractModel
         $user_relations_access = Role::can($user, 'users', 'relations');
 
         if ($full_access) {
-            return static::all(['id'])->toArray();
+            return static::all(['id'])->pluck('id')->toArray();
         }
 
         $user_project_ids = collect($user->projects)->pluck('id');
         $project_ids = collect($user_project_ids);
 
         if (count($project_ids) <= 0) {
-            return static::all(['id'])->toArray();
+            return static::all(['id'])->pluck('id')->toArray();
         }
 
         $user_tasks_project_id = collect($user->tasks)->flatMap(function ($task) {
