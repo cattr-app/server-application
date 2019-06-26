@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\Project;
 use App\Models\Role;
 use App\Models\Task;
 use App\User;
@@ -10,6 +11,7 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Support\Facades\DB;
 use Filter;
 use DateTime;
 use Route;
@@ -410,6 +412,62 @@ class TaskController extends ItemController
             Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
             200
         );
+    }
+
+    /**
+     * Returns users activity info for task.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function activity(Request $request): JsonResponse
+    {
+        $itemId = is_int($request->get('id')) ? $request->get('id') : false;
+
+        if (!$itemId) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
+                    'error' => 'Validation fail',
+                    'reason' => 'Id invalid',
+                ]),
+                400
+            );
+        }
+
+        $user = Auth::user();
+        $userProjectIds = Project::getUserRelatedProjectIds($user);
+        $projectId = Task::find($itemId)->project_id;
+        if (!in_array($projectId, $userProjectIds)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
+                    'error' => 'Access denied',
+                    'reason' => 'User haven\'t access to this task',
+                ]),
+                403
+            );
+        }
+
+        $activity = DB::table('project_report')
+            ->select(
+                'user_id',
+                'user_name',
+                'date',
+                'duration'
+            )
+            ->where([
+                ['task_id', '=', $itemId],
+            ])
+            ->groupBy(
+                'user_id',
+                'user_name',
+                'date',
+                'duration'
+            )
+            ->orderBy('date')
+            ->get()
+            ->groupBy('date');
+
+        return response()->json($activity);
     }
 
     /**

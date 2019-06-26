@@ -95,6 +95,7 @@ Route::group([
     $router->post('/tasks/edit', 'Api\v1\TaskController@edit');
     $router->any('/tasks/show', 'Api\v1\TaskController@show');
     $router->post('/tasks/remove', 'Api\v1\TaskController@destroy');
+    $router->any('/tasks/activity', 'Api\v1\TaskController@activity');
 
     //Users routes
     $router->any('/users/list', 'Api\v1\UserController@index');

@@ -184,13 +184,11 @@ class ProjectController extends ItemController
         return parent::index($request);
     }
 
-
     /**
-     * Display tasks info for a project.
+     * Returns tasks info for a project.
      *
      * @param Request $request
      * @return JsonResponse
-     * @throws ModelNotFoundException
      */
     public function tasks(Request $request): JsonResponse
     {
