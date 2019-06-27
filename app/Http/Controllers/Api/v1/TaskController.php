@@ -464,8 +464,16 @@ class TaskController extends ItemController
                 'duration'
             )
             ->orderBy('date')
-            ->get()
-            ->groupBy('date');
+            ->get();
+
+        $group_by = $request->get('group_by', 'date');
+        if (in_array($group_by, [
+            'user_id',
+            'user_name',
+            'date',
+        ])) {
+            $activity = $activity->groupBy($group_by);
+        }
 
         return response()->json($activity);
     }
