@@ -114,6 +114,7 @@ class IntegrationObserver
     {
         try {
             $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($task->user_id);
+            /** @var array $userLocalRedmineTasksIds */
             $redmineTask = array_first($userLocalRedmineTasksIds, function ($redmineTask) use ($task) {
                 return $redmineTask->task_id === $task->id;
             });

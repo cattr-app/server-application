@@ -6,9 +6,8 @@ use App\Models\Priority;
 use App\Models\Property;
 use Filter;
 use Illuminate\Http\Request;
-use Validator;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
+use Validator;
 
 /**
  * Class RedmineSettingsController
@@ -22,7 +21,7 @@ class RedmineSettingsController extends AbstractRedmineController
      *
      * @return array
      */
-    function getValidationRules()
+    public function getValidationRules()
     {
         return [
             'redmine_url' => 'required',
@@ -34,8 +33,9 @@ class RedmineSettingsController extends AbstractRedmineController
     /**
      * Update user's redmine settings
      *
-     * @param Request $request
-     * @param UserRepository $userRepository
+     * @param  Request         $request
+     * @param  UserRepository  $userRepository
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function updateSettings(Request $request, UserRepository $userRepository)
@@ -61,9 +61,9 @@ class RedmineSettingsController extends AbstractRedmineController
             'redmine.settings.url.change',
             Property::updateOrCreate(
                 [
-                    'entity_id'   => $user->id,
+                    'entity_id' => $user->id,
                     'entity_type' => Property::USER_CODE,
-                    'name'        => 'REDMINE_URL',
+                    'name' => 'REDMINE_URL',
 
                 ],
                 [
@@ -76,9 +76,9 @@ class RedmineSettingsController extends AbstractRedmineController
             'redmine.settings.url.change',
             Property::updateOrCreate(
                 [
-                    'entity_id'   => $user->id,
+                    'entity_id' => $user->id,
                     'entity_type' => Property::USER_CODE,
-                    'name'        => 'REDMINE_KEY',
+                    'name' => 'REDMINE_KEY',
                 ],
                 [
                     'value' => $request->redmine_key
@@ -88,9 +88,9 @@ class RedmineSettingsController extends AbstractRedmineController
 
         Property::updateOrCreate(
             [
-                'entity_id'   => $user->id,
+                'entity_id' => $user->id,
                 'entity_type' => Property::USER_CODE,
-                'name'        => 'REDMINE_STATUSES',
+                'name' => 'REDMINE_STATUSES',
             ],
             [
                 'value' => serialize($request->redmine_statuses),
@@ -99,9 +99,9 @@ class RedmineSettingsController extends AbstractRedmineController
 
         Property::updateOrCreate(
             [
-                'entity_id'   => $user->id,
+                'entity_id' => $user->id,
                 'entity_type' => Property::USER_CODE,
-                'name'        => 'REDMINE_PRIORITIES',
+                'name' => 'REDMINE_PRIORITIES',
             ],
             [
                 'value' => serialize($request->redmine_priorities),
@@ -122,17 +122,14 @@ class RedmineSettingsController extends AbstractRedmineController
             $userRepository->markAsNew($user->id);
         }
 
-        return response()->json(
-            Filter::process('answer.success.redmine.settings.change', 'Updated!'),
-            200
-        );
+        return response()->json(Filter::process('answer.success.redmine.settings.change', 'Updated!'));
     }
 
     /**
      * Returns user's redmine settings
      *
-     * @param Request $request
-     * @param UserRepository $userRepository
+     * @param  Request         $request
+     * @param  UserRepository  $userRepository
      *
      * @return \Illuminate\Http\JsonResponse
      */
@@ -141,47 +138,20 @@ class RedmineSettingsController extends AbstractRedmineController
         $userId = auth()->user()->id;
 
         $settingsArray = [
-            'redmine_url'      => $userRepository->getUserRedmineUrl($userId),
-            'redmine_api_key'  => $userRepository->getUserRedmineApiKey($userId),
+            'redmine_url' => $userRepository->getUserRedmineUrl($userId),
+            'redmine_api_key' => $userRepository->getUserRedmineApiKey($userId),
             'redmine_statuses' => $userRepository->getUserRedmineStatuses($userId),
             'redmine_priorities' => $userRepository->getUserRedminePriorities($userId),
             'internal_priorities' => Priority::all(),
 
             'redmine_sync' => $userRepository->isUserSendTime($userId),
             'redmine_active_status' => $userRepository->getActiveStatusId($userId),
-            'redmine_deactive_status' => $userRepository->getDeactiveStatusId($userId),
-            'redmine_activate_statuses' => $userRepository->getActivateStatuses($userId),
-            'redmine_deactivate_statuses' => $userRepository->getDeactivateStatuses($userId),
+            'redmine_inactive_status' => $userRepository->getDeactiveStatusId($userId),
+            'redmine_on_activate_statuses' => $userRepository->getActivateStatuses($userId),
+            'redmine_on_deactivate_statuses' => $userRepository->getDeactivateStatuses($userId),
             'redmine_online_timeout' => $userRepository->getOnlineTimeout($userId),
         ];
 
-        // Return default priorities and statuses if it is not saved
-        /*if (!empty($userRepository->getUserRedmineUrl($userId))) {
-            if (empty($settingsArray['redmine_statuses'])) {
-                $client = new RedmineClient($userId);
-                $settingsArray['redmine_statuses'] = array_map(function ($status) {
-                    $status['is_active'] = !isset($status['is_closed']);
-                    return $status;
-                }, $client->issue_status->all()['issue_statuses']);
-            }
-    
-            if (empty($settingsArray['redmine_priorities'])) {
-                $client = new RedmineClient($userId);
-                $settingsArray['redmine_priorities'] = array_map(function ($priority) {
-                    if (Priority::find($priority['id'])) {
-                        $priority['priority_id'] = $priority['id'];
-                    } else {
-                        $priority['priority_id'] = Priority::max('id');
-                    }
-    
-                    return $priority;
-                }, $client->issue_priority->all()['issue_priorities']);
-            }
-        }*/
-
-        return response()->json(
-            $settingsArray,
-            200
-        );
+        return response()->json($settingsArray);
     }
 }
