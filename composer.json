@@ -24,7 +24,8 @@
     "nwidart/laravel-modules": "3.3.1",
     "paulvl/backup": "3.0.2",
     "tymon/jwt-auth": " 1.0.0-rc.2",
-    "webpatser/laravel-uuid": "3.0.2"
+    "webpatser/laravel-uuid": "3.0.2",
+    "ext-json": "*"
   },
   "require-dev": {
     "doctrine/dbal": "2.9.2",

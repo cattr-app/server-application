@@ -97,7 +97,7 @@ class RedmineSettingsController extends AbstractRedmineController
 
         $userRepository->setUserSendTime($user->id, $request->redmine_sync);
         $userRepository->setActiveStatusId($user->id, $request->redmine_active_status);
-        $userRepository->setDeactiveStatusId($user->id, $request->redmine_deactive_status);
+        $userRepository->setInactiveStatusId($user->id, $request->redmine_deactive_status);
         $userRepository->setActivateStatuses($user->id, $request->redmine_activate_statuses);
         $userRepository->setDeactivateStatuses($user->id, $request->redmine_deactivate_statuses);
         $userRepository->setOnlineTimeout($user->id, $request->redmine_online_timeout);

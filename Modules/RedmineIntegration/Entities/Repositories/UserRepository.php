@@ -408,15 +408,14 @@ class UserRepository
      * @param  string  $userId
      * @param  string  $status_id
      *
-     * @return string
      */
-    public function setDeactiveStatusId($userId, $status_id)
+    public function setInactiveStatusId($userId, $status_id)
     {
-        return $this->setProperty($userId, static::DEACTIVE_STATUS_PROPERTY, $status_id);
+        $this->setProperty($userId, static::DEACTIVE_STATUS_PROPERTY, $status_id);
     }
 
     /**
-     * get user task status ids which will be set as active after task syncronisation
+     * get user task status ids which will be set as active after task synchronisation
      *
      * @param  string  $userId
      *
@@ -429,12 +428,11 @@ class UserRepository
     }
 
     /**
-     * set user task status ids which will be set as active after task syncronisation
+     * set user task status ids which will be set as active after task synchronisation
      *
      * @param  string  $userId
      * @param  array   $statuses
      *
-     * @return string
      */
     public function setActivateStatuses($userId, array $statuses)
     {
@@ -443,11 +441,11 @@ class UserRepository
         } else {
             $jsonStatuses = json_encode($statuses);
         }
-        return $this->setProperty($userId, static::ACTIVATE_STATUSES_PROPERTY, $jsonStatuses);
+        $this->setProperty($userId, static::ACTIVATE_STATUSES_PROPERTY, $jsonStatuses);
     }
 
     /**
-     * get user task status ids which will be set as inactive after task syncronisation
+     * get user task status ids which will be set as inactive after task synchronisation
      *
      * @param  string  $userId
      *
@@ -460,12 +458,11 @@ class UserRepository
     }
 
     /**
-     * set user task status ids which will be set as inactive after task syncronisation
+     * set user task status ids which will be set as inactive after task synchronisation
      *
      * @param  string  $userId
      * @param  array   $statuses
      *
-     * @return string
      */
     public function setDeactivateStatuses($userId, array $statuses)
     {
@@ -474,7 +471,7 @@ class UserRepository
         } else {
             $jsonStatuses = json_encode($statuses);
         }
-        return $this->setProperty($userId, static::DEACTIVATE_STATUSES_PROPERTY, $jsonStatuses);
+        $this->setProperty($userId, static::DEACTIVATE_STATUSES_PROPERTY, $jsonStatuses);
     }
 
     /**
@@ -497,6 +494,6 @@ class UserRepository
      */
     public function setOnlineTimeout($userId, $timeout)
     {
-        return $this->setProperty($userId, static::ONLINE_TIMEOUT_PROPERTY, $timeout);
+        $this->setProperty($userId, static::ONLINE_TIMEOUT_PROPERTY, $timeout);
     }
 }
