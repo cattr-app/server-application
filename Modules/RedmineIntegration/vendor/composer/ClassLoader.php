@@ -12,6 +12,8 @@
 
 namespace Composer\Autoload;
 
+use InvalidArgumentException;
+
 /**
  * ClassLoader implements a PSR-0, PSR-4 and classmap class loader.
  *
@@ -43,18 +45,18 @@ namespace Composer\Autoload;
 class ClassLoader
 {
     // PSR-4
-    private $prefixLengthsPsr4 = array();
-    private $prefixDirsPsr4 = array();
-    private $fallbackDirsPsr4 = array();
+    private $prefixLengthsPsr4 = [];
+    private $prefixDirsPsr4 = [];
+    private $fallbackDirsPsr4 = [];
 
     // PSR-0
-    private $prefixesPsr0 = array();
-    private $fallbackDirsPsr0 = array();
+    private $prefixesPsr0 = [];
+    private $fallbackDirsPsr0 = [];
 
     private $useIncludePath = false;
-    private $classMap = array();
+    private $classMap = [];
     private $classMapAuthoritative = false;
-    private $missingClasses = array();
+    private $missingClasses = [];
     private $apcuPrefix;
 
     public function getPrefixes()
@@ -63,7 +65,7 @@ class ClassLoader
             return call_user_func_array('array_merge', $this->prefixesPsr0);
         }
 
-        return array();
+        return [];
     }
 
     public function getPrefixesPsr4()
@@ -87,7 +89,7 @@ class ClassLoader
     }
 
     /**
-     * @param array $classMap Class to filename map
+     * @param  array  $classMap  Class to filename map
      */
     public function addClassMap(array $classMap)
     {
@@ -102,9 +104,9 @@ class ClassLoader
      * Registers a set of PSR-0 directories for a given prefix, either
      * appending or prepending to the ones previously set for this prefix.
      *
-     * @param string       $prefix  The prefix
-     * @param array|string $paths   The PSR-0 root directories
-     * @param bool         $prepend Whether to prepend the directories
+     * @param  string        $prefix   The prefix
+     * @param  array|string  $paths    The PSR-0 root directories
+     * @param  bool          $prepend  Whether to prepend the directories
      */
     public function add($prefix, $paths, $prepend = false)
     {
@@ -147,11 +149,11 @@ class ClassLoader
      * Registers a set of PSR-4 directories for a given namespace, either
      * appending or prepending to the ones previously set for this namespace.
      *
-     * @param string       $prefix  The prefix/namespace, with trailing '\\'
-     * @param array|string $paths   The PSR-4 base directories
-     * @param bool         $prepend Whether to prepend the directories
+     * @param  string        $prefix   The prefix/namespace, with trailing '\\'
+     * @param  array|string  $paths    The PSR-4 base directories
+     * @param  bool          $prepend  Whether to prepend the directories
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function addPsr4($prefix, $paths, $prepend = false)
     {
@@ -172,7 +174,7 @@ class ClassLoader
             // Register directories for a new namespace.
             $length = strlen($prefix);
             if ('\\' !== $prefix[$length - 1]) {
-                throw new \InvalidArgumentException("A non-empty PSR-4 prefix must end with a namespace separator.");
+                throw new InvalidArgumentException("A non-empty PSR-4 prefix must end with a namespace separator.");
             }
             $this->prefixLengthsPsr4[$prefix[0]][$prefix] = $length;
             $this->prefixDirsPsr4[$prefix] = (array) $paths;
@@ -195,8 +197,8 @@ class ClassLoader
      * Registers a set of PSR-0 directories for a given prefix,
      * replacing any others previously set for this prefix.
      *
-     * @param string       $prefix The prefix
-     * @param array|string $paths  The PSR-0 base directories
+     * @param  string        $prefix  The prefix
+     * @param  array|string  $paths   The PSR-0 base directories
      */
     public function set($prefix, $paths)
     {
@@ -211,10 +213,10 @@ class ClassLoader
      * Registers a set of PSR-4 directories for a given namespace,
      * replacing any others previously set for this namespace.
      *
-     * @param string       $prefix The prefix/namespace, with trailing '\\'
-     * @param array|string $paths  The PSR-4 base directories
+     * @param  string        $prefix  The prefix/namespace, with trailing '\\'
+     * @param  array|string  $paths   The PSR-4 base directories
      *
-     * @throws \InvalidArgumentException
+     * @throws InvalidArgumentException
      */
     public function setPsr4($prefix, $paths)
     {
@@ -223,21 +225,11 @@ class ClassLoader
         } else {
             $length = strlen($prefix);
             if ('\\' !== $prefix[$length - 1]) {
-                throw new \InvalidArgumentException("A non-empty PSR-4 prefix must end with a namespace separator.");
+                throw new InvalidArgumentException("A non-empty PSR-4 prefix must end with a namespace separator.");
             }
             $this->prefixLengthsPsr4[$prefix[0]][$prefix] = $length;
             $this->prefixDirsPsr4[$prefix] = (array) $paths;
         }
-    }
-
-    /**
-     * Turns on searching the include path for class files.
-     *
-     * @param bool $useIncludePath
-     */
-    public function setUseIncludePath($useIncludePath)
-    {
-        $this->useIncludePath = $useIncludePath;
     }
 
     /**
@@ -252,14 +244,13 @@ class ClassLoader
     }
 
     /**
-     * Turns off searching the prefix and fallback directories for classes
-     * that have not been registered with the class map.
+     * Turns on searching the include path for class files.
      *
-     * @param bool $classMapAuthoritative
+     * @param  bool  $useIncludePath
      */
-    public function setClassMapAuthoritative($classMapAuthoritative)
+    public function setUseIncludePath($useIncludePath)
     {
-        $this->classMapAuthoritative = $classMapAuthoritative;
+        $this->useIncludePath = $useIncludePath;
     }
 
     /**
@@ -273,13 +264,14 @@ class ClassLoader
     }
 
     /**
-     * APCu prefix to use to cache found/not-found classes, if the extension is enabled.
+     * Turns off searching the prefix and fallback directories for classes
+     * that have not been registered with the class map.
      *
-     * @param string|null $apcuPrefix
+     * @param  bool  $classMapAuthoritative
      */
-    public function setApcuPrefix($apcuPrefix)
+    public function setClassMapAuthoritative($classMapAuthoritative)
     {
-        $this->apcuPrefix = function_exists('apcu_fetch') && filter_var(ini_get('apc.enabled'), FILTER_VALIDATE_BOOLEAN) ? $apcuPrefix : null;
+        $this->classMapAuthoritative = $classMapAuthoritative;
     }
 
     /**
@@ -293,13 +285,24 @@ class ClassLoader
     }
 
     /**
+     * APCu prefix to use to cache found/not-found classes, if the extension is enabled.
+     *
+     * @param  string|null  $apcuPrefix
+     */
+    public function setApcuPrefix($apcuPrefix)
+    {
+        $this->apcuPrefix = function_exists('apcu_fetch') && filter_var(ini_get('apc.enabled'),
+            FILTER_VALIDATE_BOOLEAN) ? $apcuPrefix : null;
+    }
+
+    /**
      * Registers this instance as an autoloader.
      *
-     * @param bool $prepend Whether to prepend the autoloader or not
+     * @param  bool  $prepend  Whether to prepend the autoloader or not
      */
     public function register($prepend = false)
     {
-        spl_autoload_register(array($this, 'loadClass'), true, $prepend);
+        spl_autoload_register([$this, 'loadClass'], true, $prepend);
     }
 
     /**
@@ -307,13 +310,14 @@ class ClassLoader
      */
     public function unregister()
     {
-        spl_autoload_unregister(array($this, 'loadClass'));
+        spl_autoload_unregister([$this, 'loadClass']);
     }
 
     /**
      * Loads the given class or interface.
      *
-     * @param  string    $class The name of the class
+     * @param  string  $class  The name of the class
+     *
      * @return bool|null True if loaded, null otherwise
      */
     public function loadClass($class)
@@ -328,7 +332,7 @@ class ClassLoader
     /**
      * Finds the path to the file where the class is defined.
      *
-     * @param string $class The name of the class
+     * @param  string  $class  The name of the class
      *
      * @return string|false The path if found, false otherwise
      */
@@ -370,18 +374,18 @@ class ClassLoader
     private function findFileWithExtension($class, $ext)
     {
         // PSR-4 lookup
-        $logicalPathPsr4 = strtr($class, '\\', DIRECTORY_SEPARATOR) . $ext;
+        $logicalPathPsr4 = strtr($class, '\\', DIRECTORY_SEPARATOR).$ext;
 
         $first = $class[0];
         if (isset($this->prefixLengthsPsr4[$first])) {
             $subPath = $class;
             while (false !== $lastPos = strrpos($subPath, '\\')) {
                 $subPath = substr($subPath, 0, $lastPos);
-                $search = $subPath . '\\';
+                $search = $subPath.'\\';
                 if (isset($this->prefixDirsPsr4[$search])) {
-                    $pathEnd = DIRECTORY_SEPARATOR . substr($logicalPathPsr4, $lastPos + 1);
+                    $pathEnd = DIRECTORY_SEPARATOR.substr($logicalPathPsr4, $lastPos + 1);
                     foreach ($this->prefixDirsPsr4[$search] as $dir) {
-                        if (file_exists($file = $dir . $pathEnd)) {
+                        if (file_exists($file = $dir.$pathEnd)) {
                             return $file;
                         }
                     }
@@ -391,7 +395,7 @@ class ClassLoader
 
         // PSR-4 fallback dirs
         foreach ($this->fallbackDirsPsr4 as $dir) {
-            if (file_exists($file = $dir . DIRECTORY_SEPARATOR . $logicalPathPsr4)) {
+            if (file_exists($file = $dir.DIRECTORY_SEPARATOR.$logicalPathPsr4)) {
                 return $file;
             }
         }
@@ -400,17 +404,17 @@ class ClassLoader
         if (false !== $pos = strrpos($class, '\\')) {
             // namespaced class name
             $logicalPathPsr0 = substr($logicalPathPsr4, 0, $pos + 1)
-                . strtr(substr($logicalPathPsr4, $pos + 1), '_', DIRECTORY_SEPARATOR);
+                .strtr(substr($logicalPathPsr4, $pos + 1), '_', DIRECTORY_SEPARATOR);
         } else {
             // PEAR-like class name
-            $logicalPathPsr0 = strtr($class, '_', DIRECTORY_SEPARATOR) . $ext;
+            $logicalPathPsr0 = strtr($class, '_', DIRECTORY_SEPARATOR).$ext;
         }
 
         if (isset($this->prefixesPsr0[$first])) {
             foreach ($this->prefixesPsr0[$first] as $prefix => $dirs) {
                 if (0 === strpos($class, $prefix)) {
                     foreach ($dirs as $dir) {
-                        if (file_exists($file = $dir . DIRECTORY_SEPARATOR . $logicalPathPsr0)) {
+                        if (file_exists($file = $dir.DIRECTORY_SEPARATOR.$logicalPathPsr0)) {
                             return $file;
                         }
                     }
@@ -420,7 +424,7 @@ class ClassLoader
 
         // PSR-0 fallback dirs
         foreach ($this->fallbackDirsPsr0 as $dir) {
-            if (file_exists($file = $dir . DIRECTORY_SEPARATOR . $logicalPathPsr0)) {
+            if (file_exists($file = $dir.DIRECTORY_SEPARATOR.$logicalPathPsr0)) {
                 return $file;
             }
         }

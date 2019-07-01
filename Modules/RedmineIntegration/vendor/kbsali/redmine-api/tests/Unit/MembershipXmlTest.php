@@ -2,9 +2,13 @@
 
 namespace Redmine\Tests\Unit;
 
+use DOMDocument;
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Redmine\Tests\Fixtures\MockClient as TestClient;
+use SimpleXMLElement;
 
-class MembershipXmlTest extends \PHPUnit\Framework\TestCase
+class MembershipXmlTest extends TestCase
 {
     /**
      * @var TestClient
@@ -17,7 +21,7 @@ class MembershipXmlTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @expectedException \Exception
+     * @expectedException Exception
      */
     public function testCreateBlank()
     {
@@ -46,6 +50,16 @@ class MembershipXmlTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
     }
 
+    private function formatXml($xml)
+    {
+        $dom = new DOMDocument('1.0');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML((new SimpleXMLElement($xml))->asXML());
+
+        return $dom->saveXML();
+    }
+
     public function testUpdate()
     {
         $api = $this->client->membership;
@@ -61,15 +75,5 @@ class MembershipXmlTest extends \PHPUnit\Framework\TestCase
     </role_ids>
 </membership>';
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
-    }
-
-    private function formatXml($xml)
-    {
-        $dom = new \DOMDocument('1.0');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML((new \SimpleXMLElement($xml))->asXML());
-
-        return $dom->saveXML();
     }
 }

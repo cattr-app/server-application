@@ -5,7 +5,7 @@ namespace Redmine\Api;
 /**
  * Custom queries retrieval.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_Queries
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_Queries
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -18,7 +18,7 @@ class Query extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Queries#GET
      *
-     * @param array $params optional parameters to be passed to the api (offset, limit, ...)
+     * @param  array  $params  optional parameters to be passed to the api (offset, limit, ...)
      *
      * @return array list of queries found
      */

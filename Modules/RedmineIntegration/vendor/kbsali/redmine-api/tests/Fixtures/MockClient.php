@@ -2,6 +2,7 @@
 
 namespace Redmine\Tests\Fixtures;
 
+use Exception;
 use Redmine\Client;
 
 /**
@@ -29,8 +30,8 @@ class MockClient extends Client
     /**
      * Just return the data from runRequest().
      *
-     * @param string $path
-     * @param bool   $decode
+     * @param  string  $path
+     * @param  bool    $decode
      *
      * @return array
      */
@@ -44,13 +45,13 @@ class MockClient extends Client
     }
 
     /**
-     * @param string $path
-     * @param string $method
-     * @param string $data
-     *
-     * @throws \Exception If anything goes wrong on curl request
+     * @param  string  $path
+     * @param  string  $method
+     * @param  string  $data
      *
      * @return string
+     * @throws Exception If anything goes wrong on curl request
+     *
      */
     protected function runRequest($path, $method = 'GET', $data = '')
     {

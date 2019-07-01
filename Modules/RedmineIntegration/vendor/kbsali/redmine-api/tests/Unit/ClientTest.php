@@ -2,10 +2,13 @@
 
 namespace Redmine\Tests\Unit;
 
+use InvalidArgumentException;
+use PHPUnit\Framework\TestCase;
 use Redmine\Client;
 use Redmine\Tests\Fixtures\MockClient;
+use SimpleXMLElement;
 
-class ClientTest extends \PHPUnit\Framework\TestCase
+class ClientTest extends TestCase
 {
     /**
      * @covers \Redmine\Client
@@ -32,7 +35,7 @@ class ClientTest extends \PHPUnit\Framework\TestCase
     /**
      * @covers \Redmine\Client
      * @test
-     * @expectedException \InvalidArgumentException
+     * @expectedException InvalidArgumentException
      */
     public function shouldNotGetApiInstance()
     {
@@ -488,18 +491,19 @@ class ClientTest extends \PHPUnit\Framework\TestCase
             $client->processCurlResponse('{"api": "redmine"}', 'application/json')
         );
         // XML response
-        /* @var $xmlResponse \SimpleXMLElement */
+        /* @var $xmlResponse SimpleXMLElement */
         $xmlResponse = $client->processCurlResponse('<issue/>', 'application/xml');
         $this->assertInstanceOf('\SimpleXMLElement', $xmlResponse);
         $this->assertSame('issue', $xmlResponse->getName());
     }
 
     /**
-     * @covers \Redmine\Client
+     * @covers       \Redmine\Client
      * @test
      *
-     * @param string $apiName
-     * @param string $class
+     * @param  string  $apiName
+     * @param  string  $class
+     *
      * @dataProvider getApiClassesProvider
      */
     public function shouldGetApiInstance($apiName, $class)

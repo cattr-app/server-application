@@ -3,12 +3,9 @@
 namespace Modules\RedmineIntegration\Console;
 
 use App\Models\Property;
-use App\Models\Task;
 use App\User;
+use Exception;
 use Illuminate\Console\Command;
-use Log;
-use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
-use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Models\RedmineClient;
 use Redmine;
@@ -42,7 +39,7 @@ class SynchronizeStatuses extends Command
     /**
      * Create a new command instance.
      *
-     * @param UserRepository $userRepo
+     * @param  UserRepository  $userRepo
      */
     public function __construct(UserRepository $userRepo)
     {
@@ -70,7 +67,7 @@ class SynchronizeStatuses extends Command
         foreach ($users as $user) {
             try {
                 $this->synchronizeUserStatuses($user->id);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
     }
@@ -78,7 +75,7 @@ class SynchronizeStatuses extends Command
     /**
      * Synchronize statuses for current user
      *
-     * @param int $userId User's id in our system
+     * @param  int  $userId  User's id in our system
      *
      */
     public function synchronizeUserStatuses(int $userId)

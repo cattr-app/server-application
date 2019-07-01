@@ -2,9 +2,13 @@
 
 namespace Redmine\Tests\Unit;
 
+use DOMDocument;
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Redmine\Tests\Fixtures\MockClient as TestClient;
+use SimpleXMLElement;
 
-class IssueCategoryXmlTest extends \PHPUnit\Framework\TestCase
+class IssueCategoryXmlTest extends TestCase
 {
     /**
      * @var TestClient
@@ -17,7 +21,7 @@ class IssueCategoryXmlTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @expectedException \Exception
+     * @expectedException Exception
      */
     public function testCreateBlank()
     {
@@ -41,6 +45,16 @@ class IssueCategoryXmlTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
     }
 
+    private function formatXml($xml)
+    {
+        $dom = new DOMDocument('1.0');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML((new SimpleXMLElement($xml))->asXML());
+
+        return $dom->saveXML();
+    }
+
     public function testUpdate()
     {
         $api = $this->client->issue_category;
@@ -53,15 +67,5 @@ class IssueCategoryXmlTest extends \PHPUnit\Framework\TestCase
     <name>new category name</name>
 </issue_category>';
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
-    }
-
-    private function formatXml($xml)
-    {
-        $dom = new \DOMDocument('1.0');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML((new \SimpleXMLElement($xml))->asXML());
-
-        return $dom->saveXML();
     }
 }

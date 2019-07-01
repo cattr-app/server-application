@@ -5,6 +5,7 @@ namespace Modules\RedmineIntegration\Http\Controllers;
 use App\Models\Priority;
 use App\Models\Property;
 use Filter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Validator;
@@ -17,26 +18,12 @@ use Validator;
 class RedmineSettingsController extends AbstractRedmineController
 {
     /**
-     * Returns validation rules for 'updateSettings' request
-     *
-     * @return array
-     */
-    public function getValidationRules()
-    {
-        return [
-            'redmine_url' => 'required',
-            'redmine_key' => 'required',
-            //'redmine_statuses' => 'required',
-        ];
-    }
-
-    /**
      * Update user's redmine settings
      *
      * @param  Request         $request
      * @param  UserRepository  $userRepository
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function updateSettings(Request $request, UserRepository $userRepository)
     {
@@ -126,12 +113,26 @@ class RedmineSettingsController extends AbstractRedmineController
     }
 
     /**
+     * Returns validation rules for 'updateSettings' request
+     *
+     * @return array
+     */
+    public function getValidationRules()
+    {
+        return [
+            'redmine_url' => 'required',
+            'redmine_key' => 'required',
+            //'redmine_statuses' => 'required',
+        ];
+    }
+
+    /**
      * Returns user's redmine settings
      *
      * @param  Request         $request
      * @param  UserRepository  $userRepository
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getSettings(Request $request, UserRepository $userRepository)
     {

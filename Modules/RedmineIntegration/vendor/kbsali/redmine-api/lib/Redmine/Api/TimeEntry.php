@@ -2,10 +2,13 @@
 
 namespace Redmine\Api;
 
+use Exception;
+use SimpleXMLElement;
+
 /**
  * Listing time entries, creating, editing.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -18,7 +21,7 @@ class TimeEntry extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries
      *
-     * @param array $params optional parameters to be passed to the api (offset, limit, ...)
+     * @param  array  $params  optional parameters to be passed to the api (offset, limit, ...)
      *
      * @return array list of time entries found
      */
@@ -34,7 +37,7 @@ class TimeEntry extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries
      *
-     * @param string $id the time entry id
+     * @param  string  $id  the time entry id
      *
      * @return array information about the time entry
      */
@@ -48,9 +51,9 @@ class TimeEntry extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries
      *
-     * @param array $params the new time entry data
+     * @param  array  $params  the new time entry data
      *
-     * @throws \Exception Missing mandatory parameters
+     * @throws Exception Missing mandatory parameters
      *
      * @return string|false
      */
@@ -68,12 +71,12 @@ class TimeEntry extends AbstractApi
 
         if (
             (!isset($params['issue_id']) && !isset($params['project_id']))
-         || !isset($params['hours'])
+            || !isset($params['hours'])
         ) {
-            throw new \Exception('Missing mandatory parameters');
+            throw new Exception('Missing mandatory parameters');
         }
 
-        $xml = new \SimpleXMLElement('<?xml version="1.0"?><time_entry></time_entry>');
+        $xml = new SimpleXMLElement('<?xml version="1.0"?><time_entry></time_entry>');
         foreach ($params as $k => $v) {
             if ('custom_fields' === $k && is_array($v)) {
                 $this->attachCustomFieldXML($xml, $v);
@@ -90,8 +93,8 @@ class TimeEntry extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries
      *
-     * @param int   $id
-     * @param array $params
+     * @param  int    $id
+     * @param  array  $params
      *
      * @return string|false
      */
@@ -108,7 +111,7 @@ class TimeEntry extends AbstractApi
         ];
         $params = $this->sanitizeParams($defaults, $params);
 
-        $xml = new \SimpleXMLElement('<?xml version="1.0"?><time_entry></time_entry>');
+        $xml = new SimpleXMLElement('<?xml version="1.0"?><time_entry></time_entry>');
         foreach ($params as $k => $v) {
             if ('custom_fields' === $k && is_array($v)) {
                 $this->attachCustomFieldXML($xml, $v);
@@ -125,9 +128,9 @@ class TimeEntry extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_TimeEntries
      *
-     * @param int $id id of the time entry
+     * @param  int  $id  id of the time entry
      *
-     * @return false|\SimpleXMLElement|string
+     * @return false|SimpleXMLElement|string
      */
     public function remove($id)
     {

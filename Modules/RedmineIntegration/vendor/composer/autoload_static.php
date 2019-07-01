@@ -4,41 +4,43 @@
 
 namespace Composer\Autoload;
 
+use Closure;
+
 class ComposerStaticInit05884d0b9b3753afa5b9af9ae3f732eb
 {
-    public static $prefixLengthsPsr4 = array (
-        'W' => 
-        array (
-            'Wikimedia\\Composer\\' => 19,
-        ),
-        'R' => 
-        array (
-            'Redmine\\' => 8,
-        ),
-        'M' => 
-        array (
-            'Modules\\RedmineIntegration\\' => 27,
-        ),
-    );
+    public static $prefixLengthsPsr4 = [
+        'W' =>
+            [
+                'Wikimedia\\Composer\\' => 19,
+            ],
+        'R' =>
+            [
+                'Redmine\\' => 8,
+            ],
+        'M' =>
+            [
+                'Modules\\RedmineIntegration\\' => 27,
+            ],
+    ];
 
-    public static $prefixDirsPsr4 = array (
-        'Wikimedia\\Composer\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src',
-        ),
-        'Redmine\\' => 
-        array (
-            0 => __DIR__ . '/..' . '/kbsali/redmine-api/lib/Redmine',
-        ),
-        'Modules\\RedmineIntegration\\' => 
-        array (
-            0 => __DIR__ . '/../..' . '/',
-        ),
-    );
+    public static $prefixDirsPsr4 = [
+        'Wikimedia\\Composer\\' =>
+            [
+                0 => __DIR__.'/..'.'/wikimedia/composer-merge-plugin/src',
+            ],
+        'Redmine\\' =>
+            [
+                0 => __DIR__.'/..'.'/kbsali/redmine-api/lib/Redmine',
+            ],
+        'Modules\\RedmineIntegration\\' =>
+            [
+                0 => __DIR__.'/../..'.'/',
+            ],
+    ];
 
     public static function getInitializer(ClassLoader $loader)
     {
-        return \Closure::bind(function () use ($loader) {
+        return Closure::bind(function () use ($loader) {
             $loader->prefixLengthsPsr4 = ComposerStaticInit05884d0b9b3753afa5b9af9ae3f732eb::$prefixLengthsPsr4;
             $loader->prefixDirsPsr4 = ComposerStaticInit05884d0b9b3753afa5b9af9ae3f732eb::$prefixDirsPsr4;
 

@@ -7,18 +7,6 @@ use Illuminate\Support\ServiceProvider;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
-    /**
-     * @var Schedule
-     */
-    protected $schedule;
-
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = false;
-
     const COMMAND_LIST = [
         'users' => '*/15 * * * *',
         'statuses' => '*/15 * * * *',
@@ -27,12 +15,21 @@ class ScheduleServiceProvider extends ServiceProvider
         'tasks' => '*/15 * * * *',
         'time' => '0 * * * *'
     ];
-
     const COMMAND_PREFIX = 'redmine-integration';
-
+    /**
+     * @var Schedule
+     */
+    protected $schedule;
+    /**
+     * Indicates if loading of the provider is deferred.
+     *
+     * @var bool
+     */
+    protected $defer = false;
 
     /**
      * ScheduleServiceProvider constructor.
+     *
      * @param $app
      */
     public function __construct($app)
@@ -47,14 +44,15 @@ class ScheduleServiceProvider extends ServiceProvider
         $this->schedule = $this->app->make(Schedule::class);
         $this->app->booted(function () {
             foreach (self::COMMAND_LIST as $command => $cron) {
-                $this->registerScheduleCommand(self::COMMAND_PREFIX . ':' . $command, $cron);
+                $this->registerScheduleCommand(self::COMMAND_PREFIX.':'.$command, $cron);
             }
         });
     }
 
     /**
-     * @param string $command
-     * @param string $cron
+     * @param  string  $command
+     * @param  string  $cron
+     *
      * @return $this
      */
     protected function registerScheduleCommand(string $command, string $cron)

@@ -2,9 +2,10 @@
 
 namespace Redmine\Tests\Unit;
 
+use PHPUnit\Framework\TestCase;
 use Redmine\Tests\Fixtures\MockClient as TestUrlClient;
 
-class UrlTest extends \PHPUnit\Framework\TestCase
+class UrlTest extends TestCase
 {
     /**
      * @var TestUrlClient
@@ -223,7 +224,8 @@ class UrlTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($res['method'], 'GET');
 
         $res = $api->show(1);
-        $this->assertEquals($res['path'], '/projects/1.json?include='.urlencode('trackers,issue_categories,attachments,relations'));
+        $this->assertEquals($res['path'],
+            '/projects/1.json?include='.urlencode('trackers,issue_categories,attachments,relations'));
         $this->assertEquals($res['method'], 'GET');
 
         $res = $api->remove(1);

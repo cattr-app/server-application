@@ -324,6 +324,30 @@ class UserRepository
     }
 
     /**
+     * get timeout for last task activity for user $userId
+     *
+     * @param  string  $userId
+     * @param  string  $propertyName
+     * @param  string  $retOnUnset  optional
+     *
+     * @return string
+     */
+    protected function getProperty($userId, string $propertyName, string $retOnUnset = '')
+    {
+        $property = Property::where([
+            'entity_id' => $userId,
+            'entity_type' => Property::USER_CODE,
+            'name' => $propertyName,
+        ])->first();
+
+        if ($property) {
+            return $property->value;
+        }
+
+        return $retOnUnset;
+    }
+
+    /**
      * set active task status id for userId
      *
      * @param  string  $userId
@@ -334,6 +358,36 @@ class UserRepository
     public function setActiveStatusId($userId, $status_id)
     {
         return $this->setProperty($userId, static::ACTIVE_STATUS_PROPERTY, $status_id);
+    }
+
+    /**
+     * set property for userId
+     *
+     * @param  string  $userId
+     * @param  string  $propertyName
+     * @param  mixed   $value
+     */
+    protected function setProperty($userId, string $propertyName, $value)
+    {
+        $params = [
+            'entity_id' => $userId,
+            'entity_type' => Property::USER_CODE,
+            'name' => $propertyName,
+        ];
+
+        $property = Property::where($params)->first();
+
+        if (!$value) {
+            $value = '';
+        }
+
+        if (!$property) {
+            $params['value'] = $value;
+            Property::create($params);
+        } else {
+            $property->value = $value;
+            $property->save();
+        }
     }
 
     /**
@@ -444,59 +498,5 @@ class UserRepository
     public function setOnlineTimeout($userId, $timeout)
     {
         return $this->setProperty($userId, static::ONLINE_TIMEOUT_PROPERTY, $timeout);
-    }
-
-    /**
-     * get timeout for last task activity for user $userId
-     *
-     * @param  string  $userId
-     * @param  string  $propertyName
-     * @param  string  $retOnUnset  optional
-     *
-     * @return string
-     */
-    protected function getProperty($userId, string $propertyName, string $retOnUnset = '')
-    {
-        $property = Property::where([
-            'entity_id' => $userId,
-            'entity_type' => Property::USER_CODE,
-            'name' => $propertyName,
-        ])->first();
-
-        if ($property) {
-            return $property->value;
-        }
-
-        return $retOnUnset;
-    }
-
-    /**
-     * set property for userId
-     *
-     * @param  string  $userId
-     * @param  string  $propertyName
-     * @param  mixed   $value
-     */
-    protected function setProperty($userId, string $propertyName, $value)
-    {
-        $params = [
-            'entity_id' => $userId,
-            'entity_type' => Property::USER_CODE,
-            'name' => $propertyName,
-        ];
-
-        $property = Property::where($params)->first();
-
-        if (!$value) {
-            $value = '';
-        }
-
-        if (!$property) {
-            $params['value'] = $value;
-            Property::create($params);
-        } else {
-            $property->value = $value;
-            $property->save();
-        }
     }
 }

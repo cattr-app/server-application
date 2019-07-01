@@ -17,7 +17,7 @@ if (file_exists($composerPath)) {
 spl_autoload_register(function ($class) {
     // project-specific namespace prefix and base directory with trailing /
     $namespaceMap = [
-        'Redmine\\'        => __DIR__.'/Redmine/',
+        'Redmine\\' => __DIR__.'/Redmine/',
         'Redmine\\Tests\\' => __DIR__.'/../tests/',
     ];
 

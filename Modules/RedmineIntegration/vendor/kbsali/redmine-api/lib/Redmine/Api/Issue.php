@@ -2,10 +2,12 @@
 
 namespace Redmine\Api;
 
+use SimpleXMLElement;
+
 /**
  * Listing issues, searching, editing and closing your projects issues.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_Issues
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_Issues
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -32,7 +34,7 @@ class Issue extends AbstractApi
      * - cf_x: get issues with the given value for custom field with an ID of x. (Custom field must have 'used as a filter' checked.)
      * - query_id : id of the previously saved query
      *
-     * @param array $params the additional parameters (cf available $params above)
+     * @param  array  $params  the additional parameters (cf available $params above)
      *
      * @return array list of issues found
      */
@@ -48,8 +50,8 @@ class Issue extends AbstractApi
      * available $params :
      * include: fetch associated data (optional). Possible values: children, attachments, relations, changesets and journals
      *
-     * @param string $id     the issue id
-     * @param array  $params extra associated data
+     * @param  string  $id      the issue id
+     * @param  array   $params  extra associated data
      *
      * @return array information about the issue
      */
@@ -63,53 +65,14 @@ class Issue extends AbstractApi
     }
 
     /**
-     * Build the XML for an issue.
-     *
-     * @param array $params for the new/updated issue data
-     *
-     * @return \SimpleXMLElement
-     */
-    private function buildXML(array $params = [])
-    {
-        $xml = new \SimpleXMLElement('<?xml version="1.0"?><issue></issue>');
-
-        foreach ($params as $k => $v) {
-            if ('custom_fields' === $k && is_array($v)) {
-                $this->attachCustomFieldXML($xml, $v);
-            } elseif ('watcher_user_ids' === $k && is_array($v)) {
-                $watcherUserIds = $xml->addChild('watcher_user_ids', '');
-                $watcherUserIds->addAttribute('type', 'array');
-                foreach ($v as $watcher) {
-                    $watcherUserIds->addChild('watcher_user_id', (int) $watcher);
-                }
-            } elseif ('uploads' === $k && is_array($v)) {
-                $uploadsItem = $xml->addChild('uploads', '');
-                $uploadsItem->addAttribute('type', 'array');
-                foreach ($v as $upload) {
-                    $upload_item = $uploadsItem->addChild('upload', '');
-                    foreach ($upload as $upload_k => $upload_v) {
-                        $upload_item->addChild($upload_k, $upload_v);
-                    }
-                }
-            } else {
-                // "addChild" does not escape text for XML value, but the setter does.
-                // http://stackoverflow.com/a/555039/99904
-                $xml->$k = $v;
-            }
-        }
-
-        return $xml;
-    }
-
-    /**
      * Create a new issue given an array of $params
      * The issue is assigned to the authenticated user.
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Issues#Creating-an-issue
      *
-     * @param array $params the new issue data
+     * @param  array  $params  the new issue data
      *
-     * @return \SimpleXMLElement
+     * @return SimpleXMLElement
      */
     public function create(array $params = [])
     {
@@ -137,94 +100,9 @@ class Issue extends AbstractApi
     }
 
     /**
-     * Update issue information's by username, repo and issue number. Requires authentication.
-     *
-     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Issues#Updating-an-issue
-     *
-     * @param string $id     the issue number
-     * @param array  $params
-     *
-     * @return string|false
-     */
-    public function update($id, array $params)
-    {
-        $defaults = [
-            'id' => $id,
-            'subject' => null,
-            'notes' => null,
-            'private_notes' => false,
-            'category_id' => null,
-            'priority_id' => null,
-            'status_id' => null,
-            'tracker_id' => null,
-            'assigned_to_id' => null,
-            'due_date' => null,
-        ];
-        $params = $this->cleanParams($params);
-        $params = $this->sanitizeParams($defaults, $params);
-
-        $xml = $this->buildXML($params);
-
-        return $this->put('/issues/'.$id.'.xml', $xml->asXML());
-    }
-
-    /**
-     * @param int    $id
-     * @param string $watcher_user_id
-     *
-     * @return false|string
-     */
-    public function addWatcher($id, $watcher_user_id)
-    {
-        return $this->post('/issues/'.$id.'/watchers.xml', '<user_id>'.$watcher_user_id.'</user_id>');
-    }
-
-    /**
-     * @param int    $id
-     * @param string $watcher_user_id
-     *
-     * @return false|\SimpleXMLElement|string
-     */
-    public function removeWatcher($id, $watcher_user_id)
-    {
-        return $this->delete('/issues/'.$id.'/watchers/'.$watcher_user_id.'.xml');
-    }
-
-    /**
-     * @param int    $id
-     * @param string $status
-     *
-     * @return string|false
-     */
-    public function setIssueStatus($id, $status)
-    {
-        $api = $this->client->issue_status;
-        $statusId = $api->getIdByName($status);
-
-        return $this->update($id, [
-            'status_id' => $statusId,
-        ]);
-    }
-
-    /**
-     * @param int    $id
-     * @param string $note
-     * @param bool   $privateNote
-     *
-     * @return string|false
-     */
-    public function addNoteToIssue($id, $note, $privateNote = false)
-    {
-        return $this->update($id, [
-            'notes' => $note,
-            'private_notes' => $privateNote,
-        ]);
-    }
-
-    /**
      * Transforms literal identifiers to integer ids.
      *
-     * @param array $params
+     * @param  array  $params
      *
      * @return array
      */
@@ -266,12 +144,136 @@ class Issue extends AbstractApi
     }
 
     /**
+     * Build the XML for an issue.
+     *
+     * @param  array  $params  for the new/updated issue data
+     *
+     * @return SimpleXMLElement
+     */
+    private function buildXML(array $params = [])
+    {
+        $xml = new SimpleXMLElement('<?xml version="1.0"?><issue></issue>');
+
+        foreach ($params as $k => $v) {
+            if ('custom_fields' === $k && is_array($v)) {
+                $this->attachCustomFieldXML($xml, $v);
+            } elseif ('watcher_user_ids' === $k && is_array($v)) {
+                $watcherUserIds = $xml->addChild('watcher_user_ids', '');
+                $watcherUserIds->addAttribute('type', 'array');
+                foreach ($v as $watcher) {
+                    $watcherUserIds->addChild('watcher_user_id', (int) $watcher);
+                }
+            } elseif ('uploads' === $k && is_array($v)) {
+                $uploadsItem = $xml->addChild('uploads', '');
+                $uploadsItem->addAttribute('type', 'array');
+                foreach ($v as $upload) {
+                    $upload_item = $uploadsItem->addChild('upload', '');
+                    foreach ($upload as $upload_k => $upload_v) {
+                        $upload_item->addChild($upload_k, $upload_v);
+                    }
+                }
+            } else {
+                // "addChild" does not escape text for XML value, but the setter does.
+                // http://stackoverflow.com/a/555039/99904
+                $xml->$k = $v;
+            }
+        }
+
+        return $xml;
+    }
+
+    /**
+     * @param  int     $id
+     * @param  string  $watcher_user_id
+     *
+     * @return false|string
+     */
+    public function addWatcher($id, $watcher_user_id)
+    {
+        return $this->post('/issues/'.$id.'/watchers.xml', '<user_id>'.$watcher_user_id.'</user_id>');
+    }
+
+    /**
+     * @param  int     $id
+     * @param  string  $watcher_user_id
+     *
+     * @return false|SimpleXMLElement|string
+     */
+    public function removeWatcher($id, $watcher_user_id)
+    {
+        return $this->delete('/issues/'.$id.'/watchers/'.$watcher_user_id.'.xml');
+    }
+
+    /**
+     * @param  int     $id
+     * @param  string  $status
+     *
+     * @return string|false
+     */
+    public function setIssueStatus($id, $status)
+    {
+        $api = $this->client->issue_status;
+        $statusId = $api->getIdByName($status);
+
+        return $this->update($id, [
+            'status_id' => $statusId,
+        ]);
+    }
+
+    /**
+     * Update issue information's by username, repo and issue number. Requires authentication.
+     *
+     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Issues#Updating-an-issue
+     *
+     * @param  string  $id  the issue number
+     * @param  array   $params
+     *
+     * @return string|false
+     */
+    public function update($id, array $params)
+    {
+        $defaults = [
+            'id' => $id,
+            'subject' => null,
+            'notes' => null,
+            'private_notes' => false,
+            'category_id' => null,
+            'priority_id' => null,
+            'status_id' => null,
+            'tracker_id' => null,
+            'assigned_to_id' => null,
+            'due_date' => null,
+        ];
+        $params = $this->cleanParams($params);
+        $params = $this->sanitizeParams($defaults, $params);
+
+        $xml = $this->buildXML($params);
+
+        return $this->put('/issues/'.$id.'.xml', $xml->asXML());
+    }
+
+    /**
+     * @param  int     $id
+     * @param  string  $note
+     * @param  bool    $privateNote
+     *
+     * @return string|false
+     */
+    public function addNoteToIssue($id, $note, $privateNote = false)
+    {
+        return $this->update($id, [
+            'notes' => $note,
+            'private_notes' => $privateNote,
+        ]);
+    }
+
+    /**
      * Attach a file to an issue. Requires authentication.
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Issues#Updating-an-issue
      *
-     * @param string $id         the issue number
-     * @param array  $attachment ['token' => '...', 'filename' => '...', 'content_type' => '...']
+     * @param  string  $id          the issue number
+     * @param  array   $attachment  ['token' => '...', 'filename' => '...', 'content_type' => '...']
      *
      * @return bool|string
      */
@@ -285,11 +287,11 @@ class Issue extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Issues#Updating-an-issue
      *
-     * @param string $id          the issue number
-     * @param array  $attachments [
-     *                            ['token' => '...', 'filename' => '...', 'content_type' => '...'],
-     *                            ['token' => '...', 'filename' => '...', 'content_type' => '...']
-     *                            ]
+     * @param  string  $id           the issue number
+     * @param  array   $attachments  [
+     *                               ['token' => '...', 'filename' => '...', 'content_type' => '...'],
+     *                               ['token' => '...', 'filename' => '...', 'content_type' => '...']
+     *                               ]
      *
      * @return bool|string
      */
@@ -307,9 +309,9 @@ class Issue extends AbstractApi
     /**
      * Remove a issue by issue number.
      *
-     * @param string $id the issue number
+     * @param  string  $id  the issue number
      *
-     * @return false|\SimpleXMLElement|string
+     * @return false|SimpleXMLElement|string
      */
     public function remove($id)
     {

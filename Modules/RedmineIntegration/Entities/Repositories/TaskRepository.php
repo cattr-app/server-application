@@ -20,7 +20,9 @@ class TaskRepository
 
     /**
      * Returns Redmine ID for current task
-     * @param int $taskId
+     *
+     * @param  int  $taskId
+     *
      * @return string
      */
     public function getRedmineTaskId(int $taskId)
@@ -44,15 +46,15 @@ class TaskRepository
      *
      * Adds a specific row to properties table
      *
-     * @param int $taskId
+     * @param  int  $taskId
      */
     public function markAsNew(int $taskId)
     {
         Property::create([
-            'entity_id'   => $taskId,
+            'entity_id' => $taskId,
             'entity_type' => Property::TASK_CODE,
-            'name'        => 'NEW',
-            'value'       => 1
+            'name' => 'NEW',
+            'value' => 1
         ]);
     }
 
@@ -61,7 +63,7 @@ class TaskRepository
      *
      * Adds a specific row to properties table
      *
-     * @param int $taskId
+     * @param  int  $taskId
      */
     public function markAsOld(int $taskId)
     {
@@ -73,24 +75,26 @@ class TaskRepository
 
     /**
      * Set redmine id for task
-     * @param int $taskId Task id in local system
-     * @param int $taskRedmineId Task id in redmine
+     *
+     * @param  int  $taskId         Task id in local system
+     * @param  int  $taskRedmineId  Task id in redmine
      */
     public function setRedmineId(int $taskId, int $taskRedmineId)
     {
         Property::create([
-            'entity_id'   => $taskId,
+            'entity_id' => $taskId,
             'entity_type' => Property::TASK_CODE,
-            'name'        => 'REDMINE_ID',
-            'value'       => $taskRedmineId
+            'name' => 'REDMINE_ID',
+            'value' => $taskRedmineId
         ]);
     }
 
 
-
     /**
      * get active task status id from taskId
-     * @param string $taskId
+     *
+     * @param  string  $taskId
+     *
      * @return string
      */
     public function getRedmineStatusId($taskId)
@@ -99,29 +103,20 @@ class TaskRepository
     }
 
     /**
-     * set active task status id for taskId
-     * @param string $taskId
-     * @param string $status_id
-     * @return string
-     */
-    public function setRedmineStatusId($taskId, $status_id)
-    {
-        return $this->setProperty($taskId, static::STATUS_PROPERTY, $status_id);
-    }
-
-    /**
      * get property from taskId
-     * @param string $taskId
-     * @param string $propertyName
-     * @param string $retOnUnset optional
+     *
+     * @param  string  $taskId
+     * @param  string  $propertyName
+     * @param  string  $retOnUnset  optional
+     *
      * @return string
      */
     protected function getProperty($taskId, string $propertyName, string $retOnUnset = '')
     {
         $property = Property::where([
-            'entity_id'     => $taskId,
-            'entity_type'   => Property::TASK_CODE,
-            'name'          => $propertyName,
+            'entity_id' => $taskId,
+            'entity_type' => Property::TASK_CODE,
+            'name' => $propertyName,
         ])->first();
 
         if ($property) {
@@ -132,17 +127,31 @@ class TaskRepository
     }
 
     /**
+     * set active task status id for taskId
+     *
+     * @param  string  $taskId
+     * @param  string  $status_id
+     *
+     * @return string
+     */
+    public function setRedmineStatusId($taskId, $status_id)
+    {
+        return $this->setProperty($taskId, static::STATUS_PROPERTY, $status_id);
+    }
+
+    /**
      * set property for taskId
-     * @param string $taskId
-     * @param string $propertyName
-     * @param mixed $value
+     *
+     * @param  string  $taskId
+     * @param  string  $propertyName
+     * @param  mixed   $value
      */
     protected function setProperty($taskId, string $propertyName, $value)
     {
         $params = [
-            'entity_id'     => $taskId,
-            'entity_type'   => Property::TASK_CODE,
-            'name'          => $propertyName,
+            'entity_id' => $taskId,
+            'entity_type' => Property::TASK_CODE,
+            'name' => $propertyName,
         ];
 
         $property = Property::where($params)->first();

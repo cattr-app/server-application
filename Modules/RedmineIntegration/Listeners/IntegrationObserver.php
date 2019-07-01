@@ -3,6 +3,7 @@
 namespace Modules\RedmineIntegration\Listeners;
 
 use App\User;
+use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
@@ -138,7 +139,7 @@ class IntegrationObserver
                     'priority_id' => $priority_id,
                 ]);
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error("Can't update task in the Redmine: ".$e->getMessage());
         }
 

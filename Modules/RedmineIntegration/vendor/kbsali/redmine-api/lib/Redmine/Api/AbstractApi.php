@@ -3,6 +3,7 @@
 namespace Redmine\Api;
 
 use Redmine\Client;
+use SimpleXMLElement;
 
 /**
  * Abstract class for Api classes.
@@ -19,7 +20,7 @@ abstract class AbstractApi
     protected $client;
 
     /**
-     * @param Client $client
+     * @param  Client  $client
      */
     public function __construct(Client $client)
     {
@@ -39,23 +40,10 @@ abstract class AbstractApi
     }
 
     /**
-     * Perform the client get() method.
-     *
-     * @param string $path
-     * @param bool   $decode
-     *
-     * @return array
-     */
-    protected function get($path, $decode = true)
-    {
-        return $this->client->get($path, $decode);
-    }
-
-    /**
      * Perform the client post() method.
      *
-     * @param string $path
-     * @param string $data
+     * @param  string  $path
+     * @param  string  $data
      *
      * @return string|false
      */
@@ -67,8 +55,8 @@ abstract class AbstractApi
     /**
      * Perform the client put() method.
      *
-     * @param string $path
-     * @param string $data
+     * @param  string  $path
+     * @param  string  $data
      *
      * @return string|false
      */
@@ -80,9 +68,9 @@ abstract class AbstractApi
     /**
      * Perform the client delete() method.
      *
-     * @param string $path
+     * @param  string  $path
      *
-     * @return false|\SimpleXMLElement|string
+     * @return false|SimpleXMLElement|string
      */
     protected function delete($path)
     {
@@ -92,7 +80,7 @@ abstract class AbstractApi
     /**
      * Checks if the variable passed is not null.
      *
-     * @param mixed $var Variable to be checked
+     * @param  mixed  $var  Variable to be checked
      *
      * @return bool
      */
@@ -106,25 +94,11 @@ abstract class AbstractApi
     }
 
     /**
-     * @param array $defaults
-     * @param array $params
-     *
-     * @return array
-     */
-    protected function sanitizeParams(array $defaults, array $params)
-    {
-        return array_filter(
-            array_merge($defaults, $params),
-            [$this, 'isNotNull']
-        );
-    }
-
-    /**
      * Retrieves all the elements of a given endpoint (even if the
      * total number of elements is greater than 100).
      *
-     * @param string $endpoint API end point
-     * @param array  $params   optional parameters to be passed to the api (offset, limit, ...)
+     * @param  string  $endpoint  API end point
+     * @param  array   $params    optional parameters to be passed to the api (offset, limit, ...)
      *
      * @return array elements found
      */
@@ -155,7 +129,8 @@ abstract class AbstractApi
             $params['limit'] = $_limit;
             $params['offset'] = $offset;
 
-            $newDataSet = (array) $this->get($endpoint.'?'.preg_replace('/%5B[0-9]+%5D/simU', '%5B%5D', http_build_query($params)));
+            $newDataSet = (array) $this->get($endpoint.'?'.preg_replace('/%5B[0-9]+%5D/simU', '%5B%5D',
+                    http_build_query($params)));
             $ret = array_merge_recursive($ret, $newDataSet);
 
             $offset += $_limit;
@@ -173,16 +148,43 @@ abstract class AbstractApi
     }
 
     /**
+     * Perform the client get() method.
+     *
+     * @param  string  $path
+     * @param  bool    $decode
+     *
+     * @return array
+     */
+    protected function get($path, $decode = true)
+    {
+        return $this->client->get($path, $decode);
+    }
+
+    /**
+     * @param  array  $defaults
+     * @param  array  $params
+     *
+     * @return array
+     */
+    protected function sanitizeParams(array $defaults, array $params)
+    {
+        return array_filter(
+            array_merge($defaults, $params),
+            [$this, 'isNotNull']
+        );
+    }
+
+    /**
      * Attaches Custom Fields to a create/update query.
      *
-     * @param \SimpleXMLElement $xml    XML Element the custom fields are attached to
-     * @param array             $fields array of fields to attach, each field needs name, id and value set
+     * @param  SimpleXMLElement  $xml     XML Element the custom fields are attached to
+     * @param  array              $fields  array of fields to attach, each field needs name, id and value set
      *
-     * @return \SimpleXMLElement $xml
+     * @return SimpleXMLElement $xml
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_api#Working-with-custom-fields
      */
-    protected function attachCustomFieldXML(\SimpleXMLElement $xml, array $fields)
+    protected function attachCustomFieldXML(SimpleXMLElement $xml, array $fields)
     {
         $_fields = $xml->addChild('custom_fields');
         $_fields->addAttribute('type', 'array');

@@ -34,6 +34,6 @@ class RouteServiceProvider extends ServiceProvider
             ->as('v1.integration.redmine.')
             ->prefix('v1/integration/redmine')
             ->namespace($this->namespace)
-            ->group(__DIR__ . '/../Routes/api.php');
+            ->group(__DIR__.'/../Routes/api.php');
     }
 }

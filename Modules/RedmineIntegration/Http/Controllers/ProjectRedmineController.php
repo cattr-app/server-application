@@ -20,6 +20,7 @@ class ProjectRedmineController extends AbstractRedmineController
 
     /**
      * ProjectRedmineController constructor.
+     *
      * @param  ProjectIntegrationHelper  $projectIntegrationHelper
      */
     public function __construct(ProjectIntegrationHelper $projectIntegrationHelper)

@@ -5,7 +5,7 @@ namespace Redmine\Api;
 /**
  * Handling issue relations.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_IssueRelations
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_IssueRelations
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -18,8 +18,8 @@ class IssueRelation extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_IssueRelations#GET
      *
-     * @param int   $issueId the issue id
-     * @param array $params  optional parameters to be passed to the api (offset, limit, ...)
+     * @param  int    $issueId  the issue id
+     * @param  array  $params   optional parameters to be passed to the api (offset, limit, ...)
      *
      * @return array list of relations found
      */
@@ -35,7 +35,7 @@ class IssueRelation extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_IssueRelations#GET-2
      *
-     * @param int $id the relation id
+     * @param  int  $id  the relation id
      *
      * @return array relation's details
      */
@@ -54,7 +54,7 @@ class IssueRelation extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_IssueRelations#DELETE
      *
-     * @param int $id the relation id
+     * @param  int  $id  the relation id
      *
      * @return string
      */
@@ -68,8 +68,8 @@ class IssueRelation extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_IssueRelations#POST
      *
-     * @param int   $issueId the ID of the issue we are creating the relation on
-     * @param array $params  the new issue relation data
+     * @param  int    $issueId  the ID of the issue we are creating the relation on
+     * @param  array  $params   the new issue relation data
      *
      * @return array
      */

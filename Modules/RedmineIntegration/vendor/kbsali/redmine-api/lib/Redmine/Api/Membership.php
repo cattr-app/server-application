@@ -2,10 +2,13 @@
 
 namespace Redmine\Api;
 
+use Exception;
+use SimpleXMLElement;
+
 /**
  * Handling project memberships.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_Memberships
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_Memberships
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -18,8 +21,8 @@ class Membership extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Memberships#GET
      *
-     * @param string|int $project project id or literal identifier
-     * @param array      $params  optional parameters to be passed to the api (offset, limit, ...)
+     * @param  string|int  $project  project id or literal identifier
+     * @param  array       $params   optional parameters to be passed to the api (offset, limit, ...)
      *
      * @return array list of memberships found
      */
@@ -35,10 +38,10 @@ class Membership extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Memberships#POST
      *
-     * @param string|int $project project id or literal identifier
-     * @param array      $params  the new membership data
+     * @param  string|int  $project  project id or literal identifier
+     * @param  array       $params   the new membership data
      *
-     * @throws \Exception Missing mandatory parameters
+     * @throws Exception Missing mandatory parameters
      *
      * @return string|false
      */
@@ -51,7 +54,7 @@ class Membership extends AbstractApi
         $params = $this->sanitizeParams($defaults, $params);
 
         if (!isset($params['user_id']) || !isset($params['role_ids'])) {
-            throw new \Exception('Missing mandatory parameters');
+            throw new Exception('Missing mandatory parameters');
         }
 
         $xml = $this->buildXML($params);
@@ -60,57 +63,15 @@ class Membership extends AbstractApi
     }
 
     /**
-     * Update membership information's by id.
-     *
-     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Memberships#PUT
-     *
-     * @param int   $id     id of the membership
-     * @param array $params the new membership data
-     *
-     * @throws \Exception Missing mandatory parameters
-     *
-     * @return string|false
-     */
-    public function update($id, array $params = [])
-    {
-        $defaults = [
-            'role_ids' => null,
-        ];
-        $params = $this->sanitizeParams($defaults, $params);
-
-        if (!isset($params['role_ids'])) {
-            throw new \Exception('Missing mandatory parameters');
-        }
-
-        $xml = $this->buildXML($params);
-
-        return $this->put('/memberships/'.$id.'.xml', $xml->asXML());
-    }
-
-    /**
-     * Delete a membership.
-     *
-     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Memberships#DELETE
-     *
-     * @param int $id id of the membership
-     *
-     * @return false|\SimpleXMLElement|string
-     */
-    public function remove($id)
-    {
-        return $this->delete('/memberships/'.$id.'.xml');
-    }
-
-    /**
      * Build the XML for a membership.
      *
-     * @param array $params for the new/updated membership data
+     * @param  array  $params  for the new/updated membership data
      *
-     * @return \SimpleXMLElement
+     * @return SimpleXMLElement
      */
     private function buildXML(array $params = [])
     {
-        $xml = new \SimpleXMLElement('<?xml version="1.0"?><membership></membership>');
+        $xml = new SimpleXMLElement('<?xml version="1.0"?><membership></membership>');
 
         foreach ($params as $k => $v) {
             if ('role_ids' === $k && is_array($v)) {
@@ -125,5 +86,47 @@ class Membership extends AbstractApi
         }
 
         return $xml;
+    }
+
+    /**
+     * Update membership information's by id.
+     *
+     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Memberships#PUT
+     *
+     * @param  int    $id      id of the membership
+     * @param  array  $params  the new membership data
+     *
+     * @throws Exception Missing mandatory parameters
+     *
+     * @return string|false
+     */
+    public function update($id, array $params = [])
+    {
+        $defaults = [
+            'role_ids' => null,
+        ];
+        $params = $this->sanitizeParams($defaults, $params);
+
+        if (!isset($params['role_ids'])) {
+            throw new Exception('Missing mandatory parameters');
+        }
+
+        $xml = $this->buildXML($params);
+
+        return $this->put('/memberships/'.$id.'.xml', $xml->asXML());
+    }
+
+    /**
+     * Delete a membership.
+     *
+     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Memberships#DELETE
+     *
+     * @param  int  $id  id of the membership
+     *
+     * @return false|SimpleXMLElement|string
+     */
+    public function remove($id)
+    {
+        return $this->delete('/memberships/'.$id.'.xml');
     }
 }

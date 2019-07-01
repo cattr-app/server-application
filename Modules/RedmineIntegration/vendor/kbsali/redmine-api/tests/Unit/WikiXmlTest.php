@@ -2,9 +2,12 @@
 
 namespace Redmine\Tests\Unit;
 
+use DOMDocument;
+use PHPUnit\Framework\TestCase;
 use Redmine\Tests\Fixtures\MockClient as TestClient;
+use SimpleXMLElement;
 
-class WikiXmlTest extends \PHPUnit\Framework\TestCase
+class WikiXmlTest extends TestCase
 {
     /**
      * @var TestClient
@@ -34,6 +37,16 @@ class WikiXmlTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
     }
 
+    private function formatXml($xml)
+    {
+        $dom = new DOMDocument('1.0');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML((new SimpleXMLElement($xml))->asXML());
+
+        return $dom->saveXML();
+    }
+
     public function testUpdate()
     {
         $api = $this->client->wiki;
@@ -50,15 +63,5 @@ class WikiXmlTest extends \PHPUnit\Framework\TestCase
     <version>asdf</version>
 </wiki_page>';
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
-    }
-
-    private function formatXml($xml)
-    {
-        $dom = new \DOMDocument('1.0');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML((new \SimpleXMLElement($xml))->asXML());
-
-        return $dom->saveXML();
     }
 }

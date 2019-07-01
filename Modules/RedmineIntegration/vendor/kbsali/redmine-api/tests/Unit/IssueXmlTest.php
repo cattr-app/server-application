@@ -2,9 +2,12 @@
 
 namespace Redmine\Tests\Unit;
 
+use DOMDocument;
+use PHPUnit\Framework\TestCase;
 use Redmine\Tests\Fixtures\MockClient as TestClient;
+use SimpleXMLElement;
 
-class IssueXmlTest extends \PHPUnit\Framework\TestCase
+class IssueXmlTest extends TestCase
 {
     /**
      * @var TestClient
@@ -27,6 +30,16 @@ class IssueXmlTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
     }
 
+    private function formatXml($xml)
+    {
+        $dom = new DOMDocument('1.0');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML((new SimpleXMLElement($xml))->asXML());
+
+        return $dom->saveXML();
+    }
+
     public function testCreateComplexWithUpload()
     {
         $api = $this->client->issue;
@@ -36,10 +49,10 @@ class IssueXmlTest extends \PHPUnit\Framework\TestCase
             'description' => 'Here goes the issue description',
             'uploads' => [
                 [
-                  'token' => 'asdfasdfasdfasdf',
-                  'filename' => 'MyFile.pdf',
-                  'description' => 'MyFile is better then YourFile...',
-                  'content_type' => 'application/pdf',
+                    'token' => 'asdfasdfasdfasdf',
+                    'filename' => 'MyFile.pdf',
+                    'description' => 'MyFile is better then YourFile...',
+                    'content_type' => 'application/pdf',
                 ],
             ],
         ]);
@@ -185,15 +198,5 @@ line2</description>
     <notes>some comment</notes>
 </issue>';
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
-    }
-
-    private function formatXml($xml)
-    {
-        $dom = new \DOMDocument('1.0');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML((new \SimpleXMLElement($xml))->asXML());
-
-        return $dom->saveXML();
     }
 }

@@ -5,6 +5,7 @@ namespace Modules\RedmineIntegration\Helpers;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use DateTime;
+use Exception;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 
@@ -21,7 +22,7 @@ class TimeIntervalIntegrationHelper extends AbstractIntegrationHelper
      * @param  TaskRepository     $taskRepository
      * @param  ProjectRepository  $projectRepository
      *
-     * @throws \Exception
+     * @throws Exception
      */
     public function createInterval(
         $userId,

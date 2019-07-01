@@ -2,6 +2,8 @@
 
 namespace Redmine\Tests\Unit\Api;
 
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Redmine\Api\IssueCategory;
 
 /**
@@ -9,7 +11,7 @@ use Redmine\Api\IssueCategory;
  *
  * @author     Malte Gerth <mail@malte-gerth.de>
  */
-class IssueCategoryTest extends \PHPUnit\Framework\TestCase
+class IssueCategoryTest extends TestCase
 {
     /**
      * Test all().
@@ -332,7 +334,7 @@ class IssueCategoryTest extends \PHPUnit\Framework\TestCase
      *
      * @covers ::post
      * @covers ::create
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionIfNameIsMissing()

@@ -2,6 +2,8 @@
 
 namespace Redmine\Tests\Unit\Api;
 
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Redmine\Api\TimeEntry;
 
 /**
@@ -9,7 +11,7 @@ use Redmine\Api\TimeEntry;
  *
  * @author     Malte Gerth <mail@malte-gerth.de>
  */
-class TimeEntryTest extends \PHPUnit\Framework\TestCase
+class TimeEntryTest extends TestCase
 {
     /**
      * Test all().
@@ -137,7 +139,7 @@ class TimeEntryTest extends \PHPUnit\Framework\TestCase
      * Test create().
      *
      * @covers ::create
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionWithEmptyParameters()
@@ -161,7 +163,7 @@ class TimeEntryTest extends \PHPUnit\Framework\TestCase
      * Test create().
      *
      * @covers ::create
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionIfIssueIdAndProjectIdAreMissingInParameters()
@@ -188,7 +190,7 @@ class TimeEntryTest extends \PHPUnit\Framework\TestCase
      * Test create().
      *
      * @covers ::create
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionIfHoursAreMissingInParameters()
@@ -228,12 +230,12 @@ class TimeEntryTest extends \PHPUnit\Framework\TestCase
             'project_id' => '25',
             'hours' => '5.25',
             'custom_fields' => [
-                 [
+                [
                     'id' => 1,
                     'name' => 'Affected version',
                     'value' => '1.0.1',
                 ],
-                 [
+                [
                     'id' => 2,
                     'name' => 'Resolution',
                     'value' => 'Fixed',
@@ -281,12 +283,12 @@ class TimeEntryTest extends \PHPUnit\Framework\TestCase
         $parameters = [
             'hours' => '10.25',
             'custom_fields' => [
-                 [
+                [
                     'id' => 1,
                     'name' => 'Affected version',
                     'value' => '1.0.1',
                 ],
-                 [
+                [
                     'id' => 2,
                     'name' => 'Resolution',
                     'value' => 'Fixed',

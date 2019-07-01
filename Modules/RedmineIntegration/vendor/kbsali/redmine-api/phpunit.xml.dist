@@ -11,26 +11,26 @@
          syntaxCheck="false"
          bootstrap="lib/autoload.php"
 >
-    <testsuites>
-        <testsuite name="all">
-            <directory suffix="Test.php">tests/Unit/</directory>
-        </testsuite>
-    </testsuites>
+  <testsuites>
+    <testsuite name="all">
+      <directory suffix="Test.php">tests/Unit/</directory>
+    </testsuite>
+  </testsuites>
 
-    <groups>
-        <exclude>
-            <group>functional</group>
-        </exclude>
-    </groups>
+  <groups>
+    <exclude>
+      <group>functional</group>
+    </exclude>
+  </groups>
 
-    <filter>
-        <whitelist>
-            <directory suffix=".php">lib/Redmine/</directory>
-        </whitelist>
-    </filter>
+  <filter>
+    <whitelist>
+      <directory suffix=".php">lib/Redmine/</directory>
+    </whitelist>
+  </filter>
 
-    <logging>
-        <log type="coverage-clover" target="coverage.clover"/>
-    </logging>
+  <logging>
+    <log type="coverage-clover" target="coverage.clover"/>
+  </logging>
 
 </phpunit>

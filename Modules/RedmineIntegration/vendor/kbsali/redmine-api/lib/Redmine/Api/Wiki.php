@@ -2,10 +2,12 @@
 
 namespace Redmine\Api;
 
+use SimpleXMLElement;
+
 /**
  * Listing Wiki pages.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_WikiPages
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_WikiPages
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -18,8 +20,8 @@ class Wiki extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_WikiPages#Getting-the-pages-list-of-a-wiki
      *
-     * @param int|string $project project name
-     * @param array      $params  optional parameters to be passed to the api (offset, limit, ...)
+     * @param  int|string  $project  project name
+     * @param  array       $params   optional parameters to be passed to the api (offset, limit, ...)
      *
      * @return array list of wiki pages found for the given project
      */
@@ -36,9 +38,9 @@ class Wiki extends AbstractApi
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_WikiPages#Getting-a-wiki-page
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_WikiPages#Getting-an-old-version-of-a-wiki-page
      *
-     * @param int|string $project the project name
-     * @param string     $page    the page name
-     * @param int        $version version of the page
+     * @param  int|string  $project  the project name
+     * @param  string      $page     the page name
+     * @param  int         $version  version of the page
      *
      * @return array information about the wiki page
      */
@@ -52,11 +54,25 @@ class Wiki extends AbstractApi
     }
 
     /**
+     * Updates wiki page $page.
+     *
+     * @param  int|string  $project  the project name
+     * @param  string      $page     the page name
+     * @param  array       $params   the new wiki page data
+     *
+     * @return string|false
+     */
+    public function update($project, $page, array $params = [])
+    {
+        return $this->create($project, $page, $params);
+    }
+
+    /**
      * Create a new wiki page given an array of $params.
      *
-     * @param int|string $project the project name
-     * @param string     $page    the page name
-     * @param array      $params  the new wiki page data
+     * @param  int|string  $project  the project name
+     * @param  string      $page     the page name
+     * @param  array       $params   the new wiki page data
      *
      * @return string|false
      */
@@ -69,7 +85,7 @@ class Wiki extends AbstractApi
         ];
         $params = $this->sanitizeParams($defaults, $params);
 
-        $xml = new \SimpleXMLElement('<?xml version="1.0"?><wiki_page></wiki_page>');
+        $xml = new SimpleXMLElement('<?xml version="1.0"?><wiki_page></wiki_page>');
         foreach ($params as $k => $v) {
             $xml->addChild($k, $v);
         }
@@ -78,26 +94,12 @@ class Wiki extends AbstractApi
     }
 
     /**
-     * Updates wiki page $page.
-     *
-     * @param int|string $project the project name
-     * @param string     $page    the page name
-     * @param array      $params  the new wiki page data
-     *
-     * @return string|false
-     */
-    public function update($project, $page, array $params = [])
-    {
-        return $this->create($project, $page, $params);
-    }
-
-    /**
      * Delete a wiki page.
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_WikiPages#Deleting-a-wiki-page
      *
-     * @param int|string $project the project name
-     * @param string     $page    the page name
+     * @param  int|string  $project  the project name
+     * @param  string      $page     the page name
      *
      * @return string
      */

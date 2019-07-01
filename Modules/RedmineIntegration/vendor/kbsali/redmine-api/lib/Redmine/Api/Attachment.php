@@ -5,7 +5,7 @@ namespace Redmine\Api;
 /**
  * Attachment details.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_Attachments
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_Attachments
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -16,7 +16,7 @@ class Attachment extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Attachments
      *
-     * @param string $id the attachment number
+     * @param  string  $id  the attachment number
      *
      * @return array information about the attachment
      */
@@ -28,7 +28,7 @@ class Attachment extends AbstractApi
     /**
      * Get attachment content as a binary file.
      *
-     * @param string $id the attachment number
+     * @param  string  $id  the attachment number
      *
      * @return string the attachment content
      */
@@ -42,7 +42,7 @@ class Attachment extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_api#Attaching-files
      *
-     * @param string $attachment the attachment content
+     * @param  string  $attachment  the attachment content
      *
      * @return array information about the attachment
      */

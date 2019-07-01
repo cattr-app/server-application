@@ -5,7 +5,7 @@ namespace Redmine\Api;
 /**
  * Listing issue statuses.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_IssueStatuses
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_IssueStatuses
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -14,25 +14,26 @@ class IssueStatus extends AbstractApi
     private $issueStatuses = [];
 
     /**
-     * List issue statuses.
+     * Get a status id given its name.
      *
-     * @see http://www.redmine.org/projects/redmine/wiki/Rest_IssueStatuses#GET
+     * @param  string  $name
      *
-     * @param array $params optional parameters to be passed to the api (offset, limit, ...)
-     *
-     * @return array list of issue statuses found
+     * @return int|false
      */
-    public function all(array $params = [])
+    public function getIdByName($name)
     {
-        $this->issueStatuses = $this->retrieveAll('/issue_statuses.json', $params);
+        $arr = $this->listing();
+        if (!isset($arr[$name])) {
+            return false;
+        }
 
-        return $this->issueStatuses;
+        return $arr[(string) $name];
     }
 
     /**
      * Returns an array of issue statuses with name/id pairs.
      *
-     * @param bool $forceUpdate to force the update of the statuses var
+     * @param  bool  $forceUpdate  to force the update of the statuses var
      *
      * @return array list of issue statuses (id => name)
      */
@@ -50,19 +51,18 @@ class IssueStatus extends AbstractApi
     }
 
     /**
-     * Get a status id given its name.
+     * List issue statuses.
      *
-     * @param string $name
+     * @see http://www.redmine.org/projects/redmine/wiki/Rest_IssueStatuses#GET
      *
-     * @return int|false
+     * @param  array  $params  optional parameters to be passed to the api (offset, limit, ...)
+     *
+     * @return array list of issue statuses found
      */
-    public function getIdByName($name)
+    public function all(array $params = [])
     {
-        $arr = $this->listing();
-        if (!isset($arr[$name])) {
-            return false;
-        }
+        $this->issueStatuses = $this->retrieveAll('/issue_statuses.json', $params);
 
-        return $arr[(string) $name];
+        return $this->issueStatuses;
     }
 }

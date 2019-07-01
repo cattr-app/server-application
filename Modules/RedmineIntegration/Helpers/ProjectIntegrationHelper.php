@@ -5,6 +5,7 @@ namespace Modules\RedmineIntegration\Helpers;
 use App\Models\Project;
 use App\Models\Property;
 use App\User;
+use Exception;
 
 class ProjectIntegrationHelper extends AbstractIntegrationHelper
 {
@@ -18,7 +19,7 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
         foreach ($users as $user) {
             try {
                 $this->synchronizeUserProjects($user->id);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
             }
         }
     }

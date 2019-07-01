@@ -2,10 +2,13 @@
 
 namespace Redmine\Api;
 
+use Exception;
+use SimpleXMLElement;
+
 /**
  * Listing projects, creating, editing.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_Projects
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_Projects
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -14,26 +17,27 @@ class Project extends AbstractApi
     private $projects = [];
 
     /**
-     * List projects.
+     * Get a project id given its name.
      *
-     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Projects
+     * @param  string  $name
      *
-     * @param array $params optional parameters to be passed to the api (offset, limit, ...)
-     *
-     * @return array list of projects found
+     * @return int|bool
      */
-    public function all(array $params = [])
+    public function getIdByName($name)
     {
-        $this->projects = $this->retrieveAll('/projects.json', $params);
+        $arr = $this->listing();
+        if (!isset($arr[$name])) {
+            return false;
+        }
 
-        return $this->projects;
+        return $arr[(string) $name];
     }
 
     /**
      * Returns an array of projects with name/id pairs (or id/name if $reserse is false).
      *
-     * @param bool $forceUpdate to force the update of the projects var
-     * @param bool $reverse     to return an array indexed by name rather than id
+     * @param  bool  $forceUpdate  to force the update of the projects var
+     * @param  bool  $reverse      to return an array indexed by name rather than id
      *
      * @return array list of projects (id => project name)
      */
@@ -51,20 +55,19 @@ class Project extends AbstractApi
     }
 
     /**
-     * Get a project id given its name.
+     * List projects.
      *
-     * @param string $name
+     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Projects
      *
-     * @return int|bool
+     * @param  array  $params  optional parameters to be passed to the api (offset, limit, ...)
+     *
+     * @return array list of projects found
      */
-    public function getIdByName($name)
+    public function all(array $params = [])
     {
-        $arr = $this->listing();
-        if (!isset($arr[$name])) {
-            return false;
-        }
+        $this->projects = $this->retrieveAll('/projects.json', $params);
 
-        return $arr[(string) $name];
+        return $this->projects;
     }
 
     /**
@@ -72,9 +75,9 @@ class Project extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Projects#Showing-a-project
      *
-     * @param string $id the project id
-     * @param array $params available parameters:
-     *        include: fetch associated data (optional). Possible values: trackers, issue_categories, enabled_modules (since 2.6.0)
+     * @param  string  $id      the project id
+     * @param  array   $params  available parameters:
+     *                          include: fetch associated data (optional). Possible values: trackers, issue_categories, enabled_modules (since 2.6.0)
      *
      * @return array information about the project
      */
@@ -94,11 +97,11 @@ class Project extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Projects
      *
-     * @param array $params the new project data
+     * @param  array  $params  the new project data
      *
-     * @throws \Exception
+     * @throws Exception
      *
-     * @return \SimpleXMLElement
+     * @return SimpleXMLElement
      */
     public function create(array $params = [])
     {
@@ -111,9 +114,9 @@ class Project extends AbstractApi
 
         if (
             !isset($params['name'])
-         || !isset($params['identifier'])
+            || !isset($params['identifier'])
         ) {
-            throw new \Exception('Missing mandatory parameters');
+            throw new Exception('Missing mandatory parameters');
         }
 
         $xml = $this->prepareParamsXml($params);
@@ -122,12 +125,43 @@ class Project extends AbstractApi
     }
 
     /**
+     * @param  array  $params
+     *
+     * @return SimpleXMLElement
+     */
+    protected function prepareParamsXml($params)
+    {
+        $_params = [
+            'tracker_ids' => 'tracker',
+            'issue_custom_field_ids' => 'issue_custom_field',
+            'enabled_module_names' => 'enabled_module_names',
+        ];
+
+        $xml = new SimpleXMLElement('<?xml version="1.0"?><project></project>');
+        foreach ($params as $k => $v) {
+            if ('custom_fields' === $k && is_array($v)) {
+                $this->attachCustomFieldXML($xml, $v);
+            } elseif (isset($_params[$k]) && is_array($v)) {
+                $array = $xml->addChild($k, '');
+                $array->addAttribute('type', 'array');
+                foreach ($v as $id) {
+                    $array->addChild($_params[$k], $id);
+                }
+            } else {
+                $xml->addChild($k, $v);
+            }
+        }
+
+        return $xml;
+    }
+
+    /**
      * Update project's information.
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Projects
      *
-     * @param string $id     the project id
-     * @param array  $params
+     * @param  string  $id  the project id
+     * @param  array   $params
      *
      * @return string|false
      */
@@ -147,44 +181,13 @@ class Project extends AbstractApi
     }
 
     /**
-     * @param array $params
-     *
-     * @return \SimpleXMLElement
-     */
-    protected function prepareParamsXml($params)
-    {
-        $_params = [
-            'tracker_ids' => 'tracker',
-            'issue_custom_field_ids' => 'issue_custom_field',
-            'enabled_module_names' => 'enabled_module_names',
-        ];
-
-        $xml = new \SimpleXMLElement('<?xml version="1.0"?><project></project>');
-        foreach ($params as $k => $v) {
-            if ('custom_fields' === $k && is_array($v)) {
-                $this->attachCustomFieldXML($xml, $v);
-            } elseif (isset($_params[$k]) && is_array($v)) {
-                $array = $xml->addChild($k, '');
-                $array->addAttribute('type', 'array');
-                foreach ($v as $id) {
-                    $array->addChild($_params[$k], $id);
-                }
-            } else {
-                $xml->addChild($k, $v);
-            }
-        }
-
-        return $xml;
-    }
-
-    /**
      * Delete a project.
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_Projects
      *
-     * @param int $id id of the project
+     * @param  int  $id  id of the project
      *
-     * @return false|\SimpleXMLElement|string
+     * @return false|SimpleXMLElement|string
      */
     public function remove($id)
     {

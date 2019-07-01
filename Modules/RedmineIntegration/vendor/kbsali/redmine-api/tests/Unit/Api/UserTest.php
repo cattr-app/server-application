@@ -2,6 +2,8 @@
 
 namespace Redmine\Tests\Unit\Api;
 
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Redmine\Api\User;
 
 /**
@@ -9,7 +11,7 @@ use Redmine\Api\User;
  *
  * @author     Malte Gerth <mail@malte-gerth.de>
  */
-class UserTest extends \PHPUnit\Framework\TestCase
+class UserTest extends TestCase
 {
     /**
      * Test getCurrentUser().
@@ -240,7 +242,7 @@ class UserTest extends \PHPUnit\Framework\TestCase
      * Test create().
      *
      * @covers ::create
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionWithEmptyParameters()
@@ -265,10 +267,10 @@ class UserTest extends \PHPUnit\Framework\TestCase
      *
      * @covers            ::create
      * @dataProvider      incompleteCreateParameterProvider
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      *
-     * @param array $parameters Parameters for create()
+     * @param  array  $parameters  Parameters for create()
      */
     public function testCreateThrowsExceptionIfValueIsMissingInParameters($parameters)
     {

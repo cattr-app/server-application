@@ -5,7 +5,7 @@ namespace Redmine\Api;
 /**
  * Listing custom fields.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_CustomFields
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_CustomFields
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -14,26 +14,28 @@ class CustomField extends AbstractApi
     private $customFields = [];
 
     /**
-     * List custom fields.
+     * Get a tracket id given its name.
      *
-     * @see http://www.redmine.org/projects/redmine/wiki/Rest_CustomFields#GET
+     * @param  string|int  $name    customer field name
+     * @param  array       $params  optional parameters to be passed to the api (offset, limit, ...)
      *
-     * @param array $params optional parameters to be passed to the api (offset, limit, ...)
-     *
-     * @return array list of custom fields found
+     * @return int|false
      */
-    public function all(array $params = [])
+    public function getIdByName($name, array $params = [])
     {
-        $this->customFields = $this->retrieveAll('/custom_fields.json', $params);
+        $arr = $this->listing(false, $params);
+        if (!isset($arr[$name])) {
+            return false;
+        }
 
-        return $this->customFields;
+        return $arr[(string) $name];
     }
 
     /**
      * Returns an array of custom fields with name/id pairs.
      *
-     * @param bool  $forceUpdate to force the update of the custom fields var
-     * @param array $params      optional parameters to be passed to the api (offset, limit, ...)
+     * @param  bool   $forceUpdate  to force the update of the custom fields var
+     * @param  array  $params       optional parameters to be passed to the api (offset, limit, ...)
      *
      * @return array list of custom fields (id => name)
      */
@@ -51,20 +53,18 @@ class CustomField extends AbstractApi
     }
 
     /**
-     * Get a tracket id given its name.
+     * List custom fields.
      *
-     * @param string|int $name   customer field name
-     * @param array      $params optional parameters to be passed to the api (offset, limit, ...)
+     * @see http://www.redmine.org/projects/redmine/wiki/Rest_CustomFields#GET
      *
-     * @return int|false
+     * @param  array  $params  optional parameters to be passed to the api (offset, limit, ...)
+     *
+     * @return array list of custom fields found
      */
-    public function getIdByName($name, array $params = [])
+    public function all(array $params = [])
     {
-        $arr = $this->listing(false, $params);
-        if (!isset($arr[$name])) {
-            return false;
-        }
+        $this->customFields = $this->retrieveAll('/custom_fields.json', $params);
 
-        return $arr[(string) $name];
+        return $this->customFields;
     }
 }

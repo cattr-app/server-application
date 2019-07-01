@@ -3,7 +3,7 @@
 namespace Redmine\Api;
 
 /**
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_News
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_News
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -16,8 +16,8 @@ class News extends AbstractApi
      *
      * @see http://www.redmine.org/projects/redmine/wiki/Rest_News#GET
      *
-     * @param string|int $project project id or literal identifier [optional]
-     * @param array      $params  optional parameters to be passed to the api (offset, limit, ...)
+     * @param  string|int  $project  project id or literal identifier [optional]
+     * @param  array       $params   optional parameters to be passed to the api (offset, limit, ...)
      *
      * @return array list of news found
      */

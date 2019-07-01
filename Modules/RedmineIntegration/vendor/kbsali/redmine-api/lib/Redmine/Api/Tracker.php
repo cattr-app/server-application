@@ -5,7 +5,7 @@ namespace Redmine\Api;
 /**
  * Listing trackers.
  *
- * @see   http://www.redmine.org/projects/redmine/wiki/Rest_Trackers
+ * @see    http://www.redmine.org/projects/redmine/wiki/Rest_Trackers
  *
  * @author Kevin Saliou <kevin at saliou dot name>
  */
@@ -14,25 +14,26 @@ class Tracker extends AbstractApi
     private $trackers = [];
 
     /**
-     * List trackers.
+     * Get a tracket id given its name.
      *
-     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Trackers#GET
+     * @param  string|int  $name  tracker name
      *
-     * @param array $params optional parameters to be passed to the api (offset, limit, ...)
-     *
-     * @return array list of trackers found
+     * @return int|false
      */
-    public function all(array $params = [])
+    public function getIdByName($name)
     {
-        $this->trackers = $this->retrieveAll('/trackers.json', $params);
+        $arr = $this->listing();
+        if (!isset($arr[$name])) {
+            return false;
+        }
 
-        return $this->trackers;
+        return $arr[(string) $name];
     }
 
     /**
      * Returns an array of trackers with name/id pairs.
      *
-     * @param bool $forceUpdate to force the update of the trackers var
+     * @param  bool  $forceUpdate  to force the update of the trackers var
      *
      * @return array list of trackers (id => name)
      */
@@ -50,19 +51,18 @@ class Tracker extends AbstractApi
     }
 
     /**
-     * Get a tracket id given its name.
+     * List trackers.
      *
-     * @param string|int $name tracker name
+     * @see http://www.redmine.org/projects/redmine/wiki/Rest_Trackers#GET
      *
-     * @return int|false
+     * @param  array  $params  optional parameters to be passed to the api (offset, limit, ...)
+     *
+     * @return array list of trackers found
      */
-    public function getIdByName($name)
+    public function all(array $params = [])
     {
-        $arr = $this->listing();
-        if (!isset($arr[$name])) {
-            return false;
-        }
+        $this->trackers = $this->retrieveAll('/trackers.json', $params);
 
-        return $arr[(string) $name];
+        return $this->trackers;
     }
 }

@@ -68,52 +68,20 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the service provider.
+     * Register translations.
      *
      * @return void
      */
-    public function register()
+    public function registerTranslations()
     {
-        //Register Schedule service provider
-        $this->app->register('Modules\RedmineIntegration\Providers\ScheduleServiceProvider');
-        $this->app->register(RouteServiceProvider::class);
+        $langPath = resource_path('lang/modules/redmineintegration');
 
-        // TODO: What is this?
-
-//        $this->app->singleton(TaskIntegrationHelper::class, function ($app) {
-//            return new TaskIntegrationHelper();
-//        });
-//
-//        $this->app->singleton(TimeIntervalIntegrationHelper::class, function ($app) {
-//            return new TimeIntervalIntegrationHelper();
-//        });
-//
-//        $this->app->singleton(UserRepository::class, function ($app) {
-//            return new UserRepository();
-//        });
-//
-//        $this->app->singleton(ProjectRepository::class, function ($app) {
-//            return new ProjectRepository();
-//        });
-//
-//        $this->app->singleton(TaskRepository::class, function ($app) {
-//            return new TaskRepository();
-//        });
+        if (is_dir($langPath)) {
+            $this->loadTranslationsFrom($langPath, 'redmineintegration');
+        } else {
+            $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'redmineintegration');
+        }
     }
-
-    protected function registerCommands()
-    {
-        //Register synchronize redmine tasks command
-        $this->commands([
-            SynchronizeTasks::class,
-            SynchronizeStatuses::class,
-            SynchronizePriorities::class,
-            SynchronizeProjects::class,
-            SynchronizeUsers::class,
-            SynchronizeTime::class,
-        ]);
-    }
-
 
     /**
      * Register config.
@@ -151,22 +119,6 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register translations.
-     *
-     * @return void
-     */
-    public function registerTranslations()
-    {
-        $langPath = resource_path('lang/modules/redmineintegration');
-
-        if (is_dir($langPath)) {
-            $this->loadTranslationsFrom($langPath, 'redmineintegration');
-        } else {
-            $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'redmineintegration');
-        }
-    }
-
-    /**
      * Register an additional directory of factories.
      * @source https://github.com/sebastiaanluca/laravel-resource-flow/blob/develop/src/Modules/ModuleServiceProvider.php#L66
      */
@@ -175,6 +127,53 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         if (!app()->environment('production')) {
             app(Factory::class)->load(__DIR__.'/../Database/factories');
         }
+    }
+
+    protected function registerCommands()
+    {
+        //Register synchronize redmine tasks command
+        $this->commands([
+            SynchronizeTasks::class,
+            SynchronizeStatuses::class,
+            SynchronizePriorities::class,
+            SynchronizeProjects::class,
+            SynchronizeUsers::class,
+            SynchronizeTime::class,
+        ]);
+    }
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //Register Schedule service provider
+        $this->app->register('Modules\RedmineIntegration\Providers\ScheduleServiceProvider');
+        $this->app->register(RouteServiceProvider::class);
+
+        // TODO: What is this?
+
+//        $this->app->singleton(TaskIntegrationHelper::class, function ($app) {
+//            return new TaskIntegrationHelper();
+//        });
+//
+//        $this->app->singleton(TimeIntervalIntegrationHelper::class, function ($app) {
+//            return new TimeIntervalIntegrationHelper();
+//        });
+//
+//        $this->app->singleton(UserRepository::class, function ($app) {
+//            return new UserRepository();
+//        });
+//
+//        $this->app->singleton(ProjectRepository::class, function ($app) {
+//            return new ProjectRepository();
+//        });
+//
+//        $this->app->singleton(TaskRepository::class, function ($app) {
+//            return new TaskRepository();
+//        });
     }
 
     /**

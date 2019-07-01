@@ -2,6 +2,8 @@
 
 namespace Redmine\Tests\Unit\Api;
 
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Redmine\Api\Version;
 
 /**
@@ -9,7 +11,7 @@ use Redmine\Api\Version;
  *
  * @author     Malte Gerth <mail@malte-gerth.de>
  */
-class VersionTest extends \PHPUnit\Framework\TestCase
+class VersionTest extends TestCase
 {
     /**
      * Test all().
@@ -191,7 +193,7 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      * Test create().
      *
      * @covers ::create
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionWithEmptyParameters()
@@ -212,7 +214,7 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      * Test create().
      *
      * @covers ::create
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionWithMissingNameInParameters()
@@ -239,7 +241,7 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      *
      * @covers ::create
      * @covers ::validateStatus
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionWithInvalidStatus()
@@ -346,7 +348,7 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      *
      * @covers ::update
      * @covers ::validateStatus
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testUpdateThrowsExceptionWithInvalidStatus()
@@ -636,8 +638,8 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      * @dataProvider validSharingProvider
      * @test
      *
-     * @param string $sharingValue
-     * @param string $sharingXmlElement
+     * @param  string  $sharingValue
+     * @param  string  $sharingXmlElement
      */
     public function testCreateWithValidSharing($sharingValue, $sharingXmlElement)
     {
@@ -680,7 +682,7 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      * @dataProvider validEmptySharingProvider
      * @test
      *
-     * @param string $sharingValue
+     * @param  string  $sharingValue
      */
     public function testCreateWithValidEmptySharing($sharingValue)
     {
@@ -723,10 +725,10 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      * @covers            ::create
      * @covers            ::validateSharing
      * @dataProvider      invalidSharingProvider
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      *
-     * @param string $sharingValue
+     * @param  string  $sharingValue
      */
     public function testCreateThrowsExceptionWithInvalidSharing($sharingValue)
     {
@@ -756,8 +758,8 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      * @dataProvider validSharingProvider
      * @test
      *
-     * @param string $sharingValue
-     * @param string $sharingXmlElement
+     * @param  string  $sharingValue
+     * @param  string  $sharingXmlElement
      */
     public function testUpdateWithValidSharing($sharingValue, $sharingXmlElement)
     {
@@ -800,7 +802,7 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      * @dataProvider validEmptySharingProvider
      * @test
      *
-     * @param string $sharingValue
+     * @param  string  $sharingValue
      */
     public function testUpdateWithValidEmptySharing($sharingValue)
     {
@@ -843,10 +845,10 @@ class VersionTest extends \PHPUnit\Framework\TestCase
      * @covers            ::update
      * @covers            ::validateSharing
      * @dataProvider      invalidSharingProvider
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      *
-     * @param string $sharingValue
+     * @param  string  $sharingValue
      */
     public function testUpdateThrowsExceptionWithInvalidSharing($sharingValue)
     {

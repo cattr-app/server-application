@@ -2,6 +2,7 @@
 
 namespace Redmine\Tests\Unit\Api;
 
+use PHPUnit\Framework\TestCase;
 use Redmine\Api\IssueRelation;
 
 /**
@@ -9,7 +10,7 @@ use Redmine\Api\IssueRelation;
  *
  * @author     Malte Gerth <mail@malte-gerth.de>
  */
-class IssueRelationTest extends \PHPUnit\Framework\TestCase
+class IssueRelationTest extends TestCase
 {
     /**
      * Test all().
@@ -180,19 +181,19 @@ class IssueRelationTest extends \PHPUnit\Framework\TestCase
 
         // Create the used mock objects
         $client = $this->getMockBuilder('Redmine\Client')
-                       ->disableOriginalConstructor()
-                       ->getMock();
+            ->disableOriginalConstructor()
+            ->getMock();
         $client->expects($this->once())
-               ->method('post')
-               ->with(
-                   '/issues/1/relations.json',
-                   json_encode([
-                       'relation' => [
-                           'relation_type' => 'relates',
-                       ],
-                   ])
-               )
-               ->willReturn($postResponse);
+            ->method('post')
+            ->with(
+                '/issues/1/relations.json',
+                json_encode([
+                    'relation' => [
+                        'relation_type' => 'relates',
+                    ],
+                ])
+            )
+            ->willReturn($postResponse);
 
         // Create the object under test
         $api = new IssueRelation($client);

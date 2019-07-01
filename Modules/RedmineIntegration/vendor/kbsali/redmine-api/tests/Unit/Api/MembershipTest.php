@@ -2,6 +2,8 @@
 
 namespace Redmine\Tests\Unit\Api;
 
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Redmine\Api\Membership;
 
 /**
@@ -9,7 +11,7 @@ use Redmine\Api\Membership;
  *
  * @author     Malte Gerth <mail@malte-gerth.de>
  */
-class MembershipTest extends \PHPUnit\Framework\TestCase
+class MembershipTest extends TestCase
 {
     /**
      * Test all().
@@ -113,7 +115,7 @@ class MembershipTest extends \PHPUnit\Framework\TestCase
      * Test create().
      *
      * @covers ::create
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionWithEmptyParameters()
@@ -137,7 +139,7 @@ class MembershipTest extends \PHPUnit\Framework\TestCase
      * Test create().
      *
      * @covers ::create
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testCreateThrowsExceptionIfRoleIdsAreMissingInParameters()
@@ -248,7 +250,7 @@ class MembershipTest extends \PHPUnit\Framework\TestCase
      * Test update().
      *
      * @covers ::update
-     * @expectedException \Exception
+     * @expectedException Exception
      * @test
      */
     public function testUpdateThrowsExceptionIfRoleIdsAreMissingInParameters()

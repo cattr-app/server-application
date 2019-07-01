@@ -2,6 +2,7 @@
 
 namespace Redmine\Tests\Unit\Api;
 
+use PHPUnit\Framework\TestCase;
 use Redmine\Api\Attachment;
 
 /**
@@ -9,7 +10,7 @@ use Redmine\Api\Attachment;
  *
  * @author     Malte Gerth <mail@malte-gerth.de>
  */
-class AttachmentTest extends \PHPUnit\Framework\TestCase
+class AttachmentTest extends TestCase
 {
     /**
      * Test lastCallFailed().
@@ -18,8 +19,9 @@ class AttachmentTest extends \PHPUnit\Framework\TestCase
      * @covers       ::lastCallFailed
      * @dataProvider responseCodeProvider
      *
-     * @param int  $responseCode
-     * @param bool $hasFailed
+     * @param  int   $responseCode
+     * @param  bool  $hasFailed
+     *
      * @test
      */
     public function testLastCallFailedTrue($responseCode, $hasFailed)

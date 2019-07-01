@@ -2,9 +2,13 @@
 
 namespace Redmine\Tests\Unit;
 
+use DOMDocument;
+use Exception;
+use PHPUnit\Framework\TestCase;
 use Redmine\Tests\Fixtures\MockClient as TestClient;
+use SimpleXMLElement;
 
-class ProjectXmlTest extends \PHPUnit\Framework\TestCase
+class ProjectXmlTest extends TestCase
 {
     /**
      * @var TestClient
@@ -17,7 +21,7 @@ class ProjectXmlTest extends \PHPUnit\Framework\TestCase
     }
 
     /**
-     * @expectedException \Exception
+     * @expectedException Exception
      */
     public function testCreateBlank()
     {
@@ -60,6 +64,16 @@ class ProjectXmlTest extends \PHPUnit\Framework\TestCase
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
     }
 
+    private function formatXml($xml)
+    {
+        $dom = new DOMDocument('1.0');
+        $dom->preserveWhiteSpace = false;
+        $dom->formatOutput = true;
+        $dom->loadXML((new SimpleXMLElement($xml))->asXML());
+
+        return $dom->saveXML();
+    }
+
     public function testCreateComplexWithTrackerIds()
     {
         $api = $this->client->project;
@@ -97,15 +111,5 @@ class ProjectXmlTest extends \PHPUnit\Framework\TestCase
     <name>different name</name>
 </project>';
         $this->assertEquals($this->formatXml($xml), $this->formatXml($res['data']));
-    }
-
-    private function formatXml($xml)
-    {
-        $dom = new \DOMDocument('1.0');
-        $dom->preserveWhiteSpace = false;
-        $dom->formatOutput = true;
-        $dom->loadXML((new \SimpleXMLElement($xml))->asXML());
-
-        return $dom->saveXML();
     }
 }

@@ -1,29 +1,32 @@
 <?php
+
 namespace Modules\RedmineIntegration\Models;
 
-use Illuminate\Database\Eloquent\Model;
-use App\User;
 use App\Task;
 use App\TimeInterval;
+use App\User;
+use Illuminate\Database\Eloquent\Model;
 
 
 /**
  * Class TimeActivity
+ *
  * @package App\Models
  *
- * @property datetime $last_time_activity
- * @property int $user_id
- * @property int $time_interval_id
- * @property int $task_id
+ * @property datetime     $last_time_activity
+ * @property int          $user_id
+ * @property int          $time_interval_id
+ * @property int          $task_id
  *
- * @property User $user
- * @property Task $task
+ * @property User         $user
+ * @property Task         $task
  * @property TimeInterval $timeInterval
  */
 class TimeActivity extends Model
 {
     /**
      * table name from database
+     *
      * @var string
      */
     protected $table = 'user_time_activity';
