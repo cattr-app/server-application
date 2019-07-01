@@ -49,7 +49,8 @@ class UserRepository
     /**
      * Returns user's redmine url saved in properties table
      *
-     * @param $userId User's id in our system
+     * @param $userId  User's id in our system
+     *
      * @return string Redmine URL
      */
     public function getUserRedmineUrl(int $userId): string
@@ -64,7 +65,8 @@ class UserRepository
     /**
      * Returns user's redmine api key saved in properties table
      *
-     * @param $userId User's id in our system
+     * @param $userId  User's id in our system
+     *
      * @return string Redmine URL
      */
     public function getUserRedmineApiKey(int $userId): string
@@ -79,7 +81,8 @@ class UserRepository
     /**
      * Returns user's redmine statuses saved in properties table
      *
-     * @param $userId User's id in our system
+     * @param $userId  User's id in our system
+     *
      * @return array Redmine statuses
      */
     public function getUserRedmineStatuses(int $userId): array
@@ -94,7 +97,8 @@ class UserRepository
     /**
      * Returns user's redmine priorities saved in properties table
      *
-     * @param $userId User's id in our system
+     * @param $userId  User's id in our system
+     *
      * @return array Redmine priorities
      */
     public function getUserRedminePriorities(int $userId): array
@@ -109,28 +113,30 @@ class UserRepository
     /**
      * Returns user's redmine tasks
      *
-     * @param int $userId
+     * @param  int  $userId
+     *
      * @return Collection
      */
     public function getUserRedmineTasks(int $userId): Collection
     {
-        return DB::table(Property::getTableName() . ' as prop')
+        return DB::table(Property::getTableName().' as prop')
             ->select('prop.value as redmine_id', 'prop.entity_id as task_id')
-            ->join(Task::getTableName() . ' as t', 'prop.entity_id', '=', 't.id')
+            ->join(Task::getTableName().' as t', 'prop.entity_id', '=', 't.id')
             ->where('prop.entity_type', '=', Property::TASK_CODE)
             ->where('prop.name', '=', 'REDMINE_ID')
-            ->where('t.user_id', '=', (int)$userId)->get();
+            ->where('t.user_id', '=', (int) $userId)->get();
     }
 
     /**
      * Returns user's new (unsynchronized) tasks
      *
-     * @param int $userId
+     * @param  int  $userId
+     *
      * @return Collection
      */
     public function getUserNewRedmineTasks(int $userId): Collection
     {
-        return DB::table(Property::getTableName() . ' as prop')
+        return DB::table(Property::getTableName().' as prop')
             ->select(
                 't.id',
                 't.project_id',
@@ -139,11 +145,11 @@ class UserRepository
                 't.user_id',
                 't.assigned_by',
                 't.priority_id'
-            )->join(Task::getTableName() . ' as t', 'prop.entity_id', '=', 't.id')
+            )->join(Task::getTableName().' as t', 'prop.entity_id', '=', 't.id')
             ->where('prop.entity_type', '=', Property::TASK_CODE)
             ->where('prop.name', '=', 'NEW')
             ->where('prop.value', '=', '1')
-            ->where('t.user_id', '=', (int)$userId)->get();
+            ->where('t.user_id', '=', (int) $userId)->get();
     }
 
     /**
@@ -151,27 +157,27 @@ class UserRepository
      *
      * Adds a specific row to properties table
      *
-     * @param int $userId
+     * @param  int  $userId
      */
     public function markAsNew(int $userId)
     {
         $query = Property::where([
-            'entity_id'   => $userId,
+            'entity_id' => $userId,
             'entity_type' => Property::USER_CODE,
-            'name'        => 'NEW',
+            'name' => 'NEW',
         ]);
 
 
         if ($query->exists()) {
             $query->update([
-                'value'       => 1
+                'value' => 1
             ]);
         } else {
             Property::create([
-                'entity_id'   => $userId,
+                'entity_id' => $userId,
                 'entity_type' => Property::USER_CODE,
-                'name'        => 'NEW',
-                'value'       => 1
+                'name' => 'NEW',
+                'value' => 1
             ]);
         }
 
@@ -182,7 +188,7 @@ class UserRepository
      *
      * Adds a specific row to properties table
      *
-     * @param int $userId
+     * @param  int  $userId
      */
     public function markAsOld(int $userId)
     {
@@ -194,7 +200,9 @@ class UserRepository
 
     /**
      * Returns redmine id for current user
-     * @param int $userId
+     *
+     * @param  int  $userId
+     *
      * @return string
      */
     public function getUserRedmineId(int $userId): string
@@ -209,16 +217,16 @@ class UserRepository
     /**
      * Set redmine id for user
      *
-     * @param int $userId User local id
-     * @param int $userRedmineId User redmine id
+     * @param  int  $userId         User local id
+     * @param  int  $userRedmineId  User redmine id
      */
     public function setRedmineId(int $userId, int $userRedmineId)
     {
         Property::create([
-            'entity_id'   => $userId,
+            'entity_id' => $userId,
             'entity_type' => Property::USER_CODE,
-            'name'        => 'REDMINE_ID',
-            'value'       => $userRedmineId
+            'name' => 'REDMINE_ID',
+            'value' => $userRedmineId
         ]);
     }
 
@@ -244,11 +252,11 @@ class UserRepository
     public function getSendTimeUsers()
     {
         return User::query()
-        ->whereHas('properties', function ($propertyQuery) {
-            $propertyQuery->where('name', '=', UserRepository::TIME_SEND_PROPERTY);
-            $propertyQuery->where('value', '=', '1');
-        })
-        ->get();
+            ->whereHas('properties', function ($propertyQuery) {
+                $propertyQuery->where('name', '=', UserRepository::TIME_SEND_PROPERTY);
+                $propertyQuery->where('value', '=', '1');
+            })
+            ->get();
     }
 
 
@@ -256,15 +264,16 @@ class UserRepository
      * Check is user has turned on redmine time sending
      *
      * @param $userId integer
+     *
      * @return boolean
      */
     public function isUserSendTime($userId)
     {
         return Property::where([
-            'entity_id'     => $userId,
-            'entity_type'   => Property::USER_CODE,
-            'name'          => UserRepository::TIME_SEND_PROPERTY,
-            'value'         => '1',
+            'entity_id' => $userId,
+            'entity_type' => Property::USER_CODE,
+            'name' => UserRepository::TIME_SEND_PROPERTY,
+            'value' => '1',
         ])->exists();
     }
 
@@ -272,7 +281,7 @@ class UserRepository
     /**
      * set user turned on (or not) redmine time sending
      *
-     * @param $userId integer
+     * @param $userId  integer
      * @param $enabled boolean
      */
     public function setUserSendTime($userId, $enabled)
@@ -282,9 +291,9 @@ class UserRepository
 
 
         $query = Property::where([
-            'entity_id'     => $userId,
-            'entity_type'   => Property::USER_CODE,
-            'name'          => UserRepository::TIME_SEND_PROPERTY,
+            'entity_id' => $userId,
+            'entity_type' => Property::USER_CODE,
+            'name' => UserRepository::TIME_SEND_PROPERTY,
         ]);
 
 
@@ -294,17 +303,19 @@ class UserRepository
             ]);
         } else {
             Property::create([
-                'entity_id'   => $userId,
+                'entity_id' => $userId,
                 'entity_type' => Property::USER_CODE,
-                'name'        => UserRepository::TIME_SEND_PROPERTY,
-                'value'       => $enabled
+                'name' => UserRepository::TIME_SEND_PROPERTY,
+                'value' => $enabled
             ]);
         }
     }
 
     /**
      * get active task status id from userId
-     * @param string $userId
+     *
+     * @param  string  $userId
+     *
      * @return string
      */
     public function getActiveStatusId($userId)
@@ -314,8 +325,10 @@ class UserRepository
 
     /**
      * set active task status id for userId
-     * @param string $userId
-     * @param string $status_id
+     *
+     * @param  string  $userId
+     * @param  string  $status_id
+     *
      * @return string
      */
     public function setActiveStatusId($userId, $status_id)
@@ -325,7 +338,9 @@ class UserRepository
 
     /**
      * get deactive task status id from userId
-     * @param string $userId
+     *
+     * @param  string  $userId
+     *
      * @return string
      */
     public function getDeactiveStatusId($userId)
@@ -335,8 +350,10 @@ class UserRepository
 
     /**
      * set deactive task status id for userId
-     * @param string $userId
-     * @param string $status_id
+     *
+     * @param  string  $userId
+     * @param  string  $status_id
+     *
      * @return string
      */
     public function setDeactiveStatusId($userId, $status_id)
@@ -346,7 +363,9 @@ class UserRepository
 
     /**
      * get user task status ids which will be set as active after task syncronisation
-     * @param string $userId
+     *
+     * @param  string  $userId
+     *
      * @return string
      */
     public function getActivateStatuses($userId)
@@ -358,12 +377,12 @@ class UserRepository
     /**
      * set user task status ids which will be set as active after task syncronisation
      *
-     * @param string $userId
-     * @param array $statuses
+     * @param  string  $userId
+     * @param  array   $statuses
      *
      * @return string
      */
-    public function setActivateStatuses($userId,array $statuses)
+    public function setActivateStatuses($userId, array $statuses)
     {
         if (empty($statuses)) {
             $jsonStatuses = '';
@@ -375,7 +394,9 @@ class UserRepository
 
     /**
      * get user task status ids which will be set as inactive after task syncronisation
-     * @param string $userId
+     *
+     * @param  string  $userId
+     *
      * @return string
      */
     public function getDeactivateStatuses($userId)
@@ -387,12 +408,12 @@ class UserRepository
     /**
      * set user task status ids which will be set as inactive after task syncronisation
      *
-     * @param string $userId
-     * @param array $statuses
+     * @param  string  $userId
+     * @param  array   $statuses
      *
      * @return string
      */
-    public function setDeactivateStatuses($userId,array $statuses)
+    public function setDeactivateStatuses($userId, array $statuses)
     {
         if (empty($statuses)) {
             $jsonStatuses = '';
@@ -405,7 +426,7 @@ class UserRepository
     /**
      * get timeout for last task activity for user $userId
      *
-     * @param string $userId
+     * @param  string  $userId
      *
      * @return string
      */
@@ -417,8 +438,8 @@ class UserRepository
     /**
      * set timeout $timeout for last task activity for user $userId
      *
-     * @param string $userId
-     * @param int $timeout
+     * @param  string  $userId
+     * @param  int     $timeout
      */
     public function setOnlineTimeout($userId, $timeout)
     {
@@ -427,17 +448,19 @@ class UserRepository
 
     /**
      * get timeout for last task activity for user $userId
-     * @param string $userId
-     * @param string $propertyName
-     * @param string $retOnUnset optional
+     *
+     * @param  string  $userId
+     * @param  string  $propertyName
+     * @param  string  $retOnUnset  optional
+     *
      * @return string
      */
     protected function getProperty($userId, string $propertyName, string $retOnUnset = '')
     {
         $property = Property::where([
-            'entity_id'     => $userId,
-            'entity_type'   => Property::USER_CODE,
-            'name'          => $propertyName,
+            'entity_id' => $userId,
+            'entity_type' => Property::USER_CODE,
+            'name' => $propertyName,
         ])->first();
 
         if ($property) {
@@ -449,16 +472,17 @@ class UserRepository
 
     /**
      * set property for userId
-     * @param string $userId
-     * @param string $propertyName
-     * @param mixed $value
+     *
+     * @param  string  $userId
+     * @param  string  $propertyName
+     * @param  mixed   $value
      */
     protected function setProperty($userId, string $propertyName, $value)
     {
         $params = [
-            'entity_id'     => $userId,
-            'entity_type'   => Property::USER_CODE,
-            'name'          => $propertyName,
+            'entity_id' => $userId,
+            'entity_type' => Property::USER_CODE,
+            'name' => $propertyName,
         ];
 
         $property = Property::where($params)->first();

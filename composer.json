@@ -27,8 +27,9 @@
     "webpatser/laravel-uuid": "3.0.2"
   },
   "require-dev": {
+    "doctrine/dbal": "2.9.2",
     "phpunit/phpunit": "7.5.11",
-    "doctrine/dbal": "2.9.2"
+    "sempro/phpunit-pretty-print": "^1.0"
   },
   "autoload": {
     "classmap": [

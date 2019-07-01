@@ -12,17 +12,30 @@ use Modules\RedmineIntegration\Helpers\ProjectIntegrationHelper;
  */
 class ProjectRedmineController extends AbstractRedmineController
 {
+
+    /**
+     * @var ProjectIntegrationHelper
+     */
+    protected $projectIntegrationHelper;
+
+    /**
+     * ProjectRedmineController constructor.
+     * @param  ProjectIntegrationHelper  $projectIntegrationHelper
+     */
+    public function __construct(ProjectIntegrationHelper $projectIntegrationHelper)
+    {
+        $this->projectIntegrationHelper = $projectIntegrationHelper;
+    }
+
     /**
      * Synchronize Redmine projects with AmazingTime projects
      *
-     * @param ProjectIntegrationHelper $projectIntegrationHelper
      * @return JsonResponse
      */
-    public function synchronize(ProjectIntegrationHelper $projectIntegrationHelper): JsonResponse
+    public function synchronize(): JsonResponse
     {
         return response()->json(
-            $projectIntegrationHelper->synchronizeUserProjects(auth()->user()->id),
-            200
+            $this->projectIntegrationHelper->synchronizeUserProjects(auth()->id())
         );
     }
 }

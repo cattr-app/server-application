@@ -45,7 +45,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\EventFilter\EventFilterServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
+        // Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
 
         Modules\EventListener\Providers\EventListenerServiceProvider::class,
         Modules\RedmineIntegration\Providers\RedmineIntegrationServiceProvider::class,

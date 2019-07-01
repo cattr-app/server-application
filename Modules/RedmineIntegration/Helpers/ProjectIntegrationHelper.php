@@ -18,8 +18,7 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
         foreach ($users as $user) {
             try {
                 $this->synchronizeUserProjects($user->id);
-            }
-            catch (\Exception $e) {
+            } catch (\Exception $e) {
             }
         }
     }
@@ -27,7 +26,8 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
     /**
      * Synchronize projects for current user
      *
-     * @param int $userId User's id in our system
+     * @param  int  $userId  User's id in our system
+     *
      * @return array Associative array ['added_projects' => count_of_added_projects]
      */
     public function synchronizeUserProjects(int $userId): array
@@ -55,8 +55,8 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
             }
 
             $projectInfo = [
-                'company_id'  => 4,
-                'name'        => $projectFromRedmine['name'],
+                'company_id' => 4,
+                'name' => $projectFromRedmine['name'],
                 'description' => $projectFromRedmine['description']
             ];
 
@@ -64,10 +64,10 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
             $addedProjectsCounter++;
 
             Property::create([
-                'entity_id'   => $project->id,
+                'entity_id' => $project->id,
                 'entity_type' => Property::PROJECT_CODE,
-                'name'        => 'REDMINE_ID',
-                'value'       => $projectFromRedmine['id']
+                'name' => 'REDMINE_ID',
+                'value' => $projectFromRedmine['id']
             ]);
         }
 

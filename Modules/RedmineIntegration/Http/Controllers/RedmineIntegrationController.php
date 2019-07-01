@@ -6,6 +6,7 @@ use Illuminate\Http\JsonResponse;
 use Modules\RedmineIntegration\Helpers\ProjectIntegrationHelper;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Illuminate\Support\Facades\Auth;
+use Modules\RedmineIntegration\Models\RedmineClient;
 
 /**
  * Class RedmineIntegrationController
@@ -19,7 +20,6 @@ class RedmineIntegrationController extends AbstractRedmineController
      * @var UserRepository
      */
     protected $userRepo;
-
 
     /**
      * Create a new instance.

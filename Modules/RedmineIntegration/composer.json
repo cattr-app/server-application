@@ -23,6 +23,7 @@
         }
     },
     "require": {
-        "kbsali/redmine-api": "^1.5"
+        "kbsali/redmine-api": "*",
+        "wikimedia/composer-merge-plugin": "^1.4"
     }
 }

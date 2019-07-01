@@ -8,8 +8,21 @@ use DateTime;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 
+/**
+ * Class TimeIntervalIntegrationHelper
+ *
+ * @package Modules\RedmineIntegration\Helpers
+ */
 class TimeIntervalIntegrationHelper extends AbstractIntegrationHelper
 {
+    /**
+     * @param                     $userId
+     * @param                     $timeIntervalId
+     * @param  TaskRepository     $taskRepository
+     * @param  ProjectRepository  $projectRepository
+     *
+     * @throws \Exception
+     */
     public function createInterval(
         $userId,
         $timeIntervalId,
@@ -29,12 +42,12 @@ class TimeIntervalIntegrationHelper extends AbstractIntegrationHelper
         $diffHours = ($diff->days * 24) + $diff->h + ($diff->i / 60) + ($diff->s / 3600);
 
         $timeIntervalInfo = [
-            'issue_id'    => $taskRepository->getRedmineTaskId($task->id),
-            'project_id'  => $projectRepository->getRedmineProjectId($task->project_id),
-            'spent_on'    => $startDateTime->format('Y-m-d'),
-            'hours'       => round($diffHours, 2),
+            'issue_id' => $taskRepository->getRedmineTaskId($task->id),
+            'project_id' => $projectRepository->getRedmineProjectId($task->project_id),
+            'spent_on' => $startDateTime->format('Y-m-d'),
+            'hours' => round($diffHours, 2),
             'activity_id' => null,
-            'comments'    => "Amazing Time Entry",
+            'comments' => "Amazing Time Entry",
         ];
 
         $client->time_entry->create($timeIntervalInfo);

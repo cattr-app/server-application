@@ -51,7 +51,7 @@ class RedmineSettingsController extends AbstractRedmineController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process('answer.error.redmine.settings.update', [
-                    'error' => 'Validation fail',
+                    'error' => 'Validation failed',
                 ]),
                 400
             );

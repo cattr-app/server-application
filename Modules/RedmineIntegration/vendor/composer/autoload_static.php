@@ -7,6 +7,10 @@ namespace Composer\Autoload;
 class ComposerStaticInit05884d0b9b3753afa5b9af9ae3f732eb
 {
     public static $prefixLengthsPsr4 = array (
+        'W' => 
+        array (
+            'Wikimedia\\Composer\\' => 19,
+        ),
         'R' => 
         array (
             'Redmine\\' => 8,
@@ -18,6 +22,10 @@ class ComposerStaticInit05884d0b9b3753afa5b9af9ae3f732eb
     );
 
     public static $prefixDirsPsr4 = array (
+        'Wikimedia\\Composer\\' => 
+        array (
+            0 => __DIR__ . '/..' . '/wikimedia/composer-merge-plugin/src',
+        ),
         'Redmine\\' => 
         array (
             0 => __DIR__ . '/..' . '/kbsali/redmine-api/lib/Redmine',
