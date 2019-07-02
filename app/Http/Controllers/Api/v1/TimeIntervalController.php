@@ -58,16 +58,22 @@ class TimeIntervalController extends ItemController
      * @param string $start_at
      * @return array
      */
-    public function getValidationRules(int $user_id = 0, string $start_at = ''): array
+    public function getValidationRules(): array
     {
-        $user = User::find($user_id);
-
-
-        $end_at_rules = [
-            'date',
-            'required',
+        return [
+            'task_id'  => 'exists:tasks,id|required',
+            'user_id'  => 'exists:users,id|required',
+            'start_at' => 'date|required',
+            'end_at'   => 'date|required',
         ];
+    }
 
+    public function validateEndDate(array $intervalData): bool
+    {
+        $user_id = $intervalData['user_id'] ?? 0;
+        $start_at = $intervalData['start_at'] ?? '';
+        $user = User::find($user_id);
+        $end_at_rules = [];
         if ($user) {
             $timeOffset = $user->screenshots_interval /* min */ * 60 /* sec */;
             $beforeTimestamp = strtotime($start_at) + $timeOffset;
@@ -76,12 +82,15 @@ class TimeIntervalController extends ItemController
             $end_at_rules[] = new BetweenDate($start_at, $beforeDate);
         }
 
-        return [
-            'task_id'  => 'exists:tasks,id|required',
-            'user_id'  => 'exists:users,id|required',
-            'start_at' => 'date|required',
-            'end_at'   => $end_at_rules,
-        ];
+        $validator = Validator::make(
+            $intervalData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.create'),
+                ['end_at' => $end_at_rules]
+            )
+        );
+
+        return !$validator->fails();
     }
 
     /**
@@ -144,10 +153,8 @@ class TimeIntervalController extends ItemController
             $intervalData,
             Filter::process(
                 $this->getEventUniqueName('validation.item.create'),
-                $this->getValidationRules(
-                    $intervalData['user_id'] ?? 0,
-                    $intervalData['start_at'] ?? ''
-                ))
+                $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
@@ -179,7 +186,17 @@ class TimeIntervalController extends ItemController
             );
         }
 
-        $timeInterval = Filter::process($this->getEventUniqueName('item.create'), TimeInterval::create($intervalData));
+        $timeInterval = Filter::process($this->getEventUniqueName('item.create'), new TimeInterval($intervalData));
+        if (!$this->validateEndDate($intervalData)) {
+            // If end date is not valid, return success without saving
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                    'interval' => $timeInterval,
+                ]),
+                200
+            );
+        }
+        $timeInterval->save();
 
         //create screenshot
         if (isset($request->screenshot)) {
@@ -364,7 +381,7 @@ class TimeIntervalController extends ItemController
             $request->all()
         );
 
-        $validationRules = $this->getValidationRules($requestData['user_id'], $requestData['start_at']);
+        $validationRules = $this->getValidationRules();
         $validationRules['id'] = ['required'];
 
         $validator = Validator::make(
@@ -423,6 +440,15 @@ class TimeIntervalController extends ItemController
         }
 
         $item->fill($this->filterRequestData($requestData));
+        if (!$this->validateEndDate($requestData)) {
+            // If end date is not valid, return success without saving
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                    'res' => $item,
+                ]),
+                200
+            );
+        }
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
         $item->save();
 
