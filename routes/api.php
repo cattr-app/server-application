@@ -120,6 +120,7 @@ Route::group([
     $router->any('/screenshots/count', 'Api\v1\ScreenshotController@count');
     $router->any('/screenshots/dashboard', 'Api\v1\ScreenshotController@dashboard');
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
+    $router->post('/screenshots/bulk-create', 'Api\v1\ScreenshotController@bulkCreate');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
     $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');
     $router->post('/screenshots/remove', 'Api\v1\ScreenshotController@destroy');
