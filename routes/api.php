@@ -97,6 +97,11 @@ Route::group([
     $router->post('/tasks/remove', 'Api\v1\TaskController@destroy');
     $router->any('/tasks/activity', 'Api\v1\TaskController@activity');
 
+    $router->any('/task-comment/list', 'Api\v1\TaskCommentController@index');
+    $router->post('/task-comment/create', 'Api\v1\TaskCommentController@create');
+    $router->any('/task-comment/show', 'Api\v1\TaskCommentController@show');
+    $router->post('/task-comment/remove', 'Api\v1\TaskCommentController@destroy');
+
     //Users routes
     $router->any('/users/list', 'Api\v1\UserController@index');
     $router->any('/users/count', 'Api\v1\UserController@count');

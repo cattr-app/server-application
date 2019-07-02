@@ -89,6 +89,13 @@ class Rule extends AbstractModel
                 'remove' => __('Task remove'),
                 'full_access' => __('Tasks full access'),
             ],
+            'task-comment' => [
+                'list' => __('Task comments list'),
+                'create' => __('Task comment create'),
+                'show' => __('Task comment show'),
+                'remove' => __('Task comment remove'),
+                'full_access' => __('Tasks comments full access'),
+            ],
             'roles' => [
                 'list' => __('Role list'),
                 'create' => __('Role create'),
