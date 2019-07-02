@@ -129,6 +129,7 @@ Route::group([
     $router->any('/time-intervals/list', 'Api\v1\TimeIntervalController@index');
     $router->any('/time-intervals/count', 'Api\v1\TimeIntervalController@count');
     $router->post('/time-intervals/create', 'Api\v1\TimeIntervalController@create');
+    $router->post('/time-intervals/bulk-create', 'Api\v1\TimeIntervalController@bulkCreate');
     $router->post('/time-intervals/edit', 'Api\v1\TimeIntervalController@edit');
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
