@@ -18,4 +18,9 @@ Route::middleware('auth:api')->group(function (Router $router) {
     // Redmine Settings routes
     $router->patch('/settings', 'RedmineSettingsController@updateSettings')->name('settings.update');
     $router->get('/settings', 'RedmineSettingsController@getSettings')->name('settings.get');
+
+    $router->group(['prefix' => '/settings/data', 'as' => 'settings.data.'], function () use ($router) {
+        $router->get('internal-priorities',
+            'RedmineSettingsController@getInternalPriorities')->name('internal-priorities');
+    });
 });
