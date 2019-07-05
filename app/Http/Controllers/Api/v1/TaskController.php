@@ -37,10 +37,10 @@ class TaskController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'project_id'  => 'exists:projects,id|required',
-            'task_name'   => 'required',
-            'active'      => 'required',
-            'user_id'     => 'exists:users,id|required',
+            'project_id' => 'exists:projects,id|required',
+            'task_name' => 'required',
+            'active' => 'required',
+            'user_id' => 'exists:users,id|required',
             'priority_id' => 'exists:priorities,id|required',
         ];
     }
@@ -485,43 +485,45 @@ class TaskController extends ItemController
      */
     protected function getQuery($withRelations = true): Builder
     {
+        $user = Auth::user();
+        $user_id = $user->id;
         $query = parent::getQuery($withRelations);
-        $full_access = Role::can(Auth::user(), 'tasks', 'full_access');
-        $relations_access = Role::can(Auth::user(), 'users', 'relations');
-        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
+        $full_access = Role::can($user, 'tasks', 'full_access');
+        $relations_access = Role::can($user, 'users', 'relations');
+        $project_relations_access = Role::can($user, 'projects', 'relations');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
             return $query;
         }
 
-        $user_tasks_id = collect(Auth::user()->tasks)->pluck('id');
-        $tasks_id = collect([$user_tasks_id])->collapse();
+        $query->where(static function (Builder $query) use ($user_id, $relations_access, $project_relations_access, $action_method) {
+            /** edit and remove only for directly related users's project's task */
+            if ($action_method === 'edit' || $action_method === 'remove') {
+                $query->whereHas('user', static function (Builder $query) use ($user_id) {
+                    $query->where('id', $user_id)->select('id');
+                });
+            } else {
+                $query->when(!$project_relations_access, static function (Builder $query) use ($user_id, $project_relations_access) {
+                    $query->whereHas('user', static function (Builder $query) use ($user_id) {
+                        $query->where('id', $user_id)->select('id');
+                    });
+                });
 
-        if ($project_relations_access) {
-            $attached_task_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
-                return collect($project->tasks)->pluck('id');
-            });
-            $tasks_id = collect([$attached_task_id_to_project])->collapse();
-        }
+                $query->when($project_relations_access, static function (Builder $query) use ($user_id) {
+                    $query->orWhereHas('project.users', static function (Builder $query) use ($user_id) {
+                        $query->where('id', $user_id)->select('id');
+                    });
+                });
 
-        if ($relations_access) {
-            $attached_tasks_id_to_users = collect(Auth::user()->attached_users)->flatMap(function($user) {
-                return collect($user->tasks)->pluck('id');
-            });
-            $tasks_id = collect([$tasks_id, $attached_tasks_id_to_users])->collapse()->unique();
-        }
+                $query->when($relations_access, static function (Builder $query) use ($user_id, $project_relations_access) {
+                    $query->orWhereHas('user.attached_to', static function (Builder $query) use ($user_id) {
+                        $query->where('id', $user_id)->select('id');
+                    });
+                });
+            }
+        });
 
-        /** edit and remove only for directly related users's project's task */
-        if ($action_method === 'edit' || $action_method === 'remove') {
-            $attached_projects_id = collect(Auth::user()->projects)->pluck('id');
-            $user_project_tasks = collect(Auth::user()->tasks)->filter(function ($val, $key) use($attached_projects_id) {
-               return collect($attached_projects_id)->containsStrict($val['project_id']);
-            });
-            $tasks_id = collect($user_project_tasks)->pluck('id');
-        }
-
-        $query->whereIn('tasks.id', $tasks_id);
         return $query;
     }
 
