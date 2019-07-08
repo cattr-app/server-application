@@ -3,7 +3,6 @@
 namespace Modules\RedmineIntegration\Console;
 
 use Illuminate\Console\Command;
-use Log;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Models\RedmineClient;
 use Redmine;
@@ -37,7 +36,7 @@ class SynchronizeUsers extends Command
     /**
      * Create a new command instance.
      *
-     * @param UserRepository $userRepo
+     * @param  UserRepository  $userRepo
      */
     public function __construct(UserRepository $userRepo)
     {

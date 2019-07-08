@@ -37,7 +37,6 @@ Route::group([
 });
 
 Route::group([
-    'middleware' => 'api',
     'prefix' => 'auth',
 ], function (Router $router) {
     $router->any('ping', 'AuthController@ping');

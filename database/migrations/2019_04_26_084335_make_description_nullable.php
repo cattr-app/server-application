@@ -25,7 +25,7 @@ class MakeDescriptionNullable extends Migration
      */
     public function down()
     {
-        Schema::table('screenshots', function (Blueprint $table) {
+        Schema::table('tasks', function (Blueprint $table) {
             $table->text('description')->nullable(false)->change();
         });
     }

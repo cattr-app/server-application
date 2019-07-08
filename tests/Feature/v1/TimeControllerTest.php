@@ -23,10 +23,10 @@ class TimeControllerTest extends TestCase
         /**
          * Support GET and POST requests
          */
-        $getResponse = $this->getJson("/api/v1/time/project?project_id=1", $headers);
+        $getResponse = $this->getJson("/v1/time/project?project_id=1", $headers);
         $getResponse->assertStatus(200);
 
-        $postResponse = $this->postJson("/api/v1/time/project", $data, $headers);
+        $postResponse = $this->postJson("/v1/time/project", $data, $headers);
         $postResponse->assertStatus(200);
     }
 
@@ -43,10 +43,10 @@ class TimeControllerTest extends TestCase
         /**
          * Support GET and POST requests
          */
-        $getResponse = $this->getJson("/api/v1/time/task?task_id=1", $headers);
+        $getResponse = $this->getJson("/v1/time/task?task_id=1", $headers);
         $getResponse->assertStatus(200);
 
-        $postResponse = $this->postJson("/api/v1/time/task", $data, $headers);
+        $postResponse = $this->postJson("/v1/time/task", $data, $headers);
         $postResponse->assertStatus(200);
     }
 
@@ -64,10 +64,10 @@ class TimeControllerTest extends TestCase
         /**
          * Support GET and POST requests
          */
-        $getResponse = $this->getJson("/api/v1/time/task-user?task_id=1&user_id=1", $headers);
+        $getResponse = $this->getJson("/v1/time/task-user?task_id=1&user_id=1", $headers);
         $getResponse->assertStatus(200);
 
-        $postResponse = $this->postJson("/api/v1/time/task-user", $data, $headers);
+        $postResponse = $this->postJson("/v1/time/task-user", $data, $headers);
         $postResponse->assertStatus(200);
     }
 
@@ -80,10 +80,10 @@ class TimeControllerTest extends TestCase
         /**
          * Support GET and POST requests
          */
-        $getResponse = $this->getJson("/api/v1/time/tasks", $headers);
+        $getResponse = $this->getJson("/v1/time/tasks", $headers);
         $getResponse->assertStatus(200);
 
-        $postResponse = $this->postJson("/api/v1/time/tasks", [], $headers);
+        $postResponse = $this->postJson("/v1/time/tasks", [], $headers);
         $postResponse->assertStatus(200);
     }
 
@@ -96,10 +96,10 @@ class TimeControllerTest extends TestCase
         /**
          * Support GET and POST requests
          */
-        $getResponse = $this->getJson("/api/v1/time/total", $headers);
+        $getResponse = $this->getJson("/v1/time/total", $headers);
         $getResponse->assertStatus(200);
 
-        $postResponse = $this->postJson("/api/v1/time/total", [], $headers);
+        $postResponse = $this->postJson("/v1/time/total", [], $headers);
         $postResponse->assertStatus(200);
     }
 

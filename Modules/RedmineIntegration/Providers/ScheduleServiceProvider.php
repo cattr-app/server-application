@@ -2,11 +2,24 @@
 
 namespace Modules\RedmineIntegration\Providers;
 
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Console\Scheduling\Schedule;
+use Illuminate\Support\ServiceProvider;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
+    const COMMAND_LIST = [
+        'users' => '*/15 * * * *',
+        'statuses' => '*/15 * * * *',
+        'priorities' => '*/15 * * * *',
+        'projects' => '*/15 * * * *',
+        'tasks' => '*/15 * * * *',
+        'time' => '0 * * * *'
+    ];
+    const COMMAND_PREFIX = 'redmine-integration';
+    /**
+     * @var Schedule
+     */
+    protected $schedule;
     /**
      * Indicates if loading of the provider is deferred.
      *
@@ -14,17 +27,38 @@ class ScheduleServiceProvider extends ServiceProvider
      */
     protected $defer = false;
 
+    /**
+     * ScheduleServiceProvider constructor.
+     *
+     * @param $app
+     */
+    public function __construct($app)
+    {
+        parent::__construct($app);
+
+    }
+
+
     public function boot()
     {
+        $this->schedule = $this->app->make(Schedule::class);
         $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->command('redmine-synchronize:users')->cron('*/15 * * * *')->withoutOverlapping();
-            $schedule->command('redmine-synchronize:statuses')->cron('*/15 * * * *')->withoutOverlapping();
-            $schedule->command('redmine-synchronize:priorities')->cron('*/15 * * * *')->withoutOverlapping();
-            $schedule->command('redmine-synchronize:projects')->cron('*/15 * * * *')->withoutOverlapping();
-            $schedule->command('redmine-synchronize:tasks')->cron('*/15 * * * *')->withoutOverlapping();
-            $schedule->command('redmine-synchronize:time')->cron('0 * * * *')->withoutOverlapping();
+            foreach (self::COMMAND_LIST as $command => $cron) {
+                $this->registerScheduleCommand(self::COMMAND_PREFIX.':'.$command, $cron);
+            }
         });
+    }
+
+    /**
+     * @param  string  $command
+     * @param  string  $cron
+     *
+     * @return $this
+     */
+    protected function registerScheduleCommand(string $command, string $cron)
+    {
+        $this->schedule->command($command)->cron($cron)->withoutOverlapping();
+        return $this;
     }
 
     /**

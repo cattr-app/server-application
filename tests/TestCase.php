@@ -36,7 +36,7 @@ abstract class TestCase extends BaseTestCase
             'password'  => 'admin'
         ];
 
-        $response = $this->postJson('/api/auth/login', $auth);
+        $response = $this->postJson('/auth/login', $auth);
 
         return $response->json('access_token');
     }

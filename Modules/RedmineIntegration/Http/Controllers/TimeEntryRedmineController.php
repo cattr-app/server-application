@@ -17,7 +17,7 @@ class TimeEntryRedmineController extends AbstractRedmineController
      *
      * Upload time interval with id == $timeIntercalId to Redmine by API
      *
-     * @param Request $request
+     * @param  Request  $request
      */
     public function create(Request $request)
     {
@@ -29,7 +29,7 @@ class TimeEntryRedmineController extends AbstractRedmineController
                 'createInterval'
             ],
             [
-                'userId'          => auth()->user()->id,
+                'userId' => auth()->id(),
                 'timeIntervalId' => $request->time_interval_id
             ]
         );

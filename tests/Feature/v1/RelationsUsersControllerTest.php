@@ -38,7 +38,7 @@ class RelationsUsersControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/attached-users/bulk-create", $data, $headers);
+        $response = $this->postJson("/v1/attached-users/bulk-create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -76,9 +76,9 @@ class RelationsUsersControllerTest extends TestCase
             ]
         ];
 
-        $this->postJson("/api/v1/attached-users/bulk-create", $data, $headers);
+        $this->postJson("/v1/attached-users/bulk-create", $data, $headers);
 
-        $response = $this->postJson("/api/v1/attached-users/bulk-remove", $data, $headers);
+        $response = $this->postJson("/v1/attached-users/bulk-remove", $data, $headers);
 
         $response->assertJsonStructure($expectedFields);
         $response->assertJson($expectedJson);
@@ -109,7 +109,7 @@ class RelationsUsersControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/attached-users/create", $data, $headers);
+        $response = $this->postJson("/v1/attached-users/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -135,8 +135,8 @@ class RelationsUsersControllerTest extends TestCase
             "message" => "Item has been removed"
         ];
 
-        $this->postJson("/api/v1/attached-users/create", $data, $headers);
-        $response = $this->postJson("/api/v1/attached-users/remove", $data, $headers);
+        $this->postJson("/v1/attached-users/create", $data, $headers);
+        $response = $this->postJson("/v1/attached-users/remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -167,9 +167,9 @@ class RelationsUsersControllerTest extends TestCase
             ]
         ];
 
-        $this->postJson("/api/v1/attached-users/create", $createData, $headers);
+        $this->postJson("/v1/attached-users/create", $createData, $headers);
 
-        $response = $this->postJson("/api/v1/attached-users/list", [], $headers);
+        $response = $this->postJson("/v1/attached-users/list", [], $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);

@@ -2,10 +2,10 @@
 
 namespace Modules\RedmineIntegration\Http\Controllers;
 
-use Illuminate\Http\JsonResponse;
-use Modules\RedmineIntegration\Helpers\ProjectIntegrationHelper;
+use Exception;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Illuminate\Support\Facades\Auth;
+use Modules\RedmineIntegration\Models\RedmineClient;
+use Redmine\Client;
 
 /**
  * Class RedmineIntegrationController
@@ -20,11 +20,10 @@ class RedmineIntegrationController extends AbstractRedmineController
      */
     protected $userRepo;
 
-
     /**
      * Create a new instance.
      *
-     * @param UserRepository $userRepo
+     * @param  UserRepository  $userRepo
      */
     public function __construct(UserRepository $userRepo)
     {
@@ -32,7 +31,13 @@ class RedmineIntegrationController extends AbstractRedmineController
     }
 
 
-    public function initRedmineClient(int $userId): Redmine\Client
+    /**
+     * @param  int  $userId
+     *
+     * @return Client
+     * @throws Exception
+     */
+    public function initRedmineClient(int $userId): Client
     {
         $client = new RedmineClient($userId);
 
