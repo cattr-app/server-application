@@ -11,7 +11,3 @@
 | this file as you want.
 |
 */
-
-if (!app()->routesAreCached()) {
-    require __DIR__ . '/Http/routes.php';
-}

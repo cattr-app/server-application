@@ -17,7 +17,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Modules\\GitlabIntegration\\": ""
+      "Modules\\GitLabIntegration\\": ""
     }
   },
   "require": {
