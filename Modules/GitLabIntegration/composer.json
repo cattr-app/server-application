@@ -10,6 +10,7 @@
   "extra": {
     "laravel": {
       "providers": [
+        "Modules\\GitLabIntegration\\Providers\\GitLabIntegrationServiceProvider"
       ],
       "aliases": {
       }

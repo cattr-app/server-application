@@ -3,6 +3,7 @@
 namespace Modules\GitLabIntegration\Providers;
 
 use App\EventFilter\EventServiceProvider as ServiceProvider;
+use Modules\GitLabIntegration\Console\SyncProjects;
 
 /**
  * Class GitLabIntegrationServiceProvider
@@ -19,12 +20,32 @@ class GitLabIntegrationServiceProvider extends ServiceProvider
     protected $defer = false;
 
     /**
+     * Boot the application events.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        $this->registerCommands();
+
+        parent::boot();
+    }
+
+    protected function registerCommands()
+    {
+        $this->commands([
+            SyncProjects::class,
+        ]);
+    }
+
+    /**
      * Register the service provider.
      *
      * @return void
      */
     public function register()
     {
+        $this->app->register(ScheduleServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
     }
 

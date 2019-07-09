@@ -14,9 +14,7 @@ class ProjectsController extends Controller
      */
     protected $projects;
 
-    public function __construct(
-        GitLabProjects $projects
-    ) {
+    public function __construct(GitLabProjects $projects) {
         $this->projects = $projects;
     }
 
@@ -24,7 +22,7 @@ class ProjectsController extends Controller
     {
         $request = Filter::process('request.gitlab.projects.list', $request);
         $userId = $request->user()->id;
-        $projects = $this->projects->getAll($userId);
+        $projects = $this->projects->getUserProjects($userId);
 
         return response()->json($projects);
     }
