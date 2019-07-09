@@ -84,6 +84,7 @@ class SynchronizeStatuses extends Command
         // Merge statuses info from the redmine with the stored 'is_active' property.
         $available_statuses = $client->issue_status->all()['issue_statuses'];
         $saved_statuses = $this->userRepo->getUserRedmineStatuses($userId);
+
         $statuses = array_map(function ($status) use ($saved_statuses) {
             $saved_status = array_first($saved_statuses, function ($saved_status) use ($status) {
                 return $saved_status['id'] === $status['id'];
@@ -93,6 +94,7 @@ class SynchronizeStatuses extends Command
                 : !isset($status['is_closed']);
             return $status;
         }, $available_statuses);
+
         $property = Property::updateOrCreate([
             'entity_id' => $userId,
             'entity_type' => Property::USER_CODE,

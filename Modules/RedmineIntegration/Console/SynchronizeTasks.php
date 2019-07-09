@@ -345,7 +345,7 @@ class SynchronizeTasks extends Command
         $taskRepo = $this->taskRepo;
         $client = $this->initRedmineClient($userId);
         $activeStatusId = $userRepo->getActiveStatusId($userId);
-        $deactiveStatusId = $userRepo->getDeactiveStatusId($userId);
+        $deactiveStatusId = $userRepo->getInactiveStatusId($userId);
         $activateStatuses = $userRepo->getActivateStatuses($userId);
         $deactivateStatuses = $userRepo->getDeactivateStatuses($userId);
         $timeout = $userRepo->getOnlineTimeout($userId);

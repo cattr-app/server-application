@@ -397,7 +397,7 @@ class UserRepository
      *
      * @return string
      */
-    public function getDeactiveStatusId($userId)
+    public function getInactiveStatusId($userId)
     {
         return $this->getProperty($userId, static::DEACTIVE_STATUS_PROPERTY);
     }
@@ -445,7 +445,7 @@ class UserRepository
     }
 
     /**
-     * get user task status ids which will be set as inactive after task synchronisation
+     * get user task status ids which will be set as
      *
      * @param  string  $userId
      *
