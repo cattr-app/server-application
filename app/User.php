@@ -19,6 +19,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
 use App\Models\Project;
 use App\Models\Role;
+use App\Models\DateTrait;
+
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Collection;
 
@@ -64,6 +66,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
     use Notifiable, SoftDeletes;
     use EloquentJoin;
+    use DateTrait;
 
     /**
      * table name from database

@@ -374,7 +374,7 @@ class TaskController extends ItemController
 
         $filters = $request->all();
         is_int($request->get('user_id')) ? $filters['timeIntervals.user_id'] = $request->get('user_id') : False;
-        $compareDate = Carbon::today($timezone)->setTimezone('UTC')->toDateTimeString();
+        $compareDate = Carbon::today($timezone)->setTimezone('UTC')->toIso8601String();
         $filters['timeIntervals.start_at'] = ['>=', [$compareDate]];
         unset($filters['user_id']);
 
