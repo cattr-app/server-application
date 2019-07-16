@@ -3,6 +3,7 @@ namespace App\Models;
 
 use Carbon\Carbon;
 use DateTime;
+use InvalidArgumentException;
 
 /**
  * trait DateTrait
@@ -66,7 +67,7 @@ trait DateTrait
      * @param string $standartDatetime
      * @return string
      */
-    protected static function toISO8601(string $standartDatetime): string
+    public static function toISO8601(string $standartDatetime): string
     {
         $dateObj = new Carbon($standartDatetime);
         return $dateObj->toIso8601String();
@@ -77,10 +78,15 @@ trait DateTrait
      * @param string $iso8601
      * @return string
      */
-    protected static function toStandartTime(string $iso8601): string
+    public static function toStandartTime(string $iso8601): string
     {
-        $dateObj = Carbon::createFromFormat(DateTime::ISO8601, $iso8601);
-        return date('Y-m-d H:i:s', $dateObj->timestamp);
+        try {
+            $dateObj = Carbon::createFromFormat(DateTime::ISO8601, $iso8601);
+            return date('Y-m-d H:i:s', $dateObj->timestamp);
+        } catch (InvalidArgumentException $e) {
+        }
+
+        return date('Y-m-d H:i:s', strtotime($iso8601));
     }
 
 

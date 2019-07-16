@@ -204,7 +204,6 @@ class TaskCommentController extends ItemController
     public function index(Request $request): JsonResponse
     {
         $filters = $request->all();
-        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery()->with('user'),

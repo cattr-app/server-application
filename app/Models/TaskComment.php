@@ -22,7 +22,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property Task $task
  * @property User $user
  */
-class TaskComment extends Model
+class TaskComment extends AbstractModel
 {
     use SoftDeletes;
 
