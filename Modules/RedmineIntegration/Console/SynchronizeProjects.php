@@ -39,7 +39,7 @@ class SynchronizeProjects extends Command
     /**
      * Execute the console command.
      *
-     * @param ProjectIntegrationHelper $projectIntegrationHelper
+     * @param  ProjectIntegrationHelper  $projectIntegrationHelper
      */
     public function handle(ProjectIntegrationHelper $projectIntegrationHelper)
     {

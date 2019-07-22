@@ -16,6 +16,7 @@ class ProjectRepository
      * Returns redmine id for current project
      *
      * @param $projectId
+     *
      * @return mixed|string
      */
     public function getRedmineProjectId($projectId)
@@ -38,7 +39,7 @@ class ProjectRepository
     {
         $redmineProjectIdsArray = [];
 
-        $redmineProjectsCollection = DB::table(Property::getTableName() . ' as prop')
+        $redmineProjectsCollection = DB::table(Property::getTableName().' as prop')
             ->select('prop.entity_id')
             ->where('prop.entity_type', '=', Property::PROJECT_CODE)
             ->where('prop.name', '=', 'REDMINE_ID')->get();

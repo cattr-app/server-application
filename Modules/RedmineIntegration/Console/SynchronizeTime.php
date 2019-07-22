@@ -2,16 +2,13 @@
 
 namespace Modules\RedmineIntegration\Console;
 
-use App\Models\Property;
-use App\Models\Task;
-use App\Models\TimeInterval;
 use App\User;
+use Exception;
 use Illuminate\Console\Command;
-use Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
-use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TimeIntervalRepository;
+use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Models\RedmineClient;
 use Redmine;
 
@@ -59,9 +56,9 @@ class SynchronizeTime extends Command
     /**
      * Create a new command instance.
      *
-     * @param UserRepository $userRepo
-     * @param ProjectRepository $projectRepo
-     * @param TaskRepository $taskRepo
+     * @param  UserRepository     $userRepo
+     * @param  ProjectRepository  $projectRepo
+     * @param  TaskRepository     $taskRepo
      */
     public function __construct(UserRepository $userRepo, TaskRepository $taskRepo, TimeIntervalRepository $timeRepo)
     {
@@ -155,10 +152,10 @@ class SynchronizeTime extends Command
             $client = $this->initRedmineClient($user->id);
 
             $ret = $client->time_entry->create([
-                'issue_id'  => $issue_id,
-                'spent_on'  => $date,
-                'hours'     => $hours,
-                'comments'  => 'Upload from Amazing Time',
+                'issue_id' => $issue_id,
+                'spent_on' => $date,
+                'hours' => $hours,
+                'comments' => 'Upload from Amazing Time',
             ]);
 
             $issent = isset($ret->id);
@@ -170,7 +167,8 @@ class SynchronizeTime extends Command
                 }
             }
 
-        } catch (\Exception $e) {}
+        } catch (Exception $e) {
+        }
     }
 
 

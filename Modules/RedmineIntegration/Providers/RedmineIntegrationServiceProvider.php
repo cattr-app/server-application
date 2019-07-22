@@ -2,13 +2,15 @@
 
 namespace Modules\RedmineIntegration\Providers;
 
-use Illuminate\Database\Eloquent\Factory;
 use App\EventFilter\EventServiceProvider as ServiceProvider;
-use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
-use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
-use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Helpers\TaskIntegrationHelper;
-use Modules\RedmineIntegration\Helpers\TimeIntervalIntegrationHelper;
+use Config;
+use Illuminate\Database\Eloquent\Factory;
+use Modules\RedmineIntegration\Console\{SynchronizePriorities,
+    SynchronizeProjects,
+    SynchronizeStatuses,
+    SynchronizeTasks,
+    SynchronizeTime,
+    SynchronizeUsers};
 
 /**
  * Class RedmineIntegrationServiceProvider
@@ -24,6 +26,9 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
      */
     protected $defer = false;
 
+    /**
+     * @var array
+     */
     protected $listen = [
         'item.create.task' => [
             'Modules\RedmineIntegration\Listeners\IntegrationObserver@taskCreation',
@@ -56,111 +61,10 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->registerViews();
         $this->registerFactories();
-        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+        $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
         $this->registerCommands();
 
         parent::boot();
-    }
-
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //Register Schedule service provider
-        $this->app->register('Modules\RedmineIntegration\Providers\ScheduleServiceProvider');
-
-        //Register Helpers and Repositories for DI
-        $this->app->singleton(TaskIntegrationHelper::class, function ($app) {
-            return new TaskIntegrationHelper();
-        });
-
-        $this->app->singleton(TimeIntervalIntegrationHelper::class, function ($app) {
-            return new TimeIntervalIntegrationHelper();
-        });
-
-        $this->app->singleton(UserRepository::class, function ($app) {
-            return new UserRepository();
-        });
-
-        $this->app->singleton(ProjectRepository::class, function ($app) {
-            return new ProjectRepository();
-        });
-
-        $this->app->singleton(TaskRepository::class, function ($app) {
-            return new TaskRepository();
-        });
-    }
-
-    protected function registerCommands()
-    {
-        //Register synchronize redmine tasks command
-        $this->commands([
-            \Modules\RedmineIntegration\Console\SynchronizeTasks::class,
-        ]);
-
-        //Register synchronize redmine statuses command
-        $this->commands([
-            \Modules\RedmineIntegration\Console\SynchronizeStatuses::class,
-        ]);
-
-        //Register synchronize redmine priorities command
-        $this->commands([
-            \Modules\RedmineIntegration\Console\SynchronizePriorities::class,
-        ]);
-
-        //Register synchronize redmine projects command
-        $this->commands([
-            \Modules\RedmineIntegration\Console\SynchronizeProjects::class,
-        ]);
-
-        //Register synchronize redmine users command
-        $this->commands([
-            \Modules\RedmineIntegration\Console\SynchronizeUsers::class,
-        ]);
-
-        //Register synchronize redmine time command
-        $this->commands([
-            \Modules\RedmineIntegration\Console\SynchronizeTime::class,
-        ]);
-    }
-
-
-    /**
-     * Register config.
-     *
-     * @return void
-     */
-    protected function registerConfig()
-    {
-        $this->publishes([
-            __DIR__ . '/../Config/config.php' => config_path('redmineintegration.php'),
-        ], 'config');
-        $this->mergeConfigFrom(
-            __DIR__ . '/../Config/config.php', 'redmineintegration'
-        );
-    }
-
-    /**
-     * Register views.
-     *
-     * @return void
-     */
-    public function registerViews()
-    {
-        $viewPath = resource_path('views/modules/redmineintegration');
-
-        $sourcePath = __DIR__ . '/../Resources/views';
-
-        $this->publishes([
-            $sourcePath => $viewPath
-        ], 'views');
-
-        $this->loadViewsFrom(array_merge(array_map(function ($path) {
-            return $path . '/modules/redmineintegration';
-        }, \Config::get('view.paths')), [$sourcePath]), 'redmineintegration');
     }
 
     /**
@@ -175,8 +79,43 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         if (is_dir($langPath)) {
             $this->loadTranslationsFrom($langPath, 'redmineintegration');
         } else {
-            $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'redmineintegration');
+            $this->loadTranslationsFrom(__DIR__.'/../Resources/lang', 'redmineintegration');
         }
+    }
+
+    /**
+     * Register config.
+     *
+     * @return void
+     */
+    protected function registerConfig()
+    {
+        $this->publishes([
+            __DIR__.'/../Config/config.php' => config_path('redmineintegration.php'),
+        ], 'config');
+        $this->mergeConfigFrom(
+            __DIR__.'/../Config/config.php', 'redmineintegration'
+        );
+    }
+
+    /**
+     * Register views.
+     *
+     * @return void
+     */
+    public function registerViews()
+    {
+        $viewPath = resource_path('views/modules/redmineintegration');
+
+        $sourcePath = __DIR__.'/../Resources/views';
+
+        $this->publishes([
+            $sourcePath => $viewPath
+        ], 'views');
+
+        $this->loadViewsFrom(array_merge(array_map(function ($path) {
+            return $path.'/modules/redmineintegration';
+        }, Config::get('view.paths')), [$sourcePath]), 'redmineintegration');
     }
 
     /**
@@ -186,8 +125,55 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
     public function registerFactories()
     {
         if (!app()->environment('production')) {
-            app(Factory::class)->load(__DIR__ . '/../Database/factories');
+            app(Factory::class)->load(__DIR__.'/../Database/factories');
         }
+    }
+
+    protected function registerCommands()
+    {
+        //Register synchronize redmine tasks command
+        $this->commands([
+            SynchronizeTasks::class,
+            SynchronizeStatuses::class,
+            SynchronizePriorities::class,
+            SynchronizeProjects::class,
+            SynchronizeUsers::class,
+            SynchronizeTime::class,
+        ]);
+    }
+
+    /**
+     * Register the service provider.
+     *
+     * @return void
+     */
+    public function register()
+    {
+        //Register Schedule service provider
+        $this->app->register('Modules\RedmineIntegration\Providers\ScheduleServiceProvider');
+        $this->app->register(RouteServiceProvider::class);
+
+        // TODO: What is this?
+
+//        $this->app->singleton(TaskIntegrationHelper::class, function ($app) {
+//            return new TaskIntegrationHelper();
+//        });
+//
+//        $this->app->singleton(TimeIntervalIntegrationHelper::class, function ($app) {
+//            return new TimeIntervalIntegrationHelper();
+//        });
+//
+//        $this->app->singleton(UserRepository::class, function ($app) {
+//            return new UserRepository();
+//        });
+//
+//        $this->app->singleton(ProjectRepository::class, function ($app) {
+//            return new ProjectRepository();
+//        });
+//
+//        $this->app->singleton(TaskRepository::class, function ($app) {
+//            return new TaskRepository();
+//        });
     }
 
     /**

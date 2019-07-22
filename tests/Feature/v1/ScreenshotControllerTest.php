@@ -28,7 +28,7 @@ class ScreenshotControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/screenshots/create", $data, $headers);
+        $response = $this->postJson("/v1/screenshots/create", $data, $headers);
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
     }
@@ -54,13 +54,13 @@ class ScreenshotControllerTest extends TestCase
         /**
          * Upload screenshot and get ID
          */
-        $id = $this->post("/api/v1/screenshots/create", $data, $headers)->json("res.id");
+        $id = $this->post("/v1/screenshots/create", $data, $headers)->json("res.id");
 
         $deleteScreenshotData = [
             "id" => $id
         ];
 
-        $response = $this->post("/api/v1/screenshots/remove", $deleteScreenshotData, $headers);
+        $response = $this->post("/v1/screenshots/remove", $deleteScreenshotData, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
