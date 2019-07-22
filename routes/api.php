@@ -120,6 +120,7 @@ Route::group([
     $router->any('/screenshots/count', 'Api\v1\ScreenshotController@count');
     $router->any('/screenshots/dashboard', 'Api\v1\ScreenshotController@dashboard');
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
+    $router->post('/screenshots/bulk-create', 'Api\v1\ScreenshotController@bulkCreate');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
     $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');
     $router->post('/screenshots/remove', 'Api\v1\ScreenshotController@destroy');
@@ -128,6 +129,7 @@ Route::group([
     $router->any('/time-intervals/list', 'Api\v1\TimeIntervalController@index');
     $router->any('/time-intervals/count', 'Api\v1\TimeIntervalController@count');
     $router->post('/time-intervals/create', 'Api\v1\TimeIntervalController@create');
+    $router->post('/time-intervals/bulk-create', 'Api\v1\TimeIntervalController@bulkCreate');
     $router->post('/time-intervals/edit', 'Api\v1\TimeIntervalController@edit');
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
