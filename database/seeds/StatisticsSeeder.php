@@ -118,21 +118,6 @@ class StatisticsSeeder extends Seeder
     }
 
     /**
-     * Attaches user to another user.
-     */
-    protected function attachUser(User $user, User $attached) : RelationsUsers
-    {
-        $relation = RelationsUsers::create([
-            'attached_user_id' => $attached->id,
-            'user_id' => $user->id,
-        ]);
-
-        $this->command->getOutput()->writeln("<fg=green>{$attached->full_name} attached to user {$user->full_name}</>");
-
-        return $relation;
-    }
-
-    /**
      * Creates tasks and time intervals for an user on a project.
      */
     protected function createTasks(User $user, Project $project) : void
@@ -162,26 +147,22 @@ class StatisticsSeeder extends Seeder
         $user1 = $this->createUser('User 1', 'user1@example.com', 'user1', 2);
         $this->assignProject($user1, $projects[0]);
         $this->createTasks($user1, $projects[0]);
-        $this->attachUser($manager, $user1);
 
         $user2 = $this->createUser('User 2', 'user2@example.com', 'user2', 2);
         $this->assignProject($user2, $projects[0]);
         $this->assignProject($user2, $projects[1]);
         $this->createTasks($user2, $projects[0]);
         $this->createTasks($user2, $projects[1]);
-        $this->attachUser($manager, $user2);
 
         $user3 = $this->createUser('User 3', 'user3@example.com', 'user3', 2);
         $this->assignProject($user3, $projects[2]);
         $this->assignProject($user3, $projects[3]);
         $this->createTasks($user3, $projects[2]);
         $this->createTasks($user3, $projects[3]);
-        $this->attachUser($manager, $user3);
 
         $user4 = $this->createUser('User 4', 'user4@example.com', 'user4', 2);
         $this->assignProject($user4, $projects[3]);
         $this->createTasks($user4, $projects[3]);
-        $this->attachUser($manager, $user4);
 
         $user5 = $this->createUser('User 5', 'user5@example.com', 'user5', 2);
         $this->assignProject($user5, $projects[4]);
