@@ -45,6 +45,7 @@ return [
         // App\Providers\BroadcastServiceProvider::class,
         App\EventFilter\EventFilterServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\LockServiceProvider::class,
         // Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
 
         Modules\EventListener\Providers\EventListenerServiceProvider::class,
