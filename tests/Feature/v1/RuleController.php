@@ -18,7 +18,7 @@ class RuleController extends TestCase
             ]
         ];
 
-        $response = $this->getJson("/api/v1/rules/actions", $headers);
+        $response = $this->getJson("/v1/rules/actions", $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -41,7 +41,7 @@ class RuleController extends TestCase
             "message"
         ];
 
-        $response = $this->postJson("/api/v1/rules/edit", $data, $headers);
+        $response = $this->postJson("/v1/rules/edit", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -78,7 +78,7 @@ class RuleController extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/rules/bulk-edit", $data, $headers);
+        $response = $this->postJson("/v1/rules/bulk-edit", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);

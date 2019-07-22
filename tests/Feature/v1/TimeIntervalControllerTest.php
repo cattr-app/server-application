@@ -29,7 +29,7 @@ class TimeIntervalControllerTest extends TestCase
 
         ];
 
-        $response = $this->postJson("/api/v1/time-intervals/create", $data, $headers);
+        $response = $this->postJson("/v1/time-intervals/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -48,7 +48,7 @@ class TimeIntervalControllerTest extends TestCase
             "end_at"    => Carbon::now()->addMinutes(1)->format('Y-m-d\\TH:i:s\\Z')
         ];
 
-        $createResponse = $this->postJson("/api/v1/time-intervals/create", $createData, $headers);
+        $createResponse = $this->postJson("/v1/time-intervals/create", $createData, $headers);
 
         $data = [
             "id" => $createResponse->json("interval.id")
@@ -58,7 +58,7 @@ class TimeIntervalControllerTest extends TestCase
             "message"
         ];
 
-        $response = $this->postJson("/api/v1/time-intervals/remove", $data, $headers);
+        $response = $this->postJson("/v1/time-intervals/remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -86,7 +86,7 @@ class TimeIntervalControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/time-intervals/edit", $data, $headers);
+        $response = $this->postJson("/v1/time-intervals/edit", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -105,7 +105,7 @@ class TimeIntervalControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/time-intervals/list", [], $headers);
+        $response = $this->postJson("/v1/time-intervals/list", [], $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -126,7 +126,7 @@ class TimeIntervalControllerTest extends TestCase
             "deleted_at", "count_mouse", "count_keyboard", "user_id"
         ];
 
-        $response = $this->postJson("/api/v1/time-intervals/show", $data, $headers);
+        $response = $this->postJson("/v1/time-intervals/show", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);

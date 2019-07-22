@@ -28,7 +28,7 @@ class UserControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/users/create", $data, $headers);
+        $response = $this->postJson("/v1/users/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -48,7 +48,7 @@ class UserControllerTest extends TestCase
             "error", "reason"
         ];
 
-        $response = $this->postJson("/api/v1/users/remove", $data, $headers);
+        $response = $this->postJson("/v1/users/remove", $data, $headers);
 
         $response->assertStatus(400);
         $response->assertJsonStructure($expectedFields);
@@ -80,7 +80,7 @@ class UserControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/users/edit", $data, $headers);
+        $response = $this->postJson("/v1/users/edit", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -102,7 +102,7 @@ class UserControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/users/list", [], $headers);
+        $response = $this->postJson("/v1/users/list", [], $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -118,7 +118,7 @@ class UserControllerTest extends TestCase
 
         ];
 
-        $response = $this->postJson("/api/v1/users/list", [], $headers);
+        $response = $this->postJson("/v1/users/list", [], $headers);
         $response->assertStatus(200);
 
         $response->assertJsonStructure($expectedFields);
@@ -134,7 +134,7 @@ class UserControllerTest extends TestCase
             "id" => 1
         ];
 
-        $response = $this->postJson("/api/v1/users/show", $data, $headers);
+        $response = $this->postJson("/v1/users/show", $data, $headers);
         $response->assertStatus(200);
     }
 
@@ -144,7 +144,7 @@ class UserControllerTest extends TestCase
             "Authorization" => "Bearer " . $this->getAdminToken()
         ];
 
-        $response = $this->postJson("/api/v1/users/show", [], $headers);
+        $response = $this->postJson("/v1/users/show", [], $headers);
         $response->assertStatus(400);
     }
 
@@ -182,7 +182,7 @@ class UserControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/users/bulk-edit", $data, $headers);
+        $response = $this->postJson("/v1/users/bulk-edit", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);

@@ -1,9 +1,12 @@
 <?php
+
 namespace Modules\RedmineIntegration\Models;
 
+use Exception;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
+use Redmine\Client;
 
-class RedmineClient extends \Redmine\Client
+class RedmineClient extends Client
 {
     /**
      * RedmineClient constructor.
@@ -18,7 +21,7 @@ class RedmineClient extends \Redmine\Client
         $pass = null;
 
         if (empty($url)) {
-            $e = new \Exception('Empty url');
+            $e = new Exception('Empty url');
             throw $e;
         }
 
