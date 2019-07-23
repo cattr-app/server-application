@@ -765,15 +765,6 @@ class TimeIntervalController extends ItemController
                     ;
                 });
             }
-
-            if ($user->allowed('users', 'relations')) {
-                $query->orWhereIn(
-                    'user_id',
-                    $user->attached_users->map(static function ($attachedUser) {
-                        return $attachedUser->id;
-                    })
-                );
-            }
         });
 
         return $query;

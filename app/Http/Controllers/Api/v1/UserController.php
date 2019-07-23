@@ -82,7 +82,7 @@ class UserController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return ['attached_users'];
+        return [];
     }
 
     /**
@@ -222,7 +222,6 @@ class UserController extends ItemController
      *   "updated_at": "2018-10-18 09:36:22",
      *   "role_id": 1,
      *   "timezone": null,
-     *   "attached_users": []
      *  }
      *
      */
@@ -273,7 +272,6 @@ class UserController extends ItemController
      *       "updated_at": "2018-10-18 11:04:50",
      *       "role_id": 1,
      *       "timezone": null,
-     *       "attached_users": []
      *     }
      *   }
      *
@@ -590,7 +588,6 @@ class UserController extends ItemController
             $users = User::where('id', '<>', $userId)->get();
         } else {
             /** @var User[] $rules */
-            $user_users = $userId ? collect($user->attached_users) : collect($user->attached_to);
             $projects_users = [];
             $projects_related_users = [];
 
@@ -606,7 +603,7 @@ class UserController extends ItemController
                     $query->whereIn('id', $project_ids);
                 })->get();
             }
-            $users = collect([$user_users, $projects_users, $projects_related_users])->collapse()->unique();
+            $users = collect([$projects_users, $projects_related_users])->collapse()->unique();
         }
 
         $users = collect($users)->filter(function($user, $key) use ($userId) {
@@ -636,7 +633,6 @@ class UserController extends ItemController
             return $query;
         }
 
-        $relations_access = $user->allowed('users', 'relations');
         $project_relations_access = $user->allowed('projects', 'relations');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
@@ -664,13 +660,9 @@ class UserController extends ItemController
             }
         }
 
-        $attached_users_id = $relations_access ? $user->attached_users->map(static function($user) {
-            return $user->id;
-        }) : collect([]);
-
         $query->whereIn(
             'users.id',
-            collect([$users_id, $user_id, $attached_users_id])->collapse()->unique()
+            collect([$users_id, $user_id])->collapse()->unique()
         );
 
         return $query;
