@@ -41,7 +41,7 @@ class ScreenshotController extends ItemController
     {
         return [
             'time_interval_id' => 'exists:time_intervals,id|required',
-            'path'             => 'required',
+            'path' => 'required',
         ];
     }
 
@@ -188,9 +188,9 @@ class ScreenshotController extends ItemController
         $ds = DIRECTORY_SEPARATOR;
 
         $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs", $screenStorePath);
-        Storage::put($thumbnailPath, (string) $thumbnail->encode());
+        Storage::put($thumbnailPath, (string)$thumbnail->encode());
 
-        $timeIntervalId = ((int) $request->get('time_interval_id')) ?: null;
+        $timeIntervalId = ((int)$request->get('time_interval_id')) ?: null;
 
         $requestData = [
             'time_interval_id' => $timeIntervalId,
@@ -283,10 +283,10 @@ class ScreenshotController extends ItemController
             $ds = DIRECTORY_SEPARATOR;
 
             $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs", $screenStorePath);
-            Storage::put($thumbnailPath, (string) $thumbnail->encode());
+            Storage::put($thumbnailPath, (string)$thumbnail->encode());
 
             $requestData = [
-                'time_interval_id' => (int) $timeIntervalId,
+                'time_interval_id' => (int)$timeIntervalId,
                 'path' => $screenStorePath,
                 'thumbnail_path' => $thumbnailPath,
             ];
@@ -490,17 +490,17 @@ class ScreenshotController extends ItemController
 
             preg_match('/(\d{4}-\d{2}-\d{2} \d{2})/', $interval->start_at, $matches);
             $minutes = Carbon::parse($interval->start_at)->minute;
-            $minutes = $minutes > 9 ? (string)$minutes : '0'.$minutes;
-            $hour = $matches[1].':00:00';
+            $minutes = $minutes > 9 ? (string)$minutes : '0' . $minutes;
+            $hour = $matches[1] . ':00:00';
 
             foreach ($items as $itemkey => $item) {
-                if($item['interval'] == $hour) {
+                if ($item['interval'] == $hour) {
                     $hasInterval = true;
                     break;
                 }
             }
 
-            if($hasInterval && isset($itemkey)) {
+            if ($hasInterval && isset($itemkey)) {
                 $items[$itemkey]['intervals'][(int)$minutes{0}][] = $interval->toArray();
             } else {
                 $arr = [
@@ -535,7 +535,6 @@ class ScreenshotController extends ItemController
     {
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'screenshots', 'full_access');
-        $relations_access = Role::can(Auth::user(), 'users', 'relations');
         $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
@@ -543,7 +542,7 @@ class ScreenshotController extends ItemController
             return $query;
         }
 
-        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
+        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function ($val) {
             return collect($val->id);
         });
 
@@ -559,14 +558,6 @@ class ScreenshotController extends ItemController
                 });
 
                 $time_intervals_id = collect([$time_intervals_id, $attached_time_interval_id_to_project])->collapse()->unique();
-            }
-
-            if ($relations_access) {
-                $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
-                    return collect($val->timeIntervals)->pluck('id');
-                });
-
-                $time_intervals_id = collect([$time_intervals_id, $attached_users_time_intervals_id])->collapse()->unique();
             }
         }
 

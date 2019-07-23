@@ -472,14 +472,13 @@ class ProjectController extends ItemController
         $user_id = $user->id;
         $query = parent::getQuery($withRelations);
         $full_access = Role::can($user, 'projects', 'full_access');
-        $user_relations_access = Role::can($user, 'users', 'relations');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
             return $query;
         }
 
-        $query->where(static function (Builder $query) use ($user_id, $user_relations_access, $action_method) {
+        $query->where(static function (Builder $query) use ($user_id, $action_method) {
             $query->when($action_method !== 'edit' && $action_method !== 'remove', static function (Builder $query) use ($user_id) {
                 $query->whereHas('users', static function (Builder $query) use ($user_id) {
                     $query->where('id', $user_id)->select('id');
@@ -488,12 +487,6 @@ class ProjectController extends ItemController
                     $query->where('user_id', $user_id)->select('user_id');
                 });
                 $query->orWhereHas('tasks.timeIntervals.user', static function (Builder $query) use ($user_id) {
-                    $query->where('id', $user_id)->select('id');
-                });
-            });
-
-            $query->when($user_relations_access, static function (Builder $query) use ($user_id) {
-                $query->orWhereHas('users.attached_to', static function (Builder $query) use ($user_id) {
                     $query->where('id', $user_id)->select('id');
                 });
             });
