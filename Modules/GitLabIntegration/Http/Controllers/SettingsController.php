@@ -1,13 +1,12 @@
 <?php
 
-namespace Modules\GitlabIntegration\Http\Controllers;
+namespace Modules\GitLabIntegration\Http\Controllers;
 
 use Filter;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Modules\GitlabIntegration\Helpers\UserProperties;
-use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
+use Modules\GitLabIntegration\Helpers\UserProperties;
 
 class SettingsController extends Controller
 {

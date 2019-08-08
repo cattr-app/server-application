@@ -58,16 +58,22 @@ class TimeIntervalController extends ItemController
      * @param string $start_at
      * @return array
      */
-    public function getValidationRules(int $user_id = 0, string $start_at = ''): array
+    public function getValidationRules(): array
     {
-        $user = User::find($user_id);
-
-
-        $end_at_rules = [
-            'date',
-            'required',
+        return [
+            'task_id'  => 'exists:tasks,id|required',
+            'user_id'  => 'exists:users,id|required',
+            'start_at' => 'date|required',
+            'end_at'   => 'date|required',
         ];
+    }
 
+    public function validateEndDate(array $intervalData): bool
+    {
+        $user_id = $intervalData['user_id'] ?? 0;
+        $start_at = $intervalData['start_at'] ?? '';
+        $user = User::find($user_id);
+        $end_at_rules = [];
         if ($user) {
             $timeOffset = $user->screenshots_interval /* min */ * 60 /* sec */;
             $beforeTimestamp = strtotime($start_at) + $timeOffset;
@@ -76,12 +82,15 @@ class TimeIntervalController extends ItemController
             $end_at_rules[] = new BetweenDate($start_at, $beforeDate);
         }
 
-        return [
-            'task_id'  => 'exists:tasks,id|required',
-            'user_id'  => 'exists:users,id|required',
-            'start_at' => 'date|required',
-            'end_at'   => $end_at_rules,
-        ];
+        $validator = Validator::make(
+            $intervalData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.create'),
+                ['end_at' => $end_at_rules]
+            )
+        );
+
+        return !$validator->fails();
     }
 
     /**
@@ -144,10 +153,8 @@ class TimeIntervalController extends ItemController
             $intervalData,
             Filter::process(
                 $this->getEventUniqueName('validation.item.create'),
-                $this->getValidationRules(
-                    $intervalData['user_id'] ?? 0,
-                    $intervalData['start_at'] ?? ''
-                ))
+                $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
@@ -179,7 +186,17 @@ class TimeIntervalController extends ItemController
             );
         }
 
-        $timeInterval = Filter::process($this->getEventUniqueName('item.create'), TimeInterval::create($intervalData));
+        $timeInterval = Filter::process($this->getEventUniqueName('item.create'), new TimeInterval($intervalData));
+        if (!$this->validateEndDate($intervalData)) {
+            // If end date is not valid, return success without saving
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                    'interval' => $timeInterval,
+                ]),
+                200
+            );
+        }
+        $timeInterval->save();
 
         //create screenshot
         if (isset($request->screenshot)) {
@@ -206,6 +223,135 @@ class TimeIntervalController extends ItemController
             ]),
             200
         );
+    }
+
+    /**
+     * @api {post} /api/v1/time-intervals/bulk-create Bulk create
+     * @apiDescription Create Time Intervals
+     * @apiVersion 0.1.0
+     * @apiName BulkCreateTimeInterval
+     * @apiGroup Time Interval
+     *
+     * @apiParam {String}   intervals           Serialized array of time intervals
+     * @apiParam {Integer}  intervals.task_id   Task id
+     * @apiParam {Integer}  intervals.user_id   User id
+     * @apiParam {String}   intervals.start_at  Interval time start
+     * @apiParam {String}   intervals.end_at    Interval time end
+     * @apiParam {Binary}   screenshots[index]  Screenshot file
+     *
+     * @apiSuccess {Object[]} messages                 Messages
+     * @apiSuccess {Object}   messages.id              TimeInterval id
+     * @apiSuccess {Object}   messages.user_id.        User id
+     * @apiSuccess {Object}   messages.start_at        Start datetime
+     * @apiSuccess {Object}   messages.end_at          End datetime
+     * @apiSuccess {Object}   messages.created_at      TimeInterval
+     * @apiSuccess {Object}   messages.deleted_at      TimeInterval
+     *
+     * @apiError (400)  {Object[]} messages         Messages
+     * @apiError (400)  {String}   messages.error   Error title
+     * @apiError (400)  {String}   messages.reason  Error reason
+     * @apiError (400)  {String}   messages.code    Error code
+     *
+     * @apiUse UnauthorizedError
+     * @apiUse WrongDateTimeFormatStartEndAt
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function bulkCreate(Request $request): JsonResponse
+    {
+        $requestData = $request->all();
+        $result = [];
+
+        if (empty($requestData['intervals'])) {
+            return response()->json(
+                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
+                    [
+                        'error' => 'validation fail',
+                        'reason' => 'intervals is required',
+                    ]
+                ]),
+                400
+            );
+        }
+
+        $intervals = json_decode($requestData['intervals'], true);
+        foreach ($intervals as $index => $interval) {
+            $intervalData = [
+                'task_id' => (int) ($interval['task_id'] ?? 0),
+                'user_id' => (int) ($interval['user_id'] ?? 0),
+                'start_at' => $interval['start_at'] ?? '',
+                'end_at' => $interval['end_at'] ?? '',
+                'count_mouse' => (int) ($interval['count_mouse'] ?? 0),
+                'count_keyboard' =>  (int) ($interval['count_keyboard'] ?? 0),
+            ];
+
+            $validator = Validator::make(
+                $intervalData,
+                Filter::process(
+                    $this->getEventUniqueName('validation.item.create'),
+                    $this->getValidationRules()
+                )
+            );
+
+            if ($validator->fails()) {
+                $result[] = [
+                    'error' => 'validation fail',
+                    'reason' => $validator->errors(),
+                    'code' => 400
+                ];
+                continue;
+            }
+
+            //create time interval
+            $intervalData['start_at'] = (new Carbon($intervalData['start_at']))->setTimezone('UTC')->toDateTimeString();
+            $intervalData['end_at'] = (new Carbon($intervalData['end_at']))->setTimezone('UTC')->toDateTimeString();
+
+            // If interval is already exists, do not create duplicate.
+            $existing = TimeInterval::where([
+                ['user_id', '=', $intervalData['user_id']],
+                ['start_at', '=', $intervalData['start_at']],
+                ['end_at', '=', $intervalData['end_at']],
+            ])->first();
+            if ($existing) {
+                $result[] = $existing;
+                continue;
+            }
+
+            $timeInterval = Filter::process($this->getEventUniqueName('item.create'), new TimeInterval($intervalData));
+            if (!$this->validateEndDate($intervalData)) {
+                // If end date is not valid, return success without saving
+                $result[] = $timeInterval;
+                continue;
+            }
+            $timeInterval->save();
+
+            //create screenshot
+            if (isset($request->screenshots[$index])) {
+                $file = $request->screenshots[$index]->store('uploads/screenshots');
+                $path = Filter::process($this->getEventUniqueName('request.item.create'), $file);
+                $screenshot = Image::make($path);
+                $thumbnail = $screenshot->resize(280, null, function ($constraint) {
+                    $constraint->aspectRatio();
+                });
+                $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
+                Storage::put($thumbnailPath, (string) $thumbnail->encode());
+
+                $screenshotData = [
+                    'time_interval_id' => $timeInterval->id,
+                    'path' => $path,
+                    'thumbnail_path' => $thumbnailPath,
+                ];
+
+                $screenshot = Filter::process('item.create.screenshot', Screenshot::create($screenshotData));
+            }
+
+            $result[] = $timeInterval;
+        }
+
+        return response()->json([
+            'messages' => $result,
+        ]);
     }
 
     /**
@@ -364,7 +510,7 @@ class TimeIntervalController extends ItemController
             $request->all()
         );
 
-        $validationRules = $this->getValidationRules($requestData['user_id'], $requestData['start_at']);
+        $validationRules = $this->getValidationRules();
         $validationRules['id'] = ['required'];
 
         $validator = Validator::make(
@@ -423,6 +569,15 @@ class TimeIntervalController extends ItemController
         }
 
         $item->fill($this->filterRequestData($requestData));
+        if (!$this->validateEndDate($requestData)) {
+            // If end date is not valid, return success without saving
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                    'res' => $item,
+                ]),
+                200
+            );
+        }
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
         $item->save();
 

@@ -10,6 +10,7 @@
   "extra": {
     "laravel": {
       "providers": [
+        "Modules\\GitLabIntegration\\Providers\\GitLabIntegrationServiceProvider"
       ],
       "aliases": {
       }
@@ -17,7 +18,7 @@
   },
   "autoload": {
     "psr-4": {
-      "Modules\\GitlabIntegration\\": ""
+      "Modules\\GitLabIntegration\\": ""
     }
   },
   "require": {
