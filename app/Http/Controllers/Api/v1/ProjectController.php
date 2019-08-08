@@ -9,6 +9,7 @@ use Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\DB;
 use Route;
 
 /**
@@ -183,6 +184,88 @@ class ProjectController extends ItemController
         return parent::index($request);
     }
 
+    /**
+     * Returns tasks info for a project.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function tasks(Request $request): JsonResponse
+    {
+        $itemId = is_int($request->get('id')) ? $request->get('id') : false;
+
+        if (!$itemId) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
+                    'error' => 'Validation fail',
+                    'reason' => 'Id invalid',
+                ]),
+                400
+            );
+        }
+
+        $user = Auth::user();
+        $userProjectIds = Project::getUserRelatedProjectIds($user);
+        if (!in_array($itemId, $userProjectIds)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
+                    'error' => 'Access denied',
+                    'reason' => 'User haven\'t access to this project',
+                ]),
+                403
+            );
+        }
+
+        $project_info = DB::table('project_report')
+            ->select(
+                DB::raw('MIN(date) as start'),
+                DB::raw('MAX(date) as end'),
+                DB::raw('SUM(duration) as duration')
+            )
+            ->where([
+                ['project_id', '=', $itemId],
+            ])
+            ->first();
+
+        $tasks_query = DB::table('tasks')
+            ->leftJoin('project_report', 'tasks.id', '=', 'project_report.task_id')
+            ->select(
+                DB::raw('tasks.id as id'),
+                DB::raw('tasks.task_name as task_name'),
+                DB::raw('MIN(project_report.date) as start'),
+                DB::raw('MAX(project_report.date) as end'),
+                DB::raw('SUM(project_report.duration) as duration')
+            )
+            ->where([
+                ['tasks.project_id', '=', $itemId],
+            ])
+            ->groupBy(
+                'id',
+                'task_name'
+            );
+
+        if ($request->has('order_by')) {
+            $order_by = $request->get('order_by');
+            [$column, $dir] = is_array($order_by) ? $order_by : [$order_by, 'asc'];
+            if (in_array($column, [
+                'id',
+                'task_name',
+                'start',
+                'end',
+                'duration',
+            ])) {
+                $tasks_query->orderBy($column, $dir);
+            } else {
+                $tasks_query->orderBy('id', 'asc');
+            }
+        } else {
+            $tasks_query->orderBy('id', 'asc');
+        }
+
+        $project_info->tasks = $tasks_query->get();
+
+        return response()->json($project_info);
+    }
 
     /**
      * @api {post} /api/v1/projects/create Create

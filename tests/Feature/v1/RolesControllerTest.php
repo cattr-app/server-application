@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RoleSeeder;
 use Tests\TestCase;
-use UsersTableSeeder;
+use AdminTableSeeder;
 
 class RolesControllerTest extends TestCase
 {
@@ -27,7 +27,7 @@ class RolesControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/roles/allowed-rules", $data, $headers);
+        $response = $this->postJson("/v1/roles/allowed-rules", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -45,7 +45,7 @@ class RolesControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/roles/list", [], $headers);
+        $response = $this->postJson("/v1/roles/list", [], $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -59,7 +59,7 @@ class RolesControllerTest extends TestCase
 
         $expectedFields = [];
 
-        $response = $this->postJson("/api/v1/roles/dashboard", [], $headers);
+        $response = $this->postJson("/v1/roles/dashboard", [], $headers);
 
         $response->assertStatus(200);
         $response->assertJson($expectedFields);

@@ -77,6 +77,30 @@ abstract class  ItemController extends Controller
     }
 
     /**
+     * Display count of the resource
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function count(Request $request): JsonResponse
+    {
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), $request->all() ?: []
+            )
+        );
+
+        return response()->json([
+            'total' => Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.count.query.prepare'),
+                $itemsQuery->get()
+            )->count()
+        ]);
+    }
+
+    /**
      * @apiDefine DefaultCreateErrorResponse
      *
      * @apiError (Error 400) {String} error  Name of error
@@ -297,10 +321,10 @@ abstract class  ItemController extends Controller
      */
 
     /**
-    * @apiDefine DefaultDestroyResponse
-    * @apiSuccess {String}    message      Message about success remove
-    * @apiError   (Error 404) ItemNotFound HTTP/1.1 404 Page Not Found
-    */
+     * @apiDefine DefaultDestroyResponse
+     * @apiSuccess {String}    message      Message about success remove
+     * @apiError   (Error 404) ItemNotFound HTTP/1.1 404 Page Not Found
+     */
 
     /**
      * @apiDefine DefaultBulkDestroyErrorResponse
@@ -400,8 +424,7 @@ abstract class  ItemController extends Controller
             if (method_exists($cls, 'getTable')) {
                 $table = (new $cls())->getTable();
                 $query->whereNull("$table.deleted_at");
-            }
-            else {
+            } else {
                 $query->whereNull('deleted_at');
             }
         }

@@ -38,7 +38,7 @@ class ProjectUsersControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/projects-users/bulk-create", $data, $headers);
+        $response = $this->postJson("/v1/projects-users/bulk-create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -72,8 +72,8 @@ class ProjectUsersControllerTest extends TestCase
             ]
         ];
 
-        $this->postJson("/api/v1/projects-users/bulk-create", $data, $headers);
-        $response = $this->postJson("/api/v1/projects-users/bulk-remove", $data, $headers);
+        $this->postJson("/v1/projects-users/bulk-create", $data, $headers);
+        $response = $this->postJson("/v1/projects-users/bulk-remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -104,7 +104,7 @@ class ProjectUsersControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/projects-users/create", $data, $headers);
+        $response = $this->postJson("/v1/projects-users/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -126,8 +126,8 @@ class ProjectUsersControllerTest extends TestCase
             "message"
         ];
 
-        $this->postJson("/api/v1/projects-users/create", $data, $headers);
-        $response = $this->postJson("/api/v1/projects-users/remove", $data, $headers);
+        $this->postJson("/v1/projects-users/create", $data, $headers);
+        $response = $this->postJson("/v1/projects-users/remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -158,9 +158,9 @@ class ProjectUsersControllerTest extends TestCase
             "user_id"     => 1
         ];
 
-        $this->postJson("/api/v1/projects-users/create", $createData, $headers);
+        $this->postJson("/v1/projects-users/create", $createData, $headers);
 
-        $response = $this->getJson("/api/v1/projects-users/list", $headers);
+        $response = $this->getJson("/v1/projects-users/list", $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);

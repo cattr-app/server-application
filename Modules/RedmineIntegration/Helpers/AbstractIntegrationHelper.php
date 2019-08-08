@@ -2,8 +2,8 @@
 
 namespace Modules\RedmineIntegration\Helpers;
 
-use Redmine;
 use Modules\RedmineIntegration\Models\RedmineClient;
+use Redmine;
 
 /**
  * Class AbstractIntegrationHelper
@@ -17,7 +17,8 @@ abstract class AbstractIntegrationHelper
     /**
      * Init Redmine client object
      *
-     * @param $userId User's id in our system
+     * @param $userId  User's id in our system
+     *
      * @return Redmine\Client
      */
     public function initRedmineClient(int $userId): Redmine\Client

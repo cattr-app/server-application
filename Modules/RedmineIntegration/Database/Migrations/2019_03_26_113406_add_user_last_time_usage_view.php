@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
 class AddUserLastTimeUsageView extends Migration
@@ -13,7 +11,7 @@ class AddUserLastTimeUsageView extends Migration
      */
     public function up()
     {
-        DB::unprepared('CREATE VIEW `user_time_activity` AS
+        DB::statement('CREATE VIEW user_time_activity AS
             SELECT
                 t2.id AS time_interval_id,
                 t1.user_id,
@@ -46,6 +44,6 @@ class AddUserLastTimeUsageView extends Migration
      */
     public function down()
     {
-        DB::unprepared('DROP VIEW IF EXISTS `user_time_activity`');
+        DB::statement('DROP VIEW user_time_activity');
     }
 }

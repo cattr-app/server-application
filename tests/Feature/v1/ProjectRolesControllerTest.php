@@ -7,7 +7,7 @@ use Illuminate\Foundation\Testing\DatabaseMigrations;
 use Illuminate\Foundation\Testing\RefreshDatabase;
 use RoleSeeder;
 use Tests\TestCase;
-use UsersTableSeeder;
+use AdminTableSeeder;
 
 /**
  * Class AuthControllerTest
@@ -52,7 +52,7 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/projects-roles/bulk-create", $data, $headers);
+        $response = $this->postJson("/v1/projects-roles/bulk-create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJson($expectedJson);
@@ -93,8 +93,8 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
-        $this->postJson("/api/v1/projects-roles/bulk-create", $data, $headers);
-        $response = $this->postJson("/api/v1/projects-roles/bulk-remove", $data, $headers);
+        $this->postJson("/v1/projects-roles/bulk-create", $data, $headers);
+        $response = $this->postJson("/v1/projects-roles/bulk-remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJson($expectedJson);
@@ -124,7 +124,7 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/projects-roles/create", $data, $headers);
+        $response = $this->postJson("/v1/projects-roles/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -148,8 +148,8 @@ class ProjectRolesControllerTest extends TestCase
             "message" => "Item has been removed"
         ];
 
-        $this->postJson("/api/v1/projects-roles/create", $data, $headers);
-        $response = $this->postJson("/api/v1/projects-roles/remove", $data, $headers);
+        $this->postJson("/v1/projects-roles/create", $data, $headers);
+        $response = $this->postJson("/v1/projects-roles/remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -180,9 +180,9 @@ class ProjectRolesControllerTest extends TestCase
             ]
         ];
 
-        $this->postJson("/api/v1/projects-roles/create", $createData, $headers);
+        $this->postJson("/v1/projects-roles/create", $createData, $headers);
 
-        $response = $this->postJson("/api/v1/projects-roles/list", [], $headers);
+        $response = $this->postJson("/v1/projects-roles/list", [], $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);

@@ -12,6 +12,6 @@
 |
 */
 
-if (!app()->routesAreCached()) {
+/*if (!app()->routesAreCached()) {
     require __DIR__ . '/Http/routes.php';
-}
+}*/

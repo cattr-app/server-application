@@ -36,10 +36,6 @@ class RouteServiceProvider extends ServiceProvider
     public function map()
     {
         $this->mapApiRoutes();
-
-        $this->mapWebRoutes();
-
-        //
     }
 
     /**
@@ -48,6 +44,7 @@ class RouteServiceProvider extends ServiceProvider
      * These routes all receive session state, CSRF protection, etc.
      *
      * @return void
+     * @deprecated this is headless CRM
      */
     protected function mapWebRoutes()
     {
@@ -65,6 +62,9 @@ class RouteServiceProvider extends ServiceProvider
      */
     protected function mapApiRoutes()
     {
+        Route::options('{any}', function () {
+            return '';
+        })->where('any', '.*');
         Route::middleware('api')
             ->namespace($this->namespace)
             ->group(base_path('routes/api.php'));
