@@ -69,10 +69,16 @@ class RedmineSettingsController extends AbstractRedmineController
 
         // Hell starts here
         $userRepository->setUserSendTime($this->user->id, $request->redmine_sync);
-        $userRepository->setActiveStatusId($this->user->id, $request->redmine_active_status);
-        $userRepository->setInactiveStatusId($this->user->id, $request->redmine_inactive_status);
-        $userRepository->setActivateStatuses($this->user->id, $request->redmine_on_activate_statuses);
-        $userRepository->setDeactivateStatuses($this->user->id, $request->redmine_on_deactivate_statuses);
+        $userRepository->setActiveStatusId($this->user->id, $request->redmine_on_activate_statuses['value']);
+        $userRepository->setInactiveStatusId($this->user->id, $request->redmine_on_deactivate_statuses['value']);
+        /** @noinspection PhpParamsInspection */
+        $userRepository->setActivateStatuses(
+            $this->user->id, $request->redmine_on_activate_statuses['reference']
+        );
+        /** @noinspection PhpParamsInspection */
+        $userRepository->setDeactivateStatuses(
+            $this->user->id, $request->redmine_on_deactivate_statuses['reference']
+        );
         $userRepository->setOnlineTimeout($this->user->id, $request->redmine_online_timeout);
         // Hell ends here
 
@@ -167,8 +173,14 @@ class RedmineSettingsController extends AbstractRedmineController
             'redmine_sync' => $userRepository->isUserSendTime($userId),
             'redmine_active_status' => $userRepository->getActiveStatusId($userId),
             'redmine_inactive_status' => $userRepository->getInactiveStatusId($userId),
-            'redmine_on_activate_statuses' => $userRepository->getActivateStatuses($userId),
-            'redmine_on_deactivate_statuses' => $userRepository->getDeactivateStatuses($userId),
+            'redmine_on_activate_statuses' => [
+                'value' => $userRepository->getActiveStatusId($userId),
+                'reference' => $userRepository->getActivateStatuses($userId),
+            ],
+            'redmine_on_deactivate_statuses' => [
+                'value' => $userRepository->getInactiveStatusId($userId),
+                'reference' => $userRepository->getDeactivateStatuses($userId),
+            ],
             'redmine_online_timeout' => $userRepository->getOnlineTimeout($userId),
         ];
 
