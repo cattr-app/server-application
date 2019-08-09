@@ -5,7 +5,8 @@ namespace Modules\RedmineIntegration\Providers;
 use App\EventFilter\EventServiceProvider as ServiceProvider;
 use Config;
 use Illuminate\Database\Eloquent\Factory;
-use Modules\RedmineIntegration\Console\{SynchronizePriorities,
+use Modules\RedmineIntegration\Console\{GenerateSignature,
+    SynchronizePriorities,
     SynchronizeProjects,
     SynchronizeStatuses,
     SynchronizeTasks,
@@ -139,6 +140,7 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
             SynchronizeProjects::class,
             SynchronizeUsers::class,
             SynchronizeTime::class,
+            GenerateSignature::class
         ]);
     }
 
@@ -150,7 +152,7 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
     public function register()
     {
         //Register Schedule service provider
-        $this->app->register('Modules\RedmineIntegration\Providers\ScheduleServiceProvider');
+        $this->app->register(ScheduleServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
 
         // TODO: What is this?

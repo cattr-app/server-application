@@ -16,7 +16,8 @@ Route::middleware('auth:api')->group(function (Router $router) {
     $router->put('/time-entries', 'TimeEntryRedmineController@create')->name('time-entries.put');
 
     // Redmine Settings routes
-    $router->patch('/settings', 'RedmineSettingsController@updateSettings')->name('settings.update');
+    $router->patch('/settings', 'RedmineSettingsController@updateSettings')
+        ->name('settings.update');
     $router->get('/settings', 'RedmineSettingsController@getSettings')->name('settings.get');
 
     $router->group(['prefix' => '/settings/data', 'as' => 'settings.data.'], function () use ($router) {
