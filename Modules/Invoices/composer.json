@@ -1,0 +1,25 @@
+{
+  "name": "amazingcat/invoices",
+  "description": "Invoices module to show user rates",
+  "authors": [
+    {
+      "name": "AmazingCat",
+      "email": "to@amazingcat.net"
+    }
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [
+      ],
+      "aliases": {
+      }
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\Invoices\\": ""
+    }
+  },
+  "require": {
+  }
+}
