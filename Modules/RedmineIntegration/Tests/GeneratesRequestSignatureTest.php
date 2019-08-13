@@ -8,7 +8,7 @@ use Tests\TestCase;
 class GeneratesRequestSignatureTest extends TestCase
 {
     /**
-     * A basic test example.
+     * Generate signature test
      *
      * @return void
      * @throws \Exception

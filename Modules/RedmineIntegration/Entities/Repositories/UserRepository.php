@@ -496,4 +496,22 @@ class UserRepository
     {
         $this->setProperty($userId, static::ONLINE_TIMEOUT_PROPERTY, $timeout);
     }
+
+    /**
+     * @param  int  $redmineId
+     *
+     * @return User
+     */
+    public function getUserByRedmineId(int $redmineId)
+    {
+        $userEav = Property::where([
+            'entity_type' => Property::USER_CODE,
+            'name' => 'REDMINE_ID',
+            'value' => $redmineId
+        ])->first();
+
+        $userId = $userEav->entity_id;
+
+        return User::find($userId);
+    }
 }

@@ -12,6 +12,7 @@ use Modules\RedmineIntegration\Console\{GenerateSignature,
     SynchronizeTasks,
     SynchronizeTime,
     SynchronizeUsers};
+use Modules\RedmineIntegration\Http\Middleware\ValidateSignature;
 
 /**
  * Class RedmineIntegrationServiceProvider
@@ -64,6 +65,9 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
         $this->registerCommands();
+
+        app('router')->aliasMiddleware('redmineintegration.signature',
+            ValidateSignature::class);
 
         parent::boot();
     }
