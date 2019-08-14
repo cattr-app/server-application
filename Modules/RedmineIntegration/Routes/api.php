@@ -1,26 +1,33 @@
 <?php
 
-use Illuminate\Routing\Router;
-
-Route::middleware('auth:api')->group(function (Router $router) {
-    $router->get('/', 'RedmineIntegrationController@index')->name('index');
+Route::middleware('auth:api')->group(function () {
+    Route::get('/', 'RedmineIntegrationController@index')->name('index');
 
     // Task routes
-    $router->post('/tasks/synchronize', 'TaskRedmineController@synchronize')->name('task.synchronize');
+    Route::post('/tasks/synchronize', 'TaskRedmineController@synchronize')->name('task.synchronize');
 
     // Project routes
-    $router->post('/projects/synchronize', 'ProjectRedmineController@synchronize')
+    Route::post('/projects/synchronize', 'ProjectRedmineController@synchronize')
         ->name('projects.synchronize');
 
     // Time Entry routes
-    $router->put('/time-entries', 'TimeEntryRedmineController@create')->name('time-entries.put');
+    Route::put('/time-entries', 'TimeEntryRedmineController@create')->name('time-entries.put');
 
     // Redmine Settings routes
-    $router->patch('/settings', 'RedmineSettingsController@updateSettings')->name('settings.update');
-    $router->get('/settings', 'RedmineSettingsController@getSettings')->name('settings.get');
+    Route::patch('/settings', 'RedmineSettingsController@updateSettings')
+        ->name('settings.update');
+    Route::get('/settings', 'RedmineSettingsController@getSettings')->name('settings.get');
 
-    $router->group(['prefix' => '/settings/data', 'as' => 'settings.data.'], function () use ($router) {
-        $router->get('internal-priorities',
+    Route::group(['prefix' => '/settings/data', 'as' => 'settings.data.'], function () {
+        Route::get('internal-priorities',
             'RedmineSettingsController@getInternalPriorities')->name('internal-priorities');
     });
+});
+
+Route::group([
+    'middleware' => 'redmineintegration.signature',
+    'as' => 'plugin.',
+    'prefix' => 'plugin'
+], function () {
+    Route::post('update', 'TaskUpdateController@handleUpdate')->name('update');
 });
