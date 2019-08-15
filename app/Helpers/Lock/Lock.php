@@ -2,7 +2,7 @@
 
 namespace App\Helpers\Lock;
 
-class Lock implements ILock
+class Lock implements LockInterface
 {
     protected $locked = false;
 

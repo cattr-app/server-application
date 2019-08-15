@@ -42,7 +42,7 @@ return [
 
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
-        // App\Providers\BroadcastServiceProvider::class,
+        App\Providers\BroadcastServiceProvider::class,
         App\EventFilter\EventFilterServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\LockServiceProvider::class,

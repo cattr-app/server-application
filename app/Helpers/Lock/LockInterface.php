@@ -4,7 +4,7 @@
 namespace App\Helpers\Lock;
 
 
-interface ILock
+interface LockInterface
 {
     public function setLock(bool $lock): void;
 
