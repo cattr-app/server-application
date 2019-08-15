@@ -56,29 +56,32 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
     /**
      * Process data saving from incoming request from plugin on redmine
      *
-     * @return void
+     * @return Task
      * @throws Exception
      */
-    public function process(): void
+    public function process(): Task
     {
         $taskData = $this->getTaskDataFromRequest();
 
-        $this->processTask($taskData);
+        return $this->processTask($taskData);
     }
 
     /**
      * @param  mixed|ParameterBag  $task
      *
+     * @return Task|mixed|ParameterBag|void
      * @throws Exception
      */
     protected function processTask($task)
     {
         $this->metaInformationUpdate($task);
         if (!$this->taskExists($task['id'])) {
-            $this->addTask($task);
+            $task = $this->addTask($task);
         } else {
-            $this->updateTask($task);
+            $task = $this->updateTask($task);
         }
+
+        return $task;
     }
 
     /**
@@ -229,10 +232,10 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
     /**
      * @param  mixed|ParameterBag  $task
      *
-     * @return void
+     * @return Task
      * @throws Exception
      */
-    public function addTask($task): void
+    public function addTask($task): Task
     {
         $assignedUser = $this->userRepository->getUserByRedmineId($task['assigned_to_id']);
         $project = $this->projectHelper->getProjectByRedmineId($this->getProjectDataFromRequest()['id']);
@@ -253,6 +256,8 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
             'name' => 'REDMINE_ID',
             'value' => $task['id'],
         ]);
+
+        return $internalTask;
     }
 
     /**

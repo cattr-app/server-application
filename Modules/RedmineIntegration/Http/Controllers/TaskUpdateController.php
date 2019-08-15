@@ -9,6 +9,7 @@ use DB;
 use Exception;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Log;
+use Modules\RedmineIntegration\Events\TaskReceived;
 use Modules\RedmineIntegration\Helpers\Plugin\PluginWebhookHelper;
 use Throwable;
 
@@ -47,7 +48,9 @@ class TaskUpdateController extends Controller
     public function handleUpdate(): void
     {
         try {
-            $this->pluginWebhookHelper->process();
+            $task = $this->pluginWebhookHelper->process();
+
+            event(new TaskReceived($task));
         } catch (Throwable $e) {
             Log::info($e->getMessage());
         }
