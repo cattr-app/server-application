@@ -1,16 +1,14 @@
 {
-  "name": "GitLabIntegration",
-  "alias": "gitlabintegration",
-  "description": "GitLab Integration",
-  "keywords": [],
-  "active": 1,
-  "order": 0,
-  "providers": [
-    "Modules\\GitLabIntegration\\Providers\\GitLabIntegrationServiceProvider"
-  ],
-  "aliases": {},
-  "files": [
-    "start.php"
-  ],
-  "requires": []
+    "name": "GitlabIntegration",
+    "alias": "gitlabintegration",
+    "description": "Gitlab Integration",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\GitlabIntegration\\Providers\\GitlabIntegrationServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
 }
