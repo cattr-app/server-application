@@ -77,7 +77,7 @@ class InvoicesController extends Controller
     }
 
     /**
-     * Update or create rae for project according userId->projectId
+     * Update or create rate for project according userId->projectId
      * @param Request $request
      * @return JsonResponse
      */
@@ -104,6 +104,8 @@ class InvoicesController extends Controller
             ], $e->getCode());
         }
 
+        $answer["message"] = "New rate saved!";
+        $answer["status"] = "success";
         return response()->json($answer);
     }
 
@@ -175,10 +177,13 @@ class InvoicesController extends Controller
             $answer = $this->invoicesRepository->setDefaultRateForUser($userId, $defaultRate);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e->getMessage()
+                "message" => $e->getMessage(),
+                "status" => "error"
             ], $e->getCode());
         }
 
+        $answer["message"] = "New default rate saved!";
+        $answer["status"] = "success";
         return response()->json($answer);
     }
 }

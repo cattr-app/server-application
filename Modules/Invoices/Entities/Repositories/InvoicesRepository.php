@@ -5,6 +5,7 @@ namespace Modules\Invoices\Entities\Repositories;
 
 use App\Models\Project;
 use App\Models\Property;
+use App\User;
 use Auth;
 use DB;
 use Exception;
@@ -111,6 +112,19 @@ class InvoicesRepository
             }
         }
 
+        // If user do no have any projects we still have to show him and let him have a default rate on Invoices page
+        foreach ($userIds as $userId) {
+            if (!in_array($userId, array_keys($users))) {
+                $user = User::where('id', '=', $userId)
+                    ->first();
+
+                $users[$userId] = [
+                    'id' => $userId,
+                    'full_name' => $user->full_name,
+                    'projects' => [],
+                ];
+            }
+        }
 
         foreach ($users as $user_id => $user) {
             $users[$user_id]['projects'] =  array_values($user['projects']);
