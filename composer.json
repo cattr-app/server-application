@@ -23,7 +23,7 @@
     "laravel/framework": "5.6.39",
     "laravel/tinker": "1.0.7",
     "m4tthumphrey/php-gitlab-api": "^9.13",
-    "nwidart/laravel-modules": "3.3.1",
+    "nwidart/laravel-modules": "^5.0",
     "paulvl/backup": "3.0.2",
     "php-http/guzzle6-adapter": "^1.0",
     "tymon/jwt-auth": " 1.0.0-rc.2",
