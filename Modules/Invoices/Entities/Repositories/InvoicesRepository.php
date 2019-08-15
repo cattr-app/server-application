@@ -85,7 +85,6 @@ class InvoicesRepository
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))
             ->whereIn('user_id', $userIds)
             ->whereIn('project_id', $projectIds)
-            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
             ->get();
 
