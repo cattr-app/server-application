@@ -62,10 +62,14 @@ class InvoicesController extends Controller
                 ->whereIn('project_id', $projectIds)
                 ->get();
 
+            $this->rates = [];
+            $projectIds = [];
+
             foreach ($userProjectsRelations as $userProjectsRelation) {
-                $projectId = $userProjectsRelation->project_id;
-                $this->rates[$projectId] = $this->invoicesRepository->getUserRateForProject($projectId, $userId);
+                $projectIds []= $userProjectsRelation->project_id;
             }
+
+            $this->rates = $this->invoicesRepository->getUserRateForProjects($projectIds, $userId);
 
             $answer[] = [
                 'userId' => $userId,

@@ -22,19 +22,31 @@ class InvoicesRepository
 
     /**
      * Get user rae for project
-     * @param $projectId
+     * @param $projectIds
      * @param $userId
-     * @return string|null
+     * @return array|null
      */
-    public function getUserRateForProject($projectId, $userId): ?string
+    public function getUserRateForProjects($projectIds, $userId): ?array
     {
-        $userRateForProject = Property::where([
-            ['entity_id', '=', $userId],
-            ['entity_type', '=', Property::USER_CODE],
-            ['name', '=', self::INVOICES_RATE . self::SEPARATOR . $projectId]
-        ])->first();
+        $namedProjectIds = [];
+        foreach ($projectIds as $projectId) {
+            $namedProjectIds[$projectId] = self::INVOICES_RATE . self::SEPARATOR . $projectId;
+        }
 
-        return $userRateForProject ? $userRateForProject->value : null;
+        $userRateForProjects = Property::select('name', 'value')
+            ->where([
+                    ['entity_id', '=', $userId],
+                    ['entity_type', '=', Property::USER_CODE],
+                ])
+            ->whereIn('name', $namedProjectIds)
+            ->get();
+
+        foreach ($userRateForProjects as $userRateForProject) {
+            $projectId = array_search($userRateForProject->name, $namedProjectIds);
+            $answer[$projectId] = $userRateForProject->value ?? null;
+        }
+
+        return $answer ?? null;
     }
 
     /**
@@ -82,10 +94,11 @@ class InvoicesRepository
     public function getProjectsByUsers(array $userIds, array $projectIds)
     {
         $projectReports = DB::table('project_report')
-            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))
+            ->select('user_id', 'user_name', 'project_id', 'project_name')
+            ->distinct()
             ->whereIn('user_id', $userIds)
             ->whereIn('project_id', $projectIds)
-            ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
+            ->groupBy('user_id', 'user_name', 'project_id', 'project_name')
             ->get();
 
         $users = [];
