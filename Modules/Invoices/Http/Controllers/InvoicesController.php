@@ -4,7 +4,6 @@ namespace Modules\Invoices\Http\Controllers;
 
 
 use App\Http\Controllers\Controller;
-use App\Models\Role;
 use Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -20,11 +19,6 @@ class InvoicesController extends Controller
      * @var InvoicesRepository
      */
     private $invoicesRepository;
-
-    /**
-     * @var array $projectsId
-     */
-    private $projectsId = [];
 
     /**
      * @var array $rates
@@ -61,10 +55,15 @@ class InvoicesController extends Controller
 
         $answer = [];
         foreach ($userIds as $userId) {
-            $this->projectsId = [];
-            $this->rates = [];
+            $userProjectsRelations = \DB::table('project_report')
+                ->select('user_id', 'project_id')
+                ->distinct()
+                ->where('user_id', $userId)
+                ->whereIn('project_id', $projectIds)
+                ->get();
 
-            foreach ($projectIds as $projectId) {
+            foreach ($userProjectsRelations as $userProjectsRelation) {
+                $projectId = $userProjectsRelation->project_id;
                 $this->rates[$projectId] = $this->invoicesRepository->getUserRateForProject($projectId, $userId);
             }
 
@@ -73,6 +72,7 @@ class InvoicesController extends Controller
                 'rates' => $this->rates
             ];
         }
+
         return response()->json($answer);
     }
 
