@@ -48,8 +48,10 @@ class TaskUpdateController extends Controller
     public function handleUpdate(): void
     {
         try {
+            // Processing received task
             $task = $this->pluginWebhookHelper->process();
 
+            // Fire an event for websocket clients
             event(new TaskReceived($task));
         } catch (Throwable $e) {
             Log::info($e->getMessage());

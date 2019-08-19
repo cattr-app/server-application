@@ -2,10 +2,11 @@
 
 namespace Modules\RedmineIntegration\Models;
 
-use App\Task;
-use App\TimeInterval;
+use App\Models\Task;
+use App\Models\TimeInterval;
 use App\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**

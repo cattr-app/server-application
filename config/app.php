@@ -49,7 +49,6 @@ return [
         // Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
 
         Modules\EventListener\Providers\EventListenerServiceProvider::class,
-        Modules\GitLabIntegration\Providers\GitLabIntegrationServiceProvider::class,
         Modules\RedmineIntegration\Providers\RedmineIntegrationServiceProvider::class,
 
         Backup\BackupServiceProvider::class,

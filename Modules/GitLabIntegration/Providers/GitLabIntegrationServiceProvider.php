@@ -1,24 +1,13 @@
 <?php
 
-namespace Modules\GitLabIntegration\Providers;
+namespace Modules\GitlabIntegration\Providers;
 
-use App\EventFilter\EventServiceProvider as ServiceProvider;
-use Modules\GitLabIntegration\Console\SyncProjects;
+use Illuminate\Support\ServiceProvider;
+use Illuminate\Database\Eloquent\Factory;
+use Modules\GitlabIntegration\Console\Syncronize;
 
-/**
- * Class GitLabIntegrationServiceProvider
- *
- * @package Modules\GitLabIntegration\Providers
- */
-class GitLabIntegrationServiceProvider extends ServiceProvider
+class GitlabIntegrationServiceProvider extends ServiceProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = false;
-
     /**
      * Boot the application events.
      *
@@ -26,16 +15,11 @@ class GitLabIntegrationServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        $this->registerTranslations();
+        $this->registerConfig();
+        $this->registerFactories();
         $this->registerCommands();
-
-        parent::boot();
-    }
-
-    protected function registerCommands()
-    {
-        $this->commands([
-            SyncProjects::class,
-        ]);
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
     }
 
     /**
@@ -45,8 +29,62 @@ class GitLabIntegrationServiceProvider extends ServiceProvider
      */
     public function register()
     {
-        $this->app->register(ScheduleServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
+    }
+
+    /**
+     * Register config.
+     *
+     * @return void
+     */
+    protected function registerConfig()
+    {
+        $this->publishes([
+            __DIR__ . '/../Config/config.php' => config_path('gitlabintegration.php'),
+        ], 'config');
+        $this->mergeConfigFrom(
+            __DIR__ . '/../Config/config.php', 'gitlabintegration'
+        );
+    }
+
+    /**
+     * Register translations.
+     *
+     * @return void
+     */
+    public function registerTranslations()
+    {
+        $langPath = resource_path('lang/modules/gitlabintegration');
+
+        if (is_dir($langPath)) {
+            $this->loadTranslationsFrom($langPath, 'gitlabintegration');
+        } else {
+            $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'gitlabintegration');
+        }
+    }
+
+    /**
+     * Register an additional directory of factories.
+     *
+     * @return void
+     */
+    public function registerFactories()
+    {
+        if (!app()->environment('production')) {
+            app(Factory::class)->load(__DIR__ . '/../Database/factories');
+        }
+    }
+
+    /**
+     * Register command
+     *
+     * @return void
+     */
+    protected function registerCommands()
+    {
+        $this->commands([
+            Syncronize::class,
+        ]);
     }
 
     /**
