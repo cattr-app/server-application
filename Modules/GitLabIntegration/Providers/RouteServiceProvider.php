@@ -1,23 +1,35 @@
 <?php
 
-namespace Modules\GitLabIntegration\Providers;
+namespace Modules\GitlabIntegration\Providers;
 
-use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
 class RouteServiceProvider extends ServiceProvider
 {
-    protected $namespace = "Modules\\GitLabIntegration\\Http\\Controllers";
-
     /**
-     * Indicates if loading of the provider is deferred.
+     * The module namespace to assume when generating URLs to actions.
      *
-     * @var bool
+     * @var string
      */
-    protected $defer = false;
+    protected $moduleNamespace = 'Modules\GitlabIntegration\Http\Controllers';
 
     /**
-     * Map routes
+     * Called before routes are registered.
+     *
+     * Register any model bindings or pattern based filters.
+     *
+     * @return void
+     */
+    public function boot()
+    {
+        parent::boot();
+    }
+
+    /**
+     * Define the routes for the application.
+     *
+     * @return void
      */
     public function map()
     {
@@ -25,14 +37,18 @@ class RouteServiceProvider extends ServiceProvider
     }
 
     /**
-     * Map Api routes
+     * Define the "api" routes for the application.
+     *
+     * These routes are typically stateless.
+     *
+     * @return void
      */
     protected function mapApiRoutes()
     {
         Route::middleware('api')
             ->as('v1.integration.gitlab.')
             ->prefix('v1/integration/gitlab')
-            ->namespace($this->namespace)
-            ->group(__DIR__.'/../Routes/api.php');
+            ->namespace($this->moduleNamespace)
+            ->group(__DIR__ . '/../Routes/api.php');
     }
 }

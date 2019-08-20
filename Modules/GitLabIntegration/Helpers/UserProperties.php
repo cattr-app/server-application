@@ -1,8 +1,6 @@
 <?php
 
-
-namespace Modules\GitLabIntegration\Helpers;
-
+namespace Modules\GitlabIntegration\Helpers;
 
 use App\Models\Property;
 
