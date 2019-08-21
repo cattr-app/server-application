@@ -31,7 +31,7 @@ class TestEvent implements ShouldBroadcast
      */
     public function broadcastOn()
     {
-        return new PrivateChannel('task.updates.'.auth()->id());
+        return new PrivateChannel('task.updates.1');
     }
 
     /**
