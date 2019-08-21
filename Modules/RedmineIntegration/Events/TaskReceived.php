@@ -37,4 +37,12 @@ class TaskReceived implements ShouldBroadcast
     {
         return new PrivateChannel("task.updates.{$this->task->user_id}");
     }
+
+    /**
+     * @return string
+     */
+    public function broadcastAs()
+    {
+        return 'task.update';
+    }
 }
