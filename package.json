@@ -1,0 +1,11 @@
+{
+  "name": "at-backend",
+  "version": "1.0.0",
+  "main": "index.js",
+  "repository": "https://git.amazingcat.net/AmazingTime/core/backend",
+  "author": "perkthefox <antonkevinok@gmail.com>",
+  "license": "MIT",
+  "dependencies": {
+    "laravel-echo-server": "^1.5.7"
+  }
+}
