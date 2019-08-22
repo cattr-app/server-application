@@ -237,16 +237,27 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
      */
     public function addTask($task): Task
     {
-        $assignedUser = $this->userRepository->getUserByRedmineId($task['assigned_to_id']);
+        $assignedUser = $task['assigned_to_id'] ? $this->userRepository->getUserByRedmineId($task['assigned_to_id']) : null;
         $project = $this->projectHelper->getProjectByRedmineId($this->getProjectDataFromRequest()['id']);
+        $author = $this->userRepository->getUserByRedmineId($task['author_id']);
+
+        $taskAuthorId = $author ? $author->id : 1;
+        $redmineUrl = Property::where([
+            'entity_id' => $taskAuthorId,
+            'entity_type' => Property::USER_CODE,
+            'name' => 'REDMINE_URL'
+        ])->first()->value;
+
+        $taskUrl = "$redmineUrl/issues/" . $task['id'];
 
         $internalTask = Task::create([
             'project_id' => $project->id,
             'task_name' => $task['subject'],
             'description' => $task['description'],
             'active' => 1,
-            'user_id' => $assignedUser->id,
-            'assigned_by' => $assignedUser->id,
+            'url' => $taskUrl,
+            'user_id' => $taskAuthorId,
+            'assigned_by' => $assignedUser ? $assignedUser->id : 1,
             'priority_id' => $this->getInternalPriority($this->getPriorityDataFromRequest()['name'])->id,
         ]);
 
@@ -261,7 +272,7 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
     }
 
     /**
-     * @param mixed|ParameterBag $task
+     * @param  mixed|ParameterBag  $task
      *
      * @todo
      * @deprecated

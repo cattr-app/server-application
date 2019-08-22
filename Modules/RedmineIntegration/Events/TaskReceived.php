@@ -2,6 +2,7 @@
 
 namespace Modules\RedmineIntegration\Events;
 
+use App\Models\Project;
 use App\Models\Task;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -16,16 +17,22 @@ class TaskReceived implements ShouldBroadcast
     /**
      * @var Task
      */
-    protected $task;
+    public $task;
+
+    /**
+     * @var Project
+     */
+    public $project;
 
     /**
      * Create a new event instance.
      *
-     * @param Task $task
+     * @param  Task  $task
      */
     public function __construct($task)
     {
         $this->task = $task;
+        $this->project = $task->project;
     }
 
     /**

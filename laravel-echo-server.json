@@ -1,5 +1,5 @@
 {
-	"authHost": "http://api.at.loc/",
+	"authHost": "http://at.loc/api",
 	"authEndpoint": "/broadcasting/auth",
 	"clients": [
 		{
@@ -16,7 +16,7 @@
 	},
 	"devMode": true,
 	"host": null,
-	"port": "3028",
+	"port": "23800",
 	"protocol": "http",
 	"socketio": {},
 	"secureOptions": 67108864,
