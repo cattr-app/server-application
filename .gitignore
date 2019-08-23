@@ -30,3 +30,4 @@ config/crudgenerator.php
 resources/crud-generator/
 coverage/
 *.sql
+.DS_Store
