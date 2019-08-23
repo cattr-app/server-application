@@ -1,15 +1,13 @@
 <?php
 
-use Illuminate\Database\Seeder;
-
-use App\User;
 use App\Models\Project;
+use App\Models\Screenshot;
 use App\Models\Task;
 use App\Models\TimeInterval;
-use App\Models\Screenshot;
-
+use App\User;
 use Faker\Factory;
 use Faker\Generator;
+use Illuminate\Database\Seeder;
 
 class TaskListSeeder extends Seeder
 {
@@ -42,7 +40,7 @@ class TaskListSeeder extends Seeder
 
         $this->command->getOutput()->writeln("<fg=yellow>- Seed data for user #{$user->id}</>");
 
-        foreach(range(0, 4) as $i) {
+        foreach (range(0, 4) as $i) {
             $project = Project::create([
                 'company_id' => $i,
                 'name' => $faker->text($i * 10 + 5),
@@ -59,7 +57,7 @@ class TaskListSeeder extends Seeder
     {
         $faker = $this->faker;
 
-      foreach(range(0, 14) as $i) {
+        foreach (range(0, 14) as $i) {
             $task = Task::create([
                 'project_id' => $project->id,
                 'task_name' => $faker->text(15 + $i),
@@ -86,7 +84,7 @@ class TaskListSeeder extends Seeder
 
         $time[$user->id] += 3600 * 10;
 
-        foreach(range(0, 4) as $i) {
+        foreach (range(0, 4) as $i) {
 
             $this->command->getOutput()->writeln("<fg=cyan>--- {$task->project->id}.{$task->id}. Interval #{$i}</>");
 
@@ -114,41 +112,40 @@ class TaskListSeeder extends Seeder
 
     protected function seedScreenshot(TimeInterval $interval, User $user): void
     {
-        if($this->_isScreenshotDownloaded === false)
-        {
-        $placeholderLink = "http://via.placeholder.com/1600x900/{$this->random_color()}/{$this->random_color()}.png?"
-            . http_build_query([
-            'text' => "#{$interval->id} - {$interval->task->task_name}",
-            ]);
+        if ($this->_isScreenshotDownloaded === false) {
+            $placeholderLink = "http://via.placeholder.com/1600x900/{$this->random_color()}/{$this->random_color()}.png?"
+                .http_build_query([
+                    'text' => "#{$interval->id} - {$interval->task->task_name}",
+                ]);
 
-        $filePath = "uploads/screenshots/{$user->id}_{$interval->task_id}_{$interval->id}.png";
+            $filePath = "uploads/screenshots/{$user->id}_{$interval->task_id}_{$interval->id}.png";
 
-        /** @var Illuminate\Filesystem\FilesystemAdapter $disk */
-        $disk = Storage::disk('local');
+            /** @var Illuminate\Filesystem\FilesystemAdapter $disk */
+            $disk = Storage::disk('local');
 
-        if (!$disk->exists($filePath)) {
-            $this->command->getOutput()->writeln('<fg=cyan>---- Generate Screenshot</>');
+            if (!$disk->exists($filePath)) {
+                $this->command->getOutput()->writeln('<fg=cyan>---- Generate Screenshot</>');
 
-            $fileData = file_get_contents($placeholderLink);
-            $disk->put($filePath, $fileData);
-        }
+                $fileData = file_get_contents($placeholderLink);
+                $disk->put($filePath, $fileData);
+            }
 
             $this->_filePath = $filePath;
         }
 
         Screenshot::create([
-        'time_interval_id' => $interval->id,
-        'path' => $this->_filePath,
+            'time_interval_id' => $interval->id,
+            'path' => $this->_filePath,
         ]);
     }
 
     protected function random_color_part(): string
     {
-        return str_pad( dechex( random_int( 0, 255 ) ), 2, '0', STR_PAD_LEFT);
+        return str_pad(dechex(random_int(0, 255)), 2, '0', STR_PAD_LEFT);
     }
 
     protected function random_color(): string
     {
-        return $this->random_color_part() . $this->random_color_part() . $this->random_color_part();
+        return $this->random_color_part().$this->random_color_part().$this->random_color_part();
     }
 }

@@ -159,27 +159,7 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         $this->app->register(ScheduleServiceProvider::class);
         $this->app->register(RouteServiceProvider::class);
 
-        // TODO: What is this?
-
-//        $this->app->singleton(TaskIntegrationHelper::class, function ($app) {
-//            return new TaskIntegrationHelper();
-//        });
-//
-//        $this->app->singleton(TimeIntervalIntegrationHelper::class, function ($app) {
-//            return new TimeIntervalIntegrationHelper();
-//        });
-//
-//        $this->app->singleton(UserRepository::class, function ($app) {
-//            return new UserRepository();
-//        });
-//
-//        $this->app->singleton(ProjectRepository::class, function ($app) {
-//            return new ProjectRepository();
-//        });
-//
-//        $this->app->singleton(TaskRepository::class, function ($app) {
-//            return new TaskRepository();
-//        });
+        $this->app->register(BroadcastServiceProvider::class);
     }
 
     /**

@@ -16,7 +16,7 @@ class Synchronizer
     public function __construct(EntityResolver $entityResolver)
     {
         $this->entityResolver = $entityResolver;
-        $this->entityResolver->init();
+        // $this->entityResolver->init();
     }
 
     public function synchronize(User $user)
