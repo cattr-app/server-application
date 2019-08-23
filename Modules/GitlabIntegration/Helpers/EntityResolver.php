@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class EntityResolver
 {
+    private $initialized = false;
+
     protected $projects = [];
     protected $projectsInserted = [];
     protected $projectsRemoved = [];
@@ -22,8 +24,22 @@ class EntityResolver
 
     public function init(): void
     {
-        $this->reloadProjects();
-        $this->reloadTasks();
+        if (!$this->initialized) {
+            $this->initialized = true;
+            $this->reloadProjects();
+            $this->reloadTasks();
+        }
+    }
+
+    public function reinit(): void
+    {
+        $this->initialized = false;
+        $this->init();
+    }
+
+    public function isInitialized(): bool
+    {
+        return $this->initialized;
     }
 
     public function reloadProjects(): void

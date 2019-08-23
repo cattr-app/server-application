@@ -16,7 +16,6 @@ class Synchronizer
     public function __construct(EntityResolver $entityResolver)
     {
         $this->entityResolver = $entityResolver;
-        // $this->entityResolver->init();
     }
 
     public function synchronize(User $user)
@@ -27,6 +26,8 @@ class Synchronizer
         if (!$api) {
             return false;
         }
+
+        $this->entityResolver->init();
 
         $_userGitlabTasks = $api->getUserTasks();
         $userGitlabTasks = [];
