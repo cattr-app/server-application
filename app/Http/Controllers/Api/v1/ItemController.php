@@ -15,6 +15,7 @@ use Schema;
 use Validator;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DateTrait;
+use Event;
 
 
 /**
@@ -150,10 +151,14 @@ abstract class  ItemController extends Controller
 
         $cls = $this->getItemClass();
 
+        Event::dispatch($this->getEventUniqueName('item.create.before'), $requestData);
+
         $item = Filter::process(
             $this->getEventUniqueName('item.create'),
             $cls::create($this->filterRequestData($requestData))
         );
+
+        Event::dispatch($this->getEventUniqueName('item.create.after'), [$item, $requestData]);
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
@@ -305,6 +310,8 @@ abstract class  ItemController extends Controller
         $item->fill($this->filterRequestData($requestData));
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
         $item->save();
+
+        Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [

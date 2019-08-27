@@ -103,6 +103,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'timezone',
         'role_id',
         'important',
+        'change_password',
     ];
 
 
