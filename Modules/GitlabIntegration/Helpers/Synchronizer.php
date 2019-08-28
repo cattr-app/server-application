@@ -158,7 +158,7 @@ class Synchronizer
                 } catch (\Throwable $throwable) {
                 }
             }
-            $this->entityResolver->removeTask($diffProjectId);
+            $this->entityResolver->removeTask($diffTaskId);
         }
 
         $this->entityResolver->commit();
