@@ -91,7 +91,7 @@ class UserRepository
             ->where('entity_type', '=', Property::USER_CODE)
             ->where('name', '=', 'REDMINE_STATUSES')->first();
 
-        return $redmineStatusesProperty ? unserialize($redmineStatusesProperty->value) : [];
+        return $redmineStatusesProperty ? (unserialize($redmineStatusesProperty->value) ?: []) : [];
     }
 
     /**
@@ -107,7 +107,7 @@ class UserRepository
             ->where('entity_type', '=', Property::USER_CODE)
             ->where('name', '=', 'REDMINE_PRIORITIES')->first();
 
-        return $redminePrioritiesProperty ? unserialize($redminePrioritiesProperty->value) : [];
+        return $redminePrioritiesProperty ? (unserialize($redminePrioritiesProperty->value) ?: []) : [];
     }
 
     /**

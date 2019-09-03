@@ -89,6 +89,7 @@ class SynchronizeTasks extends Command
                 $this->synchronizeUserTasks($user->id);
                 $this->synchronizeUserActivity($user->id);
             } catch (Exception $e) {
+                // TODO - Add error log
             }
         }
     }

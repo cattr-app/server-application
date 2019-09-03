@@ -20,6 +20,16 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->registerCommands();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
+        \Filter::listen('role.actions.list', static function ($rules) {
+            if (!isset($rules['integration'])) {
+                $rules['integration'] = [];
+            }
+
+            $rules['integration']['gitlab'] = __('GitLab integration');
+
+            return $rules;
+        });
     }
 
     /**

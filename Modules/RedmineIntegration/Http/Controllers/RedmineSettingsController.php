@@ -73,11 +73,11 @@ class RedmineSettingsController extends AbstractRedmineController
         $userRepository->setInactiveStatusId($this->user->id, $request->redmine_on_deactivate_statuses['value']);
         /** @noinspection PhpParamsInspection */
         $userRepository->setActivateStatuses(
-            $this->user->id, $request->redmine_on_activate_statuses['reference']
+            $this->user->id, $request->redmine_on_activate_statuses['reference'] ?: []
         );
         /** @noinspection PhpParamsInspection */
         $userRepository->setDeactivateStatuses(
-            $this->user->id, $request->redmine_on_deactivate_statuses['reference']
+            $this->user->id, $request->redmine_on_deactivate_statuses['reference'] ?: []
         );
         $userRepository->setOnlineTimeout($this->user->id, $request->redmine_online_timeout);
         // Hell ends here

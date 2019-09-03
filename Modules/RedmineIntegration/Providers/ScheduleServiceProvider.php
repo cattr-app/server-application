@@ -11,9 +11,9 @@ class ScheduleServiceProvider extends ServiceProvider
         'users' => '*/15 * * * *',
         'statuses' => '*/15 * * * *',
         'priorities' => '*/15 * * * *',
-        'projects' => '*/15 * * * *',
-        'tasks' => '*/15 * * * *',
-        'time' => '0 * * * *'
+        'projects' => '*/5 * * * *',
+        'tasks' => '* * * * *',
+        'time' => '*/5 * * * *'
     ];
     const COMMAND_PREFIX = 'redmine-integration';
     /**

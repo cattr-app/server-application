@@ -148,6 +148,12 @@ class IntegrationObserver
 
     public function rulesHook($rules)
     {
+        if (!isset($rules['integration'])) {
+            $rules['integration'] = [];
+        }
+
+        $rules['integration']['redmine'] = __('Redmine integration');
+
         return $rules;
     }
 
