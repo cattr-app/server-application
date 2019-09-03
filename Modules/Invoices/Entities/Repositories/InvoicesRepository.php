@@ -3,10 +3,8 @@
 
 namespace Modules\Invoices\Entities\Repositories;
 
-use App\Models\Project;
 use App\Models\Property;
 use App\User;
-use Auth;
 use DB;
 use Exception;
 

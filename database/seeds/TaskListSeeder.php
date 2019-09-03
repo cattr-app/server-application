@@ -81,7 +81,7 @@ class TaskListSeeder extends Seeder
         static $time = [];
 
         if (!isset($time[$user->id])) {
-            $time[$user->id] = time() - 388800000;
+            $time[$user->id] = time();
         }
 
         $time[$user->id] += 3600 * 10;
