@@ -2,12 +2,10 @@
 
 namespace Modules\GitlabIntegration\Http\Controllers;
 
-use Filter;
 use App\Http\Controllers\Controller;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Modules\GitlabIntegration\Helpers\UserProperties;
-use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 
 class SettingsController extends Controller
 {
@@ -33,39 +31,24 @@ class SettingsController extends Controller
 
     public function set(Request $request)
     {
-        $request = Filter::process('request.gitlab.settings.set', $request);
         $userId = $request->user()->id;
 
         $validator = Validator::make(
-            $request->all(),
-            Filter::process('validation.gitlab.settings.set', [
+            $request->all(), [
                 'url' => 'string|required',
                 'apikey' => 'string|required'
-            ])
+            ]
         );
 
         if ($validator->fails()) {
-            return response()->json(
-                Filter::process('answer.error.gitlab.settings.set', [
-                    'error' => 'Validation fail',
-                ]),
-                400
-            );
+            return response()->json([
+                'error' => 'Validation fail',
+            ], 400);
         }
 
-        Filter::process(
-            'gitlab.settings.url.change',
-            $this->userProperties->setUrl($userId, $request->post('url'))
-        );
+        $this->userProperties->setUrl($userId, $request->post('url'));
+        $this->userProperties->setApiKey($userId, $request->post('apikey'));
 
-        Filter::process(
-            'gitlab.settings.apikey.change',
-            $this->userProperties->setApiKey($userId, $request->post('apikey'))
-        );
-
-        return response()->json(
-            Filter::process('answer.success.gitlab.settings.set', 'Setted!'),
-            200
-        );
+        return response()->json('Setted!', 200);
     }
 }

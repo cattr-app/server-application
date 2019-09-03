@@ -73,13 +73,6 @@ class Screenshot extends AbstractModel
 
         // Allow manager to see screenshots of related users.
         if (Role::can($user, 'screenshots', 'manager_access')) {
-            if (Role::can($user, 'users', 'relations')) {
-                $attached_user_ids = $user->attached_users->pluck('id');
-                if ($attached_user_ids->contains($user_id)) {
-                    return true;
-                }
-            }
-
             if (Role::can($user, 'projects', 'relations')) {
                 $attached_project_ids = $user->projects->pluck('id');
                 $related_user_ids = User::whereHas('timeIntervals', function ($query) use ($attached_project_ids) {

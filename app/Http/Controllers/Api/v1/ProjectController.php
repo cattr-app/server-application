@@ -33,7 +33,7 @@ class ProjectController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'name'        => 'required',
+            'name' => 'required',
             'description' => 'required',
         ];
     }
@@ -60,7 +60,7 @@ class ProjectController extends ItemController
      * @apiParam {String} [with]               For add relation model in response
      * @apiParam {Object} [tasks] `QueryParam` Project's relation task. All params in <a href="#api-Task-GetTaskList" >@Task</a>
      * @apiParam {Object} [users] `QueryParam` Project's relation user. All params in <a href="#api-User-GetUserList" >@User</a>
-    */
+     */
 
     /**
      * @apiDefine ProjectRelationsExample
@@ -153,10 +153,10 @@ class ProjectController extends ItemController
         }
 
         if ($project_relations_access && $request->get('user_id')) {
-            $usersId = collect($request->get('user_id'))->flatten(0)->filter(function($val) {
+            $usersId = collect($request->get('user_id'))->flatten(0)->filter(function ($val) {
                 return is_int($val);
             });
-            $attachedUsersId = collect(Auth::user()->projects)->flatMap(function($project) {
+            $attachedUsersId = collect(Auth::user()->projects)->flatMap(function ($project) {
                 return collect($project->users)->pluck('id');
             });
 
@@ -468,48 +468,30 @@ class ProjectController extends ItemController
      */
     protected function getQuery($withRelations = false): Builder
     {
+        $user = Auth::user();
+        $user_id = $user->id;
         $query = parent::getQuery($withRelations);
-        $full_access = Role::can(Auth::user(), 'projects', 'full_access');
-        $user_relations_access = Role::can(Auth::user(), 'users', 'relations');
+        $full_access = Role::can($user, 'projects', 'full_access');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
             return $query;
         }
 
-        $user_projects_id = collect(Auth::user()->projects)->pluck('id');
-        $projects_id = collect($user_projects_id);
-
-        /** edit and remove only for directly related users's project */
-        if ($action_method !== 'edit' && $action_method !== 'remove') {
-
-            if (count($projects_id) <= 0) {
-                return $query;
-            }
-
-            $user_tasks_project_id = collect(Auth::user()->tasks)->flatMap(function ($task) {
-                if (isset($task->project)) {
-                    return collect($task->project->id);
-                }
-                return null;
+        $query->where(static function (Builder $query) use ($user_id, $action_method) {
+            $query->when($action_method !== 'edit' && $action_method !== 'remove', static function (Builder $query) use ($user_id) {
+                $query->whereHas('users', static function (Builder $query) use ($user_id) {
+                    $query->where('id', $user_id)->select('id');
+                });
+                $query->orWhereHas('tasks', static function (Builder $query) use ($user_id) {
+                    $query->where('user_id', $user_id)->select('user_id');
+                });
+                $query->orWhereHas('tasks.timeIntervals.user', static function (Builder $query) use ($user_id) {
+                    $query->where('id', $user_id)->select('id');
+                });
             });
-            $user_time_interval_project_id = collect(Auth::user()->timeIntervals)->flatMap(function ($val) {
-                if (isset($val->task->project)) {
-                    return collect($val->task->project->id);
-                }
-                return null;
-            });
-            $projects_id = collect([$projects_id, $user_tasks_project_id, $user_time_interval_project_id])->collapse();
-        }
+        });
 
-        if ($user_relations_access) {
-            $attached_users_project_id = collect(Auth::user()->attached_users)->flatMap(function($user) {
-                return collect($user->projects)->pluck('id');
-            });
-            $projects_id = collect([$projects_id, $attached_users_project_id])->collapse()->unique();
-        }
-
-        $query->whereIn('projects.id', $projects_id);
         return $query;
     }
 }

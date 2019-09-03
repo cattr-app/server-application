@@ -38,7 +38,7 @@ class RoleControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/roles/create", $data, $headers);
+        $response = $this->postJson("/v1/roles/create", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -66,7 +66,7 @@ class RoleControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/roles/create", $data, $headers);
+        $response = $this->postJson("/v1/roles/create", $data, $headers);
 
         $response->assertStatus(400);
         $response->assertJsonStructure($expectedFields);
@@ -83,7 +83,7 @@ class RoleControllerTest extends TestCase
             "name" => "SampleRightRole"
         ];
 
-        $roleId = $this->postJson("/api/v1/roles/create", $createData, $headers)
+        $roleId = $this->postJson("/v1/roles/create", $createData, $headers)
             ->json("res")["id"];
 
         $data = [
@@ -98,7 +98,7 @@ class RoleControllerTest extends TestCase
             "message" => "Item has been removed"
         ];
 
-        $response = $this->postJson("/api/v1/roles/remove", $data, $headers);
+        $response = $this->postJson("/v1/roles/remove", $data, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -124,8 +124,8 @@ class RoleControllerTest extends TestCase
             "reason" => "Id invalid"
         ];
 
-        $this->postJson("/api/v1/roles/create", $data, $headers);
-        $response = $this->postJson("/api/v1/roles/remove", [], $headers);
+        $this->postJson("/v1/roles/create", $data, $headers);
+        $response = $this->postJson("/v1/roles/remove", [], $headers);
 
         $response->assertStatus(400);
         $response->assertJsonStructure($expectedFields);
@@ -155,7 +155,7 @@ class RoleControllerTest extends TestCase
             ]
         ];
 
-        $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
+        $roleId = $this->postJson("/v1/roles/create", $createRoleData, $headers)
             ->json("res")["id"];
 
         $editRoleData = [
@@ -163,7 +163,7 @@ class RoleControllerTest extends TestCase
             "name"  => "YetAnotherRoleName"
         ];
 
-        $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
+        $response = $this->postJson("/v1/roles/edit", $editRoleData, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -193,7 +193,7 @@ class RoleControllerTest extends TestCase
             ]
         ];
 
-        $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
+        $response = $this->postJson("/v1/roles/edit", $editRoleData, $headers);
 
         $response->assertStatus(400);
         $response->assertJsonStructure($expectedFields);
@@ -225,14 +225,14 @@ class RoleControllerTest extends TestCase
             "name" => "SampleRightRole"
         ];
 
-        $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
+        $roleId = $this->postJson("/v1/roles/create", $createRoleData, $headers)
             ->json("res")["id"];
 
         $editRoleData = [
             "id"    => $roleId
         ];
 
-        $response = $this->postJson("/api/v1/roles/edit", $editRoleData, $headers);
+        $response = $this->postJson("/v1/roles/edit", $editRoleData, $headers);
 
         $response->assertStatus(400);
         $response->assertJsonStructure($expectedFields);
@@ -258,14 +258,14 @@ class RoleControllerTest extends TestCase
             "name" => "SampleRightRole"
         ];
 
-        $roleId = $this->postJson("/api/v1/roles/create", $createRoleData, $headers)
+        $roleId = $this->postJson("/v1/roles/create", $createRoleData, $headers)
             ->json("res")["id"];
 
         $showRoleData = [
             "id"    => $roleId,
         ];
 
-        $response = $this->postJson("/api/v1/roles/show", $showRoleData, $headers);
+        $response = $this->postJson("/v1/roles/show", $showRoleData, $headers);
 
         $response->assertStatus(200);
         $response->assertJsonStructure($expectedFields);
@@ -287,7 +287,7 @@ class RoleControllerTest extends TestCase
             "reason"    => "Id invalid"
         ];
 
-        $response = $this->postJson("/api/v1/roles/show", [], $headers);
+        $response = $this->postJson("/v1/roles/show", [], $headers);
 
         $response->assertStatus(400);
         $response->assertJsonStructure($expectedFields);

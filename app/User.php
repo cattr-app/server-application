@@ -60,7 +60,6 @@ use Illuminate\Database\Eloquent\Collection;
  * @property Project[]|Collection $projects
  * @property Task[]|Collection $tasks
  * @property TimeInterval[]|Collection $timeIntervals
- * @property User[]|Collection $attached_users
  */
 class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
@@ -166,22 +165,6 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     public function projectsRelation(): HasMany
     {
         return $this->hasMany(ProjectsUsers::class, 'user_id', 'id');
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function attached_users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'relations_users', 'user_id', 'attached_user_id');
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function attached_to(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'relations_users', 'attached_user_id', 'user_id');
     }
 
     /**

@@ -93,7 +93,6 @@ class Project extends AbstractModel
      */
     public static function getUserRelatedProjectIds($user): array {
         $full_access = Role::can($user, 'projects', 'full_access');
-        $user_relations_access = Role::can($user, 'users', 'relations');
 
         if ($full_access) {
             return static::all(['id'])->pluck('id')->toArray();
@@ -123,14 +122,6 @@ class Project extends AbstractModel
         });
 
         $project_ids = collect([$project_ids, $user_tasks_project_id, $user_time_interval_project_id])->collapse();
-
-        if ($user_relations_access) {
-            $attached_users_project_ids = collect($user->attached_users)->flatMap(function($user) {
-                return collect($user->projects)->pluck('id');
-            });
-
-            $project_ids = collect([$project_ids, $attached_users_project_ids])->collapse()->unique();
-        }
 
         return $project_ids->toArray();
     }

@@ -361,7 +361,7 @@ class RolesController extends ItemController
             $items[] = [
                 'object' => $rule->object,
                 'action' => $rule->action,
-                'name'   => $actionList[$rule->object][$rule->action]
+                'name' => $actionList[$rule->object][$rule->action]
             ];
         }
 
@@ -380,7 +380,6 @@ class RolesController extends ItemController
     {
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'roles', 'full_access');
-        $relations_access = Role::can(Auth::user(), 'users', 'relations');
 
         if ($full_access) {
             return $query;
@@ -388,15 +387,7 @@ class RolesController extends ItemController
 
         $user_role_id = collect(Auth::user()->role_id);
 
-        if ($relations_access) {
-            $attached_users_role_id = collect(Auth::user()->attached_users)->flatMap(function($user) {
-                return collect($user->role_id);
-            });
-            $roles_id = collect([$user_role_id, $attached_users_role_id])->collapse()->unique();
-            $query->whereIn('id', $roles_id);
-        } else {
-            $query->whereIn('id', $user_role_id);
-        }
+        $query->whereIn('id', $user_role_id);
 
         return $query;
     }

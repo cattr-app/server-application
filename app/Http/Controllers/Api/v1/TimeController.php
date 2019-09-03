@@ -105,8 +105,8 @@ class TimeController extends ItemController
     public function total(Request $request): JsonResponse
     {
         $filters = $request->all();
-        $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
-        $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
+        $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : False;
+        $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : False;
         $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
 
         $baseQuery = $this->applyQueryFilter(
@@ -192,8 +192,8 @@ class TimeController extends ItemController
     public function project(Request $request): JsonResponse
     {
         $filters = $request->all();
-        $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
-        $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
+        $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : False;
+        $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : False;
         $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
 
         $validator = Validator::make(
@@ -299,8 +299,8 @@ class TimeController extends ItemController
     public function tasks(Request $request): JsonResponse
     {
         $filters = $request->all();
-        $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
-        $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
+        $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : False;
+        $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : False;
         $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
         $request->get('task_id') ? $filters['task_id'] = ['in', $request->get('task_id')] : False;
 
@@ -362,7 +362,7 @@ class TimeController extends ItemController
             'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
             'tasks' => $tasks,
             'total' => [
-                'time'  => $total_time,
+                'time' => $total_time,
                 'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
                 'end' => Carbon::parse($last->end_at)->format('Y-m-d\TH:i:sP'),
             ]
@@ -427,8 +427,8 @@ class TimeController extends ItemController
     public function task(Request $request): JsonResponse
     {
         $filters = $request->all();
-        $request->get('start_at') ? $filters['start_at'] = ['>=', (string) $request->get('start_at')] : False;
-        $request->get('end_at') ? $filters['end_at'] = ['<=', (string) $request->get('end_at')] : False;
+        $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : False;
+        $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : False;
         is_int($request->get('task_id')) ? $filters['task_id'] = $request->get('task_id') : False;
         $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
 
@@ -505,7 +505,7 @@ class TimeController extends ItemController
             'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
             'tasks' => $tasks,
             'total' => [
-                'time'  => $total_time,
+                'time' => $total_time,
                 'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
                 'end' => Carbon::parse($last->end_at)->format('Y-m-d\TH:i:sP'),
             ]
@@ -635,14 +635,13 @@ class TimeController extends ItemController
     {
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'time', 'full_access');
-        $relations_access = Role::can(Auth::user(), 'users', 'relations');
         $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
 
         if ($full_access) {
             return $query;
         }
 
-        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
+        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function ($val) {
             return collect($val->id);
         });
         $time_intervals_id = collect([]);
@@ -656,14 +655,7 @@ class TimeController extends ItemController
             $time_intervals_id = collect([$attached_time_interval_id_to_project])->collapse();
         }
 
-        if ($relations_access) {
-            $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
-                return collect($val->timeIntervals)->pluck('id');
-            });
-            $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id, $attached_users_time_intervals_id])->collapse()->unique();
-        } else {
-            $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id])->collapse()->unique();
-        }
+        $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id])->collapse()->unique();
         $query->whereIn('time_intervals.id', $time_intervals_id);
 
         return $query;

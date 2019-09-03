@@ -1,28 +1,28 @@
 {
-    "name": "nwidart/redmineintegration",
-    "description": "",
-    "authors": [
-        {
-            "name": "Nicolas Widart",
-            "email": "n.widart@gmail.com"
-        }
-    ],
-    "extra": {
-        "laravel": {
-            "providers": [
-                "Modules\\RedmineIntegration\\Providers\\RedmineIntegrationServiceProvider"
-            ],
-            "aliases": {
-                
-            }
-        }
-    },
-    "autoload": {
-        "psr-4": {
-            "Modules\\RedmineIntegration\\": ""
-        }
-    },
-    "require": {
-        "kbsali/redmine-api": "^1.5"
+  "name": "nwidart/redmineintegration",
+  "description": "",
+  "authors": [
+    {
+      "name": "Nicolas Widart",
+      "email": "n.widart@gmail.com"
     }
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Modules\\RedmineIntegration\\Providers\\RedmineIntegrationServiceProvider"
+      ],
+      "aliases": {
+      }
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\RedmineIntegration\\": ""
+    }
+  },
+  "require": {
+    "kbsali/redmine-api": "*",
+    "wikimedia/composer-merge-plugin": "^1.4"
+  }
 }

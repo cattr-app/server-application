@@ -2,15 +2,16 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
 
 /**
  * Class Property
+ *
  * @package App\Models
  *
- * @property int $id
- * @property int $entity_id
+ * @property int    $id
+ * @property int    $entity_id
  * @property string $entity_type
  * @property string $name
  * @property string $value
@@ -41,5 +42,29 @@ class Property extends AbstractModel
     public static function getTableName()
     {
         return with(new static)->getTable();
+    }
+
+    /**
+     * Get property from database
+     *
+     * @param  string  $scope
+     * @param  string  $key
+     * @param  array   $parameters
+     *
+     * @return Collection
+     */
+    public function getProperty(string $scope, string $key, array $parameters = [])
+    {
+        // Making data for where query
+        $queryData = [
+            'entity_type' => $scope,
+            'name' => $key
+        ];
+
+        if (!empty($parameters)) {
+            $queryData = array_merge($queryData, $parameters);
+        }
+
+        return $this->where($queryData)->get();
     }
 }

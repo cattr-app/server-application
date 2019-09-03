@@ -1,25 +1,25 @@
 {
-  "name": "amazingcat/gitlabintegration",
-  "description": "GitLab Integration",
-  "authors": [
-    {
-      "name": "AmazingCat",
-      "email": "to@amazingcat.net"
+    "name": "amazingcat/gitlabintegration",
+    "description": "Gitlab Integration",
+    "authors": [
+        {
+            "name": "AmazingCat",
+            "email": "to@amazingcat.net"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\GitlabIntegration\\Providers\\GitlabIntegrationServiceProvider"
+            ],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\GitlabIntegration\\": ""
+        }
     }
-  ],
-  "extra": {
-    "laravel": {
-      "providers": [
-      ],
-      "aliases": {
-      }
-    }
-  },
-  "autoload": {
-    "psr-4": {
-      "Modules\\GitlabIntegration\\": ""
-    }
-  },
-  "require": {
-  }
 }

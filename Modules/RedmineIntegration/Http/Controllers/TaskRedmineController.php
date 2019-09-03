@@ -28,7 +28,7 @@ class TaskRedmineController extends AbstractRedmineController
                     'synchronizeUserTasks'
                 ],
                 [
-                    'userId' => auth()->user()->id
+                    'userId' => auth()->id()
                 ]
             )
         );

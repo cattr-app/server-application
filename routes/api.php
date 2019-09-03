@@ -37,7 +37,6 @@ Route::group([
 });
 
 Route::group([
-    'middleware' => 'api',
     'prefix' => 'auth',
 ], function (Router $router) {
     $router->any('ping', 'AuthController@ping');
@@ -112,19 +111,12 @@ Route::group([
     $router->post('/users/bulk-edit', 'Api\v1\UserController@bulkEdit');
     $router->any('/users/relations', 'Api\v1\UserController@relations');
 
-    // Attached Users routes
-    $router->any('/attached-users/list', 'Api\v1\RelationsUsersController@index');
-    $router->any('/attached-users/count', 'Api\v1\RelationsUsersController@count');
-    $router->post('/attached-users/create', 'Api\v1\RelationsUsersController@create');
-    $router->post('/attached-users/bulk-create', 'Api\v1\RelationsUsersController@bulkCreate');
-    $router->post('/attached-users/remove', 'Api\v1\RelationsUsersController@destroy');
-    $router->post('/attached-users/bulk-remove', 'Api\v1\RelationsUsersController@bulkDestroy');
-
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
     $router->any('/screenshots/count', 'Api\v1\ScreenshotController@count');
     $router->any('/screenshots/dashboard', 'Api\v1\ScreenshotController@dashboard');
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
+    $router->post('/screenshots/bulk-create', 'Api\v1\ScreenshotController@bulkCreate');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
     $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');
     $router->post('/screenshots/remove', 'Api\v1\ScreenshotController@destroy');
@@ -133,6 +125,7 @@ Route::group([
     $router->any('/time-intervals/list', 'Api\v1\TimeIntervalController@index');
     $router->any('/time-intervals/count', 'Api\v1\TimeIntervalController@count');
     $router->post('/time-intervals/create', 'Api\v1\TimeIntervalController@create');
+    $router->post('/time-intervals/bulk-create', 'Api\v1\TimeIntervalController@bulkCreate');
     $router->post('/time-intervals/edit', 'Api\v1\TimeIntervalController@edit');
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');

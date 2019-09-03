@@ -267,6 +267,10 @@ class AuthController extends Controller
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
+        if (!auth()->user()->active) {
+            return response()->json(['error' => 'Deactivated'], 403);
+        }
+
         $this->setToken($token);
         return $this->respondWithToken($token);
     }

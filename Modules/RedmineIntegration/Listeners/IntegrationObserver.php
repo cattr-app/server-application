@@ -2,21 +2,22 @@
 
 namespace Modules\RedmineIntegration\Listeners;
 
+use App\User;
+use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Facades\Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Illuminate\Support\Facades\Log;
-use App\User;
+use Modules\RedmineIntegration\Models\RedmineClient;
 
 /**
  * Class IntegrationObserver
  *
  * @property ProjectRepository $projectRepo
- * @property TaskRepository $taskRepo
+ * @property TaskRepository    $taskRepo
  *
  * @package Modules\RedmineIntegration\Listeners
  */
@@ -42,9 +43,9 @@ class IntegrationObserver
     /**
      * Create the event listener.
      *
-     * @param ProjectRepository $projectRepo
-     * @param TaskRepository $taskRepo
-     * @param UserRepository $userRepo
+     * @param  ProjectRepository  $projectRepo
+     * @param  TaskRepository     $taskRepo
+     * @param  UserRepository     $userRepo
      */
     public function __construct(
         ProjectRepository $projectRepo,
@@ -62,6 +63,7 @@ class IntegrationObserver
      * If task's project is Redmine project => mark task as NEW for synchronization
      *
      * @param $task
+     *
      * @return mixed
      */
     public function taskCreation($task)
@@ -75,11 +77,11 @@ class IntegrationObserver
         return $task;
     }
 
-
     /**
      * Observe user after edition
      *
-     * @param $user
+     * @param $json
+     *
      * @return mixed
      */
     public function userAfterEdition($json)
@@ -90,11 +92,11 @@ class IntegrationObserver
         return $json;
     }
 
-
     /**
      * Observe user show
      *
      * @param $user
+     *
      * @return mixed
      */
     public function userShow($user)
@@ -102,17 +104,18 @@ class IntegrationObserver
         return $user;
     }
 
-
     /**
      * Observe task edition
      *
      * @param $task
+     *
      * @return mixed
      */
     public function taskEdition($task)
     {
         try {
             $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($task->user_id);
+            /** @var array $userLocalRedmineTasksIds */
             $redmineTask = array_first($userLocalRedmineTasksIds, function ($redmineTask) use ($task) {
                 return $redmineTask->task_id === $task->id;
             });
@@ -136,8 +139,8 @@ class IntegrationObserver
                     'priority_id' => $priority_id,
                 ]);
             }
-        } catch (\Exception $e) {
-            Log::error("Can't update task in the Redmine: " . $e->getMessage());
+        } catch (Exception $e) {
+            Log::error("Can't update task in the Redmine: ".$e->getMessage());
         }
 
         return $task;

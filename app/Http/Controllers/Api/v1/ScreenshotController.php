@@ -41,7 +41,7 @@ class ScreenshotController extends ItemController
     {
         return [
             'time_interval_id' => 'exists:time_intervals,id|required',
-            'path'             => 'required',
+            'path' => 'required',
         ];
     }
 
@@ -188,9 +188,9 @@ class ScreenshotController extends ItemController
         $ds = DIRECTORY_SEPARATOR;
 
         $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs", $screenStorePath);
-        Storage::put($thumbnailPath, (string) $thumbnail->encode());
+        Storage::put($thumbnailPath, (string)$thumbnail->encode());
 
-        $timeIntervalId = ((int) $request->get('time_interval_id')) ?: null;
+        $timeIntervalId = ((int)$request->get('time_interval_id')) ?: null;
 
         $requestData = [
             'time_interval_id' => $timeIntervalId,
@@ -223,6 +223,96 @@ class ScreenshotController extends ItemController
                 'res' => $item,
             ])
         );
+    }
+
+    /**
+     * @api {post} /api/v1/screenshots/bulk-create Bulk create
+     * @apiDescription Create Screenshot
+     * @apiVersion 0.1.0
+     * @apiName BulkCreateScreenshot
+     * @apiGroup Screenshot
+     *
+     * @apiSuccess {Object[]} messages                  Messages
+     * @apiSuccess {Integer}  messages.id               Screenshot id
+     * @apiSuccess {Integer}  messages.time_interval_id Screenshot Time Interval id
+     * @apiSuccess {String}   messages.path             Screenshot Image path URI
+     * @apiSuccess {String}   messages.created_at       Screenshot date time of create
+     * @apiSuccess {String}   messages.updated_at       Screenshot date time of update
+     * @apiSuccess {Boolean}  messages.important        Screenshot important flag
+     *
+     * @apiError (400)  {Object[]} messages         Messages
+     * @apiError (400)  {String}   messages.error   Error title
+     * @apiError (400)  {String}   messages.reason  Error reason
+     * @apiError (400)  {String}   messages.code    Error code
+     *
+     * @apiUse DefaultCreateErrorResponse
+     * @apiUse UnauthorizedError
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function bulkCreate(Request $request): JsonResponse
+    {
+        $requestData = $request->all();
+        $result = [];
+
+        if (empty($requestData)) {
+            return response()->json(
+                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
+                    [
+                        'error' => 'validation fail',
+                        'reason' => 'screenshots is required',
+                    ]
+                ]),
+                400
+            );
+        }
+
+        foreach ($requestData as $timeIntervalId => $screenshot) {
+            $screenStorePath = $screenshot->store('uploads/screenshots');
+            $absoluteStorePath = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, Storage::disk()->path($screenStorePath));
+
+            $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
+
+            $screenshot = Image::make($path);
+
+            $thumbnail = $screenshot->resize(280, null, function ($constraint) {
+                $constraint->aspectRatio();
+            });
+
+            $ds = DIRECTORY_SEPARATOR;
+
+            $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs", $screenStorePath);
+            Storage::put($thumbnailPath, (string)$thumbnail->encode());
+
+            $requestData = [
+                'time_interval_id' => (int)$timeIntervalId,
+                'path' => $screenStorePath,
+                'thumbnail_path' => $thumbnailPath,
+            ];
+
+            $validator = Validator::make(
+                $requestData,
+                Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+            );
+
+            if ($validator->fails()) {
+                $result[] = [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors(),
+                    'code' => 400
+                ];
+                continue;
+            }
+
+            $cls = $this->getItemClass();
+            $item = Filter::process($this->getEventUniqueName('item.create'), $cls::create($requestData));
+            $result[] = $item;
+        }
+
+        return response()->json([
+            'messages' => $result,
+        ]);
     }
 
     /**
@@ -403,13 +493,13 @@ class ScreenshotController extends ItemController
             $hour = $start_at->hour . ':00:00';
 
             foreach ($items as $itemkey => $item) {
-                if($item['interval'] == $hour) {
+                if ($item['interval'] == $hour) {
                     $hasInterval = true;
                     break;
                 }
             }
 
-            if($hasInterval && isset($itemkey)) {
+            if ($hasInterval && isset($itemkey)) {
                 $items[$itemkey]['intervals'][(int)$minutes{0}][] = $interval->toArray();
             } else {
                 $arr = [
@@ -444,7 +534,6 @@ class ScreenshotController extends ItemController
     {
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'screenshots', 'full_access');
-        $relations_access = Role::can(Auth::user(), 'users', 'relations');
         $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
@@ -452,7 +541,7 @@ class ScreenshotController extends ItemController
             return $query;
         }
 
-        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function($val) {
+        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function ($val) {
             return collect($val->id);
         });
 
@@ -468,14 +557,6 @@ class ScreenshotController extends ItemController
                 });
 
                 $time_intervals_id = collect([$time_intervals_id, $attached_time_interval_id_to_project])->collapse()->unique();
-            }
-
-            if ($relations_access) {
-                $attached_users_time_intervals_id = collect(Auth::user()->attached_users)->flatMap(function($val) {
-                    return collect($val->timeIntervals)->pluck('id');
-                });
-
-                $time_intervals_id = collect([$time_intervals_id, $attached_users_time_intervals_id])->collapse()->unique();
             }
         }
 

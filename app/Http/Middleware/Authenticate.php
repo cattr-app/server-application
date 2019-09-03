@@ -13,6 +13,12 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
     {
         if (!Auth::check()) {
             return response()->json(['error' => 'Access denied', 'reason' => 'not logined'], 403);
+        } else {
+            $user = Auth::user();
+            if (!$user->active) {
+                DB::table('tokens')->where('user_id', $user->id)->delete();
+                return response()->json(['error' => 'Access denied', 'reason' => 'deactivated'], 403);
+            }
         }
 
         // Check token.

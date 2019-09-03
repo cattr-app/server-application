@@ -4,11 +4,14 @@ namespace Modules\RedmineIntegration\Http\Controllers;
 
 use App\Models\Priority;
 use App\Models\Property;
+use App\User;
 use Filter;
+use Illuminate\Contracts\Auth\Authenticatable;
+use Illuminate\Foundation\Validation\ValidatesRequests;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Validator;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
+use Throwable;
 
 /**
  * Class RedmineSettingsController
@@ -17,171 +20,178 @@ use Modules\RedmineIntegration\Models\RedmineClient;
  */
 class RedmineSettingsController extends AbstractRedmineController
 {
+
+    use ValidatesRequests;
+
     /**
-     * Returns validation rules for 'updateSettings' request
-     *
-     * @return array
+     * @var Request
      */
-    function getValidationRules()
+    protected $request;
+
+    /**
+     * @var User|Authenticatable
+     */
+    protected $user;
+
+    public function __construct(Request $request)
     {
-        return [
-            'redmine_url' => 'required',
-            'redmine_key' => 'required',
-            //'redmine_statuses' => 'required',
-        ];
+        $this->request = $request;
+        $this->user = auth()->user();
     }
 
     /**
      * Update user's redmine settings
      *
-     * @param Request $request
-     * @param UserRepository $userRepository
-     * @return \Illuminate\Http\JsonResponse
+     * @param  Request         $request
+     * @param  UserRepository  $userRepository
+     *
+     * @return JsonResponse
      */
     public function updateSettings(Request $request, UserRepository $userRepository)
     {
         $request = Filter::process('request.redmine.settings.update', $request);
-        $user = auth()->user();
 
-        $validator = Validator::make(
-            $request->all(),
-            Filter::process('validation.redmine.settings.update', $this->getValidationRules())
-        );
-
-        if ($validator->fails()) {
+        try {
+            $this->validate(
+                $request,
+                Filter::process('validation.redmine.settings.update', $this->getValidationRules())
+            );
+        } catch (Throwable $e) {
             return response()->json(
                 Filter::process('answer.error.redmine.settings.update', [
-                    'error' => 'Validation fail',
+                    'error' => 'Validation failed',
                 ]),
                 400
             );
         }
 
-        $propertyRedmineUrl = Filter::process(
-            'redmine.settings.url.change',
-            Property::updateOrCreate(
-                [
-                    'entity_id'   => $user->id,
-                    'entity_type' => Property::USER_CODE,
-                    'name'        => 'REDMINE_URL',
+        $this->saveProperties();
 
-                ],
-                [
-                    'value' => $request->redmine_url
-                ]
-            )
+        // Hell starts here
+        $userRepository->setUserSendTime($this->user->id, $request->redmine_sync);
+        $userRepository->setActiveStatusId($this->user->id, $request->redmine_on_activate_statuses['value']);
+        $userRepository->setInactiveStatusId($this->user->id, $request->redmine_on_deactivate_statuses['value']);
+        /** @noinspection PhpParamsInspection */
+        $userRepository->setActivateStatuses(
+            $this->user->id, $request->redmine_on_activate_statuses['reference']
         );
-
-        $propertyRedmineUrl = Filter::process(
-            'redmine.settings.url.change',
-            Property::updateOrCreate(
-                [
-                    'entity_id'   => $user->id,
-                    'entity_type' => Property::USER_CODE,
-                    'name'        => 'REDMINE_KEY',
-                ],
-                [
-                    'value' => $request->redmine_key
-                ]
-            )
+        /** @noinspection PhpParamsInspection */
+        $userRepository->setDeactivateStatuses(
+            $this->user->id, $request->redmine_on_deactivate_statuses['reference']
         );
+        $userRepository->setOnlineTimeout($this->user->id, $request->redmine_online_timeout);
+        // Hell ends here
 
-        Property::updateOrCreate(
-            [
-                'entity_id'   => $user->id,
-                'entity_type' => Property::USER_CODE,
-                'name'        => 'REDMINE_STATUSES',
-            ],
-            [
-                'value' => serialize($request->redmine_statuses),
-            ]
-        );
-
-        Property::updateOrCreate(
-            [
-                'entity_id'   => $user->id,
-                'entity_type' => Property::USER_CODE,
-                'name'        => 'REDMINE_PRIORITIES',
-            ],
-            [
-                'value' => serialize($request->redmine_priorities),
-            ]
-        );
-
-        $userRepository->setUserSendTime($user->id, $request->redmine_sync);
-        $userRepository->setActiveStatusId($user->id, $request->redmine_active_status);
-        $userRepository->setDeactiveStatusId($user->id, $request->redmine_deactive_status);
-        $userRepository->setActivateStatuses($user->id, $request->redmine_activate_statuses);
-        $userRepository->setDeactivateStatuses($user->id, $request->redmine_deactivate_statuses);
-        $userRepository->setOnlineTimeout($user->id, $request->redmine_online_timeout);
-
-        //If user hasn't a redmine id in our system => mark user as NEW
-        $userRedmineId = $userRepository->getUserRedmineId($user->id);
-
-        if (!$userRedmineId) {
-            $userRepository->markAsNew($user->id);
+        // If user doesn't have a redmine id, we'll mark it as new
+        if (!$userRepository->getUserRedmineId($this->user->id)) {
+            $userRepository->markAsNew($this->user->id);
         }
 
-        return response()->json(
-            Filter::process('answer.success.redmine.settings.change', 'Updated!'),
-            200
+        return response()->json(Filter::process('answer.success.redmine.settings.change', 'Updated!'));
+    }
+
+    protected function saveProperties()
+    {
+        $this->processFilter('redmine.settings.url.change', 'REDMINE_URL', $this->request->redmine_url)
+            ->processFilter('redmine.settings.url.change', 'REDMINE_KEY', $this->request->redmine_api_key)
+            ->saveProperty('REDMINE_STATUSES', serialize($this->request->redmine_statuses))
+            ->saveProperty('REDMINE_PRIORITIES', serialize($this->request->redmine_priorities));
+    }
+
+    /**
+     * @param  string  $evt
+     * @param  string  $name
+     * @param  mixed   $value
+     *
+     * @return RedmineSettingsController
+     */
+    protected function processFilter(string $evt, string $name, $value): self
+    {
+        Filter::process(
+            $evt,
+            $this->saveProperty($name, $value)
         );
+        return $this;
+    }
+
+    /**
+     * @param $name
+     * @param $value
+     *
+     * @return RedmineSettingsController
+     */
+    protected function saveProperty($name, $value): self
+    {
+        Property::updateOrCreate(
+            [
+                'entity_id' => $this->user->id,
+                'entity_type' => Property::USER_CODE,
+                'name' => $name,
+            ],
+            [
+                'value' => $value
+            ]
+        );
+
+        return $this;
+    }
+
+    /**
+     * Returns validation rules for 'updateSettings' request
+     *
+     * @return array
+     */
+    public function getValidationRules()
+    {
+        return [
+            'redmine_url' => 'required',
+            'redmine_api_key' => 'required',
+            //'redmine_statuses' => 'required',
+        ];
     }
 
     /**
      * Returns user's redmine settings
      *
-     * @param Request $request
-     * @param UserRepository $userRepository
+     * @param  Request         $request
+     * @param  UserRepository  $userRepository
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function getSettings(Request $request, UserRepository $userRepository)
     {
         $userId = auth()->user()->id;
 
+        // This is something beyond my understanding of the real world
         $settingsArray = [
-            'redmine_url'      => $userRepository->getUserRedmineUrl($userId),
-            'redmine_api_key'  => $userRepository->getUserRedmineApiKey($userId),
+            'redmine_url' => $userRepository->getUserRedmineUrl($userId),
+            'redmine_api_key' => $userRepository->getUserRedmineApiKey($userId),
             'redmine_statuses' => $userRepository->getUserRedmineStatuses($userId),
             'redmine_priorities' => $userRepository->getUserRedminePriorities($userId),
             'internal_priorities' => Priority::all(),
 
             'redmine_sync' => $userRepository->isUserSendTime($userId),
             'redmine_active_status' => $userRepository->getActiveStatusId($userId),
-            'redmine_deactive_status' => $userRepository->getDeactiveStatusId($userId),
-            'redmine_activate_statuses' => $userRepository->getActivateStatuses($userId),
-            'redmine_deactivate_statuses' => $userRepository->getDeactivateStatuses($userId),
+            'redmine_inactive_status' => $userRepository->getInactiveStatusId($userId),
+            'redmine_on_activate_statuses' => [
+                'value' => $userRepository->getActiveStatusId($userId),
+                'reference' => $userRepository->getActivateStatuses($userId),
+            ],
+            'redmine_on_deactivate_statuses' => [
+                'value' => $userRepository->getInactiveStatusId($userId),
+                'reference' => $userRepository->getDeactivateStatuses($userId),
+            ],
             'redmine_online_timeout' => $userRepository->getOnlineTimeout($userId),
         ];
 
-        // Return default priorities and statuses if it is not saved
-        /*if (!empty($userRepository->getUserRedmineUrl($userId))) {
-            if (empty($settingsArray['redmine_statuses'])) {
-                $client = new RedmineClient($userId);
-                $settingsArray['redmine_statuses'] = array_map(function ($status) {
-                    $status['is_active'] = !isset($status['is_closed']);
-                    return $status;
-                }, $client->issue_status->all()['issue_statuses']);
-            }
-    
-            if (empty($settingsArray['redmine_priorities'])) {
-                $client = new RedmineClient($userId);
-                $settingsArray['redmine_priorities'] = array_map(function ($priority) {
-                    if (Priority::find($priority['id'])) {
-                        $priority['priority_id'] = $priority['id'];
-                    } else {
-                        $priority['priority_id'] = Priority::max('id');
-                    }
-    
-                    return $priority;
-                }, $client->issue_priority->all()['issue_priorities']);
-            }
-        }*/
+        return response()->json($settingsArray);
+    }
 
-        return response()->json(
-            $settingsArray,
-            200
-        );
+    /**
+     * @return JsonResponse
+     */
+    public function getInternalPriorities(): JsonResponse
+    {
+        return response()->json(Priority::all());
     }
 }
