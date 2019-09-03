@@ -6,12 +6,15 @@ use App\Models\Project;
 use App\Models\Role;
 use Auth;
 use Filter;
+use Event;
 use Route;
 use Illuminate\Database\Eloquent\Builder;
 use Validator;
 use App\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Mail;
+use App\Mail\InviteUser;
 
 /**
  * Class UserController
@@ -46,6 +49,48 @@ class UserController extends ItemController
      * @apiParam {Integer} [role_id]                User Role id
      * @apiParam {String}  [timezone]               User timezone
      */
+
+
+    public function __construct()
+    {
+        Filter::listen('request.item.create.user', static::class . '@' . 'requestUserCreateHook');
+        Filter::listen('request.item.edit.user', static::class . '@' . 'requestUserCreateHook');
+
+        Event::listen('item.edit.after.user', static::class . '@' . 'changePasswordHook');
+    }
+
+    public function sendInviteHook($user, $requestData)
+    {
+        Mail::to($user->email)->send(new InviteUser($user->email, $requestData['password']));
+        return $user;
+    }
+
+    public function changePasswordHook($user, $requestData)
+    {
+        if ($user->change_password && !is_null($requestData['password'])) {
+            $user->change_password = false;
+            $user->save();
+        }
+    }
+
+
+    public function requestUserCreateHook($requestData)
+    {
+        $send_invite = $requestData['send_invite'] ?? 0;
+        $change_password = $requestData['change_password'] ?? 0;
+
+        if ($send_invite) {
+            Event::listen('item.create.after.user', static::class . '@' . 'sendInviteHook');
+            Event::listen('item.edit.after.user', static::class . '@' . 'sendInviteHook');
+        } else {
+            if ($change_password) {
+                unset($requestData['change_password']);
+            }
+        }
+
+        return $requestData;
+    }
+
 
     /**
      * @return string
@@ -350,6 +395,8 @@ class UserController extends ItemController
 
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
         $item->save();
+
+        Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
