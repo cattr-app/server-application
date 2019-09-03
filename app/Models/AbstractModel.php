@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 abstract class AbstractModel extends Model
 {
     use EloquentJoin;
+    use DateTrait;
 
     /**
      * @return Builder|EloquentJoinBuilder

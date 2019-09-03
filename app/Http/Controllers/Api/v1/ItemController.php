@@ -14,6 +14,8 @@ use Illuminate\Http\Request;
 use Schema;
 use Validator;
 use Illuminate\Database\Eloquent\Model;
+use App\Models\DateTrait;
+
 
 /**
  * Class ItemController
@@ -452,6 +454,16 @@ abstract class  ItemController extends Controller
         $cls = static::getItemClass();
         $model = new $cls();
         $helper = new QueryHelper();
+
+        foreach ($model->getDates() as $dateAttr) {
+            if (isset($filter[$dateAttr])) {
+                if (is_array($filter[$dateAttr])) {
+                    $filter[$dateAttr][1] = DateTrait::toStandartTime($filter[$dateAttr][1]);
+                } else {
+                    $filter[$dateAttr] = DateTrait::toStandartTime($filter[$dateAttr]);
+                }
+            }
+        }
 
         $helper->apply($query, $filter, $model);
 

@@ -486,12 +486,11 @@ class ScreenshotController extends ItemController
 
         foreach ($intervals as $interval) {
             $hasInterval = false;
-            $matches = [];
 
-            preg_match('/(\d{4}-\d{2}-\d{2} \d{2})/', $interval->start_at, $matches);
-            $minutes = Carbon::parse($interval->start_at)->minute;
-            $minutes = $minutes > 9 ? (string)$minutes : '0' . $minutes;
-            $hour = $matches[1] . ':00:00';
+            $start_at = Carbon::parse($interval->start_at);
+            $minutes = $start_at->minute;
+            $minutes = $minutes > 9 ? (string)$minutes : '0'. $minutes;
+            $hour = $start_at->hour . ':00:00';
 
             foreach ($items as $itemkey => $item) {
                 if ($item['interval'] == $hour) {

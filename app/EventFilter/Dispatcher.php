@@ -8,14 +8,14 @@ class Dispatcher extends LaravelDispatcher
 {
     /**
      * @param $event
-     * @param array ...$payload
+     * @param mixed $payload
      * @return mixed
      */
-    public function process($event, ...$payload)
+    public function process($event, $payload)
     {
-        $data = $this->dispatch($event, $payload);
+        $data = $this->dispatch($event, [$payload]);
 
-        return \is_array($data) ? ($data[0] ?? null) : $data;
+        return $data;
     }
 
     /**
@@ -26,12 +26,6 @@ class Dispatcher extends LaravelDispatcher
      */
     public function dispatch($event, $payload = [], $halt = false)
     {
-        [$event, $payload] = $this->parseEventAndPayload($event, $payload);
-
-        if ($this->shouldBroadcast($payload)) {
-            $this->broadcastEvent($payload[0]);
-        }
-
         foreach ($this->getListeners($event) as $listener) {
             $response = $listener($event, $payload);
 
@@ -46,7 +40,7 @@ class Dispatcher extends LaravelDispatcher
             $payload[0] = $response;
         }
 
-        return $halt ? null : $payload;
+        return $halt ? null : ($payload[0] ?? null);
     }
 
 
@@ -63,12 +57,12 @@ class Dispatcher extends LaravelDispatcher
             return $this->createClassListener($listener, $wildcard);
         }
 
-        return function ($event, ...$payload) use ($listener, $wildcard) {
+        return function ($event, $payload) use ($listener, $wildcard) {
             if ($wildcard) {
-                return $listener($event, ...$payload);
+                return $listener($event, $payload[0]);
             }
 
-            return $listener(...array_values($payload));
+            return $listener($payload[0]);
         };
     }
 
@@ -83,7 +77,7 @@ class Dispatcher extends LaravelDispatcher
     {
         return function ($event, $payload) use ($listener, $wildcard) {
             if ($wildcard) {
-                return \call_user_func($this->createClassCallable($listener), $event, ...$payload);
+                return \call_user_func($this->createClassCallable($listener), $event, $payload[0]);
             }
 
             return \call_user_func_array(

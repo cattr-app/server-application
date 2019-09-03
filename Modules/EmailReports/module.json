@@ -1,0 +1,16 @@
+{
+    "name": "EmailReports",
+    "alias": "emailreports",
+    "description": "",
+    "keywords": [],
+    "active": 1,
+    "order": 0,
+    "providers": [
+        "Modules\\EmailReports\\Providers\\EmailReportsServiceProvider"
+    ],
+    "aliases": {},
+    "files": [
+        "start.php"
+    ],
+    "requires": []
+}

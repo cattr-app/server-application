@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\User;
 use Illuminate\Http\Request;
 use DB;
+use Carbon\Carbon;
 
 class DashboardController extends Controller
 {
@@ -53,8 +54,8 @@ class DashboardController extends Controller
                 'task_id' => (int)$interval->task_id,
                 'project_id' => (int)$interval->project_id,
                 'duration' => $duration,
-                'start_at' => $interval->start_at,
-                'end_at' => $interval->end_at,
+                'start_at' => Carbon::parse($interval->start_at)->toIso8601String(),
+                'end_at' => Carbon::parse($interval->end_at)->toIso8601String(),
             ];
 
             $users[$user_id]['duration'] += $duration;
