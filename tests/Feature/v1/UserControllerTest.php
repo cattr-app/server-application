@@ -74,7 +74,7 @@ class UserControllerTest extends TestCase
                 "billing_access","avatar","screenshots_active","manual_time",
                 "permanent_tasks","computer_time_popup","poor_time_popup",
                 "blur_screenshots","web_and_app_monitoring","webcam_shots",
-                "screenshots_interval","user_role_value","active",
+                "screenshots_interval","active",
                 "deleted_at","created_at","updated_at","role_id","timezone",
                 "attached_users"
             ]
@@ -97,7 +97,7 @@ class UserControllerTest extends TestCase
                 "level","payroll_access","billing_access","avatar","screenshots_active",
                 "manual_time","permanent_tasks","computer_time_popup","poor_time_popup",
                 "blur_screenshots","web_and_app_monitoring","webcam_shots",
-                "screenshots_interval","user_role_value","active","deleted_at","created_at",
+                "screenshots_interval","active","deleted_at","created_at",
                 "updated_at","role_id","timezone","attached_users"
             ]
         ];
@@ -175,7 +175,7 @@ class UserControllerTest extends TestCase
                     "screenshots_active","manual_time","permanent_tasks",
                     "computer_time_popup","poor_time_popup","blur_screenshots",
                     "web_and_app_monitoring","webcam_shots",
-                    "screenshots_interval","user_role_value","active",
+                    "screenshots_interval","active",
                     "deleted_at","created_at","updated_at","role_id",
                     "timezone","attached_users"
                 ]

@@ -44,7 +44,6 @@ class UserController extends ItemController
      * @apiParam {Boolean} [web_and_app_monitoring] ???
      * @apiParam {Boolean} [webcam_shots]           ???
      * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
-     * @apiParam {String}  [user_role_value]        ???
      * @apiParam {Boolean} active                   Is User active
      * @apiParam {Integer} [role_id]                User Role id
      * @apiParam {String}  [timezone]               User timezone
@@ -167,7 +166,6 @@ class UserController extends ItemController
      * @apiParam {Boolean}  [web_and_app_monitoring]             ???
      * @apiParam {Boolean}  [webcam_shots]                       ???
      * @apiParam {Integer}  [screenshots_interval]  `QueryParam` Screenshots creation interval (seconds)
-     * @apiParam {String}   [user_role_value]       `QueryParam` ???
      * @apiParam {Boolean}  [active]                             User is active
      * @apiParam {Integer}  [role_id]               `QueryParam` User's Role ID
      * @apiParam {String}   [created_at]            `QueryParam` User Creation DateTime
@@ -260,7 +258,6 @@ class UserController extends ItemController
      *   "web_and_app_monitoring": 1,
      *   "webcam_shots": 0,
      *   "screenshots_interval": 9,
-     *   "user_role_value": "",
      *   "active": 1,
      *   "deleted_at": null,
      *   "created_at": "2018-10-18 09:36:22",
@@ -310,7 +307,6 @@ class UserController extends ItemController
      *       "web_and_app_monitoring": 1,
      *       "webcam_shots": 0,
      *       "screenshots_interval": 9,
-     *       "user_role_value": "",
      *       "active": "1",
      *       "deleted_at": null,
      *       "created_at": "2018-10-18 09:36:22",
@@ -449,7 +445,6 @@ class UserController extends ItemController
      * @apiParam {Boolean}  [users.object.web_and_app_monitoring] ???
      * @apiParam {Boolean}  [users.object.webcam_shots]           ???
      * @apiParam {Integer}  [users.object.screenshots_interval]   Screenshots creation interval (seconds)
-     * @apiParam {String}   [users.object.user_role_value]        ???
      * @apiParam {Boolean}  users.object.active                   User is active
      * @apiParam {Integer}  [users.object.role_id]                User Role id
      * @apiParam {String}   [users.object.timezone]               User timezone

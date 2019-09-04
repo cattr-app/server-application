@@ -46,17 +46,15 @@ use Illuminate\Database\Eloquent\Collection;
  * @property int $web_and_app_monitoring
  * @property int $webcam_shots
  * @property int $screenshots_interval
- * @property string $user_role_value
  * @property int $active
  * @property string $password
  * @property string $timezone
- * @property int $role_id
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
  *
- * @property Role           $role
+ * @property-read Collection $roles
  * @property Project[]|Collection $projects
  * @property Task[]|Collection $tasks
  * @property TimeInterval[]|Collection $timeIntervals
@@ -72,6 +70,10 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
      * @var string
      */
     protected $table = 'users';
+
+    protected $with = [
+        'roles'
+    ];
 
     /**
      * The attributes that are mass assignable.
@@ -96,11 +98,9 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'web_and_app_monitoring',
         'webcam_shots',
         'screenshots_interval',
-        'user_role_value',
         'active',
         'password',
         'timezone',
-        'role_id',
         'important',
         'change_password',
     ];
@@ -144,13 +144,22 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     }
 
     /**
-     * @return BelongsTo
+     * @return BelongsToMany
      */
-    public function role(): BelongsTo
+    public function roles(): BelongsToMany
     {
-        return $this->belongsTo(Role::class, 'role_id');
+        return $this->belongsToMany(Role::class, 'user_role', 'user_id', 'role_id', 'id', 'id');
     }
 
+    /**
+     * @return \Illuminate\Support\Collection
+     */
+    public function rolesIds(): \Illuminate\Support\Collection
+    {
+        return $this->roles->map(function (Role $role) {
+            return $role->id;
+        });
+    }
 
     /**
      * @return BelongsToMany
@@ -206,7 +215,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     /**
      * Send the password reset notification.
      *
-     * @param  string  $token
+     * @param  string $token
      * @return void
      */
     public function sendPasswordResetNotification($token)

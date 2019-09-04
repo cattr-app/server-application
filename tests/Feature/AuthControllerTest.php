@@ -105,7 +105,7 @@ class AuthControllerTest extends TestCase
             "avatar","screenshots_active","manual_time","permanent_tasks",
             "computer_time_popup","poor_time_popup","blur_screenshots",
             "web_and_app_monitoring","webcam_shots","screenshots_interval",
-            "user_role_value","active","deleted_at","created_at","updated_at",
+            "active","deleted_at","created_at","updated_at",
             "role_id","timezone"
         ];
 
