@@ -111,7 +111,7 @@ class RolesController extends ItemController
     public function index(Request $request): JsonResponse
     {
         $cls = $this->getItemClass();
-        $cls::updateRules();
+        //$cls::updateRules();
 
         if ($request->get('user_id')) {
             $request->offsetSet('users.id', $request->get('user_id'));
@@ -315,21 +315,13 @@ class RolesController extends ItemController
      */
     public function allowedRules(Request $request): JsonResponse
     {
-        $roleId = Filter::process($this->getEventUniqueName('request.item.allowed-rules'), $request->get('id'));
-        $isInt = is_int($roleId);
-        $items = [];
-        /** @var array[] $actionList */
-        $actionList = Rule::getActionList();
+        $roleIds = Filter::process($this->getEventUniqueName('request.item.allowed-rules'), $request->get('ids', []));
+        if (is_numeric($roleIds)) {
+            $roleIds = [$roleIds];
+        }
 
-        if ($roleId <= 0 || !$isInt) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.allowed-rules'),
-                [
-                    'error' => 'Validation fail',
-                    'reason' => 'Invalid id',
-                ]),
-                400
-            );
+        if (!$roleIds || !is_array($roleIds) || empty($roleIds)) {
+            $roleIds = $request->user()->rolesIds();
         }
 
         /** @var Builder $itemsQuery */
@@ -337,38 +329,121 @@ class RolesController extends ItemController
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->getQuery()
         );
-        $role = $itemsQuery->find($roleId);
 
-        if (!$role) {
+        $roles = $itemsQuery->whereIn('role.id', $roleIds)->get();
+
+        if (!$roles->count()) {
             return response()->json(Filter::process(
                 $this->getEventUniqueName('answer.error.item.allowed-rules'),
                 [
-                    'error' => 'Role not found',
+                    'error' => 'Roles not found',
                     'reason' => 'Invalid Id'
                 ]),
                 400
             );
         }
 
-        /** @var Rule[] $rules */
-        $rules = $role->rules;
+        $items = [];
+        $actionList = Rule::getActionList();
 
-        foreach ($rules as $rule) {
-            if (!$rule->allow) {
-                continue;
+        foreach ($roles as $role) {
+            /** @var Role $role */
+            /** @var Rule[] $rules */
+            $rules = $role->rules;
+
+            foreach ($rules as $rule) {
+                if (!$rule->allow) {
+                    continue;
+                }
+
+                $items[] = [
+                    'object' => $rule->object,
+                    'action' => $rule->action,
+                    'name' => $actionList[$rule->object][$rule->action]
+                ];
             }
-
-            $items[] = [
-                'object' => $rule->object,
-                'action' => $rule->action,
-                'name' => $actionList[$rule->object][$rule->action]
-            ];
         }
 
         return response()->json(Filter::process(
             $this->getEventUniqueName('answer.success.item.allowed-rules'),
             $items
         ));
+    }
+
+    public function attachToUser(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'relations.*.user_id' => 'integer|exists:users,id',
+            'relations.*.role_id' => 'integer|exists:role,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'validation fail',
+                    'reason' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        $relations = $request->post('relations');
+        foreach ($relations as $relation) {
+            $user_id = $relation['user_id'];
+            $role_id = $relation['role_id'];
+
+            /** @var Role $role */
+            $role = Role::query()->find($role_id);
+            if (!$role) {
+                continue;
+            }
+
+            $role->users()->attach($user_id);
+        }
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'res' => $relations,
+            ])
+        );
+    }
+
+    public function detachFromUser(Request $request)
+    {
+        $validator = \Validator::make($request->all(), [
+            'relations.*.user_id' => 'integer|exists:users,id',
+            'relations.*.role_id' => 'integer|exists:role,id',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error' => 'validation fail',
+                    'reason' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        $relations = $request->post('relations');
+        foreach ($relations as $relation) {
+            $user_id = $relation['user_id'];
+            $role_id = $relation['role_id'];
+
+            /** @var Role $role */
+            $role = Role::query()->find($role_id);
+            if (!$role) {
+                continue;
+            }
+
+            $role->users()->detach($user_id);
+        }
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'res' => $relations,
+            ])
+        );
     }
 
     /**
@@ -385,9 +460,9 @@ class RolesController extends ItemController
             return $query;
         }
 
-        $user_role_id = collect(Auth::user()->role_id);
+        $user_role_ids = Auth::user()->rolesIds();
 
-        $query->whereIn('id', $user_role_id);
+        $query->whereIn('id', $user_role_ids);
 
         return $query;
     }

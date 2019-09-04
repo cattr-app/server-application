@@ -40,11 +40,11 @@ class Role extends AbstractModel
     protected $fillable = ['name'];
 
     /**
-     * @return HasMany
+     * @return BelongsToMany
      */
-    public function users(): HasMany
+    public function users(): BelongsToMany
     {
-        return $this->hasMany(User::class, 'role_id');
+        return $this->belongsToMany(User::class, 'user_role', 'role_id', 'user_id', 'id', 'id');
     }
 
     /**
@@ -96,8 +96,7 @@ class Role extends AbstractModel
                             'action' => $action,
                             'allow' => false,
                         ]);
-                    }
-                    elseif ($rule->trashed()) {
+                    } elseif ($rule->trashed()) {
                         $rule->restore();
                         $rule->allow = false;
                         $rule->save();
@@ -113,10 +112,12 @@ class Role extends AbstractModel
      * @param $action
      * @param $allow
      * @return bool
+     * @throws \Throwable
      */
     public static function updateAllow($role_id, $object, $action, $allow): bool
     {
-        $rule = Rule::where([
+        /** @var Rule $rule */
+        $rule = Rule::query()->where([
             'role_id' => $role_id,
             'object' => $object,
             'action' => $action,
@@ -125,7 +126,10 @@ class Role extends AbstractModel
         $user = Auth::user();
 
         throw_if(!$rule, new \Exception('rule does not exist', 400));
-        throw_if($user->role_id === $rule->role_id && !static::can($user, 'rules', 'full_access'), new \Exception('you cannot change your own privileges', 403));
+        if (!static::can($user, 'rules', 'full_access')) {
+            $userRoleIds = $user->rolesIds();
+            throw_if($userRoleIds->contains($rule->role_id), new \Exception('you cannot change your own privileges', 403));
+        }
         throw_if($role_id === 1 && $object === 'rules' && $action === 'full_access', new \Exception('you cannot change rule management for root', 403));
 
         $rule->allow = $allow;
@@ -140,12 +144,10 @@ class Role extends AbstractModel
      */
     public static function can($user, $object, $action): bool
     {
-        if (!isset($user->role)) {
-            return false;
-        }
+        /** @var User $user */
+        $userRoleIds = $user->rolesIds();
 
-        $rule = Rule::where([
-            'role_id' => $user->role->id,
+        $rule = Rule::query()->whereIn('role_id', $userRoleIds)->where([
             'object' => $object,
             'action' => $action,
         ])->first();
@@ -154,7 +156,7 @@ class Role extends AbstractModel
             return false;
         }
 
-        return (bool) $rule->allow;
+        return (bool)$rule->allow;
     }
 
 }

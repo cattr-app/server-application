@@ -40,7 +40,6 @@ class StatisticsSeeder extends Seeder
             'web_and_app_monitoring' => 1,
             'webcam_shots' => 0,
             'screenshots_interval' => 9,
-            'user_role_value' => '',
             'active' => true,
             'password' => bcrypt($pass),
         ]);
