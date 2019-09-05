@@ -66,7 +66,7 @@ class RegistrationController extends Controller
         $registration = Registration::firstOrCreate([
             'email' => $email,
         ], [
-            'key' => (string) Uuid::generate(),
+            'key' => (string)Uuid::generate(),
             'expires_at' => time() + static::EXPIRATION_TIME,
         ]);
 
@@ -130,17 +130,19 @@ class RegistrationController extends Controller
             ], 400);
         }
 
+        /** @var User $user */
         $user = User::create([
             'full_name' => $data->get('fullName'),
             'email' => $data->get('email'),
             'password' => bcrypt($data->get('password')),
-            'role_id' => 2,
             'active' => true,
             'manual_time' => false,
             'screenshots_active' => true,
             'computer_time_popup' => 5,
             'screenshots_interval' => 5,
         ]);
+
+        $user->roles()->attach(2);
 
         $registration->delete();
 

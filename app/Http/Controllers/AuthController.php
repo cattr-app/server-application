@@ -73,7 +73,6 @@ class AuthController extends Controller
      *           "deleted_at": null,
      *           "created_at": "2018-09-25 06:15:08",
      *           "updated_at": "2018-09-25 06:15:08",
-     *           "role_id": 1,
      *           "timezone": null
      *         }
      *      }
@@ -384,7 +383,6 @@ class AuthController extends Controller
    *   "deleted_at": null,
    *   "created_at": "2018-09-25 06:15:08",
    *   "updated_at": "2018-09-25 06:15:08",
-   *   "role_id": 1,
    *   "timezone": null
    * }
    *

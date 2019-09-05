@@ -19,15 +19,15 @@ class StatisticsSeeder extends Seeder
     /**
      * Creates a new user.
      */
-    protected function createUser(string $name, string $email, string $pass, int $role_id) : User
+    protected function createUser(string $name, string $email, string $pass, int $role_id): User
     {
+        /** @var User $user */
         $user = User::updateOrCreate([
             'full_name' => $name,
             'email' => $email,
             'url' => '',
             'company_id' => 1,
             'level' => '',
-            'role_id' => $role_id,
             'payroll_access' => 1,
             'billing_access' => 1,
             'avatar' => '',
@@ -44,6 +44,8 @@ class StatisticsSeeder extends Seeder
             'password' => bcrypt($pass),
         ]);
 
+        $user->roles()->attach($role_id);
+
         $this->command->getOutput()->writeln("<fg=green>$name user has been created</>");
 
         return $user;
@@ -52,7 +54,7 @@ class StatisticsSeeder extends Seeder
     /**
      * Assignes user to a project.
      */
-    protected function assignProject(User $user, Project $project) : ProjectsUsers
+    protected function assignProject(User $user, Project $project): ProjectsUsers
     {
         $relation = ProjectsUsers::create([
             'project_id' => $project->id,
@@ -67,7 +69,7 @@ class StatisticsSeeder extends Seeder
     /**
      * Adds task for an user on a project.
      */
-    protected function addTask(User $user, Project $project) : Task
+    protected function addTask(User $user, Project $project): Task
     {
         $faker = $this->faker;
 
@@ -88,7 +90,7 @@ class StatisticsSeeder extends Seeder
     /**
      * Adds time interval for an user on a project.
      */
-    protected function addTimeInterval(User $user, Task $task) : TimeInterval
+    protected function addTimeInterval(User $user, Task $task): TimeInterval
     {
         static $time = [];
 
@@ -119,7 +121,7 @@ class StatisticsSeeder extends Seeder
     /**
      * Creates tasks and time intervals for an user on a project.
      */
-    protected function createTasks(User $user, Project $project) : void
+    protected function createTasks(User $user, Project $project): void
     {
         for ($i = 0; $i < 5; ++$i) {
             $task = $this->addTask($user, $project);
@@ -132,7 +134,7 @@ class StatisticsSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run() : void
+    public function run(): void
     {
         $this->faker = Factory::create();
 
