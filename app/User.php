@@ -162,6 +162,32 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     }
 
     /**
+     * Attach role to this user
+     * @param int|Role $role
+     */
+    public function attachRole($role)
+    {
+        $roleId = $role;
+        if ($role instanceof Role) {
+            $roleId = $role->id;
+        }
+        $this->roles()->attach($roleId);
+    }
+
+    /**
+     * Detach role from this user
+     * @param int|Role $role
+     */
+    public function detachRole($role)
+    {
+        $roleId = $role;
+        if ($role instanceof Role) {
+            $roleId = $role->id;
+        }
+        $this->roles()->detach($roleId);
+    }
+
+    /**
      * @return BelongsToMany
      */
     public function projects(): BelongsToMany

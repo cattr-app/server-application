@@ -48,6 +48,32 @@ class Role extends AbstractModel
     }
 
     /**
+     * Attach this role to user
+     * @param int|User $user
+     */
+    public function attachToUser($user)
+    {
+        $userId = $user;
+        if ($user instanceof User) {
+            $userId = $user->id;
+        }
+        $this->users()->attach($userId);
+    }
+
+    /**
+     * Detach this role from user
+     * @param int|User $user
+     */
+    public function detachFromUser($user)
+    {
+        $userId = $user;
+        if ($user instanceof User) {
+            $userId = $user->id;
+        }
+        $this->users()->detach($userId);
+    }
+
+    /**
      * @return HasMany
      */
     public function rules(): HasMany

@@ -142,7 +142,7 @@ class RegistrationController extends Controller
             'screenshots_interval' => 5,
         ]);
 
-        $user->roles()->attach(2);
+        $user->attachRole(2);
 
         $registration->delete();
 

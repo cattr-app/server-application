@@ -44,7 +44,7 @@ class StatisticsSeeder extends Seeder
             'password' => bcrypt($pass),
         ]);
 
-        $user->roles()->attach($role_id);
+        $user->attachRole($role_id);
 
         $this->command->getOutput()->writeln("<fg=green>$name user has been created</>");
 

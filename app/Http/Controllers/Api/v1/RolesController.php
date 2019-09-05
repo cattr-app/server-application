@@ -398,7 +398,7 @@ class RolesController extends ItemController
                 continue;
             }
 
-            $role->users()->attach($user_id);
+            $role->attachToUser($user_id);
         }
 
         return response()->json(
@@ -436,7 +436,7 @@ class RolesController extends ItemController
                 continue;
             }
 
-            $role->users()->detach($user_id);
+            $role->detachFromUser($user_id);
         }
 
         return response()->json(

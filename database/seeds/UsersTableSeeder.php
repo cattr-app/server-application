@@ -18,13 +18,13 @@ class UsersTableSeeder extends Seeder
         $faker = Faker\Factory::create();
 
         for ($i = 1; $i <= 50; ++$i) {
-            User::query()->create([
+            /** @var User $user */
+            $user = User::query()->create([
                 'full_name' => $faker->name,
                 'email' => $faker->email,
                 'url' => '',
                 'company_id' => 1,
                 'level' => 'user',
-                'role_id' => '2',
                 'payroll_access' => 0,
                 'billing_access' => 0,
                 'avatar' => '',
@@ -40,6 +40,7 @@ class UsersTableSeeder extends Seeder
                 'active' => true,
                 'password' => bcrypt('qwaszx12345'),
             ]);
+            $user->attachRole(2);
             $this->command->getOutput()->writeln("<fg=green>User #{$i}/50 has been created</>");
         }
 
