@@ -17,7 +17,7 @@ class CreateEmailReportsTable extends Migration
             $table->integer('id', true);
             $table->string('name', 255);
             $table->string('email', 255);
-            $table->json('project_ids')->nullable();
+            $table->text('project_ids')->nullable();
             $table->tinyInteger('frequency');
             $table->tinyInteger('value');
             $table->timestamps();

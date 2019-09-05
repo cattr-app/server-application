@@ -5,10 +5,7 @@ namespace Modules\EmailReports\Models;
 
 
 use App\Models\AbstractModel;
-use App\Models\Project;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Relations\BelongsToMany;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 class EmailReports extends AbstractModel
 {
@@ -33,10 +30,10 @@ class EmailReports extends AbstractModel
             return Carbon::today()->isLastOfMonth();
         }
         if ($frequency === self::WEEKLY) {
-            return $day === Carbon::today()->dayOfWeek;
+            return $day  == Carbon::today()->dayOfWeek;
         }
         if ($frequency === self::MONTHLY) {
-            return $day === Carbon::today()->day;
+            return $day == Carbon::today()->day;
         }
 
         return true;
