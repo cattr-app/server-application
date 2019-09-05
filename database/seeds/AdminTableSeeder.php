@@ -18,13 +18,13 @@ class AdminTableSeeder extends Seeder
         $login = 'admin@example.com';
         $pass = 'admin';
 
-        User::updateOrCreate([
+        /** @var User $admin */
+        $admin = User::query()->updateOrCreate([
             'full_name'              => 'Admin',
             'email'                  => $login,
             'url'                    => '',
             'company_id'             => 1,
             'level'                  => 'admin',
-            'role_id'                  => '1',
             'payroll_access'         => 1,
             'billing_access'         => 1,
             'avatar'                 => '',
@@ -40,6 +40,7 @@ class AdminTableSeeder extends Seeder
             'active'                 => true,
             'password'               => bcrypt($pass),
         ]);
+        $admin->roles()->attach(1);
 
         $this->command->getOutput()->writeln('<fg=green>Admin user has been created</>');
     }
