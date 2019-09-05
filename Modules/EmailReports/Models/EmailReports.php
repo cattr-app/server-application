@@ -33,10 +33,10 @@ class EmailReports extends AbstractModel
             return Carbon::today()->isLastOfMonth();
         }
         if ($frequency === self::WEEKLY) {
-            return $day === Carbon::today()->dayOfWeek;
+            return $day  === Carbon::today()->dayOfWeek;
         }
         if ($frequency === self::MONTHLY) {
-            return $day === Carbon::today()->day;
+            return $day == Carbon::today()->day;
         }
 
         return true;

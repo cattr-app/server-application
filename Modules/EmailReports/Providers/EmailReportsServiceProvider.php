@@ -133,6 +133,7 @@ class EmailReportsServiceProvider extends ServiceProvider
                 'edit' => __('Email Reports edit'),
                 'remove' => __('Email Reports remove'),
                 'create' => __('Email Reports create'),
+                'count' => __('Email Reports count'),
             ];
 
             return $data;

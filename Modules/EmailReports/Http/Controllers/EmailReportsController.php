@@ -44,8 +44,8 @@ class EmailReportsController extends ItemController
                     ];
 
                 Mail::to(explode(',', $preparedReports['emails']))
-                    ->send(new EmailReportMail(date('l\, d Y', strtotime($dates['startAt'])),
-                        date('l\, d Y', strtotime($dates['endAt'] ?? 'yesterday')),
+                    ->send(new EmailReportMail(date('l\, m Y', strtotime($dates['startAt'])),
+                        date('l\, m Y', strtotime($dates['endAt'] ?? 'yesterday')),
                         $preparedReports['reports']));
             }
         }
