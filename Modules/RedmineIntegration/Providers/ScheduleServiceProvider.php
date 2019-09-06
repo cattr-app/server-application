@@ -15,7 +15,7 @@ class ScheduleServiceProvider extends ServiceProvider
         'tasks' => '* * * * *',
         'time' => '*/5 * * * *'
     ];
-    const COMMAND_PREFIX = 'redmine-integration';
+    const COMMAND_PREFIX = 'redmine-synchronize';
     /**
      * @var Schedule
      */
