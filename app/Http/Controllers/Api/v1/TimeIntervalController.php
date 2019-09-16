@@ -70,17 +70,12 @@ class TimeIntervalController extends ItemController
 
     public function validateEndDate(array $intervalData): bool
     {
-        $user_id = $intervalData['user_id'] ?? 0;
         $start_at = $intervalData['start_at'] ?? '';
-        $user = User::find($user_id);
         $end_at_rules = [];
-        if ($user) {
-            $timeOffset = $user->screenshots_interval /* min */ * 60 /* sec */;
-            $beforeTimestamp = strtotime($start_at) + $timeOffset;
-            $beforeDate = date(DATE_ATOM, $beforeTimestamp);
-
-            $end_at_rules[] = new BetweenDate($start_at, $beforeDate);
-        }
+        $timeOffset = 3600 /* one hour */;
+        $beforeTimestamp = strtotime($start_at) + $timeOffset;
+        $beforeDate = date(DATE_ATOM, $beforeTimestamp);
+        $end_at_rules[] = new BetweenDate($start_at, $beforeDate);
 
         $validator = Validator::make(
             $intervalData,
