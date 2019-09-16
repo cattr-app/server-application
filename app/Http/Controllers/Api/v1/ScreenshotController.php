@@ -26,6 +26,13 @@ use App\Helpers\QueryHelper;
  */
 class ScreenshotController extends ItemController
 {
+
+    // Stupid mock for now
+    public function getCarnivalURL() : string
+    {
+        return 'http://127.0.0.1:3333/api/v1/file';
+    }
+
     /**
      * @return string
      */
@@ -223,6 +230,32 @@ class ScreenshotController extends ItemController
                 'res' => $item,
             ])
         );
+    }
+
+    public function destroy(Request $request): JsonResponse {
+
+        $client = new \GuzzleHttp\Client();
+        $url = $this->getCarnivalURL();
+
+        $res = $client->request('DELETE',$url, [
+            'headers' => [
+                // TODO where do we get the token from?
+                'authorization' => 'token 3b44be0dba7b3ee7c33b3ab22cc8506d2b950f5224cc58c435', // another stupid mock
+                'at-user-id' => ''
+            ],
+            'json' => [
+                // TODO shall sand image url from the FE, this is a mock
+                'url' => '21/test.jpeg'
+            ]
+        ]);
+        
+
+        return response()->json(
+
+            json_decode($res->getBody())
+
+        );
+
     }
 
     /**
