@@ -12,6 +12,8 @@ use Illuminate\Database\Eloquent\Builder;
 
 class RolesController extends ItemController
 {
+    protected $disableQueryRoleCheck = false;
+
     /**
      * @return string
      */
@@ -325,10 +327,12 @@ class RolesController extends ItemController
         }
 
         /** @var Builder $itemsQuery */
+        $this->disableQueryRoleCheck = true;
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->getQuery()
         );
+        $this->disableQueryRoleCheck = false;
 
         $roles = $itemsQuery->whereIn('role.id', $roleIds)->get();
 
@@ -456,7 +460,7 @@ class RolesController extends ItemController
         $query = parent::getQuery($withRelations);
         $full_access = Role::can(Auth::user(), 'roles', 'full_access');
 
-        if ($full_access) {
+        if ($full_access || $this->disableQueryRoleCheck) {
             return $query;
         }
 
