@@ -27,12 +27,6 @@ use App\Helpers\QueryHelper;
 class ScreenshotController extends ItemController
 {
 
-    // Stupid mock for now
-    public function getCarnivalURL() : string
-    {
-        return 'http://127.0.0.1:3333/api/v1/file';
-    }
-
     /**
      * @return string
      */
@@ -181,34 +175,49 @@ class ScreenshotController extends ItemController
             );
         }
 
-        $screenStorePath = $request->screenshot->store('uploads/screenshots');
-        $absoluteStorePath = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, Storage::disk()->path($screenStorePath));
-
-        $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
-
-        $screenshot = Image::make($path);
-
-        $thumbnail = $screenshot->resize(280, null, function ($constraint) {
+        $screenshotPath = $request->screenshot->path();
+        $image = Image::make($screenshotPath);
+        $resizedImage = $image->resize(280, null, function ($constraint) {
             $constraint->aspectRatio();
-        });
+        });    
+        $imageStream = $resizedImage->stream('jpg', 100);
+        $imageResource = \GuzzleHttp\Psr7\StreamWrapper::getResource($imageStream);
 
-        $ds = DIRECTORY_SEPARATOR;
 
-        $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs", $screenStorePath);
-        Storage::put($thumbnailPath, (string)$thumbnail->encode());
+        $url = env('CARNIVAL_URL');
+        $token = 'bearer '.env('CARNIVAL_TOKEN');
+        $currentUser = Auth::user();
+        $client = new \GuzzleHttp\Client();
+        $res = $client->request('PUT',$url, [
+            'headers' => [
+                'authorization' => $token,
+                'at-user-id' => $currentUser['id']
+            ],
+            'multipart' => [
+                [
+                    'name'     => 'screenshot',
+                    'contents' => fopen($screenshotPath, 'r'),
+                    'headers'  => ['Content-Type' => 'image/jpeg']
+                ],
+                [
+                    'name'     => 'thumb',
+                    'contents' => $imageResource,
+                    'headers'  => ['Content-Type' => 'image/jpeg']
+                ]
+            ]
+        ]);
+        
+        error_log($res->getBody());
+
+        /* 
 
         $timeIntervalId = ((int)$request->get('time_interval_id')) ?: null;
 
         $requestData = [
             'time_interval_id' => $timeIntervalId,
-            'path' => $screenStorePath,
-            'thumbnail_path' => $thumbnailPath,
+            'path' => $screenStorePath, // shall put here path from s3
+            'thumbnail_path' => $thumbnailPath, // same
         ];
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-        );
 
         if ($validator->fails()) {
             return response()->json(
@@ -229,25 +238,33 @@ class ScreenshotController extends ItemController
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                 'res' => $item,
             ])
-        );
+        ); */
+
+        return response()->json(
+            [
+                'res' => 'ok',
+            ]
+        ); 
     }
 
     public function destroy(Request $request): JsonResponse {
 
+        $currentUser = Auth::user();
+        $reqBodyURLMock = 'http://127.0.0.1:7777/amazingdog/1/screenshots/fe56a57e566e246752a4c54473fdff5f2fad7a974.jpg';
         $client = new \GuzzleHttp\Client();
-        $url = $this->getCarnivalURL();
+        $url = env('CARNIVAL_URL');
+        $token = 'bearer '.env('CARNIVAL_TOKEN');
 
         $res = $client->request('DELETE',$url, [
             'headers' => [
-                // TODO where do we get the token from?
-                'authorization' => 'token 3b44be0dba7b3ee7c33b3ab22cc8506d2b950f5224cc58c435', // another stupid mock
-                'at-user-id' => ''
+                'authorization' => $token,
+                'at-user-id' => $currentUser['id']
             ],
             'json' => [
-                // TODO shall sand image url from the FE, this is a mock
-                'url' => '21/test.jpeg'
+                'url' => $reqBodyURLMock
             ]
         ]);
+        
         
 
         return response()->json(
