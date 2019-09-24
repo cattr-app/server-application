@@ -47,10 +47,11 @@ class AddMultiplyRoles extends Migration
      */
     public function down()
     {
-        /*Schema::table('users', function (Blueprint $table) {
+        Schema::table('users', function (Blueprint $table) {
             $table->unsignedInteger('role_id')->default(1);
+            $table->unsignedInteger('user_role_value')->default(1);
             $table->foreign('role_id')->references('id')->on('role');
-        });*/
+        });
 
         Schema::disableForeignKeyConstraints();
         Schema::dropIfExists('user_role');
