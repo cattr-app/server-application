@@ -114,14 +114,10 @@ class ProjectReportController extends Controller
         ;
 
         if ($start_at) {
-            $timestamp = strtotime($start_at);
-            $date = date('Y-m-d', $timestamp);
             $days->where('date', '>=', $date);
         }
 
         if ($end_at) {
-            $timestamp = strtotime($end_at);
-            $date = date('Y-m-d', $timestamp);
             $days->where('date', '<', $date);
         }
 
