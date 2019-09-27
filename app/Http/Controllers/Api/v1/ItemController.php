@@ -206,10 +206,19 @@ abstract class  ItemController extends Controller
             )
         );
 
-        $item = $itemsQuery->get();
+        $item = $itemsQuery->first();
+
+        if (!$item) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
+                    'error' => 'Item not found'
+                ]),
+                404
+            );
+        }
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item->first())
+            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item)
         );
     }
 
