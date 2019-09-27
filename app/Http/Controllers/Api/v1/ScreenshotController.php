@@ -176,6 +176,18 @@ class ScreenshotController extends ItemController
         }
 
         $screenshotPath = $request->screenshot->path();
+
+        if(!isset($screenshotPath)) {
+            return response()->json(
+                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
+                    [
+                        'error' => 'screenshot does not exist in database'
+                    ]
+                ]),
+                404
+            );
+        }
+
         $image = Image::make($screenshotPath);
         $resizedImage = $image->resize(280, null, function ($constraint) {
             $constraint->aspectRatio();
@@ -206,18 +218,32 @@ class ScreenshotController extends ItemController
                 ]
             ]
         ]);
-        
-        error_log($res->getBody());
 
-        /* 
+        if (!isset($res)) {
+            return response()->json(
+                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
+                    [
+                        'error' => 'Carnival screenshot service is unavailable'
+                    ]
+                ]),
+                500
+            );
+        }
 
+        $resBody = (string) $res->getBody();
+        $resBody = json_decode($resBody, true);
         $timeIntervalId = ((int)$request->get('time_interval_id')) ?: null;
 
         $requestData = [
             'time_interval_id' => $timeIntervalId,
-            'path' => $screenStorePath, // shall put here path from s3
-            'thumbnail_path' => $thumbnailPath, // same
+            'path' => $resBody['url'],
+            'thumbnail_path' => str_replace('.jpg', '-thum.jpg', $resBody['url']),
         ];
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+        );
 
         if ($validator->fails()) {
             return response()->json(
@@ -238,21 +264,22 @@ class ScreenshotController extends ItemController
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                 'res' => $item,
             ])
-        ); */
-
-        return response()->json(
-            [
-                'res' => 'ok',
-            ]
-        ); 
+        );
     }
 
     public function destroy(Request $request): JsonResponse {
 
-        $currentUser = Auth::user();
-        $reqBodyURLMock = 'http://127.0.0.1:7777/amazingdog/1/screenshots/fe56a57e566e246752a4c54473fdff5f2fad7a974.jpg';
+        $screenshotModel = $this->getItemClass();
+        $screenshotToDel = $screenshotModel::where('id', $request->get('id'))->firstOrFail();
+        $thisScreenshotTimeInterval = TimeInterval::where('id', $screenshotToDel->time_interval_id)->firstOrFail();
+        
+        if ((int) $thisScreenshotTimeInterval->screenshots_count <= 1) {
+            $thisScreenshotTimeInterval->delete();
+        }
+
         $client = new \GuzzleHttp\Client();
         $url = env('CARNIVAL_URL');
+        $currentUser = Auth::user();
         $token = 'bearer '.env('CARNIVAL_TOKEN');
 
         $res = $client->request('DELETE',$url, [
@@ -261,12 +288,21 @@ class ScreenshotController extends ItemController
                 'at-user-id' => $currentUser['id']
             ],
             'json' => [
-                'url' => $reqBodyURLMock
+                'url' => $screenshotToDel->path
             ]
         ]);
-        
-        
 
+        if (!isset($res)) {
+            return response()->json(
+                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
+                    [
+                        'error' => 'Carnival screenshot service is unavailable'
+                    ]
+                ]),
+                500
+            );
+        }
+        
         return response()->json(
 
             json_decode($res->getBody())
