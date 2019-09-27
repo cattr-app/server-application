@@ -53,7 +53,11 @@ class GitlabApi
             return null;
         }
 
-        $this->client = Client::create($this->apiUrl)->authenticate($this->apiKey);
+        try {
+            $this->client = Client::create($this->apiUrl)->authenticate($this->apiKey);
+        } catch (\Throwable $throwable) {
+            return null;
+        }
         $this->pager = new ResultPager($this->client);
 
         return $this;

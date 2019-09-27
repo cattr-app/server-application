@@ -29,7 +29,11 @@ class Synchronizer
 
         $this->entityResolver->init();
 
-        $_userGitlabTasks = $api->getUserTasks();
+        try {
+            $_userGitlabTasks = $api->getUserTasks();
+        } catch (\Throwable $throwable) {
+            return false;
+        }
         $userGitlabTasks = [];
         foreach ($_userGitlabTasks as $userTaskData) {
             if (!isset($userTaskData['project_id'])) {
