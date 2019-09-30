@@ -46,6 +46,25 @@ class Project extends AbstractModel
     ];
 
     /**
+     * @var array
+     */
+    protected $casts = [
+        'company_id' => 'integer',
+        'name' => 'string',
+        'description' => 'string',
+        'important' => 'boolean',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $dates = [
+        'deleted_at',
+        'created_at',
+        'updated_at',
+    ];
+
+    /**
      * Override parent boot and Call deleting event
      *
      * @return void

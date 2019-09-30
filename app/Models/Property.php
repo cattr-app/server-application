@@ -37,8 +37,35 @@ class Property extends AbstractModel
     /**
      * @var array
      */
-    protected $fillable = ['entity_id', 'entity_type', 'name', 'value'];
+    protected $fillable = [
+        'entity_id',
+        'entity_type',
+        'name',
+        'value',
+    ];
 
+    /**
+     * @var array
+     */
+    protected $casts = [
+        'entity_id' => 'integer',
+        'entity_type' => 'string',
+        'name' => 'string',
+        'value' => 'string',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    /**
+     * @return string
+     */
     public static function getTableName()
     {
         return with(new static)->getTable();

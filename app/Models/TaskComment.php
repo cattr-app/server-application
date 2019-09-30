@@ -35,8 +35,28 @@ class TaskComment extends AbstractModel
     /**
      * @var array
      */
-    protected $fillable = ['task_id', 'content'];
+    protected $fillable = [
+        'task_id',
+        'content',
+    ];
 
+    /**
+     * @var array
+     */
+    protected $casts = [
+        'task_id' => 'integer',
+        'user_id' => 'integer',
+        'content' => 'string',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     /**
      * @return BelongsTo

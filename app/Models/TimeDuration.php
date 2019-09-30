@@ -26,6 +26,15 @@ class TimeDuration extends AbstractModel
     protected $table = 'time_durations_cache';
 
     /**
+     * @var array
+     */
+    protected $casts = [
+        'duration' => 'integer',
+        'user_id' => 'integer',
+        'date' => 'date',
+    ];
+
+    /**
      * @return BelongsTo
      */
     public function user(): BelongsTo

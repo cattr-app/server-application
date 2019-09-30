@@ -26,7 +26,6 @@ class Rule extends AbstractModel
 {
     use SoftDeletes;
 
-
     /**
      * table name from database
      * @var string
@@ -36,7 +35,12 @@ class Rule extends AbstractModel
     /**
      * @var array
      */
-    protected $fillable = ['role_id', 'object', 'action', 'allow'];
+    protected $fillable = [
+        'role_id',
+        'object',
+        'action',
+        'allow',
+    ];
 
     /**
      * @return BelongsTo
@@ -63,6 +67,7 @@ class Rule extends AbstractModel
                 'remove' => __('Project remove'),
                 'relations' => __('Project list attached to user'),
                 'full_access' => __('Project full access'),
+                'count' => __('Project count'),
             ],
             'projects-users' => [
                 'list' => __('Project User relation list'),
@@ -88,6 +93,7 @@ class Rule extends AbstractModel
                 'edit' => __('Task edit'),
                 'remove' => __('Task remove'),
                 'full_access' => __('Tasks full access'),
+                'count' => __('Task count')
             ],
             'task-comment' => [
                 'list' => __('Task comments list'),
@@ -104,6 +110,7 @@ class Rule extends AbstractModel
                 'remove' => __('Role remove'),
                 'allowed-rules' => __('Role allowed rule list'),
                 'full_access' => __('Roles full access'),
+                'count' => __('Role count'),
             ],
             'screenshots' => [
                 'list' => __('Screenshot list'),
@@ -122,6 +129,7 @@ class Rule extends AbstractModel
                 'edit' => __('Time interval edit'),
                 'show' => __('Time interval show'),
                 'remove' => __('Time interval remove'),
+                'bulk-remove' => __('Time interval bulk remove'),
                 'full_access' => __('Time intervals full access'),
                 'manager_access' => __('Time intervals manager access'),
             ],
@@ -143,6 +151,7 @@ class Rule extends AbstractModel
                 'relations' => __('Attached users list'),
                 'full_access' => __('Users full access'),
                 'manager_access' => __('Users manager access'),
+                'count' => __('User count'),
             ],
             'attached-users' => [
                 'list' => __('Attached User relation list'),
