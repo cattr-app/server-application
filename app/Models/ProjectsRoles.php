@@ -26,6 +26,30 @@ class ProjectsRoles extends AbstractModel
      */
     protected $table = 'projects_roles';
 
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'project_id',
+        'role_id',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $casts = [
+        'project_id' => 'integer',
+        'role_id' => 'integer',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+    ];
+
     protected function setKeysForSaveQuery(Builder $query)
     {
         $query
@@ -33,11 +57,6 @@ class ProjectsRoles extends AbstractModel
             ->where('role_id', '=', $this->getAttribute('role_id'));
         return $query;
     }
-
-    /**
-     * @var array
-     */
-    protected $fillable = ['project_id','role_id'];
 
     /**
      * @return BelongsTo

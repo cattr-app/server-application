@@ -39,13 +39,34 @@ class TimeInterval extends AbstractModel
     /**
      * @var array
      */
-    protected $fillable = ['task_id', 'start_at', 'user_id', 'end_at', 'count_mouse', 'count_keyboard'];
+    protected $fillable = [
+        'task_id',
+        'start_at',
+        'user_id',
+        'end_at',
+        'count_mouse',
+        'count_keyboard',
+    ];
 
+    /**
+     * @var array
+     */
+    protected $casts = [
+        'task_id' => 'integer',
+        'user_id' => 'integer',
+        'count_mouse' => 'integer',
+        'count_keyboard' => 'integer',
+    ];
+
+    /**
+     * @var array
+     */
     protected $dates = [
         'start_at',
         'end_at',
         'created_at',
         'updated_at',
+        'deleted_at',
     ];
 
     /**

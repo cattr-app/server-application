@@ -22,6 +22,13 @@ class Priority extends AbstractModel
     ];
 
     /**
+     * @var array
+     */
+    protected $casts = [
+        'name' => 'string',
+    ];
+
+    /**
      * @return HasMany
      */
     public function tasks(): HasMany

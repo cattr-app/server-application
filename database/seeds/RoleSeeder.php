@@ -24,65 +24,70 @@ class RoleSeeder extends Seeder
         Role::updateOrCreate(['id' => 255, 'name' => 'blocked']);
 
         $userAllow = [
-          'project-report' => [
-            'list',
-            'projects',
-          ],
-          'projects' => [
-              'list',
-              'show'
-          ],
-          'roles' => [
-              'allowed-rules'
-          ],
-          'screenshots' => [
-              'create',
-              'dashboard',
-              'list',
-              'remove',
-              'show',
-          ],
-          'tasks' => [
-              'create',
-              'dashboard',
-              'edit',
-              'list',
-              'remove',
-              'show'
-          ],
-          'time' => [
-              'project',
-              'task',
-              'task-user',
-              'tasks',
-              'total'
-          ],
-          'time-duration' => [
-              'list',
-          ],
-          'time-intervals' => [
-              'create',
-              'edit',
-              'list',
-              'remove',
-              'show'
-          ],
-          'time-use-report' => [
-              'list',
-          ],
-          'users' => [
-              'edit',
-              'list',
-              'show'
-          ],
+            'project-report' => [
+                'list',
+                'projects',
+            ],
+            'projects' => [
+                'list',
+                'show',
+                'count',
+            ],
+            'roles' => [
+                'allowed-rules',
+            ],
+            'screenshots' => [
+                'create',
+                'dashboard',
+                'list',
+                'remove',
+                'show',
+            ],
+            'tasks' => [
+                'create',
+                'dashboard',
+                'edit',
+                'list',
+                'remove',
+                'show',
+                'count',
+            ],
+            'time' => [
+                'project',
+                'task',
+                'task-user',
+                'tasks',
+                'total',
+            ],
+            'time-duration' => [
+                'list',
+            ],
+            'time-intervals' => [
+                'create',
+                'edit',
+                'list',
+                'remove',
+                'bulk-remove',
+                'show',
+            ],
+            'time-use-report' => [
+                'list',
+            ],
+            'users' => [
+                'edit',
+                'list',
+                'show',
+                'count',
+            ],
         ];
         $observerAllow = [
             'projects' => [
                 'list',
-                'show'
+                'show',
+                'count',
             ],
             'roles' => [
-                'allowed-rules'
+                'allowed-rules',
             ],
             'screenshots' => [
                 'dashboard',
@@ -92,7 +97,8 @@ class RoleSeeder extends Seeder
             'tasks' => [
                 'dashboard',
                 'show',
-                'list'
+                'list',
+                'count',
             ],
             'time' => [
                 'project',
@@ -103,7 +109,8 @@ class RoleSeeder extends Seeder
             ],
             'time-intervals' => [
                 'list',
-                'show'
+                'show',
+                'bulk-remove',
             ],
             'users' => [
                 'list',
@@ -115,10 +122,11 @@ class RoleSeeder extends Seeder
             'projects' => [
                 'list',
                 'relations',
-                'show'
+                'show',
+                'count',
             ],
             'roles' => [
-                'allowed-rules'
+                'allowed-rules',
             ],
             'screenshots' => [
                 'dashboard',
@@ -128,18 +136,20 @@ class RoleSeeder extends Seeder
             'tasks' => [
                 'dashboard',
                 'list',
-                'show'
+                'show',
+                'count',
             ],
             'time' => [
                 'project',
                 'task',
                 'task-user',
                 'tasks',
-                'total'
+                'total',
             ],
             'time-intervals' => [
                 'list',
-                'show'
+                'show',
+                'bulk-remove',
             ],
             'users' => [
                 'list',
@@ -159,11 +169,13 @@ class RoleSeeder extends Seeder
             'projects' => [
                 'list',
                 'edit',
-                'show'
+                'show',
+                'count',
             ],
             'roles' => [
                 'list',
                 'allowed-rules',
+                'count',
             ],
             'screenshots' => [
                 'dashboard',
@@ -188,17 +200,18 @@ class RoleSeeder extends Seeder
                 'total'
             ],
             'time-duration' => [
-              'list',
+                'list',
             ],
             'time-intervals' => [
                 'list',
                 'edit',
                 'remove',
+                'bulk-remove',
                 'show',
                 'manager_access'
             ],
             'time-use-report' => [
-              'list',
+                'list',
             ],
             'users' => [
                 'list',

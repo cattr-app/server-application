@@ -40,6 +40,22 @@ class Role extends AbstractModel
     protected $fillable = ['name'];
 
     /**
+     * @var array
+     */
+    protected $casts = [
+        'name' => 'string'
+    ];
+
+    /**
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    /**
      * @return BelongsToMany
      */
     public function users(): BelongsToMany

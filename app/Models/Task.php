@@ -58,6 +58,30 @@ class Task extends AbstractModel
     ];
 
     /**
+     * @var array
+     */
+    protected $casts = [
+        'project_id' => 'integer',
+        'task_name' => 'string',
+        'description' => 'string',
+        'active' => 'integer',
+        'user_id' => 'integer',
+        'assigned_by' => 'integer',
+        'url' => 'string',
+        'priority_id' => 'integer',
+        'important' => 'boolean',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    /**
      * Override parent boot and Call deleting event
      *
      * @return void

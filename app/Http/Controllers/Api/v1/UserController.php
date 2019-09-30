@@ -109,7 +109,7 @@ class UserController extends ItemController
             'email'                  => 'required|unique:users,email',
             'active'                 => 'required|boolean',
             'password'               => 'required',
-            'role_id'                => 'exists:role,id|required',
+            //'role_id'                => 'exists:role,id|required',
         ];
     }
 
