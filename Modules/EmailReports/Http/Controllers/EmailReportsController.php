@@ -5,7 +5,12 @@ namespace Modules\EmailReports\Http\Controllers;
 
 use App\Http\Controllers\Api\v1\ItemController;
 use App\User;
+use Filter;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\ModelNotFoundException;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Mail;
 use Modules\EmailReports\Entities\SavedReportsRepository;
 use Modules\EmailReports\Mail\EmailReportMail;
@@ -84,5 +89,80 @@ class EmailReportsController extends ItemController
     public function getEventUniqueNamePart(): string
     {
         return 'email-reports';
+    }
+
+    public function index(Request $request): JsonResponse
+    {
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), $request->all() ?: []
+            )
+        );
+
+        $items = [];
+        foreach ($itemsQuery->get() as $item) {
+            $item->project_ids = json_decode($item->project_ids);
+            $items []= $item;
+        }
+
+            return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.result'),
+                $items
+            )
+        );
+    }
+
+    /**
+     * Display the specified resource.
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * @throws ModelNotFoundException
+     */
+    public function show(Request $request): JsonResponse
+    {
+        $itemId = is_int($request->get('id')) ? $request->get('id') : false;
+
+        if (!$itemId) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
+                    'error' => 'Validation fail',
+                    'reason' => 'Id invalid',
+                ]),
+                400
+            );
+        }
+
+        $filters = [
+            'id' => $itemId
+        ];
+        $request->get('with') ? $filters['with'] = $request->get('with') : false;
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(), $filters ?: []
+            )
+        );
+
+        $item = $itemsQuery->first();
+
+        if (!$item) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
+                    'error' => 'Item not found'
+                ]),
+                404
+            );
+        }
+
+        $item->project_ids = json_decode($item->project_ids);
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item)
+        );
     }
 }
