@@ -4,7 +4,6 @@ namespace Modules\EmailReports\Providers;
 
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
-use Illuminate\View\Factory as ViewFactory;
 
 class EmailReportsServiceProvider extends ServiceProvider
 {
@@ -14,17 +13,6 @@ class EmailReportsServiceProvider extends ServiceProvider
      * @var bool
      */
     protected $defer = false;
-
-    /**
-     * @var ViewFactory
-     */
-    private $viewFactory;
-
-    public function __construct($app)
-    {
-        parent::__construct($app);
-        $this->viewFactory = $app->make(\Illuminate\View\Factory::class);
-    }   
 
     /**
      * Boot the application events.
@@ -75,8 +63,9 @@ class EmailReportsServiceProvider extends ServiceProvider
     public function registerViews()
     {
         $sourcePath = __DIR__.'/../Resources/views';
-        $this->viewFactory->addLocation($sourcePath);
-        $this->viewFactory->addNamespace('emailreports', $sourcePath . '/emailreports');
+        $viewFactory = $this->app->make(\Illuminate\View\Factory::class);
+        $viewFactory->addLocation($sourcePath);
+        $viewFactory->addNamespace('emailreports', $sourcePath . '/emailreports');
     }
 
     /**
@@ -126,17 +115,19 @@ class EmailReportsServiceProvider extends ServiceProvider
 
     private function loadEmailreportsRules()
     {
-        \Filter::listen('role.actions.list', static function ($data) {
-            $data['email-reports'] = [
-                'list' => __('Email Reports list'),
-                'show' => __('Email Reports show'),
-                'edit' => __('Email Reports edit'),
-                'remove' => __('Email Reports remove'),
-                'create' => __('Email Reports create'),
-                'count' => __('Email Reports count'),
-            ];
+        \Filter::listen('role.actions.list', static function ($rules) {
+            if (!isset($rules['email-reports'])) {
+                $rules['email-reports'] = [
+                    'list' => __('Email Reports list'),
+                    'show' => __('Email Reports show'),
+                    'edit' => __('Email Reports edit'),
+                    'remove' => __('Email Reports remove'),
+                    'create' => __('Email Reports create'),
+                    'count' => __('Email Reports count'),
+                ];
+            }
 
-            return $data;
+            return $rules;
         });
     }
 }

@@ -22,12 +22,11 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
         \Filter::listen('role.actions.list', static function ($rules) {
-            if (!isset($rules['integration'])) {
-                $rules['integration'] = [];
+            if (!isset($rules['integration']['gitlab'])) {
+                $rules['integration'] += [
+                    'gitlab' => __('GitLab integration')
+                ];
             }
-
-            $rules['integration']['gitlab'] = __('GitLab integration');
-
             return $rules;
         });
     }
