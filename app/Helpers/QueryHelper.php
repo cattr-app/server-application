@@ -36,51 +36,49 @@ class QueryHelper
             unset($filter['offset']);
         }
 
-        if (isset($filter['order_by'])) {
-            $order_by = $filter['order_by'];
-            [$column, $dir] = \is_array($order_by) ? $order_by : [$order_by, 'asc'];
+        if (isset($filter['orderBy'])) {
+            $order_by = $filter['orderBy'];
+            [$column, $dir] = \is_array($order_by) ? array_values($order_by) : [$order_by, 'asc'];
             if (Schema::hasColumn($table, $column)) {
                 $query->orderBy($column, $dir);
             }
 
-            unset($filter['order_by']);
+            unset($filter['orderBy']);
         }
 
         if (isset($filter['with'])) {
-            $with = explode(',', $filter['with']);
-            if ($with) {
-                foreach ($with as $relation) {
-                    $relation = trim($relation);
-                    if (strpos($relation, '.') !== False) {
-                        $params = explode('.', $relation);
-                        $domain = array_shift($params);
+            $with = is_array($filter['with']) ? $filter['with'] : explode(',', $filter['with']);
+            foreach ($with as $relation) {
+                $relation = trim($relation);
+                if (strpos($relation, '.') !== False) {
+                    $params = explode('.', $relation);
+                    $domain = array_shift($params);
 
-                        if (!method_exists($model, $domain)) {
-                            $cls = get_class($model);
-                            throw new \RuntimeException("Unknown relation {$cls}::{$domain}()");
-                        }
-                        /** @var Relation $relationQuery */
-                        $relationQuery = $model->{$domain}();
+                    if (!method_exists($model, $domain)) {
+                        $cls = get_class($model);
+                        throw new \RuntimeException("Unknown relation {$cls}::{$domain}()");
+                    }
+                    /** @var Relation $relationQuery */
+                    $relationQuery = $model->{$domain}();
 
-                        if (is_array($params)) {
-                            while (count($params) > 0) {
-                                $relationModel = $relationQuery->getModel();
-                                $domain = array_shift($params);
+                    if (is_array($params)) {
+                        while (count($params) > 0) {
+                            $relationModel = $relationQuery->getModel();
+                            $domain = array_shift($params);
 
-                                if (!method_exists($relationModel, $domain)) {
-                                    $cls = get_class($model);
-                                    throw new \RuntimeException("Unknown relation {$cls}::{$domain}()");
-                                }
-
-                                $relationQuery = $relationModel->{$domain}();
+                            if (!method_exists($relationModel, $domain)) {
+                                $cls = get_class($model);
+                                throw new \RuntimeException("Unknown relation {$cls}::{$domain}()");
                             }
-                        }
 
-                        $query->with($relation);
-                    } else {
-                        if (method_exists($model, $relation)) {
-                            $query->with($relation);
+                            $relationQuery = $relationModel->{$domain}();
                         }
+                    }
+
+                    $query->with($relation);
+                } else {
+                    if (method_exists($model, $relation)) {
+                        $query->with($relation);
                     }
                 }
             }
@@ -99,7 +97,7 @@ class QueryHelper
                 $relations[$domain][$filterParam] = $param;
             } else {
                 if (Schema::hasColumn($table, $key)) {
-                    [$operator, $value] = \is_array($param) ? $param : ['=', $param];
+                    [$operator, $value] = \is_array($param) ? array_values($param) : ['=', $param];
 
                     if (\is_array($value) && $operator === '=') {
                         $query->whereIn($key, $value);

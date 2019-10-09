@@ -165,6 +165,16 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         });
     }
 
+    public function syncRoles($roles)
+    {
+        $roleIds = [];
+        foreach ($roles as $role) {
+            $roleIds []= isset($role['id']) ? $role['id'] : $role;
+        }
+
+        $this->roles()->sync($roleIds);
+    }
+
     /**
      * Attach role to this user
      * @param int|Role $role

@@ -389,6 +389,10 @@ class UserController extends ItemController
             $item->fill($requestData);
         }
 
+        if (isset($requestData['roles'])) {
+            $item->syncRoles($requestData['roles']);
+        }
+
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
         $item->save();
 

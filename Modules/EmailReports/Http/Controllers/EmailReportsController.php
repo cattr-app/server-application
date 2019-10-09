@@ -4,6 +4,7 @@ namespace Modules\EmailReports\Http\Controllers;
 
 
 use App\Http\Controllers\Api\v1\ItemController;
+use App\Models\Project;
 use App\User;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
@@ -103,7 +104,7 @@ class EmailReportsController extends ItemController
 
         $items = [];
         foreach ($itemsQuery->get() as $item) {
-            $item->project_ids = json_decode($item->project_ids);
+            $item->project_ids = Project::whereIn('id', json_decode($item->project_ids))->get();
             $items []= $item;
         }
 
@@ -159,7 +160,7 @@ class EmailReportsController extends ItemController
             );
         }
 
-        $item->project_ids = json_decode($item->project_ids);
+        $item->project_ids = Project::whereIn('id', json_decode($item->project_ids))->get();
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.show'), $item)
