@@ -33,7 +33,7 @@ class Handler extends ExceptionHandler
      */
     public function report(Exception $exception)
     {
-        if (config('app.debug') && app()->bound('sentry') && $this->shouldReport($exception)){
+        if (!config('app.debug') && app()->bound('sentry') && $this->shouldReport($exception)){
             app('sentry')->captureException($exception);
         }
 
