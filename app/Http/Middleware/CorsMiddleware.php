@@ -48,16 +48,31 @@ class CorsMiddleware
     protected function allowAllCors($request)
     {
         $origin = $request->header('Origin');
+        $allowedDomain = $this->allowedDomain($origin);
 
-        if (is_null($origin)) {
+        if (!$allowedDomain) {
             return;
         }
 
+        header('Access-Control-Allow-Origin: ' . $allowedDomain);
+        header('Access-Control-Allow-Methods: POST, GET, DELETE, PUT, PATCH, OPTIONS');
+        header('Access-Control-Allow-Headers: *');
+        header('Access-Control-Max-Age: 1728000');
+    }
+
+
+    protected function allowedDomain($origin)
+    {
+        if (is_null($origin)) {
+            return false;
+        }
+
+        $requestProtocol = parse_url($origin, PHP_URL_SCHEME);
         $requestDomain = parse_url($origin, PHP_URL_HOST);
         $requestPort = parse_url($origin, PHP_URL_PORT);
 
         if (is_null($requestDomain)) {
-            return;
+            return false;
         }
 
         // has port? add it to domain
@@ -65,13 +80,12 @@ class CorsMiddleware
             $requestDomain = $requestDomain . ':' . $requestPort;
         }
 
+        $requestDomain = $requestProtocol . '://' . $requestDomain;
+
         if (!in_array($requestDomain, $this->trustedDomains)) {
-            return;
+            return false;
         }
 
-        header('Access-Control-Allow-Origin: ' . $requestDomain);
-        header('Access-Control-Allow-Methods: POST, GET, DELETE, PUT, PATCH, OPTIONS');
-        header('Access-Control-Allow-Headers: *');
-        header('Access-Control-Max-Age: 1728000');
+        return $requestDomain;
     }
 }
