@@ -167,7 +167,7 @@ class UserController extends ItemController
      * @apiParam {Boolean}  [webcam_shots]                       ???
      * @apiParam {Integer}  [screenshots_interval]  `QueryParam` Screenshots creation interval (seconds)
      * @apiParam {Boolean}  [active]                             User is active
-     * @apiParam {Integer}  [role_id]               `QueryParam` User's Role ID
+     * @apiParam {Integer}  [roles]                 `QueryParam` User's Roles
      * @apiParam {String}   [created_at]            `QueryParam` User Creation DateTime
      * @apiParam {String}   [updated_at]            `QueryParam` Last User data update DataTime
      * @apiParam {String}   [deleted_at]            `QueryParam` When User was deleted (null if not)
@@ -196,7 +196,7 @@ class UserController extends ItemController
      * @apiSuccess {Object} res.full_name   User
      * @apiSuccess {Object} res.email       Email
      * @apiSuccess {Object} res.active      Is user active
-     * @apiSuccess {Object} res.role_id     User role id
+     * @apiSuccess {Object} res.roles       User roles
      * @apiSuccess {Object} res.updated_at  User last update datetime
      * @apiSuccess {Object} res.created_at  User registration datetime
      *
@@ -216,6 +216,55 @@ class UserController extends ItemController
      *
      * @apiUse UserModel
      */
+
+    /**
+     * Create item
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function create(Request $request): JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        $cls = $this->getItemClass();
+
+        Event::dispatch($this->getEventUniqueName('item.create.before'), $requestData);
+
+        $item = Filter::process(
+            $this->getEventUniqueName('item.create'),
+            $cls::create($this->filterRequestData($requestData))
+        );
+
+        if (isset($requestData['roles'])) {
+            $item->syncRoles($requestData['roles']);
+        }
+
+        $item->save();
+
+        Event::dispatch($this->getEventUniqueName('item.create.after'), [$item, $requestData]);
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'res' => $item,
+            ])
+        );
+    }
 
     /**
      * @api {post} /api/v1/users/show Show
@@ -255,6 +304,7 @@ class UserController extends ItemController
      *   "computer_time_popup": 300,
      *   "poor_time_popup": "",
      *   "blur_screenshots": 0,
+     *   "roles": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
      *   "web_and_app_monitoring": 1,
      *   "webcam_shots": 0,
      *   "screenshots_interval": 9,
@@ -307,6 +357,7 @@ class UserController extends ItemController
      *       "web_and_app_monitoring": 1,
      *       "webcam_shots": 0,
      *       "screenshots_interval": 9,
+     *       "roles": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
      *       "active": "1",
      *       "deleted_at": null,
      *       "created_at": "2018-10-18 09:36:22",
@@ -641,7 +692,7 @@ class UserController extends ItemController
                 $projects = collect($user->projects);
 
                 $projects_users = $projects->flatMap(function($project) {
-                   return collect($project->users);
+                    return collect($project->users);
                 })->unique('id');
 
                 $project_ids = $projects->map(function ($project) { return $project->id; });
@@ -653,7 +704,7 @@ class UserController extends ItemController
         }
 
         $users = collect($users)->filter(function($user, $key) use ($userId) {
-           return $user->id !== $userId;
+            return $user->id !== $userId;
         });
 
         return response()->json(Filter::process(
