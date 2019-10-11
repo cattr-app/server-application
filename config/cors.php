@@ -19,5 +19,6 @@ return [
     'allowedMethods' => ['*'],
     'exposedHeaders' => [],
     'maxAge' => 0,
+    'trustedDomains' => env('TRUSTED_FRONTEND_DOMAIN', 'at.loc'),
 
 ];
