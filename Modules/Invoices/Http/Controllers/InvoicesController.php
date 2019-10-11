@@ -104,8 +104,9 @@ class InvoicesController extends Controller
             $answer = $this->invoicesRepository->updateOrCreateUserRate($userId, $projectId, $rate);
         } catch (\Exception $e) {
             return response()->json([
-                'error' => $e->getMessage()
-            ], $e->getCode());
+                'error' => $e->getMessage(),
+                'code' => $e->getCode(),
+            ], 500);
         }
 
         $answer["message"] = "New rate saved!";
@@ -182,8 +183,9 @@ class InvoicesController extends Controller
         } catch (\Exception $e) {
             return response()->json([
                 "message" => $e->getMessage(),
-                "status" => "error"
-            ], $e->getCode());
+                "status" => "error",
+                'code' => $e->getCode(),
+            ], 500);
         }
 
         $answer["message"] = "New default rate saved!";
