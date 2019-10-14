@@ -24,13 +24,14 @@
 
 use Illuminate\Http\Request;
 use Illuminate\Routing\Router;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
 Route::group([
     'prefix' => 'uploads'
-], function (Router $router) {
+], static function (Router $router) {
     $router->group([
         'prefix' => 'screenshots'
-    ], function (Router $router) {
+    ], static function (Router $router) {
         $router->get('{screenshot}', 'ScreenshotController@screenshot');
         $router->get('thumbs/{screenshot}', 'ScreenshotController@thumbnail');
     });
@@ -38,7 +39,7 @@ Route::group([
 
 Route::group([
     'prefix' => 'auth',
-], function (Router $router) {
+], static function (Router $router) {
     $router->any('ping', 'AuthController@ping');
     $router->any('check', 'AuthController@check');
     $router->post('login', 'AuthController@login');
@@ -164,6 +165,8 @@ Route::group([
     $router->post('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
     $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
     $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
-
 });
 
+Route::fallback(static function (string $uri) {
+    throw new NotFoundHttpException();
+});
