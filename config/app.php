@@ -51,10 +51,9 @@ return [
 
         Modules\EventListener\Providers\EventListenerServiceProvider::class,
         Modules\RedmineIntegration\Providers\RedmineIntegrationServiceProvider::class,
-        Modules\GitLabIntegration\Providers\GitlabIntegrationServiceProvider::class,
+        Modules\GitlabIntegration\Providers\GitlabIntegrationServiceProvider::class,
         Modules\Invoices\Providers\InvoicesServiceProvider::class,
         Modules\EmailReports\Providers\EmailReportsServiceProvider::class,
-        Modules\GitlabIntegration\Providers\GitlabIntegrationServiceProvider::class,
 
         Backup\BackupServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,

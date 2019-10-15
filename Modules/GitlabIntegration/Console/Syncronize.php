@@ -3,7 +3,6 @@
 namespace Modules\GitlabIntegration\Console;
 
 use Illuminate\Console\Command;
-use Modules\GitLabIntegration\Helpers\GitLabProjects;
 use Modules\GitlabIntegration\Helpers\Synchronizer;
 
 class Syncronize extends Command
@@ -22,10 +21,14 @@ class Syncronize extends Command
      */
     protected $description = 'Synchronize projects from the Gitlab for all users, who activate the Gitlab integration.';
 
+    /**
+     * @var Synchronizer
+     */
     protected $synchronizer;
 
     /**
      * Create a new command instance.
+     * @param Synchronizer $synchronizer
      */
     public function __construct(Synchronizer $synchronizer)
     {
