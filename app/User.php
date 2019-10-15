@@ -108,7 +108,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
      * @var array
      */
     protected $casts = [
-        'full_name' => 'string',
+        /*'full_name' => 'string',
         'email' => 'string',
         'url' => 'string',
         'company_id' => 'integer',
@@ -128,7 +128,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'active' => 'boolean',
         'password' => 'string',
         'timezone' => 'string',
-        'important' => 'boolean',
+        'important' => 'boolean',*/
         'change_password' => 'int'
     ];
 
