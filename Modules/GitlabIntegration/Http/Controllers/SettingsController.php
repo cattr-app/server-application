@@ -17,6 +17,16 @@ class SettingsController extends Controller
     public function __construct(UserProperties $userProperties)
     {
         $this->userProperties = $userProperties;
+
+        parent::__construct();
+    }
+
+    public static function getControllerRules(): array
+    {
+        return [
+            'get' => 'integration.gitlab',
+            'set' => 'integration.gitlab',
+        ];
     }
 
     public function get(Request $request)
@@ -49,6 +59,6 @@ class SettingsController extends Controller
         $this->userProperties->setUrl($userId, $request->post('url'));
         $this->userProperties->setApiKey($userId, $request->post('apikey'));
 
-        return response()->json('Setted!', 200);
+        return response()->json('Setted', 200);
     }
 }

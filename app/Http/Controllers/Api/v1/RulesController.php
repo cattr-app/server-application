@@ -48,6 +48,20 @@ class RulesController extends ItemController
     }
 
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'rules.list',
+            'count' => 'rules.list',
+            'edit' => 'rules.edit',
+            'bulkEdit' => 'rules.bulk-edit',
+            'actions' => 'rules.actions',
+        ];
+    }
+
+    /**
      * @apiDefine RuleRelations
      *
      * @apiParam {String} [with]              For add relation model in response

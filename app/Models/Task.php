@@ -64,7 +64,7 @@ class Task extends AbstractModel
         'project_id' => 'integer',
         'task_name' => 'string',
         'description' => 'string',
-        'active' => 'integer',
+        'active' => 'boolean',
         'user_id' => 'integer',
         'assigned_by' => 'integer',
         'url' => 'string',

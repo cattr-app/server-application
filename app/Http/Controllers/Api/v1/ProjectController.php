@@ -55,6 +55,22 @@ class ProjectController extends ItemController
     }
 
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'projects.list',
+            'count' => 'projects.list',
+            'create' => 'projects.create',
+            'edit' => 'projects.edit',
+            'show' => 'projects.show',
+            'destroy' => 'projects.remove',
+            'tasks' => 'projects.tasks',
+        ];
+    }
+
+    /**
      * @apiDefine ProjectRelations
      *
      * @apiParam {String} [with]               For add relation model in response

@@ -1,8 +1,6 @@
 <?php
 
 Route::middleware('auth:api')->group(function () {
-    Route::get('/', 'RedmineIntegrationController@index')->name('index');
-
     // Task routes
     Route::post('/tasks/synchronize', 'TaskRedmineController@synchronize')->name('task.synchronize');
 

@@ -23,7 +23,7 @@ use Event;
  *
  * @package App\Http\Controllers\Api\v1
  */
-abstract class  ItemController extends Controller
+abstract class ItemController extends Controller
 {
     /**
      * Returns current item's class name

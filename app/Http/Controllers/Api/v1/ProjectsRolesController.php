@@ -44,6 +44,21 @@ class ProjectsRolesController extends ItemController
     }
 
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'projects-roles.list',
+            'count' => 'projects-roles.list',
+            'create' => 'projects-roles.create',
+            'bulkCreate' => 'projects-roles.bulk-create',
+            'destroy' => 'projects-roles.remove',
+            'bulkDestroy' => 'projects-roles.bulk-remove',
+        ];
+    }
+
+    /**
      * @api {get} /api/v1/projects-roles/list List
      * @apiDescription Get list of Projects Roles relations
      * @apiVersion 0.1.0
