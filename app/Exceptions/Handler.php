@@ -6,7 +6,16 @@ use Exception;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\Response;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+/**
+ * Class Handler
+ * @package App\Exceptions
+ */
 class Handler extends ExceptionHandler
 {
     /**
@@ -14,22 +23,19 @@ class Handler extends ExceptionHandler
      *
      * @var array
      */
-    protected $dontReport = [
-        \Illuminate\Auth\AuthenticationException::class,
-        \Illuminate\Auth\Access\AuthorizationException::class,
-        \Symfony\Component\HttpKernel\Exception\HttpException::class,
-        \Illuminate\Database\Eloquent\ModelNotFoundException::class,
-        \Illuminate\Session\TokenMismatchException::class,
-        \Illuminate\Validation\ValidationException::class,
-    ];
+    protected $dontReport = [];
 
     /**
-     * Report or log an exception.
+     * A list of the internal exception types that should not be reported.
      *
-     * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
-     *
-     * @param  \Exception  $exception
-     * @return void
+     * @var array
+     */
+    protected $internalDontReport = [];
+
+    /**
+     * @param Exception $exception
+     * @return mixed|void
+     * @throws Exception
      */
     public function report(Exception $exception)
     {
@@ -43,50 +49,55 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Exception  $exception
-     * @return \Illuminate\Http\Response
+     * @param  Request  $request
+     * @param Exception $exception
+     * @return Response|JsonResponse
      */
     public function render($request, Exception $exception)
     {
-        $path = $request->path();
-
-        if ($request->expectsJson() || strpos($path, 'api/') === 0) {
-            $status_code = 500;
-
-            if ($exception instanceof ModelNotFoundException) {
-                $status_code = 404;
-            }
-
-            $data = [
-                'error' => $exception->getMessage(),
-            ];
-
-            if (config('app.debug')) {
-                $data['class'] = get_class($exception);
-                $data['code'] = $exception->getCode();
-                $data['trace'] = explode("\n", $exception->getTraceAsString());
-            }
-
-            return response()->json($data, $status_code);
+        if (!config('app.json_errors')) {
+            return parent::render($request, $exception);
         }
 
-        return parent::render($request, $exception);
-    }
+        $statusCode = 500;
+        $message = $exception->getMessage();
+        $class = get_class($exception);
+        $reason = null;
 
-    /**
-     * Convert an authentication exception into an unauthenticated response.
-     *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Illuminate\Auth\AuthenticationException  $exception
-     * @return \Illuminate\Http\Response
-     */
-    protected function unauthenticated($request, AuthenticationException $exception)
-    {
-        if ($request->expectsJson()) {
-            return response()->json(['error' => 'Unauthenticated.'], 401);
+        if ($exception instanceof ModelNotFoundException) {
+            $statusCode = 404;
+        } elseif ($exception instanceof NotFoundHttpException) {
+            $message = sprintf(
+                'Unknown uri: %s',
+                $request->getRequestUri()
+            );
+        } elseif ($exception instanceOf MethodNotAllowedHttpException) {
+            $message = sprintf(
+                'Method "%s" is not allowed for uri %s',
+                $request->getMethod(),
+                $request->getRequestUri()
+            );
+        } elseif ($exception instanceof Entities\AuthorizationException) {
+            $reason = $exception->getReason();
         }
 
-        return redirect()->guest('/login');
+        $data = [
+            'status' => false,
+            'status_code' => $statusCode,
+            'error' => $message,
+            'type' => preg_replace('#^.*\\\\#', '', $class),
+        ];
+
+        if ($reason !== null) {
+            $data['reason'] = $reason;
+        }
+
+        if (config('app.debug')) {
+            $data['class'] = $class;
+            $data['error_code'] = $exception->getCode();
+            $data['trace'] = explode("\n", $exception->getTraceAsString());
+        }
+
+        return response()->json($data, $statusCode);
     }
 }
