@@ -75,6 +75,11 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'roles'
     ];
 
+    // Somehow tinyint was casting to string ¯\_(ツ)_/¯
+    protected $casts = [
+        'change_password' => 'int'
+    ];
+
     /**
      * The attributes that are mass assignable.
      *
