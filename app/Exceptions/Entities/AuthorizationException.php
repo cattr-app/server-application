@@ -23,7 +23,7 @@ class AuthorizationException extends AuthorizationExceptionCore
      * @param int $code
      * @param Throwable|null $previous
      */
-    public function __construct($message = '', $reason = '', $code = 403, Throwable $previous = null)
+    public function __construct($message = '', $reason = '', $code = 401, Throwable $previous = null)
     {
         $this->reason = $reason;
         parent::__construct($message, $code, $previous);
