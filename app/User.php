@@ -90,7 +90,6 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'email',
         'url',
         'company_id',
-        'level',
         'payroll_access',
         'billing_access',
         'avatar',
