@@ -13,33 +13,33 @@ use App\Models\TimeDuration;
 use Nwidart\Modules\Collection;
 use App\User;
 use DB;
+use Validator;
 
 class ProjectReportController extends Controller
 {
     /**
-     * Handle the incoming request.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return array
      */
-    public function index(Request $request)
+    public static function getControllerRules(): array
     {
-        $type = $request->input('type');
-        $start_at = $request->input('start_at');
-        $end_at = $request->input('end_at');
-        return $this->$type($start_at, $end_at);
+        return [
+            'report' => 'project-report.list',
+            'projects' => 'project-report.projects',
+            'task' => 'project-report.list',
+            'days' => 'time-duration.list',
+        ];
     }
 
     /**
      * [resources description]
-     * @param  Request $request [description]
+     * @param Request $request [description]
      * @return [type]           [description]
      */
     public function resources($uids, $pids, $start_at, $end_at)
     {
-
         $projectReports = DB::table('project_report')
-            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))
+            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
+                DB::raw('SUM(duration) as duration'))
             ->whereIn('user_id', $uids)
             ->whereIn('project_id', $pids)
             ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
@@ -88,7 +88,7 @@ class ProjectReportController extends Controller
 
 
         foreach ($projects as $project_id => $project) {
-            $projects[$project_id]['users'] =  array_values($project['users']);
+            $projects[$project_id]['users'] = array_values($project['users']);
         }
 
         $projects = array_values($projects);
@@ -98,7 +98,7 @@ class ProjectReportController extends Controller
 
     /**
      * [events description]
-     * @param  Request $request [description]
+     * @param Request $request [description]
      * @return [type]           [description]
      */
     public function days(Request $request)
@@ -110,8 +110,7 @@ class ProjectReportController extends Controller
         $days = DB::table('project_report')
             ->select('user_id', 'date', DB::raw('SUM(duration) as duration'))
             ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
-            ->groupBy('user_id', 'date')
-        ;
+            ->groupBy('user_id', 'date');
 
         if ($start_at) {
             $days->where('date', '>=', $start_at);
@@ -130,7 +129,7 @@ class ProjectReportController extends Controller
 
     /**
      * [events description]
-     * @param  Request $request [description]
+     * @param Request $request [description]
      * @return [type]           [description]
      */
     public function report(Request $request)

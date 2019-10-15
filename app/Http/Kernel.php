@@ -19,7 +19,7 @@ class Kernel extends HttpKernel
         \App\Http\Middleware\TrimStrings::class,
         \Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull::class,
         \App\Http\Middleware\CorsMiddleware::class,
-        \App\Http\Middleware\LockMiddleware::class
+        \App\Http\Middleware\LockMiddleware::class,
     ];
 
     /**
@@ -43,6 +43,10 @@ class Kernel extends HttpKernel
         'api' => [
             'throttle:120,1',
             'bindings',
+        ],
+
+        'role' => [
+            \App\Http\Middleware\RoleCheck::class,
         ],
     ];
 

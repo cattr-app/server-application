@@ -17,6 +17,10 @@ use Illuminate\Support\Facades\Auth;
  */
 class ScreenshotController extends Controller
 {
+    public function __construct()
+    {
+    }
+
     public function screenshot(Request $request)
     {
         $path = $request->path();

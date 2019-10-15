@@ -53,6 +53,22 @@ class ScreenshotController extends ItemController
         return 'screenshot';
     }
 
+    /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'screenshots.list',
+            'count' => 'screenshots.list',
+            'dashboard' => 'screenshots.dashboard',
+            'create' => 'screenshots.create',
+            'bulkCreate' => 'screenshots.bulk-create',
+            'edit' => 'screenshots.edit',
+            'show' => 'screenshots.show',
+            'destroy' => 'screenshots.remove',
+        ];
+    }
 
     /**
      * @apiDefine ScreenshotRelations

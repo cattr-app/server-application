@@ -44,6 +44,21 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'projects-users.list',
+            'count' => 'projects-users.list',
+            'create' => 'projects-users.create',
+            'bulkCreate' => 'projects-users.bulk-create',
+            'destroy' => 'projects-users.remove',
+            'bulkDestroy' => 'projects-users.bulk-remove',
+        ];
+    }
+
+    /**
      * @apiDefine ProjectUserRelations
      * @apiParam {Object} [user]    `QueryParam` ProjectUser's relation user. All params in <a href="#api-User-GetUserList" >@User</a>
      * @apiParam {Object} [project] `QueryParam` ProjectUser's relation project. All params in <a href="#api-Project-GetProjectList" >@Project</a>

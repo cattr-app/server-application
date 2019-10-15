@@ -62,6 +62,23 @@ class TaskController extends ItemController
     }
 
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'tasks.list',
+            'count' => 'tasks.list',
+            'dashboard' => 'tasks.dashboard',
+            'create' => 'tasks.create',
+            'edit' => 'tasks.edit',
+            'show' => 'tasks.show',
+            'destroy' => 'tasks.remove',
+            'activity' => 'tasks.activity',
+        ];
+    }
+
+    /**
      * @apiDefine TaskRelations
      *
      * @apiParam {String} [with]                       For add relation model in response
