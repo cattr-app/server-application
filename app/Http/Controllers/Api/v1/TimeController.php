@@ -44,6 +44,20 @@ class TimeController extends ItemController
     }
 
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'total' => 'time.total',
+            'project' => 'time.project',
+            'tasks' => 'time.tasks',
+            'task' => 'time.task',
+            'taskUser' => 'time.task-user',
+        ];
+    }
+
+    /**
      * @apiDefine Relations
      * @apiParam {Object} [task]        `QueryParam` TimeInterval's relation task. All params in <a href="#api-Task-GetTaskList" >@Task</a>
      * @apiParam {Object} [user]        `QueryParam` TimeInterval's relation user. All params in <a href="#api-User-GetUserList" >@User</a>

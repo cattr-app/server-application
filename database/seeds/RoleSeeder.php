@@ -31,7 +31,7 @@ class RoleSeeder extends Seeder
             'projects' => [
                 'list',
                 'show',
-                'count',
+                'tasks',
             ],
             'roles' => [
                 'allowed-rules',
@@ -50,7 +50,12 @@ class RoleSeeder extends Seeder
                 'list',
                 'remove',
                 'show',
-                'count',
+            ],
+            'task-comment' => [
+                'list',
+                'create',
+                'show',
+                'remove',
             ],
             'time' => [
                 'project',
@@ -77,14 +82,16 @@ class RoleSeeder extends Seeder
                 'edit',
                 'list',
                 'show',
-                'count',
+            ],
+            'integration' => [
+                'gitlab',
+                'redmine',
             ],
         ];
         $observerAllow = [
             'projects' => [
                 'list',
                 'show',
-                'count',
             ],
             'roles' => [
                 'allowed-rules',
@@ -98,7 +105,6 @@ class RoleSeeder extends Seeder
                 'dashboard',
                 'show',
                 'list',
-                'count',
             ],
             'time' => [
                 'project',
@@ -123,7 +129,6 @@ class RoleSeeder extends Seeder
                 'list',
                 'relations',
                 'show',
-                'count',
             ],
             'roles' => [
                 'allowed-rules',
@@ -137,7 +142,6 @@ class RoleSeeder extends Seeder
                 'dashboard',
                 'list',
                 'show',
-                'count',
             ],
             'time' => [
                 'project',
@@ -156,6 +160,10 @@ class RoleSeeder extends Seeder
                 'show',
                 'relations',
             ],
+            'integration' => [
+                'gitlab',
+                'redmine',
+            ],
         ];
         $managerAllow = [
             'dashboard' => [
@@ -170,12 +178,10 @@ class RoleSeeder extends Seeder
                 'list',
                 'edit',
                 'show',
-                'count',
             ],
             'roles' => [
                 'list',
                 'allowed-rules',
-                'count',
             ],
             'screenshots' => [
                 'dashboard',
@@ -220,6 +226,10 @@ class RoleSeeder extends Seeder
                 'relations',
                 'show',
                 'manager_access',
+            ],
+            'integration' => [
+                'gitlab',
+                'redmine',
             ],
         ];
 

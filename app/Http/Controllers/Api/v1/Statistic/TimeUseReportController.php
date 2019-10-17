@@ -16,9 +16,19 @@ use DB;
 class TimeUseReportController extends Controller
 {
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'report' => 'time-use-report.list',
+        ];
+    }
+
+    /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function report(Request $request)
@@ -28,7 +38,8 @@ class TimeUseReportController extends Controller
         $end_at = $request->input('end_at');
 
         $projectReports = DB::table('project_report')
-            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))
+            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
+                DB::raw('SUM(duration) as duration'))
             ->whereIn('user_id', $user_ids)
             ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->where('date', '>=', $start_at)
@@ -63,7 +74,7 @@ class TimeUseReportController extends Controller
             $users[$user_id]['total_time'] += $duration;
         }
 
-        $ret = [ ['users' => array_values($users) ] ];
+        $ret = [['users' => array_values($users)]];
 
 
         return response()->json($ret);

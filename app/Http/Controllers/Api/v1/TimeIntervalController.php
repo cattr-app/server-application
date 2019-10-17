@@ -68,6 +68,23 @@ class TimeIntervalController extends ItemController
         ];
     }
 
+    /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'time-intervals.list',
+            'count' => 'time-intervals.list',
+            'create' => 'time-intervals.create',
+            'bulkCreate' => 'time-intervals.bulk-create',
+            'edit' => 'time-intervals.edit',
+            'show' => 'time-intervals.show',
+            'destroy' => 'time-intervals.remove',
+            'bulkDestroy' => 'time-intervals.bulk-remove',
+        ];
+    }
+
     public function validateEndDate(array $intervalData): bool
     {
         $start_at = $intervalData['start_at'] ?? '';

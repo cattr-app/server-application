@@ -2,19 +2,21 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\Entities\AuthorizationException;
 use App\User;
 use App\Helpers\CatHelper;
 use Illuminate\Auth\Events\PasswordReset;
 use Illuminate\Http\{Request, Response, JsonResponse};
 use Illuminate\Support\Facades\{Auth, DB, Hash, Password};
 use Illuminate\Support\Str;
+use Illuminate\Routing\Controller as BaseController;
 
 /**
  * Class AuthController
  *
  * @package App\Http\Controllers
  */
-class AuthController extends Controller
+class AuthController extends BaseController
 {
     /**
      * @apiDefine UnauthorizedError
@@ -56,7 +58,6 @@ class AuthController extends Controller
      *           "email": "johndoe@example.com",
      *           "url": "",
      *           "company_id": 41,
-     *           "level": "admin",
      *           "payroll_access": 1,
      *           "billing_access": 1,
      *           "avatar": "",
@@ -209,45 +210,46 @@ class AuthController extends Controller
         return json_decode($response->getBody(), true)['success'];
     }
 
-   /**
-    * @api {post} /api/auth/login Login
-    * @apiDescription Get user JWT
-    *
-    *
-    * @apiVersion 0.1.0
-    * @apiName Login
-    * @apiGroup Auth
-    *
-    * @apiParam {String}   login       User login
-    * @apiParam {String}   password    User password
-    * @apiParam {String}   recaptcha   Recaptcha token
-    *
-    * @apiSuccess {String}     access_token  Token
-    * @apiSuccess {String}     token_type    Token Type
-    * @apiSuccess {String}     expires_in    Token TTL in seconds
-    * @apiSuccess {Array}      user          User Entity
-    *
-    * @apiError (Error 401) {String} Error Error
-    *
-    * @apiParamExample {json} Request Example
-    *  {
-    *      "login":      "johndoe@example.com",
-    *      "password":   "amazingpassword",
-    *      "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
-    *  }
-    *
-    * @apiUse AuthAnswer
-    * @apiUse UnauthorizedError
-    *
-    * @return JsonResponse
-    */
+    /**
+     * @return JsonResponse
+     * @throws AuthorizationException
+     * @api {post} /api/auth/login Login
+     * @apiDescription Get user JWT
+     *
+     *
+     * @apiVersion 0.1.0
+     * @apiName Login
+     * @apiGroup Auth
+     *
+     * @apiParam {String}   login       User login
+     * @apiParam {String}   password    User password
+     * @apiParam {String}   recaptcha   Recaptcha token
+     *
+     * @apiSuccess {String}     access_token  Token
+     * @apiSuccess {String}     token_type    Token Type
+     * @apiSuccess {String}     expires_in    Token TTL in seconds
+     * @apiSuccess {Array}      user          User Entity
+     *
+     * @apiError (Error 401) {String} Error Error
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *      "login":      "johndoe@example.com",
+     *      "password":   "amazingpassword",
+     *      "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *  }
+     *
+     * @apiUse AuthAnswer
+     * @apiUse UnauthorizedError
+     *
+     */
     public function login(Request $request): JsonResponse
     {
         // Ignore captcha validation for the desktop client
-        if (substr($request->header('user-agent', ''), 0, 6) !== 'khttp/') {
-            if (!$this->validateRecaptcha(request('recaptcha', ''))) {
-                return response()->json(['error' => 'Unauthorized'], 401);
-            }
+        if ((strpos($request->header('user-agent', ''), 'khttp/') !== 0)
+            && !$this->validateRecaptcha(request('recaptcha', ''))
+        ) {
+            throw new AuthorizationException('Access denied', 'Not authorized');
         }
 
         $credentials = request([
@@ -260,16 +262,21 @@ class AuthController extends Controller
             'password' => $credentials['password'] ?? null,
         ];
 
+
         /** @var string $token */
         if (!$token = auth()->attempt($data)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            throw new AuthorizationException('Access denied', 'Not authorized');
         }
 
-        if (!auth()->user()->active) {
-            return response()->json(['error' => 'Deactivated'], 403);
+        $user = auth()->user();
+
+        if ($user && !$user->active) {
+            throw new AuthorizationException('Access denied', 'User deactivated', 403);
         }
+
 
         $this->setToken($token);
+
         return $this->respondWithToken($token);
     }
 
@@ -366,7 +373,6 @@ class AuthController extends Controller
    *   "email": "admin@example.com",
    *   "url": "",
    *   "company_id": 1,
-   *   "level": "admin",
    *   "payroll_access": 1,
    *   "billing_access": 1,
    *   "avatar": "",

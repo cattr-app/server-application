@@ -4,6 +4,7 @@ return [
     'name' => env('APP_NAME', 'Laravel'),
     'env' => env('APP_ENV', 'production'),
     'debug' => env('APP_DEBUG', false),
+    'json_errors' => env('JSON_ERRORS', true),
     'url' => env('APP_URL', 'http://localhost'),
     'timezone' => 'UTC',
     'locale' => 'en',
@@ -50,9 +51,9 @@ return [
 
         Modules\EventListener\Providers\EventListenerServiceProvider::class,
         Modules\RedmineIntegration\Providers\RedmineIntegrationServiceProvider::class,
+        Modules\GitlabIntegration\Providers\GitlabIntegrationServiceProvider::class,
         Modules\Invoices\Providers\InvoicesServiceProvider::class,
         Modules\EmailReports\Providers\EmailReportsServiceProvider::class,
-        Modules\GitlabIntegration\Providers\GitlabIntegrationServiceProvider::class,
 
         Backup\BackupServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,

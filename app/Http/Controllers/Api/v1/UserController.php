@@ -31,7 +31,6 @@ class UserController extends ItemController
      * @apiParam {String}  email                    E-mail
      * @apiParam {String}  [url]                    ???
      * @apiParam {Integer} [company_id]             ???
-     * @apiParam {String}  [level]                  Role access level
      * @apiParam {Boolean} [payroll_access]         ???
      * @apiParam {Boolean} [billing_access]         ???
      * @apiParam {String}  [avatar]                 Avatar image url/uri
@@ -56,6 +55,8 @@ class UserController extends ItemController
         Filter::listen('request.item.edit.user', static::class . '@' . 'requestUserCreateHook');
 
         Event::listen('item.edit.after.user', static::class . '@' . 'changePasswordHook');
+
+        parent::__construct();
     }
 
     public function sendInviteHook($user, $requestData)
@@ -109,7 +110,6 @@ class UserController extends ItemController
             'email'                  => 'required|unique:users,email',
             'active'                 => 'required|boolean',
             'password'               => 'required',
-            //'role_id'                => 'exists:role,id|required',
         ];
     }
 
@@ -127,6 +127,23 @@ class UserController extends ItemController
     public function getQueryWith(): array
     {
         return [];
+    }
+
+    /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'users.list',
+            'count' => 'users.list',
+            'create' => 'users.create',
+            'edit' => 'users.edit',
+            'show' => 'users.show',
+            'destroy' => 'users.remove',
+            'bulkEdit' => 'users.bulk-edit',
+            'relations' => 'users.relations',
+        ];
     }
 
     /**
@@ -153,7 +170,6 @@ class UserController extends ItemController
      * @apiParam {String}   [email]                 `QueryParam` E-mail
      * @apiParam {String}   [url]                   `QueryParam` ???
      * @apiParam {Integer}  [company_id]            `QueryParam` ???
-     * @apiParam {String}   [level]                 `QueryParam` Role access level
      * @apiParam {Boolean}  [payroll_access]                     ???
      * @apiParam {Boolean}  [billing_access]                     ???
      * @apiParam {String}   [avatar]                `QueryParam` Avatar image url/uri
@@ -294,7 +310,6 @@ class UserController extends ItemController
      *   "email": "admin@example.com",
      *   "url": "",
      *   "company_id": 1,
-     *    "level": "admin",
      *   "payroll_access": 1,
      *   "billing_access": 1,
      *   "avatar": "",
@@ -344,7 +359,6 @@ class UserController extends ItemController
      *       "email": "gook@tree.com",
      *       "url": "",
      *       "company_id": 1,
-     *       "level": "admin",
      *       "payroll_access": 1,
      *       "billing_access": 1,
      *       "avatar": "",
@@ -487,7 +501,6 @@ class UserController extends ItemController
      * @apiParam {String}   users.object.email                    E-mail
      * @apiParam {String}   [users.object.url]                    ???
      * @apiParam {Integer}  [users.object.company_id]             ???
-     * @apiParam {String}   [users.object.level]                  Role access level
      * @apiParam {Boolean}  [users.object.payroll_access]         ???
      * @apiParam {Boolean}  [users.object.billing_access]         ???
      * @apiParam {String}   [users.object.avatar]                 Avatar image url/uri

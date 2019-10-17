@@ -63,6 +63,20 @@ class TaskCommentController extends ItemController
         ];
     }
 
+
+    /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'task-comment.list',
+            'create' => 'task-comment.create',
+            'show' => 'task-comment.show',
+            'destroy' => 'task-comment.remove',
+        ];
+    }
+
     /**
      * @api {post} /api/v1/task-comment/create Create
      * @apiDescription Create Task Comment
@@ -328,5 +342,4 @@ class TaskCommentController extends ItemController
             ])
         );
     }
-
 }

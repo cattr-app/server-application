@@ -68,6 +68,7 @@ class Rule extends AbstractModel
                 'relations' => __('Project list attached to user'),
                 'full_access' => __('Project full access'),
                 'count' => __('Project count'),
+                'tasks' => __('Project tasks'),
             ],
             'projects-users' => [
                 'list' => __('Project User relation list'),

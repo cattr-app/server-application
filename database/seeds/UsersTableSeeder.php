@@ -24,7 +24,6 @@ class UsersTableSeeder extends Seeder
                 'email' => $faker->email,
                 'url' => '',
                 'company_id' => 1,
-                'level' => 'user',
                 'payroll_access' => 0,
                 'billing_access' => 0,
                 'avatar' => '',
