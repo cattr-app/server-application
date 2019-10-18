@@ -2,6 +2,7 @@
 
 namespace App\Exceptions\Entities;
 
+use App\Exceptions\Interfaces\{ReasonableException, TypedException};
 use \Illuminate\Auth\Access\AuthorizationException as AuthorizationExceptionCore;
 use Throwable;
 
@@ -9,24 +10,48 @@ use Throwable;
  * Class AuthorizationException
  * @package App\Exceptions\Entities
  */
-class AuthorizationException extends AuthorizationExceptionCore
+class AuthorizationException extends AuthorizationExceptionCore implements TypedException, ReasonableException
 {
+    public const ERROR_TYPE_UNAUTHORIZED = 'authorization.unauthorized';
+    public const ERROR_TYPE_TOKEN_MISMATCH = 'authorization.token_mismatch';
+    public const ERROR_TYPE_TOKEN_EXPIRED = 'authorization.token_expired';
+    public const ERROR_TYPE_USER_DISABLED = 'authorization.user_disabled';
+
     /**
      * @var string
      */
-    protected $reason = '';
+    protected $type = '';
 
     /**
      * AuthorizationException constructor.
      * @param string $message
-     * @param string $reason
+     * @param string $type
      * @param int $code
      * @param Throwable|null $previous
      */
-    public function __construct($message = '', $reason = '', $code = 401, Throwable $previous = null)
+    public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, Throwable $previous = null)
     {
-        $this->reason = $reason;
-        parent::__construct($message, $code, $previous);
+        $this->type = $type;
+
+        parent::__construct(
+            __('Access denied'),
+            static::codeByType($type),
+            $previous
+        );
+    }
+
+    /**
+     * @param string $type
+     * @return int
+     */
+    public static function codeByType(string $type): int
+    {
+        return [
+            static::ERROR_TYPE_UNAUTHORIZED   => 401,
+            static::ERROR_TYPE_TOKEN_MISMATCH => 401,
+            static::ERROR_TYPE_TOKEN_EXPIRED  => 401,
+            static::ERROR_TYPE_USER_DISABLED  => 403,
+        ][$type] ?? 400;
     }
 
     /**
@@ -34,6 +59,19 @@ class AuthorizationException extends AuthorizationExceptionCore
      */
     public function getReason(): string
     {
-        return $this->reason;
+        return __([
+            static::ERROR_TYPE_UNAUTHORIZED   => 'Not authorized',
+            static::ERROR_TYPE_TOKEN_MISMATCH => 'Token mismatch',
+            static::ERROR_TYPE_TOKEN_EXPIRED  => 'Token expired',
+            static::ERROR_TYPE_USER_DISABLED  => 'User deactivated',
+        ][$this->type] ?? 'Unknown reason');
+    }
+
+    /**
+     * @return string
+     */
+    public function getType(): string
+    {
+        return $this->type;
     }
 }
