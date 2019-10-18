@@ -9,6 +9,7 @@ use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\Response;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -63,6 +64,10 @@ class Handler extends ExceptionHandler
         $message = $exception->getMessage();
         $class = get_class($exception);
         $reason = null;
+
+        if ($exception instanceof HttpException) {
+            $statusCode = $exception->getStatusCode();
+        }
 
         if ($exception instanceof ModelNotFoundException) {
             $statusCode = 404;
