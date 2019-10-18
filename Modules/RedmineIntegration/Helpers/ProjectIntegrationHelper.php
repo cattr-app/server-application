@@ -27,53 +27,61 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
     /**
      * Synchronize projects for current user
      *
-     * @param  int  $userId  User's id in our system
+     * @param int $userId User's id in our system
      *
      * @return array Associative array ['added_projects' => count_of_added_projects]
+     * @throws Exception
      */
     public function synchronizeUserProjects(int $userId): array
     {
-        $client = $this->initRedmineClient($userId);
 
-        $projectsData = $client->project->all([
-            'limit' => 1000
-        ]);
+        try {
+            $client = $this->initRedmineClient($userId);
+            $projectsData = $client->project->all([
+                'limit' => 1000
+            ]);
+            $projects = $projectsData['projects'];
+            $addedProjectsCounter = 0;
+            foreach ($projects as $projectFromRedmine) {
+                //if project already exists => continue
+                $projectExist = Property::where([
+                    ['entity_type', '=', Property::PROJECT_CODE],
+                    ['name', '=', 'REDMINE_ID'],
+                    ['value', '=', $projectFromRedmine['id']]
+                ])->first();
 
-        $projects = $projectsData['projects'];
+                if ($projectExist != null) {
+                    continue;
+                }
 
-        $addedProjectsCounter = 0;
+                $projectInfo = [
+                    'company_id' => 4,
+                    'name' => $projectFromRedmine['name'],
+                    'description' => $projectFromRedmine['description']
+                ];
 
-        foreach ($projects as $projectFromRedmine) {
-            //if project already exists => continue
-            $projectExist = Property::where([
-                ['entity_type', '=', Property::PROJECT_CODE],
-                ['name', '=', 'REDMINE_ID'],
-                ['value', '=', $projectFromRedmine['id']]
-            ])->first();
+                $project = Project::create($projectInfo);
+                $addedProjectsCounter++;
 
-            if ($projectExist != null) {
-                continue;
+                Property::create([
+                    'entity_id' => $project->id,
+                    'entity_type' => Property::PROJECT_CODE,
+                    'name' => 'REDMINE_ID',
+                    'value' => $projectFromRedmine['id']
+                ]);
+            }
+            return [
+                'added_projects' => $addedProjectsCounter
+            ];
+        } catch (Exception $e) {
+            if ($e->getCode() == 404) {
+                return [
+                    'added_projects' => [],
+                    'notice' => 'This user does not have assigned Redmine URL',
+                ];
             }
 
-            $projectInfo = [
-                'company_id' => 4,
-                'name' => $projectFromRedmine['name'],
-                'description' => $projectFromRedmine['description']
-            ];
-
-            $project = Project::create($projectInfo);
-            $addedProjectsCounter++;
-
-            Property::create([
-                'entity_id' => $project->id,
-                'entity_type' => Property::PROJECT_CODE,
-                'name' => 'REDMINE_ID',
-                'value' => $projectFromRedmine['id']
-            ]);
+            throw $e;
         }
-
-        return [
-            'added_projects' => $addedProjectsCounter
-        ];
     }
 }

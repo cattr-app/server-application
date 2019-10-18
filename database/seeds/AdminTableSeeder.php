@@ -24,7 +24,6 @@ class AdminTableSeeder extends Seeder
             'email'                  => $login,
             'url'                    => '',
             'company_id'             => 1,
-            'level'                  => 'admin',
             'payroll_access'         => 1,
             'billing_access'         => 1,
             'avatar'                 => '',

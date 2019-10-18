@@ -32,6 +32,22 @@ class InvoicesController extends Controller
     public function __construct(InvoicesRepository $invoicesRepository)
     {
         $this->invoicesRepository = $invoicesRepository;
+
+        parent::__construct();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'invoices.list',
+            'update' => 'invoices.full_access',
+            'projects' => 'invoices.list',
+            'getDefaultRate' => 'invoices.list',
+            'setDefaultRate' => 'invoices.full_access',
+        ];
     }
 
     /**
@@ -42,13 +58,6 @@ class InvoicesController extends Controller
     public function index(Request $request): JsonResponse
     {
         $user = Auth::user();
-        $showAccess = $user->allowed('invoices', 'list');
-        if (!$showAccess) {
-            return response()->json([
-                'error' => 'Access denied',
-                'reason' => 'User haven\'t access to watch rates',
-            ], 403);
-        }
 
         $userIds = $request->input('userIds');
         $projectIds = $request->input('projectIds');
@@ -88,13 +97,6 @@ class InvoicesController extends Controller
     public function update(Request $request)
     {
         $user = Auth::user();
-        $fullAccess = $user->allowed('invoices', 'full_access');
-        if (!$fullAccess) {
-            return response()->json([
-                'error' => 'Access denied',
-                'reason' => 'User haven\'t access to manipulate rates',
-            ], 403);
-        }
 
         $userId = $request->input('userId');
         $projectId = $request->input('projectId');
@@ -121,13 +123,6 @@ class InvoicesController extends Controller
     public function projects(Request $request)
     {
         $user = Auth::user();
-        $showAccess = $user->allowed('invoices', 'list');
-        if (!$showAccess) {
-            return response()->json([
-                'error' => 'Access denied',
-                'reason' => 'User haven\'t access to watch rates',
-            ], 403);
-        }
 
         $userIds = $request->input('userIds');
         $projectIds = $request->input('projectIds');
@@ -144,13 +139,6 @@ class InvoicesController extends Controller
     public function getDefaultRate(Request $request)
     {
         $user = Auth::user();
-        $showAccess = $user->allowed('invoices', 'list');
-        if (!$showAccess) {
-            return response()->json([
-                'error' => 'Access denied',
-                'reason' => 'User haven\'t access to watch rates',
-            ], 403);
-        }
 
         $userIds = $request->input('userIds');
 
@@ -166,13 +154,6 @@ class InvoicesController extends Controller
     public function setDefaultRate(Request $request)
     {
         $user = Auth::user();
-        $fullAccess = $user->allowed('invoices', 'full_access');
-        if (!$fullAccess) {
-            return response()->json([
-                'error' => 'Access denied',
-                'reason' => 'User haven\'t access to manipulate rates',
-            ], 403);
-        }
 
         $userId = $request->input('userId');
         $defaultRate = $request->input('defaultRate');

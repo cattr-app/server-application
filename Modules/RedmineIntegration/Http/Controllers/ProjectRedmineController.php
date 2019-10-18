@@ -19,6 +19,16 @@ class ProjectRedmineController extends AbstractRedmineController
     protected $projectIntegrationHelper;
 
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'synchronize' => 'integration.redmine',
+        ];
+    }
+
+    /**
      * ProjectRedmineController constructor.
      *
      * @param  ProjectIntegrationHelper  $projectIntegrationHelper
@@ -26,6 +36,8 @@ class ProjectRedmineController extends AbstractRedmineController
     public function __construct(ProjectIntegrationHelper $projectIntegrationHelper)
     {
         $this->projectIntegrationHelper = $projectIntegrationHelper;
+
+        parent::__construct();
     }
 
     /**

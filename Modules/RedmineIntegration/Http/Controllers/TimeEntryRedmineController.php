@@ -13,6 +13,16 @@ use Modules\RedmineIntegration\Helpers\TimeIntervalIntegrationHelper;
 class TimeEntryRedmineController extends AbstractRedmineController
 {
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'create' => 'integration.redmine',
+        ];
+    }
+
+    /**
      * Send Time Interval to Redmine
      *
      * Upload time interval with id == $timeIntercalId to Redmine by API

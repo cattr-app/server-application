@@ -37,6 +37,20 @@ class RedmineSettingsController extends AbstractRedmineController
     {
         $this->request = $request;
         $this->user = auth()->user();
+
+        parent::__construct();
+    }
+
+    /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'updateSettings' => 'integration.redmine',
+            'getSettings' => 'integration.redmine',
+            'getInternalPriorities' => 'integration.redmine',
+        ];
     }
 
     /**

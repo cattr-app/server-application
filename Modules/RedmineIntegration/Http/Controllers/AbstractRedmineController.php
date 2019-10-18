@@ -2,7 +2,7 @@
 
 namespace Modules\RedmineIntegration\Http\Controllers;
 
-use Illuminate\Routing\Controller;
+use App\Http\Controllers\Controller;
 
 /**
  * Class AbstractRedmineController

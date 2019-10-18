@@ -37,6 +37,15 @@ class TaskUpdateController extends Controller
     ) {
         $this->request = $request;
         $this->pluginWebhookHelper = $pluginWebhookHelper;
+
+        parent::__construct();
+    }
+
+    public static function getControllerRules(): array
+    {
+        return [
+            'handleUpdate' => 'integration.redmine',
+        ];
     }
 
     /**

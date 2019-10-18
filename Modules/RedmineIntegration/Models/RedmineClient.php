@@ -21,7 +21,7 @@ class RedmineClient extends Client
         $pass = null;
 
         if (empty($url)) {
-            $e = new Exception('Empty url');
+            $e = new Exception('Empty url', 404);
             throw $e;
         }
 

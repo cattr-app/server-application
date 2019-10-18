@@ -85,7 +85,6 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'email',
         'url',
         'company_id',
-        'level',
         'payroll_access',
         'billing_access',
         'avatar',
@@ -103,6 +102,34 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'timezone',
         'important',
         'change_password',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $casts = [
+        /*'full_name' => 'string',
+        'email' => 'string',
+        'url' => 'string',
+        'company_id' => 'integer',
+        'level' => 'string',
+        'payroll_access' => 'boolean',
+        'billing_access' => 'boolean',
+        'avatar' => 'string',
+        'screenshots_active' => 'boolean',
+        'manual_time' => 'boolean',
+        'permanent_tasks' => 'boolean',
+        'computer_time_popup' => 'boolean',
+        'poor_time_popup' => 'boolean',
+        'blur_screenshots' => 'boolean',
+        'web_and_app_monitoring' => 'boolean',
+        'webcam_shots' => 'boolean',
+        'screenshots_interval' => 'integer',
+        'active' => 'boolean',
+        'password' => 'string',
+        'timezone' => 'string',
+        'important' => 'boolean',*/
+        'change_password' => 'int'
     ];
 
 

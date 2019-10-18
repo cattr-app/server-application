@@ -15,6 +15,10 @@ class RegistrationController extends Controller
     // One hour.
     const EXPIRATION_TIME = 60 * 60;
 
+    public function __construct()
+    {
+    }
+
     /**
      * Creates a new registration token and sends an email to the specified address.
      *

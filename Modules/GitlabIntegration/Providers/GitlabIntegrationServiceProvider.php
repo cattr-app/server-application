@@ -6,6 +6,10 @@ use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\GitlabIntegration\Console\Syncronize;
 
+/**
+ * Class GitlabIntegrationServiceProvider
+ * @package Modules\GitlabIntegration\Providers
+ */
 class GitlabIntegrationServiceProvider extends ServiceProvider
 {
     /**

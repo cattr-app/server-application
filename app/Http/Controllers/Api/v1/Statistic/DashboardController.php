@@ -9,13 +9,24 @@ use App\User;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
+use Validator;
 
 class DashboardController extends Controller
 {
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'timeIntervals' => 'time-intervals.list',
+        ];
+    }
+
+    /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function timeIntervals(Request $request)
@@ -36,6 +47,7 @@ class DashboardController extends Controller
             ->get();
 
         $users = [];
+
         foreach ($intervals as $interval) {
             $user_id = (int)$interval->user_id;
             $duration = (int)$interval->duration;
