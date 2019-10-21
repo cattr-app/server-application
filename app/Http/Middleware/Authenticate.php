@@ -25,14 +25,14 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
     public function handle($request, Closure $next, ...$guards)
     {
         if (!Auth::check()) {
-            throw new AuthorizationException('Access denied', 'Not authorized');
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
         $user = Auth::user();
 
         if (!$user || !$user->active) {
             DB::table('tokens')->where('user_id', $user->id)->delete();
-            throw new AuthorizationException('Access denied', 'User deactivated');
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
         // Check token.
@@ -48,7 +48,7 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
             ;
 
             if (!isset($token)) {
-                throw new AuthorizationException('Access denied', 'Token mismatch');
+                throw new AuthorizationException(AuthorizationException::ERROR_TYPE_TOKEN_MISMATCH);
             }
         }
 

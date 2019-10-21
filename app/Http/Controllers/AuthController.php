@@ -249,7 +249,7 @@ class AuthController extends BaseController
         if ((strpos($request->header('user-agent', ''), 'khttp/') !== 0)
             && !$this->validateRecaptcha(request('recaptcha', ''))
         ) {
-            throw new AuthorizationException('Access denied', 'Not authorized');
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
         $credentials = request([
@@ -265,13 +265,13 @@ class AuthController extends BaseController
 
         /** @var string $token */
         if (!$token = auth()->attempt($data)) {
-            throw new AuthorizationException('Access denied', 'Not authorized');
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
         $user = auth()->user();
 
         if ($user && !$user->active) {
-            throw new AuthorizationException('Access denied', 'User deactivated', 403);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
 
@@ -517,6 +517,8 @@ class AuthController extends BaseController
     }
 
     /**
+     * @return JsonResponse
+     * @throws AuthorizationException
      * @api {post} /api/auth/reset Reset
      * @apiDescription Get user JWT
      *
@@ -548,17 +550,17 @@ class AuthController extends BaseController
      * @apiUse AuthAnswer
      * @apiUse UnauthorizedError
      *
-     * @return JsonResponse
      */
     public function reset()
     {
         if (!$this->validateRecaptcha(request('recaptcha', ''))) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
         $data = request(['token', 'password']);
         $data['email'] = request('login');
         $data['password_confirmation'] = $data['password'];
+
         $response = $this->broker()->reset(
             $data,
             function ($user, $password) {
@@ -569,12 +571,14 @@ class AuthController extends BaseController
                 $this->guard()->login($user);
             }
         );
+
         if ($response !== Password::PASSWORD_RESET) {
-            return response()->json(['error' => 'Unauthorized'], 401);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
         $token = auth()->refresh();
         $this->setToken($token);
+
         return $this->respondWithToken($token);
     }
 }

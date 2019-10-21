@@ -2,17 +2,24 @@
 
 namespace App\Exceptions;
 
+use App\Exceptions\Interfaces\ReasonableException;
+use App\Exceptions\Interfaces\TypedException;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
+/**
+ * Class Handler
+ * @package App\Exceptions
+ */
 class Handler extends ExceptionHandler
 {
     /**
@@ -41,7 +48,7 @@ class Handler extends ExceptionHandler
      * @return void
      * @throws Exception
      */
-    public function report(Exception $exception)
+    public function report(Exception $exception): void
     {
         if (!config('app.debug') && app()->bound('sentry') && $this->shouldReport($exception)) {
             app('sentry')->captureException($exception);
@@ -56,7 +63,7 @@ class Handler extends ExceptionHandler
      * @param  Request    $request
      * @param  Exception  $exception
      *
-     * @return Response
+     * @return JsonResponse|Response
      */
     public function render($request, Exception $exception)
     {
@@ -64,20 +71,27 @@ class Handler extends ExceptionHandler
             return parent::render($request, $exception);
         }
 
-        $message = is_object($exception->getMessage()) ? $exception->getMessage()->toArray() : $exception->getMessage();
+        $message = $exception->getMessage();
+        $isHttpException = $this->isHttpException($exception);
+        $cls = get_class($exception);
+        $code = (int) $exception->getCode();
 
-        if (config('app.debug')) {
-            $validExceptionsClasses = array_map(function ($item) use ($exception) {
+        $debugData = false;
+        $reason = $exception instanceof ReasonableException ? $exception->getReason() : false;
+        $errorType = $exception instanceof TypedException ? $exception->getType() : false;
+
+        if (!$isHttpException) {
+            $validExceptionsClasses = collect($this->dontReport)->filter(static function ($item) use ($exception) {
                 return is_subclass_of($exception, $item);
-            }, $this->dontReport);
+            });
 
-            if (!$this->isHttpException($exception) && empty($validExceptionsClasses)) {
+            if (!$validExceptionsClasses->count() && config('app.debug')) {
                 $debugData = [
                     'file' => $exception->getFile(),
                     'line' => $exception->getLine(),
-                    'code' => $exception->getCode(),
-                    'class' => get_class($exception),
-                    'trace' => $exception->getTrace()
+                    'code' => $code,
+                    'class' => $cls,
+                    'trace' => $exception->getTrace(),
                 ];
             }
         }
@@ -86,51 +100,71 @@ class Handler extends ExceptionHandler
         if ($exception instanceof \Error) {
             // If current exception is an PHP default error we'll interpret it as 500 Server Error code
             $statusCode = 500;
-        } elseif ($this->isHttpException($exception)) {
+        } elseif ($isHttpException) {
             // Otherwise, if it is Laravel's HttpException we can access getStatusCode() method from exception
             // instance
             $statusCode = $exception->getStatusCode();
-            if ($statusCode == 404) {
-                $message = __("Requested url :url was not found", ['url' => $request->getRequestUri()]);
+
+            if ($statusCode === 404) {
+                $message = __('Requested url :url was not found', [
+                    'url' => $request->getRequestUri(),
+                ]);
+                $errorType = 'http.request.not_found';
+            } elseif ($statusCode === 405 && $message === '') {
+                $message = __('Requested method :method is not allowed for :url', [
+                    'method' => $request->getMethod(),
+                    'url' => $request->getRequestUri(),
+                ]);
+                $errorType = 'http.request.wrong_method';
             }
-        } elseif ($exception->getCode() == 404 || $exception->getCode() == 401) {
+        } elseif ($code === 404 || $code === 401) {
             // If we have 404 or 401 code we will process it as an request status code
-            $statusCode = $exception->getCode();
+            $statusCode = $code;
         } else {
             // Otherwise, if non of previous checks was correct we'll assuming that current exception was thrown
             // because of a bad request body
             $statusCode = 400;
         }
 
-        if ($exception instanceof Entities\AuthorizationException) {
-            $authReason = $exception->getReason();
+        if ($errorType === false) {
+            // Get error type from exception class
+            $errorType = strtolower(preg_replace(
+                ['/^.*\\\\/', '/Exception$/', '/([^A-Z-])([A-Z])/'],
+                ['', '', '$1_$2'],
+                $cls
+            ));
         }
 
         // Debug data will be passed to response body only if application currently in debug mode
         return response()->json(
             array_merge(
-                ['message' => $message],
-                isset($debugData) ? ['debug' => $debugData] : [],
-                isset($authReason) ? ['reason' => $authReason] : []
+                [
+                    'error' => true,
+                    'message' => $message,
+                    'status_code' => $statusCode,
+                ],
+                $debugData !== false ? [ 'debug' => $debugData ] : [],
+                // Error Reason used for a more detailed explanation of the error on client side
+                $reason !== false && $reason !== null ? [ 'reason' => $reason ] : [],
+                // Error Type used for a more accurate error processing on client side
+                $errorType !== false && $errorType !== null ? [ 'type' => $errorType ] : []
             ),
-            $statusCode
+            $statusCode,
+            [],
+            config('app.debug') ? JSON_PRETTY_PRINT : 0
         );
     }
 
     /**
      * Convert an authentication exception into an unauthenticated response.
      *
-     * @param  Request                  $request
-     * @param  AuthenticationException  $exception
+     * @param Request $request
+     * @param AuthenticationException $exception
      *
-     * @return Response
+     * @return JsonResponse|Response
      */
     protected function unauthenticated($request, AuthenticationException $exception)
     {
-        if ($request->expectsJson()) {
-            return response()->json(['error' => 'Unauthenticated.'], 401);
-        }
-
-        return redirect()->guest('/login');
+        return $this->render($request, $exception);
     }
 }

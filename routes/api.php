@@ -23,9 +23,14 @@
  */
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\RouteCollection;
 use Illuminate\Routing\Router;
+use Illuminate\Routing\Route as RouteModel;
+use Illuminate\Support\Collection;
+use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+// Static content processing
 Route::group([
     'prefix' => 'uploads'
 ], static function (Router $router) {
@@ -37,6 +42,7 @@ Route::group([
     });
 });
 
+// Routes for login/register processing
 Route::group([
     'prefix' => 'auth',
 ], static function (Router $router) {
@@ -55,10 +61,12 @@ Route::group([
     $router->post('/register/{key}', 'RegistrationController@postForm');
 });
 
+
+// Main API routes
 Route::group([
     'middleware' => 'auth:api',
     'prefix' => 'v1',
-], function (Router $router) {
+], static function (Router $router) {
     // Register routes
     $router->post('/register/create', 'RegistrationController@create');
 
@@ -167,6 +175,38 @@ Route::group([
     $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
 });
 
-Route::fallback(static function (string $uri) {
+// Laravel router pass to fallback not non-exist urls only but wrong-method requests too.
+// So required to check if route have alternative request methods
+// and throw not-found or wrong-method exceptions manually
+Route::fallback(function () {
+    /** @var Router $this */
+    /** @var Request $request */
+    $request = $this->currentRequest;
+    /** @var RouteCollection $routes */
+    $routeCollection = $this->routes;
+    /** @var string[] $methods */
+    $methods = array_diff(Router::$verbs, [ $request->getMethod(), 'OPTIONS' ]);
+
+    foreach ($methods as $method) {
+        // Get all routes for method without fallback routes
+        /** @var Route[]|Collection $routes */
+        $routes = collect($routeCollection->get($method))->filter(static function ($route) {
+            /** @var RouteModel $route */
+            return !$route->isFallback && $route->uri !== '{fallbackPlaceholder}';
+        });
+
+        // Look if any route have match with current request
+        $mismatch = $routes->first(static function ($value) use ($request) {
+            /** @var RouteModel $value */
+            return $value->matches($request, false );
+        });
+
+        // Throw wrong-method exception if matches found
+        if ($mismatch !== null) {
+            throw new MethodNotAllowedHttpException([]);
+        }
+    }
+
+    // No matches, throw not-found exception
     throw new NotFoundHttpException();
 });
