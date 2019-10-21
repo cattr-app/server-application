@@ -126,7 +126,9 @@ class UserController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return [];
+        return [
+            'roles',
+        ];
     }
 
     /**
