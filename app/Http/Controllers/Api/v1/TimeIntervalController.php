@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
 use App\Rules\BetweenDate;
@@ -10,13 +9,13 @@ use App\User;
 use Auth;
 use Carbon\Carbon;
 use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
+use Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Filter;
-use Validator;
-use Intervention\Image\Facades\Image;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
+use Validator;
 
 /**
  * Class TimeIntervalController
@@ -54,17 +53,18 @@ class TimeIntervalController extends ItemController
 
 
     /**
-     * @param int $user_id
-     * @param string $start_at
+     * @param  int     $user_id
+     * @param  string  $start_at
+     *
      * @return array
      */
     public function getValidationRules(): array
     {
         return [
-            'task_id'  => 'exists:tasks,id|required',
-            'user_id'  => 'exists:users,id|required',
+            'task_id' => 'exists:tasks,id|required',
+            'user_id' => 'exists:users,id|required',
             'start_at' => 'date|required',
-            'end_at'   => 'date|required',
+            'end_at' => 'date|required',
         ];
     }
 
@@ -106,13 +106,16 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/time-intervals/create Create
-     * @apiDescription Create Time Interval
-     * @apiVersion 0.1.0
-     * @apiName CreateTimeInterval
-     * @apiGroup Time Interval
+     * @param  Request  $request
      *
-     * @apiUse UnauthorizedError
+     * @return JsonResponse
+     * @api            {post} /api/v1/time-intervals/create Create
+     * @apiDescription Create Time Interval
+     * @apiVersion     0.1.0
+     * @apiName        CreateTimeInterval
+     * @apiGroup       Time Interval
+     *
+     * @apiUse         UnauthorizedError
      *
      * @apiRequestExample {json} Request Example
      * {
@@ -145,20 +148,18 @@ class TimeIntervalController extends ItemController
      * @apiParam {Integer}  [count_mouse]     Mouse events count
      * @apiParam {Integer}  [count_keyboard]  Keyboard events count
      *
-     * @apiUse WrongDateTimeFormatStartEndAt
+     * @apiUse         WrongDateTimeFormatStartEndAt
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function create(Request $request): JsonResponse
     {
         $intervalData = [
-            'task_id' => (int)$request->get('task_id'),
-            'user_id' => (int)$request->get('user_id'),
+            'task_id' => (int) $request->get('task_id'),
+            'user_id' => (int) $request->get('user_id'),
             'start_at' => $request->get('start_at'),
             'end_at' => $request->get('end_at'),
             'count_mouse' => (int) $request->get('count_mouse') ?: 0,
-            'count_keyboard' =>  (int) $request->get('count_keyboard') ?: 0,
+            'count_keyboard' => (int) $request->get('count_keyboard') ?: 0,
         ];
 
         $validator = Validator::make(
@@ -183,20 +184,29 @@ class TimeIntervalController extends ItemController
         $intervalData['start_at'] = (new Carbon($intervalData['start_at']))->setTimezone('UTC')->toDateTimeString();
         $intervalData['end_at'] = (new Carbon($intervalData['end_at']))->setTimezone('UTC')->toDateTimeString();
 
-        // If interval is already exists, do not create duplicate.
-        $existing = TimeInterval::where([
-            ['user_id', '=', $intervalData['user_id']],
-            ['start_at', '=', $intervalData['start_at']],
-            ['end_at', '=', $intervalData['end_at']],
-        ])->first();
-        if ($existing) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                    'interval' => $existing,
-                ]),
-                200
-            );
-        }
+        /*
+         * TODO: я понятия не имею, зачем Александр возвращает 'success' ответы, но разбираться в этом как-то не
+         * хочется. */
+
+        // We'll check if there is an interval where current start_at are between this interval full range
+       /* $lastInterval = TimeInterval::where(['user_id' => $intervalData['user_id']])->last();
+        if ($lastInterval) {
+            $carbonStartAt = Carbon::parse($intervalData['start_at']);
+            if (Carbon::parse($lastInterval->start_at)->lt($carbonStartAt) &&
+                Carbon::parse($lastInterval->end_at)->gt($carbonStartAt)) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                        'interval' => $lastInterval,
+                    ]),
+                    400
+                );
+            }
+        }*/
+
+       $existing = TimeInterval::where(['user_id' => $intervalData['user_id']])->where(function ($query) use ($intervalData) {
+           $query->where('start_at', '<=', $intervalData['start_at']);
+           $query->where('end_at', '>', $intervalData['start_at']);
+       })->count();
 
         $timeInterval = Filter::process($this->getEventUniqueName('item.create'), new TimeInterval($intervalData));
         if (!$this->validateEndDate($intervalData)) {
@@ -205,14 +215,15 @@ class TimeIntervalController extends ItemController
                 Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                     'interval' => $timeInterval,
                 ]),
-                200
+                400
             );
         }
         $timeInterval->save();
 
         //create screenshot
         if (isset($request->screenshot)) {
-            $path = Filter::process($this->getEventUniqueName('request.item.create'), $request->screenshot->store('uploads/screenshots'));
+            $path = Filter::process($this->getEventUniqueName('request.item.create'),
+                $request->screenshot->store('uploads/screenshots'));
             $screenshot = Image::make($path);
             $thumbnail = $screenshot->resize(280, null, function ($constraint) {
                 $constraint->aspectRatio();
@@ -238,11 +249,14 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/time-intervals/bulk-create Bulk create
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/time-intervals/bulk-create Bulk create
      * @apiDescription Create Time Intervals
-     * @apiVersion 0.1.0
-     * @apiName BulkCreateTimeInterval
-     * @apiGroup Time Interval
+     * @apiVersion     0.1.0
+     * @apiName        BulkCreateTimeInterval
+     * @apiGroup       Time Interval
      *
      * @apiParam {String}   intervals           Serialized array of time intervals
      * @apiParam {Integer}  intervals.task_id   Task id
@@ -264,11 +278,9 @@ class TimeIntervalController extends ItemController
      * @apiError (400)  {String}   messages.reason  Error reason
      * @apiError (400)  {String}   messages.code    Error code
      *
-     * @apiUse UnauthorizedError
-     * @apiUse WrongDateTimeFormatStartEndAt
+     * @apiUse         UnauthorizedError
+     * @apiUse         WrongDateTimeFormatStartEndAt
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function bulkCreate(Request $request): JsonResponse
     {
@@ -295,7 +307,7 @@ class TimeIntervalController extends ItemController
                 'start_at' => $interval['start_at'] ?? '',
                 'end_at' => $interval['end_at'] ?? '',
                 'count_mouse' => (int) ($interval['count_mouse'] ?? 0),
-                'count_keyboard' =>  (int) ($interval['count_keyboard'] ?? 0),
+                'count_keyboard' => (int) ($interval['count_keyboard'] ?? 0),
             ];
 
             $validator = Validator::make(
@@ -375,11 +387,14 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/time-intervals/list List
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/time-intervals/list List
      * @apiDescription Get list of Time Intervals
-     * @apiVersion 0.1.0
-     * @apiName GetTimeIntervalList
-     * @apiGroup Time Interval
+     * @apiVersion     0.1.0
+     * @apiName        GetTimeIntervalList
+     * @apiGroup       Time Interval
      *
      * @apiParam {Integer}  [id]         `QueryParam` Time Interval id
      * @apiParam {Integer}  [task_id]    `QueryParam` Time Interval Task id
@@ -409,15 +424,13 @@ class TimeIntervalController extends ItemController
      *      ...
      * }
      *
-     * @apiUse UnauthorizedError
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
         $filters = $request->all();
-        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
+        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : false;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),
@@ -438,11 +451,11 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/time-intervals/show Show
+     * @api            {post} /api/v1/time-intervals/show Show
      * @apiDescription Show Time Interval
-     * @apiVersion 0.1.0
-     * @apiName ShowTimeInterval
-     * @apiGroup Time Interval
+     * @apiVersion     0.1.0
+     * @apiName        ShowTimeInterval
+     * @apiGroup       Time Interval
      *
      * @apiParam {Integer}  id     Time Interval id
      *
@@ -468,15 +481,15 @@ class TimeIntervalController extends ItemController
      *   "user_id": 1
      * }
      *
-     * @apiUse UnauthorizedError
+     * @apiUse         UnauthorizedError
      */
 
     /**
-     * @api {post} /api/v1/time-intervals/edit Edit
+     * @api            {post} /api/v1/time-intervals/edit Edit
      * @apiDescription Edit Time Interval
-     * @apiVersion 0.1.0
-     * @apiName EditTimeInterval
-     * @apiGroup Time Interval
+     * @apiVersion     0.1.0
+     * @apiName        EditTimeInterval
+     * @apiGroup       Time Interval
      *
      * @apiParam {Integer}  id           Time Interval id
      * @apiParam {Integer}  [user_id]    Time Interval User id
@@ -513,7 +526,7 @@ class TimeIntervalController extends ItemController
      * }
      *
      *
-     * @apiUse UnauthorizedError
+     * @apiUse         UnauthorizedError
      */
     public function edit(Request $request): JsonResponse
     {
@@ -601,11 +614,11 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api {delete, post} /api/v1/time-intervals/remove Destroy
+     * @api            {delete, post} /api/v1/time-intervals/remove Destroy
      * @apiDescription Destroy Time Interval
-     * @apiVersion 0.1.0
-     * @apiName DestroyTimeInterval
-     * @apiGroup Time Interval
+     * @apiVersion     0.1.0
+     * @apiName        DestroyTimeInterval
+     * @apiGroup       Time Interval
      *
      * @apiParam {Integer}   id Time interval id
      *
@@ -616,15 +629,19 @@ class TimeIntervalController extends ItemController
      *   "message":"Item has been removed"
      * }
      *
-     * @apiUse UnauthorizedError
+     * @apiUse         UnauthorizedError
      */
 
     /**
-     * @api {delete, post} /api/v1/time-intervals/bulk-remove BulkDestroy
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @throws \Exception
+     * @api            {delete, post} /api/v1/time-intervals/bulk-remove BulkDestroy
      * @apiDescription Multiple Destroy TimeInterval
-     * @apiVersion 0.1.0
-     * @apiName BulkDestroyTimeInterval
-     * @apiGroup Time Interval
+     * @apiVersion     0.1.0
+     * @apiName        BulkDestroyTimeInterval
+     * @apiGroup       Time Interval
      *
      * @apiParam {Object[]}    array              Time Intervals
      * @apiParam {Object}      array.object       Time Interval
@@ -667,13 +684,10 @@ class TimeIntervalController extends ItemController
      *   ]
      * }
      *
-     * @apiUse UnauthorizedError
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
-     * @throws \Exception
      */
-    public function bulkDestroy(Request $request) : JsonResponse
+    public function bulkDestroy(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all());
         $result = [];
@@ -746,7 +760,7 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @param bool $withRelations
+     * @param  bool  $withRelations
      *
      * @return Builder
      */
@@ -773,8 +787,7 @@ class TimeIntervalController extends ItemController
                         ->whereIn('id', $user->projects->map(static function ($project) {
                             return $project->id;
                         }))
-                        ->limit(1)
-                    ;
+                        ->limit(1);
                 });
             }
         });
