@@ -54,7 +54,7 @@ Route::group([
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
     $router->post('send-reset', 'AuthController@sendReset');
-    $router->get('reset', 'AuthController@getReset')->name('password.reset');
+    $router->post('confirm-reset', 'AuthController@getReset')->name('password.reset');
     $router->post('reset', 'AuthController@reset');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');
