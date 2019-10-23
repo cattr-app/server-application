@@ -1,4 +1,4 @@
-<?php
+<?php /** @noinspection PhpMissingParentConstructorInspection */
 
 
 namespace Modules\RedmineIntegration\Http\Controllers;
@@ -37,8 +37,6 @@ class TaskUpdateController extends Controller
     ) {
         $this->request = $request;
         $this->pluginWebhookHelper = $pluginWebhookHelper;
-
-        parent::__construct();
     }
 
     public static function getControllerRules(): array

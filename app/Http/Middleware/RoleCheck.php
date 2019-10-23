@@ -2,11 +2,8 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\Entities\AuthorizationException;
 use Closure;
-use App\Models\Role;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use PHPUnit\Runner\Exception;
 
 
 class RoleCheck
@@ -14,9 +11,11 @@ class RoleCheck
     /**
      * Handle an incoming request.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
+     * @param  \Illuminate\Http\Request  $request
+     * @param  \Closure                  $next
+     *
      * @return mixed
+     * @throws AuthorizationException
      */
     public function handle($request, Closure $next)
     {
@@ -26,10 +25,10 @@ class RoleCheck
             $actionName = $request->route()->getActionName();
             [$controller, $method] = explode('@', $actionName);
 
-            if(method_exists($controller, 'getControllerRules')) {
+            if (method_exists($controller, 'getControllerRules')) {
                 $rules = $controller::getControllerRules();
 
-                if(isset($rules[$method])) {
+                if (isset($rules[$method])) {
                     $rule = $rules[$method];
                     [$object, $action] = explode('.', $rule);
                 }
@@ -39,7 +38,7 @@ class RoleCheck
             $object = isset($object) ? $object : $request->segment(2);
             $action = isset($action) ? $action : $request->segment(3);
 
-            if($user->allowed($object, $action) || $user->allowed($object, 'full_access')) {
+            if ($user->allowed($object, $action) || $user->allowed($object, 'full_access')) {
                 return $next($request);
             } else {
                 return response()->json([
@@ -48,5 +47,7 @@ class RoleCheck
                 ], 403);
             }
         }
+
+        throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
     }
 }
