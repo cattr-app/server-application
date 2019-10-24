@@ -109,7 +109,7 @@ class UserController extends ItemController
             'full_name'              => 'required',
             'email'                  => 'required|unique:users,email',
             'active'                 => 'required|boolean',
-            'password'               => 'required',
+            'password'               => 'required|min:6',
         ];
     }
 
@@ -410,7 +410,11 @@ class UserController extends ItemController
         $validationRules = $this->getValidationRules();
         $validationRules['id'] = 'required';
         $validationRules['email'] .= ','.$request->get('id');
-        unset($validationRules['password']);
+        $validationRules['password'] = 'sometimes|min:6';
+
+        if(array_key_exists('password', $requestData) && is_null($requestData['password'])) {
+            unset($requestData['password']);
+        }
 
         $validator = Validator::make(
             $requestData,
@@ -423,7 +427,7 @@ class UserController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'validation fail',
+                    'error' => 'Validation fail',
                     'reason' => $validator->errors()
                 ]),
                 400
