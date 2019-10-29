@@ -2,6 +2,7 @@
 
 namespace App\Exceptions;
 
+use App\Exceptions\Entities\AuthorizationCaptchaException;
 use App\Exceptions\Interfaces\ReasonableException;
 use App\Exceptions\Interfaces\TypedException;
 use Exception;
@@ -43,7 +44,7 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param  Exception  $exception
+     * @param  Exception $exception
      *
      * @return void
      * @throws Exception
@@ -60,8 +61,8 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  Request    $request
-     * @param  Exception  $exception
+     * @param  Request $request
+     * @param  Exception $exception
      *
      * @return JsonResponse|Response
      */
@@ -74,7 +75,7 @@ class Handler extends ExceptionHandler
         $message = $exception->getMessage();
         $isHttpException = $this->isHttpException($exception);
         $cls = get_class($exception);
-        $code = (int) $exception->getCode();
+        $code = (int)$exception->getCode();
 
         $debugData = false;
         $reason = $exception instanceof ReasonableException ? $exception->getReason() : false;
@@ -117,7 +118,7 @@ class Handler extends ExceptionHandler
                 ]);
                 $errorType = 'http.request.wrong_method';
             }
-        } elseif ($code === 404 || $code === 401) {
+        } elseif ($code === 404 || $code === 401 || $code === 429 || $code == 420) {
             // If we have 404 or 401 code we will process it as an request status code
             $statusCode = $code;
         } else {
@@ -136,19 +137,23 @@ class Handler extends ExceptionHandler
         }
 
         // Debug data will be passed to response body only if application currently in debug mode
+        $exceptionResult = array_merge(
+            [
+                'error' => true,
+                'message' => $message,
+                'status_code' => $statusCode,
+            ],
+            $debugData !== false ? ['debug' => $debugData] : [],
+            // Error Reason used for a more detailed explanation of the error on client side
+            $reason !== false && $reason !== null ? ['reason' => $reason] : [],
+            // Error Type used for a more accurate error processing on client side
+            $errorType !== false && $errorType !== null ? ['type' => $errorType] : []
+        );
+        if ($exception instanceof AuthorizationCaptchaException) {
+            $exceptionResult['site_key'] = AuthorizationCaptchaException::getSiteKey();
+        }
         return response()->json(
-            array_merge(
-                [
-                    'error' => true,
-                    'message' => $message,
-                    'status_code' => $statusCode,
-                ],
-                $debugData !== false ? [ 'debug' => $debugData ] : [],
-                // Error Reason used for a more detailed explanation of the error on client side
-                $reason !== false && $reason !== null ? [ 'reason' => $reason ] : [],
-                // Error Type used for a more accurate error processing on client side
-                $errorType !== false && $errorType !== null ? [ 'type' => $errorType ] : []
-            ),
+            $exceptionResult,
             $statusCode,
             [],
             config('app.debug') ? JSON_PRETTY_PRINT : 0

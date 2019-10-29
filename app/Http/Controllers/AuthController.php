@@ -2,18 +2,20 @@
 
 namespace App\Http\Controllers;
 
+use App\Exceptions\Entities\AuthorizationCaptchaException;
 use App\Exceptions\Entities\AuthorizationException;
-use App\Exceptions\Entities\TooManyRequestsException;
-use App\Models\PasswordReset as PasswordResetModel;
+use App\Helpers\Recaptcha\Recaptcha;
 use App\User;
 use App\Helpers\CatHelper;
 use GuzzleHttp\Client;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Contracts\Auth\PasswordBroker;
-use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Http\{
+    Request, Response, JsonResponse
+};
+use Illuminate\Support\Facades\{
+    Auth, DB, Hash, Password
+};
 use Illuminate\Support\Str;
-use Illuminate\Http\{Request, Response, JsonResponse};
-use Illuminate\Support\Facades\{Auth, DB, Hash, Password};
 use Illuminate\Routing\Controller as BaseController;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 
@@ -88,12 +90,19 @@ class AuthController extends BaseController
      */
 
     /**
+     * @var Recaptcha
+     */
+    protected $recaptcha;
+
+    /**
      * Create a new AuthController instance.
      *
      * @return void
      */
-    public function __construct()
+    public function __construct(Recaptcha $recaptcha)
     {
+        $this->recaptcha = $recaptcha;
+
         $this->middleware('auth:api', [
             'except' => ['check', 'login', 'refresh', 'sendReset', 'getReset', 'reset']
         ]);
@@ -200,24 +209,6 @@ class AuthController extends BaseController
         ]);
     }
 
-
-    protected function validateRecaptcha(string $token): bool
-    {
-        $privKey = env('RECAPTCHA_PRIVATE');
-        if (empty($privKey)) {
-            return true;
-        }
-
-        $client = new Client();
-        $response = $client->post('https://www.google.com/recaptcha/api/siteverify', [
-            'form_params' => [
-                'secret' => $privKey,
-                'response' => $token,
-            ],
-        ]);
-        return json_decode($response->getBody(), true)['success'];
-    }
-
     /**
      * @param Request $request
      * @return JsonResponse
@@ -253,16 +244,10 @@ class AuthController extends BaseController
      */
     public function login(Request $request): JsonResponse
     {
-        // Ignore captcha validation for the desktop client
-        if ((strpos($request->header('user-agent', ''), 'khttp/') !== 0)
-            && !$this->validateRecaptcha(request('recaptcha', ''))
-        ) {
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
-        }
-
         $credentials = request([
             'login',
-            'password'
+            'password',
+            'recaptcha'
         ]);
 
         $data = [
@@ -270,18 +255,38 @@ class AuthController extends BaseController
             'password' => $credentials['password'] ?? null,
         ];
 
+        if (!$data['email']) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        }
+
+        if (!$this->recaptcha->getRateLimiter()->allowedIp()) {
+            $this->recaptcha->getRateLimiter()->incIp();
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_BANNED);
+        }
+
+        if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($data['email']) && !$this->recaptcha->testCaptcha($credentials['recaptcha'] ?? '')) {
+            $this->recaptcha->inc($data['email']);
+            throw new AuthorizationCaptchaException();
+        }
 
         /** @var string $token */
         if (!$token = auth()->attempt($data)) {
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+            $this->recaptcha->inc($data['email']);
+            if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($data['email'])) {
+                throw new AuthorizationCaptchaException();
+            } else {
+                throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+            }
         }
 
         $user = auth()->user();
 
         if ($user && !$user->active) {
+            $this->recaptcha->inc($data['email']);
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
+        $this->recaptcha->forgetCurrentIp($data['email']);
 
         $this->setToken($token);
 
@@ -361,7 +366,6 @@ class AuthController extends BaseController
     }
 
     /**
-     * @return JsonResponse
      * @api {get} /api/auth/me Me
      * @apiDescription Get authenticated User Entity
      *
@@ -402,6 +406,7 @@ class AuthController extends BaseController
      *   "timezone": null
      * }
      *
+     * @return JsonResponse
      */
     public function me(): JsonResponse
     {
@@ -494,31 +499,34 @@ class AuthController extends BaseController
      */
     public function sendReset()
     {
-        $minTimeOffset = 300;
-
-        $captcha = request('recaptcha', '');
-        if (!$this->validateRecaptcha($captcha)) {
-            return response()->json(['error' => 'Unauthorized'], 401);
-        }
-
         $email = request('login', '');
-        $user = User::where('email', $email)->first();
+        $captcha = request('recaptcha', '');
 
-        if (!isset($user)) {
-            throw new HttpException(404, 'User with such email isn’t found');
+        if (!$this->recaptcha->getRateLimiter()->allowedIp()) {
+            $this->recaptcha->getRateLimiter()->incIp();
+            return response()->json(['error' => 'Enhance Your Calm'], 420);
         }
 
-        $passwordReset = PasswordResetModel::where('email', $email)->first();
-        if (isset($passwordReset)) {
-            $timeOffset = time() - strtotime($passwordReset->created_at);
-            if ($timeOffset < $minTimeOffset) {
-                throw new TooManyRequestsException(
-                    'Too many password reset requests',
-                    ['remaining_time' => $minTimeOffset - $timeOffset]);
+        if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($email) && !$this->recaptcha->testCaptcha($captcha)) {
+            $this->recaptcha->inc($email);
+            return response()->json(['error' => 'User with such email isn’t found or captcha required!', 'site_key' => AuthorizationCaptchaException::getSiteKey()], 429);
+        }
+
+        $user = User::query()->where(['email' => $email])->first();
+        if (!isset($user)) {
+            $this->recaptcha->inc($email);
+
+            if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($email)) {
+                $this->recaptcha->inc($email);
+                return response()->json(['error' => 'User with such email isn’t found or captcha required!', 'site_key' => AuthorizationCaptchaException::getSiteKey()], 429);
             }
 
+            return response()->json([
+                'error' => 'User with such email isn’t found',
+            ], 404);
         }
 
+        $this->recaptcha->forgetCurrentIp($email);
         $credentials = ['email' => $email];
         $this->broker()->sendResetLink($credentials);
 
@@ -565,13 +573,19 @@ class AuthController extends BaseController
      */
     public function reset()
     {
-        if (!$this->validateRecaptcha(request('recaptcha', ''))) {
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
-        }
-
         $data = request(['token', 'password']);
         $data['email'] = request('login');
         $data['password_confirmation'] = $data['password'];
+
+        if (!$this->recaptcha->getRateLimiter()->allowedIp()) {
+            $this->recaptcha->getRateLimiter()->incIp();
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_BANNED);
+        }
+
+        if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($data['email']) && !$this->recaptcha->testCaptcha(request('recaptcha', ''))) {
+            $this->recaptcha->inc($data['email']);
+            throw new AuthorizationCaptchaException();
+        }
 
         $response = $this->broker()->reset(
             $data,
@@ -584,9 +598,14 @@ class AuthController extends BaseController
         );
 
         if ($response !== Password::PASSWORD_RESET) {
+            $this->recaptcha->inc($data['email']);
+            if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($data['email'])) {
+                throw new AuthorizationCaptchaException();
+            }
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
+        $this->recaptcha->forgetCurrentIp($data['email']);
         $token = auth()->refresh();
         $this->setToken($token);
 
