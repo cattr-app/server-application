@@ -24,9 +24,7 @@ class AuthorizationException extends AuthorizationExceptionCore implements Typed
 
     /**
      * AuthorizationException constructor.
-     * @param string $message
      * @param string $type
-     * @param int $code
      * @param Throwable|null $previous
      */
     public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, Throwable $previous = null)

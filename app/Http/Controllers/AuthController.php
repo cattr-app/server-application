@@ -3,13 +3,20 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\Entities\AuthorizationException;
+use App\Exceptions\Entities\TooManyRequestsException;
+use App\Models\PasswordReset as PasswordResetModel;
 use App\User;
 use App\Helpers\CatHelper;
+use GuzzleHttp\Client;
 use Illuminate\Auth\Events\PasswordReset;
+use Illuminate\Contracts\Auth\PasswordBroker;
+use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Support\Str;
 use Illuminate\Http\{Request, Response, JsonResponse};
 use Illuminate\Support\Facades\{Auth, DB, Hash, Password};
-use Illuminate\Support\Str;
 use Illuminate\Routing\Controller as BaseController;
+use Symfony\Component\HttpKernel\Exception\HttpException;
+
 
 /**
  * Class AuthController
@@ -93,6 +100,7 @@ class AuthController extends BaseController
     }
 
     /**
+     * @return JsonResponse
      * @api {any} /api/auth/ping Ping
      * @apiDescription Get API status
      *
@@ -111,7 +119,6 @@ class AuthController extends BaseController
      *      "cat":    '(=ㅇ༝ㅇ=)'
      *  }
      *
-     * @return JsonResponse
      */
     public function ping(): JsonResponse
     {
@@ -125,6 +132,7 @@ class AuthController extends BaseController
     }
 
     /**
+     * @return JsonResponse
      * @api {any} /api/auth/check Check
      * @apiDescription Check API status
      *
@@ -141,7 +149,6 @@ class AuthController extends BaseController
      *      "amazingtime": true,
      *  }
      *
-     * @return JsonResponse
      */
     public function check(): JsonResponse
     {
@@ -193,6 +200,7 @@ class AuthController extends BaseController
         ]);
     }
 
+
     protected function validateRecaptcha(string $token): bool
     {
         $privKey = env('RECAPTCHA_PRIVATE');
@@ -200,10 +208,10 @@ class AuthController extends BaseController
             return true;
         }
 
-        $client = new \GuzzleHttp\Client();
+        $client = new Client();
         $response = $client->post('https://www.google.com/recaptcha/api/siteverify', [
             'form_params' => [
-                'secret'   => $privKey,
+                'secret' => $privKey,
                 'response' => $token,
             ],
         ]);
@@ -211,6 +219,7 @@ class AuthController extends BaseController
     }
 
     /**
+     * @param Request $request
      * @return JsonResponse
      * @throws AuthorizationException
      * @api {post} /api/auth/login Login
@@ -241,7 +250,6 @@ class AuthController extends BaseController
      *
      * @apiUse AuthAnswer
      * @apiUse UnauthorizedError
-     *
      */
     public function login(Request $request): JsonResponse
     {
@@ -283,6 +291,8 @@ class AuthController extends BaseController
     /**
      * Log the user out (Invalidate the token).
      *
+     * @param Request $request
+     * @return JsonResponse
      * @api {any} /api/auth/logout Logout
      * @apiDescription Invalidate JWT
      * @apiVersion 0.1.0
@@ -298,7 +308,6 @@ class AuthController extends BaseController
      *
      * @apiUse UnauthorizedError
      *
-     * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
@@ -313,6 +322,8 @@ class AuthController extends BaseController
     /**
      * Log the user out (Invalidate all tokens).
      *
+     * @param Request $request
+     * @return JsonResponse
      * @api {any} /api/auth/logout Logout
      * @apiDescription Invalidate JWT
      * @apiVersion 0.1.0
@@ -333,15 +344,13 @@ class AuthController extends BaseController
      *
      * @apiUse UnauthorizedError
      *
-     * @return JsonResponse
      */
     public function logoutAll(Request $request): JsonResponse
     {
         $token = $request->json()->get('token');
         if (isset($token)) {
             $this->invalidateAllTokens($token);
-        }
-        else {
+        } else {
             $this->invalidateAllTokens();
             auth()->logout();
         }
@@ -351,55 +360,57 @@ class AuthController extends BaseController
         ]);
     }
 
-  /**
-   * @api {get} /api/auth/me Me
-   * @apiDescription Get authenticated User Entity
-   *
-   * @apiVersion 0.1.0
-   * @apiName Me
-   * @apiGroup Auth
-   *
-   * @apiSuccess {String}     access_token  Token
-   * @apiSuccess {String}     token_type    Token Type
-   * @apiSuccess {String}     expires_in    Token TTL in seconds
-   * @apiSuccess {Array}      user          User Entity
-   *
-   * @apiUse UnauthorizedError
-   *
-   * @apiSuccessExample {json} Answer Example
-   * {
-   *   "id": 1,
-   *   "full_name": "Admin",
-   *   "email": "admin@example.com",
-   *   "url": "",
-   *   "company_id": 1,
-   *   "payroll_access": 1,
-   *   "billing_access": 1,
-   *   "avatar": "",
-   *   "screenshots_active": 1,
-   *   "manual_time": 0,
-   *   "permanent_tasks": 0,
-   *   "computer_time_popup": 300,
-   *   "poor_time_popup": "",
-   *   "blur_screenshots": 0,
-   *   "web_and_app_monitoring": 1,
-   *   "webcam_shots": 0,
-   *   "screenshots_interval": 9,
-   *   "active": "active",
-   *   "deleted_at": null,
-   *   "created_at": "2018-09-25 06:15:08",
-   *   "updated_at": "2018-09-25 06:15:08",
-   *   "timezone": null
-   * }
-   *
-   * @return JsonResponse
-   */
-  public function me(): JsonResponse
-  {
-    return response()->json(auth()->user());
-  }
+    /**
+     * @return JsonResponse
+     * @api {get} /api/auth/me Me
+     * @apiDescription Get authenticated User Entity
+     *
+     * @apiVersion 0.1.0
+     * @apiName Me
+     * @apiGroup Auth
+     *
+     * @apiSuccess {String}     access_token  Token
+     * @apiSuccess {String}     token_type    Token Type
+     * @apiSuccess {String}     expires_in    Token TTL in seconds
+     * @apiSuccess {Array}      user          User Entity
+     *
+     * @apiUse UnauthorizedError
+     *
+     * @apiSuccessExample {json} Answer Example
+     * {
+     *   "id": 1,
+     *   "full_name": "Admin",
+     *   "email": "admin@example.com",
+     *   "url": "",
+     *   "company_id": 1,
+     *   "payroll_access": 1,
+     *   "billing_access": 1,
+     *   "avatar": "",
+     *   "screenshots_active": 1,
+     *   "manual_time": 0,
+     *   "permanent_tasks": 0,
+     *   "computer_time_popup": 300,
+     *   "poor_time_popup": "",
+     *   "blur_screenshots": 0,
+     *   "web_and_app_monitoring": 1,
+     *   "webcam_shots": 0,
+     *   "screenshots_interval": 9,
+     *   "active": "active",
+     *   "deleted_at": null,
+     *   "created_at": "2018-09-25 06:15:08",
+     *   "updated_at": "2018-09-25 06:15:08",
+     *   "timezone": null
+     * }
+     *
+     */
+    public function me(): JsonResponse
+    {
+        return response()->json(auth()->user());
+    }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @api {post} /api/auth/refresh Refresh
      * @apiDescription Refresh JWT
      *
@@ -422,7 +433,7 @@ class AuthController extends BaseController
     /**
      * Get the token array structure.
      *
-     * @param  string $token
+     * @param string $token
      *
      * @return JsonResponse
      */
@@ -439,7 +450,7 @@ class AuthController extends BaseController
     /**
      * Get the broker to be used during password reset.
      *
-     * @return \Illuminate\Contracts\Auth\PasswordBroker
+     * @return PasswordBroker
      */
     protected function broker()
     {
@@ -449,7 +460,7 @@ class AuthController extends BaseController
     /**
      * Get the guard to be used during password reset.
      *
-     * @return \Illuminate\Contracts\Auth\StatefulGuard
+     * @return StatefulGuard
      */
     protected function guard()
     {
@@ -457,6 +468,7 @@ class AuthController extends BaseController
     }
 
     /**
+     * @return Response|JsonResponse
      * @api {post} /api/auth/send-reset Send reset e-mail
      * @apiDescription Get user JWT
      *
@@ -479,21 +491,32 @@ class AuthController extends BaseController
      * @apiUse AuthAnswer
      * @apiUse UnauthorizedError
      *
-     * @return Response|JsonResponse
      */
     public function sendReset()
     {
+        $minTimeOffset = 300;
+
         $captcha = request('recaptcha', '');
         if (!$this->validateRecaptcha($captcha)) {
             return response()->json(['error' => 'Unauthorized'], 401);
         }
 
         $email = request('login', '');
-        $user = User::where(['email' => $email])->first();
+        $user = User::where('email', $email)->first();
+
         if (!isset($user)) {
-            return response()->json([
-                'error' => 'User with such email isn’t found',
-            ], 404);
+            throw new HttpException(404, 'User with such email isn’t found');
+        }
+
+        $passwordReset = PasswordResetModel::where('email', $email)->first();
+        if (isset($passwordReset)) {
+            $timeOffset = time() - strtotime($passwordReset->created_at);
+            if ($timeOffset < $minTimeOffset) {
+                throw new TooManyRequestsException(
+                    'Too many password reset requests',
+                    ['remaining_time' => $minTimeOffset - $timeOffset]);
+            }
+
         }
 
         $credentials = ['email' => $email];
@@ -504,17 +527,6 @@ class AuthController extends BaseController
         ], 200);
     }
 
-    /**
-     * Redirects user to the reset password confirmation form in the frontend.
-     *
-     * @return RedirectResponse
-     */
-    public function getReset(Request $request)
-    {
-        $token = $request->query('token');
-        $email = $request->query('email');
-        return redirect("auth/confirm-reset?token=$token&email=$email");
-    }
 
     /**
      * @return JsonResponse
@@ -565,7 +577,6 @@ class AuthController extends BaseController
             $data,
             function ($user, $password) {
                 $user->password = Hash::make($password);
-                $user->setRememberToken(Str::random(60));
                 $user->save();
                 event(new PasswordReset($user));
                 $this->guard()->login($user);
