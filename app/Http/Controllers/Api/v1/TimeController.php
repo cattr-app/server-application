@@ -645,9 +645,9 @@ class TimeController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
-        $query = parent::getQuery($withRelations);
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = Role::can(Auth::user(), 'time', 'full_access');
         $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
 

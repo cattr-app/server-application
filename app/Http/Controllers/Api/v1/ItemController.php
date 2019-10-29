@@ -428,17 +428,17 @@ abstract class ItemController extends Controller
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         /** @var Model $cls */
         $cls = static::getItemClass();
 
-        $query = new Builder($cls::getQuery());
+        $query = new Builder($cls::getQuery(), true);
         $query->setModel(new $cls());
 
         $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls));
 
-        if ($softDelete) {
+        if ($softDelete && !$withSoftDeleted) {
             if (method_exists($cls, 'getTable')) {
                 $table = (new $cls())->getTable();
                 $query->whereNull("$table.deleted_at");
