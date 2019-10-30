@@ -140,6 +140,7 @@ Route::group([
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
     $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
     $router->post('/time-intervals/bulk-remove', 'Api\v1\TimeIntervalController@bulkDestroy');
+    $router->post('/time-intervals/manual-create', 'Api\v1\TimeIntervalController@manualCreate');
 
     //Time routes
     $router->any('/time/total', 'Api\v1\TimeController@total');
