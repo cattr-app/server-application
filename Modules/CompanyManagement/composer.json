@@ -1,0 +1,25 @@
+{
+    "name": "amazingcat/at-companymanagement",
+    "description": "",
+    "authors": [
+        {
+            "name": "AmazingCat",
+            "email": "to@amazingcat.net"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\CompanyManagement\\Providers\\CompanyManagementServiceProvider"
+            ],
+            "aliases": {
+                
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\CompanyManagement\\": ""
+        }
+    }
+}

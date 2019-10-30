@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use Auth;
-use Filter;
 use App\Models\Role;
 use App\Models\Rule;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
+use Auth;
+use Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 
 class RolesController extends ItemController
 {
@@ -78,18 +78,21 @@ class RolesController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/roles/list List
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/roles/list List
      * @apiDescription Get list of Roles
-     * @apiVersion 0.1.0
-     * @apiName GetRolesList
-     * @apiGroup Roles
+     * @apiVersion     0.1.0
+     * @apiName        GetRolesList
+     * @apiGroup       Roles
      *
      * @apiParam {Integer}  [id]          `QueryParam` Role ID
      * @apiParam {Integer}  [user_id]     `QueryParam` Role's Users ID
      * @apiParam {String}   [name]        `QueryParam` Role Name
      * @apiParam {String} [created_at]    `QueryParam` Role Creation DateTime
      * @apiParam {String} [updated_at]    `QueryParam` Last Role update DataTime
-     * @apiUse RolesRelations
+     * @apiUse         RolesRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -99,7 +102,7 @@ class RolesController extends ItemController
      *      "created_at":  [">", "2019-01-01 00:00:00"],
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
-     * @apiUse RolesRelationsExample
+     * @apiUse         RolesRelationsExample
      *
      * @apiSuccessExample {json} Simple response example
      * [
@@ -122,11 +125,8 @@ class RolesController extends ItemController
      * @apiSuccess {Object[]} RoleList.Role.users       Role User
      * @apiSuccess {Object[]} RoleList.Role.rules       Role Task
      *
-     * @apiUse UnauthorizedError
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -142,11 +142,14 @@ class RolesController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/roles/create Create
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/roles/create Create
      * @apiDescription Create Role
-     * @apiVersion 0.1.0
-     * @apiName CreateRole
-     * @apiGroup Role
+     * @apiVersion     0.1.0
+     * @apiName        CreateRole
+     * @apiGroup       Role
      *
      * @apiParam {String} name Roles's name
      *
@@ -171,27 +174,27 @@ class RolesController extends ItemController
      * @apiSuccess {String}   res.created_at  Role date time of create
      * @apiSuccess {String}   res.updated_at  Role date time of update
      *
-     * @apiUse DefaultCreateErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultCreateErrorResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/roles/show Show
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/roles/show Show
      * @apiDescription Get Role Entity
-     * @apiVersion 0.1.0
-     * @apiName ShowRole
-     * @apiGroup Role
+     * @apiVersion     0.1.0
+     * @apiName        ShowRole
+     * @apiGroup       Role
      *
      * @apiParam {Integer}    id                        Role id
      * @apiParam {String}     [name]       `QueryParam` Role Name
      * @apiParam {String}     [created_at] `QueryParam` Role date time of create
      * @apiParam {String}     [updated_at] `QueryParam` Role date time of update
      *
-     * @apiUse RolesRelations
+     * @apiUse         RolesRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -202,7 +205,7 @@ class RolesController extends ItemController
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
      *
-     * @apiUse RolesRelationsExample
+     * @apiUse         RolesRelationsExample
      *
      * @apiSuccess {Object}   Role             Role object
      * @apiSuccess {Integer}  Role.id          Role id
@@ -222,20 +225,20 @@ class RolesController extends ItemController
      *   "updated_at": "2018-09-25 06:15:07"
      * }
      *
-     * @apiUse DefaultShowErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultShowErrorResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/roles/edit Edit
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/roles/edit Edit
      * @apiDescription Edit Role
-     * @apiVersion 0.1.0
-     * @apiName EditRole
-     * @apiGroup Role
+     * @apiVersion     0.1.0
+     * @apiName        EditRole
+     * @apiGroup       Role
      *
      * @apiParam {Integer} id   Role ID
      * @apiParam {String}  name Role Name
@@ -253,21 +256,21 @@ class RolesController extends ItemController
      * @apiSuccess {String}   Role.updated_at Role date time of update
      * @apiSuccess {String}   Role.deleted_at Role date time of delete
      *
-     * @apiUse DefaultEditErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultEditErrorResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/roles/remove Destroy
-     * @apiUse DefaultDestroyRequestExample
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/roles/remove Destroy
+     * @apiUse         DefaultDestroyRequestExample
      * @apiDescription Destroy Role
-     * @apiVersion 0.1.0
-     * @apiName DestroyRole
-     * @apiGroup Role
+     * @apiVersion     0.1.0
+     * @apiName        DestroyRole
+     * @apiGroup       Role
      *
      * @apiParam {Integer} id Role id
      *
@@ -276,20 +279,20 @@ class RolesController extends ItemController
      *      "id": 1
      *  }
      *
-     * @apiUse DefaultDestroyResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultDestroyResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/roles/allowed-rules AllowedRules
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/roles/allowed-rules AllowedRules
      * @apiDescription Get Rule allowed action list
-     * @apiVersion 0.1.0
-     * @apiName GetRulesAllowedActionList
-     * @apiGroup Roles
+     * @apiVersion     0.1.0
+     * @apiName        GetRulesAllowedActionList
+     * @apiGroup       Roles
      *
      * @apiParam {Integer} id Role id
      *
@@ -321,7 +324,7 @@ class RolesController extends ItemController
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
      *
-     * @apiUse UnauthorizedError
+     * @apiUse         UnauthorizedError
      *
      * @apiErrorExample {json} Invalid id Example
      * {
@@ -329,9 +332,6 @@ class RolesController extends ItemController
      *   "reason": "Invalid id"
      * }
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
     public function allowedRules(Request $request): JsonResponse
     {
@@ -469,7 +469,7 @@ class RolesController extends ItemController
     }
 
     /**
-     * @param bool $withRelations
+     * @param  bool  $withRelations
      *
      * @return Builder
      */
