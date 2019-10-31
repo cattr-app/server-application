@@ -28,6 +28,30 @@ class ProjectsUsers extends AbstractModel
      */
     protected $table = 'projects_users';
 
+    /**
+     * @var array
+     */
+    protected $fillable = [
+        'project_id',
+        'user_id',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $casts = [
+        'project_id' => 'integer',
+        'user_id' => 'integer',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+    ];
+
     protected function setKeysForSaveQuery(Builder $query)
     {
         $query
@@ -35,11 +59,6 @@ class ProjectsUsers extends AbstractModel
             ->where('user_id', '=', $this->getAttribute('user_id'));
         return $query;
     }
-
-    /**
-     * @var array
-     */
-    protected $fillable = ['project_id','user_id'];
 
     /**
      * @return BelongsTo

@@ -13,6 +13,16 @@ use Modules\RedmineIntegration\Helpers\TaskIntegrationHelper;
 class TaskRedmineController extends AbstractRedmineController
 {
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'synchronize' => 'integration.redmine',
+        ];
+    }
+
+    /**
      * Synchronize Redmine tasks with AmazingTime tasks
      *
      * @return JsonResponse

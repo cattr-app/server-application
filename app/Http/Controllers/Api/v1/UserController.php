@@ -31,7 +31,6 @@ class UserController extends ItemController
      * @apiParam {String}  email                    E-mail
      * @apiParam {String}  [url]                    ???
      * @apiParam {Integer} [company_id]             ???
-     * @apiParam {String}  [level]                  Role access level
      * @apiParam {Boolean} [payroll_access]         ???
      * @apiParam {Boolean} [billing_access]         ???
      * @apiParam {String}  [avatar]                 Avatar image url/uri
@@ -56,6 +55,8 @@ class UserController extends ItemController
         Filter::listen('request.item.edit.user', static::class . '@' . 'requestUserCreateHook');
 
         Event::listen('item.edit.after.user', static::class . '@' . 'changePasswordHook');
+
+        parent::__construct();
     }
 
     public function sendInviteHook($user, $requestData)
@@ -108,8 +109,7 @@ class UserController extends ItemController
             'full_name'              => 'required',
             'email'                  => 'required|unique:users,email',
             'active'                 => 'required|boolean',
-            'password'               => 'required',
-            'role_id'                => 'exists:role,id|required',
+            'password'               => 'required|min:6',
         ];
     }
 
@@ -126,7 +126,26 @@ class UserController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return [];
+        return [
+            'roles',
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'users.list',
+            'count' => 'users.list',
+            'create' => 'users.create',
+            'edit' => 'users.edit',
+            'show' => 'users.show',
+            'destroy' => 'users.remove',
+            'bulkEdit' => 'users.bulk-edit',
+            'relations' => 'users.relations',
+        ];
     }
 
     /**
@@ -153,7 +172,6 @@ class UserController extends ItemController
      * @apiParam {String}   [email]                 `QueryParam` E-mail
      * @apiParam {String}   [url]                   `QueryParam` ???
      * @apiParam {Integer}  [company_id]            `QueryParam` ???
-     * @apiParam {String}   [level]                 `QueryParam` Role access level
      * @apiParam {Boolean}  [payroll_access]                     ???
      * @apiParam {Boolean}  [billing_access]                     ???
      * @apiParam {String}   [avatar]                `QueryParam` Avatar image url/uri
@@ -167,7 +185,7 @@ class UserController extends ItemController
      * @apiParam {Boolean}  [webcam_shots]                       ???
      * @apiParam {Integer}  [screenshots_interval]  `QueryParam` Screenshots creation interval (seconds)
      * @apiParam {Boolean}  [active]                             User is active
-     * @apiParam {Integer}  [role_id]               `QueryParam` User's Role ID
+     * @apiParam {Integer}  [roles]                 `QueryParam` User's Roles
      * @apiParam {String}   [created_at]            `QueryParam` User Creation DateTime
      * @apiParam {String}   [updated_at]            `QueryParam` Last User data update DataTime
      * @apiParam {String}   [deleted_at]            `QueryParam` When User was deleted (null if not)
@@ -196,7 +214,7 @@ class UserController extends ItemController
      * @apiSuccess {Object} res.full_name   User
      * @apiSuccess {Object} res.email       Email
      * @apiSuccess {Object} res.active      Is user active
-     * @apiSuccess {Object} res.role_id     User role id
+     * @apiSuccess {Object} res.roles       User roles
      * @apiSuccess {Object} res.updated_at  User last update datetime
      * @apiSuccess {Object} res.created_at  User registration datetime
      *
@@ -216,6 +234,55 @@ class UserController extends ItemController
      *
      * @apiUse UserModel
      */
+
+    /**
+     * Create item
+     *
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function create(Request $request): JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        $cls = $this->getItemClass();
+
+        Event::dispatch($this->getEventUniqueName('item.create.before'), $requestData);
+
+        $item = Filter::process(
+            $this->getEventUniqueName('item.create'),
+            $cls::create($this->filterRequestData($requestData))
+        );
+
+        if (isset($requestData['roles'])) {
+            $item->syncRoles($requestData['roles']);
+        }
+
+        $item->save();
+
+        Event::dispatch($this->getEventUniqueName('item.create.after'), [$item, $requestData]);
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'res' => $item,
+            ])
+        );
+    }
 
     /**
      * @api {post} /api/v1/users/show Show
@@ -245,7 +312,6 @@ class UserController extends ItemController
      *   "email": "admin@example.com",
      *   "url": "",
      *   "company_id": 1,
-     *    "level": "admin",
      *   "payroll_access": 1,
      *   "billing_access": 1,
      *   "avatar": "",
@@ -255,6 +321,7 @@ class UserController extends ItemController
      *   "computer_time_popup": 300,
      *   "poor_time_popup": "",
      *   "blur_screenshots": 0,
+     *   "roles": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
      *   "web_and_app_monitoring": 1,
      *   "webcam_shots": 0,
      *   "screenshots_interval": 9,
@@ -294,7 +361,6 @@ class UserController extends ItemController
      *       "email": "gook@tree.com",
      *       "url": "",
      *       "company_id": 1,
-     *       "level": "admin",
      *       "payroll_access": 1,
      *       "billing_access": 1,
      *       "avatar": "",
@@ -307,6 +373,7 @@ class UserController extends ItemController
      *       "web_and_app_monitoring": 1,
      *       "webcam_shots": 0,
      *       "screenshots_interval": 9,
+     *       "roles": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
      *       "active": "1",
      *       "deleted_at": null,
      *       "created_at": "2018-10-18 09:36:22",
@@ -343,7 +410,11 @@ class UserController extends ItemController
         $validationRules = $this->getValidationRules();
         $validationRules['id'] = 'required';
         $validationRules['email'] .= ','.$request->get('id');
-        unset($validationRules['password']);
+        $validationRules['password'] = 'sometimes|min:6';
+
+        if(array_key_exists('password', $requestData) && is_null($requestData['password'])) {
+            unset($requestData['password']);
+        }
 
         $validator = Validator::make(
             $requestData,
@@ -356,7 +427,7 @@ class UserController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'validation fail',
+                    'error' => 'Validation fail',
                     'reason' => $validator->errors()
                 ]),
                 400
@@ -387,6 +458,10 @@ class UserController extends ItemController
             $item->fill($this->filterRequestData($requestData));
         } else {
             $item->fill($requestData);
+        }
+
+        if (isset($requestData['roles'])) {
+            $item->syncRoles($requestData['roles']);
         }
 
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
@@ -432,7 +507,6 @@ class UserController extends ItemController
      * @apiParam {String}   users.object.email                    E-mail
      * @apiParam {String}   [users.object.url]                    ???
      * @apiParam {Integer}  [users.object.company_id]             ???
-     * @apiParam {String}   [users.object.level]                  Role access level
      * @apiParam {Boolean}  [users.object.payroll_access]         ???
      * @apiParam {Boolean}  [users.object.billing_access]         ???
      * @apiParam {String}   [users.object.avatar]                 Avatar image url/uri
@@ -637,7 +711,7 @@ class UserController extends ItemController
                 $projects = collect($user->projects);
 
                 $projects_users = $projects->flatMap(function($project) {
-                   return collect($project->users);
+                    return collect($project->users);
                 })->unique('id');
 
                 $project_ids = $projects->map(function ($project) { return $project->id; });
@@ -649,7 +723,7 @@ class UserController extends ItemController
         }
 
         $users = collect($users)->filter(function($user, $key) use ($userId) {
-           return $user->id !== $userId;
+            return $user->id !== $userId;
         });
 
         return response()->json(Filter::process(

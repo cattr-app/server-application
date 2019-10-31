@@ -85,7 +85,6 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'email',
         'url',
         'company_id',
-        'level',
         'payroll_access',
         'billing_access',
         'avatar',
@@ -105,13 +104,44 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'change_password',
     ];
 
+    /**
+     * @var array
+     */
+    protected $casts = [
+        'full_name' => 'string',
+        'email' => 'string',
+        'url' => 'string',
+        'company_id' => 'integer',
+        'payroll_access' => 'boolean',
+        'billing_access' => 'boolean',
+        'avatar' => 'string',
+        'screenshots_active' => 'boolean',
+        'manual_time' => 'boolean',
+        'permanent_tasks' => 'boolean',
+        'computer_time_popup' => 'integer',
+        'poor_time_popup' => 'integer',
+        'blur_screenshots' => 'boolean',
+        'web_and_app_monitoring' => 'boolean',
+        'webcam_shots' => 'boolean',
+        'screenshots_interval' => 'integer',
+        'active' => 'boolean',
+        'password' => 'string',
+        'timezone' => 'string',
+        'important' => 'boolean',
+        'change_password' => 'int'
+    ];
+
 
     /**
      * The attributes that should be mutated to dates.
      *
      * @var array
      */
-    protected $dates = ['deleted_at'];
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
 
     /**
      * The attributes that should be hidden for arrays.
@@ -159,6 +189,16 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         return $this->roles->map(function (Role $role) {
             return $role->id;
         });
+    }
+
+    public function syncRoles($roles)
+    {
+        $roleIds = [];
+        foreach ($roles as $role) {
+            $roleIds []= isset($role['id']) ? $role['id'] : $role;
+        }
+
+        $this->roles()->sync($roleIds);
     }
 
     /**

@@ -8,6 +8,8 @@ use App\User;
 use Auth;
 use Illuminate\Http\Request;
 use DB;
+use Carbon\Carbon;
+use Validator;
 
 /**
  * Class TimeUseReportController
@@ -16,23 +18,63 @@ use DB;
 class TimeUseReportController extends Controller
 {
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'report' => 'time-use-report.list',
+        ];
+    }
+
+    /**
      * Handle the incoming request.
      *
-     * @param  \Illuminate\Http\Request $request
+     * @param \Illuminate\Http\Request $request
      * @return \Illuminate\Http\Response
      */
     public function report(Request $request)
     {
+        $validator = Validator::make(
+            $request->all(),
+            [
+                'start_at' => 'date',
+                'end_at' => 'date',
+            ]
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ], 400
+            );
+        }
+
         $user_ids = $request->input('user_ids');
-        $start_at = $request->input('start_at');
-        $end_at = $request->input('end_at');
+
+        $user = auth()->user();
+        $timezone = $user->timezone ?: 'UTC';
+        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
+
+        $startAt = Carbon::parse($request->input('start_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
+
+        $endAt = Carbon::parse($request->input('end_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
 
         $projectReports = DB::table('project_report')
-            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))
+            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
+                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
+                DB::raw('SUM(duration) as duration')
+            )
             ->whereIn('user_id', $user_ids)
-            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
-            ->where('date', '>=', $start_at)
-            ->where('date', '<', $end_at)
+            ->whereIn('project_id', Project::getUserRelatedProjectIds($user))
+            ->where('date', '>=', $startAt)
+            ->where('date', '<', $endAt)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
             ->get();
 
@@ -63,7 +105,7 @@ class TimeUseReportController extends Controller
             $users[$user_id]['total_time'] += $duration;
         }
 
-        $ret = [ ['users' => array_values($users) ] ];
+        $ret = [['users' => array_values($users)]];
 
 
         return response()->json($ret);

@@ -27,7 +27,6 @@ class StatisticsSeeder extends Seeder
             'email' => $email,
             'url' => '',
             'company_id' => 1,
-            'level' => '',
             'payroll_access' => 1,
             'billing_access' => 1,
             'avatar' => '',

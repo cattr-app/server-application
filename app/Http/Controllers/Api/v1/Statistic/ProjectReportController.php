@@ -3,53 +3,89 @@
 namespace App\Http\Controllers\Api\v1\Statistic;
 
 use Auth;
-use App\Models\ProjectsUsers;
-use App\Models\Task;
-use App\Models\TimeInterval;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
-use App\Models\TimeDuration;
-use Nwidart\Modules\Collection;
-use App\User;
 use DB;
+use Validator;
+use Carbon\Carbon;
 
 class ProjectReportController extends Controller
 {
     /**
-     * Handle the incoming request.
-     *
-     * @param  \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @return array
      */
-    public function index(Request $request)
+    public function getValidationRules(): array
     {
-        $type = $request->input('type');
-        $start_at = $request->input('start_at');
-        $end_at = $request->input('end_at');
-        return $this->$type($start_at, $end_at);
+        return [
+            'start_at' => 'date',
+            'end_at' => 'date',
+        ];
     }
 
     /**
-     * [resources description]
-     * @param  Request $request [description]
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'report' => 'project-report.list',
+            'projects' => 'project-report.projects',
+            'task' => 'project-report.list',
+            'days' => 'time-duration.list',
+        ];
+    }
+
+    /**
+     * [report description]
+     * @param Request $request [description]
      * @return [type]           [description]
      */
-    public function resources($uids, $pids, $start_at, $end_at)
+    public function report(Request $request)
     {
+        $validator = Validator::make(
+            $request->all(),
+            $this->getValidationRules()
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ], 400
+            );
+        }
+
+        $uids = $request->input('uids');
+        $pids = $request->input('pids');
+
+        $user = auth()->user();
+        $timezone = $user->timezone ?: 'UTC';
+        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
+
+        $startAt = Carbon::parse($request->input('start_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
+
+        $endAt = Carbon::parse($request->input('end_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
 
         $projectReports = DB::table('project_report')
-            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name', DB::raw('SUM(duration) as duration'))
+            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
+                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
+                DB::raw('SUM(duration) as duration')
+            )
             ->whereIn('user_id', $uids)
             ->whereIn('project_id', $pids)
-            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
-            ->where('date', '>=', $start_at)
-            ->where('date', '<', $end_at)
+            ->whereIn('project_id', Project::getUserRelatedProjectIds($user))
+            ->where('date', '>=', $startAt)
+            ->where('date', '<', $endAt)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
             ->get();
 
         $projects = [];
-
 
         foreach ($projectReports as $projectReport) {
             $project_id = $projectReport->project_id;
@@ -88,7 +124,7 @@ class ProjectReportController extends Controller
 
 
         foreach ($projects as $project_id => $project) {
-            $projects[$project_id]['users'] =  array_values($project['users']);
+            $projects[$project_id]['users'] = array_values($project['users']);
         }
 
         $projects = array_values($projects);
@@ -98,28 +134,48 @@ class ProjectReportController extends Controller
 
     /**
      * [events description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * @param Request $request [description]
+     * @return \Illuminate\Http\JsonResponse [description]
      */
     public function days(Request $request)
     {
-        $start_at = is_null($request->input('start_at')) ? '' : $request->start_at;
-        $end_at = is_null($request->input('end_at')) ? '' : $request->end_at;
+        $validator = Validator::make(
+            $request->all(),
+            $this->getValidationRules()
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ], 400
+            );
+        }
+
         $uids = $request->uids;
 
+        $user = auth()->user();
+        $timezone = $user->timezone ?: 'UTC';
+        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
+
+        $startAt = Carbon::parse($request->input('start_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
+
+        $endAt = Carbon::parse($request->input('end_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
+
         $days = DB::table('project_report')
-            ->select('user_id', 'date', DB::raw('SUM(duration) as duration'))
+            ->select('user_id', 'date',
+                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
+                DB::raw('SUM(duration) as duration')
+            )
             ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
-            ->groupBy('user_id', 'date')
-        ;
-
-        if ($start_at) {
-            $days->where('date', '>=', $start_at);
-        }
-
-        if ($end_at) {
-            $days->where('date', '<', $end_at);
-        }
+            ->where('date', '>=', $startAt)
+            ->where('date', '<', $endAt)
+            ->groupBy('user_id', 'date');
 
         if (!empty($uids)) {
             $days->whereIn('user_id', $uids);
@@ -129,20 +185,9 @@ class ProjectReportController extends Controller
     }
 
     /**
-     * [events description]
-     * @param  Request $request [description]
-     * @return [type]           [description]
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
-    public function report(Request $request)
-    {
-        $start_at = $request->input('start_at') == null ? '' : $request->start_at;
-        $end_at = $request->input('end_at') == null ? '' : $request->end_at;
-        $uids = $request->uids;
-        $pids = $request->pids;
-
-        return response()->json($this->resources($uids, $pids, $start_at, $end_at));
-    }
-
     public function projects(Request $request)
     {
         $uids = $request->uids;
@@ -176,19 +221,50 @@ class ProjectReportController extends Controller
 
     /**
      * Returns durations per date for a task.
+     *
+     * @param $id
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
      */
     public function task($id, Request $request)
     {
+        $validator = Validator::make(
+            $request->all(),
+            $this->getValidationRules()
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ], 400
+            );
+        }
+
         $uid = $request->uid;
-        $start_at = $request->input('start_at') == null ? '' : $request->start_at;
-        $end_at = $request->input('end_at') == null ? '' : $request->end_at;
+
+        $user = auth()->user();
+        $timezone = $user->timezone ?: 'UTC';
+        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P'); # Format +00:00
+
+        $startAt = Carbon::parse($request->input('start_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
+
+        $endAt = Carbon::parse($request->input('end_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
 
         $report = DB::table('project_report')
-            ->select('date', DB::raw('CAST(duration AS UNSIGNED) AS duration'))
+            ->select(
+                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
+                DB::raw('SUM(duration) as duration')
+            )
             ->where('task_id', $id)
             ->where('user_id', $uid)
-            ->where('date', '>=', $start_at)
-            ->where('date', '<', $end_at)
+            ->where('date', '>=', $startAt)
+            ->where('date', '<', $endAt)
             ->get(['date', 'duration']);
 
         return response()->json($report);

@@ -11,9 +11,8 @@ use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Filter;
-use DateTime;
 use Route;
 
 /**
@@ -59,6 +58,23 @@ class TaskController extends ItemController
     public function getQueryWith(): array
     {
         return ['priority'];
+    }
+
+    /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'tasks.list',
+            'count' => 'tasks.list',
+            'dashboard' => 'tasks.dashboard',
+            'create' => 'tasks.create',
+            'edit' => 'tasks.edit',
+            'show' => 'tasks.show',
+            'destroy' => 'tasks.remove',
+            'activity' => 'tasks.activity',
+        ];
     }
 
     /**
@@ -447,12 +463,16 @@ class TaskController extends ItemController
             );
         }
 
+        $timezone = $user->timezone ?: 'UTC';
+        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
+
         $activity = DB::table('project_report')
             ->select(
                 'user_id',
                 'user_name',
                 'date',
-                'duration'
+                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
+                DB::raw('SUM(duration) as duration')
             )
             ->where([
                 ['task_id', '=', $itemId],

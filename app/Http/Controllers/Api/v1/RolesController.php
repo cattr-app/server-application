@@ -41,6 +41,24 @@ class RolesController extends ItemController
     }
 
     /**
+     * @return array
+     */
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'roles.list',
+            'count' => 'roles.list',
+            'create' => 'roles.create',
+            'edit' => 'roles.edit',
+            'show' => 'roles.show',
+            'destroy' => 'roles.remove',
+            'allowedRules' => 'roles.allowed-rules',
+            'attachToUser' => 'roles.attach-user',
+            'detachFromUser' => 'roles.detach-user',
+        ];
+    }
+
+    /**
      * @apiDefine RolesRelations
      *
      * @apiParam {String} [with]               For add relation model in response

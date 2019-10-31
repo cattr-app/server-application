@@ -43,6 +43,26 @@ class Screenshot extends AbstractModel
     ];
 
     /**
+     * @var array
+     */
+    protected $casts = [
+        'time_interval_id' => 'integer',
+        'path' => 'string',
+        'thumbnail_path' => 'string',
+        'important' => 'boolean',
+        'is_removed' => 'boolean',
+    ];
+
+    /**
+     * @var array
+     */
+    protected $dates = [
+        'created_at',
+        'updated_at',
+        'deleted_at',
+    ];
+
+    /**
      * @return BelongsTo
      */
     public function timeInterval(): BelongsTo
