@@ -1,0 +1,27 @@
+{
+  "name": "amazingcat/reports",
+  "description": "",
+  "authors": [
+    {
+      "name": "AmazingCat",
+      "email": "to@amazingcat.net"
+    }
+  ],
+  "extra": {
+    "laravel": {
+      "providers": [
+        "Modules\\Reports\\Providers\\ReportsServiceProvider"
+      ],
+      "aliases": {
+      }
+    }
+  },
+  "autoload": {
+    "psr-4": {
+      "Modules\\Reports\\": ""
+    }
+  },
+  "require": {
+    "maatwebsite/excel": "^3.1"
+  }
+}
