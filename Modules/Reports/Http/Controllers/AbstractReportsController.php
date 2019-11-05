@@ -67,7 +67,8 @@ abstract class AbstractReportsController extends Controller
                 return response()->json(['error' => 'There is no applicable accept header']);
         }
 
-        return $this->exporter->collection()->downloadExcel(time().'_project_export.'.$fsType, $type, true);
+        return $this->exporter->collection()
+            ->downloadExcel(time().'_project_export.'.$fsType, $type, true);
     }
 
     /**

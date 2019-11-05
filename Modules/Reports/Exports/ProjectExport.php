@@ -11,9 +11,11 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\WithEvents;
+use Maatwebsite\Excel\Events\AfterSheet;
 use Modules\Reports\Entities\ProjectReport;
 
-class ProjectExport implements FromCollection
+class ProjectExport implements FromCollection, WithEvents
 {
     /**
      * @return Collection
@@ -33,23 +35,50 @@ class ProjectExport implements FromCollection
         });
 
         $returnableData = collect([]);
+        $totalTime = 0;
 
         $preparedCollection->each(function ($item, $key) use ($returnableData) {
-            $item->each(function ($user) use ($key, $returnableData) {
+            $item->each(function ($user) use ($item, $key, $returnableData) {
                 $user = $user[0];
                 foreach ($user['tasks'] as $task) {
                     $time = (new Carbon('@0'))->diff(new Carbon("@{$task['duration']}"));
                     $decimalTime = $task['duration'] / 60 / 60;
                     $returnableData->push([
                         'Project' => $key,
-                        'User Name' => $user['full_name'],
+                        'User' => $user['full_name'],
                         'Task' => $task['task_name'],
                         'Time' => "{$time->h}:{$time->i}:{$time->s}",
-                        'Time (decimal)' => $decimalTime
+                        'Hours (decimal)' => $decimalTime
                     ]);
                 }
+
+                $time = (new Carbon('@0'))->diff(new Carbon("@{$user['tasks_time']}"));
+                $projectDecimalTime = $user['tasks_time'] / 60 / 60;
+                $returnableData->push([
+                    'Project' => "Subtotal for $key",
+                    'User' => '',
+                    'Task' => '',
+                    'Time' => "{$time->h}:{$time->i}:{$time->s}",
+                    'Hours (decimal)' => $projectDecimalTime
+                ]);
             });
         });
+
+        foreach ($preparedCollection as $item) {
+            foreach ($item as $user) {
+                $user = $user[0];
+                $totalTime += $user['tasks_time'];
+            }
+        }
+
+        $time = (new Carbon('@0'))->diff(new Carbon("@$totalTime"));
+        $returnableData->push([
+            'Project' => '',
+            'User' => '',
+            'Task' => 'Total',
+            'Time' => "{$time->h}:{$time->i}:{$time->s}",
+            'Hours (decimal)' => $totalTime / 60 / 60
+        ]);
 
         return $returnableData;
     }
@@ -172,5 +201,23 @@ class ProjectExport implements FromCollection
 
         $plainData[$projectId]['users'][$userId]['tasks_time'] += $item->duration;
         $plainData[$projectId]['project_time'] += $item->duration;
+    }
+
+    /**
+     * @return array
+     */
+    public function registerEvents(): array
+    {
+        return [
+            AfterSheet::class => function (AfterSheet $event) {
+                $headers = 'A1:W1';
+                $event->sheet->getDelegate()->getStyle($headers)->getFont()->setBold(true);
+
+                $event->sheet->getDelegate()->getColumnDimension('A1:A9999')->setWidth(20);
+                $event->sheet->getDelegate()->getColumnDimension('B1:B9999')->setWidth(10);
+                $event->sheet->getDelegate()->getColumnDimension('C1:C9999')->setWidth(20);
+                $event->sheet->getDelegate()->getColumnDimension('E1:E9999')->setWidth(15);
+            }
+        ];
     }
 }
