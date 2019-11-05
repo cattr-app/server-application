@@ -4,8 +4,7 @@ namespace App\Http\Controllers\Api\v1\Statistic;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
-use App\User;
-use Auth;
+use App\Models\ProjectReport;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
@@ -66,7 +65,7 @@ class TimeUseReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $projectReports = DB::table('project_report')
+        $projectReports = ProjectReport::query()
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')

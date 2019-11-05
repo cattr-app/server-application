@@ -6,6 +6,7 @@ use Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\ProjectReport;
 use DB;
 use Validator;
 use Carbon\Carbon;
@@ -72,7 +73,7 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $projectReports = DB::table('project_report')
+        $projectReports = ProjectReport::query()
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
@@ -167,12 +168,12 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $days = DB::table('project_report')
+        $days = ProjectReport::query()
             ->select('user_id', 'date',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
             )
-            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
+            ->whereIn('project_id', Project::getUserRelatedProjectIds($user))
             ->where('date', '>=', $startAt)
             ->where('date', '<', $endAt)
             ->groupBy('user_id', 'date');
@@ -256,7 +257,7 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $report = DB::table('project_report')
+        $report = ProjectReport::query()
             ->select(
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
