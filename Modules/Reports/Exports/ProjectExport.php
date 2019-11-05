@@ -4,8 +4,6 @@
 namespace Modules\Reports\Exports;
 
 use App\Models\Project;
-use App\User;
-use DateTime;
 use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -40,13 +38,14 @@ class ProjectExport implements FromCollection
             $item->each(function ($user) use ($key, $returnableData) {
                 $user = $user[0];
                 foreach ($user['tasks'] as $task) {
-                    $time = (new Carbon('@0'))->diff(new Carbon('@'.$task['duration']));
+                    $time = (new Carbon('@0'))->diff(new Carbon("@{$task['duration']}"));
+                    $decimalTime = $task['duration'] / 60 / 60;
                     $returnableData->push([
                         'Project' => $key,
                         'User Name' => $user['full_name'],
                         'Task' => $task['task_name'],
                         'Time' => "{$time->h}:{$time->i}:{$time->s}",
-                        'Time (seconds)' => $task['duration']
+                        'Time (decimal)' => $decimalTime
                     ]);
                 }
             });

@@ -22,6 +22,7 @@
     }
   },
   "require": {
-    "maatwebsite/excel": "^3.1"
+    "maatwebsite/excel": "^3.1",
+    "mpdf/mpdf": "^8.0"
   }
 }

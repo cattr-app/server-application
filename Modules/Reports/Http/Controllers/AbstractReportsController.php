@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Modules\Reports\Http\Controllers;
 
 use App\Http\Controllers\Controller;
@@ -34,8 +33,8 @@ abstract class AbstractReportsController extends Controller
     /**
      * ReportsController constructor.
      *
-     * @param  Request        $request
-     * @param  Excel          $exporter
+     * @param  Request  $request
+     * @param  Excel    $exporter
      */
     public function __construct(Request $request, Excel $exporter)
     {
@@ -53,31 +52,22 @@ abstract class AbstractReportsController extends Controller
     {
         switch ($this->request->headers->get('Accept')) {
             case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                return $this->getExcelReport();
+                $type = Excel::XLSX;
+                $fsType = 'xlsx';
                 break;
             case 'text/csv':
-                return $this->getCsvReport();
+                $type = Excel::CSV;
+                $fsType = 'csv';
                 break;
-            default: return response()->json(['error' => 'There is no applicable accept header']);
+            case 'application/pdf':
+                $type = Excel::MPDF;
+                $fsType = Excel::MPDF;
+                break;
+            default:
+                return response()->json(['error' => 'There is no applicable accept header']);
         }
-    }
 
-    /**
-     * @return mixed
-     * @throws Exception
-     */
-    protected function getCsvReport()
-    {
-        return $this->exporter->collection()->downloadExcel(time().'_project_export.csv', Excel::CSV, true);
-    }
-
-    /**
-     * @return mixed
-     * @throws Exception
-     */
-    protected function getExcelReport()
-    {
-        return $this->exporter->collection()->downloadExcel(time().'_project_export.xlsx', null, true);
+        return $this->exporter->collection()->downloadExcel(time().'_project_export.'.$fsType, $type, true);
     }
 
     /**
