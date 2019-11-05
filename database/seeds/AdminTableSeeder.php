@@ -38,6 +38,7 @@ class AdminTableSeeder extends Seeder
             'screenshots_interval'   => 9,
             'active'                 => true,
             'password'               => bcrypt($pass),
+            'is_admin'               => true
         ]);
         $admin->attachRole(1);
 
