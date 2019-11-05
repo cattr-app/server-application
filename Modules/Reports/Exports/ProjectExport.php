@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Modules\Reports\Exports;
 
 use App\Models\Project;
@@ -28,6 +27,7 @@ class ProjectExport implements FromCollection, WithEvents
             throw new Exception('Requested data was not found in request body');
         }
 
+        // Grouping prepared collection to groups by Project Name
         $preparedCollection = $this->getPreparedCollection($queryData)->mapToGroups(function ($item) {
             return [
                 $item['name'] => $item['users']
@@ -37,33 +37,19 @@ class ProjectExport implements FromCollection, WithEvents
         $returnableData = collect([]);
         $totalTime = 0;
 
+        // Processing grouped database collection to fill the collection, which will be exported
         $preparedCollection->each(function ($item, $key) use ($returnableData) {
             $item->each(function ($user) use ($item, $key, $returnableData) {
                 $user = $user[0];
                 foreach ($user['tasks'] as $task) {
-                    $time = (new Carbon('@0'))->diff(new Carbon("@{$task['duration']}"));
-                    $decimalTime = $task['duration'] / 60 / 60;
-                    $returnableData->push([
-                        'Project' => $key,
-                        'User' => $user['full_name'],
-                        'Task' => $task['task_name'],
-                        'Time' => "{$time->h}:{$time->i}:{$time->s}",
-                        'Hours (decimal)' => $decimalTime
-                    ]);
+                    $this->addRowToCollection($returnableData, $key, $user, $task);
                 }
 
-                $time = (new Carbon('@0'))->diff(new Carbon("@{$user['tasks_time']}"));
-                $projectDecimalTime = $user['tasks_time'] / 60 / 60;
-                $returnableData->push([
-                    'Project' => "Subtotal for $key",
-                    'User' => '',
-                    'Task' => '',
-                    'Time' => "{$time->h}:{$time->i}:{$time->s}",
-                    'Hours (decimal)' => $projectDecimalTime
-                ]);
+                $this->addSubtotalToCollection($returnableData, $key, $user['tasks_time']);
             });
         });
 
+        // Calculating total time
         foreach ($preparedCollection as $item) {
             foreach ($item as $user) {
                 $user = $user[0];
@@ -71,6 +57,7 @@ class ProjectExport implements FromCollection, WithEvents
             }
         }
 
+        // Add total row to collection
         $time = (new Carbon('@0'))->diff(new Carbon("@$totalTime"));
         $returnableData->push([
             'Project' => '',
@@ -81,6 +68,47 @@ class ProjectExport implements FromCollection, WithEvents
         ]);
 
         return $returnableData;
+    }
+
+    /**
+     * @param  Collection  $collection
+     * @param  string      $projectName
+     * @param  array       $user
+     * @param  array       $task
+     */
+    protected function addRowToCollection(Collection $collection, string $projectName, array $user, array $task)
+    {
+        $time = (new Carbon('@0'))->diff(new Carbon("@{$task['duration']}"));
+        $decimalTime = $task['duration'] / 60 / 60;
+        $collection->push([
+            'Project' => $projectName,
+            'User' => $user['full_name'],
+            'Task' => $task['task_name'],
+            'Time' => "{$time->h}:{$time->i}:{$time->s}",
+            'Hours (decimal)' => $decimalTime
+        ]);
+    }
+
+    /**
+     * Add subtotal record to existing collection
+     *
+     * @param  Collection  $collection
+     * @param  string      $projectName
+     * @param  int|float   $time
+     *
+     * @return void
+     */
+    protected function addSubtotalToCollection(Collection $collection, string $projectName, $time): void
+    {
+        $timeObject = (new Carbon('@0'))->diff(new Carbon("@$time"));
+        $projectDecimalTime = $time / 60 / 60;
+        $collection->push([
+            'Project' => "Subtotal for $projectName",
+            'User' => '',
+            'Task' => '',
+            'Time' => "{$timeObject->h}:{$timeObject->i}:{$timeObject->s}",
+            'Hours (decimal)' => $projectDecimalTime
+        ]);
     }
 
     /**
