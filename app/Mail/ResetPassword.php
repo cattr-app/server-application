@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use Illuminate\Support\Facades\Lang;
+use Lang;
 use Illuminate\Notifications\Messages\MailMessage;
 
 class ResetPassword extends \Illuminate\Auth\Notifications\ResetPassword
@@ -24,7 +24,7 @@ class ResetPassword extends \Illuminate\Auth\Notifications\ResetPassword
      * Build the mail representation of the notification.
      *
      * @param  mixed  $notifiable
-     * @return \Illuminate\Notifications\Messages\MailMessage
+     * @return MailMessage
      */
     public function toMail($notifiable)
     {
@@ -35,7 +35,7 @@ class ResetPassword extends \Illuminate\Auth\Notifications\ResetPassword
         return (new MailMessage)
             ->subject(Lang::getFromJson('Reset Password Notification'))
             ->line(Lang::getFromJson('You are receiving this email because we received a password reset request for your account.'))
-            ->action(Lang::getFromJson('Reset Password'), url(config('app.url').route('password.reset', [
+            ->action(Lang::getFromJson('Reset Password'), url(config('app.url').route('password.reset.process', [
                 'token' => $this->token,
                 'email' => $this->email,
             ], false)))

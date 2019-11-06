@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\Entities\AuthorizationCaptchaException;
+use App\Exceptions\Entities\CaptchaException;
 use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\Recaptcha\Recaptcha;
 use App\User;
@@ -104,66 +104,7 @@ class AuthController extends BaseController
         $this->recaptcha = $recaptcha;
 
         $this->middleware('auth:api', [
-            'except' => ['check', 'login', 'refresh', 'sendReset', 'getReset', 'reset']
-        ]);
-    }
-
-    /**
-     * @return JsonResponse
-     * @api {any} /api/auth/ping Ping
-     * @apiDescription Get API status
-     *
-     * @apiVersion 0.1.0
-     * @apiName Ping
-     * @apiGroup Auth
-     *
-     * @apiSuccess {Integer}   status API HTTP-code status
-     * @apiSuccess {Boolean}   error  Error
-     * @apiSuccess {String}    cat    Sample Cat
-     *
-     * @apiSuccessExample {json} Answer Example
-     *  {
-     *      "status": 200,
-     *      "error":  false,
-     *      "cat":    '(=ㅇ༝ㅇ=)'
-     *  }
-     *
-     */
-    public function ping(): JsonResponse
-    {
-        $helper = new CatHelper();
-
-        return response()->json([
-            'status' => 200,
-            'error' => false,
-            'cat' => $helper->getCat(),
-        ]);
-    }
-
-    /**
-     * @return JsonResponse
-     * @api {any} /api/auth/check Check
-     * @apiDescription Check API status
-     *
-     * @apiVersion 0.1.0
-     * @apiName Check
-     * @apiGroup Auth
-     *
-     * @apiSuccess {Integer}   code API HTTP-code status
-     * @apiSuccess {Boolean}   amazingtime
-     *
-     * @apiSuccessExample {json} Answer Example
-     *  {
-     *      "code": 200,
-     *      "amazingtime": true,
-     *  }
-     *
-     */
-    public function check(): JsonResponse
-    {
-        return response()->json([
-            'code' => 200,
-            'amazingtime' => true,
+            'except' => ['check', 'login', 'refresh', 'sendPasswordReset', 'processPasswordReset']
         ]);
     }
 
@@ -266,14 +207,14 @@ class AuthController extends BaseController
 
         if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($data['email']) && !$this->recaptcha->testCaptcha($credentials['recaptcha'] ?? '')) {
             $this->recaptcha->inc($data['email']);
-            throw new AuthorizationCaptchaException();
+            throw new CaptchaException();
         }
 
         /** @var string $token */
         if (!$token = auth()->attempt($data)) {
             $this->recaptcha->inc($data['email']);
             if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($data['email'])) {
-                throw new AuthorizationCaptchaException();
+                throw new CaptchaException();
             } else {
                 throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
             }
@@ -366,6 +307,7 @@ class AuthController extends BaseController
     }
 
     /**
+     * @return JsonResponse
      * @api {get} /api/auth/me Me
      * @apiDescription Get authenticated User Entity
      *
@@ -406,7 +348,6 @@ class AuthController extends BaseController
      *   "timezone": null
      * }
      *
-     * @return JsonResponse
      */
     public function me(): JsonResponse
     {
@@ -497,7 +438,7 @@ class AuthController extends BaseController
      * @apiUse UnauthorizedError
      *
      */
-    public function sendReset()
+    public function sendPasswordReset()
     {
         $email = request('login', '');
         $captcha = request('recaptcha', '');
@@ -509,7 +450,7 @@ class AuthController extends BaseController
 
         if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($email) && !$this->recaptcha->testCaptcha($captcha)) {
             $this->recaptcha->inc($email);
-            return response()->json(['error' => 'User with such email isn’t found or captcha required!', 'site_key' => AuthorizationCaptchaException::getSiteKey()], 429);
+            return response()->json(['error' => 'User with such email isn’t found or captcha required!', 'site_key' => CaptchaException::getSiteKey()], 429);
         }
 
         $user = User::query()->where(['email' => $email])->first();
@@ -518,7 +459,7 @@ class AuthController extends BaseController
 
             if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($email)) {
                 $this->recaptcha->inc($email);
-                return response()->json(['error' => 'User with such email isn’t found or captcha required!', 'site_key' => AuthorizationCaptchaException::getSiteKey()], 429);
+                return response()->json(['error' => 'User with such email isn’t found or captcha required!', 'site_key' => CaptchaException::getSiteKey()], 429);
             }
 
             return response()->json([
@@ -571,7 +512,7 @@ class AuthController extends BaseController
      * @apiUse UnauthorizedError
      *
      */
-    public function reset()
+    public function processPasswordReset()
     {
         $data = request(['token', 'password']);
         $data['email'] = request('login');
@@ -584,7 +525,7 @@ class AuthController extends BaseController
 
         if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($data['email']) && !$this->recaptcha->testCaptcha(request('recaptcha', ''))) {
             $this->recaptcha->inc($data['email']);
-            throw new AuthorizationCaptchaException();
+            throw new CaptchaException();
         }
 
         $response = $this->broker()->reset(
@@ -600,7 +541,7 @@ class AuthController extends BaseController
         if ($response !== Password::PASSWORD_RESET) {
             $this->recaptcha->inc($data['email']);
             if (!$this->recaptcha->allowedWithoutCaptchaCurrentIp($data['email'])) {
-                throw new AuthorizationCaptchaException();
+                throw new CaptchaException();
             }
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
