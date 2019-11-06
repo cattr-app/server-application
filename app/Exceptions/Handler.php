@@ -2,8 +2,8 @@
 
 namespace App\Exceptions;
 
-use App\Exceptions\Entities\AuthorizationCaptchaException;
-use App\Exceptions\Interfaces\ReasonableException;
+use App\Exceptions\Entities\CaptchaException;
+use App\Exceptions\Interfaces\DataExtendedException;
 use App\Exceptions\Interfaces\TypedException;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -16,6 +16,7 @@ use Illuminate\Http\Response;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
  * Class Handler
@@ -78,7 +79,7 @@ class Handler extends ExceptionHandler
         $code = (int)$exception->getCode();
 
         $debugData = false;
-        $reason = $exception instanceof ReasonableException ? $exception->getReason() : false;
+        $data = $exception instanceof DataExtendedException ? $exception->getData() : false;
         $errorType = $exception instanceof TypedException ? $exception->getType() : false;
 
         if (!$isHttpException) {
@@ -139,18 +140,17 @@ class Handler extends ExceptionHandler
         // Debug data will be passed to response body only if application currently in debug mode
         $exceptionResult = array_merge(
             [
-                'error' => true,
+                'success' => false,
                 'message' => $message,
-                'status_code' => $statusCode,
             ],
             $debugData !== false ? ['debug' => $debugData] : [],
-            // Error Reason used for a more detailed explanation of the error on client side
-            $reason !== false && $reason !== null ? ['reason' => $reason] : [],
+            // Additional error data, for example remaining time to repeat password reset request
+            $data !== false && $data !== null ? ['data' => $data] : [],
             // Error Type used for a more accurate error processing on client side
-            $errorType !== false && $errorType !== null ? ['type' => $errorType] : []
+            $errorType !== false && $errorType !== null ? ['error_type' => $errorType] : []
         );
-        if ($exception instanceof AuthorizationCaptchaException) {
-            $exceptionResult['site_key'] = AuthorizationCaptchaException::getSiteKey();
+        if ($exception instanceof CaptchaException) {
+            $exceptionResult['site_key'] = CaptchaException::getSiteKey();
         }
         return response()->json(
             $exceptionResult,
@@ -171,5 +171,16 @@ class Handler extends ExceptionHandler
     protected function unauthenticated($request, AuthenticationException $exception)
     {
         return $this->render($request, $exception);
+    }
+
+    /**
+     * Determine if the given exception is an HTTP exception.
+     *
+     * @param  \Exception  $e
+     * @return bool
+     */
+    protected function isHttpException(Exception $e)
+    {
+        return $e instanceof HttpExceptionInterface;
     }
 }

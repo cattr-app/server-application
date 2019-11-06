@@ -2,13 +2,12 @@
 
 namespace App\Exceptions\Entities;
 
-use Throwable;
 
-class AuthorizationCaptchaException extends AuthorizationException
+class CaptchaException extends AuthorizationException
 {
     public function __construct()
     {
-        parent::__construct(static::ERROR_TYPE_CAPTCHA, null);
+        parent::__construct(static::ERROR_TYPE_CAPTCHA);
     }
 
     public static function getSiteKey()

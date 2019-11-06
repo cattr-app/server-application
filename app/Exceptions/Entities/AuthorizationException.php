@@ -2,17 +2,21 @@
 
 namespace App\Exceptions\Entities;
 
-use App\Exceptions\Interfaces\{
-    ReasonableException, TypedException
-};
-use \Illuminate\Auth\Access\AuthorizationException as AuthorizationExceptionCore;
 use Throwable;
+
+use Illuminate\Auth\Access\AuthorizationException as BaseAuthorizationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+
+use App\Exceptions\Interfaces\DataExtendedException;
+use App\Exceptions\Interfaces\TypedException;
+
 
 /**
  * Class AuthorizationException
  * @package App\Exceptions\Entities
  */
-class AuthorizationException extends AuthorizationExceptionCore implements TypedException, ReasonableException
+class AuthorizationException extends BaseAuthorizationException
+    implements TypedException, DataExtendedException, HttpExceptionInterface
 {
     public const ERROR_TYPE_UNAUTHORIZED = 'authorization.unauthorized';
     public const ERROR_TYPE_CAPTCHA = 'authorization.captcha';
@@ -21,56 +25,55 @@ class AuthorizationException extends AuthorizationExceptionCore implements Typed
     public const ERROR_TYPE_TOKEN_EXPIRED = 'authorization.token_expired';
     public const ERROR_TYPE_USER_DISABLED = 'authorization.user_disabled';
 
+
+    protected const ERRORS =
+        [
+            self::ERROR_TYPE_UNAUTHORIZED => ['code' => 401, 'message' => 'Not authorized'],
+            self::ERROR_TYPE_CAPTCHA => ['code' => 429, 'message' => 'Invalid captcha',],
+            self::ERROR_TYPE_BANNED => ['code' => 420, 'message' => 'Enhance Your Calm'],
+            self::ERROR_TYPE_TOKEN_MISMATCH => ['code' => 401, 'message' => 'Token mismatch'],
+            self::ERROR_TYPE_TOKEN_EXPIRED => ['code' => 401, 'message' => 'Token expired'],
+            self::ERROR_TYPE_USER_DISABLED => ['code' => 403, 'message' => 'User deactivated']
+        ];
+
     /**
      * @var string
      */
-    protected $type = '';
+    protected $type;
+
+    /**
+     * @var mixed
+     */
+    protected $data;
 
     /**
      * AuthorizationException constructor.
      * @param string $type
+     * @param null $data
      * @param Throwable|null $previous
      */
-    public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, Throwable $previous = null)
+    public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, $data = null, Throwable $previous = null)
     {
         $this->type = $type;
+        $this->data = $data;
 
-        parent::__construct(
-            __('Access denied'),
-            static::codeByType($type),
-            $previous
-        );
+        parent::__construct($this->getMessageByType(), $this->getStatusCode(), $previous);
     }
 
     /**
-     * @param string $type
-     * @return int
+     * @return mixed
      */
-    public static function codeByType(string $type): int
+    public function getData()
     {
-        return [
-                static::ERROR_TYPE_UNAUTHORIZED => 401,
-                static::ERROR_TYPE_CAPTCHA => 429,
-                static::ERROR_TYPE_BANNED => 420,
-                static::ERROR_TYPE_TOKEN_MISMATCH => 401,
-                static::ERROR_TYPE_TOKEN_EXPIRED => 401,
-                static::ERROR_TYPE_USER_DISABLED => 403,
-            ][$type] ?? 400;
+        return $this->data;
     }
 
     /**
      * @return string
      */
-    public function getReason(): string
+    public function getMessageByType(): string
     {
-        return __([
-                static::ERROR_TYPE_UNAUTHORIZED => 'Not authorized',
-                static::ERROR_TYPE_CAPTCHA => 'Not authorized or captcha invalid',
-                static::ERROR_TYPE_BANNED => 'Enhance Your Calm',
-                static::ERROR_TYPE_TOKEN_MISMATCH => 'Token mismatch',
-                static::ERROR_TYPE_TOKEN_EXPIRED => 'Token expired',
-                static::ERROR_TYPE_USER_DISABLED => 'User deactivated',
-            ][$this->type] ?? 'Unknown reason');
+        return self::ERRORS[$this->type]['message'];
     }
 
     /**
@@ -79,5 +82,21 @@ class AuthorizationException extends AuthorizationExceptionCore implements Typed
     public function getType(): string
     {
         return $this->type;
+    }
+
+    /**
+     * @return int
+     */
+    public function getStatusCode(): int
+    {
+        return self::ERRORS[$this->type]['code'];
+    }
+
+    /**
+     * @return array
+     */
+    public function getHeaders(): array
+    {
+        return [];
     }
 }
