@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1\Statistic;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\ProjectReport;
+use Filter;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
@@ -14,8 +15,16 @@ use Validator;
  * Class TimeUseReportController
  * @package App\Http\Controllers\Api\v1\Statistic
  */
-class TimeUseReportController extends Controller
+class TimeUseReportController extends ReportController
 {
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
+    {
+        return 'time-use-report';
+    }
+
     /**
      * @return array
      */
@@ -36,18 +45,22 @@ class TimeUseReportController extends Controller
     {
         $validator = Validator::make(
             $request->all(),
-            [
-                'start_at' => 'date',
-                'end_at' => 'date',
-            ]
+            Filter::process(
+                $this->getEventUniqueName('validation.report.show'),
+                [
+                    'start_at' => 'date',
+                    'end_at' => 'date',
+                ]
+            )
         );
 
         if ($validator->fails()) {
             return response()->json(
-                [
+                Filter::process(
+                    $this->getEventUniqueName('answer.error.report.show'), [
                     'error' => 'Validation fail',
                     'reason' => $validator->errors()
-                ], 400
+                ], 400)
             );
         }
 
@@ -104,9 +117,13 @@ class TimeUseReportController extends Controller
             $users[$user_id]['total_time'] += $duration;
         }
 
-        $ret = [['users' => array_values($users)]];
-
-
-        return response()->json($ret);
+        $report = [['users' => array_values($users)]];
+        
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $report
+            )
+        );
     }
 }

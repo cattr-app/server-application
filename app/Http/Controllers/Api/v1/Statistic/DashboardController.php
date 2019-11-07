@@ -6,13 +6,22 @@ use Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\User;
+use Filter;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
 use Validator;
 
-class DashboardController extends Controller
+class DashboardController extends ReportController
 {
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
+    {
+        return 'dashboard';
+    }
+
     /**
      * @return array
      */
@@ -74,6 +83,12 @@ class DashboardController extends Controller
         }
 
         $results = ['userIntervals' => $users];
-        return response()->json($results);
+
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $results
+            )
+        );
     }
 }
