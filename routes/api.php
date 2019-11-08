@@ -61,6 +61,24 @@ Route::group([
     $router->post('/register/{key}', 'RegistrationController@postForm');
 });
 
+// Temporary fix for missing v1 prefix in the url
+    Route::group([
+        'prefix' => 'v1/auth',
+    ], function (Router $router) {
+        $router->any('ping', 'AuthController@ping');
+        $router->any('check', 'AuthController@check');
+        $router->post('login', 'AuthController@login');
+        $router->any('logout', 'AuthController@logout');
+        $router->any('logout-all', 'AuthController@logoutAll');
+        $router->post('refresh', 'AuthController@refresh');
+        $router->any('me', 'AuthController@me');
+        $router->post('send-reset', 'AuthController@sendReset');
+        $router->post('confirm-reset', 'AuthController@getReset')->name('password.reset');
+        $router->post('reset', 'AuthController@reset');
+
+        $router->get('/register/{key}', 'RegistrationController@getForm');
+        $router->post('/register/{key}', 'RegistrationController@postForm');
+    });
 
 // Main API routes
 Route::group([

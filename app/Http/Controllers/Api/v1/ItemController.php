@@ -182,7 +182,7 @@ abstract class ItemController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $itemId = is_int($request->get('id')) ? $request->get('id') : false;
+        $itemId = intval($request->id);
 
         if (!$itemId) {
             return response()->json(

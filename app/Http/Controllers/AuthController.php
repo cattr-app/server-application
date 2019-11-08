@@ -410,7 +410,7 @@ class AuthController extends BaseController
      */
     public function me(): JsonResponse
     {
-        return response()->json(auth()->user());
+        return response()->json(['user' => auth()->user()]);
     }
 
     /**
