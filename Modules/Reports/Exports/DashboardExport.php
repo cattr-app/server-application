@@ -5,16 +5,16 @@ namespace Modules\Reports\Exports;
 
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Modules\Reports\Entities\DashboardReport;
 
-class DashboardExport implements FromCollection, WithEvents
+class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
 {
     const REPORT_DAYS_FORMAT = 'l, d M Y';
     const ROUND_DIGITS = 3;
@@ -123,6 +123,8 @@ class DashboardExport implements FromCollection, WithEvents
             ];
         }
 
+        // The key is represents a day in format "Friday, 01 Nov 2019"
+        // Changing REPORT_DAY_FORMAT make sure it will be unique
         if (!isset($plainData[$userId]['per_day'][$start->format(static::REPORT_DAYS_FORMAT)])) {
             $plainData[$userId]['per_day'][$start->format(static::REPORT_DAYS_FORMAT)] = 0;
         }
@@ -171,6 +173,7 @@ class DashboardExport implements FromCollection, WithEvents
                 $headers = 'A1:W1';
                 $event->sheet->getDelegate()->getStyle($headers)->getFont()->setBold(true);
 
+                // TODO These maybe useless if ShouldAutoSize will work in a good way :)
                 $event->sheet->getDelegate()->getColumnDimension('A1:A9999')->setWidth(20);
                 $event->sheet->getDelegate()->getColumnDimension('B1:B9999')->setWidth(20);
                 $event->sheet->getDelegate()->getColumnDimension('C1:C9999')->setWidth(20);

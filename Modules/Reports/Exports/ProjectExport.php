@@ -16,6 +16,8 @@ use Modules\Reports\Entities\ProjectReport;
 
 class ProjectExport implements FromCollection, WithEvents
 {
+    const ROUND_DIGITS = 3;
+
     /**
      * @return Collection
      * @throws Exception
@@ -59,12 +61,14 @@ class ProjectExport implements FromCollection, WithEvents
 
         // Add total row to collection
         $time = (new Carbon('@0'))->diff(new Carbon("@$totalTime"));
+        $totalTime = round($totalTime / 60 / 60, static::ROUND_DIGITS);
+
         $returnableData->push([
             'Project' => '',
             'User' => '',
             'Task' => 'Total',
             'Time' => "{$time->h}:{$time->i}:{$time->s}",
-            'Hours (decimal)' => $totalTime / 60 / 60
+            'Hours (decimal)' => $totalTime
         ]);
 
         return $returnableData;
@@ -79,7 +83,8 @@ class ProjectExport implements FromCollection, WithEvents
     protected function addRowToCollection(Collection $collection, string $projectName, array $user, array $task)
     {
         $time = (new Carbon('@0'))->diff(new Carbon("@{$task['duration']}"));
-        $decimalTime = $task['duration'] / 60 / 60;
+        $decimalTime = round($task['duration'] / 60 / 60, static::ROUND_DIGITS);
+
         $collection->push([
             'Project' => $projectName,
             'User' => $user['full_name'],
@@ -101,7 +106,8 @@ class ProjectExport implements FromCollection, WithEvents
     protected function addSubtotalToCollection(Collection $collection, string $projectName, $time): void
     {
         $timeObject = (new Carbon('@0'))->diff(new Carbon("@$time"));
-        $projectDecimalTime = $time / 60 / 60;
+        $projectDecimalTime =round($time / 60 / 60, static::ROUND_DIGITS);
+
         $collection->push([
             'Project' => "Subtotal for $projectName",
             'User' => '',
