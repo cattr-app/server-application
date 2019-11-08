@@ -5,7 +5,13 @@
   "repository": "https://git.amazingcat.net/AmazingTime/core/backend",
   "author": "perkthefox <antonkevinok@gmail.com>",
   "license": "MIT",
+  "scripts": {
+    "api": "php -r \"if (!file_exists(__DIR__.'/public/apidoc')) { mkdir(__DIR__.'/apidoc') ; symlink(__DIR__.'/apidoc/', __DIR__.'/public/apidoc'); }\" ; node node_modules/apidoc/bin/apidoc -i app/Http/Controllers/ -o apidoc",
+    "api-nsl": "node node_modules/apidoc/bin/apidoc -i app/Http/Controllers/ -o apidoc"
+
+  },
   "dependencies": {
+    "apidoc": "^0.17.7",
     "laravel-echo-server": "^1.5.7"
   }
 }
