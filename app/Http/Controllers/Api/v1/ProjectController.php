@@ -325,7 +325,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {get, post} /api/v1/projects/show Show
+     * @api {post} /api/v1/projects/show Show
      * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          1,
