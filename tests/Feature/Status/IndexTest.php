@@ -9,7 +9,7 @@ class IndexTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = '/status';
+        $this->uri = 'status';
     }
 
     public function test_index()
