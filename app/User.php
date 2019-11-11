@@ -128,7 +128,8 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'password' => 'string',
         'timezone' => 'string',
         'important' => 'boolean',
-        'change_password' => 'int'
+        'change_password' => 'int',
+        'is_admin' => 'integer'
     ];
 
 
