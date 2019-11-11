@@ -115,8 +115,8 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'payroll_access' => 'boolean',
         'billing_access' => 'boolean',
         'avatar' => 'string',
-        'screenshots_active' => 'boolean',
-        'manual_time' => 'boolean',
+        'screenshots_active' => 'integer',
+        'manual_time' => 'integer',
         'permanent_tasks' => 'boolean',
         'computer_time_popup' => 'integer',
         'poor_time_popup' => 'integer',
@@ -124,10 +124,10 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'web_and_app_monitoring' => 'boolean',
         'webcam_shots' => 'boolean',
         'screenshots_interval' => 'integer',
-        'active' => 'boolean',
+        'active' => 'integer',
         'password' => 'string',
         'timezone' => 'string',
-        'important' => 'boolean',
+        'important' => 'integer',
         'change_password' => 'int',
         'is_admin' => 'integer'
     ];
