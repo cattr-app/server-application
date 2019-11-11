@@ -17,7 +17,7 @@ class LoginTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = '/auth/login';
+        $this->uri = 'auth/login';
 
         $this->user = app(UserFactory::class)->create();
         $this->loginData = [

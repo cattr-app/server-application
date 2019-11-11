@@ -10,7 +10,7 @@ class RefreshTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = '/auth/refresh';
+        $this->uri = 'auth/refresh';
         $this->user = app(UserFactory::class)->withTokens()->create();
     }
 

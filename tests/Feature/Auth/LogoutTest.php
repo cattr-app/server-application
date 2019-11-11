@@ -10,7 +10,7 @@ class LogoutTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = '/auth/logout';
+        $this->uri = 'auth/logout';
         $this->user = app(UserFactory::class)->withTokens()->create();
     }
 

@@ -9,7 +9,7 @@ class ProcessTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->uri = '/auth/password-reset/process';
+        $this->uri = 'auth/password-reset/process';
     }
 
     public function test_without_params()

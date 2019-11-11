@@ -11,7 +11,7 @@ class LogoutFromAllTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = '/auth/logout-from-all';
+        $this->uri = 'auth/logout-from-all';
         $this->user = app(UserFactory::class)->withTokens(4)->create();
     }
 

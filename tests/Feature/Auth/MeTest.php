@@ -9,7 +9,7 @@ class MeTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = '/auth/me';
+        $this->uri = 'auth/me';
         $this->user = app(UserFactory::class)->withTokens()->create();
     }
 

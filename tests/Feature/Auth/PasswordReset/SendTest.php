@@ -9,7 +9,7 @@ class SendTest extends TestCase
     protected function setUp()
     {
         parent::setUp();
-        $this->uri = '/auth/password-reset/send';
+        $this->uri = 'auth/password-reset/send';
     }
 
     public function test_without_params()
