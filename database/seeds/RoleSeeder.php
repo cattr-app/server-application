@@ -31,7 +31,6 @@ class RoleSeeder extends Seeder
             'projects' => [
                 'list',
                 'show',
-                'tasks',
             ],
             'roles' => [
                 'allowed-rules',
