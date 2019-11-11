@@ -36,4 +36,10 @@ class LogoutFromAllTest extends TestCase
             $this->assertDatabaseMissing('tokens', $token);
         }
     }
+
+    public function test_without_auth()
+    {
+        $response = $this->get($this->uri);
+        $response->assertError(401);
+    }
 }
