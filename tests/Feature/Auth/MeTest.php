@@ -10,7 +10,7 @@ class MeTest extends TestCase
     {
         parent::setUp();
         $this->uri = '/auth/me';
-        $this->user = app(UserFactory::class)->withToken()->create();
+        $this->user = app(UserFactory::class)->withTokens()->create();
     }
 
     protected function tearDown(): void

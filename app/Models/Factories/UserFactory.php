@@ -12,15 +12,22 @@ class UserFactory
     /** @var Faker $faker */
     protected $faker;
 
-    /** @var bool $needsToken*/
-    protected $needsToken;
+    /** @var int $needsToken */
+    protected $needsTokens = 0;
 
+    /**
+     * UserFactory constructor.
+     * @param Faker $faker
+     */
     public function __construct(Faker $faker)
     {
         $this->faker = $faker;
     }
 
-    public function getRandomUserData()
+    /**
+     * @return array
+     */
+    public function getRandomUserData(): array
     {
         $full_name = $this->faker->name;
 
@@ -46,24 +53,49 @@ class UserFactory
         ];
     }
 
-    public function withToken()
+    /**
+     * @param $user
+     * @return User
+     */
+    protected function createTokens($user): User
     {
-        $this->needsToken = true;
+        $tokens = [];
+
+        while ($this->needsTokens--) {
+            $tokens[] = [
+                'token' => JWTAuth::fromUser($user),
+                'expires_at' => now()->addDay()
+            ];
+        }
+
+        /** @var User $user */
+        $user->tokens()->createMany($tokens);
+
+        return $user;
+    }
+
+    /**
+     * @param int $quantity
+     * @return $this
+     */
+    public function withTokens(int $quantity = 1): self
+    {
+        $this->needsTokens = $quantity;
+
         return $this;
     }
 
-    public function create()
+    /**
+     * @return User
+     */
+    public function create(): User
     {
         /** @var User $user */
         $user = factory(User::class)->create();
-
-        if ($this->needsToken) {
-            $user->tokens()->create([
-                'token' => JWTAuth::fromUser($user),
-                'expires_at' => now()->addDay()
-            ]);
+        if (!$this->needsTokens) {
+            return $user;
         }
 
-        return $user;
+        return $this->createTokens($user);
     }
 }

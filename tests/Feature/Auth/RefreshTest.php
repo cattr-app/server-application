@@ -11,7 +11,7 @@ class RefreshTest extends TestCase
     {
         parent::setUp();
         $this->uri = '/auth/refresh';
-        $this->user = app(UserFactory::class)->withToken()->create();
+        $this->user = app(UserFactory::class)->withTokens()->create();
     }
 
     protected function tearDown(): void
