@@ -78,12 +78,12 @@
     "sort-packages": true,
     "optimize-autoloader": true
   },
-  "autoload-dev": {
+  /*"autoload-dev": {
     "classmap": [
       "tests/TestCase.php"
     ],
     "psr-4": {
       "Tests\\": "tests/"
     }
-  }
+  }*/
 }
