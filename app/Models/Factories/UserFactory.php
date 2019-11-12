@@ -9,11 +9,21 @@ use JWTAuth;
 
 class UserFactory
 {
+    private const ROLES = [
+        'admin' => 1,
+    ];
+
     /** @var Faker $faker */
     protected $faker;
 
     /** @var int $needsToken */
     protected $needsTokens = 0;
+
+    /** @var User $user */
+    protected $user;
+
+    /** @var string */
+    private $role;
 
     /**
      * UserFactory constructor.
@@ -22,6 +32,8 @@ class UserFactory
     public function __construct(Faker $faker)
     {
         $this->faker = $faker;
+
+        $this->user = User::make($this->getRandomUserData());
     }
 
     /**
@@ -54,27 +66,6 @@ class UserFactory
     }
 
     /**
-     * @param $user
-     * @return User
-     */
-    protected function createTokens($user): User
-    {
-        $tokens = [];
-
-        while ($this->needsTokens--) {
-            $tokens[] = [
-                'token' => JWTAuth::fromUser($user),
-                'expires_at' => now()->addDay()
-            ];
-        }
-
-        /** @var User $user */
-        $user->tokens()->createMany($tokens);
-
-        return $user;
-    }
-
-    /**
      * @param int $quantity
      * @return $this
      */
@@ -86,16 +77,49 @@ class UserFactory
     }
 
     /**
+     * @return $this
+     */
+    public function makeAdmin(): self
+    {
+        $this->role = 'admin';
+
+        return $this;
+    }
+
+    /**
      * @return User
      */
     public function create(): User
     {
-        /** @var User $user */
-        $user = factory(User::class)->create();
-        if (!$this->needsTokens) {
-            return $user;
+        $this->user->save();
+
+        if ($this->needsTokens) {
+            $this->createTokens();
         }
 
-        return $this->createTokens($user);
+        if (!is_null($this->role)) {
+            $this->assignRole();
+        }
+
+        return $this->user;
+    }
+
+    protected function assignRole(): void
+    {
+        $this->user->attachRole(self::ROLES[$this->role]);
+    }
+
+    protected function createTokens(): void
+    {
+        $tokens = [];
+
+        while ($this->needsTokens--) {
+            $tokens[] = [
+                'token' => JWTAuth::fromUser($this->user),
+                'expires_at' => now()->addDay()
+            ];
+        }
+
+        $this->user->tokens()->createMany($tokens);
     }
 }
