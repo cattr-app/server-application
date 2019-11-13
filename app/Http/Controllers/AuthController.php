@@ -2,22 +2,19 @@
 
 namespace App\Http\Controllers;
 
-use App\Exceptions\Entities\CaptchaException;
 use App\Exceptions\Entities\AuthorizationException;
+use App\Exceptions\Entities\CaptchaException;
 use App\Helpers\Recaptcha\Recaptcha;
 use App\User;
-use App\Helpers\CatHelper;
-use GuzzleHttp\Client;
+use Auth;
+use Hash;
 use Illuminate\Auth\Events\PasswordReset;
-use Illuminate\Http\{
-    Request, Response, JsonResponse
-};
-use Illuminate\Support\Facades\{
-    Auth, DB, Hash, Password
-};
-use Illuminate\Support\Str;
+use Illuminate\Contracts\Auth\PasswordBroker;
+use Illuminate\Contracts\Auth\StatefulGuard;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Password;
 
 
 /**
@@ -97,57 +94,46 @@ class AuthController extends BaseController
     /**
      * Create a new AuthController instance.
      *
-     * @return void
+     * @param Recaptcha $recaptcha
      */
     public function __construct(Recaptcha $recaptcha)
     {
         $this->recaptcha = $recaptcha;
 
         $this->middleware('auth:api', [
-            'except' => ['check', 'login', 'refresh', 'sendPasswordReset', 'processPasswordReset']
+            'except' => [
+                'login',
+                'refresh',
+                'sendPasswordReset',
+                'processPasswordReset'
+            ]
         ]);
     }
 
-    protected function invalidateToken(Request $request)
+    protected function invalidateToken()
     {
-        $auth = explode(' ', $request->header('Authorization'));
-        if (!empty($auth) && count($auth) > 1 && $auth[0] == 'bearer') {
-            $token = $auth[1];
-            $user = auth()->user();
-            if (isset($user)) {
-                DB::table('tokens')->where([
-                    ['user_id', auth()->user()->id],
-                    ['token', $token],
-                ])->delete();
-            }
-        }
+        /** @var User $user */
+        $user = auth()->user();
+        $token = request()->bearerToken();
+        $user->tokens()->where('token', $token)->delete();
     }
 
     /**
-     * @param null|string $except
+     * @param string $except
      */
-    protected function invalidateAllTokens($except = null)
+    protected function invalidateAllTokens($except = '')
     {
-        $conditions = [
-            ['user_id', auth()->user()->id],
-        ];
-
-        if (isset($except)) {
-            $conditions[] = ['token', '!=', $except];
-        }
-
-        DB::table('tokens')->where($conditions)->delete();
+        /** @var User $user */
+        $user = auth()->user();
+        $user->tokens()->where('token', '!=', $except)->delete();
     }
 
     protected function setToken(string $token)
     {
-        $expires_timestamp = time() + 60 * auth()->factory()->getTTL();
-
-        DB::table('tokens')->insert([
-            'user_id' => auth()->user()->id,
-            'token' => $token,
-            'expires_at' => date('Y-m-d H:i:s', $expires_timestamp),
-        ]);
+        /** @var User $user */
+        $user = auth()->user();
+        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
+        $user->tokens()->create(['token' => $token, 'expires_at' => $tokenExpires]);
     }
 
     /**
@@ -237,7 +223,6 @@ class AuthController extends BaseController
     /**
      * Log the user out (Invalidate the token).
      *
-     * @param Request $request
      * @return JsonResponse
      * @api {any} /api/auth/logout Logout
      * @apiDescription Invalidate JWT
@@ -255,20 +240,17 @@ class AuthController extends BaseController
      * @apiUse UnauthorizedError
      *
      */
-    public function logout(Request $request): JsonResponse
+    public function logout(): JsonResponse
     {
-        $this->invalidateToken($request);
+        $this->invalidateToken();
         auth()->logout();
 
-        return response()->json([
-            'message' => 'Successfully logged out'
-        ]);
+        return response()->json(['success' => true, 'message' => 'Successfully logged out']);
     }
 
     /**
      * Log the user out (Invalidate all tokens).
      *
-     * @param Request $request
      * @return JsonResponse
      * @api {any} /api/auth/logout Logout
      * @apiDescription Invalidate JWT
@@ -291,19 +273,12 @@ class AuthController extends BaseController
      * @apiUse UnauthorizedError
      *
      */
-    public function logoutAll(Request $request): JsonResponse
+    public function logoutFromAll(): JsonResponse
     {
-        $token = $request->json()->get('token');
-        if (isset($token)) {
-            $this->invalidateAllTokens($token);
-        } else {
-            $this->invalidateAllTokens();
-            auth()->logout();
-        }
+        $this->invalidateAllTokens();
+        auth()->logout();
 
-        return response()->json([
-            'message' => 'Successfully logged out',
-        ]);
+        return response()->json(['success' => true, 'message' => 'Successfully logged out from all sessions']);
     }
 
     /**
@@ -355,7 +330,6 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param Request $request
      * @return JsonResponse
      * @api {post} /api/auth/refresh Refresh
      * @apiDescription Refresh JWT
@@ -368,9 +342,9 @@ class AuthController extends BaseController
      *
      * @apiUse AuthAnswer
      */
-    public function refresh(Request $request): JsonResponse
+    public function refresh(): JsonResponse
     {
-        $this->invalidateToken($request);
+        $this->invalidateToken();
         $token = auth()->refresh();
         $this->setToken($token);
         return $this->respondWithToken($token);
@@ -386,6 +360,7 @@ class AuthController extends BaseController
     protected function respondWithToken($token): JsonResponse
     {
         return response()->json([
+            'success' => true,
             'access_token' => $token,
             'token_type' => 'bearer',
             'expires_in' => auth()->factory()->getTTL() * 60,
@@ -414,7 +389,7 @@ class AuthController extends BaseController
     }
 
     /**
-     * @return Response|JsonResponse
+     * @return JsonResponse
      * @api {post} /api/auth/send-reset Send reset e-mail
      * @apiDescription Get user JWT
      *

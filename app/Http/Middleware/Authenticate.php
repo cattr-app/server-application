@@ -2,10 +2,10 @@
 
 namespace App\Http\Middleware;
 
+use App\User;
 use Closure;
-use Auth;
-use DB;
 use App\Exceptions\Entities\AuthorizationException;
+use Illuminate\Auth\Middleware\Authenticate as BaseAuthenticate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,7 +13,7 @@ use Illuminate\Http\Request;
  * Class Authenticate
  * @package App\Http\Middleware
  */
-class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
+class Authenticate extends BaseAuthenticate
 {
     /**
      * @param Request $request
@@ -24,32 +24,19 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
      */
     public function handle($request, Closure $next, ...$guards)
     {
-        if (!Auth::check()) {
+        if (!auth()->check()) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
+        /** @var User $user */
+        $user = auth()->user();
 
-        $user = Auth::user();
-
-        if (!$user || !$user->active) {
-            DB::table('tokens')->where('user_id', $user->id)->delete();
+        if (!$user->active) {
+            $user->tokens()->delete();
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
-        // Check token.
-        $auth = explode(' ', $request->header('Authorization'));
-
-        if (!empty($auth) && count($auth) > 1 && $auth[0] === 'bearer') {
-            $token = $auth[1];
-            $token = DB::table('tokens')
-                ->where('user_id', auth()->user()->id)
-                ->where('token', $token)
-                ->where('expires_at', '>', time())
-                ->first()
-            ;
-
-            if (!isset($token)) {
-                throw new AuthorizationException(AuthorizationException::ERROR_TYPE_TOKEN_MISMATCH);
-            }
+        if (!request()->bearerToken()) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_TOKEN_MISMATCH);
         }
 
         return $next($request);
