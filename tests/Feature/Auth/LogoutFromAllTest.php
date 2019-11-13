@@ -25,6 +25,8 @@ class LogoutFromAllTest extends TestCase
     {
         $tokens = $this->user->tokens()->get()->toArray();
 
+        $this->assertNotEmpty($tokens);
+
         foreach ($tokens as $token) {
             $this->assertDatabaseHas('tokens', $token);
         }
