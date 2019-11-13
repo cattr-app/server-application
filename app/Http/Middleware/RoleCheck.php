@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\Entities\AuthorizationException;
 use Closure;
 
 
@@ -14,6 +15,7 @@ class RoleCheck
      * @param  \Closure                  $next
      *
      * @return mixed
+     * @throws AuthorizationException
      */
     public function handle($request, Closure $next)
     {
@@ -32,7 +34,7 @@ class RoleCheck
                 }
             }
 
-            // Request: /v1/{object}/{action}
+            //request: /v1/{object}/{action}
             $object = isset($object) ? $object : $request->segment(2);
             $action = isset($action) ? $action : $request->segment(3);
 
@@ -46,6 +48,6 @@ class RoleCheck
             }
         }
 
-        return response()->json(['error' => 'Unauthorized', 'reason' => 'Unauthorized'], 403);
+        throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
     }
 }
