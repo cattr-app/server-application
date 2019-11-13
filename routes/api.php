@@ -46,7 +46,6 @@ Route::group([
 Route::group([
     'prefix' => 'auth',
 ], static function (Router $router) {
-    $router->any('check', 'AuthController@check');
     $router->post('login', 'AuthController@login');
     $router->any('logout', 'AuthController@logout');
     $router->any('logout-all', 'AuthController@logoutAll');
