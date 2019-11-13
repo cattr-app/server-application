@@ -22,13 +22,13 @@ class PingTest extends TestCase
 
     public function test_ping()
     {
-        $response = $this->actingAs($this->user)->get($this->uri);
+        $response = $this->actingAs($this->user)->getJson($this->uri);
         $response->assertStatus(200);
     }
 
     public function test_without_auth()
     {
-        $response = $this->get($this->uri);
+        $response = $this->getJson($this->uri);
         $response->assertError(401);
 
     }

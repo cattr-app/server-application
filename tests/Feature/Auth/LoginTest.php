@@ -34,7 +34,7 @@ class LoginTest extends TestCase
 
     public function test_success()
     {
-        $response = $this->post($this->uri, $this->loginData);
+        $response = $this->postJson($this->uri, $this->loginData);
         $response->assertStatus(200);
 
         $token = $this->user->tokens()->first()->token;
@@ -45,7 +45,7 @@ class LoginTest extends TestCase
     public function test_wrong_credentials()
     {
         $this->loginData['password'] = 'wrong_password';
-        $response = $this->post($this->uri, $this->loginData);
+        $response = $this->postJson($this->uri, $this->loginData);
         $response->assertError(401);
     }
 
@@ -53,14 +53,14 @@ class LoginTest extends TestCase
     {
         $this->user->active = false;
         $this->user->save();
-        $response = $this->post($this->uri, $this->loginData);
+        $response = $this->postJson($this->uri, $this->loginData);
         $response->assertError(403);
     }
 
     public function test_soft_deleted_user()
     {
         $this->user->delete();
-        $response = $this->post($this->uri, $this->loginData);
+        $response = $this->postJson($this->uri, $this->loginData);
         $response->assertError(401);
     }
 

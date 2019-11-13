@@ -21,7 +21,7 @@ class MeTest extends TestCase
 
     public function test_me()
     {
-        $response = $this->actingAs($this->user)->get($this->uri);
+        $response = $this->actingAs($this->user)->getJson($this->uri);
         $response->assertStatus(200);
         $response->assertJson(['id' => $this->user->id]);
     }

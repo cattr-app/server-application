@@ -25,7 +25,7 @@ class RefreshTest extends TestCase
         $token = $this->user->tokens()->first()->token;
         $this->assertDatabaseHas('tokens', ['token' => $token]);
 
-        $response = $this->actingAs($this->user)->post($this->uri);
+        $response = $this->actingAs($this->user)->postJson($this->uri);
 
         $response->assertStatus(200);
         $this->assertDatabaseMissing('tokens', ['token' => $token]);

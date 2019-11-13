@@ -14,7 +14,7 @@ class ProcessTest extends TestCase
 
     public function test_without_params()
     {
-        $response = $this->post($this->uri);
+        $response = $this->postJson($this->uri);
         $response->assertStatus(400);
 
     }

@@ -269,7 +269,7 @@ class AuthController extends BaseController
      *
      * @apiUse UnauthorizedError
      */
-    public function logoutFromAll(Request $request): JsonResponse
+    public function logoutAll(Request $request): JsonResponse
     {
         $this->invalidateAllTokens($request->user());
         auth()->logout();

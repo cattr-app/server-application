@@ -11,7 +11,7 @@ class LogoutFromAllTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = 'auth/logout-from-all';
+        $this->uri = 'auth/logout-all';
         $this->user = app(UserFactory::class)->withTokens(4)->create();
     }
 
@@ -31,7 +31,7 @@ class LogoutFromAllTest extends TestCase
             $this->assertDatabaseHas('tokens', $token);
         }
 
-        $response = $this->actingAs($this->user)->post($this->uri);
+        $response = $this->actingAs($this->user)->postJson($this->uri);
         $response->assertStatus(200);
 
         foreach ($tokens as $token) {
@@ -41,7 +41,7 @@ class LogoutFromAllTest extends TestCase
 
     public function test_without_auth()
     {
-        $response = $this->get($this->uri);
+        $response = $this->postJson($this->uri);
         $response->assertError(401);
     }
 }
