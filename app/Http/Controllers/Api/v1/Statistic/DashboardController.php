@@ -33,6 +33,7 @@ class DashboardController extends Controller
     {
         return [
             'timeIntervals' => 'time-intervals.list',
+            'timePerDay' => 'time-intervals.list',
         ];
     }
 
