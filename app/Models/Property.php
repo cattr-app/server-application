@@ -80,7 +80,7 @@ class Property extends AbstractModel
      *
      * @return Collection
      */
-    public function getProperty(string $scope, string $key, array $parameters = [])
+    public static function getProperty(string $scope, string $key, array $parameters = [])
     {
         // Making data for where query
         $queryData = [
@@ -92,6 +92,6 @@ class Property extends AbstractModel
             $queryData = array_merge($queryData, $parameters);
         }
 
-        return $this->where($queryData)->get();
+        return self::where($queryData)->get();
     }
 }

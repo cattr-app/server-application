@@ -20,7 +20,7 @@ class DashboardController extends Controller
     public function getValidationRules(): array
     {
         return [
-            'user_ids' => 'exists:users,id|required',
+            'user_ids' => 'exists:users,id|array',
             'start_at' => 'date|required',
             'end_at' => 'date|required',
         ];
@@ -147,7 +147,7 @@ class DashboardController extends Controller
             );
         }
 
-        $uids = $request->input('user_ids');
+        $uids = $request->input('user_ids', []);
 
         $timezone = $request->input('timezone') ?: 'UTC';
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
