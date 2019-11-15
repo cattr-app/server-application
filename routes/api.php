@@ -157,6 +157,7 @@ Route::group([
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
     $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
+    $router->any('/time-intervals/day-duration', 'Api\v1\Statistic\DashboardController@timePerDay');
     $router->post('/time-intervals/bulk-remove', 'Api\v1\TimeIntervalController@bulkDestroy');
 
     //Time routes
