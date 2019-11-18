@@ -16,7 +16,7 @@ class Recaptcha
 
     public static function isEnabled(): bool
     {
-        return env('RECAPTCHA_ENABLED');
+        return config('app.recaptcha.enabled', false);
     }
 
     public function getRateLimiter(): RateLimiter

@@ -13,6 +13,9 @@ return [
 
     'cipher' => 'AES-256-CBC',
     'log' => env('APP_LOG', 'single'),
+    'recaptcha' => [
+        'enabled' => env('RECAPTCHA_ENABLED', false)
+    ],
 
     'log_level' => env('APP_LOG_LEVEL', 'debug'),
     'providers' => [
