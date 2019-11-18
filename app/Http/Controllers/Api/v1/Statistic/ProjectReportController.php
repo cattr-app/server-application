@@ -34,6 +34,7 @@ class ProjectReportController extends Controller
             'projects' => 'project-report.projects',
             'task' => 'project-report.list',
             'days' => 'time-duration.list',
+            'screenshots' => 'project-report.screenshots'
         ];
     }
 
