@@ -191,6 +191,8 @@ Route::group([
     $router->post('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
     $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
     $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
+    $router->post('/project-report/screenshots', 'Api\v1\Statistic\ProjectReportController@screenshots');
+
 });
 
 // Laravel router pass to fallback not non-exist urls only but wrong-method requests too.

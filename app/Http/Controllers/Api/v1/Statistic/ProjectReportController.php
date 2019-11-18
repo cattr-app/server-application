@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\Models\TimeInterval;
 use Auth;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
@@ -269,4 +270,27 @@ class ProjectReportController extends Controller
 
         return response()->json($report);
     }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function screenshots(Request $request) {
+        $taskID = $request->input('task_id');
+        $date = $request->input('date');
+
+        $startDate = Carbon::parse($date);
+        $endDate = clone $startDate;
+        $endDate = $endDate->addDay();
+
+        $result = TimeInterval::where('task_id', '=', $taskID)
+            ->where('start_at', '>=', $startDate->toDateTimeString())
+            ->where('start_at', '<', $endDate->toDateTimeString())
+            ->with('screenshots')
+            ->get()
+            ->pluck('screenshots');
+
+        return response()->json($result);
+    }
+
 }
