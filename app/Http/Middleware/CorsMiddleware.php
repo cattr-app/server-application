@@ -47,6 +47,18 @@ class CorsMiddleware
 
     protected function allowAllCors($request)
     {
+        if (!config('cors.enable')) {
+            foreach ([
+                'Access-Control-Allow-Origin',
+                'Access-Control-Allow-Methods',
+                'Access-Control-Allow-Headers',
+                'Access-Control-Max-Age',
+            ] as $headerName) {
+                header_remove($headerName);
+            }
+            return;
+        }
+
         $origin = $request->header('Origin');
         $allowedDomain = $this->allowedDomain($origin);
 
