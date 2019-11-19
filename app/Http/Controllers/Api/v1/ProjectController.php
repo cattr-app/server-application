@@ -51,7 +51,7 @@ class ProjectController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return ['users', 'tasks'];
+        return ['users', 'tasks', 'tasks.timeIntervals'];
     }
 
     /**
