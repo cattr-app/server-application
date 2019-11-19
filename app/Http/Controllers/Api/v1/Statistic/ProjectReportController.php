@@ -62,7 +62,7 @@ class ProjectReportController extends Controller
         }
 
         $uids = $request->input('uids');
-        $pids = $request->input('pids');
+        $pids = $request->input('pids', []);
 
         $user = auth()->user();
         $timezone = $user->timezone ?: 'UTC';
