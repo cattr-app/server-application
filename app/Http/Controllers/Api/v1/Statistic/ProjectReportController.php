@@ -2,8 +2,10 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\Models\Task;
 use App\Models\TimeInterval;
 use Auth;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
@@ -111,6 +113,13 @@ class ProjectReportController extends Controller
                 ];
             }
 
+            // Get intervals assigned to current task
+            /** @var Collection $taskIntervals */
+            $taskIntervals = Task::find($projectReport->task_id)
+                ->timeIntervals()
+                ->where('start_at', '>=', $startAt)
+                ->where('end_at', '<', $endAt)
+                ->get();
 
             $projects[$project_id]['users'][$user_id]['tasks'][] = [
                 'id' => $projectReport->task_id,
@@ -118,6 +127,9 @@ class ProjectReportController extends Controller
                 'user_id' => $projectReport->user_id,
                 'task_name' => $projectReport->task_name,
                 'duration' => (int)$projectReport->duration,
+                'screenshots' => $taskIntervals->map(function ($interval) {
+                    return TimeInterval::find($interval->id)->screenshot;
+                })
             ];
 
             $projects[$project_id]['users'][$user_id]['tasks_time'] += $projectReport->duration;
