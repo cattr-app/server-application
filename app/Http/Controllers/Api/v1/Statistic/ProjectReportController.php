@@ -11,6 +11,7 @@ use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use DB;
+use Modules\Reports\Entities\ProjectReport;
 use Validator;
 use Carbon\Carbon;
 
@@ -61,8 +62,10 @@ class ProjectReportController extends Controller
 
     /**
      * [report description]
-     * @param Request $request [description]
-     * @return [type]           [description]
+     *
+     * @param  Request  $request
+     *
+     * @return array|\Illuminate\Http\JsonResponse
      */
     public function report(Request $request)
     {
@@ -94,7 +97,7 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $projectReports = DB::table('project_report')
+        $projectReports = ProjectReport::with('task.timeIntervals')
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
@@ -103,7 +106,7 @@ class ProjectReportController extends Controller
             ->whereIn('project_id', $pids)
             ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->where('date', '>=', $startAt)
-            ->where('date', '<', $endAt)
+            ->where('date', '<=', $endAt)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
             ->get();
 
@@ -133,20 +136,20 @@ class ProjectReportController extends Controller
 
             // Get intervals assigned to current task
             /** @var Collection $taskIntervals */
-            $taskIntervals = Task::find($projectReport->task_id)
+            /*$taskIntervals = Task::find($projectReport->task_id)
                 ->timeIntervals()
                 ->where('start_at', '>=', $startAt)
-                ->where('end_at', '<', $endAt)
-                ->get();
+                ->where('end_at', '<=', $endAt)
+                ->get();*/
 
             $projects[$project_id]['users'][$user_id]['tasks'][] = [
                 'id' => $projectReport->task_id,
                 'project_id' => $projectReport->project_id,
                 'user_id' => $projectReport->user_id,
                 'task_name' => $projectReport->task_name,
-                'duration' => (int)$projectReport->duration,
-                'screenshots' => $taskIntervals->map(function ($interval) {
-                    return TimeInterval::find($interval->id)->screenshot;
+                'duration' => (int) $projectReport->duration,
+                'screenshots' => $projectReport->task->timeIntervals->map(function ($interval) {
+                    return $interval->screenshot;
                 })
             ];
 
@@ -166,7 +169,9 @@ class ProjectReportController extends Controller
 
     /**
      * [events description]
-     * @param Request $request [description]
+     *
+     * @param  Request  $request  [description]
+     *
      * @return \Illuminate\Http\JsonResponse [description]
      */
     public function days(Request $request)
@@ -216,7 +221,8 @@ class ProjectReportController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function projects(Request $request)
@@ -267,8 +273,9 @@ class ProjectReportController extends Controller
     /**
      * Returns durations per date for a task.
      *
-     * @param $id
-     * @param Request $request
+     * @param           $id
+     * @param  Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function task($id, Request $request)
@@ -319,10 +326,12 @@ class ProjectReportController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function screenshots(Request $request) {
+    public function screenshots(Request $request)
+    {
         $taskID = $request->input('task_id');
         $date = $request->input('date');
 
