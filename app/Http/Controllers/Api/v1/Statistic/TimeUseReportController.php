@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1\Statistic;
 
 use App\Http\Controllers\Controller;
 use App\Models\Project;
+use App\Models\Property;
 use App\User;
 use Auth;
 use Illuminate\Http\Request;
@@ -17,6 +18,22 @@ use Validator;
  */
 class TimeUseReportController extends Controller
 {
+    /**
+     * @var
+     */
+    protected $timezone;
+
+    /**
+     * ProjectReportController constructor.
+     */
+    public function __construct()
+    {
+        $companyTimezoneProperty = Property::getProperty('company', 'TIMEZONE')->first();
+        $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
+
+        parent::__construct();
+    }
+
     /**
      * @return array
      */
@@ -38,8 +55,9 @@ class TimeUseReportController extends Controller
         $validator = Validator::make(
             $request->all(),
             [
-                'start_at' => 'date',
-                'end_at' => 'date',
+                'user_ids' => 'exists:users,id|array',
+                'start_at' => 'required|date',
+                'end_at' => 'required|date',
             ]
         );
 
@@ -52,10 +70,9 @@ class TimeUseReportController extends Controller
             );
         }
 
-        $user_ids = $request->input('user_ids');
+        $user_ids = $request->input('user_ids', []);
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -72,7 +89,7 @@ class TimeUseReportController extends Controller
                 DB::raw('SUM(duration) as duration')
             )
             ->whereIn('user_id', $user_ids)
-            ->whereIn('project_id', Project::getUserRelatedProjectIds($user))
+            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->where('date', '>=', $startAt)
             ->where('date', '<', $endAt)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')

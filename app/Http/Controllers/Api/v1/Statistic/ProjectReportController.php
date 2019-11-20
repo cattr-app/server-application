@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\Models\Property;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use Auth;
@@ -16,13 +17,31 @@ use Carbon\Carbon;
 class ProjectReportController extends Controller
 {
     /**
+     * @var
+     */
+    protected $timezone;
+
+    /**
+     * ProjectReportController constructor.
+     */
+    public function __construct()
+    {
+        $companyTimezoneProperty = Property::getProperty('company', 'TIMEZONE')->first();
+        $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
+
+        parent::__construct();
+    }
+
+    /**
      * @return array
      */
     public function getValidationRules(): array
     {
         return [
-            'start_at' => 'date',
-            'end_at' => 'date',
+            'uids' => 'exists:users,id|array',
+            'pids' => 'exists:projects,id|array',
+            'start_at' => 'required|date',
+            'end_at' => 'required|date',
         ];
     }
 
@@ -61,11 +80,10 @@ class ProjectReportController extends Controller
             );
         }
 
-        $uids = $request->input('uids');
+        $uids = $request->input('uids', []);
         $pids = $request->input('pids', []);
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -83,7 +101,7 @@ class ProjectReportController extends Controller
             )
             ->whereIn('user_id', $uids)
             ->whereIn('project_id', $pids)
-            ->whereIn('project_id', Project::getUserRelatedProjectIds($user))
+            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->where('date', '>=', $startAt)
             ->where('date', '<', $endAt)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
@@ -167,10 +185,9 @@ class ProjectReportController extends Controller
             );
         }
 
-        $uids = $request->uids;
+        $uids = $request->input('uids', []);
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -204,7 +221,21 @@ class ProjectReportController extends Controller
      */
     public function projects(Request $request)
     {
-        $uids = $request->uids;
+        $validator = Validator::make(
+            $request->all(),
+            $this->getValidationRules()
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ], 400
+            );
+        }
+
+        $uids = $request->input('uids', []);
         // Get projects, where specified users is attached.
         $users_attached_project_ids = Project::whereHas('users', function ($query) use ($uids) {
             $query->whereIn('id', $uids);
@@ -244,7 +275,11 @@ class ProjectReportController extends Controller
     {
         $validator = Validator::make(
             $request->all(),
-            $this->getValidationRules()
+            [
+                'start_at' => 'required|date',
+                'end_at' => 'required|date',
+                'uid' => 'required|exists:users,id',
+            ]
         );
 
         if ($validator->fails()) {
@@ -258,8 +293,7 @@ class ProjectReportController extends Controller
 
         $uid = $request->uid;
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P'); # Format +00:00
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
