@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\Models\Property;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use Auth;
