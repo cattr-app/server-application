@@ -51,7 +51,7 @@ class ProjectController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return ['users'];
+        return ['users', 'tasks', 'tasks.timeIntervals'];
     }
 
     /**
@@ -482,7 +482,7 @@ class ProjectController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = false): Builder
+    protected function getQuery($withRelations = true): Builder
     {
         $user = Auth::user();
         $user_id = $user->id;

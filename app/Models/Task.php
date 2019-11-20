@@ -64,12 +64,12 @@ class Task extends AbstractModel
         'project_id' => 'integer',
         'task_name' => 'string',
         'description' => 'string',
-        'active' => 'boolean',
+        'active' => 'integer',
         'user_id' => 'integer',
         'assigned_by' => 'integer',
         'url' => 'string',
         'priority_id' => 'integer',
-        'important' => 'boolean',
+        'important' => 'integer',
     ];
 
     /**

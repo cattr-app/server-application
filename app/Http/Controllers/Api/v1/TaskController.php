@@ -5,14 +5,13 @@ namespace App\Http\Controllers\Api\v1;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\Task;
-use App\User;
 use Auth;
 use Carbon\Carbon;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
-use Illuminate\Http\JsonResponse;
 use DB;
 use Filter;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Route;
 
 /**
@@ -57,7 +56,7 @@ class TaskController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return ['priority'];
+        return ['priority', 'project', 'user'];
     }
 
     /**
@@ -101,11 +100,14 @@ class TaskController extends ItemController
     /**
      * Display a listing of the resource.
      *
-     * @api {post} /api/v1/tasks/list List
+     * @param  Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @api            {post} /api/v1/tasks/list List
      * @apiDescription Get list of Tasks
-     * @apiVersion 0.1.0
-     * @apiName GetTaskList
-     * @apiGroup Task
+     * @apiVersion     0.1.0
+     * @apiName        GetTaskList
+     * @apiGroup       Task
      *
      * @apiParam {Integer}  [id]          `QueryParam` Task ID
      * @apiParam {Integer}  [project_id]  `QueryParam` Task Project
@@ -117,7 +119,7 @@ class TaskController extends ItemController
      * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
      * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
      * @apiParam {String}   [updated_at]  `QueryParam` Last Task update DataTime
-     * @apiUse TaskRelations
+     * @apiUse         TaskRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -133,7 +135,7 @@ class TaskController extends ItemController
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
      *
-     * @apiUse TaskRelationsExample
+     * @apiUse         TaskRelationsExample
      *
      * @apiSuccess {Object[]} TaskList                     Tasks
      * @apiSuccess {Object}   TaskList.Task                Task
@@ -152,16 +154,17 @@ class TaskController extends ItemController
      * @apiSuccess {Object[]} TaskList.Task.assigned       Task assigned User object
      * @apiSuccess {Object[]} TaskList.Task.project        Task Project object
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/tasks/create Create
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/tasks/create Create
      * @apiDescription Create Task
-     * @apiVersion 0.1.0
-     * @apiName CreateTask
-     * @apiGroup Task
+     * @apiVersion     0.1.0
+     * @apiName        CreateTask
+     * @apiGroup       Task
      *
      * @apiParam {Integer} [project_id]  Task Project
      * @apiParam {String}  [task_name]   Task Name
@@ -195,18 +198,19 @@ class TaskController extends ItemController
      * @apiSuccess {String}   res.created_at     Task date time of create
      * @apiSuccess {String}   res.updated_at     Task date time of update
      *
-     * @apiUse DefaultCreateErrorResponse
+     * @apiUse         DefaultCreateErrorResponse
      *
-     * @param Request $request
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/tasks/show Show
+     * @param  Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @api            {post} /api/v1/tasks/show Show
      * @apiDescription Show Task
-     * @apiVersion 0.1.0
-     * @apiName ShowTask
-     * @apiGroup Task
+     * @apiVersion     0.1.0
+     * @apiName        ShowTask
+     * @apiGroup       Task
      *
      * @apiParam {Integer}  id                         Task id
      * @apiParam {Integer}  [project_id]  `QueryParam` Task Project
@@ -218,7 +222,7 @@ class TaskController extends ItemController
      * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
      * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
      * @apiParam {String}   [updated_at]  `QueryParam` Last Task update DataTime
-     * @apiUse TaskRelations
+     * @apiUse         TaskRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -233,7 +237,7 @@ class TaskController extends ItemController
      *      "created_at":  [">", "2019-01-01 00:00:00"],
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
-     * @apiUse TaskRelationsExample
+     * @apiUse         TaskRelationsExample
      *
      * @apiSuccess {Object}   Task                Task
      * @apiSuccess {Integer}  Task.id             Task id
@@ -251,18 +255,19 @@ class TaskController extends ItemController
      * @apiSuccess {Object[]} Task.assigned       Task assigned User object
      * @apiSuccess {Object[]} Task.project        Task Project
      *
-     * @apiUse DefaultShowErrorResponse
+     * @apiUse         DefaultShowErrorResponse
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/tasks/edit Edit
+     * @param  Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @api            {post} /api/v1/tasks/edit Edit
      * @apiDescription Edit Task
-     * @apiVersion 0.1.0
-     * @apiName EditTask
-     * @apiGroup Task
+     * @apiVersion     0.1.0
+     * @apiName        EditTask
+     * @apiGroup       Task
      *
      * @apiParam {Integer}  id          Task id
      * @apiParam {Integer}  project_id  Task Project
@@ -273,7 +278,7 @@ class TaskController extends ItemController
      * @apiParam {Integer}  user_id     Task User
      * @apiParam {Integer}  assigned_by User who assigned task
      * @apiParam {Integer}  priority_id Task Priority ID
-     * @apiUse TaskRelations
+     * @apiUse         TaskRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -287,7 +292,7 @@ class TaskController extends ItemController
      *      "url":         "url",
      *      "priority_id": 1
      *  }
-     * @apiUse TaskRelationsExample
+     * @apiUse         TaskRelationsExample
      *
      * @apiSuccess {Object}   res                Task object
      * @apiSuccess {Integer}  res.id             Task ID
@@ -301,34 +306,36 @@ class TaskController extends ItemController
      * @apiSuccess {String}   res.updated_at     Task date time of update
      * @apiSuccess {String}   res.deleted_at     Task date time of delete
      *
-     * @apiUse DefaultEditErrorResponse
+     * @apiUse         DefaultEditErrorResponse
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/tasks/remove Destroy
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/tasks/remove Destroy
      * @apiDescription Destroy Task
-     * @apiVersion 0.1.0
-     * @apiName DestroyTask
-     * @apiGroup Task
+     * @apiVersion     0.1.0
+     * @apiName        DestroyTask
+     * @apiGroup       Task
      *
      * @apiParam {String} id Task Id
      *
-     * @apiUse DefaultDestroyRequestExample
-     * @apiUse DefaultDestroyResponse
+     * @apiUse         DefaultDestroyRequestExample
+     * @apiUse         DefaultDestroyResponse
      *
-     * @param Request $request
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/tasks/dashboard Dashboard
+     * @param  Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @api            {post} /api/v1/tasks/dashboard Dashboard
      * @apiDescription Display task for dashboard
-     * @apiVersion 0.1.0
-     * @apiName DashboardTask
-     * @apiGroup Task
+     * @apiVersion     0.1.0
+     * @apiName        DashboardTask
+     * @apiGroup       Task
      *
      * @apiParam {Integer}  [id]          `QueryParam` Task ID
      * @apiParam {Integer}  [project_id]  `QueryParam` Task Project
@@ -340,7 +347,7 @@ class TaskController extends ItemController
      * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
      * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
      * @apiParam {String}   [updated_at]  `QueryParam` Last Task update DataTime
-     * @apiUse TaskRelations
+     * @apiUse         TaskRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -355,7 +362,7 @@ class TaskController extends ItemController
      *      "created_at":  [">", "2019-01-01 00:00:00"],
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
-     * @apiUse TaskRelationsExample
+     * @apiUse         TaskRelationsExample
      *
      * @apiSuccess {Object[]} array                       Tasks
      * @apiSuccess {Object}   array.object                Task object
@@ -375,8 +382,6 @@ class TaskController extends ItemController
      * @apiSuccess {Object[]} array.object.assigned       Task assigned User
      * @apiSuccess {Object}   array.object.project        Task Project
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function dashboard(Request $request): JsonResponse
     {
@@ -389,7 +394,7 @@ class TaskController extends ItemController
         $uid = $user->id;
 
         $filters = $request->all();
-        is_int($request->get('user_id')) ? $filters['timeIntervals.user_id'] = $request->get('user_id') : False;
+        is_int($request->get('user_id')) ? $filters['timeIntervals.user_id'] = $request->get('user_id') : false;
         $compareDate = Carbon::today($timezone)->setTimezone('UTC')->toIso8601String();
         $filters['timeIntervals.start_at'] = ['>=', [$compareDate]];
         unset($filters['user_id']);
@@ -402,11 +407,13 @@ class TaskController extends ItemController
             )
         );
 
-        $items = $itemsQuery->with(['timeIntervals' => function ($q) use ($compareDate, $uid) {
-            /** @var Builder $q */
-            $q->where('start_at', '>=', $compareDate);
-            $q->where('user_id', $uid);
-        }])->get()->toArray();
+        $items = $itemsQuery->with([
+            'timeIntervals' => function ($q) use ($compareDate, $uid) {
+                /** @var Builder $q */
+                $q->where('start_at', '>=', $compareDate);
+                $q->where('user_id', $uid);
+            }
+        ])->get()->toArray();
 
         if (collect($items)->isEmpty()) {
             return response()->json(Filter::process(
@@ -433,7 +440,8 @@ class TaskController extends ItemController
     /**
      * Returns users activity info for task.
      *
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return JsonResponse
      */
     public function activity(Request $request): JsonResponse
@@ -499,7 +507,7 @@ class TaskController extends ItemController
     }
 
     /**
-     * @param bool $withRelations
+     * @param  bool  $withRelations
      *
      * @return Builder
      */
@@ -523,11 +531,12 @@ class TaskController extends ItemController
                     $query->where('id', $user_id)->select('id');
                 });
             } else {
-                $query->when(!$project_relations_access, static function (Builder $query) use ($user_id, $project_relations_access) {
-                    $query->whereHas('user', static function (Builder $query) use ($user_id) {
-                        $query->where('id', $user_id)->select('id');
+                $query->when(!$project_relations_access,
+                    static function (Builder $query) use ($user_id, $project_relations_access) {
+                        $query->whereHas('user', static function (Builder $query) use ($user_id) {
+                            $query->where('id', $user_id)->select('id');
+                        });
                     });
-                });
 
                 $query->when($project_relations_access, static function (Builder $query) use ($user_id) {
                     $query->orWhereHas('project.users', static function (Builder $query) use ($user_id) {

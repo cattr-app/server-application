@@ -2,9 +2,10 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
-use App\Models\Property;
+use App\Models\Task;
+use App\Models\TimeInterval;
 use Auth;
-use Aws\Api\ErrorParser\JsonRpcErrorParser;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
@@ -53,6 +54,7 @@ class ProjectReportController extends Controller
             'projects' => 'project-report.projects',
             'task' => 'project-report.list',
             'days' => 'time-duration.list',
+            'screenshots' => 'project-report.screenshots'
         ];
     }
 
@@ -128,6 +130,13 @@ class ProjectReportController extends Controller
                 ];
             }
 
+            // Get intervals assigned to current task
+            /** @var Collection $taskIntervals */
+            $taskIntervals = Task::find($projectReport->task_id)
+                ->timeIntervals()
+                ->where('start_at', '>=', $startAt)
+                ->where('end_at', '<', $endAt)
+                ->get();
 
             $projects[$project_id]['users'][$user_id]['tasks'][] = [
                 'id' => $projectReport->task_id,
@@ -135,6 +144,9 @@ class ProjectReportController extends Controller
                 'user_id' => $projectReport->user_id,
                 'task_name' => $projectReport->task_name,
                 'duration' => (int)$projectReport->duration,
+                'screenshots' => $taskIntervals->map(function ($interval) {
+                    return TimeInterval::find($interval->id)->screenshot;
+                })
             ];
 
             $projects[$project_id]['users'][$user_id]['tasks_time'] += $projectReport->duration;
@@ -304,4 +316,27 @@ class ProjectReportController extends Controller
 
         return response()->json($report);
     }
+
+    /**
+     * @param Request $request
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function screenshots(Request $request) {
+        $taskID = $request->input('task_id');
+        $date = $request->input('date');
+
+        $startDate = Carbon::parse($date);
+        $endDate = clone $startDate;
+        $endDate = $endDate->addDay();
+
+        $result = TimeInterval::where('task_id', '=', $taskID)
+            ->where('start_at', '>=', $startDate->toDateTimeString())
+            ->where('start_at', '<', $endDate->toDateTimeString())
+            ->with('screenshots')
+            ->get()
+            ->pluck('screenshots');
+
+        return response()->json($result);
+    }
+
 }
