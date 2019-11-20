@@ -34,6 +34,11 @@ class ScreenshotController extends ItemController
         return Screenshot::class;
     }
 
+    public function getQueryWith(): array
+    {
+        return ['timeinterval.task'];
+    }
+
     /**
      * @return array
      */
