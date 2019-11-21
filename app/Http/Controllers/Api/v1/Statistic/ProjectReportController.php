@@ -148,9 +148,11 @@ class ProjectReportController extends Controller
                 'user_id' => $projectReport->user_id,
                 'task_name' => $projectReport->task_name,
                 'duration' => (int) $projectReport->duration,
-                'screenshots' => $projectReport->task->timeIntervals->map(function ($interval) {
-                    return $interval->screenshot;
-                })
+                'screenshots' => $projectReport->task->timeIntervals()
+                    ->where('start_at', '>=', $startAt)->where('end_at', '<=', $endAt)->get()->map(function
+                    ($interval) {
+                        return $interval->screenshot;
+                    })
             ];
 
             $projects[$project_id]['users'][$user_id]['tasks_time'] += $projectReport->duration;
@@ -163,6 +165,7 @@ class ProjectReportController extends Controller
         }
 
         $projects = array_values($projects);
+
 
         return $projects;
     }
