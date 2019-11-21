@@ -187,12 +187,12 @@ Route::group([
 
 
     // Statistic routes
-    $router->get('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
-    $router->get('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
-    $router->get('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
-    $router->get('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
-    $router->get('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
-    $router->get('/project-report/screenshots', 'Api\v1\Statistic\ProjectReportController@screenshots');
+    $router->any('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
+    $router->any('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
+    $router->any('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
+    $router->any('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
+    $router->any('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
+    $router->any('/project-report/screenshots', 'Api\v1\Statistic\ProjectReportController@screenshots');
 
 });
 
