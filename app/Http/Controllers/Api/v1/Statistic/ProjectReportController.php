@@ -148,10 +148,11 @@ class ProjectReportController extends Controller
                 'user_id' => $projectReport->user_id,
                 'task_name' => $projectReport->task_name,
                 'duration' => (int) $projectReport->duration,
-                'screenshots' => $projectReport->task->timeIntervals()
-                    ->where('start_at', '>=', $startAt)->where('end_at', '<=', $endAt)->get()->map(function
-                    ($interval) {
-                        return $interval->screenshot;
+                'screenshots' => $projectReport->task->timeIntervals()->with('screenshot')
+                    ->where('start_at', '>=', $startAt)->where('end_at', '<=', $endAt)->get()
+                    ->pluck('screenshot')
+                    ->groupBy(function ($screen) {
+                        return Carbon::parse($screen['created_at'])->startOfDay()->format('Y-m-d');
                     })
             ];
 
