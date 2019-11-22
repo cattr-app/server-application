@@ -14,3 +14,8 @@ use Illuminate\Http\Request;
 */
 
 Route::get('/reports/projects', 'ProjectReportsController@getReport');
+
+/**
+ * Can be used for both Timeline and Team reports because the difference just in user_ids we receive
+ */
+Route::get('/reports/dashboard', 'DashboardReportsController@getReport');
