@@ -7,6 +7,7 @@ use App\Models\ProjectsUsers;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\Property;
+use App\Models\Token;
 use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
 use Fico7489\Laravel\EloquentJoin\Traits\EloquentJoin;
 use Illuminate\Database\Eloquent\Builder;
@@ -236,6 +237,10 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id');
     }
 
+    public function tokens(): HasMany
+    {
+        return $this->hasMany(Token::class);
+    }
     /**
      * @return HasMany
      */

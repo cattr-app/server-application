@@ -46,16 +46,14 @@ Route::group([
 Route::group([
     'prefix' => 'auth',
 ], static function (Router $router) {
-    $router->any('ping', 'AuthController@ping');
-    $router->any('check', 'AuthController@check');
     $router->post('login', 'AuthController@login');
     $router->any('logout', 'AuthController@logout');
     $router->any('logout-all', 'AuthController@logoutAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
-    $router->post('send-reset', 'AuthController@sendReset');
-    $router->post('confirm-reset', 'AuthController@getReset')->name('password.reset');
-    $router->post('reset', 'AuthController@reset');
+    $router->post('password-reset/send', 'AuthController@sendPasswordReset');
+    $router->post('password-reset/process', 'AuthController@processPasswordReset')
+        ->name('password.reset.process');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');
     $router->post('/register/{key}', 'RegistrationController@postForm');
@@ -79,6 +77,13 @@ Route::group([
         $router->get('/register/{key}', 'RegistrationController@getForm');
         $router->post('/register/{key}', 'RegistrationController@postForm');
     });
+
+Route::group([
+    'prefix' => 'status',
+], static function (Router $router) {
+    $router->any('/', 'StatusController@index');
+});
+
 
 // Main API routes
 Route::group([
@@ -206,7 +211,7 @@ Route::fallback(function () {
     /** @var RouteCollection $routes */
     $routeCollection = $this->routes;
     /** @var string[] $methods */
-    $methods = array_diff(Router::$verbs, [ $request->getMethod(), 'OPTIONS' ]);
+    $methods = array_diff(Router::$verbs, [$request->getMethod(), 'OPTIONS']);
 
     foreach ($methods as $method) {
         // Get all routes for method without fallback routes
@@ -219,7 +224,7 @@ Route::fallback(function () {
         // Look if any route have match with current request
         $mismatch = $routes->first(static function ($value) use ($request) {
             /** @var RouteModel $value */
-            return $value->matches($request, false );
+            return $value->matches($request, false);
         });
 
         // Throw wrong-method exception if matches found
