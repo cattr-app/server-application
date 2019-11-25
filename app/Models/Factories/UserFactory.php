@@ -11,6 +11,7 @@ class UserFactory
 {
     private const ROLES = [
         'admin' => 1,
+        'user' => 2
     ];
 
     /** @var Faker $faker */
@@ -32,7 +33,6 @@ class UserFactory
     public function __construct(Faker $faker)
     {
         $this->faker = $faker;
-
         $this->user = User::make($this->getRandomUserData());
     }
 
@@ -72,16 +72,22 @@ class UserFactory
     public function withTokens(int $quantity = 1): self
     {
         $this->needsTokens = $quantity;
-
         return $this;
     }
 
     /**
      * @return $this
      */
-    public function makeAdmin(): self
+    public function asAdmin(): self
     {
         $this->role = 'admin';
+
+        return $this;
+    }
+
+    public function asUser(): self
+    {
+        $this->role = 'user';
 
         return $this;
     }

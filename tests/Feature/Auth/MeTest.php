@@ -6,29 +6,26 @@ use App\Models\Factories\UserFactory;
 use Tests\TestCase;
 class MeTest extends TestCase
 {
+    const URI = 'auth/me';
+
+    private $user;
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = 'auth/me';
         $this->user = app(UserFactory::class)->withTokens()->create();
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->user->forceDelete();
     }
 
     public function test_me()
     {
-        $response = $this->actingAs($this->user)->getJson($this->uri);
+        $response = $this->actingAs($this->user)->getJson(self::URI);
         $response->assertStatus(200);
         $response->assertJson(['id' => $this->user->id]);
     }
 
     public function test_without_auth()
     {
-        $response = $this->get($this->uri);
+        $response = $this->get(self::URI);
         $response->assertError(401);
     }
 }

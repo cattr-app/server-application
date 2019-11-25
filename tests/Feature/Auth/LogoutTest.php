@@ -7,17 +7,16 @@ use App\Models\Factories\UserFactory;
 
 class LogoutTest extends TestCase
 {
+    const URI = 'auth/logout';
+
+    private $user;
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = 'auth/logout';
-        $this->user = app(UserFactory::class)->withTokens()->create();
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->user->forceDelete();
+        $this->user = app(UserFactory::class)
+            ->withTokens()
+            ->create();
     }
 
     public function test_logout()
@@ -25,7 +24,7 @@ class LogoutTest extends TestCase
         $token = $this->user->tokens()->first()->token;
         $this->assertDatabaseHas('tokens', ['token' => $token]);
 
-        $response = $this->actingAs($this->user)->postJson($this->uri);
+        $response = $this->actingAs($this->user)->postJson(self::URI);
 
         $response->assertStatus(200);
         $this->assertDatabaseMissing('tokens', ['token' => $token]);

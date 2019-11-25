@@ -7,17 +7,14 @@ use Tests\TestCase;
 
 class RefreshTest extends TestCase
 {
+    const URI = 'auth/refresh';
+
+    private $user;
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = 'auth/refresh';
         $this->user = app(UserFactory::class)->withTokens()->create();
-    }
-
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->user->forceDelete();
     }
 
     public function test_refresh()
@@ -25,7 +22,7 @@ class RefreshTest extends TestCase
         $token = $this->user->tokens()->first()->token;
         $this->assertDatabaseHas('tokens', ['token' => $token]);
 
-        $response = $this->actingAs($this->user)->postJson($this->uri);
+        $response = $this->actingAs($this->user)->postJson(self::URI);
 
         $response->assertStatus(200);
         $this->assertDatabaseMissing('tokens', ['token' => $token]);

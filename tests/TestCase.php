@@ -4,6 +4,7 @@ namespace Tests;
 
 use App\User;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
+use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 
@@ -26,16 +27,8 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 abstract class TestCase extends BaseTestCase
 {
     use CreatesApplication;
+    use DatabaseTransactions;
 
-    /**
-     * @var User user
-     */
-    protected $user;
-
-    /**
-     * @var string uri
-     */
-    protected $uri;
 
     /**
      * @param UserContract $user

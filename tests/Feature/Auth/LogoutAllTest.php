@@ -6,22 +6,19 @@ namespace Tests\Feature\Auth;
 use App\Models\Factories\UserFactory;
 use Tests\TestCase;
 
-class LogoutFromAllTest extends TestCase
+class LogoutAllTest extends TestCase
 {
+    const URI = 'auth/logout-all';
+
+    private $user;
+
     protected function setUp(): void
     {
         parent::setUp();
-        $this->uri = 'auth/logout-all';
         $this->user = app(UserFactory::class)->withTokens(4)->create();
     }
 
-    protected function tearDown(): void
-    {
-        parent::tearDown();
-        $this->user->forceDelete();
-    }
-
-    public function test_logout_from_all()
+    public function test_logout_all()
     {
         $tokens = $this->user->tokens()->get()->toArray();
 
@@ -31,7 +28,7 @@ class LogoutFromAllTest extends TestCase
             $this->assertDatabaseHas('tokens', $token);
         }
 
-        $response = $this->actingAs($this->user)->postJson($this->uri);
+        $response = $this->actingAs($this->user)->postJson(self::URI);
         $response->assertStatus(200);
 
         foreach ($tokens as $token) {
@@ -41,7 +38,7 @@ class LogoutFromAllTest extends TestCase
 
     public function test_without_auth()
     {
-        $response = $this->postJson($this->uri);
+        $response = $this->postJson(self::URI);
         $response->assertError(401);
     }
 }
