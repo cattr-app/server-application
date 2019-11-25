@@ -6,15 +6,11 @@ use Tests\TestCase;
 
 class IndexTest extends TestCase
 {
-    protected function setUp(): void
-    {
-        parent::setUp();
-        $this->uri = 'status';
-    }
+    const URI = 'status';
 
     public function test_index()
     {
-        $response = $this->get($this->uri);
+        $response = $this->get(self::URI);
         $response->assertStatus(200);
     }
 }
