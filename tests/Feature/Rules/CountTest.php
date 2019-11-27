@@ -6,6 +6,10 @@ use App\Models\Factories\UserFactory;
 use App\Models\Rule;
 use Tests\TestCase;
 
+/**
+ * Class CountTest
+ * @package Tests\Feature\Rules
+ */
 class CountTest extends TestCase
 {
     const URI = 'v1/rules/count';

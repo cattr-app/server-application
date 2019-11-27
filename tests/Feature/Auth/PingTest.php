@@ -1,10 +1,14 @@
 <?php
 
-namespace Test\Feature\Auth;
+namespace Tests\Feature\Auth;
 
 use App\Models\Factories\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class PingTest
+ * @package Tests\Feature\Auth
+ */
 class PingTest extends TestCase
 {
     const URI = 'auth/logout';

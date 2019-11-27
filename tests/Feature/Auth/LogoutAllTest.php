@@ -6,6 +6,10 @@ namespace Tests\Feature\Auth;
 use App\Models\Factories\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class LogoutAllTest
+ * @package Tests\Feature\Auth
+ */
 class LogoutAllTest extends TestCase
 {
     const URI = 'auth/logout-all';

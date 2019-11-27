@@ -4,6 +4,11 @@ namespace Tests\Feature\Auth;
 
 use App\Models\Factories\UserFactory;
 use Tests\TestCase;
+
+/**
+ * Class MeTest
+ * @package Tests\Feature\Auth
+ */
 class MeTest extends TestCase
 {
     const URI = 'auth/me';

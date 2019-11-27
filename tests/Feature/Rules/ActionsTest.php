@@ -6,6 +6,10 @@ use App\Models\Factories\UserFactory;
 use App\Models\Rule;
 use Tests\TestCase;
 
+/**
+ * Class ActionsTest
+ * @package Tests\Feature\Rules
+ */
 class ActionsTest extends TestCase
 {
     const URI = 'v1/rules/actions';

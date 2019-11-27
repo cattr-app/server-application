@@ -5,6 +5,10 @@ namespace Tests\Feature\Auth;
 use App\Models\Factories\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class LoginTest
+ * @package Tests\Feature\Auth
+ */
 class LoginTest extends TestCase
 {
     const URI = 'auth/login';
