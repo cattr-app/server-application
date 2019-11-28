@@ -6,7 +6,10 @@ use Faker\Generator as Faker;
 use App\User;
 use JWTAuth;
 
-
+/**
+ * Class UserFactory
+ * @package App\Models\Factories
+ */
 class UserFactory
 {
     private const ROLES = [
@@ -24,7 +27,7 @@ class UserFactory
     protected $user;
 
     /** @var string */
-    private $role;
+    protected $role;
 
     /**
      * UserFactory constructor.
@@ -85,6 +88,9 @@ class UserFactory
         return $this;
     }
 
+    /**
+     * @return $this
+     */
     public function asUser(): self
     {
         $this->role = 'user';

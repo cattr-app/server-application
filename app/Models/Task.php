@@ -27,16 +27,16 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property bool $important
  *
  * @property TimeInterval[] $timeIntervals
- * @property User[]         $user
- * @property User[]         $assigned
- * @property Project[]      $project
- * @property Priority       $priority
+ * @property User[] $user
+ * @property User[] $assigned
+ * @property Project[] $project
+ * @property Priority $priority
  */
 class Task extends AbstractModel
 {
     use SoftDeletes;
 
-	/**
+    /**
      * table name from database
      * @var string
      */
@@ -81,6 +81,11 @@ class Task extends AbstractModel
         'deleted_at',
     ];
 
+    public static function getTableName()
+    {
+        return with(new static)->getTable();
+    }
+
     /**
      * Override parent boot and Call deleting event
      *
@@ -90,12 +95,20 @@ class Task extends AbstractModel
     {
         parent::boot();
 
-        static::deleting(function($tasks) {
+        static::deleting(function ($tasks) {
             /** @var Task $tasks */
             foreach ($tasks->timeIntervals()->get() as $val) {
                 $val->delete();
             }
         });
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function timeIntervals(): HasMany
+    {
+        return $this->hasMany(TimeInterval::class, 'task_id');
     }
 
     /**
@@ -123,24 +136,11 @@ class Task extends AbstractModel
     }
 
     /**
-     * @return HasMany
-     */
-    public function timeIntervals(): HasMany
-    {
-    	return $this->hasMany(TimeInterval::class, 'task_id');
-    }
-
-    /**
      * @return BelongsTo
      */
     public function priority(): BelongsTo
     {
         return $this->belongsTo(Priority::class, 'priority_id');
-    }
-
-    public static function getTableName()
-    {
-        return with(new static)->getTable();
     }
 
 }
