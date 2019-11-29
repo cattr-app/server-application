@@ -16,19 +16,29 @@ class TaskFactory
     private const DESCRIPTION_LENGTH = 10;
     private const PRIORITY_ID = 2;
 
-    /** @var Task */
+    /**
+     * @var Task
+     */
     private $task;
 
-    /** @var Faker */
+    /**
+     * @var Faker
+     */
     private $faker;
 
-    /**@var int */
+    /**
+     * @var int
+     */
     private $needsIntervals = 0;
 
-    /** @var User */
+    /**
+     * @var User
+     */
     private $user;
 
-    /** @var Project */
+    /**
+     * @var Project
+     */
     private $project;
 
     /**
@@ -70,7 +80,6 @@ class TaskFactory
      */
     public function linkUser($user): self
     {
-
         if ($user instanceof User) {
             $this->user = $user;
             return $this;
@@ -111,7 +120,6 @@ class TaskFactory
         }
 
         $this->task->project()->associate($this->project);
-
         $this->task->save();
 
         if ($this->needsIntervals) {

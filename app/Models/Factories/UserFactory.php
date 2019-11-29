@@ -17,16 +17,24 @@ class UserFactory
         'user' => 2
     ];
 
-    /** @var Faker $faker */
+    /**
+     * @var Faker $faker
+     */
     protected $faker;
 
-    /** @var int $needsToken */
+    /**
+     * @var int $needsToken
+     */
     protected $needsTokens = 0;
 
-    /** @var User $user */
+    /**
+     * @var User $user
+     */
     protected $user;
 
-    /** @var string */
+    /**
+     * @var string
+     */
     protected $role;
 
     /**
@@ -84,7 +92,6 @@ class UserFactory
     public function asAdmin(): self
     {
         $this->role = 'admin';
-
         return $this;
     }
 
@@ -94,7 +101,6 @@ class UserFactory
     public function asUser(): self
     {
         $this->role = 'user';
-
         return $this;
     }
 

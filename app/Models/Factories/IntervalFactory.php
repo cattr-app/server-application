@@ -16,18 +16,22 @@ class IntervalFactory
     private const COUNT_MOUSE = 42;
     private const COUNT_KEYBOARD = 43;
     private const INTERVAL_DURATION_SECONDS = 299;
+
     /**
      * @var TimeInterval
      */
     private $interval;
+
     /**
      * @var Faker
      */
     private $faker;
+
     /**
      * @var User
      */
     private $user;
+
     /**
      * @var Task
      */

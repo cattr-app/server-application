@@ -13,18 +13,25 @@ class ProjectFactory
 {
     private const COMPANY_ID = 1;
     private const DESCRIPTION_LENGTH = 300;
+
     /**
      * @var Project
      */
     private $project;
+
     /**
      * @var Faker
      */
     private $faker;
+
     /**
      * @var int
      */
     private $needsTasks = 0;
+
+    /**
+     * @var int
+     */
     private $needsIntervals = 0;
 
     /**
@@ -88,7 +95,10 @@ class ProjectFactory
         $tasks = [];
 
         while ($this->needsTasks--) {
-            $tasks[] = app(TaskFactory::class)->withIntervals($this->needsIntervals)->linkProject($this->project)->create();
+            $tasks[] = app(TaskFactory::class)
+                ->withIntervals($this->needsIntervals)
+                ->linkProject($this->project)
+                ->create();
         }
     }
 }
