@@ -21,7 +21,7 @@ class LoginTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = UserFactory::create();
+        $this->user = app(UserFactory::class)->create();
         $this->loginData = [
             'login' => $this->user->email,
             'password' => $this->user->full_name

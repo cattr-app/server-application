@@ -3,7 +3,6 @@
 namespace Tests\Feature\Rules;
 
 use App\Models\Factories\UserFactory;
-use App\Models\Rule;
 use Tests\TestCase;
 
 /**
@@ -18,6 +17,10 @@ class EditTest extends TestCase
 
     private $user;
 
+    private $correctRule;
+
+    private $incorrectRule;
+
     protected function setUp(): void
     {
         parent::setUp();
@@ -30,37 +33,37 @@ class EditTest extends TestCase
             ->withTokens()
             ->asAdmin()
             ->create();
-    }
 
-    public function test_edit()
-    {
-        $data = [
+        $this->correctRule = [
             'role_id' => 1,
             'object' => 'register',
             'action' => 'create',
             'allow' => 0
         ];
 
-        $this->assertDatabaseMissing('rule', $data);
-
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $data);
-
-        $this->assertDatabaseHas('rule', $data);
-        $response->assertStatus(200);
-    }
-
-    public function test_not_existing_rule()
-    {
-        $data = [
+        $this->incorrectRule = [
             'role_id' => 1,
             'object' => 'unknown',
             'action' => 'create',
             'allow' => 1
         ];
+    }
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $data);
+    public function test_edit()
+    {
+        $this->assertDatabaseMissing('rule', $this->correctRule);
 
-        //TODO fix response format to asserting with structure check
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->correctRule);
+
+        $this->assertDatabaseHas('rule', $this->correctRule);
+        $response->assertStatus(200);
+    }
+
+    public function test_not_existing_rule()
+    {
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->incorrectRule);
+
+        //TODO Fix response format to asserting with structure check
         $response->assertStatus(400);
     }
 
@@ -74,7 +77,7 @@ class EditTest extends TestCase
     {
         $response = $this->actingAs($this->user)->postJson(self::URI);
 
-        //TODO fix response format to asserting with structure check
+        //TODO Fix response format to asserting with structure check
         $response->assertStatus(403);
     }
 }

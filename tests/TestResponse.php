@@ -2,6 +2,7 @@
 
 namespace Tests;
 
+use PHPUnit\Framework\Assert as PHPUnit;
 use Illuminate\Foundation\Testing\TestResponse as BaseTestResponse;
 
 class TestResponse extends BaseTestResponse
@@ -11,16 +12,20 @@ class TestResponse extends BaseTestResponse
      * and correct error structure
      *
      * @param int $status
-     * @param bool $hasDataField
+     * @param bool $hasInfo
      */
-    public function assertError(int $status, bool $hasDataField = false)
+    public function assertError(int $status, bool $hasInfo = false)
     {
         $this->assertStatus($status);
 
         $structure = ['success', 'message', 'error_type'];
-        if ($hasDataField) {
-            array_push($structure, 'data');
+        if ($hasInfo) {
+            $structure[] = 'info';
         }
+        else {
+            PHPUnit::assertArrayNotHasKey('info', $this->decodeResponseJson());
+        }
+
         $this->assertJsonStructure($structure);
     }
 }
