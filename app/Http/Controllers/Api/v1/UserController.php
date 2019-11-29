@@ -161,7 +161,7 @@ class UserController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/users/list List
+     * @api {get, post} /api/v1/users/list List
      * @apiDescription Get list of Users
      * @apiVersion 0.1.0
      * @apiName GetUserList

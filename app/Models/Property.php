@@ -28,6 +28,7 @@ class Property extends AbstractModel
     public const TIME_INTERVAL_CODE = 'time_interval';
     public const SCREENSHOT_CODE = 'screenshot';
     public const USER_CODE = 'user';
+    public const TASK_COMMENT_CODE = 'task_comment';
 
     /**
      * @var string

@@ -8,10 +8,10 @@ use Throwable;
  * Interface ReasonableException
  * @package App\Exceptions\Interfaces
  */
-interface DataExtendedException extends Throwable
+interface InfoExtendedException extends Throwable
 {
     /**
      * @return mixed
      */
-    public function getData();
+    public function getInfo();
 }

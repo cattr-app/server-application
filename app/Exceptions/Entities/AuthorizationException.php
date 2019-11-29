@@ -7,7 +7,7 @@ use Throwable;
 use Illuminate\Auth\Access\AuthorizationException as BaseAuthorizationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
-use App\Exceptions\Interfaces\DataExtendedException;
+use App\Exceptions\Interfaces\InfoExtendedException;
 use App\Exceptions\Interfaces\TypedException;
 
 
@@ -16,7 +16,7 @@ use App\Exceptions\Interfaces\TypedException;
  * @package App\Exceptions\Entities
  */
 class AuthorizationException extends BaseAuthorizationException
-    implements TypedException, DataExtendedException, HttpExceptionInterface
+    implements TypedException, InfoExtendedException, HttpExceptionInterface
 {
     public const ERROR_TYPE_UNAUTHORIZED = 'authorization.unauthorized';
     public const ERROR_TYPE_CAPTCHA = 'authorization.captcha';
@@ -44,18 +44,18 @@ class AuthorizationException extends BaseAuthorizationException
     /**
      * @var mixed
      */
-    protected $data;
+    protected $info;
 
     /**
      * AuthorizationException constructor.
      * @param string $type
-     * @param null $data
+     * @param array|null $info
      * @param Throwable|null $previous
      */
-    public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, $data = null, Throwable $previous = null)
+    public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, $info = null, Throwable $previous = null)
     {
         $this->type = $type;
-        $this->data = $data;
+        $this->info = $info;
 
         parent::__construct($this->getMessageByType(), $this->getStatusCode(), $previous);
     }
@@ -63,9 +63,9 @@ class AuthorizationException extends BaseAuthorizationException
     /**
      * @return mixed
      */
-    public function getData()
+    public function getInfo()
     {
-        return $this->data;
+        return $this->info;
     }
 
     /**
