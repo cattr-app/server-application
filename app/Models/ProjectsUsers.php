@@ -14,11 +14,13 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int    $project_id
  * @property int    $user_id
+ * @property int    $role_id
  * @property string $created_at
  * @property string $updated_at
  *
  * @property User    $user
  * @property Project $project
+ * @property Role    $role
  */
 class ProjectsUsers extends AbstractModel
 {
@@ -34,6 +36,7 @@ class ProjectsUsers extends AbstractModel
     protected $fillable = [
         'project_id',
         'user_id',
+        'role_id',
     ];
 
     /**
@@ -42,6 +45,7 @@ class ProjectsUsers extends AbstractModel
     protected $casts = [
         'project_id' => 'integer',
         'user_id' => 'integer',
+        'role_id' => 'integer',
     ];
 
     /**
@@ -74,5 +78,13 @@ class ProjectsUsers extends AbstractModel
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
 }

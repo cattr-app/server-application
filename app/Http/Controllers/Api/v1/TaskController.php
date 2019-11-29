@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
+use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\Task;
 use Auth;

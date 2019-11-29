@@ -57,11 +57,11 @@ class Role extends AbstractModel
     ];
 
     /**
-     * @return BelongsToMany
+     * @return HasMany
      */
-    public function users(): BelongsToMany
+    public function users()
     {
-        return $this->belongsToMany(User::class, 'user_role', 'role_id', 'user_id', 'id', 'id');
+        return $this->hasMany(User::class, 'role_id', 'id');
     }
 
     /**
@@ -69,28 +69,28 @@ class Role extends AbstractModel
      *
      * @param  int|User  $user
      */
-    public function attachToUser($user)
+    /*public function attachToUser($user)
     {
         $userId = $user;
         if ($user instanceof User) {
             $userId = $user->id;
         }
         $this->users()->attach($userId);
-    }
+    }*/
 
     /**
      * Detach this role from user
      *
      * @param  int|User  $user
      */
-    public function detachFromUser($user)
+    /*public function detachFromUser($user)
     {
         $userId = $user;
         if ($user instanceof User) {
             $userId = $user->id;
         }
         $this->users()->detach($userId);
-    }
+    }*/
 
     /**
      * @return HasMany
@@ -173,7 +173,7 @@ class Role extends AbstractModel
 
         throw_if(!$rule, new \Exception('rule does not exist', 400));
         if (!static::can($user, 'rules', 'full_access')) {
-            $userRoleIds = $user->rolesIds();
+            $userRoleIds = [$user->role_id];
             throw_if($userRoleIds->contains($rule->role_id),
                 new \Exception('you cannot change your own privileges', 403));
         }
@@ -188,24 +188,74 @@ class Role extends AbstractModel
      * @param $user
      * @param $object
      * @param $action
+     * @param $id
      *
      * @return bool
      */
-    public static function can($user, $object, $action): bool
+    public static function can($user, $object, $action, $id = null): bool
     {
         /** @var User $user */
-        $userRoleIds = $user->rolesIds();
+        $userRoleIds = [$user->role_id];
 
-        $rule = Rule::query()->whereIn('role_id', $userRoleIds)->where([
-            'object' => $object,
-            'action' => $action,
-        ])->first();
+        // Check access to the specific entity
+        if (isset($id)) {
+            $projectID = null;
 
-        if (!$rule) {
-            return false;
+            // Get ID of the related project
+            switch ($object) {
+                case 'projects':
+                    $projectID = $id;
+                    break;
+
+                case 'tasks':
+                    $task = Task::find($id);
+                    if (isset($task)) {
+                        $projectID = $task->project_id;
+                    }
+                    break;
+
+                case 'time-intervals':
+                    $interval = TimeInterval::with('task')->find($id);
+                    if (isset($interval)) {
+                        $projectID = $interval->task->project_id;
+                    }
+                    break;
+
+                case 'screenshots':
+                    $screenshot = Screenshot::with('timeInterval.task')->find($id);
+                    if (isset($screenshot)) {
+                        $projectID = $screenshot->timeInterval->task->project_id;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+
+            if (isset($projectID)) {
+                // Get role of the user in the project
+                $projectUserRelation = ProjectsUsers::where([
+                    'project_id' => $projectID,
+                    'user_id'    => $user->id,
+                ])->first();
+                if (isset($projectUserRelation)) {
+                    $userRoleIds[] = $projectUserRelation->role_id;
+                }
+            }
         }
 
-        return (bool) $rule->allow;
+        $rules = Rule::query()->whereIn('role_id', $userRoleIds)->where([
+            'object' => $object,
+            'action' => $action,
+        ])->get();
+
+        foreach ($rules as $rule) {
+            if ((bool) $rule->allow) {
+                return true;
+            }
+        }
+
+        return false;
     }
 
 }

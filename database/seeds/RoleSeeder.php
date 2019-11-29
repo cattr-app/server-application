@@ -21,6 +21,7 @@ class RoleSeeder extends Seeder
         Role::updateOrCreate(['id' => 3, 'name' => 'observer']);
         Role::updateOrCreate(['id' => 4, 'name' => 'client']);
         Role::updateOrCreate(['id' => 5, 'name' => 'manager']);
+        Role::updateOrCreate(['id' => 6, 'name' => 'auditor']);
         Role::updateOrCreate(['id' => 255, 'name' => 'blocked']);
 
         $userAllow = [
@@ -45,9 +46,7 @@ class RoleSeeder extends Seeder
             'tasks' => [
                 'create',
                 'dashboard',
-                'edit',
                 'list',
-                'remove',
                 'show',
             ],
             'task-comment' => [
@@ -231,12 +230,73 @@ class RoleSeeder extends Seeder
                 'redmine',
             ],
         ];
+        $auditorAllow = [
+            'dashboard' => [
+                'manager_access',
+            ],
+            'project-report' => [
+                'list',
+                'projects',
+                'manager_access',
+            ],
+            'projects' => [
+                'list',
+                'show',
+            ],
+            'roles' => [
+                'list',
+                'allowed-rules',
+            ],
+            'screenshots' => [
+                'dashboard',
+                'list',
+                'show',
+                'manager_access',
+            ],
+            'tasks' => [
+                'dashboard',
+                'list',
+                'show',
+            ],
+            'time' => [
+                'project',
+                'task',
+                'task-user',
+                'tasks',
+                'total'
+            ],
+            'time-duration' => [
+                'list',
+            ],
+            'time-intervals' => [
+                'list',
+                'edit',
+                'remove',
+                'bulk-remove',
+                'show',
+                'manager_access'
+            ],
+            'time-use-report' => [
+                'list',
+            ],
+            'users' => [
+                'list',
+                'relations',
+                'show',
+                'manager_access',
+            ],
+            'integration' => [
+                'gitlab',
+                'redmine',
+            ],
+        ];
 
         $this->addRules(1, Rule::getActionList());
         $this->addRules(2, $userAllow);
         $this->addRules(3, $observerAllow);
         $this->addRules(4, $clientAllow);
         $this->addRules(5, $managerAllow);
+        $this->addRules(6, $auditorAllow);
 
         $rules = collect(Rule::getActionList());
         foreach (Rule::all() as $rule) {

@@ -341,7 +341,7 @@ class RolesController extends ItemController
         }
 
         if (!$roleIds || !is_array($roleIds) || empty($roleIds)) {
-            $roleIds = $request->user()->rolesIds();
+            $roleIds = [$request->user()->role_id];
         }
 
         /** @var Builder $itemsQuery */
@@ -482,7 +482,7 @@ class RolesController extends ItemController
             return $query;
         }
 
-        $user_role_ids = Auth::user()->rolesIds();
+        $user_role_ids = [Auth::user()->role_id];
 
         $query->whereIn('id', $user_role_ids);
 
