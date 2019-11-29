@@ -15,25 +15,20 @@ class TaskFactory
 {
     private const DESCRIPTION_LENGTH = 10;
     private const PRIORITY_ID = 2;
-    /**
-     * @var Task
-     */
+
+    /** @var Task */
     private $task;
-    /**
-     * @var Faker
-     */
+
+    /** @var Faker */
     private $faker;
-    /**
-     * @var int
-     */
+
+    /**@var int */
     private $needsIntervals = 0;
-    /**
-     * @var User
-     */
+
+    /** @var User */
     private $user;
-    /**
-     * @var Project
-     */
+
+    /** @var Project */
     private $project;
 
     /**
@@ -75,12 +70,13 @@ class TaskFactory
      */
     public function linkUser($user): self
     {
-        if( $user instanceof User ){
+
+        if ($user instanceof User) {
             $this->user = $user;
-        }else{
-            $this->user = User::find($user);
+            return $this;
         }
 
+        $this->user = User::find($user);
         return $this;
     }
 
@@ -90,12 +86,12 @@ class TaskFactory
      */
     public function linkProject($project): self
     {
-        if( $project instanceof Project ){
+        if ($project instanceof Project) {
             $this->project = $project;
-        }else{
-            $this->project = Project::find($project);
+            return $this;
         }
 
+        $this->project = Project::find($project);
         return $this;
     }
 
@@ -104,13 +100,13 @@ class TaskFactory
      */
     public function create(): Task
     {
-        if( !$this->user ){
+        if (!$this->user) {
             $this->user = app(UserFactory::class)->create();
         }
 
         $this->task->user()->associate($this->user);
 
-        if( !$this->project ){
+        if (!$this->project) {
             $this->project = app(ProjectFactory::class)->create();
         }
 
@@ -125,12 +121,15 @@ class TaskFactory
         return $this->task;
     }
 
-    private function createIntervals() : void
+    private function createIntervals(): void
     {
         $intervals = [];
 
         while ($this->needsIntervals--) {
-            $intervals[] = app(IntervalFactory::class)->linkUser($this->user)->linkTask($this->task)->create();
+            $intervals[] = app(IntervalFactory::class)
+                ->linkUser($this->user)
+                ->linkTask($this->task)
+                ->create();
         }
     }
 }

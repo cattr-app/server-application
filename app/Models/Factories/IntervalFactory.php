@@ -70,11 +70,12 @@ class IntervalFactory
         $this->interval->user()->associate($this->user);
 
         if (!$this->task) {
-            $this->task = app(TaskFactory::class)->linkUser($this->user)->create();
+            $this->task = app(TaskFactory::class)
+                ->linkUser($this->user)
+                ->create();
         }
 
         $this->interval->task()->associate($this->task);
-
         $this->interval->save();
 
         return $this->interval;
@@ -88,10 +89,10 @@ class IntervalFactory
     {
         if ($user instanceof User) {
             $this->user = $user;
-        } else {
-            $this->user = User::find($user);
+            return $this;
         }
 
+        $this->user = User::find($user);
         return $this;
     }
 
@@ -103,10 +104,10 @@ class IntervalFactory
     {
         if ($task instanceof Task) {
             $this->task = $task;
-        } else {
-            $this->task = Task::find($task);
+            return $this;
         }
 
+        $this->task = Task::find($task);
         return $this;
     }
 }
