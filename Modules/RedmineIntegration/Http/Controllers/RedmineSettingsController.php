@@ -106,7 +106,7 @@ class RedmineSettingsController extends AbstractRedmineController
 
     protected function saveProperties()
     {
-        $this->processFilter('redmine.settings.url.change', 'REDMINE_URL', $this->request->redmine_url)
+        $this
             ->processFilter('redmine.settings.url.change', 'REDMINE_KEY', $this->request->redmine_api_key)
             ->saveProperty('REDMINE_STATUSES', serialize($this->request->redmine_statuses))
             ->saveProperty('REDMINE_PRIORITIES', serialize($this->request->redmine_priorities));
@@ -158,9 +158,7 @@ class RedmineSettingsController extends AbstractRedmineController
     public function getValidationRules()
     {
         return [
-            'redmine_url' => 'required',
             'redmine_api_key' => 'required',
-            //'redmine_statuses' => 'required',
         ];
     }
 
@@ -178,7 +176,8 @@ class RedmineSettingsController extends AbstractRedmineController
 
         // This is something beyond my understanding of the real world
         $settingsArray = [
-            'redmine_url' => $userRepository->getUserRedmineUrl($userId),
+            'enabled' => $redmineEnabled = Property::where(['entity_type' => 'company', 'name' => 'redmine_enabled'])
+                    ->first()->value ?? false,
             'redmine_api_key' => $userRepository->getUserRedmineApiKey($userId),
             'redmine_statuses' => $userRepository->getUserRedmineStatuses($userId),
             'redmine_priorities' => $userRepository->getUserRedminePriorities($userId),

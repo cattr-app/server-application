@@ -3,6 +3,8 @@
 namespace Modules\GitlabIntegration\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Property;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Modules\GitlabIntegration\Helpers\UserProperties;
@@ -14,6 +16,11 @@ class SettingsController extends Controller
      */
     private $userProperties;
 
+    /**
+     * SettingsController constructor.
+     *
+     * @param  UserProperties  $userProperties
+     */
     public function __construct(UserProperties $userProperties)
     {
         $this->userProperties = $userProperties;
@@ -21,6 +28,9 @@ class SettingsController extends Controller
         parent::__construct();
     }
 
+    /**
+     * @return array
+     */
     public static function getControllerRules(): array
     {
         return [
@@ -29,23 +39,33 @@ class SettingsController extends Controller
         ];
     }
 
+    /**
+     * @param  Request  $request
+     *
+     * @return array
+     */
     public function get(Request $request)
     {
         $userId = $request->user()->id;
 
         return [
-            'url' => $this->userProperties->getUrl($userId),
+            'enabled' => Property::where(['entity_type' => 'company', 'name' => 'gitlab_enabled'])->first()
+                ->value ?? false,
             'apikey' => $this->userProperties->getApiKey($userId)
         ];
     }
 
+    /**
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     */
     public function set(Request $request)
     {
         $userId = $request->user()->id;
 
         $validator = Validator::make(
             $request->all(), [
-                'url' => 'string|required',
                 'apikey' => 'string|required'
             ]
         );
@@ -56,9 +76,8 @@ class SettingsController extends Controller
             ], 400);
         }
 
-        $this->userProperties->setUrl($userId, $request->post('url'));
         $this->userProperties->setApiKey($userId, $request->post('apikey'));
 
-        return response()->json('Setted', 200);
+        return response()->json(['success' => 'true', 'message' => 'Settings saved successfully']);
     }
 }

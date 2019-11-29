@@ -172,6 +172,7 @@ class Rule extends AbstractModel
                 'list' => __('Projects report list'),
                 'projects' => __('Projects report related projects'),
                 'manager_access' => __('Projects report manager access'),
+                'screenshots' => __('Projects report task screenshots access'),
             ],
             'time-duration' => [
                 'list' => __('Time duration list'),

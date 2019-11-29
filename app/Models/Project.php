@@ -52,7 +52,7 @@ class Project extends AbstractModel
         'company_id' => 'integer',
         'name' => 'string',
         'description' => 'string',
-        'important' => 'boolean',
+        'important' => 'integer',
     ];
 
     /**

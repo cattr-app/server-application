@@ -3,7 +3,7 @@
 namespace App\Exceptions;
 
 use App\Exceptions\Entities\CaptchaException;
-use App\Exceptions\Interfaces\DataExtendedException;
+use App\Exceptions\Interfaces\InfoExtendedException;
 use App\Exceptions\Interfaces\TypedException;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -79,7 +79,7 @@ class Handler extends ExceptionHandler
         $code = (int)$exception->getCode();
 
         $debugData = false;
-        $data = $exception instanceof DataExtendedException ? $exception->getData() : false;
+        $info = $exception instanceof InfoExtendedException ? $exception->getInfo() : false;
         $errorType = $exception instanceof TypedException ? $exception->getType() : false;
 
         if (!$isHttpException) {
@@ -144,14 +144,12 @@ class Handler extends ExceptionHandler
                 'message' => $message,
             ],
             $debugData !== false ? ['debug' => $debugData] : [],
-            // Additional error data, for example remaining time to repeat password reset request
-            $data !== false && $data !== null ? ['data' => $data] : [],
+            // Additional error info, for example remaining time to repeat password reset request
+            $info !== false && $info !== null ? ['info' => $info] : [],
             // Error Type used for a more accurate error processing on client side
             $errorType !== false && $errorType !== null ? ['error_type' => $errorType] : []
         );
-        if ($exception instanceof CaptchaException) {
-            $exceptionResult['site_key'] = CaptchaException::getSiteKey();
-        }
+
         return response()->json(
             $exceptionResult,
             $statusCode,

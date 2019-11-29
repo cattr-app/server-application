@@ -11,7 +11,7 @@ return [
     | to accept any value.
     |
     */
-   
+
     'supportsCredentials' => false,
     'allowedOrigins' => ['*'],
     'allowedOriginsPatterns' => [],
@@ -20,5 +20,6 @@ return [
     'exposedHeaders' => [],
     'maxAge' => 0,
     'trustedDomains' => env('TRUSTED_FRONTEND_DOMAIN', 'at.loc'),
+    'enable' => env('CORS_ENABLED', 'false'),
 
 ];

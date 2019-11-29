@@ -28,6 +28,7 @@ class Property extends AbstractModel
     public const TIME_INTERVAL_CODE = 'time_interval';
     public const SCREENSHOT_CODE = 'screenshot';
     public const USER_CODE = 'user';
+    public const TASK_COMMENT_CODE = 'task_comment';
 
     /**
      * @var string
@@ -80,7 +81,7 @@ class Property extends AbstractModel
      *
      * @return Collection
      */
-    public function getProperty(string $scope, string $key, array $parameters = [])
+    public static function getProperty(string $scope, string $key, array $parameters = [])
     {
         // Making data for where query
         $queryData = [
@@ -92,6 +93,6 @@ class Property extends AbstractModel
             $queryData = array_merge($queryData, $parameters);
         }
 
-        return $this->where($queryData)->get();
+        return self::where($queryData)->get();
     }
 }

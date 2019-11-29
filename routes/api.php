@@ -59,6 +59,24 @@ Route::group([
     $router->post('/register/{key}', 'RegistrationController@postForm');
 });
 
+// Temporary fix for missing v1 prefix in the url
+    Route::group([
+        'prefix' => 'v1/auth',
+    ], function (Router $router) {
+        $router->any('ping', 'AuthController@ping');
+        $router->any('check', 'AuthController@check');
+        $router->post('login', 'AuthController@login');
+        $router->any('logout', 'AuthController@logout');
+        $router->any('logout-all', 'AuthController@logoutAll');
+        $router->post('refresh', 'AuthController@refresh');
+        $router->any('me', 'AuthController@me');
+        $router->post('send-reset', 'AuthController@sendReset');
+        $router->post('confirm-reset', 'AuthController@getReset')->name('password.reset');
+        $router->post('reset', 'AuthController@reset');
+
+        $router->get('/register/{key}', 'RegistrationController@getForm');
+        $router->post('/register/{key}', 'RegistrationController@postForm');
+    });
 
 Route::group([
     'prefix' => 'status',
@@ -144,6 +162,7 @@ Route::group([
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
     $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
+    $router->any('/time-intervals/day-duration', 'Api\v1\Statistic\DashboardController@timePerDay');
     $router->post('/time-intervals/bulk-remove', 'Api\v1\TimeIntervalController@bulkDestroy');
 
     //Time routes
@@ -173,11 +192,13 @@ Route::group([
 
 
     // Statistic routes
-    $router->post('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
-    $router->post('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
-    $router->post('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
-    $router->post('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
-    $router->post('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
+    $router->any('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
+    $router->any('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
+    $router->any('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
+    $router->any('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
+    $router->any('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
+    $router->any('/project-report/screenshots', 'Api\v1\Statistic\ProjectReportController@screenshots');
+
 });
 
 // Laravel router pass to fallback not non-exist urls only but wrong-method requests too.

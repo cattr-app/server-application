@@ -2,24 +2,48 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\Models\Property;
+use App\Models\Task;
+use App\Models\TimeInterval;
 use Auth;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use DB;
+use Modules\Reports\Entities\ProjectReport;
 use Validator;
 use Carbon\Carbon;
+use function foo\func;
 
 class ProjectReportController extends Controller
 {
+    /**
+     * @var
+     */
+    protected $timezone;
+
+    /**
+     * ProjectReportController constructor.
+     */
+    public function __construct()
+    {
+        $companyTimezoneProperty = Property::getProperty('company', 'TIMEZONE')->first();
+        $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
+
+        parent::__construct();
+    }
+
     /**
      * @return array
      */
     public function getValidationRules(): array
     {
         return [
-            'start_at' => 'date',
-            'end_at' => 'date',
+            'uids' => 'exists:users,id|array',
+            'pids' => 'exists:projects,id|array',
+            'start_at' => 'required|date',
+            'end_at' => 'required|date',
         ];
     }
 
@@ -33,13 +57,16 @@ class ProjectReportController extends Controller
             'projects' => 'project-report.projects',
             'task' => 'project-report.list',
             'days' => 'time-duration.list',
+            'screenshots' => 'project-report.screenshots'
         ];
     }
 
     /**
      * [report description]
-     * @param Request $request [description]
-     * @return [type]           [description]
+     *
+     * @param  Request  $request
+     *
+     * @return array|\Illuminate\Http\JsonResponse
      */
     public function report(Request $request)
     {
@@ -57,11 +84,10 @@ class ProjectReportController extends Controller
             );
         }
 
-        $uids = $request->input('uids');
-        $pids = $request->input('pids');
+        $uids = $request->input('uids', []);
+        $pids = $request->input('pids', []);
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -72,16 +98,16 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $projectReports = DB::table('project_report')
+        $projectReports = ProjectReport::with('task.timeIntervals')
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
             )
             ->whereIn('user_id', $uids)
             ->whereIn('project_id', $pids)
-            ->whereIn('project_id', Project::getUserRelatedProjectIds($user))
+            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->where('date', '>=', $startAt)
-            ->where('date', '<', $endAt)
+            ->where('date', '<=', $endAt)
             ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
             ->get();
 
@@ -109,13 +135,31 @@ class ProjectReportController extends Controller
                 ];
             }
 
+            // Get intervals assigned to current task
+            /** @var Collection $taskIntervals */
+            /*$taskIntervals = Task::find($projectReport->task_id)
+                ->timeIntervals()
+                ->where('start_at', '>=', $startAt)
+                ->where('end_at', '<=', $endAt)
+                ->get();*/
 
             $projects[$project_id]['users'][$user_id]['tasks'][] = [
                 'id' => $projectReport->task_id,
                 'project_id' => $projectReport->project_id,
                 'user_id' => $projectReport->user_id,
                 'task_name' => $projectReport->task_name,
-                'duration' => (int)$projectReport->duration,
+                'duration' => (int) $projectReport->duration,
+                'screenshots' => $projectReport->task->timeIntervals()->with('screenshot')
+                    ->where('start_at', '>=', $startAt)->where('end_at', '<=', $endAt)->get()
+                    ->pluck('screenshot')
+                    ->groupBy(function ($s) {
+                        return Carbon::parse($s['created_at'])->startOfDay()->format('Y-m-d');
+                    })
+                    ->transform(function ($item, $k) {
+                        return $item->groupBy(function ($screen) {
+                            return Carbon::parse($screen['created_at'])->startOfHour()->format('h:i');
+                        });
+                    })
             ];
 
             $projects[$project_id]['users'][$user_id]['tasks_time'] += $projectReport->duration;
@@ -129,12 +173,15 @@ class ProjectReportController extends Controller
 
         $projects = array_values($projects);
 
+
         return $projects;
     }
 
     /**
      * [events description]
-     * @param Request $request [description]
+     *
+     * @param  Request  $request  [description]
+     *
      * @return \Illuminate\Http\JsonResponse [description]
      */
     public function days(Request $request)
@@ -153,10 +200,9 @@ class ProjectReportController extends Controller
             );
         }
 
-        $uids = $request->uids;
+        $uids = $request->input('uids', []);
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -185,12 +231,27 @@ class ProjectReportController extends Controller
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function projects(Request $request)
     {
-        $uids = $request->uids;
+        $validator = Validator::make(
+            $request->all(),
+            $this->getValidationRules()
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ], 400
+            );
+        }
+
+        $uids = $request->input('uids', []);
         // Get projects, where specified users is attached.
         $users_attached_project_ids = Project::whereHas('users', function ($query) use ($uids) {
             $query->whereIn('id', $uids);
@@ -222,15 +283,20 @@ class ProjectReportController extends Controller
     /**
      * Returns durations per date for a task.
      *
-     * @param $id
-     * @param Request $request
+     * @param           $id
+     * @param  Request  $request
+     *
      * @return \Illuminate\Http\JsonResponse
      */
     public function task($id, Request $request)
     {
         $validator = Validator::make(
             $request->all(),
-            $this->getValidationRules()
+            [
+                'start_at' => 'required|date',
+                'end_at' => 'required|date',
+                'uid' => 'required|exists:users,id',
+            ]
         );
 
         if ($validator->fails()) {
@@ -244,8 +310,7 @@ class ProjectReportController extends Controller
 
         $uid = $request->uid;
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P'); # Format +00:00
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -269,4 +334,29 @@ class ProjectReportController extends Controller
 
         return response()->json($report);
     }
+
+    /**
+     * @param  Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     */
+    public function screenshots(Request $request)
+    {
+        $taskID = $request->input('task_id');
+        $date = $request->input('date');
+
+        $startDate = Carbon::parse($date);
+        $endDate = clone $startDate;
+        $endDate = $endDate->addDay();
+
+        $result = TimeInterval::where('task_id', '=', $taskID)
+            ->where('start_at', '>=', $startDate->toDateTimeString())
+            ->where('start_at', '<', $endDate->toDateTimeString())
+            ->with('screenshots')
+            ->get()
+            ->pluck('screenshots');
+
+        return response()->json($result);
+    }
+
 }

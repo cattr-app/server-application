@@ -2,6 +2,7 @@
 
 namespace Modules\GitlabIntegration\Helpers;
 
+use App\Models\Property;
 use App\User;
 use Gitlab\Client;
 use Gitlab\ResultPager;
@@ -46,7 +47,7 @@ class GitlabApi
     {
         $this->user = $user;
 
-        $this->apiUrl = $this->userProperties->getUrl($user->id);
+        $this->apiUrl = Property::where(['entity_type' => 'company', 'name' => 'gitlab_url'])->first()->value;
         $this->apiKey = $this->userProperties->getApiKey($user->id);
 
         if (empty($this->apiUrl) || empty($this->apiKey)) {

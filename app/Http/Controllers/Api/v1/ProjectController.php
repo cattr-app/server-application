@@ -51,7 +51,7 @@ class ProjectController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return ['users'];
+        return ['users'/*, 'tasks', 'tasks.timeIntervals'*/];
     }
 
     /**
@@ -91,11 +91,14 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api {get, post} /api/v1/projects/list List
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {get, post} /api/v1/projects/list List
      * @apiDescription Get list of Projects
-     * @apiVersion 0.1.0
-     * @apiName GetProjectList
-     * @apiGroup Project
+     * @apiVersion     0.1.0
+     * @apiName        GetProjectList
+     * @apiGroup       Project
      *
      * @apiParam {Integer}  [id]          `QueryParam` Project id
      * @apiParam {Integer}  [user_id]     `QueryParam` Project User id
@@ -104,7 +107,7 @@ class ProjectController extends ItemController
      * @apiParam {String}   [created_at]  `QueryParam` Project date time of create
      * @apiParam {String}   [updated_at]  `QueryParam` Project date time of update
      *
-     * @apiUse ProjectRelations
+     * @apiUse         ProjectRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -115,8 +118,8 @@ class ProjectController extends ItemController
      *      "created_at":  [">", "2019-01-01 00:00:00"],
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
-     * @apiUse ProjectRelationsExample
-     * @apiUse UnauthorizedError
+     * @apiUse         ProjectRelationsExample
+     * @apiUse         UnauthorizedError
      *
      * @apiSuccess {Object[]} ProjectList                     Projects
      * @apiSuccess {Object}   ProjectList.Project             Project
@@ -151,8 +154,6 @@ class ProjectController extends ItemController
      *   }
      * ]
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -203,7 +204,8 @@ class ProjectController extends ItemController
     /**
      * Returns tasks info for a project.
      *
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return JsonResponse
      */
     public function tasks(Request $request): JsonResponse
@@ -284,11 +286,14 @@ class ProjectController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/projects/create Create
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/projects/create Create
      * @apiDescription Create Project
-     * @apiVersion 0.1.0
-     * @apiName CreateProject
-     * @apiGroup Project
+     * @apiVersion     0.1.0
+     * @apiName        CreateProject
+     * @apiGroup       Project
      *
      * @apiParam {String}  name         Project name
      * @apiParam {String}  description  Project description
@@ -306,8 +311,8 @@ class ProjectController extends ItemController
      * @apiSuccess {String}   res.created_at  Project date time of create
      * @apiSuccess {String}   res.updated_at  Project date time of update
      *
-     * @apiUse DefaultCreateErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultCreateErrorResponse
+     * @apiUse         UnauthorizedError
      *
      * @apiSuccessExample {json} Answer Example
      * {
@@ -320,12 +325,13 @@ class ProjectController extends ItemController
      *   }
      * }
      *
-     * @param Request $request
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/projects/show Show
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/projects/show Show
      * @apiParamExample {json} Simple Request Example
      *  {
      *      "id":          1,
@@ -335,11 +341,11 @@ class ProjectController extends ItemController
      *      "created_at":  [">", "2019-01-01 00:00:00"],
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
-     * @apiUse ProjectRelationsExample
+     * @apiUse         ProjectRelationsExample
      * @apiDescription Show Project
-     * @apiVersion 0.1.0
-     * @apiName ShowProject
-     * @apiGroup Project
+     * @apiVersion     0.1.0
+     * @apiName        ShowProject
+     * @apiGroup       Project
      *
      * @apiParam {Integer}  id            `QueryParam` Project id
      * @apiParam {Integer}  [user_id]     `QueryParam` Project User id
@@ -347,7 +353,7 @@ class ProjectController extends ItemController
      * @apiParam {String}   [description] `QueryParam` Project description
      * @apiParam {String}   [created_at]  `QueryParam` Project date time of create
      * @apiParam {String}   [updated_at]  `QueryParam` Project date time of update
-     * @apiUse ProjectRelations
+     * @apiUse         ProjectRelations
      *
      * @apiSuccess {Object}   Project             Project object
      * @apiSuccess {Integer}  Project.id          Project id
@@ -420,15 +426,16 @@ class ProjectController extends ItemController
      *   ]
      * }
      *
-     * @apiUse DefaultShowErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultShowErrorResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
 
     /**
-     * @api {put, post} /api/v1/projects/edit Edit
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {put, post} /api/v1/projects/edit Edit
      * @apiParamExample {json} Simple Request Example
      *  {
      *      "id": 1,
@@ -437,9 +444,9 @@ class ProjectController extends ItemController
      *  }
      *
      * @apiDescription Edit Project
-     * @apiVersion 0.1.0
-     * @apiName EditProject
-     * @apiGroup Project
+     * @apiVersion     0.1.0
+     * @apiName        EditProject
+     * @apiGroup       Project
      *
      * @apiParam {String}  id           Project id
      * @apiParam {String}  name         Project name
@@ -453,36 +460,35 @@ class ProjectController extends ItemController
      * @apiSuccess {String}   res.updated_at  Project date time of update
      * @apiSuccess {String}   res.deleted_at  Project date time of delete
      *
-     * @apiUse DefaultEditErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultEditErrorResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
 
     /**
-     * @api {delete, post} /api/v1/projects/remove Destroy
-     * @apiUse DefaultDestroyRequestExample
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {delete, post} /api/v1/projects/remove Destroy
+     * @apiUse         DefaultDestroyRequestExample
      * @apiDescription Destroy Project
-     * @apiVersion 0.1.0
-     * @apiName DestroyProject
-     * @apiGroup Project
+     * @apiVersion     0.1.0
+     * @apiName        DestroyProject
+     * @apiGroup       Project
      *
      * @apiParam {String} id Project id
      *
-     * @apiUse DefaultDestroyResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultDestroyResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
 
     /**
-     * @param bool $withRelations
+     * @param  bool  $withRelations
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = false): Builder
+    protected function getQuery($withRelations = true): Builder
     {
         $user = Auth::user();
         $user_id = $user->id;
@@ -495,17 +501,18 @@ class ProjectController extends ItemController
         }
 
         $query->where(static function (Builder $query) use ($user_id, $action_method) {
-            $query->when($action_method !== 'edit' && $action_method !== 'remove', static function (Builder $query) use ($user_id) {
-                $query->whereHas('users', static function (Builder $query) use ($user_id) {
-                    $query->where('id', $user_id)->select('id');
+            $query->when($action_method !== 'edit' && $action_method !== 'remove',
+                static function (Builder $query) use ($user_id) {
+                    $query->whereHas('users', static function (Builder $query) use ($user_id) {
+                        $query->where('id', $user_id)->select('id');
+                    });
+                    $query->orWhereHas('tasks', static function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id)->select('user_id');
+                    });
+                    $query->orWhereHas('tasks.timeIntervals.user', static function (Builder $query) use ($user_id) {
+                        $query->where('id', $user_id)->select('id');
+                    });
                 });
-                $query->orWhereHas('tasks', static function (Builder $query) use ($user_id) {
-                    $query->where('user_id', $user_id)->select('user_id');
-                });
-                $query->orWhereHas('tasks.timeIntervals.user', static function (Builder $query) use ($user_id) {
-                    $query->where('id', $user_id)->select('id');
-                });
-            });
         });
 
         return $query;
