@@ -768,29 +768,49 @@ class TimeIntervalController extends ItemController
     {
         /** @var User $user */
         $user = Auth::user();
-
         $query = parent::getQuery($withRelations);
         $full_access = $user->allowed('time-intervals', 'full_access');
+        $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
             return $query;
         }
 
-        $query->where(static function (EloquentJoinBuilder $query) use ($user) {
-            $query->where('user_id', '=', $user->id);
-
-            if ($user->allowed('projects', 'relations')) {
-                $query->joinRelations('task.project');
-                $query->orWhereHas('task.project', static function (EloquentJoinBuilder $query) use ($user) {
-                    $query
-                        ->select('id')
-                        ->whereIn('id', $user->projects->map(static function ($project) {
-                            return $project->id;
-                        }))
-                        ->limit(1);
-                });
+        $rules = $this->getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
             }
-        });
+
+            $query->where(function (Builder $query) use ($user, $object, $action) {
+                $user_id = $user->id;
+
+                // Filter by project roles of the user
+                $query->whereHas('task.project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
+                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
+                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                            $query->where([
+                                'object' => $object,
+                                'action' => $action,
+                                'allow'  => true,
+                            ])->select('id');
+                        })->select('id');
+                    })->select('id');
+                });
+
+                // For read and delete access include user own intervals
+                $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
+                    $query->orWhere('user_id', $user_id)->select('user_id');
+                });
+
+                $query->when($action === 'edit' && (bool) $user->manual_time, static function (Builder $query) use ($user_id) {
+                    $query->orWhere('user_id', $user_id)->select('user_id');
+                });
+            });
+        }
 
         return $query;
     }

@@ -19,10 +19,10 @@ class AddIsAdministratorColumnToUsersTable extends Migration
         });
 
         // Updating users
-        $users = User::with('roles')->get();
+        $users = User::with('role')->get();
         foreach ($users as $user) {
             /** @var User $user */
-            if ($user->roles->where('name', 'root')->count()) {
+            if ($user->role->name === 'root') {
                 $user->is_admin = true;
                 $user->save();
             }

@@ -9,6 +9,19 @@ use Illuminate\Database\Migrations\Migration;
 
 class AddRoleToUsers extends Migration
 {
+    protected function updateRules(int $roleID, array $rules, bool $allow)
+    {
+        foreach ($rules as $object => $actions) {
+            foreach ($actions as $action) {
+                Rule::updateOrCreate([
+                    'role_id' => $roleID,
+                    'object'  => $object,
+                    'action'  => $action,
+                ], ['allow' => $allow]);
+            }
+        }
+    }
+
     protected function updateData()
     {
         $userRoles = DB::table('user_role')->select(['user_id', 'role_id'])->get();
@@ -22,83 +35,86 @@ class AddRoleToUsers extends Migration
 
         echo "\nAll roles set to users.\n";
 
-        $auditorRole = Role::where(['name' => 'auditor'])->first();
-        if (!isset($auditorRole)) {
-            $auditorRole = Role::updateOrCreate(['name' => 'auditor']);
-
+        $userRole = Role::where(['name' => 'user'])->first();
+        if (isset($userRole)) {
             $allow = [
-                'dashboard' => [
-                    'manager_access',
-                ],
-                'project-report' => [
-                    'list',
-                    'projects',
-                    'manager_access',
-                ],
-                'projects' => [
-                    'list',
-                    'show',
-                ],
-                'roles' => [
-                    'list',
-                    'allowed-rules',
-                ],
-                'screenshots' => [
-                    'dashboard',
-                    'list',
-                    'show',
-                    'manager_access',
-                ],
-                'tasks' => [
-                    'dashboard',
-                    'list',
-                    'show',
-                ],
-                'time' => [
-                    'project',
-                    'task',
-                    'task-user',
-                    'tasks',
-                    'total'
-                ],
-                'time-duration' => [
-                    'list',
-                ],
-                'time-intervals' => [
-                    'list',
-                    'edit',
-                    'remove',
-                    'bulk-remove',
-                    'show',
-                    'manager_access'
-                ],
-                'time-use-report' => [
-                    'list',
-                ],
-                'users' => [
-                    'list',
-                    'relations',
-                    'show',
-                    'manager_access',
-                ],
-                'integration' => [
-                    'gitlab',
-                    'redmine',
-                ],
+                'screenshots'    => ['create', 'bulk-create'],
+                'time-intervals' => ['create', 'bulk-create'],
+            ];
+            $disallow = [
+                'users'          => ['manager_access', 'list', 'show', 'create', 'edit', 'remove'],
+                'projects'       => ['list', 'show', 'create', 'edit', 'remove'],
+                'tasks'          => ['dashboard', 'list', 'show', 'create', 'edit', 'remove'],
+                'screenshots'    => ['manager_access', 'dashboard', 'list', 'show', 'edit', 'remove'],
+                'time-intervals' => ['manager_access', 'list', 'show', 'edit', 'remove'],
             ];
 
-            foreach ($allow as $object => $actions) {
-                foreach ($actions as $action => $action_name) {
-                    Rule::updateOrCreate([
-                        'role_id' => $auditorRole->id,
-                        'object' => $object,
-                        'action' => !is_int($action) ? $action : $action_name,
-                        'allow' => true,
-                    ]);
-                }
-            }
+            $this->updateRules($userRole->id, $allow, true);
+            $this->updateRules($userRole->id, $disallow, false);
+
+            echo "\nUpdated user rules.\n";
+        }
+
+        $auditorRole = Role::where(['name' => 'auditor'])->first();
+        if (isset($auditorRole)) {
+            $allow = [
+                'users'          => ['manager_access', 'list', 'show'],
+                'projects'       => ['list', 'show'],
+                'tasks'          => ['dashboard', 'list', 'show', 'create'],
+                'screenshots'    => ['manager_access', 'dashboard', 'list', 'show', 'create', 'bulk-create'],
+                'time-intervals' => ['manager_access', 'list', 'show', 'create', 'bulk-create'],
+            ];
+            $disallow = [
+                'users'          => ['create', 'edit', 'remove'],
+                'projects'       => ['create', 'edit', 'remove'],
+                'tasks'          => ['edit', 'remove'],
+                'screenshots'    => ['edit', 'remove'],
+                'time-intervals' => ['edit', 'remove', 'bulk-remove'],
+            ];
+
+            $this->updateRules($auditorRole->id, $allow, true);
+            $this->updateRules($auditorRole->id, $disallow, false);
+
+            echo "\nUpdated auditor rules.\n";
+        } else {
+            $auditorRole = Role::updateOrCreate(['name' => 'auditor']);
+            $allow = [
+                'users'           => ['manager_access', 'list', 'show'],
+                'projects'        => ['list', 'show'],
+                'tasks'           => ['dashboard', 'list', 'show', 'create'],
+                'screenshots'     => ['manager_access', 'dashboard', 'list', 'show', 'create', 'bulk-create'],
+                'time-intervals'  => ['manager_access', 'list', 'show', 'create', 'bulk-create'],
+                'dashboard'       => ['manager_access'],
+                'project-report'  => ['manager_access', 'list', 'projects'],
+                'roles'           => ['list', 'allowed-rules'],
+                'time'            => ['project', 'task', 'task-user', 'tasks', 'total'],
+                'time-duration'   => ['list'],
+                'time-use-report' => ['list'],
+                'integration'     => ['gitlab', 'redmine'],
+            ];
+
+            $this->updateRules($auditorRole->id, $allow, true);
 
             echo "\nCreated auditor role.\n";
+        }
+
+        $managerRole = Role::where(['name' => 'manager'])->first();
+        if (isset($managerRole)) {
+            $allow = [
+                'users'          => ['manager_access', 'list', 'show', 'create', 'edit'],
+                'projects'       => ['list', 'show', 'create', 'edit', 'remove'],
+                'tasks'          => ['dashboard', 'list', 'show', 'create', 'edit', 'remove'],
+                'screenshots'    => ['manager_access', 'dashboard', 'list', 'show', 'create', 'bulk-create', 'edit', 'remove'],
+                'time-intervals' => ['manager_access', 'list', 'show', 'create', 'bulk-create', 'edit', 'remove', 'bulk-remove'],
+            ];
+            $disallow = [
+                'users' => ['remove'],
+            ];
+
+            $this->updateRules($managerRole->id, $allow, true);
+            $this->updateRules($managerRole->id, $disallow, false);
+
+            echo "\nUpdated manager rules.\n";
         }
     }
 

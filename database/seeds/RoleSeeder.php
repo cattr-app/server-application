@@ -29,26 +29,14 @@ class RoleSeeder extends Seeder
                 'list',
                 'projects',
             ],
-            'projects' => [
-                'list',
-                'show',
-            ],
+            'projects' => [],
             'roles' => [
                 'allowed-rules',
             ],
             'screenshots' => [
                 'create',
-                'dashboard',
-                'list',
-                'remove',
-                'show',
             ],
-            'tasks' => [
-                'create',
-                'dashboard',
-                'list',
-                'show',
-            ],
+            'tasks' => [],
             'task-comment' => [
                 'list',
                 'create',
@@ -67,19 +55,12 @@ class RoleSeeder extends Seeder
             ],
             'time-intervals' => [
                 'create',
-                'edit',
-                'list',
-                'remove',
-                'bulk-remove',
-                'show',
+                'bulk-create',
             ],
             'time-use-report' => [
                 'list',
             ],
             'users' => [
-                'edit',
-                'list',
-                'show',
             ],
             'integration' => [
                 'gitlab',
@@ -163,73 +144,6 @@ class RoleSeeder extends Seeder
                 'redmine',
             ],
         ];
-        $managerAllow = [
-            'dashboard' => [
-                'manager_access',
-            ],
-            'project-report' => [
-                'list',
-                'projects',
-                'manager_access',
-            ],
-            'projects' => [
-                'list',
-                'edit',
-                'show',
-            ],
-            'roles' => [
-                'list',
-                'allowed-rules',
-            ],
-            'screenshots' => [
-                'dashboard',
-                'list',
-                'edit',
-                'remove',
-                'show',
-                'manager_access',
-            ],
-            'tasks' => [
-                'dashboard',
-                'edit',
-                'list',
-                'remove',
-                'show',
-            ],
-            'time' => [
-                'project',
-                'task',
-                'task-user',
-                'tasks',
-                'total'
-            ],
-            'time-duration' => [
-                'list',
-            ],
-            'time-intervals' => [
-                'list',
-                'edit',
-                'remove',
-                'bulk-remove',
-                'show',
-                'manager_access'
-            ],
-            'time-use-report' => [
-                'list',
-            ],
-            'users' => [
-                'list',
-                'edit',
-                'bulk-edit',
-                'relations',
-                'show',
-                'manager_access',
-            ],
-            'integration' => [
-                'gitlab',
-                'redmine',
-            ],
-        ];
         $auditorAllow = [
             'dashboard' => [
                 'manager_access',
@@ -248,13 +162,13 @@ class RoleSeeder extends Seeder
                 'allowed-rules',
             ],
             'screenshots' => [
+                'manager_access',
                 'dashboard',
                 'list',
                 'show',
-                'manager_access',
+                'create',
             ],
             'tasks' => [
-                'dashboard',
                 'list',
                 'show',
             ],
@@ -269,21 +183,88 @@ class RoleSeeder extends Seeder
                 'list',
             ],
             'time-intervals' => [
+                'manager_access',
                 'list',
-                'edit',
-                'remove',
-                'bulk-remove',
                 'show',
-                'manager_access'
+                'create',
+                'bulk-create',
             ],
             'time-use-report' => [
                 'list',
             ],
             'users' => [
-                'list',
-                'relations',
-                'show',
                 'manager_access',
+                'list',
+                'show',
+            ],
+            'integration' => [
+                'gitlab',
+                'redmine',
+            ],
+        ];
+        $managerAllow = [
+            'dashboard' => [
+                'manager_access',
+            ],
+            'project-report' => [
+                'list',
+                'projects',
+                'manager_access',
+            ],
+            'projects' => [
+                'list',
+                'show',
+                'edit',
+                'remove',
+            ],
+            'roles' => [
+                'list',
+                'allowed-rules',
+            ],
+            'screenshots' => [
+                'manager_access',
+                'dashboard',
+                'list',
+                'show',
+                'create',
+                'edit',
+                'remove',
+            ],
+            'tasks' => [
+                'list',
+                'show',
+                'edit',
+                'remove',
+            ],
+            'time' => [
+                'project',
+                'task',
+                'task-user',
+                'tasks',
+                'total'
+            ],
+            'time-duration' => [
+                'list',
+            ],
+            'time-intervals' => [
+                'manager_access',
+                'list',
+                'show',
+                'create',
+                'bulk-create',
+                'edit',
+                'remove',
+                'bulk-remove',
+            ],
+            'time-use-report' => [
+                'list',
+            ],
+            'users' => [
+                'manager_access',
+                'list',
+                'show',
+                'edit',
+                'bulk-edit',
             ],
             'integration' => [
                 'gitlab',

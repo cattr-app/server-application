@@ -194,6 +194,10 @@ class Role extends AbstractModel
      */
     public static function can($user, $object, $action, $id = null): bool
     {
+        if ((bool) $user->is_admin) {
+            return true;
+        }
+
         /** @var User $user */
         $userRoleIds = [$user->role_id];
 
