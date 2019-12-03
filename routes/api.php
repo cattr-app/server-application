@@ -48,11 +48,12 @@ Route::group([
 ], static function (Router $router) {
     $router->post('login', 'AuthController@login');
     $router->any('logout', 'AuthController@logout');
-    $router->any('logout-all', 'AuthController@logoutAll');
+    $router->any('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
-    $router->post('password-reset/send', 'AuthController@sendPasswordReset');
-    $router->post('password-reset/process', 'AuthController@processPasswordReset')
+    $router->post('password-reset/request', 'PasswordReset@request');
+    $router->post('password-reset/validate', 'PasswordReset@validate');
+    $router->post('password-reset/process', 'PasswordReset@process')
         ->name('password.reset.process');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');
@@ -63,15 +64,15 @@ Route::group([
     Route::group([
         'prefix' => 'v1/auth',
     ], function (Router $router) {
-        $router->any('ping', 'AuthController@ping');
-        $router->any('check', 'AuthController@check');
         $router->post('login', 'AuthController@login');
         $router->any('logout', 'AuthController@logout');
-        $router->any('logout-all', 'AuthController@logoutAll');
+        $router->any('logout-from-all', 'AuthController@logoutFromAll');
         $router->post('refresh', 'AuthController@refresh');
         $router->any('me', 'AuthController@me');
-        $router->post('send-reset', 'AuthController@sendPasswordReset');
-        $router->post('reset', 'AuthController@processPasswordReset');
+        $router->post('password-reset/request', 'PasswordReset@request');
+        $router->post('password-reset/validate', 'PasswordReset@validate');
+        $router->post('password-reset/process', 'PasswordReset@process')
+            ->name('password.reset.process');
 
         $router->get('/register/{key}', 'RegistrationController@getForm');
         $router->post('/register/{key}', 'RegistrationController@postForm');
