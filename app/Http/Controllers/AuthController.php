@@ -446,7 +446,8 @@ class AuthController extends BaseController
             $this->recaptcha->check($credentials);
 
             return response()->json([
-                'error' => 'User with such email isn’t found',
+                'success' => false,
+                'message' => 'User with such email isn’t found',
             ], 404);
         }
 
@@ -456,6 +457,7 @@ class AuthController extends BaseController
         $this->broker()->sendResetLink($credentials);
 
         return response()->json([
+            'success' => true,
             'message' => 'Link for restore password has been sent to your email.',
         ], 200);
     }
