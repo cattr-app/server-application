@@ -241,6 +241,19 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     {
         return $this->hasMany(Token::class);
     }
+
+    /**
+     * @param $token
+     * @return Token
+     */
+    public function addToken($token)
+    {
+        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
+        /** @var Token $token */
+        $token = $this->tokens()->create(['token' => $token, 'expires_at' => $tokenExpires]);
+        return $token;
+
+    }
     /**
      * @return HasMany
      */
