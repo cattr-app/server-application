@@ -74,7 +74,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     protected $table = 'users';
 
     protected $with = [
-        'role'
+        'role', 'projectsRelation.role',
     ];
 
     /**
