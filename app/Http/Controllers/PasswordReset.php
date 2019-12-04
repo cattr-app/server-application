@@ -64,7 +64,7 @@ class PasswordReset extends BaseController
      * @apiUse ParamsValidationError
      * @apiUse InvalidPasswordResetDataError
      */
-    public function validate(Request $request)
+    public function validate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
                 'email' => 'required|email',
@@ -120,7 +120,7 @@ class PasswordReset extends BaseController
      * @apiUse NoSuchUserError
      * @apiUse CaptchaError
      */
-    public function request(Request $request)
+    public function request(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), ['email' => 'required|email']);
         if ($validator->fails()) {
