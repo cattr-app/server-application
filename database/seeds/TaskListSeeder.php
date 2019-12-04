@@ -113,7 +113,7 @@ class TaskListSeeder extends Seeder
     protected function seedScreenshot(TimeInterval $interval, User $user): void
     {
         if ($this->_isScreenshotDownloaded === false) {
-            $placeholderLink = "http://via.placeholder.com/1600x900/{$this->random_color()}/{$this->random_color()}.png?"
+            $placeholderLink = "https://via.placeholder.com/1600x900/{$this->random_color()}/{$this->random_color()}.png?"
                 .http_build_query([
                     'text' => "#{$interval->id} - {$interval->task->task_name}",
                 ]);
