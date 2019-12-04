@@ -22,7 +22,7 @@ class AddIsAdministratorColumnToUsersTable extends Migration
         $users = User::with('role')->get();
         foreach ($users as $user) {
             /** @var User $user */
-            if ($user->role->name === 'root') {
+            if ($user->role && $user->role->name === 'root') {
                 $user->is_admin = true;
                 $user->save();
             }
