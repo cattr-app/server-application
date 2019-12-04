@@ -18,23 +18,128 @@ use App\Exceptions\Interfaces\TypedException;
 class AuthorizationException extends BaseAuthorizationException
     implements TypedException, InfoExtendedException, HttpExceptionInterface
 {
+    /**
+     * @apiDefine 400Error
+     * @apiError (Error 4xx) {String}   message  Message from server
+     * @apiError (Error 4xx) {Boolean}  success  Indicates erroneous response when FALSE
+     */
+
+    /**
+     * @apiDefine UnauthorizedError
+     * @apiErrorExample {json} Unauthorized
+     *  HTTP/1.1 401 Unauthorized
+     *  {
+     *    "success": false,
+     *    "message": "Not authorized"
+     *  }
+     */
     public const ERROR_TYPE_UNAUTHORIZED = 'authorization.unauthorized';
+
+    /**
+     * @apiDefine CaptchaError
+     * @apiError (Error 429) {Object}  info           Additional info from server
+     * @apiError (Error 429) {String}  info.site_key  Public site key for rendering reCaptcha
+     *
+     * @apiErrorExample {json} Captcha
+     *  HTTP/1.1 429 Too Many Requests
+     *  {
+     *    "success": false,
+     *    "message": "Invalid captcha",
+     *    "info": {
+     *      "site_key": "6Le7R8IUAAAAAMCwR4b...."
+     *    }
+     *  }
+     */
     public const ERROR_TYPE_CAPTCHA = 'authorization.captcha';
+
+    /**
+     * @apiDefine LimiterError
+     * @apiErrorExample {json} Limiter
+     *  HTTP/1.1 423 Locked
+     *  {
+     *    "success": false,
+     *    "message": "Enhance Your Calm"
+     *  }
+     */
     public const ERROR_TYPE_BANNED = 'authorization.banned_enhance_your_calm';
+
+    /**
+     * @apiDefine TokenMismatchError
+     * @apiErrorExample {json} Token mismatch
+     *  HTTP/1.1 401 Unauthorized
+     *  {
+     *    "success": false,
+     *    "message": "Token mismatch"
+     *  }
+     */
     public const ERROR_TYPE_TOKEN_MISMATCH = 'authorization.token_mismatch';
+
+    /**
+     * @apiDefine TokenExpiredError
+     * @apiErrorExample {json} Token expired
+     *  HTTP/1.1 401 Unauthorized
+     *  {
+     *    "success": false,
+     *    "message": "Token expired"
+     *  }
+     */
     public const ERROR_TYPE_TOKEN_EXPIRED = 'authorization.token_expired';
+
+    /**
+     * @apiDefine UserDeactivatedError
+     * @apiErrorExample {json} User deactivated
+     *  HTTP/1.1 403 Forbidden
+     *  {
+     *    "success": false,
+     *    "message": "User deactivated"
+     *  }
+     */
     public const ERROR_TYPE_USER_DISABLED = 'authorization.user_disabled';
 
+    /**
+     * @apiDefine ParamsValidationError
+     * @apiErrorExample {json} Params validation
+     *  HTTP/1.1 400 Bad Request
+     *  {
+     *    "success": false,
+     *    "message": "Ivalid params"
+     *  }
+     */
+    public const ERROR_TYPE_VALIDATION_FAILED = 'authorization.wrong_params';
 
-    protected const ERRORS =
-        [
-            self::ERROR_TYPE_UNAUTHORIZED => ['code' => 401, 'message' => 'Not authorized'],
-            self::ERROR_TYPE_CAPTCHA => ['code' => 429, 'message' => 'Invalid captcha',],
-            self::ERROR_TYPE_BANNED => ['code' => 420, 'message' => 'Enhance Your Calm'],
-            self::ERROR_TYPE_TOKEN_MISMATCH => ['code' => 401, 'message' => 'Token mismatch'],
-            self::ERROR_TYPE_TOKEN_EXPIRED => ['code' => 401, 'message' => 'Token expired'],
-            self::ERROR_TYPE_USER_DISABLED => ['code' => 403, 'message' => 'User deactivated']
-        ];
+    /**
+     * @apiDefine NoSuchUserError
+     * @apiErrorExample {json} No such user
+     *  HTTP/1.1 404 Not Found
+     *  {
+     *    "success": false,
+     *    "message": "User with such email isn’t found"
+     *  }
+     */
+    public const ERROR_TYPE_USER_NOT_FOUND = 'authorization.user_not_found';
+
+    /**
+     * @apiDefine InvalidPasswordResetDataError
+     * @apiErrorExample {json} Invalid password reset data
+     *  HTTP/1.1 401 Unauthorized
+     *  {
+     *    "success": false,
+     *    "message": "Invalid password reset data"
+     *  }
+     */
+    public const ERROR_TYPE_INVALID_PASSWORD_RESET_DATA = 'authorization.invalid_password_data';
+
+    protected const ERRORS = [
+        self::ERROR_TYPE_UNAUTHORIZED => ['code' => 401, 'message' => 'Not authorized'],
+        self::ERROR_TYPE_CAPTCHA => ['code' => 429, 'message' => 'Invalid captcha',],
+        self::ERROR_TYPE_BANNED => ['code' => 423, 'message' => 'Enhance Your Calm'],
+        self::ERROR_TYPE_TOKEN_MISMATCH => ['code' => 401, 'message' => 'Token mismatch'],
+        self::ERROR_TYPE_TOKEN_EXPIRED => ['code' => 401, 'message' => 'Token expired'],
+        self::ERROR_TYPE_USER_DISABLED => ['code' => 403, 'message' => 'User deactivated'],
+        self::ERROR_TYPE_VALIDATION_FAILED => ['code' => 400, 'message' => 'Invalid params'],
+        self::ERROR_TYPE_USER_NOT_FOUND => ['code' => 404, 'message' => 'User with such email isn’t found'],
+        self::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA => ['code' => 401, 'message' => 'Invalid password reset data'],
+    ];
 
     /**
      * @var string

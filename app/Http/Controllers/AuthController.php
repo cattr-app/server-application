@@ -140,12 +140,12 @@ class AuthController extends BaseController
         ]);
 
         if ($validator->fails()) {
-            return response()->json(['success'=> false, 'message' => 'asd'], 400);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_VALIDATION_FAILED);
         }
 
         $this->recaptcha->check($credentials);
 
-        if (!$newToken = auth()->attempt($credentials)) {
+        if (!$newToken = auth()->attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
             $this->recaptcha->incrementCaptchaAmounts();
             $this->recaptcha->check($credentials);
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
