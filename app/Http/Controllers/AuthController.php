@@ -145,7 +145,7 @@ class AuthController extends BaseController
 
         $this->recaptcha->check($credentials);
 
-        if (!$newToken = auth()->attempt($credentials)) {
+        if (!$newToken = auth()->attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
             $this->recaptcha->incrementCaptchaAmounts();
             $this->recaptcha->check($credentials);
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
