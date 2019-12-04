@@ -64,7 +64,7 @@ class PasswordReset extends BaseController
      * @apiUse ParamsValidationError
      * @apiUse InvalidPasswordResetDataError
      */
-    public function validate(Request $request)
+    public function validate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
                 'email' => 'required|email',
