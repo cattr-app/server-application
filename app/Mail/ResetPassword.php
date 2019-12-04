@@ -2,10 +2,11 @@
 
 namespace App\Mail;
 
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Lang;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ResetPassword extends \Illuminate\Auth\Notifications\ResetPassword
+class ResetPassword extends ResetPasswordNotification
 {
     /**
      * User email.
@@ -26,7 +27,7 @@ class ResetPassword extends \Illuminate\Auth\Notifications\ResetPassword
      * @param  mixed  $notifiable
      * @return MailMessage
      */
-    public function toMail($notifiable)
+    public function toMail($notifiable): MailMessage
     {
         if (static::$toMailCallback) {
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
