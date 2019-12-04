@@ -5,8 +5,8 @@ namespace App\Http\Controllers\Api\v1\Statistic;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Property;
-use App\User;
-use Auth;
+use App\Models\ProjectReport;
+use Filter;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
@@ -16,8 +16,16 @@ use Validator;
  * Class TimeUseReportController
  * @package App\Http\Controllers\Api\v1\Statistic
  */
-class TimeUseReportController extends Controller
+class TimeUseReportController extends ReportController
 {
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
+    {
+        return 'time-use-report';
+    }
+
     /**
      * @var
      */
@@ -54,19 +62,23 @@ class TimeUseReportController extends Controller
     {
         $validator = Validator::make(
             $request->all(),
-            [
+            Filter::process(
+                $this->getEventUniqueName('validation.report.show'),
+                [
                 'user_ids' => 'exists:users,id|array',
-                'start_at' => 'required|date',
-                'end_at' => 'required|date',
-            ]
+                    'start_at' => 'required|date',
+                    'end_at' => 'required|date',
+                ]
+            )
         );
 
         if ($validator->fails()) {
             return response()->json(
-                [
+                Filter::process(
+                    $this->getEventUniqueName('answer.error.report.show'), [
                     'error' => 'Validation fail',
                     'reason' => $validator->errors()
-                ], 400
+                ], 400)
             );
         }
 
@@ -83,7 +95,7 @@ class TimeUseReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $projectReports = DB::table('project_report')
+        $projectReports = ProjectReport::query()
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
@@ -122,9 +134,13 @@ class TimeUseReportController extends Controller
             $users[$user_id]['total_time'] += $duration;
         }
 
-        $ret = [['users' => array_values($users)]];
+        $report = [['users' => array_values($users)]];
 
-
-        return response()->json($ret);
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $report
+            )
+        );
     }
 }

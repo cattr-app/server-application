@@ -7,12 +7,13 @@ use Auth;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
+use Filter;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
 use Validator;
 
-class DashboardController extends Controller
+class DashboardController extends ReportController
 {
     /**
      * @return array
@@ -24,6 +25,14 @@ class DashboardController extends Controller
             'start_at' => 'date|required',
             'end_at' => 'date|required',
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
+    {
+        return 'dashboard';
     }
 
     /**
@@ -116,12 +125,14 @@ class DashboardController extends Controller
             $users[$user_id]['duration'] += $duration;
         }
 
-        $result = [
-            'success' => true,
-            'user_intervals' => $users,
-        ];
+        $results = ['userIntervals' => $users];
 
-        return response()->json($result);
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $results
+            )
+        );
     }
 
     /**
