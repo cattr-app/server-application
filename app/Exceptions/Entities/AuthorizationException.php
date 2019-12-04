@@ -18,13 +18,6 @@ use App\Exceptions\Interfaces\TypedException;
 class AuthorizationException extends BaseAuthorizationException
     implements TypedException, InfoExtendedException, HttpExceptionInterface
 {
-    public const ERROR_TYPE_UNAUTHORIZED = 'authorization.unauthorized';
-    public const ERROR_TYPE_CAPTCHA = 'authorization.captcha';
-    public const ERROR_TYPE_BANNED = 'authorization.banned_enhance_your_calm';
-    public const ERROR_TYPE_TOKEN_MISMATCH = 'authorization.token_mismatch';
-    public const ERROR_TYPE_TOKEN_EXPIRED = 'authorization.token_expired';
-    public const ERROR_TYPE_USER_DISABLED = 'authorization.user_disabled';
-
     /**
      * @apiDefine 400Error
      * @apiError (Error 4xx) {String}   message  Message from server
@@ -40,6 +33,7 @@ class AuthorizationException extends BaseAuthorizationException
      *    "message": "Not authorized"
      *  }
      */
+    public const ERROR_TYPE_UNAUTHORIZED = 'authorization.unauthorized';
 
     /**
      * @apiDefine CaptchaError
@@ -56,6 +50,7 @@ class AuthorizationException extends BaseAuthorizationException
      *    }
      *  }
      */
+    public const ERROR_TYPE_CAPTCHA = 'authorization.captcha';
 
     /**
      * @apiDefine LimiterError
@@ -66,6 +61,7 @@ class AuthorizationException extends BaseAuthorizationException
      *    "message": "Enhance Your Calm"
      *  }
      */
+    public const ERROR_TYPE_BANNED = 'authorization.banned_enhance_your_calm';
 
     /**
      * @apiDefine TokenMismatchError
@@ -76,6 +72,7 @@ class AuthorizationException extends BaseAuthorizationException
      *    "message": "Token mismatch"
      *  }
      */
+    public const ERROR_TYPE_TOKEN_MISMATCH = 'authorization.token_mismatch';
 
     /**
      * @apiDefine TokenExpiredError
@@ -86,6 +83,7 @@ class AuthorizationException extends BaseAuthorizationException
      *    "message": "Token expired"
      *  }
      */
+    public const ERROR_TYPE_TOKEN_EXPIRED = 'authorization.token_expired';
 
     /**
      * @apiDefine UserDeactivatedError
@@ -96,6 +94,7 @@ class AuthorizationException extends BaseAuthorizationException
      *    "message": "User deactivated"
      *  }
      */
+    public const ERROR_TYPE_USER_DISABLED = 'authorization.user_disabled';
 
     /**
      * @apiDefine ParamsValidationError
@@ -106,6 +105,7 @@ class AuthorizationException extends BaseAuthorizationException
      *    "message": "Ivalid params"
      *  }
      */
+    public const ERROR_TYPE_VALIDATION_FAILED = 'authorization.wrong_params';
 
     /**
      * @apiDefine NoSuchUserError
@@ -116,6 +116,7 @@ class AuthorizationException extends BaseAuthorizationException
      *    "message": "User with such email isn’t found"
      *  }
      */
+    public const ERROR_TYPE_USER_NOT_FOUND = 'authorization.user_not_found';
 
     /**
      * @apiDefine InvalidPasswordResetDataError
@@ -126,6 +127,8 @@ class AuthorizationException extends BaseAuthorizationException
      *    "message": "Invalid password reset data"
      *  }
      */
+    public const ERROR_TYPE_INVALID_PASSWORD_RESET_DATA = 'authorization.invalid_password_data';
+
     protected const ERRORS =
         [
             self::ERROR_TYPE_UNAUTHORIZED => ['code' => 401, 'message' => 'Not authorized'],
