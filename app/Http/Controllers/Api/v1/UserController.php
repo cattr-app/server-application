@@ -127,7 +127,7 @@ class UserController extends ItemController
     public function getQueryWith(): array
     {
         return [
-            'role',
+            'roles',
         ];
     }
 
@@ -330,6 +330,33 @@ class UserController extends ItemController
      *  }
      *
      */
+
+    /**
+     * Display a listing of the resource.
+     *
+     * @param Request $request
+     *
+     * @return JsonResponse
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $withDeleted = $request->input('with_deleted') === true;
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(true, $withDeleted), $request->all() ?: []
+            )
+        );
+
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.result'),
+                $itemsQuery->get()
+            )
+        );
+    }
 
     /**
      * @api {put, post} /api/v1/users/edit Edit
@@ -729,12 +756,12 @@ class UserController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         /** @var User $user */
         $user = Auth::user();
         $user_id = $user->id;
-        $query = parent::getQuery($withRelations);
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = $user->allowed('users', 'full_access');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 

@@ -919,11 +919,11 @@ class TimeIntervalController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         /** @var User $user */
         $user = Auth::user();
-        $query = parent::getQuery($withRelations);
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = $user->allowed('time-intervals', 'full_access');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 

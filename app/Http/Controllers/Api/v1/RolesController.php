@@ -486,10 +486,10 @@ class RolesController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         $user = Auth::user();
-        $query = parent::getQuery($withRelations);
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = Role::can($user, 'roles', 'full_access');
 
         if ($full_access || $this->disableQueryRoleCheck) {

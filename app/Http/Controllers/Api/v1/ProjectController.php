@@ -488,11 +488,11 @@ class ProjectController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = false, $withSoftDeleted = false): Builder
     {
         $user = Auth::user();
         $user_id = $user->id;
-        $query = parent::getQuery($withRelations);
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = Role::can($user, 'projects', 'full_access');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
