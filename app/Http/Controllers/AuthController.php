@@ -9,6 +9,7 @@ use App\User;
 use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
+use Validator;
 
 
 /**
@@ -93,31 +94,8 @@ class AuthController extends BaseController
     public function __construct(RecaptchaHelper $recaptcha)
     {
         $this->recaptcha = $recaptcha;
-
-        $this->middleware('auth:api', [
-            'except' => ['check', 'login', 'refresh']
-        ]);
+        $this->middleware('auth:api', ['except' => ['login']]);
     }
-
-
-    /**
-     * @param User $user
-     * @param string $token
-     */
-    protected function invalidateToken(User $user, string $token): void
-    {
-        $user->tokens()->where('token', $token)->delete();
-    }
-
-    /**
-     * @param User $user
-     * @param null|string $except
-     */
-    protected function invalidateAllTokens(User $user, $except = null)
-    {
-        $user->tokens()->where('token', '!=', $except)->delete();
-    }
-
 
     /**
      * @param Request $request
@@ -154,21 +132,22 @@ class AuthController extends BaseController
      */
     public function login(Request $request): JsonResponse
     {
-        $credentials = $request->only(['login', 'password', 'recaptcha']);
+        $credentials = $request->only(['email', 'password', 'recaptcha']);
 
-        if (!$credentials['login']) {
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        $validator = Validator::make($request->all(), [
+            'email' => 'required',
+            'password' => 'required',
+        ]);
+
+        if ($validator->fails()) {
+            return response()->json(['success'=> false, 'message' => 'asd'], 400);
         }
-
-        $credentials['email'] = $credentials['login'];
 
         $this->recaptcha->check($credentials);
 
-        if (!$tokenString = auth()->attempt($credentials)) {
+        if (!$newToken = auth()->attempt($credentials)) {
             $this->recaptcha->incrementCaptchaAmounts();
-
             $this->recaptcha->check($credentials);
-
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
@@ -179,7 +158,7 @@ class AuthController extends BaseController
         }
 
         /** @var Token $token */
-        $token = $user->addToken($tokenString);
+        $token = $user->addToken($newToken);
 
         $this->recaptcha->clearCaptchaAmounts();
 
@@ -214,7 +193,7 @@ class AuthController extends BaseController
      */
     public function logout(Request $request): JsonResponse
     {
-        $this->invalidateToken($request->user(), $request->bearerToken());
+        $request->user()->invalidateToken($request->bearerToken());
         auth()->logout();
 
         return response()->json(['success' => true, 'message' => 'Successfully logged out']);
@@ -248,10 +227,10 @@ class AuthController extends BaseController
      */
     public function logoutFromAll(Request $request): JsonResponse
     {
-        $this->invalidateAllTokens($request->user());
+        $request->user()->invalidateAllTokens();
         auth()->logout();
 
-        return response()->json(['success' => true, 'message' => 'Successfully logged out']);
+        return response()->json(['success' => true, 'message' => 'Successfully logged out from all sessions']);
     }
 
     /**
@@ -321,7 +300,7 @@ class AuthController extends BaseController
         /** @var User $user $user */
         $user = $request->user();
 
-        $this->invalidateToken($user, $request->bearerToken());
+        $user->invalidateToken($request->bearerToken());
         $token = auth()->refresh();
         $token = $user->addToken($token);
 
