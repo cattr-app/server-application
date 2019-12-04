@@ -2,10 +2,11 @@
 
 namespace App\Mail;
 
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Lang;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ResetPassword extends \Illuminate\Auth\Notifications\ResetPassword
+class ResetPassword extends ResetPasswordNotification
 {
     /**
      * User email.
@@ -26,19 +27,21 @@ class ResetPassword extends \Illuminate\Auth\Notifications\ResetPassword
      * @param  mixed  $notifiable
      * @return MailMessage
      */
-    public function toMail($notifiable)
+    public function toMail($notifiable): MailMessage
     {
         if (static::$toMailCallback) {
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
         }
+        env('PASSWORD_RESET_FRONTEND_ROUTE');
+
+        $resetUrl = env("TRUSTED_FRONTEND_DOMAIN") . '/'
+            . env('PASSWORD_RESET_FRONTEND_ROUTE')
+            . "?email=$this->email&token=$this->token";
 
         return (new MailMessage)
             ->subject(Lang::getFromJson('Reset Password Notification'))
             ->line(Lang::getFromJson('You are receiving this email because we received a password reset request for your account.'))
-            ->action(Lang::getFromJson('Reset Password'), url(config('app.url').route('password.reset.process', [
-                'token' => $this->token,
-                'email' => $this->email,
-            ], false)))
+            ->action(Lang::getFromJson('Reset Password'), $resetUrl)
             ->line(Lang::getFromJson('If you did not request a password reset, no further action is required.'));
     }
 }

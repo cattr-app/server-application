@@ -69,8 +69,8 @@ class RecaptchaHelper
     private function getCaptchaCacheKey(): string
     {
         $ip = Request::ip();
-        $login = $this->user;
-        return "AUTH_RECAPTCHA_LIMITER_{$ip}_{$login}_ATTEMPTS";
+        $email = $this->user;
+        return "AUTH_RECAPTCHA_LIMITER_{$ip}_{$email}_ATTEMPTS";
     }
 
     /**
@@ -96,7 +96,7 @@ class RecaptchaHelper
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_BANNED);
         }
 
-        $this->user = $credentials['login'];
+        $this->user = $credentials['email'];
 
         if (isset($credentials['recaptcha'])) {
             $this->solve($credentials['recaptcha']);
