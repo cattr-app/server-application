@@ -129,18 +129,17 @@ class AuthorizationException extends BaseAuthorizationException
      */
     public const ERROR_TYPE_INVALID_PASSWORD_RESET_DATA = 'authorization.invalid_password_data';
 
-    protected const ERRORS =
-        [
-            self::ERROR_TYPE_UNAUTHORIZED => ['code' => 401, 'message' => 'Not authorized'],
-            self::ERROR_TYPE_CAPTCHA => ['code' => 429, 'message' => 'Invalid captcha',],
-            self::ERROR_TYPE_BANNED => ['code' => 423, 'message' => 'Enhance Your Calm'],
-            self::ERROR_TYPE_TOKEN_MISMATCH => ['code' => 401, 'message' => 'Token mismatch'],
-            self::ERROR_TYPE_TOKEN_EXPIRED => ['code' => 401, 'message' => 'Token expired'],
-            self::ERROR_TYPE_USER_DISABLED => ['code' => 403, 'message' => 'User deactivated'],
-            self::ERROR_TYPE_VALIDATION_FAILED => ['code' => 400, 'message' => 'Ivalid params'],
-            self::ERROR_TYPE_USER_NOT_FOUND => ['code' => 404, 'message' => 'User with such email isn’t found'],
-            self::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA => ['code' => 401, 'message' => 'Invalid password reset data'],
-        ];
+    protected const ERRORS = [
+        self::ERROR_TYPE_UNAUTHORIZED => ['code' => 401, 'message' => 'Not authorized'],
+        self::ERROR_TYPE_CAPTCHA => ['code' => 429, 'message' => 'Invalid captcha',],
+        self::ERROR_TYPE_BANNED => ['code' => 423, 'message' => 'Enhance Your Calm'],
+        self::ERROR_TYPE_TOKEN_MISMATCH => ['code' => 401, 'message' => 'Token mismatch'],
+        self::ERROR_TYPE_TOKEN_EXPIRED => ['code' => 401, 'message' => 'Token expired'],
+        self::ERROR_TYPE_USER_DISABLED => ['code' => 403, 'message' => 'User deactivated'],
+        self::ERROR_TYPE_VALIDATION_FAILED => ['code' => 400, 'message' => 'Invalid params'],
+        self::ERROR_TYPE_USER_NOT_FOUND => ['code' => 404, 'message' => 'User with such email isn’t found'],
+        self::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA => ['code' => 401, 'message' => 'Invalid password reset data'],
+    ];
 
     /**
      * @var string

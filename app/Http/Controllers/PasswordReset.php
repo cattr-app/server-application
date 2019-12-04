@@ -6,7 +6,7 @@ use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\RecaptchaHelper;
 use App\User;
 use Hash;
-use Illuminate\Auth\Events\PasswordReset as PasswordResetAliasEvent;
+use Illuminate\Auth\Events\PasswordReset as PasswordResetEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Password;
@@ -221,7 +221,7 @@ class PasswordReset extends BaseController
             function (User $user, string $password) {
                 $user->password = Hash::make($password);
                 $user->save();
-                event(new PasswordResetAliasEvent($user));
+                event(new PasswordResetEvent($user));
                 auth()->login($user);
             }
         );
