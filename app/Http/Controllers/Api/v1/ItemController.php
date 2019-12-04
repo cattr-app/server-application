@@ -307,13 +307,24 @@ abstract class ItemController extends Controller
         });
 
         if (!$item) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Model fetch fail',
-                    'reason' => 'Model not found',
-                ]),
-                400
-            );
+            $cls = $this->getItemClass();
+            if ($cls::find($request->get('id')) !== null) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'error' => 'Access denied to this item',
+                        'reason' => 'action is not allowed',
+                    ]),
+                    403
+                );
+            } else {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'error' => 'Model fetch fail',
+                        'reason' => 'Model not found',
+                    ]),
+                    400
+                );
+            }
         }
 
         $item->fill($this->filterRequestData($requestData));
@@ -390,7 +401,28 @@ abstract class ItemController extends Controller
         );
 
         /** @var \Illuminate\Database\Eloquent\Model $item */
-        $item = $itemsQuery->firstOrFail();
+        $item = $itemsQuery->first();
+        if (!$item) {
+            $cls = $this->getItemClass();
+            if ($cls::find($request->get('id')) !== null) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
+                        'error' => 'Access denied to this item',
+                        'reason' => 'action is not allowed',
+                    ]),
+                    403
+                );
+            } else {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
+                        'error' => 'Model fetch fail',
+                        'reason' => 'Model not found',
+                    ]),
+                    400
+                );
+            }
+        }
+
         $item->delete();
 
         return response()->json(

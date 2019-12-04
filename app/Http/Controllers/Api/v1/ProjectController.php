@@ -500,20 +500,41 @@ class ProjectController extends ItemController
             return $query;
         }
 
-        $query->where(static function (Builder $query) use ($user_id, $action_method) {
-            $query->when($action_method !== 'edit' && $action_method !== 'remove',
-                static function (Builder $query) use ($user_id) {
-                    $query->whereHas('users', static function (Builder $query) use ($user_id) {
-                        $query->where('id', $user_id)->select('id');
-                    });
+        $rules = $this->getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
+            }
+
+            $query->where(function (Builder $query) use ($user_id, $object, $action) {
+                // Filter by project roles of the user
+                $query->whereHas('usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
+                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
+                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                            $query->where([
+                                'object' => $object,
+                                'action' => $action,
+                                'allow'  => true,
+                            ])->select('id');
+                        })->select('id');
+                    })->select('id');
+                });
+
+                // For read-only access include projects where the user have assigned tasks or tracked intervals
+                $query->when($action !== 'edit' && $action !== 'remove', static function (Builder $query) use ($user_id) {
                     $query->orWhereHas('tasks', static function (Builder $query) use ($user_id) {
                         $query->where('user_id', $user_id)->select('user_id');
                     });
-                    $query->orWhereHas('tasks.timeIntervals.user', static function (Builder $query) use ($user_id) {
-                        $query->where('id', $user_id)->select('id');
+
+                    $query->orWhereHas('tasks.timeIntervals', static function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id)->select('user_id');
                     });
                 });
-        });
+            });
+        }
 
         return $query;
     }

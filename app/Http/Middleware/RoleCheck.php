@@ -3,6 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Exceptions\Entities\AuthorizationException;
+use App\User;
 use Closure;
 
 
@@ -20,6 +21,7 @@ class RoleCheck
     public function handle($request, Closure $next)
     {
         if (auth()->check()) {
+            /** @var User $user */
             $user = auth()->user();
 
             $actionName = $request->route()->getActionName();
@@ -37,8 +39,16 @@ class RoleCheck
             //request: /v1/{object}/{action}
             $object = isset($object) ? $object : $request->segment(2);
             $action = isset($action) ? $action : $request->segment(3);
+            $id = $request->get('id');
 
-            if ($user->allowed($object, $action) || $user->allowed($object, 'full_access')) {
+            // Handled on the query level
+            if ($object === 'users' && in_array($action, ['list', 'show', 'edit'])
+                || in_array($object, ['projects', 'tasks']) && in_array($action, ['list', 'show'])
+                || in_array($object, ['screenshots', 'time-intervals']) && in_array($action, ['list', 'show', 'edit', 'remove'])) {
+                return $next($request);
+            }
+
+            if ($user->allowed($object, $action, $id) || $user->allowed($object, 'full_access')) {
                 return $next($request);
             } else {
                 return response()->json([

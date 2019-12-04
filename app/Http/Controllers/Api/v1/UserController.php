@@ -127,7 +127,7 @@ class UserController extends ItemController
     public function getQueryWith(): array
     {
         return [
-            'roles',
+            'role',
         ];
     }
 
@@ -185,7 +185,7 @@ class UserController extends ItemController
      * @apiParam {Boolean}  [webcam_shots]                       ???
      * @apiParam {Integer}  [screenshots_interval]  `QueryParam` Screenshots creation interval (seconds)
      * @apiParam {Boolean}  [active]                             User is active
-     * @apiParam {Integer}  [roles]                 `QueryParam` User's Roles
+     * @apiParam {Integer}  [role]                  `QueryParam` User's Role
      * @apiParam {String}   [created_at]            `QueryParam` User Creation DateTime
      * @apiParam {String}   [updated_at]            `QueryParam` Last User data update DataTime
      * @apiParam {String}   [deleted_at]            `QueryParam` When User was deleted (null if not)
@@ -214,7 +214,7 @@ class UserController extends ItemController
      * @apiSuccess {Object} res.full_name   User
      * @apiSuccess {Object} res.email       Email
      * @apiSuccess {Object} res.active      Is user active
-     * @apiSuccess {Object} res.roles       User roles
+     * @apiSuccess {Object} res.role        User role
      * @apiSuccess {Object} res.updated_at  User last update datetime
      * @apiSuccess {Object} res.created_at  User registration datetime
      *
@@ -269,10 +269,6 @@ class UserController extends ItemController
             $cls::create($this->filterRequestData($requestData))
         );
 
-        if (isset($requestData['roles'])) {
-            $item->syncRoles($requestData['roles']);
-        }
-
         $item->save();
 
         Event::dispatch($this->getEventUniqueName('item.create.after'), [$item, $requestData]);
@@ -321,7 +317,7 @@ class UserController extends ItemController
      *   "computer_time_popup": 300,
      *   "poor_time_popup": "",
      *   "blur_screenshots": 0,
-     *   "roles": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
+     *   "role": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
      *   "web_and_app_monitoring": 1,
      *   "webcam_shots": 0,
      *   "screenshots_interval": 9,
@@ -373,7 +369,7 @@ class UserController extends ItemController
      *       "web_and_app_monitoring": 1,
      *       "webcam_shots": 0,
      *       "screenshots_interval": 9,
-     *       "roles": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
+     *       "role": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
      *       "active": "1",
      *       "deleted_at": null,
      *       "created_at": "2018-10-18 09:36:22",
@@ -458,10 +454,6 @@ class UserController extends ItemController
             $item->fill($this->filterRequestData($requestData));
         } else {
             $item->fill($requestData);
-        }
-
-        if (isset($requestData['roles'])) {
-            $item->syncRoles($requestData['roles']);
         }
 
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
@@ -741,45 +733,51 @@ class UserController extends ItemController
     {
         /** @var User $user */
         $user = Auth::user();
-
+        $user_id = $user->id;
         $query = parent::getQuery($withRelations);
         $full_access = $user->allowed('users', 'full_access');
+        $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
             return $query;
         }
 
-        $project_relations_access = $user->allowed('projects', 'relations');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
-
-        $user_id = collect($user->id);
-        $users_id = collect([]);
-
-        /** edit and remove only for directly related users */
-        if ($action_method !== 'edit' && $action_method !== 'remove') {
-            if ($project_relations_access) {
-                $projectIDs = $user->projects->map(static function ($project) {
-                    return $project->id;
-                });
-
-                $usersAssignedToProjectsIDs = User::joinQuery()
-                    ->whereInJoin('projectsRelation.project.id', $projectIDs)
-                    ->pluck('users.id')
-                ;
-
-                $projectsUsersIDs = User::joinQuery()
-                    ->whereInJoin('timeIntervals.task.project.id', $projectIDs)
-                    ->pluck('users.id')
-                ;
-
-                $users_id = collect([$usersAssignedToProjectsIDs, $projectsUsersIDs])->collapse()->unique();
+        $rules = $this->getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
             }
-        }
 
-        $query->whereIn(
-            'users.id',
-            collect([$users_id, $user_id])->collapse()->unique()
-        );
+            $query->where(function (Builder $query) use ($user_id, $object, $action) {
+                $roleSubquery = static function (Builder $query) use ($user_id, $object, $action) {
+                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
+                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                            $query->where([
+                                'object' => $object,
+                                'action' => $action,
+                                'allow'  => true,
+                            ])->select('id');
+                        })->select('id');
+                    })->select('id');
+                };
+
+                // Filter by project roles of the user
+                // Users assigned to the project
+                $query->whereHas('projects.usersRelation', $roleSubquery);
+                // Users assigned to tasks in the project
+                $query->orwhereHas('tasks.project.usersRelation', $roleSubquery);
+                // Users has tracked intervals in tasks of the project
+                $query->orwhereHas('timeIntervals.task.project.usersRelation', $roleSubquery);
+
+                // For read and edit access include own user data
+                $query->when($action !== 'remove', static function (Builder $query) use ($user_id) {
+                    $query->orWhere('id', $user_id);
+                });
+            });
+        }
 
         return $query;
     }

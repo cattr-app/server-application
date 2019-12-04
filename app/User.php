@@ -54,11 +54,12 @@ use Illuminate\Database\Eloquent\Collection;
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
+ * @property int $role_id
  *
- * @property-read Collection $roles
  * @property Project[]|Collection $projects
  * @property Task[]|Collection $tasks
  * @property TimeInterval[]|Collection $timeIntervals
+ * @property Role $role
  */
 class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
@@ -73,7 +74,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     protected $table = 'users';
 
     protected $with = [
-        'roles'
+        'role', 'projectsRelation.role',
     ];
 
     /**
@@ -103,6 +104,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'timezone',
         'important',
         'change_password',
+        'role_id',
     ];
 
     /**
@@ -130,7 +132,8 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'timezone' => 'string',
         'important' => 'integer',
         'change_password' => 'int',
-        'is_admin' => 'integer'
+        'is_admin' => 'integer',
+        'role_id' => 'integer'
     ];
 
 
@@ -176,57 +179,11 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     }
 
     /**
-     * @return BelongsToMany
+     * @return BelongsTo
      */
-    public function roles(): BelongsToMany
+    public function role()
     {
-        return $this->belongsToMany(Role::class, 'user_role', 'user_id', 'role_id', 'id', 'id');
-    }
-
-    /**
-     * @return \Illuminate\Support\Collection
-     */
-    public function rolesIds(): \Illuminate\Support\Collection
-    {
-        return $this->roles->map(function (Role $role) {
-            return $role->id;
-        });
-    }
-
-    public function syncRoles($roles)
-    {
-        $roleIds = [];
-        foreach ($roles as $role) {
-            $roleIds []= isset($role['id']) ? $role['id'] : $role;
-        }
-
-        $this->roles()->sync($roleIds);
-    }
-
-    /**
-     * Attach role to this user
-     * @param int|Role $role
-     */
-    public function attachRole($role)
-    {
-        $roleId = $role;
-        if ($role instanceof Role) {
-            $roleId = $role->id;
-        }
-        $this->roles()->attach($roleId);
-    }
-
-    /**
-     * Detach role from this user
-     * @param int|Role $role
-     */
-    public function detachRole($role)
-    {
-        $roleId = $role;
-        if ($role instanceof Role) {
-            $roleId = $role->id;
-        }
-        $this->roles()->detach($roleId);
+        return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
     /**
@@ -234,39 +191,12 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
      */
     public function projects(): BelongsToMany
     {
-        return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id');
+        return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id')->withPivot('role_id');
     }
 
     public function tokens(): HasMany
     {
         return $this->hasMany(Token::class);
-    }
-
-    /**
-     * @param $token
-     * @return Token
-     */
-    public function addToken($token)
-    {
-        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
-        /** @var Token $token */
-        $token = $this->tokens()->create(['token' => $token, 'expires_at' => $tokenExpires]);
-        return $token;
-
-    }
-
-    /**
-     * @param string $token
-     */
-    public function invalidateToken(string $token): void
-    {
-        $this->tokens()->where('token', $token)->delete();
-    }
-
-
-    public function invalidateAllTokens($except = null)
-    {
-        $this->tokens()->where('token', '!=', $except)->delete();
     }
 
     /**
@@ -334,10 +264,11 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     /**
      * @param string $object
      * @param string $action
+     * @param string|null $id
      * @return bool
      */
-    public function allowed(string $object, string $action): bool
+    public function allowed(string $object, string $action, $id = null): bool
     {
-        return Role::can($this, $object, $action);
+        return Role::can($this, $object, $action, $id);
     }
 }
