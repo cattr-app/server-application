@@ -51,9 +51,9 @@ Route::group([
     $router->any('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
-    $router->post('password-reset/request', 'PasswordReset@request');
-    $router->post('password-reset/validate', 'PasswordReset@validate');
-    $router->post('password-reset/process', 'PasswordReset@process')
+    $router->post('password/reset/request', 'PasswordReset@request');
+    $router->post('password/reset/validate', 'PasswordReset@validate');
+    $router->post('password/reset/process', 'PasswordReset@process')
         ->name('password.reset.process');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');
@@ -61,22 +61,22 @@ Route::group([
 });
 
 // Temporary fix for missing v1 prefix in the url
-    Route::group([
-        'prefix' => 'v1/auth',
-    ], function (Router $router) {
-        $router->post('login', 'AuthController@login');
-        $router->any('logout', 'AuthController@logout');
-        $router->any('logout-from-all', 'AuthController@logoutFromAll');
-        $router->post('refresh', 'AuthController@refresh');
-        $router->any('me', 'AuthController@me');
-        $router->post('password-reset/request', 'PasswordReset@request');
-        $router->post('password-reset/validate', 'PasswordReset@validate');
-        $router->post('password-reset/process', 'PasswordReset@process')
-            ->name('password.reset.process');
+Route::group([
+    'prefix' => 'v1/auth',
+], function (Router $router) {
+    $router->post('login', 'AuthController@login');
+    $router->any('logout', 'AuthController@logout');
+    $router->any('logout-from-all', 'AuthController@logoutFromAll');
+    $router->post('refresh', 'AuthController@refresh');
+    $router->any('me', 'AuthController@me');
+    $router->post('password/reset/request', 'PasswordReset@request');
+    $router->post('password/reset/validate', 'PasswordReset@validate');
+    $router->post('password/reset/process', 'PasswordReset@process')
+        ->name('password.reset.process');
 
-        $router->get('/register/{key}', 'RegistrationController@getForm');
-        $router->post('/register/{key}', 'RegistrationController@postForm');
-    });
+    $router->get('/register/{key}', 'RegistrationController@getForm');
+    $router->post('/register/{key}', 'RegistrationController@postForm');
+});
 
 Route::group([
     'prefix' => 'status',

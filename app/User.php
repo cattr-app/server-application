@@ -254,6 +254,21 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         return $token;
 
     }
+
+    /**
+     * @param string $token
+     */
+    public function invalidateToken(string $token): void
+    {
+        $this->tokens()->where('token', $token)->delete();
+    }
+
+
+    public function invalidateAllTokens($except = null)
+    {
+        $this->tokens()->where('token', '!=', $except)->delete();
+    }
+
     /**
      * @return HasMany
      */

@@ -4,13 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\RecaptchaHelper;
-use App\Models\PasswordReset as PasswordResetModel;
 use App\User;
+use Hash;
 use Illuminate\Auth\Events\PasswordReset as PasswordResetAliasEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
 use Password;
-use Request;
+use DB;
+use Illuminate\Http\Request;
+use Validator;
 
 class PasswordReset extends BaseController
 {
@@ -21,7 +23,7 @@ class PasswordReset extends BaseController
 
     /**
      * @param RecaptchaHelper $recaptcha
-     * @api {post} /api/auth/send-reset Send reset e-mail
+     * @api {post} /api/auth/password/reset/request Send reset e-mail
      * @apiDescription Get user JWT
      *
      *
@@ -48,13 +50,24 @@ class PasswordReset extends BaseController
         $this->recaptcha = $recaptcha;
     }
 
+    /*TODO API DOCS */
     public function validate(Request $request)
     {
-        /** @var PasswordResetModel $resetRequest */
-        $resetRequest = PasswordResetModel::where('email', $request->input('email'));
-        if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
-            return response()->json(['success' => false, 'message' => 'Invalid password reset data']);
+        $validator = Validator::make($request->all(), [
+                'email' => 'required|email',
+                'token' => 'required|string']
+        );
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'asd'], 400);
         }
+
+        $resetRequest = DB::table('password_resets')
+            ->where('email', $request->input('email'))->first();
+
+        if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
+            return response()->json(['success' => false, 'message' => 'Invalid password reset data'], 401);
+        }
+
         return response()->json(['success' => true, 'message' => 'Password reset data is valid']);
     }
 
@@ -65,9 +78,14 @@ class PasswordReset extends BaseController
      */
     public function request(Request $request)
     {
+        $validator = Validator::make($request->all(), ['email' => 'required|email',]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'asd'], 400);
+        }
+
         $credentials = $request->only(['email', 'recaptcha']);
         $this->recaptcha->check($credentials);
-        $user = User::where('email', $credentials['login'])->first();
+        $user = User::where('email', $credentials['email'])->first();
 
         if (!$user) {
             $this->recaptcha->incrementCaptchaAmounts();
@@ -81,11 +99,11 @@ class PasswordReset extends BaseController
 
         $this->recaptcha->clearCaptchaAmounts();
 
-        Password::broker()->sendResetLink($credentials['email']);
+        Password::broker()->sendResetLink($credentials);
 
         return response()->json([
             'success' => true,
-            'message' => 'Link for restore password has been sent to your email.',
+            'message' => 'Link for restore password has been sent to specified email.',
         ], 200);
     }
 
@@ -94,7 +112,7 @@ class PasswordReset extends BaseController
      * @param Request $request
      * @return JsonResponse
      * @throws AuthorizationException
-     * @api {post} /api/auth/reset Reset
+     * @api {post} /api/auth/password/reset/process Reset
      * @apiDescription Get user JWT
      *
      *
@@ -129,9 +147,24 @@ class PasswordReset extends BaseController
      */
     public function process(Request $request): JsonResponse
     {
-        $resetRequest = PasswordResetModel::where('email', $request->input('email'));
+        $validator = Validator::make($request->all(), [
+            'email' => 'required|email',
+            'token' => 'required|string',
+            'password' => 'required',
+            'password_confirmation' => 'required'
+        ]);
+        if ($validator->fails()) {
+            return response()->json(['success' => false, 'message' => 'Bad request'], 400);
+        }
+
+        $resetRequest = DB::table('password_resets')
+            ->where('email', $request->input('email'))->first();
+
         if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+            return response()->json([
+                    'success' => false,
+                    'message' => 'Password reset request with specified data not exists or already expired']
+                , 404);
         }
 
         $response = Password::broker()->reset($request->all(),
