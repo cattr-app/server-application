@@ -43,11 +43,17 @@ class AuthorizationException extends BaseAuthorizationException
 
     /**
      * @apiDefine CaptchaError
+     * @apiError (Error 429) {Object}  info           Additional info from server
+     * @apiError (Error 429) {String}  info.site_key  Public site key for rendering reCaptcha
+     *
      * @apiErrorExample {json} Captcha
      *  HTTP/1.1 429 Too Many Requests
      *  {
      *    "success": false,
-     *    "message": "Invalid captcha"
+     *    "message": "Invalid captcha",
+     *    "info": {
+     *      "site_key": "6Le7R8IUAAAAAMCwR4b...."
+     *    }
      *  }
      */
 
