@@ -22,50 +22,64 @@ class PasswordReset extends BaseController
     private $recaptcha;
 
     /**
+     * PasswordReset constructor.
      * @param RecaptchaHelper $recaptcha
-     * @api {post} /api/auth/password/reset/request Send reset e-mail
-     * @apiDescription Get user JWT
-     *
-     *
-     * @apiVersion 0.1.0
-     * @apiName Send reset
-     * @apiGroup Auth
-     *
-     * @apiParam {String}   login       User login
-     * @apiParam {String}   recaptcha   Recaptcha token
-     *
-     * @apiError (Error 401) {String} Error Error
-     *
-     * @apiParamExample {json} Request Example
-     *  {
-     *      "login":      "johndoe@example.com",
-     *      "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
-     *  }
-     *
-     * @apiUse AuthAnswer
-     * @apiUse UnauthorizedError
      */
     public function __construct(RecaptchaHelper $recaptcha)
     {
         $this->recaptcha = $recaptcha;
     }
 
-    /*TODO API DOCS */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws AuthorizationException
+     *
+     * @api {post} /api/auth/password/reset/validate Validate
+     * @apiDescription Validates password reset token
+     *
+     * @apiVersion 0.1.0
+     * @apiName Validate token
+     * @apiGroup Password Reset
+     *
+     * @apiParam {String}  email  User email
+     * @apiParam {String}  token  Password reset token
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *      "email":  "johndoe@example.com",
+     *      "token":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *  }
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
+     * @apiSuccess {String}   message  Message from server
+     *
+     * @apiSuccessExample {json} Success-Response
+     *  {
+     *     "success": true,
+     *     "message": "Link for restore password has been sent to specified email"
+     *  }
+     *
+     * @apiUse 400Error
+     * @apiUse ParamsValidationError
+     * @apiUse InvalidPasswordResetDataError
+     */
     public function validate(Request $request)
     {
         $validator = Validator::make($request->all(), [
                 'email' => 'required|email',
-                'token' => 'required|string']
+                'token' => 'required|string'
+            ]
         );
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => 'asd'], 400);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_VALIDATION_FAILED);
         }
 
         $resetRequest = DB::table('password_resets')
             ->where('email', $request->input('email'))->first();
 
         if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
-            return response()->json(['success' => false, 'message' => 'Invalid password reset data'], 401);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
         return response()->json(['success' => true, 'message' => 'Password reset data is valid']);
@@ -75,12 +89,42 @@ class PasswordReset extends BaseController
      * @param Request $request
      * @return JsonResponse
      * @throws AuthorizationException
+     *
+     * @api {post} /api/auth/password/reset/request Send
+     * @apiDescription Sends email to user with reset link
+     *
+     * @apiVersion 0.1.0
+     * @apiName Send email
+     * @apiGroup Password Reset
+     *
+     * @apiParam {String}  login         User login
+     * @apiParam {String}  [recaptcha]   Recaptcha token
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *      "email":      "johndoe@example.com",
+     *      "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *  }
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
+     * @apiSuccess {String}   message  Message from server
+     *
+     * @apiSuccessExample {json} Success Response
+     *  {
+     *     "success": true,
+     *     "message": "Link for restore password has been sent to specified email"
+     *  }
+     *
+     * @apiUse 400Error
+     * @apiUse ParamsValidationError
+     * @apiUse NoSuchUserError
+     * @apiUse CaptchaError
      */
     public function request(Request $request)
     {
-        $validator = Validator::make($request->all(), ['email' => 'required|email',]);
+        $validator = Validator::make($request->all(), ['email' => 'required|email']);
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => 'asd'], 400);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_VALIDATION_FAILED);
         }
 
         $credentials = $request->only(['email', 'recaptcha']);
@@ -91,10 +135,7 @@ class PasswordReset extends BaseController
             $this->recaptcha->incrementCaptchaAmounts();
             $this->recaptcha->check($credentials);
 
-            return response()->json([
-                'success' => false,
-                'message' => 'User with such email isn’t found',
-            ], 404);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_NOT_FOUND);
         }
 
         $this->recaptcha->clearCaptchaAmounts();
@@ -103,7 +144,7 @@ class PasswordReset extends BaseController
 
         return response()->json([
             'success' => true,
-            'message' => 'Link for restore password has been sent to specified email.',
+            'message' => 'Link for restore password has been sent to specified email',
         ], 200);
     }
 
@@ -112,37 +153,49 @@ class PasswordReset extends BaseController
      * @param Request $request
      * @return JsonResponse
      * @throws AuthorizationException
+     *
      * @api {post} /api/auth/password/reset/process Reset
      * @apiDescription Get user JWT
      *
      *
      * @apiVersion 0.1.0
-     * @apiName Reset
-     * @apiGroup Auth
+     * @apiName Process
+     * @apiGroup Password Reset
      *
-     * @apiParam {String}   email       User email
-     * @apiParam {String}   token       Password reset token
-     * @apiParam {String}   password    New password
-     * @apiParam {String}   password_confirmation   Password confirmation
-     * @apiParam {String}   recaptcha   Recaptcha token
+     * @apiParam {String}  email                   User email
+     * @apiParam {String}  token                   Password reset token
+     * @apiParam {String}  password                New password
+     * @apiParam {String}  password_confirmation   Password confirmation
      *
-     * @apiSuccess {String}     access_token  Token
-     * @apiSuccess {String}     token_type    Token Type
-     * @apiSuccess {String}     expires_in    Token TTL in seconds
-     * @apiSuccess {Array}      user          User Entity
+     * @apiSuccess {String}   access_token  Token
+     * @apiSuccess {String}   token_type    Token Type
+     * @apiSuccess {String}   expires_in    Token TTL in seconds
+     * @apiSuccess {Object}   user          User Entity
+     * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
      *
-     * @apiError (Error 401) {String} Error Error
-     *
-     * @apiParamExample {json} Request Example
+     *  @apiParamsExample {json} Request Example
+     *  HTTP/1.1 200 OK
      *  {
-     *      "email":      "johndoe@example.com",
-     *      "token":      "16184cf3b2510464a53c0e573c75740540fe...",
-     *      "password":   "amazingpassword",
-     *      "password_confirmation":   "amazingpassword",
-     *      "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *      "email":                  "johndoe@example.com",
+     *      "token":                  "16184cf3b2510464a53c0e573c75740540fe...",
+     *      "password_confirmation":  "amazingpassword",
+     *      "password":               "amazingpassword"
      *  }
      *
-     * @apiUse AuthAnswer
+     * @apiSuccessExample {json} Success Response
+     *  HTTP/1.1 200 OK
+     *  {
+     *      "success":      true,
+     *      "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
+     *      "token_type":   "bearer",
+     *      "password":     "amazingpassword",
+     *      "expires_in":   "3600",
+     *      "user":         {}
+     *  }
+     *
+     * @apiUse 400Error
+     * @apiUse ParamsValidationError
+     * @apiUse InvalidPasswordResetDataError
      * @apiUse UnauthorizedError
      */
     public function process(Request $request): JsonResponse
@@ -154,17 +207,14 @@ class PasswordReset extends BaseController
             'password_confirmation' => 'required'
         ]);
         if ($validator->fails()) {
-            return response()->json(['success' => false, 'message' => 'Bad request'], 400);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_VALIDATION_FAILED);
         }
 
         $resetRequest = DB::table('password_resets')
             ->where('email', $request->input('email'))->first();
 
         if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
-            return response()->json([
-                    'success' => false,
-                    'message' => 'Password reset request with specified data not exists or already expired']
-                , 404);
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
         $response = Password::broker()->reset($request->all(),
@@ -187,6 +237,7 @@ class PasswordReset extends BaseController
         $token = $user->addToken($tokenString);
 
         return response()->json([
+            'success' => true,
             'access_token' => $token->token,
             'token_type' => 'bearer',
             'expires_in' => $token->expires_at,
