@@ -488,7 +488,7 @@ class ProjectController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = false, $withSoftDeleted = false): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         $user = Auth::user();
         $user_id = $user->id;
