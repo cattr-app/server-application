@@ -47,14 +47,6 @@ class ProjectController extends ItemController
     }
 
     /**
-     * @return string[]
-     */
-    public function getQueryWith(): array
-    {
-        return ['users'/*, 'tasks', 'tasks.timeIntervals'*/];
-    }
-
-    /**
      * @return array
      */
     public static function getControllerRules(): array
