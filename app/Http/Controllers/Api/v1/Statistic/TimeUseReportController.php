@@ -6,6 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Property;
 use App\Models\ProjectReport;
+use Auth;
 use Filter;
 use Illuminate\Http\Request;
 use DB;

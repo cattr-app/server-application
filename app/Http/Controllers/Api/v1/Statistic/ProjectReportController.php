@@ -12,11 +12,10 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
-use App\Models\ProjectReport;
 use DB;
 use Validator;
 use Carbon\Carbon;
-use function foo\func;
+use Modules\Reports\Entities\ProjectReport;
 
 class ProjectReportController extends ReportController
 {
