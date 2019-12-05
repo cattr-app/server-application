@@ -200,6 +200,33 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     }
 
     /**
+     * @param $token
+     * @return Token
+     */
+    public function addToken($token)
+    {
+        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
+        /** @var Token $token */
+        $token = $this->tokens()->create(['token' => $token, 'expires_at' => $tokenExpires]);
+        return $token;
+
+    }
+
+    /**
+     * @param string $token
+     */
+    public function invalidateToken(string $token): void
+    {
+        $this->tokens()->where('token', $token)->delete();
+    }
+
+
+    public function invalidateAllTokens($except = null)
+    {
+        $this->tokens()->where('token', '!=', $except)->delete();
+    }
+
+    /**
      * @return HasMany
      */
     public function projectsRelation(): HasMany
