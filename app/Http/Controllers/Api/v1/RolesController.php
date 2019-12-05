@@ -340,8 +340,15 @@ class RolesController extends ItemController
             $roleIds = [$roleIds];
         }
 
+        $user = $request->user();
         if (!$roleIds || !is_array($roleIds) || empty($roleIds)) {
-            $roleIds = $request->user()->rolesIds();
+            $roleIds = [$user->role_id];
+        }
+
+        if ($request->input('with_project_roles', false)) {
+            foreach ($user->projectsRelation as $relation) {
+                $roleIds[] = $relation->role_id;
+            }
         }
 
         /** @var Builder $itemsQuery */
@@ -352,7 +359,11 @@ class RolesController extends ItemController
         );
         $this->disableQueryRoleCheck = false;
 
-        $roles = $itemsQuery->whereIn('role.id', $roleIds)->get();
+        if ($user->is_admin) {
+            $roles = $itemsQuery->get();
+        } else {
+            $roles = $itemsQuery->whereIn('role.id', $roleIds)->get();
+        }
 
         if (!$roles->count()) {
             return response()->json(Filter::process(
@@ -378,10 +389,12 @@ class RolesController extends ItemController
                     continue;
                 }
 
+                $name = $actionList[$rule->object][$rule->action] ?? "$rule->object/$rule->action";
+
                 $items[] = [
                     'object' => $rule->object,
                     'action' => $rule->action,
-                    'name' => $actionList[$rule->object][$rule->action]
+                    'name'   => $name,
                 ];
             }
         }
@@ -473,18 +486,17 @@ class RolesController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
-        $query = parent::getQuery($withRelations);
-        $full_access = Role::can(Auth::user(), 'roles', 'full_access');
+        $user = Auth::user();
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
+        $full_access = Role::can($user, 'roles', 'full_access');
 
         if ($full_access || $this->disableQueryRoleCheck) {
             return $query;
         }
 
-        $user_role_ids = Auth::user()->rolesIds();
-
-        $query->whereIn('id', $user_role_ids);
+        $query->where(['id' => $user->role_id]);
 
         return $query;
     }

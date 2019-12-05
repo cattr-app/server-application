@@ -144,9 +144,8 @@ class RegistrationController extends Controller
             'screenshots_active' => true,
             'computer_time_popup' => 5,
             'screenshots_interval' => 5,
+            'role_id' => 2,
         ]);
-
-        $user->attachRole(2);
 
         $registration->delete();
 

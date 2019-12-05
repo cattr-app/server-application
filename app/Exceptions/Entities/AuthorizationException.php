@@ -20,8 +20,9 @@ class AuthorizationException extends BaseAuthorizationException
 {
     /**
      * @apiDefine 400Error
-     * @apiError (Error 4xx) {String}   message  Message from server
-     * @apiError (Error 4xx) {Boolean}  success  Indicates erroneous response when FALSE
+     * @apiError (Error 4xx) {String}   message     Message from server
+     * @apiError (Error 4xx) {Boolean}  success     Indicates erroneous response when FALSE
+     * @apiError (Error 4xx) {String}   error_type  Error type
      */
 
     /**

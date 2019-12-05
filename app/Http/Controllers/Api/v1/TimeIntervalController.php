@@ -79,6 +79,7 @@ class TimeIntervalController extends ItemController
             'create' => 'time-intervals.create',
             'bulkCreate' => 'time-intervals.bulk-create',
             'edit' => 'time-intervals.edit',
+            'bulkEdit' => 'time-intervals.bulk-edit',
             'show' => 'time-intervals.show',
             'destroy' => 'time-intervals.remove',
             'bulkDestroy' => 'time-intervals.bulk-remove',
@@ -614,6 +615,160 @@ class TimeIntervalController extends ItemController
     }
 
     /**
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @throws \Exception
+     * @api            {delete, post} /api/v1/time-intervals/bulk-edit BulkEdit
+     * @apiDescription Multiple Edit TimeInterval
+     * @apiVersion     0.1.0
+     * @apiName        BulkEditTimeInterval
+     * @apiGroup       Time Interval
+     *
+     * @apiParam {Object[]}    intervals              Time Intervals
+     * @apiParam {Object}      intervals.object       Time Interval
+     * @apiParam {Integer}     intervals.object.id    Time Interval id
+     * @apiParam {Object}      data                   Data to set on intervals
+     * @apiParam {Integer}     data.task_id           Task ID
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "intervals": [
+     *     {
+     *       "id": 1
+     *     }
+     *   ],
+     *   "data": {
+     *     "task_id": 1
+     *   }
+     * }
+     *
+     * @apiSuccess {Object[]} messages               Messages
+     * @apiSuccess {Object}   message                Message
+     * @apiSuccess {String}   message.message        Status
+     *
+     * @apiSuccessExample {json} Response Example
+     * {
+     *   "messages": [
+     *     {
+     *       "message": "Item has been updated"
+     *     }
+     *   ]
+     * }
+     *
+     * @apiError (404)  {Object[]} messages                 Messages
+     * @apiError (404)  {Object}   messages.message         Message
+     * @apiError (404)  {String}   messages.message.error   Error title
+     * @apiError (404)  {String}   messages.message.reason  Error reason
+     *
+     * @apiErrorExample (404) {json} Errors Response Example
+     * {
+     *   "messages": [
+     *     {
+     *       "error": "Item has not been updated",
+     *       "reason": "Item not found"
+     *     }
+     *   ]
+     * }
+     *
+     * @apiUse         UnauthorizedError
+     *
+     */
+    public function bulkEdit(Request $request): JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.bulkEdit'), $request->all());
+        $result = [];
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.bulkEdit'),
+                [
+                    'intervals' => 'array|required',
+                    'data' => 'array|required',
+                ]
+            ),
+            [
+                'array' => ':attribute should be an array',
+                'required' => ':attribute is empty',
+            ]
+        );
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => $validator->errors(),
+                ]),
+                400
+            );
+        }
+
+        $data = $requestData['data'];
+        $dataValidator = Validator::make(
+            $data,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.bulkEdit'),
+                ['task_id' => 'exists:tasks,id|required']
+            )
+        );
+        if ($dataValidator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'error' => 'validation fail',
+                    'reason' => $dataValidator->errors(),
+                ]),
+                400
+            );
+        }
+
+        $intervals = $requestData['intervals'];
+        foreach ($intervals as $interval) {
+            /** @var Builder $itemsQuery */
+            $itemsQuery = Filter::process(
+                $this->getEventUniqueName('answer.success.item.query.prepare'),
+                $this->applyQueryFilter(
+                    $this->getQuery(),
+                    $interval
+                )
+            );
+
+            $intervalValidator = Validator::make(
+                $interval,
+                Filter::process(
+                    $this->getEventUniqueName('validation.item.edit'),
+                    ['id' => 'exists:time_intervals,id|required']
+                )
+            );
+
+            if ($intervalValidator->fails()) {
+                $result[] = [
+                    'error' => 'Validation fail',
+                    'reason' => $intervalValidator->errors(),
+                    'code' => 400
+                ];
+                continue;
+            }
+
+            /** @var \Illuminate\Database\Eloquent\Model $item */
+            $item = $itemsQuery->first();
+            if ($item && $item->update($data)) {
+                $result[] = ['message' => 'Item has been updated'];
+            } else {
+                $result[] = [
+                    'error' => 'Item has not been updated',
+                    'reason' => 'Item not found'
+                ];
+            }
+        }
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.bulkEdit'), [
+                'messages' => $result
+            ])
+        );
+    }
+
+    /**
      * @api            {delete, post} /api/v1/time-intervals/remove Destroy
      * @apiDescription Destroy Time Interval
      * @apiVersion     0.1.0
@@ -764,33 +919,53 @@ class TimeIntervalController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         /** @var User $user */
         $user = Auth::user();
-
-        $query = parent::getQuery($withRelations);
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = $user->allowed('time-intervals', 'full_access');
+        $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
             return $query;
         }
 
-        $query->where(static function (EloquentJoinBuilder $query) use ($user) {
-            $query->where('user_id', '=', $user->id);
-
-            if ($user->allowed('projects', 'relations')) {
-                $query->joinRelations('task.project');
-                $query->orWhereHas('task.project', static function (EloquentJoinBuilder $query) use ($user) {
-                    $query
-                        ->select('id')
-                        ->whereIn('id', $user->projects->map(static function ($project) {
-                            return $project->id;
-                        }))
-                        ->limit(1);
-                });
+        $rules = $this->getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
             }
-        });
+
+            $query->where(function (Builder $query) use ($user, $object, $action) {
+                $user_id = $user->id;
+
+                // Filter by project roles of the user
+                $query->whereHas('task.project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
+                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
+                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                            $query->where([
+                                'object' => $object,
+                                'action' => $action,
+                                'allow'  => true,
+                            ])->select('id');
+                        })->select('id');
+                    })->select('id');
+                });
+
+                // For read and delete access include user own intervals
+                $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
+                    $query->orWhere('user_id', $user_id)->select('user_id');
+                });
+
+                $query->when($action === 'edit' && (bool) $user->manual_time, static function (Builder $query) use ($user_id) {
+                    $query->orWhere('user_id', $user_id)->select('user_id');
+                });
+            });
+        }
 
         return $query;
     }

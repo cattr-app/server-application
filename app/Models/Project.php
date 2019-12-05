@@ -90,6 +90,14 @@ class Project extends AbstractModel
     }
 
     /**
+     * @return HasMany
+     */
+    public function usersRelation(): HasMany
+    {
+        return $this->hasMany(ProjectsUsers::class, 'project_id', 'id');
+    }
+
+    /**
      * @return BelongsToMany
      */
     public function roles(): BelongsToMany

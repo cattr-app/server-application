@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
+use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\Task;
 use Auth;
@@ -56,7 +57,7 @@ class TaskController extends ItemController
      */
     public function getQueryWith(): array
     {
-        return ['priority', 'project', 'user'];
+        return ['priority'];
     }
 
     /**
@@ -511,40 +512,51 @@ class TaskController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         $user = Auth::user();
         $user_id = $user->id;
-        $query = parent::getQuery($withRelations);
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = Role::can($user, 'tasks', 'full_access');
-        $project_relations_access = Role::can($user, 'projects', 'relations');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
             return $query;
         }
 
-        $query->where(static function (Builder $query) use ($user_id, $project_relations_access, $action_method) {
-            /** edit and remove only for directly related users's project's task */
-            if ($action_method === 'edit' || $action_method === 'remove') {
-                $query->whereHas('user', static function (Builder $query) use ($user_id) {
-                    $query->where('id', $user_id)->select('id');
-                });
-            } else {
-                $query->when(!$project_relations_access,
-                    static function (Builder $query) use ($user_id, $project_relations_access) {
-                        $query->whereHas('user', static function (Builder $query) use ($user_id) {
-                            $query->where('id', $user_id)->select('id');
-                        });
-                    });
-
-                $query->when($project_relations_access, static function (Builder $query) use ($user_id) {
-                    $query->orWhereHas('project.users', static function (Builder $query) use ($user_id) {
-                        $query->where('id', $user_id)->select('id');
-                    });
-                });
+        $rules = $this->getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
             }
-        });
+
+            $query->where(function (Builder $query) use ($user_id, $object, $action) {
+                // Filter by project roles of the user
+                $query->whereHas('project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
+                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
+                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                            $query->where([
+                                'object' => $object,
+                                'action' => $action,
+                                'allow'  => true,
+                            ])->select('id');
+                        })->select('id');
+                    })->select('id');
+                });
+
+                // For read-only access include tasks where the user is assigned or has tracked intervals
+                $query->when($action !== 'edit' && $action !== 'remove', static function (Builder $query) use ($user_id) {
+                    $query->orWhere('user_id', $user_id);
+
+                    $query->orWhereHas('timeIntervals', static function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id)->select('user_id');
+                    });
+                });
+            });
+        }
 
         return $query;
     }

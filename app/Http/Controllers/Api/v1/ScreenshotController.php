@@ -551,37 +551,56 @@ class ScreenshotController extends ItemController
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
-        $query = parent::getQuery($withRelations);
+        $user = Auth::user();
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = Role::can(Auth::user(), 'screenshots', 'full_access');
-        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
         $action_method = Route::getCurrentRoute()->getActionMethod();
 
         if ($full_access) {
             return $query;
         }
 
-        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function ($val) {
-            return collect($val->id);
-        });
+        $rules = $this->getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
+            }
 
-        $time_intervals_id = collect([$user_time_interval_id])->collapse();
-        if ($action_method !== 'remove'
-            || $action_method === 'remove'
-            && Role::can(Auth::user(), 'remove', 'remove_related')) {
-            if ($project_relations_access) {
-                $attached_time_interval_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
-                    return collect($project->tasks)->flatMap(function ($task) {
-                        return collect($task->timeIntervals)->pluck('id');
+            $query->where(function (Builder $query) use ($user, $object, $action) {
+                $user_id = $user->id;
+
+                // Filter by project roles of the user
+                $query->whereHas('timeInterval.task.project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
+                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
+                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                            $query->where([
+                                'object' => $object,
+                                'action' => $action,
+                                'allow'  => true,
+                            ])->select('id');
+                        })->select('id');
+                    })->select('id');
+                });
+
+                // For read and delete access include user own intervals
+                $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
+                    $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id)->select('user_id');
                     });
                 });
 
-                $time_intervals_id = collect([$time_intervals_id, $attached_time_interval_id_to_project])->collapse()->unique();
-            }
+                $query->when($action === 'edit' && (bool) $user->manual_time, static function (Builder $query) use ($user_id) {
+                    $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id)->select('user_id');
+                    });
+                });
+            });
         }
-
-        $query->whereIn('screenshots.time_interval_id', $time_intervals_id);
 
         return $query;
     }

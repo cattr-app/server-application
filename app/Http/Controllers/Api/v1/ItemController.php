@@ -307,13 +307,24 @@ abstract class ItemController extends Controller
         });
 
         if (!$item) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Model fetch fail',
-                    'reason' => 'Model not found',
-                ]),
-                400
-            );
+            $cls = $this->getItemClass();
+            if ($cls::find($request->get('id')) !== null) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'error' => 'Access denied to this item',
+                        'reason' => 'action is not allowed',
+                    ]),
+                    403
+                );
+            } else {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'error' => 'Model fetch fail',
+                        'reason' => 'Model not found',
+                    ]),
+                    400
+                );
+            }
         }
 
         $item->fill($this->filterRequestData($requestData));
@@ -390,7 +401,28 @@ abstract class ItemController extends Controller
         );
 
         /** @var \Illuminate\Database\Eloquent\Model $item */
-        $item = $itemsQuery->firstOrFail();
+        $item = $itemsQuery->first();
+        if (!$item) {
+            $cls = $this->getItemClass();
+            if ($cls::find($request->get('id')) !== null) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
+                        'error' => 'Access denied to this item',
+                        'reason' => 'action is not allowed',
+                    ]),
+                    403
+                );
+            } else {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
+                        'error' => 'Model fetch fail',
+                        'reason' => 'Model not found',
+                    ]),
+                    400
+                );
+            }
+        }
+
         $item->delete();
 
         return response()->json(
@@ -428,17 +460,17 @@ abstract class ItemController extends Controller
      *
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         /** @var Model $cls */
         $cls = static::getItemClass();
 
-        $query = new Builder($cls::getQuery());
+        $query = new Builder($cls::getQuery(), true);
         $query->setModel(new $cls());
 
         $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls));
 
-        if ($softDelete) {
+        if ($softDelete && !$withSoftDeleted) {
             if (method_exists($cls, 'getTable')) {
                 $table = (new $cls())->getTable();
                 $query->whereNull("$table.deleted_at");

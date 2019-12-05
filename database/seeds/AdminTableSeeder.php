@@ -38,9 +38,9 @@ class AdminTableSeeder extends Seeder
             'screenshots_interval'   => 9,
             'active'                 => true,
             'password'               => bcrypt($pass),
-            'is_admin'               => true
+            'is_admin'               => true,
+            'role_id'                => 2,
         ]);
-        $admin->attachRole(1);
 
         $this->command->getOutput()->writeln('<fg=green>Admin user has been created</>');
     }

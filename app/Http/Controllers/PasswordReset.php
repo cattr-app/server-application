@@ -14,6 +14,10 @@ use DB;
 use Illuminate\Http\Request;
 use Validator;
 
+/**
+ * Class PasswordReset
+ * @package App\Http\Controllers
+ */
 class PasswordReset extends BaseController
 {
     /**
@@ -35,7 +39,7 @@ class PasswordReset extends BaseController
      * @return JsonResponse
      * @throws AuthorizationException
      *
-     * @api {post} /api/auth/password/reset/validate Validate
+     * @api {get} /api/auth/password/reset/validate Validate
      * @apiDescription Validates password reset token
      *
      * @apiVersion 0.1.0
@@ -47,17 +51,18 @@ class PasswordReset extends BaseController
      *
      * @apiParamExample {json} Request Example
      *  {
-     *      "email":  "johndoe@example.com",
-     *      "token":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *    "email":  "johndoe@example.com",
+     *    "token":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
      *  }
      *
      * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
      * @apiSuccess {String}   message  Message from server
      *
      * @apiSuccessExample {json} Success-Response
+     *  HTTP/1.1 200 OK
      *  {
-     *     "success": true,
-     *     "message": "Link for restore password has been sent to specified email"
+     *    "success": true,
+     *    "message": "Link for restore password has been sent to specified email"
      *  }
      *
      * @apiUse 400Error
@@ -102,23 +107,25 @@ class PasswordReset extends BaseController
      *
      * @apiParamExample {json} Request Example
      *  {
-     *      "email":      "johndoe@example.com",
-     *      "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *    "email":      "johndoe@example.com",
+     *    "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
      *  }
      *
      * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
      * @apiSuccess {String}   message  Message from server
      *
      * @apiSuccessExample {json} Success Response
+     *  HTTP/1.1 200 OK
      *  {
-     *     "success": true,
-     *     "message": "Link for restore password has been sent to specified email"
+     *    "success": true,
+     *    "message": "Link for restore password has been sent to specified email"
      *  }
      *
      * @apiUse 400Error
      * @apiUse ParamsValidationError
      * @apiUse NoSuchUserError
      * @apiUse CaptchaError
+     * @apiUse LimiterError
      */
     public function request(Request $request): JsonResponse
     {
@@ -167,30 +174,29 @@ class PasswordReset extends BaseController
      * @apiParam {String}  password                New password
      * @apiParam {String}  password_confirmation   Password confirmation
      *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "email":                  "johndoe@example.com",
+     *    "token":                  "16184cf3b2510464a53c0e573c75740540fe...",
+     *    "password_confirmation":  "amazingpassword",
+     *    "password":               "amazingpassword"
+     *  }
+     *
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL in seconds
      * @apiSuccess {Object}   user          User Entity
      * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
      *
-     *  @apiParamsExample {json} Request Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *      "email":                  "johndoe@example.com",
-     *      "token":                  "16184cf3b2510464a53c0e573c75740540fe...",
-     *      "password_confirmation":  "amazingpassword",
-     *      "password":               "amazingpassword"
-     *  }
-     *
      * @apiSuccessExample {json} Success Response
      *  HTTP/1.1 200 OK
      *  {
-     *      "success":      true,
-     *      "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
-     *      "token_type":   "bearer",
-     *      "password":     "amazingpassword",
-     *      "expires_in":   "3600",
-     *      "user":         {}
+     *    "success":      true,
+     *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
+     *    "token_type":   "bearer",
+     *    "password":     "amazingpassword",
+     *    "expires_in":   "3600",
+     *    "user":         {}
      *  }
      *
      * @apiUse 400Error

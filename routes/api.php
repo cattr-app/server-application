@@ -47,12 +47,12 @@ Route::group([
     'prefix' => 'auth',
 ], static function (Router $router) {
     $router->post('login', 'AuthController@login');
-    $router->any('logout', 'AuthController@logout');
-    $router->any('logout-from-all', 'AuthController@logoutFromAll');
+    $router->post('logout', 'AuthController@logout');
+    $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordReset@request');
-    $router->post('password/reset/validate', 'PasswordReset@validate');
+    $router->get('password/reset/validate', 'PasswordReset@validate');
     $router->post('password/reset/process', 'PasswordReset@process')
         ->name('password.reset.process');
 
@@ -65,12 +65,12 @@ Route::group([
     'prefix' => 'v1/auth',
 ], function (Router $router) {
     $router->post('login', 'AuthController@login');
-    $router->any('logout', 'AuthController@logout');
-    $router->any('logout-from-all', 'AuthController@logoutFromAll');
+    $router->post('logout', 'AuthController@logout');
+    $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordReset@request');
-    $router->post('password/reset/validate', 'PasswordReset@validate');
+    $router->get('password/reset/validate', 'PasswordReset@validate');
     $router->post('password/reset/process', 'PasswordReset@process')
         ->name('password.reset.process');
 
@@ -159,6 +159,7 @@ Route::group([
     $router->post('/time-intervals/create', 'Api\v1\TimeIntervalController@create');
     $router->post('/time-intervals/bulk-create', 'Api\v1\TimeIntervalController@bulkCreate');
     $router->post('/time-intervals/edit', 'Api\v1\TimeIntervalController@edit');
+    $router->post('/time-intervals/bulk-edit', 'Api\v1\TimeIntervalController@bulkEdit');
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
     $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
