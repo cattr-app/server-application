@@ -122,16 +122,6 @@ class UserController extends ItemController
     }
 
     /**
-     * @return string[]
-     */
-    public function getQueryWith(): array
-    {
-        return [
-            'roles',
-        ];
-    }
-
-    /**
      * @return array
      */
     public static function getControllerRules(): array

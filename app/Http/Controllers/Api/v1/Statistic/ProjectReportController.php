@@ -149,21 +149,8 @@ class ProjectReportController extends ReportController
                 ];
             }
 
-            // Get intervals assigned to current task
-            /** @var Collection $taskIntervals */
-            /*$taskIntervals = Task::find($projectReport->task_id)
-                ->timeIntervals()
-                ->where('start_at', '>=', $startAt)
-                ->where('end_at', '<=', $endAt)
-                ->get();*/
-
-            $projects[$project_id]['users'][$user_id]['tasks'][] = [
-                'id' => $projectReport->task_id,
-                'project_id' => $projectReport->project_id,
-                'user_id' => $projectReport->user_id,
-                'task_name' => $projectReport->task_name,
-                'duration' => (int) $projectReport->duration,
-                'screenshots' => $projectReport->task->timeIntervals()->with('screenshot')
+            if (isset($projectReport->task)) {
+                $screenshots = $projectReport->task->timeIntervals()->with('screenshot')
                     ->where('start_at', '>=', $startAt)->where('end_at', '<=', $endAt)->get()
                     ->pluck('screenshot')
                     ->groupBy(function ($s) {
@@ -173,7 +160,18 @@ class ProjectReportController extends ReportController
                         return $item->groupBy(function ($screen) {
                             return Carbon::parse($screen['created_at'])->startOfHour()->format('h:i');
                         });
-                    })
+                    });
+            } else {
+                $screenshots = [];
+            }
+
+            $projects[$project_id]['users'][$user_id]['tasks'][] = [
+                'id' => $projectReport->task_id,
+                'project_id' => $projectReport->project_id,
+                'user_id' => $projectReport->user_id,
+                'task_name' => $projectReport->task_name,
+                'duration' => (int) $projectReport->duration,
+                'screenshots' => $screenshots,
             ];
 
             $projects[$project_id]['users'][$user_id]['tasks_time'] += $projectReport->duration;
