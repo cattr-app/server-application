@@ -327,6 +327,7 @@ class AuthController extends BaseController
         $token = $user->addToken($token);
 
         return response()->json([
+            'success' => true,
             'access_token' => $token->token,
             'token_type' => 'bearer',
             'expires_in' => $token->expires_at,
