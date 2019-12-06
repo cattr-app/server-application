@@ -32,10 +32,8 @@ class ResetPassword extends ResetPasswordNotification
         if (static::$toMailCallback) {
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
         }
-        env('PASSWORD_RESET_FRONTEND_ROUTE');
 
-        $resetUrl = env("TRUSTED_FRONTEND_DOMAIN") . '/'
-            . env('PASSWORD_RESET_FRONTEND_ROUTE')
+        $resetUrl = config('app.password_reset_url')
             . "?email=$this->email&token=$this->token";
 
         return (new MailMessage)

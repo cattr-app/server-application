@@ -52,7 +52,7 @@ Route::group([
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordReset@request');
-    $router->get('password/reset/validate', 'PasswordReset@validate');
+    $router->post('password/reset/validate', 'PasswordReset@validate');
     $router->post('password/reset/process', 'PasswordReset@process')
         ->name('password.reset.process');
 
@@ -70,7 +70,7 @@ Route::group([
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordReset@request');
-    $router->get('password/reset/validate', 'PasswordReset@validate');
+    $router->post('password/reset/validate', 'PasswordReset@validate');
     $router->post('password/reset/process', 'PasswordReset@process')
         ->name('password.reset.process');
 

@@ -81,10 +81,10 @@ class PasswordReset extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_VALIDATION_FAILED);
         }
 
-        $resetRequest = DB::table('password_resets')
-            ->where('email', $request->input('email'))->first();
+        $user = Password::broker()->getUser($request->all());
+        $isValidToken = Password::broker()->getRepository()->exists($user, $request->input('token'));
 
-        if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
+        if (!$isValidToken) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
@@ -219,7 +219,8 @@ class PasswordReset extends BaseController
         }
 
         $resetRequest = DB::table('password_resets')
-            ->where('email', $request->input('email'))->first();
+            ->where('email', $request->input('email'))
+            ->first();
 
         if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
