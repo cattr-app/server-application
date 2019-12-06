@@ -6,17 +6,18 @@ use App\Models\Property;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use Auth;
+use Filter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
 use App\Http\Controllers\Controller;
 use App\Models\Project;
 use DB;
-use Modules\Reports\Entities\ProjectReport;
 use Validator;
 use Carbon\Carbon;
-use function foo\func;
+use Modules\Reports\Entities\ProjectReport;
 
-class ProjectReportController extends Controller
+class ProjectReportController extends ReportController
 {
     /**
      * @var
@@ -48,6 +49,14 @@ class ProjectReportController extends Controller
     }
 
     /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
+    {
+        return 'project-report';
+    }
+
+    /**
      * @return array
      */
     public static function getControllerRules(): array
@@ -68,19 +77,23 @@ class ProjectReportController extends Controller
      *
      * @return array|\Illuminate\Http\JsonResponse
      */
-    public function report(Request $request)
+    public function report(Request $request): JsonResponse
     {
         $validator = Validator::make(
             $request->all(),
-            $this->getValidationRules()
+            Filter::process(
+                $this->getEventUniqueName('validation.report.show'),
+                $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
             return response()->json(
-                [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
-                ], 400
+                Filter::process(
+                    $this->getEventUniqueName('answer.error.report.show'), [
+                        'error' => 'Validation fail',
+                        'reason' => $validator->errors()
+                    ], 400)
             );
         }
 
@@ -172,7 +185,12 @@ class ProjectReportController extends Controller
         $projects = array_values($projects);
 
 
-        return $projects;
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $projects
+            )
+        );
     }
 
     /**
@@ -182,19 +200,23 @@ class ProjectReportController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse [description]
      */
-    public function days(Request $request)
+    public function days(Request $request): JsonResponse
     {
         $validator = Validator::make(
             $request->all(),
-            $this->getValidationRules()
+            Filter::process(
+                $this->getEventUniqueName('validation.report.show'),
+                $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
             return response()->json(
-                [
+                Filter::process(
+                    $this->getEventUniqueName('answer.error.report.show'), [
                     'error' => 'Validation fail',
                     'reason' => $validator->errors()
-                ], 400
+                ], 400)
             );
         }
 
@@ -211,12 +233,12 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $days = DB::table('project_report')
+        $days = ProjectReport::query()
             ->select('user_id', 'date',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
             )
-            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
+            ->whereIn('project_id', Project::getUserRelatedProjectIds($user))
             ->where('date', '>=', $startAt)
             ->where('date', '<', $endAt)
             ->groupBy('user_id', 'date');
@@ -225,7 +247,14 @@ class ProjectReportController extends Controller
             $days->whereIn('user_id', $uids);
         }
 
-        return response()->json($days->get());
+        $days = $days->get();
+
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $days
+            )
+        );
     }
 
     /**
@@ -233,7 +262,7 @@ class ProjectReportController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function projects(Request $request)
+    public function projects(Request $request): JsonResponse
     {
         $validator = Validator::make(
             $request->all(),
@@ -275,7 +304,12 @@ class ProjectReportController extends Controller
         // Load projects.
         $projects = Project::query()->whereIn('id', $project_ids)->get(['id', 'name']);
 
-        return response()->json($projects);
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $projects
+            )
+        );
     }
 
     /**
@@ -286,23 +320,23 @@ class ProjectReportController extends Controller
      *
      * @return \Illuminate\Http\JsonResponse
      */
-    public function task($id, Request $request)
+    public function task($id, Request $request): JsonResponse
     {
         $validator = Validator::make(
             $request->all(),
-            [
-                'start_at' => 'required|date',
-                'end_at' => 'required|date',
-                'uid' => 'required|exists:users,id',
-            ]
+            Filter::process(
+                $this->getEventUniqueName('validation.report.show'),
+                $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
             return response()->json(
-                [
+                Filter::process(
+                    $this->getEventUniqueName('answer.error.report.show'), [
                     'error' => 'Validation fail',
                     'reason' => $validator->errors()
-                ], 400
+                ], 400)
             );
         }
 
@@ -319,7 +353,7 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $report = DB::table('project_report')
+        $report = ProjectReport::query()
             ->select(
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
@@ -330,7 +364,12 @@ class ProjectReportController extends Controller
             ->where('date', '<', $endAt)
             ->get(['date', 'duration']);
 
-        return response()->json($report);
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $report
+            )
+        );
     }
 
     /**

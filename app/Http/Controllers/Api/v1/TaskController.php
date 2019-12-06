@@ -53,14 +53,6 @@ class TaskController extends ItemController
     }
 
     /**
-     * @return string[]
-     */
-    public function getQueryWith(): array
-    {
-        return ['priority'];
-    }
-
-    /**
      * @return array
      */
     public static function getControllerRules(): array
