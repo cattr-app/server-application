@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Exceptions\Entities\AuthorizationException;
 use Cache;
+use Config;
 use GuzzleHttp\Client;
 use Request;
 use Throwable;
@@ -14,17 +15,6 @@ use Throwable;
  */
 class RecaptchaHelper
 {
-    private const DEFAULT_CONFIG = [
-        'RECAPTCHA_ENABLED' => false,
-        'RECAPTCHA_SITE_KEY' => '',
-        'RECAPTCHA_SECRET_KEY' => '',
-        'RECAPTCHA_GOOGLE_URL' => 'http://localhost',
-        'RECAPTCHA_TTL' => 3600,
-        'RECAPTCHA_FAILED_ATTEMPTS' => 10,
-        'RECAPTCHA_BAN_ATTEMPTS' => 10,
-        'RATE_LIMITER_ENABLED' => false,
-        'RATE_LIMITER_TTL' => 3600
-    ];
     /**
      * @var string $user
      */
@@ -46,7 +36,7 @@ class RecaptchaHelper
         $cacheKey = $this->getCaptchaCacheKey();
 
         if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, 1, env('RECAPTCHA_TTL', self::DEFAULT_CONFIG['RECAPTCHA_TTL']));
+            Cache::put($cacheKey, 1, config('recaptcha.ttl'));
         } else {
             Cache::increment($cacheKey);
         }
@@ -59,7 +49,7 @@ class RecaptchaHelper
      */
     private function captchaEnabled(): bool
     {
-        return env('RECAPTCHA_ENABLED', self::DEFAULT_CONFIG['RECAPTCHA_ENABLED']);
+        return config('recaptcha.enabled');
     }
 
     /**
@@ -105,7 +95,7 @@ class RecaptchaHelper
         if ($this->needsCaptcha()) {
             $this->incrementBanAmounts();
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_CAPTCHA,
-                ['site_key' => env('RECAPTCHA_SITE_KEY', self::DEFAULT_CONFIG['RECAPTCHA_SITE_KEY'])]);
+                ['site_key' => config('recaptcha.site_key')]);
         }
     }
 
@@ -128,11 +118,11 @@ class RecaptchaHelper
             return false;
         }
 
-        if ($banData['amounts'] < env('RECAPTCHA_BAN_ATTEMPTS', self::DEFAULT_CONFIG['RECAPTCHA_BAN_ATTEMPTS'])) {
+        if ($banData['amounts'] < config('recaptcha.ban_attempts')) {
             return false;
         }
 
-        if ($banData['time'] + env('RATE_LIMITER_TTL', self::DEFAULT_CONFIG['RATE_LIMITER_TTL']) < time()) {
+        if ($banData['time'] + config('recaptcha.rate_limiter_ttl') < time()) {
             Cache::forget($cacheKey);
             return false;
         }
@@ -147,7 +137,7 @@ class RecaptchaHelper
      */
     private function banEnabled(): bool
     {
-        return $this->captchaEnabled() && env('RATE_LIMITER_ENABLED', self::DEFAULT_CONFIG['RATE_LIMITER_ENABLED']);
+        return $this->captchaEnabled() && config('recaptcha.rate_limiter_enabled');
     }
 
     /**
@@ -180,7 +170,7 @@ class RecaptchaHelper
             $banData['amounts']++;
         }
 
-        Cache::put($cacheKey, $banData, env('RATE_LIMITER_TTL', self::DEFAULT_CONFIG['RATE_LIMITER_TTL']));
+        Cache::put($cacheKey, $banData, config('recaptcha.rate_limiter_ttl'));
     }
 
     /**
@@ -198,9 +188,9 @@ class RecaptchaHelper
             return;
         }
 
-        $response = (new Client())->post(env('RECAPTCHA_GOOGLE_URL', 'http://localhost'), [
+        $response = (new Client())->post(config('recaptcha.google_url'), [
             'form_params' => [
-                'secret' => env('RECAPTCHA_SECRET_KEY', self::DEFAULT_CONFIG['RECAPTCHA_SECRET_KEY']),
+                'secret' => config('recaptcha.secret_key'),
                 'response' => $captchaToken,
             ],
         ]);
@@ -249,7 +239,7 @@ class RecaptchaHelper
             return false;
         }
 
-        if ($attempts <= env('RECAPTCHA_FAILED_ATTEMPTS', self::DEFAULT_CONFIG['RECAPTCHA_FAILED_ATTEMPTS'])) {
+        if ($attempts <= config('recaptcha.failed_attempts')) {
             return false;
         }
 

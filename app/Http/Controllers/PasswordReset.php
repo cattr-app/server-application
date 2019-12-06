@@ -39,6 +39,7 @@ class PasswordReset extends BaseController
      * @return JsonResponse
      * @throws AuthorizationException
      *
+     *
      * @api {get} /api/auth/password/reset/validate Validate
      * @apiDescription Validates password reset token
      *
@@ -62,7 +63,7 @@ class PasswordReset extends BaseController
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
-     *    "message": "Link for restore password has been sent to specified email"
+     *    "message": "Password reset data is valid"
      *  }
      *
      * @apiUse 400Error
@@ -94,6 +95,7 @@ class PasswordReset extends BaseController
      * @param Request $request
      * @return JsonResponse
      * @throws AuthorizationException
+     *
      *
      * @api {post} /api/auth/password/reset/request Send
      * @apiDescription Sends email to user with reset link
@@ -161,18 +163,18 @@ class PasswordReset extends BaseController
      * @return JsonResponse
      * @throws AuthorizationException
      *
+     *
      * @api {post} /api/auth/password/reset/process Reset
      * @apiDescription Get user JWT
-     *
      *
      * @apiVersion 0.1.0
      * @apiName Process
      * @apiGroup Password Reset
      *
-     * @apiParam {String}  email                   User email
-     * @apiParam {String}  token                   Password reset token
-     * @apiParam {String}  password                New password
-     * @apiParam {String}  password_confirmation   Password confirmation
+     * @apiParam {String}  email                  User email
+     * @apiParam {String}  token                  Password reset token
+     * @apiParam {String}  password               New password
+     * @apiParam {String}  password_confirmation  Password confirmation
      *
      * @apiParamExample {json} Request Example
      *  {
@@ -191,12 +193,12 @@ class PasswordReset extends BaseController
      * @apiSuccessExample {json} Success Response
      *  HTTP/1.1 200 OK
      *  {
-     *    "success":      true,
-     *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
-     *    "token_type":   "bearer",
-     *    "password":     "amazingpassword",
-     *    "expires_in":   "3600",
-     *    "user":         {}
+     *    "success":       true,
+     *    "access_token":  "16184cf3b2510464a53c0e573c75740540fe...",
+     *    "token_type":    "bearer",
+     *    "password":      "amazingpassword",
+     *    "expires_in":    "3600",
+     *    "user":          {}
      *  }
      *
      * @apiUse 400Error
