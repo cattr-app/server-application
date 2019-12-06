@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
-use App\Http\Controllers\Controller;
 use App\Models\Project;
 use App\Models\Property;
 use App\Models\ProjectReport;
 use Auth;
 use Filter;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use DB;
 use Carbon\Carbon;
@@ -56,10 +56,10 @@ class TimeUseReportController extends ReportController
     /**
      * Handle the incoming request.
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return JsonResponse
      */
-    public function report(Request $request)
+    public function report(Request $request): JsonResponse
     {
         $validator = Validator::make(
             $request->all(),
@@ -79,8 +79,8 @@ class TimeUseReportController extends ReportController
                     $this->getEventUniqueName('answer.error.report.show'), [
                     'error' => 'Validation fail',
                     'reason' => $validator->errors()
-                ], 400)
-            );
+                ]),
+            400);
         }
 
         $user_ids = $request->input('user_ids', []);
@@ -111,7 +111,6 @@ class TimeUseReportController extends ReportController
         $users = [];
 
         foreach ($projectReports as $projectReport) {
-            $project_id = $projectReport->project_id;
             $user_id = $projectReport->user_id;
             $duration = (int)$projectReport->duration;
 
