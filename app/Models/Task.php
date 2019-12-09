@@ -135,7 +135,7 @@ class Task extends AbstractModel
 
         static::deleting(function($tasks) {
             /** @var Task $tasks */
-            foreach ($tasks->tasks()->get() as $val) {
+            foreach ($tasks->timeIntervals()->get() as $val) {
                 $val->delete();
             }
         });
@@ -168,7 +168,7 @@ class Task extends AbstractModel
     /**
      * @return HasMany
      */
-    public function tasks(): HasMany
+    public function timeIntervals(): HasMany
     {
     	return $this->hasMany(TimeInterval::class, 'task_id');
     }
