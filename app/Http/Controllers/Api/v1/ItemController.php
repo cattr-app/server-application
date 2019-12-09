@@ -71,10 +71,16 @@ abstract class ItemController extends Controller
             )
         );
 
+        $paginate = $request->get('paginate', false);
+        $currentPage = $request->get('page', 1);
+        $perPage = $request->get('perPage', 15);
+
         return response()->json(
             Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.result'),
-                $itemsQuery->get()
+                $paginate ?
+                    $itemsQuery->paginate($perPage, ['*'], 'page', $currentPage)
+                    : $itemsQuery->get()
             )
         );
     }
