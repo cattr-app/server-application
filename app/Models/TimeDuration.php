@@ -3,19 +3,24 @@
 namespace App\Models;
 
 use App\User;
-use Illuminate\Database\Eloquent\Model;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class TimeDuration
- * @package App\Models
  *
+ * @package App\Models
  * @property int $date
  * @property int $duration
  * @property int $user_id
-
  * @property User $user
+ * @property int $id
+ * @method static EloquentBuilder|TimeDuration whereDate($value)
+ * @method static EloquentBuilder|TimeDuration whereDuration($value)
+ * @method static EloquentBuilder|TimeDuration whereId($value)
+ * @method static EloquentBuilder|TimeDuration whereUserId($value)
+ * @mixin Eloquent
  */
 class TimeDuration extends AbstractModel
 {
