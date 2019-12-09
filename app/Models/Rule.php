@@ -3,14 +3,17 @@
 namespace App\Models;
 
 
-use Illuminate\Database\Eloquent\Model;
+use Eloquent;
+use Filter;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
  * Class Rule
- * @package App\Models
  *
+ * @package App\Models
  * @property int $id
  * @property int $role_id
  * @property string $object
@@ -19,8 +22,21 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
- *
  * @property Role $role
+ * @method static bool|null forceDelete()
+ * @method static QueryBuilder|Rule onlyTrashed()
+ * @method static bool|null restore()
+ * @method static EloquentBuilder|Rule whereAction($value)
+ * @method static EloquentBuilder|Rule whereAllow($value)
+ * @method static EloquentBuilder|Rule whereCreatedAt($value)
+ * @method static EloquentBuilder|Rule whereDeletedAt($value)
+ * @method static EloquentBuilder|Rule whereId($value)
+ * @method static EloquentBuilder|Rule whereObject($value)
+ * @method static EloquentBuilder|Rule whereRoleId($value)
+ * @method static EloquentBuilder|Rule whereUpdatedAt($value)
+ * @method static QueryBuilder|Rule withTrashed()
+ * @method static QueryBuilder|Rule withoutTrashed()
+ * @mixin Eloquent
  */
 class Rule extends AbstractModel
 {
@@ -51,11 +67,11 @@ class Rule extends AbstractModel
     }
 
     /**
-     * @return array[]
+     * @return array
      */
     public static function getActionList(): array
     {
-        return \Filter::process('role.actions.list', [
+        return Filter::process('role.actions.list', [
             'register' => [
                 'create' => __('Register user'),
             ],

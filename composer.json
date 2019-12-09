@@ -79,14 +79,6 @@
     "sort-packages": true,
     "optimize-autoloader": true
   },
-  "autoload-dev": {
-    "classmap": [
-      "tests/TestCase.php"
-    ],
-    "psr-4": {
-      "Tests\\": "tests/"
-    }
-  },
   "extra": {
     "merge-plugin": {
       "include": [

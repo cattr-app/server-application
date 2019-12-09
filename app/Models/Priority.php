@@ -2,11 +2,21 @@
 
 namespace App\Models;
 
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
  * Class Priority
+ *
  * @package App\Models
+ * @property int $id
+ * @property string $name
+ * @property-read Collection|Task[] $tasks
+ * @method static EloquentBuilder|Priority whereId($value)
+ * @method static EloquentBuilder|Priority whereName($value)
+ * @mixin Eloquent
  */
 class Priority extends AbstractModel
 {
@@ -38,6 +48,9 @@ class Priority extends AbstractModel
     	return $this->hasMany(Task::class, 'priority_id');
     }
 
+    /**
+     * @return string
+     */
     public static function getTableName()
     {
         return with(new static)->getTable();

@@ -3,24 +3,29 @@
 namespace App\Models;
 
 use App\User;
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
  * Class ProjectsUsers
- * @package App\Models
  *
+ * @package App\Models
  * @property int    $project_id
  * @property int    $user_id
  * @property int    $role_id
  * @property string $created_at
  * @property string $updated_at
- *
  * @property User    $user
  * @property Project $project
  * @property Role    $role
+ * @method static EloquentBuilder|ProjectsUsers whereCreatedAt($value)
+ * @method static EloquentBuilder|ProjectsUsers whereProjectId($value)
+ * @method static EloquentBuilder|ProjectsUsers whereUpdatedAt($value)
+ * @method static EloquentBuilder|ProjectsUsers whereUserId($value)
+ * @mixin Eloquent
  */
 class ProjectsUsers extends AbstractModel
 {
@@ -56,12 +61,14 @@ class ProjectsUsers extends AbstractModel
         'updated_at',
     ];
 
-    protected function setKeysForSaveQuery(Builder $query)
+    /**
+     * @param EloquentBuilder $query
+     * @return EloquentBuilder
+     */
+    protected function setKeysForSaveQuery(Builder $query): EloquentBuilder
     {
-        $query
-            ->where('project_id', '=', $this->getAttribute('project_id'))
+        return $query->where('project_id', '=', $this->getAttribute('project_id'))
             ->where('user_id', '=', $this->getAttribute('user_id'));
-        return $query;
     }
 
     /**

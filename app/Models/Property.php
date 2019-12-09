@@ -2,14 +2,16 @@
 
 namespace App\Models;
 
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
  * Class Property
  *
  * @package App\Models
- *
  * @property int    $id
  * @property int    $entity_id
  * @property string $entity_type
@@ -18,6 +20,20 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ * @method static bool|null forceDelete()
+ * @method static QueryBuilder|Property onlyTrashed()
+ * @method static bool|null restore()
+ * @method static EloquentBuilder|Property whereCreatedAt($value)
+ * @method static EloquentBuilder|Property whereDeletedAt($value)
+ * @method static EloquentBuilder|Property whereEntityId($value)
+ * @method static EloquentBuilder|Property whereEntityType($value)
+ * @method static EloquentBuilder|Property whereId($value)
+ * @method static EloquentBuilder|Property whereName($value)
+ * @method static EloquentBuilder|Property whereUpdatedAt($value)
+ * @method static EloquentBuilder|Property whereValue($value)
+ * @method static QueryBuilder|Property withTrashed()
+ * @method static QueryBuilder|Property withoutTrashed()
+ * @mixin Eloquent
  */
 class Property extends AbstractModel
 {
@@ -81,7 +97,7 @@ class Property extends AbstractModel
      *
      * @return Collection
      */
-    public static function getProperty(string $scope, string $key, array $parameters = [])
+    public static function getProperty(string $scope, string $key, array $parameters = []): Collection
     {
         // Making data for where query
         $queryData = [

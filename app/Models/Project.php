@@ -2,17 +2,35 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use App\User;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+
+/**
+ * @apiDefine ProjectObject
+ *
+ * @apiSuccess {Object}   project              Project entity
+ * @apiSuccess {Integer}  project.id           ID
+ * @apiSuccess {Integer}  project.company_id   Company ID
+ * @apiSuccess {String}   project.name         Name
+ * @apiSuccess {String}   project.description  Description of project
+ * @apiSuccess {String}   project.created_at   Creation DateTime
+ * @apiSuccess {String}   project.updated_at   Update DateTime
+ * @apiSuccess {String}   project.deleted_at   Delete DateTime or `NULL` if user wasn't deleted
+ * @apiSuccess {Array}    project.users        Users attached to project
+ * @apiSuccess {Array}    project.tasks        Tasks of project
+ */
+
 
 /**
  * Class Project
- * @package App\Models
  *
+ * @package App\Models
  * @property int $id
  * @property int $company_id
  * @property string $name
@@ -21,9 +39,24 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
- *
  * @property User $users
  * @property Task[] $tasks
+ * @property-read Collection|Role[] $roles
+ * @property-read Collection|ProjectsUsers[] $usersRelation
+ * @method static bool|null forceDelete()
+ * @method static QueryBuilder|Project onlyTrashed()
+ * @method static bool|null restore()
+ * @method static EloquentBuilder|Project whereCompanyId($value)
+ * @method static EloquentBuilder|Project whereCreatedAt($value)
+ * @method static EloquentBuilder|Project whereDeletedAt($value)
+ * @method static EloquentBuilder|Project whereDescription($value)
+ * @method static EloquentBuilder|Project whereId($value)
+ * @method static EloquentBuilder|Project whereImportant($value)
+ * @method static EloquentBuilder|Project whereName($value)
+ * @method static EloquentBuilder|Project whereUpdatedAt($value)
+ * @method static QueryBuilder|Project withTrashed()
+ * @method static QueryBuilder|Project withoutTrashed()
+ * @mixin Eloquent
  */
 class Project extends AbstractModel
 {
@@ -116,9 +149,10 @@ class Project extends AbstractModel
     /**
      * @param User $user
      *
-     * @return int[]
+     * @return array
      */
-    public static function getUserRelatedProjectIds($user): array {
+    public static function getUserRelatedProjectIds($user): array
+    {
         $full_access = Role::can($user, 'projects', 'full_access');
 
         if ($full_access) {
@@ -140,9 +174,9 @@ class Project extends AbstractModel
             return null;
         });
 
-        $user_time_interval_project_id = collect($user->timeIntervals)->flatMap(function ($val) {
-            if (isset($val->task->project)) {
-                return collect($val->task->project->id);
+        $user_time_interval_project_id = collect($user->timeIntervals)->flatMap(function ($interval) {
+            if (isset($interval->task->project)) {
+                return collect($interval->task->project->id);
             }
 
             return null;

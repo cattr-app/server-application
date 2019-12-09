@@ -2,8 +2,23 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Support\Carbon;
 
+/**
+ * App\Models\Registration
+ *
+ * @property int $id
+ * @property string $key
+ * @property string $email
+ * @property Carbon $expires_at
+ * @method static EloquentBuilder|Registration whereEmail($value)
+ * @method static EloquentBuilder|Registration whereExpiresAt($value)
+ * @method static EloquentBuilder|Registration whereId($value)
+ * @method static EloquentBuilder|Registration whereKey($value)
+ * @mixin Eloquent
+ */
 class Registration extends AbstractModel
 {
     /**
