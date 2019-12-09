@@ -20,6 +20,8 @@ class Synchronizer
 
     public function synchronize(User $user)
     {
+        $api = null;
+
         /** @var GitlabApi $api */
         $api = GitlabApi::buildFromUser($user);
 
@@ -174,6 +176,7 @@ class Synchronizer
     {
         foreach (User::all() as $user) {
             $this->synchronize($user);
+            $this->entityResolver->reinit();
         }
     }
 
