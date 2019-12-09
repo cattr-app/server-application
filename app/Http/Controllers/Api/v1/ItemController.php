@@ -98,8 +98,8 @@ abstract class ItemController extends Controller
         return response()->json([
             'total' => Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.count.query.prepare'),
-                $itemsQuery->get()
-            )->count()
+                $itemsQuery->count()
+            )
         ]);
     }
 
