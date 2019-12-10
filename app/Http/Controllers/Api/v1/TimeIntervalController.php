@@ -83,6 +83,7 @@ class TimeIntervalController extends ItemController
             'show' => 'time-intervals.show',
             'destroy' => 'time-intervals.remove',
             'bulkDestroy' => 'time-intervals.bulk-remove',
+            'manualCreate' => 'time-intervals.create',
         ];
     }
 
@@ -133,6 +134,7 @@ class TimeIntervalController extends ItemController
      *     "task_id": 1,
      *     "start_at": "2013-04-12 20:40:00",
      *     "end_at": "2013-04-12 20:40:00",
+     *     "is_manual": true,
      *     "created_at": "2018-10-01 03:20:59",
      *     "updated_at": "2018-10-01 03:20:59",
      *     "count_mouse": 0,
@@ -240,6 +242,107 @@ class TimeIntervalController extends ItemController
 
             $screenshot = Filter::process('item.create.screenshot', Screenshot::create($screenshotData));
         }
+
+        return response()->json(
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'interval' => $timeInterval,
+            ]),
+            200
+        );
+    }
+
+    /**
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/time-intervals/manual-create Manual Create
+     * @apiDescription Manual Create Time Interval
+     * @apiVersion     0.1.0
+     * @apiName        ManualCreateTimeInterval
+     * @apiGroup       Time Interval
+     *
+     * @apiUse         UnauthorizedError
+     *
+     * @apiRequestExample {json} Request Example
+     * {
+     *   "task_id": 1,
+     *   "user_id": 1,
+     *   "start_at": "2013-04-12T16:40:00-04:00",
+     *   "end_at": "2013-04-12T16:40:00-04:00"
+     * }
+     *
+     * @apiSuccessExample {json} Answer Example
+     * {
+     *   "interval": {
+     *     "id": 2251,
+     *     "task_id": 1,
+     *     "start_at": "2013-04-12 20:40:00",
+     *     "end_at": "2013-04-12 20:40:00",
+     *     "is_manual": true,
+     *     "created_at": "2018-10-01 03:20:59",
+     *     "updated_at": "2018-10-01 03:20:59",
+     *     "count_mouse": 0,
+     *     "count_keyboard": 0,
+     *     "user_id": 1
+     *   }
+     * }
+     *
+     * @apiParam {Integer}  task_id   Task id
+     * @apiParam {Integer}  user_id   User id
+     * @apiParam {String}   start_at  Interval time start
+     * @apiParam {String}   end_at    Interval time end
+     *
+     * @apiUse         WrongDateTimeFormatStartEndAt
+     *
+     */
+    public function manualCreate(Request $request): JsonResponse
+    {
+        /* TODO: Add permission validation to time management for other users */
+
+        $user = auth()->user();
+
+        if(!$user->manual_time) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
+                    'error' => 'Access denied',
+                    'reason' => 'User does not have access to manual time editing',
+                ]),
+                403
+            );
+        }
+
+        $intervalData = [
+            'task_id' => $request->input('task_id'),
+            'user_id' => $request->input('user_id'),
+            'start_at' => $request->input('start_at'),
+            'end_at' => $request->input('end_at'),
+            'is_manual' => true,
+        ];
+
+        $validator = Validator::make(
+            $intervalData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.create'),
+                $this->getValidationRules()
+            )
+        );
+
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'error' => 'Validation fail',
+                    'reason' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        $timeInterval = Filter::process(
+            $this->getEventUniqueName('item.create'),
+            new TimeInterval($intervalData));
+
+
+        $timeInterval->save();
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
