@@ -18,7 +18,7 @@ use Validator;
  * Class PasswordReset
  * @package App\Http\Controllers
  */
-class PasswordReset extends BaseController
+class PasswordResetController extends BaseController
 {
     /**
      * @var RecaptchaHelper
@@ -26,7 +26,7 @@ class PasswordReset extends BaseController
     private $recaptcha;
 
     /**
-     * PasswordReset constructor.
+     * PasswordResetController constructor.
      * @param RecaptchaHelper $recaptcha
      */
     public function __construct(RecaptchaHelper $recaptcha)
@@ -97,7 +97,7 @@ class PasswordReset extends BaseController
      * @throws AuthorizationException
      *
      *
-     * @api {post} /api/auth/password/reset/request Send
+     * @api {post} /api/auth/password/reset/request Request
      * @apiDescription Sends email to user with reset link
      *
      * @apiVersion 0.1.0
@@ -154,7 +154,7 @@ class PasswordReset extends BaseController
         return response()->json([
             'success' => true,
             'message' => 'Link for restore password has been sent to specified email',
-        ], 200);
+        ]);
     }
 
 
@@ -164,8 +164,8 @@ class PasswordReset extends BaseController
      * @throws AuthorizationException
      *
      *
-     * @api {post} /api/auth/password/reset/process Reset
-     * @apiDescription Get user JWT
+     * @api {post} /api/auth/password/reset/process Process
+     * @apiDescription Resets user password
      *
      * @apiVersion 0.1.0
      * @apiName Process
@@ -183,12 +183,11 @@ class PasswordReset extends BaseController
      *    "password_confirmation":  "amazingpassword",
      *    "password":               "amazingpassword"
      *  }
-     *
+     * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL in seconds
      * @apiSuccess {Object}   user          User Entity
-     * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
      *
      * @apiSuccessExample {json} Success Response
      *  HTTP/1.1 200 OK

@@ -2,19 +2,22 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
 use App\Rules\BetweenDate;
 use App\User;
 use Auth;
 use Carbon\Carbon;
-use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+use Mpdf\Tag\Time;
+use Storage;
+use Image;
+use Route;
 use Validator;
 
 /**
@@ -53,9 +56,6 @@ class TimeIntervalController extends ItemController
 
 
     /**
-     * @param  int     $user_id
-     * @param  string  $start_at
-     *
      * @return array
      */
     public function getValidationRules(): array
@@ -91,7 +91,7 @@ class TimeIntervalController extends ItemController
     {
         $start_at = $intervalData['start_at'] ?? '';
         $end_at_rules = [];
-        $timeOffset = 3600 /* one hour */;
+        $timeOffset = 3600; /* one hour */
         $beforeTimestamp = strtotime($start_at) + $timeOffset;
         $beforeDate = date(DATE_ATOM, $beforeTimestamp);
         $end_at_rules[] = new BetweenDate($start_at, $beforeDate);
@@ -108,7 +108,7 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      * @api            {post} /api/v1/time-intervals/create Create
@@ -157,12 +157,12 @@ class TimeIntervalController extends ItemController
     public function create(Request $request): JsonResponse
     {
         $intervalData = [
-            'task_id' => (int) $request->get('task_id'),
-            'user_id' => (int) $request->get('user_id'),
+            'task_id' => (int)$request->get('task_id'),
+            'user_id' => (int)$request->get('user_id'),
             'start_at' => $request->get('start_at'),
             'end_at' => $request->get('end_at'),
-            'count_mouse' => (int) $request->get('count_mouse') ?: 0,
-            'count_keyboard' => (int) $request->get('count_keyboard') ?: 0,
+            'count_mouse' => (int)$request->get('count_mouse') ?: 0,
+            'count_keyboard' => (int)$request->get('count_keyboard') ?: 0,
         ];
 
         $validator = Validator::make(
@@ -176,8 +176,10 @@ class TimeIntervalController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -192,36 +194,56 @@ class TimeIntervalController extends ItemController
          * хочется. */
 
         // We'll check if there is an interval where current start_at are between this interval full range
-       /* $lastInterval = TimeInterval::where(['user_id' => $intervalData['user_id']])->last();
-        if ($lastInterval) {
-            $carbonStartAt = Carbon::parse($intervalData['start_at']);
-            if (Carbon::parse($lastInterval->start_at)->lt($carbonStartAt) &&
-                Carbon::parse($lastInterval->end_at)->gt($carbonStartAt)) {
-                return response()->json(
-                    Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                        'interval' => $lastInterval,
-                    ]),
-                    400
-                );
-            }
-        }*/
+        /* $lastInterval = TimeInterval::where(['user_id' => $intervalData['user_id']])->last();
+         if ($lastInterval) {
+             $carbonStartAt = Carbon::parse($intervalData['start_at']);
+             if (Carbon::parse($lastInterval->start_at)->lt($carbonStartAt) &&
+                 Carbon::parse($lastInterval->end_at)->gt($carbonStartAt)) {
+                 return response()->json(
+                     Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                         'interval' => $lastInterval,
+                     ]),
+                     400
+                 );
+             }
+         }
 
-       $existing = TimeInterval::where(['user_id' => $intervalData['user_id']])->where(function ($query) use ($intervalData) {
-           $query->where('start_at', '<=', $intervalData['start_at']);
-           $query->where('end_at', '>', $intervalData['start_at']);
-       })->count();
+        $existing = TimeInterval::where(['user_id' => $intervalData['user_id']])->where(function ($query) use ($intervalData) {
+            $query->where('start_at', '<=', $intervalData['start_at']);
+            $query->where('end_at', '>', $intervalData['start_at']);
+        })->count();
+        */
 
-        $timeInterval = Filter::process($this->getEventUniqueName('item.create'), new TimeInterval($intervalData));
-        if (!$this->validateEndDate($intervalData)) {
-            // If end date is not valid, return success without saving
+        $existing = TimeInterval::where([
+            ['user_id', '=', $intervalData['user_id']],
+            ['start_at', '=', $intervalData['start_at']],
+            ['end_at', '=', $intervalData['end_at']],
+        ])->first();
+        //todo duplication questions
+        if ($existing) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                    'interval' => $timeInterval,
-                ]),
-                400
+                    'success' => false,
+                    ''
+                ])
             );
         }
-        $timeInterval->save();
+
+
+        if (!$this->validateEndDate($intervalData)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid interval'
+                ]), 400);
+        }
+
+        $timeInterval = Filter::process(
+            $this->getEventUniqueName('item.create'),
+            TimeInterval::create($intervalData)
+        );
 
         //create screenshot
         if (isset($request->screenshot)) {
@@ -232,7 +254,7 @@ class TimeIntervalController extends ItemController
                 $constraint->aspectRatio();
             });
             $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
-            Storage::put($thumbnailPath, (string) $thumbnail->encode());
+            Storage::put($thumbnailPath, (string)$thumbnail->encode());
 
             $screenshotData = [
                 'time_interval_id' => $timeInterval->id,
@@ -240,19 +262,19 @@ class TimeIntervalController extends ItemController
                 'thumbnail_path' => $thumbnailPath,
             ];
 
-            $screenshot = Filter::process('item.create.screenshot', Screenshot::create($screenshotData));
+            Filter::process('item.create.screenshot', Screenshot::create($screenshotData));
         }
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success' => true,
                 'interval' => $timeInterval,
-            ]),
-            200
+            ])
         );
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      * @api            {post} /api/v1/time-intervals/manual-create Manual Create
@@ -395,8 +417,10 @@ class TimeIntervalController extends ItemController
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
                     [
-                        'error' => 'validation fail',
-                        'reason' => 'intervals is required',
+                        'success' => false,
+                        'error_type' => 'validation',
+                        'message' => 'Validation error',
+                        'info' => 'intervals is required'
                     ]
                 ]),
                 400
@@ -406,16 +430,15 @@ class TimeIntervalController extends ItemController
         $intervals = json_decode($requestData['intervals'], true);
         foreach ($intervals as $index => $interval) {
             $intervalData = [
-                'task_id' => (int) ($interval['task_id'] ?? 0),
-                'user_id' => (int) ($interval['user_id'] ?? 0),
+                'task_id' => (int)($interval['task_id'] ?? 0),
+                'user_id' => (int)($interval['user_id'] ?? 0),
                 'start_at' => $interval['start_at'] ?? '',
                 'end_at' => $interval['end_at'] ?? '',
-                'count_mouse' => (int) ($interval['count_mouse'] ?? 0),
-                'count_keyboard' => (int) ($interval['count_keyboard'] ?? 0),
+                'count_mouse' => (int)($interval['count_mouse'] ?? 0),
+                'count_keyboard' => (int)($interval['count_keyboard'] ?? 0),
             ];
 
-            $validator = Validator::make(
-                $intervalData,
+            $validator = Validator::make($intervalData,
                 Filter::process(
                     $this->getEventUniqueName('validation.item.create'),
                     $this->getValidationRules()
@@ -424,8 +447,10 @@ class TimeIntervalController extends ItemController
 
             if ($validator->fails()) {
                 $result[] = [
-                    'error' => 'validation fail',
-                    'reason' => $validator->errors(),
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
                     'code' => 400
                 ];
                 continue;
@@ -448,8 +473,13 @@ class TimeIntervalController extends ItemController
 
             $timeInterval = Filter::process($this->getEventUniqueName('item.create'), new TimeInterval($intervalData));
             if (!$this->validateEndDate($intervalData)) {
-                // If end date is not valid, return success without saving
-                $result[] = $timeInterval;
+                $result[] = [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid interval',
+                    'code' => 400
+                ];
                 continue;
             }
             $timeInterval->save();
@@ -463,7 +493,7 @@ class TimeIntervalController extends ItemController
                     $constraint->aspectRatio();
                 });
                 $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
-                Storage::put($thumbnailPath, (string) $thumbnail->encode());
+                Storage::put($thumbnailPath, (string)$thumbnail->encode());
 
                 $screenshotData = [
                     'time_interval_id' => $timeInterval->id,
@@ -474,7 +504,7 @@ class TimeIntervalController extends ItemController
                 $screenshot = Filter::process('item.create.screenshot', Screenshot::create($screenshotData));
             }
 
-            $result[] = $timeInterval;
+            $result[] = ['success'=> true, 'interval' => $timeInterval, 'code' => 200];
         }
 
         return response()->json([
@@ -491,7 +521,7 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      * @api            {post} /api/v1/time-intervals/list List
@@ -653,8 +683,10 @@ class TimeIntervalController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -667,8 +699,10 @@ class TimeIntervalController extends ItemController
         if (!is_int($request->get('id'))) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Invalid id',
-                    'reason' => 'Id is not integer',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id',
                 ]),
                 400
             );
@@ -682,7 +716,7 @@ class TimeIntervalController extends ItemController
             )
         );
 
-        /** @var \Illuminate\Database\Eloquent\Model $item */
+        /** @var Model $item */
         $item = collect($itemsQuery->get())->first(function ($val, $key) use ($request) {
             return $val['id'] === $request->get('id');
         });
@@ -690,8 +724,9 @@ class TimeIntervalController extends ItemController
         if (!$item) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Model fetch fail',
-                    'reason' => 'Model not found',
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found',
                 ]),
                 400
             );
@@ -699,12 +734,14 @@ class TimeIntervalController extends ItemController
 
         $item->fill($this->filterRequestData($requestData));
         if (!$this->validateEndDate($requestData)) {
-            // If end date is not valid, return success without saving
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                    'res' => $item,
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid interval'
                 ]),
-                200
+                400
             );
         }
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
@@ -712,13 +749,14 @@ class TimeIntervalController extends ItemController
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
                 'res' => $item,
             ])
         );
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      * @throws \Exception
@@ -799,11 +837,11 @@ class TimeIntervalController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => $validator->errors(),
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
+                ]), 400);
         }
 
         $data = $requestData['data'];
@@ -817,11 +855,11 @@ class TimeIntervalController extends ItemController
         if ($dataValidator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => $dataValidator->errors(),
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $dataValidator->errors(),
+                ]), 400);
         }
 
         $intervals = $requestData['intervals'];
@@ -845,21 +883,25 @@ class TimeIntervalController extends ItemController
 
             if ($intervalValidator->fails()) {
                 $result[] = [
-                    'error' => 'Validation fail',
-                    'reason' => $intervalValidator->errors(),
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation Error',
+                    'info' => $intervalValidator->errors(),
                     'code' => 400
                 ];
                 continue;
             }
 
-            /** @var \Illuminate\Database\Eloquent\Model $item */
+            /** @var Model $item */
             $item = $itemsQuery->first();
             if ($item && $item->update($data)) {
-                $result[] = ['message' => 'Item has been updated'];
+                $result[] = ['success' => true, 'message' => 'Item has been updated'];
             } else {
                 $result[] = [
-                    'error' => 'Item has not been updated',
-                    'reason' => 'Item not found'
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found',
+                    'code' => 404
                 ];
             }
         }
@@ -891,7 +933,7 @@ class TimeIntervalController extends ItemController
      */
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      * @throws \Exception
@@ -953,22 +995,22 @@ class TimeIntervalController extends ItemController
         if (empty($requestData['intervals'])) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'intervals is empty',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'intervals is empty'
+                ]), 400);
         }
 
         $intervals = $requestData['intervals'];
         if (!is_array($intervals)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
                     'reason' => 'intervals should be an array',
-                ]),
-                400
-            );
+                ]), 400);
         }
 
         foreach ($intervals as $interval) {
@@ -991,21 +1033,27 @@ class TimeIntervalController extends ItemController
 
             if ($validator->fails()) {
                 $result[] = [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors(),
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
                     'code' => 400
                 ];
                 continue;
             }
 
-            /** @var \Illuminate\Database\Eloquent\Model $item */
+            /** @var Model $item */
             $item = $itemsQuery->first();
             if ($item && $item->delete()) {
-                $result[] = ['message' => 'Item has been removed'];
+                $result[] = [
+                    'success' => true,
+                    'message' => 'Item has been removed'];
             } else {
                 $result[] = [
-                    'error' => 'Item has not been removed',
-                    'reason' => 'Item not found'
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found',
+                    'code' => 404
                 ];
             }
         }
@@ -1018,8 +1066,9 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @param  bool  $withRelations
+     * @param bool $withRelations
      *
+     * @param bool $withSoftDeleted
      * @return Builder
      */
     protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
@@ -1053,7 +1102,7 @@ class TimeIntervalController extends ItemController
                             $query->where([
                                 'object' => $object,
                                 'action' => $action,
-                                'allow'  => true,
+                                'allow' => true,
                             ])->select('id');
                         })->select('id');
                     })->select('id');
@@ -1064,7 +1113,7 @@ class TimeIntervalController extends ItemController
                     $query->orWhere('user_id', $user_id)->select('user_id');
                 });
 
-                $query->when($action === 'edit' && (bool) $user->manual_time, static function (Builder $query) use ($user_id) {
+                $query->when($action === 'edit' && (bool)$user->manual_time, static function (Builder $query) use ($user_id) {
                     $query->orWhere('user_id', $user_id)->select('user_id');
                 });
             });
