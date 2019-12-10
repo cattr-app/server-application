@@ -51,9 +51,9 @@ Route::group([
     $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
-    $router->post('password/reset/request', 'PasswordReset@request');
-    $router->post('password/reset/validate', 'PasswordReset@validate');
-    $router->post('password/reset/process', 'PasswordReset@process')
+    $router->post('password/reset/request', 'PasswordResetController@request');
+    $router->post('password/reset/validate', 'PasswordResetController@validate');
+    $router->post('password/reset/process', 'PasswordResetController@process')
         ->name('password.reset.process');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');
@@ -69,9 +69,9 @@ Route::group([
     $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
-    $router->post('password/reset/request', 'PasswordReset@request');
-    $router->post('password/reset/validate', 'PasswordReset@validate');
-    $router->post('password/reset/process', 'PasswordReset@process')
+    $router->post('password/reset/request', 'PasswordResetController@request');
+    $router->post('password/reset/validate', 'PasswordResetController@validate');
+    $router->post('password/reset/process', 'PasswordResetController@process')
         ->name('password.reset.process');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');

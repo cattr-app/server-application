@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1;
 use App\Models\ProjectsRoles;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
@@ -31,7 +32,7 @@ class ProjectsRolesController extends ItemController
     {
         return [
             'project_id' => 'required|exists:projects,id',
-            'role_id'    => 'required|exists:role,id',
+            'role_id' => 'required|exists:role,id',
         ];
     }
 
@@ -59,6 +60,9 @@ class ProjectsRolesController extends ItemController
     }
 
     /**
+     * @param Request $request
+     *
+     * @return JsonResponse
      * @api {get} /api/v1/projects-roles/list List
      * @apiDescription Get list of Projects Roles relations
      * @apiVersion 0.1.0
@@ -92,12 +96,11 @@ class ProjectsRolesController extends ItemController
      *   "role_id": 1
      * }
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @api {post} /api/v1/projects-roles/create Create
      * @apiDescription Create Project Roles relation
      *
@@ -154,8 +157,6 @@ class ProjectsRolesController extends ItemController
      *   }
      * }
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function create(Request $request): JsonResponse
     {
@@ -169,11 +170,11 @@ class ProjectsRolesController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]), 400);
         }
 
         $cls = $this->getItemClass();
@@ -191,6 +192,8 @@ class ProjectsRolesController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @api {post} /api/v1/projects-roles/bulk-create BulkCreate
      * @apiDescription Multiple Create Project Roles relation
      * @apiVersion 0.1.0
@@ -246,8 +249,6 @@ class ProjectsRolesController extends ItemController
      * @apiUse UnauthorizedError
      * @todo: add request and response example with error
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function bulkCreate(Request $request): JsonResponse
     {
@@ -257,19 +258,21 @@ class ProjectsRolesController extends ItemController
         if (empty($requestData['relations'])) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'relations is empty',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'relations is empty',
+                ]), 400);
         }
 
         $relations = $requestData['relations'];
         if (!is_array($relations)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'relations should be an array',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'relations should be an array',
                 ]),
                 400
             );
@@ -290,8 +293,10 @@ class ProjectsRolesController extends ItemController
 
             if ($validator->fails()) {
                 $result[] = Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors(),
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
                     'code' => 400
                 ]);
                 continue;
@@ -315,70 +320,70 @@ class ProjectsRolesController extends ItemController
         );
     }
 
-  /**
-   * @api {remove, post} /api/v1/projects-roles/remove Destroy
-   * @apiDescription Destroy Project Roles relation
-   * @apiVersion 0.1.0
-   * @apiName DestroyProjectRoles
-   * @apiGroup ProjectRoles
-   *
-   * @apiParam      {Object}   object               `QueryParam`
-   * @apiParam      {Integer}  object.project_id    `QueryParam`
-   * @apiParam      {Integer}  object.role_id       `QueryParam`
-   *
-   * @apiParamExample {json} Request example
-   * {
-   *    "project_id": 1,
-   *    "role_id": 1
-   * }
-   *
-   * @apiSuccess    {Object}   object           message
-   * @apiSuccess    {String}   object.message   body
-   *
-   * @apiSuccessExample {json} Response example
-   * {
-   *    "message": "Item has been removed"
-   * }
-   *
-   * @apiUse DefaultDestroyRequestExample
-   * @apiUse DefaultBulkDestroyErrorResponse
-   * @apiUse DefaultDestroyResponse
-   *
-   * @apiUse UnauthorizedError
-   *
-   *
-   * @apiErrorExample (403) {json} Not allowed action example
-   * {
-   *   "error": "Access denied to projects-roles/remove",
-   *   "reason": "action is not allowed"
-   * }
-   *
-   *  @apiErrorExample (404) {json} Not found example
-   * {
-   *   "error": "No query results for model [App\\User]."
-   * }
-   *
-   * @apiError {String} error  Error
-   * @apiError {String} reason Reason
-   *
-   * @apiErrorExample (400) {json} Validation fail example
-   * {
-   *   "error": "Validation fail",
-   *   "reason": {
-   *     "project_id": [
-   *       "The selected project id is invalid."
-   *     ],
-   *     "role_id": [
-   *       "The selected role id is invalid."
-   *     ]
-   *   }
-   * }
-   *
-   * @param Request $request
-   * @return JsonResponse
-   *
-   * @throws \Exception
-   */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     *
+     * @throws \Exception
+     * @api {remove, post} /api/v1/projects-roles/remove Destroy
+     * @apiDescription Destroy Project Roles relation
+     * @apiVersion 0.1.0
+     * @apiName DestroyProjectRoles
+     * @apiGroup ProjectRoles
+     *
+     * @apiParam      {Object}   object               `QueryParam`
+     * @apiParam      {Integer}  object.project_id    `QueryParam`
+     * @apiParam      {Integer}  object.role_id       `QueryParam`
+     *
+     * @apiParamExample {json} Request example
+     * {
+     *    "project_id": 1,
+     *    "role_id": 1
+     * }
+     *
+     * @apiSuccess    {Object}   object           message
+     * @apiSuccess    {String}   object.message   body
+     *
+     * @apiSuccessExample {json} Response example
+     * {
+     *    "message": "Item has been removed"
+     * }
+     *
+     * @apiUse DefaultDestroyRequestExample
+     * @apiUse DefaultBulkDestroyErrorResponse
+     * @apiUse DefaultDestroyResponse
+     *
+     * @apiUse UnauthorizedError
+     *
+     *
+     * @apiErrorExample (403) {json} Not allowed action example
+     * {
+     *   "error": "Access denied to projects-roles/remove",
+     *   "reason": "action is not allowed"
+     * }
+     *
+     * @apiErrorExample (404) {json} Not found example
+     * {
+     *   "error": "No query results for model [App\\User]."
+     * }
+     *
+     * @apiError {String} error  Error
+     * @apiError {String} reason Reason
+     *
+     * @apiErrorExample (400) {json} Validation fail example
+     * {
+     *   "error": "Validation fail",
+     *   "reason": {
+     *     "project_id": [
+     *       "The selected project id is invalid."
+     *     ],
+     *     "role_id": [
+     *       "The selected role id is invalid."
+     *     ]
+     *   }
+     * }
+     *
+     */
     public function destroy(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all());
@@ -394,8 +399,10 @@ class ProjectsRolesController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -409,18 +416,17 @@ class ProjectsRolesController extends ItemController
             )
         );
 
-        /** @var \Illuminate\Database\Eloquent\Model $item */
+        /** @var Model $item */
         $item = $itemsQuery->first();
         if ($item) {
             $item->delete();
         } else {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                    'error' => 'Item has not been removed',
-                    'reason' => 'Item not found'
-                ]),
-                404
-            );
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found',
+                ]), 404);
         }
 
         return response()->json(
@@ -431,6 +437,9 @@ class ProjectsRolesController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
      * @api {post} /api/v1/projects-roles/bulk-remove BulkDestroy
      * @apiDescription Multiple Destroy Project Roles relation
      * @apiVersion 0.1.0
@@ -445,9 +454,6 @@ class ProjectsRolesController extends ItemController
      * @apiSuccess {Object[]}  array                   Messages
      * @apiSuccess {Object}    array.object            Message
      *
-     * @param Request $request
-     * @return JsonResponse
-     * @throws \Exception
      */
     public function bulkDestroy(Request $request): JsonResponse
     {
@@ -457,22 +463,22 @@ class ProjectsRolesController extends ItemController
         if (empty($requestData['relations'])) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'relations is empty',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'relations is empty',
+                ]), 400);
         }
 
         $relations = $requestData['relations'];
         if (!is_array($relations)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'relations should be an array',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'relations should be an array',
+                ]), 400);
         }
 
         foreach ($relations as $relation) {
@@ -494,23 +500,27 @@ class ProjectsRolesController extends ItemController
 
             if ($validator->fails()) {
                 $result[] = [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors(),
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
                     'code' => 400,
                 ];
                 continue;
             }
 
-            /** @var \Illuminate\Database\Eloquent\Model $item */
+            /** @var Model $item */
             $item = $itemsQuery->first();
             if ($item && $item->delete()) {
                 $result[] = ['message' => 'Item has been removed'];
             } else {
                 $result[] = [
-                    'error' => 'Item has not been removed',
-                    'reason' => 'Item not found'
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found',
+                    'code' => 404,
                 ];
-             }
+            }
         }
 
         return response()->json(

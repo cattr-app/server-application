@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1;
 use App\Models\ProjectsUsers;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
@@ -31,7 +32,7 @@ class ProjectsUsersController extends ItemController
     {
         return [
             'project_id' => 'required|exists:projects,id',
-            'user_id'    => 'required|exists:users,id',
+            'user_id' => 'required|exists:users,id',
         ];
     }
 
@@ -76,6 +77,9 @@ class ProjectsUsersController extends ItemController
      */
 
     /**
+     * @param Request $request
+     *
+     * @return JsonResponse
      * @api {any} /api/v1/projects-users/list List
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -103,12 +107,11 @@ class ProjectsUsersController extends ItemController
      *
      * @apiUse UnauthorizedError
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @api {post} /api/v1/projects-users/create Create
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -131,8 +134,6 @@ class ProjectsUsersController extends ItemController
      * @apiUse DefaultCreateErrorResponse
      * @apiUse UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function create(Request $request): JsonResponse
     {
@@ -146,11 +147,11 @@ class ProjectsUsersController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
+                ]), 400);
         }
 
         $cls = $this->getItemClass();
@@ -168,6 +169,8 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @api {post} /api/v1/projects-users/bulk-create BulkCreate
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -223,8 +226,6 @@ class ProjectsUsersController extends ItemController
      * @apiUse DefaultBulkCreateErrorResponse
      * @apiUse UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function bulkCreate(Request $request): JsonResponse
     {
@@ -234,22 +235,22 @@ class ProjectsUsersController extends ItemController
         if (empty($requestData['relations'])) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'relations is empty',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'relations is empty',
+                ]), 400);
         }
 
         $relations = $requestData['relations'];
         if (!is_array($relations)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'relations should be an array',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'relations should be an array',
+                ]), 400);
         }
 
         $allowed_fields = array_flip([
@@ -267,8 +268,10 @@ class ProjectsUsersController extends ItemController
 
             if ($validator->fails()) {
                 $result[] = Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors(),
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
                     'code' => 400
                 ]);
                 continue;
@@ -293,6 +296,10 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
+     *
+     * @throws \Exception
      * @api {delete, post} /api/v1/projects-users/remove Destroy
      * @apiDescription Destroy Project Users relation
      * @apiParamExample {json} Simple Request Example
@@ -325,10 +332,6 @@ class ProjectsUsersController extends ItemController
      *   "reason": "Item not found"
      * }
      *
-     * @param Request $request
-     * @return JsonResponse
-     *
-     * @throws \Exception
      */
     public function destroy(Request $request): JsonResponse
     {
@@ -345,8 +348,10 @@ class ProjectsUsersController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
                 ]),
                 400
             );
@@ -360,28 +365,32 @@ class ProjectsUsersController extends ItemController
             )
         );
 
-        /** @var \Illuminate\Database\Eloquent\Model $item */
+        /** @var Model $item */
         $item = $itemsQuery->first();
         if ($item) {
             $item->delete();
         } else {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                    'error' => 'Item has not been removed',
-                    'reason' => 'Item not found'
-                ]),
-                404
-            );
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found'
+                ]), 404);
         }
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
+                'success' => true,
                 'message' => 'Item has been removed'
             ])
         );
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
+     *
+     * @throws \Exception
      * @api {post} /api/v1/projects-users/bulk-remove BulkDestroy
      * @apiParamExample {json} Simple Request Example
      * {
@@ -412,10 +421,6 @@ class ProjectsUsersController extends ItemController
      *
      * @apiUse DefaultBulkDestroyErrorResponse
      *
-     * @param Request $request
-     * @return JsonResponse
-     *
-     * @throws \Exception
      */
     public function bulkDestroy(Request $request): JsonResponse
     {
@@ -425,22 +430,22 @@ class ProjectsUsersController extends ItemController
         if (empty($requestData['relations'])) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'relations is empty',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'relations is empty',
+                ]), 400);
         }
 
         $relations = $requestData['relations'];
         if (!is_array($relations)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'relations should be an array',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'relations should be an array',
+                ]), 400);
         }
 
         foreach ($relations as $relation) {
@@ -462,23 +467,27 @@ class ProjectsUsersController extends ItemController
 
             if ($validator->fails()) {
                 $result[] = [
-                        'error'     => 'Validation fail',
-                        'reason'    => $validator->errors(),
-                        'code'      =>  400
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
+                    'code' => 400
                 ];
                 continue;
             }
 
-            /** @var \Illuminate\Database\Eloquent\Model $item */
+            /** @var Model $item */
             $item = $itemsQuery->first();
             if ($item && $item->delete()) {
-                $result[] = ['message' => 'Item has been removed'];
+                $result[] = ['success' => true, 'message' => 'Item has been removed'];
             } else {
                 $result[] = [
-                    'error' => 'Item has not been removed',
-                    'reason' => 'Item not found'
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found',
+                    'code' => 404
                 ];
-             }
+            }
         }
 
         return response()->json(

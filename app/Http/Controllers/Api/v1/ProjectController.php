@@ -9,7 +9,7 @@ use Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use DB;
 use Route;
 
 /**
@@ -207,11 +207,11 @@ class ProjectController extends ItemController
         if (!$itemId) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Validation fail',
-                    'reason' => 'Id invalid',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id',
+                ]), 400);
         }
 
         $user = Auth::user();
@@ -219,11 +219,10 @@ class ProjectController extends ItemController
         if (!in_array($itemId, $userProjectIds)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Access denied',
-                    'reason' => 'User haven\'t access to this project',
-                ]),
-                403
-            );
+                    'success' => false,
+                    'error_type' => 'authorization.access_denied',
+                    'message' => 'User has no access to this project',
+                ]), 403);
         }
 
         $project_info = DB::table('project_report')

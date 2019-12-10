@@ -30,11 +30,10 @@ class StatusController extends Controller
      */
     public function index(): JsonResponse
     {
-        $data = [
+        return response()->json([
+            'success' => true,
             'amazingtime' => true,
             'cat' => app(CatHelper::class)->getCat(),
-        ];
-
-        return response()->json($data);
+        ]);
     }
 }

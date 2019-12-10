@@ -154,7 +154,7 @@ class PasswordResetController extends BaseController
         return response()->json([
             'success' => true,
             'message' => 'Link for restore password has been sent to specified email',
-        ], 200);
+        ]);
     }
 
 
