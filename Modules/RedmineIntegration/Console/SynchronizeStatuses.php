@@ -2,13 +2,9 @@
 
 namespace Modules\RedmineIntegration\Console;
 
-use App\Models\Property;
-use App\User;
-use Exception;
 use Illuminate\Console\Command;
-use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
-use Redmine;
+use Modules\CompanyManagement\Models\RedmineSettings;
+use Redmine\Client;
 
 /**
  * Class SynchronizeStatuses
@@ -29,85 +25,60 @@ class SynchronizeStatuses extends Command
      *
      * @var string
      */
-    protected $description = 'Synchronize statuses from redmine for all users, who activated redmine integration.';
+    protected $description = 'Synchronize statuses from redmine.';
 
     /**
-     * @var UserRepository
+     * @var RedmineSettings
      */
-    protected $userRepo;
+    protected $companyRedmineSettings;
 
     /**
      * Create a new command instance.
      *
-     * @param  UserRepository  $userRepo
+     * @param  RedmineSettings  $companyRedmineSettings
      */
-    public function __construct(UserRepository $userRepo)
+    public function __construct(RedmineSettings $companyRedmineSettings)
     {
         parent::__construct();
 
-        $this->userRepo = $userRepo;
+        $this->companyRedmineSettings = $companyRedmineSettings;
     }
 
     /**
      * Execute the console command.
-     *
      */
     public function handle()
     {
-        $this->synchronizeStatuses();
-    }
-
-    /**
-     * Synchronize statuses for all users
-     */
-    public function synchronizeStatuses()
-    {
-        $users = User::all();
-
-        foreach ($users as $user) {
-            try {
-                $this->synchronizeUserStatuses($user->id);
-            } catch (Exception $e) {
-            }
+        $url = $this->companyRedmineSettings->getURL();
+        if (empty($url)) {
+            throw new \Exception('Empty URL', 404);
         }
-    }
 
-    /**
-     * Synchronize statuses for current user
-     *
-     * @param  int  $userId  User's id in our system
-     *
-     */
-    public function synchronizeUserStatuses(int $userId)
-    {
-        $client = $this->initRedmineClient($userId);
-        // Merge statuses info from the redmine with the stored 'is_active' property.
-        $available_statuses = $client->issue_status->all()['issue_statuses'];
-        $saved_statuses = $this->userRepo->getUserRedmineStatuses($userId);
+        $key = $this->companyRedmineSettings->getAPIKey();
+        if (empty($key)) {
+            throw new \Exception('Empty API key', 404);
+        }
 
-        $statuses = array_map(function ($status) use ($saved_statuses) {
-            $saved_status = array_first($saved_statuses, function ($saved_status) use ($status) {
-                return $saved_status['id'] === $status['id'];
+        $client = new Client($url, $key);
+        $redmineStatuses = $client->issue_status->all()['issue_statuses'];
+        $savedStatuses = $this->companyRedmineSettings->getStatuses();
+
+        // Merge statuses info from the redmine with the active state of stored statuses
+        $statuses = array_map(function ($redmineStatus) use ($savedStatuses) {
+            // Try find saved status with the same ID
+            $savedStatus = array_first($savedStatuses, function ($savedStatus) use ($redmineStatus) {
+                return $savedStatus['id'] === $redmineStatus['id'];
             });
-            $status['is_active'] = isset($saved_status)
-                ? $saved_status['is_active']
-                : !isset($status['is_closed']);
-            return $status;
-        }, $available_statuses);
 
-        $property = Property::updateOrCreate([
-            'entity_id' => $userId,
-            'entity_type' => Property::USER_CODE,
-            'name' => 'REDMINE_STATUSES',
-        ], [
-            'value' => serialize($statuses),
-        ]);
-    }
+            // Set status is active, if saved status is exist and active,
+            // or if status from the Redmine is not closed
+            $redmineStatus['is_active'] = isset($savedStatus)
+                ? $savedStatus['is_active']
+                : !isset($redmineStatus['is_closed']);
 
-    public function initRedmineClient(int $userId): Redmine\Client
-    {
-        $client = new RedmineClient($userId);
+            return $redmineStatus;
+        }, $redmineStatuses);
 
-        return $client;
+        $this->companyRedmineSettings->setStatuses($statuses);
     }
 }

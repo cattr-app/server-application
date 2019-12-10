@@ -108,7 +108,6 @@ class RedmineSettingsController extends AbstractRedmineController
     {
         $this
             ->processFilter('redmine.settings.url.change', 'REDMINE_KEY', $this->request->redmine_api_key)
-            ->saveProperty('REDMINE_STATUSES', serialize($this->request->redmine_statuses))
             ->saveProperty('REDMINE_PRIORITIES', serialize($this->request->redmine_priorities));
     }
 
@@ -176,10 +175,9 @@ class RedmineSettingsController extends AbstractRedmineController
 
         // This is something beyond my understanding of the real world
         $settingsArray = [
-            'enabled' => $redmineEnabled = Property::where(['entity_type' => 'company', 'name' => 'redmine_enabled'])
+            'enabled' => $redmineEnabled = Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'redmine_enabled'])
                     ->first()->value ?? false,
             'redmine_api_key' => $userRepository->getUserRedmineApiKey($userId),
-            'redmine_statuses' => $userRepository->getUserRedmineStatuses($userId),
             'redmine_priorities' => $userRepository->getUserRedminePriorities($userId),
             'internal_priorities' => Priority::all(),
 

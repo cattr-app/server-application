@@ -19,7 +19,7 @@ class RedmineClient extends Client
     public function __construct($userId)
     {
         $userRepository = new UserRepository();
-        $url = Property::where(['entity_type' => 'company', 'name' => 'redmine_url'])->first()->value;
+        $url = Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'redmine_url'])->first()->value;
         $apiKey = $userRepository->getUserRedmineApiKey($userId);
         $pass = null;
 

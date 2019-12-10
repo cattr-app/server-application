@@ -8,6 +8,7 @@ use App\Models\Property;
 use App\Models\Task;
 use Exception;
 use Illuminate\Http\Request;
+use Modules\CompanyManagement\Models\RedmineSettings;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
@@ -25,10 +26,16 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
      * @var Property
      */
     protected $property;
+
     /**
      * @var ProjectHelper
      */
     protected $projectHelper;
+
+    /**
+     * @var RedmineSettings
+     */
+    protected $companyRedmineSettings;
 
     /**
      * PluginWebhookHelper constructor.
@@ -39,6 +46,7 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
      * @param  Request            $request
      * @param  Property           $property
      * @param  ProjectHelper      $projectHelper
+     * @param  RedmineSettings    $companyRedmineSettings
      */
     public function __construct(
         TaskRepository $taskRepository,
@@ -46,11 +54,14 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
         UserRepository $userRepository,
         Request $request,
         Property $property,
-        ProjectHelper $projectHelper
+        ProjectHelper $projectHelper,
+        RedmineSettings $companyRedmineSettings
     ) {
         parent::__construct($taskRepository, $projectRepository, $userRepository, $request);
+
         $this->property = $property;
         $this->projectHelper = $projectHelper;
+        $this->companyRedmineSettings = $companyRedmineSettings;
     }
 
     /**
@@ -113,34 +124,13 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
     }
 
     /**
-     * TODO: Add int strict type to $redmineStatusId
-     *
      * @param  int  $redmineStatusId
      *
      * @return bool
      */
-    protected function statusExists($redmineStatusId): bool
+    protected function statusExists(int $redmineStatusId): bool
     {
-        $status = $this->property->getProperty(Property::USER_CODE, 'REDMINE_STATUSES')->first();
-
-        // If there is no statuses at all we'll return false as long as we're checking for status existence, not
-        // database filling
-        if (!$status) {
-            return false;
-        }
-
-        $status = unserialize($status->value);
-
-        // TODO: Change condition to id comparision instead of name
-        $statusExists = false;
-        foreach ($status as $item) {
-            if ($item['name'] == $redmineStatusId) {
-                $statusExists = true;
-                break;
-            }
-        }
-
-        return $statusExists;
+        return $this->companyRedmineSettings->statusExistsByID($redmineStatusId);
     }
 
     /**
@@ -150,22 +140,12 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
      */
     protected function insertStatus($status): void
     {
-        $data = $this->property->getProperty(Property::USER_CODE, 'REDMINE_STATUSES')->first();
+        $id = $status['id'] ?? 0;
+        $name = $status['name'] ?? '';
+        $active = !($status['is_closed'] ?? false);
+        $closed = $status['is_closed'] ?? false;
 
-        if (!$data) {
-            throw new Exception('Statuses are not synchronized');
-        }
-
-        $statuses = unserialize($data->value);
-
-        $statuses[] = [
-            'name' => $status['name'],
-            'is_closed' => $status['is_closed'],
-            'is_active' => 0
-        ];
-
-        $data->value = serialize($statuses);
-        $data->save();
+        $this->companyRedmineSettings->addStatus($id, $name, $active, $closed);
     }
 
     /**
@@ -220,7 +200,7 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
             $this->insertProject($this->getProjectDataFromRequest());
         }
 
-        if (!$this->statusExists($this->getStatusDataFromRequest()['name'])) {
+        if (!$this->statusExists($this->getStatusDataFromRequest()['id'])) {
             $this->insertStatus($this->getStatusDataFromRequest());
         }
 
