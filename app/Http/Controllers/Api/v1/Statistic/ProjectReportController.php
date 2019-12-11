@@ -73,9 +73,9 @@ class ProjectReportController extends ReportController
     /**
      * [report description]
      *
-     * @param  Request  $request
+     * @param Request $request
      *
-     * @return array|\Illuminate\Http\JsonResponse
+     * @return array|JsonResponse
      */
     public function report(Request $request): JsonResponse
     {
@@ -91,10 +91,11 @@ class ProjectReportController extends ReportController
             return response()->json(
                 Filter::process(
                     $this->getEventUniqueName('answer.error.report.show'), [
-                        'error' => 'Validation fail',
-                        'reason' => $validator->errors()
-                    ], 400)
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'reason' => $validator->errors()
+                ]), 400);
         }
 
         $uids = $request->input('uids', []);
@@ -169,7 +170,7 @@ class ProjectReportController extends ReportController
                 'project_id' => $projectReport->project_id,
                 'user_id' => $projectReport->user_id,
                 'task_name' => $projectReport->task_name,
-                'duration' => (int) $projectReport->duration,
+                'duration' => (int)$projectReport->duration,
                 'screenshots' => $screenshots,
             ];
 
@@ -196,9 +197,9 @@ class ProjectReportController extends ReportController
     /**
      * [events description]
      *
-     * @param  Request  $request  [description]
+     * @param Request $request [description]
      *
-     * @return \Illuminate\Http\JsonResponse [description]
+     * @return JsonResponse [description]
      */
     public function days(Request $request): JsonResponse
     {
@@ -214,10 +215,11 @@ class ProjectReportController extends ReportController
             return response()->json(
                 Filter::process(
                     $this->getEventUniqueName('answer.error.report.show'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
-                ], 400)
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]), 400);
         }
 
         $uids = $request->input('uids', []);
@@ -258,9 +260,9 @@ class ProjectReportController extends ReportController
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function projects(Request $request): JsonResponse
     {
@@ -270,12 +272,12 @@ class ProjectReportController extends ReportController
         );
 
         if ($validator->fails()) {
-            return response()->json(
-                [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
-                ], 400
-            );
+            return response()->json([
+                'success' => false,
+                'error_type' => 'validation',
+                'message' => 'Validation error',
+                'info' => $validator->errors()
+            ], 400);
         }
 
         $uids = $request->input('uids', []);
@@ -316,9 +318,9 @@ class ProjectReportController extends ReportController
      * Returns durations per date for a task.
      *
      * @param           $id
-     * @param  Request  $request
+     * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function task($id, Request $request): JsonResponse
     {
@@ -334,10 +336,11 @@ class ProjectReportController extends ReportController
             return response()->json(
                 Filter::process(
                     $this->getEventUniqueName('answer.error.report.show'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
-                ], 400)
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]), 400);
         }
 
         $uid = $request->uid;
@@ -373,9 +376,9 @@ class ProjectReportController extends ReportController
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
+     * @return JsonResponse
      */
     public function screenshots(Request $request)
     {

@@ -4,14 +4,13 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
+use Exception;
 use Filter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Schema;
 use Validator;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DateTrait;
@@ -37,7 +36,7 @@ abstract class ItemController extends Controller
      *
      * @return array
      */
-    abstract public function getValidationRules(): array;
+    abstract public function getValidationRules (): array;
 
     /**
      * Returns unique part of event name for current item
@@ -71,10 +70,16 @@ abstract class ItemController extends Controller
             )
         );
 
+        $paginate = $request->get('paginate', false);
+        $currentPage = $request->get('page', 1);
+        $perPage = $request->get('perPage', 15);
+
         return response()->json(
             Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.result'),
-                $itemsQuery->get()
+                $paginate ?
+                    $itemsQuery->paginate($perPage, ['*'], 'page', $currentPage)
+                    : $itemsQuery->get()
             )
         );
     }
@@ -96,10 +101,11 @@ abstract class ItemController extends Controller
         );
 
         return response()->json([
+            'success' => true,
             'total' => Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.count.query.prepare'),
-                $itemsQuery->get()
-            )->count()
+                $itemsQuery->count()
+            )
         ]);
     }
 
@@ -142,8 +148,10 @@ abstract class ItemController extends Controller
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -162,6 +170,7 @@ abstract class ItemController extends Controller
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success' => true,
                 'res' => $item,
             ])
         );
@@ -182,13 +191,15 @@ abstract class ItemController extends Controller
      */
     public function show(Request $request): JsonResponse
     {
-        $itemId = intval($request->id);
+        $itemId = intval($request->input('id'));
 
         if (!$itemId) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Validation fail',
-                    'reason' => 'Id invalid',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id'
                 ]),
                 400
             );
@@ -211,10 +222,10 @@ abstract class ItemController extends Controller
         if (!$item) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Item not found'
-                ]),
-                404
-            );
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found'
+                ]), 404);
         }
 
         return response()->json(
@@ -276,8 +287,10 @@ abstract class ItemController extends Controller
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -286,8 +299,10 @@ abstract class ItemController extends Controller
         if (!is_int($request->get('id'))) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Invalid id',
-                    'reason' => 'Id is not integer',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id'
                 ]),
                 400
             );
@@ -301,7 +316,7 @@ abstract class ItemController extends Controller
             )
         );
 
-        /** @var \Illuminate\Database\Eloquent\Model $item */
+        /** @var Model $item */
         $item = collect($itemsQuery->get())->first(function ($val, $key) use ($request) {
             return $val['id'] === $request->get('id');
         });
@@ -311,18 +326,20 @@ abstract class ItemController extends Controller
             if ($cls::find($request->get('id')) !== null) {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                        'error' => 'Access denied to this item',
-                        'reason' => 'action is not allowed',
+                        'success' => false,
+                        'error_type' => 'authorization.access_denied',
+                        'message' => 'Access denied to this item',
                     ]),
                     403
                 );
             } else {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                        'error' => 'Model fetch fail',
-                        'reason' => 'Model not found',
+                        'success' => false,
+                        'error_type' => 'query.item_not_found',
+                        'message' => 'Item not found',
                     ]),
-                    400
+                    404
                 );
             }
         }
@@ -335,6 +352,7 @@ abstract class ItemController extends Controller
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
                 'res' => $item,
             ])
         );
@@ -375,7 +393,7 @@ abstract class ItemController extends Controller
      *
      * @param Request $request
      * @return JsonResponse
-     * @throws \Exception
+     * @throws Exception
      */
     public function destroy(Request $request): JsonResponse
     {
@@ -385,11 +403,11 @@ abstract class ItemController extends Controller
         if (!$idInt) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
-                    'error' => 'Validation fail',
-                    'reason' => 'Id invalid',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type'=> 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id',
+                ]), 400);
         }
 
         /** @var Builder $itemsQuery */
@@ -400,26 +418,26 @@ abstract class ItemController extends Controller
             )
         );
 
-        /** @var \Illuminate\Database\Eloquent\Model $item */
+        /** @var Model $item */
         $item = $itemsQuery->first();
         if (!$item) {
             $cls = $this->getItemClass();
             if ($cls::find($request->get('id')) !== null) {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                        'error' => 'Access denied to this item',
-                        'reason' => 'action is not allowed',
+                        'success' => false,
+                        'error_type' => 'authorization.access_denied',
+                        'message' => 'Access denied to this item'
                     ]),
                     403
                 );
             } else {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                        'error' => 'Model fetch fail',
-                        'reason' => 'Model not found',
-                    ]),
-                    400
-                );
+                        'success' => false,
+                        'error_type' => 'query.item_not_found',
+                        'message' => 'Item not found',
+                    ]), 404);
             }
         }
 
@@ -427,6 +445,7 @@ abstract class ItemController extends Controller
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
+                'success' => true,
                 'message' => 'Item has been removed'
             ])
         );
@@ -458,6 +477,7 @@ abstract class ItemController extends Controller
     /**
      * @param bool $withRelations
      *
+     * @param bool $withSoftDeleted
      * @return Builder
      */
     protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
@@ -465,7 +485,7 @@ abstract class ItemController extends Controller
         /** @var Model $cls */
         $cls = static::getItemClass();
 
-        $query = new Builder($cls::getQuery(), true);
+        $query = new Builder($cls::getQuery());
         $query->setModel(new $cls());
 
         $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls));

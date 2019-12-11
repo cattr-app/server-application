@@ -157,6 +157,9 @@ class ScreenshotController extends ItemController
     /**
      * Show the form for creating a new resource.
      *
+     * @param Request $request
+     * @return JsonResponse
+     * @throws CarnivalUnavailableException
      * @api {post} /api/v1/screenshots/create Create
      * @apiDescription Create Screenshot
      * @apiVersion 0.1.0
@@ -183,8 +186,6 @@ class ScreenshotController extends ItemController
      * @apiUse DefaultCreateErrorResponse
      * @apiUse UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function create(Request $request): JsonResponse
     {
@@ -193,8 +194,10 @@ class ScreenshotController extends ItemController
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
                     [
-                        'error' => 'validation fail',
-                        'reason' => 'screenshot is required',
+                        'success' => false,
+                        'error_type' => 'validation',
+                        'message' => 'Validation error',
+                        'info' => 'screenshot is required',
                     ]
                 ]),
                 400
@@ -214,9 +217,9 @@ class ScreenshotController extends ItemController
 
             // Push screen and thumb to carnival and get their public URI
             $publicScreenshotUrl = $this->imageService->pushScreenAndThumbToCarnival($screenshotStream, $thumbStream, Auth::id());
-        
+
         } catch (ConnectException $e) {
-            
+
             throw new CarnivalUnavailableException('Carnival service is unavailable');
 
         }
@@ -240,8 +243,10 @@ class ScreenshotController extends ItemController
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
                     [
-                        'error' => 'validation fail',
-                        'reason' => $validator->errors()
+                        'success' => false,
+                        'error_type' => 'validation',
+                        'message' => 'Validation error',
+                        'info' => $validator->errors()
                     ]
                 ]),
                 400
@@ -256,6 +261,7 @@ class ScreenshotController extends ItemController
         // Respond to client
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success'=> true,
                 'screenshot' => $createdScreenshot,
             ])
         );
@@ -274,7 +280,7 @@ class ScreenshotController extends ItemController
 
         // Get associated time interval
         $thisScreenshotTimeInterval = TimeInterval::where('id', $screenshotToDel->time_interval_id)->firstOrFail();
-        
+
         // If this screenshot is last
         if ((int) $thisScreenshotTimeInterval->screenshots_count <= 1) {
 
@@ -294,16 +300,12 @@ class ScreenshotController extends ItemController
             $deletedScreenshot = $this->imageService->rmScreenAndThumbFromCarnival(Auth::id(), $toDelPath);
 
         } catch (ConnectException $e) {
-            
+
             throw new CarnivalUnavailableException('Carnival service is unavailable');
 
         }
-        
-        return response()->json(
 
-            $deletedScreenshot
-
-        );
+        return response()->json($deletedScreenshot);
 
     }
 
@@ -342,8 +344,10 @@ class ScreenshotController extends ItemController
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
                     [
-                        'error' => 'validation fail',
-                        'reason' => 'screenshots is required',
+                        'success' => false,
+                        'error_type' => 'validation',
+                        'message' => 'Validation error',
+                        'info' => 'screenshot is required',
                     ]
                 ]),
                 400
@@ -602,8 +606,7 @@ class ScreenshotController extends ItemController
         }
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
-            200
+            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items)
         );
     }
 

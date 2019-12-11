@@ -18,7 +18,7 @@ use Validator;
  * Class PasswordReset
  * @package App\Http\Controllers
  */
-class PasswordReset extends BaseController
+class PasswordResetController extends BaseController
 {
     /**
      * @var RecaptchaHelper
@@ -26,7 +26,7 @@ class PasswordReset extends BaseController
     private $recaptcha;
 
     /**
-     * PasswordReset constructor.
+     * PasswordResetController constructor.
      * @param RecaptchaHelper $recaptcha
      */
     public function __construct(RecaptchaHelper $recaptcha)
@@ -38,6 +38,7 @@ class PasswordReset extends BaseController
      * @param Request $request
      * @return JsonResponse
      * @throws AuthorizationException
+     *
      *
      * @api {get} /api/auth/password/reset/validate Validate
      * @apiDescription Validates password reset token
@@ -62,7 +63,7 @@ class PasswordReset extends BaseController
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
-     *    "message": "Link for restore password has been sent to specified email"
+     *    "message": "Password reset data is valid"
      *  }
      *
      * @apiUse 400Error
@@ -80,10 +81,10 @@ class PasswordReset extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_VALIDATION_FAILED);
         }
 
-        $resetRequest = DB::table('password_resets')
-            ->where('email', $request->input('email'))->first();
+        $user = Password::broker()->getUser($request->all());
+        $isValidToken = Password::broker()->getRepository()->exists($user, $request->input('token'));
 
-        if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
+        if (!$isValidToken) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
@@ -95,7 +96,8 @@ class PasswordReset extends BaseController
      * @return JsonResponse
      * @throws AuthorizationException
      *
-     * @api {post} /api/auth/password/reset/request Send
+     *
+     * @api {post} /api/auth/password/reset/request Request
      * @apiDescription Sends email to user with reset link
      *
      * @apiVersion 0.1.0
@@ -152,7 +154,7 @@ class PasswordReset extends BaseController
         return response()->json([
             'success' => true,
             'message' => 'Link for restore password has been sent to specified email',
-        ], 200);
+        ]);
     }
 
 
@@ -161,18 +163,18 @@ class PasswordReset extends BaseController
      * @return JsonResponse
      * @throws AuthorizationException
      *
-     * @api {post} /api/auth/password/reset/process Reset
-     * @apiDescription Get user JWT
      *
+     * @api {post} /api/auth/password/reset/process Process
+     * @apiDescription Resets user password
      *
      * @apiVersion 0.1.0
      * @apiName Process
      * @apiGroup Password Reset
      *
-     * @apiParam {String}  email                   User email
-     * @apiParam {String}  token                   Password reset token
-     * @apiParam {String}  password                New password
-     * @apiParam {String}  password_confirmation   Password confirmation
+     * @apiParam {String}  email                  User email
+     * @apiParam {String}  token                  Password reset token
+     * @apiParam {String}  password               New password
+     * @apiParam {String}  password_confirmation  Password confirmation
      *
      * @apiParamExample {json} Request Example
      *  {
@@ -181,22 +183,21 @@ class PasswordReset extends BaseController
      *    "password_confirmation":  "amazingpassword",
      *    "password":               "amazingpassword"
      *  }
-     *
+     * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL in seconds
      * @apiSuccess {Object}   user          User Entity
-     * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
      *
      * @apiSuccessExample {json} Success Response
      *  HTTP/1.1 200 OK
      *  {
-     *    "success":      true,
-     *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
-     *    "token_type":   "bearer",
-     *    "password":     "amazingpassword",
-     *    "expires_in":   "3600",
-     *    "user":         {}
+     *    "success":       true,
+     *    "access_token":  "16184cf3b2510464a53c0e573c75740540fe...",
+     *    "token_type":    "bearer",
+     *    "password":      "amazingpassword",
+     *    "expires_in":    "3600",
+     *    "user":          {}
      *  }
      *
      * @apiUse 400Error
@@ -217,7 +218,8 @@ class PasswordReset extends BaseController
         }
 
         $resetRequest = DB::table('password_resets')
-            ->where('email', $request->input('email'))->first();
+            ->where('email', $request->input('email'))
+            ->first();
 
         if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);

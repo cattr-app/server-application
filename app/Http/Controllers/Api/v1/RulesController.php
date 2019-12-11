@@ -32,10 +32,10 @@ class RulesController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'role_id'        => 'required',
-            'object'         => 'required',
-            'action'         => 'required',
-            'allow'          => 'required',
+            'role_id' => 'required',
+            'object' => 'required',
+            'action' => 'required',
+            'allow' => 'required',
         ];
     }
 
@@ -78,6 +78,10 @@ class RulesController extends ItemController
      */
 
     /**
+     * @param Request $request
+     *
+     * @return JsonResponse
+     * @throws \Throwable
      * @api {post} /api/v1/rules/edit Edit
      * @apiDescription Edit Rule
      * @apiVersion 0.1.0
@@ -102,10 +106,6 @@ class RulesController extends ItemController
      * @apiUse DefaultEditErrorResponse
      * @apiUse UnauthorizedError
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     * @throws \Throwable
      */
     public function edit(Request $request): JsonResponse
     {
@@ -120,32 +120,28 @@ class RulesController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'validation fail',
-                    'reason' => $validator->errors()
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]), 400);
         }
 
-        try {
-            Role::updateAllow($requestData['role_id'], $requestData['object'], $requestData['action'], $requestData['allow']);
-        } catch (\Exception $e) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.edit'), [
-                    'message' => $e->getMessage(),
-                ]),
-                $e->getCode()
-            );
-        };
 
+        Role::updateAllow($requestData['role_id'], $requestData['object'], $requestData['action'], $requestData['allow']);
         return response()->json(Filter::process(
             $this->getEventUniqueName('answer.success.item.edit'), [
-                'message' => 'OK',
+                'success' => true,
+                'message' => 'Role successfully updated',
             ]
         ));
     }
 
     /**
+     * @param Request $request
+     *
+     * @return JsonResponse
+     * @throws \Throwable
      * @api {post} /api/v1/rules/bulk-edit bulkEdit
      * @apiDescription Editing Multiple Rules
      * @apiVersion 0.1.0
@@ -189,10 +185,6 @@ class RulesController extends ItemController
      * @apiUse DefaultEditErrorResponse
      * @apiUse UnauthorizedError
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     * @throws \Throwable
      */
     public function bulkEdit(Request $request): JsonResponse
     {
@@ -203,22 +195,22 @@ class RulesController extends ItemController
         if (empty($requestData['rules'])) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'rules is empty',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'rules is empty',
+                ]), 400);
         }
 
         $rules = $requestData['rules'];
         if (!is_array($rules)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'rules should be an array',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'rules should be an array',
+                ]), 400);
         }
 
         foreach ($rules as $rule) {
@@ -229,19 +221,17 @@ class RulesController extends ItemController
 
             if ($validator->fails()) {
                 $result[] = [
-                    'error' => 'validation fail',
-                    'reason' => $validator->errors(),
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
                     'code' => 400
                 ];
                 continue;
             }
 
-            try {
-                if (Role::updateAllow($rule['role_id'], $rule['object'], $rule['action'], $rule['allow'])) {
-                    $result[] = ['message' => 'OK'];
-                };
-            } catch (\Exception $e) {
-                $result[] = ['error' => $e->getMessage(), 'code' => $e->getCode()];
+            if (Role::updateAllow($rule['role_id'], $rule['object'], $rule['action'], $rule['allow'])) {
+                $result[] = ['message' => 'OK'];
             };
         }
 
@@ -253,6 +243,9 @@ class RulesController extends ItemController
     }
 
     /**
+     * @param Request $request
+     *
+     * @return JsonResponse
      * @api {get} /api/v1/rules/actions Actions
      * @apiDescription Get list of Rules Actions
      * @apiVersion 0.1.0
@@ -286,9 +279,6 @@ class RulesController extends ItemController
      *
      * @apiUse UnauthorizedError
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
     public function actions(Request $request): JsonResponse
     {

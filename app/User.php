@@ -8,12 +8,17 @@ use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\Property;
 use App\Models\Token;
+use Eloquent;
 use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
 use Fico7489\Laravel\EloquentJoin\Traits\EloquentJoin;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Notifications\DatabaseNotification;
+use Illuminate\Notifications\DatabaseNotificationCollection;
 use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -26,9 +31,38 @@ use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
- * Class User
- * @package App
+ * @apiDefine UserObject
  *
+ * @apiSuccess {Object}   user                          User entity
+ * @apiSuccess {Integer}  user.id                       ID
+ * @apiSuccess {String}   user.full_name                Name
+ * @apiSuccess {String}   user.email                    Email
+ * @apiSuccess {Integer}  user.company_id               Company ID
+ * @apiSuccess {String}   user.avatar                   Avatar image url
+ * @apiSuccess {Boolean}  user.screenshots_active       Should screenshots be captured
+ * @apiSuccess {Boolean}  user.manual_time              Allow manual time edit
+ * @apiSuccess {Integer}  user.screenshots_interval     Screenshots capture interval (seconds)
+ * @apiSuccess {Boolean}  user.active                   Indicates active user when `TRUE`
+ * @apiSuccess {String}   user.timezone                 User's timezone
+ * @apiSuccess {String}   user.created_at               Creation DateTime
+ * @apiSuccess {String}   user.updated_at               Update DateTime
+ * @apiSuccess {String}   user.deleted_at               Delete DateTime or `NULL` if user wasn't deleted
+ * @apiSuccess {Boolean}  user.payroll_access          `Not used`
+ * @apiSuccess {Boolean}  user.billing_access          `Not used`
+ * @apiSuccess {String}   user.url                     `Not used`
+ * @apiSuccess {Boolean}  user.permanent_tasks         `Not used`
+ * @apiSuccess {Boolean}  user.computer_time_popup     `Not used`
+ * @apiSuccess {Boolean}  user.poor_time_popup         `Not used`
+ * @apiSuccess {Boolean}  user.blur_screenshots        `Not used`
+ * @apiSuccess {Boolean}  user.web_and_app_monitoring  `Not used`
+ * @apiSuccess {Boolean}  user.webcam_shots            `Not used`
+ */
+
+
+/**
+ * Class User
+ *
+ * @package App
  * @property int $id
  * @property string $full_name
  * @property string $email
@@ -55,11 +89,48 @@ use Illuminate\Database\Eloquent\Collection;
  * @property string $deleted_at
  * @property bool $important
  * @property int $role_id
- *
  * @property Project[]|Collection $projects
  * @property Task[]|Collection $tasks
  * @property TimeInterval[]|Collection $timeIntervals
  * @property Role $role
+ * @property string|null $remember_token
+ * @property int $change_password
+ * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
+ * @property-read Collection|ProjectsUsers[] $projectsRelation
+ * @property-read Collection|Property[] $properties
+ * @property-read Collection|Token[] $tokens
+ * @method static bool|null forceDelete()
+ * @method static QueryBuilder|User onlyTrashed()
+ * @method static bool|null restore()
+ * @method static EloquentBuilder|User whereActive($value)
+ * @method static EloquentBuilder|User whereAvatar($value)
+ * @method static EloquentBuilder|User whereBillingAccess($value)
+ * @method static EloquentBuilder|User whereBlurScreenshots($value)
+ * @method static EloquentBuilder|User whereChangePassword($value)
+ * @method static EloquentBuilder|User whereCompanyId($value)
+ * @method static EloquentBuilder|User whereComputerTimePopup($value)
+ * @method static EloquentBuilder|User whereCreatedAt($value)
+ * @method static EloquentBuilder|User whereDeletedAt($value)
+ * @method static EloquentBuilder|User whereEmail($value)
+ * @method static EloquentBuilder|User whereFullName($value)
+ * @method static EloquentBuilder|User whereId($value)
+ * @method static EloquentBuilder|User whereImportant($value)
+ * @method static EloquentBuilder|User whereManualTime($value)
+ * @method static EloquentBuilder|User wherePassword($value)
+ * @method static EloquentBuilder|User wherePayrollAccess($value)
+ * @method static EloquentBuilder|User wherePermanentTasks($value)
+ * @method static EloquentBuilder|User wherePoorTimePopup($value)
+ * @method static EloquentBuilder|User whereRememberToken($value)
+ * @method static EloquentBuilder|User whereScreenshotsActive($value)
+ * @method static EloquentBuilder|User whereScreenshotsInterval($value)
+ * @method static EloquentBuilder|User whereTimezone($value)
+ * @method static EloquentBuilder|User whereUpdatedAt($value)
+ * @method static EloquentBuilder|User whereUrl($value)
+ * @method static EloquentBuilder|User whereWebAndAppMonitoring($value)
+ * @method static EloquentBuilder|User whereWebcamShots($value)
+ * @method static QueryBuilder|User withTrashed()
+ * @method static QueryBuilder|User withoutTrashed()
+ * @mixin Eloquent
  */
 class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
@@ -191,7 +262,8 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
      */
     public function projects(): BelongsToMany
     {
-        return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id')->withPivot('role_id');
+        return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id')
+            ->withPivot('role_id');
     }
 
     public function tokens(): HasMany
@@ -215,13 +287,16 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     /**
      * @param string $token
      */
-    public function invalidateToken(string $token): void
+    public function invalidateToken(string $token)
     {
         $this->tokens()->where('token', $token)->delete();
     }
 
 
-    public function invalidateAllTokens($except = null)
+    /**
+     * @param string $except
+     */
+    public function invalidateAllTokens(string $except = null)
     {
         $this->tokens()->where('token', '!=', $except)->delete();
     }
@@ -255,7 +330,8 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
      */
     public function properties(): HasMany
     {
-        return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::USER_CODE);
+        return $this->hasMany(Property::class, 'entity_id')
+            ->where('entity_type', Property::USER_CODE);
     }
 
     /**

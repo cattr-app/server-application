@@ -211,7 +211,7 @@ class AuthController extends BaseController
      * @param Request $request
      * @return JsonResponse
      *
-     * @api {post} /api/auth/logout Logout all
+     * @api {post} /api/auth/logout-from-all Logout from all
      * @apiDescription Invalidate all user JWT
      *
      * @apiVersion 0.1.0
@@ -327,6 +327,7 @@ class AuthController extends BaseController
         $token = $user->addToken($token);
 
         return response()->json([
+            'success' => true,
             'access_token' => $token->token,
             'token_type' => 'bearer',
             'expires_in' => $token->expires_at,

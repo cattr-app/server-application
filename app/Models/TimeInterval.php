@@ -3,17 +3,39 @@
 namespace App\Models;
 
 use App\User;
-use Illuminate\Database\Eloquent\Model;
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Support\Str;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+
+/**
+ * @apiDefine ScreenshotObject
+ *
+ * @apiSuccess {Object}   timeInterval                 Time interval entity
+ * @apiSuccess {Integer}  timeInterval.id              ID
+ * @apiSuccess {Integer}  timeInterval.task_id         The ID of the linked task
+ * @apiSuccess {Integer}  timeInterval.user_id         The ID of the linked user
+ * @apiSuccess {String}   timeInterval.start_at        DateTime of interval beginning
+ * @apiSuccess {String}   timeInterval.end_at          DateTime of interval ending
+ * @apiSuccess {Integer}  timeInterval.count_mouse     Count of mouse events
+ * @apiSuccess {Integer}  timeInterval.count_keyboard  Count of keyboard events
+ * @apiSuccess {String}   timeInterval.created_at      Creation DateTime
+ * @apiSuccess {String}   timeInterval.updated_at      Update DateTime
+ * @apiSuccess {String}   timeInterval.deleted_at      Delete DateTime or `NULL` if user wasn't deleted
+ * @apiSuccess {Array}    timeInterval.screenshots     Screenshots of this interval
+ * @apiSuccess {Object}   timeInterval.user            The user that time interval belongs to
+ * @apiSuccess {Object}   timeInterval.task            The task that time interval belongs to
+ */
+
 
 /**
  * Class TimeInterval
- * @package App\Models
  *
+ * @package App\Models
  * @property int $id
  * @property int $task_id
  * @property int $user_id
@@ -22,10 +44,29 @@ use Illuminate\Support\Str;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
- *
  * @property Task $task
  * @property User $user
  * @property Screenshot[] $screenshots
+ * @property int $count_mouse
+ * @property int $count_keyboard
+ * @property-read Collection|Property[] $properties
+ * @property-read Screenshot $screenshot
+ * @method static bool|null forceDelete()
+ * @method static QueryBuilder|TimeInterval onlyTrashed()
+ * @method static bool|null restore()
+ * @method static EloquentBuilder|TimeInterval whereCountKeyboard($value)
+ * @method static EloquentBuilder|TimeInterval whereCountMouse($value)
+ * @method static EloquentBuilder|TimeInterval whereCreatedAt($value)
+ * @method static EloquentBuilder|TimeInterval whereDeletedAt($value)
+ * @method static EloquentBuilder|TimeInterval whereEndAt($value)
+ * @method static EloquentBuilder|TimeInterval whereId($value)
+ * @method static EloquentBuilder|TimeInterval whereStartAt($value)
+ * @method static EloquentBuilder|TimeInterval whereTaskId($value)
+ * @method static EloquentBuilder|TimeInterval whereUpdatedAt($value)
+ * @method static EloquentBuilder|TimeInterval whereUserId($value)
+ * @method static QueryBuilder|TimeInterval withTrashed()
+ * @method static QueryBuilder|TimeInterval withoutTrashed()
+ * @mixin Eloquent
  */
 class TimeInterval extends AbstractModel
 {
@@ -47,6 +88,7 @@ class TimeInterval extends AbstractModel
         'end_at',
         'count_mouse',
         'count_keyboard',
+        'is_manual',
     ];
 
     /**
@@ -57,6 +99,7 @@ class TimeInterval extends AbstractModel
         'user_id' => 'integer',
         'count_mouse' => 'integer',
         'count_keyboard' => 'integer',
+        'is_manual' => 'boolean',
     ];
 
     /**
@@ -79,9 +122,9 @@ class TimeInterval extends AbstractModel
     {
         parent::boot();
 
-        static::deleting(function($vals) {
-            /** @var TimeInterval $vals */
-            foreach ($vals->screenshots()->get() as $screen) {
+        static::deleting(function($intervals) {
+            /** @var TimeInterval $intervals */
+            foreach ($intervals->screenshot()->get() as $screen) {
                 $screen->delete();
             }
         });

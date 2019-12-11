@@ -10,6 +10,7 @@ use App\User;
 use Auth;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Filter;
@@ -58,8 +59,8 @@ class TaskCommentController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'task_id'  => 'required',
-            'content'  => 'required',
+            'task_id' => 'required',
+            'content' => 'required',
         ];
     }
 
@@ -78,6 +79,8 @@ class TaskCommentController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @api {post} /api/v1/task-comment/create Create
      * @apiDescription Create Task Comment
      * @apiVersion 0.1.0
@@ -114,8 +117,6 @@ class TaskCommentController extends ItemController
      *
      * @apiUse WrongDateTimeFormatStartEndAt
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function create(Request $request): JsonResponse
     {
@@ -129,8 +130,10 @@ class TaskCommentController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -147,21 +150,22 @@ class TaskCommentController extends ItemController
         $item->save();
 
 
-
         $full_access = $user->allowed('task-comment', 'full_access');
 
         if (!$full_access) {
 
             if ($item->task->user_id != $user->id) {
                 return response()->json([
-                    'error' => "Access denied to this task",
-                    'reason' => 'action is not allowed'
+                    'success' => false,
+                    'error_type' => 'authorization.access_denied',
+                    'message' => "Access denied to this task",
                 ], 403);
             }
         }
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success' => true,
                 'res' => $item,
             ])
         );
@@ -176,6 +180,8 @@ class TaskCommentController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @api {post} /api/v1/task-comment/list List
      * @apiDescription Get list of Task Comments
      * @apiVersion 0.1.0
@@ -212,8 +218,6 @@ class TaskCommentController extends ItemController
      *
      * @apiUse UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -307,11 +311,11 @@ class TaskCommentController extends ItemController
         if (!$idInt) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
-                    'error' => 'Validation fail',
-                    'reason' => 'Id invalid',
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id',
+                ]), 400);
         }
 
         /** @var Builder $itemsQuery */
@@ -327,17 +331,18 @@ class TaskCommentController extends ItemController
 
         if (!$full_access) {
             $itemsQuery->where(['user_id' => $user->id])
-            ->whereHas('task', function ($taskQuery) use ($user) {
-                $taskQuery->where(['user_id' => $user->id]);
-            });
+                ->whereHas('task', function ($taskQuery) use ($user) {
+                    $taskQuery->where(['user_id' => $user->id]);
+                });
         }
 
-        /** @var \Illuminate\Database\Eloquent\Model $item */
+        /** @var Model $item */
         $item = $itemsQuery->firstOrFail();
         $item->delete();
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
+                'success' => true,
                 'message' => 'Item has been removed'
             ])
         );

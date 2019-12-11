@@ -5,24 +5,39 @@ namespace App\Models;
 
 use App\User;
 use Auth;
+use Eloquent;
+use Exception;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 use Throwable;
 
 /**
  * Class Role
  *
  * @package App\Models
- *
  * @property int    $id
  * @property string $name
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
- *
  * @property User[] $users
  * @property Rule[] $rules
+ * @property-read Collection|Project[] $projects
+ * @method static bool|null forceDelete()
+ * @method static QueryBuilder|Role onlyTrashed()
+ * @method static bool|null restore()
+ * @method static EloquentBuilder|Role whereCreatedAt($value)
+ * @method static EloquentBuilder|Role whereDeletedAt($value)
+ * @method static EloquentBuilder|Role whereId($value)
+ * @method static EloquentBuilder|Role whereName($value)
+ * @method static EloquentBuilder|Role whereUpdatedAt($value)
+ * @method static QueryBuilder|Role withTrashed()
+ * @method static QueryBuilder|Role withoutTrashed()
+ * @mixin Eloquent
  */
 class Role extends AbstractModel
 {
@@ -59,7 +74,7 @@ class Role extends AbstractModel
     /**
      * @return HasMany
      */
-    public function users()
+    public function users(): HasMany
     {
         return $this->hasMany(User::class, 'role_id', 'id');
     }
@@ -109,9 +124,9 @@ class Role extends AbstractModel
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
-    public static function updateRules(): void
+    public static function updateRules()
     {
         /** @var array[] $actionList */
         $actionList = Rule::getActionList();
@@ -171,14 +186,14 @@ class Role extends AbstractModel
 
         $user = Auth::user();
 
-        throw_if(!$rule, new \Exception('rule does not exist', 400));
+        throw_if(!$rule, new Exception('rule does not exist', 400));
         if (!static::can($user, 'rules', 'full_access')) {
             $userRoleIds = [$user->role_id];
             throw_if($userRoleIds->contains($rule->role_id),
-                new \Exception('you cannot change your own privileges', 403));
+                new Exception('you cannot change your own privileges', 403));
         }
         throw_if($role_id === 1 && $object === 'rules' && $action === 'full_access',
-            new \Exception('you cannot change rule management for root', 403));
+            new Exception('you cannot change rule management for root', 403));
 
         $rule->allow = $allow;
         return $rule->save();

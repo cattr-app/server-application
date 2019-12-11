@@ -3,7 +3,6 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
-use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\Task;
 use Auth;
@@ -425,8 +424,7 @@ class TaskController extends ItemController
         }
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
-            200
+            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items)
         );
     }
 
@@ -444,8 +442,10 @@ class TaskController extends ItemController
         if (!$itemId) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Validation fail',
-                    'reason' => 'Id invalid',
+                    'success'=> false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id'
                 ]),
                 400
             );
@@ -457,8 +457,9 @@ class TaskController extends ItemController
         if (!in_array($projectId, $userProjectIds)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Access denied',
-                    'reason' => 'User haven\'t access to this task',
+                    'success' => false,
+                    'error_type' => 'authorization.access_denied',
+                    'message' => 'User has no access to this task'
                 ]),
                 403
             );
@@ -500,8 +501,9 @@ class TaskController extends ItemController
     }
 
     /**
-     * @param  bool  $withRelations
+     * @param bool $withRelations
      *
+     * @param bool $withSoftDeleted
      * @return Builder
      */
     protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder

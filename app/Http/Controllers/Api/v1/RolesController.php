@@ -369,8 +369,9 @@ class RolesController extends ItemController
             return response()->json(Filter::process(
                 $this->getEventUniqueName('answer.error.item.allowed-rules'),
                 [
-                    'error' => 'Roles not found',
-                    'reason' => 'Invalid Id'
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Roles not found'
                 ]),
                 400
             );
@@ -415,11 +416,11 @@ class RolesController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'validation fail',
-                    'reason' => $validator->errors()
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]), 400);
         }
 
         $relations = $request->post('relations');
@@ -438,6 +439,7 @@ class RolesController extends ItemController
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
                 'res' => $relations,
             ])
         );
@@ -453,11 +455,11 @@ class RolesController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'validation fail',
-                    'reason' => $validator->errors()
-                ]),
-                400
-            );
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]), 400);
         }
 
         $relations = $request->post('relations');
@@ -476,6 +478,7 @@ class RolesController extends ItemController
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
                 'res' => $relations,
             ])
         );

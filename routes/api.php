@@ -51,9 +51,9 @@ Route::group([
     $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
-    $router->post('password/reset/request', 'PasswordReset@request');
-    $router->get('password/reset/validate', 'PasswordReset@validate');
-    $router->post('password/reset/process', 'PasswordReset@process')
+    $router->post('password/reset/request', 'PasswordResetController@request');
+    $router->post('password/reset/validate', 'PasswordResetController@validate');
+    $router->post('password/reset/process', 'PasswordResetController@process')
         ->name('password.reset.process');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');
@@ -69,9 +69,9 @@ Route::group([
     $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
     $router->any('me', 'AuthController@me');
-    $router->post('password/reset/request', 'PasswordReset@request');
-    $router->get('password/reset/validate', 'PasswordReset@validate');
-    $router->post('password/reset/process', 'PasswordReset@process')
+    $router->post('password/reset/request', 'PasswordResetController@request');
+    $router->post('password/reset/validate', 'PasswordResetController@validate');
+    $router->post('password/reset/process', 'PasswordResetController@process')
         ->name('password.reset.process');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');
@@ -165,6 +165,7 @@ Route::group([
     $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
     $router->any('/time-intervals/day-duration', 'Api\v1\Statistic\DashboardController@timePerDay');
     $router->post('/time-intervals/bulk-remove', 'Api\v1\TimeIntervalController@bulkDestroy');
+    $router->post('/time-intervals/manual-create', 'Api\v1\TimeIntervalController@manualCreate');
 
     //Time routes
     $router->any('/time/total', 'Api\v1\TimeController@total');
