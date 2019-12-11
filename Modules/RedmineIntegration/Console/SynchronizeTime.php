@@ -9,8 +9,7 @@ use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TimeIntervalRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
-use Redmine;
+use Modules\RedmineIntegration\Models\ClientFactory;
 
 /**
  * Class SynchronizeTime
@@ -54,19 +53,30 @@ class SynchronizeTime extends Command
     protected $taskRepo;
 
     /**
+     * @var ClientFactory
+     */
+    protected $clientFactory;
+
+    /**
      * Create a new command instance.
      *
      * @param  UserRepository     $userRepo
      * @param  ProjectRepository  $projectRepo
      * @param  TaskRepository     $taskRepo
+     * @param  ClientFactory      $clientFactory
      */
-    public function __construct(UserRepository $userRepo, TaskRepository $taskRepo, TimeIntervalRepository $timeRepo)
-    {
+    public function __construct(
+        UserRepository $userRepo,
+        TaskRepository $taskRepo,
+        TimeIntervalRepository $timeRepo,
+        ClientFactory $clientFactory
+    ) {
         parent::__construct();
 
         $this->userRepo = $userRepo;
         $this->timeRepo = $timeRepo;
         $this->taskRepo = $taskRepo;
+        $this->clientFactory = $clientFactory;
     }
 
     /**
@@ -147,9 +157,8 @@ class SynchronizeTime extends Command
 
     protected function sendTime($user, $date, $issue_id, $hours, $timeIntervalIds)
     {
-
         try {
-            $client = $this->initRedmineClient($user->id);
+            $client = $this->clientFactory->createUserClient($user->id);
 
             $ret = $client->time_entry->create([
                 'issue_id' => $issue_id,
@@ -169,13 +178,5 @@ class SynchronizeTime extends Command
 
         } catch (Exception $e) {
         }
-    }
-
-
-    public function initRedmineClient(int $userId): Redmine\Client
-    {
-        $client = new RedmineClient($userId);
-
-        return $client;
     }
 }

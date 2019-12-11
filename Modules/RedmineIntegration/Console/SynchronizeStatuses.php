@@ -3,8 +3,8 @@
 namespace Modules\RedmineIntegration\Console;
 
 use Illuminate\Console\Command;
-use Modules\CompanyManagement\Models\RedmineSettings;
-use Redmine\Client;
+use Log;
+use Modules\RedmineIntegration\Models\Status;
 
 /**
  * Class SynchronizeStatuses
@@ -28,20 +28,20 @@ class SynchronizeStatuses extends Command
     protected $description = 'Synchronize statuses from redmine.';
 
     /**
-     * @var RedmineSettings
+     * @var Status
      */
-    protected $companyRedmineSettings;
+    protected $status;
 
     /**
      * Create a new command instance.
      *
-     * @param  RedmineSettings  $companyRedmineSettings
+     * @param  Status  $status
      */
-    public function __construct(RedmineSettings $companyRedmineSettings)
+    public function __construct(Status $status)
     {
         parent::__construct();
 
-        $this->companyRedmineSettings = $companyRedmineSettings;
+        $this->status = $status;
     }
 
     /**
@@ -49,36 +49,10 @@ class SynchronizeStatuses extends Command
      */
     public function handle()
     {
-        $url = $this->companyRedmineSettings->getURL();
-        if (empty($url)) {
-            throw new \Exception('Empty URL', 404);
+        try {
+            $this->status->synchronize();
+        } catch (\Exception $e) {
+            Log::error($e);
         }
-
-        $key = $this->companyRedmineSettings->getAPIKey();
-        if (empty($key)) {
-            throw new \Exception('Empty API key', 404);
-        }
-
-        $client = new Client($url, $key);
-        $redmineStatuses = $client->issue_status->all()['issue_statuses'];
-        $savedStatuses = $this->companyRedmineSettings->getStatuses();
-
-        // Merge statuses info from the redmine with the active state of stored statuses
-        $statuses = array_map(function ($redmineStatus) use ($savedStatuses) {
-            // Try find saved status with the same ID
-            $savedStatus = array_first($savedStatuses, function ($savedStatus) use ($redmineStatus) {
-                return $savedStatus['id'] === $redmineStatus['id'];
-            });
-
-            // Set status is active, if saved status is exist and active,
-            // or if status from the Redmine is not closed
-            $redmineStatus['is_active'] = isset($savedStatus)
-                ? $savedStatus['is_active']
-                : !isset($redmineStatus['is_closed']);
-
-            return $redmineStatus;
-        }, $redmineStatuses);
-
-        $this->companyRedmineSettings->setStatuses($statuses);
     }
 }

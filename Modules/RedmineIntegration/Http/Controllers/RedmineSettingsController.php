@@ -106,9 +106,7 @@ class RedmineSettingsController extends AbstractRedmineController
 
     protected function saveProperties()
     {
-        $this
-            ->processFilter('redmine.settings.url.change', 'REDMINE_KEY', $this->request->redmine_api_key)
-            ->saveProperty('REDMINE_PRIORITIES', serialize($this->request->redmine_priorities));
+        $this->processFilter('redmine.settings.url.change', 'REDMINE_KEY', $this->request->redmine_api_key);
     }
 
     /**
@@ -178,8 +176,6 @@ class RedmineSettingsController extends AbstractRedmineController
             'enabled' => $redmineEnabled = Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'redmine_enabled'])
                     ->first()->value ?? false,
             'redmine_api_key' => $userRepository->getUserRedmineApiKey($userId),
-            'redmine_priorities' => $userRepository->getUserRedminePriorities($userId),
-            'internal_priorities' => Priority::all(),
 
             'redmine_sync' => $userRepository->isUserSendTime($userId),
             'redmine_active_status' => $userRepository->getActiveStatusId($userId),

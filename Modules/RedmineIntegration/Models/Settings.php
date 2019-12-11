@@ -1,0 +1,33 @@
+<?php
+
+namespace Modules\RedmineIntegration\Models;
+
+class Settings extends CompanyProperty
+{
+    protected const REDMINE_URL = 'redmine_url';
+    protected const REDMINE_API_KEY = 'redmine_api_key';
+
+    public function getURL(): string
+    {
+        $property = $this->get(static::REDMINE_URL);
+
+        return isset($property) ? $property->value : '';
+    }
+
+    public function setURL(string $value)
+    {
+        $this->set(static::REDMINE_URL, $value);
+    }
+
+    public function getAPIKey(): string
+    {
+        $property = $this->get(static::REDMINE_API_KEY);
+
+        return isset($property) ? $property->value : '';
+    }
+
+    public function setAPIKey(string $value)
+    {
+        $this->set(static::REDMINE_API_KEY, $value);
+    }
+}

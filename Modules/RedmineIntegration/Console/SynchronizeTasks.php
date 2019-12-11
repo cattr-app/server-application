@@ -7,11 +7,12 @@ use App\Models\Task;
 use App\User;
 use Exception;
 use Illuminate\Console\Command;
-use Modules\CompanyManagement\Models\RedmineSettings;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
+use Modules\RedmineIntegration\Models\ClientFactory;
+use Modules\RedmineIntegration\Models\Priority;
+use Modules\RedmineIntegration\Models\Status;
 use Modules\RedmineIntegration\Models\TimeActivity;
 use Redmine;
 use SimpleXMLElement;
@@ -53,9 +54,19 @@ class SynchronizeTasks extends Command
     protected $taskRepo;
 
     /**
-     * @var RedmineSettings
+     * @var ClientFactory
      */
-    protected $companyRedmineSettings;
+    protected $clientFactory;
+
+    /**
+     * @var Status
+     */
+    protected $status;
+
+    /**
+     * @var Priority
+     */
+    protected $priority;
 
     /**
      * Create a new command instance.
@@ -63,20 +74,26 @@ class SynchronizeTasks extends Command
      * @param  UserRepository     $userRepo
      * @param  ProjectRepository  $projectRepo
      * @param  TaskRepository     $taskRepo
-     * @param  RedmineSettings    $companyRedmineSettings
+     * @param  ClientFactory      $clientFactory
+     * @param  Status             $status
+     * @param  Priority           $priority
      */
     public function __construct(
         UserRepository $userRepo,
         ProjectRepository $projectRepo,
         TaskRepository $taskRepo,
-        RedmineSettings $companyRedmineSettings
+        ClientFactory $clientFactory,
+        Status $status,
+        Priority $priority
     ) {
         parent::__construct();
 
         $this->userRepo = $userRepo;
         $this->projectRepo = $projectRepo;
         $this->taskRepo = $taskRepo;
-        $this->companyRedmineSettings = $companyRedmineSettings;
+        $this->clientFactory = $clientFactory;
+        $this->status = $status;
+        $this->priority = $priority;
     }
 
     /**
@@ -116,20 +133,13 @@ class SynchronizeTasks extends Command
     {
         $userNewRedmineTasks = $this->userRepo->getUserNewRedmineTasks($userId);
 
-        $client = $this->initRedmineClient($userId);
+        $client = $this->clientFactory->createUserClient($userId);
 
         foreach ($userNewRedmineTasks as $task) {
             $redmineTask = $this->createRedmineTask($client, $task);
             $this->taskRepo->setRedmineId($task->id, (int) $redmineTask->id);
             $this->taskRepo->markAsOld($task->id);
         }
-    }
-
-    public function initRedmineClient(int $userId): Redmine\Client
-    {
-        $client = new RedmineClient($userId);
-
-        return $client;
     }
 
     /**
@@ -145,7 +155,7 @@ class SynchronizeTasks extends Command
         // Get Redmine priority ID from an internal priority.
         $priority_id = 2;
         if (isset($task->priority_id) && $task->priority_id) {
-            $priorities = $this->userRepo->getUserRedminePriorities($task->user_id);
+            $priorities = $this->priority->getAll();
             $priority = array_first($priorities, function ($priority) use ($task) {
                 return $priority['priority_id'] == $task->priority_id;
             });
@@ -177,7 +187,7 @@ class SynchronizeTasks extends Command
      */
     public function synchronizeUserTasks(int $userId): array
     {
-        $client = $this->initRedmineClient($userId);
+        $client = $this->clientFactory->createUserClient($userId);
         //get current user's id
         $currentRedmineUser = $client->user->getCurrentUser();
         $currentRedmineUserId = $currentRedmineUser['user']['id'];
@@ -193,7 +203,7 @@ class SynchronizeTasks extends Command
         $changedTasksCounter = 0;
         $synchronizedTasks = [];
 
-        $statuses = $this->companyRedmineSettings->getStatuses();
+        $statuses = $this->status->getAll();
         $activeStatuses = array_filter($statuses, function ($status) {
             return $status['is_active'] === true;
         });
@@ -201,7 +211,7 @@ class SynchronizeTasks extends Command
             return $status['id'];
         }, $activeStatuses);
 
-        $priorities = $this->userRepo->getUserRedminePriorities($userId);
+        $priorities = $this->priority->getAll();
 
         foreach ($tasks as $taskFromRedmine) {
             $synchronizedTasks[] = $taskFromRedmine['id'];
@@ -357,7 +367,7 @@ class SynchronizeTasks extends Command
     {
         $userRepo = $this->userRepo;
         $taskRepo = $this->taskRepo;
-        $client = $this->initRedmineClient($userId);
+        $client = $this->clientFactory->createUserClient($userId);
         $activeStatusId = $userRepo->getActiveStatusId($userId);
         $deactiveStatusId = $userRepo->getInactiveStatusId($userId);
         $activateStatuses = $userRepo->getActivateStatuses($userId);

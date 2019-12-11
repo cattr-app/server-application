@@ -2,12 +2,16 @@
 
 namespace Modules\CompanyManagement\Http\Controllers;
 
+use App\Models\Priority;
 use App\Models\Property;
 use Illuminate\Routing\Controller;
 
 class CompanyManagementController extends Controller
 {
-    protected static $json = ['redmine_statuses'];
+    /**
+     * @var string[] Fields that should be encoded/decoded in JSON.
+     */
+    protected static $json = ['redmine_statuses', 'redmine_priorities'];
 
     /**
      * @return mixed
@@ -26,6 +30,8 @@ class CompanyManagementController extends Controller
             $toReturn[$name] = $value;
         }
 
+        $toReturn['internal_priorities'] = Priority::all();
+
         return response()->json($toReturn);
     }
 
@@ -34,7 +40,7 @@ class CompanyManagementController extends Controller
      */
     public function save()
     {
-        $data = request()->except('token');
+        $data = request()->except('token', 'internal_priorities');
         foreach ($data as $name => $value) {
             if (in_array($name, static::$json)) {
                 $value = json_encode($value);

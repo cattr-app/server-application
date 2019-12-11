@@ -8,11 +8,11 @@ use App\Models\Property;
 use App\Models\Task;
 use Exception;
 use Illuminate\Http\Request;
-use Modules\CompanyManagement\Models\RedmineSettings;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Helpers\ProjectHelper;
+use Modules\RedmineIntegration\Models\Status;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
@@ -33,9 +33,9 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
     protected $projectHelper;
 
     /**
-     * @var RedmineSettings
+     * @var Status
      */
-    protected $companyRedmineSettings;
+    protected $status;
 
     /**
      * PluginWebhookHelper constructor.
@@ -46,7 +46,7 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
      * @param  Request            $request
      * @param  Property           $property
      * @param  ProjectHelper      $projectHelper
-     * @param  RedmineSettings    $companyRedmineSettings
+     * @param  Status             $status
      */
     public function __construct(
         TaskRepository $taskRepository,
@@ -55,13 +55,13 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
         Request $request,
         Property $property,
         ProjectHelper $projectHelper,
-        RedmineSettings $companyRedmineSettings
+        Status $status
     ) {
         parent::__construct($taskRepository, $projectRepository, $userRepository, $request);
 
         $this->property = $property;
         $this->projectHelper = $projectHelper;
-        $this->companyRedmineSettings = $companyRedmineSettings;
+        $this->status = $status;
     }
 
     /**
@@ -130,7 +130,7 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
      */
     protected function statusExists(int $redmineStatusId): bool
     {
-        return $this->companyRedmineSettings->statusExistsByID($redmineStatusId);
+        return $this->status->existsByID($redmineStatusId);
     }
 
     /**
@@ -145,7 +145,7 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
         $active = !($status['is_closed'] ?? false);
         $closed = $status['is_closed'] ?? false;
 
-        $this->companyRedmineSettings->addStatus($id, $name, $active, $closed);
+        $this->status->add($id, $name, $active, $closed);
     }
 
     /**
