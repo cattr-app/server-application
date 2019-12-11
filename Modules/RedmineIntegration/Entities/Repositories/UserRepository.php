@@ -280,18 +280,6 @@ class UserRepository
     }
 
     /**
-     * get active task status id from userId
-     *
-     * @param  string  $userId
-     *
-     * @return string
-     */
-    public function getActiveStatusId($userId)
-    {
-        return $this->getProperty($userId, static::ACTIVE_STATUS_PROPERTY);
-    }
-
-    /**
      * get timeout for last task activity for user $userId
      *
      * @param  string  $userId
@@ -313,19 +301,6 @@ class UserRepository
         }
 
         return $retOnUnset;
-    }
-
-    /**
-     * set active task status id for userId
-     *
-     * @param  string  $userId
-     * @param  string  $status_id
-     *
-     * @return string
-     */
-    public function setActiveStatusId($userId, $status_id)
-    {
-        return $this->setProperty($userId, static::ACTIVE_STATUS_PROPERTY, $status_id);
     }
 
     /**
@@ -356,90 +331,6 @@ class UserRepository
             $property->value = $value;
             $property->save();
         }
-    }
-
-    /**
-     * get deactive task status id from userId
-     *
-     * @param  string  $userId
-     *
-     * @return string
-     */
-    public function getInactiveStatusId($userId)
-    {
-        return $this->getProperty($userId, static::DEACTIVE_STATUS_PROPERTY);
-    }
-
-    /**
-     * set deactive task status id for userId
-     *
-     * @param  string  $userId
-     * @param  string  $status_id
-     *
-     */
-    public function setInactiveStatusId($userId, $status_id)
-    {
-        $this->setProperty($userId, static::DEACTIVE_STATUS_PROPERTY, $status_id);
-    }
-
-    /**
-     * get user task status ids which will be set as active after task synchronisation
-     *
-     * @param  string  $userId
-     *
-     * @return string
-     */
-    public function getActivateStatuses($userId)
-    {
-        $jsonStatuses = $this->getProperty($userId, static::ACTIVATE_STATUSES_PROPERTY, '[]');
-        return json_decode($jsonStatuses, 1);
-    }
-
-    /**
-     * set user task status ids which will be set as active after task synchronisation
-     *
-     * @param  string  $userId
-     * @param  array   $statuses
-     *
-     */
-    public function setActivateStatuses($userId, array $statuses)
-    {
-        if (empty($statuses)) {
-            $jsonStatuses = '';
-        } else {
-            $jsonStatuses = json_encode($statuses);
-        }
-        $this->setProperty($userId, static::ACTIVATE_STATUSES_PROPERTY, $jsonStatuses);
-    }
-
-    /**
-     * get user task status ids which will be set as
-     *
-     * @param  string  $userId
-     *
-     * @return string
-     */
-    public function getDeactivateStatuses($userId)
-    {
-        $jsonStatuses = $this->getProperty($userId, static::DEACTIVATE_STATUSES_PROPERTY, '[]');
-        return json_decode($jsonStatuses, 1);
-    }
-
-    /**
-     * set user task status ids which will be set as inactive after task synchronisation
-     *
-     * @param  string  $userId
-     * @param  array   $statuses
-     *
-     */
-    public function setDeactivateStatuses($userId, array $statuses)
-    {
-        if (empty($statuses)) {
-            $jsonStatuses = '';
-        } else {
-            $jsonStatuses = json_encode($statuses);
-        }
-        $this->setProperty($userId, static::DEACTIVATE_STATUSES_PROPERTY, $jsonStatuses);
     }
 
     /**

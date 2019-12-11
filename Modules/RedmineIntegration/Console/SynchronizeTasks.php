@@ -368,10 +368,10 @@ class SynchronizeTasks extends Command
         $userRepo = $this->userRepo;
         $taskRepo = $this->taskRepo;
         $client = $this->clientFactory->createUserClient($userId);
-        $activeStatusId = $userRepo->getActiveStatusId($userId);
-        $deactiveStatusId = $userRepo->getInactiveStatusId($userId);
-        $activateStatuses = $userRepo->getActivateStatuses($userId);
-        $deactivateStatuses = $userRepo->getDeactivateStatuses($userId);
+        $activeStatusId = $this->status->getActiveStatusID();
+        $inactiveStatusId = $this->status->getInactiveStatusID();
+        $activateOnStatuses = $this->status->getActivateOnStatuses();
+        $deactivateOnStatuses = $this->status->getDeactivateOnStatuses();
         $timeout = $userRepo->getOnlineTimeout($userId);
         $timeActivity = $this->userTimeActivity($userId, $timeout);
         $unactiveTasks = $this->unactiveTasks($userId, $timeActivity);
@@ -381,7 +381,7 @@ class SynchronizeTasks extends Command
             $activeTaskId = $timeActivity->task_id;
             $activeIssueId = $taskRepo->getRedmineTaskId($activeTaskId);
             $currentStatusId = $taskRepo->getRedmineStatusId($activeTaskId);
-            if ($activeIssueId && $this->isInList($currentStatusId, $activateStatuses)) {
+            if ($activeIssueId && $this->isInList($currentStatusId, $activateOnStatuses)) {
                 if ($currentStatusId != $activeStatusId) {
                     $client->issue->update($activeIssueId, ['status_id' => $activeStatusId]);
                     $taskRepo->setRedmineStatusId($activeTaskId, $activeStatusId);
@@ -389,14 +389,14 @@ class SynchronizeTasks extends Command
             }
         }
 
-        if ($deactiveStatusId) {
+        if ($inactiveStatusId) {
             foreach ($unactiveTasks as $task) { // is there any way to do it somehow else?
                 $currentStatusId = $taskRepo->getRedmineStatusId($task->id);
                 $issueId = $taskRepo->getRedmineTaskId($task->id);
-                if ($issueId && $this->isInList($currentStatusId, $deactivateStatuses)) {
-                    if ($currentStatusId != $deactiveStatusId) {
-                        $client->issue->update($issueId, ['status_id' => $deactiveStatusId]);
-                        $taskRepo->setRedmineStatusId($task->id, $deactiveStatusId);
+                if ($issueId && $this->isInList($currentStatusId, $deactivateOnStatuses)) {
+                    if ($currentStatusId != $inactiveStatusId) {
+                        $client->issue->update($issueId, ['status_id' => $inactiveStatusId]);
+                        $taskRepo->setRedmineStatusId($task->id, $inactiveStatusId);
                     }
                 }
             }

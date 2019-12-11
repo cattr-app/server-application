@@ -4,8 +4,21 @@ namespace Modules\RedmineIntegration\Models;
 
 class Settings extends CompanyProperty
 {
+    protected const REDMINE_ENABLED = 'redmine_enabled';
     protected const REDMINE_URL = 'redmine_url';
     protected const REDMINE_API_KEY = 'redmine_api_key';
+
+    public function getEnabled(): int
+    {
+        $property = $this->get(static::REDMINE_ENABLED);
+
+        return isset($property) ? $property->value : 0;
+    }
+
+    public function setEnabled(int $value)
+    {
+        $this->set(static::REDMINE_ENABLED, $value);
+    }
 
     public function getURL(): string
     {

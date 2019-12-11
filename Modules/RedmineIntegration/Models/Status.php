@@ -5,6 +5,10 @@ namespace Modules\RedmineIntegration\Models;
 class Status extends CompanyProperty
 {
     protected const REDMINE_STATUSES = 'redmine_statuses';
+    protected const REDMINE_ACTIVE_STATUS = 'redmine_active_status';
+    protected const REDMINE_INACTIVE_STATUS = 'redmine_inactive_status';
+    protected const REDMINE_ACTIVATE_ON_STATUSES = 'redmine_activate_on_statuses';
+    protected const REDMINE_DEACTIVATE_ON_STATUSES = 'redmine_deactivate_on_statuses';
 
     /**
      * @var ClientFactory
@@ -51,6 +55,54 @@ class Status extends CompanyProperty
         ];
 
         $this->setAll($statuses);
+    }
+
+    public function getActiveStatusID(): int
+    {
+        $property = $this->get(static::REDMINE_ACTIVE_STATUS);
+
+        return isset($property) ? $property->value : 0;
+    }
+
+    public function setActiveStatusID(int $value)
+    {
+        $this->set(static::REDMINE_ACTIVE_STATUS, $value);
+    }
+
+    public function getInactiveStatusID(): int
+    {
+        $property = $this->get(static::REDMINE_INACTIVE_STATUS);
+
+        return isset($property) ? $property->value : 0;
+    }
+
+    public function setInactiveStatusID(int $value)
+    {
+        $this->set(static::REDMINE_INACTIVE_STATUS, $value);
+    }
+
+    public function getActivateOnStatuses(): array
+    {
+        $property = $this->get(static::REDMINE_ACTIVATE_ON_STATUSES);
+
+        return isset($property) ? (json_decode($property->value, true) ?: []) : [];
+    }
+
+    public function setActivateOnStatuses(array $value)
+    {
+        $this->set(static::REDMINE_ACTIVATE_ON_STATUSES, json_encode($value));
+    }
+
+    public function getDeactivateOnStatuses(): array
+    {
+        $property = $this->get(static::REDMINE_DEACTIVATE_ON_STATUSES);
+
+        return isset($property) ? (json_decode($property->value, true) ?: []) : [];
+    }
+
+    public function setDeactivateOnStatuses(array $value)
+    {
+        $this->set(static::REDMINE_DEACTIVATE_ON_STATUSES, json_encode($value));
     }
 
     public function synchronize()
