@@ -130,6 +130,17 @@ class AuthorizationException extends BaseAuthorizationException
      */
     public const ERROR_TYPE_INVALID_PASSWORD_RESET_DATA = 'authorization.invalid_password_data';
 
+    /**
+     * @apiDefine ForbiddenError
+     * @apiErrorExample {json} Forbidden
+     *  HTTP/1.1 401 Forbidden
+     *  {
+     *    "success": false,
+     *    "message": "Forbidden"
+     *  }
+     */
+    public const ERROR_TYPE_FORBIDDEN = 'authorization.forbidden';
+
     protected const ERRORS = [
         self::ERROR_TYPE_UNAUTHORIZED => ['code' => 401, 'message' => 'Not authorized'],
         self::ERROR_TYPE_CAPTCHA => ['code' => 429, 'message' => 'Invalid captcha',],
@@ -140,6 +151,7 @@ class AuthorizationException extends BaseAuthorizationException
         self::ERROR_TYPE_VALIDATION_FAILED => ['code' => 400, 'message' => 'Invalid params'],
         self::ERROR_TYPE_USER_NOT_FOUND => ['code' => 404, 'message' => 'User with such email isn’t found'],
         self::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA => ['code' => 401, 'message' => 'Invalid password reset data'],
+        self::ERROR_TYPE_FORBIDDEN => ['code' => 403, 'message' => 'Forbidden']
     ];
 
     /**
@@ -155,7 +167,7 @@ class AuthorizationException extends BaseAuthorizationException
     /**
      * AuthorizationException constructor.
      * @param string $type
-     * @param array|null $info
+     * @param string|array|null $info
      * @param Throwable|null $previous
      */
     public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, $info = null, Throwable $previous = null)
