@@ -2,22 +2,23 @@
 
 namespace Tests\Feature\Auth;
 
+use App\User;
 use Tests\TestCase;
 use App\Models\Factories\UserFactory;
 
-/**
- * Class LogoutTest
- * @package Tests\Feature\Auth
- */
 class LogoutTest extends TestCase
 {
     const URI = 'auth/logout';
 
+    /**
+     * @var User
+     */
     private $user;
 
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->user = app(UserFactory::class)
             ->withTokens()
             ->create();
@@ -30,7 +31,13 @@ class LogoutTest extends TestCase
 
         $response = $this->actingAs($this->user)->postJson(self::URI);
 
-        $response->assertStatus(200);
+        $response->assertApiSuccess();
         $this->assertDatabaseMissing('tokens', ['token' => $token]);
+    }
+
+    public function test_unauthorized()
+    {
+        $response = $this->postJson(self::URI);
+        $response->assertApiError(401);
     }
 }

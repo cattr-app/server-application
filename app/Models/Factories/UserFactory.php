@@ -6,10 +6,6 @@ use Faker\Generator as Faker;
 use App\User;
 use JWTAuth;
 
-/**
- * Class UserFactory
- * @package App\Models\Factories
- */
 class UserFactory
 {
     private const ROLES = [
@@ -18,17 +14,17 @@ class UserFactory
     ];
 
     /**
-     * @var Faker $faker
+     * @var Faker
      */
     protected $faker;
 
     /**
-     * @var int $needsToken
+     * @var int
      */
     protected $needsTokens = 0;
 
     /**
-     * @var User $user
+     * @var User
      */
     protected $user;
 
@@ -124,7 +120,8 @@ class UserFactory
 
     protected function assignRole(): void
     {
-        $this->user->attachRole(self::ROLES[$this->role]);
+        $this->user->role_id = self::ROLES[$this->role];
+        $this->user->save();
     }
 
     protected function createTokens(): void

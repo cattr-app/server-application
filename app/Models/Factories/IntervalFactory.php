@@ -7,10 +7,6 @@ use App\User;
 use App\Models\TimeInterval;
 use App\Models\Task;
 
-/**
- * Class IntervalFactory
- * @package App\Models\Factories
- */
 class IntervalFactory
 {
     private const COUNT_MOUSE = 42;

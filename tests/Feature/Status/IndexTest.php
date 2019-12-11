@@ -4,10 +4,6 @@ namespace Tests\Feature\Status;
 
 use Tests\TestCase;
 
-/**
- * Class IndexTest
- * @package Tests\Feature\Status
- */
 class IndexTest extends TestCase
 {
     const URI = 'status';
@@ -15,6 +11,6 @@ class IndexTest extends TestCase
     public function test_index()
     {
         $response = $this->get(self::URI);
-        $response->assertStatus(200);
+        $response->assertApiSuccess();
     }
 }

@@ -5,10 +5,6 @@ namespace App\Models\Factories;
 use Faker\Generator as Faker;
 use App\Models\Project;
 
-/**
- * Class ProjectFactory
- * @package App\Models\Factories
- */
 class ProjectFactory
 {
     private const COMPANY_ID = 1;

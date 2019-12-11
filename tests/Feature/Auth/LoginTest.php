@@ -3,18 +3,22 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\Factories\UserFactory;
+use App\User;
 use Tests\TestCase;
 
-/**
- * Class LoginTest
- * @package Tests\Feature\Auth
- */
 class LoginTest extends TestCase
 {
+
     const URI = 'auth/login';
 
+    /**
+     * @var User
+     */
     private $user;
 
+    /**
+     * @var array
+     */
     private $loginData;
 
     protected function setUp(): void
@@ -23,16 +27,15 @@ class LoginTest extends TestCase
 
         $this->user = app(UserFactory::class)->create();
         $this->loginData = [
-            'login' => $this->user->email,
+            'email' => $this->user->email,
             'password' => $this->user->full_name
         ];
     }
 
-
     public function test_success()
     {
         $response = $this->postJson(self::URI, $this->loginData);
-        $response->assertStatus(200);
+        $response->assertApiSuccess();
 
         $token = $this->user->tokens()->first()->token;
         $response->assertJson(['access_token' => $token]);
@@ -42,7 +45,7 @@ class LoginTest extends TestCase
     {
         $this->loginData['password'] = 'wrong_password';
         $response = $this->postJson(self::URI, $this->loginData);
-        $response->assertError(401);
+        $response->assertApiError(401);
     }
 
     public function test_disabled_user()
@@ -50,14 +53,14 @@ class LoginTest extends TestCase
         $this->user->active = false;
         $this->user->save();
         $response = $this->postJson(self::URI, $this->loginData);
-        $response->assertError(403);
+        $response->assertApiError(403);
     }
 
     public function test_soft_deleted_user()
     {
         $this->user->delete();
         $response = $this->postJson(self::URI, $this->loginData);
-        $response->assertError(401);
+        $response->assertApiError(401);
     }
 
     // TODO Captcha Tests

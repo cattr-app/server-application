@@ -29,7 +29,6 @@ abstract class TestCase extends BaseTestCase
     use CreatesApplication;
     use DatabaseTransactions;
 
-
     /**
      * @param UserContract $user
      * @param null $driver

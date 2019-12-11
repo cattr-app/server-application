@@ -3,22 +3,25 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\Factories\UserFactory;
+use App\User;
 use Tests\TestCase;
 
-/**
- * Class RefreshTest
- * @package Tests\Feature\Auth
- */
 class RefreshTest extends TestCase
 {
     const URI = 'auth/refresh';
 
+    /**
+     * @var User
+     */
     private $user;
 
     protected function setUp(): void
     {
         parent::setUp();
-        $this->user = app(UserFactory::class)->withTokens()->create();
+
+        $this->user = app(UserFactory::class)
+            ->withTokens()
+            ->create();
     }
 
     public function test_refresh()
@@ -28,7 +31,7 @@ class RefreshTest extends TestCase
 
         $response = $this->actingAs($this->user)->postJson(self::URI);
 
-        $response->assertStatus(200);
+        $response->assertApiSuccess();
         $this->assertDatabaseMissing('tokens', ['token' => $token]);
         $this->assertDatabaseHas('tokens', ['token' => $response->decodeResponseJson('access_token')]);
     }

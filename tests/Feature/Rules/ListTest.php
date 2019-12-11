@@ -4,23 +4,27 @@ namespace Tests\Feature\Rules;
 
 use App\Models\Factories\UserFactory;
 use App\Models\Rule;
+use App\User;
 use Tests\TestCase;
 
-/**
- * Class ListTest
- * @package Tests\Feature\Rules
- */
 class ListTest extends TestCase
 {
     const URI = 'v1/rules/list';
 
+    /**
+     * @var User
+     */
     private $admin;
 
+    /**
+     * @var User
+     */
     private $user;
 
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->user = app(UserFactory::class)
             ->withTokens()
             ->asUser()
@@ -42,14 +46,12 @@ class ListTest extends TestCase
     public function test_unauthorized()
     {
         $response = $this->getJson(self::URI);
-        $response->assertError(401);
+        $response->assertApiError(401);
     }
 
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
-
-        //TODO fix response format to asserting with structure check
-        $response->assertStatus(403);
+        $response->assertApiError(403, True);
     }
 }

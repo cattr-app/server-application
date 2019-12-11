@@ -7,10 +7,6 @@ use App\User;
 use Faker\Generator as Faker;
 use App\Models\Task;
 
-/**
- * Class TaskFactory
- * @package App\Models\Factories
- */
 class TaskFactory
 {
     private const DESCRIPTION_LENGTH = 10;

@@ -14,18 +14,24 @@ class TestResponse extends BaseTestResponse
      * @param int $status
      * @param bool $hasInfo
      */
-    public function assertError(int $status, bool $hasInfo = false)
+    public function assertApiError(int $status, bool $hasInfo = false)
     {
         $this->assertStatus($status);
+        $this->assertJson(['success' => false]);
 
         $structure = ['success', 'message', 'error_type'];
         if ($hasInfo) {
             $structure[] = 'info';
-        }
-        else {
+        } else {
             PHPUnit::assertArrayNotHasKey('info', $this->decodeResponseJson());
         }
 
         $this->assertJsonStructure($structure);
+    }
+
+    public function assertApiSuccess(int $status = 200)
+    {
+        $this->assertStatus($status);
+        $this->assertJson(['success' => true]);
     }
 }

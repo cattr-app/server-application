@@ -3,27 +3,37 @@
 namespace Tests\Feature\Rules;
 
 use App\Models\Factories\UserFactory;
+use App\User;
 use Tests\TestCase;
 
-/**
- * Class EditTest
- * @package Tests\Feature\Rules
- */
 class EditTest extends TestCase
 {
     const URI = 'v1/rules/edit';
 
+    /**
+     * @var User
+     */
     private $admin;
 
+    /**
+     * @var User
+     */
     private $user;
 
+    /**
+     * @var array
+     */
     private $correctRule;
 
+    /**
+     * @var array
+     */
     private $incorrectRule;
 
     protected function setUp(): void
     {
         parent::setUp();
+
         $this->user = app(UserFactory::class)
             ->withTokens()
             ->asUser()
@@ -56,28 +66,24 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->correctRule);
 
         $this->assertDatabaseHas('rule', $this->correctRule);
-        $response->assertStatus(200);
+        $response->assertApiSuccess();
     }
 
     public function test_not_existing_rule()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->incorrectRule);
-
-        //TODO Fix response format to asserting with structure check
-        $response->assertStatus(400);
+        $response->assertApiError(400);
     }
 
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
-        $response->assertError(401);
+        $response->assertApiError(401);
     }
 
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->postJson(self::URI);
-
-        //TODO Fix response format to asserting with structure check
-        $response->assertStatus(403);
+        $response->assertApiError(403, True);
     }
 }
