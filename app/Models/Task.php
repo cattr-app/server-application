@@ -124,11 +124,6 @@ class Task extends AbstractModel
         'deleted_at',
     ];
 
-    public static function getTableName()
-    {
-        return with(new static)->getTable();
-    }
-
     /**
      * Override parent boot and Call deleting event
      *
