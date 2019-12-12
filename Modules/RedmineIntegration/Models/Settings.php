@@ -7,6 +7,8 @@ class Settings extends CompanyProperty
     protected const REDMINE_ENABLED = 'redmine_enabled';
     protected const REDMINE_URL = 'redmine_url';
     protected const REDMINE_API_KEY = 'redmine_api_key';
+    protected const REDMINE_SYNC = 'redmine_sync';
+    protected const REDMINE_ONLINE_TIMEOUT = 'redmine_online_timeout';
 
     public function getEnabled(): int
     {
@@ -42,5 +44,29 @@ class Settings extends CompanyProperty
     public function setAPIKey(string $value)
     {
         $this->set(static::REDMINE_API_KEY, $value);
+    }
+
+    public function getSendTime(): int
+    {
+        $property = $this->get(static::REDMINE_SYNC);
+
+        return isset($property) ? $property->value : 0;
+    }
+
+    public function setSendTime(int $value)
+    {
+        $this->set(static::REDMINE_SYNC, $value);
+    }
+
+    public function getOnlineTimeout(): int
+    {
+        $property = $this->get(static::REDMINE_ONLINE_TIMEOUT);
+
+        return isset($property) ? $property->value : 0;
+    }
+
+    public function setOnlineTimeout(int $value)
+    {
+        $this->set(static::REDMINE_ONLINE_TIMEOUT, $value);
     }
 }

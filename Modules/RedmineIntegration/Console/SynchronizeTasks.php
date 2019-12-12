@@ -12,6 +12,7 @@ use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Models\ClientFactory;
 use Modules\RedmineIntegration\Models\Priority;
+use Modules\RedmineIntegration\Models\Settings;
 use Modules\RedmineIntegration\Models\Status;
 use Modules\RedmineIntegration\Models\TimeActivity;
 use Redmine;
@@ -59,6 +60,11 @@ class SynchronizeTasks extends Command
     protected $clientFactory;
 
     /**
+     * @var Settings
+     */
+    protected $settings;
+
+    /**
      * @var Status
      */
     protected $status;
@@ -75,6 +81,7 @@ class SynchronizeTasks extends Command
      * @param  ProjectRepository  $projectRepo
      * @param  TaskRepository     $taskRepo
      * @param  ClientFactory      $clientFactory
+     * @param  Settings           $settings
      * @param  Status             $status
      * @param  Priority           $priority
      */
@@ -83,6 +90,7 @@ class SynchronizeTasks extends Command
         ProjectRepository $projectRepo,
         TaskRepository $taskRepo,
         ClientFactory $clientFactory,
+        Settings $settings,
         Status $status,
         Priority $priority
     ) {
@@ -92,6 +100,7 @@ class SynchronizeTasks extends Command
         $this->projectRepo = $projectRepo;
         $this->taskRepo = $taskRepo;
         $this->clientFactory = $clientFactory;
+        $this->settings = $settings;
         $this->status = $status;
         $this->priority = $priority;
     }
@@ -372,7 +381,7 @@ class SynchronizeTasks extends Command
         $inactiveStatusId = $this->status->getInactiveStatusID();
         $activateOnStatuses = $this->status->getActivateOnStatuses();
         $deactivateOnStatuses = $this->status->getDeactivateOnStatuses();
-        $timeout = $userRepo->getOnlineTimeout($userId);
+        $timeout = $this->settings->getOnlineTimeout();
         $timeActivity = $this->userTimeActivity($userId, $timeout);
         $unactiveTasks = $this->unactiveTasks($userId, $timeActivity);
 

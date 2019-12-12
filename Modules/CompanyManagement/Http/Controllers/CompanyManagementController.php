@@ -17,6 +17,8 @@ class CompanyManagementController extends Controller
         'redmine_inactive_status' => 'int',
         'redmine_activate_on_statuses' => 'json',
         'redmine_deactivate_on_statuses' => 'json',
+        'redmine_sync' => 'int',
+        'redmine_online_timeout' => 'int',
     ];
 
     protected function decodeField(string $name, $value)

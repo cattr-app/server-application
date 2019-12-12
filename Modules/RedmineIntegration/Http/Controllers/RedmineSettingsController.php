@@ -88,9 +88,6 @@ class RedmineSettingsController extends AbstractRedmineController
 
         $this->saveProperties();
 
-        $userRepository->setUserSendTime($this->user->id, $request->redmine_sync);
-        $userRepository->setOnlineTimeout($this->user->id, $request->redmine_online_timeout);
-
         // If user doesn't have a redmine id, we'll mark it as new
         if (!$userRepository->getUserRedmineId($this->user->id)) {
             $userRepository->markAsNew($this->user->id);
@@ -169,8 +166,6 @@ class RedmineSettingsController extends AbstractRedmineController
         $settingsArray = [
             'enabled' => $this->settings->getEnabled(),
             'redmine_api_key' => $userRepository->getUserRedmineApiKey($userId),
-            'redmine_sync' => $userRepository->isUserSendTime($userId),
-            'redmine_online_timeout' => $userRepository->getOnlineTimeout($userId),
         ];
 
         return response()->json($settingsArray);

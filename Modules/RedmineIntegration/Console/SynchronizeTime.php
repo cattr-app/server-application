@@ -10,6 +10,7 @@ use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TimeIntervalRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Models\ClientFactory;
+use Modules\RedmineIntegration\Models\Settings;
 
 /**
  * Class SynchronizeTime
@@ -58,18 +59,25 @@ class SynchronizeTime extends Command
     protected $clientFactory;
 
     /**
+     * @var Settings
+     */
+    protected $settings;
+
+    /**
      * Create a new command instance.
      *
      * @param  UserRepository     $userRepo
      * @param  ProjectRepository  $projectRepo
      * @param  TaskRepository     $taskRepo
      * @param  ClientFactory      $clientFactory
+     * @param  Settings           $settings
      */
     public function __construct(
         UserRepository $userRepo,
         TaskRepository $taskRepo,
         TimeIntervalRepository $timeRepo,
-        ClientFactory $clientFactory
+        ClientFactory $clientFactory,
+        Settings $settings
     ) {
         parent::__construct();
 
@@ -77,6 +85,7 @@ class SynchronizeTime extends Command
         $this->timeRepo = $timeRepo;
         $this->taskRepo = $taskRepo;
         $this->clientFactory = $clientFactory;
+        $this->settings = $settings;
     }
 
     /**
@@ -93,11 +102,11 @@ class SynchronizeTime extends Command
      */
     public function synchronizeTime()
     {
+        if (!$this->settings->getSendTime()) {
+            return;
+        }
+
         $users = User::all();
-
-        $users = $this->userRepo->getSendTimeUsers();
-
-
         foreach ($users as $user) {
 
             $intervalQuery = $this->timeRepo->getNotSyncedInvervals($user->id);
