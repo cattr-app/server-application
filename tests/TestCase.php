@@ -9,8 +9,6 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 
 /**
- * Class TestCase
- * @package Tests
  * @method TestResponse get($uri, array $headers = [])
  * @method TestResponse getJson($uri, array $headers = [])
  * @method TestResponse post($uri, array $data = [], array $headers = [])
