@@ -149,7 +149,7 @@ class TimeController extends ItemController
         $first = collect($time_intervals)->first();
         $last = collect($time_intervals)->last();
         $items = [
-            'success' => false,
+            'success' => true,
             'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
             'time' => $total_time,
             'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
