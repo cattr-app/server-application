@@ -92,6 +92,11 @@ class ProcessTest extends TestCase
         $response = $this->postJson(self::URI, $reset);
 
         $response->assertApiSuccess();
+
+        $this->user->reFresh();
+
+        $this->assertTrue(Hash::check($reset['password'], $this->user->password));
+        $response->assertJsonStructure(['access_token']);
     }
 
     public function test_expired()
