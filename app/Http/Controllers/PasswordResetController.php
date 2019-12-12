@@ -82,8 +82,11 @@ class PasswordResetController extends BaseController
         }
 
         $user = Password::broker()->getUser($request->all());
-        $isValidToken = Password::broker()->getRepository()->exists($user, $request->input('token'));
+        if(!$user){
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
+        }
 
+        $isValidToken = Password::broker()->getRepository()->exists($user, $request->input('token'));
         if (!$isValidToken) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
