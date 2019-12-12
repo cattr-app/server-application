@@ -224,7 +224,7 @@ class PasswordResetController extends BaseController
             ->where('email', $request->input('email'))
             ->first();
 
-        if (!$resetRequest || (time() - strtotime($resetRequest->created_at) > 600)) {
+        if (!$resetRequest) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
