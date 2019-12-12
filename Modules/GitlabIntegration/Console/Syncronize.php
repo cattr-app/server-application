@@ -3,7 +3,7 @@
 namespace Modules\GitlabIntegration\Console;
 
 use Illuminate\Console\Command;
-use Modules\GitlabIntegration\Helpers\Synchronizer;
+use Modules\GitlabIntegration\Entities\Synchronizer;
 
 class Syncronize extends Command
 {
@@ -19,7 +19,7 @@ class Syncronize extends Command
      *
      * @var string
      */
-    protected $description = 'Synchronize projects from the Gitlab for all users, who activate the Gitlab integration.';
+    protected $description = 'Synchronize projects from Gitlab for all users, who activate the Gitlab integration.';
 
     /**
      * @var Synchronizer
