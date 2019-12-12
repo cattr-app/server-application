@@ -9,8 +9,8 @@ use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TimeIntervalRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
-use Redmine;
+use Modules\RedmineIntegration\Models\ClientFactory;
+use Modules\RedmineIntegration\Models\Settings;
 
 /**
  * Class SynchronizeTime
@@ -54,19 +54,38 @@ class SynchronizeTime extends Command
     protected $taskRepo;
 
     /**
+     * @var ClientFactory
+     */
+    protected $clientFactory;
+
+    /**
+     * @var Settings
+     */
+    protected $settings;
+
+    /**
      * Create a new command instance.
      *
      * @param  UserRepository     $userRepo
      * @param  ProjectRepository  $projectRepo
      * @param  TaskRepository     $taskRepo
+     * @param  ClientFactory      $clientFactory
+     * @param  Settings           $settings
      */
-    public function __construct(UserRepository $userRepo, TaskRepository $taskRepo, TimeIntervalRepository $timeRepo)
-    {
+    public function __construct(
+        UserRepository $userRepo,
+        TaskRepository $taskRepo,
+        TimeIntervalRepository $timeRepo,
+        ClientFactory $clientFactory,
+        Settings $settings
+    ) {
         parent::__construct();
 
         $this->userRepo = $userRepo;
         $this->timeRepo = $timeRepo;
         $this->taskRepo = $taskRepo;
+        $this->clientFactory = $clientFactory;
+        $this->settings = $settings;
     }
 
     /**
@@ -83,11 +102,11 @@ class SynchronizeTime extends Command
      */
     public function synchronizeTime()
     {
+        if (!$this->settings->getSendTime()) {
+            return;
+        }
+
         $users = User::all();
-
-        $users = $this->userRepo->getSendTimeUsers();
-
-
         foreach ($users as $user) {
 
             $intervalQuery = $this->timeRepo->getNotSyncedInvervals($user->id);
@@ -147,9 +166,8 @@ class SynchronizeTime extends Command
 
     protected function sendTime($user, $date, $issue_id, $hours, $timeIntervalIds)
     {
-
         try {
-            $client = $this->initRedmineClient($user->id);
+            $client = $this->clientFactory->createUserClient($user->id);
 
             $ret = $client->time_entry->create([
                 'issue_id' => $issue_id,
@@ -169,13 +187,5 @@ class SynchronizeTime extends Command
 
         } catch (Exception $e) {
         }
-    }
-
-
-    public function initRedmineClient(int $userId): Redmine\Client
-    {
-        $client = new RedmineClient($userId);
-
-        return $client;
     }
 }

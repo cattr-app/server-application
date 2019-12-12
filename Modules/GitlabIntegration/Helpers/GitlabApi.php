@@ -47,7 +47,7 @@ class GitlabApi
     {
         $this->user = $user;
 
-        $this->apiUrl = Property::where(['entity_type' => 'company', 'name' => 'gitlab_url'])->first()->value;
+        $this->apiUrl = Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'gitlab_url'])->first()->value;
         $this->apiKey = $this->userProperties->getApiKey($user->id);
 
         if (empty($this->apiUrl) || empty($this->apiKey)) {

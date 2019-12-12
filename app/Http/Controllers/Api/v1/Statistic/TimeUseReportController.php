@@ -37,7 +37,7 @@ class TimeUseReportController extends ReportController
      */
     public function __construct()
     {
-        $companyTimezoneProperty = Property::getProperty('company', 'TIMEZONE')->first();
+        $companyTimezoneProperty = Property::getProperty(Property::COMPANY_CODE, 'TIMEZONE')->first();
         $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
 
         parent::__construct();

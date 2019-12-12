@@ -34,9 +34,8 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
      */
     public function synchronizeUserProjects(int $userId): array
     {
-
         try {
-            $client = $this->initRedmineClient($userId);
+            $client = $this->clientFactory->createUserClient($userId);
             $projectsData = $client->project->all([
                 'limit' => 1000
             ]);

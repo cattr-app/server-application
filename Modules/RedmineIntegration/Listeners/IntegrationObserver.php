@@ -11,7 +11,8 @@ use Illuminate\Support\Facades\Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
+use Modules\RedmineIntegration\Models\ClientFactory;
+use Modules\RedmineIntegration\Models\Priority;
 
 /**
  * Class IntegrationObserver
@@ -36,9 +37,19 @@ class IntegrationObserver
     public $taskRepo;
 
     /**
-     * @var TaskRepository
+     * @var UserRepository
      */
     public $userRepo;
+
+    /**
+     * @var ClientFactory
+     */
+    public $clientFactory;
+
+    /**
+     * @var Priority
+     */
+    public $priority;
 
     /**
      * Create the event listener.
@@ -46,15 +57,21 @@ class IntegrationObserver
      * @param  ProjectRepository  $projectRepo
      * @param  TaskRepository     $taskRepo
      * @param  UserRepository     $userRepo
+     * @param  ClientFactory      $clientFactory
+     * @param  Priority           $priority
      */
     public function __construct(
         ProjectRepository $projectRepo,
         TaskRepository $taskRepo,
-        UserRepository $userRepo
+        UserRepository $userRepo,
+        ClientFactory $clientFactory,
+        Priority $priority
     ) {
         $this->projectRepo = $projectRepo;
         $this->taskRepo = $taskRepo;
         $this->userRepo = $userRepo;
+        $this->clientFactory = $clientFactory;
+        $this->priority = $priority;
     }
 
     /**
@@ -124,7 +141,7 @@ class IntegrationObserver
                 // Get Redmine priority ID from an internal priority.
                 $priority_id = 2;
                 if (isset($task->priority_id) && $task->priority_id) {
-                    $priorities = $this->userRepo->getUserRedminePriorities($task->user_id);
+                    $priorities = $this->priority->getAll();
                     $priority = array_first($priorities, function ($priority) use ($task) {
                         return $priority['priority_id'] == $task->priority_id;
                     });
@@ -134,7 +151,7 @@ class IntegrationObserver
                     }
                 }
 
-                $client = new RedmineClient($task->user_id);
+                $client = $this->clientFactory->createUserClient($task->user_id);
                 $client->issue->update($redmineTask->redmine_id, [
                     'priority_id' => $priority_id,
                 ]);
