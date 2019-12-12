@@ -60,6 +60,8 @@ class TimeSynchronizer
 
             $this->timeIntervalsHelper->clearSyncedIntervals();
         }
+
+        return true;
     }
 
     /**
