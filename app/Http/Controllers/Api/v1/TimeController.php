@@ -80,6 +80,8 @@ class TimeController extends ItemController
     /**
      * Display a total of time.
      *
+     * @param Request $request
+     * @return JsonResponse
      * @api {POST|GET} /api/v1/time/total Total
      * @apiParamExample {json} Request Example
      *  {
@@ -113,8 +115,6 @@ class TimeController extends ItemController
      * @apiSuccess {String}   start            Datetime of first Time Interval start_at
      * @apiSuccess {String}   end              DateTime of last Time Interval end_at
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function total(Request $request): JsonResponse
     {
@@ -149,6 +149,7 @@ class TimeController extends ItemController
         $first = collect($time_intervals)->first();
         $last = collect($time_intervals)->last();
         $items = [
+            'success' => false,
             'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
             'time' => $total_time,
             'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
@@ -164,6 +165,8 @@ class TimeController extends ItemController
     /**
      * Display the project time.
      *
+     * @param Request $request
+     * @return JsonResponse
      * @api {POST|GET} /api/v1/time/project Project
      * @apiParamExample {json} Request-Example:
      *  {
@@ -200,8 +203,6 @@ class TimeController extends ItemController
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function project(Request $request): JsonResponse
     {
@@ -218,8 +219,10 @@ class TimeController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.get'), [
-                    'error' => 'validation fail',
-                    'reason' => 'project_id is required'
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'project_id is required',
                 ]),
                 400
             );
@@ -266,6 +269,8 @@ class TimeController extends ItemController
     /**
      * Display the Tasks and theirs total time.
      *
+     * @param Request $request
+     * @return JsonResponse
      * @api {POST|GET} /api/v1/time/tasks Tasks
      * @apiParamExample {json} Request-Example:
      *  {
@@ -307,8 +312,6 @@ class TimeController extends ItemController
      * @apiSuccess {String}   total.start      Datetime of first Time Interval start_at
      * @apiSuccess {String}   total.end        DateTime of last Time Interval end_at
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function tasks(Request $request): JsonResponse
     {
@@ -391,6 +394,8 @@ class TimeController extends ItemController
     /**
      * Display the Task and its total time.
      *
+     * @param Request $request
+     * @return JsonResponse
      * @api {POST|GET} /api/v1/time/task Task
      * @apiParamExample {json} Request-Example:
      *  {
@@ -435,8 +440,6 @@ class TimeController extends ItemController
      * @apiError (Error 400) {String} error    Name of error
      * @apiError (Error 400) {String} reason   Reason of error
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function task(Request $request): JsonResponse
     {
@@ -454,8 +457,10 @@ class TimeController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.get'), [
-                    'error' => 'validation fail',
-                    'reason' => 'task_id is required'
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'task_id is required',
                 ]),
                 400
             );
@@ -534,6 +539,8 @@ class TimeController extends ItemController
     /**
      * Display time of user's single task.
      *
+     * @param Request $request
+     * @return JsonResponse
      * @api {POST|GET} /api/v1/time/task-user TaskUser
      * @apiParamExample {json} Request-Example:
      *  {
@@ -570,8 +577,6 @@ class TimeController extends ItemController
      * @apiError (Error 400) {String} error  Name of error
      * @apiError (Error 400) {String} reason Reason of error
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function taskUser(Request $request): JsonResponse
     {
@@ -597,8 +602,10 @@ class TimeController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::fire($this->getEventUniqueName('answer.error.item.get'), [
-                    'error' => 'validation fail',
-                    'reason' => 'task_id and user_id is required'
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'task_id and user_id is required'
                 ]),
                 400
             );
@@ -626,6 +633,7 @@ class TimeController extends ItemController
         }
 
         $response = [
+            'success' => true,
             'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
             'id' => $first->task_id,
             'user_id' => $first->user_id,
@@ -643,6 +651,7 @@ class TimeController extends ItemController
     /**
      * @param bool $withRelations
      *
+     * @param bool $withSoftDeleted
      * @return Builder
      */
     protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder

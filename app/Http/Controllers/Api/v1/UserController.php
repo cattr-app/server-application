@@ -7,6 +7,7 @@ use App\Models\Role;
 use Auth;
 use Filter;
 use Event;
+use Illuminate\Database\Eloquent\Model;
 use Route;
 use Illuminate\Database\Eloquent\Builder;
 use Validator;
@@ -106,10 +107,10 @@ class UserController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'full_name'              => 'required',
-            'email'                  => 'required|unique:users,email',
-            'active'                 => 'required|boolean',
-            'password'               => 'required|min:6',
+            'full_name' => 'required',
+            'email' => 'required|unique:users,email',
+            'active' => 'required|boolean',
+            'password' => 'required|min:6',
         ];
     }
 
@@ -243,8 +244,10 @@ class UserController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -265,6 +268,7 @@ class UserController extends ItemController
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success' => true,
                 'res' => $item,
             ])
         );
@@ -340,15 +344,13 @@ class UserController extends ItemController
             )
         );
 
-        return response()->json(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.item.list.result'),
-                $itemsQuery->get()
-            )
-        );
+        return parent::index($request);
     }
 
     /**
+     * @param Request $request
+     *
+     * @return JsonResponse
      * @api {put, post} /api/v1/users/edit Edit
      * @apiDescription Edit User
      * @apiVersion 0.1.0
@@ -398,9 +400,6 @@ class UserController extends ItemController
      *
      * @apiUse UserModel
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
     public function edit(Request $request): JsonResponse
     {
@@ -413,8 +412,10 @@ class UserController extends ItemController
         if (!$idInt) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Invalid id',
-                    'reason' => 'Id is not integer',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id',
                 ]),
                 400
             );
@@ -422,10 +423,10 @@ class UserController extends ItemController
 
         $validationRules = $this->getValidationRules();
         $validationRules['id'] = 'required';
-        $validationRules['email'] .= ','.$request->get('id');
+        $validationRules['email'] .= ',' . $request->get('id');
         $validationRules['password'] = 'sometimes|min:6';
 
-        if(array_key_exists('password', $requestData) && is_null($requestData['password'])) {
+        if (array_key_exists('password', $requestData) && is_null($requestData['password'])) {
             unset($requestData['password']);
         }
 
@@ -440,8 +441,10 @@ class UserController extends ItemController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -454,14 +457,15 @@ class UserController extends ItemController
                 $this->getQuery(), ['id' => $request->get('id')]
             )
         );
-        /** @var \Illuminate\Database\Eloquent\Model $item */
+        /** @var Model $item */
         $item = $itemsQuery->first();
 
         if (!$item) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'User fetch fail',
-                    'reason' => 'User not found',
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'User not found',
                 ]),
                 400
             );
@@ -480,6 +484,7 @@ class UserController extends ItemController
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
                 'res' => $item,
             ])
         );
@@ -503,6 +508,9 @@ class UserController extends ItemController
      */
 
     /**
+     * @param Request $request
+     *
+     * @return JsonResponse
      * @api {post} /api/v1/users/bulk-edit bulkEdit
      * @apiDescription Editing Multiple Users
      * @apiVersion 0.1.0
@@ -537,9 +545,6 @@ class UserController extends ItemController
      *
      * @apiUse DefaultBulkEditErrorResponse
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
     public function bulkEdit(Request $request): JsonResponse
     {
@@ -549,8 +554,10 @@ class UserController extends ItemController
         if (empty($requestData['users'])) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'users is empty',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'users is empty'
                 ]),
                 400
             );
@@ -560,8 +567,10 @@ class UserController extends ItemController
         if (!is_array($users)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'error' => 'validation fail',
-                    'reason' => 'users should be an array',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'users should be an array'
                 ]),
                 400
             );
@@ -575,14 +584,16 @@ class UserController extends ItemController
             if (!isset($user['id']) || !is_int($user['id'])) {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                        'error' => 'Invalid id',
-                        'reason' => 'Id is not integer',
+                        'success' => false,
+                        'error_type' => 'validation',
+                        'message' => 'Validation error',
+                        'info' => 'Invalid id'
                     ]),
                     400
                 );
             }
 
-            $validationRules['email'] = 'required|unique:users,email,'.$user['id'];
+            $validationRules['email'] = 'required|unique:users,email,' . $user['id'];
             $validator = Validator::make(
                 $user,
                 Filter::process($this->getEventUniqueName('validation.item.bulkEdit'), $validationRules)
@@ -604,16 +615,17 @@ class UserController extends ItemController
                     $this->getQuery(), ['id' => $user['id']]
                 )
             );
-            /** @var \Illuminate\Database\Eloquent\Model $item */
+            /** @var Model $item */
             $item = $itemsQuery->first();
 
             if (!$item) {
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                        'error' => 'User fetch fail',
-                        'reason' => 'User not found',
+                        'success' => false,
+                        'error_type' => 'query.item_not_found',
+                        'message' => 'User not found',
                     ]),
-                    400
+                    404
                 );
             }
 
@@ -637,6 +649,9 @@ class UserController extends ItemController
 
 
     /**
+     * @param Request $request
+     *
+     * @return JsonResponse
      * @api {get, post} /api/v1/users/relations Relations
      * @apiDescription Show attached users and to whom the user is attached
      * @apiVersion 0.1.0
@@ -660,9 +675,6 @@ class UserController extends ItemController
      * @apiSuccess {Object[]} array        Users
      * @apiSuccess {Object}   array.object User
      *
-     * @param Request $request
-     *
-     * @return JsonResponse
      */
     public function relations(Request $request): JsonResponse
     {
@@ -683,8 +695,10 @@ class UserController extends ItemController
             return response()->json(Filter::process(
                 $this->getEventUniqueName('answer.error.item.relations'),
                 [
-                    'error' => 'Validation fail',
-                    'reason' => 'id and attached_user_id is invalid',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'id and attached_user_id are invalid'
                 ]),
                 400
             );
@@ -701,9 +715,11 @@ class UserController extends ItemController
             return response()->json(Filter::process(
                 $this->getEventUniqueName('answer.error.item.relations'),
                 [
-                    'error' => 'User not found',
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'User not found'
                 ]),
-                400
+                404
             );
         }
 
@@ -719,11 +735,13 @@ class UserController extends ItemController
             if ($userId) {
                 $projects = collect($user->projects);
 
-                $projects_users = $projects->flatMap(function($project) {
+                $projects_users = $projects->flatMap(function ($project) {
                     return collect($project->users);
                 })->unique('id');
 
-                $project_ids = $projects->map(function ($project) { return $project->id; });
+                $project_ids = $projects->map(function ($project) {
+                    return $project->id;
+                });
                 $projects_related_users = User::whereHas('timeIntervals.task.project', function ($query) use ($project_ids) {
                     $query->whereIn('id', $project_ids);
                 })->get();
@@ -731,7 +749,7 @@ class UserController extends ItemController
             $users = collect([$projects_users, $projects_related_users])->collapse()->unique();
         }
 
-        $users = collect($users)->filter(function($user, $key) use ($userId) {
+        $users = collect($users)->filter(function ($user, $key) use ($userId) {
             return $user->id !== $userId;
         });
 
@@ -775,7 +793,7 @@ class UserController extends ItemController
                             $query->where([
                                 'object' => $object,
                                 'action' => $action,
-                                'allow'  => true,
+                                'allow' => true,
                             ])->select('id');
                         })->select('id');
                     })->select('id');

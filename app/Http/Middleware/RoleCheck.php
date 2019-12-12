@@ -51,10 +51,10 @@ class RoleCheck
             if ($user->allowed($object, $action, $id) || $user->allowed($object, 'full_access')) {
                 return $next($request);
             } else {
-                return response()->json([
-                    'error' => "Access denied to $object/$action",
-                    'reason' => 'action is not allowed'
-                ], 403);
+                throw new AuthorizationException(
+                    AuthorizationException::ERROR_TYPE_FORBIDDEN,
+                    "Access denied to $object/$action"
+                );
             }
         }
 

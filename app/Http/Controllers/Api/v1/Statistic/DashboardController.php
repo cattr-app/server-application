@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api\v1\Statistic;
 
 use App\Models\TimeInterval;
 use Auth;
-use App\Http\Controllers\Controller;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
 use Filter;
@@ -51,8 +50,8 @@ class DashboardController extends ReportController
      *
      * todo: add api doc
      *
-     * @param \Illuminate\Http\Request $request
-     * @return \Illuminate\Http\Response
+     * @param Request $request
+     * @return JsonResponse
      */
     public function timeIntervals(Request $request): JsonResponse
     {
@@ -62,13 +61,12 @@ class DashboardController extends ReportController
         );
 
         if ($validator->fails()) {
-            return response()->json(
-                [
-                    'success' => false,
-                    'message' => 'Validation fail',
-                    'info' => $validator->errors(),
-                ], 400
-            );
+            return response()->json([
+                'success' => false,
+                'error_type' => 'validation',
+                'message' => 'Validation error',
+                'info' => $validator->errors(),
+            ], 400);
         }
 
         $user_ids = $request->input('user_ids');
@@ -149,13 +147,12 @@ class DashboardController extends ReportController
         );
 
         if ($validator->fails()) {
-            return response()->json(
-                [
-                    'success' => false,
-                    'message' => 'Validation fail',
-                    'info' => $validator->errors(),
-                ], 400
-            );
+            return response()->json([
+                'success' => false,
+                'error_type' => 'validation',
+                'message' => 'Validation error',
+                'info' => $validator->errors(),
+            ], 400);
         }
 
         $uids = $request->input('user_ids', []);
@@ -171,10 +168,10 @@ class DashboardController extends ReportController
             ->tz('UTC')
             ->toDateTimeString();
 
-        $intervals = TimeInterval::select('user_id',
+        $intervals = TimeInterval::select(['user_id',
                 DB::raw("DATE(CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}')) as date"),
-                DB::raw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as duration')
-            )
+                DB::raw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as duration')]
+        )
             ->whereIn('user_id', $uids)
             ->where('start_at', '>=', $startAt)
             ->where('start_at', '<', $endAt)
@@ -183,7 +180,7 @@ class DashboardController extends ReportController
             ->groupBy('date')
             ->get()
             ->groupBy('user_id')
-            ->map(function($intervals) {
+            ->map(function ($intervals) {
                 $totalDuration = 0;
 
                 foreach ($intervals as $interval) {

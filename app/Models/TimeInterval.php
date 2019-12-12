@@ -88,6 +88,7 @@ class TimeInterval extends AbstractModel
         'end_at',
         'count_mouse',
         'count_keyboard',
+        'is_manual',
     ];
 
     /**
@@ -98,6 +99,7 @@ class TimeInterval extends AbstractModel
         'user_id' => 'integer',
         'count_mouse' => 'integer',
         'count_keyboard' => 'integer',
+        'is_manual' => 'boolean',
     ];
 
     /**
