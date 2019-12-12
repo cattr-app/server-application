@@ -344,12 +344,7 @@ class UserController extends ItemController
             )
         );
 
-        return response()->json(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.item.list.result'),
-                $itemsQuery->get()
-            )
-        );
+        return parent::index($request);
     }
 
     /**
