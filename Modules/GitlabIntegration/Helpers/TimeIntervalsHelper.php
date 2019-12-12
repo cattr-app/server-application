@@ -17,11 +17,14 @@ class TimeIntervalsHelper
 
     public function createUnsyncedInterval(TimeInterval $interval) : bool
     {
-        return DB::table(self::GIS_TABLE)->insert([
-            'task_id' => $interval->task_id,
-            'time_interval_id' => $interval->id,
-            'is_synced' => 0
-        ]);
+        if ($this->getTasksById($interval->task_id)->exists) {
+            return DB::table(self::GIS_TABLE)->insert([
+                'task_id' => $interval->task_id,
+                'time_interval_id' => $interval->id,
+                'is_synced' => 0
+            ]);
+        }
+        return false;
     }
 
     public function markAsSyncedIntervalByTaskId(int $taskId) : int
