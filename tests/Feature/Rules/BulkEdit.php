@@ -6,9 +6,9 @@ use App\Models\Factories\UserFactory;
 use App\User;
 use Tests\TestCase;
 
-class EditTest extends TestCase
+class BulkEditTest extends TestCase
 {
-    const URI = 'v1/rules/edit';
+    const URI = 'v1/rules/bulk-edit';
 
     /**
      * @var User

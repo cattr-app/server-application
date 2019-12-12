@@ -63,5 +63,11 @@ class LoginTest extends TestCase
         $response->assertApiError(401);
     }
 
+    public function test_without_params()
+    {
+        $response = $this->postJson(self::URI);
+        $response->assertApiError(400);
+    }
+
     // TODO Captcha Tests
 }
