@@ -173,8 +173,8 @@ class EntityResolver
         $this->tasks = [];
         $this->tasksToInsert = [];
         $this->tasksToDelete = [];
-        $this->taskRelations = null;
-        $this->tasksToUpdate = null;
+        $this->taskRelations = [];
+        $this->tasksToUpdate = [];
     }
 
     private function clearProjects()
