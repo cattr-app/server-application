@@ -4,72 +4,59 @@ namespace Modules\GitlabIntegration\Helpers;
 
 use App\Models\Project;
 use App\Models\Task;
-use Illuminate\Database\Eloquent\Builder;
+use DB;
+use Illuminate\Database\Eloquent\Collection;
 
+/**
+ * Class EntityResolver
+ * @package Modules\GitlabIntegration\Helpers
+ */
 class EntityResolver
 {
-    private $initialized = false;
+    const PROJECTS_TABLE = 'gitlab_projects_relations';
+    const TASKS_TABLE = 'gitlab_tasks_relations';
 
     protected $projects = [];
-    protected $projectsInserted = [];
-    protected $projectsRemoved = [];
+    protected $projectsToInsert = [];
+    protected $projectsToRemove = [];
 
     protected $tasks = [];
-    protected $tasksInserted = [];
-    protected $tasksRemoved = [];
+    protected $tasksToInsert = [];
+    protected $tasksToDelete = [];
+    protected $tasksToUpdate = [];
 
-    public function __construct()
-    {
-    }
+    /**
+     * @var $relations Collection
+     */
+    protected $taskRelations;
 
     public function init(): void
     {
-        if (!$this->initialized) {
-            $this->initialized = true;
-            $this->reloadProjects();
-            $this->reloadTasks();
-        }
+        $this->loadProjects();
+        $this->loadTasks();
     }
 
-    public function reinit(): void
+    // Fetch relation Projects -> GitProjects
+    public function loadProjects(): void
     {
-        $this->initialized = false;
-        $this->init();
-    }
-
-    public function isInitialized(): bool
-    {
-        return $this->initialized;
-    }
-
-    public function reloadProjects(): void
-    {
-        $this->projects = [];
-        $this->projectsInserted = [];
-        $this->projectsRemoved = [];
+        $this->clearProjects();
 
         $relations = \DB::table('gitlab_projects_relations')->get();
-
-        $projects = Project::query()->whereIn('id', array_map(function ($relation) {
-            return $relation->project_id;
-        }, $relations->toArray()))->get();
+        $projects = Project::whereIn('id', $relations->pluck('project_id'))->get();
 
         foreach ($relations as $relation) {
             $this->projects[$relation->gitlab_id] = $projects->where('id', $relation->project_id)->first();
         }
     }
 
-    public function reloadTasks(): void
+    // Fetch relation Tasks -> GitTasks
+    public function loadTasks(): void
     {
-        $this->tasks = [];
-        $this->tasksInserted = [];
-        $this->tasksRemoved = [];
+        $this->clearTasks();
 
         $relations = \DB::table('gitlab_tasks_relations')->get();
-
-        $tasks = Task::query()->whereIn('id', array_map(function ($relation) {
-            return $relation->task_id;
-        }, $relations->toArray()))->get();
+        $this->taskRelations = $relations;
+        $tasks = Task::query()->whereIn('id', $relations->pluck('task_id'))->get();
 
         foreach ($relations as $relation) {
             $this->tasks[$relation->gitlab_id] = $tasks->where('id', $relation->task_id)->first();
@@ -104,8 +91,8 @@ class EntityResolver
 
     public function insertProject(int $gitlabId, Project $project): void
     {
-        if (!$this->hasGitlabProject($gitlabId) && !in_array($gitlabId, $this->projectsRemoved)) {
-            $this->projectsInserted[] = [
+        if (!$this->hasGitlabProject($gitlabId) && !in_array($gitlabId, $this->projectsToRemove)) {
+            $this->projectsToInsert []= [
                 'gitlab_id' => $gitlabId,
                 'project_id' => $project->id
             ];
@@ -113,69 +100,92 @@ class EntityResolver
         }
     }
 
-    public function insertTask(int $gitlabId, Task $task): void
+    public function insertTask(int $gitlabId, Task $task, int $gitlabTaskIid): void
     {
-        if (!$this->hasGitlabTask($gitlabId) && !in_array($gitlabId, $this->tasksRemoved)) {
-            $this->tasksInserted[] = [
+        if (!$this->hasGitlabTask($gitlabId) && !in_array($gitlabId, $this->tasksToDelete)) {
+            $this->tasksToInsert []= [
                 'gitlab_id' => $gitlabId,
-                'task_id' => $task->id
+                'task_id' => $task->id,
+                'gitlab_issue_iid' => $gitlabTaskIid // Need this field when run TimeSync
             ];
             $this->tasks[$gitlabId] = $task;
         }
     }
 
-    public function diffGitlabProjects(array $gitlabProjectsIds): array
+    public function maybeUpdateTask(int $gitlabId, int $gitlabIid)
     {
-        return array_diff(array_keys($this->projects), $gitlabProjectsIds);
+        $taskRelations = $this->taskRelations->where('gitlab_issue_iid', '=', 0)->pluck('gitlab_id')->toArray();
+        if (in_array($gitlabId, $taskRelations)) {
+            $this->tasksToUpdate []= [
+                'gitlab_id' => $gitlabId,
+                'gitlab_issue_iid' => $gitlabIid
+            ];
+        }
     }
 
+    // difference between userProjects and our DB projects
+    public function diffGitlabProjects(array $gitlabProjectsIds): array
+    {
+        return array_diff($gitlabProjectsIds, array_keys($this->projects));
+    }
+
+    // difference between userTasks and our DB tasks
     public function diffGitlabTasks(array $gitlabTasksIds): array
     {
-        return array_diff(array_keys($this->tasks), $gitlabTasksIds);
+        return array_diff($gitlabTasksIds, array_keys($this->tasks));
     }
 
     public function removeProject(int $gitlabId): void
     {
         if ($this->hasGitlabProject($gitlabId)) {
-            $this->projectsRemoved[] = $gitlabId;
+            $this->projectsToRemove []= $gitlabId;
             unset($this->projects[$gitlabId]);
-        }
-    }
-
-    public function removeProjects(array $gitlabIds): void
-    {
-        foreach ($gitlabIds as $gitlabId) {
-            $this->removeProject($gitlabId);
         }
     }
 
     public function removeTask(int $gitlabId): void
     {
         if ($this->hasGitlabTask($gitlabId)) {
-            $this->tasksRemoved[] = $gitlabId;
+            $this->tasksToDelete []= $gitlabId;
             unset($this->tasks[$gitlabId]);
-        }
-    }
-
-    public function removeTasks(array $gitlabIds): void
-    {
-        foreach ($gitlabIds as $gitlabId) {
-            $this->removeTask($gitlabId);
         }
     }
 
     public function commit()
     {
-        \DB::table('gitlab_projects_relations')->insert($this->projectsInserted);
-        \DB::table('gitlab_tasks_relations')->insert($this->tasksInserted);
+        \DB::table(self::PROJECTS_TABLE)->insert($this->projectsToInsert);
+        \DB::table(self::TASKS_TABLE)->insert($this->tasksToInsert);
 
-        \DB::table('gitlab_projects_relations')->whereIn('gitlab_id', $this->projectsRemoved)->delete();
-        \DB::table('gitlab_tasks_relations')->whereIn('gitlab_id', $this->tasksRemoved)->delete();
+        foreach ($this->tasksToUpdate as $task) {
+            \DB::table(self::TASKS_TABLE)->where('gitlab_id', '=', $task['gitlab_id'])->update([
+                'gitlab_issue_iid' => $task['gitlab_issue_iid']
+            ]);
+        }
 
-        $this->projectsInserted = [];
-        $this->projectsRemoved = [];
+        \DB::table(self::PROJECTS_TABLE)->whereIn('gitlab_id', $this->projectsToRemove)->delete();
+        \DB::table(self::TASKS_TABLE)->whereIn('gitlab_id', $this->tasksToDelete)->delete();
 
-        $this->tasksInserted = [];
-        $this->tasksRemoved = [];
+        $this->clearTasks();
+        $this->clearProjects();
+    }
+
+    private function clearTasks() {
+        $this->tasks = [];
+        $this->tasksToInsert = [];
+        $this->tasksToDelete = [];
+        $this->taskRelations = [];
+        $this->tasksToUpdate = [];
+    }
+
+    private function clearProjects()
+    {
+        $this->projects = [];
+        $this->projectsToInsert = [];
+        $this->projectsToRemove = [];
+    }
+
+    public static function getGitlabIdByProjectId(int $projectId)
+    {
+        return DB::table(self::PROJECTS_TABLE)->where('project_id', '=', $projectId)->first(['gitlab_id']);
     }
 }

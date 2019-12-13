@@ -47,7 +47,8 @@ class GitlabApi
     {
         $this->user = $user;
 
-        $this->apiUrl = Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'gitlab_url'])->first()->value;
+        $this->apiUrl = Property::where(['entity_type' => 'company', 'name' => 'gitlab_url'])->first();
+        $this->apiUrl = $this->apiUrl ? $this->apiUrl->value : null;
         $this->apiKey = $this->userProperties->getApiKey($user->id);
 
         if (empty($this->apiUrl) || empty($this->apiKey)) {
@@ -57,6 +58,11 @@ class GitlabApi
         try {
             $this->client = Client::create($this->apiUrl)->authenticate($this->apiKey);
         } catch (\Throwable $throwable) {
+            print_r([
+                'code' => $throwable->getCode(),
+                'message' => $throwable->getMessage(),
+                'trace' => $throwable->getTrace()
+            ]);
             return null;
         }
         $this->pager = new ResultPager($this->client);
@@ -91,5 +97,10 @@ class GitlabApi
     public static function buildFromUser(User $user): ?GitlabApi
     {
         return app()->make(self::class)->init($user);
+    }
+
+    public function sendUserTime($projectId, $issue_iid, $duration)
+    {
+        return $this->client->issues->addSpentTime($projectId, $issue_iid, $duration);
     }
 }
