@@ -7,6 +7,10 @@ use App\Models\Factories\UserFactory;
 use App\User;
 use Tests\TestCase;
 
+/**
+ * Class LogoutFromAllTest
+ * @package Tests\Feature\Auth
+ */
 class LogoutFromAllTest extends TestCase
 {
     const URI = 'auth/logout-from-all';

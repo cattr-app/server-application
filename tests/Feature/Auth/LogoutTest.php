@@ -6,6 +6,10 @@ use App\User;
 use Tests\TestCase;
 use App\Models\Factories\UserFactory;
 
+/**
+ * Class LogoutTest
+ * @package Tests\Feature\Auth
+ */
 class LogoutTest extends TestCase
 {
     const URI = 'auth/logout';

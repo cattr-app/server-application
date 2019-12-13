@@ -8,6 +8,10 @@ use App\User;
 use Notification;
 use Tests\TestCase;
 
+/**
+ * Class RequestTest
+ * @package Tests\Feature\Auth\PasswordReset
+ */
 class RequestTest extends TestCase
 {
     const URI = 'auth/password/reset/request';

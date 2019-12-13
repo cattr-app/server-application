@@ -6,6 +6,10 @@ use App\Models\Factories\UserFactory;
 use App\User;
 use Tests\TestCase;
 
+/**
+ * Class RefreshTest
+ * @package Tests\Feature\Auth
+ */
 class RefreshTest extends TestCase
 {
     const URI = 'auth/refresh';

@@ -8,6 +8,10 @@ use DB;
 use Hash;
 use Tests\TestCase;
 
+/**
+ * Class ProcessTest
+ * @package Tests\Feature\Auth\PasswordReset
+ */
 class ProcessTest extends TestCase
 {
     const URI = 'auth/password/reset/process';
@@ -24,6 +28,12 @@ class ProcessTest extends TestCase
         $this->user = app(UserFactory::class)->create();
     }
 
+    /**
+     * @param $email
+     * @param $token
+     * @param $createdAt
+     * @return array
+     */
     protected function createReset($email, $token, $createdAt)
     {
         DB::table('password_resets')->insert([

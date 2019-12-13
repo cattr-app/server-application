@@ -8,6 +8,10 @@ use DB;
 use Hash;
 use Tests\TestCase;
 
+/**
+ * Class ValidateTest
+ * @package Tests\Feature\Auth\PasswordReset
+ */
 class ValidateTest extends TestCase
 {
     const URI = 'auth/password/reset/validate';
@@ -25,12 +29,18 @@ class ValidateTest extends TestCase
 
     }
 
+    /**
+     * @param $email
+     * @param $token
+     * @param $createdAt
+     * @return array
+     */
     protected function createReset($email, $token, $createdAt)
     {
         DB::table('password_resets')->insert([
             'email' => $email,
             'token' => Hash::make($token),
-            'created_at' => $createdAt
+            'created_at' => now()
         ]);
 
         return ['email' => $email, 'token' => $token];
