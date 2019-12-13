@@ -1,10 +1,14 @@
 <?php
 
-namespace App\Models\Factories;
+namespace Tests\Factories;
 
 use Faker\Generator as Faker;
 use App\Models\Project;
 
+/**
+ * Class ProjectFactory
+ * @package Tests\Factories
+ */
 class ProjectFactory
 {
     private const COMPANY_ID = 1;

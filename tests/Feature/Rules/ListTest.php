@@ -2,11 +2,15 @@
 
 namespace Tests\Feature\Rules;
 
-use App\Models\Factories\UserFactory;
+use Tests\Factories\UserFactory;
 use App\Models\Rule;
 use App\User;
 use Tests\TestCase;
 
+/**
+ * Class ListTest
+ * @package Tests\Feature\Rules
+ */
 class ListTest extends TestCase
 {
     const URI = 'v1/rules/list';

@@ -1,11 +1,15 @@
 <?php
 
-namespace App\Models\Factories;
+namespace Tests\Factories;
 
 use Faker\Generator as Faker;
 use App\User;
 use JWTAuth;
 
+/**
+ * Class UserFactory
+ * @package Tests\Factories
+ */
 class UserFactory
 {
     private const ROLES = [

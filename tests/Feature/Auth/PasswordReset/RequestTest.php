@@ -3,7 +3,7 @@
 namespace Tests\Feature\Auth\PasswordReset;
 
 use App\Mail\ResetPassword;
-use App\Models\Factories\UserFactory;
+use Tests\Factories\UserFactory;
 use App\User;
 use Notification;
 use Tests\TestCase;

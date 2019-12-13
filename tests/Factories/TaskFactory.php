@@ -1,12 +1,16 @@
 <?php
 
-namespace App\Models\Factories;
+namespace Tests\Factories;
 
 use App\Models\Project;
 use App\User;
 use Faker\Generator as Faker;
 use App\Models\Task;
 
+/**
+ * Class TaskFactory
+ * @package Tests\Factories
+ */
 class TaskFactory
 {
     private const DESCRIPTION_LENGTH = 10;

@@ -2,10 +2,14 @@
 
 namespace Tests\Feature\Rules;
 
-use App\Models\Factories\UserFactory;
+use Tests\Factories\UserFactory;
 use App\User;
 use Tests\TestCase;
 
+/**
+ * Class EditTest
+ * @package Tests\Feature\Rules
+ */
 class EditTest extends TestCase
 {
     const URI = 'v1/rules/edit';

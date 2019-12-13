@@ -1,12 +1,16 @@
 <?php
 
-namespace App\Models\Factories;
+namespace Tests\Factories;
 
 use Faker\Generator as Faker;
 use App\User;
 use App\Models\TimeInterval;
 use App\Models\Task;
 
+/**
+ * Class IntervalFactory
+ * @package Tests\Factories
+ */
 class IntervalFactory
 {
     private const COUNT_MOUSE = 42;

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
-use App\Models\Factories\UserFactory;
+use Tests\Factories\UserFactory;
 use App\User;
 use Tests\TestCase;
 
