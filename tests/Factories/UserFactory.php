@@ -78,7 +78,7 @@ class UserFactory
 
     /**
      * @param int $quantity
-     * @return $this
+     * @return self
      */
     public function withTokens(int $quantity = 1): self
     {
@@ -87,7 +87,7 @@ class UserFactory
     }
 
     /**
-     * @return $this
+     * @return self
      */
     public function asAdmin(): self
     {
@@ -96,7 +96,7 @@ class UserFactory
     }
 
     /**
-     * @return $this
+     * @return self
      */
     public function asUser(): self
     {

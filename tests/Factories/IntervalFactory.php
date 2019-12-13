@@ -87,7 +87,7 @@ class IntervalFactory
 
     /**
      * @param $user
-     * @return $this
+     * @return self
      */
     public function linkUser($user): self
     {
@@ -102,7 +102,7 @@ class IntervalFactory
 
     /**
      * @param $task
-     * @return $this
+     * @return self
      */
     public function linkTask($task): self
     {

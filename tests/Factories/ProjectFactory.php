@@ -58,7 +58,7 @@ class ProjectFactory
 
     /**
      * @param int $quantity
-     * @return $this
+     * @return self
      */
     public function withTasks(int $quantity = 1): self
     {
@@ -68,7 +68,7 @@ class ProjectFactory
 
     /**
      * @param int $quantity
-     * @return $this
+     * @return self
      */
     public function withIntervals(int $quantity = 1): self
     {

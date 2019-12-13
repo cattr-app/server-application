@@ -66,7 +66,7 @@ class TaskFactory
 
     /**
      * @param int $quantity
-     * @return $this
+     * @return self
      */
     public function withIntervals(int $quantity = 1): self
     {
@@ -76,7 +76,7 @@ class TaskFactory
 
     /**
      * @param $user
-     * @return $this
+     * @return self
      */
     public function linkUser($user): self
     {
@@ -91,7 +91,7 @@ class TaskFactory
 
     /**
      * @param $project
-     * @return $this
+     * @return self
      */
     public function linkProject($project): self
     {
