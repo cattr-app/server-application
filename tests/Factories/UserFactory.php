@@ -3,9 +3,9 @@
 namespace Tests\Factories;
 
 use Faker\Generator as Faker;
-use App\User;
 use Illuminate\Support\Collection;
 use JWTAuth;
+use App\User;
 
 /**
  * Class UserFactory
