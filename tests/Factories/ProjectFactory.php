@@ -2,7 +2,7 @@
 
 namespace Tests\Factories;
 
-use Faker\Generator as Faker;
+use Faker\Factory as FakerFactory;
 use App\Models\Project;
 use Illuminate\Support\Collection;
 
@@ -16,11 +16,6 @@ class ProjectFactory
     private const DESCRIPTION_LENGTH = 300;
 
     /**
-     * @var Faker
-     */
-    private $faker;
-
-    /**
      * @var int
      */
     private $needsTasks = 0;
@@ -31,24 +26,18 @@ class ProjectFactory
     private $needsIntervals = 0;
 
     /**
-     * ProjectFactory constructor.
-     * @param Faker $faker
+     * @param Project $project
      */
-    public function __construct(Faker $faker)
+    private function createTasks(Project $project): void
     {
-        $this->faker = $faker;
-    }
+        $tasks = [];
 
-    /**
-     * @return array
-     */
-    public function getRandomProjectData(): array
-    {
-        return [
-            'company_id' => self::COMPANY_ID,
-            'name' => $this->faker->company,
-            'description' => $this->faker->text(self::DESCRIPTION_LENGTH),
-        ];
+        while ($this->needsTasks--) {
+            $tasks[] = app(TaskFactory::class)
+                ->withIntervals($this->needsIntervals)
+                ->linkProject($project)
+                ->create();
+        }
     }
 
     /**
@@ -72,18 +61,32 @@ class ProjectFactory
     }
 
     /**
-     * @param int $amount
-     * @return Collection
+     * @return array
      */
-    public function createMany($amount = 1): Collection
+    public function getRandomProjectData(): array
     {
-        $collection = collect();
+        $faker = FakerFactory::create();
 
-        while ($amount--) {
-            $collection->push($this->create());
+        return [
+            'company_id' => self::COMPANY_ID,
+            'name' => $faker->company,
+            'description' => $faker->text(self::DESCRIPTION_LENGTH),
+        ];
+    }
+
+    /**
+     * @param array $attributes
+     * @return Project
+     */
+    public function make(array $attributes = []): Project
+    {
+        $projectData = $this->getRandomProjectData();
+
+        if ($attributes) {
+            $projectData = array_merge($projectData, $attributes);
         }
 
-        return $collection;
+        return Project::make($projectData);
     }
 
     /**
@@ -104,32 +107,18 @@ class ProjectFactory
     }
 
     /**
-     * @param array $attributes
-     * @return Project
+     * @param int $amount
+     * @return Collection
      */
-    public function make(array $attributes = []): Project
+    public function createMany($amount = 1): Collection
     {
-        $projectData = $this->getRandomProjectData();
+        $collection = collect();
 
-        if ($attributes) {
-            $projectData = array_merge($projectData, $attributes);
+        while ($amount--) {
+            $collection->push($this->create());
         }
 
-        return Project::make($projectData);
+        return $collection;
     }
 
-    /**
-     * @param Project $project
-     */
-    private function createTasks(Project $project): void
-    {
-        $tasks = [];
-
-        while ($this->needsTasks--) {
-            $tasks[] = app(TaskFactory::class)
-                ->withIntervals($this->needsIntervals)
-                ->linkProject($project)
-                ->create();
-        }
-    }
 }

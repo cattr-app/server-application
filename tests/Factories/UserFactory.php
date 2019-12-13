@@ -2,8 +2,8 @@
 
 namespace Tests\Factories;
 
-use Faker\Generator as Faker;
 use App\User;
+use Faker\Factory as FakerFactory;
 use Illuminate\Support\Collection;
 use JWTAuth;
 
@@ -19,11 +19,6 @@ class UserFactory
     ];
 
     /**
-     * @var Faker
-     */
-    protected $faker;
-
-    /**
      * @var int
      */
     protected $needsTokens = 0;
@@ -34,24 +29,17 @@ class UserFactory
     protected $role;
 
     /**
-     * UserFactory constructor.
-     * @param Faker $faker
-     */
-    public function __construct(Faker $faker)
-    {
-        $this->faker = $faker;
-    }
-
-    /**
      * @return array
      */
     public function getRandomUserData(): array
     {
-        $full_name = $this->faker->name;
+        $faker = FakerFactory::create();
+
+        $full_name = $faker->name;
 
         return [
             'full_name' => $full_name,
-            'email' => $this->faker->unique()->safeEmail,
+            'email' => $faker->unique()->safeEmail,
             'url' => '',
             'company_id' => 1,
             'payroll_access' => 0,
@@ -100,19 +88,31 @@ class UserFactory
     }
 
     /**
-     * @param int $amount
-     * @return Collection
+     * @param User $user
      */
-    public function createMany($amount = 1): Collection
+    protected function createTokens(User $user): void
     {
-        $collection = collect();
+        $tokens = [];
 
-        while ($amount--) {
-            $collection->push($this->create());
+        while ($this->needsTokens--) {
+            $tokens[] = [
+                'token' => JWTAuth::fromUser($user),
+                'expires_at' => now()->addDay()
+            ];
         }
 
-        return $collection;
+        $user->tokens()->createMany($tokens);
     }
+
+    /**
+     * @param User $user
+     */
+    protected function assignRole(User $user): void
+    {
+        $user->role_id = self::ROLES[$this->role];
+        $user->save();
+    }
+
 
     /**
      * @param array $attributes
@@ -151,28 +151,17 @@ class UserFactory
     }
 
     /**
-     * @param User $user
+     * @param int $amount
+     * @return Collection
      */
-    protected function createTokens(User $user): void
+    public function createMany($amount = 1): Collection
     {
-        $tokens = [];
+        $collection = collect();
 
-        while ($this->needsTokens--) {
-            $tokens[] = [
-                'token' => JWTAuth::fromUser($user),
-                'expires_at' => now()->addDay()
-            ];
+        while ($amount--) {
+            $collection->push($this->create());
         }
 
-        $user->tokens()->createMany($tokens);
-    }
-
-    /**
-     * @param User $user
-     */
-    protected function assignRole(User $user): void
-    {
-        $user->role_id = self::ROLES[$this->role];
-        $user->save();
+        return $collection;
     }
 }
