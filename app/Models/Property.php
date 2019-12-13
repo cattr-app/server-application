@@ -39,6 +39,7 @@ class Property extends AbstractModel
 {
     use SoftDeletes;
 
+    public const COMPANY_CODE = 'company';
     public const PROJECT_CODE = 'project';
     public const TASK_CODE = 'task';
     public const TIME_INTERVAL_CODE = 'time_interval';
