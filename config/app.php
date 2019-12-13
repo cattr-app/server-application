@@ -58,6 +58,8 @@ return [
         Modules\GitlabIntegration\Providers\GitlabIntegrationServiceProvider::class,
         Modules\Invoices\Providers\InvoicesServiceProvider::class,
         Modules\EmailReports\Providers\EmailReportsServiceProvider::class,
+        Modules\CompanyManagement\Providers\CompanyManagementServiceProvider::class,
+        Modules\Reports\Providers\ReportsServiceProvider::class,
 
         Backup\BackupServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
