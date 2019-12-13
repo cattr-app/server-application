@@ -23,7 +23,7 @@ class ScheduleServiceProvider extends ServiceProvider
         $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
             $schedule->command('gitlab:sync')->everyFiveMinutes()->withoutOverlapping();
-            $schedule->command('gitlab:time:sync')->everyFifteenMinutes()->withoutOverlapping();
+            $schedule->command('gitlab:time:sync')->everyMinute()->withoutOverlapping();
         });
     }
 
