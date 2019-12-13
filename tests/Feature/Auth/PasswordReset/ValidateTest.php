@@ -40,7 +40,7 @@ class ValidateTest extends TestCase
         DB::table('password_resets')->insert([
             'email' => $email,
             'token' => Hash::make($token),
-            'created_at' => now()
+            'created_at' => $createdAt
         ]);
 
         return ['email' => $email, 'token' => $token];
