@@ -5,6 +5,10 @@ namespace Tests;
 use PHPUnit\Framework\Assert as PHPUnit;
 use Illuminate\Foundation\Testing\TestResponse as BaseTestResponse;
 
+/**
+ * Class TestResponse
+ * @package Tests
+ */
 class TestResponse extends BaseTestResponse
 {
     /**
@@ -29,6 +33,12 @@ class TestResponse extends BaseTestResponse
         $this->assertJsonStructure($structure);
     }
 
+    /**
+     * Assert that the response has the given status code
+     * and correct structure
+     *
+     * @param int $status
+     */
     public function assertApiSuccess(int $status = 200)
     {
         $this->assertStatus($status);
