@@ -10,7 +10,7 @@ use Tests\TestCase;
  */
 class IndexTest extends TestCase
 {
-    const URI = 'status';
+    private const URI = 'status';
 
     public function test_index()
     {

@@ -13,7 +13,7 @@ use Tests\TestCase;
  */
 class CountTest extends TestCase
 {
-    const URI = 'v1/rules/count';
+    private const URI = 'v1/rules/count';
 
     /**
      * @var User

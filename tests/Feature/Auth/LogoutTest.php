@@ -12,7 +12,7 @@ use Tests\Factories\UserFactory;
  */
 class LogoutTest extends TestCase
 {
-    const URI = 'auth/logout';
+    private const URI = 'auth/logout';
 
     /**
      * @var User

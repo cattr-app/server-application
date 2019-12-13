@@ -14,7 +14,7 @@ use Tests\TestCase;
  */
 class ProcessTest extends TestCase
 {
-    const URI = 'auth/password/reset/process';
+    private const URI = 'auth/password/reset/process';
 
     /**
      * @var User

@@ -12,7 +12,7 @@ use Tests\TestCase;
  */
 class RefreshTest extends TestCase
 {
-    const URI = 'auth/refresh';
+    private const URI = 'auth/refresh';
 
     /**
      * @var User

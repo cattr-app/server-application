@@ -14,7 +14,7 @@ use Tests\TestCase;
  */
 class RequestTest extends TestCase
 {
-    const URI = 'auth/password/reset/request';
+    private const URI = 'auth/password/reset/request';
     /**
      * @var User
      */

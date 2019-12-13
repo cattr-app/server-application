@@ -14,7 +14,7 @@ use Tests\TestCase;
  */
 class ValidateTest extends TestCase
 {
-    const URI = 'auth/password/reset/validate';
+    private const URI = 'auth/password/reset/validate';
 
     /**
      * @var User

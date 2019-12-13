@@ -13,7 +13,7 @@ use Tests\TestCase;
  */
 class LogoutFromAllTest extends TestCase
 {
-    const URI = 'auth/logout-from-all';
+    private const URI = 'auth/logout-from-all';
 
     /**
      * @var User

@@ -12,7 +12,7 @@ use Tests\TestCase;
  */
 class EditTest extends TestCase
 {
-    const URI = 'v1/rules/edit';
+    private const URI = 'v1/rules/edit';
 
     /**
      * @var User

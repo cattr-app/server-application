@@ -12,7 +12,7 @@ use Tests\TestCase;
  */
 class MeTest extends TestCase
 {
-    const URI = 'auth/me';
+    private const URI = 'auth/me';
 
     /**
      * @var User

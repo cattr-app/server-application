@@ -13,7 +13,7 @@ use Tests\TestCase;
  */
 class ActionsTest extends TestCase
 {
-    const URI = 'v1/rules/actions';
+    private const URI = 'v1/rules/actions';
 
     /**
      * @var User
