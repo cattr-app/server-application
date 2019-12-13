@@ -37,7 +37,8 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
             return $rules;
         });
 
-        Filter::listen('answer.success.item.create.timeinterval', static function ($timeInterval) {
+        Filter::listen('answer.success.item.create.timeinterval', static function ($data) {
+            $timeInterval = $data['interval'];
             $helper = app()->make(TimeIntervalsHelper::class);
             $helper->createUnsyncedInterval($timeInterval);
         });
