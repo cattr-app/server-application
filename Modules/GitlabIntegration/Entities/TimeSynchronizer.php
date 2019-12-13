@@ -9,6 +9,7 @@ use App\Models\TimeInterval;
 use App\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
+use Log;
 use Modules\GitlabIntegration\Helpers\GitlabApi;
 use Modules\GitlabIntegration\Helpers\TimeIntervalsHelper;
 
@@ -37,6 +38,7 @@ class TimeSynchronizer
         foreach (User::all() as $user) {
             $this->api = GitlabApi::buildFromUser($user);
             if (!$this->api) {
+                Log::info("Can`t instantiate an API for user " . $user->full_name ."\n");
                 return false;
             }
 

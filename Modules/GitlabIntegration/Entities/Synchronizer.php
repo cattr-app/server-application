@@ -5,6 +5,7 @@ namespace Modules\GitlabIntegration\Entities;
 use App\Models\Project;
 use App\Models\Task;
 use App\User;
+use Log;
 use Modules\GitlabIntegration\Helpers\EntityResolver;
 use Modules\GitlabIntegration\Helpers\GitlabApi;
 
@@ -64,12 +65,14 @@ class Synchronizer
         try {
             $_userGitlabTasks = $this->api->getUserTasks();
         } catch (\Throwable $throwable) {
-            echo "Tasks cant be fetched for user " . $user->full_name . "\n";
-            print_r([
-                'code' => $throwable->getCode(),
-                'message' => $throwable->getMessage(),
-                'trace' => $throwable->getTrace()
-            ]);
+            Log::alert("Tasks cant be fetched for user " . $user->full_name . "\n");
+            Log::alert(
+                print_r([
+                    'code' => $throwable->getCode(),
+                    'message' => $throwable->getMessage(),
+                    'trace' => $throwable->getTrace()
+                ])
+            );
             return false;
         }
 
@@ -82,8 +85,7 @@ class Synchronizer
 
             $project = $this->fillProject($gitlabProjectData);
             if (!$project->save()) {
-                echo "For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name;
-                echo "\n Skipping \n";
+                Log::alert("For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name);
                 continue;
             }
 
@@ -93,7 +95,7 @@ class Synchronizer
             }
 
             $this->userGitlabProjectsIds []= $gitlabProjectId;
-            echo "Project \"" . $project->name . "\" sync for " . $user->full_name . "\n";
+            Log::info("Project \"" . $project->name . "\" sync for " . $user->full_name . "\n");
 
             if (!isset($userGitlabTasks[$gitlabProjectId])) {
                 continue;
@@ -105,8 +107,7 @@ class Synchronizer
 
                 $task = $this->fillTask($gitlabTaskData, $project, $user);
                 if (!$task->save()) {
-                    echo "For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name;
-                    echo "\n Skipping \n";
+                    Log::alert( "For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name);
                     continue;
                 }
 
@@ -118,7 +119,7 @@ class Synchronizer
                 $this->entityResolver->maybeUpdateTask($gitlabTaskId, $gitlabTaskIid);
 
                 $this->userGitlabTasksIds []= $gitlabTaskId;
-                echo "Task \"" . $task->task_name . "\" attached to user " . $user->full_name . "\n";
+                Log::info("Task \"" . $task->task_name . "\" attached to user " . $user->full_name . "\n");
             }
         }
 
@@ -220,11 +221,11 @@ class Synchronizer
                 try {
                     $project->forceDelete();
                 } catch (\Throwable $throwable) {
-                    print_r([
+                    Log::alert(print_r([
                         'code' => $throwable->getCode(),
                         'message' => $throwable->getMessage(),
                         'trace' => $throwable->getTrace()
-                    ]);
+                    ]));
                 }
             }
             $this->entityResolver->removeProject($diffProjectId);
@@ -237,11 +238,11 @@ class Synchronizer
                 try {
                     $task->forceDelete();
                 } catch (\Throwable $throwable) {
-                    print_r([
+                    Log::alert(print_r([
                         'code' => $throwable->getCode(),
                         'message' => $throwable->getMessage(),
                         'trace' => $throwable->getTrace()
-                    ]);
+                    ]));
                 }
             }
             $this->entityResolver->removeTask($diffTaskId);
@@ -253,7 +254,7 @@ class Synchronizer
         $this->api = GitlabApi::buildFromUser($user);
 
         if (!$this->api) {
-            echo "Can`t instantiate an API for user " . $user->full_name ."\n";
+            Log::info("Can`t instantiate an API for user " . $user->full_name ."\n");
             return false;
         }
 
