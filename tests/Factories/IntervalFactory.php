@@ -6,6 +6,7 @@ use Faker\Generator as Faker;
 use App\User;
 use App\Models\TimeInterval;
 use App\Models\Task;
+use Illuminate\Support\Collection;
 
 /**
  * Class IntervalFactory
@@ -16,11 +17,6 @@ class IntervalFactory
     private const COUNT_MOUSE = 42;
     private const COUNT_KEYBOARD = 43;
     private const INTERVAL_DURATION_SECONDS = 299;
-
-    /**
-     * @var TimeInterval
-     */
-    private $interval;
 
     /**
      * @var Faker
@@ -44,13 +40,65 @@ class IntervalFactory
     public function __construct(Faker $faker)
     {
         $this->faker = $faker;
-        $this->interval = TimeInterval::make($this->getRandomIntervalData());
+    }
+
+    /**
+     * @param int $amount
+     * @return Collection
+     */
+    public function createMany($amount = 1): Collection
+    {
+        $collection = collect();
+
+        while ($amount--) {
+            $collection->push($this->create());
+        }
+
+        return $collection;
+    }
+
+    /**
+     * @param array $attributes
+     * @return TimeInterval
+     */
+    public function create(array $attributes = []): TimeInterval
+    {
+        $interval = $this->make($attributes);
+
+        $interval->user()->associate($this->user);
+
+        if (!$this->task) {
+            $this->task = app(TaskFactory::class)
+                ->linkUser($this->user)
+                ->create();
+        }
+
+        $interval->task()->associate($this->task);
+
+        $interval->save();
+
+        return $interval;
+    }
+
+    /**
+     * @param array $attributes
+     * @return TimeInterval
+     */
+    public function make(array $attributes = []): TimeInterval
+    {
+        $intervalData = $this->getRandomIntervalData();
+
+        if ($attributes) {
+            $intervalData = array_merge($intervalData, $attributes);
+        }
+
+        return TimeInterval::make($intervalData);
     }
 
     /**
      * @return array
      */
-    public function getRandomIntervalData(): array
+    private function getRandomIntervalData(): array
     {
         $time = $this->faker->unique()->unixTime();
 
@@ -60,29 +108,6 @@ class IntervalFactory
             'count_mouse' => self::COUNT_MOUSE,
             'count_keyboard' => self::COUNT_KEYBOARD
         ];
-    }
-
-    /**
-     * @return TimeInterval
-     */
-    public function create(): TimeInterval
-    {
-        if (!$this->user) {
-            $this->user = app(UserFactory::class)->create();
-        }
-
-        $this->interval->user()->associate($this->user);
-
-        if (!$this->task) {
-            $this->task = app(TaskFactory::class)
-                ->linkUser($this->user)
-                ->create();
-        }
-
-        $this->interval->task()->associate($this->task);
-        $this->interval->save();
-
-        return $this->interval;
     }
 
     /**

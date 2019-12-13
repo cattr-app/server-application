@@ -4,6 +4,7 @@ namespace Tests\Factories;
 
 use Faker\Generator as Faker;
 use App\Models\Project;
+use Illuminate\Support\Collection;
 
 /**
  * Class ProjectFactory
@@ -13,11 +14,6 @@ class ProjectFactory
 {
     private const COMPANY_ID = 1;
     private const DESCRIPTION_LENGTH = 300;
-
-    /**
-     * @var Project
-     */
-    private $project;
 
     /**
      * @var Faker
@@ -41,7 +37,6 @@ class ProjectFactory
     public function __construct(Faker $faker)
     {
         $this->faker = $faker;
-        $this->project = Project::make($this->getRandomProjectData());
     }
 
     /**
@@ -77,27 +72,63 @@ class ProjectFactory
     }
 
     /**
-     * @return Project
+     * @param int $amount
+     * @return Collection
      */
-    public function create(): Project
+    public function createMany($amount = 1): Collection
     {
-        $this->project->save();
+        $collection = collect();
 
-        if ($this->needsTasks) {
-            $this->createTasks();
+        while ($amount--) {
+            $collection->push($this->create());
         }
 
-        return $this->project;
+        return $collection;
     }
 
-    private function createTasks(): void
+    /**
+     * @param array $attributes
+     * @return Project
+     */
+    public function create(array $attributes = []): Project
+    {
+        $project = $this->make($attributes);
+
+        $project->save();
+
+        if ($this->needsTasks) {
+            $this->createTasks($project);
+        }
+
+        return $project;
+    }
+
+    /**
+     * @param array $attributes
+     * @return Project
+     */
+    public function make(array $attributes = []): Project
+    {
+        $projectData = $this->getRandomProjectData();
+
+        if ($attributes) {
+            $projectData = array_merge($projectData, $attributes);
+        }
+
+        return Project::make($projectData);
+    }
+
+    /**
+     * @param Project $project
+     */
+    private function createTasks(Project $project): void
     {
         $tasks = [];
 
         while ($this->needsTasks--) {
             $tasks[] = app(TaskFactory::class)
                 ->withIntervals($this->needsIntervals)
-                ->linkProject($this->project)
+                ->linkProject($project)
                 ->create();
         }
     }

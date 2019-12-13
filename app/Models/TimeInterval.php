@@ -6,6 +6,7 @@ use App\User;
 use Eloquent;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -66,6 +67,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|TimeInterval whereUserId($value)
  * @method static QueryBuilder|TimeInterval withTrashed()
  * @method static QueryBuilder|TimeInterval withoutTrashed()
+ * @method static Model|TimeInterval make($attributes)
  * @mixin Eloquent
  */
 class TimeInterval extends AbstractModel

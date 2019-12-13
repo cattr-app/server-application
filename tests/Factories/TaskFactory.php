@@ -6,6 +6,7 @@ use App\Models\Project;
 use App\User;
 use Faker\Generator as Faker;
 use App\Models\Task;
+use Illuminate\Support\Collection;
 
 /**
  * Class TaskFactory
@@ -15,11 +16,6 @@ class TaskFactory
 {
     private const DESCRIPTION_LENGTH = 10;
     private const PRIORITY_ID = 2;
-
-    /**
-     * @var Task
-     */
-    private $task;
 
     /**
      * @var Faker
@@ -48,7 +44,6 @@ class TaskFactory
     public function __construct(Faker $faker)
     {
         $this->faker = $faker;
-        $this->task = Task::make($this->getRandomTaskData());
     }
 
     /**
@@ -105,38 +100,75 @@ class TaskFactory
     }
 
     /**
+     * @param int $amount
+     * @return Collection
+     */
+    public function createMany($amount = 1): Collection
+    {
+        $collection = collect();
+
+        while ($amount--) {
+            $collection->push($this->create());
+        }
+
+        return $collection;
+    }
+
+    /**
+     * @param array $attributes
      * @return Task
      */
-    public function create(): Task
+    public function make(array $attributes = []): Task
     {
+        $taskData = $this->getRandomTaskData();
+
+        if ($attributes) {
+            $taskData = array_merge($taskData, $attributes);
+        }
+
+        return Task::make($taskData);
+    }
+
+    /**
+     * @param array $attributes
+     * @return Task
+     */
+    public function create(array $attributes = []): Task
+    {
+        $task = $this->make($attributes);
+
         if (!$this->user) {
             $this->user = app(UserFactory::class)->create();
         }
 
-        $this->task->user()->associate($this->user);
+        $task->user()->associate($this->user);
 
         if (!$this->project) {
             $this->project = app(ProjectFactory::class)->create();
         }
 
-        $this->task->project()->associate($this->project);
-        $this->task->save();
+        $task->project()->associate($this->project);
+
+        $task->save();
 
         if ($this->needsIntervals) {
-            $this->createIntervals();
+            $this->createIntervals($task);
         }
 
-        return $this->task;
+        return $task;
     }
 
-    private function createIntervals(): void
+    /**
+     * @param Task $task
+     */
+    private function createIntervals(Task $task): void
     {
         $intervals = [];
 
         while ($this->needsIntervals--) {
             $intervals[] = app(IntervalFactory::class)
                 ->linkUser($this->user)
-                ->linkTask($this->task)
+                ->linkTask($task)
                 ->create();
         }
     }
