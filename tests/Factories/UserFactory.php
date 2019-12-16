@@ -4,14 +4,13 @@ namespace Tests\Factories;
 
 use App\User;
 use Faker\Factory as FakerFactory;
-use Illuminate\Support\Collection;
 use JWTAuth;
 
 /**
  * Class UserFactory
  * @package Tests\Factories
  */
-class UserFactory
+class UserFactory extends AbstractFactory
 {
     private const ROLES = [
         'admin' => 1,
@@ -66,6 +65,7 @@ class UserFactory
     public function withTokens(int $quantity = 1): self
     {
         $this->needsTokens = $quantity;
+
         return $this;
     }
 
@@ -75,6 +75,7 @@ class UserFactory
     public function asAdmin(): self
     {
         $this->role = 'admin';
+
         return $this;
     }
 
@@ -84,6 +85,7 @@ class UserFactory
     public function asUser(): self
     {
         $this->role = 'user';
+
         return $this;
     }
 
@@ -110,23 +112,6 @@ class UserFactory
     protected function assignRole(User $user): void
     {
         $user->role_id = self::ROLES[$this->role];
-        $user->save();
-    }
-
-
-    /**
-     * @param array $attributes
-     * @return User
-     */
-    protected function make(array $attributes = []): User
-    {
-        $userData = $this->getRandomUserData();
-
-        if ($attributes) {
-            $userData = array_merge($userData, $attributes);
-        }
-
-        return User::make($userData);
     }
 
     /**
@@ -135,9 +120,13 @@ class UserFactory
      */
     public function create(array $attributes = []): User
     {
-        $user = $this->make($attributes);
+        $userData = $this->getRandomUserData();
 
-        $user->save();
+        if ($attributes) {
+            $userData = array_merge($userData, $attributes);
+        }
+
+        $user = User::create($userData);
 
         if ($this->needsTokens) {
             $this->createTokens($user);
@@ -148,20 +137,5 @@ class UserFactory
         }
 
         return $user;
-    }
-
-    /**
-     * @param int $amount
-     * @return Collection
-     */
-    public function createMany($amount = 1): Collection
-    {
-        $collection = collect();
-
-        while ($amount--) {
-            $collection->push($this->create());
-        }
-
-        return $collection;
     }
 }

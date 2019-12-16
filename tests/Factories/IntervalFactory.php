@@ -6,13 +6,12 @@ use Faker\Factory as FakerFactory;
 use App\User;
 use App\Models\TimeInterval;
 use App\Models\Task;
-use Illuminate\Support\Collection;
 
 /**
  * Class IntervalFactory
  * @package Tests\Factories
  */
-class IntervalFactory
+class IntervalFactory extends AbstractFactory
 {
     private const COUNT_MOUSE = 42;
     private const COUNT_KEYBOARD = 43;
@@ -45,48 +44,45 @@ class IntervalFactory
     }
 
     /**
-     * @param $user
+     * @param User $user
      * @return self
      */
-    public function linkUser($user): self
+    public function forUser(User $user): self
     {
-        if ($user instanceof User) {
-            $this->user = $user;
-            return $this;
-        }
+        $this->user = $user;
 
-        $this->user = User::find($user);
         return $this;
     }
 
     /**
-     * @param $task
+     * @param Task $task
      * @return self
      */
-    public function linkTask($task): self
+    public function forTask(Task $task): self
     {
-        if ($task instanceof Task) {
-            $this->task = $task;
-            return $this;
-        }
+        $this->task = $task;
 
-        $this->task = Task::find($task);
         return $this;
     }
 
-    /**
-     * @param array $attributes
-     * @return TimeInterval
-     */
-    protected function make(array $attributes = []): TimeInterval
+    protected function defineUser(TimeInterval &$interval)
     {
-        $intervalData = $this->getRandomIntervalData();
-
-        if ($attributes) {
-            $intervalData = array_merge($intervalData, $attributes);
+        if (!$this->user) {
+            $this->user = app(UserFactory::class)->create();
         }
 
-        return TimeInterval::make($intervalData);
+        $interval->user()->associate($this->user);
+    }
+
+    protected function defineTask(TimeInterval &$interval)
+    {
+        if (!$this->task) {
+            $this->task = app(TaskFactory::class)
+                ->forUser($this->user)
+                ->create();
+        }
+
+        $interval->task()->associate($this->task);
     }
 
     /**
@@ -95,35 +91,19 @@ class IntervalFactory
      */
     public function create(array $attributes = []): TimeInterval
     {
-        $interval = $this->make($attributes);
+        $intervalData = $this->getRandomIntervalData();
 
-        $interval->user()->associate($this->user);
-
-        if (!$this->task) {
-            $this->task = app(TaskFactory::class)
-                ->linkUser($this->user)
-                ->create();
+        if ($attributes) {
+            $intervalData = array_merge($intervalData, $attributes);
         }
 
-        $interval->task()->associate($this->task);
+        $interval = TimeInterval::make($intervalData);
+
+        $this->defineUser($interval);
+        $this->defineTask($interval);
 
         $interval->save();
 
         return $interval;
-    }
-
-    /**
-     * @param int $amount
-     * @return Collection
-     */
-    public function createMany($amount = 1): Collection
-    {
-        $collection = collect();
-
-        while ($amount--) {
-            $collection->push($this->create());
-        }
-
-        return $collection;
     }
 }

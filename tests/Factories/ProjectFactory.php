@@ -4,13 +4,12 @@ namespace Tests\Factories;
 
 use Faker\Factory as FakerFactory;
 use App\Models\Project;
-use Illuminate\Support\Collection;
 
 /**
  * Class ProjectFactory
  * @package Tests\Factories
  */
-class ProjectFactory
+class ProjectFactory extends AbstractFactory
 {
     private const COMPANY_ID = 1;
     private const DESCRIPTION_LENGTH = 300;
@@ -26,37 +25,13 @@ class ProjectFactory
     private $needsIntervals = 0;
 
     /**
-     * @param Project $project
-     */
-    private function createTasks(Project $project): void
-    {
-        $tasks = [];
-
-        while ($this->needsTasks--) {
-            $tasks[] = app(TaskFactory::class)
-                ->withIntervals($this->needsIntervals)
-                ->linkProject($project)
-                ->create();
-        }
-    }
-
-    /**
      * @param int $quantity
      * @return self
      */
     public function withTasks(int $quantity = 1): self
     {
         $this->needsTasks = $quantity;
-        return $this;
-    }
 
-    /**
-     * @param int $quantity
-     * @return self
-     */
-    public function withIntervals(int $quantity = 1): self
-    {
-        $this->needsIntervals = $quantity;
         return $this;
     }
 
@@ -75,18 +50,16 @@ class ProjectFactory
     }
 
     /**
-     * @param array $attributes
-     * @return Project
+     * @param Project $project
      */
-    protected function make(array $attributes = []): Project
+    protected function createTasks(Project $project): void
     {
-        $projectData = $this->getRandomProjectData();
-
-        if ($attributes) {
-            $projectData = array_merge($projectData, $attributes);
+        while ($this->needsTasks--) {
+            app(TaskFactory::class)
+                ->withIntervals($this->needsIntervals)
+                ->forProject($project)
+                ->create();
         }
-
-        return Project::make($projectData);
     }
 
     /**
@@ -95,9 +68,13 @@ class ProjectFactory
      */
     public function create(array $attributes = []): Project
     {
-        $project = $this->make($attributes);
+        $projectData = $this->getRandomProjectData();
 
-        $project->save();
+        if ($attributes) {
+            $projectData = array_merge($projectData, $attributes);
+        }
+
+        $project = Project::create($projectData);
 
         if ($this->needsTasks) {
             $this->createTasks($project);
@@ -105,20 +82,4 @@ class ProjectFactory
 
         return $project;
     }
-
-    /**
-     * @param int $amount
-     * @return Collection
-     */
-    public function createMany($amount = 1): Collection
-    {
-        $collection = collect();
-
-        while ($amount--) {
-            $collection->push($this->create());
-        }
-
-        return $collection;
-    }
-
 }

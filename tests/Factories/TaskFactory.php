@@ -5,9 +5,7 @@ namespace Tests\Factories;
 use App\Models\Project;
 use App\User;
 use Faker\Factory as FakerFactory;
-
 use App\Models\Task;
-use Illuminate\Support\Collection;
 
 /**
  * Class TaskFactory
@@ -55,36 +53,29 @@ class TaskFactory
     public function withIntervals(int $quantity = 1): self
     {
         $this->needsIntervals = $quantity;
+
         return $this;
     }
 
     /**
-     * @param $user
+     * @param User $user
      * @return self
      */
-    public function linkUser($user): self
+    public function forUser(User $user): self
     {
-        if ($user instanceof User) {
-            $this->user = $user;
-            return $this;
-        }
+        $this->user = $user;
 
-        $this->user = User::find($user);
         return $this;
     }
 
     /**
-     * @param $project
+     * @param Project $project
      * @return self
      */
-    public function linkProject($project): self
+    public function forProject(Project $project): self
     {
-        if ($project instanceof Project) {
-            $this->project = $project;
-            return $this;
-        }
+        $this->project = $project;
 
-        $this->project = Project::find($project);
         return $this;
     }
 
@@ -93,29 +84,21 @@ class TaskFactory
      */
     private function createIntervals(Task $task): void
     {
-        $intervals = [];
-
         while ($this->needsIntervals--) {
-            $intervals[] = app(IntervalFactory::class)
-                ->linkUser($this->user)
-                ->linkTask($task)
+            app(IntervalFactory::class)
+                ->forUser($this->user)
+                ->forTask($task)
                 ->create();
         }
     }
 
-    /**
-     * @param array $attributes
-     * @return Task
-     */
-    protected function make(array $attributes = []): Task
+    protected function defineProject(Task &$task)
     {
-        $taskData = $this->getRandomTaskData();
-
-        if ($attributes) {
-            $taskData = array_merge($taskData, $attributes);
+        if (!$this->project) {
+            $this->project = app(ProjectFactory::class)->create();
         }
 
-        return Task::make($taskData);
+        $task->project()->associate($this->project);
     }
 
     /**
@@ -124,19 +107,15 @@ class TaskFactory
      */
     public function create(array $attributes = []): Task
     {
-        $task = $this->make($attributes);
+        $taskData = $this->getRandomTaskData();
 
-        if (!$this->user) {
-            $this->user = app(UserFactory::class)->create();
+        if ($attributes) {
+            $taskData = array_merge($taskData, $attributes);
         }
 
-        $task->user()->associate($this->user);
+        $task = Task::make($taskData);
 
-        if (!$this->project) {
-            $this->project = app(ProjectFactory::class)->create();
-        }
-
-        $task->project()->associate($this->project);
+        $this->defineProject($task);
         $task->save();
 
         if ($this->needsIntervals) {
@@ -144,20 +123,5 @@ class TaskFactory
         }
 
         return $task;
-    }
-
-    /**
-     * @param int $amount
-     * @return Collection
-     */
-    public function createMany($amount = 1): Collection
-    {
-        $collection = collect();
-
-        while ($amount--) {
-            $collection->push($this->create());
-        }
-
-        return $collection;
     }
 }
