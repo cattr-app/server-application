@@ -39,7 +39,7 @@ class TimeSynchronizer
             $this->api = GitlabApi::buildFromUser($user);
             if (!$this->api) {
                 Log::info("Can`t instantiate an API for user " . $user->full_name ."\n");
-                return false;
+                continue;
             }
 
             $userIntervals = TimeInterval::whereIn('id', $timeIntervals->pluck('time_interval_id'))
@@ -54,6 +54,7 @@ class TimeSynchronizer
                 $glProjectId = $relation['gl_project_id'];
                 $glIssueIid = $relation['gl_issue_iid'];
                 $response = $this->api->sendUserTime($glProjectId, $glIssueIid, $durations[$taskId]['humanDuration']);
+                echo "Sending issue_iid " . $glIssueIid . " duration " . $durations[$taskId]['humanDuration'] . " for user " . $user->full_name . "\n";
 
                 if ($response && isset($response['total_time_spent'])) {
                     $this->timeIntervalsHelper->markAsSyncedIntervalByTaskId($taskId);
