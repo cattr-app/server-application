@@ -78,7 +78,7 @@ class IntervalFactory
      * @param array $attributes
      * @return TimeInterval
      */
-    public function make(array $attributes = []): TimeInterval
+    protected function make(array $attributes = []): TimeInterval
     {
         $intervalData = $this->getRandomIntervalData();
 

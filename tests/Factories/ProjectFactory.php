@@ -78,7 +78,7 @@ class ProjectFactory
      * @param array $attributes
      * @return Project
      */
-    public function make(array $attributes = []): Project
+    protected function make(array $attributes = []): Project
     {
         $projectData = $this->getRandomProjectData();
 

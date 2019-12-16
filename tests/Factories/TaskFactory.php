@@ -107,7 +107,7 @@ class TaskFactory
      * @param array $attributes
      * @return Task
      */
-    public function make(array $attributes = []): Task
+    protected function make(array $attributes = []): Task
     {
         $taskData = $this->getRandomTaskData();
 

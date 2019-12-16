@@ -118,7 +118,7 @@ class UserFactory
      * @param array $attributes
      * @return User
      */
-    public function make(array $attributes = []): User
+    protected function make(array $attributes = []): User
     {
         $userData = $this->getRandomUserData();
 
