@@ -10,17 +10,13 @@ use Illuminate\Support\Collection;
  */
 abstract class AbstractFactory
 {
-    /**
-     * @param array $attributes
-     * @return mixed
-     */
     abstract public function create(array $attributes = []);
 
     /**
      * @param int $amount
      * @return Collection
      */
-    public function createMany(int $amount = 1)
+    public function createMany(int $amount = 1): Collection
     {
         $collection = collect();
 

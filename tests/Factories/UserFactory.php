@@ -112,6 +112,7 @@ class UserFactory extends AbstractFactory
     protected function assignRole(User $user): void
     {
         $user->role_id = self::ROLES[$this->role];
+        $user->save();
     }
 
     /**

@@ -20,7 +20,6 @@ use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
  * @method TestResponse delete($uri, array $data = [], array $headers = [])
  * @method TestResponse deleteJson($uri, array $data = [], array $headers = [])
  * @method TestResponse json($method, $uri, array $data = [], array $headers = [])
- * @method TestResponse call($method, $uri, $parameters = [], $cookies = [], $files = [], $server = [], $content = null)
  */
 abstract class TestCase extends BaseTestCase
 {

@@ -21,6 +21,8 @@ class TaskFactory
      */
     private $needsIntervals = 0;
 
+    private $needsUser = false;
+
     /**
      * @var User
      */
@@ -101,6 +103,13 @@ class TaskFactory
         $task->project()->associate($this->project);
     }
 
+    protected function withUser()
+    {
+        $this->needsUser = true;
+
+        return $this;
+    }
+
     /**
      * @param array $attributes
      * @return Task
@@ -116,6 +125,10 @@ class TaskFactory
         $task = Task::make($taskData);
 
         $this->defineProject($task);
+
+        if ($this->needsUser) {
+            $task->user()->associate(app(UserFactory::class)->create());
+        }
         $task->save();
 
         if ($this->needsIntervals) {
