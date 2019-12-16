@@ -41,6 +41,7 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
             $timeInterval = $data['interval'];
             $helper = app()->make(TimeIntervalsHelper::class);
             $helper->createUnsyncedInterval($timeInterval);
+            return $data;
         });
     }
 
