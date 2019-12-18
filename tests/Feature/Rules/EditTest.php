@@ -88,12 +88,12 @@ class EditTest extends TestCase
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->postJson(self::URI);
-        $response->assertApiError(403, True);
+        $response->assertApiError(403, true);
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
-        $response->assertApiError(400, True);
+        $response->assertApiError(400, true);
     }
 }

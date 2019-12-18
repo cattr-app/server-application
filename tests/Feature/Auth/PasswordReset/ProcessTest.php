@@ -58,7 +58,7 @@ class ProcessTest extends TestCase
 
         $response->assertApiSuccess();
 
-        $this->user->reFresh();
+        $this->user->refresh();
 
         $this->assertTrue(Hash::check($reset['password'], $this->user->password));
         $response->assertJsonStructure(['access_token']);
@@ -103,7 +103,7 @@ class ProcessTest extends TestCase
 
         $response->assertApiSuccess();
 
-        $this->user->reFresh();
+        $this->user->refresh();
 
         $this->assertTrue(Hash::check($reset['password'], $this->user->password));
         $response->assertJsonStructure(['access_token']);

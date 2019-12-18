@@ -56,6 +56,6 @@ class CountTest extends TestCase
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
-        $response->assertApiError(403, True);
+        $response->assertApiError(403, true);
     }
 }

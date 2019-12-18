@@ -44,7 +44,7 @@ class ActionsTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
-        $response->assertOK();
+        $response->assertOk();
 
         $items = [];
         foreach (Rule::getActionList() as $object => $actions) {
@@ -70,6 +70,6 @@ class ActionsTest extends TestCase
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
-        $response->assertApiError(403, True);
+        $response->assertApiError(403, true);
     }
 }
