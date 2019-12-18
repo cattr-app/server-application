@@ -14,6 +14,9 @@ class CreateTest extends TestCase
 {
 
     private const URI = 'v1/projects/create';
+
+    private const COMPANY_ID = 2;
+
     /**
      * @var User
      */
@@ -33,7 +36,7 @@ class CreateTest extends TestCase
             ->create();
 
         $this->projectData = [
-            'company_id'=> 2,
+            'company_id'=> self::COMPANY_ID,
             'name' => 'Test Project',
             'description' => 'Test Description'
         ];

@@ -10,6 +10,10 @@ use Illuminate\Support\Collection;
  */
 abstract class AbstractFactory
 {
+    /**
+     * @param array $attributes
+     * @return mixed
+     */
     abstract public function create(array $attributes = []);
 
     /**

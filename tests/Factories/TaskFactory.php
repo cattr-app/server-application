@@ -11,7 +11,7 @@ use App\Models\Task;
  * Class TaskFactory
  * @package Tests\Factories
  */
-class TaskFactory
+class TaskFactory extends AbstractFactory
 {
     private const DESCRIPTION_LENGTH = 10;
     private const PRIORITY_ID = 2;
@@ -94,7 +94,10 @@ class TaskFactory
         }
     }
 
-    protected function defineProject(Task &$task)
+    /**
+     * @param Task $task
+     */
+    protected function defineProject(Task $task)
     {
         if (!$this->project) {
             $this->project = app(ProjectFactory::class)->create();
@@ -103,7 +106,10 @@ class TaskFactory
         $task->project()->associate($this->project);
     }
 
-    protected function withUser()
+    /**
+     * @return $this
+     */
+    public function withUser()
     {
         $this->needsUser = true;
 
