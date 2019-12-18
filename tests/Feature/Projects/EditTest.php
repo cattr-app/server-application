@@ -9,6 +9,10 @@ use App\User;
 use Tests\TestCase;
 
 
+/**
+ * Class EditTest
+ * @package Tests\Feature\Projects
+ */
 class EditTest extends TestCase
 {
     private const URI = 'v1/projects/edit';

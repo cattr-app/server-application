@@ -6,6 +6,10 @@ use App\User;
 use Tests\Factories\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class CreateTest
+ * @package Tests\Feature\Projects
+ */
 class CreateTest extends TestCase
 {
 

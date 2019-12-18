@@ -8,6 +8,10 @@ use Tests\Factories\UserFactory;
 use App\User;
 use Tests\TestCase;
 
+/**
+ * Class ListTest
+ * @package Tests\Feature\Projects
+ */
 class ListTest extends TestCase
 {
     private const URI = 'v1/projects/list';

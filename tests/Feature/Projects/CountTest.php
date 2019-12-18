@@ -8,6 +8,10 @@ use Tests\Factories\UserFactory;
 use App\User;
 use Tests\TestCase;
 
+/**
+ * Class CountTest
+ * @package Tests\Feature\Projects
+ */
 class CountTest extends TestCase
 {
     private const URI = 'v1/projects/count';

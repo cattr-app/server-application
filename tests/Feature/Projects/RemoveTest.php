@@ -8,6 +8,10 @@ use Tests\Factories\UserFactory;
 use App\User;
 use Tests\TestCase;
 
+/**
+ * Class RemoveTest
+ * @package Tests\Feature\Projects
+ */
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/projects/remove';
