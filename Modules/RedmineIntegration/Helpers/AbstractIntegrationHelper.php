@@ -2,8 +2,7 @@
 
 namespace Modules\RedmineIntegration\Helpers;
 
-use Modules\RedmineIntegration\Models\RedmineClient;
-use Redmine;
+use Modules\RedmineIntegration\Models\ClientFactory;
 
 /**
  * Class AbstractIntegrationHelper
@@ -15,16 +14,12 @@ use Redmine;
 abstract class AbstractIntegrationHelper
 {
     /**
-     * Init Redmine client object
-     *
-     * @param $userId  User's id in our system
-     *
-     * @return Redmine\Client
+     * @var ClientFactory
      */
-    public function initRedmineClient(int $userId): Redmine\Client
-    {
-        $client = new RedmineClient($userId);
+    protected $clientFactory;
 
-        return $client;
+    public function __construct(ClientFactory $clientFactory)
+    {
+        $this->clientFactory = $clientFactory;
     }
 }

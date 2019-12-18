@@ -222,17 +222,16 @@ class TimeIntervalController extends ItemController
         //todo duplication questions
         if ($existing) {
             return response()->json(
-                Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
                     'success' => false,
-                    ''
-                ])
-            );
+                    'message' => 'Interval already exists!'
+                ]), 400);
         }
 
 
         if (!$this->validateEndDate($intervalData)) {
             return response()->json(
-                Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
@@ -240,10 +239,7 @@ class TimeIntervalController extends ItemController
                 ]), 400);
         }
 
-        $timeInterval = Filter::process(
-            $this->getEventUniqueName('item.create'),
-            TimeInterval::create($intervalData)
-        );
+        $timeInterval = TimeInterval::create($intervalData);
 
         //create screenshot
         if (isset($request->screenshot)) {
@@ -269,8 +265,7 @@ class TimeIntervalController extends ItemController
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                 'success' => true,
                 'interval' => $timeInterval,
-            ])
-        );
+            ]), 200);
     }
 
     /**

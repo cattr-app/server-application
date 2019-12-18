@@ -29,8 +29,14 @@ use App\Exceptions\CarnivalUnavailableException;
 class ScreenshotController extends ItemController
 {
 
+    /**
+     * @var ImageService
+     */
+    protected $imageService;
+
     public function __construct(ImageService $imageService)
     {
+        parent::__construct();
         $this->imageService = $imageService;
     }
 
@@ -192,16 +198,13 @@ class ScreenshotController extends ItemController
         // Request must contain screenshot
         if (!isset($request->screenshot)) {
             return response()->json(
-                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
-                    [
-                        'success' => false,
-                        'error_type' => 'validation',
-                        'message' => 'Validation error',
-                        'info' => 'screenshot is required',
-                    ]
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'screenshot is required',
                 ]),
-                400
-            );
+                400);
         }
 
         // Get path to screenshot stored in tmp
@@ -241,30 +244,23 @@ class ScreenshotController extends ItemController
 
         if ($validator->fails()) {
             return response()->json(
-                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
-                    [
-                        'success' => false,
-                        'error_type' => 'validation',
-                        'message' => 'Validation error',
-                        'info' => $validator->errors()
-                    ]
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
-                400
-            );
+                400 );
         }
 
-        // Have no idea why to this like that, but i let you live for now
-        // Store screenshot object to DB
-        $screenshotModel = $this->getItemClass();
-        $createdScreenshot = Filter::process($this->getEventUniqueName('item.create'), $screenshotModel::create($screenshotPack));
+        $createdScreenshot = Filter::process($this->getEventUniqueName('item.create'), Screenshot::create($screenshotPack));
 
         // Respond to client
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                 'success'=> true,
                 'screenshot' => $createdScreenshot,
-            ])
-        );
+            ]), 200 );
     }
 
     public function destroy(Request $request): JsonResponse {

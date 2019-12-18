@@ -49,7 +49,7 @@ class SettingsController extends Controller
         $userId = $request->user()->id;
 
         return [
-            'enabled' => Property::where(['entity_type' => 'company', 'name' => 'gitlab_enabled'])->first()
+            'enabled' => Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'gitlab_enabled'])->first()
                 ->value ?? false,
             'apikey' => $this->userProperties->getApiKey($userId)
         ];
