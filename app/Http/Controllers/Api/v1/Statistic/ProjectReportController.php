@@ -152,13 +152,12 @@ class ProjectReportController extends ReportController
             if (isset($projectReport->task)) {
                 $screenshots = $projectReport->task->timeIntervals()->with('screenshot')
                     ->where('start_at', '>=', $startAt)->where('end_at', '<=', $endAt)->get()
-                    ->pluck('screenshot')
                     ->groupBy(function ($s) {
-                        return Carbon::parse($s['created_at'])->startOfDay()->format('Y-m-d');
+                        return Carbon::parse($s['start_at'])->startOfDay()->format('Y-m-d');
                     })
                     ->transform(function ($item, $k) {
                         return $item->groupBy(function ($screen) {
-                            return Carbon::parse($screen['created_at'])->startOfHour()->format('h:i');
+                            return Carbon::parse($screen['start_at'])->startOfHour()->format('h:i');
                         });
                     });
             } else {
