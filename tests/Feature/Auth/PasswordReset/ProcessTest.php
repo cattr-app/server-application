@@ -84,16 +84,6 @@ class ProcessTest extends TestCase
         $response->assertApiError(401);
     }
 
-    public function test_invalid_confirmation()
-    {
-        $reset = $this->createReset($this->user->email, 'token', now());
-        $reset['password'] = 'not_matching_password';
-
-        $response = $this->postJson(self::URI, $reset);
-
-        $response->assertApiError(401);
-    }
-
     public function test_almost_expired()
     {
         $reset = [$this->user->email, 'expired', now()->subMinutes(config('auth.passwords.users.expire') - 1)];
