@@ -8,7 +8,6 @@ use Tests\Factories\UserFactory;
 use App\User;
 use Tests\TestCase;
 
-
 /**
  * Class ShowTest
  * @package Tests\Feature\Projects
@@ -57,14 +56,16 @@ class ShowTest extends TestCase
         $response->assertJson($this->project->toArray());
     }
 
-    public function test_assigned(){
+    public function test_assigned()
+    {
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
 
         $response->assertOk();
         $response->assertJson($this->project->toArray());
     }
 
-    public function test_not_assigned(){
+    public function test_not_assigned()
+    {
         $response = $this->actingAs($this->notAssignedUser)->postJson(self::URI, ['id' => $this->project->id]);
 
         $response->assertApiError(403, true);
