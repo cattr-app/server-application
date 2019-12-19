@@ -24,9 +24,9 @@ abstract class AbstractFactory
     {
         $collection = collect();
 
-        while ($amount--) {
+        do {
             $collection->push($this->create());
-        }
+        } while (--$amount);
 
         return $collection;
     }

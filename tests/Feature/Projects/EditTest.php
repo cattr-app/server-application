@@ -48,7 +48,6 @@ class EditTest extends TestCase
 
         $response->assertApiSuccess();
         $this->assertDatabaseHas('projects', $this->project->toArray());
-
     }
 
     public function test_not_existing_project()

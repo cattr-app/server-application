@@ -48,12 +48,11 @@ class EditTest extends TestCase
 
         $response->assertApiSuccess();
         $this->assertDatabaseHas('tasks', $this->task->toArray());
-
     }
 
-    public function test_not_existing_project()
+    public function test_not_existing()
     {
-        $this->task->id = 42;
+        $this->task->id = Task::count() + 20;
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->toArray());
 

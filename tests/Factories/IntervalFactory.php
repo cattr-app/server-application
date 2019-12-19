@@ -65,16 +65,22 @@ class IntervalFactory extends AbstractFactory
         return $this;
     }
 
-    protected function defineUser(TimeInterval &$interval)
+    /**
+     * @param TimeInterval $interval
+     */
+    private function defineUser(TimeInterval &$interval)
     {
         if (!$this->user) {
             $this->user = app(UserFactory::class)->create();
         }
 
-        $interval->user()->associate($this->user);
+        $interval->user_id = $this->user->id;
     }
 
-    protected function defineTask(TimeInterval &$interval)
+    /**
+     * @param TimeInterval $interval
+     */
+    private function defineTask(TimeInterval &$interval)
     {
         if (!$this->task) {
             $this->task = app(TaskFactory::class)
@@ -82,7 +88,7 @@ class IntervalFactory extends AbstractFactory
                 ->create();
         }
 
-        $interval->task()->associate($this->task);
+        $interval->task_id = $this->task->id;
     }
 
     /**

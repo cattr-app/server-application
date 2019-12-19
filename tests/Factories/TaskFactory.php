@@ -34,21 +34,6 @@ class TaskFactory extends AbstractFactory
     private $project;
 
     /**
-     * @return array
-     */
-    public function getRandomTaskData(): array
-    {
-        $faker = FakerFactory::create();
-
-        return [
-            'task_name' => $faker->jobTitle,
-            'description' => $faker->text(self::DESCRIPTION_LENGTH),
-            'active' => true,
-            'priority_id' => self::PRIORITY_ID,
-        ];
-    }
-
-    /**
      * @param int $quantity
      * @return self
      */
@@ -82,31 +67,6 @@ class TaskFactory extends AbstractFactory
     }
 
     /**
-     * @param Task $task
-     */
-    private function createIntervals(Task $task): void
-    {
-        while ($this->needsIntervals--) {
-            app(IntervalFactory::class)
-                ->forUser($this->user)
-                ->forTask($task)
-                ->create();
-        }
-    }
-
-    /**
-     * @param Task $task
-     */
-    protected function defineProject(Task $task)
-    {
-        if (!$this->project) {
-            $this->project = app(ProjectFactory::class)->create();
-        }
-
-        $task->project()->associate($this->project);
-    }
-
-    /**
      * @return $this
      */
     public function withUser()
@@ -133,7 +93,8 @@ class TaskFactory extends AbstractFactory
         $this->defineProject($task);
 
         if ($this->needsUser) {
-            $task->user()->associate(app(UserFactory::class)->create());
+            $user = app(UserFactory::class)->create();
+            $task->user_id = $user->id;
         }
         $task->save();
 
@@ -142,5 +103,45 @@ class TaskFactory extends AbstractFactory
         }
 
         return $task;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRandomTaskData(): array
+    {
+        $faker = FakerFactory::create();
+
+        return [
+            'task_name' => $faker->jobTitle,
+            'description' => $faker->text(self::DESCRIPTION_LENGTH),
+            'active' => true,
+            'priority_id' => self::PRIORITY_ID,
+        ];
+    }
+
+    /**
+     * @param Task $task
+     */
+    private function defineProject(Task &$task)
+    {
+        if (!$this->project) {
+            $this->project = app(ProjectFactory::class)->create();
+        }
+
+        $task->project_id = $this->project->id;
+    }
+
+    /**
+     * @param Task $task
+     */
+    private function createIntervals(Task $task): void
+    {
+        do {
+            app(IntervalFactory::class)
+                ->forUser($this->user)
+                ->forTask($task)
+                ->create();
+        } while (--$this->needsIntervals);
     }
 }

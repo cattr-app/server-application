@@ -36,33 +36,6 @@ class ProjectFactory extends AbstractFactory
     }
 
     /**
-     * @return array
-     */
-    public function getRandomProjectData(): array
-    {
-        $faker = FakerFactory::create();
-
-        return [
-            'company_id' => self::COMPANY_ID,
-            'name' => $faker->company,
-            'description' => $faker->text(self::DESCRIPTION_LENGTH),
-        ];
-    }
-
-    /**
-     * @param Project $project
-     */
-    protected function createTasks(Project $project): void
-    {
-        while ($this->needsTasks--) {
-            app(TaskFactory::class)
-                ->withIntervals($this->needsIntervals)
-                ->forProject($project)
-                ->create();
-        }
-    }
-
-    /**
      * @param array $attributes
      * @return Project
      */
@@ -81,5 +54,32 @@ class ProjectFactory extends AbstractFactory
         }
 
         return $project;
+    }
+
+    /**
+     * @return array
+     */
+    public function getRandomProjectData(): array
+    {
+        $faker = FakerFactory::create();
+
+        return [
+            'company_id' => self::COMPANY_ID,
+            'name' => $faker->company,
+            'description' => $faker->text(self::DESCRIPTION_LENGTH),
+        ];
+    }
+
+    /**
+     * @param Project $project
+     */
+    protected function createTasks(Project $project): void
+    {
+        do {
+            app(TaskFactory::class)
+                ->withIntervals($this->needsIntervals)
+                ->forProject($project)
+                ->create();
+        } while (--$this->needsTasks);
     }
 }
