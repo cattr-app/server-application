@@ -266,6 +266,9 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
             ->withPivot('role_id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function tokens(): HasMany
     {
         return $this->hasMany(Token::class);
