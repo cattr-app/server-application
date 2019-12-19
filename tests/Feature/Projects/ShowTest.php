@@ -67,7 +67,7 @@ class ShowTest extends TestCase
     public function test_not_assigned(){
         $response = $this->actingAs($this->notAssignedUser)->postJson(self::URI, ['id' => $this->project->id]);
 
-        $response->assertApiError(404);
+        $response->assertApiError(403, true);
     }
 
     public function test_unauthorized()

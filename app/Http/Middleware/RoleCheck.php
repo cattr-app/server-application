@@ -43,7 +43,6 @@ class RoleCheck
 
             // Handled on the query level
             if ($object === 'users' && in_array($action, ['list', 'show', 'edit'])
-                || in_array($object, ['projects', 'tasks']) && in_array($action, ['list', 'show'])
                 || in_array($object, ['screenshots', 'time-intervals']) && in_array($action, ['list', 'show', 'edit', 'remove'])) {
                 return $next($request);
             }
@@ -53,7 +52,7 @@ class RoleCheck
             } else {
                 throw new AuthorizationException(
                     AuthorizationException::ERROR_TYPE_FORBIDDEN,
-                    "Access denied to $object/$action"
+                    "Access denied to $object/$action/$id"
                 );
             }
         }

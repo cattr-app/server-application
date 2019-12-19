@@ -44,10 +44,6 @@ class Kernel extends HttpKernel
             'throttle:120,1',
             'bindings',
         ],
-
-        'role' => [
-            \App\Http\Middleware\RoleCheck::class,
-        ],
     ];
 
     /**
