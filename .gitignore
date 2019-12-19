@@ -31,3 +31,4 @@ resources/crud-generator/
 coverage/
 *.sql
 .DS_Store
+.phpunit.result.cache
