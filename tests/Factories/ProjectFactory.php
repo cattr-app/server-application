@@ -23,6 +23,10 @@ class ProjectFactory extends AbstractFactory
      * @var int
      */
     private $needsIntervals = 0;
+    /**
+     * @var array
+     */
+    private $users = 0;
 
     /**
      * @param int $quantity
@@ -49,11 +53,26 @@ class ProjectFactory extends AbstractFactory
 
         $project = Project::create($projectData);
 
+        if ($this->users) {
+            $project->users()->attach($this->users);
+        }
+
         if ($this->needsTasks) {
             $this->createTasks($project);
         }
 
         return $project;
+    }
+
+    /**
+     * @param array $users
+     * @return $this
+     */
+    public function associateUsers(array $users): self
+    {
+        $this->users = $users;
+
+        return $this;
     }
 
     /**

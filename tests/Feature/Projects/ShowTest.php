@@ -21,6 +21,8 @@ class ShowTest extends TestCase
      * @var User
      */
     private $admin;
+    private $assignedUser;
+    private $notAssignedUser;
 
     /**
      * @var Project
@@ -36,16 +38,36 @@ class ShowTest extends TestCase
             ->asAdmin()
             ->create();
 
-        $this->project = app(ProjectFactory::class)->create();
+        $this->assignedUser = app(UserFactory::class)
+            ->withTokens()
+            ->create();
+
+        $this->notAssignedUser = app(UserFactory::class)
+            ->withTokens()
+            ->create();
+
+        $this->project = app(ProjectFactory::class)->associateUsers([$this->assignedUser->id])->create();
     }
 
-    public function test_show()
+    public function test_admin()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
 
         $response->assertOk();
         $response->assertJson($this->project->toArray());
+    }
 
+    public function test_assigned(){
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
+
+        $response->assertOk();
+        $response->assertJson($this->project->toArray());
+    }
+
+    public function test_not_assigned(){
+        $response = $this->actingAs($this->notAssignedUser)->postJson(self::URI, ['id' => $this->project->id]);
+
+        $response->assertApiError(404);
     }
 
     public function test_unauthorized()
