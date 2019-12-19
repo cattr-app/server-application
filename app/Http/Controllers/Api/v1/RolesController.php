@@ -359,6 +359,7 @@ class RolesController extends ItemController
         );
         $this->disableQueryRoleCheck = false;
 
+        $itemsQuery->with('rules');
         if ($user->is_admin) {
             $roles = $itemsQuery->get();
         } else {

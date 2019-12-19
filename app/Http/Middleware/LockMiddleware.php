@@ -11,6 +11,11 @@ class LockMiddleware
     protected $lock;
     protected const excludedPaths = ['show', 'list', 'dashboard', 'allowed-rules', 'count'];
 
+    /**
+     * LockMiddleware constructor.
+     *
+     * @param  Lock  $lock
+     */
     public function __construct(Lock $lock)
     {
         $this->lock = $lock;

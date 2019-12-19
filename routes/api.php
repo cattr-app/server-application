@@ -207,11 +207,13 @@ Route::group([
 // So required to check if route have alternative request methods
 // and throw not-found or wrong-method exceptions manually
 Route::fallback(function () {
-    /** @var Router $this */
+
+    /** @var Router $router */
+    $router = app('router');
     /** @var Request $request */
-    $request = $this->currentRequest;
+    $request = $router->getCurrentRequest();
     /** @var RouteCollection $routes */
-    $routeCollection = $this->routes;
+    $routeCollection = $router->getRoutes();
     /** @var string[] $methods */
     $methods = array_diff(Router::$verbs, [$request->getMethod(), 'OPTIONS']);
 

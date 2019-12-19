@@ -6,8 +6,8 @@ use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\RecaptchaHelper;
 use App\Models\Token;
 use App\User;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Validator;
 
@@ -78,7 +78,7 @@ class AuthController extends BaseController
     /**
      * Create a new AuthController instance.
      *
-     * @param RecaptchaHelper $recaptcha
+     * @param  RecaptchaHelper  $recaptcha
      */
     public function __construct(RecaptchaHelper $recaptcha)
     {
@@ -87,16 +87,17 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return JsonResponse
      * @throws AuthorizationException
      *
-     * @api {post} /api/auth/login Login
+     * @api            {post} /api/auth/login Login
      * @apiDescription Get user JWT
      *
-     * @apiVersion 0.1.0
-     * @apiName Login
-     * @apiGroup Auth
+     * @apiVersion     0.1.0
+     * @apiName        Login
+     * @apiGroup       Auth
      *
      * @apiParam {String}  email        User email
      * @apiParam {String}  password     User password
@@ -125,12 +126,12 @@ class AuthController extends BaseController
      *    "user":         {}
      *  }
      *
-     * @apiUse 400Error
-     * @apiUse ParamsValidationError
-     * @apiUse UnauthorizedError
-     * @apiUse UserDeactivatedError
-     * @apiUse CaptchaError
-     * @apiUse LimiterError
+     * @apiUse         400Error
+     * @apiUse         ParamsValidationError
+     * @apiUse         UnauthorizedError
+     * @apiUse         UserDeactivatedError
+     * @apiUse         CaptchaError
+     * @apiUse         LimiterError
      */
     public function login(Request $request): JsonResponse
     {
@@ -147,7 +148,8 @@ class AuthController extends BaseController
 
         $this->recaptcha->check($credentials);
 
-        if (!$newToken = auth()->attempt(['email' => $credentials['email'], 'password' => $credentials['password']])) {
+        if (!$newToken = auth()->setTTL(365 * 24 * 60)->attempt(['email' => $credentials['email'], 'password' =>
+            $credentials['password']])) {
             $this->recaptcha->incrementCaptchaAmounts();
             $this->recaptcha->check($credentials);
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
@@ -174,17 +176,18 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return JsonResponse
      *
-     * @api {post} /api/auth/logout Logout
+     * @api            {post} /api/auth/logout Logout
      * @apiDescription Invalidate JWT
      *
-     * @apiVersion 0.1.0
-     * @apiName Logout
-     * @apiGroup Auth
+     * @apiVersion     0.1.0
+     * @apiName        Logout
+     * @apiGroup       Auth
      *
-     * @apiUse AuthHeader
+     * @apiUse         AuthHeader
      *
      * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
      * @apiSuccess {String}   message  Message from server
@@ -196,8 +199,8 @@ class AuthController extends BaseController
      *    "message": "Successfully logged out"
      *  }
      *
-     * @apiUse 400Error
-     * @apiUse UnauthorizedError
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
      */
     public function logout(Request $request): JsonResponse
     {
@@ -208,17 +211,18 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return JsonResponse
      *
-     * @api {post} /api/auth/logout-from-all Logout from all
+     * @api            {post} /api/auth/logout-from-all Logout from all
      * @apiDescription Invalidate all user JWT
      *
-     * @apiVersion 0.1.0
-     * @apiName Logout all
-     * @apiGroup Auth
+     * @apiVersion     0.1.0
+     * @apiName        Logout all
+     * @apiGroup       Auth
      *
-     * @apiUse AuthHeader
+     * @apiUse         AuthHeader
      *
      * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
      * @apiSuccess {String}   message  Message from server
@@ -230,8 +234,8 @@ class AuthController extends BaseController
      *    "message": "Successfully ended all sessions"
      *  }
      *
-     * @apiUse 400Error
-     * @apiUse UnauthorizedError
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
      */
     public function logoutFromAll(Request $request): JsonResponse
     {
@@ -242,17 +246,18 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return JsonResponse
      *
-     * @api {get} /api/auth/me Me
+     * @api            {get} /api/auth/me Me
      * @apiDescription Get authenticated User Entity
      *
-     * @apiVersion 0.1.0
-     * @apiName Me
-     * @apiGroup Auth
+     * @apiVersion     0.1.0
+     * @apiName        Me
+     * @apiGroup       Auth
      *
-     * @apiUse AuthHeader
+     * @apiUse         AuthHeader
      *
      * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
      * @apiSuccess {Array}    user     User Entity
@@ -287,8 +292,8 @@ class AuthController extends BaseController
      *    }
      *  }
      *
-     * @apiUse 400Error
-     * @apiUse UnauthorizedError
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
      */
     public function me(Request $request): JsonResponse
     {
@@ -296,17 +301,18 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return JsonResponse
      *
-     * @api {post} /api/auth/refresh Refresh
+     * @api            {post} /api/auth/refresh Refresh
      * @apiDescription Refreshes JWT
      *
-     * @apiVersion 0.1.0
-     * @apiName Refresh
-     * @apiGroup Auth
+     * @apiVersion     0.1.0
+     * @apiName        Refresh
+     * @apiGroup       Auth
      *
-     * @apiUse AuthHeader
+     * @apiUse         AuthHeader
      *
      * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
      * @apiSuccess {String}   access_token  Token
@@ -314,8 +320,8 @@ class AuthController extends BaseController
      * @apiSuccess {String}   expires_in    Token TTL in seconds
      * @apiSuccess {Array}    user          User Entity
      *
-     * @apiUse 400Error
-     * @apiUse UnauthorizedError
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
      */
     public function refresh(Request $request): JsonResponse
     {

@@ -2,24 +2,23 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Exceptions\CarnivalUnavailableException;
+use App\Helpers\QueryHelper;
 use App\Models\Role;
 use App\Models\Screenshot;
+use App\Models\TimeInterval;
+use App\Services\ImageService;
 use Auth;
 use Carbon\Carbon;
+use Filter;
+use GuzzleHttp\Exception\ConnectException;
+use GuzzleHttp\Exception\RequestException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Filter;
-use Illuminate\Support\Facades\Input;
-use Validator;
-use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\DB;
-use App\Models\TimeInterval;
-use App\Helpers\QueryHelper;
-use App\Services\ImageService;
-use GuzzleHttp\Exception\ConnectException;
-use App\Exceptions\CarnivalUnavailableException;
+use Illuminate\Support\Facades\Storage;
+use Validator;
 
 /**
  * Class ScreenshotController
@@ -42,6 +41,7 @@ class ScreenshotController extends ItemController
 
 
     // TODO: find out why it is done this way
+
     /**
      * @return string
      */
@@ -103,11 +103,14 @@ class ScreenshotController extends ItemController
      */
 
     /**
-     * @api {post} /api/v1/screenshots/list List
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/screenshots/list List
      * @apiDescription Get list of Screenshots
-     * @apiVersion 0.1.0
-     * @apiName GetScreenshotList
-     * @apiGroup Screenshot
+     * @apiVersion     0.1.0
+     * @apiName        GetScreenshotList
+     * @apiGroup       Screenshot
      *
      * @apiParam {Integer}  [id]               `QueryParam` Screenshot ID
      * @apiParam {Integer}  [time_interval_id] `QueryParam` Screenshot's Time Interval ID
@@ -116,7 +119,7 @@ class ScreenshotController extends ItemController
      * @apiParam {String}   [path]             `QueryParam` Image path URI
      * @apiParam {DateTime} [created_at]       `QueryParam` Screenshot Creation DateTime
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
-     * @apiUse ScreenshotRelations
+     * @apiUse         ScreenshotRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -129,8 +132,8 @@ class ScreenshotController extends ItemController
      *      "updated_at":       ["<", "2019-01-01 00:00:00"]
      *  }
      *
-     * @apiUse ScreenshotRelationsExample
-     * @apiUser UnauthorizedError
+     * @apiUse         ScreenshotRelationsExample
+     * @apiUser        UnauthorizedError
      *
      * @apiSuccess {Object[]} ScreenshotList                             Screenshots (Array of objects)
      * @apiSuccess {Object}   ScreenshotList.Screenshot                  Screenshot object
@@ -142,8 +145,6 @@ class ScreenshotController extends ItemController
      * @apiSuccess {DateTime} ScreenshotList.Screenshot.deleted_at       Screenshot's date time of delete
      * @apiSuccess {Object}   ScreenshotList.Screenshot.time_interval    Screenshot's Task
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function index(Request $request): JsonResponse
     {
@@ -163,14 +164,15 @@ class ScreenshotController extends ItemController
     /**
      * Show the form for creating a new resource.
      *
-     * @param Request $request
+     * @param  Request  $request
+     *
      * @return JsonResponse
      * @throws CarnivalUnavailableException
-     * @api {post} /api/v1/screenshots/create Create
+     * @api            {post} /api/v1/screenshots/create Create
      * @apiDescription Create Screenshot
-     * @apiVersion 0.1.0
-     * @apiName CreateScreenshot
-     * @apiGroup Screenshot
+     * @apiVersion     0.1.0
+     * @apiName        CreateScreenshot
+     * @apiGroup       Screenshot
      *
      * @apiParam {Integer} time_interval_id  Screenshot's Time Interval ID
      * @apiParam {Binary}  screenshot        Screenshot file
@@ -189,8 +191,8 @@ class ScreenshotController extends ItemController
      * @apiSuccess {String}   Screenshot.updated_at       Screenshot date time of update
      * @apiSuccess {Boolean}  Screenshot.important        Screenshot important flag
      *
-     * @apiUse DefaultCreateErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultCreateErrorResponse
+     * @apiUse         UnauthorizedError
      *
      */
     public function create(Request $request): JsonResponse
@@ -219,16 +221,20 @@ class ScreenshotController extends ItemController
         try {
 
             // Push screen and thumb to carnival and get their public URI
-            $publicScreenshotUrl = $this->imageService->pushScreenAndThumbToCarnival($screenshotStream, $thumbStream, Auth::id());
+            $publicScreenshotUrl = $this->imageService->pushScreenAndThumbToCarnival(
+                $screenshotStream, $thumbStream, Auth::id()
+            );
 
         } catch (ConnectException $e) {
 
             throw new CarnivalUnavailableException('Carnival service is unavailable');
 
+        } catch (RequestException $e) {
+            // Do nothing pls ok?
         }
 
         // Get interval id
-        $timeIntervalID = ((int)$request->get('time_interval_id')) ?: null;
+        $timeIntervalID = ((int) $request->get('time_interval_id')) ?: null;
 
         // Pack everything we need
         $screenshotPack = [
@@ -239,7 +245,9 @@ class ScreenshotController extends ItemController
 
         $validator = Validator::make(
             $screenshotPack,
-            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+            Filter::process(
+                $this->getEventUniqueName('validation.item.create'), $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
@@ -250,20 +258,22 @@ class ScreenshotController extends ItemController
                     'message' => 'Validation error',
                     'info' => $validator->errors()
                 ]),
-                400 );
+                400);
         }
 
-        $createdScreenshot = Filter::process($this->getEventUniqueName('item.create'), Screenshot::create($screenshotPack));
+        $createdScreenshot = Filter::process($this->getEventUniqueName('item.create'),
+            Screenshot::create($screenshotPack));
 
         // Respond to client
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success'=> true,
+                'success' => true,
                 'screenshot' => $createdScreenshot,
-            ]), 200 );
+            ]), 200);
     }
 
-    public function destroy(Request $request): JsonResponse {
+    public function destroy(Request $request): JsonResponse
+    {
 
         // Get screenshot model
         $screenshotModel = $this->getItemClass();
@@ -306,11 +316,14 @@ class ScreenshotController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/screenshots/bulk-create Bulk create
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/screenshots/bulk-create Bulk create
      * @apiDescription Create Screenshot
-     * @apiVersion 0.1.0
-     * @apiName BulkCreateScreenshot
-     * @apiGroup Screenshot
+     * @apiVersion     0.1.0
+     * @apiName        BulkCreateScreenshot
+     * @apiGroup       Screenshot
      *
      * @apiSuccess {Object[]} messages                  Messages
      * @apiSuccess {Integer}  messages.id               Screenshot id
@@ -325,11 +338,9 @@ class ScreenshotController extends ItemController
      * @apiError (400)  {String}   messages.reason  Error reason
      * @apiError (400)  {String}   messages.code    Error code
      *
-     * @apiUse DefaultCreateErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultCreateErrorResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function bulkCreate(Request $request): JsonResponse
     {
@@ -352,7 +363,7 @@ class ScreenshotController extends ItemController
 
         foreach ($requestData as $timeIntervalId => $screenshot) {
             $screenStorePath = $screenshot->store('uploads/screenshots');
-            $absoluteStorePath = str_replace(array('/', '\\'), DIRECTORY_SEPARATOR, Storage::disk()->path($screenStorePath));
+            $absoluteStorePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, Storage::disk()->path($screenStorePath));
 
             $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
 
@@ -364,11 +375,12 @@ class ScreenshotController extends ItemController
 
             $ds = DIRECTORY_SEPARATOR;
 
-            $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs", $screenStorePath);
-            Storage::put($thumbnailPath, (string)$thumbnail->encode());
+            $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs",
+                $screenStorePath);
+            Storage::put($thumbnailPath, (string) $thumbnail->encode());
 
             $requestData = [
-                'time_interval_id' => (int)$timeIntervalId,
+                'time_interval_id' => (int) $timeIntervalId,
                 'path' => $screenStorePath,
                 'thumbnail_path' => $thumbnailPath,
             ];
@@ -398,18 +410,21 @@ class ScreenshotController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/screenshots/show Show
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/screenshots/show Show
      * @apiDescription Show Screenshot
-     * @apiVersion 0.1.0
-     * @apiName ShowScreenshot
-     * @apiGroup Screenshot
+     * @apiVersion     0.1.0
+     * @apiName        ShowScreenshot
+     * @apiGroup       Screenshot
      *
      * @apiParam {Integer}  id                              Screenshot id
      * @apiParam {Integer}  [time_interval_id] `QueryParam` Screenshot Time Interval id
      * @apiParam {String}   [path]             `QueryParam` Image path URI
      * @apiParam {String}   [created_at]       `QueryParam` Screenshot Creation DateTime
      * @apiParam {String}   [updated_at]       `QueryParam` Last Screenshot data update DataTime
-     * @apiUse ScreenshotRelations
+     * @apiUse         ScreenshotRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -419,7 +434,7 @@ class ScreenshotController extends ItemController
      *      "created_at":       [">", "2019-01-01 00:00:00"],
      *      "updated_at":       ["<", "2019-01-01 00:00:00"]
      *  }
-     * @apiUse ScreenshotRelationsExample
+     * @apiUse         ScreenshotRelationsExample
      *
      * @apiSuccess {Object}   Screenshot                  Screenshot object
      * @apiSuccess {Integer}  Screenshot.id               Screenshot id
@@ -430,19 +445,20 @@ class ScreenshotController extends ItemController
      * @apiSuccess {String}   Screenshot.deleted_at       Screenshot date time of delete
      * @apiSuccess {Object}   Screenshot.time_interval    Screenshot Task
      *
-     * @apiUse DefaultShowErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultShowErrorResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/screenshots/edit Edit
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/screenshots/edit Edit
      * @apiDescription Edit Screenshot
-     * @apiVersion 0.1.0
-     * @apiName EditScreenshot
-     * @apiGroup Screenshot
+     * @apiVersion     0.1.0
+     * @apiName        EditScreenshot
+     * @apiGroup       Screenshot
      * @apiParam {Integer}  id               Screenshot id
      * @apiParam {Integer}  time_interval_id Screenshot Time Interval id
      * @apiParam {String}   path             Image path URI
@@ -464,35 +480,37 @@ class ScreenshotController extends ItemController
      * @apiSuccess {String}   Screenshot.updated_at       Screenshot date time of update
      * @apiSuccess {String}   Screenshot.deleted_at       Screenshot date time of delete
      *
-     * @apiUse DefaultEditErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiUse         DefaultEditErrorResponse
+     * @apiUse         UnauthorizedError
      *
-     * @param Request $request
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/screenshots/remove Destroy
-     * @apiUse DefaultDestroyRequestExample
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     * @api            {post} /api/v1/screenshots/remove Destroy
+     * @apiUse         DefaultDestroyRequestExample
      * @apiDescription Destroy Screenshot
-     * @apiVersion 0.1.0
-     * @apiName DestroyScreenshot
-     * @apiGroup Screenshot
+     * @apiVersion     0.1.0
+     * @apiName        DestroyScreenshot
+     * @apiGroup       Screenshot
      *
      * @apiParam {String} id Screenshot id
      *
-     * @apiUse DefaultDestroyResponse
+     * @apiUse         DefaultDestroyResponse
      *
-     * @param Request $request
-     * @return JsonResponse
      */
 
     /**
-     * @api {post} /api/v1/screenshots/dashboard Dashboard
+     * @param  Request  $request
+     *
+     * @return \Illuminate\Http\JsonResponse
+     * @api            {post} /api/v1/screenshots/dashboard Dashboard
      * @apiDescription Get dashboard of Screenshots
-     * @apiVersion 0.1.0
-     * @apiName GetScreenshotDashboard
-     * @apiGroup Screenshot
+     * @apiVersion     0.1.0
+     * @apiName        GetScreenshotDashboard
+     * @apiGroup       Screenshot
      *
      * @apiParam {Integer}  [id]               `QueryParam` Screenshot ID
      * @apiParam {Integer}  [time_interval_id] `QueryParam` Screenshot's Time Interval ID
@@ -500,7 +518,7 @@ class ScreenshotController extends ItemController
      * @apiParam {String}   [path]             `QueryParam` Image path URI
      * @apiParam {DateTime} [created_at]       `QueryParam` Screenshot Creation DateTime
      * @apiParam {DateTime} [updated_at]       `QueryParam` Last Screenshot data update DataTime
-     * @apiUse ScreenshotRelations
+     * @apiUse         ScreenshotRelations
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -512,8 +530,8 @@ class ScreenshotController extends ItemController
      *      "created_at":       [">", "2019-01-01 00:00:00"],
      *      "updated_at":       ["<", "2019-01-01 00:00:00"]
      *  }
-     * @apiUse ScreenshotRelationsExample
-     * @apiUse UnauthorizedError
+     * @apiUse         ScreenshotRelationsExample
+     * @apiUse         UnauthorizedError
      *
      * @apiSuccess {Object[]} Array                                            Array of objects
      * @apiSuccess {String}   Array.object.interval                            Time of interval
@@ -526,8 +544,6 @@ class ScreenshotController extends ItemController
      * @apiSuccess {String}   Array.object.screenshots.object.deleted_at       Screenshot date time of delete
      * @apiSuccess {Object}   Array.object.screenshots.object.time_interval    Screenshot Task
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
      */
     public function dashboard(Request $request): JsonResponse
     {
@@ -538,7 +554,7 @@ class ScreenshotController extends ItemController
 
         $filters = $request->all();
         unset($filters['with']);
-        is_int($request->get('user_id')) ? $filters['user_id'] = $request->get('user_id') : False;
+        is_int($request->get('user_id')) ? $filters['user_id'] = $request->get('user_id') : false;
         $compareDate = Carbon::today($timezone)->setTimezone('UTC')->toDateTimeString();
         $filters['start_at'] = ['>=', [$compareDate]];
 
@@ -571,8 +587,8 @@ class ScreenshotController extends ItemController
 
             $start_at = Carbon::parse($interval->start_at);
             $minutes = $start_at->minute;
-            $minutes = $minutes > 9 ? (string)$minutes : '0'. $minutes;
-            $hour = $start_at->hour . ':00:00';
+            $minutes = $minutes > 9 ? (string) $minutes : '0'.$minutes;
+            $hour = $start_at->hour.':00:00';
 
             foreach ($items as $itemkey => $item) {
                 if ($item['interval'] == $hour) {
@@ -582,7 +598,7 @@ class ScreenshotController extends ItemController
             }
 
             if ($hasInterval && isset($itemkey)) {
-                $items[$itemkey]['intervals'][(int)$minutes{0}][] = $interval->toArray();
+                $items[$itemkey]['intervals'][(int) $minutes{0}][] = $interval->toArray();
             } else {
                 $arr = [
                     'interval' => $hour,
@@ -596,7 +612,7 @@ class ScreenshotController extends ItemController
                     ],
                 ];
 
-                $arr['intervals'][(int)$minutes{0}][] = $interval->toArray();
+                $arr['intervals'][(int) $minutes{0}][] = $interval->toArray();
                 $items[] = $arr;
             }
         }
@@ -607,7 +623,7 @@ class ScreenshotController extends ItemController
     }
 
     /**
-     * @param bool $withRelations
+     * @param  bool  $withRelations
      *
      * @return Builder
      */
@@ -635,17 +651,19 @@ class ScreenshotController extends ItemController
                 $user_id = $user->id;
 
                 // Filter by project roles of the user
-                $query->whereHas('timeInterval.task.project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
-                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
-                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                            $query->where([
-                                'object' => $object,
-                                'action' => $action,
-                                'allow'  => true,
-                            ])->select('id');
-                        })->select('id');
-                    })->select('id');
-                });
+                $query->whereHas('timeInterval.task.project.usersRelation',
+                    static function (Builder $query) use ($user_id, $object, $action) {
+                        $query->where('user_id', $user_id)->whereHas('role',
+                            static function (Builder $query) use ($object, $action) {
+                                $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                                    $query->where([
+                                        'object' => $object,
+                                        'action' => $action,
+                                        'allow' => true,
+                                    ])->select('id');
+                                })->select('id');
+                            })->select('id');
+                    });
 
                 // For read and delete access include user own intervals
                 $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
@@ -654,11 +672,12 @@ class ScreenshotController extends ItemController
                     });
                 });
 
-                $query->when($action === 'edit' && (bool) $user->manual_time, static function (Builder $query) use ($user_id) {
-                    $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
-                        $query->where('user_id', $user_id)->select('user_id');
+                $query->when($action === 'edit' && (bool) $user->manual_time,
+                    static function (Builder $query) use ($user_id) {
+                        $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
+                            $query->where('user_id', $user_id)->select('user_id');
+                        });
                     });
-                });
             });
         }
 
