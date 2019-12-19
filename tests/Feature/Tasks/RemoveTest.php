@@ -46,7 +46,6 @@ class RemoveTest extends TestCase
 
         $response->assertApiSuccess();
         $this->assertSoftDeleted('tasks', ['id' => $this->task->id]);
-
     }
 
     public function test_unauthorized()

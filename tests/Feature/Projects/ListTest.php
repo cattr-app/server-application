@@ -22,6 +22,7 @@ class ListTest extends TestCase
      * @var User
      */
     private $admin;
+    private $commonUser;
 
     protected function setUp(): void
     {
@@ -30,6 +31,10 @@ class ListTest extends TestCase
         $this->admin = app(UserFactory::class)
             ->withTokens()
             ->asAdmin()
+            ->create();
+
+        $this->commonUser = app(UserFactory::class)
+            ->withTokens()
             ->create();
 
         app(ProjectFactory::class)->createMany(self::PROJECTS_AMOUNT);
@@ -48,5 +53,13 @@ class ListTest extends TestCase
         $response = $this->getJson(self::URI);
 
         $response->assertApiError(401);
+    }
+
+    public function test_common_user()
+    {
+        $response = $this->actingAs($this->commonUser)->getJson(self::URI);
+
+        $response->assertOk();
+        $response->assertJson([]);
     }
 }
