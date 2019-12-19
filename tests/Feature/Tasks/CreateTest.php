@@ -26,7 +26,7 @@ class CreateTest extends TestCase
      */
     private $taskData;
 
-    protected function setUp()
+    protected function setUp(): void
     {
         parent::setUp();
 
