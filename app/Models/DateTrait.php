@@ -42,9 +42,9 @@ trait DateTrait
     /**
      * get value in date attribute $attrName and converting it to ISO8601 format
      * @param string $attrName
-     * @return mixed
+     * @return string|null
      */
-    public function getDateAttr($attrName): string
+    public function getDateAttr($attrName)
     {
         $attr = $this->attributes[$attrName];
         return static::toISO8601($attr);
@@ -65,28 +65,21 @@ trait DateTrait
     /**
      * convert string MySQL datetime format -> ISO8601
      * @param string $standartDatetime
-     * @return string
+     * @return string|null
      */
-    public static function toISO8601(string $standartDatetime): string
+    public static function toISO8601($standartDatetime)
     {
-        $dateObj = new Carbon($standartDatetime);
-        return $dateObj->toIso8601String();
+        return $standartDatetime ? date('c', strtotime($standartDatetime)) : null;
     }
 
     /**
      * convert string ISO8601 format -> MySQL
      * @param string $iso8601
-     * @return string
+     * @return string|null
      */
-    public static function toStandartTime(string $iso8601): string
+    public static function toStandartTime($iso8601)
     {
-        try {
-            $dateObj = Carbon::createFromFormat(DateTime::ISO8601, $iso8601);
-            return date('Y-m-d H:i:s', $dateObj->timestamp);
-        } catch (InvalidArgumentException $e) {
-        }
-
-        return date('Y-m-d H:i:s', strtotime($iso8601));
+        return $iso8601 ? date('Y-m-d H:i:s', strtotime($iso8601)) : null;
     }
 
 
