@@ -2,34 +2,37 @@
 
 namespace App\Models;
 
-use Eloquent;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use App\Project;
+use App\Task;
+use App\User;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
-/**
- * App\Models\ProjectReport
- *
- * @property int $user_id
- * @property string $user_name
- * @property int $task_id
- * @property int $project_id
- * @property string $task_name
- * @property string $project_name
- * @property string $date
- * @property float|null $duration
- * @method static EloquentBuilder|ProjectReport whereDate($value)
- * @method static EloquentBuilder|ProjectReport whereDuration($value)
- * @method static EloquentBuilder|ProjectReport whereProjectId($value)
- * @method static EloquentBuilder|ProjectReport whereProjectName($value)
- * @method static EloquentBuilder|ProjectReport whereTaskId($value)
- * @method static EloquentBuilder|ProjectReport whereTaskName($value)
- * @method static EloquentBuilder|ProjectReport whereUserId($value)
- * @method static EloquentBuilder|ProjectReport whereUserName($value)
- * @mixin Eloquent
- */
-class ProjectReport extends AbstractModel
+class ProjectReport extends Model
 {
-    /**
-     * @var string
-     */
     protected $table = 'project_report';
+
+    /**
+     * @return BelongsTo
+     */
+    public function user()
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function task()
+    {
+        return $this->belongsTo(Task::class, 'task_id');
+    }
+
+    /**
+     * @return BelongsTo
+     */
+    public function project()
+    {
+        return $this->belongsTo(Project::class, 'project_id');
+    }
 }

@@ -11,7 +11,7 @@ use DB;
 use Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\Reports\Entities\ProjectReport;
+use App\Models\ProjectReport;
 use Validator;
 
 class ProjectReportController extends ReportController
