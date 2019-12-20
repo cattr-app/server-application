@@ -35,7 +35,7 @@
   "require-dev": {
     "doctrine/dbal": "2.9.2",
     "laravel/telescope": "^2.1",
-    "phpunit/phpunit": "7.5.11",
+    "phpunit/phpunit": "^8.0",
     "sempro/phpunit-pretty-print": "^1.0"
   },
   "autoload": {
