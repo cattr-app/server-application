@@ -113,37 +113,116 @@ class ProjectReportController extends ReportController
             array_merge($pids, Project::getUserRelatedProjectIds(request()->user()))
         );
 
-        $report = ProjectReport::with(
-            [
-                'user' => function ($query) {
-                    $query->select('full_name', 'id');
-                    $query->without(['role', 'projects_relation']);
-                },
-                'task' => function ($query) {
-                    $query->select('task_name', 'id');
-                },
-                'task.timeIntervals' => function ($query) use ($startAt, $endAt, $uids) {
-                    $query->select('start_at', 'end_at', 'task_id', 'user_id', 'id');
-                },
-                'task.timeIntervals.screenshot' => function ($query) {
-                    $query->select('path', 'thumbnail_path', 'time_interval_id', 'id');
-                },
-                'project' => function ($query) {
-                    $query->select('name', 'id');
-                }
-            ]
-        )
-            ->select('user_id', 'task_id', 'project_id',
-                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
-                DB::raw('SUM(duration) as duration')
-            )
-            ->whereIn('user_id', $uids)
-            ->whereBetween('date', [$startAt, $endAt])
-            ->whereIn('project_id', $pids)
-            ->groupBy('user_id', 'task_id', 'project_id');
+        $report = DB::table('projects')
+            ->select([
+                DB::raw('projects.id as project_id'),
+                DB::raw('projects.name as project_name'),
+                DB::raw('tasks.id as task_id'),
+                DB::raw('tasks.task_name as task_name'),
+                DB::raw('users.id as user_id'),
+                DB::raw('users.full_name as user_name'),
+                DB::raw('SUM(TIME_TO_SEC(TIMEDIFF(time_intervals.end_at, time_intervals.start_at))) as task_duration'),
+                DB::raw(
+                    "DATE_FORMAT(CONVERT_TZ(time_intervals.start_at, '+00:00', '$timezoneOffset'), '%Y-%m-%d') as task_date"
+                ),
+                DB::raw(
+                    "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path, 'created_at', screenshots.created_at)) as screens"
+                )
+            ])
+            ->join('tasks', 'tasks.project_id', '=', 'projects.id')
+            ->join('time_intervals', function ($join) use ($startAt, $endAt) {
+                $join
+                    ->on('time_intervals.task_id', '=', 'tasks.id')
+                    ->where('time_intervals.start_at', '>=', $startAt)
+                    ->where('time_intervals.end_at', '<', $endAt);
+            })
+            ->join('users', function ($join) use ($uids) {
+                $join
+                    ->on('time_intervals.user_id', '=', 'users.id')
+                    ->whereIn('users.id', $uids);
+            })
+            ->join('screenshots', 'screenshots.time_interval_id', '=', 'time_intervals.id')
+            ->whereIn('projects.id', $pids)
+            ->groupBy(['task_id', 'task_date'])
+            ->orderBy('task_date', 'ASC')
+            ->orderBy(DB::raw('ANY_VALUE(screenshots.created_at)'), 'ASC');
+
 
         $collection = $report->get();
 
+        $resultCollection = [];
+
+        $collection = $collection->groupBy('project_name');
+
+        foreach ($collection as $projectName => $items) {
+            foreach ($items as $item) {
+                if (!array_key_exists($projectName, $resultCollection)) {
+                    $resultCollection[$projectName] = [
+                        'id' => $item->project_id,
+                        'name' => $item->project_name,
+                        'project_time' => 0,
+                        'users' => [],
+                    ];
+                }
+                if (!array_key_exists($item->user_id, $resultCollection[$projectName]['users'])) {
+                    $resultCollection[$projectName]['users'][$item->user_id] = [
+                        'id' => $item->user_id,
+                        'full_name' => $item->user_name,
+                        'tasks' => [],
+                        'tasks_time' => 0,
+                    ];
+                }
+                if (!array_key_exists($item->task_id,
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'])) {
+
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id] = [
+                        'task_name' => $item->task_name,
+                        'id' => $item->task_id,
+                        'duration' => 0,
+                        'screenshots' => [],
+                    ];
+                }
+
+                $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['duration'] +=
+                    $item->task_duration;
+
+                $screenshotsCollection = collect(json_decode($item->screens, true))
+                    ->groupBy(function ($screen) {
+                        return Carbon::parse($screen['created_at'])->format('Y-m-d');
+                    })
+                    ->transform(function ($screen) {
+                        return $screen->groupBy(function ($screen) {
+                            return Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
+                        });
+                    });
+
+                $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'] =
+                    $screenshotsCollection;
+
+            }
+        }
+
+        foreach ($resultCollection as &$project) {
+            foreach ($project['users'] as &$user) {
+                usort($user['tasks'], function ($a, $b) {
+                    return $a['duration'] < $b['duration'];
+                });
+
+                foreach ($user['tasks'] as $task) {
+                    $user['tasks_time'] += $task['duration'];
+                }
+
+                $project['project_time'] += $user['tasks_time'];
+            }
+
+            usort($project['users'], function ($a, $b) {
+                return $a['tasks_time'] < $b['tasks_time'];
+            });
+        }
+
+        usort($resultCollection, function ($a, $b) {
+            return $a['project_time'] < $b['project_time'];
+        });
 
         // TODO: \/ refactor collection processing please \/ <3
         /*
@@ -209,7 +288,7 @@ class ProjectReportController extends ReportController
         return response()->json(
             Filter::process(
                 $this->getEventUniqueName('answer.success.report.show'),
-                $collection
+                $resultCollection
             )
         );
     }

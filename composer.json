@@ -21,6 +21,7 @@
     "intervention/image": "^2.5",
     "kbsali/redmine-api": "^1.5",
     "laravel/framework": "^6.8",
+    "laravel/helpers": "^1.1",
     "laravel/tinker": "^2.0",
     "m4tthumphrey/php-gitlab-api": "^9.15",
     "nwidart/laravel-modules": "^6.2",
@@ -28,8 +29,8 @@
     "php-http/guzzle6-adapter": "^2.0",
     "predis/predis": "^1.1",
     "sentry/sentry-laravel": "^1.5",
-    "webpatser/laravel-uuid": "^3.0",
     "tymon/jwt-auth": "1.0.0-rc.5",
+    "webpatser/laravel-uuid": "^3.0",
     "wikimedia/composer-merge-plugin": "^1.4"
   },
   "require-dev": {

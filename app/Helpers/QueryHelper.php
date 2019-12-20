@@ -16,7 +16,7 @@ use Schema;
 class QueryHelper
 {
     const RESERVED_REQUEST_KEYWORDS = [
-        'with', 'withCount', 'paginate', 'perPage'
+        'with', 'withCount', 'paginate', 'perPage', 'page', 'with_deleted'
     ];
 
     /**
@@ -29,7 +29,7 @@ class QueryHelper
     {
         if (!is_array($filter)) {
             if (is_string($filter)) {
-                $filter = explode(',', $filter);
+                $filter = explode(',', str_replace(' ', '', $filter));
             } else {
                 throw new \Exception(
                     "Relation filter must be a type of array or string, ".gettype($filter)." given in"
