@@ -57,7 +57,7 @@ class TaskListSeeder extends Seeder
     {
         $faker = $this->faker;
 
-        foreach (range(0, 14) as $i) {
+        foreach (range(0, 500) as $i) {
             $task = Task::create([
                 'project_id' => $project->id,
                 'task_name' => $faker->text(15 + $i),
@@ -101,7 +101,7 @@ class TaskListSeeder extends Seeder
                 'count_keyboard' => 43
             ]);
 
-            $this->seedScreenshot($interval, $user);
+            // $this->seedScreenshot($interval, $user);
         }
     }
 

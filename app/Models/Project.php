@@ -63,12 +63,6 @@ class Project extends AbstractModel
     use SoftDeletes;
 
     /**
-     * table name from database
-     * @var string
-     */
-    protected $table = 'projects';
-
-    /**
      * @var array
      */
     protected $fillable = [
@@ -106,11 +100,9 @@ class Project extends AbstractModel
     {
         parent::boot();
 
-        static::deleting(function($projects) {
-            /** @var Project $projects */
-            foreach ($projects->tasks()->get() as $task) {
-                $task->delete();
-            }
+        static::deleting(function($project) {
+            /** @noinspection PhpExpressionResultUnusedInspection */
+            $project->tasks()->delete();
         });
     }
 

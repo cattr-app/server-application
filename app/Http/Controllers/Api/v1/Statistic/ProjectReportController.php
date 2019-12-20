@@ -2,20 +2,17 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\Models\Project;
 use App\Models\Property;
-use App\Models\Task;
 use App\Models\TimeInterval;
 use Auth;
+use Carbon\Carbon;
+use DB;
 use Filter;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
-use App\Models\Project;
-use DB;
-use Validator;
-use Carbon\Carbon;
 use Modules\Reports\Entities\ProjectReport;
+use Validator;
 
 class ProjectReportController extends ReportController
 {
@@ -73,7 +70,7 @@ class ProjectReportController extends ReportController
     /**
      * [report description]
      *
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return array|JsonResponse
      */
@@ -112,21 +109,44 @@ class ProjectReportController extends ReportController
             ->tz('UTC')
             ->toDateTimeString();
 
-        $projectReports = ProjectReport::with('task.timeIntervals')
-            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
+        $pids = array_unique(
+            array_merge($pids, Project::getUserRelatedProjectIds(request()->user()))
+        );
+
+        $report = ProjectReport::with(
+            [
+                'user' => function ($query) {
+                    $query->select('full_name', 'id');
+                    $query->without(['role', 'projects_relation']);
+                },
+                'task' => function ($query) {
+                    $query->select('task_name', 'id');
+                },
+                'task.timeIntervals' => function ($query) use ($startAt, $endAt, $uids) {
+                    $query->select('start_at', 'end_at', 'task_id', 'user_id', 'id');
+                },
+                'task.timeIntervals.screenshot' => function ($query) {
+                    $query->select('path', 'thumbnail_path', 'time_interval_id', 'id');
+                },
+                'project' => function ($query) {
+                    $query->select('name', 'id');
+                }
+            ]
+        )
+            ->select('user_id', 'task_id', 'project_id',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
             )
             ->whereIn('user_id', $uids)
+            ->whereBetween('date', [$startAt, $endAt])
             ->whereIn('project_id', $pids)
-            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
-            ->where('date', '>=', $startAt)
-            ->where('date', '<=', $endAt)
-            ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
-            ->get();
+            ->groupBy('user_id', 'task_id', 'project_id');
 
-        $projects = [];
+        $collection = $report->get();
 
+
+        // TODO: \/ refactor collection processing please \/ <3
+        /*
         foreach ($projectReports as $projectReport) {
             $project_id = $projectReport->project_id;
             $user_id = $projectReport->user_id;
@@ -150,7 +170,7 @@ class ProjectReportController extends ReportController
             }
 
             if (isset($projectReport->task)) {
-                $screenshots = $projectReport->task->timeIntervals()->with('screenshot')
+                $screenshots = $projectReport->task->timeIntervals()
                     ->where('start_at', '>=', $startAt)->where('end_at', '<=', $endAt)->get()
                     ->pluck('screenshot')
                     ->groupBy(function ($s) {
@@ -176,20 +196,21 @@ class ProjectReportController extends ReportController
 
             $projects[$project_id]['users'][$user_id]['tasks_time'] += $projectReport->duration;
             $projects[$project_id]['project_time'] += $projectReport->duration;
-        }
+        }*/
 
 
-        foreach ($projects as $project_id => $project) {
+        /*foreach ($projects as $project_id => $project) {
             $projects[$project_id]['users'] = array_values($project['users']);
         }
 
-        $projects = array_values($projects);
+        $projects = array_values($projects);*/
+        // TODO: END /\ refactor collection processing please /\ <3
 
 
         return response()->json(
             Filter::process(
                 $this->getEventUniqueName('answer.success.report.show'),
-                $projects
+                $collection
             )
         );
     }
@@ -197,7 +218,7 @@ class ProjectReportController extends ReportController
     /**
      * [events description]
      *
-     * @param Request $request [description]
+     * @param  Request  $request  [description]
      *
      * @return JsonResponse [description]
      */
@@ -260,7 +281,7 @@ class ProjectReportController extends ReportController
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      */
@@ -318,7 +339,7 @@ class ProjectReportController extends ReportController
      * Returns durations per date for a task.
      *
      * @param           $id
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      */
@@ -376,7 +397,7 @@ class ProjectReportController extends ReportController
     }
 
     /**
-     * @param Request $request
+     * @param  Request  $request
      *
      * @return JsonResponse
      */
