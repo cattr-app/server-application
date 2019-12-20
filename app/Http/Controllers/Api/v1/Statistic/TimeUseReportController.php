@@ -97,6 +97,7 @@ class TimeUseReportController extends ReportController
             ->toDateTimeString();
 
         $projectReports = ProjectReport::query()
+            ->with('user')
             ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
@@ -105,7 +106,7 @@ class TimeUseReportController extends ReportController
             ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->where('date', '>=', $startAt)
             ->where('date', '<', $endAt)
-            ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
+            ->groupBy('user_id', 'task_id', 'project_id', 'task_name', 'project_name')
             ->get();
 
         $users = [];
@@ -116,9 +117,7 @@ class TimeUseReportController extends ReportController
 
             if (!isset($users[$user_id])) {
                 $users[$user_id] = [
-                    'user_id' => $user_id,
-                    'name' => $projectReport->user_name,
-                    'tasks' => [],
+                    'user' => $projectReport->user,
                     'total_time' => 0,
                 ];
             }
