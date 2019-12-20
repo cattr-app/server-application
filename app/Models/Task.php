@@ -135,11 +135,9 @@ class Task extends AbstractModel
     {
         parent::boot();
 
-        static::deleting(function ($tasks) {
+        static::deleting(function($task) {
             /** @var Task $tasks */
-            foreach ($tasks->timeIntervals()->get() as $val) {
-                $val->delete();
-            }
+            $task->timeIntervals()->delete();
         });
     }
 

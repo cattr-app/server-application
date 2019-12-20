@@ -2,7 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 
-class AddProjectReportView extends Migration
+class FixForProjectReportView extends Migration
 {
     /**
      * Run the migrations.
@@ -11,16 +11,13 @@ class AddProjectReportView extends Migration
      */
     public function up()
     {
-        DB::unprepared('
-            CREATE OR REPLACE VIEW `project_report` AS
+        DB::unprepared("
+            CREATE OR REPLACE ALGORITHM=MERGE VIEW `project_report` AS
             SELECT
-                `time_intervals`.`user_id` as `user_id`,
-                `users`.`full_name` as `user_name`,
-                `time_intervals`.`task_id` as `task_id`,
-                `tasks`.`project_id` as `project_id`,
-                `tasks`.`task_name` as `task_name`,
-                `projects`.`name` as `project_name`,
-                DATE(`time_intervals`.`start_at`) as `date`,
+                `users`.id as `user_id`,
+                `tasks`.id as `task_id`,
+                `projects`.id as `project_id`,
+                `time_intervals`.`start_at` as `date`,
                 SUM(TIME_TO_SEC(TIMEDIFF(`time_intervals`.`end_at`, `time_intervals`.`start_at`))) AS `duration`
             FROM
                 `time_intervals`
@@ -39,12 +36,9 @@ class AddProjectReportView extends Migration
             GROUP BY
                 `date`,
                 `user_id`,
-                `user_name`,
                 `task_id`,
-                `task_name`,
-                `project_id`,
-                `project_name`
-        ');
+                `project_id`
+        ");
     }
 
     /**
@@ -54,6 +48,6 @@ class AddProjectReportView extends Migration
      */
     public function down()
     {
-        DB::unprepared('DROP VIEW IF EXISTS `project_report`');
+        //
     }
 }

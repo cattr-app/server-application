@@ -13,11 +13,11 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * Class ProjectsUsers
  *
  * @package App\Models
- * @property int    $project_id
- * @property int    $user_id
- * @property int    $role_id
- * @property string $created_at
- * @property string $updated_at
+ * @property int     $project_id
+ * @property int     $user_id
+ * @property int     $role_id
+ * @property string  $created_at
+ * @property string  $updated_at
  * @property User    $user
  * @property Project $project
  * @property Role    $role
@@ -31,6 +31,7 @@ class ProjectsUsers extends AbstractModel
 {
     /**
      * table name from database
+     *
      * @var string
      */
     protected $table = 'projects_users';
@@ -48,7 +49,6 @@ class ProjectsUsers extends AbstractModel
      * @var array
      */
     protected $casts = [
-        'project_id' => 'integer',
         'user_id' => 'integer',
         'role_id' => 'integer',
     ];
@@ -62,7 +62,8 @@ class ProjectsUsers extends AbstractModel
     ];
 
     /**
-     * @param EloquentBuilder $query
+     * @param  EloquentBuilder  $query
+     *
      * @return EloquentBuilder
      */
     protected function setKeysForSaveQuery(Builder $query): EloquentBuilder
