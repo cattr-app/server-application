@@ -17,7 +17,7 @@ class FixForProjectReportView extends Migration
                 `users`.id as `user_id`,
                 `tasks`.id as `task_id`,
                 `projects`.id as `project_id`,
-                DATE(`time_intervals`.`start_at`) as `date`,
+                `time_intervals`.`start_at` as `date`,
                 SUM(TIME_TO_SEC(TIMEDIFF(`time_intervals`.`end_at`, `time_intervals`.`start_at`))) AS `duration`
             FROM
                 `time_intervals`
