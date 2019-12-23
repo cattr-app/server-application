@@ -20,6 +20,7 @@ use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 
 /**
  * Class Handler
+ *
  * @package App\Exceptions
  */
 class Handler extends ExceptionHandler
@@ -45,7 +46,7 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param  Exception $exception
+     * @param  Exception  $exception
      *
      * @return void
      * @throws Exception
@@ -62,8 +63,8 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  Request $request
-     * @param  Exception $exception
+     * @param  Request    $request
+     * @param  Exception  $exception
      *
      * @return JsonResponse|Response
      */
@@ -76,7 +77,7 @@ class Handler extends ExceptionHandler
         $message = $exception->getMessage();
         $isHttpException = $this->isHttpException($exception);
         $cls = get_class($exception);
-        $code = (int)$exception->getCode();
+        $code = (int) $exception->getCode();
 
         $debugData = false;
         $info = $exception instanceof InfoExtendedException ? $exception->getInfo() : false;
@@ -99,7 +100,7 @@ class Handler extends ExceptionHandler
         }
 
         // Processing exception status code
-        if ($exception instanceof \Error) {
+        if ($this->isDefaultPhpException($exception)) {
             // If current exception is an PHP default error we'll interpret it as 500 Server Error code
             $statusCode = 500;
         } elseif ($isHttpException) {
@@ -161,8 +162,8 @@ class Handler extends ExceptionHandler
     /**
      * Convert an authentication exception into an unauthenticated response.
      *
-     * @param Request $request
-     * @param AuthenticationException $exception
+     * @param  Request                  $request
+     * @param  AuthenticationException  $exception
      *
      * @return JsonResponse|Response
      */
@@ -172,12 +173,25 @@ class Handler extends ExceptionHandler
     }
 
     /**
+     * @param  \Throwable  $e
+     *
+     * @return bool
+     */
+    protected function isDefaultPhpException(\Throwable $e): bool
+    {
+        return $e instanceof \Error ||
+            $e instanceof \RuntimeException ||
+            $e instanceof Exception;
+    }
+
+    /**
      * Determine if the given exception is an HTTP exception.
      *
      * @param  \Exception  $e
+     *
      * @return bool
      */
-    protected function isHttpException(Exception $e)
+    protected function isHttpException(Exception $e): bool
     {
         return $e instanceof HttpExceptionInterface;
     }

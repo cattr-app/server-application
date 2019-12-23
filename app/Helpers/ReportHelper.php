@@ -2,6 +2,11 @@
 
 namespace App\Helpers;
 
+use App\Models\Project;
+use App\Models\Screenshot;
+use App\Models\Task;
+use App\Models\TimeInterval;
+use App\User;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Database\Query\Builder;
@@ -9,6 +14,51 @@ use Illuminate\Support\Collection;
 
 class ReportHelper
 {
+    /**
+     * @var Project
+     */
+    protected $project;
+
+    /**
+     * @var TimeInterval
+     */
+    protected $timeInterval;
+
+    /**
+     * @var User
+     */
+    protected $user;
+    /**
+     * @var Task
+     */
+    protected $task;
+    /**
+     * @var Screenshot
+     */
+    protected $screenshot;
+
+    /**
+     * ReportHelper constructor.
+     *
+     * @param  Project       $project
+     * @param  TimeInterval  $timeInterval
+     * @param  User          $user
+     * @param  Task          $task
+     * @param  Screenshot    $screenshot
+     */
+    public function __construct(
+        Project $project,
+        TimeInterval $timeInterval,
+        User $user,
+        Task $task,
+        Screenshot $screenshot
+    ) {
+        $this->project = $project;
+        $this->timeInterval = $timeInterval;
+        $this->user = $user;
+        $this->task = $task;
+        $this->screenshot = $screenshot;
+    }
 
     /**
      * @param $collection
@@ -98,7 +148,7 @@ class ReportHelper
      * @param  array   $pids
      * @param  string  $startAt
      * @param  string  $endAt
-     * @param          $timezoneOffset
+     * @param  mixed   $timezoneOffset
      *
      * @return Builder
      */
@@ -117,19 +167,25 @@ class ReportHelper
             ]
         );
 
-        return DB::table('projects')
+        return DB::table($this->getTableName('project'))
             ->selectRaw($select, [$timezoneOffset])
-            ->join('tasks', 'tasks.project_id', '=', 'projects.id')
-            ->join('time_intervals', function ($join) use ($startAt, $endAt) {
-                $join
-                    ->on('time_intervals.task_id', '=', 'tasks.id');
-                /*->where('time_intervals.start_at', '>=', $startAt)
-                ->where('time_intervals.end_at', '<', $endAt);*/
+            ->join($this->getTableName('task'),
+                $this->getTableName('task', 'project_id'),
+                '=',
+                $this->getTableName('project', 'id'))
+            ->join($this->getTableName('timeInterval'), function ($join) {
+                $join->on(
+                    $this->getTableName('timeInterval', 'task_id'),
+                    '=',
+                    $this->getTableName('task', 'id')
+                );
             })
-            ->join('users', function ($join) use ($uids) {
-                $join
-                    ->on('time_intervals.user_id', '=', 'users.id');
-                //->whereIn('users.id', $uids);
+            ->join($this->getTableName('user'), function ($join) {
+                $join->on(
+                    $this->getTableName('timeInterval', 'user_id'),
+                    '=',
+                    $this->getTableName('user', 'id')
+                );
             })
             ->join('screenshots', 'screenshots.time_interval_id', '=', 'time_intervals.id')
             ->whereIn('projects.id', $pids)
@@ -139,5 +195,22 @@ class ReportHelper
             ->groupBy(['task_id', 'task_date'])
             ->orderBy('task_date', 'ASC')
             ->orderBy(DB::raw('ANY_VALUE(screenshots.created_at)'), 'ASC');
+    }
+
+    /**
+     * @param  string       $entity
+     *
+     * @param  string|null  $column
+     *
+     * @return string
+     */
+    protected function getTableName(string $entity, string $column = null): string
+    {
+        if (!property_exists(static::class, $entity)) {
+            throw new \RuntimeException("$entity does not exists on ".static::class);
+        }
+
+        $tblName = $this->{$entity}->getTable();
+        return $column ? $tblName.".$column" : $tblName;
     }
 }
