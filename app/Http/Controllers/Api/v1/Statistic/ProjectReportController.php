@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1\Statistic;
 
 use App\Models\Project;
+use App\Models\ProjectReport;
 use App\Models\Property;
 use App\Models\TimeInterval;
 use Auth;
@@ -11,7 +12,6 @@ use DB;
 use Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Models\ProjectReport;
 use Validator;
 
 class ProjectReportController extends ReportController
@@ -113,36 +113,38 @@ class ProjectReportController extends ReportController
             array_merge($pids, Project::getUserRelatedProjectIds(request()->user()))
         );
 
+        $select = implode(', ', [
+                'projects.id as project_id',
+                'projects.name as project_name',
+                'tasks.id as task_id',
+                'tasks.task_name as task_name',
+                'users.id as user_id',
+                'users.full_name as user_name',
+                'SUM(TIME_TO_SEC(TIMEDIFF(time_intervals.end_at, time_intervals.start_at))) as task_duration',
+                "DATE_FORMAT(CONVERT_TZ(time_intervals.start_at, '+00:00', ?), '%Y-%m-%d') as task_date",
+                "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path, 'created_at', screenshots.created_at)) as screens",
+            ]
+        );
+
         $report = DB::table('projects')
-            ->select([
-                DB::raw('projects.id as project_id'),
-                DB::raw('projects.name as project_name'),
-                DB::raw('tasks.id as task_id'),
-                DB::raw('tasks.task_name as task_name'),
-                DB::raw('users.id as user_id'),
-                DB::raw('users.full_name as user_name'),
-                DB::raw('SUM(TIME_TO_SEC(TIMEDIFF(time_intervals.end_at, time_intervals.start_at))) as task_duration'),
-                DB::raw(
-                    "DATE_FORMAT(CONVERT_TZ(time_intervals.start_at, '+00:00', '$timezoneOffset'), '%Y-%m-%d') as task_date"
-                ),
-                DB::raw(
-                    "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path, 'created_at', screenshots.created_at)) as screens"
-                )
-            ])
+            ->selectRaw($select, [$timezoneOffset])
             ->join('tasks', 'tasks.project_id', '=', 'projects.id')
             ->join('time_intervals', function ($join) use ($startAt, $endAt) {
                 $join
-                    ->on('time_intervals.task_id', '=', 'tasks.id')
-                    ->where('time_intervals.start_at', '>=', $startAt)
-                    ->where('time_intervals.end_at', '<', $endAt);
+                    ->on('time_intervals.task_id', '=', 'tasks.id');
+                /*->where('time_intervals.start_at', '>=', $startAt)
+                ->where('time_intervals.end_at', '<', $endAt);*/
             })
             ->join('users', function ($join) use ($uids) {
                 $join
-                    ->on('time_intervals.user_id', '=', 'users.id')
-                    ->whereIn('users.id', $uids);
+                    ->on('time_intervals.user_id', '=', 'users.id');
+                //->whereIn('users.id', $uids);
             })
             ->join('screenshots', 'screenshots.time_interval_id', '=', 'time_intervals.id')
             ->whereIn('projects.id', $pids)
+            ->where('time_intervals.start_at', '>=', $startAt)
+            ->where('time_intervals.end_at', '<', $endAt)
+            ->whereIn('users.id', $uids)
             ->groupBy(['task_id', 'task_date'])
             ->orderBy('task_date', 'ASC')
             ->orderBy(DB::raw('ANY_VALUE(screenshots.created_at)'), 'ASC');
