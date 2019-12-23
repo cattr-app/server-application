@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\Helpers\ReportHelper;
 use App\Models\Project;
+use App\Models\ProjectReport;
 use App\Models\Property;
 use App\Models\TimeInterval;
 use Auth;
@@ -11,7 +13,6 @@ use DB;
 use Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\Models\ProjectReport;
 use Validator;
 
 class ProjectReportController extends ReportController
@@ -20,14 +21,22 @@ class ProjectReportController extends ReportController
      * @var
      */
     protected $timezone;
+    /**
+     * @var ReportHelper
+     */
+    protected $reportHelper;
 
     /**
      * ProjectReportController constructor.
+     *
+     * @param  ReportHelper  $reportHelper
      */
-    public function __construct()
-    {
+    public function __construct(
+        ReportHelper $reportHelper
+    ) {
         $companyTimezoneProperty = Property::getProperty(Property::COMPANY_CODE, 'TIMEZONE')->first();
         $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
+        $this->reportHelper = $reportHelper;
 
         parent::__construct();
     }
@@ -113,106 +122,18 @@ class ProjectReportController extends ReportController
             array_merge($pids, Project::getUserRelatedProjectIds(request()->user()))
         );
 
-        $report = ProjectReport::with(
-            [
-                'user' => function ($query) {
-                    $query->select('full_name', 'id');
-                    $query->without(['role', 'projects_relation']);
-                },
-                'task' => function ($query) {
-                    $query->select('task_name', 'id');
-                },
-                'task.timeIntervals' => function ($query) use ($startAt, $endAt, $uids) {
-                    $query->select('start_at', 'end_at', 'task_id', 'user_id', 'id');
-                },
-                'task.timeIntervals.screenshot' => function ($query) {
-                    $query->select('path', 'thumbnail_path', 'time_interval_id', 'id');
-                },
-                'project' => function ($query) {
-                    $query->select('name', 'id');
-                }
-            ]
-        )
-            ->select('user_id', 'task_id', 'project_id',
-                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
-                DB::raw('SUM(duration) as duration')
-            )
-            ->whereIn('user_id', $uids)
-            ->whereBetween('date', [$startAt, $endAt])
-            ->whereIn('project_id', $pids)
-            ->groupBy('user_id', 'task_id', 'project_id');
 
-        $collection = $report->get();
-
-
-        // TODO: \/ refactor collection processing please \/ <3
-        /*
-        foreach ($projectReports as $projectReport) {
-            $project_id = $projectReport->project_id;
-            $user_id = $projectReport->user_id;
-
-            if (!isset($projects[$project_id])) {
-                $projects[$project_id] = [
-                    'id' => $project_id,
-                    'name' => $projectReport->project_name,
-                    'users' => [],
-                    'project_time' => 0,
-                ];
-            }
-
-            if (!isset($projects[$project_id]['users'][$user_id])) {
-                $projects[$project_id]['users'][$user_id] = [
-                    'id' => $user_id,
-                    'full_name' => $projectReport->user_name,
-                    'tasks' => [],
-                    'tasks_time' => 0,
-                ];
-            }
-
-            if (isset($projectReport->task)) {
-                $screenshots = $projectReport->task->timeIntervals()
-                    ->where('start_at', '>=', $startAt)->where('end_at', '<=', $endAt)->get()
-                    ->groupBy(function ($s) {
-                        return Carbon::parse($s['start_at'])->startOfDay()->format('Y-m-d');
-                    })
-                    ->transform(function ($item, $k) {
-                        return $item->groupBy(function ($screen) {
-                            return Carbon::parse($screen['start_at'])->startOfHour()->format('h:i');
-                        });
-                    });
-            } else {
-                $screenshots = [];
-            }
-
-            $projects[$project_id]['users'][$user_id]['tasks'][] = [
-                'id' => $projectReport->task_id,
-                'project_id' => $projectReport->project_id,
-                'user_id' => $projectReport->user_id,
-                'task_name' => $projectReport->task_name,
-                'duration' => (int)$projectReport->duration,
-                'screenshots' => $screenshots,
-            ];
-
-            $projects[$project_id]['users'][$user_id]['tasks_time'] += $projectReport->duration;
-            $projects[$project_id]['project_time'] += $projectReport->duration;
-        }*/
-
-
-        /*foreach ($projects as $project_id => $project) {
-            $projects[$project_id]['users'] = array_values($project['users']);
-        }
-
-        $projects = array_values($projects);*/
-        // TODO: END /\ refactor collection processing please /\ <3
-
+        $collection = $this->reportHelper->getReportQuery($uids, $pids, $startAt, $endAt, $timezoneOffset)->get();
+        $resultCollection = $this->reportHelper->getProcessedCollection($collection);
 
         return response()->json(
             Filter::process(
                 $this->getEventUniqueName('answer.success.report.show'),
-                $collection
+                $resultCollection
             )
         );
     }
+
 
     /**
      * [events description]

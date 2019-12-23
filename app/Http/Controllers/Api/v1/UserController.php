@@ -336,14 +336,6 @@ class UserController extends ItemController
     {
         $withDeleted = $request->input('with_deleted') === true;
 
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(true, $withDeleted), $request->all() ?: []
-            )
-        );
-
         return parent::index($request);
     }
 
