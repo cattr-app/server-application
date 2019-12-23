@@ -65,7 +65,7 @@ class ReportHelper
      *
      * @return Collection
      */
-    public function getProcessedCollection($collection): Collection
+    public function getProcessedProjectReportCollection($collection): Collection
     {
         $collection = $collection->groupBy('project_name');
 
@@ -148,53 +148,88 @@ class ReportHelper
      * @param  array   $pids
      * @param  string  $startAt
      * @param  string  $endAt
+     * @param          $timezoneOffset
+     * @param  array   $rawSelect
+     *
+     * @return Builder
+     */
+    public function getBaseQuery(
+        array $uids,
+        array $pids,
+        string $startAt,
+        string $endAt,
+        $timezoneOffset,
+        array $rawSelect = []
+    ): Builder {
+        $rawSelect = implode(', ',
+            array_unique(
+                array_merge($rawSelect, [
+                    'projects.id as project_id',
+                    'projects.name as project_name',
+                    'tasks.id as task_id',
+                    'tasks.task_name as task_name',
+                    'users.id as user_id',
+                    'users.full_name as user_name',
+                    'SUM(TIME_TO_SEC(TIMEDIFF(time_intervals.end_at, time_intervals.start_at))) as task_duration',
+                    "DATE_FORMAT(CONVERT_TZ(time_intervals.start_at, '+00:00', ?), '%Y-%m-%d') as task_date"
+                ])
+            )
+        );
+
+        return DB::table($this->getTableName('project'))
+            ->selectRaw($rawSelect, [$timezoneOffset])
+            ->join(
+                $this->getTableName('task'),
+                $this->getTableName('task', 'project_id'),
+                '=',
+                $this->getTableName('project', 'id')
+            )
+            ->join(
+                $this->getTableName('timeInterval'),
+                $this->getTableName('timeInterval', 'task_id'),
+                '=',
+                $this->getTableName('task', 'id')
+            )
+            ->join(
+                $this->getTableName('user'),
+                $this->getTableName('timeInterval', 'user_id'),
+                '=',
+                $this->getTableName('user', 'id')
+            )
+            ->whereIn($this->getTableName('project', 'id'), $pids)
+            ->where($this->getTableName('timeInterval', 'start_at'), '>=', $startAt)
+            ->where($this->getTableName('timeInterval', 'end_at'), '<', $endAt)
+            ->whereIn($this->getTableName('user'), $uids)
+            ->groupBy(['task_id', 'task_date'])
+            ->orderBy('task_date', 'ASC');
+    }
+
+    /**
+     * @param  array   $uids
+     * @param  array   $pids
+     * @param  string  $startAt
+     * @param  string  $endAt
      * @param  mixed   $timezoneOffset
      *
      * @return Builder
      */
-    public function getReportQuery(array $uids, array $pids, string $startAt, string $endAt, $timezoneOffset): Builder
-    {
-        $select = implode(', ', [
-                'projects.id as project_id',
-                'projects.name as project_name',
-                'tasks.id as task_id',
-                'tasks.task_name as task_name',
-                'users.id as user_id',
-                'users.full_name as user_name',
-                'SUM(TIME_TO_SEC(TIMEDIFF(time_intervals.end_at, time_intervals.start_at))) as task_duration',
-                "DATE_FORMAT(CONVERT_TZ(time_intervals.start_at, '+00:00', ?), '%Y-%m-%d') as task_date",
-                "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path, 'created_at', screenshots.created_at)) as screens",
-            ]
-        );
+    public function getProjectReportQuery(
+        array $uids,
+        array $pids,
+        string $startAt,
+        string $endAt,
+        $timezoneOffset
+    ): Builder {
+        $query = $this->getBaseQuery($uids, $pids, $startAt, $endAt, $timezoneOffset, [
+            "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path, 'created_at', screenshots.created_at)) as screens"
+        ]);
 
-        return DB::table($this->getTableName('project'))
-            ->selectRaw($select, [$timezoneOffset])
-            ->join($this->getTableName('task'),
-                $this->getTableName('task', 'project_id'),
-                '=',
-                $this->getTableName('project', 'id'))
-            ->join($this->getTableName('timeInterval'), function ($join) {
-                $join->on(
-                    $this->getTableName('timeInterval', 'task_id'),
-                    '=',
-                    $this->getTableName('task', 'id')
-                );
-            })
-            ->join($this->getTableName('user'), function ($join) {
-                $join->on(
-                    $this->getTableName('timeInterval', 'user_id'),
-                    '=',
-                    $this->getTableName('user', 'id')
-                );
-            })
-            ->join('screenshots', 'screenshots.time_interval_id', '=', 'time_intervals.id')
-            ->whereIn('projects.id', $pids)
-            ->where('time_intervals.start_at', '>=', $startAt)
-            ->where('time_intervals.end_at', '<', $endAt)
-            ->whereIn('users.id', $uids)
-            ->groupBy(['task_id', 'task_date'])
-            ->orderBy('task_date', 'ASC')
-            ->orderBy(DB::raw('ANY_VALUE(screenshots.created_at)'), 'ASC');
+        return $query->join(
+            $this->getTableName('screenshot'),
+            $this->getTableName('screenshot', 'time_interval_id'),
+            '=',
+            $this->getTableName('timeInterval', 'id')
+        )->orderBy(DB::raw('ANY_VALUE('.$this->getTableName('screenshot', 'created_at').')'), 'ASC');
     }
 
     /**
