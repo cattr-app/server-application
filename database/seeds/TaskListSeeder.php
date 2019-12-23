@@ -101,7 +101,7 @@ class TaskListSeeder extends Seeder
                 'count_keyboard' => 43
             ]);
 
-            // $this->seedScreenshot($interval, $user);
+             $this->seedScreenshot($interval, $user);
         }
     }
 
