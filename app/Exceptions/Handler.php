@@ -100,10 +100,8 @@ class Handler extends ExceptionHandler
         }
 
         // Processing exception status code
-        if ($this->isDefaultPhpException($exception)) {
-            // If current exception is an PHP default error we'll interpret it as 500 Server Error code
-            $statusCode = 500;
-        } elseif ($isHttpException) {
+
+        if ($isHttpException) {
             // Otherwise, if it is Laravel's HttpException we can access getStatusCode() method from exception
             // instance
             $statusCode = $exception->getStatusCode();
@@ -123,6 +121,9 @@ class Handler extends ExceptionHandler
         } elseif ($code === 404 || $code === 401 || $code === 429 || $code == 420) {
             // If we have 404 or 401 code we will process it as an request status code
             $statusCode = $code;
+        } elseif ($this->isDefaultPhpException($exception)) {
+            // If current exception is an PHP default error we'll interpret it as 500 Server Error code
+            $statusCode = 500;
         } else {
             // Otherwise, if non of previous checks was correct we'll assuming that current exception was thrown
             // because of a bad request body
