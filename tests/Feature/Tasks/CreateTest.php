@@ -16,8 +16,6 @@ class CreateTest extends TestCase
 {
     private const URI = 'v1/tasks/create';
 
-    private const PRIORITY_ID = 2;
-
     /**
      * @var User
      */
