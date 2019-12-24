@@ -2,14 +2,11 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
-use App\Models\Project;
+use App\Helpers\ReportHelper;
 use App\Models\Property;
-use App\Models\ProjectReport;
-use Auth;
 use Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use DB;
 use Carbon\Carbon;
 use Validator;
 
@@ -19,6 +16,11 @@ use Validator;
  */
 class TimeUseReportController extends ReportController
 {
+    /**
+     * @var ReportHelper
+     */
+    protected $reportHelper;
+
     /**
      * @return string
      */
@@ -34,11 +36,15 @@ class TimeUseReportController extends ReportController
 
     /**
      * ProjectReportController constructor.
+     * @param ReportHelper $reportHelper
      */
-    public function __construct()
+    public function __construct(
+        ReportHelper $reportHelper
+    )
     {
         $companyTimezoneProperty = Property::getProperty(Property::COMPANY_CODE, 'TIMEZONE')->first();
         $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
+        $this->reportHelper = $reportHelper;
 
         parent::__construct();
     }
@@ -85,7 +91,7 @@ class TimeUseReportController extends ReportController
 
         $user_ids = $request->input('user_ids', []);
 
-        $timezone = $this->timezone;
+        $timezone = $request->input('timezone', []) ?? $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -96,49 +102,13 @@ class TimeUseReportController extends ReportController
             ->tz('UTC')
             ->toDateTimeString();
 
-        $projectReports = ProjectReport::query()
-            ->with('user')
-            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
-                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
-                DB::raw('SUM(duration) as duration')
-            )
-            ->whereIn('user_id', $user_ids)
-            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
-            ->where('date', '>=', $startAt)
-            ->where('date', '<', $endAt)
-            ->groupBy('user_id', 'task_id', 'project_id', 'task_name', 'project_name')
-            ->get();
-
-        $users = [];
-
-        foreach ($projectReports as $projectReport) {
-            $user_id = $projectReport->user_id;
-            $duration = (int)$projectReport->duration;
-
-            if (!isset($users[$user_id])) {
-                $users[$user_id] = [
-                    'user' => $projectReport->user,
-                    'total_time' => 0,
-                ];
-            }
-
-            $users[$user_id]['tasks'][] = [
-                'task_id' => $projectReport->task_id,
-                'project_id' => $projectReport->project_id,
-                'name' => $projectReport->task_name,
-                'project_name' => $projectReport->project_name,
-                'total_time' => $duration,
-            ];
-
-            $users[$user_id]['total_time'] += $duration;
-        }
-
-        $report = [['users' => array_values($users)]];
+        $collection = $this->reportHelper->getTimeUseReportQuery($user_ids, $startAt, $endAt, $timezoneOffset)->get();
+        $resultCollection = $this->reportHelper->getProcessedTimeUseReportCollection($collection);
 
         return response()->json(
             Filter::process(
                 $this->getEventUniqueName('answer.success.report.show'),
-                $report
+                $resultCollection
             )
         );
     }
