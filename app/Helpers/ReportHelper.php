@@ -284,7 +284,7 @@ class ReportHelper
         string $endAt,
         $timezoneOffset
     ): Builder {
-        $query = $this->getBaseQuery($uids, $pids, $startAt, $endAt, $timezoneOffset, [
+        $query = $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
             "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path, 'created_at', CONVERT_TZ(screenshots.created_at, '+00:00', ?))) as screens"
         ], [$timezoneOffset]);
 
