@@ -506,6 +506,7 @@ class ScreenshotController extends ItemController
      * @param  Request  $request
      *
      * @return \Illuminate\Http\JsonResponse
+     * @throws \Exception
      * @api            {post} /api/v1/screenshots/dashboard Dashboard
      * @apiDescription Get dashboard of Screenshots
      * @apiVersion     0.1.0
@@ -543,7 +544,6 @@ class ScreenshotController extends ItemController
      * @apiSuccess {String}   Array.object.screenshots.object.updated_at       Screenshot date time of update
      * @apiSuccess {String}   Array.object.screenshots.object.deleted_at       Screenshot date time of delete
      * @apiSuccess {Object}   Array.object.screenshots.object.time_interval    Screenshot Task
-     *
      */
     public function dashboard(Request $request): JsonResponse
     {
@@ -652,10 +652,10 @@ class ScreenshotController extends ItemController
 
                 // Filter by project roles of the user
                 $query->whereHas('timeInterval.task.project.usersRelation',
-                    static function (Builder $query) use ($user_id, $object, $action) {
+                    function (Builder $query) use ($user_id, $object, $action) {
                         $query->where('user_id', $user_id)->whereHas('role',
-                            static function (Builder $query) use ($object, $action) {
-                                $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                            function (Builder $query) use ($object, $action) {
+                                $query->whereHas('rules', function (Builder $query) use ($object, $action) {
                                     $query->where([
                                         'object' => $object,
                                         'action' => $action,
@@ -666,15 +666,15 @@ class ScreenshotController extends ItemController
                     });
 
                 // For read and delete access include user own intervals
-                $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
-                    $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
+                $query->when($action !== 'edit', function (Builder $query) use ($user_id) {
+                    $query->orWhereHas('timeInterval', function (Builder $query) use ($user_id) {
                         $query->where('user_id', $user_id)->select('user_id');
                     });
                 });
 
                 $query->when($action === 'edit' && (bool) $user->manual_time,
-                    static function (Builder $query) use ($user_id) {
-                        $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
+                    function (Builder $query) use ($user_id) {
+                        $query->orWhereHas('timeInterval', function (Builder $query) use ($user_id) {
                             $query->where('user_id', $user_id)->select('user_id');
                         });
                     });
