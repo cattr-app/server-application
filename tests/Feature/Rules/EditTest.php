@@ -76,7 +76,7 @@ class EditTest extends TestCase
     public function test_not_existing_rule()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->incorrectRule);
-        $response->assertApiError(400);
+        $response->assertApiError(404);
     }
 
     public function test_unauthorized()
