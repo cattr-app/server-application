@@ -3,7 +3,7 @@
 namespace Tests\Feature\Auth\PasswordReset;
 
 use App\Mail\ResetPassword;
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\User;
 use Notification;
 use Tests\TestCase;
@@ -24,7 +24,7 @@ class RequestTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = app(UserFactory::class)->create();
+        $this->user = UserFactory::create();
     }
 
     public function test_request()

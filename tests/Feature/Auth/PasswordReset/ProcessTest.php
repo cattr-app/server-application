@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Auth\PasswordReset;
 
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\User;
 use DB;
 use Hash;
@@ -25,7 +25,7 @@ class ProcessTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = app(UserFactory::class)->create();
+        $this->user = UserFactory::create();
     }
 
     /**

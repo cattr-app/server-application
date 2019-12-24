@@ -4,6 +4,9 @@ namespace Tests\Factories;
 
 use App\Models\Project;
 use App\User;
+use Tests\Factories\Facades\ProjectFactory;
+use Tests\Factories\Facades\IntervalFactory;
+use Tests\Factories\Facades\UserFactory;
 use Faker\Factory as FakerFactory;
 use App\Models\Task;
 
@@ -20,8 +23,6 @@ class TaskFactory extends AbstractFactory
      * @var int
      */
     private $needsIntervals = 0;
-
-    private $needsUser = false;
 
     /**
      * @var User
@@ -66,15 +67,6 @@ class TaskFactory extends AbstractFactory
         return $this;
     }
 
-    /**
-     * @return $this
-     */
-    public function withUser()
-    {
-        $this->needsUser = true;
-
-        return $this;
-    }
 
     /**
      * @param array $attributes
@@ -91,11 +83,8 @@ class TaskFactory extends AbstractFactory
         $task = Task::make($taskData);
 
         $this->defineProject($task);
+        $this->defineUser($task);
 
-        if ($this->needsUser) {
-            $user = app(UserFactory::class)->create();
-            $task->user_id = $user->id;
-        }
         $task->save();
 
         if ($this->needsIntervals) {
@@ -126,7 +115,7 @@ class TaskFactory extends AbstractFactory
     private function defineProject(Task &$task)
     {
         if (!$this->project) {
-            $this->project = app(ProjectFactory::class)->create();
+            $this->project = ProjectFactory::create();
         }
 
         $task->project_id = $this->project->id;
@@ -135,11 +124,22 @@ class TaskFactory extends AbstractFactory
     /**
      * @param Task $task
      */
+    private function defineUser(Task &$task)
+    {
+        if (!$this->user) {
+            $this->user = UserFactory::create();
+        }
+
+        $task->user_id = $this->user->id;
+    }
+
+    /**
+     * @param Task $task
+     */
     private function createIntervals(Task $task): void
     {
         do {
-            app(IntervalFactory::class)
-                ->forUser($this->user)
+            IntervalFactory::forUser($this->user)
                 ->forTask($task)
                 ->create();
         } while (--$this->needsIntervals);

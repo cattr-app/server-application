@@ -3,7 +3,7 @@
 
 namespace Tests\Feature\Auth;
 
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\User;
 use Tests\TestCase;
 
@@ -24,9 +24,7 @@ class LogoutFromAllTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = app(UserFactory::class)
-            ->withTokens(4)
-            ->create();
+        $this->user = UserFactory::withTokens(4)->create();
     }
 
     public function test_logout_from_all()

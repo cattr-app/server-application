@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Rules;
 
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\User;
 use Tests\TestCase;
 
@@ -38,15 +38,8 @@ class EditTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = app(UserFactory::class)
-            ->withTokens()
-            ->asUser()
-            ->create();
-
-        $this->admin = app(UserFactory::class)
-            ->withTokens()
-            ->asAdmin()
-            ->create();
+        $this->user = UserFactory::asUser()->withTokens()->create();
+        $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
         $this->correctRule = [
             'role_id' => 1,

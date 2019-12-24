@@ -96,13 +96,12 @@ class UserFactory extends AbstractFactory
     {
         $tokens = [];
 
-        do{
+        do {
             $tokens[] = [
                 'token' => JWTAuth::fromUser($user),
                 'expires_at' => now()->addDay()
             ];
-        }
-        while (--$this->needsTokens);
+        } while (--$this->needsTokens);
 
         $user->tokens()->createMany($tokens);
     }

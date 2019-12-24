@@ -3,8 +3,8 @@
 namespace Tests\Feature\Tasks;
 
 use App\Models\Task;
-use Tests\Factories\TaskFactory;
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\TaskFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\User;
 use Tests\TestCase;
 
@@ -27,6 +27,15 @@ class ShowTest extends TestCase
      */
     private $task;
 
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->admin = UserFactory::asAdmin()->withTokens()->create();
+
+        $this->task = TaskFactory::create();
+    }
+
     public function test_show()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->task->id]);
@@ -47,17 +56,5 @@ class ShowTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 
         $response->assertApiError(400, true);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->admin = app(UserFactory::class)
-            ->withTokens()
-            ->asAdmin()
-            ->create();
-
-        $this->task = app(TaskFactory::class)->create();
     }
 }

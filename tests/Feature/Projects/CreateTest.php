@@ -3,8 +3,8 @@
 namespace Tests\Feature\Projects;
 
 use App\User;
-use Tests\Factories\ProjectFactory;
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\ProjectFactory;
+use Tests\Factories\Facades\UserFactory;
 use Tests\TestCase;
 
 /**
@@ -13,9 +13,7 @@ use Tests\TestCase;
  */
 class CreateTest extends TestCase
 {
-
     private const URI = 'v1/projects/create';
-
 
     /**
      * @var User
@@ -30,12 +28,9 @@ class CreateTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = app(UserFactory::class)
-            ->withTokens()
-            ->asAdmin()
-            ->create();
+        $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->projectData = app(ProjectFactory::class)->getRandomProjectData();
+        $this->projectData = ProjectFactory::getRandomProjectData();
     }
 
     public function test_create()

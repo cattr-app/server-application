@@ -3,8 +3,8 @@
 namespace Tests\Feature\Projects;
 
 use App\Models\Project;
-use Tests\Factories\ProjectFactory;
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\ProjectFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\User;
 use Tests\TestCase;
 
@@ -30,12 +30,9 @@ class RemoveTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = app(UserFactory::class)
-            ->withTokens()
-            ->asAdmin()
-            ->create();
+        $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->project = app(ProjectFactory::class)->create();
+        $this->project = ProjectFactory::create();
     }
 
     public function test_remove()

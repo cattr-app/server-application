@@ -54,7 +54,9 @@ class ProjectFactory extends AbstractFactory
         $project = Project::create($projectData);
 
         if ($this->users) {
-            $project->users()->attach($this->users);
+            foreach ($this->users as $user) {
+                $project->users()->attach($user->id);
+            }
         }
 
         if ($this->needsTasks) {
@@ -68,7 +70,7 @@ class ProjectFactory extends AbstractFactory
      * @param array $users
      * @return $this
      */
-    public function associateUsers(array $users): self
+    public function forUsers(array $users): self
     {
         $this->users = $users;
 

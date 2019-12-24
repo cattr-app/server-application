@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\User;
 use Tests\TestCase;
 
@@ -28,7 +28,7 @@ class LoginTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = app(UserFactory::class)->create();
+        $this->user = UserFactory::create();
         $this->loginData = [
             'email' => $this->user->email,
             'password' => $this->user->full_name

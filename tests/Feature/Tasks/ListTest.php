@@ -3,8 +3,8 @@
 namespace Tests\Feature\Tasks;
 
 use App\Models\Task;
-use Tests\Factories\TaskFactory;
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\TaskFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\User;
 use Tests\TestCase;
 
@@ -28,16 +28,11 @@ class ListTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = app(UserFactory::class)
-            ->withTokens()
-            ->asAdmin()
-            ->create();
+        $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->commonUser = app(UserFactory::class)
-            ->withTokens()
-            ->create();
+        $this->commonUser = UserFactory::withTokens()->asUser()->create();
 
-        app(TaskFactory::class)->createMany(self::TASKS_AMOUNT);
+        TaskFactory::createMany(self::TASKS_AMOUNT);
     }
 
     public function test_list()

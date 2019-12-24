@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Auth;
 
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\User;
 use Tests\TestCase;
 
@@ -23,9 +23,7 @@ class RefreshTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = app(UserFactory::class)
-            ->withTokens()
-            ->create();
+        $this->user = UserFactory::withTokens()->create();
     }
 
     public function test_refresh()

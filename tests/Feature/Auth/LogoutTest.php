@@ -4,7 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\User;
 use Tests\TestCase;
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\UserFactory;
 
 /**
  * Class LogoutTest
@@ -23,9 +23,7 @@ class LogoutTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = app(UserFactory::class)
-            ->withTokens()
-            ->create();
+        $this->user = UserFactory::withTokens()->create();
     }
 
     public function test_logout()

@@ -3,8 +3,8 @@
 namespace Tests\Feature\Tasks;
 
 use App\User;
-use Tests\Factories\ProjectFactory;
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\ProjectFactory;
+use Tests\Factories\Facades\UserFactory;
 use Tests\TestCase;
 
 /**
@@ -30,21 +30,15 @@ class CreateTest extends TestCase
     {
         parent::setUp();
 
-        $this->admin = app(UserFactory::class)
-            ->withTokens()
-            ->asAdmin()
-            ->create();
-
-        $project = app(ProjectFactory::class)->create();
-        $user = app(UserFactory::class)->create();
+        $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
         $this->taskData = [
-            'project_id' => $project->id,
+            'project_id' => ProjectFactory::create()->id,
             'task_name' => 'Test Task',
             'description' => 'Test Description',
             'priority_id' => self::PRIORITY_ID,
             'active' => true,
-            'user_id' => $user->id
+            'user_id' => UserFactory::create()->id
         ];
     }
 

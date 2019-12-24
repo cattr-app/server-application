@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Rules;
 
-use Tests\Factories\UserFactory;
+use Tests\Factories\Facades\UserFactory;
 use App\Models\Rule;
 use App\User;
 use Tests\TestCase;
@@ -29,15 +29,8 @@ class ListTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = app(UserFactory::class)
-            ->withTokens()
-            ->asUser()
-            ->create();
-
-        $this->admin = app(UserFactory::class)
-            ->withTokens()
-            ->asAdmin()
-            ->create();
+        $this->user = UserFactory::asUser()->withTokens()->create();
+        $this->admin = UserFactory::asAdmin()->withTokens()->create();
     }
 
     public function test_list()
