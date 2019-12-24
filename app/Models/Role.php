@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-
 use App\User;
 use Auth;
 use Eloquent;
@@ -13,13 +12,14 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 /**
  * Class Role
  *
  * @package App\Models
- * @property int    $id
+ * @property int $id
  * @property string $name
  * @property string $created_at
  * @property string $updated_at
@@ -82,7 +82,7 @@ class Role extends AbstractModel
     /**
      * Attach this role to user
      *
-     * @param  int|User  $user
+     * @param int|User $user
      */
     /*public function attachToUser($user)
     {
@@ -96,7 +96,7 @@ class Role extends AbstractModel
     /**
      * Detach this role from user
      *
-     * @param  int|User  $user
+     * @param int|User $user
      */
     /*public function detachFromUser($user)
     {
@@ -186,14 +186,18 @@ class Role extends AbstractModel
 
         $user = Auth::user();
 
-        throw_if(!$rule, new Exception('rule does not exist', 400));
+        throw_if(!$rule, new HttpException(404, 'Rule does not exist'));
         if (!static::can($user, 'rules', 'full_access')) {
             $userRoleIds = [$user->role_id];
-            throw_if($userRoleIds->contains($rule->role_id),
-                new Exception('you cannot change your own privileges', 403));
+            throw_if(
+                $userRoleIds->contains($rule->role_id),
+                new HttpException(403, 'You cannot change your own privileges')
+            );
         }
-        throw_if($role_id === 1 && $object === 'rules' && $action === 'full_access',
-            new Exception('you cannot change rule management for root', 403));
+        throw_if(
+            $role_id === 1 && $object === 'rules' && $action === 'full_access',
+            new HttpException(403, 'You cannot change rule management for root')
+        );
 
         $rule->allow = $allow;
         return $rule->save();
@@ -209,7 +213,7 @@ class Role extends AbstractModel
      */
     public static function can($user, $object, $action, $id = null): bool
     {
-        if ((bool) $user->is_admin) {
+        if ((bool)$user->is_admin) {
             return true;
         }
 
@@ -255,7 +259,7 @@ class Role extends AbstractModel
                 // Get role of the user in the project
                 $projectUserRelation = ProjectsUsers::where([
                     'project_id' => $projectID,
-                    'user_id'    => $user->id,
+                    'user_id' => $user->id,
                 ])->first();
                 if (isset($projectUserRelation)) {
                     $userRoleIds[] = $projectUserRelation->role_id;
@@ -269,12 +273,11 @@ class Role extends AbstractModel
         ])->get();
 
         foreach ($rules as $rule) {
-            if ((bool) $rule->allow) {
+            if ((bool)$rule->allow) {
                 return true;
             }
         }
 
         return false;
     }
-
 }

@@ -99,8 +99,23 @@ class ReportHelper
                     ];
                 }
 
-                $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['duration'] +=
-                    $item->task_duration;
+                if (!array_key_exists(
+                    'dates',
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id])
+                ) {
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'] = [];
+                }
+
+                if (!array_key_exists(
+                    $item->task_date,
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'])
+                ) {
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$item
+                        ->task_date] = 0;
+                }
+
+                $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]
+                ['dates'][$item->task_date] += $item->task_duration;
 
                 $screenshotsCollection = collect(json_decode($item->screens, true))
                     ->groupBy(function ($screen) {
@@ -110,16 +125,25 @@ class ReportHelper
                         return $screen->groupBy(function ($screen) {
                             return Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
                         });
-                    });
+                    })->toArray();
 
                 $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'] =
-                    $screenshotsCollection;
+                    array_merge(
+                        $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'],
+                        $screenshotsCollection
+                    );
 
             }
         }
 
         foreach ($resultCollection as &$project) {
             foreach ($project['users'] as &$user) {
+                foreach ($user['tasks'] as &$task) {
+                    foreach ($task['dates'] as $dateSummary) {
+                        $task['duration'] += $dateSummary;
+                    }
+                }
+
                 usort($user['tasks'], function ($a, $b) {
                     return $a['duration'] < $b['duration'];
                 });
@@ -188,6 +212,8 @@ class ReportHelper
      * @param          $timezoneOffset
      * @param  array   $rawSelect
      *
+     * @param  array   $bindings
+     *
      * @return Builder
      */
     public function getBaseQuery(
@@ -195,7 +221,8 @@ class ReportHelper
         string $startAt,
         string $endAt,
         $timezoneOffset,
-        array $rawSelect = []
+        array $rawSelect = [],
+        array $bindings = []
     ): Builder {
         $rawSelect = implode(', ',
             array_unique(
@@ -212,8 +239,10 @@ class ReportHelper
             )
         );
 
+        $bindings = array_merge([$timezoneOffset], $bindings);
+
         return DB::table($this->getTableName('project'))
-            ->selectRaw($rawSelect, [$timezoneOffset])
+            ->selectRaw($rawSelect, [$bindings])
             ->join(
                 $this->getTableName('task'),
                 $this->getTableName('task', 'project_id'),
@@ -255,10 +284,9 @@ class ReportHelper
         string $endAt,
         $timezoneOffset
     ): Builder {
-        $query = $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
-            "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path',
-             screenshots.thumbnail_path, 'created_at', screenshots.created_at)) as screens"
-        ]);
+        $query = $this->getBaseQuery($uids, $pids, $startAt, $endAt, $timezoneOffset, [
+            "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path, 'created_at', CONVERT_TZ(screenshots.created_at, '+00:00', ?))) as screens"
+        ], [$timezoneOffset]);
 
         return $query->join(
                 $this->getTableName('screenshot'),
