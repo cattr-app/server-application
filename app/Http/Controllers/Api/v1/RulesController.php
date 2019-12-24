@@ -124,13 +124,16 @@ class RulesController extends ItemController
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
-                ]), 400);
+                ]),
+                400
+            );
         }
 
 
         Role::updateAllow($requestData['role_id'], $requestData['object'], $requestData['action'], $requestData['allow']);
         return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.edit'), [
+            $this->getEventUniqueName('answer.success.item.edit'),
+            [
                 'success' => true,
                 'message' => 'Role successfully updated',
             ]
@@ -199,7 +202,9 @@ class RulesController extends ItemController
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'rules is empty',
-                ]), 400);
+                ]),
+                400
+            );
         }
 
         $rules = $requestData['rules'];
@@ -210,7 +215,9 @@ class RulesController extends ItemController
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'rules should be an array',
-                ]), 400);
+                ]),
+                400
+            );
         }
 
         foreach ($rules as $rule) {
@@ -236,7 +243,8 @@ class RulesController extends ItemController
         }
 
         return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.bulkEdit'), [
+            $this->getEventUniqueName('answer.success.item.bulkEdit'),
+            [
                 'messages' => $result,
             ]
         ));
@@ -298,7 +306,8 @@ class RulesController extends ItemController
         }
 
         return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.list'), $items
+            $this->getEventUniqueName('answer.success.item.list'),
+            $items
         ));
     }
 }
