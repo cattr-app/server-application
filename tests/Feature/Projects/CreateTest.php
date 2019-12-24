@@ -3,6 +3,7 @@
 namespace Tests\Feature\Projects;
 
 use App\User;
+use Tests\Factories\ProjectFactory;
 use Tests\Factories\UserFactory;
 use Tests\TestCase;
 
@@ -15,7 +16,6 @@ class CreateTest extends TestCase
 
     private const URI = 'v1/projects/create';
 
-    private const COMPANY_ID = 2;
 
     /**
      * @var User
@@ -35,11 +35,7 @@ class CreateTest extends TestCase
             ->asAdmin()
             ->create();
 
-        $this->projectData = [
-            'company_id'=> self::COMPANY_ID,
-            'name' => 'Test Project',
-            'description' => 'Test Description'
-        ];
+        $this->projectData = app(ProjectFactory::class)->getRandomProjectData();
     }
 
     public function test_create()
