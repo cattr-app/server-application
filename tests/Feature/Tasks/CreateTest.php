@@ -4,6 +4,7 @@ namespace Tests\Feature\Tasks;
 
 use App\User;
 use Tests\Facades\ProjectFactory;
+use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
@@ -32,14 +33,10 @@ class CreateTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->taskData = [
+        $this->taskData = array_merge(TaskFactory::getRandomTaskData(), [
             'project_id' => ProjectFactory::create()->id,
-            'task_name' => 'Test Task',
-            'description' => 'Test Description',
-            'priority_id' => self::PRIORITY_ID,
-            'active' => true,
             'user_id' => UserFactory::create()->id
-        ];
+        ]);
     }
 
     public function test_create()

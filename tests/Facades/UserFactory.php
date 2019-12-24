@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static BaseUserFactory asAdmin()
  * @method static BaseUserFactory asUser()
  * @method static array getRandomUserData()
+ * @method static array getBasicUserData()
  * @mixin BaseUserFactory
  */
 class UserFactory extends Facade

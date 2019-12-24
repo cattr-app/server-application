@@ -26,7 +26,6 @@ class ValidateTest extends TestCase
         parent::setUp();
 
         $this->user = UserFactory::create();
-
     }
 
     /**

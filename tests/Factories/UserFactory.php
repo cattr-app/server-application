@@ -30,6 +30,21 @@ class UserFactory extends AbstractFactory
     /**
      * @return array
      */
+    public function getBasicUserData(): array
+    {
+        $faker = FakerFactory::create();
+
+        return [
+            'full_name' => $faker->name,
+            'email' => $faker->unique()->safeEmail,
+            'active' => 1,
+            'password' => $faker->password
+        ];
+    }
+
+    /**
+     * @return array
+     */
     public function getRandomUserData(): array
     {
         $faker = FakerFactory::create();
