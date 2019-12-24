@@ -3,8 +3,8 @@
 namespace Tests\Feature\Projects;
 
 use App\User;
-use Tests\Factories\Facades\ProjectFactory;
-use Tests\Factories\Facades\UserFactory;
+use Tests\Facades\ProjectFactory;
+use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 /**

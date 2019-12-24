@@ -4,9 +4,9 @@ namespace Tests\Factories;
 
 use App\Models\Project;
 use App\User;
-use Tests\Factories\Facades\ProjectFactory;
-use Tests\Factories\Facades\IntervalFactory;
-use Tests\Factories\Facades\UserFactory;
+use Tests\Facades\ProjectFactory;
+use Tests\Facades\IntervalFactory;
+use Tests\Facades\UserFactory;
 use Faker\Factory as FakerFactory;
 use App\Models\Task;
 

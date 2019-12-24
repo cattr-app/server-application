@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Auth\PasswordReset;
 
-use Tests\Factories\Facades\UserFactory;
+use Tests\Facades\UserFactory;
 use App\User;
 use DB;
 use Hash;

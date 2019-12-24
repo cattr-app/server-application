@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Factories\Facades;
+namespace Tests\Facades;
 
 use Tests\Factories\ProjectFactory as BaseProjectFactory;
 use App\Models\Project;

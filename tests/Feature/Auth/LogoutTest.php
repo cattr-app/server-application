@@ -4,7 +4,7 @@ namespace Tests\Feature\Auth;
 
 use App\User;
 use Tests\TestCase;
-use Tests\Factories\Facades\UserFactory;
+use Tests\Facades\UserFactory;
 
 /**
  * Class LogoutTest

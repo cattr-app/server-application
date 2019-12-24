@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Factories\Facades;
+namespace Tests\Facades;
 
 use App\User;
 use Tests\Factories\TaskFactory as BaseTaskFactory;

@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Factories\Facades;
+namespace Tests\Facades;
 
 use App\Models\Task;
 use App\User;

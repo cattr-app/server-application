@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Rules;
 
-use Tests\Factories\Facades\UserFactory;
+use Tests\Facades\UserFactory;
 use App\Models\Rule;
 use App\User;
 use Tests\TestCase;

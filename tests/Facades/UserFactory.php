@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Factories\Facades;
+namespace Tests\Facades;
 
 use Tests\Factories\UserFactory as BaseUserFactory;
 use App\User;
