@@ -199,7 +199,7 @@ class ReportHelper
             ->whereIn($this->getTableName('project', 'id'), $pids)
             ->where($this->getTableName('timeInterval', 'start_at'), '>=', $startAt)
             ->where($this->getTableName('timeInterval', 'end_at'), '<', $endAt)
-            ->whereIn($this->getTableName('user'), $uids)
+            ->whereIn($this->getTableName('user', 'id'), $uids)
             ->groupBy(['task_id', 'task_date'])
             ->orderBy('task_date', 'ASC');
     }
