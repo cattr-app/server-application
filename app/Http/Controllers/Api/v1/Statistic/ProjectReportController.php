@@ -123,8 +123,8 @@ class ProjectReportController extends ReportController
         );
 
 
-        $collection = $this->reportHelper->getReportQuery($uids, $pids, $startAt, $endAt, $timezoneOffset)->get();
-        $resultCollection = $this->reportHelper->getProcessedCollection($collection);
+        $collection = $this->reportHelper->getProjectReportQuery($uids, $pids, $startAt, $endAt, $timezoneOffset)->get();
+        $resultCollection = $this->reportHelper->getProcessedProjectReportCollection($collection);
 
         return response()->json(
             Filter::process(
