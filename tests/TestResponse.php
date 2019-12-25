@@ -62,6 +62,11 @@ class TestResponse extends BaseTestResponse
         return $this->assertError(400, $type, $hasInfo);
     }
 
+    public function assertItemNotFound(string $type = 'query.item_not_found', bool $hasInfo = false)
+    {
+        return $this->assertError(404, $type, $hasInfo);
+    }
+
     /**
      * Assert that the response has the given status code
      * and correct structure

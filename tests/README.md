@@ -16,5 +16,5 @@
 * Copy `.env.testing.example` file and rename it to `.env.testing`.  
 * In `.env.testing` edit DB connection info to match yours.  
 * After that you need to apply migrations to your testing database `php artisan migrate --env=testing`.  
-* And run RoleSeeder `php artisan db:seed --class=RoleSeeder`.
+* And run RoleSeeder `php artisan db:seed --class=RoleSeeder --env=testing` .
 
