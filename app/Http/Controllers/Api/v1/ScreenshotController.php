@@ -2,22 +2,20 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Exceptions\CarnivalUnavailableException;
 use App\Helpers\QueryHelper;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
-use App\Services\ImageService;
 use Auth;
 use Carbon\Carbon;
+use Exception;
 use Filter;
-use GuzzleHttp\Exception\ConnectException;
-use GuzzleHttp\Exception\RequestException;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
 use Validator;
 
 /**
@@ -27,19 +25,6 @@ use Validator;
  */
 class ScreenshotController extends ItemController
 {
-
-    /**
-     * @var ImageService
-     */
-    protected $imageService;
-
-    public function __construct(ImageService $imageService)
-    {
-        parent::__construct();
-        $this->imageService = $imageService;
-    }
-
-
     // TODO: find out why it is done this way
 
     /**
@@ -103,7 +88,7 @@ class ScreenshotController extends ItemController
      */
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      * @api            {post} /api/v1/screenshots/list List
@@ -164,11 +149,11 @@ class ScreenshotController extends ItemController
     /**
      * Show the form for creating a new resource.
      *
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
-     * @throws CarnivalUnavailableException
-     * @api            {post} /api/v1/screenshots/create Create
+     *
+     * @api            {post} dmin Create
      * @apiDescription Create Screenshot
      * @apiVersion     0.1.0
      * @apiName        CreateScreenshot
@@ -209,38 +194,27 @@ class ScreenshotController extends ItemController
                 400);
         }
 
-        // Get path to screenshot stored in tmp
-        $screenshotPath = $request->screenshot->path();
+        $screenStorePath = $request->screenshot->store('uploads/screenshots');
+        $absoluteStorePath = Storage::disk()->path($screenStorePath);
+        $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
 
-        // Open it in order to get stream
-        $screenshotStream = fopen($screenshotPath, 'r');
+        $screenshot = Image::make($path);
 
-        // Get stream for thumb
-        $thumbStream = $this->imageService->makeThumb($screenshotPath);
+        $thumbnail = $screenshot->resize(280, null, static function ($constraint) {
+            $constraint->aspectRatio();
+        });
 
-        try {
-
-            // Push screen and thumb to carnival and get their public URI
-            $publicScreenshotUrl = $this->imageService->pushScreenAndThumbToCarnival(
-                $screenshotStream, $thumbStream, Auth::id()
-            );
-
-        } catch (ConnectException $e) {
-
-            throw new CarnivalUnavailableException('Carnival service is unavailable');
-
-        } catch (RequestException $e) {
-            // Do nothing pls ok?
-        }
+        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
+        Storage::put($thumbnailPath, (string)$thumbnail->encode());
 
         // Get interval id
-        $timeIntervalID = ((int) $request->get('time_interval_id')) ?: null;
+        $timeIntervalID = ((int)$request->get('time_interval_id')) ?: null;
 
         // Pack everything we need
         $screenshotPack = [
             'time_interval_id' => $timeIntervalID,
-            'path' => $publicScreenshotUrl,
-            'thumbnail_path' => str_replace('.jpg', '-thumb.jpg', $publicScreenshotUrl),
+            'path' => $path,
+            'thumbnail_path' => str_replace('.jpg', '-thumb.jpg', $thumbnailPath),
         ];
 
         $validator = Validator::make(
@@ -274,45 +248,27 @@ class ScreenshotController extends ItemController
 
     public function destroy(Request $request): JsonResponse
     {
-
         // Get screenshot model
         $screenshotModel = $this->getItemClass();
 
         // Find exact screenshot to be deleted
         $screenshotToDel = $screenshotModel::where('id', $request->get('id'))->firstOrFail();
 
-        // Save it's path
-        $toDelPath = $screenshotToDel->path;
-
         // Get associated time interval
         $thisScreenshotTimeInterval = TimeInterval::where('id', $screenshotToDel->time_interval_id)->firstOrFail();
 
         // If this screenshot is last
         if ((int) $thisScreenshotTimeInterval->screenshots_count <= 1) {
-
             // Delete interval with it
             $thisScreenshotTimeInterval->delete();
 
         } else {
-
             // Or screenshot only otherwise
             $screenshotToDel->delete();
 
         }
 
-        try {
-
-            // Remove them from carnival
-            $deletedScreenshot = $this->imageService->rmScreenAndThumbFromCarnival(Auth::id(), $toDelPath);
-
-        } catch (ConnectException $e) {
-
-            throw new CarnivalUnavailableException('Carnival service is unavailable');
-
-        }
-
-        return response()->json($deletedScreenshot);
-
+        return response()->json('deleted');
     }
 
     /**
@@ -503,10 +459,11 @@ class ScreenshotController extends ItemController
      */
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
-     * @return \Illuminate\Http\JsonResponse
-     * @throws \Exception
+     * @return JsonResponse
+     * @throws Exception
+     *
      * @api            {post} /api/v1/screenshots/dashboard Dashboard
      * @apiDescription Get dashboard of Screenshots
      * @apiVersion     0.1.0
