@@ -17,6 +17,7 @@ use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 /**
  * Class Handler
@@ -118,9 +119,17 @@ class Handler extends ExceptionHandler
                 ]);
                 $errorType = 'http.request.wrong_method';
             }
+        } elseif ($exception instanceof TokenExpiredException) {
+            $message = $exception->getMessage();
+            $errorType = 'authorization.token_expired';
+            $statusCode = $exception->getCode();
         } elseif ($code === 404 || $code === 401 || $code === 429 || $code == 420) {
             // If we have 404 or 401 code we will process it as an request status code
             $statusCode = $code;
+
+            if ($code === 400) {
+                $errorType = 'authorization.unauthorized';
+            }
         } elseif ($this->isDefaultPhpException($exception)) {
             // If current exception is an PHP default error we'll interpret it as 500 Server Error code
             $statusCode = 500;
@@ -128,6 +137,10 @@ class Handler extends ExceptionHandler
             // Otherwise, if non of previous checks was correct we'll assuming that current exception was thrown
             // because of a bad request body
             $statusCode = 400;
+
+            if (!$request->bearerToken()) {
+                $errorType = 'authorization.invalid_token';
+            }
         }
 
         if ($errorType === false) {

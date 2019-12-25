@@ -125,7 +125,8 @@ class ReportHelper
                         return $screen->groupBy(function ($screen) {
                             return Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
                         });
-                    })->toArray();
+                    })
+                    ->toArray();
 
                 $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'] =
                     array_merge(
@@ -135,18 +136,22 @@ class ReportHelper
 
             }
         }
-
+        $a = 1;
         foreach ($resultCollection as &$project) {
+            $project['users'] = array_values($project['users']);
+
             foreach ($project['users'] as &$user) {
+                $user['tasks'] = array_values($user['tasks']);
+
                 foreach ($user['tasks'] as &$task) {
                     foreach ($task['dates'] as $dateSummary) {
                         $task['duration'] += $dateSummary;
                     }
                 }
 
-                usort($user['tasks'], function ($a, $b) {
+               /* usort($user['tasks'], function ($a, $b) {
                     return $a['duration'] < $b['duration'];
-                });
+                });*/
 
                 foreach ($user['tasks'] as $task) {
                     $user['tasks_time'] += $task['duration'];
@@ -155,16 +160,16 @@ class ReportHelper
                 $project['project_time'] += $user['tasks_time'];
             }
 
-            usort($project['users'], function ($a, $b) {
+            /*usort($project['users'], function ($a, $b) {
                 return $a['tasks_time'] < $b['tasks_time'];
-            });
+            });*/
         }
 
-        usort($resultCollection, function ($a, $b) {
+        /*usort($resultCollection, function ($a, $b) {
             return $a['project_time'] < $b['project_time'];
-        });
+        });*/
 
-        return collect($resultCollection);
+        return collect(array_values($resultCollection));
     }
 
     /**
@@ -206,7 +211,6 @@ class ReportHelper
 
     /**
      * @param  array   $uids
-     * @param  array   $pids
      * @param  string  $startAt
      * @param  string  $endAt
      * @param          $timezoneOffset
@@ -271,6 +275,7 @@ class ReportHelper
     /**
      * @param  array   $uids
      * @param  array   $pids
+     *
      * @param  string  $startAt
      * @param  string  $endAt
      * @param  mixed   $timezoneOffset
