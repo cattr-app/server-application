@@ -246,6 +246,7 @@ class ReportHelper
         $bindings = array_merge([$timezoneOffset], $bindings);
 
         return DB::table($this->getTableName('project'))
+            ->distinct()
             ->selectRaw($rawSelect, [$bindings])
             ->join(
                 $this->getTableName('task'),

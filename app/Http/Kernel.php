@@ -38,7 +38,6 @@ class Kernel extends HttpKernel
         ConvertEmptyStringsToNull::class,
         CorsMiddleware::class,
         LockMiddleware::class,
-        CheckTokenExpired::class
     ];
 
     /**

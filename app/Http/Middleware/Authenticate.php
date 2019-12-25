@@ -8,6 +8,7 @@ use DB;
 use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * Class Authenticate
@@ -16,14 +17,18 @@ use Illuminate\Http\Request;
 class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
 {
     /**
-     * @param Request $request
-     * @param Closure $next
-     * @param mixed ...$guards
+     * @param  Request  $request
+     * @param  Closure  $next
+     * @param  mixed    ...$guards
+     *
      * @return JsonResponse|mixed
      * @throws AuthorizationException
+     * @throws \Tymon\JWTAuth\Exceptions\JWTException
      */
     public function handle($request, Closure $next, ...$guards)
     {
+        JWTAuth::parseToken()->getClaim('exp');
+
         if (!Auth::check()) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
@@ -33,23 +38,6 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
         if (!$user || !$user->active) {
             DB::table('tokens')->where('user_id', $user->id)->delete();
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
-        }
-
-        // Check token.
-        $auth = explode(' ', $request->header('Authorization'));
-
-        if (!empty($auth) && count($auth) > 1 && $auth[0] === 'bearer') {
-            $token = $auth[1];
-            $token = DB::table('tokens')
-                ->where('user_id', auth()->user()->id)
-                ->where('token', $token)
-                ->where('expires_at', '>', time())
-                ->first()
-            ;
-
-            if (!isset($token)) {
-                throw new AuthorizationException(AuthorizationException::ERROR_TYPE_TOKEN_MISMATCH);
-            }
         }
 
         return $next($request);
