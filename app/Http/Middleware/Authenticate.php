@@ -2,41 +2,42 @@
 
 namespace App\Http\Middleware;
 
-use App\User;
 use Closure;
+use Auth;
+use DB;
 use App\Exceptions\Entities\AuthorizationException;
-use Illuminate\Auth\Middleware\Authenticate as BaseAuthenticate;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * Class Authenticate
  * @package App\Http\Middleware
  */
-class Authenticate extends BaseAuthenticate
+class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
 {
     /**
-     * @param Request $request
-     * @param Closure $next
-     * @param mixed ...$guards
+     * @param  Request  $request
+     * @param  Closure  $next
+     * @param  mixed    ...$guards
+     *
      * @return JsonResponse|mixed
      * @throws AuthorizationException
+     * @throws \Tymon\JWTAuth\Exceptions\JWTException
      */
     public function handle($request, Closure $next, ...$guards)
     {
-        if (!auth()->check()) {
+        JWTAuth::parseToken()->getClaim('exp');
+
+        if (!Auth::check()) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
-        /** @var User $user */
-        $user = auth()->user();
 
-        if (!$user->active) {
-            $user->tokens()->delete();
+        $user = Auth::user();
+
+        if (!$user || !$user->active) {
+            DB::table('tokens')->where('user_id', $user->id)->delete();
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
-        }
-
-        if (!request()->bearerToken()) {
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_TOKEN_MISMATCH);
         }
 
         return $next($request);

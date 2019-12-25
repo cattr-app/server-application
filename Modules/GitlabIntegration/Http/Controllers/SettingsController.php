@@ -47,11 +47,13 @@ class SettingsController extends Controller
     public function get(Request $request)
     {
         $userId = $request->user()->id;
+        $apiKey = $this->userProperties->getApiKey($userId);
+        $hiddenKey = (bool)$apiKey ? preg_replace('/^(.{4}).*(.{4})$/i', '$1 ********* $2', $apiKey) : $apiKey;
 
         return [
-            'enabled' => Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'gitlab_enabled'])->first()
+            'enabled' => (bool)Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'gitlab_enabled'])->first()
                 ->value ?? false,
-            'apikey' => $this->userProperties->getApiKey($userId)
+            'apikey' =>  $hiddenKey
         ];
     }
 
@@ -74,6 +76,10 @@ class SettingsController extends Controller
             return response()->json([
                 'error' => 'Validation fail',
             ], 400);
+        }
+
+        if (strpos($request->post('apikey'), '*') !== false) {
+            return response()->json(['success' => 'true', 'message' => 'Nothing to update!']);
         }
 
         $this->userProperties->setApiKey($userId, $request->post('apikey'));

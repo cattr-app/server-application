@@ -124,8 +124,23 @@ class ReportHelper
                     ->transform(function ($screen) {
                         return $screen->groupBy(function ($screen) {
                             return Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
-                        });
-                    })->toArray();
+                        })
+                        ->sortKeys();
+                    })
+                    ->transform(function ($screens) {
+                        foreach ($screens as $hourKey => $hourlyScreens) {
+                            foreach ($hourlyScreens as $screen) {
+                                $time = floor(Carbon::parse($screen['created_at'])
+                                    ->format('i') / 10);
+
+                                $result[$hourKey][$time] = $screen;
+                            }
+                            $result[$hourKey] = array_values($result[$hourKey]);
+                        }
+                        return $result;
+                    })
+                    ->sortKeys()
+                    ->toArray();
 
                 $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'] =
                     array_merge(
@@ -148,8 +163,9 @@ class ReportHelper
                     return $a['duration'] < $b['duration'];
                 });
 
-                foreach ($user['tasks'] as $task) {
-                    $user['tasks_time'] += $task['duration'];
+                /** The $task variable is already taken **/
+                foreach ($user['tasks'] as $userTask) {
+                    $user['tasks_time'] += $userTask['duration'];
                 }
 
                 $project['project_time'] += $user['tasks_time'];
