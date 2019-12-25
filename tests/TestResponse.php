@@ -52,16 +52,31 @@ class TestResponse extends BaseTestResponse
         return $this->assertError(401, $type, $hasInfo);
     }
 
+    /**
+     * @param string $type
+     * @param bool $hasInfo
+     * @return BaseTestResponse|TestResponse
+     */
     public function assertForbidden(string $type = 'authorization.forbidden', bool $hasInfo = true)
     {
         return $this->assertError(403, $type, $hasInfo);
     }
 
+    /**
+     * @param string $type
+     * @param bool $hasInfo
+     * @return TestResponse
+     */
     public function assertValidationError(string $type = 'validation', bool $hasInfo = true)
     {
         return $this->assertError(400, $type, $hasInfo);
     }
 
+    /**
+     * @param string $type
+     * @param bool $hasInfo
+     * @return TestResponse
+     */
     public function assertItemNotFound(string $type = 'query.item_not_found', bool $hasInfo = false)
     {
         return $this->assertError(404, $type, $hasInfo);
