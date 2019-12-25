@@ -8,6 +8,7 @@ use DB;
 use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
@@ -23,11 +24,14 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
      *
      * @return JsonResponse|mixed
      * @throws AuthorizationException
-     * @throws \Tymon\JWTAuth\Exceptions\JWTException
      */
     public function handle($request, Closure $next, ...$guards)
     {
-        JWTAuth::parseToken()->getClaim('exp');
+        try {
+            JWTAuth::parseToken()->getClaim('exp');
+        } catch (JWTException $exception) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        }
 
         if (!Auth::check()) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
