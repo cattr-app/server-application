@@ -304,7 +304,7 @@ class ReportHelper
             "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path, 'created_at', CONVERT_TZ(screenshots.created_at, '+00:00', ?))) as screens"
         ], [$timezoneOffset]);
 
-        return $query->join(
+        return $query->leftJoin(
                 $this->getTableName('screenshot'),
                 $this->getTableName('screenshot', 'time_interval_id'),
                 '=',
