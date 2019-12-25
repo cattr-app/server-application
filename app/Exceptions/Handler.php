@@ -17,6 +17,7 @@ use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 /**
@@ -47,7 +48,7 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param  Exception  $exception
+     * @param Exception $exception
      *
      * @return void
      * @throws Exception
@@ -64,8 +65,8 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  Request    $request
-     * @param  Exception  $exception
+     * @param Request $request
+     * @param Exception $exception
      *
      * @return JsonResponse|Response
      */
@@ -78,7 +79,7 @@ class Handler extends ExceptionHandler
         $message = $exception->getMessage();
         $isHttpException = $this->isHttpException($exception);
         $cls = get_class($exception);
-        $code = (int) $exception->getCode();
+        $code = (int)$exception->getCode();
 
         $debugData = false;
         $info = $exception instanceof InfoExtendedException ? $exception->getInfo() : false;
@@ -102,7 +103,11 @@ class Handler extends ExceptionHandler
 
         // Processing exception status code
 
-        if ($isHttpException) {
+        if ($exception instanceof AuthorizationException) {
+            $statusCode = $exception->getStatusCode();
+            $errorType = $exception->getType();
+
+        } elseif ($isHttpException) {
             // Otherwise, if it is Laravel's HttpException we can access getStatusCode() method from exception
             // instance
             $statusCode = $exception->getStatusCode();
@@ -177,8 +182,8 @@ class Handler extends ExceptionHandler
     /**
      * Convert an authentication exception into an unauthenticated response.
      *
-     * @param  Request                  $request
-     * @param  AuthenticationException  $exception
+     * @param Request $request
+     * @param AuthenticationException $exception
      *
      * @return JsonResponse|Response
      */
@@ -188,11 +193,11 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * @param  \Throwable  $e
+     * @param Throwable $e
      *
      * @return bool
      */
-    protected function isDefaultPhpException(\Throwable $e): bool
+    protected function isDefaultPhpException(Throwable $e): bool
     {
         return $e instanceof \Error ||
             $e instanceof \RuntimeException ||
@@ -202,7 +207,7 @@ class Handler extends ExceptionHandler
     /**
      * Determine if the given exception is an HTTP exception.
      *
-     * @param  \Exception  $e
+     * @param Exception $e
      *
      * @return bool
      */
