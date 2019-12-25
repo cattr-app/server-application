@@ -56,7 +56,7 @@ class LoginTest extends TestCase
         $this->user->active = false;
         $this->user->save();
         $response = $this->postJson(self::URI, $this->loginData);
-        $response->assertError(403);
+        $response->assertForbidden('authorization.user_disabled', false);
     }
 
     public function test_soft_deleted_user()
