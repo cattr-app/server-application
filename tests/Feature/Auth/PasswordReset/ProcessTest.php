@@ -56,7 +56,7 @@ class ProcessTest extends TestCase
 
         $response = $this->postJson(self::URI, $reset);
 
-        $response->assertApiSuccess();
+        $response->assertSuccess();
 
         $this->user->refresh();
 
@@ -71,7 +71,7 @@ class ProcessTest extends TestCase
 
         $response = $this->postJson(self::URI, $reset);
 
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 
     public function test_invalid_email()
@@ -81,7 +81,7 @@ class ProcessTest extends TestCase
 
         $response = $this->postJson(self::URI, $reset);
 
-        $response->assertApiError(401);
+        $response->assertUnauthorized('authorization.invalid_password_data');
     }
 
     public function test_almost_expired()
@@ -91,7 +91,7 @@ class ProcessTest extends TestCase
 
         $response = $this->postJson(self::URI, $reset);
 
-        $response->assertApiSuccess();
+        $response->assertSuccess();
 
         $this->user->refresh();
 
@@ -106,12 +106,12 @@ class ProcessTest extends TestCase
 
         $response = $this->postJson(self::URI, $reset);
 
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->postJson(self::URI);
-        $response->assertApiError(400);
+        $response->assertError(400);
     }
 }

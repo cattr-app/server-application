@@ -43,7 +43,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskData);
 
-        $response->assertApiSuccess();
+        $response->assertSuccess();
         $this->assertDatabaseHas('tasks', $this->taskData);
         $this->assertDatabaseHas('tasks', $response->json('res'));
     }
@@ -52,13 +52,13 @@ class CreateTest extends TestCase
     {
         $response = $this->postJson(self::URI);
 
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 
-        $response->assertApiError(400, true);
+        $response->assertValidationError();
     }
 }

@@ -47,7 +47,7 @@ class ListTest extends TestCase
     {
         $response = $this->getJson(self::URI);
 
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 
     public function test_common_user()

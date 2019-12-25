@@ -36,7 +36,7 @@ class CountTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
-        $response->assertApiSuccess();
+        $response->assertSuccess();
         $response->assertJson(['total' => Project::count()]);
     }
 
@@ -44,6 +44,6 @@ class CountTest extends TestCase
     {
         $response = $this->getJson(self::URI);
 
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 }

@@ -34,7 +34,7 @@ class RequestTest extends TestCase
 
         $response = $this->postJson(self::URI, ['email' => $this->user->email]);
 
-        $response->assertApiSuccess();
+        $response->assertSuccess();
         Notification::assertSentTo($this->user, ResetPassword::class);
     }
 
@@ -45,7 +45,7 @@ class RequestTest extends TestCase
 
         $response = $this->postJson(self::URI, ['email' => 'wronemail@example.com']);
 
-        $response->assertApiError(404);
+        $response->assertError(404);
         Notification::assertNothingSent();
     }
 
@@ -56,7 +56,7 @@ class RequestTest extends TestCase
 
         $response = $this->postJson(self::URI);
 
-        $response->assertApiError(400);
+        $response->assertError(400);
         Notification::assertNothingSent();
     }
 }

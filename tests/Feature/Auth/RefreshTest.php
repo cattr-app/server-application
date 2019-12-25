@@ -33,7 +33,7 @@ class RefreshTest extends TestCase
 
         $response = $this->actingAs($this->user)->postJson(self::URI);
 
-        $response->assertApiSuccess();
+        $response->assertSuccess();
         $this->assertDatabaseMissing('tokens', ['token' => $token]);
         $this->assertDatabaseHas('tokens', ['token' => $response->decodeResponseJson('access_token')]);
     }

@@ -63,30 +63,31 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->correctRule);
 
         $this->assertDatabaseHas('rule', $this->correctRule);
-        $response->assertApiSuccess();
+        $response->assertSuccess();
     }
 
     public function test_not_existing_rule()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->incorrectRule);
-        $response->assertApiError(404);
+        $response->assertError(404);
     }
 
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->postJson(self::URI);
-        $response->assertApiError(403, true);
+        $response->assertForbidden();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
-        $response->assertApiError(400, true);
+
+        $response->assertValidationError();
     }
 }

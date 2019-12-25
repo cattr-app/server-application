@@ -38,7 +38,7 @@ class LoginTest extends TestCase
     public function test_success()
     {
         $response = $this->postJson(self::URI, $this->loginData);
-        $response->assertApiSuccess();
+        $response->assertSuccess();
 
         $token = $this->user->tokens()->first()->token;
         $response->assertJson(['access_token' => $token]);
@@ -48,7 +48,7 @@ class LoginTest extends TestCase
     {
         $this->loginData['password'] = 'wrong_password';
         $response = $this->postJson(self::URI, $this->loginData);
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 
     public function test_disabled_user()
@@ -56,20 +56,20 @@ class LoginTest extends TestCase
         $this->user->active = false;
         $this->user->save();
         $response = $this->postJson(self::URI, $this->loginData);
-        $response->assertApiError(403);
+        $response->assertError(403);
     }
 
     public function test_soft_deleted_user()
     {
         $this->user->delete();
         $response = $this->postJson(self::URI, $this->loginData);
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->postJson(self::URI);
-        $response->assertApiError(400);
+        $response->assertError(400);
     }
 
     // TODO Captcha Tests

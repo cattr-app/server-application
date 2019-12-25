@@ -16,12 +16,19 @@ class TestResponse extends BaseTestResponse
      * and correct error structure
      *
      * @param int $status
+     * @param string|null $type
      * @param bool $hasInfo
+     * @return TestResponse
      */
-    public function assertApiError(int $status, bool $hasInfo = false)
+    public function assertError(int $status, string $type = null, bool $hasInfo = false)
     {
         $this->assertStatus($status);
         $this->assertJson(['success' => false]);
+
+
+        if ($type) {
+            $this->assertJson(['error_type' => $type]);
+        }
 
         $structure = ['success', 'message', 'error_type'];
         if ($hasInfo) {
@@ -31,6 +38,28 @@ class TestResponse extends BaseTestResponse
         }
 
         $this->assertJsonStructure($structure);
+
+        return $this;
+    }
+
+    /**
+     * @param string $type
+     * @param bool $hasInfo
+     * @return BaseTestResponse|TestResponse
+     */
+    public function assertUnauthorized(string $type = 'authorization.unauthorized', bool $hasInfo = false)
+    {
+        return $this->assertError(401, $type, $hasInfo);
+    }
+
+    public function assertForbidden(string $type = 'authorization.forbidden', bool $hasInfo = true)
+    {
+        return $this->assertError(403, $type, $hasInfo);
+    }
+
+    public function assertValidationError(string $type = 'validation', bool $hasInfo = true)
+    {
+        return $this->assertError(400, $type, $hasInfo);
     }
 
     /**
@@ -38,10 +67,13 @@ class TestResponse extends BaseTestResponse
      * and correct structure
      *
      * @param int $status
+     * @return TestResponse
      */
-    public function assertApiSuccess(int $status = 200)
+    public function assertSuccess(int $status = 200)
     {
         $this->assertStatus($status);
         $this->assertJson(['success' => true]);
+
+        return $this;
     }
 }

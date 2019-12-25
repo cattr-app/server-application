@@ -41,7 +41,7 @@ class RemoveTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
 
-        $response->assertApiSuccess();
+        $response->assertSuccess();
         $this->assertSoftDeleted('projects', ['id' => $this->project->id]);
 
     }
@@ -50,13 +50,13 @@ class RemoveTest extends TestCase
     {
         $response = $this->postJson(self::URI);
 
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 
-        $response->assertApiError(400, true);
+        $response->assertValidationError();
     }
 }

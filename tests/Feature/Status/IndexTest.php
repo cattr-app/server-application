@@ -15,6 +15,6 @@ class IndexTest extends TestCase
     public function test_index()
     {
         $response = $this->get(self::URI);
-        $response->assertApiSuccess();
+        $response->assertSuccess();
     }
 }

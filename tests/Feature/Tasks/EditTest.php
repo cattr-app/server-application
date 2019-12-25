@@ -43,7 +43,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->toArray());
 
-        $response->assertApiSuccess();
+        $response->assertSuccess();
         $this->assertDatabaseHas('tasks', $this->task->toArray());
     }
 
@@ -53,20 +53,20 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->toArray());
 
-        $response->assertApiError(404);
+        $response->assertError(404);
     }
 
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
 
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 
-        $response->assertApiError(400, true);
+        $response->assertValidationError();
     }
 }

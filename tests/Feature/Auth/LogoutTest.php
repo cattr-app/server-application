@@ -33,13 +33,13 @@ class LogoutTest extends TestCase
 
         $response = $this->actingAs($this->user)->postJson(self::URI);
 
-        $response->assertApiSuccess();
+        $response->assertSuccess();
         $this->assertDatabaseMissing('tokens', ['token' => $token]);
     }
 
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 }

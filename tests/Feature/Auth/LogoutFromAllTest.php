@@ -38,7 +38,7 @@ class LogoutFromAllTest extends TestCase
         }
 
         $response = $this->actingAs($this->user)->postJson(self::URI);
-        $response->assertApiSuccess();
+        $response->assertSuccess();
 
         foreach ($tokens as $token) {
             $this->assertDatabaseMissing('tokens', $token);
@@ -48,6 +48,6 @@ class LogoutFromAllTest extends TestCase
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
-        $response->assertApiError(401);
+        $response->assertUnauthorized();
     }
 }
