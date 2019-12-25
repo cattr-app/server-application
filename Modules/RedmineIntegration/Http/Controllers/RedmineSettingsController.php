@@ -98,6 +98,9 @@ class RedmineSettingsController extends AbstractRedmineController
 
     protected function saveProperties()
     {
+        if (strpos($this->request->redmine_api_key, '*') !== false) {
+            return;
+        }
         $this->processFilter('redmine.settings.url.change', 'REDMINE_KEY', $this->request->redmine_api_key);
     }
 
@@ -162,12 +165,13 @@ class RedmineSettingsController extends AbstractRedmineController
     public function getSettings(Request $request, UserRepository $userRepository)
     {
         $userId = auth()->user()->id;
+        $apiKey = $userRepository->getUserRedmineApiKey($userId);
+        $hiddenKey = (bool)$apiKey ? preg_replace('/^(.{4}).*(.{4})$/i', '$1 ********* $2', $apiKey) : $apiKey;
 
         $settingsArray = [
-            'enabled' => $this->settings->getEnabled(),
-            'redmine_api_key' => $userRepository->getUserRedmineApiKey($userId),
+            'enabled' => (bool)$this->settings->getEnabled(),
+            'redmine_api_key' => $hiddenKey
         ];
-
         return response()->json($settingsArray);
     }
 
