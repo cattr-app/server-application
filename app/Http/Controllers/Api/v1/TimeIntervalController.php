@@ -322,7 +322,7 @@ class TimeIntervalController extends ItemController
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
                     'error' => 'Access denied',
-                    'reason' => 'User does not have access to manual time editing',
+                    'info' => 'User does not have access to manual time editing',
                 ]),
                 403
             );
@@ -348,7 +348,7 @@ class TimeIntervalController extends ItemController
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
                     'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'info' => $validator->errors()
                 ]),
                 400
             );

@@ -126,10 +126,15 @@ class ProjectReportController extends ReportController
         $collection = $this->reportHelper->getProjectReportQuery($uids, $pids, $startAt, $endAt, $timezoneOffset)->get();
         $resultCollection = $this->reportHelper->getProcessedProjectReportCollection($collection);
 
+        $result = [
+            'projects' => $resultCollection,
+            'timezone' => "{$timezone} ($timezoneOffset)"
+        ];
+
         return response()->json(
             Filter::process(
                 $this->getEventUniqueName('answer.success.report.show'),
-                $resultCollection
+                $result
             )
         );
     }

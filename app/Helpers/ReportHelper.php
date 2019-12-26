@@ -28,10 +28,12 @@ class ReportHelper
      * @var User
      */
     protected $user;
+
     /**
      * @var Task
      */
     protected $task;
+
     /**
      * @var Screenshot
      */
