@@ -117,7 +117,16 @@ class ReportHelper
                 $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]
                 ['dates'][$item->task_date] += $item->task_duration;
 
-                $screenshotsCollection = collect(json_decode($item->screens, true))
+                // We dont need empty screens when showing them in Project Report
+                // Collapsible dropdown because we creating an object which has two fields
+                // 'dates => '2019-12-24'  and 'screenshots' => [ '2019-12-24' =>[ '13:00' => screenObjects] ]
+                //  If screenshots created_at is empty --> Carbon will use null and pick Current Time which will brake
+                // An object fields dependency and we will see Nan 'h' Nan 'm' on frontend
+                $screens = array_filter(json_decode($item->screens, true), function ($screen) use ($item) {
+                    return !is_null($screen['created_at']);
+                });
+
+                $screenshotsCollection = collect($screens)
                     ->groupBy(function ($screen) {
                         return Carbon::parse($screen['created_at'])->format('Y-m-d');
                     })
