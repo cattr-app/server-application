@@ -125,9 +125,6 @@ class ReportHelper
                     ['dates'][$taskDate] += $duration;
                 }
 
-                // Из-за leftJoin мы получаем скрины все, которые принадлежат интервалу, что неправильно, ткк должны быть по дате
-                //
-                //
                 // We dont need empty screens when showing them in Project Report
                 // Collapsible dropdown because we creating an object which has two fields
                 // 'dates => '2019-12-24'  and 'screenshots' => [ '2019-12-24' =>[ '13:00' => screenObjects] ]

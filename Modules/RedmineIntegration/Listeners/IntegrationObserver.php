@@ -143,7 +143,7 @@ class IntegrationObserver
                 $priority_id = 2;
                 if (isset($task->priority_id) && $task->priority_id) {
                     $priorities = $this->priority->getAll();
-                    $priority = array_first($priorities, function ($priority) use ($task) {
+                    $priority = Arr::first($priorities, function ($priority) use ($task) {
                         return $priority['priority_id'] == $task->priority_id;
                     });
 
