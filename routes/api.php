@@ -206,7 +206,7 @@ Route::group([
 // Laravel router pass to fallback not non-exist urls only but wrong-method requests too.
 // So required to check if route have alternative request methods
 // and throw not-found or wrong-method exceptions manually
-Route::fallback(function () {
+Route::any( '(.*)', function () {
 
     /** @var Router $router */
     $router = app('router');
