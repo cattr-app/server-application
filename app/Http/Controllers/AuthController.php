@@ -6,6 +6,7 @@ use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\RecaptchaHelper;
 use App\Models\Token;
 use App\User;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
@@ -32,7 +33,7 @@ class AuthController extends BaseController
      *      {
      *        "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciO...",
      *        "token_type": "bearer",
-     *         "expires_in": 3600,
+     *         "expires_in": '2020-12-26T14:18:32+00:00 ',
      *         "user": {
      *           "id": 42,
      *           "full_name": "Captain",
@@ -122,7 +123,7 @@ class AuthController extends BaseController
      *    "success":      true,
      *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
      *    "token_type":   "bearer",
-     *    "expires_in":   "3600",
+     *    "expires_in":   "2020-12-26T14:18:32+00:00",
      *    "user":         {}
      *  }
      *
@@ -170,7 +171,7 @@ class AuthController extends BaseController
             'success' => true,
             'access_token' => $token->token,
             'token_type' => 'bearer',
-            'expires_in' => $token->expires_at,
+            'expires_in' => Carbon::parse($token->expires_at)->toIso8601String(),
             'user' => $user
         ]);
     }
@@ -317,7 +318,7 @@ class AuthController extends BaseController
      * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
-     * @apiSuccess {String}   expires_in    Token TTL in seconds
+     * @apiSuccess {String}   expires_in    Token TTL 8601String Date
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
@@ -335,7 +336,7 @@ class AuthController extends BaseController
             'success' => true,
             'access_token' => $token->token,
             'token_type' => 'bearer',
-            'expires_in' => $token->expires_at,
+            'expires_in' => Carbon::parse($token->expires_at)->toIso8601String(),
         ]);
     }
 }
