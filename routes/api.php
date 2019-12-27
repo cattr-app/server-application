@@ -50,7 +50,7 @@ Route::group([
     $router->post('logout', 'AuthController@logout');
     $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
-    $router->any('me', 'AuthController@me');
+    $router->get('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordResetController@request');
     $router->post('password/reset/validate', 'PasswordResetController@validate');
     $router->post('password/reset/process', 'PasswordResetController@process')
@@ -68,7 +68,7 @@ Route::group([
     $router->post('logout', 'AuthController@logout');
     $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
-    $router->any('me', 'AuthController@me');
+    $router->get('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordResetController@request');
     $router->post('password/reset/validate', 'PasswordResetController@validate');
     $router->post('password/reset/process', 'PasswordResetController@process')
