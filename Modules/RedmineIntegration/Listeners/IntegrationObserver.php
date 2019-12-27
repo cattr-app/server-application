@@ -7,6 +7,7 @@ use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
@@ -133,7 +134,7 @@ class IntegrationObserver
         try {
             $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($task->user_id);
             /** @var array $userLocalRedmineTasksIds */
-            $redmineTask = array_first($userLocalRedmineTasksIds, function ($redmineTask) use ($task) {
+            $redmineTask = Arr::first($userLocalRedmineTasksIds, function ($redmineTask) use ($task) {
                 return $redmineTask->task_id === $task->id;
             });
 
