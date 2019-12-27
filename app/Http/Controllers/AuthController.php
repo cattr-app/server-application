@@ -318,7 +318,6 @@ class AuthController extends BaseController
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL in seconds
-     * @apiSuccess {Array}    user          User Entity
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
@@ -337,7 +336,6 @@ class AuthController extends BaseController
             'access_token' => $token->token,
             'token_type' => 'bearer',
             'expires_in' => $token->expires_at,
-            'user' => $user
         ]);
     }
 }
