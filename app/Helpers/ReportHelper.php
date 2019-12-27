@@ -72,6 +72,8 @@ class ReportHelper
         $resultCollection = [];
         foreach ($collection as $projectName => $items) {
             foreach ($items as $item) {
+                $intervals = collect(json_decode($item->intervals, true));
+
                 if (!array_key_exists($projectName, $resultCollection)) {
                     $resultCollection[$projectName] = [
                         'id' => $item->project_id,
@@ -106,23 +108,30 @@ class ReportHelper
                     $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'] = [];
                 }
 
-                if (!array_key_exists(
-                    $item->task_date,
-                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'])
-                ) {
-                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$item
-                        ->task_date] = 0;
+                foreach ($intervals as $interval) {
+                    $taskDate = Carbon::parse($interval['start_at'])->format('Y-m-d');
+                    $duration = Carbon::parse($interval['end_at'])->diffInSeconds($interval['start_at']);
+
+                    if (!array_key_exists(
+                        $taskDate,
+                        $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'])
+                    ) {
+                        $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$taskDate] = 0;
+                    }
+
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]
+                    ['dates'][$taskDate] += $duration;
                 }
 
-                $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]
-                ['dates'][$item->task_date] += $item->task_duration;
-
+                // Из-за leftJoin мы получаем скрины все, которые принадлежат интервалу, что неправильно, ткк должны быть по дате
+                //
+                //
                 // We dont need empty screens when showing them in Project Report
                 // Collapsible dropdown because we creating an object which has two fields
                 // 'dates => '2019-12-24'  and 'screenshots' => [ '2019-12-24' =>[ '13:00' => screenObjects] ]
                 //  If screenshots created_at is empty --> Carbon will use null and pick Current Time which will brake
                 // An object fields dependency and we will see Nan 'h' Nan 'm' on frontend
-                $screens = array_filter(json_decode($item->screens, true), function ($screen) use ($item) {
+                $screens = array_filter(json_decode($item->screens, true), function ($screen) {
                     return !is_null($screen['created_at']);
                 });
 
@@ -134,13 +143,13 @@ class ReportHelper
                         return $screen->groupBy(function ($screen) {
                             return Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
                         })
-                        ->sortKeys();
+                            ->sortKeys();
                     })
                     ->transform(function ($screens) {
                         foreach ($screens as $hourKey => $hourlyScreens) {
                             foreach ($hourlyScreens as $screen) {
                                 $time = floor(Carbon::parse($screen['created_at'])
-                                    ->format('i') / 10);
+                                        ->format('i') / 10);
 
                                 $result[$hourKey][$time] = $screen;
                             }
@@ -211,19 +220,20 @@ class ReportHelper
                     ];
                 }
 
-                $resultCollection[$userID]['tasks'] []= [
-                    'task_id'      => $item->task_id,
+                $resultCollection[$userID]['tasks'][$item->task_id] = [
                     'project_id'   => $item->project_id,
-                    'date'         => $item->task_date,
                     'name'         => $item->task_name,
                     'project_name' => $item->project_name,
-                    'total_time'   => $item->task_duration,
+                    'total_time'   => 0,
                 ];
 
-                $resultCollection[$userID]['total_time'] += $item->task_duration;
+                $intervals = collect(json_decode($item->intervals, true));
+                foreach ($intervals as $interval) {
+                    $duration = Carbon::parse($interval['end_at'])->diffInSeconds($interval['start_at']);
+                    $resultCollection[$userID]['tasks'][$item->task_id]['total_time'] += $duration;
+                    $resultCollection[$userID]['total_time'] += $duration;
+                }
             }
-
-
         }
 
         return collect($resultCollection);
@@ -258,8 +268,6 @@ class ReportHelper
                     'tasks.task_name as task_name',
                     'users.id as user_id',
                     'users.full_name as user_name',
-                    'SUM(TIME_TO_SEC(TIMEDIFF(time_intervals.end_at, time_intervals.start_at))) as task_duration',
-                    "DATE_FORMAT(CONVERT_TZ(time_intervals.start_at, '+00:00', ?), '%Y-%m-%d') as task_date"
                 ])
             )
         );
@@ -289,8 +297,7 @@ class ReportHelper
             ->where($this->getTableName('timeInterval', 'start_at'), '>=', $startAt)
             ->where($this->getTableName('timeInterval', 'end_at'), '<', $endAt)
             ->whereIn($this->getTableName('user','id'), $uids)
-            ->groupBy('task_id')
-            ->orderBy('task_date', 'ASC');
+            ->groupBy('task_id');
     }
 
     /**
@@ -310,10 +317,22 @@ class ReportHelper
         $timezoneOffset
     ): Builder {
         $query = $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
-            "JSON_ARRAYAGG(JSON_OBJECT('id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path, 'created_at', CONVERT_TZ(screenshots.created_at, '+00:00', ?))) as screens"
+            "JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path,
+                    'created_at', screenshots.created_at
+                )
+            ) as screens",
+            "JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'id', time_intervals.id, 'user_id', time_intervals.user_id, 'task_id', time_intervals.task_id,
+                    'end_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?), 'start_at',
+                    CONVERT_TZ(time_intervals.start_at, '+00:00', ?)
+                )
+            ) as intervals"
         ], [$timezoneOffset]);
 
-        return $query->leftJoin(
+        return $query->join(
                 $this->getTableName('screenshot'),
                 $this->getTableName('screenshot', 'time_interval_id'),
                 '=',
@@ -337,9 +356,17 @@ class ReportHelper
         $timezoneOffset
     ): Builder {
         return $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
-            "JSON_OBJECT('id', users.id, 'full_name', users.full_name, 'email', users.email, 'company_id',
-             users.company_id, 'avatar', users.avatar) as user"
-        ]);
+            "JSON_OBJECT(
+                'id', users.id, 'full_name', users.full_name, 'email', users.email, 'company_id',
+                 users.company_id, 'avatar', users.avatar
+             ) as user",
+            "JSON_ARRAYAGG(
+                JSON_OBJECT('id', time_intervals.id, 'user_id', time_intervals.user_id, 'task_id', 
+                    time_intervals.task_id, 'end_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?),
+                    'start_at', CONVERT_TZ(time_intervals.start_at, '+00:00', ?)
+                    )
+                ) as intervals"
+        ], [$timezoneOffset]);
     }
 
     /**
