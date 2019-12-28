@@ -123,18 +123,23 @@ class ReportHelper
 
                     $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]
                     ['dates'][$taskDate] += $duration;
+
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]
+                    ['duration'] += $duration;
+
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks_time'] += $duration;
+                    $resultCollection[$projectName]['project_time'] += $duration;
                 }
 
                 // We dont need empty screens when showing them in Project Report
                 // Collapsible dropdown because we creating an object which has two fields
                 // 'dates => '2019-12-24'  and 'screenshots' => [ '2019-12-24' =>[ '13:00' => screenObjects] ]
-                //  If screenshots created_at is empty --> Carbon will use null and pick Current Time which will brake
-                // An object fields dependency and we will see Nan 'h' Nan 'm' on frontend
-                $screens = array_filter(json_decode($item->screens, true), function ($screen) {
-                    return !is_null($screen['created_at']);
-                });
+                //  If screenshots created_at is empty --> Carbon will use null and pick Current Time which will brake frontend
 
-                $screenshotsCollection = collect($screens)
+                $screenshotsCollection = collect(json_decode($item->screens, true))
+                    ->filter(function ($screen) {
+                        return !is_null($screen['created_at']);
+                    })
                     ->groupBy(function ($screen) {
                         return Carbon::parse($screen['created_at'])->format('Y-m-d');
                     })
@@ -170,22 +175,9 @@ class ReportHelper
 
         foreach ($resultCollection as &$project) {
             foreach ($project['users'] as &$user) {
-                foreach ($user['tasks'] as &$task) {
-                    foreach ($task['dates'] as $dateSummary) {
-                        $task['duration'] += $dateSummary;
-                    }
-                }
-
                 usort($user['tasks'], function ($a, $b) {
-                    return $a['duration'] < $b['duration'];
+                    return $a['duration'] > $b['duration'];
                 });
-
-                /** The $task variable is already taken **/
-                foreach ($user['tasks'] as $userTask) {
-                    $user['tasks_time'] += $userTask['duration'];
-                }
-
-                $project['project_time'] += $user['tasks_time'];
             }
 
             usort($project['users'], function ($a, $b) {
@@ -233,7 +225,17 @@ class ReportHelper
                     $resultCollection[$userID]['total_time'] += $duration;
                 }
             }
+
+            // Sort User Tasks by total_time
+            usort($resultCollection[$userID]['tasks'], function($a, $b) {
+               return $a['total_time'] < $b['total_time'];
+            });
         }
+
+        // Sort Users by total_time
+        usort($resultCollection, function($a, $b) {
+            return $a['total_time'] < $b['total_time'];
+        });
 
         return collect($resultCollection);
     }
@@ -337,7 +339,7 @@ class ReportHelper
                 '=',
                 $this->getTableName('timeInterval', 'id')
             )->orderBy(DB::raw('ANY_VALUE('.$this->getTableName('screenshot', 'created_at').')'), 'ASC')
-             ->whereIn($this->getTableName('project', 'id'), $pids);
+             ->whereIn('project_id', $pids);
     }
 
     /**
