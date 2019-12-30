@@ -56,6 +56,7 @@ class IntervalFactory extends AbstractFactory
 
     /**
      * @param Task $task
+     *
      * @return self
      */
     public function forTask(Task $task): self
