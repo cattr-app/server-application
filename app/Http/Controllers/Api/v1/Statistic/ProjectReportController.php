@@ -118,9 +118,7 @@ class ProjectReportController extends ReportController
             ->tz('UTC')
             ->toDateTimeString();
 
-        $pids = array_unique(
-            array_merge($pids, Project::getUserRelatedProjectIds(request()->user()))
-        );
+        $pids = $pids ?? Project::getUserRelatedProjectIds(request()->user());
 
 
         $collection = $this->reportHelper->getProjectReportQuery($uids, $pids, $startAt, $endAt, $timezoneOffset)->get();
