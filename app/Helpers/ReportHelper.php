@@ -100,14 +100,8 @@ class ReportHelper
                         'id' => $item->task_id,
                         'duration' => 0,
                         'screenshots' => [],
+                        'dates' => []
                     ];
-                }
-
-                if (!array_key_exists(
-                    'dates',
-                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id])
-                ) {
-                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'] = [];
                 }
 
                 foreach ($intervals as $interval) {
@@ -131,43 +125,34 @@ class ReportHelper
                     $resultCollection[$projectName]['project_time'] += $duration;
                 }
 
-                // We dont need empty screens when showing them in Project Report
-                // Collapsible dropdown because we creating an object which has two fields
-                // 'dates => '2019-12-24'  and 'screenshots' => [ '2019-12-24' =>[ '13:00' => screenObjects] ]
-                //  If screenshots created_at is empty --> Carbon will use null and pick Current Time which will brake frontend
+                $screenshotsCollection = collect(json_decode($item->screens, true));
 
-                $screenshotsCollection = collect(json_decode($item->screens, true))
-                    ->filter(function ($screen) {
-                        return !is_null($screen['created_at']);
-                    })
-                    ->groupBy(function ($screen) {
-                        return Carbon::parse($screen['created_at'])->format('Y-m-d');
-                    })
-                    ->transform(function ($screen) {
-                        return $screen->groupBy(function ($screen) {
-                            return Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
-                        })
-                            ->sortKeys();
-                    })
-                    ->transform(function ($screens) {
-                        foreach ($screens as $hourKey => $hourlyScreens) {
-                            foreach ($hourlyScreens as $screen) {
-                                $time = floor(Carbon::parse($screen['created_at'])
-                                        ->format('i') / 10);
+                $screensResultCollection = [];
+                foreach ($screenshotsCollection as $screen) {
+                    // $createdAtFormatted --- '2019-12-30'
+                    // $hoursScreenKey --- '11:00'
+                    $createdAtFormatted = Carbon::parse($screen['created_at'])->format('Y-m-d');
+                    $hoursScreenKey = Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
 
-                                $result[$hourKey][$time] = $screen;
-                            }
-                            $result[$hourKey] = array_values($result[$hourKey]);
-                        }
-                        return $result;
-                    })
-                    ->sortKeys()
-                    ->toArray();
+                    if (!array_key_exists($createdAtFormatted, $screensResultCollection)) {
+                        $screensResultCollection[$createdAtFormatted] = [];
+                    }
+                    if (!array_key_exists($hoursScreenKey, $screensResultCollection[$createdAtFormatted])) {
+                        $screensResultCollection[$createdAtFormatted][$hoursScreenKey] = [];
+                    }
+
+                    $time = number_format(floor(Carbon::parse($screen['created_at'])
+                                        ->format('i') / 10));
+
+                    if (!array_key_exists($time, $screensResultCollection[$createdAtFormatted][$hoursScreenKey])) {
+                        $screensResultCollection[$createdAtFormatted][$hoursScreenKey][$time] = $screen;
+                    }
+                }
 
                 $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'] =
                     array_merge(
                         $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'],
-                        $screenshotsCollection
+                        $screensResultCollection
                     );
 
             }
@@ -176,7 +161,7 @@ class ReportHelper
         foreach ($resultCollection as &$project) {
             foreach ($project['users'] as &$user) {
                 usort($user['tasks'], function ($a, $b) {
-                    return $a['duration'] > $b['duration'];
+                    return $a['duration'] < $b['duration'];
                 });
             }
 
@@ -339,7 +324,8 @@ class ReportHelper
                 '=',
                 $this->getTableName('timeInterval', 'id')
             )->orderBy(DB::raw('ANY_VALUE('.$this->getTableName('screenshot', 'created_at').')'), 'ASC')
-             ->whereIn('project_id', $pids);
+             ->whereIn('project_id', $pids)
+             ->whereNotNull('screenshots.created_at');
     }
 
     /**
