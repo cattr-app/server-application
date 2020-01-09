@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Tests\Feature\Screenshot;
-
 
 use App\Models\Screenshot;
 use App\User;
@@ -26,7 +24,6 @@ class ListTest extends TestCase
     protected function setUp(): void
     {
         parent::setUp();
-
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
         $this->commonUser = UserFactory::withTokens()->asUser()->create();
     }
@@ -34,6 +31,14 @@ class ListTest extends TestCase
     public function test_list()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
+
+        $response->assertOk();
+        $response->assertJson(Screenshot::all()->toArray());
+    }
+
+    public function test_common_list()
+    {
+        $response = $this->actingAs($this->commonUser)->postJson(self::URI);
 
         $response->assertOk();
         $response->assertJson(Screenshot::all()->toArray());

@@ -20,12 +20,18 @@ class RemoveTest extends TestCase
      * @var Screenshot
      */
     private $screenshot;
+    /**
+     * @var User
+     */
+    private $commonUser;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
+
+        $this->commonUser = UserFactory::withTokens()->asUser()->create();
 
         $this->screenshot = ScreenshotFactory::create();
     }
@@ -35,6 +41,16 @@ class RemoveTest extends TestCase
         $this->assertDatabaseHas('screenshots', $this->screenshot->toArray());
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->screenshot->id]);
+
+        $response->assertSeeText('deleted');
+        $this->assertSoftDeleted('screenshots', ['id' => $this->screenshot->id]);
+    }
+
+    public function test_common_remove(): void
+    {
+        $this->assertDatabaseHas('screenshots', $this->screenshot->toArray());
+
+        $response = $this->actingAs($this->commonUser)->postJson(self::URI, ['id' => $this->screenshot->id]);
 
         $response->assertSeeText('deleted');
         $this->assertSoftDeleted('screenshots', ['id' => $this->screenshot->id]);
