@@ -53,7 +53,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->project->toArray());
 
-        $response->assertError(404);
+        $response->assertItemNotFound();
     }
 
     public function test_unauthorized()

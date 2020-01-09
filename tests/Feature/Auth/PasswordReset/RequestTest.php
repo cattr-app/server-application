@@ -45,7 +45,7 @@ class RequestTest extends TestCase
 
         $response = $this->postJson(self::URI, ['email' => 'wronemail@example.com']);
 
-        $response->assertError(404);
+        $response->assertItemNotFound('authorization.user_not_found');
         Notification::assertNothingSent();
     }
 
