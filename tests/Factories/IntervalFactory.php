@@ -30,7 +30,7 @@ class IntervalFactory extends AbstractFactory
     /**
      * @return array
      */
-    private function getRandomIntervalData(): array
+    public function getRandomIntervalData(): array
     {
         $faker = FakerFactory::create();
         $time = $faker->unique()->unixTime();
@@ -108,8 +108,9 @@ class IntervalFactory extends AbstractFactory
 
         $this->defineUser($interval);
         $this->defineTask($interval);
-
-        $interval->save();
+        if (!isset($attributes['is_save'])) {
+            $interval->save();
+        }
 
         return $interval;
     }
