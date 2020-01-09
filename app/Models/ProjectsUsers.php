@@ -49,6 +49,7 @@ class ProjectsUsers extends AbstractModel
      * @var array
      */
     protected $casts = [
+        'project_id' => 'integer',
         'user_id' => 'integer',
         'role_id' => 'integer',
     ];

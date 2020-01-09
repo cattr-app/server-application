@@ -118,18 +118,21 @@ class ProjectReportController extends ReportController
             ->tz('UTC')
             ->toDateTimeString();
 
-        $pids = array_unique(
-            array_merge($pids, Project::getUserRelatedProjectIds(request()->user()))
-        );
+        $pids = $pids ?? Project::getUserRelatedProjectIds(request()->user());
 
 
         $collection = $this->reportHelper->getProjectReportQuery($uids, $pids, $startAt, $endAt, $timezoneOffset)->get();
         $resultCollection = $this->reportHelper->getProcessedProjectReportCollection($collection);
 
+        $result = [
+            'projects' => $resultCollection,
+            'timezone' => "{$timezone} ($timezoneOffset)"
+        ];
+
         return response()->json(
             Filter::process(
                 $this->getEventUniqueName('answer.success.report.show'),
-                $resultCollection
+                $result
             )
         );
     }

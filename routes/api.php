@@ -50,7 +50,7 @@ Route::group([
     $router->post('logout', 'AuthController@logout');
     $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
-    $router->any('me', 'AuthController@me');
+    $router->get('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordResetController@request');
     $router->post('password/reset/validate', 'PasswordResetController@validate');
     $router->post('password/reset/process', 'PasswordResetController@process')
@@ -68,7 +68,7 @@ Route::group([
     $router->post('logout', 'AuthController@logout');
     $router->post('logout-from-all', 'AuthController@logoutFromAll');
     $router->post('refresh', 'AuthController@refresh');
-    $router->any('me', 'AuthController@me');
+    $router->get('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordResetController@request');
     $router->post('password/reset/validate', 'PasswordResetController@validate');
     $router->post('password/reset/process', 'PasswordResetController@process')
@@ -206,7 +206,7 @@ Route::group([
 // Laravel router pass to fallback not non-exist urls only but wrong-method requests too.
 // So required to check if route have alternative request methods
 // and throw not-found or wrong-method exceptions manually
-Route::fallback(function () {
+Route::any( '(.*)', function () {
 
     /** @var Router $router */
     $router = app('router');
