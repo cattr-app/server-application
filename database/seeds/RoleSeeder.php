@@ -16,13 +16,13 @@ class RoleSeeder extends Seeder
     {
         $this->command->getOutput()->writeln('<fg=yellow>Add base roles</>');
 
-        Role::updateOrCreate(['id' => 1, 'name' => 'root']);
-        Role::updateOrCreate(['id' => 2, 'name' => 'user']);
-        Role::updateOrCreate(['id' => 3, 'name' => 'observer']);
-        Role::updateOrCreate(['id' => 4, 'name' => 'client']);
-        Role::updateOrCreate(['id' => 5, 'name' => 'manager']);
-        Role::updateOrCreate(['id' => 6, 'name' => 'auditor']);
-        Role::updateOrCreate(['id' => 255, 'name' => 'blocked']);
+        Role::updateOrCreate(['id' => 1], ['name' => 'root']);
+        Role::updateOrCreate(['id' => 2], ['name' => 'user']);
+        Role::updateOrCreate(['id' => 3], ['name' => 'observer']);
+        Role::updateOrCreate(['id' => 4], ['name' => 'client']);
+        Role::updateOrCreate(['id' => 5], ['name' => 'manager']);
+        Role::updateOrCreate(['id' => 6], ['name' => 'auditor']);
+        Role::updateOrCreate(['id' => 255], ['name' => 'blocked']);
 
         $userAllow = [
             'project-report' => [
