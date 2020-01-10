@@ -217,8 +217,12 @@ class Role extends AbstractModel
             return true;
         }
 
+        // TODO: need refactoring
+
         /** @var User $user */
         $userRoleIds = [$user->role_id];
+
+        $projectID = request()->input('project_id', null);
 
         // Check access to the specific entity
         if (isset($id)) {
@@ -254,16 +258,16 @@ class Role extends AbstractModel
                 default:
                     break;
             }
+        }
 
-            if (isset($projectID)) {
-                // Get role of the user in the project
-                $projectUserRelation = ProjectsUsers::where([
-                    'project_id' => $projectID,
-                    'user_id' => $user->id,
-                ])->first();
-                if (isset($projectUserRelation)) {
-                    $userRoleIds[] = $projectUserRelation->role_id;
-                }
+        if (isset($projectID)) {
+            // Get role of the user in the project
+            $projectUserRelation = ProjectsUsers::where([
+                'project_id' => $projectID,
+                'user_id' => $user->id,
+            ])->first();
+            if (isset($projectUserRelation)) {
+                $userRoleIds[] = $projectUserRelation->role_id;
             }
         }
 
