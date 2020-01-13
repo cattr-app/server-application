@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class ShowTest extends TestCase
 {
-    const URI = '/v1/screenshots/show';
+    private const URI = '/v1/screenshots/show';
 
     /**
      * @var User

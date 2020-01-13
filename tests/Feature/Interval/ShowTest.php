@@ -12,10 +12,12 @@ use Tests\TestCase;
 class ShowTest extends TestCase
 {
     private const URI = 'v1/time-intervals/show';
+
     /**
      * @var User
      */
     private $admin;
+
     /**
      * @var TimeInterval
      */

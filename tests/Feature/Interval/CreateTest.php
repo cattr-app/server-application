@@ -78,14 +78,12 @@ class CreateTest extends TestCase
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
-
         $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
-
         $response->assertValidationError();
     }
 }

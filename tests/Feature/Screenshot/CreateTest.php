@@ -10,10 +10,7 @@ use Tests\TestCase;
 
 class CreateTest extends TestCase
 {
-    /**
-     * endpoint
-     */
-    const URI = '/v1/screenshots/create';
+    private const URI = '/v1/screenshots/create';
 
     /**
      * @var User

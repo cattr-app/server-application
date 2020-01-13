@@ -61,7 +61,6 @@ class EditTest extends TestCase
             ]
         );
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
-
         $response->assertOk();
 
         $this->assertDatabaseHas('time_intervals', $response->json()['res']);
@@ -69,24 +68,21 @@ class EditTest extends TestCase
 
     public function test_not_existing_interval()
     {
-        $this->interval->id++;
+        ++$this->interval->id;
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->interval->toArray());
-
         $response->assertItemNotFound();
     }
 
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
-
         $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
-
         $response->assertValidationError();
     }
 }
