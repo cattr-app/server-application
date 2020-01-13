@@ -1,8 +1,6 @@
 <?php
 
-
 namespace Tests\Feature\Interval;
-
 
 use App\Models\Task;
 use App\User;
@@ -45,15 +43,19 @@ class CreateTest extends TestCase
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
         $this->commonUser = UserFactory::withTokens()->asUser()->create();
         $this->task = TaskFactory::create();
-        $this->intervalData = IntervalFactory::getRandomIntervalData();
+        $this->intervalData = array_merge(
+            IntervalFactory::getRandomIntervalData(),
+            ['task_id' => $this->task->id, 'user_id' => $this->admin->id]
+        );
     }
 
     public function test_create(): void
     {
         $this->assertDatabaseMissing('time_intervals', $this->intervalData);
+
         $response = $this->actingAs($this->admin)->postJson(
             self::URI,
-            array_merge($this->intervalData, ['task_id' => $this->task->id, 'user_id' => $this->admin->id])
+            $this->intervalData
         );
         $response->assertOk();
         $response->assertJson(['success' => "true"]);
@@ -69,7 +71,6 @@ class CreateTest extends TestCase
             array_merge($this->intervalData, ['task_id' => $this->task->id, 'user_id' => $this->commonUser->id])
         );
         $response->assertOk();
-        $response->assertJson(['success' => "true"]);
 
         $this->assertDatabaseHas('time_intervals', $response->json()['interval']);
     }
