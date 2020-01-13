@@ -360,11 +360,8 @@ class RolesController extends ItemController
         $this->disableQueryRoleCheck = false;
 
         $itemsQuery->with('rules');
-        if ($user->is_admin) {
-            $roles = $itemsQuery->get();
-        } else {
-            $roles = $itemsQuery->whereIn('role.id', $roleIds)->get();
-        }
+
+        $roles = $user->is_admin ? $itemsQuery->get() : $itemsQuery->whereIn('role.id', $roleIds)->get();
 
         if (!$roles->count()) {
             return response()->json(Filter::process(
