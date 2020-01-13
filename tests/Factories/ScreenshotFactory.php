@@ -3,7 +3,6 @@
 namespace Tests\Factories;
 
 use App\Models\Screenshot;
-use Faker\Factory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use \Tests\Facades\IntervalFactory;
@@ -20,14 +19,14 @@ class ScreenshotFactory extends AbstractFactory
             $screenshotData = array_merge($screenshotData, $attributes);
         }
 
-        $imagePath = Factory::create()->image();
+        $image = \Tests\Facades\ScreenshotFactory::getImage();
 
         $screenshot = Screenshot::make($screenshotData);
 
         $this->defineInterval($screenshot);
 
-        $screenshot->path = $imagePath;
-        $screenshot->thumbnail_path = $imagePath;
+        $screenshot->path = $image->path();
+        $screenshot->thumbnail_path = $image->path();
         $screenshot->save();
 
         return $screenshot;

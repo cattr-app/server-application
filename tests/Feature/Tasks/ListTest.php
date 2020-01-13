@@ -43,6 +43,11 @@ class ListTest extends TestCase
         $response->assertJson(Task::all()->toArray());
     }
 
+    public function test_paginate_list()
+    {
+        //todo future
+    }
+
     public function test_unauthorized()
     {
         $response = $this->getJson(self::URI);

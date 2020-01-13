@@ -9,7 +9,6 @@ use App\Models\Task;
 
 /**
  * Class IntervalFactory
- * @package Tests\Factories
  */
 class IntervalFactory extends AbstractFactory
 {
@@ -108,9 +107,8 @@ class IntervalFactory extends AbstractFactory
 
         $this->defineUser($interval);
         $this->defineTask($interval);
-        if (!isset($attributes['is_save'])) {
-            $interval->save();
-        }
+
+        $interval->save();
 
         return $interval;
     }
