@@ -26,6 +26,6 @@ class CatHelper
      */
     public function getCat(): string
     {
-        return array_rand(static::$cats);
+        return self::$cats[array_rand(self::$cats)];
     }
 }
