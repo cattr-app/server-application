@@ -1,8 +1,7 @@
 <?php
 
 
-namespace Tests\Feature\Interval;
-
+namespace Tests\Feature\TimeIntervals;
 
 use App\Models\TimeInterval;
 use App\User;
@@ -13,6 +12,7 @@ use Tests\TestCase;
 class CountTest extends TestCase
 {
     private const URI = 'v1/time-intervals/count';
+
     private const SCREENSHOTS_AMOUNT = 10;
 
     /**
@@ -40,12 +40,7 @@ class CountTest extends TestCase
     public function test_unauthorized()
     {
         $response = $this->getJson(self::URI);
-        $response->assertUnauthorized();
-    }
 
-    public function test_without_params()
-    {
-        $response = $this->actingAs($this->admin)->get(self::URI);
-        $response->assertValidationError();
+        $response->assertUnauthorized();
     }
 }

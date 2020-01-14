@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Tests\Feature\Interval;
+namespace Tests\Feature\TimeIntervals;
 
 
 use App\Models\Task;
@@ -27,11 +27,6 @@ class EditTest extends TestCase
     private $interval;
 
     /**
-     * @var array
-     */
-    private $randomDataInterval;
-
-    /**
      * @var Task
      */
     private $task;
@@ -41,29 +36,24 @@ class EditTest extends TestCase
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
+
         $this->interval = IntervalFactory::create();
-        $this->randomDataInterval = IntervalFactory::getRandomIntervalData();
+
         $this->task = TaskFactory::create();
     }
 
     public function test_edit()
     {
-        $originInterval = $this->interval->toArray();
+        $originalInterval = clone $this->interval;
 
-        $this->assertDatabaseHas('time_intervals', $originInterval);
-        $requestData = array_merge(
-            $this->randomDataInterval,
-            [
-                'id' => $originInterval['id'],
-                'user_id' => $this->admin->id,
-                'task_id' => $this->task->id,
+        $this->interval->count_keyboard = $this->interval->count_keyboard + 5;
 
-            ]
-        );
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->interval->toArray());
+
         $response->assertOk();
-
-        $this->assertDatabaseHas('time_intervals', $response->json()['res']);
+        $response->assertJson(['res' => $this->interval->toArray()]);
+        $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
+        $this->assertNotEquals($originalInterval->toArray(), $this->interval->toArray());
     }
 
     public function test_not_existing_interval()

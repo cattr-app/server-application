@@ -1,7 +1,7 @@
 <?php
 
 
-namespace Tests\Feature\Interval;
+namespace Tests\Feature\TimeIntervals;
 
 use App\Models\TimeInterval;
 use App\User;
@@ -28,6 +28,7 @@ class ShowTest extends TestCase
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
+
         $this->interval = IntervalFactory::create();
     }
 
@@ -35,22 +36,23 @@ class ShowTest extends TestCase
     {
         $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
 
-        $responsePost = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->interval->id]);
-        $responsePost->assertOk();
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->interval->id]);
+        $response->assertOk();
 
-        $responseGet = $this->actingAs($this->admin)->get(self::URI . '?id=' . $this->interval->id);
-        $responseGet->assertOk();
+        $response->assertJson($this->interval->toArray());
     }
 
     public function test_unauthorized()
     {
         $response = $this->get(self::URI);
+
         $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->get(self::URI);
+
         $response->assertValidationError();
     }
 }

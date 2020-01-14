@@ -1,6 +1,6 @@
 <?php
 
-namespace Tests\Feature\Interval;
+namespace Tests\Feature\TimeIntervals;
 
 use App\Models\TimeInterval;
 use App\User;
@@ -34,12 +34,14 @@ class ListTest extends TestCase
     public function test_unauthorized()
     {
         $response = $this->get(self::URI);
+
         $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->get(self::URI);
+
         $response->assertValidationError();
     }
 }
