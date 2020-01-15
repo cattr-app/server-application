@@ -1,0 +1,21 @@
+integration_testing:
+  image: php:7.2-alpine
+  only:
+    - 52-implement-integration-tests
+  services:
+    - mariadb:10.4
+  variables:
+    MYSQL_DATABASE: amazing_time_tests
+    MYSQL_ROOT_PASSWORD: secret
+  stage: test
+  before_script:
+    - apk update
+    - apk add libpng-dev
+    - docker-php-ext-install gd bcmath zip pdo_mysql
+    - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  script:
+    - composer install
+    - cp .env.testing.example .env.testing
+    - php artisan migrate --env=testing
+    - php artisan db:seed --class=RoleSeeder --env=testing
+    - vendor/phpunit/phpunit/phpunit --configuration phpunit.xml tests/Feature/
