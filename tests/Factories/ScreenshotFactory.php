@@ -3,6 +3,7 @@
 namespace Tests\Factories;
 
 use App\Models\Screenshot;
+use App\Models\TimeInterval;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use \Tests\Facades\IntervalFactory;
@@ -10,6 +11,11 @@ use \Tests\Facades\IntervalFactory;
 class ScreenshotFactory extends AbstractFactory
 {
     private $interval;
+
+    /**
+     * @var bool
+     */
+    private $randomRelations = false;
 
     public function create(array $attributes = []): Screenshot
     {
@@ -19,7 +25,7 @@ class ScreenshotFactory extends AbstractFactory
             $screenshotData = array_merge($screenshotData, $attributes);
         }
 
-        $image = \Tests\Facades\ScreenshotFactory::getImage();
+        $image = ScreenshotFactory::getImage();
 
         $screenshot = Screenshot::make($screenshotData);
 
@@ -39,6 +45,23 @@ class ScreenshotFactory extends AbstractFactory
         }
 
         return $this->interval->id;
+    }
+
+    public function setInterval(TimeInterval $interval)
+    {
+        $this->interval = $interval;
+
+        return $this;
+    }
+
+    /**
+     * @return self
+     */
+    public function withRandomRelations()
+    {
+        $this->randomRelations = true;
+
+        return $this;
     }
 
     /**
@@ -61,7 +84,7 @@ class ScreenshotFactory extends AbstractFactory
 
     private function defineInterval(Screenshot $screenshot)
     {
-        if (!$this->interval) {
+        if ($this->randomRelations || !$this->interval) {
             $this->interval = IntervalFactory::create();
         }
 

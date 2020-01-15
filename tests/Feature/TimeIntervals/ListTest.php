@@ -4,12 +4,14 @@ namespace Tests\Feature\TimeIntervals;
 
 use App\Models\TimeInterval;
 use App\User;
+use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 class ListTest extends TestCase
 {
     private const URI = 'v1/time-intervals/list';
+    private const COUNT_INTERVALS = 10;
 
     /**
      * @var User
@@ -21,6 +23,8 @@ class ListTest extends TestCase
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
+
+        IntervalFactory::createMany(self::COUNT_INTERVALS); //создавать через сreate()
     }
 
     public function test_list()

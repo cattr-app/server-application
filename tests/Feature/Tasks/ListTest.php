@@ -18,6 +18,10 @@ class ListTest extends TestCase
 
     private const TASKS_AMOUNT = 10;
 
+    private const PAGINATE_LIMIT = 5;
+
+    private const IS_PAGINATE = 1;
+
     /**
      * @var User
      */
@@ -45,7 +49,19 @@ class ListTest extends TestCase
 
     public function test_paginate_list()
     {
-        //todo future
+        for($i = 1; $i < 3; $i++) {
+            $url = self::URI . '?' . 'paginate=' . self::IS_PAGINATE . '&perPage=' . self::PAGINATE_LIMIT . '&page=' . $i;
+            $response = $this->actingAs($this->admin)->get($url);
+
+            $paginationData = $response->json();
+
+            $response->assertOk();
+
+            $this->assertEquals($i, $paginationData['current_page']);
+            $this->assertEquals(self::PAGINATE_LIMIT, count($paginationData['data']));
+
+            sleep(2);
+        }
     }
 
     public function test_unauthorized()
