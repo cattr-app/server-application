@@ -27,6 +27,11 @@ class IntervalFactory extends AbstractFactory
     private $task;
 
     /**
+     * @var bool
+     */
+    private $randomRelations = false;
+
+    /**
      * @return array
      */
     public function getRandomIntervalData(): array
@@ -70,7 +75,7 @@ class IntervalFactory extends AbstractFactory
      */
     private function defineUser(TimeInterval &$interval)
     {
-        if (!$this->user) {
+        if ($this->randomRelations || !$this->user) {
             $this->user = app(UserFactory::class)->create();
         }
 
@@ -82,13 +87,23 @@ class IntervalFactory extends AbstractFactory
      */
     private function defineTask(TimeInterval &$interval)
     {
-        if (!$this->task) {
+        if ($this->randomRelations || !$this->task) {
             $this->task = app(TaskFactory::class)
                 ->forUser($this->user)
                 ->create();
         }
 
         $interval->task_id = $this->task->id;
+    }
+
+    /**
+     * @return self
+     */
+    public function withRandomRelations()
+    {
+        $this->randomRelations = true;
+
+        return $this;
     }
 
     /**
