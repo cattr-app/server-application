@@ -2,6 +2,7 @@
 
 namespace App\Mail;
 
+use App\User;
 use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Lang;
 use Illuminate\Notifications\Messages\MailMessage;
@@ -35,6 +36,9 @@ class ResetPassword extends ResetPasswordNotification
 
         $resetUrl = config('app.password_reset_url')
             . "?email=$this->email&token=$this->token";
+
+        $locale = User::where('email', '=', $this->email)->first()->get('user_language');
+        Lang::setLocale($locale ? $locale : 'en');
 
         return (new MailMessage)
             ->subject(Lang::get('Reset Password Notification'))
