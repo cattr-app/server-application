@@ -127,7 +127,6 @@ class UserFactory extends AbstractFactory
     protected function assignRole(User $user): void
     {
         $user->role_id = self::ROLES[$this->role];
-        $user->save();
     }
 
     /**
@@ -151,6 +150,8 @@ class UserFactory extends AbstractFactory
         if (!is_null($this->role)) {
             $this->assignRole($user);
         }
+
+        $user->save();
 
         return $user;
     }
