@@ -1,17 +1,17 @@
 <?php
 
+namespace Tests\Feature\Screenshots;
 
-namespace Tests\Feature\TimeIntervals;
-
-use App\Models\TimeInterval;
+use App\Models\Screenshot;
 use App\User;
-use Tests\Facades\IntervalFactory;
+use Illuminate\Support\Facades\Storage;
+use Tests\Facades\ScreenshotFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 class ShowTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/show';
+    private const URI = '/v1/screenshots/show';
 
     /**
      * @var User
@@ -19,9 +19,9 @@ class ShowTest extends TestCase
     private $admin;
 
     /**
-     * @var TimeInterval
+     * @var Screenshot
      */
-    private $interval;
+    private $screenshot;
 
     protected function setUp(): void
     {
@@ -29,30 +29,28 @@ class ShowTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->interval = IntervalFactory::create();
+        Storage::fake();
+
+        $this->screenshot = ScreenshotFactory::create();
     }
 
     public function test_show()
     {
-        $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
+        $this->assertDatabaseHas('screenshots', $this->screenshot->toArray());
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->interval->id]);
+        $response = $this->actingAs($this->admin)->getJson(self::URI . '?id=' . $this->screenshot->id);
         $response->assertOk();
-
-        $response->assertJson($this->interval->toArray());
     }
 
     public function test_unauthorized()
     {
         $response = $this->getJson(self::URI);
-
         $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
-
         $response->assertValidationError();
     }
 }

@@ -26,26 +26,17 @@ class EditTest extends TestCase
      */
     private $interval;
 
-    /**
-     * @var Task
-     */
-    private $task;
-
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->interval = IntervalFactory::create();
-
-        $this->task = TaskFactory::create();
+        $this->interval = IntervalFactory::create()->makeHidden('updated_at');
     }
 
     public function test_edit()
     {
-        $originalInterval = clone $this->interval;
-
         $this->interval->count_keyboard = $this->interval->count_keyboard + 5;
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->interval->toArray());
@@ -53,7 +44,6 @@ class EditTest extends TestCase
         $response->assertOk();
         $response->assertJson(['res' => $this->interval->toArray()]);
         $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
-        $this->assertNotEquals($originalInterval->toArray(), $this->interval->toArray());
     }
 
     public function test_not_existing_interval()
@@ -61,18 +51,21 @@ class EditTest extends TestCase
         ++$this->interval->id;
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->interval->toArray());
+
         $response->assertItemNotFound();
     }
 
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
+
         $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
+
         $response->assertValidationError();
     }
 }

@@ -11,9 +11,6 @@ use Tests\TestCase;
 
 class CreateTest extends TestCase
 {
-    /**
-     * endpoint
-     */
     private const URI = 'v1/time-intervals/create';
 
     /**

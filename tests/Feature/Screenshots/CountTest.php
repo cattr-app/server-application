@@ -1,18 +1,19 @@
 <?php
 
-namespace Tests\Feature\TimeIntervals;
+namespace Tests\Feature\Screenshots;
 
-use App\Models\TimeInterval;
+use App\Models\Screenshot;
 use App\User;
-use Tests\Facades\IntervalFactory;
+use Illuminate\Support\Facades\Storage;
+use Tests\Facades\ScreenshotFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-class ListTest extends TestCase
+class CountTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/list';
+    private const URI = 'v1/screenshots/count';
 
-    private const INTERVALS_AMOUNT = 10;
+    private const SCREENSHOTS_AMOUNT = 10;
 
     /**
      * @var User
@@ -25,15 +26,17 @@ class ListTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        IntervalFactory::createMany(self::INTERVALS_AMOUNT);
+        Storage::fake();
+
+        ScreenshotFactory::createMany(self::SCREENSHOTS_AMOUNT);
     }
 
-    public function test_list()
+    public function test_count()
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
-        $response->assertOk();
-        $response->assertJson(TimeInterval::all()->toArray());
+        $response->assertSuccess();
+        $response->assertJson(['total' => Screenshot::count()]);
     }
 
     public function test_unauthorized()

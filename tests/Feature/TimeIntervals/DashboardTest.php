@@ -56,14 +56,14 @@ class DashboardTest extends TestCase
 
     public function test_unauthorized()
     {
-        $response = $this->get(self::URI);
+        $response = $this->getJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
-        $response = $this->actingAs($this->admin)->get(self::URI);
+        $response = $this->actingAs($this->admin)->getJson(self::URI);
 
         $response->assertValidationError();
     }

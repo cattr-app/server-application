@@ -1,16 +1,18 @@
 <?php
 
-namespace Tests\Feature\Screenshot;
+namespace Tests\Feature\Screenshots;
 
 use App\Models\Screenshot;
 use App\User;
+use Illuminate\Support\Facades\Storage;
 use Tests\Facades\ScreenshotFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-class CountTest extends TestCase
+class ListTest extends TestCase
 {
-    private const URI = 'v1/screenshots/count';
+    private const URI = 'v1/screenshots/list';
+
     private const SCREENSHOTS_AMOUNT = 10;
 
     /**
@@ -24,15 +26,17 @@ class CountTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        ScreenshotFactory::createMany(self::SCREENSHOTS_AMOUNT);
+        Storage::fake();
+
+        ScreenshotFactory::withRandomRelations()->createMany(self::SCREENSHOTS_AMOUNT);
     }
 
-    public function test_count()
+    public function test_list()
     {
-        $response = $this->actingAs($this->admin)->getJson(self::URI);
+        $response = $this->actingAs($this->admin)->postJson(self::URI);
 
         $response->assertOk();
-        $response->assertJson(['total' => Screenshot::count()]);
+        $response->assertJson(Screenshot::all()->toArray());
     }
 
     public function test_unauthorized()

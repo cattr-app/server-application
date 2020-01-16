@@ -4,12 +4,16 @@ namespace Tests\Factories;
 
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
+use Faker\Factory as FakerFactory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use \Tests\Facades\IntervalFactory;
 
 class ScreenshotFactory extends AbstractFactory
 {
+    /**
+     * @var TimeInterval
+     */
     private $interval;
 
     /**
@@ -17,41 +21,31 @@ class ScreenshotFactory extends AbstractFactory
      */
     private $randomRelations = false;
 
+    private function generateScreenshotData()
+    {
+        $name = FakerFactory::create()->unique()->firstName . '.jpg';
+        $image = UploadedFile::fake()->image($name);
+
+        $path = Storage::put('uploads/screenshots', $image);
+        $thumbnail = Storage::put('uploads/screenshots', UploadedFile::fake()->image($name));
+
+        return ['path' => $path, 'thumbnail' => $thumbnail];
+    }
+
     public function create(array $attributes = []): Screenshot
     {
-        $screenshotData = $this->getRandomScreenshotData();
+        $screenshotData = $this->generateScreenshotData();
 
         if ($attributes) {
             $screenshotData = array_merge($screenshotData, $attributes);
         }
 
-        $image = ScreenshotFactory::getImage();
-
         $screenshot = Screenshot::make($screenshotData);
 
         $this->defineInterval($screenshot);
-
-        $screenshot->path = $image->path();
-        $screenshot->thumbnail_path = $image->path();
         $screenshot->save();
 
         return $screenshot;
-    }
-
-    public function getIntervalId(): int
-    {
-        if (!$this->interval) {
-            $this->interval = IntervalFactory::create();
-        }
-
-        return $this->interval->id;
-    }
-
-    public function setInterval(TimeInterval $interval)
-    {
-        $this->interval = $interval;
-
-        return $this;
     }
 
     /**
@@ -63,24 +57,6 @@ class ScreenshotFactory extends AbstractFactory
 
         return $this;
     }
-
-    /**
-     * @return array
-     */
-    public function getRandomScreenshotData(): array
-    {
-        return [
-            'time_interval_id' => $this->getIntervalId(),
-        ];
-    }
-
-    public function getImage()
-    {
-        Storage::fake();
-
-        return UploadedFile::fake()->image('avatar.jpg');
-    }
-
 
     private function defineInterval(Screenshot $screenshot)
     {
