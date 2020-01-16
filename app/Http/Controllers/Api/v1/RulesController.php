@@ -130,7 +130,13 @@ class RulesController extends ItemController
         }
 
 
-        Role::updateAllow($requestData['role_id'], $requestData['object'], $requestData['action'], $requestData['allow']);
+        if (!Role::updateAllow($requestData['role_id'], $requestData['object'], $requestData['action'], $requestData['allow'])) {
+            return response()->json([
+                'success' => false,
+                'error_type' => 'query.item_not_found',
+                'message' => 'Rule does not exist'
+            ], 404);
+        }
         return response()->json(Filter::process(
             $this->getEventUniqueName('answer.success.item.edit'),
             [
