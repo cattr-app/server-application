@@ -279,7 +279,7 @@ class ScreenshotController extends ItemController
 
         }
 
-        return response()->json('deleted');
+        return response()->json(['success' => true, 'message' => 'Screenshot successfully deleted']);
     }
 
     /**
