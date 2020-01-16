@@ -17,6 +17,8 @@ use Tymon\JWTAuth\Facades\JWTAuth;
  */
 class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
 {
+    const DEFAULT_USER_LANGUAGE = 'en';
+
     /**
      * @param  Request  $request
      * @param  Closure  $next
@@ -44,6 +46,7 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
+        \Lang::setLocale($user->user_language ? $user->user_language : self::DEFAULT_USER_LANGUAGE);
         return $next($request);
     }
 }

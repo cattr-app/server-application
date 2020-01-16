@@ -46,6 +46,7 @@ class UserController extends ItemController
      * @apiParam {Boolean} active                   Is User active
      * @apiParam {Integer} [role_id]                User Role id
      * @apiParam {String}  [timezone]               User timezone
+     * @apiParam {String}  user.user_language       Language which is used for frontend translations and emails
      */
 
 
@@ -180,6 +181,7 @@ class UserController extends ItemController
      * @apiParam {String}   [updated_at]            `QueryParam` Last User data update DataTime
      * @apiParam {String}   [deleted_at]            `QueryParam` When User was deleted (null if not)
      * @apiParam {String}   [timezone]              `QueryParam` User's timezone
+     * @apiParam {String}  user.user_language       Language which is used for frontend translations and emails
      *
      * @apiSuccess (200) {Object[]} Users
      */
@@ -294,6 +296,7 @@ class UserController extends ItemController
      * @apiSuccess {String}  object.email       User email
      * @apiSuccess {String}  object.url         User url
      * @apiSuccess {Integer} object.role_id     User role id
+     * @apiSuccess {String}  user.user_language Language which is used for frontend translations and emails
      *
      * @apiSuccessExample {json} Response Example
      * {
@@ -387,6 +390,7 @@ class UserController extends ItemController
      *       "updated_at": "2018-10-18 11:04:50",
      *       "role_id": 1,
      *       "timezone": null,
+     *       "user_language": "en"
      *     }
      *   }
      *
@@ -531,6 +535,7 @@ class UserController extends ItemController
      * @apiParam {Boolean}  users.object.active                   User is active
      * @apiParam {Integer}  [users.object.role_id]                User Role id
      * @apiParam {String}   [users.object.timezone]               User timezone
+     * @apiParam {String}  user.user_language Language which is used for frontend translations and emails
      *
      * @apiSuccess {Object[]} message        Users
      * @apiSuccess {Object}   message.object User

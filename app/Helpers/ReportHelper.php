@@ -212,13 +212,13 @@ class ReportHelper
             }
 
             // Sort User Tasks by total_time
-            usort($resultCollection[$userID]['tasks'], function($a, $b) {
+            uasort($resultCollection[$userID]['tasks'], function($a, $b) {
                return $a['total_time'] < $b['total_time'];
             });
         }
 
         // Sort Users by total_time
-        usort($resultCollection, function($a, $b) {
+        uasort($resultCollection, function($a, $b) {
             return $a['total_time'] < $b['total_time'];
         });
 
