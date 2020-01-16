@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Exceptions\Entities\AuthorizationException;
 use App\User;
 use Auth;
 use Eloquent;
@@ -186,17 +187,19 @@ class Role extends AbstractModel
 
         $user = Auth::user();
 
-        throw_if(!$rule, new HttpException(404, 'Rule does not exist'));
+        if (!$rule) {
+            return false;
+        }
+
         if (!static::can($user, 'rules', 'full_access')) {
-            $userRoleIds = [$user->role_id];
             throw_if(
-                $userRoleIds->contains($rule->role_id),
-                new HttpException(403, 'You cannot change your own privileges')
+                $user->role_id === $rule->role_id,
+                new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN, 'You cannot change your own privileges')
             );
         }
         throw_if(
             $role_id === 1 && $object === 'rules' && $action === 'full_access',
-            new HttpException(403, 'You cannot change rule management for root')
+            new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN, 'You cannot change rule management for root')
         );
 
         $rule->allow = $allow;

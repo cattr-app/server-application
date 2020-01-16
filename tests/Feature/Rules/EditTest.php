@@ -69,18 +69,21 @@ class EditTest extends TestCase
     public function test_not_existing_rule()
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->incorrectRule);
+
         $response->assertItemNotFound();
     }
 
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
+
         $response->assertUnauthorized();
     }
 
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->postJson(self::URI);
+
         $response->assertForbidden();
     }
 

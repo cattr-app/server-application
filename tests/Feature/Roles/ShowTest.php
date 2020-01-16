@@ -1,0 +1,44 @@
+<?php
+namespace Tests\Feature\Roles;
+
+use App\User;
+
+use App\Models\Role;
+use Tests\Facades\UserFactory;
+use Tests\TestCase;
+
+/**
+ * Class ShowTest
+ * @package Tests\Feature\Roles
+ */
+class ShowTest extends TestCase
+{
+    private const URI = 'v1/roles/show';
+
+    /**
+     * @var User
+     */
+    private $admin;
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->admin = UserFactory::withTokens()->asAdmin()->create();
+    }
+
+    public function test_show()
+    {
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => 1]);
+
+        $response->assertOk();
+        $response->assertJson(Role::find(1)->toArray());
+    }
+
+    public function test_unauthorized()
+    {
+        $response = $this->getJson(self::URI);
+
+        $response->assertUnauthorized();
+    }
+}

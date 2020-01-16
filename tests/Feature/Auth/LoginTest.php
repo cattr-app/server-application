@@ -29,6 +29,7 @@ class LoginTest extends TestCase
         parent::setUp();
 
         $this->user = UserFactory::create();
+
         $this->loginData = [
             'email' => $this->user->email,
             'password' => $this->user->full_name
@@ -41,6 +42,7 @@ class LoginTest extends TestCase
         $response->assertSuccess();
 
         $token = $this->user->tokens()->first()->token;
+
         $response->assertJson(['access_token' => $token]);
     }
 
@@ -48,6 +50,7 @@ class LoginTest extends TestCase
     {
         $this->loginData['password'] = 'wrong_password';
         $response = $this->postJson(self::URI, $this->loginData);
+
         $response->assertUnauthorized();
     }
 
@@ -56,6 +59,7 @@ class LoginTest extends TestCase
         $this->user->active = false;
         $this->user->save();
         $response = $this->postJson(self::URI, $this->loginData);
+
         $response->assertForbidden('authorization.user_disabled', false);
     }
 
@@ -63,14 +67,14 @@ class LoginTest extends TestCase
     {
         $this->user->delete();
         $response = $this->postJson(self::URI, $this->loginData);
+
         $response->assertUnauthorized();
     }
 
     public function test_without_params()
     {
         $response = $this->postJson(self::URI);
+
         $response->assertError(400);
     }
-
-    // TODO Captcha Tests
 }

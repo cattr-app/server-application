@@ -36,6 +36,7 @@ class CountTest extends TestCase
     public function test_count()
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
+
         $response->assertOk();
         $response->assertJson(['total' => Rule::count()]);
     }
@@ -43,12 +44,14 @@ class CountTest extends TestCase
     public function test_unauthorized()
     {
         $response = $this->getJson(self::URI);
+
         $response->assertUnauthorized();
     }
 
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
+
         $response->assertForbidden();
     }
 }

@@ -57,6 +57,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @apiSuccess {Boolean}  user.blur_screenshots        `Not used`
  * @apiSuccess {Boolean}  user.web_and_app_monitoring  `Not used`
  * @apiSuccess {Boolean}  user.webcam_shots            `Not used`
+ * @apiSuccess {String}   user.user_language            Language which is used for frontend translations and emails
  */
 
 
@@ -85,6 +86,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property int $active
  * @property string $password
  * @property string $timezone
+ * @property string $user_language
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
@@ -178,6 +180,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'important',
         'change_password',
         'role_id',
+        'user_language',
     ];
 
     /**
@@ -206,7 +209,8 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
         'important' => 'integer',
         'change_password' => 'int',
         'is_admin' => 'integer',
-        'role_id' => 'integer'
+        'role_id' => 'integer',
+        'user_language' => 'string',
     ];
 
 

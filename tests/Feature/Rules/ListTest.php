@@ -36,6 +36,7 @@ class ListTest extends TestCase
     public function test_list()
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
+
         $response->assertOk();
         $response->assertJson(Rule::all()->toArray());
     }
@@ -43,12 +44,14 @@ class ListTest extends TestCase
     public function test_unauthorized()
     {
         $response = $this->getJson(self::URI);
+
         $response->assertUnauthorized();
     }
 
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
+
         $response->assertForbidden();
     }
 }

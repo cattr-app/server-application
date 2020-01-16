@@ -245,7 +245,7 @@ class TimeIntervalController extends ItemController
         if (isset($request->screenshot)) {
             $path = Filter::process($this->getEventUniqueName('request.item.create'),
                 $request->screenshot->store('uploads/screenshots'));
-            $screenshot = Image::make($path);
+            $screenshot = Image::make(storage_path('app/' . $path));
             $thumbnail = $screenshot->resize(280, null, function ($constraint) {
                 $constraint->aspectRatio();
             });

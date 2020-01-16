@@ -34,8 +34,6 @@ class ListTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->commonUser = UserFactory::withTokens()->asUser()->create();
-
         TaskFactory::createMany(self::TASKS_AMOUNT);
     }
 
@@ -69,13 +67,5 @@ class ListTest extends TestCase
         $response = $this->getJson(self::URI);
 
         $response->assertUnauthorized();
-    }
-
-    public function test_common_user()
-    {
-        $response = $this->actingAs($this->commonUser)->getJson(self::URI);
-
-        $response->assertOk();
-        $response->assertJson([]);
     }
 }
