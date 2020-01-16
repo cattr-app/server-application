@@ -33,7 +33,7 @@ class EditTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->project = ProjectFactory::create();
+        $this->project = ProjectFactory::create()->makeHidden('updated_at');
     }
 
 
@@ -44,6 +44,7 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->project->toArray());
 
         $response->assertSuccess();
+        $response->assertJson(['res' => $this->project->toArray()]);
         $this->assertDatabaseHas('projects', $this->project->toArray());
     }
 

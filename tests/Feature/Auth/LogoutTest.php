@@ -40,6 +40,7 @@ class LogoutTest extends TestCase
     public function test_unauthorized()
     {
         $response = $this->postJson(self::URI);
+
         $response->assertUnauthorized();
     }
 }

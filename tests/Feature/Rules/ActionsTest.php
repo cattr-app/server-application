@@ -57,12 +57,14 @@ class ActionsTest extends TestCase
     public function test_unauthorized()
     {
         $response = $this->getJson(self::URI);
+
         $response->assertUnauthorized();
     }
 
     public function test_forbidden()
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
+
         $response->assertForbidden();
     }
 }

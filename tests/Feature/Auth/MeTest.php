@@ -29,13 +29,15 @@ class MeTest extends TestCase
     public function test_me()
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
+
         $response->assertSuccess();
         $response->assertJson(['user' => $this->user->toArray()]);
     }
 
     public function test_without_auth()
     {
-        $response = $this->get(self::URI);
+        $response = $this->getJson(self::URI);
+
         $response->assertUnauthorized();
     }
 }

@@ -33,20 +33,19 @@ class EditTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->task = TaskFactory::create();
+        $this->task = TaskFactory::create()->makeHidden('updated_at');
     }
 
-//TODO fix
+    public function test_edit()
+    {
+        $this->task->description = 'New Description';
 
-//    public function test_edit()
-//    {
-//        $this->task->description = 'New Description';
-//
-//        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->toArray());
-//
-//        $response->assertSuccess();
-//        $this->assertDatabaseHas('tasks', $this->task->toArray());
-//    }
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->toArray());
+
+        $response->assertSuccess();
+        $response->assertJson(['res' => $this->task->toArray()]);
+        $this->assertDatabaseHas('tasks', $this->task->toArray());
+    }
 
     public function test_not_existing()
     {

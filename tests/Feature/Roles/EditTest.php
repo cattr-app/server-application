@@ -38,6 +38,7 @@ class EditTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->newRoleData);
 
         $response->assertSuccess();
+        $response->assertJson(['res' => $this->newRoleData]);
         $this->assertDatabaseHas('role', $this->newRoleData);
     }
 
