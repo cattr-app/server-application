@@ -723,7 +723,7 @@ class TimeIntervalController extends ItemController
                     'error_type' => 'query.item_not_found',
                     'message' => 'Item not found',
                 ]),
-                400
+                404
             );
         }
 
