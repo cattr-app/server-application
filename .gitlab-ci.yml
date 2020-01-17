@@ -3,7 +3,9 @@ integration_testing:
   only:
     - 52-implement-integration-tests
   services:
-    - mariadb:10.4
+    - name: mysql:latest
+      alias: mysql
+      command: ["--default-authentication-plugin=mysql_native_password"]
   variables:
     MYSQL_DATABASE: amazing_time_tests
     MYSQL_ROOT_PASSWORD: secret
