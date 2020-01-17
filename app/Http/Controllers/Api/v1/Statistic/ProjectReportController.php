@@ -100,7 +100,7 @@ class ProjectReportController extends ReportController
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
-                    'reason' => $validator->errors()
+                    'info' => $validator->errors()
                 ]), 400);
         }
 
