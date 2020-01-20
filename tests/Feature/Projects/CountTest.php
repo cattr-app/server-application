@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 /**
  * Class CountTest
- * @package Tests\Feature\Projects
  */
 class CountTest extends TestCase
 {
@@ -32,7 +31,7 @@ class CountTest extends TestCase
         ProjectFactory::createMany(self::PROJECTS_AMOUNT);
     }
 
-    public function test_count()
+    public function test_count(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
@@ -40,7 +39,7 @@ class CountTest extends TestCase
         $response->assertJson(['total' => Project::count()]);
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 

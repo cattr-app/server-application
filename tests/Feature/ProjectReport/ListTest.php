@@ -13,6 +13,9 @@ use Tests\TestCase;
 use Tests\TestResponse;
 
 
+/**
+ * Class ListTest
+ */
 class ListTest extends TestCase
 {
     private const URI = 'v1/project-report/list';
@@ -51,7 +54,7 @@ class ListTest extends TestCase
      * @param TestResponse $response
      * @return Collection
      */
-    private function collectResponseProjects(TestResponse $response)
+    private function collectResponseProjects(TestResponse $response): Collection
     {
         return collect($response->json('projects'));
     }
@@ -60,7 +63,7 @@ class ListTest extends TestCase
      * @param TestResponse $response
      * @return Collection
      */
-    private function collectResponseUsers(TestResponse $response)
+    private function collectResponseUsers(TestResponse $response): Collection
     {
         return $this->collectResponseProjects($response)->pluck('users')->collapse();
     }
@@ -103,14 +106,14 @@ class ListTest extends TestCase
         //TODO change later
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 

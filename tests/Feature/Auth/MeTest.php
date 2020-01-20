@@ -8,7 +8,6 @@ use Tests\TestCase;
 
 /**
  * Class MeTest
- * @package Tests\Feature\Auth
  */
 class MeTest extends TestCase
 {
@@ -26,7 +25,7 @@ class MeTest extends TestCase
         $this->user = UserFactory::withTokens()->create();
     }
 
-    public function test_me()
+    public function test_me(): void
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
 
@@ -34,7 +33,7 @@ class MeTest extends TestCase
         $response->assertJson(['user' => $this->user->toArray()]);
     }
 
-    public function test_without_auth()
+    public function test_without_auth(): void
     {
         $response = $this->getJson(self::URI);
 

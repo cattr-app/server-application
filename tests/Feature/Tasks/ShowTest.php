@@ -11,7 +11,6 @@ use Tests\TestCase;
 
 /**
  * Class ShowTest
- * @package Tests\Feature\Projects
  */
 class ShowTest extends TestCase
 {
@@ -36,7 +35,7 @@ class ShowTest extends TestCase
         $this->task = TaskFactory::create();
     }
 
-    public function test_show()
+    public function test_show(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->task->id]);
 
@@ -44,14 +43,14 @@ class ShowTest extends TestCase
         $response->assertJson($this->task->toArray());
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

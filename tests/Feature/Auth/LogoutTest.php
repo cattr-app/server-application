@@ -8,7 +8,6 @@ use Tests\Facades\UserFactory;
 
 /**
  * Class LogoutTest
- * @package Tests\Feature\Auth
  */
 class LogoutTest extends TestCase
 {
@@ -26,7 +25,7 @@ class LogoutTest extends TestCase
         $this->user = UserFactory::withTokens()->create();
     }
 
-    public function test_logout()
+    public function test_logout(): void
     {
         $token = $this->user->tokens()->first()->token;
         $this->assertDatabaseHas('tokens', ['token' => $token]);
@@ -37,7 +36,7 @@ class LogoutTest extends TestCase
         $this->assertDatabaseMissing('tokens', ['token' => $token]);
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 

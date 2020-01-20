@@ -10,6 +10,9 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class DashboardTest
+ */
 class DashboardTest extends TestCase
 {
     private const URI = 'v1/time-intervals/dashboard';
@@ -35,7 +38,7 @@ class DashboardTest extends TestCase
         $this->intervals = IntervalFactory::forUser($this->admin)->createMany(self::INTERVALS_AMOUNT);
     }
 
-    public function test_dashboard()
+    public function test_dashboard(): void
     {
         $requestData = [
             'start_at' => $this->intervals->min('start_at'),
@@ -54,14 +57,14 @@ class DashboardTest extends TestCase
         #TODO change later
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 

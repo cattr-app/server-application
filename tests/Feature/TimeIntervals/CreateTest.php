@@ -9,6 +9,9 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class CreateTest
+ */
 class CreateTest extends TestCase
 {
     private const URI = 'v1/time-intervals/create';
@@ -52,14 +55,14 @@ class CreateTest extends TestCase
         $this->assertDatabaseHas('time_intervals', $this->intervalData);
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

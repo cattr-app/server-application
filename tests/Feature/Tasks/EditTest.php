@@ -11,7 +11,6 @@ use Tests\TestCase;
 
 /**
  * Class EditTest
- * @package Tests\Feature\Tasks
  */
 class EditTest extends TestCase
 {
@@ -36,7 +35,7 @@ class EditTest extends TestCase
         $this->task = TaskFactory::create()->makeHidden('updated_at');
     }
 
-    public function test_edit()
+    public function test_edit(): void
     {
         $this->task->description = 'New Description';
 
@@ -47,7 +46,7 @@ class EditTest extends TestCase
         $this->assertDatabaseHas('tasks', $this->task->toArray());
     }
 
-    public function test_not_existing()
+    public function test_not_existing(): void
     {
         $this->task->id = Task::count() + 20;
 
@@ -56,14 +55,14 @@ class EditTest extends TestCase
         $response->assertItemNotFound();
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

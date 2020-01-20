@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 /**
  * Class CreateTest
- * @package Tests\Feature\Tasks
  */
 class CreateTest extends TestCase
 {
@@ -37,7 +36,7 @@ class CreateTest extends TestCase
         ]);
     }
 
-    public function test_create()
+    public function test_create(): void
     {
         $this->assertDatabaseMissing('tasks', $this->taskData);
 
@@ -48,14 +47,14 @@ class CreateTest extends TestCase
         $this->assertDatabaseHas('tasks', $response->json('res'));
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

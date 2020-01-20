@@ -8,7 +8,6 @@ use Tests\TestCase;
 
 /**
  * Class LoginTest
- * @package Tests\Feature\Auth
  */
 class LoginTest extends TestCase
 {
@@ -36,7 +35,7 @@ class LoginTest extends TestCase
         ];
     }
 
-    public function test_success()
+    public function test_success(): void
     {
         $response = $this->postJson(self::URI, $this->loginData);
         $response->assertSuccess();
@@ -46,7 +45,7 @@ class LoginTest extends TestCase
         $response->assertJson(['access_token' => $token]);
     }
 
-    public function test_wrong_credentials()
+    public function test_wrong_credentials(): void
     {
         $this->loginData['password'] = 'wrong_password';
         $response = $this->postJson(self::URI, $this->loginData);
@@ -54,7 +53,7 @@ class LoginTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    public function test_disabled_user()
+    public function test_disabled_user(): void
     {
         $this->user->active = false;
         $this->user->save();
@@ -63,7 +62,7 @@ class LoginTest extends TestCase
         $response->assertForbidden('authorization.user_disabled', false);
     }
 
-    public function test_soft_deleted_user()
+    public function test_soft_deleted_user(): void
     {
         $this->user->delete();
         $response = $this->postJson(self::URI, $this->loginData);

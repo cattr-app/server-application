@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 /**
  * Class ProcessTest
- * @package Tests\Feature\Auth\PasswordReset
  */
 class ProcessTest extends TestCase
 {
@@ -34,7 +33,7 @@ class ProcessTest extends TestCase
      * @param $createdAt
      * @return array
      */
-    protected function createReset($email, $token, $createdAt)
+    protected function createReset($email, $token, $createdAt): void
     {
         DB::table('password_resets')->insert([
             'email' => $email,
@@ -50,7 +49,7 @@ class ProcessTest extends TestCase
         ];
     }
 
-    public function test_process()
+    public function test_process(): void
     {
         $reset = $this->createReset($this->user->email, 'token', now());
 
@@ -64,7 +63,7 @@ class ProcessTest extends TestCase
         $response->assertJsonStructure(['access_token']);
     }
 
-    public function test_invalid_token()
+    public function test_invalid_token(): void
     {
         $reset = $this->createReset($this->user->email, 'token', now());
         $reset['token'] = 'invalid_token';
@@ -74,7 +73,7 @@ class ProcessTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    public function test_invalid_email()
+    public function test_invalid_email(): void
     {
         $reset = $this->createReset($this->user->email, 'token', now());
         $reset['email'] = 'invalidemail@example.com';
@@ -84,7 +83,7 @@ class ProcessTest extends TestCase
         $response->assertUnauthorized('authorization.invalid_password_data');
     }
 
-    public function test_almost_expired()
+    public function test_almost_expired(): void
     {
         $reset = [$this->user->email, 'expired', now()->subMinutes(config('auth.passwords.users.expire') - 1)];
         $reset = $this->createReset(...$reset);
@@ -99,7 +98,7 @@ class ProcessTest extends TestCase
         $response->assertJsonStructure(['access_token']);
     }
 
-    public function test_expired()
+    public function test_expired(): void
     {
         $reset = [$this->user->email, 'expired', now()->subMinutes(config('auth.passwords.users.expire'))];
         $reset = $this->createReset(...$reset);
@@ -109,7 +108,7 @@ class ProcessTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->postJson(self::URI);
         $response->assertError(400);

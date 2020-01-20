@@ -9,6 +9,9 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class ShowTest
+ */
 class ShowTest extends TestCase
 {
     private const URI = 'v1/time-intervals/show';
@@ -32,7 +35,7 @@ class ShowTest extends TestCase
         $this->interval = IntervalFactory::create();
     }
 
-    public function test_show()
+    public function test_show(): void
     {
         $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
 
@@ -42,14 +45,14 @@ class ShowTest extends TestCase
         $response->assertJson($this->interval->toArray());
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 

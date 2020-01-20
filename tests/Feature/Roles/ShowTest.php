@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 /**
  * Class ShowTest
- * @package Tests\Feature\Roles
  */
 class ShowTest extends TestCase
 {
@@ -27,7 +26,7 @@ class ShowTest extends TestCase
         $this->admin = UserFactory::withTokens()->asAdmin()->create();
     }
 
-    public function test_show()
+    public function test_show(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => 1]);
 
@@ -35,7 +34,7 @@ class ShowTest extends TestCase
         $response->assertJson(Role::find(1)->toArray());
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 

@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 /**
  * Class ShowTest
- * @package Tests\Feature\Projects
  */
 class ShowTest extends TestCase
 {
@@ -39,7 +38,7 @@ class ShowTest extends TestCase
         $this->project = ProjectFactory::forUsers([$this->assignedUser])->create();
     }
 
-    public function test_admin()
+    public function test_admin(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
 
@@ -47,7 +46,7 @@ class ShowTest extends TestCase
         $response->assertJson($this->project->toArray());
     }
 
-    public function test_assigned()
+    public function test_assigned(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
 
@@ -55,21 +54,21 @@ class ShowTest extends TestCase
         $response->assertJson($this->project->toArray());
     }
 
-    public function test_not_assigned()
+    public function test_not_assigned(): void
     {
         $response = $this->actingAs($this->notAssignedUser)->postJson(self::URI, ['id' => $this->project->id]);
 
         $response->assertForbidden();
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

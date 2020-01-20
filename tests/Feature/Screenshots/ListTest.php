@@ -9,6 +9,9 @@ use Tests\Facades\ScreenshotFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class ListTest
+ */
 class ListTest extends TestCase
 {
     private const URI = 'v1/screenshots/list';
@@ -31,7 +34,7 @@ class ListTest extends TestCase
         ScreenshotFactory::withRandomRelations()->createMany(self::SCREENSHOTS_AMOUNT);
     }
 
-    public function test_list()
+    public function test_list(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 
@@ -39,7 +42,7 @@ class ListTest extends TestCase
         $response->assertJson(Screenshot::all()->toArray());
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 

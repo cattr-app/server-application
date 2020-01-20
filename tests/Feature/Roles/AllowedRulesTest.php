@@ -8,7 +8,6 @@ use Tests\TestCase;
 
 /**
  * Class AllowedRulesTest
- * @package Tests\Feature\Roles
  */
 class AllowedRulesTest extends TestCase
 {
@@ -26,12 +25,12 @@ class AllowedRulesTest extends TestCase
         $this->admin = UserFactory::withTokens()->asAdmin()->create();
     }
 
-    public function test_allowed_rules()
+    public function test_allowed_rules(): void
     {
         $adminResponse = $this->actingAs($this->admin)->getJson(self::URI);
 
         $adminResponse->assertOk();
 
-        #TODO Check Response Json
+        // TODO Check Response Json
     }
 }

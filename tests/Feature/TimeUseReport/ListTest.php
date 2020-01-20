@@ -10,6 +10,9 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class ListTest
+ */
 class ListTest extends TestCase
 {
     private const URI = 'v1/time-use-report/list';
@@ -72,14 +75,14 @@ class ListTest extends TestCase
         //TODO change later
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 

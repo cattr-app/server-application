@@ -13,6 +13,9 @@ use Tests\Facades\UserFactory;
 use Tests\Facades\IntervalFactory;
 use Tests\TestCase;
 
+/**
+ * Class CreateTest
+ */
 class CreateTest extends TestCase
 {
     private const URI = '/v1/screenshots/create';
@@ -65,14 +68,14 @@ class CreateTest extends TestCase
         //TODO find out what's wrong with thumbnails
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

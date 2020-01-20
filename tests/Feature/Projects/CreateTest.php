@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 /**
  * Class CreateTest
- * @package Tests\Feature\Projects
  */
 class CreateTest extends TestCase
 {
@@ -33,7 +32,7 @@ class CreateTest extends TestCase
         $this->projectData = ProjectFactory::getRandomProjectData();
     }
 
-    public function test_create()
+    public function test_create(): void
     {
         $this->assertDatabaseMissing('projects', $this->projectData);
 
@@ -44,14 +43,14 @@ class CreateTest extends TestCase
         $this->assertDatabaseHas('projects', $response->json('res'));
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

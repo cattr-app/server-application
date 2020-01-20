@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 /**
  * Class EditTest
- * @package Tests\Feature\Roles
  */
 class EditTest extends TestCase
 {
@@ -33,7 +32,7 @@ class EditTest extends TestCase
         $this->newRoleData = ['id' => 1, 'name' => 'new-name'];
     }
 
-    public function test_edit()
+    public function test_edit(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->newRoleData);
 
@@ -42,7 +41,7 @@ class EditTest extends TestCase
         $this->assertDatabaseHas('role', $this->newRoleData);
     }
 
-    public function test_not_existing_role()
+    public function test_not_existing_role(): void
     {
         $this->newRoleData['id'] = 42;
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->newRoleData);
@@ -50,14 +49,14 @@ class EditTest extends TestCase
         $response->assertItemNotFound();
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

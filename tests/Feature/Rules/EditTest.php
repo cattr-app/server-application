@@ -8,7 +8,6 @@ use Tests\TestCase;
 
 /**
  * Class EditTest
- * @package Tests\Feature\Rules
  */
 class EditTest extends TestCase
 {
@@ -56,7 +55,7 @@ class EditTest extends TestCase
         ];
     }
 
-    public function test_edit()
+    public function test_edit(): void
     {
         $this->assertDatabaseMissing('rule', $this->correctRule);
 
@@ -66,28 +65,28 @@ class EditTest extends TestCase
         $response->assertSuccess();
     }
 
-    public function test_not_existing_rule()
+    public function test_not_existing_rule(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->incorrectRule);
 
         $response->assertItemNotFound();
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_forbidden()
+    public function test_forbidden(): void
     {
         $response = $this->actingAs($this->user)->postJson(self::URI);
 
         $response->assertForbidden();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 /**
  * Class ListTest
- * @package Tests\Feature\Projects
  */
 class ListTest extends TestCase
 {
@@ -37,7 +36,7 @@ class ListTest extends TestCase
         ProjectFactory::createMany(self::PROJECTS_AMOUNT);
     }
 
-    public function test_list()
+    public function test_list(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
@@ -45,7 +44,7 @@ class ListTest extends TestCase
         $response->assertJson(Project::all()->toArray());
     }
 
-    public function test_paginate_list()
+    public function test_paginate_list(): void
     {
         for($i = 1; $i < 3; $i++) {
             $url = self::URI . '?' . 'paginate=' . self::IS_PAGINATE . '&perPage=' . self::PAGINATE_LIMIT . '&page=' . $i;
@@ -62,14 +61,14 @@ class ListTest extends TestCase
         }
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_common_user()
+    public function test_common_user(): void
     {
         $response = $this->actingAs($this->commonUser)->getJson(self::URI);
 

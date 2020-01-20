@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 /**
  * Class ListTest
- * @package Tests\Feature\Roles
  */
 class ListTest extends TestCase
 {
@@ -28,7 +27,7 @@ class ListTest extends TestCase
         $this->commonUser = UserFactory::withTokens()->asUser()->create();
     }
 
-    public function test_list()
+    public function test_list(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
@@ -36,7 +35,7 @@ class ListTest extends TestCase
         $response->assertJson(Role::all()->toArray());
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 

@@ -8,7 +8,6 @@ use Tests\TestCase;
 
 /**
  * Class RefreshTest
- * @package Tests\Feature\Auth
  */
 class RefreshTest extends TestCase
 {
@@ -26,7 +25,7 @@ class RefreshTest extends TestCase
         $this->user = UserFactory::withTokens()->create();
     }
 
-    public function test_refresh()
+    public function test_refresh(): void
     {
         $token = $this->user->tokens()->first()->token;
         $this->assertDatabaseHas('tokens', ['token' => $token]);

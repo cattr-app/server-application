@@ -12,6 +12,9 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class EditTest
+ */
 class EditTest extends TestCase
 {
     private const URI = 'v1/time-intervals/edit';
@@ -35,9 +38,9 @@ class EditTest extends TestCase
         $this->interval = IntervalFactory::create();
     }
 
-    public function test_edit()
+    public function test_edit(): void
     {
-        $this->interval->count_keyboard = $this->interval->count_keyboard + 5;
+        $this->interval->count_keyboard += 5;
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->interval->toArray());
 
@@ -46,7 +49,7 @@ class EditTest extends TestCase
         $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
     }
 
-    public function test_not_existing_interval()
+    public function test_not_existing_interval(): void
     {
         ++$this->interval->id;
 
@@ -55,14 +58,14 @@ class EditTest extends TestCase
         $response->assertItemNotFound();
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

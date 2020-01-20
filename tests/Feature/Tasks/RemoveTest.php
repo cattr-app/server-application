@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 /**
  * Class RemoveTest
- * @package Tests\Feature\Tasks
  */
 class RemoveTest extends TestCase
 {
@@ -35,7 +34,7 @@ class RemoveTest extends TestCase
         $this->task = TaskFactory::create();
     }
 
-    public function test_remove()
+    public function test_remove(): void
     {
         $this->assertDatabaseHas('tasks', $this->task->toArray());
 
@@ -45,14 +44,14 @@ class RemoveTest extends TestCase
         $this->assertSoftDeleted('tasks', ['id' => $this->task->id]);
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

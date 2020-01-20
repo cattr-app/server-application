@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 /**
  * Class ActionsTest
- * @package Tests\Feature\Rules
  */
 class ActionsTest extends TestCase
 {
@@ -33,7 +32,7 @@ class ActionsTest extends TestCase
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
     }
 
-    public function test_actions()
+    public function test_actions(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
@@ -54,14 +53,14 @@ class ActionsTest extends TestCase
         $response->assertJson($items);
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_forbidden()
+    public function test_forbidden(): void
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
 

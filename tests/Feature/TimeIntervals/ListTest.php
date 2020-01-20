@@ -8,6 +8,9 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class ListTest
+ */
 class ListTest extends TestCase
 {
     private const URI = 'v1/time-intervals/list';
@@ -28,7 +31,7 @@ class ListTest extends TestCase
         IntervalFactory::createMany(self::INTERVALS_AMOUNT);
     }
 
-    public function test_list()
+    public function test_list(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
@@ -36,7 +39,7 @@ class ListTest extends TestCase
         $response->assertJson(TimeInterval::all()->toArray());
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 

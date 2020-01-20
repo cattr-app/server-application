@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 /**
  * Class RequestTest
- * @package Tests\Feature\Auth\PasswordReset
  */
 class RequestTest extends TestCase
 {
@@ -27,7 +26,7 @@ class RequestTest extends TestCase
         $this->user = UserFactory::create();
     }
 
-    public function test_request()
+    public function test_request(): void
     {
         Notification::fake();
         Notification::assertNothingSent();
@@ -38,7 +37,7 @@ class RequestTest extends TestCase
         Notification::assertSentTo($this->user, ResetPassword::class);
     }
 
-    public function test_wrong_email()
+    public function test_wrong_email(): void
     {
         Notification::fake();
         Notification::assertNothingSent();
@@ -49,7 +48,7 @@ class RequestTest extends TestCase
         Notification::assertNothingSent();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         Notification::fake();
         Notification::assertNothingSent();

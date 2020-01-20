@@ -8,7 +8,6 @@ use Tests\TestCase;
 
 /**
  * Class CreateTest
- * @package Tests\Feature\Roles
  */
 class CreateTest extends TestCase
 {
@@ -33,7 +32,7 @@ class CreateTest extends TestCase
         $this->roleData = ['name' => 'time-traveler'];
     }
 
-    public function test_create()
+    public function test_create(): void
     {
         $this->assertDatabaseMissing('role', $this->roleData);
 
@@ -44,7 +43,7 @@ class CreateTest extends TestCase
         $this->assertDatabaseHas('role', $response->json('res'));
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 

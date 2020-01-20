@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 /**
  * Class LogoutFromAllTest
- * @package Tests\Feature\Auth
  */
 class LogoutFromAllTest extends TestCase
 {
@@ -27,7 +26,7 @@ class LogoutFromAllTest extends TestCase
         $this->user = UserFactory::withTokens(4)->create();
     }
 
-    public function test_logout_from_all()
+    public function test_logout_from_all(): void
     {
         $tokens = $this->user->tokens()->get()->toArray();
 
@@ -45,7 +44,7 @@ class LogoutFromAllTest extends TestCase
         }
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 

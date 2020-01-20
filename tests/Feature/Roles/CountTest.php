@@ -9,7 +9,6 @@ use Tests\TestCase;
 
 /**
  * Class CountTest
- * @package Tests\Feature\Roles
  */
 class CountTest extends TestCase
 {
@@ -27,7 +26,7 @@ class CountTest extends TestCase
         $this->admin = UserFactory::withTokens()->asAdmin()->create();
     }
 
-    public function test_count()
+    public function test_count(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
@@ -35,7 +34,7 @@ class CountTest extends TestCase
         $response->assertJson(['total' => Role::count()]);
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
 

@@ -10,7 +10,6 @@ use Tests\TestCase;
 
 /**
  * Class RemoveTest
- * @package Tests\Feature\Roles
  */
 class RemoveTest extends TestCase
 {
@@ -28,7 +27,7 @@ class RemoveTest extends TestCase
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
     }
 
-    public function test_remove()
+    public function test_remove(): void
     {
         $this->assertDatabaseHas('role', ['id' => 1]);
 
@@ -39,14 +38,14 @@ class RemoveTest extends TestCase
 
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 

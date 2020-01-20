@@ -10,6 +10,9 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
+/**
+ * Class RemoveTest
+ */
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/time-intervals/remove';
@@ -33,7 +36,7 @@ class RemoveTest extends TestCase
         $this->interval = IntervalFactory::create();
     }
 
-    public function test_remove()
+    public function test_remove(): void
     {
         $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
 
@@ -43,14 +46,14 @@ class RemoveTest extends TestCase
         $this->assertSoftDeleted('time_intervals', ['id' =>$this->interval->id]);
     }
 
-    public function test_unauthorized()
+    public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 
