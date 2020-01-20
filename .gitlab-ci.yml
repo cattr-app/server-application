@@ -12,8 +12,10 @@ integration_testing:
   stage: test
   before_script:
     - apk update
-    - apk add libpng-dev
-    - docker-php-ext-install gd bcmath zip pdo_mysql
+    - apk add libpng-dev freetype-dev libjpeg-turbo-dev libjpeg-turbo libpng freetype
+    - docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
+    - docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd
+    - docker-php-ext-install bcmath zip pdo_mysql
     - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   script:
     - composer install
