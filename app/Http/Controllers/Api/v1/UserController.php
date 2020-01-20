@@ -463,7 +463,7 @@ class UserController extends ItemController
                     'error_type' => 'query.item_not_found',
                     'message' => 'User not found',
                 ]),
-                400
+                404
             );
         }
 
