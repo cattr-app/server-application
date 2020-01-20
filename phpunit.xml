@@ -21,6 +21,9 @@
   <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
       <directory suffix=".php">./app</directory>
+      <exclude>
+        <directory suffix=".php">./app/Console/Commands</directory>
+      </exclude>
     </whitelist>
   </filter>
   <php>
