@@ -70,7 +70,7 @@ class IntervalFactory extends AbstractFactory
     /**
      * @param TimeInterval $interval
      */
-    private function defineUser(TimeInterval &$interval)
+    private function defineUser(TimeInterval $interval): void
     {
         if ($this->randomRelations || !$this->user) {
             $this->user = app(UserFactory::class)->create();
@@ -82,7 +82,7 @@ class IntervalFactory extends AbstractFactory
     /**
      * @param TimeInterval $interval
      */
-    private function defineTask(TimeInterval &$interval)
+    private function defineTask(TimeInterval $interval): void
     {
         if ($this->randomRelations || !$this->task) {
             $this->task = app(TaskFactory::class)
@@ -96,7 +96,7 @@ class IntervalFactory extends AbstractFactory
     /**
      * @return self
      */
-    public function withRandomRelations()
+    public function withRandomRelations(): self
     {
         $this->randomRelations = true;
 

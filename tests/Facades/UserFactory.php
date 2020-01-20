@@ -14,7 +14,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static BaseUserFactory asAdmin()
  * @method static BaseUserFactory asUser()
  * @method static array getRandomUserData()
- * @method static array getBasicUserData()
+ * @method static array getRegistrationUserData()
  * @mixin BaseUserFactory
  */
 class UserFactory extends Facade
@@ -24,7 +24,7 @@ class UserFactory extends Facade
      *
      * @return string
      */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return BaseUserFactory::class;
     }

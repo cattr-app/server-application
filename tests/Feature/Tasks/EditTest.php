@@ -32,7 +32,7 @@ class EditTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->task = TaskFactory::create()->makeHidden('updated_at');
+        $this->task = TaskFactory::create();
     }
 
     public function test_edit(): void

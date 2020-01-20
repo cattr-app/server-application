@@ -23,7 +23,7 @@ abstract class AbstractFactory
      */
     abstract public function create(array $attributes = []);
 
-    protected function hideTimestamps(Model &$model)
+    protected function hideTimestamps(Model $model): Model
     {
         $model->makeHidden(['created_at', 'updated_at', 'deleted_at']);
 

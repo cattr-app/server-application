@@ -12,7 +12,6 @@ use App\Models\Task;
 
 /**
  * Class TaskFactory
- * @package Tests\Factories
  */
 class TaskFactory extends AbstractFactory
 {
@@ -116,7 +115,7 @@ class TaskFactory extends AbstractFactory
     /**
      * @param Task $task
      */
-    private function defineProject(Task &$task)
+    private function defineProject(Task $task): void
     {
         $this->project = ProjectFactory::create();
 
@@ -126,7 +125,7 @@ class TaskFactory extends AbstractFactory
     /**
      * @param Task $task
      */
-    private function defineUser(Task &$task)
+    private function defineUser(Task $task): void
     {
         $this->user = UserFactory::create();
 

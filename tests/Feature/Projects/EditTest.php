@@ -32,7 +32,7 @@ class EditTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->project = ProjectFactory::create()->makeHidden('updated_at');
+        $this->project = ProjectFactory::create();
     }
 
 

@@ -8,7 +8,6 @@ use JWTAuth;
 
 /**
  * Class UserFactory
- * @package Tests\Factories
  */
 class UserFactory extends AbstractFactory
 {
@@ -30,7 +29,7 @@ class UserFactory extends AbstractFactory
     /**
      * @return array
      */
-    public function getBasicUserData(): array
+    public function getRegistrationUserData(): array
     {
         $faker = FakerFactory::create();
 
@@ -147,7 +146,7 @@ class UserFactory extends AbstractFactory
             $this->createTokens($user);
         }
 
-        if (!is_null($this->role)) {
+        if (!($this->role)) {
             $this->assignRole($user);
         }
 

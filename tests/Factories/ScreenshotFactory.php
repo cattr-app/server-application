@@ -21,7 +21,7 @@ class ScreenshotFactory extends AbstractFactory
      */
     private $randomRelations = false;
 
-    private function generateScreenshotData()
+    private function generateScreenshotData(): array
     {
         $name = FakerFactory::create()->unique()->firstName . '.jpg';
         $image = UploadedFile::fake()->image($name);
@@ -29,7 +29,7 @@ class ScreenshotFactory extends AbstractFactory
         $path = Storage::put('uploads/screenshots', $image);
         $thumbnail = Storage::put('uploads/screenshots', UploadedFile::fake()->image($name));
 
-        return ['path' => $path, 'thumbnail' => $thumbnail];
+        return compact($path, $thumbnail);
     }
 
     public function create(array $attributes = []): Screenshot
@@ -55,7 +55,7 @@ class ScreenshotFactory extends AbstractFactory
     /**
      * @return self
      */
-    public function withRandomRelations()
+    public function withRandomRelations(): self
     {
         $this->randomRelations = true;
 
@@ -66,14 +66,14 @@ class ScreenshotFactory extends AbstractFactory
      * @param TimeInterval $interval
      * @return self
      */
-    public function forInterval(TimeInterval $interval)
+    public function forInterval(TimeInterval $interval): self
     {
         $this->interval = $interval;
 
         return $this;
     }
 
-    private function defineInterval(Screenshot $screenshot)
+    private function defineInterval(Screenshot $screenshot): void
     {
         if ($this->randomRelations || !$this->interval) {
             $this->interval = IntervalFactory::create();
