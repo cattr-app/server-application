@@ -29,7 +29,7 @@ class ScreenshotFactory extends AbstractFactory
         $path = Storage::put('uploads/screenshots', $image);
         $thumbnail = Storage::put('uploads/screenshots', UploadedFile::fake()->image($name));
 
-        return compact($path, $thumbnail);
+        return compact('path', 'thumbnail');
     }
 
     public function create(array $attributes = []): Screenshot
