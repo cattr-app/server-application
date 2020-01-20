@@ -2,6 +2,7 @@
 
 namespace Tests\Factories;
 
+use Carbon\Carbon;
 use Faker\Factory as FakerFactory;
 use App\User;
 use App\Models\TimeInterval;
@@ -9,14 +10,9 @@ use App\Models\Task;
 
 /**
  * Class IntervalFactory
- * @package Tests\Factories
  */
 class IntervalFactory extends AbstractFactory
 {
-    private const COUNT_MOUSE = 42;
-    private const COUNT_KEYBOARD = 43;
-    private const INTERVAL_DURATION_SECONDS = 299;
-
     /**
      * @var User
      */
@@ -28,18 +24,23 @@ class IntervalFactory extends AbstractFactory
     private $task;
 
     /**
+     * @var bool
+     */
+    private $randomRelations = false;
+
+    /**
      * @return array
      */
-    private function getRandomIntervalData(): array
+    public function getRandomIntervalData(): array
     {
-        $faker = FakerFactory::create();
-        $time = $faker->unique()->unixTime();
+        $randomDateTime = FakerFactory::create()->unique()->dateTimeThisYear();
+        $randomDateTime = Carbon::instance($randomDateTime);
 
         return [
-            'start_at' => date('Y-m-d H:i:s', $time - self::INTERVAL_DURATION_SECONDS),
-            'end_at' => date('Y-m-d H:i:s', $time),
-            'count_mouse' => self::COUNT_MOUSE,
-            'count_keyboard' => self::COUNT_KEYBOARD
+            'end_at' => $randomDateTime->toIso8601String(),
+            'start_at' => $randomDateTime->subSeconds(rand(1, 3600))->toIso8601String(),
+            'count_mouse' => rand(1, 1000),
+            'count_keyboard' => rand(1, 1000)
         ];
     }
 
@@ -56,6 +57,7 @@ class IntervalFactory extends AbstractFactory
 
     /**
      * @param Task $task
+     *
      * @return self
      */
     public function forTask(Task $task): self
@@ -70,7 +72,7 @@ class IntervalFactory extends AbstractFactory
      */
     private function defineUser(TimeInterval &$interval)
     {
-        if (!$this->user) {
+        if ($this->randomRelations || !$this->user) {
             $this->user = app(UserFactory::class)->create();
         }
 
@@ -82,7 +84,7 @@ class IntervalFactory extends AbstractFactory
      */
     private function defineTask(TimeInterval &$interval)
     {
-        if (!$this->task) {
+        if ($this->randomRelations || !$this->task) {
             $this->task = app(TaskFactory::class)
                 ->forUser($this->user)
                 ->create();
@@ -90,6 +92,17 @@ class IntervalFactory extends AbstractFactory
 
         $interval->task_id = $this->task->id;
     }
+
+    /**
+     * @return self
+     */
+    public function withRandomRelations()
+    {
+        $this->randomRelations = true;
+
+        return $this;
+    }
+
 
     /**
      * @param array $attributes
@@ -109,6 +122,10 @@ class IntervalFactory extends AbstractFactory
         $this->defineTask($interval);
 
         $interval->save();
+
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps($interval);
+        }
 
         return $interval;
     }

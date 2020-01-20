@@ -15,6 +15,8 @@ use App\Models\TimeInterval;
  * @method static array getRandomIntervalData()
  * @method static BaseIntervalFactory forUser(User $user)
  * @method static BaseIntervalFactory forTask(Task $task)
+ * @method static BaseIntervalFactory withRandomRelations()
+ *
  * @mixin BaseIntervalFactory
  */
 class IntervalFactory extends Facade

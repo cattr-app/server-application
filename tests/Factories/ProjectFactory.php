@@ -23,6 +23,7 @@ class ProjectFactory extends AbstractFactory
      * @var int
      */
     private $needsIntervals = 0;
+
     /**
      * @var array
      */
@@ -63,14 +64,18 @@ class ProjectFactory extends AbstractFactory
             $this->createTasks($project);
         }
 
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps($project);
+        }
+
         return $project;
     }
 
     /**
-     * @param array $users
+     * @param $users
      * @return $this
      */
-    public function forUsers(array $users): self
+    public function forUsers($users): self
     {
         $this->users = $users;
 

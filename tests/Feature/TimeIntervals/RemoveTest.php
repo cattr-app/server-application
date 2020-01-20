@@ -1,30 +1,28 @@
 <?php
 
-namespace Tests\Feature\Projects;
 
-use App\Models\Project;
-use Tests\Facades\ProjectFactory;
-use Tests\Facades\UserFactory;
+namespace Tests\Feature\TimeIntervals;
+
+
+use App\Models\TimeInterval;
 use App\User;
+use Tests\Facades\IntervalFactory;
+use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RemoveTest
- * @package Tests\Feature\Projects
- */
 class RemoveTest extends TestCase
 {
-    private const URI = 'v1/projects/remove';
+    private const URI = 'v1/time-intervals/remove';
+
+    /**
+     * @var TimeInterval
+     */
+    private $interval;
 
     /**
      * @var User
      */
     private $admin;
-
-    /**
-     * @var Project
-     */
-    private $project;
 
     protected function setUp(): void
     {
@@ -32,18 +30,17 @@ class RemoveTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->project = ProjectFactory::create();
+        $this->interval = IntervalFactory::create();
     }
 
     public function test_remove()
     {
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->interval->id]);
 
         $response->assertSuccess();
-        $this->assertSoftDeleted('projects', $this->project->only('id'));
-
+        $this->assertSoftDeleted('time_intervals', ['id' =>$this->interval->id]);
     }
 
     public function test_unauthorized()

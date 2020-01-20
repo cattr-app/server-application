@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Facade;
  * @method static Collection createMany(int $amount = 1)
  * @method static BaseTaskFactory forUser(User $user)
  * @method static array getRandomTaskData()
+ * @method static BaseTaskFactory withIntervals(int $quantity = 1)
+ *
  * @mixin BaseTaskFactory
  */
 class TaskFactory extends Facade

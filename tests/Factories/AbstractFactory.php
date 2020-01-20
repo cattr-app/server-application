@@ -2,6 +2,7 @@
 
 namespace Tests\Factories;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
 /**
@@ -10,11 +11,24 @@ use Illuminate\Support\Collection;
  */
 abstract class AbstractFactory
 {
+
+    /**
+     * @var bool
+     */
+    protected $timestampsHidden = true;
+
     /**
      * @param array $attributes
      * @return mixed
      */
     abstract public function create(array $attributes = []);
+
+    protected function hideTimestamps(Model &$model)
+    {
+        $model->makeHidden(['created_at', 'updated_at', 'deleted_at']);
+
+        return $model;
+    }
 
     /**
      * @param int $amount

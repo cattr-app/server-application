@@ -91,6 +91,10 @@ class TaskFactory extends AbstractFactory
             $this->createIntervals($task);
         }
 
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps($task);
+        }
+
         return $task;
     }
 
@@ -114,9 +118,7 @@ class TaskFactory extends AbstractFactory
      */
     private function defineProject(Task &$task)
     {
-        if (!$this->project) {
-            $this->project = ProjectFactory::create();
-        }
+        $this->project = ProjectFactory::create();
 
         $task->project_id = $this->project->id;
     }
@@ -126,9 +128,7 @@ class TaskFactory extends AbstractFactory
      */
     private function defineUser(Task &$task)
     {
-        if (!$this->user) {
-            $this->user = UserFactory::create();
-        }
+        $this->user = UserFactory::create();
 
         $task->user_id = $this->user->id;
     }

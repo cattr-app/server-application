@@ -1,30 +1,26 @@
 <?php
 
-namespace Tests\Feature\Projects;
+namespace Tests\Feature\Screenshots;
 
-use App\Models\Project;
-use Tests\Facades\ProjectFactory;
-use Tests\Facades\UserFactory;
+use App\Models\Screenshot;
 use App\User;
+use Illuminate\Support\Facades\Storage;
+use Tests\Facades\ScreenshotFactory;
+use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RemoveTest
- * @package Tests\Feature\Projects
- */
 class RemoveTest extends TestCase
 {
-    private const URI = 'v1/projects/remove';
+    private const URI = '/v1/screenshots/remove';
 
     /**
      * @var User
      */
     private $admin;
-
     /**
-     * @var Project
+     * @var Screenshot
      */
-    private $project;
+    private $screenshot;
 
     protected function setUp(): void
     {
@@ -32,18 +28,19 @@ class RemoveTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->project = ProjectFactory::create();
+        Storage::fake();
+
+        $this->screenshot = ScreenshotFactory::create();
     }
 
-    public function test_remove()
+    public function test_remove(): void
     {
-        $this->assertDatabaseHas('projects', $this->project->toArray());
+        $this->assertDatabaseHas('screenshots', $this->screenshot->toArray());
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->screenshot->id]);
 
         $response->assertSuccess();
-        $this->assertSoftDeleted('projects', $this->project->only('id'));
-
+        $this->assertSoftDeleted('screenshots', ['id' => $this->screenshot->id]);
     }
 
     public function test_unauthorized()
