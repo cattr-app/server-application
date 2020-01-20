@@ -33,7 +33,7 @@ class ProcessTest extends TestCase
      * @param $createdAt
      * @return array
      */
-    protected function createReset($email, $token, $createdAt): void
+    protected function createReset($email, $token, $createdAt): array
     {
         DB::table('password_resets')->insert([
             'email' => $email,
