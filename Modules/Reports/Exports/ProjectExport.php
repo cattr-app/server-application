@@ -2,8 +2,8 @@
 
 namespace Modules\Reports\Exports;
 
-use App\Models\Project;
-use DB;
+use App\Helpers\ReportHelper;
+use App\Models\Property;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -12,11 +12,27 @@ use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
-use Modules\Reports\Entities\ProjectReport;
 
 class ProjectExport implements FromCollection, WithEvents
 {
     const ROUND_DIGITS = 3;
+
+    /**
+     * @var ReportHelper
+     */
+    protected $reportHelper;
+
+    /**
+     * @var string
+     */
+    protected $timezone;
+
+    public function __construct(ReportHelper $reportHelper)
+    {
+        $companyTimezoneProperty = Property::getProperty(Property::COMPANY_CODE, 'TIMEZONE')->first();
+        $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
+        $this->reportHelper = $reportHelper;
+    }
 
     /**
      * @return Collection
@@ -40,80 +56,78 @@ class ProjectExport implements FromCollection, WithEvents
         $totalTime = 0;
 
         // Processing grouped database collection to fill the collection, which will be exported
-        $preparedCollection->each(function ($item, $key) use ($returnableData) {
-            $item->each(function ($user) use ($item, $key, $returnableData) {
-                $user = $user[0];
-                foreach ($user['tasks'] as $task) {
-                    $this->addRowToCollection($returnableData, $key, $user, $task);
+        foreach ($preparedCollection as $key => $items) {
+            $totalTasksTime = 0;
+            foreach ($items as $users) {
+                foreach ($users as $user) {
+                    foreach ($user['tasks'] as $task) {
+                        $this->addRowToCollection($returnableData, $key, $user, $task);
+                    }
+                    $totalTasksTime += $user['tasks_time'];
                 }
-
-                $this->addSubtotalToCollection($returnableData, $key, $user['tasks_time']);
-            });
-        });
-
-        // Calculating total time
-        foreach ($preparedCollection as $item) {
-            foreach ($item as $user) {
-                $user = $user[0];
-                $totalTime += $user['tasks_time'];
+                $this->addSubtotalToCollection($returnableData, $key, $totalTasksTime);
             }
+            $totalTime += $totalTasksTime;
         }
 
         // Add total row to collection
-        $time = (new Carbon('@0'))->diff(new Carbon("@$totalTime"));
-        $totalTime = round($totalTime / 60 / 60, static::ROUND_DIGITS);
+        $time = (new Carbon('@0'))->diffForHumans(new Carbon("@$totalTime"), true, true, 3);
+        $totalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@$totalTime"));
+
 
         $returnableData->push([
             'Project' => '',
             'User' => '',
             'Task' => 'Total',
-            'Time' => "{$time->h}:{$time->i}:{$time->s}",
-            'Hours (decimal)' => $totalTime
+            'Time' => "{$time}",
+            'Hours (decimal)' => round($totalTime, self::ROUND_DIGITS)
         ]);
 
         return $returnableData;
     }
 
     /**
-     * @param  Collection  $collection
-     * @param  string      $projectName
-     * @param  array       $user
-     * @param  array       $task
+     * @param Collection $collection
+     * @param string $projectName
+     * @param array $user
+     * @param array $task
+     * @throws Exception
      */
     protected function addRowToCollection(Collection $collection, string $projectName, array $user, array $task)
     {
-        $time = (new Carbon('@0'))->diff(new Carbon("@{$task['duration']}"));
-        $decimalTime = round($task['duration'] / 60 / 60, static::ROUND_DIGITS);
+        $time = (new Carbon('@0'))->diffForHumans(new Carbon("@{$task['duration']}"), true, true, 3);
+        $decimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@{$task['duration']}"));
 
         $collection->push([
             'Project' => $projectName,
             'User' => $user['full_name'],
             'Task' => $task['task_name'],
-            'Time' => "{$time->h}:{$time->i}:{$time->s}",
-            'Hours (decimal)' => $decimalTime
+            'Time' => "{$time}",
+            'Hours (decimal)' => round($decimalTime, self::ROUND_DIGITS)
         ]);
     }
 
     /**
      * Add subtotal record to existing collection
      *
-     * @param  Collection  $collection
-     * @param  string      $projectName
-     * @param  int|float   $time
+     * @param Collection $collection
+     * @param string $projectName
+     * @param int|float $time
      *
      * @return void
+     * @throws Exception
      */
     protected function addSubtotalToCollection(Collection $collection, string $projectName, $time): void
     {
-        $timeObject = (new Carbon('@0'))->diff(new Carbon("@$time"));
-        $projectDecimalTime =round($time / 60 / 60, static::ROUND_DIGITS);
+        $timeObject = (new Carbon('@0'))->diffForHumans(new Carbon("@$time"),true, true, 3);
+        $projectDecimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@$time"));
 
         $collection->push([
             'Project' => "Subtotal for $projectName",
             'User' => '',
             'Task' => '',
-            'Time' => "{$timeObject->h}:{$timeObject->i}:{$timeObject->s}",
-            'Hours (decimal)' => $projectDecimalTime
+            'Time' => "{$timeObject}",
+            'Hours (decimal)' => round($projectDecimalTime, self::ROUND_DIGITS)
         ]);
     }
 
@@ -128,8 +142,7 @@ class ProjectExport implements FromCollection, WithEvents
     protected function getPreparedCollection(array $collectionData): Collection
     {
         $unprepCollection = $this->_getUnpreparedCollection($collectionData);
-
-        return $this->prepareCollection($unprepCollection);
+        return $this->getProcessedCollection($unprepCollection);
     }
 
     /**
@@ -141,101 +154,102 @@ class ProjectExport implements FromCollection, WithEvents
      */
     protected function _getUnpreparedCollection(array $queryData): Collection
     {
-        /** @noinspection PhpParamsInspection */
-        return ProjectReport::query()->select(
-            'user_id',
-            'user_name',
-            'task_id',
-            'project_id',
-            'task_name',
-            'project_name',
-            DB::raw('SUM(duration) as duration')
+        $timezone = $this->timezone;
+        $timezoneOffset = (new \Carbon\Carbon())->setTimezone($timezone)->format('P');
+
+        $startAt = Carbon::parse($queryData['start_at'], $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
+
+        $endAt = Carbon::parse($queryData['end_at'], $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
+
+        $projectReportCollection = $this->reportHelper->getBaseQuery(
+            $queryData['uids'], $startAt, $endAt, $timezoneOffset, [
+            "JSON_ARRAYAGG(
+                JSON_OBJECT(
+                    'id', time_intervals.id, 'user_id', time_intervals.user_id, 'task_id', time_intervals.task_id,
+                    'end_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?), 'start_at',
+                    CONVERT_TZ(time_intervals.start_at, '+00:00', ?)
+                )
+            ) as intervals"
+        ],
+            [$timezoneOffset]
         )
-            ->whereIn('user_id', $queryData['uids'])
             ->whereIn('project_id', $queryData['pids'])
-            ->whereIn('project_id', Project::getUserRelatedProjectIds(auth()->user()))
-            ->where('date', '>=', $queryData['start_at'])
-            ->where('date', '<', $queryData['end_at'])
-            ->groupBy('user_id', 'task_id', 'project_id')
             ->get();
 
+        return $projectReportCollection;
     }
 
-    /**
-     * Preparing returnable collection for "collect" method
-     *
-     * @param  Collection  $collection
-     *
-     * @return Collection
-     */
-    protected function prepareCollection(Collection $collection): Collection
+    public function getProcessedCollection($collection): Collection
     {
-        $plainData = [];
+        $collection = $collection->groupBy('project_name');
 
-        foreach ($collection as $item) {
-            $this->_preparePlainData($item, $plainData, $item->user_id, $item->project_id);
+        $resultCollection = [];
+        foreach ($collection as $projectName => $items) {
+            foreach ($items as $item) {
+                $intervals = collect(json_decode($item->intervals, true));
+
+                if (!array_key_exists($projectName, $resultCollection)) {
+                    $resultCollection[$projectName] = [
+                        'id' => $item->project_id,
+                        'name' => $item->project_name,
+                        'project_time' => 0,
+                        'users' => [],
+                    ];
+                }
+                if (!array_key_exists($item->user_id, $resultCollection[$projectName]['users'])) {
+                    $resultCollection[$projectName]['users'][$item->user_id] = [
+                        'id' => $item->user_id,
+                        'full_name' => $item->user_name,
+                        'tasks' => [],
+                        'tasks_time' => 0,
+                    ];
+                }
+                if (!array_key_exists($item->task_id,
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'])) {
+
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id] = [
+                        'task_name' => $item->task_name,
+                        'id' => $item->task_id,
+                        'duration' => 0,
+                        'user_id' => $item->user_id
+                    ];
+                }
+
+                foreach ($intervals as $interval) {
+                    $duration = Carbon::parse($interval['end_at'])->diffInSeconds($interval['start_at']);
+
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]
+                    ['duration'] += $duration;
+
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks_time'] += $duration;
+                    $resultCollection[$projectName]['project_time'] += $duration;
+                }
+            }
         }
 
-        return collect($this->processPlainData($plainData));
+        foreach ($resultCollection as &$project) {
+            foreach ($project['users'] as &$user) {
+                usort($user['tasks'], function ($a, $b) {
+                    return $a['duration'] < $b['duration'];
+                });
+            }
+
+            usort($project['users'], function ($a, $b) {
+                return $a['tasks_time'] < $b['tasks_time'];
+            });
+        }
+
+        usort($resultCollection, function ($a, $b) {
+            return $a['project_time'] < $b['project_time'];
+        });
+
+        return collect($resultCollection);
     }
 
-    /**
-     * After we'll got an workable plain data, we'll need to reformat and process it
-     *
-     * @param  array  $plainData
-     *
-     * @return array
-     */
-    protected function processPlainData(array $plainData): array
-    {
-        foreach ($plainData as $id => $project) {
-            $plainData[$id]['users'] = array_values($project['users']);
-        }
-
-        return array_values($plainData);
-    }
-
-    /**
-     * Here we'll need to format plain database data to workable format
-     *
-     * @param         $item
-     * @param  array  $plainData
-     * @param         $userId
-     * @param         $projectId
-     *
-     * @return void
-     */
-    protected function _preparePlainData($item, array &$plainData, $userId, $projectId): void
-    {
-        if (!isset($plainData[$projectId])) {
-            $plainData[$projectId] = [
-                'id' => $projectId,
-                'name' => $item->project_name,
-                'users' => [],
-                'project_time' => 0
-            ];
-        }
-
-        if (!isset($plainData[$projectId]['users'][$userId])) {
-            $plainData[$projectId]['users'][$userId] = [
-                'id' => $userId,
-                'full_name' => $item->user_name,
-                'tasks' => [],
-                'tasks_time' => 0
-            ];
-        }
-
-        $plainData[$projectId]['users'][$userId]['tasks'][] = [
-            'id' => $item->task_id,
-            'project_id' => $item->project_id,
-            'user_id' => $item->user_id,
-            'task_name' => $item->task_name,
-            'duration' => (int) $item->duration,
-        ];
-
-        $plainData[$projectId]['users'][$userId]['tasks_time'] += $item->duration;
-        $plainData[$projectId]['project_time'] += $item->duration;
-    }
 
     /**
      * @return array
