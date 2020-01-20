@@ -37,7 +37,7 @@ class ShowTest extends TestCase
 
     public function test_show(): void
     {
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->task->id]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->only('id'));
 
         $response->assertOk();
         $response->assertJson($this->task->toArray());

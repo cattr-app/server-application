@@ -40,7 +40,7 @@ class RemoveTest extends TestCase
     {
         $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->interval->id]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->interval->only('id'));
 
         $response->assertSuccess();
         $this->assertSoftDeleted('time_intervals', ['id' =>$this->interval->id]);

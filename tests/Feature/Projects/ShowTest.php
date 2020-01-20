@@ -40,7 +40,7 @@ class ShowTest extends TestCase
 
     public function test_admin(): void
     {
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->project->only('id'));
 
         $response->assertOk();
         $response->assertJson($this->project->toArray());
@@ -48,7 +48,7 @@ class ShowTest extends TestCase
 
     public function test_assigned(): void
     {
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->project->only('id'));
 
         $response->assertOk();
         $response->assertJson($this->project->toArray());
@@ -56,7 +56,7 @@ class ShowTest extends TestCase
 
     public function test_not_assigned(): void
     {
-        $response = $this->actingAs($this->notAssignedUser)->postJson(self::URI, ['id' => $this->project->id]);
+        $response = $this->actingAs($this->notAssignedUser)->postJson(self::URI, $this->project->only('id'));
 
         $response->assertForbidden();
     }

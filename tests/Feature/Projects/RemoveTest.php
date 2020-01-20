@@ -38,7 +38,7 @@ class RemoveTest extends TestCase
     {
         $this->assertDatabaseHas('projects', $this->project->toArray());
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->project->id]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->project->only('id'));
 
         $response->assertSuccess();
         $this->assertSoftDeleted('projects', $this->project->only('id'));

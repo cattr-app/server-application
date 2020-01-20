@@ -38,10 +38,10 @@ class RemoveTest extends TestCase
     {
         $this->assertDatabaseHas('tasks', $this->task->toArray());
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->task->id]);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->only('id'));
 
         $response->assertSuccess();
-        $this->assertSoftDeleted('tasks', ['id' => $this->task->id]);
+        $this->assertSoftDeleted('tasks', $this->task->only('id'));
     }
 
     public function test_unauthorized(): void
