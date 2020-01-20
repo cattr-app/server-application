@@ -7,7 +7,6 @@ use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
-
 /**
  * @method TestResponse get($uri, array $headers = [])
  * @method TestResponse getJson($uri, array $headers = [])

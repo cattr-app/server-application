@@ -2,6 +2,7 @@
 
 namespace Tests\Factories;
 
+use Carbon\Carbon;
 use Faker\Factory as FakerFactory;
 use App\User;
 use App\Models\TimeInterval;
@@ -12,10 +13,6 @@ use App\Models\Task;
  */
 class IntervalFactory extends AbstractFactory
 {
-    private const COUNT_MOUSE = 42;
-    private const COUNT_KEYBOARD = 43;
-    private const INTERVAL_DURATION_SECONDS = 299;
-
     /**
      * @var User
      */
@@ -36,14 +33,14 @@ class IntervalFactory extends AbstractFactory
      */
     public function getRandomIntervalData(): array
     {
-        $faker = FakerFactory::create();
-        $time = $faker->unique()->unixTime();
+        $randomDateTime = FakerFactory::create()->unique()->dateTimeThisYear();
+        $randomDateTime = Carbon::instance($randomDateTime);
 
         return [
-            'start_at' => date('Y-m-d H:i:s', $time - self::INTERVAL_DURATION_SECONDS),
-            'end_at' => date('Y-m-d H:i:s', $time),
-            'count_mouse' => self::COUNT_MOUSE,
-            'count_keyboard' => self::COUNT_KEYBOARD
+            'end_at' => $randomDateTime->toIso8601String(),
+            'start_at' => $randomDateTime->subSeconds(rand(1, 3600))->toIso8601String(),
+            'count_mouse' => rand(1, 1000),
+            'count_keyboard' => rand(1, 1000)
         ];
     }
 
@@ -106,6 +103,7 @@ class IntervalFactory extends AbstractFactory
         return $this;
     }
 
+
     /**
      * @param array $attributes
      * @return TimeInterval
@@ -124,6 +122,10 @@ class IntervalFactory extends AbstractFactory
         $this->defineTask($interval);
 
         $interval->save();
+
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps($interval);
+        }
 
         return $interval;
     }

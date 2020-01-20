@@ -32,7 +32,7 @@ class EditTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->interval = IntervalFactory::create()->makeHidden('updated_at');
+        $this->interval = IntervalFactory::create();
     }
 
     public function test_edit()

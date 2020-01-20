@@ -2,6 +2,7 @@
 
 namespace Tests\Facades;
 
+use App\Models\TimeInterval;
 use Illuminate\Support\Collection;
 use Tests\Factories\ProjectFactory as BaseProjectFactory;
 use Tests\Factories\ScreenshotFactory as BaseScreenshotFactory;
@@ -14,6 +15,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static Screenshot create(array $attributes = [])
  * @method static Collection createMany(int $amount = 1)
  * @method static BaseProjectFactory withRandomRelations()
+ * @method static BaseProjectFactory forInterval(TimeInterval $interval)
  *
  * @mixin ScreenshotFactory
  */

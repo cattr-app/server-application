@@ -153,6 +153,10 @@ class UserFactory extends AbstractFactory
 
         $user->save();
 
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps($user);
+        }
+
         return $user;
     }
 }

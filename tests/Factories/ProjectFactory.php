@@ -64,6 +64,10 @@ class ProjectFactory extends AbstractFactory
             $this->createTasks($project);
         }
 
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps($project);
+        }
+
         return $project;
     }
 

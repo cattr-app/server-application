@@ -91,6 +91,10 @@ class TaskFactory extends AbstractFactory
             $this->createIntervals($task);
         }
 
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps($task);
+        }
+
         return $task;
     }
 

@@ -45,6 +45,10 @@ class ScreenshotFactory extends AbstractFactory
         $this->defineInterval($screenshot);
         $screenshot->save();
 
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps($screenshot);
+        }
+
         return $screenshot;
     }
 
@@ -54,6 +58,17 @@ class ScreenshotFactory extends AbstractFactory
     public function withRandomRelations()
     {
         $this->randomRelations = true;
+
+        return $this;
+    }
+
+    /**
+     * @param TimeInterval $interval
+     * @return self
+     */
+    public function forInterval(TimeInterval $interval)
+    {
+        $this->interval = $interval;
 
         return $this;
     }
