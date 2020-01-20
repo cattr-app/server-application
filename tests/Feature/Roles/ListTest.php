@@ -24,7 +24,6 @@ class ListTest extends TestCase
         parent::setUp();
 
         $this->admin = UserFactory::withTokens()->asAdmin()->create();
-        $this->commonUser = UserFactory::withTokens()->asUser()->create();
     }
 
     public function test_list(): void
