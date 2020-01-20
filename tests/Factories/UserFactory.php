@@ -146,7 +146,7 @@ class UserFactory extends AbstractFactory
             $this->createTokens($user);
         }
 
-        if (!($this->role)) {
+        if ($this->role) {
             $this->assignRole($user);
         }
 
