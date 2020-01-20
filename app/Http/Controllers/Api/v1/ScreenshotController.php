@@ -566,7 +566,7 @@ class ScreenshotController extends ItemController
             }
 
             if ($hasInterval && isset($itemkey)) {
-                $items[$itemkey]['intervals'][(int) $minutes{0}][] = $interval->toArray();
+                $items[$itemkey]['intervals'][(int) $minutes[0]][] = $interval->toArray();
             } else {
                 $arr = [
                     'interval' => $hour,
@@ -580,7 +580,7 @@ class ScreenshotController extends ItemController
                     ],
                 ];
 
-                $arr['intervals'][(int) $minutes{0}][] = $interval->toArray();
+                $arr['intervals'][(int) $minutes[0]][] = $interval->toArray();
                 $items[] = $arr;
             }
         }

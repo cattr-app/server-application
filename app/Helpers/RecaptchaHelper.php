@@ -4,7 +4,6 @@ namespace App\Helpers;
 
 use App\Exceptions\Entities\AuthorizationException;
 use Cache;
-use Config;
 use GuzzleHttp\Client;
 use Request;
 use Throwable;
@@ -114,7 +113,7 @@ class RecaptchaHelper
 
         $banData = Cache::get($cacheKey, null);
 
-        if (is_null($banData)) {
+        if ($banData === null || !isset($banData['amounts'], $banData['time'])) {
             return false;
         }
 
@@ -164,7 +163,7 @@ class RecaptchaHelper
 
         $banData = Cache::get($cacheKey);
 
-        if (is_null($banData)) {
+        if ($banData === null || !isset($banData['amounts'])) {
             $banData = ['amounts' => 1, 'time' => time()];
         } else {
             $banData['amounts']++;
@@ -178,7 +177,7 @@ class RecaptchaHelper
      *
      * @param string $captchaToken
      */
-    private function solve(string $captchaToken = ""): void
+    private function solve(string $captchaToken = ''): void
     {
         if (!$this->captchaEnabled()) {
             return;
@@ -195,7 +194,7 @@ class RecaptchaHelper
             ],
         ]);
 
-        if ($response->getStatusCode() != 200) {
+        if ($response->getStatusCode() !== 200) {
             return;
         }
 
@@ -235,7 +234,7 @@ class RecaptchaHelper
 
         $attempts = Cache::get($cacheKey, null);
 
-        if (is_null($attempts)) {
+        if ($attempts === null) {
             return false;
         }
 
