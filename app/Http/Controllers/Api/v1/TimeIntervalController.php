@@ -932,131 +932,99 @@ class TimeIntervalController extends ItemController
      *
      * @return JsonResponse
      * @throws \Exception
-     * @api            {delete, post} /api/v1/time-intervals/bulk-remove BulkDestroy
+     *
+     * @api            {post} /api/v1/time-intervals/bulk-remove BulkDestroy
      * @apiDescription Multiple Destroy TimeInterval
+     *
      * @apiVersion     0.1.0
      * @apiName        BulkDestroyTimeInterval
      * @apiGroup       Time Interval
      *
-     * @apiParam {Object[]}    array              Time Intervals
-     * @apiParam {Object}      array.object       Time Interval
-     * @apiParam {Integer}     array.object.id    Time Interval id
+     * @apiParam {Integer[]}  intervals  Intervals ID to delete
      *
      * @apiParamExample {json} Request Example
      * {
-     *   "intervals": [
-     *     {
-     *       "id": "1"
-     *     }
-     *   ]
+     *   "intervals": [ 1, 2, 3 ]
      * }
      *
-     * @apiSuccess {Object[]} messages               Messages
-     * @apiSuccess {Object}   message                Message
-     * @apiSuccess {String}   message.message        Status
+     * @apiSuccess {Boolean}    success    Indicates successful request when TRUE
+     * @apiSuccess {String}     message    Message from server
+     * @apiSuccess {Integer[]}  removed    Removed intervals
+     * @apiSuccess {Integer[]}  not_found  Not found intervals
      *
      * @apiSuccessExample {json} Response Example
-     * {
-     *   "messages": [
-     *     {
-     *       "message": "Item has been removed"
-     *     }
-     *   ]
-     * }
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Intervals successfully removed",
+     *    "removed": [12, 123, 45],
+     *  }
      *
-     * @apiError (404)  {Object[]} messages                 Messages
-     * @apiError (404)  {Object}   messages.message         Message
-     * @apiError (404)  {String}   messages.message.error   Error title
-     * @apiError (404)  {String}   messages.message.reason  Error reason
+     * @apiSuccessExample {json} Not all intervals removed response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Some intervals have not been removed",
+     *    "removed": [12, 123, 45],
+     *    "not_found": [154, 77, 66]
+     *  }
      *
-     * @apiErrorExample (404) {json} Errors Response Example
-     * {
-     *   "messages": [
-     *     {
-     *       "error": "Item has not been removed",
-     *       "reason": "Item not found"
-     *     }
-     *   ]
-     * }
      *
+     * @apiUse         400Error
+     * @apiUse         ParamsValidationError
      * @apiUse         UnauthorizedError
-     *
      */
     public function bulkDestroy(Request $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all());
-        $result = [];
+        $validationRules = [
+            'intervals' => 'required|array',
+            'intervals.*' => 'integer'
+        ];
 
-        if (empty($requestData['intervals'])) {
+        $validator = Validator::make(
+            Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all()),
+            Filter::process($this->getEventUniqueName('validation.item.edit'), $validationRules)
+        );
+
+        if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
-                    'info' => 'intervals is empty'
-                ]), 400);
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
         }
 
-        $intervals = $requestData['intervals'];
-        if (!is_array($intervals)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'reason' => 'intervals should be an array',
-                ]), 400);
-        }
+        $intervalIds = $validator->validated()['intervals'];
 
-        foreach ($intervals as $interval) {
-            /** @var Builder $itemsQuery */
-            $itemsQuery = Filter::process(
-                $this->getEventUniqueName('answer.success.item.query.prepare'),
-                $this->applyQueryFilter(
-                    $this->getQuery(),
-                    $interval
-                )
-            );
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter($this->getQuery(), ['id' => ['in', $intervalIds]])
+        );
 
-            $validator = Validator::make(
-                $interval,
-                Filter::process(
-                    $this->getEventUniqueName('validation.item.edit'),
-                    ['id' => 'exists:time_intervals,id|required']
-                )
-            );
+        $foundIds = $itemsQuery->pluck('id')->toArray();
+        $notFoundIds = array_diff($intervalIds, $foundIds);
 
-            if ($validator->fails()) {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors(),
-                    'code' => 400
-                ];
-                continue;
-            }
+        $itemsQuery->delete();
 
-            /** @var Model $item */
-            $item = $itemsQuery->first();
-            if ($item && $item->delete()) {
-                $result[] = [
-                    'success' => true,
-                    'message' => 'Item has been removed'];
-            } else {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found',
-                    'code' => 404
-                ];
-            }
+        $responseData = [
+            'success' => true,
+            'message' => 'Intervals successfully removed',
+            'removed' => $foundIds
+        ];
+
+        if ($notFoundIds) {
+            $responseData['message'] = 'Some intervals have not been removed';
+            $responseData['not_found'] = array_values($notFoundIds);
         }
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'messages' => $result
-            ])
+            Filter::process($this->getEventUniqueName('answer.success.item.remove'), $responseData),
+            ($notFoundIds) ? 207 : 200
         );
     }
 
