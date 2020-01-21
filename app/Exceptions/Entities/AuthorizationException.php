@@ -62,7 +62,7 @@ class AuthorizationException extends BaseAuthorizationException
      *    "message": "Enhance Your Calm"
      *  }
      */
-    public const ERROR_TYPE_BANNED = 'authorization.banned_enhance_your_calm';
+    public const ERROR_TYPE_BANNED = 'authorization.banned';
 
     /**
      * @apiDefine TokenMismatchError
