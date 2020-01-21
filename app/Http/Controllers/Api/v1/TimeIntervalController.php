@@ -932,55 +932,47 @@ class TimeIntervalController extends ItemController
      *
      * @return JsonResponse
      * @throws \Exception
-     * @api            {delete, post} /api/v1/time-intervals/bulk-remove BulkDestroy
+     *
+     * @api            {post} /api/v1/time-intervals/bulk-remove BulkDestroy
      * @apiDescription Multiple Destroy TimeInterval
+     *
      * @apiVersion     0.1.0
      * @apiName        BulkDestroyTimeInterval
      * @apiGroup       Time Interval
      *
-     * @apiParam {Object[]}    array              Time Intervals
-     * @apiParam {Object}      array.object       Time Interval
-     * @apiParam {Integer}     array.object.id    Time Interval id
+     * @apiParam {Integer[]}  intervals  Intervals ID to delete
      *
      * @apiParamExample {json} Request Example
      * {
-     *   "intervals": [
-     *     {
-     *       "id": "1"
-     *     }
-     *   ]
+     *   "intervals": [ 1, 2, 3 ]
      * }
      *
-     * @apiSuccess {Object[]} messages               Messages
-     * @apiSuccess {Object}   message                Message
-     * @apiSuccess {String}   message.message        Status
+     * @apiSuccess {Boolean}    success    Indicates successful request when TRUE
+     * @apiSuccess {String}     message    Message from server
+     * @apiSuccess {Integer[]}  removed    Removed intervals
+     * @apiSuccess {Integer[]}  not_found  Not found intervals
      *
      * @apiSuccessExample {json} Response Example
-     * {
-     *   "messages": [
-     *     {
-     *       "message": "Item has been removed"
-     *     }
-     *   ]
-     * }
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Intervals successfully removed",
+     *    "removed": [12, 123, 45],
+     *  }
      *
-     * @apiError (404)  {Object[]} messages                 Messages
-     * @apiError (404)  {Object}   messages.message         Message
-     * @apiError (404)  {String}   messages.message.error   Error title
-     * @apiError (404)  {String}   messages.message.reason  Error reason
+     * @apiSuccessExample {json} Not all intervals removed response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Some intervals have not been removed",
+     *    "removed": [12, 123, 45],
+     *    "not_found": [154, 77, 66]
+     *  }
      *
-     * @apiErrorExample (404) {json} Errors Response Example
-     * {
-     *   "messages": [
-     *     {
-     *       "error": "Item has not been removed",
-     *       "reason": "Item not found"
-     *     }
-     *   ]
-     * }
      *
+     * @apiUse         400Error
+     * @apiUse         ParamsValidationError
      * @apiUse         UnauthorizedError
-     *
      */
     public function bulkDestroy(Request $request): JsonResponse
     {
