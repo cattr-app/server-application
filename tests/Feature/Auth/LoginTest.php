@@ -128,6 +128,6 @@ class LoginTest extends TestCase
 
         $response = $this->postJson(self::URI, $this->loginData);
 
-        $response->assertError(420, 'authorization.banned');
+        $response->assertError(423, 'authorization.banned');
     }
 }

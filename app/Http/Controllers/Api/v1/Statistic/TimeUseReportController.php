@@ -22,17 +22,17 @@ class TimeUseReportController extends ReportController
     protected $reportHelper;
 
     /**
+     * @var mixed
+     */
+    protected $timezone;
+
+    /**
      * @return string
      */
     public function getEventUniqueNamePart(): string
     {
         return 'time-use-report';
     }
-
-    /**
-     * @var
-     */
-    protected $timezone;
 
     /**
      * ProjectReportController constructor.
