@@ -211,6 +211,7 @@ class AuthorizationException extends BaseAuthorizationException
     }
 
     /**
+     * @codeCoverageIgnore
      * @return array
      */
     public function getHeaders(): array

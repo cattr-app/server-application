@@ -5,6 +5,7 @@ namespace Tests\Feature\Auth;
 use Tests\Facades\UserFactory;
 use App\User;
 use Tests\TestCase;
+use Illuminate\Support\Facades\Cache;
 
 /**
  * Class LoginTest
@@ -22,6 +23,9 @@ class LoginTest extends TestCase
      * @var array
      */
     private $loginData;
+
+    private const CAPTCHA_CACHE_KEY = 'AUTH_RECAPTCHA_LIMITER_{ip}_{email}_ATTEMPTS';
+    private const BAN_CACHE_KEY = 'AUTH_RATE_LIMITER_{ip}';
 
     protected function setUp(): void
     {
@@ -70,10 +74,60 @@ class LoginTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    public function test_without_params()
+    public function test_without_params(): void
     {
         $response = $this->postJson(self::URI);
 
         $response->assertError(400);
+    }
+
+    public function test_recaptcha(): void
+    {
+        config(['recaptcha.enabled' => true]);
+        config(['recaptcha.failed_attempts' => 1]);
+
+        $cacheKey = str_replace(['{email}', '{ip}'], [$this->loginData['email'], '127.0.0.1'],
+            self::CAPTCHA_CACHE_KEY);
+
+        $this->assertFalse(Cache::has($cacheKey));
+
+        $this->loginData['password'] = 'wrong_password';
+        $this->postJson(self::URI, $this->loginData);
+
+        $this->assertTrue(Cache::has($cacheKey));
+
+        $this->assertEquals(1, Cache::get($cacheKey));
+
+        $response = $this->postJson(self::URI, $this->loginData);
+
+        $response->assertError(429, 'authorization.captcha', true);
+    }
+
+    public function test_ban(): void
+    {
+        config(['recaptcha.enabled' => true]);
+        config(['recaptcha.rate_limiter_enabled' => true]);
+        config(['recaptcha.failed_attempts' => 0]);
+        config(['recaptcha.ban_attempts' => 1]);
+
+        $cacheKey = str_replace('{ip}', '127.0.0.1', self::BAN_CACHE_KEY);
+
+        $this->assertFalse(Cache::has($cacheKey));
+
+        $this->loginData['password'] = 'wrong_password';
+        $this->postJson(self::URI, $this->loginData);
+
+        $this->assertTrue(Cache::has($cacheKey));
+
+        $cacheResponse = Cache::get($cacheKey);
+
+        $this->assertArrayHasKey('amounts', $cacheResponse);
+        $this->assertArrayHasKey('time', $cacheResponse);
+
+        $this->assertEquals(1, $cacheResponse['amounts']);
+
+        $response = $this->postJson(self::URI, $this->loginData);
+
+        $response->assertError(420, 'authorization.banned');
     }
 }
