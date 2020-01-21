@@ -1009,7 +1009,11 @@ class TimeIntervalController extends ItemController
         $foundIds = $itemsQuery->pluck('id')->toArray();
         $notFoundIds = array_diff($intervalIds, $foundIds);
 
-        $itemsQuery->delete();
+
+        // to cascade screenshots soft deleting
+        foreach ($itemsQuery->getModels() as $item) {
+            $item->delete();
+        }
 
         $responseData = [
             'success' => true,
