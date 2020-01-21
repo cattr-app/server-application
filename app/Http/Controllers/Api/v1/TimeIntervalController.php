@@ -984,79 +984,55 @@ class TimeIntervalController extends ItemController
      */
     public function bulkDestroy(Request $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all());
-        $result = [];
+        $validationRules = [
+            'intervals' => 'required|array',
+            'intervals.*' => 'integer'
+        ];
 
-        if (empty($requestData['intervals'])) {
+        $validator = Validator::make(
+            Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all()),
+            Filter::process($this->getEventUniqueName('validation.item.edit'), $validationRules)
+        );
+
+        if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
-                    'info' => 'intervals is empty'
-                ]), 400);
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
         }
 
-        $intervals = $requestData['intervals'];
-        if (!is_array($intervals)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'reason' => 'intervals should be an array',
-                ]), 400);
-        }
+        $intervalIds = $validator->validated()['intervals'];
 
-        foreach ($intervals as $interval) {
-            /** @var Builder $itemsQuery */
-            $itemsQuery = Filter::process(
-                $this->getEventUniqueName('answer.success.item.query.prepare'),
-                $this->applyQueryFilter(
-                    $this->getQuery(),
-                    $interval
-                )
-            );
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter($this->getQuery(), ['id' => ['in', $intervalIds]])
+        );
 
-            $validator = Validator::make(
-                $interval,
-                Filter::process(
-                    $this->getEventUniqueName('validation.item.edit'),
-                    ['id' => 'exists:time_intervals,id|required']
-                )
-            );
+        $foundIds = $itemsQuery->pluck('id')->toArray();
+        $notFoundIds = array_diff($intervalIds, $foundIds);
 
-            if ($validator->fails()) {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors(),
-                    'code' => 400
-                ];
-                continue;
-            }
+        $itemsQuery->delete();
 
-            /** @var Model $item */
-            $item = $itemsQuery->first();
-            if ($item && $item->delete()) {
-                $result[] = [
-                    'success' => true,
-                    'message' => 'Item has been removed'];
-            } else {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found',
-                    'code' => 404
-                ];
-            }
+        $responseData = [
+            'success' => true,
+            'message' => 'Intervals successfully removed',
+            'removed' => $foundIds
+        ];
+
+        if ($notFoundIds) {
+            $responseData['message'] = 'Some intervals have not been removed';
+            $responseData['not_found'] = array_values($notFoundIds);
         }
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'messages' => $result
-            ])
+            Filter::process($this->getEventUniqueName('answer.success.item.remove'), $responseData),
+            ($notFoundIds) ? 207 : 200
         );
     }
 
