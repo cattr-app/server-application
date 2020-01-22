@@ -25,6 +25,7 @@ class Controller extends BaseController
     }
 
     /**
+     * @codeCoverageIgnore
      * @return array
      */
     public static function getControllerRules(): array
