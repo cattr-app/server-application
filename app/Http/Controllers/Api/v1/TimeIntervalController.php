@@ -755,60 +755,56 @@ class TimeIntervalController extends ItemController
      *
      * @return JsonResponse
      * @throws \Exception
-     * @api            {delete, post} /api/v1/time-intervals/bulk-edit BulkEdit
-     * @apiDescription Multiple Edit TimeInterval
+     * @api            {post} /api/v1/time-intervals/bulk-edit BulkEdit
+     * @apiDescription Multiple Edit TimeInterval to assign tasks to them
+     *
      * @apiVersion     0.1.0
      * @apiName        BulkEditTimeInterval
      * @apiGroup       Time Interval
      *
-     * @apiParam {Object[]}    intervals              Time Intervals
-     * @apiParam {Object}      intervals.object       Time Interval
-     * @apiParam {Integer}     intervals.object.id    Time Interval id
-     * @apiParam {Object}      data                   Data to set on intervals
-     * @apiParam {Integer}     data.task_id           Task ID
+     * @apiParam {Object[]}  intervals          Time Intervals to edit
+     * @apiParam {Integer}   intervals.id       Time Interval ID
+     * @apiParam {Integer}   intervals.task_id  Task ID
      *
      * @apiParamExample {json} Request Example
      * {
      *   "intervals": [
      *     {
-     *       "id": 1
+     *       "id": 12,
+     *       "task_id": 12
+     *     },
+     *     {
+     *       "id": 13,
+     *       "task_id": 16
      *     }
-     *   ],
-     *   "data": {
-     *     "task_id": 1
-     *   }
+     *   ]
      * }
      *
-     * @apiSuccess {Object[]} messages               Messages
-     * @apiSuccess {Object}   message                Message
-     * @apiSuccess {String}   message.message        Status
+     * @apiSuccess {Boolean}    success    Indicates successful request when TRUE
+     * @apiSuccess {String}     message    Message from server
+     * @apiSuccess {Integer[]}  updated    Updated intervals
+     * @apiSuccess {Integer[]}  not_found  Not found intervals
      *
      * @apiSuccessExample {json} Response Example
-     * {
-     *   "messages": [
-     *     {
-     *       "message": "Item has been updated"
-     *     }
-     *   ]
-     * }
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Intervals successfully updated",
+     *    "updated": [12, 123, 45],
+     *  }
      *
-     * @apiError (404)  {Object[]} messages                 Messages
-     * @apiError (404)  {Object}   messages.message         Message
-     * @apiError (404)  {String}   messages.message.error   Error title
-     * @apiError (404)  {String}   messages.message.reason  Error reason
+     * @apiSuccessExample {json} Not all intervals updated Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Some intervals have not been updated",
+     *    "updated": [12, 123, 45],
+     *    "not_found": [154, 77, 66]
+     *  }
      *
-     * @apiErrorExample (404) {json} Errors Response Example
-     * {
-     *   "messages": [
-     *     {
-     *       "error": "Item has not been updated",
-     *       "reason": "Item not found"
-     *     }
-     *   ]
-     * }
-     *
+     * @apiUse         400Error
+     * @apiUse         ParamsValidationError
      * @apiUse         UnauthorizedError
-     *
      */
     public function bulkEdit(Request $request): JsonResponse
     {
@@ -919,7 +915,7 @@ class TimeIntervalController extends ItemController
      *    "removed": [12, 123, 45],
      *  }
      *
-     * @apiSuccessExample {json} Not all intervals removed response Example
+     * @apiSuccessExample {json} Not all intervals removed Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
