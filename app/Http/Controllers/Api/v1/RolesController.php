@@ -4,8 +4,8 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Role;
 use App\Models\Rule;
-use Auth;
-use Filter;
+use Illuminate\Support\Facades\Auth;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

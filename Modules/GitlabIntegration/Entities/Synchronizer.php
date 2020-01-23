@@ -4,7 +4,7 @@ namespace Modules\GitlabIntegration\Entities;
 
 use App\Models\Project;
 use App\Models\Task;
-use App\User;
+use App\Models\User;
 use Log;
 use Modules\GitlabIntegration\Helpers\EntityResolver;
 use Modules\GitlabIntegration\Helpers\GitlabApi;

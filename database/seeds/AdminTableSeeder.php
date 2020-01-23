@@ -1,6 +1,6 @@
 <?php
 
-use App\User;
+use App\Models\User;
 use App\Models\Rule;
 use Illuminate\Database\Seeder;
 use Symfony\Component\Console\Output\ConsoleOutput;

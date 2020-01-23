@@ -4,8 +4,8 @@
 namespace Modules\Invoices\Entities\Repositories;
 
 use App\Models\Property;
-use App\User;
-use DB;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Exception;
 
 /**

@@ -5,12 +5,12 @@ namespace App\Http\Controllers;
 use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\RecaptchaHelper;
 use App\Models\Token;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 
 /**

@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Mail\InviteUser;
 use App\Models\Role;
-use App\User;
-use Auth;
-use Event;
-use Filter;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Route;
-use Validator;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class UserController

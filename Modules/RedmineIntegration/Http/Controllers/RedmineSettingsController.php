@@ -4,8 +4,8 @@ namespace Modules\RedmineIntegration\Http\Controllers;
 
 use App\Models\Priority;
 use App\Models\Property;
-use App\User;
-use Filter;
+use App\Models\User;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;

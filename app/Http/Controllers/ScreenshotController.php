@@ -2,13 +2,8 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
 use App\Models\Screenshot;
-use App\User;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Auth;
 
 /**
  * Class ScreenshotController

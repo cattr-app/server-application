@@ -4,7 +4,7 @@ namespace Modules\RedmineIntegration\Helpers;
 
 use App\Models\Project;
 use App\Models\Property;
-use App\User;
+use App\Models\User;
 use Exception;
 
 class ProjectIntegrationHelper extends AbstractIntegrationHelper

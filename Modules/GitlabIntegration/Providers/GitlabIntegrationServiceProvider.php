@@ -2,7 +2,7 @@
 
 namespace Modules\GitlabIntegration\Providers;
 
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\GitlabIntegration\Console\SynchronizeTime;

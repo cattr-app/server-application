@@ -7,13 +7,13 @@ use App\Models\Project;
 use App\Models\ProjectReport;
 use App\Models\Property;
 use App\Models\TimeInterval;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use DB;
-use Filter;
+use Illuminate\Support\Facades\DB;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class ProjectReportController extends ReportController
 {

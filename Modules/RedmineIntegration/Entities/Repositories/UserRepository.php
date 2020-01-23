@@ -4,7 +4,7 @@ namespace Modules\RedmineIntegration\Entities\Repositories;
 
 use App\Models\Property;
 use App\Models\Task;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
 
