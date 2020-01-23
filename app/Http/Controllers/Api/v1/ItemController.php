@@ -327,7 +327,7 @@ abstract class ItemController extends Controller
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                         'success' => false,
-                        'error_type' => 'authorization.access_denied',
+                        'error_type' => 'authorization.forbidden',
                         'message' => 'Access denied to this item',
                     ]),
                     403
@@ -426,7 +426,7 @@ abstract class ItemController extends Controller
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
                         'success' => false,
-                        'error_type' => 'authorization.access_denied',
+                        'error_type' => 'authorization.forbidden',
                         'message' => 'Access denied to this item'
                     ]),
                     403

@@ -157,7 +157,7 @@ class TaskCommentController extends ItemController
             if ($item->task->user_id != $user->id) {
                 return response()->json([
                     'success' => false,
-                    'error_type' => 'authorization.access_denied',
+                    'error_type' => 'authorization.forbidden',
                     'message' => "Access denied to this task",
                 ], 403);
             }

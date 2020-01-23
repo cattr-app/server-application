@@ -220,7 +220,7 @@ class ProjectController extends ItemController
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
                     'success' => false,
-                    'error_type' => 'authorization.access_denied',
+                    'error_type' => 'authorization.forbidden',
                     'message' => 'User has no access to this project',
                 ]), 403);
         }
