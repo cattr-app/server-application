@@ -4,7 +4,7 @@ namespace Tests\Factories;
 
 use Carbon\Carbon;
 use Faker\Factory as FakerFactory;
-use App\User;
+use App\Models\User;
 use App\Models\TimeInterval;
 use App\Models\Task;
 

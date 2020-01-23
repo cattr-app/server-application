@@ -2,7 +2,7 @@
 
 namespace Tests\Facades;
 
-use App\User;
+use App\Models\User;
 use Tests\Factories\TaskFactory as BaseTaskFactory;
 use App\Models\Task;
 use Illuminate\Support\Collection;

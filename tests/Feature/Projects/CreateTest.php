@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Projects;
 
-use App\User;
+use App\Models\User;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;

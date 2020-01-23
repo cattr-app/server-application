@@ -3,7 +3,7 @@
 namespace Tests\Factories;
 
 use App\Models\Project;
-use App\User;
+use App\Models\User;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;

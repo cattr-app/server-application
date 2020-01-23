@@ -3,7 +3,7 @@
 namespace Tests\Feature\TimeUseReport;
 
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Tests\Facades\IntervalFactory;

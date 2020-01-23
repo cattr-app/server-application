@@ -3,7 +3,7 @@
 namespace Tests\Feature\Screenshots;
 
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Faker\Factory;
 use Illuminate\Http\Testing\File;
 use Illuminate\Http\UploadedFile;

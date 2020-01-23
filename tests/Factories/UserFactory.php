@@ -2,7 +2,7 @@
 
 namespace Tests\Factories;
 
-use App\User;
+use App\Models\User;
 use Faker\Factory as FakerFactory;
 use JWTAuth;
 

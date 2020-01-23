@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\Tasks;
 
-use App\User;
+use App\Models\User;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;

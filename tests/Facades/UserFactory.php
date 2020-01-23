@@ -3,7 +3,7 @@
 namespace Tests\Facades;
 
 use Tests\Factories\UserFactory as BaseUserFactory;
-use App\User;
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 

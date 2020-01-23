@@ -5,7 +5,7 @@ namespace Tests\Feature\TimeIntervals;
 
 
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;

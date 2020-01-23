@@ -3,7 +3,7 @@
 namespace Tests\Feature\Roles;
 
 use Tests\Facades\UserFactory;
-use App\User;
+use App\Models\User;
 use Tests\TestCase;
 
 

@@ -2,7 +2,7 @@
 
 namespace Tests\Feature\TimeIntervals;
 
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Faker\Factory as FakerFactory;
 use Illuminate\Support\Collection;

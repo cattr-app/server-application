@@ -4,7 +4,7 @@ namespace Tests\Feature\Rules;
 
 use Tests\Facades\UserFactory;
 use App\Models\Rule;
-use App\User;
+use App\Models\User;
 use Tests\TestCase;
 
 /**

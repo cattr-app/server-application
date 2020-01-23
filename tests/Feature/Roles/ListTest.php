@@ -1,7 +1,7 @@
 <?php
 namespace Tests\Feature\Roles;
 
-use App\User;
+use App\Models\User;
 
 use App\Models\Role;
 use Tests\Facades\UserFactory;

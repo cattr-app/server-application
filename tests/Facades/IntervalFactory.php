@@ -3,7 +3,7 @@
 namespace Tests\Facades;
 
 use App\Models\Task;
-use App\User;
+use App\Models\User;
 use Tests\Factories\IntervalFactory as BaseIntervalFactory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;

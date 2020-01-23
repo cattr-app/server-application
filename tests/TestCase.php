@@ -2,7 +2,7 @@
 
 namespace Tests;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Contracts\Auth\Authenticatable as UserContract;
 use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
