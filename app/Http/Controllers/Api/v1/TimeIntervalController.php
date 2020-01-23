@@ -755,156 +755,111 @@ class TimeIntervalController extends ItemController
      *
      * @return JsonResponse
      * @throws \Exception
-     * @api            {delete, post} /api/v1/time-intervals/bulk-edit BulkEdit
-     * @apiDescription Multiple Edit TimeInterval
+     * @api            {post} /api/v1/time-intervals/bulk-edit BulkEdit
+     * @apiDescription Multiple Edit TimeInterval to assign tasks to them
+     *
      * @apiVersion     0.1.0
      * @apiName        BulkEditTimeInterval
      * @apiGroup       Time Interval
      *
-     * @apiParam {Object[]}    intervals              Time Intervals
-     * @apiParam {Object}      intervals.object       Time Interval
-     * @apiParam {Integer}     intervals.object.id    Time Interval id
-     * @apiParam {Object}      data                   Data to set on intervals
-     * @apiParam {Integer}     data.task_id           Task ID
+     * @apiParam {Object[]}  intervals          Time Intervals to edit
+     * @apiParam {Integer}   intervals.id       Time Interval ID
+     * @apiParam {Integer}   intervals.task_id  Task ID
      *
      * @apiParamExample {json} Request Example
      * {
      *   "intervals": [
      *     {
-     *       "id": 1
+     *       "id": 12,
+     *       "task_id": 12
+     *     },
+     *     {
+     *       "id": 13,
+     *       "task_id": 16
      *     }
-     *   ],
-     *   "data": {
-     *     "task_id": 1
-     *   }
+     *   ]
      * }
      *
-     * @apiSuccess {Object[]} messages               Messages
-     * @apiSuccess {Object}   message                Message
-     * @apiSuccess {String}   message.message        Status
+     * @apiSuccess {Boolean}    success    Indicates successful request when TRUE
+     * @apiSuccess {String}     message    Message from server
+     * @apiSuccess {Integer[]}  updated    Updated intervals
+     * @apiSuccess {Integer[]}  not_found  Not found intervals
      *
      * @apiSuccessExample {json} Response Example
-     * {
-     *   "messages": [
-     *     {
-     *       "message": "Item has been updated"
-     *     }
-     *   ]
-     * }
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Intervals successfully updated",
+     *    "updated": [12, 123, 45],
+     *  }
      *
-     * @apiError (404)  {Object[]} messages                 Messages
-     * @apiError (404)  {Object}   messages.message         Message
-     * @apiError (404)  {String}   messages.message.error   Error title
-     * @apiError (404)  {String}   messages.message.reason  Error reason
+     * @apiSuccessExample {json} Not all intervals updated Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Some intervals have not been updated",
+     *    "updated": [12, 123, 45],
+     *    "not_found": [154, 77, 66]
+     *  }
      *
-     * @apiErrorExample (404) {json} Errors Response Example
-     * {
-     *   "messages": [
-     *     {
-     *       "error": "Item has not been updated",
-     *       "reason": "Item not found"
-     *     }
-     *   ]
-     * }
-     *
+     * @apiUse         400Error
+     * @apiUse         ParamsValidationError
      * @apiUse         UnauthorizedError
-     *
      */
     public function bulkEdit(Request $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.bulkEdit'), $request->all());
-        $result = [];
+        $validationRules = [
+            'intervals' => 'required|array',
+            'intervals.*.id' => 'required|integer',
+            'intervals.*.task_id' => 'required|integer'
+        ];
 
         $validator = Validator::make(
-            $requestData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.bulkEdit'),
-                [
-                    'intervals' => 'array|required',
-                    'data' => 'array|required',
-                ]
-            ),
-            [
-                'array' => ':attribute should be an array',
-                'required' => ':attribute is empty',
-            ]
+            Filter::process($this->getEventUniqueName('request.item.edit'), $request->all()),
+            Filter::process($this->getEventUniqueName('validation.item.edit'), $validationRules)
         );
+
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
-                    'info' => $validator->errors(),
-                ]), 400);
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
         }
 
-        $data = $requestData['data'];
-        $dataValidator = Validator::make(
-            $data,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.bulkEdit'),
-                ['task_id' => 'exists:tasks,id|required']
-            )
+        $intervalsData = collect($validator->validated()['intervals']);
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter($this->getQuery(), ['id' => ['in', $intervalsData->pluck('id')->toArray()]])
         );
-        if ($dataValidator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $dataValidator->errors(),
-                ]), 400);
-        }
 
-        $intervals = $requestData['intervals'];
-        foreach ($intervals as $interval) {
-            /** @var Builder $itemsQuery */
-            $itemsQuery = Filter::process(
-                $this->getEventUniqueName('answer.success.item.query.prepare'),
-                $this->applyQueryFilter(
-                    $this->getQuery(),
-                    $interval
-                )
-            );
+        $foundIds = $itemsQuery->pluck('id')->toArray();
+        $notFoundIds = array_diff($intervalsData->pluck('id')->toArray(), $foundIds);
 
-            $intervalValidator = Validator::make(
-                $interval,
-                Filter::process(
-                    $this->getEventUniqueName('validation.item.edit'),
-                    ['id' => 'exists:time_intervals,id|required']
-                )
-            );
+        $itemsQuery->each(static function (Model $item) use ($intervalsData) {
+            $item->update(array_only($intervalsData->where('id', $item->id)->first(), 'task_id'));
+        });
 
-            if ($intervalValidator->fails()) {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation Error',
-                    'info' => $intervalValidator->errors(),
-                    'code' => 400
-                ];
-                continue;
-            }
+        $responseData = [
+            'success' => true,
+            'message' => 'Intervals successfully updated',
+            'updated' => $foundIds
+        ];
 
-            /** @var Model $item */
-            $item = $itemsQuery->first();
-            if ($item && $item->update($data)) {
-                $result[] = ['success' => true, 'message' => 'Item has been updated'];
-            } else {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found',
-                    'code' => 404
-                ];
-            }
+        if ($notFoundIds) {
+            $responseData['message'] = 'Some intervals have not been updated';
+            $responseData['not_found'] = array_values($notFoundIds);
         }
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.bulkEdit'), [
-                'messages' => $result
-            ])
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), $responseData),
+            ($notFoundIds) ? 207 : 200
         );
     }
 
@@ -960,7 +915,7 @@ class TimeIntervalController extends ItemController
      *    "removed": [12, 123, 45],
      *  }
      *
-     * @apiSuccessExample {json} Not all intervals removed response Example
+     * @apiSuccessExample {json} Not all intervals removed Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
@@ -1009,7 +964,11 @@ class TimeIntervalController extends ItemController
         $foundIds = $itemsQuery->pluck('id')->toArray();
         $notFoundIds = array_diff($intervalIds, $foundIds);
 
-        $itemsQuery->delete();
+
+        // to cascade screenshots soft deleting
+        foreach ($itemsQuery->getModels() as $item) {
+            $item->delete();
+        }
 
         $responseData = [
             'success' => true,

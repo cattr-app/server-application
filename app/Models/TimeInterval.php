@@ -126,9 +126,7 @@ class TimeInterval extends AbstractModel
 
         static::deleting(function($intervals) {
             /** @var TimeInterval $intervals */
-            foreach ($intervals->screenshot()->get() as $screen) {
-                $screen->delete();
-            }
+            $intervals->screenshot()->delete();
         });
     }
 
