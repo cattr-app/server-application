@@ -5,8 +5,8 @@ namespace Modules\EmailReports\Http\Controllers;
 
 use App\Http\Controllers\Api\v1\ItemController;
 use App\Models\Project;
-use App\User;
-use Filter;
+use App\Models\User;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;

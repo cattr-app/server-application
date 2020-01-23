@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
 use App\Models\Role;
-use Auth;
-use Filter;
+use Illuminate\Support\Facades\Auth;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use DB;
-use Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Class ProjectController

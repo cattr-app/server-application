@@ -2,10 +2,7 @@
 
 namespace App\Models;
 
-use App\User;
-use Eloquent;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -74,14 +71,13 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Task whereUserId($value)
  * @method static QueryBuilder|Task withTrashed()
  * @method static QueryBuilder|Task withoutTrashed()
- * @method static Model|Task make($attributes)
- * @mixin Eloquent
+ * @mixin Model
  */
 class Task extends AbstractModel
 {
     use SoftDeletes;
 
-    /**
+	/**
      * table name from database
      * @var string
      */
@@ -142,14 +138,6 @@ class Task extends AbstractModel
     }
 
     /**
-     * @return HasMany
-     */
-    public function timeIntervals(): HasMany
-    {
-        return $this->hasMany(TimeInterval::class, 'task_id');
-    }
-
-    /**
      * @return BelongsTo
      */
     public function project(): BelongsTo
@@ -171,6 +159,14 @@ class Task extends AbstractModel
     public function assigned(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_by');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function timeIntervals(): HasMany
+    {
+    	return $this->hasMany(TimeInterval::class, 'task_id');
     }
 
     /**

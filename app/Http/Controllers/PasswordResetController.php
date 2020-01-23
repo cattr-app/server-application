@@ -4,15 +4,15 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\RecaptchaHelper;
-use App\User;
-use Hash;
+use App\Models\User;
+use Illuminate\Support\Facades\Hash;
 use Illuminate\Auth\Events\PasswordReset as PasswordResetEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller as BaseController;
-use Password;
-use DB;
+use Illuminate\Support\Facades\Password;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class PasswordReset

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\ProjectsUsers;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ProjectsUsersController

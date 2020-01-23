@@ -4,7 +4,7 @@ use App\Models\Project;
 use App\Models\Screenshot;
 use App\Models\Task;
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Database\Seeder;

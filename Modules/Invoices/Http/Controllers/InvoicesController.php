@@ -4,7 +4,7 @@ namespace Modules\Invoices\Http\Controllers;
 
 
 use App\Http\Controllers\Controller;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Modules\Invoices\Entities\Repositories\InvoicesRepository;

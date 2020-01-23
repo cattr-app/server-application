@@ -6,7 +6,7 @@ namespace Modules\GitlabIntegration\Entities;
 
 use App\Models\Task;
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Collection;
 use Log;

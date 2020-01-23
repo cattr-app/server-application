@@ -4,7 +4,7 @@ namespace Modules\RedmineIntegration\Console;
 
 use App\Models\Property;
 use App\Models\Task;
-use App\User;
+use App\Models\User;
 use Exception;
 use Illuminate\Console\Command;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;

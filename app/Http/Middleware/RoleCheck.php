@@ -3,7 +3,7 @@
 namespace App\Http\Middleware;
 
 use App\Exceptions\Entities\AuthorizationException;
-use App\User;
+use App\Models\User;
 use Closure;
 
 

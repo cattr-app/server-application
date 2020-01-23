@@ -4,11 +4,11 @@ namespace App\Http\Controllers\Api\v1\Statistic;
 
 use App\Helpers\ReportHelper;
 use App\Models\Property;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Carbon\Carbon;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TimeUseReportController
