@@ -1,14 +1,9 @@
 <?php
 
-namespace App;
+namespace App\Models;
 
+use Eloquent as EloquentIdeHelper;
 use App\Mail\ResetPassword;
-use App\Models\ProjectsUsers;
-use App\Models\Task;
-use App\Models\TimeInterval;
-use App\Models\Property;
-use App\Models\Token;
-use Eloquent;
 use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
 use Fico7489\Laravel\EloquentJoin\Traits\EloquentJoin;
 use Illuminate\Database\Eloquent\Builder;
@@ -23,9 +18,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Foundation\Auth\User as Authenticatable;
-use App\Models\Project;
-use App\Models\Role;
-use App\Models\DateTrait;
 
 use Illuminate\Contracts\Auth\CanResetPassword;
 use Illuminate\Database\Eloquent\Collection;
@@ -132,11 +124,12 @@ use Illuminate\Database\Eloquent\Collection;
  * @method static EloquentBuilder|User whereWebcamShots($value)
  * @method static QueryBuilder|User withTrashed()
  * @method static QueryBuilder|User withoutTrashed()
- * @mixin Eloquent
+ * @mixin EloquentIdeHelper
  */
 class User extends Authenticatable implements JWTSubject, CanResetPassword
 {
-    use Notifiable, SoftDeletes;
+    use Notifiable;
+    use SoftDeletes;
     use EloquentJoin;
     use DateTrait;
 

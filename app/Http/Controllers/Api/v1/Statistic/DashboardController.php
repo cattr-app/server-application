@@ -3,14 +3,14 @@
 namespace App\Http\Controllers\Api\v1\Statistic;
 
 use App\Models\TimeInterval;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use App\Models\Project;
 use Illuminate\Http\JsonResponse;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Http\Request;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Carbon\Carbon;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 class DashboardController extends ReportController
 {

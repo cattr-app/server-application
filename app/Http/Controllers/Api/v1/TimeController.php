@@ -3,11 +3,11 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Role;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use App\Models\TimeInterval;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;

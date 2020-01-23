@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\ProjectsRoles;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ProjectsRolesController
@@ -250,75 +250,6 @@ class ProjectsRolesController extends ItemController
      * @todo: add request and response example with error
      *
      */
-    public function bulkCreate(Request $request): JsonResponse
-    {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
-        $result = [];
-
-        if (empty($requestData['relations'])) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'relations is empty',
-                ]), 400);
-        }
-
-        $relations = $requestData['relations'];
-        if (!is_array($relations)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'relations should be an array',
-                ]),
-                400
-            );
-        }
-
-        $allowed_fields = array_flip([
-            'project_id',
-            'role_id',
-        ]);
-
-        foreach ($relations as $relation) {
-            $relation = array_intersect_key($relation, $allowed_fields);
-
-            $validator = Validator::make(
-                $relation,
-                Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-            );
-
-            if ($validator->fails()) {
-                $result[] = Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors(),
-                    'code' => 400
-                ]);
-                continue;
-            }
-
-            $cls = $this->getItemClass();
-
-            $item = Filter::process(
-                $this->getEventUniqueName('item.create'),
-                $cls::firstOrCreate($this->filterRequestData($relation))
-            );
-
-            unset($item['id']);
-            $result[] = $item;
-        }
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'messages' => $result,
-            ])
-        );
-    }
 
     /**
      * @param Request $request
@@ -455,78 +386,4 @@ class ProjectsRolesController extends ItemController
      * @apiSuccess {Object}    array.object            Message
      *
      */
-    public function bulkDestroy(Request $request): JsonResponse
-    {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all());
-        $result = [];
-
-        if (empty($requestData['relations'])) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'relations is empty',
-                ]), 400);
-        }
-
-        $relations = $requestData['relations'];
-        if (!is_array($relations)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'relations should be an array',
-                ]), 400);
-        }
-
-        foreach ($relations as $relation) {
-            /** @var Builder $itemsQuery */
-            $itemsQuery = Filter::process(
-                $this->getEventUniqueName('answer.success.item.query.prepare'),
-                $this->applyQueryFilter(
-                    $this->getQuery(), $relation
-                )
-            );
-
-            $validator = Validator::make(
-                $relation,
-                Filter::process(
-                    $this->getEventUniqueName('validation.item.edit'),
-                    $this->getValidationRules()
-                )
-            );
-
-            if ($validator->fails()) {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors(),
-                    'code' => 400,
-                ];
-                continue;
-            }
-
-            /** @var Model $item */
-            $item = $itemsQuery->first();
-            if ($item && $item->delete()) {
-                $result[] = ['message' => 'Item has been removed'];
-            } else {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found',
-                    'code' => 404,
-                ];
-            }
-        }
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'messages' => $result
-            ])
-        );
-    }
 }

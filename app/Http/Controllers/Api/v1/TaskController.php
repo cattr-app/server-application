@@ -5,14 +5,14 @@ namespace App\Http\Controllers\Api\v1;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\Task;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use DB;
-use Filter;
+use Illuminate\Support\Facades\DB;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Route;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Class TaskController
@@ -458,7 +458,7 @@ class TaskController extends ItemController
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
                     'success' => false,
-                    'error_type' => 'authorization.access_denied',
+                    'error_type' => 'authorization.forbidden',
                     'message' => 'User has no access to this task'
                 ]),
                 403
@@ -512,7 +512,7 @@ class TaskController extends ItemController
         $user_id = $user->id;
         $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = Role::can($user, 'tasks', 'full_access');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
+        $action_method = Route::current()->getActionMethod();
 
         if ($full_access) {
             return $query;

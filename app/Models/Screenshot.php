@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
-use App\User;
-use Eloquent;
+use Eloquent as EloquentIdeHelper;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -52,7 +52,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Screenshot whereUpdatedAt($value)
  * @method static QueryBuilder|Screenshot withTrashed()
  * @method static QueryBuilder|Screenshot withoutTrashed()
- * @mixin Eloquent
+ * @mixin EloquentIdeHelper
  */
 class Screenshot extends AbstractModel
 {

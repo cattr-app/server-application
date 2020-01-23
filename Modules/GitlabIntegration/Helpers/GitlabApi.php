@@ -3,7 +3,7 @@
 namespace Modules\GitlabIntegration\Helpers;
 
 use App\Models\Property;
-use App\User;
+use App\Models\User;
 use Gitlab\Client;
 use Gitlab\ResultPager;
 

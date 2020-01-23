@@ -6,17 +6,17 @@ use App\Helpers\QueryHelper;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Exception;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ScreenshotController
@@ -298,72 +298,6 @@ class ScreenshotController extends ItemController
      * @apiUse         UnauthorizedError
      *
      */
-    public function bulkCreate(Request $request): JsonResponse
-    {
-        $requestData = $request->all();
-        $result = [];
-
-        if (empty($requestData)) {
-            return response()->json(
-                Filter::fire($this->getEventUniqueName('answer.error.item.create'), [
-                    [
-                        'success' => false,
-                        'error_type' => 'validation',
-                        'message' => 'Validation error',
-                        'info' => 'screenshot is required',
-                    ]
-                ]),
-                400
-            );
-        }
-
-        foreach ($requestData as $timeIntervalId => $screenshot) {
-            $screenStorePath = $screenshot->store('uploads/screenshots');
-            $absoluteStorePath = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, Storage::disk()->path($screenStorePath));
-
-            $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
-
-            $screenshot = Image::make($path);
-
-            $thumbnail = $screenshot->resize(280, null, function ($constraint) {
-                $constraint->aspectRatio();
-            });
-
-            $ds = DIRECTORY_SEPARATOR;
-
-            $thumbnailPath = str_replace("uploads{$ds}screenshots", "uploads{$ds}screenshots{$ds}thumbs",
-                $screenStorePath);
-            Storage::put($thumbnailPath, (string) $thumbnail->encode());
-
-            $requestData = [
-                'time_interval_id' => (int) $timeIntervalId,
-                'path' => $screenStorePath,
-                'thumbnail_path' => $thumbnailPath,
-            ];
-
-            $validator = Validator::make(
-                $requestData,
-                Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-            );
-
-            if ($validator->fails()) {
-                $result[] = [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors(),
-                    'code' => 400
-                ];
-                continue;
-            }
-
-            $cls = $this->getItemClass();
-            $item = Filter::process($this->getEventUniqueName('item.create'), $cls::create($requestData));
-            $result[] = $item;
-        }
-
-        return response()->json([
-            'messages' => $result,
-        ]);
-    }
 
     /**
      * @param  Request  $request

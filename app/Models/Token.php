@@ -2,10 +2,9 @@
 
 namespace App\Models;
 
-use Eloquent;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Model;
-use App\User;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
@@ -22,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static EloquentBuilder|Token whereId($value)
  * @method static EloquentBuilder|Token whereToken($value)
  * @method static EloquentBuilder|Token whereUserId($value)
- * @mixin Eloquent
+ * @mixin EloquentIdeHelper
  */
 class Token extends Model
 {

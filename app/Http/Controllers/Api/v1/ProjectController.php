@@ -4,13 +4,13 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
 use App\Models\Role;
-use Auth;
-use Filter;
+use Illuminate\Support\Facades\Auth;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use DB;
-use Route;
+use Illuminate\Support\Facades\DB;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Class ProjectController
@@ -220,7 +220,7 @@ class ProjectController extends ItemController
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
                     'success' => false,
-                    'error_type' => 'authorization.access_denied',
+                    'error_type' => 'authorization.forbidden',
                     'message' => 'User has no access to this project',
                 ]), 403);
         }

@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,7 +20,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static EloquentBuilder|ProjectsRoles whereProjectId($value)
  * @method static EloquentBuilder|ProjectsRoles whereRoleId($value)
  * @method static EloquentBuilder|ProjectsRoles whereUpdatedAt($value)
- * @mixin Eloquent
+ * @mixin EloquentIdeHelper
  */
 class ProjectsRoles extends AbstractModel
 {

@@ -1,15 +1,20 @@
 <?php
 
-namespace App\EventFilter;
+namespace App\EventFilter\Facades;
 
-use Illuminate\Support\Facades\Facade as LaravelFacade;
+use Illuminate\Events\Dispatcher;
+use Illuminate\Support\Facades\Facade;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Testing\Fakes\EventFake;
 
 /**
- * @see \Illuminate\Events\Dispatcher
+ * @see Dispatcher
+ * @method static subscribe(object|string $subscriber)
+ * @method static listen(string|array $events, mixed $listener)
+ * @method static process(string $event, mixed $payload)
+ * @mixin Dispatcher
  */
-class Facade extends LaravelFacade
+class Filter extends Facade
 {
     /**
      * Replace the bound instance with a fake.

@@ -3,12 +3,12 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Models\ProjectsUsers;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ProjectsUsersController
@@ -227,73 +227,6 @@ class ProjectsUsersController extends ItemController
      * @apiUse UnauthorizedError
      *
      */
-    public function bulkCreate(Request $request): JsonResponse
-    {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
-        $result = [];
-
-        if (empty($requestData['relations'])) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'relations is empty',
-                ]), 400);
-        }
-
-        $relations = $requestData['relations'];
-        if (!is_array($relations)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'relations should be an array',
-                ]), 400);
-        }
-
-        $allowed_fields = array_flip([
-            'project_id',
-            'user_id',
-        ]);
-
-        foreach ($relations as $relation) {
-            $relation = array_intersect_key($relation, $allowed_fields);
-
-            $validator = Validator::make(
-                $relation,
-                Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-            );
-
-            if ($validator->fails()) {
-                $result[] = Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors(),
-                    'code' => 400
-                ]);
-                continue;
-            }
-
-            $cls = $this->getItemClass();
-
-            $item = Filter::process(
-                $this->getEventUniqueName('item.create'),
-                $cls::firstOrCreate($this->filterRequestData($relation))
-            );
-
-            unset($item['id']);
-            $result[] = $item;
-        }
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'messages' => $result,
-            ])
-        );
-    }
 
     /**
      * @param Request $request

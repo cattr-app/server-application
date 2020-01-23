@@ -2,7 +2,7 @@
 
 namespace Modules\RedmineIntegration\Listeners;
 
-use App\User;
+use App\Models\User;
 use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;

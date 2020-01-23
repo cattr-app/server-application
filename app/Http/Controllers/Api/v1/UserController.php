@@ -4,17 +4,17 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Mail\InviteUser;
 use App\Models\Role;
-use App\User;
-use Auth;
-use Event;
-use Filter;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Event;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
-use Route;
-use Validator;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class UserController
@@ -543,107 +543,6 @@ class UserController extends ItemController
      * @apiUse         DefaultBulkEditErrorResponse
      *
      */
-    public function bulkEdit(Request $request): JsonResponse
-    {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.bulkEdit'), $request->all());
-        $result = [];
-
-        if (empty($requestData['users'])) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'users is empty'
-                ]),
-                400
-            );
-        }
-
-        $users = $requestData['users'];
-        if (!is_array($users)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'users should be an array'
-                ]),
-                400
-            );
-        }
-
-        $validationRules = $this->getValidationRules();
-        $validationRules['id'] = 'required';
-        unset($validationRules['password']);
-
-        foreach ($users as $user) {
-            if (!isset($user['id']) || !is_int($user['id'])) {
-                return response()->json(
-                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                        'success' => false,
-                        'error_type' => 'validation',
-                        'message' => 'Validation error',
-                        'info' => 'Invalid id'
-                    ]),
-                    400
-                );
-            }
-
-            $validationRules['email'] = 'required|unique:users,email,'.$user['id'];
-            $validator = Validator::make(
-                $user,
-                Filter::process($this->getEventUniqueName('validation.item.bulkEdit'), $validationRules)
-            );
-
-            if ($validator->fails()) {
-                $result[] = [
-                    'error' => 'validation fail',
-                    'reason' => $validator->errors(),
-                    'code' => 400
-                ];
-                continue;
-            }
-
-            /** @var Builder $itemsQuery */
-            $itemsQuery = Filter::process(
-                $this->getEventUniqueName('answer.success.item.query.prepare'),
-                $this->applyQueryFilter(
-                    $this->getQuery(), ['id' => $user['id']]
-                )
-            );
-            /** @var Model $item */
-            $item = $itemsQuery->first();
-
-            if (!$item) {
-                return response()->json(
-                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                        'success' => false,
-                        'error_type' => 'query.item_not_found',
-                        'message' => 'User not found',
-                    ]),
-                    404
-                );
-            }
-
-            if (isset($user['password'])) {
-                $item->fill($this->filterRequestData($user));
-            } else {
-                $item->fill($user);
-            }
-
-            $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
-            $item->save();
-            $result[] = $item;
-        }
-
-        return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.bulkEdit'), [
-                'messages' => $result,
-            ]
-        ));
-    }
-
 
     /**
      * @param  Request  $request

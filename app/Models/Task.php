@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use App\User;
-use Eloquent;
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -73,7 +72,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Task whereUserId($value)
  * @method static QueryBuilder|Task withTrashed()
  * @method static QueryBuilder|Task withoutTrashed()
- * @mixin Eloquent
+ * @mixin EloquentIdeHelper
  */
 class Task extends AbstractModel
 {

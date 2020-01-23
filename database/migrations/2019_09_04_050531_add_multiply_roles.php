@@ -23,11 +23,11 @@ class AddMultiplyRoles extends Migration
             $table->unique(['user_id', 'role_id']);
         });
 
-        $users = \App\User::query()->select(['id', 'role_id'])->get();
+        $users = \App\Models\User::query()->select(['id', 'role_id'])->get();
         $usersTotal = $users->count();
         echo "\n";
         foreach ($users as $index => $user) {
-            /** @var \App\User $user */
+            /** @var \App\Models\User $user */
             $user->roles()->attach($user->role_id);
             echo "\rAttaching latests roles to users..." . ($index + 1) . "/" . $usersTotal . " (" . floor($usersTotal / ($index + 1) * 100.0) . "%)";
         }

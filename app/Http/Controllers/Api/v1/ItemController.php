@@ -5,16 +5,16 @@ namespace App\Http\Controllers\Api\v1;
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
 use Exception;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DateTrait;
-use Event;
+use Illuminate\Support\Facades\Event;
 
 
 /**
@@ -327,7 +327,7 @@ abstract class ItemController extends Controller
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                         'success' => false,
-                        'error_type' => 'authorization.access_denied',
+                        'error_type' => 'authorization.forbidden',
                         'message' => 'Access denied to this item',
                     ]),
                     403
@@ -426,7 +426,7 @@ abstract class ItemController extends Controller
                 return response()->json(
                     Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
                         'success' => false,
-                        'error_type' => 'authorization.access_denied',
+                        'error_type' => 'authorization.forbidden',
                         'message' => 'Access denied to this item'
                     ]),
                     403
