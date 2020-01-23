@@ -8,6 +8,9 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Client;
+use MCStreetguy\ComposerParser\Factory as ComposerParser;
 
 class AppInstallCommand extends Command
 {
@@ -73,13 +76,21 @@ class AppInstallCommand extends Command
         if ($this->settingUpDatabase() != 0) {
             return -1;
         }
+
+        $this->info('Enter administrator credentials:');
+        $adminData = $this->askAdminCredentials();
+
+        if (!$this->registerInstance($adminData['login'])) {
+            // User did not confirm installation
+            $this->filesystem->delete(base_path('.env'));
+            return -1;
+        }
+
         $this->settingUpEnvMigrateAndSeed();
 
         $this->info("Creating admin user");
-        $admin = $this->createAdminUser();
+        $admin = $this->createAdminUser($adminData);
         $this->info("Administrator with email {$admin->email} was created successfully");
-
-        // TODO: send email to Amazing Cat statistics server
 
         $this->updateEnvData("RECAPTCHA_ENABLED", $this->choice("Enable RECaptcha", [
             "true" => "Yes",
@@ -91,18 +102,61 @@ class AppInstallCommand extends Command
     }
 
     /**
+     * Send information about the new instance on the server
+     *
+     * @param $adminEmail
+     * @return bool
+     */
+    protected function registerInstance($adminEmail)
+    {
+        try {
+            $client = new Client();
+
+            $composerJson = ComposerParser::parse(base_path('composer.json'));
+            $appVersion = $composerJson->getVersion();
+
+            $response = $client->post('https://stats.cattr.app/v1/register', [
+                'json' => [
+                    'ownerEmail' => $adminEmail,
+                    'version' => $appVersion
+                ]
+            ]);
+
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+
+            if (isset($responseBody['flashMessage'])) {
+                $this->info($responseBody['flashMessage']);
+            }
+
+            if (isset($responseBody['updateVersion'])) {
+                $this->alert("New version is available: {$responseBody['updateVersion']}");
+            }
+
+            if ($responseBody['knownVulnerable']) {
+                return $this->confirm('You have a vulnerable version, are you sure you want to continue?');
+            }
+
+            return true;
+        } catch (GuzzleException $e) {
+            if ($e->getResponse()) {
+                $error = json_decode($e->getResponse()->getBody(), true);
+                $this->warn($error['message']);
+            } else {
+                $this->warn('Сould not get a response from the server to check the relevance of your version.');
+            }
+
+            return true;
+        }
+    }
+
+    /**
      * @return User
      */
-    protected function createAdminUser(): User
+    protected function createAdminUser($admin): User
     {
-        $login = $this->ask("Admin E-Mail");
-        $password = Hash::make($this->secret("Admin ($login) Password"));
-
-        $name = $this->ask("Admin Full Name");
-
         return User::create([
-            'full_name' => $name,
-            'email' => $login,
+            'full_name' => $admin['name'],
+            'email' => $admin['login'],
             'url' => '',
             'company_id' => 1,
             'payroll_access' => 1,
@@ -118,10 +172,26 @@ class AppInstallCommand extends Command
             'webcam_shots' => 0,
             'screenshots_interval' => 9,
             'active' => true,
-            'password' => $password,
+            'password' => $admin['password'],
             'is_admin' => true,
             'role_id' => 2,
         ]);
+    }
+
+    /**
+     * @return array
+     */
+    protected function askAdminCredentials()
+    {
+        $login = $this->ask("Admin E-Mail");
+        $password = Hash::make($this->secret("Admin ($login) Password"));
+        $name = $this->ask("Admin Full Name");
+
+        return [
+            'login' => $login,
+            'password' => $password,
+            'name' => $name,
+        ];
     }
 
     /**
@@ -177,7 +247,7 @@ class AppInstallCommand extends Command
 
             return -1;
         }
-        $this->info("Database testing successfully.");
+        $this->info("Database testing successfully.\n");
 
         return 0;
     }
