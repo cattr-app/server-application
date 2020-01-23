@@ -8,6 +8,9 @@ use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
+use GuzzleHttp\Exception\GuzzleException;
+use GuzzleHttp\Client;
+use MCStreetguy\ComposerParser\Factory as ComposerParser;
 
 class AppInstallCommand extends Command
 {
@@ -79,7 +82,9 @@ class AppInstallCommand extends Command
         $admin = $this->createAdminUser();
         $this->info("Administrator with email {$admin->email} was created successfully");
 
-        // TODO: send email to Amazing Cat statistics server
+        if (!$this->registerInstance($admin->email)) {
+            return -1;
+        }
 
         $this->updateEnvData("RECAPTCHA_ENABLED", $this->choice("Enable RECaptcha", [
             "true" => "Yes",
@@ -88,6 +93,54 @@ class AppInstallCommand extends Command
         $this->call("config:cache");
         $this->info("Application was installed successfully!");
         return 0;
+    }
+
+    /**
+     * Send information about the new instance on the server
+     *
+     * @param $adminEmail
+     * @return bool
+     */
+    protected function registerInstance($adminEmail)
+    {
+        try {
+            $client = new Client();
+
+            $composerJson = ComposerParser::parse(base_path('composer.json'));
+            $appVersion = $composerJson->getVersion();
+
+            $response = $client->post('https://stats.cattr.app/v1/register', [
+                'json' => [
+                    'ownerEmail' => $adminEmail,
+                    'version' => $appVersion
+                ]
+            ]);
+
+            $responseBody = json_decode($response->getBody()->getContents(), true);
+
+            if (isset($responseBody['flashMessage'])) {
+                $this->info($responseBody['flashMessage']);
+            }
+
+            if (isset($responseBody['updateVersion'])) {
+                $this->alert("New version is available: {$responseBody['updateVersion']}");
+            }
+
+            if ($responseBody['knownVulnerable']) {
+                return $this->confirm('You have a vulnerable version, are you sure you want to continue?');
+            }
+
+            return true;
+        } catch (GuzzleException $e) {
+            if ($e->getResponse()) {
+                $error = json_decode($e->getResponse()->getBody(), true);
+                $this->warn($error['message']);
+            } else {
+                $this->warn('Сould not get a response from the server to check the relevance of your version.');
+            }
+
+            return true;
+        }
     }
 
     /**

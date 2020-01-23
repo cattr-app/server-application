@@ -1,6 +1,7 @@
 {
   "name": "amazing-time/backend-application",
   "description": "Backend Application for AmazingTime tracker application",
+  "version": "1.2.2",
   "keywords": [
     "amazingcat",
     "time tracking",
@@ -24,6 +25,7 @@
     "laravel/helpers": "^1.1",
     "laravel/tinker": "^2.0",
     "m4tthumphrey/php-gitlab-api": "^9.15",
+    "mcstreetguy/composer-parser": "^1.1",
     "nwidart/laravel-modules": "^6.2",
     "paulvl/backup": "^3.1",
     "php-http/guzzle6-adapter": "^2.0",
