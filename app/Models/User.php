@@ -2,8 +2,8 @@
 
 namespace App\Models;
 
+use Eloquent as EloquentIdeHelper;
 use App\Mail\ResetPassword;
-use Illuminate\Database\Eloquent\Model;
 use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
 use Fico7489\Laravel\EloquentJoin\Traits\EloquentJoin;
 use Illuminate\Database\Eloquent\Builder;
@@ -124,7 +124,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @method static EloquentBuilder|User whereWebcamShots($value)
  * @method static QueryBuilder|User withTrashed()
  * @method static QueryBuilder|User withoutTrashed()
- * @mixin Model
+ * @mixin EloquentIdeHelper
  */
 class User extends Authenticatable implements JWTSubject, CanResetPassword
 {

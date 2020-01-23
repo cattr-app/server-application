@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -51,7 +51,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|TaskComment whereUserId($value)
  * @method static QueryBuilder|TaskComment withTrashed()
  * @method static QueryBuilder|TaskComment withoutTrashed()
- * @mixin Model
+ * @mixin EloquentIdeHelper
  */
 class TaskComment extends AbstractModel
 {

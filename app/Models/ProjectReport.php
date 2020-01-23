@@ -2,9 +2,15 @@
 
 namespace App\Models;
 
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Class Project
+ * @package App\Models
+ * @mixin EloquentIdeHelper
+ */
 class ProjectReport extends Model
 {
     protected $table = 'project_report';

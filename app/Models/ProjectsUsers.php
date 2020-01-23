@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -24,7 +24,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static EloquentBuilder|ProjectsUsers whereProjectId($value)
  * @method static EloquentBuilder|ProjectsUsers whereUpdatedAt($value)
  * @method static EloquentBuilder|ProjectsUsers whereUserId($value)
- * @mixin Model
+ * @mixin EloquentIdeHelper
  */
 class ProjectsUsers extends AbstractModel
 {

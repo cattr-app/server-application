@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Eloquent as EloquentIdeHelper;
 use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Model;
@@ -36,7 +37,7 @@ use Throwable;
  * @method static EloquentBuilder|Role whereUpdatedAt($value)
  * @method static QueryBuilder|Role withTrashed()
  * @method static QueryBuilder|Role withoutTrashed()
- * @mixin Model
+ * @mixin EloquentIdeHelper
  */
 class Role extends AbstractModel
 {

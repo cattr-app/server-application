@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -51,7 +52,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Screenshot whereUpdatedAt($value)
  * @method static QueryBuilder|Screenshot withTrashed()
  * @method static QueryBuilder|Screenshot withoutTrashed()
- * @mixin Model
+ * @mixin EloquentIdeHelper
  */
 class Screenshot extends AbstractModel
 {
