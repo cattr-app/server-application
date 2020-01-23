@@ -27,6 +27,7 @@ use Illuminate\Routing\RouteCollection;
 use Illuminate\Routing\Router;
 use Illuminate\Routing\Route as RouteModel;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
