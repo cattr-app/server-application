@@ -259,8 +259,9 @@ class ReportHelper
         );
 
         $bindings = array_merge([$timezoneOffset], $bindings);
+        $user = auth()->user();
 
-        return DB::table($this->getTableName('project'))
+        $query = DB::table($this->getTableName('project'))
             ->selectRaw($rawSelect, [$bindings])
             ->join(
                 $this->getTableName('task'),
@@ -284,6 +285,18 @@ class ReportHelper
             ->where($this->getTableName('timeInterval', 'end_at'), '<', $endAt)
             ->whereIn($this->getTableName('user','id'), $uids)
             ->groupBy('task_id');
+
+        if ((bool)$user->is_admin) {
+            return $query;
+        }
+
+        return $query
+            ->join(
+                'projects_users',
+                'projects_users.project_id',
+                '=',
+                'projects.id')
+            ->where(['projects_users.user_id' => $user->id]);
     }
 
     /**
