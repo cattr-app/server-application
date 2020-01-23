@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Support\Carbon;
 
@@ -17,7 +17,7 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Registration whereExpiresAt($value)
  * @method static EloquentBuilder|Registration whereId($value)
  * @method static EloquentBuilder|Registration whereKey($value)
- * @mixin Eloquent
+ * @mixin Model
  */
 class Registration extends AbstractModel
 {

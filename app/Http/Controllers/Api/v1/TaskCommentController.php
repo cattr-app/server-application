@@ -2,21 +2,14 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Models\Role;
-use App\Models\Screenshot;
 use App\Models\TaskComment;
-use App\Rules\BetweenDate;
-use App\User;
-use Auth;
-use Carbon\Carbon;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Filter;
-use Validator;
-use Intervention\Image\Facades\Image;
-use Illuminate\Support\Facades\Storage;
+use App\EventFilter\Facades\Filter;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TaskCommentController

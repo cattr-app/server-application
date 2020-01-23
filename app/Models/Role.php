@@ -3,9 +3,8 @@
 namespace App\Models;
 
 use App\Exceptions\Entities\AuthorizationException;
-use App\User;
-use Auth;
-use Eloquent;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Database\Eloquent\Model;
 use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -13,7 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 
 /**
@@ -38,7 +36,7 @@ use Throwable;
  * @method static EloquentBuilder|Role whereUpdatedAt($value)
  * @method static QueryBuilder|Role withTrashed()
  * @method static QueryBuilder|Role withoutTrashed()
- * @mixin Eloquent
+ * @mixin Model
  */
 class Role extends AbstractModel
 {

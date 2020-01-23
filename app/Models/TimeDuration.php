@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-use App\User;
-use Eloquent;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -20,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static EloquentBuilder|TimeDuration whereDuration($value)
  * @method static EloquentBuilder|TimeDuration whereId($value)
  * @method static EloquentBuilder|TimeDuration whereUserId($value)
- * @mixin Eloquent
+ * @mixin Model
  */
 class TimeDuration extends AbstractModel
 {

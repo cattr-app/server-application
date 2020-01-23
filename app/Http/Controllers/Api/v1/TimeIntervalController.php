@@ -6,19 +6,18 @@ use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
 use App\Rules\BetweenDate;
-use App\User;
-use Auth;
+use App\Models\User;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Mpdf\Tag\Time;
-use Storage;
-use Image;
-use Route;
-use Validator;
+use Illuminate\Support\Facades\Storage;
+use Intervention\Image\Facades\Image;
+use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TimeIntervalController

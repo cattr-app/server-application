@@ -6,9 +6,9 @@ use App\Models\Project;
 use App\Models\Screenshot;
 use App\Models\Task;
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Carbon\Carbon;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
 
@@ -348,7 +348,7 @@ class ReportHelper
                  users.company_id, 'avatar', users.avatar
              ) as user",
             "JSON_ARRAYAGG(
-                JSON_OBJECT('id', time_intervals.id, 'user_id', time_intervals.user_id, 'task_id', 
+                JSON_OBJECT('id', time_intervals.id, 'user_id', time_intervals.user_id, 'task_id',
                     time_intervals.task_id, 'end_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?),
                     'start_at', CONVERT_TZ(time_intervals.start_at, '+00:00', ?)
                     )

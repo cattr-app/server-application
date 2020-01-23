@@ -6,17 +6,17 @@ use App\Helpers\QueryHelper;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
-use Auth;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
 use Exception;
-use Filter;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Intervention\Image\Facades\Image;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ScreenshotController

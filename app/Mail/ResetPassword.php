@@ -2,7 +2,7 @@
 
 namespace App\Mail;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Lang;
 use Illuminate\Notifications\Messages\MailMessage;

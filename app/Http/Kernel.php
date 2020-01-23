@@ -3,7 +3,6 @@
 namespace App\Http;
 
 use App\Http\Middleware\Authenticate;
-use App\Http\Middleware\CheckTokenExpired;
 use App\Http\Middleware\CorsMiddleware;
 use App\Http\Middleware\EncryptCookies;
 use App\Http\Middleware\LockMiddleware;

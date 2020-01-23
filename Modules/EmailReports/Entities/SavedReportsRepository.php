@@ -5,8 +5,8 @@ namespace Modules\EmailReports\Entities;
 
 use App\Models\Project;
 use App\Models\Property;
-use App\User;
-use DB;
+use App\Models\User;
+use Illuminate\Support\Facades\DB;
 use Modules\Invoices\Entities\Repositories\InvoicesRepository;
 
 class SavedReportsRepository

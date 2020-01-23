@@ -3,7 +3,7 @@
 namespace App\EventFilter;
 
 use Illuminate\Support\ServiceProvider;
-use App\EventFilter\Facade as Filter;
+use App\EventFilter\Facades\Filter;
 
 class EventServiceProvider extends ServiceProvider
 {

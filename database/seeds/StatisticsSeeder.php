@@ -6,7 +6,7 @@ use App\Models\RelationsUsers;
 use App\Models\Rule;
 use App\Models\Task;
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Faker\Factory;
 use Illuminate\Database\Seeder;
 use Symfony\Component\Console\Output\ConsoleOutput;

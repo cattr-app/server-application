@@ -2,7 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\User;
+use App\Models\User;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Config;

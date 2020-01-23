@@ -4,7 +4,7 @@ namespace Modules\GitlabIntegration\Helpers;
 
 use App\Models\Project;
 use App\Models\Task;
-use DB;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
 
 /**
