@@ -76,15 +76,21 @@ class AppInstallCommand extends Command
         if ($this->settingUpDatabase() != 0) {
             return -1;
         }
+
+        $this->info('Enter administrator credentials:');
+        $adminData = $this->askAdminCredentials();
+
+        if (!$this->registerInstance($adminData['login'])) {
+            // User did not confirm installation
+            $this->filesystem->delete(base_path('.env'));
+            return -1;
+        }
+
         $this->settingUpEnvMigrateAndSeed();
 
         $this->info("Creating admin user");
-        $admin = $this->createAdminUser();
+        $admin = $this->createAdminUser($adminData);
         $this->info("Administrator with email {$admin->email} was created successfully");
-
-        if (!$this->registerInstance($admin->email)) {
-            return -1;
-        }
 
         $this->updateEnvData("RECAPTCHA_ENABLED", $this->choice("Enable RECaptcha", [
             "true" => "Yes",
@@ -146,16 +152,11 @@ class AppInstallCommand extends Command
     /**
      * @return User
      */
-    protected function createAdminUser(): User
+    protected function createAdminUser($admin): User
     {
-        $login = $this->ask("Admin E-Mail");
-        $password = Hash::make($this->secret("Admin ($login) Password"));
-
-        $name = $this->ask("Admin Full Name");
-
         return User::create([
-            'full_name' => $name,
-            'email' => $login,
+            'full_name' => $admin['name'],
+            'email' => $admin['login'],
             'url' => '',
             'company_id' => 1,
             'payroll_access' => 1,
@@ -171,10 +172,26 @@ class AppInstallCommand extends Command
             'webcam_shots' => 0,
             'screenshots_interval' => 9,
             'active' => true,
-            'password' => $password,
+            'password' => $admin['password'],
             'is_admin' => true,
             'role_id' => 2,
         ]);
+    }
+
+    /**
+     * @return array
+     */
+    protected function askAdminCredentials()
+    {
+        $login = $this->ask("Admin E-Mail");
+        $password = Hash::make($this->secret("Admin ($login) Password"));
+        $name = $this->ask("Admin Full Name");
+
+        return [
+            'login' => $login,
+            'password' => $password,
+            'name' => $name,
+        ];
     }
 
     /**
@@ -230,7 +247,7 @@ class AppInstallCommand extends Command
 
             return -1;
         }
-        $this->info("Database testing successfully.");
+        $this->info("Database testing successfully.\n");
 
         return 0;
     }
