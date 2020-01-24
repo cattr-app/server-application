@@ -103,4 +103,11 @@ class BulkEditTest extends TestCase
 
         $response->assertUnauthorized();
     }
+
+    public function test_without_params(): void
+    {
+        $response = $this->actingAs($this->admin)->postJson(self::URI);
+
+        $response->assertValidationError();
+    }
 }
