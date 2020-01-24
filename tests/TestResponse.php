@@ -20,7 +20,7 @@ class TestResponse extends BaseTestResponse
      * @param bool $hasInfo
      * @return TestResponse
      */
-    public function assertError(int $status, string $type = null, bool $hasInfo = false)
+    public function assertError(int $status, string $type = null, bool $hasInfo = false): TestResponse
     {
         $this->assertStatus($status);
         $this->assertJson(['success' => false]);
@@ -45,9 +45,9 @@ class TestResponse extends BaseTestResponse
     /**
      * @param string $type
      * @param bool $hasInfo
-     * @return BaseTestResponse|TestResponse
+     * @return TestResponse
      */
-    public function assertUnauthorized(string $type = 'authorization.unauthorized', bool $hasInfo = false)
+    public function assertUnauthorized(string $type = 'authorization.unauthorized', bool $hasInfo = false): TestResponse
     {
         return $this->assertError(401, $type, $hasInfo);
     }
@@ -55,9 +55,9 @@ class TestResponse extends BaseTestResponse
     /**
      * @param string $type
      * @param bool $hasInfo
-     * @return BaseTestResponse|TestResponse
+     * @return TestResponse
      */
-    public function assertForbidden(string $type = 'authorization.forbidden', bool $hasInfo = true)
+    public function assertForbidden(string $type = 'authorization.forbidden', bool $hasInfo = true): TestResponse
     {
         return $this->assertError(403, $type, $hasInfo);
     }
@@ -67,7 +67,7 @@ class TestResponse extends BaseTestResponse
      * @param bool $hasInfo
      * @return TestResponse
      */
-    public function assertValidationError(string $type = 'validation', bool $hasInfo = true)
+    public function assertValidationError(string $type = 'validation', bool $hasInfo = true): TestResponse
     {
         return $this->assertError(400, $type, $hasInfo);
     }
@@ -77,7 +77,7 @@ class TestResponse extends BaseTestResponse
      * @param bool $hasInfo
      * @return TestResponse
      */
-    public function assertItemNotFound(string $type = 'query.item_not_found', bool $hasInfo = false)
+    public function assertItemNotFound(string $type = 'query.item_not_found', bool $hasInfo = false): TestResponse
     {
         return $this->assertError(404, $type, $hasInfo);
     }
@@ -89,7 +89,7 @@ class TestResponse extends BaseTestResponse
      * @param int $status
      * @return TestResponse
      */
-    public function assertSuccess(int $status = 200)
+    public function assertSuccess(int $status = 200): TestResponse
     {
         $this->assertStatus($status);
         $this->assertJson(['success' => true]);
