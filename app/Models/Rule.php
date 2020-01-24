@@ -2,8 +2,7 @@
 
 namespace App\Models;
 
-
-use Illuminate\Database\Eloquent\Model;
+use Eloquent as EloquentIdeHelper;
 use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -36,7 +35,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Rule whereUpdatedAt($value)
  * @method static QueryBuilder|Rule withTrashed()
  * @method static QueryBuilder|Rule withoutTrashed()
- * @mixin Model
+ * @mixin EloquentIdeHelper
  */
 class Rule extends AbstractModel
 {

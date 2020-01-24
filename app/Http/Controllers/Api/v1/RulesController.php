@@ -193,66 +193,7 @@ class RulesController extends ItemController
      * @apiUse UnauthorizedError
      *
      */
-    public function bulkEdit(Request $request): JsonResponse
-    {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.bulkEdit'), $request->all());
-        $result = [];
-        Role::updateRules();
 
-        if (empty($requestData['rules'])) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'rules is empty',
-                ]),
-                400
-            );
-        }
-
-        $rules = $requestData['rules'];
-        if (!is_array($rules)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'rules should be an array',
-                ]),
-                400
-            );
-        }
-
-        foreach ($rules as $rule) {
-            $validator = Validator::make(
-                $rule,
-                Filter::process($this->getEventUniqueName('validation.item.edit'), $this->getValidationRules())
-            );
-
-            if ($validator->fails()) {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors(),
-                    'code' => 400
-                ];
-                continue;
-            }
-
-            if (Role::updateAllow($rule['role_id'], $rule['object'], $rule['action'], $rule['allow'])) {
-                $result[] = ['message' => 'OK'];
-            };
-        }
-
-        return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.bulkEdit'),
-            [
-                'messages' => $result,
-            ]
-        ));
-    }
 
     /**
      * @param Request $request

@@ -107,7 +107,6 @@ Route::group([
     $router->any('/projects-users/list', 'Api\v1\ProjectsUsersController@index');
     $router->any('/projects-users/count', 'Api\v1\ProjectsUsersController@count');
     $router->post('/projects-users/create', 'Api\v1\ProjectsUsersController@create');
-    $router->post('/projects-users/bulk-create', 'Api\v1\ProjectsUsersController@bulkCreate');
     $router->post('/projects-users/remove', 'Api\v1\ProjectsUsersController@destroy');
     $router->post('/projects-users/bulk-remove', 'Api\v1\ProjectsUsersController@bulkDestroy');
 
@@ -115,9 +114,7 @@ Route::group([
     $router->any('/projects-roles/list', 'Api\v1\ProjectsRolesController@index');
     $router->any('/projects-roles/count', 'Api\v1\ProjectsRolesController@count');
     $router->post('/projects-roles/create', 'Api\v1\ProjectsRolesController@create');
-    $router->post('/projects-roles/bulk-create', 'Api\v1\ProjectsRolesController@bulkCreate');
     $router->post('/projects-roles/remove', 'Api\v1\ProjectsRolesController@destroy');
-    $router->post('/projects-roles/bulk-remove', 'Api\v1\ProjectsRolesController@bulkDestroy');
 
     //Tasks routes
     $router->any('/tasks/list', 'Api\v1\TaskController@index');
@@ -141,7 +138,6 @@ Route::group([
     $router->post('/users/edit', 'Api\v1\UserController@edit');
     $router->any('/users/show', 'Api\v1\UserController@show');
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
-    $router->post('/users/bulk-edit', 'Api\v1\UserController@bulkEdit');
     $router->any('/users/relations', 'Api\v1\UserController@relations');
 
     //Screenshots routes
@@ -149,7 +145,6 @@ Route::group([
     $router->any('/screenshots/count', 'Api\v1\ScreenshotController@count');
     $router->any('/screenshots/dashboard', 'Api\v1\ScreenshotController@dashboard');
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
-    $router->post('/screenshots/bulk-create', 'Api\v1\ScreenshotController@bulkCreate');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
     $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');
     $router->post('/screenshots/remove', 'Api\v1\ScreenshotController@destroy');
@@ -158,7 +153,6 @@ Route::group([
     $router->any('/time-intervals/list', 'Api\v1\TimeIntervalController@index');
     $router->any('/time-intervals/count', 'Api\v1\TimeIntervalController@count');
     $router->post('/time-intervals/create', 'Api\v1\TimeIntervalController@create');
-    $router->post('/time-intervals/bulk-create', 'Api\v1\TimeIntervalController@bulkCreate');
     $router->post('/time-intervals/edit', 'Api\v1\TimeIntervalController@edit');
     $router->post('/time-intervals/bulk-edit', 'Api\v1\TimeIntervalController@bulkEdit');
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
@@ -190,7 +184,6 @@ Route::group([
     $router->any('/rules/list', 'Api\v1\RulesController@index');
     $router->any('/rules/count', 'Api\v1\RulesController@count');
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
-    $router->post('/rules/bulk-edit', 'Api\v1\RulesController@bulkEdit');
     $router->any('/rules/actions', 'Api\v1\RulesController@actions');
 
 

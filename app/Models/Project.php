@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use Illuminate\Database\Eloquent\Model;
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -55,7 +55,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Project whereUpdatedAt($value)
  * @method static QueryBuilder|Project withTrashed()
  * @method static QueryBuilder|Project withoutTrashed()
- * @mixin Model
+ * @mixin EloquentIdeHelper
  */
 class Project extends AbstractModel
 {

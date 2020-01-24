@@ -273,7 +273,7 @@ class ProjectController extends ItemController
 
         $project_info->tasks = $tasks_query->get();
 
-        return response()->json($project_info);
+        return response()->json(['success' => true, 'res' => $project_info]);
     }
 
     /**
