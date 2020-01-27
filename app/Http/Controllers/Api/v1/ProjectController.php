@@ -195,7 +195,8 @@ class ProjectController extends ItemController
 
     /**
      * Returns tasks info for a project.
-     *
+     * @deprecated
+     * @codeCoverageIgnore
      * @param  Request  $request
      *
      * @return JsonResponse

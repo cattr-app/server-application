@@ -394,7 +394,8 @@ class ScreenshotController extends ItemController
 
     /**
      * @param Request $request
-     *
+     * @deprecated
+     * @codeCoverageIgnore
      * @return JsonResponse
      * @throws Exception
      *
