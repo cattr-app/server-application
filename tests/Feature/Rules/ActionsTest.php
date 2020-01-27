@@ -36,7 +36,7 @@ class ActionsTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
-        $response->assertOk();
+        $response->assertSuccess();
 
         $items = [];
         foreach (Rule::getActionList() as $object => $actions) {
@@ -49,8 +49,9 @@ class ActionsTest extends TestCase
             }
         }
 
-        //TODO ¯\_(ツ)_/¯
-        $response->assertJson($items);
+        $response->assertJson(['res' => $items]);
+
+        //TODO change later
     }
 
     public function test_unauthorized(): void
