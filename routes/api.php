@@ -138,7 +138,6 @@ Route::group([
     $router->post('/users/edit', 'Api\v1\UserController@edit');
     $router->any('/users/show', 'Api\v1\UserController@show');
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
-    $router->any('/users/relations', 'Api\v1\UserController@relations');
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
