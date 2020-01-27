@@ -43,6 +43,8 @@ class ShowTest extends TestCase
 
         $response = $this->actingAs($this->admin)->getJson(self::URI . '?id=' . $this->screenshot->id);
         $response->assertOk();
+
+        //TODO change later
     }
 
     public function test_unauthorized(): void

@@ -55,7 +55,7 @@ class RequestTest extends TestCase
 
         $response = $this->postJson(self::URI);
 
-        $response->assertError(400);
+        $response->assertError(self::HTTP_BAD_REQUEST);
         Notification::assertNothingSent();
     }
 }

@@ -49,7 +49,7 @@ class TestResponse extends BaseTestResponse
      */
     public function assertUnauthorized(string $type = 'authorization.unauthorized', bool $hasInfo = false): TestResponse
     {
-        return $this->assertError(401, $type, $hasInfo);
+        return $this->assertError(self::HTTP_UNAUTHORIZED, $type, $hasInfo);
     }
 
     /**
@@ -59,7 +59,7 @@ class TestResponse extends BaseTestResponse
      */
     public function assertForbidden(string $type = 'authorization.forbidden', bool $hasInfo = true): TestResponse
     {
-        return $this->assertError(403, $type, $hasInfo);
+        return $this->assertError(self::HTTP_FORBIDDEN, $type, $hasInfo);
     }
 
     /**
@@ -69,7 +69,7 @@ class TestResponse extends BaseTestResponse
      */
     public function assertValidationError(string $type = 'validation', bool $hasInfo = true): TestResponse
     {
-        return $this->assertError(400, $type, $hasInfo);
+        return $this->assertError(self::HTTP_BAD_REQUEST, $type, $hasInfo);
     }
 
     /**
@@ -79,7 +79,7 @@ class TestResponse extends BaseTestResponse
      */
     public function assertItemNotFound(string $type = 'query.item_not_found', bool $hasInfo = false): TestResponse
     {
-        return $this->assertError(404, $type, $hasInfo);
+        return $this->assertError(self::HTTP_NOT_FOUND, $type, $hasInfo);
     }
 
     /**
@@ -89,7 +89,7 @@ class TestResponse extends BaseTestResponse
      * @param int $status
      * @return TestResponse
      */
-    public function assertSuccess(int $status = 200): TestResponse
+    public function assertSuccess(int $status = self::HTTP_OK): TestResponse
     {
         $this->assertStatus($status);
         $this->assertJson(['success' => true]);

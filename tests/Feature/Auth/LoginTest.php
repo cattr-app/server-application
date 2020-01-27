@@ -78,7 +78,7 @@ class LoginTest extends TestCase
     {
         $response = $this->postJson(self::URI);
 
-        $response->assertError(400);
+        $response->assertError(self::HTTP_BAD_REQUEST);
     }
 
     public function test_recaptcha(): void
@@ -86,8 +86,11 @@ class LoginTest extends TestCase
         config(['recaptcha.enabled' => true]);
         config(['recaptcha.failed_attempts' => 1]);
 
-        $cacheKey = str_replace(['{email}', '{ip}'], [$this->loginData['email'], '127.0.0.1'],
-            self::CAPTCHA_CACHE_KEY);
+        $cacheKey = str_replace(
+            ['{email}', '{ip}'],
+            [$this->loginData['email'], '127.0.0.1'],
+            self::CAPTCHA_CACHE_KEY
+        );
 
         $this->assertFalse(Cache::has($cacheKey));
 
@@ -100,7 +103,7 @@ class LoginTest extends TestCase
 
         $response = $this->postJson(self::URI, $this->loginData);
 
-        $response->assertError(429, 'authorization.captcha', true);
+        $response->assertError(self::HTTP_TOO_MANY_REQUESTS, 'authorization.captcha', true);
     }
 
     public function test_ban(): void
@@ -128,6 +131,6 @@ class LoginTest extends TestCase
 
         $response = $this->postJson(self::URI, $this->loginData);
 
-        $response->assertError(423, 'authorization.banned');
+        $response->assertError(self::HTTP_LOCKED, 'authorization.banned');
     }
 }

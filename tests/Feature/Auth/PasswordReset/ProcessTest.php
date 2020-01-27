@@ -111,6 +111,6 @@ class ProcessTest extends TestCase
     public function test_without_params(): void
     {
         $response = $this->postJson(self::URI);
-        $response->assertError(400);
+        $response->assertError(self::HTTP_BAD_REQUEST);
     }
 }
