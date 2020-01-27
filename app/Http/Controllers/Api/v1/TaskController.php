@@ -430,7 +430,8 @@ class TaskController extends ItemController
 
     /**
      * Returns users activity info for task.
-     *
+     * @deprecated
+     * @codeCoverageIgnore
      * @param  Request  $request
      *
      * @return JsonResponse

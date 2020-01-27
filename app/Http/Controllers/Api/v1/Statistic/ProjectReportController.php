@@ -140,7 +140,8 @@ class ProjectReportController extends ReportController
 
     /**
      * [events description]
-     *
+     * @deprecated
+     * @codeCoverageIgnore
      * @param  Request  $request  [description]
      *
      * @return JsonResponse [description]
@@ -204,8 +205,9 @@ class ProjectReportController extends ReportController
     }
 
     /**
+     * @deprecated
+     * @codeCoverageIgnore
      * @param  Request  $request
-     *
      * @return JsonResponse
      */
     public function projects(Request $request): JsonResponse
