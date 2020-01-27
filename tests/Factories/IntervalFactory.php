@@ -38,9 +38,9 @@ class IntervalFactory extends AbstractFactory
 
         return [
             'end_at' => $randomDateTime->toIso8601String(),
-            'start_at' => $randomDateTime->subSeconds(rand(1, 3600))->toIso8601String(),
-            'count_mouse' => rand(1, 1000),
-            'count_keyboard' => rand(1, 1000)
+            'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
+            'count_mouse' => random_int(1, 1000),
+            'count_keyboard' => random_int(1, 1000)
         ];
     }
 

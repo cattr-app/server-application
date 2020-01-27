@@ -21,8 +21,14 @@ class ScreenshotFactory extends AbstractFactory
      */
     private $randomRelations = false;
 
+    /**
+     * @var bool
+     */
     private $fakeStorage = false;
 
+    /**
+     * @return $this
+     */
     public function fake(): self
     {
         $this->fakeStorage = true;
@@ -30,6 +36,9 @@ class ScreenshotFactory extends AbstractFactory
         return $this;
     }
 
+    /**
+     * @return array
+     */
     private function generateScreenshotData(): array
     {
         $name = FakerFactory::create()->unique()->firstName . '.jpg';
@@ -41,6 +50,10 @@ class ScreenshotFactory extends AbstractFactory
         return compact('path', 'thumbnail');
     }
 
+    /**
+     * @param array $attributes
+     * @return Screenshot
+     */
     public function create(array $attributes = []): Screenshot
     {
         if ($this->fakeStorage) {
@@ -86,6 +99,9 @@ class ScreenshotFactory extends AbstractFactory
         return $this;
     }
 
+    /**
+     * @param Screenshot $screenshot
+     */
     private function defineInterval(Screenshot $screenshot): void
     {
         if ($this->randomRelations || !$this->interval) {
