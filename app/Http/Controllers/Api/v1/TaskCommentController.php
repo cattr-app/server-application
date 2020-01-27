@@ -13,7 +13,8 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TaskCommentController
- *
+ * @deprecated
+ * @codeCoverageIgnore
  * @package App\Http\Controllers\Api\v1
  */
 class TaskCommentController extends ItemController
