@@ -398,10 +398,10 @@ class RolesController extends ItemController
             }
         }
 
-        return response()->json(Filter::process(
+        return response()->json([ 'success' => true, 'res' => Filter::process(
             $this->getEventUniqueName('answer.success.item.allowed-rules'),
             $items
-        ));
+        )]);
     }
 
     public function attachToUser(Request $request)
