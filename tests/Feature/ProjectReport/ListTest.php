@@ -73,14 +73,12 @@ class ListTest extends TestCase
     {
         parent::setUp();
 
-        Storage::fake();
-
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
         $this->intervals = IntervalFactory::withRandomRelations()->createMany(self::INTERVALS_AMOUNT);
 
         $this->intervals->each(function (TimeInterval $interval) {
-            ScreenshotFactory::forInterval($interval)->create();
+            ScreenshotFactory::fake()->forInterval($interval)->create();
             $this->uids[] = $interval->user_id;
             $this->pids[] = $interval->task->project->id;
             $this->duration += Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);

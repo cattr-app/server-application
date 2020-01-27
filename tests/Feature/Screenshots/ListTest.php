@@ -29,9 +29,7 @@ class ListTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        Storage::fake();
-
-        ScreenshotFactory::withRandomRelations()->createMany(self::SCREENSHOTS_AMOUNT);
+        ScreenshotFactory::fake()->withRandomRelations()->createMany(self::SCREENSHOTS_AMOUNT);
     }
 
     public function test_list(): void

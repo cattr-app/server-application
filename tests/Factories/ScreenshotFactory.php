@@ -21,6 +21,15 @@ class ScreenshotFactory extends AbstractFactory
      */
     private $randomRelations = false;
 
+    private $fakeStorage = false;
+
+    public function fake(): self
+    {
+        $this->fakeStorage = true;
+
+        return $this;
+    }
+
     private function generateScreenshotData(): array
     {
         $name = FakerFactory::create()->unique()->firstName . '.jpg';
@@ -34,6 +43,10 @@ class ScreenshotFactory extends AbstractFactory
 
     public function create(array $attributes = []): Screenshot
     {
+        if ($this->fakeStorage) {
+            Storage::fake();
+        }
+
         $screenshotData = $this->generateScreenshotData();
 
         if ($attributes) {

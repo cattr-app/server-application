@@ -16,6 +16,7 @@ use Illuminate\Support\Facades\Facade;
  * @method static Collection createMany(int $amount = 1)
  * @method static BaseProjectFactory withRandomRelations()
  * @method static BaseProjectFactory forInterval(TimeInterval $interval)
+ * @method static BaseProjectFactory fake()
  *
  * @mixin ScreenshotFactory
  */

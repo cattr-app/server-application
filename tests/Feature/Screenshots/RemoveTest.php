@@ -31,9 +31,7 @@ class RemoveTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        Storage::fake();
-
-        $this->screenshot = ScreenshotFactory::create();
+        $this->screenshot = ScreenshotFactory::fake()->create();
     }
 
     public function test_remove(): void

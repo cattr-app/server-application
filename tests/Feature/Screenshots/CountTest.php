@@ -29,9 +29,7 @@ class CountTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        Storage::fake();
-
-        ScreenshotFactory::createMany(self::SCREENSHOTS_AMOUNT);
+        ScreenshotFactory::fake()->createMany(self::SCREENSHOTS_AMOUNT);
     }
 
     public function test_count(): void
