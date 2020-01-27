@@ -163,10 +163,7 @@ Route::group([
 
     //Time routes
     $router->any('/time/total', 'Api\v1\TimeController@total');
-    $router->any('/time/project', 'Api\v1\TimeController@project');
     $router->any('/time/tasks', 'Api\v1\TimeController@tasks');
-    $router->any('/time/task', 'Api\v1\TimeController@task');
-    $router->any('/time/task-user', 'Api\v1\TimeController@taskUser');
 
     //Role routes
     $router->any('/roles/list', 'Api\v1\RolesController@index');
