@@ -78,43 +78,46 @@ class TimeController extends ItemController
      */
 
     /**
-     * Display a total of time.
+     * @api             {get, post} /v1/time/total Total
+     * @apiDescription  Get total of Time
      *
-     * @param Request $request
-     * @return JsonResponse
-     * @api {POST|GET} /api/v1/time/total Total
+     * @apiVersion      1.0.0
+     * @apiName         GetTimeTotal
+     * @apiGroup        Time
+     *
+     * @apiParam {String}   start_at  Start DataTime
+     * @apiParam {String}   end_at    End DataTime
+     * @apiParam {Integer}  user_id   User ID
+     *
      * @apiParamExample {json} Request Example
      *  {
-     *      "user_id":        1,
-     *      "task_id":        ["=", [1,2,3]],
-     *      "project_id":     [">", 1],
-     *      "start_at":       "2005-01-01 00:00:00",
-     *      "end_at":         "2019-01-01 00:00:00",
-     *      "count_mouse":    [">=", 30],
-     *      "count_keyboard": ["<=", 200],
-     *      "id":             [">", 1]
+     *      "user_id": 1,
+     *      "start_at": "2005-01-01 00:00:00",
+     *      "end_at": "2019-01-01 00:00:00"
      *  }
-     * @apiUse RelationsExample
-     * @apiDescription Get total of Time
-     * @apiVersion 0.1.0
-     * @apiName GetTimeTotal
-     * @apiGroup Time
      *
-     * @apiParam {Integer[]} [tasks_id]       `QueryParam` TimeInterval Task id
-     * @apiParam {Integer}   [project_id]     `QueryParam` TimeInterval Task Project id
-     * @apiParam {Integer}   [user_id]        `QueryParam` TimeInterval Task User ID
-     * @apiParam {String}    [start_at]                    TimeInterval Start DataTime
-     * @apiParam {String}    [end_at]                      TimeInterval End DataTime
-     * @apiParam {Integer}   [count_mouse]    `QueryParam` TimeInterval Count mouse
-     * @apiParam {Integer}   [count_keyboard] `QueryParam` TimeInterval Count keyboard
-     * @apiParam {Integer}   [id]             `QueryParam` TimeInterval id
-     * @apiUse Relations
+     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
+     * @apiSuccess {Boolean}  time     Total time in seconds
+     * @apiSuccess {String}   start    Datetime of first Time Interval start_at
+     * @apiSuccess {String}   end      DateTime of last Time Interval end_at
      *
-     * @apiSuccess {String}   current_datetime Current datetime of server
-     * @apiSuccess {Integer}  time             Total time in seconds
-     * @apiSuccess {String}   start            Datetime of first Time Interval start_at
-     * @apiSuccess {String}   end              DateTime of last Time Interval end_at
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "time": 338230,
+     *    "start": "2020-01-23T19:42:27+00:00",
+     *    "end": "2020-04-30T21:58:31+00:00"
+     *  }
      *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     */
+    /**
+     * Display a total of time
+     * @param Request $request
+     * @return JsonResponse
      */
     public function total(Request $request): JsonResponse
     {
