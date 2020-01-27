@@ -8,6 +8,7 @@ use App\EventFilter\Facades\Filter;
 use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 /**
  * Class RulesController
@@ -60,26 +61,6 @@ class RulesController extends ItemController
     }
 
     /**
-     * @apiDefine RuleRelations
-     *
-     * @apiParam {String} [with]              For add relation model in response
-     * @apiParam {Object} [role] `QueryParam` Rules's relation role. All params in <a href="#api-Roles-GetRolesList" >@Role</a>
-     */
-
-    /**
-     * @apiDefine RuleRelationsExample
-     * @apiParamExample {json} Request-With-Relations-Example:
-     *  {
-     *      "with":      "role",
-     *      "role.name": ["like", "%lorem%"]
-     *  }
-     */
-
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     * @throws \Throwable
      * @api {post} /api/v1/rules/edit Edit
      * @apiDescription Edit Rule
      * @apiVersion 0.1.0
@@ -105,6 +86,11 @@ class RulesController extends ItemController
      * @apiUse UnauthorizedError
      *
      */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Throwable
+     */
     public function edit(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.edit'), $request->all());
@@ -128,7 +114,8 @@ class RulesController extends ItemController
         }
 
 
-        if (!Role::updateAllow($requestData['role_id'], $requestData['object'], $requestData['action'], $requestData['allow'])) {
+        if (!Role::updateAllow($requestData['role_id'], $requestData['object'], $requestData['action'],
+            $requestData['allow'])) {
             return response()->json([
                 'success' => false,
                 'error_type' => 'query.item_not_found',
@@ -148,7 +135,7 @@ class RulesController extends ItemController
      * @param Request $request
      *
      * @return JsonResponse
-     * @throws \Throwable
+     * @throws Throwable
      * @api {post} /api/v1/rules/bulk-edit bulkEdit
      * @apiDescription Editing Multiple Rules
      * @apiVersion 0.1.0
@@ -196,9 +183,6 @@ class RulesController extends ItemController
 
 
     /**
-     * @param Request $request
-     *
-     * @return JsonResponse
      * @api {get} /api/v1/rules/actions Actions
      * @apiDescription Get list of Rules Actions
      * @apiVersion 0.1.0
@@ -233,7 +217,10 @@ class RulesController extends ItemController
      * @apiUse UnauthorizedError
      *
      */
-    public function actions(Request $request): JsonResponse
+    /**
+     * @return JsonResponse
+     */
+    public function actions(): JsonResponse
     {
         /** @var array[] $actionList */
         $actionList = Rule::getActionList();
@@ -250,9 +237,12 @@ class RulesController extends ItemController
             }
         }
 
-        return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.list'),
-            $items
-        ));
+        return response()->json([
+            'success' => true,
+            'res' => Filter::process(
+                $this->getEventUniqueName('answer.success.item.list'),
+                $items
+            )
+        ]);
     }
 }
