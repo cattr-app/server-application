@@ -16,6 +16,7 @@ use Modules\Reports\Entities\DashboardReport;
 
 class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
 {
+    const SORTABLE_DAYS_FORMAT = 'Y-m-d';
     const REPORT_DAYS_FORMAT = 'l, d M Y';
     const ROUND_DIGITS = 3;
 
@@ -36,6 +37,25 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
 
         // Prepare collection to the way we need -> assign user his worked time
         $preparedCollection = $this->getPreparedCollection($queryData);
+
+        // Get all dates
+        $dates = [];
+        foreach ($preparedCollection as $collection) {
+            $dates = array_merge($dates, array_keys($collection['per_day']));
+        }
+        $dates = array_unique($dates);
+
+        // Adjust columns for each user
+        $preparedCollection = $preparedCollection->map(function ($collection) use ($dates) {
+            $missingDates = array_diff($dates, array_keys($collection['per_day']));
+            foreach ($missingDates as $date) {
+                $collection['per_day'][$date] = 0;
+            }
+
+            ksort($collection['per_day']);
+
+            return $collection;
+        });
 
         // Create collection which are going to be used for Excel lib
         $returnableData = collect([]);
@@ -123,14 +143,15 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
             ];
         }
 
-        // The key is represents a day in format "Friday, 01 Nov 2019"
-        // Changing REPORT_DAY_FORMAT make sure it will be unique
-        if (!isset($plainData[$userId]['per_day'][$start->format(static::REPORT_DAYS_FORMAT)])) {
-            $plainData[$userId]['per_day'][$start->format(static::REPORT_DAYS_FORMAT)] = 0;
+        // Use lexicographically sortable keys.
+        $key = $start->format(static::SORTABLE_DAYS_FORMAT);
+        if (!isset($plainData[$userId]['per_day'][$key])) {
+            $plainData[$userId]['per_day'][$key] = 0;
         }
 
-        $plainData[$userId]['per_day'][$start->format(static::REPORT_DAYS_FORMAT)] += $end->diffInSeconds($start);
-        $plainData[$userId]['time_worked'] += $end->diffInSeconds($start);
+        $seconds = $end->diffInSeconds($start);
+        $plainData[$userId]['per_day'][$key] += $seconds;
+        $plainData[$userId]['time_worked'] += $seconds;
     }
 
 
@@ -148,16 +169,28 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
         $timeObject = (new Carbon('@0'))->diff(new Carbon("@$totalTime"));
         $totalTimeDecimal = round($totalTime / 60 / 60, static::ROUND_DIGITS);
 
+        $hours = $timeObject->h + 24 * $timeObject->days;
+        $minutes = ($timeObject->i < 10 ? '0' : '') . $timeObject->i;
+        $seconds = ($timeObject->s < 10 ? '0' : '') . $timeObject->s;
         $mainInfo = [
             'User' => $userName,
-            'Time worked' => "{$timeObject->h}:{$timeObject->i}:{$timeObject->s}",
+            'Time worked' => "{$hours}:{$minutes}:{$seconds}",
             'Time worked (decimal)' => $totalTimeDecimal,
         ];
 
         $daysData = [];
         foreach ($perDay as $day => $timeWorked) {
+            // The key is represents a day in format "Friday, 01 Nov 2019"
+            // Changing REPORT_DAY_FORMAT make sure it will be unique
+            $date = Carbon::createFromFormat(static::SORTABLE_DAYS_FORMAT, $day);
+            $key = $date->format(static::REPORT_DAYS_FORMAT);
+
             $dayTimeObject = (new Carbon('@0'))->diff(new Carbon("@$timeWorked"));
-            $daysData[$day] = "{$dayTimeObject->h}:{$dayTimeObject->i}:{$dayTimeObject->s}";
+            $hours = $dayTimeObject->h + 24 * $dayTimeObject->days;
+            $minutes = ($dayTimeObject->i < 10 ? '0' : '') . $dayTimeObject->i;
+            $seconds = ($dayTimeObject->s < 10 ? '0' : '') . $dayTimeObject->s;
+
+            $daysData[$key] = "{$hours}:{$minutes}:{$seconds}";
         }
 
         $collection->push(array_merge($mainInfo, $daysData));
