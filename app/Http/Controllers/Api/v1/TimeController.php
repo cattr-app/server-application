@@ -118,55 +118,58 @@ class TimeController extends ItemController
      */
     public function total(Request $request): JsonResponse
     {
-        $filters = $request->all();
-        $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : False;
-        $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : False;
-        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
+        $validationRules = [
+            'start_at' => 'required|date',
+            'end_at' => 'required|date',
+            'user_id' => 'required|integer|exists:users,id'
+        ];
 
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(),
-            $filters ?: []
-        );
+        $validator = Validator::make($request->all(), $validationRules);
 
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.time.total'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+        $filters = [
+            'start_at' => ['>=', $request->get('start_at')],
+            'end_at' => ['<=', $request->get('end_at')],
+            'user_id' => ['=', $request->get('user_id')]
+        ];
+
+        /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter($this->getQuery(), $filters)
         );
-        $time_intervals = $itemsQuery->get();
-        $total_time = 0;
 
-        if (collect($time_intervals)->isEmpty()) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.success.item.list'),
-                []
-            ));
-        }
+        $timeIntervals = $itemsQuery->get();
 
-        foreach ($time_intervals as $interval) {
-            $total_time += Carbon::parse($interval->end_at)->timestamp - Carbon::parse($interval->start_at)->timestamp;
-        }
+        $totalTime = $timeIntervals->sum(static function ($interval) {
+            return Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
+        });
 
-        $first = collect($time_intervals)->first();
-        $last = collect($time_intervals)->last();
-        $items = [
+        $responseData = [
             'success' => true,
-            'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
-            'time' => $total_time,
-            'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
-            'end' => Carbon::parse($last->end_at)->format('Y-m-d\TH:i:sP'),
+            'time' => $totalTime,
+            'start' => $timeIntervals->min('start_at'),
+            'end' => $timeIntervals->max('end_at')
         ];
 
         return response()->json(Filter::process(
             $this->getEventUniqueName('answer.success.item.list'),
-            $items
+            $responseData
         ));
     }
 
     /**
      * Display the project time.
-     *
-     * @param Request $request
-     * @return JsonResponse
      * @api {POST|GET} /api/v1/time/project Project
      * @apiParamExample {json} Request-Example:
      *  {
@@ -204,67 +207,7 @@ class TimeController extends ItemController
      * @apiError (Error 400) {String} reason Reason of error
      *
      */
-    public function project(Request $request): JsonResponse
-    {
-        $filters = $request->all();
-        $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : False;
-        $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : False;
-        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
 
-        $validator = Validator::make(
-            $filters,
-            Filter::process($this->getEventUniqueName('validation.item.get'), ['project_id' => 'required'])
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::fire($this->getEventUniqueName('answer.error.item.get'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'project_id is required',
-                ]),
-                400
-            );
-        }
-
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(),
-            $filters ?: []
-        );
-
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery
-        );
-        $time_intervals = $itemsQuery->get();
-        $total_time = 0;
-
-        if (collect($time_intervals)->isEmpty()) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.success.item.list'),
-                []
-            ));
-        }
-
-        foreach ($time_intervals as $interval) {
-            $total_time += Carbon::parse($interval->end_at)->timestamp - Carbon::parse($interval->start_at)->timestamp;
-        }
-
-        $first = collect($time_intervals)->first();
-        $last = collect($time_intervals)->last();
-        $items = [
-            'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
-            'time' => $total_time,
-            'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
-            'end' => Carbon::parse($last->end_at)->format('Y-m-d\TH:i:sP'),
-        ];
-
-        return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.list'),
-            $items
-        ));
-    }
 
     /**
      * Display the Tasks and theirs total time.
@@ -394,8 +337,6 @@ class TimeController extends ItemController
     /**
      * Display the Task and its total time.
      *
-     * @param Request $request
-     * @return JsonResponse
      * @api {POST|GET} /api/v1/time/task Task
      * @apiParamExample {json} Request-Example:
      *  {
@@ -441,106 +382,10 @@ class TimeController extends ItemController
      * @apiError (Error 400) {String} reason   Reason of error
      *
      */
-    public function task(Request $request): JsonResponse
-    {
-        $filters = $request->all();
-        $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : False;
-        $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : False;
-        is_int($request->get('task_id')) ? $filters['task_id'] = $request->get('task_id') : False;
-        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
-
-        $validator = Validator::make(
-            $filters,
-            Filter::process($this->getEventUniqueName('validation.item.get'), ['task_id' => 'required'])
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::fire($this->getEventUniqueName('answer.error.item.get'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'task_id is required',
-                ]),
-                400
-            );
-        }
-
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(),
-            $filters ?: []
-        );
-
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery
-        );
-
-        $time_intervals = $itemsQuery->get()->groupBy('task_id')->map(function ($item, $key) {
-            return collect($item)->groupBy('user_id');
-        });
-
-        if (collect($time_intervals)->isEmpty()) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.success.item.list'),
-                []
-            ));
-        }
-
-        $taskList = $itemsQuery->with('task')->get()->map(function ($item, $key) {
-            return collect($item)->only('task');
-        })->flatten(1)->unique()->values()->all();
-
-        $total_time = 0;
-        $tasks = [];
-
-        foreach ($time_intervals as $task => $intervals_task) {
-            foreach ($intervals_task as $user => $intervals_user) {
-                $time = 0;
-
-                foreach ($intervals_user as $key => $interval) {
-                    $time += Carbon::parse($interval->end_at)->timestamp - Carbon::parse($interval->start_at)->timestamp;
-                }
-
-                $first = $intervals_user->first();
-                $last = $intervals_user->last();
-                $tasks[] = [
-                    'id' => $task,
-                    'user_id' => $user,
-                    'project_id' => collect($taskList)->filter(function ($value) use ($task) {
-                        return $value['id'] === $task;
-                    })->first()['project_id'],
-                    'time' => $time,
-                    'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
-                    'end' => Carbon::parse($last->end_at)->format('Y-m-d\TH:i:sP')
-                ];
-                $total_time += $time;
-            }
-        }
-
-        $first = $itemsQuery->get()->first();
-        $last = $itemsQuery->get()->last();
-        $response = [
-            'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
-            'tasks' => $tasks,
-            'total' => [
-                'time' => $total_time,
-                'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
-                'end' => Carbon::parse($last->end_at)->format('Y-m-d\TH:i:sP'),
-            ]
-        ];
-
-        return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.list'),
-            $response
-        ));
-    }
 
     /**
      * Display time of user's single task.
      *
-     * @param Request $request
-     * @return JsonResponse
      * @api {POST|GET} /api/v1/time/task-user TaskUser
      * @apiParamExample {json} Request-Example:
      *  {
@@ -578,75 +423,6 @@ class TimeController extends ItemController
      * @apiError (Error 400) {String} reason Reason of error
      *
      */
-    public function taskUser(Request $request): JsonResponse
-    {
-        $filters = $request->all();
-        is_int($request->get('user_id')) ? $filters['user_id'] = $request->get('user_id') : False;
-        is_int($request->get('task_id')) ? $filters['task_id'] = $request->get('task_id') : False;
-
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(),
-            $filters ?: []
-        );
-
-        $validator = Validator::make(
-            $filters,
-            Filter::process($this->getEventUniqueName('validation.item.get'),
-                [
-                    'task_id' => 'required',
-                    'user_id' => 'required'
-                ]
-            )
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::fire($this->getEventUniqueName('answer.error.item.get'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'task_id and user_id is required'
-                ]),
-                400
-            );
-        }
-
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery
-        );
-        $time_intervals = $itemsQuery->get();
-
-        if (collect($time_intervals)->isEmpty()) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.success.item.list'),
-                []
-            ));
-        }
-
-        $time = 0;
-        $first = $time_intervals->first();
-        $last = $time_intervals->last();
-
-        foreach ($time_intervals as $interval) {
-            $time += Carbon::parse($interval->end_at)->timestamp - Carbon::parse($interval->start_at)->timestamp;
-        }
-
-        $response = [
-            'success' => true,
-            'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
-            'id' => $first->task_id,
-            'user_id' => $first->user_id,
-            'time' => $time,
-            'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
-            'end' => Carbon::parse($last->end_at)->format('Y-m-d\TH:i:sP')
-        ];
-
-        return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.list'),
-            $response
-        ));
-    }
 
     /**
      * @param bool $withRelations
