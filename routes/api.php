@@ -110,11 +110,12 @@ Route::group([
     $router->post('/projects-users/remove', 'Api\v1\ProjectsUsersController@destroy');
     $router->post('/projects-users/bulk-remove', 'Api\v1\ProjectsUsersController@bulkDestroy');
 
-    //Projects Roles routes
-    $router->any('/projects-roles/list', 'Api\v1\ProjectsRolesController@index');
-    $router->any('/projects-roles/count', 'Api\v1\ProjectsRolesController@count');
-    $router->post('/projects-roles/create', 'Api\v1\ProjectsRolesController@create');
-    $router->post('/projects-roles/remove', 'Api\v1\ProjectsRolesController@destroy');
+    /*  Deprecated
+        $router->any('/projects-roles/list', 'Api\v1\ProjectsRolesController@index');
+        $router->any('/projects-roles/count', 'Api\v1\ProjectsRolesController@count');
+        $router->post('/projects-roles/create', 'Api\v1\ProjectsRolesController@create');
+        $router->post('/projects-roles/remove', 'Api\v1\ProjectsRolesController@destroy');
+    */
 
     //Tasks routes
     $router->any('/tasks/list', 'Api\v1\TaskController@index');
@@ -126,10 +127,12 @@ Route::group([
     $router->post('/tasks/remove', 'Api\v1\TaskController@destroy');
     $router->any('/tasks/activity', 'Api\v1\TaskController@activity');
 
-    $router->any('/task-comment/list', 'Api\v1\TaskCommentController@index');
-    $router->post('/task-comment/create', 'Api\v1\TaskCommentController@create');
-    $router->any('/task-comment/show', 'Api\v1\TaskCommentController@show');
-    $router->post('/task-comment/remove', 'Api\v1\TaskCommentController@destroy');
+    /*  Deprecated
+        $router->any('/task-comment/list', 'Api\v1\TaskCommentController@index');
+        $router->post('/task-comment/create', 'Api\v1\TaskCommentController@create');
+        $router->any('/task-comment/show', 'Api\v1\TaskCommentController@show');
+        $router->post('/task-comment/remove', 'Api\v1\TaskCommentController@destroy');
+       */
 
     //Users routes
     $router->any('/users/list', 'Api\v1\UserController@index');
@@ -190,13 +193,12 @@ Route::group([
     $router->any('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
     $router->any('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
     $router->any('/project-report/screenshots', 'Api\v1\Statistic\ProjectReportController@screenshots');
-
 });
 
 // Laravel router pass to fallback not non-exist urls only but wrong-method requests too.
 // So required to check if route have alternative request methods
-// and throw not-found or wrong-method exceptions manually
-Route::any( '(.*)', function () {
+// throw not-found or wrong-method exceptions manually
+Route::any('(.*)', static function () {
 
     /** @var Router $router */
     $router = app('router');
