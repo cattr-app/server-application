@@ -48,15 +48,16 @@ class EditTest extends TestCase
     }
 
 
-    //TODO fix UserController first
-//    public function test_not_existing(): void
-//    {
-//        $this->user->id++;
-//
-//        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->user->toArray());
-//
-//        $response->assertItemNotFound();
-//    }
+    public function test_not_existing(): void
+    {
+        $this->user->id++;
+        $this->user->email = 'newemail@example.com';
+
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->user->toArray());
+
+        $response->assertItemNotFound();
+    }
+
 
     public function test_unauthorized(): void
     {
