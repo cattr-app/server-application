@@ -148,16 +148,22 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
         $timeObject = (new Carbon('@0'))->diff(new Carbon("@$totalTime"));
         $totalTimeDecimal = round($totalTime / 60 / 60, static::ROUND_DIGITS);
 
+        $hours = $timeObject->h + 24 * $timeObject->days;
+        $minutes = ($timeObject->i < 10 ? '0' : '') . $timeObject->i;
+        $seconds = ($timeObject->s < 10 ? '0' : '') . $timeObject->s;
         $mainInfo = [
             'User' => $userName,
-            'Time worked' => "{$timeObject->h}:{$timeObject->i}:{$timeObject->s}",
+            'Time worked' => "{$hours}:{$minutes}:{$seconds}",
             'Time worked (decimal)' => $totalTimeDecimal,
         ];
 
         $daysData = [];
         foreach ($perDay as $day => $timeWorked) {
             $dayTimeObject = (new Carbon('@0'))->diff(new Carbon("@$timeWorked"));
-            $daysData[$day] = "{$dayTimeObject->h}:{$dayTimeObject->i}:{$dayTimeObject->s}";
+            $hours = $dayTimeObject->h + 24 * $dayTimeObject->days;
+            $minutes = ($dayTimeObject->i < 10 ? '0' : '') . $dayTimeObject->i;
+            $seconds = ($dayTimeObject->s < 10 ? '0' : '') . $dayTimeObject->s;
+            $daysData[$day] = "{$hours}:{$minutes}:{$seconds}";
         }
 
         $collection->push(array_merge($mainInfo, $daysData));
