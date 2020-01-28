@@ -834,12 +834,12 @@ class TimeIntervalController extends ItemController
 
         $validator = Validator::make(
             Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all()),
-            Filter::process($this->getEventUniqueName('validation.item.edit'), $validationRules)
+            Filter::process($this->getEventUniqueName('validation.item.destroy'), $validationRules)
         );
 
         if ($validator->fails()) {
             return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkDestroy'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
