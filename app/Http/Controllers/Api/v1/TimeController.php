@@ -261,6 +261,27 @@ class TimeController extends ItemController
      */
     public function tasks(Request $request): JsonResponse
     {
+        $validationRules = [
+            'start_at' => 'date',
+            'end_at' => 'date',
+            'project_id' => 'exists:projects,id',
+            'task_id' => 'exists:tasks,id'
+        ];
+
+        $validator = Validator::make($request->all(), $validationRules);
+
+        if ($validator->fails()) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.time.total'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
         $filters = $request->all();
         $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : False;
         $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : False;
@@ -277,57 +298,50 @@ class TimeController extends ItemController
             $baseQuery
         );
 
-        $time_intervals = $itemsQuery->get()->groupBy('task_id')->map(function ($item, $key) {
-            return collect($item)->groupBy('user_id');
-        });
+        $totalTime = 0;
 
-        if (collect($time_intervals)->isEmpty()) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.success.item.list'),
-                []
-            ));
-        }
+        $tasks = $itemsQuery
+            ->with('task')
+            ->get()
+            ->groupBy(['task_id', 'user_id'])
+            ->map(function($taskIntervals, $taskId) use (&$totalTime) {
+                $task = [];
 
-        $taskList = $itemsQuery->with('task')->get()->map(function ($item, $key) {
-            return collect($item)->only('task');
-        })->flatten(1)->unique()->values()->all();
+                foreach ($taskIntervals as $userId => $userIntervals) {
+                    $taskTime = 0;
 
-        $total_time = 0;
-        $tasks = [];
+                    foreach ($userIntervals as $interval) {
+                        $taskTime += Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
+                    }
 
-        foreach ($time_intervals as $task => $intervals_task) {
-            foreach ($intervals_task as $user => $intervals_user) {
-                $time = 0;
+                    $firstUserInterval = $userIntervals->first();
+                    $lastUserInterval = $userIntervals->last();
 
-                foreach ($intervals_user as $key => $interval) {
-                    $time += Carbon::parse($interval->end_at)->timestamp - Carbon::parse($interval->start_at)->timestamp;
+                    $task = [
+                        'id' => $taskId,
+                        'user_id' => $userId,
+                        'project_id' => $userIntervals[0]['task']['project_id'],
+                        'time' => $taskTime,
+                        'start' => Carbon::parse($firstUserInterval->start_at)->toISOString(),
+                        'end' => Carbon::parse($lastUserInterval->end_at)->toISOString()
+                    ];
+
+                    $totalTime += $taskTime;
                 }
 
-                $first = $intervals_user->first();
-                $last = $intervals_user->last();
-                $tasks[] = [
-                    'id' => $task,
-                    'user_id' => $user,
-                    'project_id' => collect($taskList)->filter(function ($value) use ($task) {
-                        return $value['id'] === $task;
-                    })->first()['project_id'],
-                    'time' => $time,
-                    'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
-                    'end' => Carbon::parse($last->end_at)->format('Y-m-d\TH:i:sP')
-                ];
-                $total_time += $time;
-            }
-        }
+                return $task;
+            })
+            ->values();
 
         $first = $itemsQuery->get()->first();
         $last = $itemsQuery->get()->last();
+
         $response = [
-            'current_datetime' => Carbon::now()->format('Y-m-d\TH:i:sP'),
             'tasks' => $tasks,
             'total' => [
-                'time' => $total_time,
-                'start' => Carbon::parse($first->start_at)->format('Y-m-d\TH:i:sP'),
-                'end' => Carbon::parse($last->end_at)->format('Y-m-d\TH:i:sP'),
+                'time' => $totalTime,
+                'start' => $first ? Carbon::parse($first->start_at)->toISOString() : null,
+                'end' => $last ? Carbon::parse($last->end_at)->toISOString() : null,
             ]
         ];
 
