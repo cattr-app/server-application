@@ -4,12 +4,16 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Role;
 use App\Models\Rule;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
+/**
+ * Class RolesController
+ */
 class RolesController extends ItemController
 {
     protected $disableQueryRoleCheck = false;
@@ -59,74 +63,50 @@ class RolesController extends ItemController
     }
 
     /**
-     * @apiDefine RolesRelations
+     * @api             {post} /v1/roles/list List
+     * @apiDescription  Get list of Roles
      *
-     * @apiParam {String} [with]               For add relation model in response
-     * @apiParam {Object} [users] `QueryParam` Roles's relation users. All params in <a href="#api-User-GetUserList" >@User</a>
-     * @apiParam {Object} [rules] `QueryParam` Roles's relation rules. All params in <a href="#api-Rule-GetRulesActions" >@Rules</a>
-     */
-
-    /**
-     * @apiDefine RolesRelationsExample
-     * @apiParamExample {json} Request With Relations Example
+     * @apiVersion      1.0.0
+     * @apiName         GetRolesList
+     * @apiGroup        Role
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   roles_list
+     * @apiPermission   roles_full_access
+     *
+     * @apiUse          RoleParams
+     *
+     * @apiParamExample {json} Request Example
      *  {
-     *      "with":               "users,rules,users.tasks",
-     *      "users.tasks.id":     [">", 1],
-     *      "users.tasks.active": 1,
-     *      "users.full_name":    ["like", "%lorem%"]
+     *    "id": [">", 1]
+     *    "name": ["like", "%lorem%"],
+     *    "created_at": [">", "2019-01-01 00:00:00"],
+     *    "updated_at": ["<", "2019-01-01 00:00:00"]
      *  }
-     */
-
-    /**
-     * @param  Request  $request
      *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  [
+     *    {
+     *      "id": 256,
+     *      "name": "test",
+     *      "deleted_at": null,
+     *      "created_at": "2018-10-12 11:44:08",
+     *      "updated_at": "2018-10-12 11:44:08"
+     *    }
+     *  ]
+     *
+     * @apiUse          RoleObject
+     *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     */
+    /**
+     * @param Request $request
      * @return JsonResponse
-     * @api            {post} /api/v1/roles/list List
-     * @apiDescription Get list of Roles
-     * @apiVersion     0.1.0
-     * @apiName        GetRolesList
-     * @apiGroup       Roles
-     *
-     * @apiParam {Integer}  [id]          `QueryParam` Role ID
-     * @apiParam {Integer}  [user_id]     `QueryParam` Role's Users ID
-     * @apiParam {String}   [name]        `QueryParam` Role Name
-     * @apiParam {String} [created_at]    `QueryParam` Role Creation DateTime
-     * @apiParam {String} [updated_at]    `QueryParam` Last Role update DataTime
-     * @apiUse         RolesRelations
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "id":          [">", 1]
-     *      "user_id":     ["=", [1,2,3]],
-     *      "name":        ["like", "%lorem%"],
-     *      "created_at":  [">", "2019-01-01 00:00:00"],
-     *      "updated_at":  ["<", "2019-01-01 00:00:00"]
-     *  }
-     * @apiUse         RolesRelationsExample
-     *
-     * @apiSuccessExample {json} Simple response example
-     * [
-     *   {
-     *     "id": 256,
-     *     "name": "test",
-     *     "deleted_at": null,
-     *     "created_at": "2018-10-12 11:44:08",
-     *     "updated_at": "2018-10-12 11:44:08"
-     *   }
-     * ]
-     *
-     * @apiSuccess {Object[]} RoleList                  Roles
-     * @apiSuccess {Object}   RoleList.Role             Role object
-     * @apiSuccess {Integer}  RoleList.Role.id          Role ID
-     * @apiSuccess {String}   RoleList.Role.name        Role name
-     * @apiSuccess {String}   RoleList.Role.created_at  Role date time of create
-     * @apiSuccess {String}   RoleList.Role.updated_at  Role date time of update
-     * @apiSuccess {String}   RoleList.Role.deleted_at  Role date time of delete
-     * @apiSuccess {Object[]} RoleList.Role.users       Role User
-     * @apiSuccess {Object[]} RoleList.Role.rules       Role Task
-     *
-     * @apiUse         UnauthorizedError
-     *
+     * @throws Exception
      */
     public function index(Request $request): JsonResponse
     {
@@ -142,196 +122,248 @@ class RolesController extends ItemController
     }
 
     /**
-     * @param  Request  $request
+     * @api             {post} /v1/roles/create Create
+     * @apiDescription  Create Role
      *
-     * @return JsonResponse
-     * @api            {post} /api/v1/roles/create Create
-     * @apiDescription Create Role
-     * @apiVersion     0.1.0
-     * @apiName        CreateRole
-     * @apiGroup       Role
+     * @apiVersion      1.0.0
+     * @apiName         CreateRole
+     * @apiGroup        Role
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   roles_create
+     * @apiPermission   roles_full_access
      *
      * @apiParam {String} name Roles's name
      *
-     * @apiParamExample {json} Simple Request Example
+     * @apiParamExample {json} Request Example
      *  {
-     *      "name": "test"
+     *    "name": "test"
      *  }
      *
-     * @apiSuccessExample {json} Answer Example
-     * {
-     *   "res": {
-     *     "name": "test",
-     *     "updated_at": "2018-10-12 11:44:08",
-     *     "created_at": "2018-10-12 11:44:08",
-     *     "id": 256
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object}   res      Response object
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": {
+     *      "name": "test",
+     *      "updated_at": "2018-10-12 11:44:08",
+     *      "created_at": "2018-10-12 11:44:08",
+     *      "id": 256
      *    }
-     * }
-     *
-     * @apiSuccess {Object}   res             Response object
-     * @apiSuccess {Integer}  res.id          Role ID
-     * @apiSuccess {String}   res.name        Role name
-     * @apiSuccess {String}   res.created_at  Role date time of create
-     * @apiSuccess {String}   res.updated_at  Role date time of update
-     *
-     * @apiUse         DefaultCreateErrorResponse
-     * @apiUse         UnauthorizedError
-     *
-     */
-
-    /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     * @api            {post} /api/v1/roles/show Show
-     * @apiDescription Get Role Entity
-     * @apiVersion     0.1.0
-     * @apiName        ShowRole
-     * @apiGroup       Role
-     *
-     * @apiParam {Integer}    id                        Role id
-     * @apiParam {String}     [name]       `QueryParam` Role Name
-     * @apiParam {String}     [created_at] `QueryParam` Role date time of create
-     * @apiParam {String}     [updated_at] `QueryParam` Role date time of update
-     *
-     * @apiUse         RolesRelations
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "id":          1,
-     *      "name":        ["like", "%lorem%"],
-     *      "description": ["like", "%lorem%"],
-     *      "created_at":  [">", "2019-01-01 00:00:00"],
-     *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
      *
-     * @apiUse         RolesRelationsExample
+     * @apiUse          RoleObject
      *
-     * @apiSuccess {Object}   Role             Role object
-     * @apiSuccess {Integer}  Role.id          Role id
-     * @apiSuccess {String}   Role.name        Role name
-     * @apiSuccess {String}   Role.created_at  Role date time of create
-     * @apiSuccess {String}   Role.updated_at  Role date time of update
-     * @apiSuccess {String}   Role.deleted_at  Role date time of delete
-     * @apiSuccess {Object[]} Role.users       Role User
-     * @apiSuccess {Object[]} Role.rules       Role Task
-     *
-     * @apiSuccessExample {json} Answer Relations Example
-     * {
-     *   "id": 1,
-     *   "name": "root",
-     *   "deleted_at": null,
-     *   "created_at": "2018-09-25 06:15:07",
-     *   "updated_at": "2018-09-25 06:15:07"
-     * }
-     *
-     * @apiUse         DefaultShowErrorResponse
-     * @apiUse         UnauthorizedError
-     *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     * @apiUse          ValidationError
      */
 
     /**
-     * @param  Request  $request
+     * @api             {get,post} /v1/roles/count Count
+     * @apiDescription  Count Roles
      *
-     * @return JsonResponse
-     * @api            {post} /api/v1/roles/edit Edit
-     * @apiDescription Edit Role
-     * @apiVersion     0.1.0
-     * @apiName        EditRole
-     * @apiGroup       Role
+     * @apiVersion      1.0.0
+     * @apiName         Count
+     * @apiGroup        Role
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   roles_count
+     * @apiPermission   roles_full_access
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   total    Amount of projects that we have
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "total": 2
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+
+    /**
+     * @api             {post} /v1/roles/show Show
+     * @apiDescription  Get Role Entity
+     *
+     * @apiVersion      1.0.0
+     * @apiName         ShowRole
+     * @apiGroup        Role
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   roles_show
+     * @apiPermission   roles_full_access
+     *
+     * @apiParam {Integer}  id  ID
+     *
+     * @apiUse          RoleParams
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "id": 1,
+     *    "name": ["like", "%lorem%"],
+     *    "description": ["like", "%lorem%"],
+     *    "created_at": [">", "2019-01-01 00:00:00"],
+     *    "updated_at": ["<", "2019-01-01 00:00:00"]
+     *  }
+     *
+     * @apiUse          RoleObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "id": 1,
+     *    "name": "root",
+     *    "deleted_at": null,
+     *    "created_at": "2018-09-25 06:15:07",
+     *    "updated_at": "2018-09-25 06:15:07"
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     * @apiUse          ValidationError
+     * @apiUse          ItemNotFoundError
+     */
+
+    /**
+     * @api             {post} /v1/roles/edit Edit
+     * @apiDescription  Edit Role
+     *
+     * @apiVersion      1.0.0
+     * @apiName         EditRole
+     * @apiGroup        Role
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   roles_edit
+     * @apiPermission   roles_full_access
      *
      * @apiParam {Integer} id   Role ID
      * @apiParam {String}  name Role Name
      *
-     * @apiParamExample {json} Simple Request Example
+     * @apiParamExample {json} Request Example
      *  {
-     *      "id": 1,
-     *      "name": "test"
+     *    "id": 1,
+     *    "name": "test"
      *  }
      *
-     * @apiSuccess {Object}   Role            Role object
-     * @apiSuccess {Integer}  Role.id         Role ID
-     * @apiSuccess {String}   Role.name       Role name
-     * @apiSuccess {String}   Role.created_at Role date time of create
-     * @apiSuccess {String}   Role.updated_at Role date time of update
-     * @apiSuccess {String}   Role.deleted_at Role date time of delete
+     * @apiUse          RoleObject
      *
-     * @apiUse         DefaultEditErrorResponse
-     * @apiUse         UnauthorizedError
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "id": 1,
+     *    "name": "root",
+     *    "deleted_at": null,
+     *    "created_at": "2018-09-25 06:15:07",
+     *    "updated_at": "2018-09-25 06:15:07"
+     *  }
      *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          ItemNotFoundError
      */
 
     /**
-     * @param  Request  $request
+     * @api             {post} /v1/roles/remove Destroy
+     * @apiDescription  Destroy Role
      *
-     * @return JsonResponse
-     * @api            {post} /api/v1/roles/remove Destroy
-     * @apiUse         DefaultDestroyRequestExample
-     * @apiDescription Destroy Role
-     * @apiVersion     0.1.0
-     * @apiName        DestroyRole
-     * @apiGroup       Role
+     * @apiVersion      1.0.0
+     * @apiName         DestroyRole
+     * @apiGroup        Role
      *
-     * @apiParam {Integer} id Role id
+     * @apiUse          AuthHeader
      *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "id": 1
-     *  }
+     * @apiPermission   roles_remove
+     * @apiPermission   roles_full_access
      *
-     * @apiUse         DefaultDestroyResponse
-     * @apiUse         UnauthorizedError
+     * @apiParam {Integer}  id  Role ID
      *
-     */
-
-    /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     * @api            {post} /api/v1/roles/allowed-rules AllowedRules
-     * @apiDescription Get Rule allowed action list
-     * @apiVersion     0.1.0
-     * @apiName        GetRulesAllowedActionList
-     * @apiGroup       Roles
-     *
-     * @apiParam {Integer} id Role id
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "id": 1
-     *  }
-     *
-     * @apiSuccess {Object[]} array               Rules
-     * @apiSuccess {Object}   array.object        Rule
-     * @apiSuccess {String}   array.object.object Object of rule
-     * @apiSuccess {String}   array.object.action Action of rule
-     * @apiSuccess {String}   array.object.name   Name of rule
-     *
-     * @apiSuccessExample {json} Answer Example
-     * [
-     *   {
-     *     "object": "attached-users",
-     *     "action": "bulk-create",
-     *     "name": "Attached User relation multiple create"
-     *   },
-     *   {
-     *     "object": "attached-users",
-     *     "action": "bulk-remove",
-     *     "name": "Attached User relation multiple remove"
-     *   }
-     * ]
-     *
-     * @apiError (Error 400) {String} error  Name of error
-     * @apiError (Error 400) {String} reason Reason of error
-     *
-     * @apiUse         UnauthorizedError
-     *
-     * @apiErrorExample {json} Invalid id Example
+     * @apiParamExample {json} Request Example
      * {
-     *   "error": "Validation fail",
-     *   "reason": "Invalid id"
+     *   "id": 1
      * }
      *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   message  Destroy status
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Item has been removed"
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     * @apiUse          ItemNotFoundError
+     */
+
+    /**
+     * @api             {get,post} /v1/roles/allowed-rules Allowed Rules
+     * @apiDescription  Get Rule allowed action for current user list
+     *
+     * @apiVersion      1.0.0
+     * @apiName         GetRulesAllowedActionList
+     * @apiGroup        Role
+     *
+     * @apiParam {Integer} ids Role ids
+     *
+     * @apiPermission   roles_allowed_rules
+     * @apiPermission   roles_full_access
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "ids": 1
+     *  }
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object[]} res      Rules
+     *
+     * @apiUse RoleObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res":
+     *      [
+     *        {
+     *          "object": "attached-users",
+     *          "action": "bulk-create",
+     *          "name": "Attached User relation multiple create"
+     *        },
+     *        {
+     *          "object": "attached-users",
+     *          "action": "bulk-remove",
+     *          "name": "Attached User relation multiple remove"
+     *        }
+     *      ]
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
      */
     public function allowedRules(Request $request): JsonResponse
     {
@@ -404,7 +436,61 @@ class RolesController extends ItemController
         )]);
     }
 
-    public function attachToUser(Request $request)
+    /**
+     * @api             {post} /v1/roles/attach-user Attach User
+     * @apiDescription  Attach user to role
+     *
+     * @apiVersion      1.0.0
+     * @apiName         AttachUser
+     * @apiGroup        Role
+     *
+     * @apiParam {Object[]}  relations          New relations of user
+     * @apiParam {Integer}   relations.user_id  User ID
+     * @apiParam {Integer}   relations.role_id  Role ID
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "relations": [
+     *      {
+     *        "user_id": 1,
+     *        "role_id": 2
+     *      }
+     *    ]
+     *  }
+     *
+     * @apiSuccess {Boolean}   success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object[]}  res      Relations
+     *
+     * @apiUse RoleObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": [
+     *      {
+     *        "object": "attached-users",
+     *        "action": "bulk-create",
+     *        "name": "Attached User relation multiple create"
+     *      },
+     *      {
+     *        "object": "attached-users",
+     *        "action": "bulk-remove",
+     *        "name": "Attached User relation multiple remove"
+     *      }
+     *    ]
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
+     * @apiUse         ValidationError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function attachToUser(Request $request): JsonResponse
     {
         $validator = \Validator::make($request->all(), [
             'relations.*.user_id' => 'integer|exists:users,id',
@@ -443,7 +529,61 @@ class RolesController extends ItemController
         );
     }
 
-    public function detachFromUser(Request $request)
+    /**
+     * @api             {post} /v1/roles/detach-user Detach User
+     * @apiDescription  Detach user from role
+     *
+     * @apiVersion      1.0.0
+     * @apiName         DetachUser
+     * @apiGroup        Role
+     *
+     * @apiParam {Object[]}  relations          Relations of user that must be removed
+     * @apiParam {Integer}   relations.user_id  User ID
+     * @apiParam {Integer}   relations.role_id  Role ID
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "relations": [
+     *      {
+     *        "user_id": 1,
+     *        "role_id": 2
+     *      }
+     *    ]
+     *  }
+     *
+     * @apiSuccess {Boolean}   success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object[]}  res      Relations
+     *
+     * @apiUse RoleObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": [
+     *      {
+     *        "object": "attached-users",
+     *        "action": "bulk-create",
+     *        "name": "Attached User relation multiple create"
+     *      },
+     *      {
+     *        "object": "attached-users",
+     *        "action": "bulk-remove",
+     *        "name": "Attached User relation multiple remove"
+     *      }
+     *    ]
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
+     * @apiUse         ValidationError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function detachFromUser(Request $request): JsonResponse
     {
         $validator = \Validator::make($request->all(), [
             'relations.*.user_id' => 'integer|exists:users,id',

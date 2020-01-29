@@ -25,7 +25,6 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * @apiDefine UserObject
  *
- * @apiSuccess {Object}   user                          User entity
  * @apiSuccess {Integer}  user.id                       ID
  * @apiSuccess {String}   user.full_name                Name
  * @apiSuccess {String}   user.email                    Email
@@ -36,9 +35,9 @@ use Illuminate\Database\Eloquent\Collection;
  * @apiSuccess {Integer}  user.screenshots_interval     Screenshots capture interval (seconds)
  * @apiSuccess {Boolean}  user.active                   Indicates active user when `TRUE`
  * @apiSuccess {String}   user.timezone                 User's timezone
- * @apiSuccess {String}   user.created_at               Creation DateTime
- * @apiSuccess {String}   user.updated_at               Update DateTime
- * @apiSuccess {String}   user.deleted_at               Delete DateTime or `NULL` if user wasn't deleted
+ * @apiSuccess {ISO8601}  user.created_at               Creation DateTime
+ * @apiSuccess {ISO8601}  user.updated_at               Update DateTime
+ * @apiSuccess {ISO8601}  user.deleted_at               Delete DateTime or `NULL` if wasn't deleted
  * @apiSuccess {Boolean}  user.payroll_access          `Not used`
  * @apiSuccess {Boolean}  user.billing_access          `Not used`
  * @apiSuccess {String}   user.url                     `Not used`
@@ -49,6 +48,68 @@ use Illuminate\Database\Eloquent\Collection;
  * @apiSuccess {Boolean}  user.web_and_app_monitoring  `Not used`
  * @apiSuccess {Boolean}  user.webcam_shots            `Not used`
  * @apiSuccess {String}   user.user_language            Language which is used for frontend translations and emails
+ *
+ * @apiVersion 1.0.0
+ */
+
+/**
+ * @apiDefine UserParams
+ *
+ * @apiParam {Integer}  [id]                       ID
+ * @apiParam {String}   [full_name]                Name
+ * @apiParam {String}   [email]                    Email
+ * @apiParam {Integer}  [company_id]               Company ID
+ * @apiParam {String}   [avatar]                   Avatar image url
+ * @apiParam {Boolean}  [screenshots_active]       Should screenshots be captured
+ * @apiParam {Boolean}  [manual_time]              Allow manual time edit
+ * @apiParam {Integer}  [screenshots_interval]     Screenshots capture interval (seconds)
+ * @apiParam {Boolean}  [active]                   Indicates active user when `TRUE`
+ * @apiParam {String}   [timezone]                 User's timezone
+ * @apiParam {ISO8601}  [created_at]               Creation DateTime
+ * @apiParam {ISO8601}  [updated_at]               Update DateTime
+ * @apiParam {ISO8601}  [deleted_at]               Delete DateTime
+ * @apiParam {Boolean}  [payroll_access]          `Not used`
+ * @apiParam {Boolean}  [billing_access]          `Not used`
+ * @apiParam {String}   [url]                     `Not used`
+ * @apiParam {Boolean}  [permanent_tasks]         `Not used`
+ * @apiParam {Boolean}  [computer_time_popup]     `Not used`
+ * @apiParam {Boolean}  [poor_time_popup]         `Not used`
+ * @apiParam {Boolean}  [blur_screenshots]        `Not used`
+ * @apiParam {Boolean}  [web_and_app_monitoring]  `Not used`
+ * @apiParam {Boolean}  [webcam_shots]            `Not used`
+ * @apiParam {String}   [user_language]            Language which is used for frontend translations and emails
+ *
+ * @apiVersion 1.0.0
+ */
+
+/**
+ * @apiDefine UserScopedParams
+ *
+ * @apiParam {Integer}  [users.id]                       ID
+ * @apiParam {String}   [users.full_name]                Name
+ * @apiParam {String}   [users.email]                    Email
+ * @apiParam {Integer}  [users.company_id]               Company ID
+ * @apiParam {String}   [users.avatar]                   Avatar image url
+ * @apiParam {Boolean}  [users.screenshots_active]       Should screenshots be captured
+ * @apiParam {Boolean}  [users.manual_time]              Allow manual time edit
+ * @apiParam {Integer}  [users.screenshots_interval]     Screenshots capture interval (seconds)
+ * @apiParam {Boolean}  [users.active]                   Indicates active user when `TRUE`
+ * @apiParam {String}   [users.timezone]                 User's timezone
+ * @apiParam {ISO8601}  [users.created_at]               Creation DateTime
+ * @apiParam {ISO8601}  [users.updated_at]               Update DateTime
+ * @apiParam {ISO8601}  [users.deleted_at]               Delete DateTime
+ * @apiParam {Boolean}  [users.payroll_access]          `Not used`
+ * @apiParam {Boolean}  [users.billing_access]          `Not used`
+ * @apiParam {String}   [users.url]                     `Not used`
+ * @apiParam {Boolean}  [users.permanent_tasks]         `Not used`
+ * @apiParam {Boolean}  [users.computer_time_popup]     `Not used`
+ * @apiParam {Boolean}  [users.poor_time_popup]         `Not used`
+ * @apiParam {Boolean}  [users.blur_screenshots]        `Not used`
+ * @apiParam {Boolean}  [users.web_and_app_monitoring]  `Not used`
+ * @apiParam {Boolean}  [users.webcam_shots]            `Not used`
+ * @apiParam {String}   [users.user_language]            Language which is used for frontend translations and emails
+ *
+ * @apiVersion 1.0.0
  */
 
 

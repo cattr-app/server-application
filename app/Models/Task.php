@@ -12,7 +12,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * @apiDefine TaskObject
  *
- * @apiSuccess {Object}   task                Task entity
  * @apiSuccess {Integer}  task.id             ID
  * @apiSuccess {Integer}  task.project_id     The ID of the linked project
  * @apiSuccess {Integer}  task.user_id        The ID of the linked user
@@ -22,14 +21,40 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @apiSuccess {String}   task.description    Description of the task
  * @apiSuccess {Boolean}  task.active         Indicates active task when `TRUE`
  * @apiSuccess {String}   task.important      Indicates important task when `TRUE`
- * @apiSuccess {String}   task.created_at     Creation DateTime
- * @apiSuccess {String}   task.updated_at     Update DateTime
- * @apiSuccess {String}   task.deleted_at     Delete DateTime or `NULL` if user wasn't deleted
+ * @apiSuccess {ISO8601}  task.created_at     Creation DateTime
+ * @apiSuccess {ISO8601}  task.updated_at     Update DateTime
+ * @apiSuccess {ISO8601}  task.deleted_at     Delete DateTime or `NULL` if wasn't deleted
  * @apiSuccess {Array}    task.timeIntervals  Time intervals of the task
  * @apiSuccess {Array}    task.user           Linked users
  * @apiSuccess {Array}    task.assigned       Users, that assigned this task
  * @apiSuccess {Array}    task.project        The project that task belongs to
  * @apiSuccess {Object}   task.priority       Task priority
+ *
+ * @apiVersion 1.0.0
+ */
+
+/**
+ * @apiDefine TaskParams
+ *
+ * @apiParam {Integer}  [id]             ID
+ * @apiParam {Integer}  [project_id]     The ID of the linked project
+ * @apiParam {Integer}  [user_id]        The ID of the linked user
+ * @apiParam {Integer}  [assigned_by]    The ID of the user that assigned task
+ * @apiParam {Integer}  [priority_id]    The ID of the priority
+ * @apiParam {String}   [task_name]      Name of the task
+ * @apiParam {String}   [description]    Description of the task
+ * @apiParam {Boolean}  [active]         Indicates active task when `TRUE`
+ * @apiParam {String}   [important]      Indicates important task when `TRUE`
+ * @apiParam {ISO8601}  [created_at]     Creation DateTime
+ * @apiParam {ISO8601}  [updated_at]     Update DateTime
+ * @apiParam {ISO8601}  [deleted_at]     Delete DateTime
+ * @apiParam {Array}    [timeIntervals]  Time intervals of the task
+ * @apiParam {Array}    [user]           Linked users
+ * @apiParam {Array}    [assigned]       Users, that assigned this task
+ * @apiParam {Array}    [project]        The project that task belongs to
+ * @apiParam {Object}   [priority]       Task priority
+ *
+ * @apiVersion 1.0.0
  */
 
 /**

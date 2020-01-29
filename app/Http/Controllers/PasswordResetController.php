@@ -35,40 +35,40 @@ class PasswordResetController extends BaseController
     }
 
     /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws AuthorizationException
+     * @api             {get} /v1/auth/password/reset/validate Validate
+     * @apiDescription  Validates password reset token
      *
-     *
-     * @api {get} /api/auth/password/reset/validate Validate
-     * @apiDescription Validates password reset token
-     *
-     * @apiVersion 0.1.0
-     * @apiName Validate token
-     * @apiGroup Password Reset
+     * @apiVersion      1.0.0
+     * @apiName         Validate token
+     * @apiGroup        Password Reset
      *
      * @apiParam {String}  email  User email
      * @apiParam {String}  token  Password reset token
      *
      * @apiParamExample {json} Request Example
      *  {
-     *    "email":  "johndoe@example.com",
-     *    "token":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *    "email": "johndoe@example.com",
+     *    "token": "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Message from server
      *
-     * @apiSuccessExample {json} Success-Response
+     * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
      *    "message": "Password reset data is valid"
      *  }
      *
-     * @apiUse 400Error
-     * @apiUse ParamsValidationError
-     * @apiUse InvalidPasswordResetDataError
+     * @apiUse         400Error
+     * @apiUse         ParamsValidationError
+     * @apiUse         InvalidPasswordResetDataError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function validate(Request $request): JsonResponse
     {
@@ -95,42 +95,42 @@ class PasswordResetController extends BaseController
     }
 
     /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws AuthorizationException
+     * @api             {post} /v1/auth/password/reset/request Request
+     * @apiDescription  Sends email to user with reset link
      *
-     *
-     * @api {post} /api/auth/password/reset/request Request
-     * @apiDescription Sends email to user with reset link
-     *
-     * @apiVersion 0.1.0
-     * @apiName Send email
-     * @apiGroup Password Reset
+     * @apiVersion      1.0.0
+     * @apiName         Request
+     * @apiGroup        Password Reset
      *
      * @apiParam {String}  login         User login
      * @apiParam {String}  [recaptcha]   Recaptcha token
      *
      * @apiParamExample {json} Request Example
      *  {
-     *    "email":      "johndoe@example.com",
-     *    "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *    "email": "johndoe@example.com",
+     *    "recaptcha": "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Message from server
      *
-     * @apiSuccessExample {json} Success Response
+     * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
      *    "message": "Link for restore password has been sent to specified email"
      *  }
      *
-     * @apiUse 400Error
-     * @apiUse ParamsValidationError
-     * @apiUse NoSuchUserError
-     * @apiUse CaptchaError
-     * @apiUse LimiterError
+     * @apiUse         400Error
+     * @apiUse         ParamsValidationError
+     * @apiUse         NoSuchUserError
+     * @apiUse         CaptchaError
+     * @apiUse         LimiterError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function request(Request $request): JsonResponse
     {
@@ -162,17 +162,12 @@ class PasswordResetController extends BaseController
 
 
     /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws AuthorizationException
+     * @api             {post} /v1/auth/password/reset/process Process
+     * @apiDescription  Resets user password
      *
-     *
-     * @api {post} /api/auth/password/reset/process Process
-     * @apiDescription Resets user password
-     *
-     * @apiVersion 0.1.0
-     * @apiName Process
-     * @apiGroup Password Reset
+     * @apiVersion      1.0.0
+     * @apiName         Process
+     * @apiGroup        Password Reset
      *
      * @apiParam {String}  email                  User email
      * @apiParam {String}  token                  Password reset token
@@ -181,32 +176,40 @@ class PasswordResetController extends BaseController
      *
      * @apiParamExample {json} Request Example
      *  {
-     *    "email":                  "johndoe@example.com",
-     *    "token":                  "16184cf3b2510464a53c0e573c75740540fe...",
-     *    "password_confirmation":  "amazingpassword",
-     *    "password":               "amazingpassword"
+     *    "email": "johndoe@example.com",
+     *    "token": "16184cf3b2510464a53c0e573c75740540fe...",
+     *    "password_confirmation": "amazingpassword",
+     *    "password": "amazingpassword"
      *  }
-     * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
+     *
+     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL in seconds
      * @apiSuccess {Object}   user          User Entity
      *
-     * @apiSuccessExample {json} Success Response
+     * @apiUse         UserObject
+     *
+     * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success":       true,
-     *    "access_token":  "16184cf3b2510464a53c0e573c75740540fe...",
-     *    "token_type":    "bearer",
-     *    "password":      "amazingpassword",
-     *    "expires_in":    "3600",
-     *    "user":          {}
+     *    "success": true,
+     *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
+     *    "token_type": "bearer",
+     *    "password": "amazingpassword",
+     *    "expires_in": "3600",
+     *    "user": {}
      *  }
      *
-     * @apiUse 400Error
-     * @apiUse ParamsValidationError
-     * @apiUse InvalidPasswordResetDataError
-     * @apiUse UnauthorizedError
+     * @apiUse         400Error
+     * @apiUse         ParamsValidationError
+     * @apiUse         InvalidPasswordResetDataError
+     * @apiUse         UnauthorizedError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function process(Request $request): JsonResponse
     {

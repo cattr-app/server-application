@@ -12,9 +12,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
- * @apiDefine ScreenshotObject
+ * @apiDefine TimeIntervalObject
  *
- * @apiSuccess {Object}   timeInterval                 Time interval entity
  * @apiSuccess {Integer}  timeInterval.id              ID
  * @apiSuccess {Integer}  timeInterval.task_id         The ID of the linked task
  * @apiSuccess {Integer}  timeInterval.user_id         The ID of the linked user
@@ -22,12 +21,31 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @apiSuccess {String}   timeInterval.end_at          DateTime of interval ending
  * @apiSuccess {Integer}  timeInterval.count_mouse     Count of mouse events
  * @apiSuccess {Integer}  timeInterval.count_keyboard  Count of keyboard events
- * @apiSuccess {String}   timeInterval.created_at      Creation DateTime
- * @apiSuccess {String}   timeInterval.updated_at      Update DateTime
- * @apiSuccess {String}   timeInterval.deleted_at      Delete DateTime or `NULL` if user wasn't deleted
+ * @apiSuccess {ISO8601}  timeInterval.created_at      Creation DateTime
+ * @apiSuccess {ISO8601}  timeInterval.updated_at      Update DateTime
+ * @apiSuccess {ISO8601}  timeInterval.deleted_at      Delete DateTime or `NULL` if wasn't deleted
  * @apiSuccess {Array}    timeInterval.screenshots     Screenshots of this interval
  * @apiSuccess {Object}   timeInterval.user            The user that time interval belongs to
  * @apiSuccess {Object}   timeInterval.task            The task that time interval belongs to
+ *
+ * @apiVersion 1.0.0
+ */
+
+/**
+ * @apiDefine TimeIntervalParams
+ *
+ * @apiParam {Integer}  [id]              ID
+ * @apiParam {Integer}  [task_id]         The ID of the linked task
+ * @apiParam {Integer}  [user_id]         The ID of the linked user
+ * @apiParam {String}   [start_at]        DateTime of interval beginning
+ * @apiParam {String}   [end_at]          DateTime of interval ending
+ * @apiParam {Integer}  [count_mouse]     Count of mouse events
+ * @apiParam {Integer}  [count_keyboard]  Count of keyboard events
+ * @apiParam {ISO8601}  [created_at]      Creation DateTime
+ * @apiParam {ISO8601}  [updated_at]      Update DateTime
+ * @apiParam {ISO8601}  [deleted_at]      Delete DateTime
+ *
+ * @apiVersion 1.0.0
  */
 
 
