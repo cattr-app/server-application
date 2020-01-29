@@ -362,6 +362,7 @@ class TimeIntervalController extends ItemController
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success' => true,
                 'interval' => $timeInterval,
             ]),
             200
