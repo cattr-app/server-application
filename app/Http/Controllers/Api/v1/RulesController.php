@@ -61,16 +61,101 @@ class RulesController extends ItemController
     }
 
     /**
-     * @api {post} /api/v1/rules/edit Edit
+     * @api             {get, post} /v1/rules/list List
+     * @apiDescription  Get list of Rules
+     *
+     * @apiVersion      1.0.0
+     * @apiName         GetRulesList
+     * @apiGroup        Rule
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiParam {Integer}  [id]          ID
+     * @apiParam {Integer}  [role_id]     ID of the role
+     * @apiParam {String}   [object]      Object with what rule works
+     * @apiParam {String}   [action]      Action of the rule
+     * @apiParam {Integer}  [allow]       ID of the role
+     * @apiParam {String}   [created_at]  Creation DateTime
+     * @apiParam {String}   [updated_at]  Update DateTime
+     * @apiParam {String}   [deleted_at]  Delete DateTime
+     *
+     *
+     * @apiParamExample {json} Simple Request Example
+     *  {
+     *    "id": 1
+     *  }
+     *
+     * @apiSuccess {Integer}  id          ID
+     * @apiSuccess {Integer}  role_id     ID of the role
+     * @apiSuccess {String}   object      Object with what rule works
+     * @apiSuccess {String}   action      Action of the rule
+     * @apiSuccess {Integer}  allow       ID of the role
+     * @apiSuccess {String}   created_at  Creation DateTime
+     * @apiSuccess {String}   updated_at  Update DateTime
+     * @apiSuccess {String}   deleted_at  Delete DateTime or `NULL` if user wasn't deleted
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  [
+     *    {
+     *      "id": 37,
+     *      "role_id": "1",
+     *      "object": "register",
+     *      "action": "create",
+     *      "allow": "1",
+     *      "created_at": "2020-01-23T09:42:24+00:00",
+     *      "updated_at": "2020-01-23T09:42:24+00:00",
+     *      "deleted_at": null
+     *    }
+     *  ]
+     *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     */
+
+    /**
+     * @api             {get,post} /v1/rules/count Count
+     * @apiDescription  Count Rules
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Count
+     * @apiGroup        Rule
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   total    Amount of rules that we have
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "total": 2
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+
+    /**
+     * @api {post} /v1/rules/edit Edit
      * @apiDescription Edit Rule
-     * @apiVersion 0.1.0
+     *
+     * @apiVersion 1.0.0
      * @apiName EditRule
      * @apiGroup Rule
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   rules_edit
+     * @apiPermission   rules_full_access
      *
      * @apiParam {Integer} role_id Role id
      * @apiParam {String}  object  Object name
      * @apiParam {String}  action  Action name
-     * @apiParam {Boolean} allow   Allow status
+     * @apiParam {Boolean} allow   Allow status (`1` - allow)
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -80,11 +165,20 @@ class RulesController extends ItemController
      *      "allow": 1
      *  }
      *
-     * @apiSuccess {String} message OK
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   message  Message from server
      *
-     * @apiUse DefaultEditErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Role successfully updated"
+     *  }
      *
+     * @apiUse         400Error
+     * @apiUse         ValidationError
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
      */
     /**
      * @param Request $request
@@ -132,90 +226,63 @@ class RulesController extends ItemController
     }
 
     /**
-     * @param Request $request
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /v1/rules/bulk-edit Bulk Edit
+     * @apiDescription  Editing Multiple Rules
      *
-     * @return JsonResponse
-     * @throws Throwable
-     * @api {post} /api/v1/rules/bulk-edit bulkEdit
-     * @apiDescription Editing Multiple Rules
-     * @apiVersion 0.1.0
-     * @apiName bulkEditRules
-     * @apiGroup Rule
+     * @apiVersion      1.0.0
+     * @apiName         bulkEditRules
+     * @apiGroup        Rule
      *
-     * @apiParam {Object[]} rules                Rules
-     * @apiParam {Object}   rules.object         Rule
-     * @apiParam {Integer}  rules.object.role_id Role id
-     * @apiParam {String}   rules.object.object  Rule object name
-     * @apiParam {String}   rules.object.action  Rule action name
-     * @apiParam {Boolean}  rules.object.allow   Rule allow status
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "rules":
-     *      [
-     *          {
-     *              "role_id": 2,
-     *              "object": "projects",
-     *              "action": "create",
-     *              "allow": 0
-     *          },
-     *          {
-     *              "role_id": 2,
-     *              "object": "projects",
-     *              "action": "list",
-     *              "allow": 0
-     *          }
-     *      ]
-     *  }
-     *
-     * @apiSuccess {String[]} messages         Messages
-     * @apiSuccess {String}   messages.message OK
-     *
-     * @apiSuccessExample {json} Response example
-     * {
-     * timeInterval,timeInterval.task
-     * }
-     *
-     * @apiUse DefaultEditErrorResponse
-     * @apiUse UnauthorizedError
-     *
+     * @apiPermission   rules_bulk_edit
+     * @apiPermission   rules_full_access
      */
 
-
     /**
-     * @api {get} /api/v1/rules/actions Actions
+     * @api {get, post} /v1/rules/actions Actions
      * @apiDescription Get list of Rules Actions
-     * @apiVersion 0.1.0
+     *
+     * @apiVersion 1.0.0
      * @apiName GetRulesActions
      * @apiGroup Rule
      *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   rules_actions
+     * @apiPermission   rules_full_access
+     *
+     * @apiSuccess {Boolean}   success     Indicates successful request when `TRUE`
+     * @apiSuccess {Object[]}  res         Available actions
+     * @apiSuccess {String}    res.object  Object with what action works
+     * @apiSuccess {String}    res.action  Action type
+     * @apiSuccess {String}    res.name    Action name
+     *
      * @apiSuccessExample {json} Response example
-     * [
-     *   {
-     *     "object": "projects",
-     *     "action": "list",
-     *     "name": "Project list"
-     *   },
-     *   {
-     *     "object": "projects",
-     *     "action": "create",
-     *     "name": "Project create"
-     *   },
-     *   {
-     *     "object": "projects",
-     *     "action": "show",
-     *     "name": "Project show"
-     *   }
-     * ]
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": [
+     *      {
+     *       "object": "projects",
+     *       "action": "list",
+     *       "name": "Project list"
+     *      },
+     *      {
+     *        "object": "projects",
+     *        "action": "create",
+     *        "name": "Project create"
+     *      },
+     *      {
+     *        "object": "projects",
+     *        "action": "show",
+     *        "name": "Project show"
+     *      }
+     *    ]
+     *  }
      *
-     * @apiSuccess (200) {Object[]} actions               Actions
-     * @apiSuccess (200) {Object}   actions.action        Applied to
-     * @apiSuccess (200) {String}   actions.action.object Applied action
-     * @apiSuccess (200) {String}   actions.action.action Action type
-     * @apiSuccess (200) {String}   actions.action.string Action name
-     *
-     * @apiUse UnauthorizedError
-     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
      */
     /**
      * @return JsonResponse

@@ -11,21 +11,6 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
- * @apiDefine TaskCommentObject
- *
- * @apiSuccess {Object}   taskComment             Task Comment entity
- * @apiSuccess {Integer}  taskComment.id          ID
- * @apiSuccess {Integer}  taskComment.task_id     The ID of the linked task
- * @apiSuccess {Integer}  taskComment.user_id     The ID of the linked user
- * @apiSuccess {String}   taskComment.content     Content of the comment
- * @apiSuccess {String}   taskComment.created_at  Creation DateTime
- * @apiSuccess {String}   taskComment.updated_at  Update DateTime
- * @apiSuccess {String}   taskComment.deleted_at  Delete DateTime or `NULL` if user wasn't deleted
- * @apiSuccess {Object}   taskComment.user        Linked user
- * @apiSuccess {Array}    taskComment.task        Linked task
- */
-
-/**
  * Class TaskComment
  *
  * @package App\Models

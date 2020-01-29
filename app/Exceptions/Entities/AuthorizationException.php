@@ -21,8 +21,10 @@ class AuthorizationException extends BaseAuthorizationException
     /**
      * @apiDefine 400Error
      * @apiError (Error 4xx) {String}   message     Message from server
-     * @apiError (Error 4xx) {Boolean}  success     Indicates erroneous response when FALSE
+     * @apiError (Error 4xx) {Boolean}  success     Indicates erroneous response when `FALSE`
      * @apiError (Error 4xx) {String}   error_type  Error type
+     *
+     * @apiVersion 1.0.0
      */
 
     /**
@@ -31,8 +33,11 @@ class AuthorizationException extends BaseAuthorizationException
      *  HTTP/1.1 401 Unauthorized
      *  {
      *    "success": false,
-     *    "message": "Not authorized"
+     *    "message": "Not authorized",
+     *    "error_type": "authorization.unauthorized"
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_UNAUTHORIZED = 'authorization.unauthorized';
 
@@ -46,10 +51,13 @@ class AuthorizationException extends BaseAuthorizationException
      *  {
      *    "success": false,
      *    "message": "Invalid captcha",
+     *    "error_type": "authorization.captcha"
      *    "info": {
      *      "site_key": "6Le7R8IUAAAAAMCwR4b...."
      *    }
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_CAPTCHA = 'authorization.captcha';
 
@@ -59,8 +67,11 @@ class AuthorizationException extends BaseAuthorizationException
      *  HTTP/1.1 423 Locked
      *  {
      *    "success": false,
-     *    "message": "Enhance Your Calm"
+     *    "message": "Enhance Your Calm",
+     *    "error_type": "authorization.banned_enhance_your_calm"
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_BANNED = 'authorization.banned';
 
@@ -70,8 +81,11 @@ class AuthorizationException extends BaseAuthorizationException
      *  HTTP/1.1 401 Unauthorized
      *  {
      *    "success": false,
-     *    "message": "Token mismatch"
+     *    "message": "Token mismatch",
+     *    "error_type": "authorization.token_mismatch"
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_TOKEN_MISMATCH = 'authorization.token_mismatch';
 
@@ -81,8 +95,11 @@ class AuthorizationException extends BaseAuthorizationException
      *  HTTP/1.1 401 Unauthorized
      *  {
      *    "success": false,
-     *    "message": "Token expired"
+     *    "message": "Token expired",
+     *    "error_type": "authorization.token_expired"
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_TOKEN_EXPIRED = 'authorization.token_expired';
 
@@ -92,8 +109,11 @@ class AuthorizationException extends BaseAuthorizationException
      *  HTTP/1.1 403 Forbidden
      *  {
      *    "success": false,
-     *    "message": "User deactivated"
+     *    "message": "User deactivated",
+     *    "error_type": "authorization.user_disabled"
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_USER_DISABLED = 'authorization.user_disabled';
 
@@ -103,8 +123,11 @@ class AuthorizationException extends BaseAuthorizationException
      *  HTTP/1.1 400 Bad Request
      *  {
      *    "success": false,
-     *    "message": "Ivalid params"
+     *    "message": "Invalid params",
+     *    "error_type": "authorization.wrong_params"
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_VALIDATION_FAILED = 'authorization.wrong_params';
 
@@ -114,8 +137,11 @@ class AuthorizationException extends BaseAuthorizationException
      *  HTTP/1.1 404 Not Found
      *  {
      *    "success": false,
-     *    "message": "User with such email isn’t found"
+     *    "message": "User with such email isn’t found",
+     *    "error_type": "authorization.user_not_found"
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_USER_NOT_FOUND = 'authorization.user_not_found';
 
@@ -125,8 +151,11 @@ class AuthorizationException extends BaseAuthorizationException
      *  HTTP/1.1 401 Unauthorized
      *  {
      *    "success": false,
-     *    "message": "Invalid password reset data"
+     *    "message": "Invalid password reset data",
+     *    "error_type": "authorization.invalid_password_data"
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_INVALID_PASSWORD_RESET_DATA = 'authorization.invalid_password_data';
 
@@ -136,8 +165,11 @@ class AuthorizationException extends BaseAuthorizationException
      *  HTTP/1.1 403 Forbidden
      *  {
      *    "success": false,
-     *    "message": "Forbidden"
+     *    "message": "Access denied to this item",
+     *    "error_type": "authorization.forbidden"
      *  }
+     *
+     * @apiVersion 1.0.0
      */
     public const ERROR_TYPE_FORBIDDEN = 'authorization.forbidden';
 
@@ -151,7 +183,7 @@ class AuthorizationException extends BaseAuthorizationException
         self::ERROR_TYPE_VALIDATION_FAILED => ['code' => 400, 'message' => 'Invalid params'],
         self::ERROR_TYPE_USER_NOT_FOUND => ['code' => 404, 'message' => 'User with such email isn’t found'],
         self::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA => ['code' => 401, 'message' => 'Invalid password reset data'],
-        self::ERROR_TYPE_FORBIDDEN => ['code' => 403, 'message' => 'Forbidden']
+        self::ERROR_TYPE_FORBIDDEN => ['code' => 403, 'message' => 'Access denied to this item']
     ];
 
     /**
