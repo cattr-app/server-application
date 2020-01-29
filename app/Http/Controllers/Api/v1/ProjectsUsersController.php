@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\ProjectsUsers;
 use App\EventFilter\Facades\Filter;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
@@ -151,7 +152,9 @@ class ProjectsUsersController extends ItemController
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors(),
-                ]), 400);
+                ]),
+                400
+            );
         }
 
         $cls = $this->getItemClass();
@@ -232,7 +235,7 @@ class ProjectsUsersController extends ItemController
      * @param Request $request
      * @return JsonResponse
      *
-     * @throws \Exception
+     * @throws Exception
      * @api {delete, post} /api/v1/projects-users/remove Destroy
      * @apiDescription Destroy Project Users relation
      * @apiParamExample {json} Simple Request Example
@@ -294,22 +297,25 @@ class ProjectsUsersController extends ItemController
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), $requestData
+                $this->getQuery(),
+                $requestData
             )
         );
 
         /** @var Model $item */
         $item = $itemsQuery->first();
-        if ($item) {
-            $item->delete();
-        } else {
+        if (!$item) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                     'success' => false,
                     'error_type' => 'query.item_not_found',
                     'message' => 'Item not found'
-                ]), 404);
+                ]),
+                404
+            );
         }
+
+        $item->delete();
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
@@ -323,7 +329,7 @@ class ProjectsUsersController extends ItemController
      * @param Request $request
      * @return JsonResponse
      *
-     * @throws \Exception
+     * @throws Exception
      * @api {post} /api/v1/projects-users/bulk-remove BulkDestroy
      * @apiParamExample {json} Simple Request Example
      * {
@@ -357,76 +363,67 @@ class ProjectsUsersController extends ItemController
      */
     public function bulkDestroy(Request $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all());
-        $result = [];
+        $validationRules = [
+            'relations' => 'required|array',
+            'relations.*.user_id' => 'required|integer',
+            'relations.*.project_id' => 'required|integer',
+        ];
 
-        if (empty($requestData['relations'])) {
+        $validator = Validator::make(
+            Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all()),
+            Filter::process($this->getEventUniqueName('validation.item.destroy'), $validationRules)
+        );
+
+        if ($validator->fails()) {
             return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkDestroy'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
-                    'info' => 'relations is empty',
-                ]), 400);
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
         }
 
-        $relations = $requestData['relations'];
-        if (!is_array($relations)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'relations should be an array',
-                ]), 400);
-        }
+        //filter excess params if they are provided
+        $relations = collect($request->get('relations'))->map(static function ($relation) {
+            return array_only($relation, ['project_id', 'user_id']);
+        });
 
-        foreach ($relations as $relation) {
-            /** @var Builder $itemsQuery */
-            $itemsQuery = Filter::process(
-                $this->getEventUniqueName('answer.success.item.query.prepare'),
-                $this->applyQueryFilter(
-                    $this->getQuery(), $relation
-                )
-            );
+        $filters = [
+            'project_id' => ['in', $relations->pluck('project_id')->toArray()],
+            'user_id' => ['in', $relations->pluck('user_id')->toArray()]
+        ];
 
-            $validator = Validator::make(
-                $relation,
-                Filter::process(
-                    $this->getEventUniqueName('validation.item.edit'),
-                    $this->getValidationRules()
-                )
-            );
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter($this->getQuery(), $filters)
+        );
 
-            if ($validator->fails()) {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors(),
-                    'code' => 400
-                ];
-                continue;
-            }
+        $foundRelations = $itemsQuery->get()->map->only(['project_id', 'user_id']);
 
-            /** @var Model $item */
-            $item = $itemsQuery->first();
-            if ($item && $item->delete()) {
-                $result[] = ['success' => true, 'message' => 'Item has been removed'];
-            } else {
-                $result[] = [
-                    'success' => false,
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found',
-                    'code' => 404
-                ];
-            }
+        $notFoundRelations = $relations->filter(static function ($item) use ($foundRelations) {
+            return !$foundRelations->contains($item);
+        });
+
+        $itemsQuery->delete();
+
+        $responseData = [
+            'success' => true,
+            'message' => 'Items successfully removed',
+            'removed' => $foundRelations->values()
+        ];
+
+        if ($notFoundRelations->isNotEmpty()) {
+            $responseData['message'] = 'Some items have not been removed';
+            $responseData['not_found'] = $notFoundRelations->values();
         }
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'messages' => $result
-            ])
+            Filter::process($this->getEventUniqueName('answer.success.item.remove'), $responseData),
+            ($notFoundRelations->isNotEmpty()) ? 207 : 200
         );
     }
 }
