@@ -1,12 +1,12 @@
 <?php
 
 
-namespace Tests\Feature\ProjectUsers;
+namespace Tests\Feature\ProjectsUsers;
 
-use App\Models\ProjectsUsers;
 use App\Models\User;
-use Tests\Facades\ProjectFactory;
+use Illuminate\Support\Collection;
 use Tests\Facades\UserFactory;
+use Tests\Facades\ProjectUserFactory;
 use Tests\TestCase;
 
 /**
@@ -16,8 +16,8 @@ class BulkRemoveTest extends TestCase
 {
     private const URI = 'v1/projects-users/bulk-remove';
 
-    private const PROJECTS_AMOUNT = 5;
-    private const USERS_AMOUNT = 5;
+    private const PROJECTS_USERS_AMOUNT = 5;
+
     /**
      * @var User
      */
@@ -29,24 +29,9 @@ class BulkRemoveTest extends TestCase
     private $requestData;
 
     /**
-     * @param int $roleId
-     * @return array
+     * @var Collection
      */
-    private function createProjectUsers(int $roleId): array
-    {
-        $projectIds = ProjectFactory::createMany(self::PROJECTS_AMOUNT)->pluck('id')->toArray();
-        $userIds = UserFactory::createMany(self::USERS_AMOUNT)->pluck('id')->toArray();
-
-        $relations = [];
-
-        foreach (array_combine($userIds, $projectIds) as $userId => $projectId) {
-            ProjectsUsers::create(['user_id' => $userId, 'project_id' => $projectId, 'role_id' => $roleId]);
-            $relations[] = ['project_id' => $projectId, 'user_id' => $userId,];
-        }
-
-        return $relations;
-    }
-
+    private $projectsUsers;
 
     protected function setUp(): void
     {
@@ -54,7 +39,9 @@ class BulkRemoveTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->requestData = ['relations' => $this->createProjectUsers(2)];
+        $this->projectsUsers = ProjectUserFactory::createMany(self::PROJECTS_USERS_AMOUNT);
+
+        $this->requestData = ['relations' => $this->projectsUsers->map->only(['project_id', 'user_id'])->toArray()];
     }
 
     public function test_bulk_remove(): void
