@@ -123,7 +123,7 @@ class DashboardController extends ReportController
             $users[$user_id]['duration'] += $duration;
         }
 
-        $results = ['userIntervals' => $users];
+        $results = ['userIntervals' => $users, 'success' => true];
 
         return response()->json(
             Filter::process(
