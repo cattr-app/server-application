@@ -70,6 +70,7 @@ class BulkRemoveTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
 
+        $response->assertStatus(self::HTTP_MULTI_STATUS);
         $response->assertJson(['removed' => TimeInterval::all()->pluck('id')->toArray()]);
         $response->assertJson(['not_found' => array_only($nonIntervals, 'id')]);
 
