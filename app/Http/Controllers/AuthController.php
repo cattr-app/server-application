@@ -21,53 +21,11 @@ use Illuminate\Support\Facades\Validator;
 class AuthController extends BaseController
 {
     /**
-     * @apiDefine AuthAnswer
-     *
-     * @apiSuccess {String}     access_token  Token
-     * @apiSuccess {String}     token_type    Token Type
-     * @apiSuccess {String}     expires_in    Token TTL in seconds
-     * @apiSuccess {Array}      user          User Entity
-     *
-     * @apiSuccessExample {json} Answer Example
-     *  {
-     *      {
-     *        "access_token": "eyJ0eXAiOiJKV1QiLCJhbGciO...",
-     *        "token_type": "bearer",
-     *         "expires_in": '2020-12-26T14:18:32+00:00 ',
-     *         "user": {
-     *           "id": 42,
-     *           "full_name": "Captain",
-     *           "email": "johndoe@example.com",
-     *           "url": "",
-     *           "company_id": 41,
-     *           "payroll_access": 1,
-     *           "billing_access": 1,
-     *           "avatar": "",
-     *           "screenshots_active": 1,
-     *           "manual_time": 0,
-     *           "permanent_tasks": 0,
-     *           "computer_time_popup": 300,
-     *           "poor_time_popup": "",
-     *           "blur_screenshots": 0,
-     *           "web_and_app_monitoring": 1,
-     *           "webcam_shots": 0,
-     *           "screenshots_interval": 9,
-     *           "active": "active",
-     *           "deleted_at": null,
-     *           "created_at": "2018-09-25 06:15:08",
-     *           "updated_at": "2018-09-25 06:15:08",
-     *           "timezone": null
-     *         }
-     *      }
-     *  }
-     */
-
-    /**
      * @apiDefine AuthHeader
      * @apiHeader {String} Authorization Token for user auth
      * @apiHeaderExample {json} Authorization Header Example
      *  {
-     *    "Authorization":  "bearer 16184cf3b2510464a53c0e573c75740540fe..."
+     *    "Authorization": "bearer 16184cf3b2510464a53c0e573c75740540fe..."
      *  }
      */
 
@@ -88,15 +46,10 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     * @throws AuthorizationException
-     *
-     * @api            {post} /api/auth/login Login
+     * @api            {post} /v1/auth/login Login
      * @apiDescription Get user JWT
      *
-     * @apiVersion     0.1.0
+     * @apiVersion     1.0.0
      * @apiName        Login
      * @apiGroup       Auth
      *
@@ -106,25 +59,27 @@ class AuthController extends BaseController
      *
      * @apiParamExample {json} Request Example
      *  {
-     *    "email":      "johndoe@example.com",
-     *    "password":   "amazingpassword",
-     *    "recaptcha":  "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
+     *    "email": "johndoe@example.com",
+     *    "password": "amazingpassword",
+     *    "recaptcha": "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
      *  }
      *
-     * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
+     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
-     * @apiSuccess {String}   expires_in    Token TTL in seconds
+     * @apiSuccess {ISO8601}  expires_in    Token TTL
      * @apiSuccess {Object}   user          User Entity
      *
-     * @apiSuccessExample {json} Success Response
+     * @apiUse         UserObject
+     *
+     * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success":      true,
+     *    "success": true,
      *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
-     *    "token_type":   "bearer",
-     *    "expires_in":   "2020-12-26T14:18:32+00:00",
-     *    "user":         {}
+     *    "token_type": "bearer",
+     *    "expires_in": "2020-12-26T14:18:32+00:00",
+     *    "user": {}
      *  }
      *
      * @apiUse         400Error
@@ -133,6 +88,11 @@ class AuthController extends BaseController
      * @apiUse         UserDeactivatedError
      * @apiUse         CaptchaError
      * @apiUse         LimiterError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws AuthorizationException
      */
     public function login(Request $request): JsonResponse
     {
@@ -177,23 +137,19 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     *
-     * @api            {post} /api/auth/logout Logout
+     * @api            {post} /v1/auth/logout Logout
      * @apiDescription Invalidate JWT
      *
-     * @apiVersion     0.1.0
+     * @apiVersion     1.0.0
      * @apiName        Logout
      * @apiGroup       Auth
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Message from server
      *
-     * @apiSuccessExample {json} Success Response
+     * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
@@ -202,6 +158,10 @@ class AuthController extends BaseController
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
      */
     public function logout(Request $request): JsonResponse
     {
@@ -212,31 +172,31 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     *
-     * @api            {post} /api/auth/logout-from-all Logout from all
+     * @api            {post} /v1/auth/logout-from-all Logout from all
      * @apiDescription Invalidate all user JWT
      *
-     * @apiVersion     0.1.0
+     * @apiVersion     1.0.0
      * @apiName        Logout all
      * @apiGroup       Auth
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Message from server
      *
-     * @apiSuccessExample {json} Success Response
+     * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
-     *    "message": "Successfully ended all sessions"
+     *    "message": "Successfully logged out from all sessions"
      *  }
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
      */
     public function logoutFromAll(Request $request): JsonResponse
     {
@@ -247,23 +207,21 @@ class AuthController extends BaseController
     }
 
     /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     *
-     * @api            {get} /api/auth/me Me
+     * @api            {get} /v1/auth/me Me
      * @apiDescription Get authenticated User Entity
      *
-     * @apiVersion     0.1.0
+     * @apiVersion     1.0.0
      * @apiName        Me
      * @apiGroup       Auth
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
-     * @apiSuccess {Array}    user     User Entity
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object}   user     User Entity
      *
-     * @apiSuccessExample {json} Answer Example
+     * @apiUse         UserObject
+     *
+     * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
@@ -296,32 +254,36 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function me(Request $request): JsonResponse
     {
         return response()->json(['success' => true, 'user' => $request->user()]);
     }
 
     /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     *
-     * @api            {post} /api/auth/refresh Refresh
+     * @api            {post} /v1/auth/refresh Refresh
      * @apiDescription Refreshes JWT
      *
-     * @apiVersion     0.1.0
+     * @apiVersion     1.0.0
      * @apiName        Refresh
      * @apiGroup       Auth
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Boolean}  success       Indicates successful request when TRUE
+     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL 8601String Date
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
      */
     public function refresh(Request $request): JsonResponse
     {
@@ -339,4 +301,26 @@ class AuthController extends BaseController
             'expires_in' => Carbon::parse($token->expires_at)->toIso8601String(),
         ]);
     }
+
+    /**
+     * @apiDeprecated since 1.0.0 use now (#Password_Reset:Process)
+     * @api {post} /api/auth/reset Reset
+     * @apiDescription Get user JWT
+     *
+     *
+     * @apiVersion 1.0.0
+     * @apiName Reset
+     * @apiGroup Auth
+     */
+
+    /**
+     * @apiDeprecated since 1.0.0 use now (#Password_Reset:Request)
+     * @api {post} /api/auth/send-reset Send reset e-mail
+     * @apiDescription Get user JWT
+     *
+     *
+     * @apiVersion 1.0.0
+     * @apiName Send reset
+     * @apiGroup Auth
+     */
 }

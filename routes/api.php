@@ -82,7 +82,7 @@ Route::group([
 Route::group([
     'prefix' => 'status',
 ], static function (Router $router) {
-    $router->any('/', 'StatusController@index');
+    $router->get('/', 'StatusController@index');
 });
 
 
@@ -159,10 +159,11 @@ Route::group([
     $router->post('/time-intervals/bulk-edit', 'Api\v1\TimeIntervalController@bulkEdit');
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
-    $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
-    $router->any('/time-intervals/day-duration', 'Api\v1\Statistic\DashboardController@timePerDay');
     $router->post('/time-intervals/bulk-remove', 'Api\v1\TimeIntervalController@bulkDestroy');
     $router->post('/time-intervals/manual-create', 'Api\v1\TimeIntervalController@manualCreate');
+
+    $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
+    $router->any('/time-intervals/day-duration', 'Api\v1\Statistic\DashboardController@timePerDay');
 
     //Time routes
     $router->any('/time/total', 'Api\v1\TimeController@total');

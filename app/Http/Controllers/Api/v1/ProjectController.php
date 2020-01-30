@@ -4,6 +4,8 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
 use App\Models\Role;
+use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
@@ -63,43 +65,19 @@ class ProjectController extends ItemController
     }
 
     /**
-     * @apiDefine ProjectRelations
+     * @api             {get, post} /v1/projects/list List
+     * @apiDescription  Get list of Projects
      *
-     * @apiParam {String} [with]               For add relation model in response
-     * @apiParam {Object} [tasks] `QueryParam` Project's relation task. All params in <a href="#api-Task-GetTaskList" >@Task</a>
-     * @apiParam {Object} [users] `QueryParam` Project's relation user. All params in <a href="#api-User-GetUserList" >@User</a>
-     */
-
-    /**
-     * @apiDefine ProjectRelationsExample
-     * @apiParamExample {json} Request With Relations Example
-     *  {
-     *      "with":            "tasks,users,tasks.timeIntervals",
-     *      "tasks.id":        [">", 1],
-     *      "tasks.active":    1,
-     *      "users.full_name": ["like", "%lorem%"],
-     *      "id":              1
-     *  }
-     */
-
-    /**
-     * @param  Request  $request
+     * @apiVersion      1.0.0
+     * @apiName         GetProjectList
+     * @apiGroup        Project
      *
-     * @return JsonResponse
-     * @api            {get, post} /api/v1/projects/list List
-     * @apiDescription Get list of Projects
-     * @apiVersion     0.1.0
-     * @apiName        GetProjectList
-     * @apiGroup       Project
+     * @apiUse          AuthHeader
      *
-     * @apiParam {Integer}  [id]          `QueryParam` Project id
-     * @apiParam {Integer}  [user_id]     `QueryParam` Project User id
-     * @apiParam {String}   [name]        `QueryParam` Project name
-     * @apiParam {String}   [description] `QueryParam` Project description
-     * @apiParam {String}   [created_at]  `QueryParam` Project date time of create
-     * @apiParam {String}   [updated_at]  `QueryParam` Project date time of update
+     * @apiPermission   projects_list
+     * @apiPermission   projects_full_access
      *
-     * @apiUse         ProjectRelations
+     * @apiUse         ProjectParams
      *
      * @apiParamExample {json} Simple Request Example
      *  {
@@ -110,42 +88,40 @@ class ProjectController extends ItemController
      *      "created_at":  [">", "2019-01-01 00:00:00"],
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
-     * @apiUse         ProjectRelationsExample
-     * @apiUse         UnauthorizedError
      *
-     * @apiSuccess {Object[]} ProjectList                     Projects
-     * @apiSuccess {Object}   ProjectList.Project             Project
-     * @apiSuccess {Integer}  ProjectList.Project.id          Project id
-     * @apiSuccess {String}   ProjectList.Project.name        Project name
-     * @apiSuccess {String}   ProjectList.Project.description Project description
-     * @apiSuccess {String}   ProjectList.Project.created_at  Project date time of create
-     * @apiSuccess {String}   ProjectList.Project.updated_at  Project date time of update
-     * @apiSuccess {String}   ProjectList.Project.deleted_at  Project date time of delete
-     * @apiSuccess {Object[]} ProjectList.Project.users       Project Users
-     * @apiSuccess {Object[]} ProjectList.Project.tasks       Project Tasks
+     * @apiUse          ProjectObject
      *
-     * @apiSuccessExample {json} Answer Example
-     * [
-     *   {
-     *     "id": 1,
-     *     "company_id": 0,
-     *     "name": "Eos est amet sunt ut autem harum.",
-     *     "description": "Dolores rem et sed beatae...",
-     *     "deleted_at": null,
-     *     "created_at": "2018-09-25 06:15:08",
-     *     "updated_at": "2018-09-25 06:15:08"
-     *   },
-     *   {
-     *     "id": 2,
-     *     "company_id": 1,
-     *     "name": "Incidunt officiis.",
-     *     "description": "Quas quam sint vero...",
-     *     "deleted_at": null,
-     *     "created_at": "2018-09-25 06:15:11",
-     *     "updated_at": "2018-09-25 06:15:11"
-     *   }
-     * ]
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  [
+     *    {
+     *      "id": 1,
+     *      "company_id": 0,
+     *      "name": "Eos est amet sunt ut autem harum.",
+     *      "description": "Dolores rem et sed beatae...",
+     *      "deleted_at": null,
+     *      "created_at": "2018-09-25 06:15:08",
+     *      "updated_at": "2018-09-25 06:15:08"
+     *    },
+     *    {
+     *      "id": 2,
+     *      "company_id": 1,
+     *      "name": "Incidunt officiis.",
+     *      "description": "Quas quam sint vero...",
+     *      "deleted_at": null,
+     *      "created_at": "2018-09-25 06:15:11",
+     *      "updated_at": "2018-09-25 06:15:11"
+     *    }
+     *  ]
      *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
     public function index(Request $request): JsonResponse
     {
@@ -194,11 +170,23 @@ class ProjectController extends ItemController
     }
 
     /**
+     * @apiDeprecated   since 1.0.0
+     * @api             {get,post} /v1/projects/tasks Tasks
+     * @apiDescription  Get tasks that assigned to project
+     *
+     * @apiVersion      1.0.0
+     * @apiName         ProjectTasks
+     * @apiGroup        Project
+     *
+     * @apiPermission   projects_tasks
+     * @apiPermission   projects_full_access
+     */
+    /**
      * Returns tasks info for a project.
+     *
+     * @param Request $request
      * @deprecated
      * @codeCoverageIgnore
-     * @param  Request  $request
-     *
      * @return JsonResponse
      */
     public function tasks(Request $request): JsonResponse
@@ -215,7 +203,8 @@ class ProjectController extends ItemController
                 ]), 400);
         }
 
-        $user = Auth::user();
+        /* @var User $user */
+        $user = auth()->user();
         $userProjectIds = Project::getUserRelatedProjectIds($user);
         if (!in_array($itemId, $userProjectIds)) {
             return response()->json(
@@ -278,53 +267,69 @@ class ProjectController extends ItemController
     }
 
     /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     * @api            {post} /api/v1/projects/create Create
+     * @api            {post} /v1/projects/create Create
      * @apiDescription Create Project
-     * @apiVersion     0.1.0
+     *
+     * @apiVersion     1.0.0
      * @apiName        CreateProject
      * @apiGroup       Project
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   projects_create
+     * @apiPermission   projects_full_access
      *
      * @apiParam {String}  name         Project name
      * @apiParam {String}  description  Project description
      *
-     * @apiParamExample {json} Simple Request Example
+     * @apiParamExample {json} Request Example
      *  {
      *      "name": "SampleOriginalProjectName",
      *      "description": "Code-monkey development group presents"
      *  }
      *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res             Response
-     * @apiSuccess {Integer}  res.id          Project id
-     * @apiSuccess {String}   res.name        Project name
-     * @apiSuccess {String}   res.description Project description
-     * @apiSuccess {String}   res.created_at  Project date time of create
-     * @apiSuccess {String}   res.updated_at  Project date time of update
      *
-     * @apiUse         DefaultCreateErrorResponse
+     * @apiUse          ProjectObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": {
+     *      "name": "SampleOriginalProjectName",
+     *      "description": "Code-monkey development group presents",
+     *      "updated_at": "2018-09-27 04:55:29",
+     *      "created_at": "2018-09-27 04:55:29",
+     *      "id": 6
+     *    }
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
-     *
-     * @apiSuccessExample {json} Answer Example
-     * {
-     *   "res": {
-     *     "name": "SampleOriginalProjectName",
-     *     "description": "Code-monkey development group presents",
-     *     "updated_at": "2018-09-27 04:55:29",
-     *     "created_at": "2018-09-27 04:55:29",
-     *     "id": 6
-     *   }
-     * }
-     *
+     * @apiUse         ForbiddenError
      */
 
     /**
-     * @param  Request  $request
+     * @api             {get, post} /v1/projects/show Show
+     * @apiDescription  Show Project
      *
-     * @return JsonResponse
-     * @api            {post} /api/v1/projects/show Show
-     * @apiParamExample {json} Simple Request Example
+     * @apiVersion      1.0.0
+     * @apiName         ShowProject
+     * @apiGroup        Project
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   projects_show
+     * @apiPermission   projects_full_access
+     *
+     * @apiParam {Integer}  id  Project ID
+     *
+     * @apiUse          ProjectParams
+     *
+     * @apiParamExample {json} Request Example
      *  {
      *      "id":          1,
      *      "user_id":     ["=", [1,2,3]],
@@ -333,150 +338,196 @@ class ProjectController extends ItemController
      *      "created_at":  [">", "2019-01-01 00:00:00"],
      *      "updated_at":  ["<", "2019-01-01 00:00:00"]
      *  }
-     * @apiUse         ProjectRelationsExample
-     * @apiDescription Show Project
-     * @apiVersion     0.1.0
-     * @apiName        ShowProject
-     * @apiGroup       Project
      *
-     * @apiParam {Integer}  id            `QueryParam` Project id
-     * @apiParam {Integer}  [user_id]     `QueryParam` Project User id
-     * @apiParam {String}   [name]        `QueryParam` Project name
-     * @apiParam {String}   [description] `QueryParam` Project description
-     * @apiParam {String}   [created_at]  `QueryParam` Project date time of create
-     * @apiParam {String}   [updated_at]  `QueryParam` Project date time of update
-     * @apiUse         ProjectRelations
+     * @apiUse         ProjectObject
      *
-     * @apiSuccess {Object}   Project             Project object
-     * @apiSuccess {Integer}  Project.id          Project id
-     * @apiSuccess {String}   Project.name        Project name
-     * @apiSuccess {String}   Project.description Project description
-     * @apiSuccess {String}   Project.created_at  Project date time of create
-     * @apiSuccess {String}   Project.updated_at  Project date time of update
-     * @apiSuccess {String}   Project.deleted_at  Project date time of delete
-     * @apiSuccess {Object[]} Project.users       Project Users
-     * @apiSuccess {Object[]} Project.tasks       Project Tasks
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "id": 1,
+     *    "company_id": 0,
+     *    "name": "Eos est amet sunt ut autem harum.",
+     *    "description": "Dolores rem et sed beatae architecto...",
+     *    "deleted_at": null,
+     *    "created_at": "2018-09-25 06:15:08",
+     *    "updated_at": "2018-09-25 06:15:08"
+     *  }
      *
-     * @apiSuccessExample {json} Answer Example
-     * {
-     *   "id": 1,
-     *   "company_id": 0,
-     *   "name": "Eos est amet sunt ut autem harum.",
-     *   "description": "Dolores rem et sed beatae architecto...",
-     *   "deleted_at": null,
-     *   "created_at": "2018-09-25 06:15:08",
-     *   "updated_at": "2018-09-25 06:15:08"
-     * }
+     * @apiSuccessExample {json} Response Relation Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "id": 1,
+     *    "company_id": 0,
+     *    "name": "Eos est amet sunt ut autem harum.",
+     *    "description": "Dolores rem et sed beatae architecto assumenda illum reprehenderit...",
+     *    "deleted_at": null,
+     *    "created_at": "2018-09-25 06:15:08",
+     *    "updated_at": "2018-09-25 06:15:08",
+     *    "tasks": [
+     *      {
+     *        "id": 1,
+     *        "project_id": 1,
+     *        "task_name": "Enim et sit similique.",
+     *        "description": "Adipisci eius qui quia et rerum rem perspiciatis...",
+     *        "active": 1,
+     *        "user_id": 1,
+     *        "assigned_by": 1,
+     *        "url": null,
+     *        "created_at": "2018-09-25 06:15:08",
+     *        "updated_at": "2018-09-25 06:15:08",
+     *        "deleted_at": null,
+     *        "time_intervals": [
+     *          {
+     *            "id": 1,
+     *            "task_id": 1,
+     *            "start_at": "2006-05-31 16:15:09",
+     *            "end_at": "2006-05-31 16:20:07",
+     *            "created_at": "2018-09-25 06:15:08",
+     *            "updated_at": "2018-09-25 06:15:08",
+     *            "deleted_at": null,
+     *            "count_mouse": 88,
+     *            "count_keyboard": 127,
+     *            "user_id": 1
+     *          },
+     *          {
+     *            "id": 2,
+     *            "task_id": 1,
+     *            "start_at": "2006-05-31 16:20:08",
+     *            "end_at": "2006-05-31 16:25:06",
+     *            "created_at": "2018-09-25 06:15:08",
+     *            "updated_at": "2018-09-25 06:15:08",
+     *            "deleted_at": null,
+     *            "count_mouse": 117,
+     *            "count_keyboard": 23,
+     *            "user_id": 1
+     *          }
+     *      }
+     *    ]
+     *  }
      *
-     * @apiSuccessExample {json} Answer Relation Example
-     * {
-     *   "id": 1,
-     *   "company_id": 0,
-     *   "name": "Eos est amet sunt ut autem harum.",
-     *   "description": "Dolores rem et sed beatae architecto assumenda illum reprehenderit...",
-     *   "deleted_at": null,
-     *   "created_at": "2018-09-25 06:15:08",
-     *   "updated_at": "2018-09-25 06:15:08",
-     *   "tasks": [
-     *   {
-     *   "id": 1,
-     *   "project_id": 1,
-     *   "task_name": "Enim et sit similique.",
-     *   "description": "Adipisci eius qui quia et rerum rem perspiciatis...",
-     *   "active": 1,
-     *   "user_id": 1,
-     *   "assigned_by": 1,
-     *   "url": null,
-     *   "created_at": "2018-09-25 06:15:08",
-     *   "updated_at": "2018-09-25 06:15:08",
-     *   "deleted_at": null,
-     *   "time_intervals": [
-     *     {
-     *       "id": 1,
-     *       "task_id": 1,
-     *       "start_at": "2006-05-31 16:15:09",
-     *       "end_at": "2006-05-31 16:20:07",
-     *       "created_at": "2018-09-25 06:15:08",
-     *       "updated_at": "2018-09-25 06:15:08",
-     *       "deleted_at": null,
-     *       "count_mouse": 88,
-     *       "count_keyboard": 127,
-     *       "user_id": 1
-     *     },
-     *     {
-     *       "id": 2,
-     *       "task_id": 1,
-     *       "start_at": "2006-05-31 16:20:08",
-     *       "end_at": "2006-05-31 16:25:06",
-     *       "created_at": "2018-09-25 06:15:08",
-     *       "updated_at": "2018-09-25 06:15:08",
-     *       "deleted_at": null,
-     *       "count_mouse": 117,
-     *       "count_keyboard": 23,
-     *       "user_id": 1
-     *     }
-     *   ]
-     * }
-     *
-     * @apiUse         DefaultShowErrorResponse
+     * @apiUse         400Error
+     * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
-     *
+     * @apiUse         ForbiddenError
+     * @apiUse         ItemNotFoundError
      */
 
     /**
-     * @param  Request  $request
+     * @api             {post} /v1/projects/edit Edit
+     * @apiDescription  Edit Project
      *
-     * @return JsonResponse
-     * @api            {put, post} /api/v1/projects/edit Edit
-     * @apiParamExample {json} Simple Request Example
+     * @apiVersion      1.0.0
+     * @apiName         EditProject
+     * @apiGroup        Project
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   projects_edit
+     * @apiPermission   projects_full_access
+     *
+     * @apiParamExample {json} Request Example
      *  {
      *      "id": 1,
      *      "name": "test",
      *      "description": "test"
      *  }
      *
-     * @apiDescription Edit Project
-     * @apiVersion     0.1.0
-     * @apiName        EditProject
-     * @apiGroup       Project
-     *
      * @apiParam {String}  id           Project id
      * @apiParam {String}  name         Project name
      * @apiParam {String}  description  Project description
      *
-     * @apiSuccess {Object}   res             Response object
-     * @apiSuccess {Integer}  res.id          Project id
-     * @apiSuccess {String}   res.name        Project name
-     * @apiSuccess {String}   res.description Project description
-     * @apiSuccess {String}   res.created_at  Project date time of create
-     * @apiSuccess {String}   res.updated_at  Project date time of update
-     * @apiSuccess {String}   res.deleted_at  Project date time of delete
+     * @apiSuccess {Object}   res      Response object
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      *
-     * @apiUse         DefaultEditErrorResponse
+     * @apiUse          ProjectObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  {
+     *    "success": true,
+     *    "res": {
+     *      "id": 1,
+     *      "company_id": 0,
+     *      "name": "Eos est amet sunt ut autem harum.",
+     *      "description": "Dolores rem et sed beatae architecto...",
+     *      "deleted_at": null,
+     *      "created_at": "2018-09-25 06:15:08",
+     *      "updated_at": "2018-09-25 06:15:08"
+     *    }
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
-     *
+     * @apiUse         ItemNotFoundError
      */
 
     /**
-     * @param  Request  $request
+     * @api             {post} /v1/projects/remove Destroy
+     * @apiDescription  Destroy Project
      *
-     * @return JsonResponse
-     * @api            {delete, post} /api/v1/projects/remove Destroy
-     * @apiUse         DefaultDestroyRequestExample
-     * @apiDescription Destroy Project
-     * @apiVersion     0.1.0
-     * @apiName        DestroyProject
-     * @apiGroup       Project
+     * @apiVersion      1.0.0
+     * @apiName         DestroyProject
+     * @apiGroup        Project
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   projects_remove
+     * @apiPermission   projects_full_access
      *
      * @apiParam {String} id Project id
      *
-     * @apiUse         DefaultDestroyResponse
-     * @apiUse         UnauthorizedError
+     * @apiParamExample {json} Request Example
+     * {
+     *   "id": 1
+     * }
      *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   message  Destroy status
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Item has been removed"
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     * @apiUse          ItemNotFoundError
      */
 
     /**
-     * @param  bool  $withRelations
+     * @api             {get,post} /v1/projects/count Count
+     * @apiDescription  Count Projects
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Count
+     * @apiGroup        Project
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   projects_count
+     * @apiPermission   projects_full_access
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   total    Amount of projects that we have
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "total": 2
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+
+    /**
+     * @param bool $withRelations
      *
      * @return Builder
      */
@@ -504,27 +555,29 @@ class ProjectController extends ItemController
             $query->where(function (Builder $query) use ($user_id, $object, $action) {
                 // Filter by project roles of the user
                 $query->whereHas('usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
-                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
-                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                            $query->where([
-                                'object' => $object,
-                                'action' => $action,
-                                'allow'  => true,
-                            ])->select('id');
+                    $query->where('user_id', $user_id)->whereHas('role',
+                        static function (Builder $query) use ($object, $action) {
+                            $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                                $query->where([
+                                    'object' => $object,
+                                    'action' => $action,
+                                    'allow' => true,
+                                ])->select('id');
+                            })->select('id');
                         })->select('id');
-                    })->select('id');
                 });
 
                 // For read-only access include projects where the user have assigned tasks or tracked intervals
-                $query->when($action !== 'edit' && $action !== 'remove', static function (Builder $query) use ($user_id) {
-                    $query->orWhereHas('tasks', static function (Builder $query) use ($user_id) {
-                        $query->where('user_id', $user_id)->select('user_id');
-                    });
+                $query->when($action !== 'edit' && $action !== 'remove',
+                    static function (Builder $query) use ($user_id) {
+                        $query->orWhereHas('tasks', static function (Builder $query) use ($user_id) {
+                            $query->where('user_id', $user_id)->select('user_id');
+                        });
 
-                    $query->orWhereHas('tasks.timeIntervals', static function (Builder $query) use ($user_id) {
-                        $query->where('user_id', $user_id)->select('user_id');
+                        $query->orWhereHas('tasks.timeIntervals', static function (Builder $query) use ($user_id) {
+                            $query->where('user_id', $user_id)->select('user_id');
+                        });
                     });
-                });
             });
         }
 

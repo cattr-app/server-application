@@ -13,18 +13,35 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * @apiDefine ProjectObject
  *
- * @apiSuccess {Object}   project              Project entity
- * @apiSuccess {Integer}  project.id           ID
- * @apiSuccess {Integer}  project.company_id   Company ID
- * @apiSuccess {String}   project.name         Name
- * @apiSuccess {String}   project.description  Description of project
- * @apiSuccess {String}   project.created_at   Creation DateTime
- * @apiSuccess {String}   project.updated_at   Update DateTime
- * @apiSuccess {String}   project.deleted_at   Delete DateTime or `NULL` if user wasn't deleted
- * @apiSuccess {Array}    project.users        Users attached to project
- * @apiSuccess {Array}    project.tasks        Tasks of project
+ * @apiSuccess {Integer}  project.id            ID
+ * @apiSuccess {Integer}  [project.company_id]  Company ID
+ * @apiSuccess {String}   project.name          Name
+ * @apiSuccess {String}   project.description   Description of project
+ * @apiSuccess {ISO8601}  project.created_at    Creation DateTime
+ * @apiSuccess {ISO8601}  project.updated_at    Update DateTime
+ * @apiSuccess {ISO8601}  project.deleted_at    Delete DateTime or `NULL` if wasn't deleted
+ * @apiSuccess {Array}    [project.users]       Users attached to project
+ * @apiSuccess {Array}    [project.tasks]       Tasks of project
+ *
+ * @apiVersion 1.0.0
  */
 
+/**
+ * @apiDefine ProjectParams
+ *
+ * @apiParam {Integer}  [id]           ID
+ * @apiParam {Integer}  [company_id]   Company ID
+ * @apiParam {String}   [name]         Name
+ * @apiParam {String}   [description]  Description of project
+ * @apiParam {ISO8601}  [created_at]   Creation DateTime
+ * @apiParam {ISO8601}  [updated_at]   Update DateTime
+ * @apiParam {ISO8601}  [deleted_at]   Delete DateTime or `NULL` if user wasn't deleted
+ * @apiParam {String}   [with]         Related models to return in response
+ * @apiParam {Object}   [users]        Users attached to project, all params in <a href="#api-User-GetUserList" >@User</a>
+ * @apiParam {Object}   [tasks]        Tasks of project, all params in <a href="#api-Task-GetTaskList" >@Task</a>
+ *
+ * @apiVersion 1.0.0
+ */
 
 /**
  * Class Project
