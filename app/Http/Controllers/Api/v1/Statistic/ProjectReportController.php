@@ -431,8 +431,17 @@ class ProjectReportController extends ReportController
     }
 
     /**
-     * @param  Request  $request
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /v1/project-report/screenshots Screenshots
      *
+     * @apiVersion      1.0.0
+     * @apiName         Screenshots
+     * @apiGroup        Project Report
+     */
+    /**
+     * @param  Request  $request
+     * @deprecated
+     * @codeCoverageIgnore
      * @return JsonResponse
      */
     public function screenshots(Request $request): JsonResponse
