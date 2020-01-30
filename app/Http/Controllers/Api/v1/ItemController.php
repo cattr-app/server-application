@@ -25,6 +25,35 @@ use Illuminate\Support\Facades\Event;
 abstract class ItemController extends Controller
 {
     /**
+     * @apiDefine ItemNotFoundError
+     * @apiErrorExample {json} No such item
+     *  HTTP/1.1 404 Not Found
+     *  {
+     *    "success": false,
+     *    "message": "Item not found",
+     *    "error_type": "query.item_not_found"
+     *  }
+     *
+     * @apiVersion 1.0.0
+     */
+
+    /**
+     * @apiDefine ValidationError
+     * @apiErrorExample {json} Validation error
+     *  HTTP/1.1 400 Bad Request
+     *  {
+     *    "success": false,
+     *    "message": "Validation error",
+     *    "error_type": "validation",
+     *    "info": "Invalid id"
+     *  }
+     *
+     * @apiError (Error 400) {String}  info  Validation errors
+     *
+     * @apiVersion 1.0.0
+     */
+
+    /**
      * Returns current item's class name
      *
      * @return string|Model
@@ -59,6 +88,7 @@ abstract class ItemController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws Exception
      */
     public function index(Request $request): JsonResponse
     {
@@ -89,6 +119,7 @@ abstract class ItemController extends Controller
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws Exception
      */
     public function count(Request $request): JsonResponse
     {
@@ -108,27 +139,6 @@ abstract class ItemController extends Controller
             )
         ]);
     }
-
-    /**
-     * @apiDefine DefaultCreateErrorResponse
-     *
-     * @apiError (Error 400) {String} error  Name of error
-     * @apiError (Error 400) {String} reason Reason of error
-     */
-
-    /**
-     * @apiDefine DefaultBulkCreateErrorResponse
-     * @apiError (Error 200) {Object[]}  messages               Errors
-     * @apiError (Error 200) {Object}    messages.object        Error object
-     * @apiError (Error 200) {String}    messages.object.error  Name of error
-     * @apiError (Error 200) {String}    messages.object.reason Reason of error
-     * @apiError (Error 200) {Integer}   messages.object.code   Code of error
-     *
-     * @apiError (Error 400) {Object[]} messages                Errors
-     * @apiError (Error 400) {Object}   messages.object         Error
-     * @apiError (Error 400) {String}   messages.object.error   Name of error
-     * @apiError (Error 400) {String}   messages.object.reason  Reason of error
-     */
 
     /**
      * Create item
@@ -177,17 +187,12 @@ abstract class ItemController extends Controller
     }
 
     /**
-     * @apiDefine DefaultShowErrorResponse
-     * @apiError (Error 400) {String} error  Name of error
-     * @apiError (Error 400) {String} reason Reason of error
-     */
-
-    /**
      * Display the specified resource.
      *
      * @param Request $request
      * @return JsonResponse
      * @throws ModelNotFoundException
+     * @throws Exception
      */
     public function show(Request $request): JsonResponse
     {
@@ -234,37 +239,13 @@ abstract class ItemController extends Controller
     }
 
     /**
-     * @apiDefine DefaultEditErrorResponse
-     *
-     * @apiError (Error 400) {String} error  Error name
-     * @apiError (Error 400) {String} reason Reason
-     */
-
-    /**
-     * @apiDefine DefaultBulkEditErrorResponse
-     *
-     * Yes, we send errors with 200 HTTP status-code, because 207 use WebDAV
-     * and REST API have some architecture problems
-     *
-     * @apiError (Error 200) {Object[]}  messages               Errors
-     * @apiError (Error 200) {Object}    messages.object        Error
-     * @apiError (Error 200) {String}    messages.object.error  Error name
-     * @apiError (Error 200) {String}    messages.object.reason Reason
-     * @apiError (Error 200) {Integer}   messages.object.code   Error Status-Code
-     *
-     * @apiError (Error 400) {Object[]} messages               Errors
-     * @apiError (Error 400) {Object}   messages.object        Error
-     * @apiError (Error 400) {String}   messages.object.error  Name of error
-     * @apiError (Error 400) {String}   messages.object.reason Reason of error
-     */
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param Request $request
      * @return JsonResponse
      * @throws MassAssignmentException
      * @throws ModelNotFoundException
+     * @throws Exception
      */
     public function edit(Request $request): JsonResponse
     {
@@ -357,36 +338,6 @@ abstract class ItemController extends Controller
             ])
         );
     }
-
-    /**
-     * @apiDefine DefaultDestroyRequestExample
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "id": 1
-     *  }
-     */
-
-    /**
-     * @apiDefine DefaultDestroyResponse
-     * @apiSuccess {String}    message      Message about success remove
-     * @apiError   (Error 404) ItemNotFound HTTP/1.1 404 Page Not Found
-     */
-
-    /**
-     * @apiDefine DefaultBulkDestroyErrorResponse
-     *
-     * @apiError (Error 200) {Object[]}  messages               Errors
-     * @apiError (Error 200) {Object}    messages.object        Error object
-     * @apiError (Error 200) {String}    messages.object.error  Name of error
-     * @apiError (Error 200) {String}    messages.object.reason Reason of error
-     * @apiError (Error 200) {Integer}   messages.object.code   Code of error
-     *
-     * @apiError (Error 400) {Object[]} messages               Errors
-     * @apiError (Error 400) {Object}   messages.object        Error object
-     * @apiError (Error 400) {String}   messages.object.error  Name of error
-     * @apiError (Error 400) {String}   messages.object.reason Reason of error
-     */
 
     /**
      * Remove the specified resource from storage.
@@ -516,6 +467,7 @@ abstract class ItemController extends Controller
      * @param array $filter
      *
      * @return Builder
+     * @throws Exception
      */
     protected function applyQueryFilter(Builder $query, array $filter = []): Builder
     {

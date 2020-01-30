@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -12,17 +11,34 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * @apiDefine ScreenshotObject
  *
- * @apiSuccess {Object}   screenshot                   Screenshot entity
  * @apiSuccess {Integer}  screenshot.id                ID
  * @apiSuccess {Integer}  screenshot.time_interval_id  Time interval ID
  * @apiSuccess {String}   screenshot.path              Image url
  * @apiSuccess {String}   screenshot.thumbnail_path    Thumbnail url
- * @apiSuccess {String}   screenshot.created_at        Creation DateTime
- * @apiSuccess {String}   screenshot.updated_at        Update DateTime
- * @apiSuccess {String}   screenshot.deleted_at        Delete DateTime or `NULL` if user wasn't deleted
+ * @apiSuccess {ISO8601}  screenshot.created_at        Creation DateTime
+ * @apiSuccess {ISO8601}  screenshot.updated_at        Update DateTime
+ * @apiSuccess {ISO8601}  screenshot.deleted_at        Delete DateTime or `NULL` if wasn't deleted
  * @apiSuccess {Object}   screenshot.time_interval     The time interval that screenshot belongs to
+ * @apiSuccess {Boolean}  screenshot.important         Important flag
+ *
+ * @apiVersion 1.0.0
  */
 
+/**
+ * @apiDefine ScreenshotParams
+ *
+ * @apiParam {Integer}  [id]                ID
+ * @apiParam {Integer}  [time_interval_id]  Time interval ID
+ * @apiParam {String}   [path]              Image url
+ * @apiParam {String}   [thumbnail_path]    Thumbnail url
+ * @apiParam {ISO8601}  [created_at]        Creation DateTime
+ * @apiParam {ISO8601}  [updated_at]        Update DateTime
+ * @apiParam {ISO8601}  [deleted_at]        Delete DateTime
+ * @apiParam {Object}   [time_interval]     The time interval that screenshot belongs to
+ * @apiParam {Boolean}  [important]         Important flag
+ *
+ * @apiVersion 1.0.0
+ */
 
 /**
  * Class Screenshot

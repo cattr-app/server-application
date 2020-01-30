@@ -5,7 +5,6 @@ namespace App\Models;
 use Eloquent as EloquentIdeHelper;
 use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Database\Eloquent\Model;
 use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -14,6 +13,34 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Throwable;
+
+/**
+ * @apiDefine RoleObject
+ *
+ * @apiSuccess {Integer}  role.id          ID
+ * @apiSuccess {Integer}  role.name        Name
+ * @apiSuccess {ISO8601}  role.created_at  Creation DateTime
+ * @apiSuccess {ISO8601}  role.updated_at  Update DateTime
+ * @apiSuccess {ISO8601}  role.deleted_at  Delete DateTime or `NULL` if wasn't deleted
+ *
+ * @apiVersion 1.0.0
+ */
+
+/**
+ * @apiDefine RoleParams
+ *
+ * @apiParam {Integer}  [id]          ID
+ * @apiParam {Integer}  [name]        Name
+ * @apiParam {ISO8601}  [created_at]  Creation DateTime
+ * @apiParam {ISO8601}  [updated_at]  Update DateTime
+ * @apiParam {ISO8601}  [deleted_at]  Delete DateTime
+ * @apiParam {String}   [with]        For add relation model in response
+ * @apiParam {Object}   [users]       Roles's relation users. All params in <a href="#api-User-GetUserList" >@User</a>
+ * @apiParam {Object}   [rules]       Roles's relation rules. All params in <a href="#api-Rule-GetRulesActions" >@Rules</a>
+
+ *
+ * @apiVersion 1.0.0
+ */
 
 /**
  * Class Role

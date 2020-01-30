@@ -61,80 +61,93 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
-     * @apiDefine ProjectUserRelations
-     * @apiParam {Object} [user]    `QueryParam` ProjectUser's relation user. All params in <a href="#api-User-GetUserList" >@User</a>
-     * @apiParam {Object} [project] `QueryParam` ProjectUser's relation project. All params in <a href="#api-Project-GetProjectList" >@Project</a>
-     */
-
-    /**
-     * @apiDefine ProjectUserRelationsExample
-     * @apiParamExample {json} Request With Relations Example
+     * @api             {get,post} /v1/projects-users/list List
+     * @apiDescription  Get list of Projects Users relations
+     *
+     * @apiVersion      1.0.0
+     * @apiName         List
+     * @apiGroup        Project Users
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   projects_users_list
+     * @apiPermission   projects_users_full_access
+     *
+     * @apiUse          ProjectUserParams
+     *
+     * @apiParamExample {json} Request Example
      *  {
-     *      "with":                 "project, user, project.tasks",
-     *      "project.id":           [">", 1],
-     *      "project.tasks.active": 1,
-     *      "user.full_name":       ["like", "%lorem%"]
+     *    "user_id": ["=", [1,2,3]],
+     *    "project_id": [">", 1]
      *  }
-     */
-
-    /**
-     * @param Request $request
      *
-     * @return JsonResponse
-     * @api {any} /api/v1/projects-users/list List
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "user_id":        ["=", [1,2,3]],
-     *      "project_id":     [">", 1]
-     *  }
-     * @apiUse ProjectUserRelationsExample
-     * @apiDescription Get list of Projects Users relations
-     * @apiVersion 0.1.0
-     * @apiName GetProjectUsersList
-     * @apiGroup ProjectUsers
+     * @apiUse          ProjectUserObject
      *
-     * @apiParam {Integer} [project_id] `QueryParam` Project-User Project id
-     * @apiParam {Integer} [user_id]    `QueryParam` Project-User User id
-     * @apiUse ProjectUserRelations
-     *
-     * @apiSuccess {Object[]}  ProjectUsersList                          Project-Users
-     * @apiSuccess {Object}    ProjectUsersList.ProjectUser             Project-User
-     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.user_id     Project-User User id
-     * @apiSuccess {Integer}   ProjectUsersList.ProjectUser.project_id  Project-User Project id
-     * @apiSuccess {String}    ProjectUsersList.ProjectUser.created_at  Project-User date time of create
-     * @apiSuccess {String}    ProjectUsersList.ProjectUser.updated_at  Project-User date time of update
-     * @apiSuccess {Object}    ProjectUsersList.ProjectUser.user        Project-User User
-     * @apiSuccess {Object}    ProjectUsersList.ProjectUser.project     Project-User Project
-     *
-     * @apiUse UnauthorizedError
-     *
-     */
-
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @api {post} /api/v1/projects-users/create Create
-     * @apiParamExample {json} Simple Request Example
-     *  {
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  [
+     *    {
      *      "project_id": 1,
-     *      "user_id": 45
+     *      "user_id": 3,
+     *      "created_at": "2020-01-27T07:29:19+00:00",
+     *      "updated_at": "2020-01-27T07:29:19+00:00",
+     *      "role_id": 1
+     *    }
+     *  ]
+     *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     */
+
+    /**
+     * @api             {post} /v1/projects-users/create Create
+     * @apiDescription  Create Project Users relation
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Create
+     * @apiGroup        Project Users
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   projects_users_create
+     * @apiPermission   projects_users_full_access
+     *
+     * @apiParam  {Integer}  project_id  Project-User Project id
+     * @apiParam  {Integer}  user_id     Project-User User id
+     *
+     * @apiParamExample {json} Simple Request Example
+     *  {
+     *    "project_id": 1,
+     *    "user_id": 45
      *  }
-     * @apiDescription Create Project Users relation
-     * @apiVersion 0.1.0
-     * @apiName CreateProjectUsers
-     * @apiGroup ProjectUsers
      *
-     * @apiParam   {Integer}   project_id              Project-User Project id
-     * @apiParam   {Integer}   user_id                 Project-User User id
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object}   res      Project-User
      *
-     * @apiSuccess {Integer}   array.object.user_id     Project-User User id
-     * @apiSuccess {Integer}   array.object.project_id  Project-User Project id
-     * @apiSuccess {String}    array.object.created_at  Project-User date time of create
-     * @apiSuccess {String}    array.object.updated_at  Project-User date time of update
+     * @apiUse          ProjectUserObject
      *
-     * @apiUse DefaultCreateErrorResponse
-     * @apiUse UnauthorizedError
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": {
+     *      "project_id": 1,
+     *      "user_id": 45,
+     *      "created_at": "2020-01-27T07:29:19+00:00",
+     *      "updated_at": "2020-01-27T07:29:19+00:00",
+     *      "role_id": 1
+     *    }
+     *  }
      *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
      */
     public function create(Request $request): JsonResponse
     {
@@ -172,102 +185,85 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
-     * @param Request $request
-     * @return JsonResponse
-     * @api {post} /api/v1/projects-users/bulk-create BulkCreate
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "relations":
-     *      [
-     *          {
-     *              "project_id":1,
-     *              "user_id":3
-     *          },
-     *          {
-     *              "project_id":1,
-     *              "user_id":2
-     *          }
-     *      ]
-     *  }
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /v1/projects-users/bulk-create Bulk Create
+     * @apiDescription  Multiple Create Project Users relation
      *
-     * @apiDescription Multiple Create Project Users relation
-     * @apiVersion 0.1.0
-     * @apiName BulkCreateProjectUsers
-     * @apiGroup ProjectUsers
+     * @apiVersion      1.0.0
+     * @apiName         Bulk Create
+     * @apiGroup        Project Users
      *
-     * @apiParam {Object[]} relations                   Project-User relations
-     * @apiParam {Object}   relations.object            Object Project-User relation
-     * @apiParam {Integer}  relations.object.project_id Project-User Project id
-     * @apiParam {Integer}  relations.object.user_id    Project-User User id
-     *
-     * @apiSuccess {Object[]} messages                   Project-Users
-     * @apiSuccess {Object}   messages.object            Project-User
-     * @apiSuccess {Integer}  messages.object.user_id    Project-User User id
-     * @apiSuccess {Integer}  messages.object.project_id Project-User Project id
-     * @apiSuccess {String}   messages.object.created_at Project-User date time of create
-     * @apiSuccess {String}   messages.object.updated_at Project-User date time of update
-     *
-     * @apiSuccessExample {json} Simple Response Example
-     * {
-     *   "messages": [
-     *     {
-     *       "project_id": 1,
-     *       "user_id": 3,
-     *       "updated_at": "2018-10-17 03:58:05",
-     *       "created_at": "2018-10-17 03:58:05",
-     *       "id": 0
-     *     },
-     *     {
-     *       "project_id": 1,
-     *       "user_id": 2,
-     *       "created_at": "2018-10-17 03:58:05",
-     *       "updated_at": "2018-10-17 03:58:05"
-     *     }
-     *   ]
-     * }
-     *
-     * @apiUse DefaultBulkCreateErrorResponse
-     * @apiUse UnauthorizedError
-     *
+     * @apiPermission   projects_users_bulk_create
+     * @apiPermission   projects_users_full_access
      */
 
     /**
-     * @param Request $request
-     * @return JsonResponse
+     * @api             {get,post} /v1/projects-users/count Count
+     * @apiDescription  Count Project Users
      *
-     * @throws Exception
-     * @api {delete, post} /api/v1/projects-users/remove Destroy
-     * @apiDescription Destroy Project Users relation
+     * @apiVersion      1.0.0
+     * @apiName         Count
+     * @apiGroup        Project Users
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   total    Amount of projects that we have
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "total": 2
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+
+    /**
+     * @api             {post} /v1/projects-users/remove Destroy
+     * @apiDescription  Destroy Project Users relation
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Destroy
+     * @apiGroup        Project Users
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   projects_users_remove
+     * @apiPermission   projects_users_full_access
+     *
+     * @apiParam  {Integer}  project_id  Project ID
+     * @apiParam  {Integer}  user_id     User ID
+     *
      * @apiParamExample {json} Simple Request Example
      *  {
-     *      "project_id":1,
-     *      "user_id":4
+     *    "project_id": 1,
+     *    "user_id": 4
      *  }
-     * @apiVersion 0.1.0
-     * @apiName DestroyProjectUsers
-     * @apiGroup ProjectUsers
      *
-     * @apiParam             {Integer} project_id           Project-User Project id
-     * @apiParam             {Integer} user_id              Project-User User id
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   message  Destroy status
      *
-     * @apiSuccess {String} message Message about success item remove
-     *
-     * @apiSuccessExample {json} Simple Response Example
-     * {
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
      *    "message": "Item has been removed"
-     * }
+     *  }
      *
-     * @apiError (Error 400) {String} error     Name of error
-     * @apiError (Error 400) {String} reason    Reason of error
-     *
-     * @apiUse UnauthorizedError
-     *
-     * @apiErrorExample {json} Simple Error Example
-     * {
-     *   "error": "Item has not been removed",
-     *   "reason": "Item not found"
-     * }
-     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     * @apiUse          ItemNotFoundError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
     public function destroy(Request $request): JsonResponse
     {
@@ -326,40 +322,67 @@ class ProjectsUsersController extends ItemController
     }
 
     /**
-     * @param Request $request
-     * @return JsonResponse
+     * @api             {post} /v1/projects-users/bulk-remove Bulk Destroy
+     * @apiDescription  Multiple Destroy Project Users relation
      *
-     * @throws Exception
-     * @api {post} /api/v1/projects-users/bulk-remove BulkDestroy
+     * @apiVersion      1.0.0
+     * @apiName         Bulk Destroy
+     * @apiGroup        Project Users
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   projects_users_bulk_remove
+     * @apiPermission   projects_users_full_access
+     *
+     * @apiParam  {Object[]}  relations             Project-User relations
+     * @apiParam  {Integer}   relations.project_id  Project ID
+     * @apiParam  {Integer}   relations.user_id     User ID
+     *
      * @apiParamExample {json} Simple Request Example
      * {
-     *  "relations":
-     *  [
-     *      {
-     *          "project_id": 1,
-     *          "user_id": 4
-     *      },
-     *      {
-     *          "project_id": 2,
-     *          "user_id": 4
-     *      }
+     *  "relations": [
+     *    {
+     *      "project_id": 1,
+     *      "user_id": 4
+     *    },
+     *    {
+     *      "project_id": 2,
+     *      "user_id": 4
+     *    }
      *  ]
      * }
-     * @apiDescription Multiple Destroy Project Users relation
-     * @apiVersion 0.1.0
-     * @apiName BulkDestroyProjectUsers
-     * @apiGroup ProjectUsers
      *
-     * @apiParam    {Object[]} relations                    Project-User relations
-     * @apiParam    {Object}   relations.object             Object Project-User relation
-     * @apiParam    {Integer}  relations.object.project_id  Project-User Project id
-     * @apiParam    {Integer}  relations.object.user_id     Project-User User id
+     * @apiSuccess {Boolean}    success    Indicates successful request when `TRUE`
+     * @apiSuccess {String}     message    Message from server
+     * @apiSuccess {Integer[]}  removed    Removed relations
+     * @apiSuccess {Integer[]}  not_found  Not found relations
      *
-     * @apiSuccess  {Object[]} messages                     Messages
-     * @apiSuccess  {Object}   messages.object Item removal Message status
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Items successfully removed",
+     *    "removed": [12, 123, 45],
+     *  }
      *
-     * @apiUse DefaultBulkDestroyErrorResponse
+     * @apiSuccessExample {json} Not all intervals removed Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Some items have not been removed",
+     *    "removed": [12, 123, 45],
+     *    "not_found": [154, 77, 66]
+     *  }
      *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
     public function bulkDestroy(Request $request): JsonResponse
     {

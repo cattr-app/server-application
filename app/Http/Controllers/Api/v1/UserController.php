@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
+use Exception;
 
 /**
  * Class UserController
@@ -23,33 +24,6 @@ use Illuminate\Support\Facades\Validator;
  */
 class UserController extends ItemController
 {
-    /**
-     * @apiDefine UserModel
-     *
-     * @apiParam {Integer} id                       User ID
-     * @apiParam {String}  full_name                Full Name
-     * @apiParam {String}  email                    E-mail
-     * @apiParam {String}  [url]                    ???
-     * @apiParam {Integer} [company_id]             ???
-     * @apiParam {Boolean} [payroll_access]         ???
-     * @apiParam {Boolean} [billing_access]         ???
-     * @apiParam {String}  [avatar]                 Avatar image url/uri
-     * @apiParam {Boolean} [screenshots_active]     Screenshots should be captured
-     * @apiParam {Boolean} [manual_time]            Allow manual time edit
-     * @apiParam {Boolean} [permanent_tasks]        ???
-     * @apiParam {Boolean} [computer_time_popup]    ???
-     * @apiParam {Boolean} [poor_time_popup]        ???
-     * @apiParam {Boolean} [blur_screenshots]       ???
-     * @apiParam {Boolean} [web_and_app_monitoring] ???
-     * @apiParam {Boolean} [webcam_shots]           ???
-     * @apiParam {Integer} [screenshots_interval]   Screenshots creation interval (seconds)
-     * @apiParam {Boolean} active                   Is User active
-     * @apiParam {Integer} [role_id]                User Role id
-     * @apiParam {String}  [timezone]               User timezone
-     * @apiParam {String}  user.user_language       Language which is used for frontend translations and emails
-     */
-
-
     public function __construct()
     {
         Filter::listen('request.item.create.user', static::class.'@'.'requestUserCreateHook');
@@ -60,13 +34,22 @@ class UserController extends ItemController
         parent::__construct();
     }
 
+    /**
+     * @param $user
+     * @param $requestData
+     * @return mixed
+     */
     public function sendInviteHook($user, $requestData)
     {
         Mail::to($user->email)->send(new InviteUser($user->email, $requestData['password']));
         return $user;
     }
 
-    public function changePasswordHook($user, $requestData)
+    /**
+     * @param User $user
+     * @param $requestData
+     */
+    public function changePasswordHook($user, $requestData): void
     {
         if ($user->change_password && !is_null($requestData['password'])) {
             $user->change_password = false;
@@ -75,6 +58,10 @@ class UserController extends ItemController
     }
 
 
+    /**
+     * @param $requestData
+     * @return mixed
+     */
     public function requestUserCreateHook($requestData)
     {
         $send_invite = $requestData['send_invite'] ?? 0;
@@ -83,10 +70,8 @@ class UserController extends ItemController
         if ($send_invite) {
             Event::listen('item.create.after.user', static::class.'@'.'sendInviteHook');
             Event::listen('item.edit.after.user', static::class.'@'.'sendInviteHook');
-        } else {
-            if ($change_password) {
-                unset($requestData['change_password']);
-            }
+        } elseif ($change_password) {
+            unset($requestData['change_password']);
         }
 
         return $requestData;
@@ -152,46 +137,105 @@ class UserController extends ItemController
     }
 
     /**
-     * @api            {get, post} /api/v1/users/list List
-     * @apiDescription Get list of Users
-     * @apiVersion     0.1.0
-     * @apiName        GetUserList
-     * @apiGroup       User
+     * @api             {get, post} /v1/users/list List
+     * @apiDescription  Get list of Users with any params
      *
-     * @apiParam {Integer}  [id]                    `QueryParam` User ID
-     * @apiParam {String}   [full_name]             `QueryParam` Full Name
-     * @apiParam {String}   [email]                 `QueryParam` E-mail
-     * @apiParam {String}   [url]                   `QueryParam` ???
-     * @apiParam {Integer}  [company_id]            `QueryParam` ???
-     * @apiParam {Boolean}  [payroll_access]                     ???
-     * @apiParam {Boolean}  [billing_access]                     ???
-     * @apiParam {String}   [avatar]                `QueryParam` Avatar image url/uri
-     * @apiParam {Boolean}  [screenshots_active]                 Screenshots should be captured
-     * @apiParam {Boolean}  [manual_time]                        Allow manual time edit
-     * @apiParam {Boolean}  [permanent_tasks]                    ???
-     * @apiParam {Boolean}  [computer_time_popup]                ???
-     * @apiParam {Boolean}  [poor_time_popup]                    ???
-     * @apiParam {Boolean}  [blur_screenshots]                   ???
-     * @apiParam {Boolean}  [web_and_app_monitoring]             ???
-     * @apiParam {Boolean}  [webcam_shots]                       ???
-     * @apiParam {Integer}  [screenshots_interval]  `QueryParam` Screenshots creation interval (seconds)
-     * @apiParam {Boolean}  [active]                             User is active
-     * @apiParam {Integer}  [role]                  `QueryParam` User's Role
-     * @apiParam {String}   [created_at]            `QueryParam` User Creation DateTime
-     * @apiParam {String}   [updated_at]            `QueryParam` Last User data update DataTime
-     * @apiParam {String}   [deleted_at]            `QueryParam` When User was deleted (null if not)
-     * @apiParam {String}   [timezone]              `QueryParam` User's timezone
-     * @apiParam {String}  user.user_language       Language which is used for frontend translations and emails
+     * @apiVersion      1.0.0
+     * @apiName         GetUserList
+     * @apiGroup        User
      *
-     * @apiSuccess (200) {Object[]} Users
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   users_list
+     * @apiPermission   users_full_access
+     *
+     * @apiUse          UserParams
+     * @apiUse          UserObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  [
+     *    {
+     *      "id": 1,
+     *      "full_name": "Admin",
+     *      "email": "admin@example.com",
+     *      "url": "",
+     *      "company_id": 1,
+     *      "payroll_access": true,
+     *      "billing_access": true,
+     *      "avatar": "",
+     *      "screenshots_active": 1,
+     *      "manual_time": 0,
+     *      "permanent_tasks": false,
+     *      "computer_time_popup": 300,
+     *      "poor_time_popup": 0,
+     *      "blur_screenshots": false,
+     *      "web_and_app_monitoring": true,
+     *      "webcam_shots": false,
+     *      "screenshots_interval": 9,
+     *      "active": 1,
+     *      "deleted_at": null,
+     *      "created_at": "2019-11-04T10:01:50+00:00",
+     *      "updated_at": "2019-11-04T10:01:50+00:00",
+     *      "timezone": null,
+     *      "important": 0,
+     *      "change_password": 0,
+     *      "is_admin": 0,
+     *      "role_id": 1
+     *    },
+     *    {
+     *      "id": 2,
+     *      "full_name": "Darwin",
+     *      "email": "darwin@seleondar.ru",
+     *      "url": null,
+     *      "company_id": null,
+     *      "payroll_access": null,
+     *      "billing_access": null,
+     *      "avatar": null,
+     *      "screenshots_active": 1,
+     *      "manual_time": 1,
+     *      "permanent_tasks": null,
+     *      "computer_time_popup": 5000,
+     *      "poor_time_popup": null,
+     *      "blur_screenshots": null,
+     *      "web_and_app_monitoring": null,
+     *      "webcam_shots": null,
+     *      "screenshots_interval": 5,
+     *      "active": 1,
+     *      "deleted_at": null,
+     *      "created_at": "2019-11-04T10:22:20+00:00",
+     *      "updated_at": "2019-11-06T10:42:25+00:00",
+     *      "timezone": "Asia\/Omsk",
+     *      "important": 0,
+     *      "change_password": 0,
+     *      "is_admin": 0,
+     *      "role_id": 2
+     *    }
+     *  ]
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
      */
 
     /**
-     * @api            {post} /api/v1/users/create Create
-     * @apiDescription Create User Entity
-     * @apiVersion     0.1.0
-     * @apiName        CreateUser
-     * @apiGroup       User
+     * @api             {post} /v1/users/create Create
+     * @apiDescription  Create User Entity
+     *
+     * @apiVersion      1.0.0
+     * @apiName         CreateUser
+     * @apiGroup        User
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   users_create
+     * @apiPermission   users_full_access
+     *
+     * @apiParam {String}   email      New user email
+     * @apiParam {String}   full_name  New user name
+     * @apiParam {String}   password   New user password
+     * @apiParam {Integer}  active     Will new user be active or not `(1 - active, 0 - not)`
+     * @apiParam {Integer}  role_id    ID of the role of the new user
      *
      * @apiParamExample {json} Request Example
      * {
@@ -202,31 +246,31 @@ class UserController extends ItemController
      *   "role_id": "3"
      * }
      *
-     * @apiSuccess {Object} res User
-     * @apiSuccess {Object} res.full_name   User
-     * @apiSuccess {Object} res.email       Email
-     * @apiSuccess {Object} res.active      Is user active
-     * @apiSuccess {Object} res.role        User role
-     * @apiSuccess {Object} res.updated_at  User last update datetime
-     * @apiSuccess {Object} res.created_at  User registration datetime
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object}   res      User
      *
+     * @apiUse UserObject
      *
      * @apiSuccessExample {json} Response Example
-     * {
-     *   "res": {
-     *     "full_name": "John Doe",
-     *     "email": "johndoe@example.com",
-     *     "active": "1",
-     *     "role_id": "1",
-     *     "updated_at": "2018-10-18 09:06:36",
-     *     "created_at": "2018-10-18 09:06:36",
-     *     "id": 3
-     *   }
-     * }
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": {
+     *      "full_name": "John Doe",
+     *      "email": "johndoe@example.com",
+     *      "active": "1",
+     *      "role_id": "1",
+     *      "updated_at": "2018-10-18 09:06:36",
+     *      "created_at": "2018-10-18 09:06:36",
+     *      "id": 3
+     *    }
+     *  }
      *
-     * @apiUse         UserModel
+     * @apiUse         400Error
+     * @apiUse         ValidationError
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
      */
-
     /**
      * Create item
      *
@@ -255,6 +299,9 @@ class UserController extends ItemController
             );
         }
 
+        /**
+         * @var User $cls
+         */
         $cls = $this->getItemClass();
 
         Event::dispatch($this->getEventUniqueName('item.create.before'), $requestData);
@@ -277,11 +324,17 @@ class UserController extends ItemController
     }
 
     /**
-     * @api            {post} /api/v1/users/show Show
-     * @apiDescription Show User
-     * @apiVersion     0.1.0
-     * @apiName        ShowUser
-     * @apiGroup       User
+     * @api             {get, post} /v1/users/show Show
+     * @apiDescription  Show User
+     *
+     * @apiVersion      1.0.0
+     * @apiName         ShowUser
+     * @apiGroup        User
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   users_show
+     * @apiPermission   users_full_access
      *
      * @apiParam {Integer} id   User id
      *
@@ -290,50 +343,50 @@ class UserController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Object}  object             User
-     * @apiSuccess {Integer} object.id          User id
-     * @apiSuccess {String}  object.full_name   User full name
-     * @apiSuccess {String}  object.email       User email
-     * @apiSuccess {String}  object.url         User url
-     * @apiSuccess {Integer} object.role_id     User role id
-     * @apiSuccess {String}  user.user_language Language which is used for frontend translations and emails
+     * @apiUse UserObject
      *
      * @apiSuccessExample {json} Response Example
-     * {
-     *   "id": 1,
-     *   "full_name": "Admin",
-     *   "email": "admin@example.com",
-     *   "url": "",
-     *   "company_id": 1,
-     *   "payroll_access": 1,
-     *   "billing_access": 1,
-     *   "avatar": "",
-     *   "screenshots_active": 1,
-     *   "manual_time": 0,
-     *   "permanent_tasks": 0,
-     *   "computer_time_popup": 300,
-     *   "poor_time_popup": "",
-     *   "blur_screenshots": 0,
-     *   "role": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
-     *   "web_and_app_monitoring": 1,
-     *   "webcam_shots": 0,
-     *   "screenshots_interval": 9,
-     *   "active": 1,
-     *   "deleted_at": null,
-     *   "created_at": "2018-10-18 09:36:22",
-     *   "updated_at": "2018-10-18 09:36:22",
-     *   "role_id": 1,
-     *   "timezone": null,
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "id": 1,
+     *    "full_name": "Admin",
+     *    "email": "admin@example.com",
+     *    "url": "",
+     *    "company_id": 1,
+     *    "payroll_access": 1,
+     *    "billing_access": 1,
+     *    "avatar": "",
+     *    "screenshots_active": 1,
+     *    "manual_time": 0,
+     *    "permanent_tasks": 0,
+     *    "computer_time_popup": 300,
+     *    "poor_time_popup": "",
+     *    "blur_screenshots": 0,
+     *    "role": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
+     *    "web_and_app_monitoring": 1,
+     *    "webcam_shots": 0,
+     *    "screenshots_interval": 9,
+     *    "active": 1,
+     *    "deleted_at": null,
+     *    "created_at": "2018-10-18 09:36:22",
+     *    "updated_at": "2018-10-18 09:36:22",
+     *    "role_id": 1,
+     *    "timezone": null,
      *  }
      *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     * @apiUse         ForbiddenError
+     * @apiUse         ValidationError
      */
-
     /**
      * Display a listing of the resource.
      *
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
+     * @throws Exception
      */
     public function index(Request $request): JsonResponse
     {
@@ -343,15 +396,21 @@ class UserController extends ItemController
     }
 
     /**
-     * @param  Request  $request
+     * @api             {post} /v1/users/edit Edit
+     * @apiDescription  Edit User
      *
-     * @return JsonResponse
-     * @api            {put, post} /api/v1/users/edit Edit
-     * @apiDescription Edit User
-     * @apiVersion     0.1.0
-     * @apiName        EditUser
-     * @apiGroup       User
+     * @apiVersion      1.0.0
+     * @apiName         EditUser
+     * @apiGroup        User
      *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   users_edit
+     * @apiPermission   users_full_access
+     *
+     * @apiUse UserParams
+     *
+     * @apiParam {Integer}  id  ID of the target user
      *
      * @apiParamExample {json} Request Example
      * {
@@ -361,11 +420,16 @@ class UserController extends ItemController
      *   "active": "1"
      * }
      *
-     * @apiSuccess {Object} res   User
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object}   res      User
+     *
+     * @apiUse UserObject
      *
      * @apiSuccessExample {json} Response Example
-     * {
-     *   "res": {
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": {
      *      "id": 1,
      *      "full_name": "Jonni Tree",
      *       "email": "gook@tree.com",
@@ -391,11 +455,18 @@ class UserController extends ItemController
      *       "role_id": 1,
      *       "timezone": null,
      *       "user_language": "en"
-     *     }
-     *   }
+     *      }
+     *  }
      *
-     * @apiUse         UserModel
-     *
+     * @apiUse         400Error
+     * @apiUse         ValidationError
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
     public function edit(Request $request): JsonResponse
     {
@@ -487,90 +558,92 @@ class UserController extends ItemController
     }
 
     /**
-     * @api            {delete, post} /api/v1/users/remove Destroy
-     * @apiDescription Destroy User
-     * @apiVersion     0.1.0
-     * @apiName        DestroyUser
-     * @apiGroup       User
+     * @api             {post} /v1/users/remove Destroy
+     * @apiDescription  Destroy User
      *
-     * @apiSuccess {string} message User destroy status
+     * @apiVersion      1.0.0
+     * @apiName         DestroyUser
+     * @apiGroup        User
      *
-     * @apiSuccessExample {json} Response Example
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   users_remove
+     * @apiPermission   users_full_access
+     *
+     * @apiParam {Integer}  id  ID of the target user
+     *
+     * @apiParamExample {json} Request Example
      * {
-     *   "message": "Item has been removed"
+     *   "id": 1
      * }
      *
-     * @apiUse         DefaultDestroyRequestExample
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   message  Destroy status
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Item has been removed"
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
      */
 
     /**
-     * @param  Request  $request
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /v1/users/bulk-edit Bulk Edit
+     * @apiDescription  Editing Multiple Users
      *
-     * @return JsonResponse
-     * @api            {post} /api/v1/users/bulk-edit bulkEdit
-     * @apiDescription Editing Multiple Users
-     * @apiVersion     0.1.0
-     * @apiName        bulkEditUsers
-     * @apiGroup       User
+     * @apiVersion      1.0.0
+     * @apiName         bulkEditUsers
+     * @apiGroup        User
      *
-     * @apiParam {Object[]} users                                 Users
-     * @apiParam {Object}   users.object                          User
-     * @apiParam {Integer}  users.object.id                       User id
-     * @apiParam {String}   users.object.full_name                Full Name
-     * @apiParam {String}   users.object.email                    E-mail
-     * @apiParam {String}   [users.object.url]                    ???
-     * @apiParam {Integer}  [users.object.company_id]             ???
-     * @apiParam {Boolean}  [users.object.payroll_access]         ???
-     * @apiParam {Boolean}  [users.object.billing_access]         ???
-     * @apiParam {String}   [users.object.avatar]                 Avatar image url/uri
-     * @apiParam {Boolean}  [users.object.screenshots_active]     Screenshots should be captured
-     * @apiParam {Boolean}  [users.object.manual_time]            Allow manual time edit
-     * @apiParam {Boolean}  [users.object.permanent_tasks]        ???
-     * @apiParam {Boolean}  [users.object.computer_time_popup]    ???
-     * @apiParam {Boolean}  [users.object.poor_time_popup]        ???
-     * @apiParam {Boolean}  [users.object.blur_screenshots]       ???
-     * @apiParam {Boolean}  [users.object.web_and_app_monitoring] ???
-     * @apiParam {Boolean}  [users.object.webcam_shots]           ???
-     * @apiParam {Integer}  [users.object.screenshots_interval]   Screenshots creation interval (seconds)
-     * @apiParam {Boolean}  users.object.active                   User is active
-     * @apiParam {Integer}  [users.object.role_id]                User Role id
-     * @apiParam {String}   [users.object.timezone]               User timezone
-     * @apiParam {String}  user.user_language Language which is used for frontend translations and emails
-     *
-     * @apiSuccess {Object[]} message        Users
-     * @apiSuccess {Object}   message.object User
-     *
-     * @apiUse         DefaultBulkEditErrorResponse
-     *
+     * @apiPermission   users_bulk_edit
+     * @apiPermission   users_full_access
      */
 
     /**
-     * @param  Request  $request
+     * @api             {get,post} /v1/users/count Count
+     * @apiDescription  Count Users
      *
-     * @return JsonResponse
-     * @api             {get, post} /api/v1/users/relations Relations
+     * @apiVersion      1.0.0
+     * @apiName         Count
+     * @apiGroup        User
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   users_count
+     * @apiPermission   users_full_access
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   total    Amount of users that we have
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "total": 2
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+
+    /**
+     * @apiDeprecated   since 1.0.0 use now (#Project_Users:List)
+     * @api             {post} /v1/users/relations Relations
      * @apiDescription  Show attached users and to whom the user is attached
-     * @apiVersion      0.1.0
+     *
+     * @apiVersion      1.0.0
      * @apiName         RelationsUser
      * @apiGroup        User
      *
-     * @apiErrorExample Wrong id
-     * {
-     *   "error": "Validation fail",
-     *   "reason": "id and attached_user_id is invalid"
-     * }
-     *
-     * @apiSuccessExample {json} Response example
-     * {
-     *    "": ""
-     * }
-     *
-     * @apiParam {Integer} [id]               User id
-     * @apiParam {Integer} [attached_user_id] Attached User id
-     *
-     * @apiSuccess {Object[]} array        Users
-     * @apiSuccess {Object}   array.object User
-     *
+     * @apiPermission   users_relations
      */
 
     /**
@@ -592,7 +665,7 @@ class UserController extends ItemController
             return $query;
         }
 
-        $rules = $this->getControllerRules();
+        $rules = self::getControllerRules();
         $rule = $rules[$action_method] ?? null;
         if (isset($rule)) {
             [$object, $action] = explode('.', $rule);

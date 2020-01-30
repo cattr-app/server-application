@@ -13,6 +13,9 @@ use Illuminate\Support\Facades\Validator;
 /**
  * Class TimeUseReportController
  * @package App\Http\Controllers\Api\v1\Statistic
+ *
+ * @deprecated
+ * @codeCoverageIgnore
  */
 class TimeUseReportController extends ReportController
 {
@@ -59,6 +62,17 @@ class TimeUseReportController extends ReportController
         ];
     }
 
+    /**
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /v1/time-duration/list Report
+     * @apiDescription  Show attached users and to whom the user is attached
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Report
+     * @apiGroup        Time Duration
+     *
+     * @apiPermission   time_duration_list
+     */
     /**
      * Handle the incoming request.
      *
