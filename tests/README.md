@@ -29,3 +29,12 @@ You can also run tests with coverage if xdebug extension is installed to see tes
 up to the highlighting of executed and non-executed lines right inside the code editor.  
 
 _For more information check official PhpStorm documentation._
+
+
+# Running Tests Automatically  
+
+### Gitlab
+
+Configuration at `.gitlab-ci.yml` allows you to run tests automatically when you push commits to your repository. It will appear as "integration_testing" job at the test stage. You can select branches, that job will run on by pointing them in **only** directive at `.gitalb-ci.yml`. Or exclude branches by **except** directive.
+
+For more information check [gitlab-ci.yml reference](https://docs.gitlab.com/ee/ci/yaml/) and [GitLab CI/CD](https://docs.gitlab.com/ee/ci/)
