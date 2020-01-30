@@ -89,7 +89,6 @@ class TestResponse extends BaseTestResponse
         $this->assertStatus($status);
         $this->assertJson(['success' => false]);
 
-
         if ($type) {
             $this->assertJson(['error_type' => $type]);
         }

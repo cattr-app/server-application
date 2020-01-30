@@ -8,6 +8,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * Class UserFactory
+ *
  * @method static User create()
  * @method static Collection createMany(int $amount = 1)
  * @method static BaseUserFactory withTokens(int $amount = 1)

@@ -6,6 +6,9 @@ use App\Models\ProjectsUsers;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 
+/**
+ * Class ProjectUserFactory
+ */
 class ProjectUserFactory extends AbstractFactory
 {
     private const DEFAULT_ROLE_ID = 2;

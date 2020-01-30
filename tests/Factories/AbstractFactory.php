@@ -5,9 +5,9 @@ namespace Tests\Factories;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Collection;
 
+
 /**
  * Class AbstractFactory
- * @package Tests\Factories
  */
 abstract class AbstractFactory
 {

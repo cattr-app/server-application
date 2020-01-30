@@ -9,6 +9,9 @@ use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
 use \Tests\Facades\IntervalFactory;
 
+/**
+ * Class ScreenshotFactory
+ */
 class ScreenshotFactory extends AbstractFactory
 {
     /**

@@ -8,6 +8,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * Class ProjectUserFactory
+ *
  * @method static  ProjectsUsers create(array $attributes = [])
  * @method static Collection createMany(int $amount = 1)
  * @method static array generateProjectUserData()

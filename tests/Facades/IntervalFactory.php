@@ -10,6 +10,8 @@ use Illuminate\Support\Facades\Facade;
 use App\Models\TimeInterval;
 
 /**
+ * Class IntervalFactory
+ *
  * @method static TimeInterval create(array $attributes = [])
  * @method static Collection createMany(int $amount = 1)
  * @method static array getRandomIntervalData()

@@ -9,6 +9,8 @@ use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
 
 /**
+ * Class TaskFactory
+ *
  * @method static Task create(array $attributes = [])
  * @method static Collection createMany(int $amount = 1)
  * @method static BaseTaskFactory forUser(User $user)

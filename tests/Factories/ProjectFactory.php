@@ -7,7 +7,6 @@ use App\Models\Project;
 
 /**
  * Class ProjectFactory
- * @package Tests\Factories
  */
 class ProjectFactory extends AbstractFactory
 {

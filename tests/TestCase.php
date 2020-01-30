@@ -8,6 +8,8 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 /**
+ * Class TestCase
+ *
  * @method TestResponse get($uri, array $headers = [])
  * @method TestResponse getJson($uri, array $headers = [])
  * @method TestResponse post($uri, array $data = [], array $headers = [])
@@ -94,7 +96,7 @@ abstract class TestCase extends BaseTestCase
      * @param null $driver
      * @return $this|BaseTestCase
      */
-    public function actingAs(UserContract $user, $driver = null)
+    public function actingAs(UserContract $user, $driver = null): self
     {
         /** @var User $user */
         $token = $user->tokens()->first()->token;
