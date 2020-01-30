@@ -34,9 +34,7 @@ class ListTest extends TestCase
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
         $response->assertOk();
-        $this->assertEquals(count($response->json()), User::count());
-
-        //TODO change later
+        $response->assertJson(User::all()->only('id')->toArray());
     }
 
     public function test_unauthorized(): void

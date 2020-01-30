@@ -68,11 +68,9 @@ class ListTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->requestData);
         $response->assertOk();
 
-        $totalTime = array_sum(array_column($response->json(), 'total_time'));
+        $totalTime = collect($response->json())->pluck('total_time')->sum();
 
         $this->assertEquals($this->duration, $totalTime);
-
-        //TODO change later
     }
 
     public function test_unauthorized(): void

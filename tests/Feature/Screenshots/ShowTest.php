@@ -39,21 +39,21 @@ class ShowTest extends TestCase
     {
         $this->assertDatabaseHas('screenshots', $this->screenshot->toArray());
 
-        $response = $this->actingAs($this->admin)->getJson(self::URI . '?id=' . $this->screenshot->id);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->screenshot->only('id'));
         $response->assertOk();
-
-        //TODO change later
     }
 
     public function test_unauthorized(): void
     {
         $response = $this->getJson(self::URI);
+
         $response->assertUnauthorized();
     }
 
     public function test_without_params(): void
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
+
         $response->assertValidationError();
     }
 }

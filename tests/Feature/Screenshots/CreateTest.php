@@ -64,8 +64,6 @@ class CreateTest extends TestCase
         $response->assertSuccess();
         $this->assertDatabaseHas('screenshots', $response->json('screenshot'));
         Storage::assertExists('uploads/screenshots/' . basename($response->json('screenshot.path')));
-
-        //TODO find out what's wrong with thumbnails
     }
 
     public function test_unauthorized(): void
