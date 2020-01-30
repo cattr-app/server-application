@@ -3,9 +3,9 @@
 namespace Tests\Feature\Projects;
 
 use App\Models\Project;
+use App\Models\User;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
-use App\Models\User;
 use Tests\TestCase;
 
 

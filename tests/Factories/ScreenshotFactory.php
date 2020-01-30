@@ -7,7 +7,7 @@ use App\Models\TimeInterval;
 use Faker\Factory as FakerFactory;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Facades\Storage;
-use \Tests\Facades\IntervalFactory;
+use Tests\Facades\IntervalFactory;
 
 /**
  * Class ScreenshotFactory

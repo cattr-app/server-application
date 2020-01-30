@@ -2,11 +2,11 @@
 
 namespace Tests\Facades;
 
-use App\Models\User;
-use Tests\Factories\TaskFactory as BaseTaskFactory;
 use App\Models\Task;
+use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
+use Tests\Factories\TaskFactory as BaseTaskFactory;
 
 /**
  * Class TaskFactory

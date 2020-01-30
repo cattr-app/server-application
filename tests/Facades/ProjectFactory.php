@@ -2,10 +2,10 @@
 
 namespace Tests\Facades;
 
-use Tests\Factories\ProjectFactory as BaseProjectFactory;
 use App\Models\Project;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
+use Tests\Factories\ProjectFactory as BaseProjectFactory;
 
 /**
  * Class ProjectFactory

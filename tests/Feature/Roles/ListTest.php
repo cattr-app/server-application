@@ -1,9 +1,8 @@
 <?php
 namespace Tests\Feature\Roles;
 
-use App\Models\User;
-
 use App\Models\Role;
+use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 

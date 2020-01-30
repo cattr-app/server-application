@@ -6,7 +6,6 @@ use App\Models\TimeInterval;
 use App\Models\User;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Storage;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\ScreenshotFactory;
 use Tests\Facades\UserFactory;

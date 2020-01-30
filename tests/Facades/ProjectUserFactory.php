@@ -3,9 +3,9 @@
 namespace Tests\Facades;
 
 use App\Models\ProjectsUsers;
-use Tests\Factories\ProjectUserFactory as BaseProjectUserFactory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
+use Tests\Factories\ProjectUserFactory as BaseProjectUserFactory;
 
 /**
  * Class ProjectUserFactory

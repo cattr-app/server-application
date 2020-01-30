@@ -2,11 +2,11 @@
 
 namespace Tests\Facades;
 
+use App\Models\Screenshot;
 use App\Models\TimeInterval;
 use Illuminate\Support\Collection;
-use Tests\Factories\ScreenshotFactory as BaseScreenshotFactory;
-use App\Models\Screenshot;
 use Illuminate\Support\Facades\Facade;
+use Tests\Factories\ScreenshotFactory as BaseScreenshotFactory;
 
 /**
  * Class ScreenshotFactory

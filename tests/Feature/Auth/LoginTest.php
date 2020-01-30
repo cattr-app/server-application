@@ -2,10 +2,10 @@
 
 namespace Tests\Feature\Auth;
 
-use Tests\Facades\UserFactory;
 use App\Models\User;
-use Tests\TestCase;
 use Illuminate\Support\Facades\Cache;
+use Tests\Facades\UserFactory;
+use Tests\TestCase;
 
 /**
  * Class LoginTest

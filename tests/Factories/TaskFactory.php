@@ -3,12 +3,12 @@
 namespace Tests\Factories;
 
 use App\Models\Project;
-use App\Models\User;
-use Tests\Facades\ProjectFactory;
-use Tests\Facades\IntervalFactory;
-use Tests\Facades\UserFactory;
-use Faker\Factory as FakerFactory;
 use App\Models\Task;
+use App\Models\User;
+use Faker\Factory as FakerFactory;
+use Tests\Facades\IntervalFactory;
+use Tests\Facades\ProjectFactory;
+use Tests\Facades\UserFactory;
 
 /**
  * Class TaskFactory

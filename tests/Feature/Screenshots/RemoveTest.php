@@ -4,7 +4,6 @@ namespace Tests\Feature\Screenshots;
 
 use App\Models\Screenshot;
 use App\Models\User;
-use Illuminate\Support\Facades\Storage;
 use Tests\Facades\ScreenshotFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;

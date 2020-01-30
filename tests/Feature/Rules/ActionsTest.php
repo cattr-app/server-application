@@ -2,9 +2,9 @@
 
 namespace Tests\Feature\Rules;
 
-use Tests\Facades\UserFactory;
 use App\Models\Rule;
 use App\Models\User;
+use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 /**

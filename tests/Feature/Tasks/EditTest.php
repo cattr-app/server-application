@@ -3,9 +3,9 @@
 namespace Tests\Feature\Tasks;
 
 use App\Models\Task;
+use App\Models\User;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
-use App\Models\User;
 use Tests\TestCase;
 
 

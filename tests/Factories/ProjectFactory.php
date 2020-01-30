@@ -2,8 +2,8 @@
 
 namespace Tests\Factories;
 
-use Faker\Factory as FakerFactory;
 use App\Models\Project;
+use Faker\Factory as FakerFactory;
 
 /**
  * Class ProjectFactory

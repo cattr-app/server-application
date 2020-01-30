@@ -4,7 +4,6 @@ namespace Tests\Feature\TimeIntervals;
 
 use App\Models\User;
 use Carbon\Carbon;
-use Faker\Factory as FakerFactory;
 use Illuminate\Support\Collection;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;

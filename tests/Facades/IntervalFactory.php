@@ -3,11 +3,11 @@
 namespace Tests\Facades;
 
 use App\Models\Task;
+use App\Models\TimeInterval;
 use App\Models\User;
-use Tests\Factories\IntervalFactory as BaseIntervalFactory;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
-use App\Models\TimeInterval;
+use Tests\Factories\IntervalFactory as BaseIntervalFactory;
 
 /**
  * Class IntervalFactory

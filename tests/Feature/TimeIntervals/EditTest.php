@@ -4,11 +4,9 @@
 namespace Tests\Feature\TimeIntervals;
 
 
-use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Tests\Facades\IntervalFactory;
-use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 

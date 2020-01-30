@@ -2,11 +2,11 @@
 
 namespace Tests\Factories;
 
+use App\Models\Task;
+use App\Models\TimeInterval;
+use App\Models\User;
 use Carbon\Carbon;
 use Faker\Factory as FakerFactory;
-use App\Models\User;
-use App\Models\TimeInterval;
-use App\Models\Task;
 
 /**
  * Class IntervalFactory

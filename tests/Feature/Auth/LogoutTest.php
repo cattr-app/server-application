@@ -3,8 +3,8 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Tests\TestCase;
 use Tests\Facades\UserFactory;
+use Tests\TestCase;
 
 /**
  * Class LogoutTest

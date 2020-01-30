@@ -2,8 +2,8 @@
 
 namespace Tests\Feature\Roles;
 
-use Tests\Facades\UserFactory;
 use App\Models\User;
+use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 

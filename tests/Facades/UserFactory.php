@@ -2,10 +2,10 @@
 
 namespace Tests\Facades;
 
-use Tests\Factories\UserFactory as BaseUserFactory;
 use App\Models\User;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Facade;
+use Tests\Factories\UserFactory as BaseUserFactory;
 
 /**
  * Class UserFactory

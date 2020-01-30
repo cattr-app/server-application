@@ -2,8 +2,8 @@
 
 namespace Tests;
 
-use PHPUnit\Framework\Assert as PHPUnit;
 use Illuminate\Foundation\Testing\TestResponse as BaseTestResponse;
+use PHPUnit\Framework\Assert as PHPUnit;
 
 /**
  * Class TestResponse

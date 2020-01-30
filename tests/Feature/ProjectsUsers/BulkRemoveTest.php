@@ -5,8 +5,8 @@ namespace Tests\Feature\ProjectsUsers;
 
 use App\Models\User;
 use Illuminate\Support\Collection;
-use Tests\Facades\UserFactory;
 use Tests\Facades\ProjectUserFactory;
+use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 /**
