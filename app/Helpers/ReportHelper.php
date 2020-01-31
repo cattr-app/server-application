@@ -197,6 +197,7 @@ class ReportHelper
                 }
 
                 $resultCollection[$userID]['tasks'][$item->task_id] = [
+                    'task_id'      => $item->task_id,
                     'project_id'   => $item->project_id,
                     'name'         => $item->task_name,
                     'project_name' => $item->project_name,
@@ -212,13 +213,13 @@ class ReportHelper
             }
 
             // Sort User Tasks by total_time
-            uasort($resultCollection[$userID]['tasks'], function($a, $b) {
+            usort($resultCollection[$userID]['tasks'], function($a, $b) {
                return $a['total_time'] < $b['total_time'];
             });
         }
 
         // Sort Users by total_time
-        uasort($resultCollection, function($a, $b) {
+        usort($resultCollection, function($a, $b) {
             return $a['total_time'] < $b['total_time'];
         });
 
