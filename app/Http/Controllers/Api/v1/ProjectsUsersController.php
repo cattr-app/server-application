@@ -366,7 +366,7 @@ class ProjectsUsersController extends ItemController
      *  }
      *
      * @apiSuccessExample {json} Not all intervals removed Response Example
-     *  HTTP/1.1 200 OK
+     *  HTTP/1.1 207 Multi-Status
      *  {
      *    "success": true,
      *    "message": "Some items have not been removed",

@@ -688,7 +688,7 @@ class TimeIntervalController extends ItemController
      *  }
      *
      * @apiSuccessExample {json} Not all intervals updated Response Example
-     *  HTTP/1.1 200 OK
+     *  HTTP/1.1 207 Multi-Status
      *  {
      *    "success": true,
      *    "message": "Some intervals have not been updated",
@@ -858,7 +858,7 @@ class TimeIntervalController extends ItemController
      *  }
      *
      * @apiSuccessExample {json} Not all intervals removed Response Example
-     *  HTTP/1.1 200 OK
+     *  HTTP/1.1 207 Multi-Status
      *  {
      *    "success": true,
      *    "message": "Some intervals have not been removed",

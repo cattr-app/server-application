@@ -68,7 +68,7 @@ abstract class AbstractReportsController extends Controller
         }
 
         return $this->exporter->collection()
-            ->downloadExcel(time().'_project_export.'.$fsType, $type, true);
+            ->downloadExcel(time() . '_project_export.' . $fsType, $type, true);
     }
 
     /**
@@ -77,5 +77,4 @@ abstract class AbstractReportsController extends Controller
      * @return string
      */
     abstract protected function exportClass(): string;
-
 }
