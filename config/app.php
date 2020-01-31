@@ -60,6 +60,7 @@ return [
         Modules\EmailReports\Providers\EmailReportsServiceProvider::class,
         Modules\CompanyManagement\Providers\CompanyManagementServiceProvider::class,
         Modules\Reports\Providers\ReportsServiceProvider::class,
+        Modules\JiraIntegration\Providers\JiraIntegrationServiceProvider::class,
 
         Backup\BackupServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
