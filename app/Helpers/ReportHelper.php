@@ -197,6 +197,7 @@ class ReportHelper
                 }
 
                 $resultCollection[$userID]['tasks'][$item->task_id] = [
+                    'task_id'      => $item->task_id,
                     'project_id'   => $item->project_id,
                     'name'         => $item->task_name,
                     'project_name' => $item->project_name,
