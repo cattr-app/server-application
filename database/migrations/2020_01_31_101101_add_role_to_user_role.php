@@ -14,11 +14,14 @@ class AddRoleToUserRole extends Migration
     public function up()
     {
         $userRole = Role::where(['name' => 'user'])->first();
-        Rule::updateOrCreate([
-            'role_id' => $userRole->id,
-            'object'  => 'time-intervals',
-            'action'  => 'bulk-edit',
-        ], ['allow' => true]);
+
+        if ($userRole) {
+            Rule::updateOrCreate([
+                'role_id' => $userRole->id,
+                'object'  => 'time-intervals',
+                'action'  => 'bulk-edit',
+            ], ['allow' => true]);
+        }
     }
 
     /**
