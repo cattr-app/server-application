@@ -1,4 +1,3 @@
-
 # Running Tests From PhpStorm  
 
 
@@ -8,7 +7,8 @@
 (_File | Settings | Languages & Frameworks | PHP_)
 
 * Make sure path to composer autoloader is correct in test frameworks configuration options,
-as well as default configuration file (`phpunit.xml`) for test runner, which can be find inside project root directory.  
+as well as default configuration file (`phpunit.xml`) for test runner, 
+which can be find inside project root directory.  
 (_File | Settings | Languages & Frameworks | PHP | Test Frameworks_)  
 
 
@@ -35,12 +35,14 @@ _For more information check official PhpStorm documentation._
 
 ### GitLab
 
-Configuration at `.gitlab-ci.yml` allows you to run tests automatically when you push commits to your repository. 
+Configuration at `.gitlab-ci.yml` allows you to run tests automatically 
+when you push commits to your repository. 
 It will appear as "integration_testing" job at the test stage. 
 You can select branches, that job will run on by pointing them in **only** directive at `.gitalb-ci.yml`. 
 Or exclude branches by **except** directive.
 
-For more information check [gitlab-ci.yml reference](https://docs.gitlab.com/ee/ci/yaml/) and [GitLab CI/CD](https://docs.gitlab.com/ee/ci/)
+For more information check [gitlab-ci.yml reference](https://docs.gitlab.com/ee/ci/yaml/) 
+and [GitLab CI/CD](https://docs.gitlab.com/ee/ci/)
 
 
 # Writing Tests
@@ -52,14 +54,15 @@ Every test should extend `tests/TestCase` class, which creates application befor
 
 It uses `DatabaseTransaction` trait to wrap each test case in a database transaction
 to isolate a database from any changes while running tests.
-Because of that it's worth mentioning that there is no point in trying to look into the database during debugging, because there will be no changes,
+Because of that it's worth mentioning that there is no point in trying to look into the database during debugging, 
+because there will be no changes,
 but nothing prevents you from making queries directly from the tests.  
 
 #### Requests
 All requests return a slightly extended `TestResponse` class, which can be found in `tests/TestResponse.php`. 
 It provides methods to conveniently check different types of responses and their structure.
 
-The overridden `actingAs` helper method provides a simple way to authenticate a given user as the current user.
+The overridden `actingAs` helper method provides a simple way to authenticate a given user model as the current user.
 The user must have valid tokens for successful authentication.
 
 Also, it's highly recommended to use constants when specifying the expected answer status code,
