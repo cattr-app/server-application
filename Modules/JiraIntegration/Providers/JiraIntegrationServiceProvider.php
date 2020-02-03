@@ -2,6 +2,7 @@
 
 namespace Modules\JiraIntegration\Providers;
 
+use App\EventFilter\Facades\Filter;
 use Illuminate\Support\ServiceProvider;
 use Modules\JiraIntegration\Console\SyncTasks;
 
@@ -16,6 +17,15 @@ class JiraIntegrationServiceProvider extends ServiceProvider
     {
         $this->registerConfig();
         $this->registerCommands();
+        $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
+
+        Filter::listen('answer.success.item.create.timeinterval', static function ($data) {
+            $timeInterval = $data['interval'];
+
+
+
+            return $data;
+        });
     }
 
     /**
