@@ -5,7 +5,6 @@ namespace Modules\Reports\Providers;
 use Illuminate\Database\Eloquent\Factory;
 use Illuminate\Support\ServiceProvider;
 use Maatwebsite\Excel\ExcelServiceProvider;
-use Maatwebsite\Excel\Files\TemporaryFileFactory;
 
 class ReportsServiceProvider extends ServiceProvider
 {
@@ -14,20 +13,13 @@ class ReportsServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerTranslations();
         $this->registerConfig();
         $this->registerViews();
         $this->registerFactories();
         $this->loadMigrationsFrom(__DIR__.'/../Database/Migrations');
-
-        $this->app->bind(TemporaryFileFactory::class, function () {
-            return app()->make(TemporaryFileFactory::class, [
-                'temporaryPath' => config('excel.temporary_files.local_path'),
-                'temporaryDisk' => config('excel.temporary_files.remote_disk')
-            ]);
-        });
     }
 
     /**
@@ -35,7 +27,7 @@ class ReportsServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->app->register(RouteServiceProvider::class);
         $this->app->register(ExcelServiceProvider::class);
@@ -46,13 +38,14 @@ class ReportsServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    protected function registerConfig()
+    protected function registerConfig(): void
     {
         $this->publishes([
             __DIR__.'/../Config/config.php' => config_path('reports.php'),
         ], 'config');
         $this->mergeConfigFrom(
-            __DIR__.'/../Config/config.php', 'reports'
+            __DIR__.'/../Config/config.php',
+            'reports'
         );
     }
 
@@ -61,7 +54,7 @@ class ReportsServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerViews()
+    public function registerViews(): void
     {
         $viewPath = resource_path('views/modules/reports');
 
@@ -81,7 +74,7 @@ class ReportsServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerTranslations()
+    public function registerTranslations(): void
     {
         $langPath = resource_path('lang/modules/reports');
 
@@ -97,20 +90,10 @@ class ReportsServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function registerFactories()
+    public function registerFactories(): void
     {
-        if (!app()->environment('production') && $this->app->runningInConsole()) {
+        if ($this->app->runningInConsole() && !app()->environment('production')) {
             app(Factory::class)->load(__DIR__.'/../Database/factories');
         }
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [];
     }
 }
