@@ -105,7 +105,12 @@ class TimeUseReportController extends ReportController
 
         $user_ids = $request->input('user_ids', []);
 
-        $timezone = $request->input('timezone', []) ?? $this->timezone;
+        $timezone = $request->input('timezone', []);
+
+        if (!$timezone) {
+            $timezone = $this->timezone;
+        }
+
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)

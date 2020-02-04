@@ -1,0 +1,28 @@
+integration_testing:
+  image: php:7.2-alpine
+  only:
+    - vue-frontend-compatability
+  services:
+    - name: mysql:latest
+      alias: mysql
+      command: ["--default-authentication-plugin=mysql_native_password"]
+  variables:
+    MYSQL_DATABASE: amazing_time_tests
+    MYSQL_ROOT_PASSWORD: secret
+  stage: test
+  before_script:
+    - apk update
+    - apk add libpng-dev freetype-dev libjpeg-turbo-dev libjpeg-turbo libpng freetype
+    - docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
+    - docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd
+    - docker-php-ext-install bcmath zip pdo_mysql
+    - apk add --no-cache $PHPIZE_DEPS
+    - pecl install xdebug
+    - docker-php-ext-enable xdebug
+    - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+  script:
+    - composer install
+    - cp .env.testing.example .env.testing
+    - php artisan migrate --env=testing
+    - php artisan db:seed --class=RoleSeeder --env=testing
+    - vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
