@@ -6,9 +6,7 @@ use Modules\Reports\Exports\ProjectExport;
 
 /**
  * Class ProjectReportsController
- *
- * @package Modules\Reports\Http\Controllers
- */
+*/
 class ProjectReportsController extends AbstractReportsController
 {
 

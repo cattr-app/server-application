@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Exceptions\Entities\AuthorizationException;
 use App\Models\User;
 use Closure;
+use Illuminate\Http\Request;
 
 
 class RoleCheck
@@ -12,8 +13,8 @@ class RoleCheck
     /**
      * Handle an incoming request.
      *
-     * @param  \Illuminate\Http\Request  $request
-     * @param  \Closure                  $next
+     * @param  Request  $request
+     * @param Closure $next
      *
      * @return mixed
      * @throws AuthorizationException
@@ -37,8 +38,8 @@ class RoleCheck
             }
 
             //request: /v1/{object}/{action}
-            $object = isset($object) ? $object : $request->segment(2);
-            $action = isset($action) ? $action : $request->segment(3);
+            $object = $object ?? $request->segment(2);
+            $action = $action ?? $request->segment(3);
             $id = $request->get('id');
 
             // Handled on the query level
@@ -50,12 +51,12 @@ class RoleCheck
 
             if ($user->allowed($object, $action, $id) || $user->allowed($object, 'full_access')) {
                 return $next($request);
-            } else {
-                throw new AuthorizationException(
-                    AuthorizationException::ERROR_TYPE_FORBIDDEN,
-                    "Access denied to $object/$action/$id"
-                );
             }
+
+            throw new AuthorizationException(
+                AuthorizationException::ERROR_TYPE_FORBIDDEN,
+                "Access denied to $object/$action/$id"
+            );
         }
 
         throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);

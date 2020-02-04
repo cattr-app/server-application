@@ -16,9 +16,7 @@ use Throwable;
 
 /**
  * Class RedmineSettingsController
- *
- * @package Modules\RedmineIntegration\Http\Controllers
- */
+*/
 class RedmineSettingsController extends AbstractRedmineController
 {
 

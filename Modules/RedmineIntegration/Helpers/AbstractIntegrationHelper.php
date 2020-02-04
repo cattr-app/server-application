@@ -8,9 +8,7 @@ use Modules\RedmineIntegration\Models\ClientFactory;
  * Class AbstractIntegrationHelper
  *
  * Abstract integration helper class
- *
- * @package Modules\RedmineIntegration\Entities
- */
+*/
 abstract class AbstractIntegrationHelper
 {
     /**

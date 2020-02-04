@@ -15,9 +15,7 @@ use Illuminate\Http\Request;
 
 /**
  * Class TimeController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class TimeController extends ItemController
 {
     /**

@@ -21,9 +21,7 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 /**
  * Class Handler
- *
- * @package App\Exceptions
- */
+*/
 class Handler extends ExceptionHandler
 {
     /**

@@ -60,7 +60,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * Class Task
  *
- * @package App\Models
  * @property int $id
  * @property int $project_id
  * @property int $user_id
@@ -103,7 +102,7 @@ class Task extends AbstractModel
 {
     use SoftDeletes;
 
-	/**
+    /**
      * table name from database
      * @var string
      */
@@ -153,11 +152,11 @@ class Task extends AbstractModel
      *
      * @return void
      */
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
-        static::deleting(function($task) {
+        static::deleting(static function (Task $task) {
             /** @var Task $tasks */
             $task->timeIntervals()->delete();
         });
@@ -192,7 +191,7 @@ class Task extends AbstractModel
      */
     public function timeIntervals(): HasMany
     {
-    	return $this->hasMany(TimeInterval::class, 'task_id');
+        return $this->hasMany(TimeInterval::class, 'task_id');
     }
 
     /**
@@ -208,7 +207,6 @@ class Task extends AbstractModel
      */
     public static function getTableName(): string
     {
-        return with(new static)->getTable();
+        return with(new static())->getTable();
     }
-
 }

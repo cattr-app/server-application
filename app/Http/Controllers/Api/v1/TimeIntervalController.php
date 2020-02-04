@@ -22,9 +22,7 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TimeIntervalController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class TimeIntervalController extends ItemController
 {
     /**

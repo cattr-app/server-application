@@ -11,9 +11,7 @@ use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 
 /**
  * Class TimeIntervalIntegrationHelper
- *
- * @package Modules\RedmineIntegration\Helpers
- */
+*/
 class TimeIntervalIntegrationHelper extends AbstractIntegrationHelper
 {
     /**

@@ -17,9 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 /**
  * Class TaskController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class TaskController extends ItemController
 {
     /**

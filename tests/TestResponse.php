@@ -7,8 +7,7 @@ use PHPUnit\Framework\Assert as PHPUnit;
 
 /**
  * Class TestResponse
- * @package Tests
- */
+*/
 class TestResponse extends BaseTestResponse
 {
     public const HTTP_CONTINUE = 100;

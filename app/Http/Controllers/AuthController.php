@@ -15,9 +15,7 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Class AuthController
- *
- * @package App\Http\Controllers
- */
+*/
 class AuthController extends BaseController
 {
     /**

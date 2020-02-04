@@ -11,8 +11,7 @@ use Modules\GitlabIntegration\Helpers\TimeIntervalsHelper;
 
 /**
  * Class GitlabIntegrationServiceProvider
- * @package Modules\GitlabIntegration\Providers
- */
+*/
 class GitlabIntegrationServiceProvider extends ServiceProvider
 {
     /**

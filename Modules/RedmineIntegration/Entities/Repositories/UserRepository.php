@@ -10,9 +10,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Class UserRepository
- *
- * @package Modules\RedmineIntegration\Entities\Repositories
- */
+*/
 class UserRepository
 {
 

@@ -7,9 +7,7 @@ use Modules\RedmineIntegration\Helpers\ProjectIntegrationHelper;
 
 /**
  * Class ProjectRedmineController
- *
- * @package Modules\RedmineIntegration\Http\Controllers
- */
+*/
 class ProjectRedmineController extends AbstractRedmineController
 {
 

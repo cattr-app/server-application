@@ -19,9 +19,7 @@ use Exception;
 
 /**
  * Class UserController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class UserController extends ItemController
 {
     public function __construct()

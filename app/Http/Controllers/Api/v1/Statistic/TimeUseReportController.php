@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TimeUseReportController
- * @package App\Http\Controllers\Api\v1\Statistic
  *
  * @deprecated
  * @codeCoverageIgnore

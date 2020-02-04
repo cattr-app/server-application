@@ -865,7 +865,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * Class Rule
  *
- * @package App\Models
  * @property int $id
  * @property int $role_id
  * @property string $object

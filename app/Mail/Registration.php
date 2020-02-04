@@ -3,24 +3,25 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Queue\SerializesModels;
 
 class Registration extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public $url;
 
     /**
      * Create a new message instance.
      *
-     * @return void
+     * @param $key
      */
-    public function __construct($key) {
-        $this->url = Url::to("auth/register/$key");
+    public function __construct($key)
+    {
+        $this->url = URL::to("auth/register/$key");
     }
 
     /**
@@ -28,7 +29,7 @@ class Registration extends Mailable
      *
      * @return $this
      */
-    public function build()
+    public function build(): self
     {
         return $this->view('emails.registration');
     }

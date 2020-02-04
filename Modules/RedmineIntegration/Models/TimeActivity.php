@@ -12,8 +12,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class TimeActivity
  *
- * @package App\Models
- *
  * @property datetime     $last_time_activity
  * @property int          $user_id
  * @property int          $time_interval_id

@@ -3,7 +3,6 @@
 namespace App\Providers;
 
 use Laravel\Telescope\Telescope;
-use Illuminate\Support\Facades\Gate;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
 
@@ -14,7 +13,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      *
      * @return void
      */
-    public function register()
+    public function register(): void
     {
         // Telescope::night();
 
@@ -38,7 +37,7 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      *
      * @return void
      */
-    protected function hideSensitiveRequestDetails()
+    protected function hideSensitiveRequestDetails(): void
     {
         if ($this->app->isLocal()) {
             return;
@@ -51,21 +50,5 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             'x-csrf-token',
             'x-xsrf-token',
         ]);
-    }
-
-    /**
-     * Register the Telescope gate.
-     *
-     * This gate determines who can access Telescope in non-local environments.
-     *
-     * @return void
-     */
-    protected function gate()
-    {
-        Gate::define('viewTelescope', function ($user) {
-            return in_array($user->email, [
-                //
-            ]);
-        });
     }
 }

@@ -46,7 +46,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * Class Project
  *
- * @package App\Models
  * @property int $id
  * @property int $company_id
  * @property string $name
@@ -112,12 +111,11 @@ class Project extends AbstractModel
      *
      * @return void
      */
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
-        static::deleting(function($project) {
-            /** @noinspection PhpExpressionResultUnusedInspection */
+        static::deleting(static function (Project $project) {
             $project->tasks()->delete();
         });
     }

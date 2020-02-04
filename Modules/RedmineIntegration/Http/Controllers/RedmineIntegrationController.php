@@ -7,9 +7,7 @@ use Modules\RedmineIntegration\Models\ClientFactory;
 
 /**
  * Class RedmineIntegrationController
- *
- * @package Modules\RedmineIntegration\Http\Controllers
- */
+*/
 class RedmineIntegrationController extends AbstractRedmineController
 {
     /**

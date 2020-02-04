@@ -11,9 +11,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Class AbstractPluginWebhookHelper
- *
- * @package Modules\RedmineIntegration\Helpers\Plugin
- */
+*/
 abstract class AbstractPluginWebhookHelper
 {
     /**

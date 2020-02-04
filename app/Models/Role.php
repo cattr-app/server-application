@@ -45,7 +45,6 @@ use Throwable;
 /**
  * Class Role
  *
- * @package App\Models
  * @property int $id
  * @property string $name
  * @property string $created_at
@@ -153,7 +152,7 @@ class Role extends AbstractModel
     /**
      * @throws Exception
      */
-    public static function updateRules()
+    public static function updateRules(): void
     {
         /** @var array[] $actionList */
         $actionList = Rule::getActionList();

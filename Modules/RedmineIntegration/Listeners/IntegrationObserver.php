@@ -20,9 +20,7 @@ use Modules\RedmineIntegration\Models\Priority;
  *
  * @property ProjectRepository $projectRepo
  * @property TaskRepository    $taskRepo
- *
- * @package Modules\RedmineIntegration\Listeners
- */
+*/
 class IntegrationObserver
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;

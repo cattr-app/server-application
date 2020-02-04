@@ -16,9 +16,7 @@ use Modules\RedmineIntegration\Http\Middleware\ValidateSignature;
 
 /**
  * Class RedmineIntegrationServiceProvider
- *
- * @package Modules\RedmineIntegration\Providers
- */
+*/
 class RedmineIntegrationServiceProvider extends ServiceProvider
 {
     /**

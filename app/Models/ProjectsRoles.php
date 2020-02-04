@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class ProjectsRoles
  *
- * @package App\Models
  * @property int $project_id
  * @property int $role_id
  * @property string $created_at

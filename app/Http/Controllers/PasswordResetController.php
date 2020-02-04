@@ -16,8 +16,7 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Class PasswordReset
- * @package App\Http\Controllers
- */
+*/
 class PasswordResetController extends BaseController
 {
     /**
@@ -73,16 +72,16 @@ class PasswordResetController extends BaseController
     public function validate(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), [
-                'email' => 'required|email',
-                'token' => 'required|string'
-            ]
-        );
+            'email' => 'required|email',
+            'token' => 'required|string'
+        ]);
+
         if ($validator->fails()) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_VALIDATION_FAILED);
         }
 
         $user = Password::broker()->getUser($request->all());
-        if(!$user){
+        if (!$user) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
@@ -135,6 +134,7 @@ class PasswordResetController extends BaseController
     public function request(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), ['email' => 'required|email']);
+
         if ($validator->fails()) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_VALIDATION_FAILED);
         }
@@ -231,8 +231,9 @@ class PasswordResetController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
-        $response = Password::broker()->reset($request->all(),
-            function (User $user, string $password) {
+        $response = Password::broker()->reset(
+            $request->all(),
+            static function (User $user, string $password) {
                 $user->password = Hash::make($password);
                 $user->save();
                 event(new PasswordResetEvent($user));

@@ -20,9 +20,7 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ScreenshotController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class ScreenshotController extends ItemController
 {
     // TODO: find out why it is done this way

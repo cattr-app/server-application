@@ -10,8 +10,7 @@ use Exception;
 
 /**
  * Class InvoicesRepository
- * @package Modules\Invoices\Entities\Repositories
- */
+*/
 class InvoicesRepository
 {
     const INVOICES_RATE = 'INVOICES_RATE';

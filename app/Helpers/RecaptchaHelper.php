@@ -10,8 +10,7 @@ use Throwable;
 
 /**
  * Class RecaptchaHelper
- * @package App\Helpers
- */
+*/
 class RecaptchaHelper
 {
     /**

@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class Token
  *
- * @package App
  * @property int $id
  * @property string $user_id
  * @property string $token

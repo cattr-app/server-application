@@ -10,9 +10,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Class AbstractReportsController
- *
- * @package Modules\Reports\Http\Controllers
- */
+*/
 abstract class AbstractReportsController extends Controller
 {
     /**

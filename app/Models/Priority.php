@@ -10,7 +10,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 /**
  * Class Priority
  *
- * @package App\Models
  * @property int $id
  * @property string $name
  * @property-read Collection|Task[] $tasks
@@ -20,7 +19,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  */
 class Priority extends AbstractModel
 {
-	/**
+    /**
      * table name from database
      * @var string
      */
@@ -45,14 +44,14 @@ class Priority extends AbstractModel
      */
     public function tasks(): HasMany
     {
-    	return $this->hasMany(Task::class, 'priority_id');
+        return $this->hasMany(Task::class, 'priority_id');
     }
 
     /**
      * @return string
      */
-    public static function getTableName()
+    public static function getTableName(): string
     {
-        return with(new static)->getTable();
+        return with(new static())->getTable();
     }
 }

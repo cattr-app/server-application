@@ -8,9 +8,7 @@ use Modules\RedmineIntegration\Models\Priority;
 
 /**
  * Class SynchronizePriorities
- *
- * @package Modules\RedmineIntegration\Console
- */
+*/
 class SynchronizePriorities extends Command
 {
     /**
@@ -46,8 +44,7 @@ class SynchronizePriorities extends Command
 
     /**
      * Execute the console command.
-     *
-     */
+    */
     public function handle()
     {
         try {

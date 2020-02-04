@@ -11,8 +11,7 @@ use Modules\Invoices\Entities\Repositories\InvoicesRepository;
 
 /**
  * Class InvoicesController
- * @package Modules\Invoices\Http\Controllers
- */
+*/
 class InvoicesController extends Controller
 {
     /**
