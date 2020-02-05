@@ -58,7 +58,7 @@ class ShowTest extends TestCase
     {
         $response = $this->actingAs($this->notAssignedUser)->postJson(self::URI, $this->project->only('id'));
 
-        $response->assertForbidden();
+        $response->assertItemNotFound();
     }
 
     public function test_unauthorized(): void
