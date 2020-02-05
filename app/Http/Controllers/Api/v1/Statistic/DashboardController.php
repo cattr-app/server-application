@@ -271,7 +271,7 @@ class DashboardController extends ReportController
 
         $intervals = DB::table('time_intervals AS i')
             ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-            ->select('i.user_id', 'i.id', 'i.task_id', 't.project_id',
+            ->select('i.user_id', 'i.id', 'i.task_id', 't.project_id', 'i.is_manual',
                 DB::raw("CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}') as start_at"),
                 DB::raw("CONVERT_TZ(end_at, '+00:00', '{$timezoneOffset}') as end_at"),
                 DB::raw('TIMESTAMPDIFF(SECOND, i.start_at, i.end_at) as duration'))
@@ -302,6 +302,7 @@ class DashboardController extends ReportController
                 'user_id' => (int)$user_id,
                 'task_id' => (int)$interval->task_id,
                 'project_id' => (int)$interval->project_id,
+                'is_manual' => (int)$interval->is_manual,
                 'duration' => $duration,
                 'start_at' => Carbon::parse($interval->start_at)->toIso8601String(),
                 'end_at' => Carbon::parse($interval->end_at)->toIso8601String(),
