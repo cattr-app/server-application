@@ -274,17 +274,21 @@ class DashboardController extends ReportController
             ->select('i.user_id', 'i.id', 'i.task_id', 't.project_id', 'i.is_manual',
                 DB::raw("CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}') as start_at"),
                 DB::raw("CONVERT_TZ(end_at, '+00:00', '{$timezoneOffset}') as end_at"),
-                DB::raw('TIMESTAMPDIFF(SECOND, i.start_at, i.end_at) as duration'))
+                DB::raw('TIMESTAMPDIFF(SECOND, i.start_at, i.end_at) as duration'),
+                DB::raw('UNIX_TIMESTAMP(start_at) as raw_start_at'),
+                DB::raw('UNIX_TIMESTAMP(end_at) as raw_end_at'))
             ->whereIn('i.user_id', $user_ids)
             ->where('i.start_at', '>=', $startAt)
             ->where('i.start_at', '<', $endAt)
             ->whereIn('t.project_id', Project::getUserRelatedProjectIds(Auth::user()))
             ->whereNull('i.deleted_at')
+            ->orderBy('i.user_id')
+            ->orderBy('i.task_id')
             ->orderBy('i.start_at')
             ->get();
 
         $users = [];
-
+        $previousInterval = false;
         foreach ($intervals as $interval) {
             $user_id = (int)$interval->user_id;
             $duration = (int)$interval->duration;
@@ -297,8 +301,9 @@ class DashboardController extends ReportController
                 ];
             }
 
-            $users[$user_id]['intervals'][] = [
+            $intervalData = [
                 'id' => (int)$interval->id,
+                'ids' => [(int)$interval->id],
                 'user_id' => (int)$user_id,
                 'task_id' => (int)$interval->task_id,
                 'project_id' => (int)$interval->project_id,
@@ -308,7 +313,22 @@ class DashboardController extends ReportController
                 'end_at' => Carbon::parse($interval->end_at)->toIso8601String(),
             ];
 
+            // Merge with the previous interval if it is consecutive and has the same task
+            if ($previousInterval !== false
+                && (int)$interval->raw_start_at - (int)$previousInterval->raw_end_at <= 1
+                && $interval->is_manual === $previousInterval->is_manual
+                && $interval->user_id === $previousInterval->user_id
+                && $interval->task_id === $previousInterval->task_id) {
+                $previousIndex = count($users[$user_id]['intervals']) - 1;
+                $users[$user_id]['intervals'][$previousIndex]['ids'][] = $intervalData['id'];
+                $users[$user_id]['intervals'][$previousIndex]['duration'] += $intervalData['duration'];
+                $users[$user_id]['intervals'][$previousIndex]['end_at'] = $intervalData['end_at'];
+            } else {
+                $users[$user_id]['intervals'][] = $intervalData;
+            }
+
             $users[$user_id]['duration'] += $duration;
+            $previousInterval = $interval;
         }
 
         $results = ['userIntervals' => $users, 'success' => true];
