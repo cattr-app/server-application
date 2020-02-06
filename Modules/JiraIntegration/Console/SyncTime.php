@@ -3,23 +3,23 @@
 namespace Modules\JiraIntegration\Console;
 
 use Illuminate\Console\Command;
-use Modules\JiraIntegration\Services\SyncTasks as Service;
+use Modules\JiraIntegration\Services\SyncTime as Service;
 
-class SyncTasks extends Command
+class SyncTime extends Command
 {
     /**
      * The console command name.
      *
      * @var string
      */
-    protected $name = 'jira:sync-tasks';
+    protected $name = 'jira:sync-time';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Synchronize tasks from Jira for all users, who activate the Jira integration.';
+    protected $description = 'Synchronize time to Jira for all users, who activate the Jira integration.';
 
     /**
      * @var Service

@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\JiraIntegration\Entities;
+namespace Modules\JiraIntegration\Services;
 
 use App\Models\Project;
 use App\Models\Task;
@@ -8,8 +8,13 @@ use App\Models\User;
 use JiraRestApi\Configuration\ArrayConfiguration;
 use JiraRestApi\Issue\Issue;
 use JiraRestApi\Issue\IssueService;
+use JiraRestApi\JiraException;
 use JiraRestApi\Project\Project as JiraProject;
 use JiraRestApi\Project\ProjectService;
+use Log;
+use Modules\JiraIntegration\Entities\ProjectRelation;
+use Modules\JiraIntegration\Entities\Settings;
+use Modules\JiraIntegration\Entities\TaskRelation;
 
 class SyncTasks
 {
@@ -53,43 +58,47 @@ class SyncTasks
         $projectService = new ProjectService($config);
         $issueService = new IssueService($config);
 
-        $take = 100;
-        $result = $issueService->search('', 0, $take);
-        $issues = $result->issues;
-        $total = $result->total;
+        try {
+            $take = 100;
+            $result = $issueService->search("assignee = \"{$user->email}\"", 0, $take);
+            $issues = $result->issues;
+            $total = $result->total;
 
-        for ($skip = $take; $skip < $total; $skip += $take) {
-            $result = $issueService->search('', $skip, $take);
-            $issues = array_merge($issues, $result->issues);
-        }
-
-        /** @var Issue[] $issues */
-        foreach ($issues as $issue) {
-            $jiraProjectID = (int)$issue->fields->getProjectId();
-            $projectRelation = ProjectRelation::find($jiraProjectID);
-            if (!isset($projectRelation)) {
-                $jiraProject = $projectService->get($jiraProjectID);
-                $projectData = $this->toInternalProjectData($jiraProject);
-                $project = Project::create($projectData);
-
-                $projectRelation = ProjectRelation::create([
-                    'id' => $jiraProjectID,
-                    'project_id' => $project->id,
-                ]);
+            for ($skip = $take; $skip < $total; $skip += $take) {
+                $result = $issueService->search('', $skip, $take);
+                $issues = array_merge($issues, $result->issues);
             }
 
-            $taskRelation = TaskRelation::find((int)$issue->id);
-            if (!isset($taskRelation)) {
-                $taskData = $this->toInternalTaskData($issue);
-                $taskData['user_id'] = $user->id;
-                $taskData['project_id'] = $projectRelation->project_id;
-                $task = Task::create($taskData);
+            /** @var Issue[] $issues */
+            foreach ($issues as $issue) {
+                $jiraProjectID = (int)$issue->fields->getProjectId();
+                $projectRelation = ProjectRelation::find($jiraProjectID);
+                if (!isset($projectRelation)) {
+                    $jiraProject = $projectService->get($jiraProjectID);
+                    $projectData = $this->toInternalProjectData($jiraProject);
+                    $project = Project::create($projectData);
 
-                TaskRelation::create([
-                    'id' => (int)$issue->id,
-                    'task_id' => $task->id,
-                ]);
+                    $projectRelation = ProjectRelation::create([
+                        'id' => $jiraProjectID,
+                        'project_id' => $project->id,
+                    ]);
+                }
+
+                $taskRelation = TaskRelation::find((int)$issue->id);
+                if (!isset($taskRelation)) {
+                    $taskData = $this->toInternalTaskData($issue);
+                    $taskData['user_id'] = $user->id;
+                    $taskData['project_id'] = $projectRelation->project_id;
+                    $task = Task::create($taskData);
+
+                    TaskRelation::create([
+                        'id' => (int)$issue->id,
+                        'task_id' => $task->id,
+                    ]);
+                }
             }
+        } catch(JiraException $e) {
+            Log::error($e);
         }
     }
 

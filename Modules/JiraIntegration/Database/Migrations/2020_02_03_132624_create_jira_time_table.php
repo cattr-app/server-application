@@ -15,8 +15,8 @@ class CreateJiraTimeTable extends Migration
     {
         Schema::create('jira_time_relation', function (Blueprint $table) {
             $table->bigIncrements('id');
-            $table->bigInteger('jira_task_id');
-            $table->bigInteger('time_interval_id');
+            $table->unsignedInteger('jira_task_id');
+            $table->unsignedInteger('time_interval_id');
         });
     }
 

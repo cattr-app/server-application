@@ -3,8 +3,10 @@
 namespace Modules\JiraIntegration\Providers;
 
 use App\EventFilter\Facades\Filter;
+use App\Models\TimeInterval;
 use Illuminate\Support\ServiceProvider;
-use Modules\JiraIntegration\Console\SyncTasks;
+use Modules\JiraIntegration\Console\{SyncTasks, SyncTime};
+use Modules\JiraIntegration\Entities\{TaskRelation, TimeRelation};
 
 class JiraIntegrationServiceProvider extends ServiceProvider
 {
@@ -19,10 +21,25 @@ class JiraIntegrationServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
+        Filter::listen('role.actions.list', static function ($rules) {
+            if (!isset($rules['integration']['jira'])) {
+                $rules['integration'] += [
+                    'jira' => __('Jira integration')
+                ];
+            }
+            return $rules;
+        });
+
         Filter::listen('answer.success.item.create.timeinterval', static function ($data) {
+            /** @var TimeInterval $timeInterval */
             $timeInterval = $data['interval'];
-
-
+            $taskRelation = TaskRelation::where(['task_id' => $timeInterval->task_id])->first();
+            if (isset($taskRelation)) {
+                TimeRelation::create([
+                    'jira_task_id' => $taskRelation->id,
+                    'time_interval_id' => $timeInterval->id,
+                ]);
+            }
 
             return $data;
         });
@@ -63,6 +80,7 @@ class JiraIntegrationServiceProvider extends ServiceProvider
     {
         $this->commands([
             SyncTasks::class,
+            SyncTime::class,
         ]);
     }
 
