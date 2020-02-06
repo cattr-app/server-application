@@ -35,7 +35,6 @@ class TasksTest extends TestCase
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
         $this->intervals = IntervalFactory::forUser($this->admin)->createMany(self::INTERVALS_AMOUNT);
-
     }
 
     public function test_total(): void
@@ -49,7 +48,7 @@ class TasksTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
         $response->assertSuccess();
 
-        //TODO CHECK RESPONSE CONTENT AND ASK QUESTIONS
+        //TODO CHECK RESPONSE CONTENT
     }
 
     public function test_unauthorized(): void
@@ -59,10 +58,12 @@ class TasksTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    public function test_without_params(): void
-    {
-        $response = $this->actingAs($this->admin)->getJson(self::URI);
-
-        $response->assertValidationError();
-    }
+    //TODO ASK QUESTIONS
+//
+//    public function test_without_params(): void
+//    {
+//        $response = $this->actingAs($this->admin)->getJson(self::URI);
+//
+//        $response->assertValidationError();
+//    }
 }
