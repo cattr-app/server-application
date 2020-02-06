@@ -316,6 +316,7 @@ class TimeController extends ItemController
         $last = $itemsQuery->get()->last();
 
         $response = [
+            'success' => true,
             'tasks' => $tasks,
             'total' => [
                 'time' => $totalTime,
