@@ -46,7 +46,7 @@ class EditTest extends TestCase
         $this->newRoleData['id'] = 42;
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->newRoleData);
 
-        $response->assertItemNotFound();
+        $response->assertNotFound();
     }
 
     public function test_unauthorized(): void

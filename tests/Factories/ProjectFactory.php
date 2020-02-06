@@ -3,6 +3,7 @@
 namespace Tests\Factories;
 
 use App\Models\Project;
+use Tests\Facades\TaskFactory;
 use Faker\Factory as FakerFactory;
 
 /**
@@ -101,8 +102,7 @@ class ProjectFactory extends AbstractFactory
     protected function createTasks(Project $project): void
     {
         do {
-            app(TaskFactory::class)
-                ->withIntervals($this->needsIntervals)
+            TaskFactory::withIntervals($this->needsIntervals)
                 ->forProject($project)
                 ->create();
         } while (--$this->needsTasks);

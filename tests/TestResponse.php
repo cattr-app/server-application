@@ -139,9 +139,19 @@ class TestResponse extends BaseTestResponse
      * @param bool $hasInfo
      * @return TestResponse
      */
-    public function assertItemNotFound(string $type = 'query.item_not_found', bool $hasInfo = false): TestResponse
+    public function assertNotFound(string $type = 'query.item_not_found', bool $hasInfo = false): TestResponse
     {
         return $this->assertError(self::HTTP_NOT_FOUND, $type, $hasInfo);
+    }
+
+    /**
+     * @param string $type
+     * @param bool $hasInfo
+     * @return TestResponse
+     */
+    public function assertConflict(string $type = 'query.item_already_exists', bool $hasInfo = false): TestResponse
+    {
+        return $this->assertError(self::HTTP_CONFLICT, $type, $hasInfo);
     }
 
     /**

@@ -55,7 +55,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->user->toArray());
 
-        $response->assertItemNotFound();
+        $response->assertNotFound();
     }
 
 

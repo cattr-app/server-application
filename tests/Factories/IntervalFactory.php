@@ -7,6 +7,8 @@ use App\Models\TimeInterval;
 use App\Models\User;
 use Carbon\Carbon;
 use Faker\Factory as FakerFactory;
+use Tests\Facades\TaskFactory;
+use Tests\Facades\UserFactory;
 
 /**
  * Class IntervalFactory
@@ -45,6 +47,40 @@ class IntervalFactory extends AbstractFactory
     }
 
     /**
+     * @return array
+     */
+    public function generateRandomIntervalData(): array
+    {
+        $randomDateTime = FakerFactory::create()->unique()->dateTimeThisYear();
+        $randomDateTime = Carbon::instance($randomDateTime);
+
+        return [
+            'task_id' => TaskFactory::create()->id,
+            'user_id' => UserFactory::create()->id,
+            'end_at' => $randomDateTime->toIso8601String(),
+            'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
+            'count_mouse' => random_int(1, 1000),
+            'count_keyboard' => random_int(1, 1000)
+        ];
+    }
+
+    /**
+     * @return array
+     */
+    public function generateRandomManualIntervalData(): array
+    {
+        $randomDateTime = FakerFactory::create()->unique()->dateTimeThisYear();
+        $randomDateTime = Carbon::instance($randomDateTime);
+
+        return [
+            'task_id' => TaskFactory::create()->id,
+            'user_id' => UserFactory::create()->id,
+            'end_at' => $randomDateTime->toIso8601String(),
+            'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
+        ];
+    }
+
+    /**
      * @param User $user
      * @return self
      */
@@ -73,7 +109,7 @@ class IntervalFactory extends AbstractFactory
     private function defineUser(TimeInterval $interval): void
     {
         if ($this->randomRelations || !$this->user) {
-            $this->user = app(UserFactory::class)->create();
+            $this->user = UserFactory::create();
         }
 
         $interval->user_id = $this->user->id;
@@ -85,9 +121,7 @@ class IntervalFactory extends AbstractFactory
     private function defineTask(TimeInterval $interval): void
     {
         if ($this->randomRelations || !$this->task) {
-            $this->task = app(TaskFactory::class)
-                ->forUser($this->user)
-                ->create();
+            $this->task = TaskFactory::forUser($this->user)->create();
         }
 
         $interval->task_id = $this->task->id;

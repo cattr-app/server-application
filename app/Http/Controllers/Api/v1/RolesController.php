@@ -489,6 +489,7 @@ class RolesController extends ItemController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @codeCoverageIgnore until it is implemented on frontend
      */
     public function attachToUser(Request $request): JsonResponse
     {
@@ -582,6 +583,7 @@ class RolesController extends ItemController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @codeCoverageIgnore until it is implemented on frontend
      */
     public function detachFromUser(Request $request): JsonResponse
     {

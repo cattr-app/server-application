@@ -15,6 +15,8 @@ use Tests\Factories\IntervalFactory as BaseIntervalFactory;
  * @method static TimeInterval create(array $attributes = [])
  * @method static Collection createMany(int $amount = 1)
  * @method static array getRandomIntervalData()
+ * @method static array generateRandomIntervalData()
+ * @method static array generateRandomManualIntervalData()
  * @method static BaseIntervalFactory forUser(User $user)
  * @method static BaseIntervalFactory forTask(Task $task)
  * @method static BaseIntervalFactory withRandomRelations()

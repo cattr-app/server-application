@@ -11,11 +11,11 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 /**
- * Class CreateTest
+ * Class ManualCreateTest
  */
-class CreateTest extends TestCase
+class ManualCreateTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/create';
+    private const URI = 'v1/time-intervals/manual-create';
 
     /**
      * @var User
@@ -37,16 +37,16 @@ class CreateTest extends TestCase
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
+        $this->admin->setAttribute('manual_time', true)->save();
 
         $this->task = TaskFactory::forUser($this->admin)->create();
 
-        $this->intervalData = IntervalFactory::generateRandomIntervalData();
+        $this->intervalData = IntervalFactory::generateRandomManualIntervalData();
     }
 
     public function test_create(): void
     {
         $this->assertDatabaseMissing('time_intervals', $this->intervalData);
-
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->intervalData);
 
         $response->assertSuccess();
@@ -61,6 +61,15 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->intervalData);
 
         $response->assertConflict();
+    }
+
+    public function test_without_access(): void
+    {
+        $this->admin->setAttribute('manual_time', false)->save();
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->intervalData);
+
+        $response->assertForbidden();
+        $this->assertDatabaseMissing('time_intervals', $this->intervalData);
     }
 
     public function test_unauthorized(): void
