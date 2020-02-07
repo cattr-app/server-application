@@ -13,8 +13,7 @@ use App\Exceptions\Interfaces\TypedException;
 
 /**
  * Class AuthorizationException
- * @package App\Exceptions\Entities
- */
+*/
 class AuthorizationException extends BaseAuthorizationException
     implements TypedException, InfoExtendedException, HttpExceptionInterface
 {
@@ -243,6 +242,7 @@ class AuthorizationException extends BaseAuthorizationException
     }
 
     /**
+     * @codeCoverageIgnore
      * @return array
      */
     public function getHeaders(): array

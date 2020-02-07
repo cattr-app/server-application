@@ -990,8 +990,7 @@
  *   "role_id": 1,
  *   "timezone": null,
  *  }
- *
- */
+*/
 /**
  * @api {put, post} /api/v1/users/edit Edit
  * @apiDescription Edit User

@@ -13,9 +13,7 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ProjectsUsersController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class ProjectsUsersController extends ItemController
 {
     /**

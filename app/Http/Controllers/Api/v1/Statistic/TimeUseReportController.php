@@ -12,7 +12,6 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TimeUseReportController
- * @package App\Http\Controllers\Api\v1\Statistic
  *
  * @deprecated
  * @codeCoverageIgnore
@@ -105,7 +104,12 @@ class TimeUseReportController extends ReportController
 
         $user_ids = $request->input('user_ids', []);
 
-        $timezone = $request->input('timezone', []) ?? $this->timezone;
+        $timezone = $request->input('timezone', []);
+
+        if (!$timezone) {
+            $timezone = $this->timezone;
+        }
+
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)

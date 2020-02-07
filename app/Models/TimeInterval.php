@@ -52,7 +52,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * Class TimeInterval
  *
- * @package App\Models
  * @property int $id
  * @property int $task_id
  * @property int $user_id
@@ -89,7 +88,7 @@ class TimeInterval extends AbstractModel
 {
     use SoftDeletes;
 
-	/**
+    /**
      * table name from database
      * @var string
      */
@@ -135,11 +134,11 @@ class TimeInterval extends AbstractModel
      *
      * @return void
      */
-    protected static function boot()
+    protected static function boot(): void
     {
         parent::boot();
 
-        static::deleting(function($intervals) {
+        static::deleting(static function ($intervals) {
             /** @var TimeInterval $intervals */
             $intervals->screenshot()->delete();
         });
@@ -166,7 +165,7 @@ class TimeInterval extends AbstractModel
      */
     public function screenshot(): HasOne
     {
-    	return $this->hasOne(Screenshot::class, 'time_interval_id');
+        return $this->hasOne(Screenshot::class, 'time_interval_id');
     }
 
     /**

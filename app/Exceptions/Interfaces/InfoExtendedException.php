@@ -6,8 +6,7 @@ use Throwable;
 
 /**
  * Interface ReasonableException
- * @package App\Exceptions\Interfaces
- */
+*/
 interface InfoExtendedException extends Throwable
 {
     /**

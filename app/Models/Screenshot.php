@@ -43,7 +43,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * Class Screenshot
  *
- * @package App\Models
  * @property int $id
  * @property int $time_interval_id
  * @property string $path
@@ -141,24 +140,22 @@ class Screenshot extends AbstractModel
         }
 
         // Allow manager to see screenshots of related users.
-        if (Role::can($user, 'screenshots', 'manager_access')) {
-            if (Role::can($user, 'projects', 'relations')) {
-                $projectIds = $user->projects->pluck('id');
-                $userIds = User::query()
-                    ->whereHas('timeIntervals', function (EloquentBuilder $query) use ($projectIds) {
-                        $query->whereHas('task', function (EloquentBuilder $query) use ($projectIds) {
-                            $query->whereHas('project', function (EloquentBuilder $query) use ($projectIds) {
-                                $query->whereIn('id', $projectIds);
-                            });
+        if (Role::can($user, 'screenshots', 'manager_access') && Role::can($user, 'projects', 'relations')) {
+            $projectIds = $user->projects->pluck('id');
+            $userIds = User::query()
+                ->whereHas('timeIntervals', static function (EloquentBuilder $query) use ($projectIds) {
+                    $query->whereHas('task', static function (EloquentBuilder $query) use ($projectIds) {
+                        $query->whereHas('project', static function (EloquentBuilder $query) use ($projectIds) {
+                            $query->whereIn('id', $projectIds);
                         });
-                    })->select('id')->get('id')->pluck('id');
+                    });
+                })->select('id')->get('id')->pluck('id');
 
-                if ($userIds->contains($user_id)) {
-                    return true;
-                }
+            if ($userIds->contains($user_id)) {
+                return true;
             }
         }
-        User::whereHas('timeIntervals', function (EloquentBuilder $query) {
+        User::whereHas('timeIntervals', static function (EloquentBuilder $query) {
             echo get_class($query);
         });
 

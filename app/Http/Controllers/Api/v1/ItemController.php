@@ -16,12 +16,9 @@ use Illuminate\Database\Eloquent\Model;
 use App\Models\DateTrait;
 use Illuminate\Support\Facades\Event;
 
-
 /**
  * Class ItemController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 abstract class ItemController extends Controller
 {
     /**
@@ -65,7 +62,7 @@ abstract class ItemController extends Controller
      *
      * @return array
      */
-    abstract public function getValidationRules (): array;
+    abstract public function getValidationRules(): array;
 
     /**
      * Returns unique part of event name for current item
@@ -96,7 +93,8 @@ abstract class ItemController extends Controller
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), $request->all() ?: []
+                $this->getQuery(),
+                $request->all() ?: []
             )
         );
 
@@ -127,7 +125,8 @@ abstract class ItemController extends Controller
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), $request->all() ?: []
+                $this->getQuery(),
+                $request->all() ?: []
             )
         );
 
@@ -218,7 +217,8 @@ abstract class ItemController extends Controller
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), $filters ?: []
+                $this->getQuery(),
+                $filters ?: []
             )
         );
 
@@ -230,7 +230,9 @@ abstract class ItemController extends Controller
                     'success' => false,
                     'error_type' => 'query.item_not_found',
                     'message' => 'Item not found'
-                ]), 404);
+                ]),
+                404
+            );
         }
 
         return response()->json(
@@ -358,14 +360,17 @@ abstract class ItemController extends Controller
                     'error_type'=> 'validation',
                     'message' => 'Validation error',
                     'info' => 'Invalid id',
-                ]), 400);
+                ]),
+                400
+            );
         }
 
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), ['id' => $itemId]
+                $this->getQuery(),
+                ['id' => $itemId]
             )
         );
 
@@ -388,7 +393,9 @@ abstract class ItemController extends Controller
                         'success' => false,
                         'error_type' => 'query.item_not_found',
                         'message' => 'Item not found',
-                    ]), 404);
+                    ]),
+                    404
+                );
             }
         }
 
@@ -478,9 +485,9 @@ abstract class ItemController extends Controller
         foreach ($model->getDates() as $dateAttr) {
             if (isset($filter[$dateAttr])) {
                 if (is_array($filter[$dateAttr])) {
-                    $filter[$dateAttr][1] = DateTrait::toStandartTime($filter[$dateAttr][1]);
+                    $filter[$dateAttr][1] = DateTrait::toStandardTime($filter[$dateAttr][1]);
                 } else {
-                    $filter[$dateAttr] = DateTrait::toStandartTime($filter[$dateAttr]);
+                    $filter[$dateAttr] = DateTrait::toStandardTime($filter[$dateAttr]);
                 }
             }
         }

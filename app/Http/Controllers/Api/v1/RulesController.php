@@ -12,9 +12,7 @@ use Throwable;
 
 /**
  * Class RulesController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class RulesController extends ItemController
 {
     /**

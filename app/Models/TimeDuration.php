@@ -9,7 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class TimeDuration
  *
- * @package App\Models
  * @property int $date
  * @property int $duration
  * @property int $user_id
@@ -23,7 +22,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class TimeDuration extends AbstractModel
 {
-	/**
+    /**
      * table name from database
      * @var string
      */

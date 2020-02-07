@@ -11,9 +11,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Class ScreenshotController
- *
- * @package App\Http\Controllers
- */
+*/
 class ScreenshotController extends Controller
 {
     /**

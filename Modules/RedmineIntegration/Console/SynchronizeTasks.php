@@ -20,9 +20,7 @@ use SimpleXMLElement;
 
 /**
  * Class SynchronizeTasks
- *
- * @package Modules\RedmineIntegration\Console
- */
+*/
 class SynchronizeTasks extends Command
 {
     /**
@@ -107,8 +105,7 @@ class SynchronizeTasks extends Command
 
     /**
      * Execute the console command.
-     *
-     */
+    */
     public function handle()
     {
         $this->synchronizeTasks();
@@ -136,8 +133,7 @@ class SynchronizeTasks extends Command
      * Synchronize tasks for current user
      *
      * @param  int  $userId  User's id in our system
-     *
-     */
+    */
     public function synchronizeUserNewTasks(int $userId)
     {
         $userNewRedmineTasks = $this->userRepo->getUserNewRedmineTasks($userId);

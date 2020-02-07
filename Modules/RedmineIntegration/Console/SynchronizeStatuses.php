@@ -8,9 +8,7 @@ use Modules\RedmineIntegration\Models\Status;
 
 /**
  * Class SynchronizeStatuses
- *
- * @package Modules\RedmineIntegration\Console
- */
+*/
 class SynchronizeStatuses extends Command
 {
     /**

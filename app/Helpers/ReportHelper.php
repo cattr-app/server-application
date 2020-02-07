@@ -197,6 +197,7 @@ class ReportHelper
                 }
 
                 $resultCollection[$userID]['tasks'][$item->task_id] = [
+                    'task_id'      => $item->task_id,
                     'project_id'   => $item->project_id,
                     'name'         => $item->task_name,
                     'project_name' => $item->project_name,
@@ -226,14 +227,13 @@ class ReportHelper
     }
 
     /**
-     * @param  array   $uids
-     * @param  array   $pids
-     * @param  string  $startAt
-     * @param  string  $endAt
+     * @param array $uids
+     * @param string $startAt
+     * @param string $endAt
      * @param          $timezoneOffset
-     * @param  array   $rawSelect
+     * @param array $rawSelect
      *
-     * @param  array   $bindings
+     * @param array $bindings
      *
      * @return Builder
      */
@@ -259,7 +259,6 @@ class ReportHelper
         );
 
         $bindings = array_merge([$timezoneOffset], $bindings);
-        $user = auth()->user();
 
         return DB::table($this->getTableName('project'))
             ->selectRaw($rawSelect, [$bindings])
@@ -282,7 +281,7 @@ class ReportHelper
                 $this->getTableName('user', 'id')
             )
             ->where($this->getTableName('timeInterval', 'start_at'), '>=', $startAt)
-            ->where($this->getTableName('timeInterval', 'end_at'), '<', $endAt)
+            ->where($this->getTableName('timeInterval', 'start_at'), '<', $endAt)
             ->whereIn($this->getTableName('user','id'), $uids)
             ->groupBy('task_id');
     }
@@ -319,14 +318,13 @@ class ReportHelper
             ) as intervals"
         ], [$timezoneOffset]);
 
-        return $query->join(
+        return $query->leftJoin(
                 $this->getTableName('screenshot'),
                 $this->getTableName('screenshot', 'time_interval_id'),
                 '=',
                 $this->getTableName('timeInterval', 'id')
             )->orderBy(DB::raw('ANY_VALUE('.$this->getTableName('screenshot', 'created_at').')'), 'ASC')
-             ->whereIn('project_id', $pids)
-             ->whereNotNull('screenshots.created_at');
+             ->whereIn('project_id', $pids);
     }
 
     /**

@@ -11,8 +11,7 @@ use Modules\GitlabIntegration\Helpers\TimeIntervalsHelper;
 
 /**
  * Class GitlabIntegrationServiceProvider
- * @package Modules\GitlabIntegration\Providers
- */
+*/
 class GitlabIntegrationServiceProvider extends ServiceProvider
 {
     /**
@@ -27,15 +26,6 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
         $this->registerFactories();
         $this->registerCommands();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
-
-        Filter::listen('role.actions.list', static function ($rules) {
-            if (!isset($rules['integration']['gitlab'])) {
-                $rules['integration'] += [
-                    'gitlab' => __('GitLab integration')
-                ];
-            }
-            return $rules;
-        });
 
         Filter::listen('answer.success.item.create.timeinterval', static function ($data) {
             $timeInterval = $data['interval'];

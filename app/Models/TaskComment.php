@@ -13,7 +13,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * Class TaskComment
  *
- * @package App\Models
  * @property int $id
  * @property int $task_id
  * @property string $content
@@ -42,7 +41,7 @@ class TaskComment extends AbstractModel
 {
     use SoftDeletes;
 
-	/**
+    /**
      * table name from database
      * @var string
      */

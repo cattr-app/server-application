@@ -16,9 +16,7 @@ use Illuminate\Support\Facades\Route;
 
 /**
  * Class ProjectController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class ProjectController extends ItemController
 {
     /**

@@ -20,9 +20,7 @@ use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ScreenshotController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class ScreenshotController extends ItemController
 {
     // TODO: find out why it is done this way
@@ -308,6 +306,17 @@ class ScreenshotController extends ItemController
      */
     public function destroy(Request $request): JsonResponse
     {
+        if (!isset($request->id)) {
+            return response()->json(
+                Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'screenshot id is required',
+                ]),
+                400);
+        }
+
         // Get screenshot model
         $screenshotModel = $this->getItemClass();
 

@@ -3,12 +3,11 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Http\Request;
 
 class CorsMiddleware
 {
-
     protected $trustedDomains = [];
-
 
     public function __construct()
     {
@@ -16,7 +15,7 @@ class CorsMiddleware
         $domains = config('cors.trustedDomains');
 
         // remove spaces
-        $domains = str_replace([' '],'', $domains);
+        $domains = str_replace(' ', '', $domains);
 
         if ($domains) {
             // string => array ['domain1.com', 'domain2.com', 'domain3.com', 'domainN.com']
@@ -27,8 +26,8 @@ class CorsMiddleware
     /**
      * Handle an incoming request.
      *
-     * @param \Illuminate\Http\Request $request
-     * @param \Closure $next
+     * @param Request $request
+     * @param Closure $next
      * @return mixed
      */
     public function handle($request, Closure $next)
@@ -38,14 +37,14 @@ class CorsMiddleware
     }
 
 
-    public function terminate($request, $response)
+    public function terminate(Request $request): void
     {
-        if ($request->getMethod() == 'OPTIONS') {
+        if ($request->getMethod() === 'OPTIONS') {
             $this->allowAllCors($request);
         }
     }
 
-    protected function allowAllCors($request)
+    protected function allowAllCors(Request $request): void
     {
         if (!config('cors.enable')) {
             foreach ([
@@ -75,7 +74,7 @@ class CorsMiddleware
 
     protected function allowedDomain($origin)
     {
-        if (is_null($origin)) {
+        if ($origin === null) {
             return false;
         }
 
@@ -83,18 +82,18 @@ class CorsMiddleware
         $requestDomain = parse_url($origin, PHP_URL_HOST);
         $requestPort = parse_url($origin, PHP_URL_PORT);
 
-        if (is_null($requestDomain)) {
+        if ($requestDomain === null) {
             return false;
         }
 
         // has port? add it to domain
-        if (!is_null($requestPort)) {
-            $requestDomain = $requestDomain . ':' . $requestPort;
+        if ($requestPort !== null) {
+            $requestDomain .= ':' . $requestPort;
         }
 
         $requestDomain = $requestProtocol . '://' . $requestDomain;
 
-        if (!in_array($requestDomain, $this->trustedDomains)) {
+        if (!in_array($requestDomain, $this->trustedDomains, true)) {
             return false;
         }
 

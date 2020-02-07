@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * Class Project
- * @package App\Models
+ *
  * @mixin EloquentIdeHelper
  */
 class ProjectReport extends Model
@@ -18,7 +18,7 @@ class ProjectReport extends Model
     /**
      * @return BelongsTo
      */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
@@ -26,7 +26,7 @@ class ProjectReport extends Model
     /**
      * @return BelongsTo
      */
-    public function task()
+    public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class, 'task_id');
     }
@@ -34,7 +34,7 @@ class ProjectReport extends Model
     /**
      * @return BelongsTo
      */
-    public function project()
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
     }

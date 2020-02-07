@@ -8,9 +8,7 @@ use Modules\RedmineIntegration\Models\ClientFactory;
 
 /**
  * Class SynchronizeProjects
- *
- * @package Modules\RedmineIntegration\Console
- */
+*/
 class SynchronizeUsers extends Command
 {
     /**
@@ -53,8 +51,7 @@ class SynchronizeUsers extends Command
 
     /**
      * Execute the console command.
-     *
-     */
+    */
     public function handle()
     {
         $this->synchronizeNewUsers();

@@ -10,9 +10,7 @@ use Schema;
 
 /**
  * Class QueryHelper
- *
- * @package App\Helpers
- */
+*/
 class QueryHelper
 {
     const RESERVED_REQUEST_KEYWORDS = [

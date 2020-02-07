@@ -1,13 +1,8 @@
 <?php
 namespace App\Models;
 
-use Carbon\Carbon;
-use DateTime;
-use InvalidArgumentException;
-
 /**
  * trait DateTrait
- * @package App\Models
  */
 trait DateTrait
 {
@@ -19,7 +14,7 @@ trait DateTrait
      */
     public function getAttribute($key)
     {
-        if (in_array($key, $this->getDates())) {
+        if (in_array($key, $this->getDates(), true)) {
             return $this->getDateAttr($key);
         }
         return parent::getAttribute($key);
@@ -33,7 +28,7 @@ trait DateTrait
      */
     public function setAttribute($key, $value)
     {
-        if (in_array($key, $this->getDates())) {
+        if (in_array($key, $this->getDates(), true)) {
             return $this->setDateAttr($key, $value);
         }
         return parent::setAttribute($key, $value);
@@ -42,9 +37,9 @@ trait DateTrait
     /**
      * get value in date attribute $attrName and converting it to ISO8601 format
      * @param string $attrName
-     * @return mixed
+     * @return string|null
      */
-    public function getDateAttr($attrName): string
+    public function getDateAttr($attrName): ?string
     {
         $attr = $this->attributes[$attrName];
         return static::toISO8601($attr);
@@ -58,44 +53,37 @@ trait DateTrait
      */
     public function setDateAttr($attrName, $value)
     {
-        $this->attributes[$attrName] = static::toStandartTime($value);
+        $this->attributes[$attrName] = static::toStandardTime($value);
         return $this;
     }
 
     /**
      * convert string MySQL datetime format -> ISO8601
-     * @param string $standartDatetime
-     * @return string
+     * @param string $standardDatetime
+     * @return string|null
      */
-    public static function toISO8601(string $standartDatetime): string
+    public static function toISO8601($standardDatetime): ?string
     {
-        $dateObj = new Carbon($standartDatetime);
-        return $dateObj->toIso8601String();
+        return $standardDatetime ? date('c', strtotime($standardDatetime)) : null;
     }
 
     /**
      * convert string ISO8601 format -> MySQL
      * @param string $iso8601
-     * @return string
+     * @return string|null
      */
-    public static function toStandartTime(string $iso8601): string
+    public static function toStandardTime($iso8601): ?string
     {
-        try {
-            $dateObj = Carbon::createFromFormat(DateTime::ISO8601, $iso8601);
-            return date('Y-m-d H:i:s', $dateObj->timestamp);
-        } catch (InvalidArgumentException $e) {
-        }
-
-        return date('Y-m-d H:i:s', strtotime($iso8601));
+        return $iso8601 ? date('Y-m-d H:i:s', strtotime($iso8601)) : null;
     }
 
 
     /**
-     * override method for convertation model to array and auto convert dates format (MySQL datetime  -> ISO8601)
+     * override method for conversion model to array and auto convert dates format (MySQL datetime  -> ISO8601)
      * @param array $attributes
      * @return array
      */
-    protected function addDateAttributesToArray(array $attributes)
+    protected function addDateAttributesToArray(array $attributes): array
     {
         foreach ($this->getDates() as $key) {
             if (! isset($attributes[$key])) {

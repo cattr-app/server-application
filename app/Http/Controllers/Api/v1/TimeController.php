@@ -15,9 +15,7 @@ use Illuminate\Http\Request;
 
 /**
  * Class TimeController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class TimeController extends ItemController
 {
     /**
@@ -318,6 +316,7 @@ class TimeController extends ItemController
         $last = $itemsQuery->get()->last();
 
         $response = [
+            'success' => true,
             'tasks' => $tasks,
             'total' => [
                 'time' => $totalTime,

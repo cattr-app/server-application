@@ -14,9 +14,7 @@ use Modules\RedmineIntegration\Models\Settings;
 
 /**
  * Class SynchronizeTime
- *
- * @package Modules\RedmineIntegration\Console
- */
+*/
 class SynchronizeTime extends Command
 {
     /**
@@ -90,8 +88,7 @@ class SynchronizeTime extends Command
 
     /**
      * Execute the console command.
-     *
-     */
+    */
     public function handle()
     {
         $this->synchronizeTime();

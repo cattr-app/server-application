@@ -8,8 +8,7 @@ use Illuminate\Routing\Controller;
 
 /**
  * Class StatusController
- * @package App\Http\Controllers
- */
+*/
 class StatusController extends Controller
 {
     /**

@@ -10,9 +10,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Class AbstractReportsController
- *
- * @package Modules\Reports\Http\Controllers
- */
+*/
 abstract class AbstractReportsController extends Controller
 {
     /**
@@ -45,7 +43,7 @@ abstract class AbstractReportsController extends Controller
     }
 
     /**
-     * @return \Maatwebsite\Excel\BinaryFileResponse|BinaryFileResponse
+     * @return BinaryFileResponse
      * @throws Exception
      */
     public function getReport()

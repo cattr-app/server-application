@@ -40,7 +40,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * Class ProjectsUsers
  *
- * @package App\Models
  * @property int     $project_id
  * @property int     $user_id
  * @property int     $role_id

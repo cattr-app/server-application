@@ -10,6 +10,7 @@ use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Event;
 
 /**
  * Class RolesController
@@ -421,14 +422,16 @@ class RolesController extends ItemController
                 }
 
                 $name = $actionList[$rule->object][$rule->action] ?? "$rule->object/$rule->action";
-
-                $items[] = [
-                    'object' => $rule->object,
-                    'action' => $rule->action,
-                    'name'   => $name,
-                ];
+                if (!array_key_exists($name, $items)) {
+                    $items[$name] = [
+                        'object' => $rule->object,
+                        'action' => $rule->action,
+                        'name' => $name,
+                    ];
+                }
             }
         }
+
 
         return response()->json([ 'success' => true, 'res' => Filter::process(
             $this->getEventUniqueName('answer.success.item.allowed-rules'),
@@ -489,6 +492,7 @@ class RolesController extends ItemController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @codeCoverageIgnore until it is implemented on frontend
      */
     public function attachToUser(Request $request): JsonResponse
     {
@@ -582,6 +586,7 @@ class RolesController extends ItemController
     /**
      * @param Request $request
      * @return JsonResponse
+     * @codeCoverageIgnore until it is implemented on frontend
      */
     public function detachFromUser(Request $request): JsonResponse
     {

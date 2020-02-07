@@ -9,8 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class EntityResolver
- * @package Modules\GitlabIntegration\Helpers
- */
+*/
 class EntityResolver
 {
     const PROJECTS_TABLE = 'gitlab_projects_relations';

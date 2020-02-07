@@ -3,21 +3,22 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Illuminate\Auth\Middleware\Authenticate as BaseAuthenticate;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Lang;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * Class Authenticate
- * @package App\Http\Middleware
- */
-class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
+*/
+class Authenticate extends BaseAuthenticate
 {
-    const DEFAULT_USER_LANGUAGE = 'en';
+    public const DEFAULT_USER_LANGUAGE = 'en';
 
     /**
      * @param  Request  $request
@@ -46,7 +47,7 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
-        \Lang::setLocale($user->user_language ? $user->user_language : self::DEFAULT_USER_LANGUAGE);
+        Lang::setLocale($user->user_language ? $user->user_language : self::DEFAULT_USER_LANGUAGE);
         return $next($request);
     }
 }

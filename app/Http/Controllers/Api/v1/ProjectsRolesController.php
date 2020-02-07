@@ -15,7 +15,7 @@ use Illuminate\Support\Facades\Validator;
  * Class ProjectsRolesController
  * @deprecated
  * @codeCoverageIgnore
- * @package App\Http\Controllers\Api\v1
+ *
  * @deprecated
  * @codeCoverageIgnore
  */

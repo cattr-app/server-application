@@ -462,5 +462,4 @@ class ProjectReportController extends ReportController
 
         return response()->json($result);
     }
-
 }

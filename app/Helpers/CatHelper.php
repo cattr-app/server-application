@@ -4,9 +4,7 @@ namespace App\Helpers;
 
 /**
  * Class CatHelper
- *
- * @package App\Helpers
- */
+*/
 class CatHelper
 {
     /**

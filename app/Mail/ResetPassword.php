@@ -27,6 +27,7 @@ class ResetPassword extends ResetPasswordNotification
      *
      * @param  mixed  $notifiable
      * @return MailMessage
+     * @codeCoverageIgnore
      */
     public function toMail($notifiable): MailMessage
     {
@@ -34,13 +35,12 @@ class ResetPassword extends ResetPasswordNotification
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
         }
 
-        $resetUrl = config('app.password_reset_url')
-            . "?email=$this->email&token=$this->token";
+        $resetUrl = config('app.password_reset_url') . "?email=$this->email&token=$this->token";
 
         $locale = User::where('email', '=', $this->email)->first()->getAttribute('user_language');
         Lang::setLocale($locale);
 
-        return (new MailMessage)
+        return (new MailMessage())
             ->subject(Lang::get('emails.reset_password.subject'))
             ->line(Lang::get('emails.reset_password.intro'))
             ->action(Lang::get('emails.reset_password.action'), $resetUrl)

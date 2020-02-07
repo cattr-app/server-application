@@ -2,7 +2,6 @@
 
 namespace App\Exceptions;
 
-use App\Exceptions\Entities\CaptchaException;
 use App\Exceptions\Interfaces\InfoExtendedException;
 use App\Exceptions\Interfaces\TypedException;
 use Exception;
@@ -22,9 +21,7 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 /**
  * Class Handler
- *
- * @package App\Exceptions
- */
+*/
 class Handler extends ExceptionHandler
 {
     /**

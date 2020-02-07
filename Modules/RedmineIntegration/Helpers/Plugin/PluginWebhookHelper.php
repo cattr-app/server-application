@@ -17,9 +17,7 @@ use Symfony\Component\HttpFoundation\ParameterBag;
 
 /**
  * Class PluginWebhookHelper
- *
- * @package Modules\RedmineIntegration\Helpers\Plugin
- */
+*/
 class PluginWebhookHelper extends AbstractPluginWebhookHelper
 {
     /**
@@ -256,8 +254,7 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
      *
      * @todo
      * @deprecated
-     *
-     */
+    */
     public function updateTask($task): void
     {
         $taskEav = Property::where([

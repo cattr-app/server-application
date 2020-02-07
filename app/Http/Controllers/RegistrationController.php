@@ -13,8 +13,7 @@ use Webpatser\Uuid\Uuid;
 
 /**
  * Class RegistrationController
- * @package App\Http\Controllers
- */
+*/
 class RegistrationController extends Controller
 {
     // One hour.

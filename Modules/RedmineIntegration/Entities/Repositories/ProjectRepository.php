@@ -7,9 +7,7 @@ use Illuminate\Support\Facades\DB;
 
 /**
  * Class ProjectRepository
- *
- * @package Modules\RedmineIntegration\Entities\Repositories
- */
+*/
 class ProjectRepository
 {
     /**

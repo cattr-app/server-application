@@ -116,7 +116,6 @@ use Illuminate\Database\Eloquent\Collection;
 /**
  * Class User
  *
- * @package App
  * @property int $id
  * @property string $full_name
  * @property string $email
@@ -187,7 +186,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @method static QueryBuilder|User withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class User extends Authenticatable implements JWTSubject, CanResetPassword
+class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use SoftDeletes;
@@ -310,7 +309,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     /**
      * @return BelongsTo
      */
-    public function role()
+    public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
@@ -336,7 +335,7 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
      * @param $token
      * @return Token
      */
-    public function addToken($token)
+    public function addToken($token): Token
     {
         $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
         /** @var Token $token */
@@ -396,23 +395,12 @@ class User extends Authenticatable implements JWTSubject, CanResetPassword
     }
 
     /**
-     *
-     * Get the e-mail address where password reset links are sent.
-     *
-     * @return string
-     */
-    public function getEmailForPasswordReset()
-    {
-        return $this->email;
-    }
-
-    /**
      * Send the password reset notification.
      *
      * @param  string $token
      * @return void
      */
-    public function sendPasswordResetNotification($token)
+    public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPassword($this->email, $token));
     }

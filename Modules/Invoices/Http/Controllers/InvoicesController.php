@@ -2,54 +2,20 @@
 
 namespace Modules\Invoices\Http\Controllers;
 
-
 use App\Http\Controllers\Controller;
-use Illuminate\Support\Facades\Auth;
+use App\Models\Project;
+use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Modules\Invoices\Entities\Repositories\InvoicesRepository;
+use Illuminate\Support\Facades\Validator;
+use Modules\Invoices\Models\Invoices;
+use Modules\Invoices\Models\UserDefaultRate;
 
 /**
  * Class InvoicesController
- * @package Modules\Invoices\Http\Controllers
- */
+*/
 class InvoicesController extends Controller
 {
-    /**
-     * @var InvoicesRepository
-     */
-    private $invoicesRepository;
-
-    /**
-     * @var array $rates
-     */
-    private $rates = [];
-
-    /**
-     * InvoicesController constructor.
-     * @param InvoicesRepository $invoicesRepository
-     */
-    public function __construct(InvoicesRepository $invoicesRepository)
-    {
-        $this->invoicesRepository = $invoicesRepository;
-
-        parent::__construct();
-    }
-
-    /**
-     * @return array
-     */
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'invoices.list',
-            'update' => 'invoices.full_access',
-            'projects' => 'invoices.list',
-            'getDefaultRate' => 'invoices.list',
-            'setDefaultRate' => 'invoices.full_access',
-        ];
-    }
-
     /**
      * Get invoices according userId->projectId
      * @param Request $request
@@ -57,36 +23,53 @@ class InvoicesController extends Controller
      */
     public function index(Request $request): JsonResponse
     {
-        $user = Auth::user();
+        $validationRules = [
+            'userIds.*' => 'int',
+            'projectIds.*' => 'int',
+        ];
 
-        $userIds = $request->input('userIds');
-        $projectIds = $request->input('projectIds');
+        $validator = Validator::make($request->all(), $validationRules);
 
-        $answer = [];
-        foreach ($userIds as $userId) {
-            $userProjectsRelations = \DB::table('project_report')
-                ->select('user_id', 'project_id')
-                ->distinct()
-                ->where('user_id', $userId)
-                ->whereIn('project_id', $projectIds)
-                ->get();
-
-            $this->rates = [];
-            $projectIds = [];
-
-            foreach ($userProjectsRelations as $userProjectsRelation) {
-                $projectIds []= $userProjectsRelation->project_id;
-            }
-
-            $this->rates = $this->invoicesRepository->getUserRateForProjects($projectIds, $userId);
-
-            $answer[] = [
-                'userId' => $userId,
-                'rates' => $this->rates
-            ];
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ],
+                400
+            );
         }
 
-        return response()->json($answer);
+        $userIds = $request->input('userIds', []);
+        $projectIds = $request->input('projectIds', []);
+
+        $answer = [];
+        $projects = Project::whereIn('id', $projectIds)->get();
+        $invoices = Invoices::whereIn('user_id', $userIds)->whereIn('project_id', $projectIds)->get();
+        $users = User::without(['role', 'projectsRelation'])->whereIn('id', $userIds)->get();
+        $userRates = UserDefaultRate::whereIn('user_id', $users->pluck('id'))->get();
+
+        foreach ($users as $user) {
+            $defaultRate = $userRates->where('user_id', $user->id)->first()->default_rate ?? UserDefaultRate::ZERO_RATE;
+
+            $projectsRates = $invoices->where('user_id', $user->id);
+            foreach ($projects as $projectWithRate) {
+                $projectRate = $projectsRates->firstWhere('project_id','=', $projectWithRate['id']);
+                $projectWithRate->rate = $projectRate ? $projectRate->rate : $defaultRate;
+            }
+
+
+            $answer[$user->id] = [
+                'user' => $user,
+                'default_rate' => $defaultRate,
+                'projects' => $projects->toArray()
+            ];
+
+        }
+
+        return response()->json(collect($answer));
     }
 
     /**
@@ -94,57 +77,39 @@ class InvoicesController extends Controller
      * @param Request $request
      * @return JsonResponse
      */
-    public function update(Request $request)
+    public function setProjectRate(Request $request)
     {
-        $user = Auth::user();
+        $validationRules = [
+            'userIds.*' => 'int',
+            'projectIds.*' => 'int',
+            'rate' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+        ];
+
+        $validator = Validator::make($request->all(), $validationRules);
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ],
+                400
+            );
+        }
 
         $userId = $request->input('userId');
         $projectId = $request->input('projectId');
         $rate = $request->input('rate');
 
-        try {
-            $answer = $this->invoicesRepository->updateOrCreateUserRate($userId, $projectId, $rate);
-        } catch (\Exception $e) {
-            return response()->json([
-                'error' => $e->getMessage(),
-                'code' => $e->getCode(),
-            ], 500);
-        }
+        $answer = Invoices::updateOrCreate(['user_id' => $userId, 'project_id' => $projectId], ['rate' => (string) $rate]);
 
-        $answer["message"] = "New rate saved!";
-        $answer["status"] = "success";
-        return response()->json($answer);
-    }
-
-    /**
-     * Get all project(-s) for user(-s)
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function projects(Request $request)
-    {
-        $user = Auth::user();
-
-        $userIds = $request->input('userIds');
-        $projectIds = $request->input('projectIds');
-
-        $report = $this->invoicesRepository->getProjectsByUsers($userIds, $projectIds);
-        return response()->json($report);
-    }
-
-    /**
-     * Get default user rate
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function getDefaultRate(Request $request)
-    {
-        $user = Auth::user();
-
-        $userIds = $request->input('userIds');
-
-        $defaultRates = $this->invoicesRepository->getDefaultUsersRate($userIds);
-        return response()->json($defaultRates);
+        return response()->json([
+            'message' => 'Rate successfully update for project!',
+            'status'  => 'success',
+            $answer
+        ]);
     }
 
     /**
@@ -154,23 +119,34 @@ class InvoicesController extends Controller
      */
     public function setDefaultRate(Request $request)
     {
-        $user = Auth::user();
+        $validationRules = [
+            'userId' => 'int',
+            'defaultRate' => 'required|regex:/^\d+(\.\d{1,2})?$/',
+        ];
+
+        $validator = Validator::make($request->all(), $validationRules);
+
+        if ($validator->fails()) {
+            return response()->json(
+                [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ],
+                400
+            );
+        }
 
         $userId = $request->input('userId');
         $defaultRate = $request->input('defaultRate');
 
-        try {
-            $answer = $this->invoicesRepository->setDefaultRateForUser($userId, $defaultRate);
-        } catch (\Exception $e) {
-            return response()->json([
-                "message" => $e->getMessage(),
-                "status" => "error",
-                'code' => $e->getCode(),
-            ], 500);
-        }
+        $answer = UserDefaultRate::updateOrCreate(['user_id' => $userId],['default_rate' => (string) $defaultRate]);
 
-        $answer["message"] = "New default rate saved!";
-        $answer["status"] = "success";
-        return response()->json($answer);
+        return response()->json([
+            'message' => 'New default rate saved successfully!',
+            'status'  => 'success',
+            $answer
+        ]);
     }
 }

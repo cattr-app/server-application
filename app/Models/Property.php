@@ -11,7 +11,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 /**
  * Class Property
  *
- * @package App\Models
  * @property int    $id
  * @property int    $entity_id
  * @property string $entity_type
@@ -43,7 +42,6 @@ class Property extends AbstractModel
     public const PROJECT_CODE = 'project';
     public const TASK_CODE = 'task';
     public const TIME_INTERVAL_CODE = 'time_interval';
-    public const SCREENSHOT_CODE = 'screenshot';
     public const USER_CODE = 'user';
     public const TASK_COMMENT_CODE = 'task_comment';
 
@@ -84,9 +82,9 @@ class Property extends AbstractModel
     /**
      * @return string
      */
-    public static function getTableName()
+    public static function getTableName(): string
     {
-        return with(new static)->getTable();
+        return with(new static())->getTable();
     }
 
     /**

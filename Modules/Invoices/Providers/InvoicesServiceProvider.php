@@ -16,8 +16,6 @@ class InvoicesServiceProvider extends ServiceProvider
     {
         $this->registerConfig();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
-        $this->loadInvoicesRules();
-
         parent::boot();
     }
 
@@ -101,17 +99,5 @@ class InvoicesServiceProvider extends ServiceProvider
     public function provides()
     {
         return [];
-    }
-
-    private function loadInvoicesRules()
-    {
-        \Filter::listen('role.actions.list', static function ($data) {
-             $data['invoices'] = [
-                'list' => __('Invoices list'),
-                'full_access' => __('Invoices full access'),
-            ];
-
-            return $data;
-        });
     }
 }
