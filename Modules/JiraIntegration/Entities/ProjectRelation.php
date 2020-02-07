@@ -5,6 +5,12 @@ namespace Modules\JiraIntegration\Entities;
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Model;
 
+/**
+ * @property int $id
+ * @property int $project_id
+ *
+ * @property Project $project
+ */
 class ProjectRelation extends Model
 {
     protected $table = 'jira_projects_relation';

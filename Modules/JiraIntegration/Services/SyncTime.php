@@ -5,11 +5,11 @@ namespace Modules\JiraIntegration\Services;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\Log;
 use JiraRestApi\Configuration\ArrayConfiguration;
 use JiraRestApi\Issue\IssueService;
 use JiraRestApi\Issue\Worklog;
 use JiraRestApi\JiraException;
-use Log;
 use Modules\JiraIntegration\Entities\Settings;
 use Modules\JiraIntegration\Entities\TaskRelation;
 use Modules\JiraIntegration\Entities\TimeRelation;
@@ -36,11 +36,11 @@ class SyncTime
 
         $users = User::all();
         foreach ($users as $user) {
-            $this->synchronize($user);
+            $this->synchronizeUserTime($user);
         }
     }
 
-    public function synchronize(User $user)
+    public function synchronizeUserTime(User $user)
     {
         $token = $this->settings->getUserApiToken($user->id);
         if (empty($this->host) || empty($token)) {
@@ -48,17 +48,13 @@ class SyncTime
         }
 
         $config = new ArrayConfiguration([
-            'jiraHost' => $this->host,
-            'jiraUser' => $user->email,
+            'jiraHost'     => $this->host,
+            'jiraUser'     => $user->email,
             'jiraPassword' => $token,
         ]);
 
         $issueService = new IssueService($config);
-
-        $timeRelations = TimeRelation::whereHas('timeInterval', function ($query) use ($user) {
-            return $query->where('user_id', $user->id);
-        })->get();
-
+        $timeRelations = TimeRelation::where('user_id', $user->id)->get();
         foreach ($timeRelations as $timeRelation) {
             /** @var TimeRelation $timeRelation */
             /** @var TaskRelation $taskRelation */

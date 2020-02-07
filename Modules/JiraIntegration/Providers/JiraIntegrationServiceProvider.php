@@ -23,10 +23,9 @@ class JiraIntegrationServiceProvider extends ServiceProvider
 
         Filter::listen('role.actions.list', static function ($rules) {
             if (!isset($rules['integration']['jira'])) {
-                $rules['integration'] += [
-                    'jira' => __('Jira integration')
-                ];
+                $rules['integration'] += ['jira' => __('Jira integration')];
             }
+
             return $rules;
         });
 
@@ -36,8 +35,9 @@ class JiraIntegrationServiceProvider extends ServiceProvider
             $taskRelation = TaskRelation::where(['task_id' => $timeInterval->task_id])->first();
             if (isset($taskRelation)) {
                 TimeRelation::create([
-                    'jira_task_id' => $taskRelation->id,
+                    'jira_task_id'     => $taskRelation->id,
                     'time_interval_id' => $timeInterval->id,
+                    'user_id'          => $timeInterval->user_id,
                 ]);
             }
 
@@ -66,9 +66,7 @@ class JiraIntegrationServiceProvider extends ServiceProvider
             module_path('JiraIntegration', 'Config/config.php') => config_path('jiraintegration.php'),
         ], 'config');
 
-        $this->mergeConfigFrom(
-            module_path('JiraIntegration', 'Config/config.php'), 'jiraintegration'
-        );
+        $this->mergeConfigFrom(module_path('JiraIntegration', 'Config/config.php'), 'jiraintegration');
     }
 
     /**

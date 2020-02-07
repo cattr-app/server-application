@@ -6,15 +6,16 @@ use App\Models\Property;
 
 class Settings
 {
-    public const API_HOST = 'JIRA_API_HOST';
-    public const API_TOKEN = 'JIRA_API_TOKEN';
+    public const ENABLED = 'jira_enabled';
+    public const API_HOST = 'jira_api_host';
+    public const API_TOKEN = 'jira_api_token';
 
     public function get(string $entityType, int $entityId, string $propertyName, $default = '')
     {
         $params = [
             'entity_type' => $entityType,
-            'entity_id' => $entityId,
-            'name' => $propertyName,
+            'entity_id'   => $entityId,
+            'name'        => $propertyName,
         ];
 
         $property = Property::where($params)->first(['value']);
@@ -26,11 +27,21 @@ class Settings
     {
         $params = [
             'entity_type' => $entityType,
-            'entity_id' => $entityId,
-            'name' => $propertyName,
+            'entity_id'   => $entityId,
+            'name'        => $propertyName,
         ];
 
         return Property::updateOrCreate($params, ['value' => $value]);
+    }
+
+    public function getEnabled(): bool
+    {
+        return (int)static::get(Property::COMPANY_CODE, 0, static::ENABLED, '0') !== 0;
+    }
+
+    public function setEnabled(bool $enabled): Property
+    {
+        return static::set(Property::COMPANY_CODE, 0, static::ENABLED, $enabled ? 1 : 0);
     }
 
     public function getHost(): string

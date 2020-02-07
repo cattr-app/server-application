@@ -16,6 +16,7 @@ class AddJiraTimeConstraints extends Migration
         Schema::table('jira_time_relation', function (Blueprint $table) {
             $table->foreign('jira_task_id')->references('id')->on('jira_tasks_relation')->onDelete('cascade');
             $table->foreign('time_interval_id')->references('id')->on('time_intervals')->onDelete('cascade');
+            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
         });
     }
 
@@ -29,6 +30,7 @@ class AddJiraTimeConstraints extends Migration
         Schema::table('jira_time_relation', function (Blueprint $table) {
             $table->dropForeign(['jira_task_id']);
             $table->dropForeign(['time_interval_id']);
+            $table->dropForeign(['user_id']);
         });
     }
 }

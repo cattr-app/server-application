@@ -17,6 +17,7 @@ class CreateJiraTimeTable extends Migration
             $table->bigIncrements('id');
             $table->unsignedInteger('jira_task_id');
             $table->unsignedInteger('time_interval_id');
+            $table->unsignedInteger('user_id');
         });
     }
 
