@@ -1,11 +1,14 @@
 <?php
 
-
 namespace Modules\EmailReports\Console;
 
 use Illuminate\Console\Command;
-use Modules\EmailReports\Http\Controllers\EmailReportsController;
+use Modules\EmailReports\Entities\ReportsSender;
 
+/**
+ * Class EmailReportsSender
+ * @package Modules\EmailReports\Console
+ */
 class EmailReportsSender extends Command
 {
     /**
@@ -20,25 +23,25 @@ class EmailReportsSender extends Command
      *
      * @var string
      */
-    protected $description = 'Send email reports to users emails (working like export report on Projects Report tab).';
+    protected $description = 'Send email reports to users';
 
     /**
-     * @var EmailReportsController
+     * @var ReportsSender
      */
-    private $emailReportsController;
+    private $repository;
 
     /**
      * SendSavedReports constructor.
-     * @param EmailReportsController $emailReportsController
+     * @param ReportsSender $repository
      */
-    public function __construct(EmailReportsController $emailReportsController)
+    public function __construct(ReportsSender $repository)
     {
         parent::__construct();
-        $this->emailReportsController = $emailReportsController;
+        $this->repository = $repository;
     }
 
     public function handle()
     {
-        $this->emailReportsController->send();
+        $this->repository->send();
     }
 }

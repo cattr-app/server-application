@@ -10,10 +10,9 @@ use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Events\AfterSheet;
+use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class ProjectExport implements FromCollection, WithEvents
+class ProjectExport implements FromCollection, ShouldAutoSize
 {
     const ROUND_DIGITS = 3;
 
@@ -233,39 +232,20 @@ class ProjectExport implements FromCollection, WithEvents
 
         foreach ($resultCollection as &$project) {
             foreach ($project['users'] as &$user) {
-                usort($user['tasks'], function ($a, $b) {
+                uasort($user['tasks'], function ($a, $b) {
                     return $a['duration'] < $b['duration'];
                 });
             }
 
-            usort($project['users'], function ($a, $b) {
+            uasort($project['users'], function ($a, $b) {
                 return $a['tasks_time'] < $b['tasks_time'];
             });
         }
 
-        usort($resultCollection, function ($a, $b) {
+        uasort($resultCollection, function ($a, $b) {
             return $a['project_time'] < $b['project_time'];
         });
 
         return collect($resultCollection);
-    }
-
-
-    /**
-     * @return array
-     */
-    public function registerEvents(): array
-    {
-        return [
-            AfterSheet::class => function (AfterSheet $event) {
-                $headers = 'A1:W1';
-                $event->sheet->getDelegate()->getStyle($headers)->getFont()->setBold(true);
-
-                $event->sheet->getDelegate()->getColumnDimension('A1:A9999')->setWidth(20);
-                $event->sheet->getDelegate()->getColumnDimension('B1:B9999')->setWidth(10);
-                $event->sheet->getDelegate()->getColumnDimension('C1:C9999')->setWidth(20);
-                $event->sheet->getDelegate()->getColumnDimension('E1:E9999')->setWidth(15);
-            }
-        ];
     }
 }

@@ -4,7 +4,7 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     <meta name="viewport" content="width=device-width, initial-scale=1">
-    <title>Invoice Report Amazingtime</title>
+    <title>Invoices Report from Cattr</title>
     <style>
         body {
             width: auto;
@@ -22,7 +22,7 @@
         .row {
             margin: 20px 10px;
         }
-        
+
         .afterwords {
             text-align: center;
             font-size: smaller;

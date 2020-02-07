@@ -227,14 +227,13 @@ class ReportHelper
     }
 
     /**
-     * @param  array   $uids
-     * @param  array   $pids
-     * @param  string  $startAt
-     * @param  string  $endAt
+     * @param array $uids
+     * @param string $startAt
+     * @param string $endAt
      * @param          $timezoneOffset
-     * @param  array   $rawSelect
+     * @param array $rawSelect
      *
-     * @param  array   $bindings
+     * @param array $bindings
      *
      * @return Builder
      */
@@ -260,7 +259,6 @@ class ReportHelper
         );
 
         $bindings = array_merge([$timezoneOffset], $bindings);
-        $user = auth()->user();
 
         return DB::table($this->getTableName('project'))
             ->selectRaw($rawSelect, [$bindings])
@@ -283,7 +281,7 @@ class ReportHelper
                 $this->getTableName('user', 'id')
             )
             ->where($this->getTableName('timeInterval', 'start_at'), '>=', $startAt)
-            ->where($this->getTableName('timeInterval', 'end_at'), '<', $endAt)
+            ->where($this->getTableName('timeInterval', 'start_at'), '<', $endAt)
             ->whereIn($this->getTableName('user','id'), $uids)
             ->groupBy('task_id');
     }
