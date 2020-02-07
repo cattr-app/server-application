@@ -43,7 +43,7 @@ abstract class AbstractReportsController extends Controller
     }
 
     /**
-     * @return \Maatwebsite\Excel\BinaryFileResponse|BinaryFileResponse
+     * @return BinaryFileResponse
      * @throws Exception
      */
     public function getReport()

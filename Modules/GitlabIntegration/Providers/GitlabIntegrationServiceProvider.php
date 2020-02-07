@@ -27,15 +27,6 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        Filter::listen('role.actions.list', static function ($rules) {
-            if (!isset($rules['integration']['gitlab'])) {
-                $rules['integration'] += [
-                    'gitlab' => __('GitLab integration')
-                ];
-            }
-            return $rules;
-        });
-
         Filter::listen('answer.success.item.create.timeinterval', static function ($data) {
             $timeInterval = $data['interval'];
             $helper = app()->make(TimeIntervalsHelper::class);

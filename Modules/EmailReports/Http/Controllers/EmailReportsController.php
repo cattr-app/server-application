@@ -2,59 +2,33 @@
 
 namespace Modules\EmailReports\Http\Controllers;
 
-
 use App\Http\Controllers\Api\v1\ItemController;
 use App\Models\Project;
-use App\Models\User;
-use App\EventFilter\Facades\Filter;
-use Illuminate\Database\Eloquent\Builder;
+use Event;
+use Filter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Mail;
-use Modules\EmailReports\Entities\SavedReportsRepository;
-use Modules\EmailReports\Mail\EmailReportMail;
 use Modules\EmailReports\Models\EmailReports;
+use Modules\EmailReports\Models\EmailReportsEmails;
+use Modules\EmailReports\Models\EmailReportsProjects;
 
+/**
+ * Class EmailReportsController
+ * @package Modules\EmailReports\Http\Controllers
+ */
 class EmailReportsController extends ItemController
 {
     /**
-     * @var SavedReportsRepository
+     * @return array
      */
-    private $savedReportsRepository;
-
-    public function __construct(SavedReportsRepository $savedReportsRepository)
+    public function getQueryWith(): array
     {
-        $this->savedReportsRepository = $savedReportsRepository;
-    }
-
-    public function send()
-    {
-        $map = [EmailReports::DAILY, EmailReports::WEEKLY, EmailReports::MONTHLY ];
-        $userIds = User::all('id')->pluck('id')->toArray();
-
-        foreach ($map as $frequency) {
-            $emailReports = EmailReports::whereFrequency($frequency)->get();
-
-            foreach ($emailReports as $emailReport) {
-                if (!EmailReports::checkIsReportSendDay($emailReport->value, $frequency)) {
-                    continue;
-                }
-
-                $dates = EmailReports::getDatesToWorkWith($frequency);
-
-                $preparedReports = [
-                        'emails' => $emailReport->email,
-                        'reports' => $this->savedReportsRepository->createReportFromDecodedData($emailReport, $userIds, $dates)
-                    ];
-
-                Mail::to(explode(',', $preparedReports['emails']))
-                    ->send(new EmailReportMail(date('l\, m Y', strtotime($dates['startAt'])),
-                        date('l\, m Y', strtotime($dates['endAt'] ?? 'yesterday')),
-                        $preparedReports['reports']));
-            }
-        }
+        return [
+            'projects',
+            'emails'
+        ];
     }
 
     /**
@@ -75,10 +49,10 @@ class EmailReportsController extends ItemController
     public function getValidationRules(): array
     {
         return [
-            'name'    => 'required',
-            'email'    => 'required',
-            'frequency'    => 'required',
-            'value'    => 'required',
+            'name'    => 'required|string',
+            'emails.*'    => 'required|email',
+            'frequency'    => 'required|int',
+            'sending_day'    => 'required|date',
         ];
     }
 
@@ -92,28 +66,16 @@ class EmailReportsController extends ItemController
         return 'email-reports';
     }
 
-    public function index(Request $request): JsonResponse
+    public function create(Request $request): JsonResponse
     {
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(), $request->all() ?: []
-            )
-        );
+        Event::listen($this->getEventUniqueName('item.create.after'), static::class.'@'.'saveRelations');
+        return parent::create($request);
+    }
 
-        $items = [];
-        foreach ($itemsQuery->get() as $item) {
-            $item->project_ids = Project::whereIn('id', json_decode($item->project_ids))->get();
-            $items []= $item;
-        }
-
-            return response()->json(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.item.list.result'),
-                $items
-            )
-        );
+    public function edit(Request $request): JsonResponse
+    {
+        Event::listen($this->getEventUniqueName('item.edit.after'), static::class.'@'.'saveRelations');
+        return parent::edit($request);
     }
 
     /**
@@ -122,48 +84,52 @@ class EmailReportsController extends ItemController
      * @param Request $request
      * @return JsonResponse
      * @throws ModelNotFoundException
+     * @throws \Exception
      */
     public function show(Request $request): JsonResponse
     {
-        $itemId = is_int($request->get('id')) ? $request->get('id') : false;
+        Filter::listen($this->getEventUniqueName('answer.success.item.show'), static function ($item) {
+            $projectIds = collect($item->projects)->pluck('project_id')->toArray();
+            $projects = Project::whereIn('id', $projectIds)
+                        ->pluck('name')
+                        ->toArray();
 
-        if (!$itemId) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Validation fail',
-                    'reason' => 'Id invalid',
-                ]),
-                400
-            );
+            $space = ' ';
+
+            $item->project_names = implode(',' . $space, $projects);
+            $item->project_ids = $projectIds;
+            $item->emails = $item->emails->pluck('email')->toArray();
+            return $item->unsetRelations();
+        });
+        return parent::show($request);
+    }
+
+    public function saveRelations($emailReport, $requestData)
+    {
+        $projectIds = $requestData['project_ids'];
+        $requestEmails = $requestData['emails'];
+
+        $emailReport->projects()->delete();
+        $emailReport->emails()->delete();
+
+        $projects = [];
+        foreach ($projectIds as $projectId) {
+            $projects[] = new EmailReportsProjects([
+                'project_id' => $projectId,
+                'email_projects_id' => $emailReport->id,
+            ]);
         }
 
-        $filters = [
-            'id' => $itemId
-        ];
-        $request->get('with') ? $filters['with'] = $request->get('with') : false;
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(), $filters ?: []
-            )
-        );
-
-        $item = $itemsQuery->first();
-
-        if (!$item) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Item not found'
-                ]),
-                404
-            );
+        $emails = [];
+        foreach ($requestEmails as $email) {
+            $emails[] = new EmailReportsEmails([
+                'email' => $email,
+                'email_report_id' => $emailReport->id,
+            ]);
         }
 
-        $item->project_ids = Project::whereIn('id', json_decode($item->project_ids))->get();
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item)
-        );
+        $emailReport->projects()->saveMany($projects);
+        $emailReport->emails()->saveMany($emails);
+        return $emailReport;
     }
 }
