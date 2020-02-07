@@ -318,14 +318,13 @@ class ReportHelper
             ) as intervals"
         ], [$timezoneOffset]);
 
-        return $query->join(
+        return $query->leftJoin(
                 $this->getTableName('screenshot'),
                 $this->getTableName('screenshot', 'time_interval_id'),
                 '=',
                 $this->getTableName('timeInterval', 'id')
             )->orderBy(DB::raw('ANY_VALUE('.$this->getTableName('screenshot', 'created_at').')'), 'ASC')
-             ->whereIn('project_id', $pids)
-             ->whereNotNull('screenshots.created_at');
+             ->whereIn('project_id', $pids);
     }
 
     /**
