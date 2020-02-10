@@ -141,6 +141,7 @@ use Illuminate\Database\Eloquent\Collection;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ * @property bool $is_admin
  * @property bool $important
  * @property int $role_id
  * @property Project[]|Collection $projects
@@ -231,6 +232,7 @@ class User extends Authenticatable implements JWTSubject
         'important',
         'change_password',
         'role_id',
+        'is_admin',
         'user_language',
     ];
 

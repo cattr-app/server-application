@@ -12,8 +12,7 @@ use JWTAuth;
 class UserFactory extends AbstractFactory
 {
     private const ROLES = [
-        'admin' => 1,
-        'user' => 2
+        'user' => 1,
     ];
 
     /**
@@ -25,6 +24,11 @@ class UserFactory extends AbstractFactory
      * @var string
      */
     protected $role;
+
+    /**
+     * @var bool
+     */
+    private $isAdmin;
 
     /**
      * @return array
@@ -88,7 +92,8 @@ class UserFactory extends AbstractFactory
      */
     public function asAdmin(): self
     {
-        $this->role = 'admin';
+        $this->role = 'user';
+        $this->isAdmin = true;
 
         return $this;
     }
@@ -138,6 +143,11 @@ class UserFactory extends AbstractFactory
 
         if ($attributes) {
             $userData = array_merge($userData, $attributes);
+        }
+
+        //TODO remove that temp fix
+        if ($this->isAdmin) {
+            $userData['is_admin'] = 1;
         }
 
         $user = User::create($userData);

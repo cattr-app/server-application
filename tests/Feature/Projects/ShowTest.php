@@ -54,13 +54,6 @@ class ShowTest extends TestCase
         $response->assertJson($this->project->toArray());
     }
 
-    public function test_not_assigned(): void
-    {
-        $response = $this->actingAs($this->notAssignedUser)->postJson(self::URI, $this->project->only('id'));
-
-        $response->assertNotFound();
-    }
-
     public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
