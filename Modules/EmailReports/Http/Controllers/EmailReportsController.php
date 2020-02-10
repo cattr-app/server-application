@@ -66,12 +66,21 @@ class EmailReportsController extends ItemController
         return 'email-reports';
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function create(Request $request): JsonResponse
     {
         Event::listen($this->getEventUniqueName('item.create.after'), static::class.'@'.'saveRelations');
         return parent::create($request);
     }
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     */
     public function edit(Request $request): JsonResponse
     {
         Event::listen($this->getEventUniqueName('item.edit.after'), static::class.'@'.'saveRelations');
@@ -94,9 +103,7 @@ class EmailReportsController extends ItemController
                         ->pluck('name')
                         ->toArray();
 
-            $space = ' ';
-
-            $item->project_names = implode(',' . $space, $projects);
+            $item->project_names = implode(',' . EmailReports::SPACE, $projects);
             $item->project_ids = $projectIds;
             $item->emails = $item->emails->pluck('email')->toArray();
             return $item->unsetRelations();
@@ -104,7 +111,12 @@ class EmailReportsController extends ItemController
         return parent::show($request);
     }
 
-    public function saveRelations($emailReport, $requestData)
+    /**
+     * @param $emailReport EmailReports
+     * @param $requestData Request
+     * @return EmailReports
+     */
+    public function saveRelations(EmailReports $emailReport, Request $requestData): EmailReports
     {
         $projectIds = $requestData['project_ids'];
         $requestEmails = $requestData['emails'];

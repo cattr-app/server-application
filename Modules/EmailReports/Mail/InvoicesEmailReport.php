@@ -16,10 +16,19 @@ class InvoicesEmailReport extends Mailable
 {
     use Queueable, SerializesModels;
 
+    /**
+     * @var string
+     */
     public $fromDate;
 
+    /**
+     * @var string
+     */
     public $toDate;
 
+    /**
+     * @var File
+     */
     public $attachedFile;
 
     /**
@@ -27,6 +36,13 @@ class InvoicesEmailReport extends Mailable
      */
     public $fileName;
 
+    /**
+     * InvoicesEmailReport constructor.
+     * @param string $fromDate
+     * @param string $toDate
+     * @param File $attachedFile
+     * @param string $fileName
+     */
     public function __construct(string $fromDate, string $toDate, File $attachedFile, string $fileName)
     {
         $this->fromDate = $fromDate;
@@ -35,6 +51,9 @@ class InvoicesEmailReport extends Mailable
         $this->fileName = $fileName;
     }
 
+    /**
+     * @return InvoicesEmailReport
+     */
     public function build()
     {
         return $this->view("emailreports::invoicesReport")

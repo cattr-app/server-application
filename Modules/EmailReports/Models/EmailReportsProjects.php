@@ -6,6 +6,10 @@ use App\Models\AbstractModel;
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
+/**
+ * Class EmailReportsProjects
+ * @package Modules\EmailReports\Models
+ */
 class EmailReportsProjects extends AbstractModel
 {
     protected $fillable = [

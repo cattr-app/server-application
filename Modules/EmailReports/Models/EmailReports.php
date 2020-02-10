@@ -15,13 +15,13 @@ use Modules\EmailReports\StatisticExports\ProjectReport;
  */
 class EmailReports extends AbstractModel
 {
-    const SPACE = " ";
+    public const SPACE = " ";
 
-    const DAILY = 0;
-    const WEEKLY = 1;
-    const MONTHLY = 2;
+    public const DAILY = 0;
+    public const WEEKLY = 1;
+    public const MONTHLY = 2;
 
-    const FREQUENCY = [
+    public const FREQUENCY = [
         self::DAILY => 'Daily',
         self::WEEKLY => 'Weekly',
         self::MONTHLY => 'Monthly'
@@ -54,6 +54,11 @@ class EmailReports extends AbstractModel
 
     protected $table = 'email_reports';
 
+    /**
+     * @param $day string
+     * @param $frequency int
+     * @return bool
+     */
     public static function checkIsReportSendDay($day, $frequency): bool
     {
         if ($frequency === self::WEEKLY) {
@@ -65,6 +70,10 @@ class EmailReports extends AbstractModel
         return true;
     }
 
+    /**
+     * @param $frequency int
+     * @return array
+     */
     public static function getDatesToWorkWith($frequency): array
     {
         if ($frequency === self::WEEKLY) {
@@ -87,6 +96,10 @@ class EmailReports extends AbstractModel
         ];
     }
 
+    /**
+     * @param EmailReports $emailReport
+     * @return array
+     */
     public static function getDocumentType(EmailReports $emailReport): array
     {
         switch (trim(strtolower($emailReport->document_type))) {
@@ -109,17 +122,27 @@ class EmailReports extends AbstractModel
         ];
     }
 
-    public static function getExporterClass($emailReport)
+    /**
+     * @param $emailReport EmailReports
+     * @return mixed
+     */
+    public static function getExporterClass(EmailReports $emailReport)
     {
         return self::AVAILABLE_STATISTIC_TYPES[$emailReport->statistic_type]['class'];
 
     }
 
+    /**
+     * @return HasMany
+     */
     public function projects(): HasMany
     {
         return $this->hasMany(EmailReportsProjects::class, 'email_projects_id', 'id');
     }
 
+    /**
+     * @return HasMany
+     */
     public function emails(): HasMany
     {
         return $this->hasMany(EmailReportsEmails::class, 'email_report_id', 'id');

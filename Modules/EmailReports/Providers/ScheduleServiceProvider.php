@@ -11,9 +11,9 @@ use Illuminate\Support\ServiceProvider;
  */
 class ScheduleServiceProvider extends ServiceProvider
 {
-    const COMMAND_PREFIX = 'email-reports';
-    const COMMAND_SEND = 'send';
-    const SEPARATOR = ':';
+    public const COMMAND_PREFIX = 'email-reports';
+    public const COMMAND_SEND = 'send';
+    public const SEPARATOR = ':';
 
     /**
      * @var Schedule

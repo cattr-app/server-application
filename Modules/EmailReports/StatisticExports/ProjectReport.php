@@ -14,6 +14,10 @@ use Modules\EmailReports\Mail\ProjectReportEmailReport;
 use Modules\EmailReports\Models\EmailReports;
 use Modules\Reports\Exports\ProjectExport;
 
+/**
+ * Class ProjectReport
+ * @package Modules\EmailReports\StatisticExports
+ */
 class ProjectReport extends ProjectExport implements FromCollection, ShouldAutoSize
 {
     /**
@@ -102,6 +106,11 @@ class ProjectReport extends ProjectExport implements FromCollection, ShouldAutoS
         return $returnableData;
     }
 
+    /**
+     * @param $emailReport
+     * @param $frequency
+     * @throws \Exception
+     */
     public function sendEmail($emailReport, $frequency)
     {
         $dates = EmailReports::getDatesToWorkWith($frequency);

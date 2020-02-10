@@ -17,6 +17,10 @@ use Modules\Invoices\Models\Invoices as InvoiceModel;
 use Modules\Invoices\Models\UserDefaultRate;
 use Modules\Reports\Exports\ProjectExport;
 
+/**
+ * Class Invoices
+ * @package Modules\EmailReports\StatisticExports
+ */
 class Invoices extends ProjectExport implements FromCollection, ShouldAutoSize
 {
     /**
@@ -168,18 +172,32 @@ class Invoices extends ProjectExport implements FromCollection, ShouldAutoSize
         ]);
     }
 
+    /**
+     * @param $userId
+     * @return int|mixed
+     */
     protected function getUserDefaultRate($userId)
     {
         $defaultRate = UserDefaultRate::where('user_id', '=', $userId)->first();
         return $defaultRate ? $defaultRate->default_rate : UserDefaultRate::ZERO_RATE;
     }
 
+    /**
+     * @param int $userId
+     * @param int $projectId
+     * @return mixed|null
+     */
     protected function getUserRateForProject(int $userId, int $projectId)
     {
         $userRateForProjects =  InvoiceModel::where('user_id', $userId)->where('project_id', $projectId)->first();
         return $userRateForProjects->rate ?? null;
     }
 
+    /**
+     * @param $emailReport
+     * @param $frequency
+     * @throws \Exception
+     */
     public function sendEmail($emailReport, $frequency)
     {
         $dates = EmailReports::getDatesToWorkWith($frequency);
