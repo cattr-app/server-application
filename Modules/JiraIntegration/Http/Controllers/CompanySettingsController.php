@@ -31,8 +31,8 @@ class CompanySettingsController extends Controller
     public static function getControllerRules(): array
     {
         return [
-            'get' => 'integration.jira',
-            'set' => 'integration.jira',
+            'get' => 'integration.jira-companysettings',
+            'set' => 'integration.jira-companysettings',
         ];
     }
 

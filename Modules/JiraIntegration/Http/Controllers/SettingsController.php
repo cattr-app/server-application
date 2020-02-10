@@ -32,8 +32,8 @@ class SettingsController extends Controller
     public static function getControllerRules(): array
     {
         return [
-            'get' => 'integration.gitlab',
-            'set' => 'integration.gitlab',
+            'get' => 'integration.jira',
+            'set' => 'integration.jira',
         ];
     }
 

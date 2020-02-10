@@ -6,8 +6,8 @@ use App\Models\Property;
 
 class Settings
 {
-    public const ENABLED = 'jira_enabled';
-    public const API_HOST = 'jira_api_host';
+    public const ENABLED   = 'jira_enabled';
+    public const API_HOST  = 'jira_api_host';
     public const API_TOKEN = 'jira_api_token';
 
     public function get(string $entityType, int $entityId, string $propertyName, $default = '')
@@ -36,12 +36,12 @@ class Settings
 
     public function getEnabled(): bool
     {
-        return (int)static::get(Property::COMPANY_CODE, 0, static::ENABLED, '0') !== 0;
+        return (bool)static::get(Property::COMPANY_CODE, 0, static::ENABLED, 0);
     }
 
     public function setEnabled(bool $enabled): Property
     {
-        return static::set(Property::COMPANY_CODE, 0, static::ENABLED, $enabled ? 1 : 0);
+        return static::set(Property::COMPANY_CODE, 0, static::ENABLED, $enabled);
     }
 
     public function getHost(): string

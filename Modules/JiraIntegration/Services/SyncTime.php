@@ -2,17 +2,13 @@
 
 namespace Modules\JiraIntegration\Services;
 
-use App\Models\TimeInterval;
-use App\Models\User;
+use App\Models\{TimeInterval, User};
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use JiraRestApi\Configuration\ArrayConfiguration;
-use JiraRestApi\Issue\IssueService;
-use JiraRestApi\Issue\Worklog;
+use JiraRestApi\Issue\{IssueService, Worklog};
 use JiraRestApi\JiraException;
-use Modules\JiraIntegration\Entities\Settings;
-use Modules\JiraIntegration\Entities\TaskRelation;
-use Modules\JiraIntegration\Entities\TimeRelation;
+use Modules\JiraIntegration\Entities\{Settings, TaskRelation, TimeRelation};
 
 class SyncTime
 {
@@ -30,7 +26,7 @@ class SyncTime
 
     public function synchronizeAll()
     {
-        if (empty($this->host)) {
+        if (empty($this->host) || !$this->settings->getEnabled()) {
             return;
         }
 

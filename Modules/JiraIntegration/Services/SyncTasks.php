@@ -2,19 +2,14 @@
 
 namespace Modules\JiraIntegration\Services;
 
-use App\Models\Project;
-use App\Models\Task;
-use App\Models\User;
+use App\Models\{Project, Task, User};
 use Illuminate\Support\Facades\Log;
 use JiraRestApi\Configuration\ArrayConfiguration;
-use JiraRestApi\Issue\Issue;
-use JiraRestApi\Issue\IssueService;
+use JiraRestApi\Issue\{Issue, IssueService};
 use JiraRestApi\JiraException;
 use JiraRestApi\Project\Project as JiraProject;
 use JiraRestApi\Project\ProjectService;
-use Modules\JiraIntegration\Entities\ProjectRelation;
-use Modules\JiraIntegration\Entities\Settings;
-use Modules\JiraIntegration\Entities\TaskRelation;
+use Modules\JiraIntegration\Entities\{ProjectRelation, Settings, TaskRelation};
 
 class SyncTasks
 {
@@ -32,7 +27,7 @@ class SyncTasks
 
     public function synchronizeAll()
     {
-        if (empty($this->host)) {
+        if (empty($this->host) || !$this->settings->getEnabled()) {
             return;
         }
 
@@ -146,25 +141,25 @@ class SyncTasks
     protected function toInternalProjectData(JiraProject $project): array
     {
         return [
-            'company_id' => 0,
-            'name' => $project->name,
+            'company_id'  => 0,
+            'name'        => $project->name,
             'description' => $project->description,
-            'important' => false,
+            'important'   => false,
         ];
     }
 
     protected function toInternalTaskData(Issue $issue): array
     {
         return [
-            'task_name' => $issue->fields->summary,
+            'task_name'   => $issue->fields->summary,
             'description' => $issue->fields->description,
-            'active' => true,
+            'active'      => true,
             'assigned_by' => 0,
-            'url' => $issue->self,
-            'created_at' => $issue->fields->created,
-            'updated_at' => $issue->fields->updated,
+            'url'         => $issue->self,
+            'created_at'  => $issue->fields->created,
+            'updated_at'  => $issue->fields->updated,
             'priority_id' => 2,
-            'important' => false,
+            'important'   => false,
         ];
     }
 }
