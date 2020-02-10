@@ -4,27 +4,52 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
-use Filter;
+use Exception;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Schema;
-use Validator;
+use Illuminate\Support\Facades\Validator;
 use Illuminate\Database\Eloquent\Model;
 use App\Models\DateTrait;
-use Event;
-
+use Illuminate\Support\Facades\Event;
 
 /**
  * Class ItemController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 abstract class ItemController extends Controller
 {
+    /**
+     * @apiDefine ItemNotFoundError
+     * @apiErrorExample {json} No such item
+     *  HTTP/1.1 404 Not Found
+     *  {
+     *    "success": false,
+     *    "message": "Item not found",
+     *    "error_type": "query.item_not_found"
+     *  }
+     *
+     * @apiVersion 1.0.0
+     */
+
+    /**
+     * @apiDefine ValidationError
+     * @apiErrorExample {json} Validation error
+     *  HTTP/1.1 400 Bad Request
+     *  {
+     *    "success": false,
+     *    "message": "Validation error",
+     *    "error_type": "validation",
+     *    "info": "Invalid id"
+     *  }
+     *
+     * @apiError (Error 400) {String}  info  Validation errors
+     *
+     * @apiVersion 1.0.0
+     */
+
     /**
      * Returns current item's class name
      *
@@ -60,6 +85,7 @@ abstract class ItemController extends Controller
      * @param Request $request
      *
      * @return JsonResponse
+     * @throws Exception
      */
     public function index(Request $request): JsonResponse
     {
@@ -67,14 +93,21 @@ abstract class ItemController extends Controller
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), $request->all() ?: []
+                $this->getQuery(),
+                $request->all() ?: []
             )
         );
+
+        $paginate = $request->get('paginate', false);
+        $currentPage = $request->get('page', 1);
+        $perPage = $request->get('perPage', 15);
 
         return response()->json(
             Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.result'),
-                $itemsQuery->get()
+                $paginate ?
+                    $itemsQuery->paginate($perPage, ['*'], 'page', $currentPage)
+                    : $itemsQuery->get()
             )
         );
     }
@@ -84,6 +117,7 @@ abstract class ItemController extends Controller
      *
      * @param Request $request
      * @return JsonResponse
+     * @throws Exception
      */
     public function count(Request $request): JsonResponse
     {
@@ -91,38 +125,19 @@ abstract class ItemController extends Controller
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), $request->all() ?: []
+                $this->getQuery(),
+                $request->all() ?: []
             )
         );
 
         return response()->json([
+            'success' => true,
             'total' => Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.count.query.prepare'),
-                $itemsQuery->get()
-            )->count()
+                $itemsQuery->count()
+            )
         ]);
     }
-
-    /**
-     * @apiDefine DefaultCreateErrorResponse
-     *
-     * @apiError (Error 400) {String} error  Name of error
-     * @apiError (Error 400) {String} reason Reason of error
-     */
-
-    /**
-     * @apiDefine DefaultBulkCreateErrorResponse
-     * @apiError (Error 200) {Object[]}  messages               Errors
-     * @apiError (Error 200) {Object}    messages.object        Error object
-     * @apiError (Error 200) {String}    messages.object.error  Name of error
-     * @apiError (Error 200) {String}    messages.object.reason Reason of error
-     * @apiError (Error 200) {Integer}   messages.object.code   Code of error
-     *
-     * @apiError (Error 400) {Object[]} messages                Errors
-     * @apiError (Error 400) {Object}   messages.object         Error
-     * @apiError (Error 400) {String}   messages.object.error   Name of error
-     * @apiError (Error 400) {String}   messages.object.reason  Reason of error
-     */
 
     /**
      * Create item
@@ -142,8 +157,10 @@ abstract class ItemController extends Controller
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -162,16 +179,11 @@ abstract class ItemController extends Controller
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success' => true,
                 'res' => $item,
             ])
         );
     }
-
-    /**
-     * @apiDefine DefaultShowErrorResponse
-     * @apiError (Error 400) {String} error  Name of error
-     * @apiError (Error 400) {String} reason Reason of error
-     */
 
     /**
      * Display the specified resource.
@@ -179,16 +191,19 @@ abstract class ItemController extends Controller
      * @param Request $request
      * @return JsonResponse
      * @throws ModelNotFoundException
+     * @throws Exception
      */
     public function show(Request $request): JsonResponse
     {
-        $itemId = is_int($request->get('id')) ? $request->get('id') : false;
+        $itemId = intval($request->input('id'));
 
         if (!$itemId) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Validation fail',
-                    'reason' => 'Id invalid',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id'
                 ]),
                 400
             );
@@ -202,7 +217,8 @@ abstract class ItemController extends Controller
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), $filters ?: []
+                $this->getQuery(),
+                $filters ?: []
             )
         );
 
@@ -211,7 +227,9 @@ abstract class ItemController extends Controller
         if (!$item) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Item not found'
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found'
                 ]),
                 404
             );
@@ -223,37 +241,13 @@ abstract class ItemController extends Controller
     }
 
     /**
-     * @apiDefine DefaultEditErrorResponse
-     *
-     * @apiError (Error 400) {String} error  Error name
-     * @apiError (Error 400) {String} reason Reason
-     */
-
-    /**
-     * @apiDefine DefaultBulkEditErrorResponse
-     *
-     * Yes, we send errors with 200 HTTP status-code, because 207 use WebDAV
-     * and REST API have some architecture problems
-     *
-     * @apiError (Error 200) {Object[]}  messages               Errors
-     * @apiError (Error 200) {Object}    messages.object        Error
-     * @apiError (Error 200) {String}    messages.object.error  Error name
-     * @apiError (Error 200) {String}    messages.object.reason Reason
-     * @apiError (Error 200) {Integer}   messages.object.code   Error Status-Code
-     *
-     * @apiError (Error 400) {Object[]} messages               Errors
-     * @apiError (Error 400) {Object}   messages.object        Error
-     * @apiError (Error 400) {String}   messages.object.error  Name of error
-     * @apiError (Error 400) {String}   messages.object.reason Reason of error
-     */
-
-    /**
      * Show the form for editing the specified resource.
      *
      * @param Request $request
      * @return JsonResponse
      * @throws MassAssignmentException
      * @throws ModelNotFoundException
+     * @throws Exception
      */
     public function edit(Request $request): JsonResponse
     {
@@ -276,8 +270,10 @@ abstract class ItemController extends Controller
         if ($validator->fails()) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
                 ]),
                 400
             );
@@ -286,8 +282,10 @@ abstract class ItemController extends Controller
         if (!is_int($request->get('id'))) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Invalid id',
-                    'reason' => 'Id is not integer',
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id'
                 ]),
                 400
             );
@@ -301,19 +299,32 @@ abstract class ItemController extends Controller
             )
         );
 
-        /** @var \Illuminate\Database\Eloquent\Model $item */
+        /** @var Model $item */
         $item = collect($itemsQuery->get())->first(function ($val, $key) use ($request) {
             return $val['id'] === $request->get('id');
         });
 
         if (!$item) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error' => 'Model fetch fail',
-                    'reason' => 'Model not found',
-                ]),
-                400
-            );
+            $cls = $this->getItemClass();
+            if ($cls::find($request->get('id')) !== null) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'success' => false,
+                        'error_type' => 'authorization.forbidden',
+                        'message' => 'Access denied to this item',
+                    ]),
+                    403
+                );
+            } else {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'success' => false,
+                        'error_type' => 'query.item_not_found',
+                        'message' => 'Item not found',
+                    ]),
+                    404
+                );
+            }
         }
 
         $item->fill($this->filterRequestData($requestData));
@@ -324,47 +335,18 @@ abstract class ItemController extends Controller
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
                 'res' => $item,
             ])
         );
     }
 
     /**
-     * @apiDefine DefaultDestroyRequestExample
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "id": 1
-     *  }
-     */
-
-    /**
-     * @apiDefine DefaultDestroyResponse
-     * @apiSuccess {String}    message      Message about success remove
-     * @apiError   (Error 404) ItemNotFound HTTP/1.1 404 Page Not Found
-     */
-
-    /**
-     * @apiDefine DefaultBulkDestroyErrorResponse
-     *
-     * @apiError (Error 200) {Object[]}  messages               Errors
-     * @apiError (Error 200) {Object}    messages.object        Error object
-     * @apiError (Error 200) {String}    messages.object.error  Name of error
-     * @apiError (Error 200) {String}    messages.object.reason Reason of error
-     * @apiError (Error 200) {Integer}   messages.object.code   Code of error
-     *
-     * @apiError (Error 400) {Object[]} messages               Errors
-     * @apiError (Error 400) {Object}   messages.object        Error object
-     * @apiError (Error 400) {String}   messages.object.error  Name of error
-     * @apiError (Error 400) {String}   messages.object.reason Reason of error
-     */
-
-    /**
      * Remove the specified resource from storage.
      *
      * @param Request $request
      * @return JsonResponse
-     * @throws \Exception
+     * @throws Exception
      */
     public function destroy(Request $request): JsonResponse
     {
@@ -374,8 +356,10 @@ abstract class ItemController extends Controller
         if (!$idInt) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
-                    'error' => 'Validation fail',
-                    'reason' => 'Id invalid',
+                    'success' => false,
+                    'error_type'=> 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id',
                 ]),
                 400
             );
@@ -385,16 +369,41 @@ abstract class ItemController extends Controller
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), ['id' => $itemId]
+                $this->getQuery(),
+                ['id' => $itemId]
             )
         );
 
-        /** @var \Illuminate\Database\Eloquent\Model $item */
-        $item = $itemsQuery->firstOrFail();
+        /** @var Model $item */
+        $item = $itemsQuery->first();
+        if (!$item) {
+            $cls = $this->getItemClass();
+            if ($cls::find($request->get('id')) !== null) {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
+                        'success' => false,
+                        'error_type' => 'authorization.forbidden',
+                        'message' => 'Access denied to this item'
+                    ]),
+                    403
+                );
+            } else {
+                return response()->json(
+                    Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
+                        'success' => false,
+                        'error_type' => 'query.item_not_found',
+                        'message' => 'Item not found',
+                    ]),
+                    404
+                );
+            }
+        }
+
         $item->delete();
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
+                'success' => true,
                 'message' => 'Item has been removed'
             ])
         );
@@ -426,9 +435,10 @@ abstract class ItemController extends Controller
     /**
      * @param bool $withRelations
      *
+     * @param bool $withSoftDeleted
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         /** @var Model $cls */
         $cls = static::getItemClass();
@@ -438,7 +448,7 @@ abstract class ItemController extends Controller
 
         $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls));
 
-        if ($softDelete) {
+        if ($softDelete && !$withSoftDeleted) {
             if (method_exists($cls, 'getTable')) {
                 $table = (new $cls())->getTable();
                 $query->whereNull("$table.deleted_at");
@@ -464,6 +474,7 @@ abstract class ItemController extends Controller
      * @param array $filter
      *
      * @return Builder
+     * @throws Exception
      */
     protected function applyQueryFilter(Builder $query, array $filter = []): Builder
     {
@@ -474,9 +485,9 @@ abstract class ItemController extends Controller
         foreach ($model->getDates() as $dateAttr) {
             if (isset($filter[$dateAttr])) {
                 if (is_array($filter[$dateAttr])) {
-                    $filter[$dateAttr][1] = DateTrait::toStandartTime($filter[$dateAttr][1]);
+                    $filter[$dateAttr][1] = DateTrait::toStandardTime($filter[$dateAttr][1]);
                 } else {
-                    $filter[$dateAttr] = DateTrait::toStandartTime($filter[$dateAttr]);
+                    $filter[$dateAttr] = DateTrait::toStandardTime($filter[$dateAttr]);
                 }
             }
         }

@@ -5,11 +5,15 @@ namespace Modules\EmailReports\Providers;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
 
+/**
+ * Class ScheduleServiceProvider
+ * @package Modules\EmailReports\Providers
+ */
 class ScheduleServiceProvider extends ServiceProvider
 {
-    const COMMAND_PREFIX = 'email-reports';
-    const COMMAND_SEND = 'send';
-    const SEPARATOR = ':';
+    public const COMMAND_PREFIX = 'email-reports';
+    public const COMMAND_SEND = 'send';
+    public const SEPARATOR = ':';
 
     /**
      * @var Schedule

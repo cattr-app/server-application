@@ -2,25 +2,64 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
-use Auth;
-use Illuminate\Http\Request;
-use App\Http\Controllers\Controller;
+use App\Helpers\ReportHelper;
 use App\Models\Project;
-use DB;
-use Validator;
+use App\Models\ProjectReport;
+use App\Models\Property;
+use App\Models\TimeInterval;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\EventFilter\Facades\Filter;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 
-class ProjectReportController extends Controller
+class ProjectReportController extends ReportController
 {
+    /**
+     * @var
+     */
+    protected $timezone;
+    /**
+     * @var ReportHelper
+     */
+    protected $reportHelper;
+
+    /**
+     * ProjectReportController constructor.
+     *
+     * @param  ReportHelper  $reportHelper
+     */
+    public function __construct(
+        ReportHelper $reportHelper
+    ) {
+        $companyTimezoneProperty = Property::getProperty(Property::COMPANY_CODE, 'TIMEZONE')->first();
+        $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
+        $this->reportHelper = $reportHelper;
+
+        parent::__construct();
+    }
+
     /**
      * @return array
      */
     public function getValidationRules(): array
     {
         return [
-            'start_at' => 'date',
-            'end_at' => 'date',
+            'uids' => 'exists:users,id|array',
+            'pids' => 'exists:projects,id|array',
+            'start_at' => 'required|date',
+            'end_at' => 'required|date',
         ];
+    }
+
+    /**
+     * @return string
+     */
+    public function getEventUniqueNamePart(): string
+    {
+        return 'project-report';
     }
 
     /**
@@ -33,35 +72,131 @@ class ProjectReportController extends Controller
             'projects' => 'project-report.projects',
             'task' => 'project-report.list',
             'days' => 'time-duration.list',
+            'screenshots' => 'project-report.screenshots'
         ];
     }
 
     /**
-     * [report description]
-     * @param Request $request [description]
-     * @return [type]           [description]
+     * @api             {get,post} /v1/project-report/list List
+     * @apiDescription  Get report
+     *
+     * @apiVersion      1.0.0
+     * @apiName         List
+     * @apiGroup        Project Report
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   project_report_list
+     *
+     * @apiParam {Integer[]}  uids      User IDs, that must be included in the report
+     * @apiParam {Integer[]}  pids      Project IDs, that must be included in the report
+     * @apiParam {ISO8601}    start_at  DateTime of start
+     * @apiParam {ISO8601}    end_at    DateTime of end
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "uids": [ 1 ],
+     *    "pids": [ 1 ],
+     *    "start_at": "2013-04-12 20:40:00",
+     *    "end_at": "2013-04-12 20:41:00"
+     *  }
+     *
+     * @apiSuccess {String}    timezone                                         Company timezone
+     * @apiSuccess {Object[]}  projects                                         Response
+     * @apiSuccess {Integer}   projects.id                                      Project ID
+     * @apiSuccess {String}    projects.name                                    Project name
+     * @apiSuccess {Integer}   projects.project_time                            Time, that has been spent on the project
+     * @apiSuccess {Object[]}  projects.users                                   Users, participated in the project
+     * @apiSuccess {Integer}   projects.users.id                                User ID
+     * @apiSuccess {String}    projects.users.full_name                         User name
+     * @apiSuccess {Object[]}  projects.users.tasks                             User tasks
+     * @apiSuccess {String}    projects.users.tasks.task_name                   Task name
+     * @apiSuccess {Integer}   projects.users.tasks.id                          Task ID
+     * @apiSuccess {Integer}   projects.users.tasks.duration                    Task duration
+     * @apiSuccess {Object[]}  projects.users.tasks.screenshots                 Screenshots of the task
+     * @apiSuccess {Integer}   projects.users.tasks.screenshots.id              Screenshot ID
+     * @apiSuccess {String}    projects.users.tasks.screenshots.path            Screenshot path
+     * @apiSuccess {ISO8601}   projects.users.tasks.screenshots.created_at      Creation DateTime
+     * @apiSuccess {String}    projects.users.tasks.screenshots.thumbnail_path  Screenshot thumbnail path
+     * @apiSuccess {Object}    projects.users.tasks.dates                       Keys - dates, values - second, spent
+     * @apiSuccess {Integer}   projects.users.tasks_time                        Time spent on tasks
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "projects": [
+     *      {
+     *        "id": "1",
+     *        "name": "New name",
+     *        "project_time": 275650,
+     *        "users": [
+     *          {
+     *            "id": "2",
+     *            "full_name": "asd",
+     *            "tasks": [
+     *              {
+     *                "task_name": "ASD",
+     *                "id": "2",
+     *                "duration": 1490,
+     *                "screenshots": {
+     *                  "2020-01-23": {
+     *                    "09:00": {
+     *                      "4": {
+     *                        "id": 6,
+     *                        "path": "uploads\/screenshots\/1_2_6.png",
+     *                        "created_at": "2020-01-23 09:42:26.000000",
+     *                        "thumbnail_path": null
+     *                      }
+     *                    }
+     *                  }
+     *                },
+     *                "dates": {
+     *                  "2020-01-24": 1490
+     *                }
+     *              }
+     *            ],
+     *            "tasks_time": 1490
+     *          }
+     *        ]
+     *      }
+     *    ],
+     *    "timezone": "UTC (+00:00)"
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     * @apiUse          ValidationError
      */
-    public function report(Request $request)
+    /**
+     * @param  Request  $request
+     * @return array|JsonResponse
+     */
+    public function report(Request $request): JsonResponse
     {
         $validator = Validator::make(
             $request->all(),
-            $this->getValidationRules()
+            Filter::process(
+                $this->getEventUniqueName('validation.report.show'),
+                $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
             return response()->json(
-                [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
-                ], 400
-            );
+                Filter::process(
+                    $this->getEventUniqueName('answer.error.report.show'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]), 400);
         }
 
-        $uids = $request->input('uids');
-        $pids = $request->input('pids');
+        $uids = $request->input('uids', []);
+        $pids = $request->input('pids', []);
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -72,91 +207,67 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $projectReports = DB::table('project_report')
-            ->select('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name',
-                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
-                DB::raw('SUM(duration) as duration')
+        $pids = $pids ?? Project::getUserRelatedProjectIds(request()->user());
+
+
+        $collection = $this->reportHelper->getProjectReportQuery($uids, $pids, $startAt, $endAt, $timezoneOffset)->get();
+        $resultCollection = $this->reportHelper->getProcessedProjectReportCollection($collection);
+
+        $result = [
+            'projects' => $resultCollection,
+            'timezone' => "{$timezone} ($timezoneOffset)"
+        ];
+
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $result
             )
-            ->whereIn('user_id', $uids)
-            ->whereIn('project_id', $pids)
-            ->whereIn('project_id', Project::getUserRelatedProjectIds($user))
-            ->where('date', '>=', $startAt)
-            ->where('date', '<', $endAt)
-            ->groupBy('user_id', 'user_name', 'task_id', 'project_id', 'task_name', 'project_name')
-            ->get();
-
-        $projects = [];
-
-        foreach ($projectReports as $projectReport) {
-            $project_id = $projectReport->project_id;
-            $user_id = $projectReport->user_id;
-
-            if (!isset($projects[$project_id])) {
-                $projects[$project_id] = [
-                    'id' => $project_id,
-                    'name' => $projectReport->project_name,
-                    'users' => [],
-                    'project_time' => 0,
-                ];
-            }
-
-            if (!isset($projects[$project_id]['users'][$user_id])) {
-                $projects[$project_id]['users'][$user_id] = [
-                    'id' => $user_id,
-                    'full_name' => $projectReport->user_name,
-                    'tasks' => [],
-                    'tasks_time' => 0,
-                ];
-            }
-
-
-            $projects[$project_id]['users'][$user_id]['tasks'][] = [
-                'id' => $projectReport->task_id,
-                'project_id' => $projectReport->project_id,
-                'user_id' => $projectReport->user_id,
-                'task_name' => $projectReport->task_name,
-                'duration' => (int)$projectReport->duration,
-            ];
-
-            $projects[$project_id]['users'][$user_id]['tasks_time'] += $projectReport->duration;
-            $projects[$project_id]['project_time'] += $projectReport->duration;
-        }
-
-
-        foreach ($projects as $project_id => $project) {
-            $projects[$project_id]['users'] = array_values($project['users']);
-        }
-
-        $projects = array_values($projects);
-
-        return $projects;
+        );
     }
 
     /**
-     * [events description]
-     * @param Request $request [description]
-     * @return \Illuminate\Http\JsonResponse [description]
+     * @apiDeprecated   since 1.0.0
+     * @api             {get,post} /v1/time-duration/list Days
+     * @apiDescription  Get report for days
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Days
+     * @apiGroup        Project Report
+     *
+     * @apiPermission   time_duration_list
      */
-    public function days(Request $request)
+    /**
+     * @deprecated
+     * @codeCoverageIgnore
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     */
+    public function days(Request $request): JsonResponse
     {
         $validator = Validator::make(
             $request->all(),
-            $this->getValidationRules()
+            Filter::process(
+                $this->getEventUniqueName('validation.report.show'),
+                $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
             return response()->json(
-                [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
-                ], 400
-            );
+                Filter::process(
+                    $this->getEventUniqueName('answer.error.report.show'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]), 400);
         }
 
-        $uids = $request->uids;
+        $uids = $request->input('uids', []);
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -167,12 +278,12 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $days = DB::table('project_report')
+        $days = ProjectReport::query()
             ->select('user_id', 'date',
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
             )
-            ->whereIn('project_id', Project::getUserRelatedProjectIds(Auth::user()))
+            ->whereIn('project_id', Project::getUserRelatedProjectIds($user))
             ->where('date', '>=', $startAt)
             ->where('date', '<', $endAt)
             ->groupBy('user_id', 'date');
@@ -181,16 +292,50 @@ class ProjectReportController extends Controller
             $days->whereIn('user_id', $uids);
         }
 
-        return response()->json($days->get());
+        $days = $days->get();
+
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $days
+            )
+        );
     }
 
     /**
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @apiDeprecated   since 1.0.0
+     * @api             {get,post} /v1/project-report/projects Projects
+     * @apiDescription  Get report for projects
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Projects
+     * @apiGroup        Project Report
+     *
+     * @apiPermission   project_report_projects
      */
-    public function projects(Request $request)
+    /**
+     * @deprecated
+     * @codeCoverageIgnore
+     * @param  Request  $request
+     * @return JsonResponse
+     */
+    public function projects(Request $request): JsonResponse
     {
-        $uids = $request->uids;
+        $validator = Validator::make(
+            $request->all(),
+            $this->getValidationRules()
+        );
+
+        if ($validator->fails()) {
+            return response()->json([
+                'success' => false,
+                'error_type' => 'validation',
+                'message' => 'Validation error',
+                'info' => $validator->errors()
+            ], 400);
+        }
+
+        $uids = $request->input('uids', []);
         // Get projects, where specified users is attached.
         $users_attached_project_ids = Project::whereHas('users', function ($query) use ($uids) {
             $query->whereIn('id', $uids);
@@ -216,36 +361,46 @@ class ProjectReportController extends Controller
         // Load projects.
         $projects = Project::query()->whereIn('id', $project_ids)->get(['id', 'name']);
 
-        return response()->json($projects);
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $projects
+            )
+        );
     }
 
     /**
      * Returns durations per date for a task.
      *
-     * @param $id
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @param           $id
+     * @param  Request  $request
+     *
+     * @return JsonResponse
      */
-    public function task($id, Request $request)
+    public function task($id, Request $request): JsonResponse
     {
         $validator = Validator::make(
             $request->all(),
-            $this->getValidationRules()
+            Filter::process(
+                $this->getEventUniqueName('validation.report.show'),
+                $this->getValidationRules()
+            )
         );
 
         if ($validator->fails()) {
             return response()->json(
-                [
-                    'error' => 'Validation fail',
-                    'reason' => $validator->errors()
-                ], 400
-            );
+                Filter::process(
+                    $this->getEventUniqueName('answer.error.report.show'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]), 400);
         }
 
         $uid = $request->uid;
 
-        $user = auth()->user();
-        $timezone = $user->timezone ?: 'UTC';
+        $timezone = $this->timezone;
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P'); # Format +00:00
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -256,7 +411,7 @@ class ProjectReportController extends Controller
             ->tz('UTC')
             ->toDateTimeString();
 
-        $report = DB::table('project_report')
+        $report = ProjectReport::query()
             ->select(
                 DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
                 DB::raw('SUM(duration) as duration')
@@ -267,6 +422,44 @@ class ProjectReportController extends Controller
             ->where('date', '<', $endAt)
             ->get(['date', 'duration']);
 
-        return response()->json($report);
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.report.show'),
+                $report
+            )
+        );
+    }
+
+    /**
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /v1/project-report/screenshots Screenshots
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Screenshots
+     * @apiGroup        Project Report
+     */
+    /**
+     * @param  Request  $request
+     * @deprecated
+     * @codeCoverageIgnore
+     * @return JsonResponse
+     */
+    public function screenshots(Request $request): JsonResponse
+    {
+        $taskID = $request->input('task_id');
+        $date = $request->input('date');
+
+        $startDate = Carbon::parse($date);
+        $endDate = clone $startDate;
+        $endDate = $endDate->addDay();
+
+        $result = TimeInterval::where('task_id', '=', $taskID)
+            ->where('start_at', '>=', $startDate->toDateTimeString())
+            ->where('start_at', '<', $endDate->toDateTimeString())
+            ->with('screenshots')
+            ->get()
+            ->pluck('screenshots');
+
+        return response()->json($result);
     }
 }

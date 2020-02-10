@@ -20,10 +20,9 @@ class ScheduleServiceProvider extends ServiceProvider
 
     public function boot()
     {
-        $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->command('gitlab:sync')->everyFiveMinutes()->withoutOverlapping();
-        });
+        $schedule = $this->app->make(Schedule::class);
+        $schedule->command('gitlab:sync')->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command('gitlab:time:sync')->everyMinute()->withoutOverlapping();
     }
 
     /**

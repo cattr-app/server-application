@@ -5,21 +5,19 @@ namespace App\Http\Controllers\Api\v1;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\Task;
-use App\User;
-use Auth;
+use Exception;
+use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
+use Illuminate\Support\Facades\DB;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\Request;
 use Illuminate\Http\JsonResponse;
-use DB;
-use Filter;
-use Route;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Route;
 
 /**
  * Class TaskController
- *
- * @package App\Http\Controllers\Api\v1
- */
+*/
 class TaskController extends ItemController
 {
     /**
@@ -53,14 +51,6 @@ class TaskController extends ItemController
     }
 
     /**
-     * @return string[]
-     */
-    public function getQueryWith(): array
-    {
-        return ['priority'];
-    }
-
-    /**
      * @return array
      */
     public static function getControllerRules(): array
@@ -78,305 +68,318 @@ class TaskController extends ItemController
     }
 
     /**
-     * @apiDefine TaskRelations
+     * @api             {post} /v1/tasks/list List
+     * @apiDescription  Get list of Tasks
      *
-     * @apiParam {String} [with]                       For add relation model in response
-     * @apiParam {Object} [timeIntervals] `QueryParam` Task's relation Time Intervals. All params in <a href="#api-Time_Interval-GetTimeIntervalList" >@Time_Intervals</a>
-     * @apiParam {Object} [user]          `QueryParam` Task's relation user. All params in <a href="#api-User-GetUserList" >@User</a>
-     * @apiParam {Object} [assigned]      `QueryParam` Task's relation user. All params in <a href="#api-User-GetUserList" >@User</a>
-     * @apiParam {Object} [project]       `QueryParam` Task's relation user. All params in <a href="#api-Project-GetProjectList" >@Project</a>
+     * @apiVersion      1.0.0
+     * @apiName         List
+     * @apiGroup        Task
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   tasks_list
+     * @apiPermission   tasks_full_access
+     *
+     * @apiUse          TaskParams
+     * @apiUse          TaskObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  [
+     *    {
+     *      "id": 2,
+     *      "project_id": 1,
+     *      "task_name": "Delectus.",
+     *      "description": "Et qui sed qui vero quis. Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
+     *      "active": 1,
+     *      "user_id": 1,
+     *      "assigned_by": 1,
+     *      "url": null,
+     *      "created_at": "2020-01-23T09:42:26+00:00",
+     *      "updated_at": "2020-01-23T09:42:26+00:00",
+     *      "deleted_at": null,
+     *      "priority_id": 2,
+     *      "important": 0
+     *    }
+     *  ]
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
      */
 
     /**
-     * @apiDefine TaskRelationsExample
-     * @apiParamExample {json} Request With Relations Example
-     *  {
-     *      "with":                "project,user,timeIntervals,assigned"
-     *      "user.id":             [">", 1],
-     *      "project.task.active": 1,
-     *      "assigned.full_name":  ["like", "%lorem%"]
-     *  }
-     */
-
-    /**
-     * Display a listing of the resource.
+     * @api             {post} /v1/tasks/create Create
+     * @apiDescription  Create Task
      *
-     * @api {post} /api/v1/tasks/list List
-     * @apiDescription Get list of Tasks
-     * @apiVersion 0.1.0
-     * @apiName GetTaskList
-     * @apiGroup Task
+     * @apiVersion      1.0.0
+     * @apiName         Create
+     * @apiGroup        Task
      *
-     * @apiParam {Integer}  [id]          `QueryParam` Task ID
-     * @apiParam {Integer}  [project_id]  `QueryParam` Task Project
-     * @apiParam {String}   [task_name]   `QueryParam` Task Name
-     * @apiParam {String}   [description] `QueryParam` Task Description
-     * @apiParam {String}   [url]         `QueryParam` Task Url
-     * @apiParam {Integer}  [active]                   Is Task active. Available value: {0,1}
-     * @apiParam {Integer}  [user_id]     `QueryParam` Task User
-     * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
-     * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
-     * @apiParam {String}   [updated_at]  `QueryParam` Last Task update DataTime
-     * @apiUse TaskRelations
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   tasks_create
+     * @apiPermission   tasks_full_access
+     *
+     * @apiParam {Integer}  project_id   Project
+     * @apiParam {String}   task_name    Name
+     * @apiParam {String}   description  Description
+     * @apiParam {String}   url          Url
+     * @apiParam {Integer}  active       Active/Inactive Task. Available value: {0,1}
+     * @apiParam {Integer}  user_id      User
+     * @apiParam {Integer}  assigned_by  User who assigned task
+     * @apiParam {Integer}  priority_id  Priority ID
      *
      * @apiParamExample {json} Simple Request Example
      *  {
-     *      "id":          [">", 1]
-     *      "project_id":  ["=", [1,2,3]],
-     *      "active":      1,
-     *      "user_id":     ["=", [1,2,3]],
-     *      "assigned_by": ["=", [1,2,3]],
-     *      "task_name":   ["like", "%lorem%"],
-     *      "description": ["like", "%lorem%"],
-     *      "url":         ["like", "%lorem%"],
-     *      "created_at":  [">", "2019-01-01 00:00:00"],
-     *      "updated_at":  ["<", "2019-01-01 00:00:00"]
+     *    "project_id":"163",
+     *    "task_name":"retr",
+     *    "description":"fdgfd",
+     *    "active":1,
+     *    "user_id":"3",
+     *    "assigned_by":"1",
+     *    "url":"URL",
+     *    "priority_id": 1
      *  }
      *
-     * @apiUse TaskRelationsExample
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object}   res      Task
      *
-     * @apiSuccess {Object[]} TaskList                     Tasks
-     * @apiSuccess {Object}   TaskList.Task                Task
-     * @apiSuccess {Integer}  TaskList.Task.id             Task id
-     * @apiSuccess {Integer}  TaskList.Task.project_id     Task Project id
-     * @apiSuccess {Integer}  TaskList.Task.user_id        Task User id
-     * @apiSuccess {Integer}  TaskList.Task.active         Task is active
-     * @apiSuccess {String}   TaskList.Task.task_name      Task name
-     * @apiSuccess {String}   TaskList.Task.description    Task description
-     * @apiSuccess {String}   TaskList.Task.url            Task url
-     * @apiSuccess {String}   TaskList.Task.created_at     Task date time of create
-     * @apiSuccess {String}   TaskList.Task.updated_at     Task date time of update
-     * @apiSuccess {String}   TaskList.Task.deleted_at     Task date time of delete
-     * @apiSuccess {Object[]} TaskList.Task.time_intervals Task Time intervals
-     * @apiSuccess {Object[]} TaskList.Task.user           Task User object
-     * @apiSuccess {Object[]} TaskList.Task.assigned       Task assigned User object
-     * @apiSuccess {Object[]} TaskList.Task.project        Task Project object
+     * @apiUse TaskObject
      *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": {
+     *      "id": 2,
+     *      "project_id": 1,
+     *      "task_name": "Delectus.",
+     *      "description": "Et qui sed qui vero quis. Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
+     *      "active": 1,
+     *      "user_id": 1,
+     *      "assigned_by": 1,
+     *      "url": null,
+     *      "created_at": "2020-01-23T09:42:26+00:00",
+     *      "updated_at": "2020-01-23T09:42:26+00:00",
+     *      "deleted_at": null,
+     *      "priority_id": 2,
+     *      "important": 0
+     *    }
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         ValidationError
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
      */
 
     /**
-     * @api {post} /api/v1/tasks/create Create
-     * @apiDescription Create Task
-     * @apiVersion 0.1.0
-     * @apiName CreateTask
-     * @apiGroup Task
+     * @api             {post} /v1/tasks/show Show
+     * @apiDescription  Show Task
      *
-     * @apiParam {Integer} [project_id]  Task Project
-     * @apiParam {String}  [task_name]   Task Name
-     * @apiParam {String}  [description] Task Description
-     * @apiParam {String}  url           Task Url
-     * @apiParam {Integer} [active]      Active/Inactive Task. Available value: {0,1}
-     * @apiParam {Integer} [user_id]     Task User
-     * @apiParam {Integer} [assigned_by] User who assigned task
-     * @apiParam {Integer} [priority_id] Task Priority ID
+     * @apiVersion      1.0.0
+     * @apiName         Show
+     * @apiGroup        Task
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   tasks_show
+     * @apiPermission   tasks_full_access
+     *
+     * @apiParam {Integer}  id  ID
+     *
+     * @apiUse          TaskParams
      *
      * @apiParamExample {json} Simple Request Example
      *  {
-     *      "project_id":"163",
-     *      "task_name":"retr",
-     *      "description":"fdgfd",
-     *      "active":1,
-     *      "user_id":"3",
-     *      "assigned_by":"1",
-     *      "url":"URL",
-     *      "priority_id": 1
+     *    "id": 1,
+     *    "project_id": ["=", [1,2,3]],
+     *    "active": 1,
+     *    "user_id": ["=", [1,2,3]],
+     *    "assigned_by": ["=", [1,2,3]],
+     *    "task_name": ["like", "%lorem%"],
+     *    "description": ["like", "%lorem%"],
+     *    "url": ["like", "%lorem%"],
+     *    "created_at": [">", "2019-01-01 00:00:00"],
+     *    "updated_at": ["<", "2019-01-01 00:00:00"]
      *  }
      *
-     * @apiSuccess {Object}   res                Task object
-     * @apiSuccess {Integer}  res.id             Task ID
-     * @apiSuccess {Integer}  res.project_id     Task Project ID
-     * @apiSuccess {Integer}  res.user_id        Task User ID
-     * @apiSuccess {Integer}  res.active         Task active status
-     * @apiSuccess {String}   res.task_name      Task name
-     * @apiSuccess {String}   res.description    Task description
-     * @apiSuccess {String}   res.url            Task url
-     * @apiSuccess {String}   res.created_at     Task date time of create
-     * @apiSuccess {String}   res.updated_at     Task date time of update
+     * @apiUse          TaskObject
      *
-     * @apiUse DefaultCreateErrorResponse
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "id": 2,
+     *    "project_id": 1,
+     *    "task_name": "Delectus.",
+     *    "description": "Et qui sed qui vero quis. Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
+     *    "active": 1,
+     *    "user_id": 1,
+     *    "assigned_by": 1,
+     *    "url": null,
+     *    "created_at": "2020-01-23T09:42:26+00:00",
+     *    "updated_at": "2020-01-23T09:42:26+00:00",
+     *    "deleted_at": null,
+     *    "priority_id": 2,
+     *    "important": 0
+     *  }
      *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     * @apiUse         ForbiddenError
+     * @apiUse         ValidationError
+     */
+
+    /**
+     * @api             {post} /v1/tasks/edit Edit
+     * @apiDescription  Edit Task
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Edit
+     * @apiGroup        Task
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   tasks_edit
+     * @apiPermission   tasks_full_access
+     *
+     * @apiParam {Integer}  id           ID
+     * @apiParam {Integer}  project_id   Project
+     * @apiParam {Integer}  active       Is Task active. Available value: {0,1}
+     * @apiParam {Integer}  user_id      Task User
+     * @apiParam {Integer}  priority_id  Priority ID
+     *
+     * @apiUse         TaskParams
+     *
+     * @apiParamExample {json} Simple Request Example
+     *  {
+     *    "id": 1,
+     *    "project_id": 2,
+     *    "active": 1,
+     *    "user_id": 3,
+     *    "assigned_by": 2,
+     *    "task_name": "lorem",
+     *    "description": "test",
+     *    "url": "url",
+     *    "priority_id": 1
+     *  }
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object}   res      Task
+     *
+     * @apiUse         TaskObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": {
+     *      "id": 2,
+     *      "project_id": 1,
+     *      "task_name": "Delectus.",
+     *      "description": "Et qui sed qui vero quis. Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
+     *      "active": 1,
+     *      "user_id": 1,
+     *      "assigned_by": 1,
+     *      "url": null,
+     *      "created_at": "2020-01-23T09:42:26+00:00",
+     *      "updated_at": "2020-01-23T09:42:26+00:00",
+     *      "deleted_at": null,
+     *      "priority_id": 2,
+     *      "important": 0
+     *    }
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         ValidationError
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     */
+
+    /**
+     * @api             {post} /v1/tasks/remove Destroy
+     * @apiDescription  Destroy Task
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Destroy
+     * @apiGroup        Task
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   tasks_remove
+     * @apiPermission   tasks_full_access
+     *
+     * @apiParam {Integer}  id  ID of the target task
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "id": 1
+     * }
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   message  Destroy status
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Item has been removed"
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+
+    /**
+     * @api             {get,post} /v1/tasks/count Count
+     * @apiDescription  Count Tasks
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Count
+     * @apiGroup        Task
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   tasks_count
+     * @apiPermission   tasks_full_access
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   total    Amount of tasks that we have
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "total": 2
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+
+    /**
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /v1/tasks/dashboard Dashboard
+     * @apiDescription  Display task for dashboard
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Dashboard
+     * @apiGroup        Task
+     *
+     * @apiPermission   tasks_dashboard
+     * @apiPermission   tasks_full_access
+     */
+    /**
      * @param Request $request
      * @return JsonResponse
-     */
-
-    /**
-     * @api {post} /api/v1/tasks/show Show
-     * @apiDescription Show Task
-     * @apiVersion 0.1.0
-     * @apiName ShowTask
-     * @apiGroup Task
-     *
-     * @apiParam {Integer}  id                         Task id
-     * @apiParam {Integer}  [project_id]  `QueryParam` Task Project
-     * @apiParam {String}   [task_name]   `QueryParam` Task Name
-     * @apiParam {String}   [description] `QueryParam` Task Description
-     * @apiParam {String}   [url]         `QueryParam` Task Url
-     * @apiParam {Integer}  [active]                   Is Task active. Available value: {0,1}
-     * @apiParam {Integer}  [user_id]     `QueryParam` Task's User
-     * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
-     * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
-     * @apiParam {String}   [updated_at]  `QueryParam` Last Task update DataTime
-     * @apiUse TaskRelations
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "id":          1,
-     *      "project_id":  ["=", [1,2,3]],
-     *      "active":      1,
-     *      "user_id":     ["=", [1,2,3]],
-     *      "assigned_by": ["=", [1,2,3]],
-     *      "task_name":   ["like", "%lorem%"],
-     *      "description": ["like", "%lorem%"],
-     *      "url":         ["like", "%lorem%"],
-     *      "created_at":  [">", "2019-01-01 00:00:00"],
-     *      "updated_at":  ["<", "2019-01-01 00:00:00"]
-     *  }
-     * @apiUse TaskRelationsExample
-     *
-     * @apiSuccess {Object}   Task                Task
-     * @apiSuccess {Integer}  Task.id             Task id
-     * @apiSuccess {Integer}  Task.project_id     Task Project id
-     * @apiSuccess {Integer}  Task.user_id        Task User id
-     * @apiSuccess {Integer}  Task.active         Task active status
-     * @apiSuccess {String}   Task.task_name      Task name
-     * @apiSuccess {String}   Task.description    Task description
-     * @apiSuccess {String}   Task.url            Task url
-     * @apiSuccess {String}   Task.created_at     Task date time of create
-     * @apiSuccess {String}   Task.updated_at     Task date time of update
-     * @apiSuccess {String}   Task.deleted_at     Task date time of delete
-     * @apiSuccess {Object[]} Task.time_intervals Task Users
-     * @apiSuccess {Object[]} Task.user           Task User object
-     * @apiSuccess {Object[]} Task.assigned       Task assigned User object
-     * @apiSuccess {Object[]} Task.project        Task Project
-     *
-     * @apiUse DefaultShowErrorResponse
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-
-    /**
-     * @api {post} /api/v1/tasks/edit Edit
-     * @apiDescription Edit Task
-     * @apiVersion 0.1.0
-     * @apiName EditTask
-     * @apiGroup Task
-     *
-     * @apiParam {Integer}  id          Task id
-     * @apiParam {Integer}  project_id  Task Project
-     * @apiParam {String}   task_name   Task Name
-     * @apiParam {String}   description Task Description
-     * @apiParam {String}   [url]       Task Url
-     * @apiParam {Integer}  active      Is Task active. Available value: {0,1}
-     * @apiParam {Integer}  user_id     Task User
-     * @apiParam {Integer}  assigned_by User who assigned task
-     * @apiParam {Integer}  priority_id Task Priority ID
-     * @apiUse TaskRelations
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "id":          1,
-     *      "project_id":  2,
-     *      "active":      1,
-     *      "user_id":     3,
-     *      "assigned_by": 2,
-     *      "task_name":   "lorem",
-     *      "description": "test",
-     *      "url":         "url",
-     *      "priority_id": 1
-     *  }
-     * @apiUse TaskRelationsExample
-     *
-     * @apiSuccess {Object}   res                Task object
-     * @apiSuccess {Integer}  res.id             Task ID
-     * @apiSuccess {Integer}  res.project_id     Task Project ID
-     * @apiSuccess {Integer}  res.user_id        Task User ID
-     * @apiSuccess {Integer}  res.active         Task active status
-     * @apiSuccess {String}   res.task_name      Task name
-     * @apiSuccess {String}   res.description    Task description
-     * @apiSuccess {String}   res.url            Task url
-     * @apiSuccess {String}   res.created_at     Task date time of create
-     * @apiSuccess {String}   res.updated_at     Task date time of update
-     * @apiSuccess {String}   res.deleted_at     Task date time of delete
-     *
-     * @apiUse DefaultEditErrorResponse
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
-     */
-
-    /**
-     * @api {post} /api/v1/tasks/remove Destroy
-     * @apiDescription Destroy Task
-     * @apiVersion 0.1.0
-     * @apiName DestroyTask
-     * @apiGroup Task
-     *
-     * @apiParam {String} id Task Id
-     *
-     * @apiUse DefaultDestroyRequestExample
-     * @apiUse DefaultDestroyResponse
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
-
-    /**
-     * @api {post} /api/v1/tasks/dashboard Dashboard
-     * @apiDescription Display task for dashboard
-     * @apiVersion 0.1.0
-     * @apiName DashboardTask
-     * @apiGroup Task
-     *
-     * @apiParam {Integer}  [id]          `QueryParam` Task ID
-     * @apiParam {Integer}  [project_id]  `QueryParam` Task Project
-     * @apiParam {String}   [task_name]   `QueryParam` Task Name
-     * @apiParam {String}   [description] `QueryParam` Task Description
-     * @apiParam {String}   [url]         `QueryParam` Task Url
-     * @apiParam {Integer}  [active]                   Active/Inactive Task. Available value: {0,1}
-     * @apiParam {Integer}  [user_id]     `QueryParam` Task's User
-     * @apiParam {Integer}  [assigned_by] `QueryParam` User who assigned task
-     * @apiParam {String}   [created_at]  `QueryParam` Task Creation DateTime
-     * @apiParam {String}   [updated_at]  `QueryParam` Last Task update DataTime
-     * @apiUse TaskRelations
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *      "id":          [">", 1]
-     *      "project_id":  ["=", [1,2,3]],
-     *      "active":      1,
-     *      "user_id":     ["=", [1,2,3]],
-     *      "assigned_by": ["=", [1,2,3]],
-     *      "task_name":   ["like", "%lorem%"],
-     *      "description": ["like", "%lorem%"],
-     *      "url":         ["like", "%lorem%"],
-     *      "created_at":  [">", "2019-01-01 00:00:00"],
-     *      "updated_at":  ["<", "2019-01-01 00:00:00"]
-     *  }
-     * @apiUse TaskRelationsExample
-     *
-     * @apiSuccess {Object[]} array                       Tasks
-     * @apiSuccess {Object}   array.object                Task object
-     * @apiSuccess {Integer}  array.object.id             Task ID
-     * @apiSuccess {Integer}  array.object.project_id     Task Project ID
-     * @apiSuccess {Integer}  array.object.user_id        Task User ID
-     * @apiSuccess {Integer}  array.object.active         Task active status
-     * @apiSuccess {String}   array.object.task_name      Task name
-     * @apiSuccess {String}   array.object.description    Task description
-     * @apiSuccess {String}   array.object.url            Task url
-     * @apiSuccess {String}   array.object.created_at     Task date time of create
-     * @apiSuccess {String}   array.object.updated_at     Task date time of update
-     * @apiSuccess {String}   array.object.deleted_at     Task date time of delete
-     * @apiSuccess {Time}     array.object.total_time     Task total time
-     * @apiSuccess {Object[]} array.object.time_intervals Task TimeIntervals
-     * @apiSuccess {Object}   array.object.user           Task User object
-     * @apiSuccess {Object[]} array.object.assigned       Task assigned User
-     * @apiSuccess {Object}   array.object.project        Task Project
-     *
-     * @param Request $request
-     * @return \Illuminate\Http\JsonResponse
+     * @throws Exception
+     * @deprecated
+     * @codeCoverageIgnore
      */
     public function dashboard(Request $request): JsonResponse
     {
@@ -389,7 +392,7 @@ class TaskController extends ItemController
         $uid = $user->id;
 
         $filters = $request->all();
-        is_int($request->get('user_id')) ? $filters['timeIntervals.user_id'] = $request->get('user_id') : False;
+        is_int($request->get('user_id')) ? $filters['timeIntervals.user_id'] = $request->get('user_id') : false;
         $compareDate = Carbon::today($timezone)->setTimezone('UTC')->toIso8601String();
         $filters['timeIntervals.start_at'] = ['>=', [$compareDate]];
         unset($filters['user_id']);
@@ -402,11 +405,13 @@ class TaskController extends ItemController
             )
         );
 
-        $items = $itemsQuery->with(['timeIntervals' => function ($q) use ($compareDate, $uid) {
-            /** @var Builder $q */
-            $q->where('start_at', '>=', $compareDate);
-            $q->where('user_id', $uid);
-        }])->get()->toArray();
+        $items = $itemsQuery->with([
+            'timeIntervals' => function ($q) use ($compareDate, $uid) {
+                /** @var Builder $q */
+                $q->where('start_at', '>=', $compareDate);
+                $q->where('user_id', $uid);
+            }
+        ])->get()->toArray();
 
         if (collect($items)->isEmpty()) {
             return response()->json(Filter::process(
@@ -425,16 +430,29 @@ class TaskController extends ItemController
         }
 
         return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items),
-            200
+            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items)
         );
     }
 
     /**
-     * Returns users activity info for task.
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /v1/tasks/activity Activity
+     * @apiDescription  Display tasks activity
      *
-     * @param Request $request
+     * @apiVersion      1.0.0
+     * @apiName         Activity
+     * @apiGroup        Task
+     *
+     * @apiPermission   tasks_dashboard
+     * @apiPermission   tasks_full_access
+     */
+    /**
+     * Returns users activity info for task.
+     * @param  Request  $request
+     *
      * @return JsonResponse
+     * @deprecated
+     * @codeCoverageIgnore
      */
     public function activity(Request $request): JsonResponse
     {
@@ -443,8 +461,10 @@ class TaskController extends ItemController
         if (!$itemId) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Validation fail',
-                    'reason' => 'Id invalid',
+                    'success'=> false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id'
                 ]),
                 400
             );
@@ -456,8 +476,9 @@ class TaskController extends ItemController
         if (!in_array($projectId, $userProjectIds)) {
             return response()->json(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error' => 'Access denied',
-                    'reason' => 'User haven\'t access to this task',
+                    'success' => false,
+                    'error_type' => 'authorization.forbidden',
+                    'message' => 'User has no access to this task'
                 ]),
                 403
             );
@@ -501,41 +522,54 @@ class TaskController extends ItemController
     /**
      * @param bool $withRelations
      *
+     * @param bool $withSoftDeleted
      * @return Builder
      */
-    protected function getQuery($withRelations = true): Builder
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
         $user = Auth::user();
         $user_id = $user->id;
-        $query = parent::getQuery($withRelations);
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
         $full_access = Role::can($user, 'tasks', 'full_access');
-        $project_relations_access = Role::can($user, 'projects', 'relations');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
+        $action_method = Route::current()->getActionMethod();
 
         if ($full_access) {
             return $query;
         }
 
-        $query->where(static function (Builder $query) use ($user_id, $project_relations_access, $action_method) {
-            /** edit and remove only for directly related users's project's task */
-            if ($action_method === 'edit' || $action_method === 'remove') {
-                $query->whereHas('user', static function (Builder $query) use ($user_id) {
-                    $query->where('id', $user_id)->select('id');
-                });
-            } else {
-                $query->when(!$project_relations_access, static function (Builder $query) use ($user_id, $project_relations_access) {
-                    $query->whereHas('user', static function (Builder $query) use ($user_id) {
-                        $query->where('id', $user_id)->select('id');
-                    });
+        $rules = $this->getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
+            }
+
+            $query->where(function (Builder $query) use ($user_id, $object, $action) {
+                // Filter by project roles of the user
+                $query->whereHas('project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
+                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
+                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                            $query->where([
+                                'object' => $object,
+                                'action' => $action,
+                                'allow'  => true,
+                            ])->select('id');
+                        })->select('id');
+                    })->select('id');
                 });
 
-                $query->when($project_relations_access, static function (Builder $query) use ($user_id) {
-                    $query->orWhereHas('project.users', static function (Builder $query) use ($user_id) {
-                        $query->where('id', $user_id)->select('id');
+                // For read-only access include tasks where the user is assigned or has tracked intervals
+                $query->when($action !== 'edit' && $action !== 'remove', static function (Builder $query) use ($user_id) {
+                    $query->orWhere('user_id', $user_id);
+
+                    $query->orWhereHas('timeIntervals', static function (Builder $query) use ($user_id) {
+                        $query->where('user_id', $user_id)->select('user_id');
                     });
                 });
-            }
-        });
+            });
+        }
 
         return $query;
     }

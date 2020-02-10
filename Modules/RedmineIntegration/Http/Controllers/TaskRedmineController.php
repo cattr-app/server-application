@@ -7,9 +7,7 @@ use Modules\RedmineIntegration\Helpers\TaskIntegrationHelper;
 
 /**
  * Class TaskRedmineController
- *
- * @package Modules\RedmineIntegration\Http\Controllers
- */
+*/
 class TaskRedmineController extends AbstractRedmineController
 {
     /**

@@ -7,9 +7,7 @@ use Modules\RedmineIntegration\Helpers\ProjectIntegrationHelper;
 
 /**
  * Class SynchronizeProjects
- *
- * @package Modules\RedmineIntegration\Console
- */
+*/
 class SynchronizeProjects extends Command
 {
     /**

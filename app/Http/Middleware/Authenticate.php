@@ -3,27 +3,39 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Auth;
-use DB;
+use Illuminate\Auth\Middleware\Authenticate as BaseAuthenticate;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Lang;
+use Tymon\JWTAuth\Exceptions\JWTException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * Class Authenticate
- * @package App\Http\Middleware
- */
-class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
+*/
+class Authenticate extends BaseAuthenticate
 {
+    public const DEFAULT_USER_LANGUAGE = 'en';
+
     /**
-     * @param Request $request
-     * @param Closure $next
-     * @param mixed ...$guards
+     * @param  Request  $request
+     * @param  Closure  $next
+     * @param  mixed    ...$guards
+     *
      * @return JsonResponse|mixed
      * @throws AuthorizationException
      */
     public function handle($request, Closure $next, ...$guards)
     {
+        try {
+            JWTAuth::parseToken()->getClaim('exp');
+        } catch (JWTException $exception) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        }
+
         if (!Auth::check()) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
@@ -35,23 +47,7 @@ class Authenticate extends \Illuminate\Auth\Middleware\Authenticate
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
-        // Check token.
-        $auth = explode(' ', $request->header('Authorization'));
-
-        if (!empty($auth) && count($auth) > 1 && $auth[0] === 'bearer') {
-            $token = $auth[1];
-            $token = DB::table('tokens')
-                ->where('user_id', auth()->user()->id)
-                ->where('token', $token)
-                ->where('expires_at', '>', time())
-                ->first()
-            ;
-
-            if (!isset($token)) {
-                throw new AuthorizationException(AuthorizationException::ERROR_TYPE_TOKEN_MISMATCH);
-            }
-        }
-
+        Lang::setLocale($user->user_language ? $user->user_language : self::DEFAULT_USER_LANGUAGE);
         return $next($request);
     }
 }

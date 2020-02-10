@@ -2,20 +2,13 @@
 
 namespace Modules\RedmineIntegration\Console;
 
-use App\Models\Priority;
-use App\Models\Property;
-use App\User;
-use Exception;
 use Illuminate\Console\Command;
-use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
-use Redmine;
+use Log;
+use Modules\RedmineIntegration\Models\Priority;
 
 /**
  * Class SynchronizePriorities
- *
- * @package Modules\RedmineIntegration\Console
- */
+*/
 class SynchronizePriorities extends Command
 {
     /**
@@ -30,89 +23,34 @@ class SynchronizePriorities extends Command
      *
      * @var string
      */
-    protected $description = 'Synchronize priorities from redmine for all users, who activated redmine integration.';
+    protected $description = 'Synchronize priorities from redmine.';
 
     /**
-     * @var UserRepository
+     * @var Priority
      */
-    protected $userRepo;
+    protected $priority;
 
     /**
      * Create a new command instance.
      *
-     * @param  UserRepository  $userRepo
+     * @param  Priority  $priority
      */
-    public function __construct(UserRepository $userRepo)
+    public function __construct(Priority $priority)
     {
         parent::__construct();
 
-        $this->userRepo = $userRepo;
+        $this->priority = $priority;
     }
 
     /**
      * Execute the console command.
-     *
-     */
+    */
     public function handle()
     {
-        $this->synchronizePriorities();
-    }
-
-    /**
-     * Synchronize priorities for all users
-     */
-    public function synchronizePriorities()
-    {
-        $users = User::all();
-
-        foreach ($users as $user) {
-            try {
-                $this->synchronizeUserPriorities($user->id);
-            } catch (Exception $e) {
-            }
+        try {
+            $this->priority->synchronize();
+        } catch (\Exception $e) {
+            Log::error($e);
         }
-    }
-
-    /**
-     * Synchronize priorities for current user
-     *
-     * @param  int  $userId  User's id in our system
-     *
-     */
-    public function synchronizeUserPriorities(int $userId)
-    {
-        $client = $this->initRedmineClient($userId);
-        // Merge priorities info from the redmine with the stored internal priority_id.
-        $available_priorities = $client->issue_priority->all()['issue_priorities'];
-        $saved_priorities = $this->userRepo->getUserRedminePriorities($userId);
-        $priorities = array_map(function ($priority) use ($saved_priorities) {
-            $saved_priority = array_first($saved_priorities, function ($saved_priority) use ($priority) {
-                return $saved_priority['id'] === $priority['id'];
-            });
-
-            if (isset($saved_priority) && Priority::find($saved_priority['priority_id'])) {
-                $priority['priority_id'] = $saved_priority['priority_id'];
-            } elseif (Priority::find($priority['id'])) {
-                $priority['priority_id'] = $priority['id'];
-            } else {
-                $priority['priority_id'] = Priority::max('id');
-            }
-
-            return $priority;
-        }, $available_priorities);
-        $property = Property::updateOrCreate([
-            'entity_id' => $userId,
-            'entity_type' => Property::USER_CODE,
-            'name' => 'REDMINE_PRIORITIES',
-        ], [
-            'value' => serialize($priorities),
-        ]);
-    }
-
-    public function initRedmineClient(int $userId): Redmine\Client
-    {
-        $client = new RedmineClient($userId);
-
-        return $client;
     }
 }

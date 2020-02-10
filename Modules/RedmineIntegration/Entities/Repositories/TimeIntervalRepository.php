@@ -7,9 +7,7 @@ use App\Models\TimeInterval;
 
 /**
  * Class TimeIntervalRepository
- *
- * @package Modules\RedmineIntegration\Entities\Repositories
- */
+*/
 class TimeIntervalRepository
 {
 

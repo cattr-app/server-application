@@ -2,10 +2,12 @@
 
 namespace App\Mail;
 
+use App\Models\User;
+use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Lang;
 use Illuminate\Notifications\Messages\MailMessage;
 
-class ResetPassword extends \Illuminate\Auth\Notifications\ResetPassword
+class ResetPassword extends ResetPasswordNotification
 {
     /**
      * User email.
@@ -25,20 +27,23 @@ class ResetPassword extends \Illuminate\Auth\Notifications\ResetPassword
      *
      * @param  mixed  $notifiable
      * @return MailMessage
+     * @codeCoverageIgnore
      */
-    public function toMail($notifiable)
+    public function toMail($notifiable): MailMessage
     {
         if (static::$toMailCallback) {
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
         }
 
-        return (new MailMessage)
-            ->subject(Lang::getFromJson('Reset Password Notification'))
-            ->line(Lang::getFromJson('You are receiving this email because we received a password reset request for your account.'))
-            ->action(Lang::getFromJson('Reset Password'), url(config('app.url').route('password.reset.process', [
-                'token' => $this->token,
-                'email' => $this->email,
-            ], false)))
-            ->line(Lang::getFromJson('If you did not request a password reset, no further action is required.'));
+        $resetUrl = config('app.password_reset_url') . "?email=$this->email&token=$this->token";
+
+        $locale = User::where('email', '=', $this->email)->first()->getAttribute('user_language');
+        Lang::setLocale($locale);
+
+        return (new MailMessage())
+            ->subject(Lang::get('emails.reset_password.subject'))
+            ->line(Lang::get('emails.reset_password.intro'))
+            ->action(Lang::get('emails.reset_password.action'), $resetUrl)
+            ->line(Lang::get('emails.reset_password.outro'));
     }
 }

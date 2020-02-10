@@ -11,9 +11,7 @@ use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 
 /**
  * Class TimeIntervalIntegrationHelper
- *
- * @package Modules\RedmineIntegration\Helpers
- */
+*/
 class TimeIntervalIntegrationHelper extends AbstractIntegrationHelper
 {
     /**
@@ -30,7 +28,7 @@ class TimeIntervalIntegrationHelper extends AbstractIntegrationHelper
         TaskRepository $taskRepository,
         ProjectRepository $projectRepository
     ) {
-        $client = $this->initRedmineClient($userId);
+        $client = $this->clientFactory->createUserClient($userId);
 
         $timeInterval = TimeInterval::where('id', '=', $timeIntervalId)->first();
         $task = Task::where('id', '=', $timeInterval->task_id)->first();

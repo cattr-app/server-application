@@ -4,15 +4,13 @@ namespace Modules\RedmineIntegration\Models;
 
 use App\Models\Task;
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
  * Class TimeActivity
- *
- * @package App\Models
  *
  * @property datetime     $last_time_activity
  * @property int          $user_id

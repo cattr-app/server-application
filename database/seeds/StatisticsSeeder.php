@@ -6,7 +6,7 @@ use App\Models\RelationsUsers;
 use App\Models\Rule;
 use App\Models\Task;
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Faker\Factory;
 use Illuminate\Database\Seeder;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -41,9 +41,8 @@ class StatisticsSeeder extends Seeder
             'screenshots_interval' => 9,
             'active' => true,
             'password' => bcrypt($pass),
+            'role_id' => $role_id,
         ]);
-
-        $user->attachRole($role_id);
 
         $this->command->getOutput()->writeln("<fg=green>$name user has been created</>");
 

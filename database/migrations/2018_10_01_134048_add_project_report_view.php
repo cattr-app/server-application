@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
 
 class AddProjectReportView extends Migration
@@ -56,6 +54,6 @@ class AddProjectReportView extends Migration
      */
     public function down()
     {
-        DB::unprepared( 'DROP VIEW IF EXISTS `project_report`' );
+        DB::unprepared('DROP VIEW IF EXISTS `project_report`');
     }
 }

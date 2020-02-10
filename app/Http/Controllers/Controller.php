@@ -9,12 +9,12 @@ use Illuminate\Foundation\Auth\Access\AuthorizesRequests;
 
 /**
  * Class Controller
- *
- * @package App\Http\Controllers
- */
+*/
 class Controller extends BaseController
 {
-    use AuthorizesRequests, DispatchesJobs, ValidatesRequests;
+    use AuthorizesRequests;
+    use DispatchesJobs;
+    use ValidatesRequests;
 
     /**
      * Controller constructor.
@@ -25,6 +25,7 @@ class Controller extends BaseController
     }
 
     /**
+     * @codeCoverageIgnore
      * @return array
      */
     public static function getControllerRules(): array

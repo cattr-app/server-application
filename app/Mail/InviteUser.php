@@ -3,14 +3,13 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
-use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Queue\SerializesModels;
 
 class InviteUser extends Mailable
 {
-    use Queueable, SerializesModels;
+    use Queueable;
+    use SerializesModels;
 
     public $login;
     public $password;
@@ -18,9 +17,11 @@ class InviteUser extends Mailable
     /**
      * Create a new message instance.
      *
-     * @return void
+     * @param $login
+     * @param $password
      */
-    public function __construct($login, $password) {
+    public function __construct($login, $password)
+    {
         $this->login = $login;
         $this->password = $password;
     }
@@ -30,7 +31,7 @@ class InviteUser extends Mailable
      *
      * @return $this
      */
-    public function build()
+    public function build(): self
     {
         return $this->view('emails.invite', [
             'login' => $this->login,

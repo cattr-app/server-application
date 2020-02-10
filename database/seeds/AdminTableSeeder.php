@@ -1,6 +1,6 @@
 <?php
 
-use App\User;
+use App\Models\User;
 use App\Models\Rule;
 use Illuminate\Database\Seeder;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -38,8 +38,9 @@ class AdminTableSeeder extends Seeder
             'screenshots_interval'   => 9,
             'active'                 => true,
             'password'               => bcrypt($pass),
+            'is_admin'               => true,
+            'role_id'                => 2,
         ]);
-        $admin->attachRole(1);
 
         $this->command->getOutput()->writeln('<fg=green>Admin user has been created</>');
     }

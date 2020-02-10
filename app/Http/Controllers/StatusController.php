@@ -6,35 +6,38 @@ use App\Helpers\CatHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
+/**
+ * Class StatusController
+*/
 class StatusController extends Controller
 {
     /**
-     * @return JsonResponse
-     * @api {any} /api/status Status
-     * @apiDescription Check API status
+     * @api             {get} /status Status
+     * @apiDescription  Check API status
      *
-     * @apiVersion 0.1.0
-     * @apiName Status
-     * @apiGroup Status
+     * @apiVersion      1.0.0
+     * @apiName         Status
+     * @apiGroup        Status
      *
+     * @apiSuccess {Boolean}  amazingtime  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   cat          A cat for you
      *
-     * @apiSuccess {Boolean}   amazingtime
-     * @apiSuccess {String}   cat
-     *
-     * @apiSuccessExample {json} Answer Example
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
      *  {
-     *      "amazingtime": true,
-     *      "cat": "(=ㅇ༝ㅇ=)"
+     *    "amazingtime": true,
+     *    "cat": "(=ㅇ༝ㅇ=)"
      *  }
-     *
+     */
+    /**
+     * @return JsonResponse
      */
     public function index(): JsonResponse
     {
-        $data = [
+        return response()->json([
+            'success' => true,
             'amazingtime' => true,
             'cat' => app(CatHelper::class)->getCat(),
-        ];
-
-        return response()->json($data);
+        ]);
     }
 }

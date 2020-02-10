@@ -7,9 +7,7 @@ use Modules\RedmineIntegration\Helpers\TimeIntervalIntegrationHelper;
 
 /**
  * Class TimeEntryRedmineController
- *
- * @package Modules\RedmineIntegration\Http\Controllers
- */
+*/
 class TimeEntryRedmineController extends AbstractRedmineController
 {
     /**

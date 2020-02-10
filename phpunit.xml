@@ -21,6 +21,10 @@
   <filter>
     <whitelist processUncoveredFilesFromWhitelist="true">
       <directory suffix=".php">./app</directory>
+      <exclude>
+        <directory suffix=".php">./app/Console/Commands</directory>
+        <file>./app/Http/Controllers/Api/v1/TaskCommentController.php</file>
+      </exclude>
     </whitelist>
   </filter>
   <php>

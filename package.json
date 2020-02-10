@@ -6,9 +6,13 @@
   "author": "perkthefox <antonkevinok@gmail.com>",
   "license": "MIT",
   "scripts": {
-    "api": "php -r \"if (!file_exists(__DIR__.'/public/apidoc')) { mkdir(__DIR__.'/apidoc') ; symlink(__DIR__.'/apidoc/', __DIR__.'/public/apidoc'); }\" ; node node_modules/apidoc/bin/apidoc -i app/Http/Controllers/ -o apidoc",
-    "api-nsl": "node node_modules/apidoc/bin/apidoc -i app/Http/Controllers/ -o apidoc"
-
+    "api": "php -r \"if (!file_exists(__DIR__.'/public/apidoc')) { mkdir(__DIR__.'/apidoc') ; symlink(__DIR__.'/apidoc/', __DIR__.'/public/apidoc'); }\" ; node node_modules/apidoc/bin/apidoc -i app/ -o apidoc",
+    "api-nsl": "node node_modules/apidoc/bin/apidoc -i app/ -o apidoc"
+  },
+  "apidoc": {
+    "template": {
+      "forceLanguage": "en"
+    }
   },
   "dependencies": {
     "apidoc": "^0.17.7",

@@ -4,7 +4,7 @@ use App\Models\Project;
 use App\Models\Screenshot;
 use App\Models\Task;
 use App\Models\TimeInterval;
-use App\User;
+use App\Models\User;
 use Faker\Factory;
 use Faker\Generator;
 use Illuminate\Database\Seeder;
@@ -57,7 +57,7 @@ class TaskListSeeder extends Seeder
     {
         $faker = $this->faker;
 
-        foreach (range(0, 14) as $i) {
+        foreach (range(0, 500) as $i) {
             $task = Task::create([
                 'project_id' => $project->id,
                 'task_name' => $faker->text(15 + $i),
@@ -101,7 +101,7 @@ class TaskListSeeder extends Seeder
                 'count_keyboard' => 43
             ]);
 
-            $this->seedScreenshot($interval, $user);
+             $this->seedScreenshot($interval, $user);
         }
     }
 
@@ -113,7 +113,7 @@ class TaskListSeeder extends Seeder
     protected function seedScreenshot(TimeInterval $interval, User $user): void
     {
         if ($this->_isScreenshotDownloaded === false) {
-            $placeholderLink = "http://via.placeholder.com/1600x900/{$this->random_color()}/{$this->random_color()}.png?"
+            $placeholderLink = "https://via.placeholder.com/1600x900/{$this->random_color()}/{$this->random_color()}.png?"
                 .http_build_query([
                     'text' => "#{$interval->id} - {$interval->task->task_name}",
                 ]);

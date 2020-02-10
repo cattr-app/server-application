@@ -2,25 +2,30 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Role;
 use App\Models\Screenshot;
-use App\User;
 use Illuminate\Http\Request;
+use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Response;
-use Illuminate\View\View;
-use Illuminate\Support\Facades\Auth;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
+
 
 /**
  * Class ScreenshotController
- *
- * @package App\Http\Controllers
- */
+*/
 class ScreenshotController extends Controller
 {
+    /**
+     * @noinspection MagicMethodsValidityInspection
+     * @noinspection PhpMissingParentConstructorInspection
+     */
     public function __construct()
     {
     }
 
+    /**
+     * @param Request $request
+     * @return ResponseFactory|Response|BinaryFileResponse
+     */
     public function screenshot(Request $request)
     {
         $path = $request->path();

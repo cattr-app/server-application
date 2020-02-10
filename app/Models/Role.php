@@ -2,27 +2,68 @@
 
 namespace App\Models;
 
-
-use Illuminate\Database\Eloquent\Model;
-use App\User;
-use Filter;
-use Auth;
-use Illuminate\Database\Eloquent\Relations\HasMany;
+use Eloquent as EloquentIdeHelper;
+use App\Exceptions\Entities\AuthorizationException;
+use Illuminate\Support\Facades\Auth;
+use Exception;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+use Throwable;
+
+/**
+ * @apiDefine RoleObject
+ *
+ * @apiSuccess {Integer}  role.id          ID
+ * @apiSuccess {Integer}  role.name        Name
+ * @apiSuccess {ISO8601}  role.created_at  Creation DateTime
+ * @apiSuccess {ISO8601}  role.updated_at  Update DateTime
+ * @apiSuccess {ISO8601}  role.deleted_at  Delete DateTime or `NULL` if wasn't deleted
+ *
+ * @apiVersion 1.0.0
+ */
+
+/**
+ * @apiDefine RoleParams
+ *
+ * @apiParam {Integer}  [id]          ID
+ * @apiParam {Integer}  [name]        Name
+ * @apiParam {ISO8601}  [created_at]  Creation DateTime
+ * @apiParam {ISO8601}  [updated_at]  Update DateTime
+ * @apiParam {ISO8601}  [deleted_at]  Delete DateTime
+ * @apiParam {String}   [with]        For add relation model in response
+ * @apiParam {Object}   [users]       Roles's relation users. All params in <a href="#api-User-GetUserList" >@User</a>
+ * @apiParam {Object}   [rules]       Roles's relation rules. All params in <a href="#api-Rule-GetRulesActions" >@Rules</a>
+
+ *
+ * @apiVersion 1.0.0
+ */
 
 /**
  * Class Role
- * @package App\Models
  *
  * @property int $id
  * @property string $name
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
- *
  * @property User[] $users
  * @property Rule[] $rules
+ * @property-read Collection|Project[] $projects
+ * @method static bool|null forceDelete()
+ * @method static QueryBuilder|Role onlyTrashed()
+ * @method static bool|null restore()
+ * @method static EloquentBuilder|Role whereCreatedAt($value)
+ * @method static EloquentBuilder|Role whereDeletedAt($value)
+ * @method static EloquentBuilder|Role whereId($value)
+ * @method static EloquentBuilder|Role whereName($value)
+ * @method static EloquentBuilder|Role whereUpdatedAt($value)
+ * @method static QueryBuilder|Role withTrashed()
+ * @method static QueryBuilder|Role withoutTrashed()
+ * @mixin EloquentIdeHelper
  */
 class Role extends AbstractModel
 {
@@ -30,6 +71,7 @@ class Role extends AbstractModel
 
     /**
      * table name from database
+     *
      * @var string
      */
     protected $table = 'role';
@@ -56,38 +98,40 @@ class Role extends AbstractModel
     ];
 
     /**
-     * @return BelongsToMany
+     * @return HasMany
      */
-    public function users(): BelongsToMany
+    public function users(): HasMany
     {
-        return $this->belongsToMany(User::class, 'user_role', 'role_id', 'user_id', 'id', 'id');
+        return $this->hasMany(User::class, 'role_id', 'id');
     }
 
     /**
      * Attach this role to user
+     *
      * @param int|User $user
      */
-    public function attachToUser($user)
+    /*public function attachToUser($user)
     {
         $userId = $user;
         if ($user instanceof User) {
             $userId = $user->id;
         }
         $this->users()->attach($userId);
-    }
+    }*/
 
     /**
      * Detach this role from user
+     *
      * @param int|User $user
      */
-    public function detachFromUser($user)
+    /*public function detachFromUser($user)
     {
         $userId = $user;
         if ($user instanceof User) {
             $userId = $user->id;
         }
         $this->users()->detach($userId);
-    }
+    }*/
 
     /**
      * @return HasMany
@@ -106,7 +150,7 @@ class Role extends AbstractModel
     }
 
     /**
-     * @throws \Exception
+     * @throws Exception
      */
     public static function updateRules(): void
     {
@@ -153,8 +197,9 @@ class Role extends AbstractModel
      * @param $object
      * @param $action
      * @param $allow
+     *
      * @return bool
-     * @throws \Throwable
+     * @throws  Throwable
      */
     public static function updateAllow($role_id, $object, $action, $allow): bool
     {
@@ -167,12 +212,20 @@ class Role extends AbstractModel
 
         $user = Auth::user();
 
-        throw_if(!$rule, new \Exception('rule does not exist', 400));
-        if (!static::can($user, 'rules', 'full_access')) {
-            $userRoleIds = $user->rolesIds();
-            throw_if($userRoleIds->contains($rule->role_id), new \Exception('you cannot change your own privileges', 403));
+        if (!$rule) {
+            return false;
         }
-        throw_if($role_id === 1 && $object === 'rules' && $action === 'full_access', new \Exception('you cannot change rule management for root', 403));
+
+        if (!static::can($user, 'rules', 'full_access')) {
+            throw_if(
+                $user->role_id === $rule->role_id,
+                new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN, 'You cannot change your own privileges')
+            );
+        }
+        throw_if(
+            $role_id === 1 && $object === 'rules' && $action === 'full_access',
+            new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN, 'You cannot change rule management for root')
+        );
 
         $rule->allow = $allow;
         return $rule->save();
@@ -182,23 +235,81 @@ class Role extends AbstractModel
      * @param $user
      * @param $object
      * @param $action
+     * @param $id
+     *
      * @return bool
      */
-    public static function can($user, $object, $action): bool
+    public static function can($user, $object, $action, $id = null): bool
     {
-        /** @var User $user */
-        $userRoleIds = $user->rolesIds();
-
-        $rule = Rule::query()->whereIn('role_id', $userRoleIds)->where([
-            'object' => $object,
-            'action' => $action,
-        ])->first();
-
-        if (!$rule) {
-            return false;
+        if ((bool)$user->is_admin) {
+            return true;
         }
 
-        return (bool)$rule->allow;
-    }
+        // TODO: need refactoring
 
+        /** @var User $user */
+        $userRoleIds = [$user->role_id];
+
+        $projectID = request()->input('project_id', null);
+
+        // Check access to the specific entity
+        if (isset($id)) {
+            $projectID = null;
+
+            // Get ID of the related project
+            switch ($object) {
+                case 'projects':
+                    $projectID = $id;
+                    break;
+
+                case 'tasks':
+                    $task = Task::find($id);
+                    if (isset($task)) {
+                        $projectID = $task->project_id;
+                    }
+                    break;
+
+                case 'time-intervals':
+                    $interval = TimeInterval::with('task')->find($id);
+                    if (isset($interval)) {
+                        $projectID = $interval->task->project_id;
+                    }
+                    break;
+
+                case 'screenshots':
+                    $screenshot = Screenshot::with('timeInterval.task')->find($id);
+                    if (isset($screenshot)) {
+                        $projectID = $screenshot->timeInterval->task->project_id;
+                    }
+                    break;
+
+                default:
+                    break;
+            }
+        }
+
+        if (isset($projectID)) {
+            // Get role of the user in the project
+            $projectUserRelation = ProjectsUsers::where([
+                'project_id' => $projectID,
+                'user_id' => $user->id,
+            ])->first();
+            if (isset($projectUserRelation)) {
+                $userRoleIds[] = $projectUserRelation->role_id;
+            }
+        }
+
+        $rules = Rule::query()->whereIn('role_id', $userRoleIds)->where([
+            'object' => $object,
+            'action' => $action,
+        ])->get();
+
+        foreach ($rules as $rule) {
+            if ((bool)$rule->allow) {
+                return true;
+            }
+        }
+
+        return false;
+    }
 }

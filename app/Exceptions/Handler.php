@@ -2,8 +2,7 @@
 
 namespace App\Exceptions;
 
-use App\Exceptions\Entities\CaptchaException;
-use App\Exceptions\Interfaces\DataExtendedException;
+use App\Exceptions\Interfaces\InfoExtendedException;
 use App\Exceptions\Interfaces\TypedException;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
@@ -17,11 +16,12 @@ use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
+use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 /**
  * Class Handler
- * @package App\Exceptions
- */
+*/
 class Handler extends ExceptionHandler
 {
     /**
@@ -45,7 +45,7 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param  Exception $exception
+     * @param Exception $exception
      *
      * @return void
      * @throws Exception
@@ -62,8 +62,8 @@ class Handler extends ExceptionHandler
     /**
      * Render an exception into an HTTP response.
      *
-     * @param  Request $request
-     * @param  Exception $exception
+     * @param Request $request
+     * @param Exception $exception
      *
      * @return JsonResponse|Response
      */
@@ -79,7 +79,7 @@ class Handler extends ExceptionHandler
         $code = (int)$exception->getCode();
 
         $debugData = false;
-        $data = $exception instanceof DataExtendedException ? $exception->getData() : false;
+        $info = $exception instanceof InfoExtendedException ? $exception->getInfo() : false;
         $errorType = $exception instanceof TypedException ? $exception->getType() : false;
 
         if (!$isHttpException) {
@@ -99,9 +99,11 @@ class Handler extends ExceptionHandler
         }
 
         // Processing exception status code
-        if ($exception instanceof \Error) {
-            // If current exception is an PHP default error we'll interpret it as 500 Server Error code
-            $statusCode = 500;
+
+        if ($exception instanceof AuthorizationException) {
+            $statusCode = $exception->getStatusCode();
+            $errorType = $exception->getType();
+
         } elseif ($isHttpException) {
             // Otherwise, if it is Laravel's HttpException we can access getStatusCode() method from exception
             // instance
@@ -119,9 +121,25 @@ class Handler extends ExceptionHandler
                 ]);
                 $errorType = 'http.request.wrong_method';
             }
+
+        } elseif ($exception instanceof TokenExpiredException) {
+            $message = $exception->getMessage();
+            $errorType = 'authorization.token_expired';
+            $statusCode = 401;
+
         } elseif ($code === 404 || $code === 401 || $code === 429 || $code == 420) {
             // If we have 404 or 401 code we will process it as an request status code
             $statusCode = $code;
+
+            if ($code === 400 || !$request->bearerToken()) {
+                $errorType = 'authorization.unauthorized';
+            }
+            if ($code = 401) {
+                $errorType = 'authorization.invalid_token';
+            }
+        } elseif ($this->isDefaultPhpException($exception)) {
+            // If current exception is an PHP default error we'll interpret it as 500 Server Error code
+            $statusCode = 500;
         } else {
             // Otherwise, if non of previous checks was correct we'll assuming that current exception was thrown
             // because of a bad request body
@@ -144,14 +162,12 @@ class Handler extends ExceptionHandler
                 'message' => $message,
             ],
             $debugData !== false ? ['debug' => $debugData] : [],
-            // Additional error data, for example remaining time to repeat password reset request
-            $data !== false && $data !== null ? ['data' => $data] : [],
+            // Additional error info, for example remaining time to repeat password reset request
+            $info !== false && $info !== null ? ['info' => $info] : [],
             // Error Type used for a more accurate error processing on client side
             $errorType !== false && $errorType !== null ? ['error_type' => $errorType] : []
         );
-        if ($exception instanceof CaptchaException) {
-            $exceptionResult['site_key'] = CaptchaException::getSiteKey();
-        }
+
         return response()->json(
             $exceptionResult,
             $statusCode,
@@ -174,12 +190,25 @@ class Handler extends ExceptionHandler
     }
 
     /**
-     * Determine if the given exception is an HTTP exception.
+     * @param Throwable $e
      *
-     * @param  \Exception  $e
      * @return bool
      */
-    protected function isHttpException(Exception $e)
+    protected function isDefaultPhpException(Throwable $e): bool
+    {
+        return $e instanceof \Error ||
+            $e instanceof \RuntimeException ||
+            $e instanceof Exception;
+    }
+
+    /**
+     * Determine if the given exception is an HTTP exception.
+     *
+     * @param Exception $e
+     *
+     * @return bool
+     */
+    protected function isHttpException(Exception $e): bool
     {
         return $e instanceof HttpExceptionInterface;
     }

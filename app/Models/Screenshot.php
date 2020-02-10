@@ -2,14 +2,46 @@
 
 namespace App\Models;
 
-use App\User;
-use Illuminate\Database\Eloquent\Model;
+use Eloquent as EloquentIdeHelper;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder as QueryBuilder;
+
+/**
+ * @apiDefine ScreenshotObject
+ *
+ * @apiSuccess {Integer}  screenshot.id                ID
+ * @apiSuccess {Integer}  screenshot.time_interval_id  Time interval ID
+ * @apiSuccess {String}   screenshot.path              Image url
+ * @apiSuccess {String}   screenshot.thumbnail_path    Thumbnail url
+ * @apiSuccess {ISO8601}  screenshot.created_at        Creation DateTime
+ * @apiSuccess {ISO8601}  screenshot.updated_at        Update DateTime
+ * @apiSuccess {ISO8601}  screenshot.deleted_at        Delete DateTime or `NULL` if wasn't deleted
+ * @apiSuccess {Object}   screenshot.time_interval     The time interval that screenshot belongs to
+ * @apiSuccess {Boolean}  screenshot.important         Important flag
+ *
+ * @apiVersion 1.0.0
+ */
+
+/**
+ * @apiDefine ScreenshotParams
+ *
+ * @apiParam {Integer}  [id]                ID
+ * @apiParam {Integer}  [time_interval_id]  Time interval ID
+ * @apiParam {String}   [path]              Image url
+ * @apiParam {String}   [thumbnail_path]    Thumbnail url
+ * @apiParam {ISO8601}  [created_at]        Creation DateTime
+ * @apiParam {ISO8601}  [updated_at]        Update DateTime
+ * @apiParam {ISO8601}  [deleted_at]        Delete DateTime
+ * @apiParam {Object}   [time_interval]     The time interval that screenshot belongs to
+ * @apiParam {Boolean}  [important]         Important flag
+ *
+ * @apiVersion 1.0.0
+ */
 
 /**
  * Class Screenshot
- * @package App\Models
  *
  * @property int $id
  * @property int $time_interval_id
@@ -19,8 +51,23 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
- *
  * @property TimeInterval $timeInterval
+ * @property bool $is_removed
+ * @method static bool|null forceDelete()
+ * @method static QueryBuilder|Screenshot onlyTrashed()
+ * @method static bool|null restore()
+ * @method static EloquentBuilder|Screenshot whereCreatedAt($value)
+ * @method static EloquentBuilder|Screenshot whereDeletedAt($value)
+ * @method static EloquentBuilder|Screenshot whereId($value)
+ * @method static EloquentBuilder|Screenshot whereImportant($value)
+ * @method static EloquentBuilder|Screenshot whereIsRemoved($value)
+ * @method static EloquentBuilder|Screenshot wherePath($value)
+ * @method static EloquentBuilder|Screenshot whereThumbnailPath($value)
+ * @method static EloquentBuilder|Screenshot whereTimeIntervalId($value)
+ * @method static EloquentBuilder|Screenshot whereUpdatedAt($value)
+ * @method static QueryBuilder|Screenshot withTrashed()
+ * @method static QueryBuilder|Screenshot withoutTrashed()
+ * @mixin EloquentIdeHelper
  */
 class Screenshot extends AbstractModel
 {
@@ -72,8 +119,9 @@ class Screenshot extends AbstractModel
 
     /**
      * @param null|User $user
+     * @return bool
      */
-    public function access($user) : bool
+    public function access($user): bool
     {
         if (!isset($user)) {
             return false;
@@ -92,22 +140,26 @@ class Screenshot extends AbstractModel
         }
 
         // Allow manager to see screenshots of related users.
-        if (Role::can($user, 'screenshots', 'manager_access')) {
-            if (Role::can($user, 'projects', 'relations')) {
-                $attached_project_ids = $user->projects->pluck('id');
-                $related_user_ids = User::whereHas('timeIntervals', function ($query) use ($attached_project_ids) {
-                    $query->whereHas('task', function ($query) use ($attached_project_ids) {
-                        $query->whereHas('project', function ($query) use ($attached_project_ids) {
-                            $query->whereIn('id', $attached_project_ids);
+        if (Role::can($user, 'screenshots', 'manager_access') && Role::can($user, 'projects', 'relations')) {
+            $projectIds = $user->projects->pluck('id');
+            $userIds = User::query()
+                ->whereHas('timeIntervals', static function (EloquentBuilder $query) use ($projectIds) {
+                    $query->whereHas('task', static function (EloquentBuilder $query) use ($projectIds) {
+                        $query->whereHas('project', static function (EloquentBuilder $query) use ($projectIds) {
+                            $query->whereIn('id', $projectIds);
                         });
                     });
                 })->select('id')->get('id')->pluck('id');
-                if ($related_user_ids->contains($user_id)) {
-                    return true;
-                }
+
+            if ($userIds->contains($user_id)) {
+                return true;
             }
         }
+        User::whereHas('timeIntervals', static function (EloquentBuilder $query) {
+            echo get_class($query);
+        });
 
         return false;
     }
+
 }

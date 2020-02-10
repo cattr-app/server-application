@@ -1,11 +1,15 @@
 <?php
 
-
 namespace Modules\EmailReports\Providers;
 
-use Illuminate\Support\Facades\Route;
-use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
 
+use Illuminate\Foundation\Support\Providers\RouteServiceProvider as ServiceProvider;
+use Route;
+
+/**
+ * Class RouteServiceProvider
+ * @package Modules\EmailReports\Providers
+ */
 class RouteServiceProvider extends ServiceProvider
 {
     /**

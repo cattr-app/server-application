@@ -6,6 +6,7 @@ return [
     'debug' => env('APP_DEBUG', false),
     'json_errors' => env('JSON_ERRORS', true),
     'url' => env('APP_URL', 'http://localhost'),
+    'password_reset_url' => env('PASSWORD_RESET_URL'),
     'timezone' => 'UTC',
     'locale' => 'en',
     'fallback_locale' => 'en',
@@ -13,6 +14,9 @@ return [
 
     'cipher' => 'AES-256-CBC',
     'log' => env('APP_LOG', 'single'),
+    'recaptcha' => [
+        'enabled' => env('RECAPTCHA_ENABLED', false)
+    ],
 
     'log_level' => env('APP_LOG_LEVEL', 'debug'),
     'providers' => [
@@ -54,6 +58,8 @@ return [
         Modules\GitlabIntegration\Providers\GitlabIntegrationServiceProvider::class,
         Modules\Invoices\Providers\InvoicesServiceProvider::class,
         Modules\EmailReports\Providers\EmailReportsServiceProvider::class,
+        Modules\CompanyManagement\Providers\CompanyManagementServiceProvider::class,
+        Modules\Reports\Providers\ReportsServiceProvider::class,
 
         Backup\BackupServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
@@ -74,7 +80,7 @@ return [
         'DB' => Illuminate\Support\Facades\DB::class,
         'Eloquent' => Illuminate\Database\Eloquent\Model::class,
         'Event' => Illuminate\Support\Facades\Event::class,
-        'Filter' => App\EventFilter\Facade::class,
+        'Filter' => App\EventFilter\Facades\Filter::class,
         'File' => Illuminate\Support\Facades\File::class,
         'Gate' => Illuminate\Support\Facades\Gate::class,
         'Hash' => Illuminate\Support\Facades\Hash::class,

@@ -8,8 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class AbstractModel
- * @package App\Models
- */
+*/
 abstract class AbstractModel extends Model
 {
     use EloquentJoin;

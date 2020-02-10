@@ -4,7 +4,7 @@ namespace Modules\RedmineIntegration\Helpers;
 
 use App\Models\Project;
 use App\Models\Property;
-use App\User;
+use App\Models\User;
 use Exception;
 
 class ProjectIntegrationHelper extends AbstractIntegrationHelper
@@ -34,9 +34,8 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
      */
     public function synchronizeUserProjects(int $userId): array
     {
-
         try {
-            $client = $this->initRedmineClient($userId);
+            $client = $this->clientFactory->createUserClient($userId);
             $projectsData = $client->project->all([
                 'limit' => 1000
             ]);

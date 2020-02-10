@@ -2,13 +2,14 @@
 
 namespace App\Models;
 
+use Eloquent as EloquentIdeHelper;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
  * Class Property
- *
- * @package App\Models
  *
  * @property int    $id
  * @property int    $entity_id
@@ -18,16 +19,31 @@ use Illuminate\Database\Eloquent\SoftDeletes;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ * @method static bool|null forceDelete()
+ * @method static QueryBuilder|Property onlyTrashed()
+ * @method static bool|null restore()
+ * @method static EloquentBuilder|Property whereCreatedAt($value)
+ * @method static EloquentBuilder|Property whereDeletedAt($value)
+ * @method static EloquentBuilder|Property whereEntityId($value)
+ * @method static EloquentBuilder|Property whereEntityType($value)
+ * @method static EloquentBuilder|Property whereId($value)
+ * @method static EloquentBuilder|Property whereName($value)
+ * @method static EloquentBuilder|Property whereUpdatedAt($value)
+ * @method static EloquentBuilder|Property whereValue($value)
+ * @method static QueryBuilder|Property withTrashed()
+ * @method static QueryBuilder|Property withoutTrashed()
+ * @mixin EloquentIdeHelper
  */
 class Property extends AbstractModel
 {
     use SoftDeletes;
 
+    public const COMPANY_CODE = 'company';
     public const PROJECT_CODE = 'project';
     public const TASK_CODE = 'task';
     public const TIME_INTERVAL_CODE = 'time_interval';
-    public const SCREENSHOT_CODE = 'screenshot';
     public const USER_CODE = 'user';
+    public const TASK_COMMENT_CODE = 'task_comment';
 
     /**
      * @var string
@@ -66,9 +82,9 @@ class Property extends AbstractModel
     /**
      * @return string
      */
-    public static function getTableName()
+    public static function getTableName(): string
     {
-        return with(new static)->getTable();
+        return with(new static())->getTable();
     }
 
     /**
@@ -80,7 +96,7 @@ class Property extends AbstractModel
      *
      * @return Collection
      */
-    public function getProperty(string $scope, string $key, array $parameters = [])
+    public static function getProperty(string $scope, string $key, array $parameters = []): Collection
     {
         // Making data for where query
         $queryData = [
@@ -92,6 +108,6 @@ class Property extends AbstractModel
             $queryData = array_merge($queryData, $parameters);
         }
 
-        return $this->where($queryData)->get();
+        return self::where($queryData)->get();
     }
 }

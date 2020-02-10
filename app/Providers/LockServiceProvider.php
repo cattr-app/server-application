@@ -8,9 +8,9 @@ use Illuminate\Support\ServiceProvider;
 
 class LockServiceProvider extends ServiceProvider
 {
-    public function register()
+    public function register(): void
     {
-        $this->app->singleton(LockInterface::class, function ($app) {
+        $this->app->singleton(LockInterface::class, static function ($app) {
             return new Lock();
         });
     }

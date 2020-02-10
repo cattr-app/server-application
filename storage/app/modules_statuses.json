@@ -1,0 +1,6 @@
+{
+  "CompanyManagement": true,
+  "GitlabIntegration": true,
+  "RedmineIntegration": true,
+  "Reports": true
+}

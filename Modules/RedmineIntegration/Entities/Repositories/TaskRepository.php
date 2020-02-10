@@ -6,9 +6,7 @@ use App\Models\Property;
 
 /**
  * Class TaskRepository
- *
- * @package Modules\RedmineIntegration\Entities\Repositories
- */
+*/
 class TaskRepository
 {
 

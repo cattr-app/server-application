@@ -14,7 +14,8 @@ class BetweenDate implements Rule
     /**
      * Create a new rule instance.
      *
-     * @return void
+     * @param string $afterDate
+     * @param string $beforeDate
      */
     public function __construct(string $afterDate, string $beforeDate)
     {
@@ -29,7 +30,7 @@ class BetweenDate implements Rule
      * @param  mixed  $value
      * @return bool
      */
-    public function passes($attribute, $value)
+    public function passes($attribute, $value): bool
     {
         $endTimestamp = strtotime($value);
         $afterTimestamp = strtotime($this->afterDate);
@@ -43,7 +44,7 @@ class BetweenDate implements Rule
      *
      * @return string
      */
-    public function message()
+    public function message(): string
     {
         return 'The date is not between acceptable boundaries';
     }

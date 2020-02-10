@@ -4,14 +4,11 @@ namespace Modules\RedmineIntegration\Console;
 
 use Illuminate\Console\Command;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
-use Redmine;
+use Modules\RedmineIntegration\Models\ClientFactory;
 
 /**
  * Class SynchronizeProjects
- *
- * @package Modules\RedmineIntegration\Console
- */
+*/
 class SynchronizeUsers extends Command
 {
     /**
@@ -34,21 +31,27 @@ class SynchronizeUsers extends Command
     protected $userRepo;
 
     /**
+     * @var ClientFactory
+     */
+    protected $clientFactory;
+
+    /**
      * Create a new command instance.
      *
      * @param  UserRepository  $userRepo
+     * @param  ClientFactory   $clientFactory
      */
-    public function __construct(UserRepository $userRepo)
+    public function __construct(UserRepository $userRepo, ClientFactory $clientFactory)
     {
         parent::__construct();
 
         $this->userRepo = $userRepo;
+        $this->clientFactory = $clientFactory;
     }
 
     /**
      * Execute the console command.
-     *
-     */
+    */
     public function handle()
     {
         $this->synchronizeNewUsers();
@@ -64,18 +67,11 @@ class SynchronizeUsers extends Command
         $newRedmineUsers = $this->userRepo->getNewRedmineUsers();
 
         foreach ($newRedmineUsers as $newRedmineUser) {
-            $client = $this->initRedmineClient($newRedmineUser->entity_id);
+            $client = $this->clientFactory->createUserClient($newRedmineUser->entity_id);
             $currentUserInfo = $client->user->getCurrentUser();
 
             $this->userRepo->setRedmineId($newRedmineUser->entity_id, $currentUserInfo['user']['id']);
             $this->userRepo->markAsOld($newRedmineUser->entity_id);
         }
-    }
-
-    public function initRedmineClient(int $userId): Redmine\Client
-    {
-        $client = new RedmineClient($userId);
-
-        return $client;
     }
 }

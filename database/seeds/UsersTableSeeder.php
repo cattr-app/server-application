@@ -1,6 +1,6 @@
 <?php
 
-use App\User;
+use App\Models\User;
 use App\Models\Rule;
 use Illuminate\Database\Seeder;
 use Symfony\Component\Console\Output\ConsoleOutput;
@@ -38,8 +38,8 @@ class UsersTableSeeder extends Seeder
                 'screenshots_interval' => 9,
                 'active' => true,
                 'password' => bcrypt('qwaszx12345'),
+                'role_id' => 2,
             ]);
-            $user->attachRole(2);
             $this->command->getOutput()->writeln("<fg=green>User #{$i}/50 has been created</>");
         }
 

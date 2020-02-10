@@ -2,25 +2,25 @@
 
 namespace Modules\RedmineIntegration\Listeners;
 
-use App\User;
+use App\Models\User;
 use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
-use Modules\RedmineIntegration\Models\RedmineClient;
+use Modules\RedmineIntegration\Models\ClientFactory;
+use Modules\RedmineIntegration\Models\Priority;
 
 /**
  * Class IntegrationObserver
  *
  * @property ProjectRepository $projectRepo
  * @property TaskRepository    $taskRepo
- *
- * @package Modules\RedmineIntegration\Listeners
- */
+*/
 class IntegrationObserver
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
@@ -36,9 +36,19 @@ class IntegrationObserver
     public $taskRepo;
 
     /**
-     * @var TaskRepository
+     * @var UserRepository
      */
     public $userRepo;
+
+    /**
+     * @var ClientFactory
+     */
+    public $clientFactory;
+
+    /**
+     * @var Priority
+     */
+    public $priority;
 
     /**
      * Create the event listener.
@@ -46,15 +56,21 @@ class IntegrationObserver
      * @param  ProjectRepository  $projectRepo
      * @param  TaskRepository     $taskRepo
      * @param  UserRepository     $userRepo
+     * @param  ClientFactory      $clientFactory
+     * @param  Priority           $priority
      */
     public function __construct(
         ProjectRepository $projectRepo,
         TaskRepository $taskRepo,
-        UserRepository $userRepo
+        UserRepository $userRepo,
+        ClientFactory $clientFactory,
+        Priority $priority
     ) {
         $this->projectRepo = $projectRepo;
         $this->taskRepo = $taskRepo;
         $this->userRepo = $userRepo;
+        $this->clientFactory = $clientFactory;
+        $this->priority = $priority;
     }
 
     /**
@@ -116,7 +132,7 @@ class IntegrationObserver
         try {
             $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($task->user_id);
             /** @var array $userLocalRedmineTasksIds */
-            $redmineTask = array_first($userLocalRedmineTasksIds, function ($redmineTask) use ($task) {
+            $redmineTask = Arr::first($userLocalRedmineTasksIds, function ($redmineTask) use ($task) {
                 return $redmineTask->task_id === $task->id;
             });
 
@@ -124,8 +140,8 @@ class IntegrationObserver
                 // Get Redmine priority ID from an internal priority.
                 $priority_id = 2;
                 if (isset($task->priority_id) && $task->priority_id) {
-                    $priorities = $this->userRepo->getUserRedminePriorities($task->user_id);
-                    $priority = array_first($priorities, function ($priority) use ($task) {
+                    $priorities = $this->priority->getAll();
+                    $priority = Arr::first($priorities, function ($priority) use ($task) {
                         return $priority['priority_id'] == $task->priority_id;
                     });
 
@@ -134,7 +150,7 @@ class IntegrationObserver
                     }
                 }
 
-                $client = new RedmineClient($task->user_id);
+                $client = $this->clientFactory->createUserClient($task->user_id);
                 $client->issue->update($redmineTask->redmine_id, [
                     'priority_id' => $priority_id,
                 ]);

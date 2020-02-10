@@ -6,8 +6,7 @@ use Throwable;
 
 /**
  * Interface TypedException
- * @package App\Exceptions\Interfaces
- */
+*/
 interface TypedException extends Throwable
 {
     /**

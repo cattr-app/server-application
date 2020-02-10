@@ -3,6 +3,8 @@
 namespace Modules\GitlabIntegration\Http\Controllers;
 
 use App\Http\Controllers\Controller;
+use App\Models\Property;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Modules\GitlabIntegration\Helpers\UserProperties;
@@ -14,6 +16,11 @@ class SettingsController extends Controller
      */
     private $userProperties;
 
+    /**
+     * SettingsController constructor.
+     *
+     * @param  UserProperties  $userProperties
+     */
     public function __construct(UserProperties $userProperties)
     {
         $this->userProperties = $userProperties;
@@ -21,6 +28,9 @@ class SettingsController extends Controller
         parent::__construct();
     }
 
+    /**
+     * @return array
+     */
     public static function getControllerRules(): array
     {
         return [
@@ -29,23 +39,35 @@ class SettingsController extends Controller
         ];
     }
 
+    /**
+     * @param  Request  $request
+     *
+     * @return array
+     */
     public function get(Request $request)
     {
         $userId = $request->user()->id;
+        $apiKey = $this->userProperties->getApiKey($userId);
+        $hiddenKey = (bool)$apiKey ? preg_replace('/^(.{4}).*(.{4})$/i', '$1 ********* $2', $apiKey) : $apiKey;
 
         return [
-            'url' => $this->userProperties->getUrl($userId),
-            'apikey' => $this->userProperties->getApiKey($userId)
+            'enabled' => (bool)Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'gitlab_enabled'])->first()
+                ->value ?? false,
+            'apikey' =>  $hiddenKey
         ];
     }
 
+    /**
+     * @param  Request  $request
+     *
+     * @return JsonResponse
+     */
     public function set(Request $request)
     {
         $userId = $request->user()->id;
 
         $validator = Validator::make(
             $request->all(), [
-                'url' => 'string|required',
                 'apikey' => 'string|required'
             ]
         );
@@ -56,9 +78,12 @@ class SettingsController extends Controller
             ], 400);
         }
 
-        $this->userProperties->setUrl($userId, $request->post('url'));
+        if (strpos($request->post('apikey'), '*') !== false) {
+            return response()->json(['success' => 'true', 'message' => 'Nothing to update!']);
+        }
+
         $this->userProperties->setApiKey($userId, $request->post('apikey'));
 
-        return response()->json('Setted', 200);
+        return response()->json(['success' => 'true', 'message' => 'Settings saved successfully']);
     }
 }

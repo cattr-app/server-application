@@ -4,9 +4,7 @@ namespace App\Helpers;
 
 /**
  * Class CatHelper
- *
- * @package App\Helpers
- */
+*/
 class CatHelper
 {
     /**
@@ -26,6 +24,6 @@ class CatHelper
      */
     public function getCat(): string
     {
-        return array_random(static::$cats);
+        return self::$cats[array_rand(self::$cats)];
     }
 }

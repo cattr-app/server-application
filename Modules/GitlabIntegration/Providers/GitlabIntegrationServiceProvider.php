@@ -2,14 +2,16 @@
 
 namespace Modules\GitlabIntegration\Providers;
 
+use App\EventFilter\Facades\Filter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
+use Modules\GitlabIntegration\Console\SynchronizeTime;
 use Modules\GitlabIntegration\Console\Syncronize;
+use Modules\GitlabIntegration\Helpers\TimeIntervalsHelper;
 
 /**
  * Class GitlabIntegrationServiceProvider
- * @package Modules\GitlabIntegration\Providers
- */
+*/
 class GitlabIntegrationServiceProvider extends ServiceProvider
 {
     /**
@@ -25,13 +27,11 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
 
-        \Filter::listen('role.actions.list', static function ($rules) {
-            if (!isset($rules['integration']['gitlab'])) {
-                $rules['integration'] += [
-                    'gitlab' => __('GitLab integration')
-                ];
-            }
-            return $rules;
+        Filter::listen('answer.success.item.create.timeinterval', static function ($data) {
+            $timeInterval = $data['interval'];
+            $helper = app()->make(TimeIntervalsHelper::class);
+            $helper->createUnsyncedInterval($timeInterval);
+            return $data;
         });
     }
 
@@ -43,6 +43,7 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
     public function register()
     {
         $this->app->register(RouteServiceProvider::class);
+        $this->app->register(ScheduleServiceProvider::class);
     }
 
     /**
@@ -97,6 +98,7 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
     {
         $this->commands([
             Syncronize::class,
+            SynchronizeTime::class,
         ]);
     }
 
