@@ -16,13 +16,9 @@ class RoleSeeder extends Seeder
     {
         $this->command->getOutput()->writeln('<fg=yellow>Add base roles</>');
 
-        Role::updateOrCreate(['id' => 1], ['name' => 'root']);
+        Role::updateOrCreate(['id' => 1], ['name' => 'manager']);
         Role::updateOrCreate(['id' => 2], ['name' => 'user']);
-        Role::updateOrCreate(['id' => 3], ['name' => 'observer']);
-        Role::updateOrCreate(['id' => 4], ['name' => 'client']);
-        Role::updateOrCreate(['id' => 5], ['name' => 'manager']);
-        Role::updateOrCreate(['id' => 6], ['name' => 'auditor']);
-        Role::updateOrCreate(['id' => 255], ['name' => 'blocked']);
+        Role::updateOrCreate(['id' => 3], ['name' => 'auditor']);
 
         $userAllow = [
             'project-report' => [
@@ -35,6 +31,7 @@ class RoleSeeder extends Seeder
             ],
             'screenshots' => [
                 'create',
+                'bulk-create',
             ],
             'tasks' => [],
             'task-comment' => [
@@ -67,83 +64,6 @@ class RoleSeeder extends Seeder
                 'redmine',
             ],
         ];
-        $observerAllow = [
-            'projects' => [
-                'list',
-                'show',
-            ],
-            'roles' => [
-                'allowed-rules',
-            ],
-            'screenshots' => [
-                'dashboard',
-                'list',
-                'show'
-            ],
-            'tasks' => [
-                'dashboard',
-                'show',
-                'list',
-            ],
-            'time' => [
-                'project',
-                'task',
-                'task-user',
-                'tasks',
-                'total'
-            ],
-            'time-intervals' => [
-                'list',
-                'show',
-                'bulk-remove',
-            ],
-            'users' => [
-                'list',
-                'relations',
-                'show',
-            ]
-        ];
-        $clientAllow = [
-            'projects' => [
-                'list',
-                'relations',
-                'show',
-            ],
-            'roles' => [
-                'allowed-rules',
-            ],
-            'screenshots' => [
-                'dashboard',
-                'list',
-                'show'
-            ],
-            'tasks' => [
-                'dashboard',
-                'list',
-                'show',
-            ],
-            'time' => [
-                'project',
-                'task',
-                'task-user',
-                'tasks',
-                'total',
-            ],
-            'time-intervals' => [
-                'list',
-                'show',
-                'bulk-remove',
-            ],
-            'users' => [
-                'list',
-                'show',
-                'relations',
-            ],
-            'integration' => [
-                'gitlab',
-                'redmine',
-            ],
-        ];
         $auditorAllow = [
             'dashboard' => [
                 'manager_access',
@@ -167,10 +87,13 @@ class RoleSeeder extends Seeder
                 'list',
                 'show',
                 'create',
+                'bulk-create',
             ],
             'tasks' => [
+                'dashboard',
                 'list',
                 'show',
+                'create',
             ],
             'time' => [
                 'project',
@@ -214,6 +137,7 @@ class RoleSeeder extends Seeder
             'projects' => [
                 'list',
                 'show',
+                'create',
                 'edit',
                 'remove',
             ],
@@ -227,12 +151,15 @@ class RoleSeeder extends Seeder
                 'list',
                 'show',
                 'create',
+                'bulk-create',
                 'edit',
                 'remove',
             ],
             'tasks' => [
+                'dashboard',
                 'list',
                 'show',
+                'create',
                 'edit',
                 'remove',
             ],
@@ -258,6 +185,7 @@ class RoleSeeder extends Seeder
             ],
             'time-use-report' => [
                 'list',
+                'manager_access',
             ],
             'users' => [
                 'manager_access',
@@ -272,12 +200,9 @@ class RoleSeeder extends Seeder
             ],
         ];
 
-        $this->addRules(1, Rule::getActionList());
+        $this->addRules(1, $managerAllow);
         $this->addRules(2, $userAllow);
-        $this->addRules(3, $observerAllow);
-        $this->addRules(4, $clientAllow);
-        $this->addRules(5, $managerAllow);
-        $this->addRules(6, $auditorAllow);
+        $this->addRules(3, $auditorAllow);
 
         $rules = collect(Rule::getActionList());
         foreach (Rule::all() as $rule) {

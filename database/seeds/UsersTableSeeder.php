@@ -17,7 +17,7 @@ class UsersTableSeeder extends Seeder
 
         $faker = Faker\Factory::create();
 
-        for ($i = 1; $i <= 50; ++$i) {
+        for ($i = 1; $i <= 10; ++$i) {
             /** @var User $user */
             $user = User::query()->create([
                 'full_name' => $faker->name,
@@ -43,6 +43,6 @@ class UsersTableSeeder extends Seeder
             $this->command->getOutput()->writeln("<fg=green>User #{$i}/50 has been created</>");
         }
 
-        $this->command->getOutput()->writeln('<fg=green>50 Users has been created!</>');
+        $this->command->getOutput()->writeln('<fg=green>10 Users has been created!</>');
     }
 }

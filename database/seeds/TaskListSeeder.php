@@ -57,7 +57,7 @@ class TaskListSeeder extends Seeder
     {
         $faker = $this->faker;
 
-        foreach (range(0, 500) as $i) {
+        foreach (range(0, 20) as $i) {
             $task = Task::create([
                 'project_id' => $project->id,
                 'task_name' => $faker->text(15 + $i),
@@ -79,17 +79,17 @@ class TaskListSeeder extends Seeder
         static $time = [];
 
         if (!isset($time[$user->id])) {
-            $time[$user->id] = time();
+            $time[$user->id] = gmmktime(0, 0, 0);
         }
-
-        $time[$user->id] += 3600 * 10;
 
         foreach (range(0, 4) as $i) {
 
             $this->command->getOutput()->writeln("<fg=cyan>--- {$task->project->id}.{$task->id}. Interval #{$i}</>");
 
-            $start = $time[$user->id] + 1;
-            $time[$user->id] += (5 * 60) - 1;
+            $offsetBetweenIntervals = rand(0, 60 * 60 * 5);
+
+            $start = $time[$user->id] + $offsetBetweenIntervals;
+            $time[$user->id] += rand($offsetBetweenIntervals, 60 * 60 * 5);
             $end = $time[$user->id];
 
             $interval = TimeInterval::create([
@@ -101,7 +101,7 @@ class TaskListSeeder extends Seeder
                 'count_keyboard' => 43
             ]);
 
-             $this->seedScreenshot($interval, $user);
+            $this->seedScreenshot($interval, $user);
         }
     }
 
@@ -109,6 +109,8 @@ class TaskListSeeder extends Seeder
     protected $_isScreenshotDownloaded = false;
 
     protected $_filePath;
+
+    protected $_fileData;
 
     protected function seedScreenshot(TimeInterval $interval, User $user): void
     {
@@ -118,20 +120,24 @@ class TaskListSeeder extends Seeder
                     'text' => "#{$interval->id} - {$interval->task->task_name}",
                 ]);
 
-            $filePath = "uploads/screenshots/{$user->id}_{$interval->task_id}_{$interval->id}.png";
-
-            /** @var Illuminate\Filesystem\FilesystemAdapter $disk */
-            $disk = Storage::disk('local');
-
-            if (!$disk->exists($filePath)) {
-                $this->command->getOutput()->writeln('<fg=cyan>---- Generate Screenshot</>');
-
-                $fileData = file_get_contents($placeholderLink);
-                $disk->put($filePath, $fileData);
-            }
-
-            $this->_filePath = $filePath;
+            $this->_isScreenshotDownloaded = true;
+            $this->_fileData = file_get_contents($placeholderLink);
         }
+
+        $filePath = "uploads/screenshots/{$user->id}_{$interval->task_id}_{$interval->id}.png";
+
+        /** @var Illuminate\Filesystem\FilesystemAdapter $disk */
+        $disk = Storage::disk('local');
+
+        if (!$disk->exists($filePath)) {
+            $this->command->getOutput()->writeln('<fg=cyan>---- Generate Screenshot</>');
+
+
+            $disk->put($filePath, $this->_fileData);
+        }
+
+        $this->_filePath = $filePath;
+
 
         Screenshot::create([
             'time_interval_id' => $interval->id,
