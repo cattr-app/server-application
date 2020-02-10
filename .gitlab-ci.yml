@@ -1,7 +1,7 @@
 integration_testing:
   image: php:7.2-alpine
   only:
-    - vue-frontend-compatability
+    - development
   services:
     - name: mysql:latest
       alias: mysql
