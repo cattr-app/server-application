@@ -30,6 +30,16 @@ up to the highlighting of executed and non-executed lines right inside the code 
 
 _For more information check official PhpStorm documentation._
 
+# Running tests from command line
+
+To run tests from CLI use phpunit script from `vendor/phpunit/phpunit`.  
+Don't forget to provide path to phpunit.xml with `--configuration` parameter. 
+
+
+For example:
+`vendor/phpunit/phpunit/phpunit --configuration phpunit.xml tests/Feature`.
+
+For more information check [PHPUnit docs](https://phpunit.readthedocs.io/en/8.5/).
 
 # Running Tests in CI pipelines
 
