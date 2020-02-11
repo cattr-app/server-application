@@ -10,6 +10,7 @@ class CompanyManagementController extends Controller
 {
     protected static $casts = [
         'gitlab_enabled' => 'int',
+        'jira_enabled' => 'int',
         'redmine_enabled' => 'int',
         'redmine_statuses' => 'json',
         'redmine_priorities' => 'json',
