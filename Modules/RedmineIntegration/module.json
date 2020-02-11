@@ -1,0 +1,15 @@
+{
+  "name": "RedmineIntegration",
+  "alias": "redmineintegration",
+  "description": "",
+  "keywords": [],
+  "active": 1,
+  "order": 0,
+  "providers": [
+    "Modules\\RedmineIntegration\\Providers\\RedmineIntegrationServiceProvider"
+  ],
+  "aliases": {},
+  "files": [
+  ],
+  "requires": []
+}

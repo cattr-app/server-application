@@ -1,0 +1,20 @@
+{
+  "name": "@amazingcat/cattr-backend",
+  "version": "2.0.0",
+  "main": "index.js",
+  "author": "team@amazingcat.net",
+  "license": "SSPL-1.0",
+  "scripts": {
+    "api": "php -r \"if (!file_exists(__DIR__.'/public/apidoc')) { mkdir(__DIR__.'/apidoc') ; symlink(__DIR__.'/apidoc/', __DIR__.'/public/apidoc'); }\" ; node node_modules/apidoc/bin/apidoc -i app/ -o apidoc",
+    "api-nsl": "node node_modules/apidoc/bin/apidoc -i app/ -o apidoc"
+  },
+  "apidoc": {
+    "template": {
+      "forceLanguage": "en"
+    }
+  },
+  "dependencies": {
+    "apidoc": "^0.17.7",
+    "laravel-echo-server": "^1.5.7"
+  }
+}
