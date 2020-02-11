@@ -1,14 +1,8 @@
 {
-  "name": "amazing-time/backend-application",
-  "description": "Backend Application for AmazingTime tracker application",
-  "version": "1.2.2",
-  "keywords": [
-    "amazingcat",
-    "time tracking",
-    "amazing",
-    "cat"
-  ],
-  "license": "Beerware",
+  "name": "cattr/backend-application",
+  "description": "Backend Application for Cattr",
+  "version": "2.0.0",
+  "license": "SSPL-1.0",
   "type": "project",
   "require": {
     "php": "*",

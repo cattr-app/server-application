@@ -1,10 +1,9 @@
 {
   "name": "at-backend",
-  "version": "1.0.0",
+  "version": "2.0.0",
   "main": "index.js",
-  "repository": "https://git.amazingcat.net/AmazingTime/core/backend",
-  "author": "perkthefox <antonkevinok@gmail.com>",
-  "license": "MIT",
+  "author": "team@amazingcat.net",
+  "license": "SSPL-1.0",
   "scripts": {
     "api": "php -r \"if (!file_exists(__DIR__.'/public/apidoc')) { mkdir(__DIR__.'/apidoc') ; symlink(__DIR__.'/apidoc/', __DIR__.'/public/apidoc'); }\" ; node node_modules/apidoc/bin/apidoc -i app/ -o apidoc",
     "api-nsl": "node node_modules/apidoc/bin/apidoc -i app/ -o apidoc"
