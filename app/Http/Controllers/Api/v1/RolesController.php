@@ -58,6 +58,7 @@ class RolesController extends ItemController
             'show' => 'roles.show',
             'destroy' => 'roles.remove',
             'allowedRules' => 'roles.allowed-rules',
+            'projectRules' => 'roles.allowed-rules',
             'attachToUser' => 'roles.attach-user',
             'detachFromUser' => 'roles.detach-user',
         ];
@@ -435,6 +436,100 @@ class RolesController extends ItemController
 
         return response()->json([ 'success' => true, 'res' => Filter::process(
             $this->getEventUniqueName('answer.success.item.allowed-rules'),
+            $items
+        )]);
+    }
+
+    /**
+     * @api             {get,post} /v1/roles/allowed-rules Allowed Rules
+     * @apiDescription  Get Rule allowed action for current user list
+     *
+     * @apiVersion      1.0.0
+     * @apiName         GetRulesAllowedActionList
+     * @apiGroup        Role
+     *
+     * @apiParam {Integer} ids Role ids
+     *
+     * @apiPermission   roles_allowed_rules
+     * @apiPermission   roles_full_access
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "ids": 1
+     *  }
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object[]} res      Rules
+     *
+     * @apiUse RoleObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res":
+     *      [
+     *        {
+     *          "object": "attached-users",
+     *          "action": "bulk-create",
+     *          "name": "Attached User relation multiple create"
+     *        },
+     *        {
+     *          "object": "attached-users",
+     *          "action": "bulk-remove",
+     *          "name": "Attached User relation multiple remove"
+     *        }
+     *      ]
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
+    public function projectRules(Request $request): JsonResponse
+    {
+        /** @var Builder $itemsQuery */
+        $this->disableQueryRoleCheck = true;
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->getQuery()
+        );
+        $this->disableQueryRoleCheck = false;
+
+        $itemsQuery->with('rules');
+
+        $items = [];
+        $actionList = Rule::getActionList();
+        $user = $request->user();
+
+        foreach ($user->projectsRelation as $relation) {
+            /** @var Role $role */
+            $role = $relation->role;
+            /** @var Rule[] $rules */
+            $rules = $role->rules;
+
+            foreach ($rules as $rule) {
+                if (!$rule->allow) {
+                    continue;
+                }
+
+                $name = $actionList[$rule->object][$rule->action] ?? "$rule->object/$rule->action";
+                if (!array_key_exists($name, $items)) {
+                    $items[$relation->project_id][$name] = [
+                        'object' => $rule->object,
+                        'action' => $rule->action,
+                        'name' => $name,
+                    ];
+                }
+            }
+        }
+
+        return response()->json([ 'success' => true, 'res' => Filter::process(
+            $this->getEventUniqueName('answer.success.item.project-rules'),
             $items
         )]);
     }
