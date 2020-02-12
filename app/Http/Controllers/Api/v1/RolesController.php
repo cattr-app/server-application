@@ -441,25 +441,21 @@ class RolesController extends ItemController
     }
 
     /**
-     * @api             {get,post} /v1/roles/allowed-rules Allowed Rules
+     * @api             {get,post} /v1/roles/project-rules Project Rules
      * @apiDescription  Get Rule allowed action for current user list
      *
      * @apiVersion      1.0.0
-     * @apiName         GetRulesAllowedActionList
+     * @apiName         GetRulesProjectActionList
      * @apiGroup        Role
      *
-     * @apiParam {Integer} ids Role ids
-     *
-     * @apiPermission   roles_allowed_rules
+     * @apiPermission   roles_project_rules
      * @apiPermission   roles_full_access
      *
      * @apiParamExample {json} Request Example
-     *  {
-     *    "ids": 1
-     *  }
+     *  {}
      *
      * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
-     * @apiSuccess {Object[]} res      Rules
+     * @apiSuccess {Object}   res      Rules indexed by project ID
      *
      * @apiUse RoleObject
      *
@@ -468,18 +464,20 @@ class RolesController extends ItemController
      *  {
      *    "success": true,
      *    "res":
-     *      [
-     *        {
-     *          "object": "attached-users",
-     *          "action": "bulk-create",
-     *          "name": "Attached User relation multiple create"
-     *        },
-     *        {
-     *          "object": "attached-users",
-     *          "action": "bulk-remove",
-     *          "name": "Attached User relation multiple remove"
-     *        }
-     *      ]
+     *      {
+     *        "15": [
+     *          {
+     *            "object": "attached-users",
+     *            "action": "bulk-create",
+     *            "name": "Attached User relation multiple create"
+     *          },
+     *          {
+     *            "object": "attached-users",
+     *            "action": "bulk-remove",
+     *            "name": "Attached User relation multiple remove"
+     *          }
+     *        ]
+     *      }
      *  }
      *
      * @apiUse         400Error
