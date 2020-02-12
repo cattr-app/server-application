@@ -33,12 +33,8 @@ class RoleSeeder extends Seeder
                 'create',
                 'bulk-create',
             ],
-            'tasks' => [],
-            'task-comment' => [
-                'list',
+            'tasks' => [
                 'create',
-                'show',
-                'remove',
             ],
             'time' => [
                 'project',
@@ -53,6 +49,8 @@ class RoleSeeder extends Seeder
             'time-intervals' => [
                 'create',
                 'bulk-create',
+                'bulk-edit',
+                'bulk-remove',
             ],
             'time-use-report' => [
                 'list',
@@ -62,6 +60,7 @@ class RoleSeeder extends Seeder
             'integration' => [
                 'gitlab',
                 'redmine',
+                'jira',
             ],
         ];
         $auditorAllow = [
@@ -111,6 +110,8 @@ class RoleSeeder extends Seeder
                 'show',
                 'create',
                 'bulk-create',
+                'bulk-edit',
+                'bulk-remove',
             ],
             'time-use-report' => [
                 'list',
@@ -123,6 +124,7 @@ class RoleSeeder extends Seeder
             'integration' => [
                 'gitlab',
                 'redmine',
+                'jira',
             ],
         ];
         $managerAllow = [
@@ -181,6 +183,7 @@ class RoleSeeder extends Seeder
                 'bulk-create',
                 'bulk-edit',
                 'edit',
+                'bulk-edit',
                 'remove',
                 'bulk-remove',
             ],
@@ -198,6 +201,7 @@ class RoleSeeder extends Seeder
             'integration' => [
                 'gitlab',
                 'redmine',
+                'jira',
             ],
         ];
 

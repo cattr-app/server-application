@@ -987,6 +987,7 @@ class Rule extends AbstractModel
                 'show' => __('Screenshot show'),
                 'remove' => __('Screenshot remove'),
                 'remove_related' => __('Remove screenshots of related users'),
+                'bulk-create' => __('Screenshot multiple create'),
                 'dashboard' => __('Screenshot list at dashboard'),
                 'manager_access' => __('Screenshots manager access'),
                 'full_access' => __('Screenshots full access'),
@@ -997,6 +998,7 @@ class Rule extends AbstractModel
                 'edit' => __('Time interval edit'),
                 'show' => __('Time interval show'),
                 'remove' => __('Time interval remove'),
+                'bulk-create' => __('Time interval multiple create'),
                 'bulk-edit' => __('Time interval bulk edit'),
                 'bulk-remove' => __('Time interval bulk remove'),
                 'full_access' => __('Time intervals full access'),
@@ -1047,9 +1049,14 @@ class Rule extends AbstractModel
             ],
             'time-use-report' => [
                 'list' => __('Time use report list'),
+                'manager_access' => __('Time use report manager access'),
             ],
             'dashboard' => [
                 'manager_access' => __('Dashboard manager access'),
+            ],
+            'integration' => [
+                'gitlab' => __('GitLab integration'),
+                'jira' => __('Jira integration'),
             ],
         ]);
     }
