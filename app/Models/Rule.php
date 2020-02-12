@@ -997,6 +997,7 @@ class Rule extends AbstractModel
                 'edit' => __('Time interval edit'),
                 'show' => __('Time interval show'),
                 'remove' => __('Time interval remove'),
+                'bulk-edit' => __('Time interval bulk edit'),
                 'bulk-remove' => __('Time interval bulk remove'),
                 'full_access' => __('Time intervals full access'),
                 'manager_access' => __('Time intervals manager access'),

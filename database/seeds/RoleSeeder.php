@@ -179,6 +179,7 @@ class RoleSeeder extends Seeder
                 'show',
                 'create',
                 'bulk-create',
+                'bulk-edit',
                 'edit',
                 'remove',
                 'bulk-remove',
