@@ -177,6 +177,7 @@ Route::group([
     $router->any('/roles/show', 'Api\v1\RolesController@show');
     $router->post('/roles/remove', 'Api\v1\RolesController@destroy');
     $router->any('/roles/allowed-rules', 'Api\v1\RolesController@allowedRules');
+    $router->any('/roles/project-rules', 'Api\v1\RolesController@projectRules');
     $router->post('/roles/attach-user', 'Api\v1\RolesController@attachToUser');
     $router->post('/roles/detach-user', 'Api\v1\RolesController@detachFromUser');
 
