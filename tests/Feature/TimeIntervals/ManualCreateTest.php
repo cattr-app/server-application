@@ -15,7 +15,7 @@ use Tests\TestCase;
  */
 class ManualCreateTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/manual-create';
+    private const URI = 'v1/time-intervals/create';
 
     /**
      * @var User
