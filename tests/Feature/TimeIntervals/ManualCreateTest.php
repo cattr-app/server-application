@@ -63,15 +63,6 @@ class ManualCreateTest extends TestCase
         $response->assertConflict();
     }
 
-    public function test_without_access(): void
-    {
-        $this->admin->setAttribute('manual_time', false)->save();
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->intervalData);
-
-        $response->assertForbidden();
-        $this->assertDatabaseMissing('time_intervals', $this->intervalData);
-    }
-
     public function test_unauthorized(): void
     {
         $response = $this->postJson(self::URI);
