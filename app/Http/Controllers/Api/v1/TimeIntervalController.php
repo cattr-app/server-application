@@ -61,7 +61,6 @@ class TimeIntervalController extends ItemController
             'show' => 'time-intervals.show',
             'destroy' => 'time-intervals.remove',
             'bulkDestroy' => 'time-intervals.bulk-remove',
-            'manualCreate' => 'time-intervals.create',
         ];
     }
 
@@ -157,8 +156,9 @@ class TimeIntervalController extends ItemController
             'user_id' => $request->input('user_id'),
             'start_at' => $request->input('start_at'),
             'end_at' => $request->input('end_at'),
-            'count_mouse' => $request->input('count_mouse'),
-            'count_keyboard' => $request->input('count_keyboard')
+            'count_mouse' => $request->input('count_mouse', 0),
+            'count_keyboard' => $request->input('count_keyboard', 0),
+            'is_manual' => $request->input('is_manual', 0)
         ];
 
         $validator = Validator::make(
@@ -217,149 +217,13 @@ class TimeIntervalController extends ItemController
                 $this->getEventUniqueName('request.item.create'),
                 $request->screenshot->store('uploads/screenshots')
             );
-            $screenshot = Image::make(storage_path('app/' . $path));
-            $thumbnail = $screenshot->resize(280, null, static function ($constraint) {
-                $constraint->aspectRatio();
-            });
-            $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
-            Storage::put($thumbnailPath, (string)$thumbnail->encode());
 
-            $screenshotData = [
-                'time_interval_id' => $timeInterval->id,
-                'path' => $path,
-                'thumbnail_path' => $thumbnailPath,
-            ];
-
-            Filter::process('item.create.screenshot', Screenshot::create($screenshotData));
+            Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval, $path));
         }
 
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
-                'interval' => $timeInterval,
-            ])
-        );
-    }
-
-    /**
-     * @api             {post} /v1/time-intervals/manual-create Manual Create
-     * @apiDescription  Manual Create Time Interval
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Manual Create
-     * @apiGroup        Time Interval
-     *
-     * @apiPermission   time_intervals_manual_create
-     *
-     * @apiParam {Integer}  task_id   Task id
-     * @apiParam {Integer}  user_id   User id
-     * @apiParam {String}   start_at  Interval time start
-     * @apiParam {String}   end_at    Interval time end
-     *
-     * @apiParamExample {json} Request Example
-     * {
-     *   "task_id": 1,
-     *   "user_id": 1,
-     *   "start_at": "2013-04-12T16:40:00-04:00",
-     *   "end_at": "2013-04-12T16:40:00-04:00"
-     * }
-     *
-     * @apiSuccess {Boolean}  success   Indicates successful request when `TRUE`
-     * @apiSuccess {Object}   interval  Interval
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "success": true,
-     *    "interval": {
-     *     "id": 2251,
-     *     "task_id": 1,
-     *     "start_at": "2013-04-12 20:40:00",
-     *     "end_at": "2013-04-12 20:40:00",
-     *     "is_manual": true,
-     *     "created_at": "2018-10-01 03:20:59",
-     *     "updated_at": "2018-10-01 03:20:59",
-     *     "count_mouse": 0,
-     *     "count_keyboard": 0,
-     *     "user_id": 1
-     *   }
-     * }
-     *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ForbiddenError
-     */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function manualCreate(Request $request): JsonResponse
-    {
-        /* TODO: Add permission validation to time management for other users */
-
-        // TODO DUPLICATED CODE
-
-        if (!$request->user()->manual_time) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'success' => false,
-                    'error_type' => 'authorization.forbidden',
-                    'message' => 'Access denied',
-                    'info' => 'User does not have access to manual time editing'
-                ]),
-                403
-            );
+        if ($timeInterval->is_manual) {
+            Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval));
         }
-
-        $intervalData = [
-            'task_id' => $request->input('task_id'),
-            'user_id' => $request->input('user_id'),
-            'start_at' => $request->input('start_at'),
-            'end_at' => $request->input('end_at'),
-            'is_manual' => true,
-        ];
-
-        $validator = Validator::make(
-            $intervalData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.create'),
-                $this->getValidationRules()
-            )
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        $existing = TimeInterval::where('user_id', $intervalData['user_id'])
-            ->where('start_at', $intervalData['start_at'])
-            ->where('end_at', $intervalData['end_at'])
-            ->first();
-
-        if ($existing) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'query.item_already_exists',
-                    'message' => 'Interval already exists'
-                ]),
-                409
-            );
-        }
-
-        $timeInterval = Filter::process(
-            $this->getEventUniqueName('item.create'),
-            TimeInterval::create($intervalData)
-        );
 
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [

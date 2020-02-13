@@ -7,6 +7,8 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Intervention\Image\Facades\Image;
+use Storage;
 
 /**
  * @apiDefine ScreenshotObject
@@ -72,6 +74,8 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 class Screenshot extends AbstractModel
 {
     use SoftDeletes;
+
+    public const DEFAULT_PATH = 'public/none.png';
 
     /**
      * table name from database
@@ -160,6 +164,29 @@ class Screenshot extends AbstractModel
         });
 
         return false;
+    }
+
+    /**
+     * @param TimeInterval $timeInterval
+     * @param string $path
+     * @return Screenshot
+     */
+    public static function createByInterval(TimeInterval $timeInterval, string $path = self::DEFAULT_PATH): Screenshot
+    {
+        $screenshot = Image::make(storage_path('app/' . $path));
+        $thumbnail = $screenshot->resize(280, null, static function ($constraint) {
+            $constraint->aspectRatio();
+        });
+        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
+        Storage::put($thumbnailPath, (string)$thumbnail->encode());
+
+        $screenshotData = [
+            'time_interval_id' => $timeInterval->id,
+            'path' => $path,
+            'thumbnail_path' => $thumbnailPath,
+        ];
+
+        return Screenshot::create($screenshotData);
     }
 
 }
