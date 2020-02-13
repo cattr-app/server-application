@@ -113,10 +113,10 @@ class EmailReportsController extends ItemController
 
     /**
      * @param $emailReport EmailReports
-     * @param $requestData Request
+     * @param $requestData array
      * @return EmailReports
      */
-    public function saveRelations(EmailReports $emailReport, Request $requestData): EmailReports
+    public function saveRelations(EmailReports $emailReport, array $requestData): EmailReports
     {
         $projectIds = $requestData['project_ids'];
         $requestEmails = $requestData['emails'];
