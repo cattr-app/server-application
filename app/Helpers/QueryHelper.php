@@ -14,7 +14,7 @@ use Schema;
 class QueryHelper
 {
     const RESERVED_REQUEST_KEYWORDS = [
-        'with', 'withCount', 'paginate', 'perPage', 'page', 'with_deleted'
+        'with', 'withCount', 'paginate', 'perPage', 'page', 'with_deleted', 'search',
     ];
 
     /**
@@ -36,6 +36,41 @@ class QueryHelper
         }
 
         return $filter;
+    }
+
+    /**
+     * @param EloquentBuilder|QueryBuilder $query
+     * @param string $search
+     * @param string[] $fields
+     *
+     * @return EloquentBuilder|QueryBuilder
+     */
+    protected function buildSearchQuery($query, string $search, array $fields)
+    {
+        $value = "%$search%";
+
+        return $query->where(function ($query) use ($value, $fields) {
+            $field = array_shift($fields);
+            if (strpos($field, '.') !== false) {
+                [$relation, $relationField] = explode('.', $field);
+                $query->whereHas($relation, function ($query) use ($relationField, $value) {
+                    $query->where($relationField, 'like', $value);
+                });
+            } else {
+                $query->where($field, 'like', $value);
+            }
+
+            foreach ($fields as $field) {
+                if (strpos($field, '.') !== false) {
+                    [$relation, $relationField] = explode('.', $field);
+                    $query->orWhereHas($relation, function ($query) use ($relationField, $value) {
+                        $query->where($relationField, 'like', $value);
+                    });
+                } else {
+                    $query->orWhere($field, 'like', $value);
+                }
+            }
+        });
     }
 
     /**
@@ -78,6 +113,10 @@ class QueryHelper
 
         if (isset($filter['withCount'])) {
             $query->withCount($this->getRelationsFilter($filter['withCount']));
+        }
+
+        if (isset($filter['search']['query']) && isset($filter['search']['fields'])) {
+            $query = $this->buildSearchQuery($query, $filter['search']['query'], $filter['search']['fields']);
         }
 
         foreach ($filter as $key => $param) {
