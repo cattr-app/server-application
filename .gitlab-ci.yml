@@ -27,7 +27,8 @@ integration_testing:
 
 apidoc_deploy:
   image: node:alpine
-  only: release
+  only: 
+    - release
   before_script:
     - 'which ssh-agent || ( apk add --update openssh )'
     - eval $(ssh-agent -s)
