@@ -55,9 +55,13 @@ return [
 
         Modules\EventListener\Providers\EventListenerServiceProvider::class,
         Modules\RedmineIntegration\Providers\RedmineIntegrationServiceProvider::class,
+        Modules\RedmineIntegration\Providers\BroadcastServiceProvider::class,
+        Modules\RedmineIntegration\Providers\ScheduleServiceProvider::class,
         Modules\GitlabIntegration\Providers\GitlabIntegrationServiceProvider::class,
+        Modules\GitlabIntegration\Providers\ScheduleServiceProvider::class,
         Modules\Invoices\Providers\InvoicesServiceProvider::class,
         Modules\EmailReports\Providers\EmailReportsServiceProvider::class,
+        Modules\EmailReports\Providers\ScheduleServiceProvider::class,
         Modules\CompanyManagement\Providers\CompanyManagementServiceProvider::class,
         Modules\Reports\Providers\ReportsServiceProvider::class,
 
