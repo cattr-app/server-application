@@ -129,34 +129,8 @@ class IntegrationObserver
      */
     public function taskEdition($task)
     {
-        try {
-            $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($task->user_id);
-            /** @var array $userLocalRedmineTasksIds */
-            $redmineTask = Arr::first($userLocalRedmineTasksIds, function ($redmineTask) use ($task) {
-                return $redmineTask->task_id === $task->id;
-            });
-
-            if (isset($redmineTask)) {
-                // Get Redmine priority ID from an internal priority.
-                $priority_id = 2;
-                if (isset($task->priority_id) && $task->priority_id) {
-                    $priorities = $this->priority->getAll();
-                    $priority = Arr::first($priorities, function ($priority) use ($task) {
-                        return $priority['priority_id'] == $task->priority_id;
-                    });
-
-                    if (isset($priority)) {
-                        $priority_id = $priority['id'];
-                    }
-                }
-
-                $client = $this->clientFactory->createUserClient($task->user_id);
-                $client->issue->update($redmineTask->redmine_id, [
-                    'priority_id' => $priority_id,
-                ]);
-            }
-        } catch (Exception $e) {
-            Log::error("Can't update task in the Redmine: ".$e->getMessage());
+        if ($this->taskRepo->getRedmineTaskId($task->id)) {
+            abort(403, 'Access denied to edit a task from Redmine integration');
         }
 
         return $task;
