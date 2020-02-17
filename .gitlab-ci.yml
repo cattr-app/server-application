@@ -24,3 +24,18 @@ integration_testing:
     - php artisan migrate --env=testing
     - php artisan db:seed --class=RoleSeeder --env=testing
     - vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
+
+apidoc_deploy:
+  image: node:alpine
+  only: release
+  before_script:
+    - 'which ssh-agent || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$CI_SSH_DEPLOY_SECRET" | ssh-add -
+    - mkdir -p ~/.ssh
+    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
+    - npm install
+  script:
+    - npm run api-nsl
+    - ssh cattr-deploy@docs.cattr.app 'rm -rf /srv/docs/api/*'
+    - scp -r apidoc/* cattr-deploy@docs.cattr.app:/srv/docs/api
