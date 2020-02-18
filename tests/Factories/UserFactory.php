@@ -4,58 +4,62 @@ namespace Tests\Factories;
 
 use App\Models\User;
 use Faker\Factory as FakerFactory;
-use JWTAuth;
+use Illuminate\Database\Eloquent\Model;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
-/**
- * Class UserFactory
- */
-class UserFactory extends AbstractFactory
+class UserFactory extends Factory
 {
-    private const ROLES = [
-        'user' => 1,
-    ];
+    public const USER_ROLE = 2;
+    public const MANAGER_ROLE = 1;
+    public const AUDITOR_ROLE = 3;
 
-    /**
-     * @var int
-     */
-    protected $needsTokens = 0;
+    private int $tokensAmount = 0;
+    private ?int $roleId = null;
 
-    /**
-     * @var string
-     */
-    protected $role;
+    private User $user;
+    private bool $isAdmin = false;
 
-    /**
-     * @var bool
-     */
-    private $isAdmin;
 
-    /**
-     * @return array
-     */
-    public function getRegistrationUserData(): array
+    protected function getModelInstance(): Model
     {
-        $faker = FakerFactory::create();
-
-        return [
-            'full_name' => $faker->name,
-            'email' => $faker->unique()->safeEmail,
-            'active' => 1,
-            'password' => $faker->password
-        ];
+        return $this->user;
     }
 
-    /**
-     * @return array
-     */
-    public function getRandomUserData(): array
+    public function create(): User
+    {
+        $modelData = $this->createRandomModelData();
+
+        if ($this->isAdmin) {
+            $modelData['is_admin'] = true;
+        }
+        $this->user = User::create($modelData);
+
+        if ($this->tokensAmount) {
+            $this->createTokens();
+        }
+
+        if ($this->roleId) {
+            $this->assignRole();
+        }
+
+        $this->user->save();
+
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps();
+        }
+
+        return $this->user;
+    }
+
+
+    public function createRandomModelData(): array
     {
         $faker = FakerFactory::create();
 
-        $full_name = $faker->name;
+        $fullName = $faker->name;
 
         return [
-            'full_name' => $full_name,
+            'full_name' => $fullName,
             'email' => $faker->unique()->safeEmail,
             'url' => '',
             'company_id' => 1,
@@ -72,100 +76,53 @@ class UserFactory extends AbstractFactory
             'webcam_shots' => 0,
             'screenshots_interval' => 5,
             'active' => 1,
-            'password' => bcrypt($full_name),
+            'password' => bcrypt($fullName),
         ];
     }
 
-    /**
-     * @param int $quantity
-     * @return self
-     */
+    public function createRandomRegistrationModelData(): array
+    {
+        $faker = FakerFactory::create();
+
+        return [
+            'full_name' => $faker->name,
+            'email' => $faker->unique()->safeEmail,
+            'active' => 1,
+            'password' => $faker->password
+        ];
+    }
+
     public function withTokens(int $quantity = 1): self
     {
-        $this->needsTokens = $quantity;
-
+        $this->tokensAmount = $quantity;
         return $this;
     }
 
-    /**
-     * @return self
-     */
     public function asAdmin(): self
     {
-        $this->role = 'user';
+        $this->roleId = self::USER_ROLE;
         $this->isAdmin = true;
-
         return $this;
     }
 
-    /**
-     * @return self
-     */
     public function asUser(): self
     {
-        $this->role = 'user';
-
+        $this->roleId = self::USER_ROLE;
         return $this;
     }
 
-    /**
-     * @param User $user
-     */
-    protected function createTokens(User $user): void
+    protected function createTokens(): void
     {
-        $tokens = [];
+        $tokens = array_map(fn () => [
+            'token' => JWTAuth::fromUser($this->user),
+            'expires_at' => now()->addDay()
+        ], range(0, $this->tokensAmount));
 
-        do {
-            $tokens[] = [
-                'token' => JWTAuth::fromUser($user),
-                'expires_at' => now()->addDay()
-            ];
-        } while (--$this->needsTokens);
-
-        $user->tokens()->createMany($tokens);
+        $this->user->tokens()->createMany($tokens);
     }
 
-    /**
-     * @param User $user
-     */
-    protected function assignRole(User $user): void
+    protected function assignRole(): void
     {
-        $user->role_id = self::ROLES[$this->role];
-    }
-
-    /**
-     * @param array $attributes
-     * @return User
-     */
-    public function create(array $attributes = []): User
-    {
-        $userData = $this->getRandomUserData();
-
-        if ($attributes) {
-            $userData = array_merge($userData, $attributes);
-        }
-
-        //TODO remove that temp fix
-        if ($this->isAdmin) {
-            $userData['is_admin'] = 1;
-        }
-
-        $user = User::create($userData);
-
-        if ($this->needsTokens) {
-            $this->createTokens($user);
-        }
-
-        if ($this->role) {
-            $this->assignRole($user);
-        }
-
-        $user->save();
-
-        if ($this->timestampsHidden) {
-            $this->hideTimestamps($user);
-        }
-
-        return $user;
+        $this->user->role_id = $this->roleId;
     }
 }

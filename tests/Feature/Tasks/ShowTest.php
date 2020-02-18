@@ -9,22 +9,13 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 
-/**
- * Class ShowTest
- */
+
 class ShowTest extends TestCase
 {
     private const URI = 'v1/tasks/show';
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var Task
-     */
-    private $task;
+    private User $admin;
+    private Task $task;
 
     protected function setUp(): void
     {

@@ -6,17 +6,11 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class LogoutTest
- */
 class LogoutTest extends TestCase
 {
     private const URI = 'auth/logout';
 
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     protected function setUp(): void
     {

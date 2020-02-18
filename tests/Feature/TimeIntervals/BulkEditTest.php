@@ -12,29 +12,16 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CountTest
- */
+
 class BulkEditTest extends TestCase
 {
     private const URI = 'v1/time-intervals/bulk-edit';
 
     private const INTERVALS_AMOUNT = 5;
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var Collection
-     */
-    private $intervals;
-
-    /**
-     * @var Task
-     */
-    private $newTask;
+    private User $admin;
+    private Collection $intervals;
+    private Task $newTask;
 
     protected function setUp(): void
     {

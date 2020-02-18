@@ -8,16 +8,11 @@ use Notification;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RequestTest
- */
 class RequestTest extends TestCase
 {
     private const URI = 'auth/password/reset/request';
-    /**
-     * @var User
-     */
-    private $user;
+
+    private User $user;
 
     protected function setUp(): void
     {

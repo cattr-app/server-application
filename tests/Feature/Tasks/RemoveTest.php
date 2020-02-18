@@ -8,17 +8,12 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RemoveTest
- */
+
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/tasks/remove';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
     /**
      * @var Task

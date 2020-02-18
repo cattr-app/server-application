@@ -6,17 +6,23 @@ use App\Models\ProjectsUsers;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 
-/**
- * Class ProjectUserFactory
- */
-class ProjectUserFactory extends AbstractFactory
+class ProjectUserFactory extends Factory
 {
-    private const DEFAULT_ROLE_ID = 2;
+    private const DEFAULT_ROLE_ID = 1;
 
-    /**
-     * @return array
-     */
-    public function generateProjectUserData(): array
+    private ProjectsUsers $projectUser;
+
+    protected function getModelInstance(): ProjectsUsers
+    {
+        return $this->projectUser;
+    }
+
+    public function createRandomModelData(): array
+    {
+        return $this->createModelDataWithRelations();
+    }
+
+    public function createModelDataWithRelations(): array
     {
         return [
             'project_id' => ProjectFactory::create()->id,
@@ -27,12 +33,14 @@ class ProjectUserFactory extends AbstractFactory
 
     public function create(array $attributes = []): ProjectsUsers
     {
-        $projectUserData = $this->generateProjectUserData();
+        $modelData = $this->createRandomModelData();
 
-        if ($attributes) {
-            $projectUserData = array_merge($projectUserData, $attributes);
+        $this->projectUser = ProjectsUsers::create($modelData);
+
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps();
         }
 
-        return ProjectsUsers::create($projectUserData);
+        return $this->projectUser;
     }
 }

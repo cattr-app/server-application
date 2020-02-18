@@ -10,9 +10,7 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class ListTest
- */
+
 class ListTest extends TestCase
 {
     private const URI = 'v1/time-use-report/list';
@@ -22,26 +20,12 @@ class ListTest extends TestCase
     /**
      * @var Collection
      */
-    private $intervals;
+    private Collection $intervals;
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var int
-     */
-    private $duration;
-
-    /**
-     * @var array
-     */
-    private $userIds;
-    /**
-     * @var array
-     */
-    private $requestData;
+    private User $admin;
+    private int $duration = 0;
+    private array $userIds;
+    private array $requestData;
 
     protected function setUp(): void
     {

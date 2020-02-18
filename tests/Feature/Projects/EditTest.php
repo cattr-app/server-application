@@ -9,22 +9,14 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 
-/**
- * Class EditTest
- */
+
 class EditTest extends TestCase
 {
     private const URI = 'v1/projects/edit';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
-    /**
-     * @var Project
-     */
-    private $project;
+    private Project $project;
 
     protected function setUp(): void
     {

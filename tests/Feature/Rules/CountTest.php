@@ -7,22 +7,14 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CountTest
- */
+
 class CountTest extends TestCase
 {
     private const URI = 'v1/rules/count';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     protected function setUp(): void
     {

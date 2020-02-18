@@ -7,22 +7,14 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 
-/**
- * Class EditTest
- */
+
 class EditTest extends TestCase
 {
     private const URI = 'v1/roles/edit';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
-    /**
-     * @var string
-     */
-    private $newRoleData;
+    private array $newRoleData;
 
     protected function setUp(): void
     {

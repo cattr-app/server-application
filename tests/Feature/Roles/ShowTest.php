@@ -6,17 +6,12 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class ShowTest
- */
+
 class ShowTest extends TestCase
 {
     private const URI = 'v1/roles/show';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
     protected function setUp(): void
     {

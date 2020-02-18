@@ -9,19 +9,14 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CountTest
- */
+
 class CountTest extends TestCase
 {
     private const URI = 'v1/time-intervals/count';
 
     private const SCREENSHOTS_AMOUNT = 10;
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
     protected function setUp(): void
     {

@@ -9,9 +9,7 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class TotalTest
- */
+
 class TotalTest extends TestCase
 {
     private const URI = 'v1/time/total';
@@ -21,12 +19,9 @@ class TotalTest extends TestCase
     /**
      * @var Collection
      */
-    private $intervals;
+    private Collection $intervals;
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
     protected function setUp(): void
     {

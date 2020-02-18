@@ -9,24 +9,15 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class TasksTest
- */
+
 class TasksTest extends TestCase
 {
     private const URI = 'v1/time/tasks';
 
     private const INTERVALS_AMOUNT = 10;
 
-    /**
-     * @var Collection
-     */
-    private $intervals;
-
-    /**
-     * @var User
-     */
-    private $admin;
+    private Collection $intervals;
+    private User $admin;
 
     protected function setUp(): void
     {

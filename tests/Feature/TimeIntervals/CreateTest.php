@@ -10,27 +10,14 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CreateTest
- */
+
 class CreateTest extends TestCase
 {
     private const URI = 'v1/time-intervals/create';
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var array
-     */
-    private $intervalData;
-
-    /**
-     * @var Task
-     */
-    private $task;
+    private User $admin;
+    private array $intervalData;
+    private Task $task;
 
     protected function setUp(): void
     {
@@ -40,7 +27,7 @@ class CreateTest extends TestCase
 
         $this->task = TaskFactory::forUser($this->admin)->create();
 
-        $this->intervalData = IntervalFactory::generateRandomIntervalData();
+        $this->intervalData = IntervalFactory::createRandomModelDataWithRelation();
     }
 
     public function test_create(): void

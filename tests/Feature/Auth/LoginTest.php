@@ -7,22 +7,13 @@ use Illuminate\Support\Facades\Cache;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class LoginTest
- */
 class LoginTest extends TestCase
 {
     private const URI = 'auth/login';
 
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
-    /**
-     * @var array
-     */
-    private $loginData;
+    private array $loginData;
 
     private const CAPTCHA_CACHE_KEY = 'AUTH_RECAPTCHA_LIMITER_{ip}_{email}_ATTEMPTS';
     private const BAN_CACHE_KEY = 'AUTH_RATE_LIMITER_{ip}';

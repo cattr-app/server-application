@@ -6,32 +6,16 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class EditTest
- */
+
 class EditTest extends TestCase
 {
     private const URI = 'v1/rules/edit';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
+    private User $user;
 
-    /**
-     * @var User
-     */
-    private $user;
-
-    /**
-     * @var array
-     */
-    private $correctRule;
-
-    /**
-     * @var array
-     */
-    private $incorrectRule;
+    private array $correctRule;
+    private array $incorrectRule;
 
     protected function setUp(): void
     {
