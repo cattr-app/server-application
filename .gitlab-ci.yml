@@ -11,7 +11,9 @@ integration_testing:
   before_script:
     - apk update
     - apk add libpng-dev freetype-dev libjpeg-turbo-dev libjpeg-turbo libpng freetype libzip libzip-dev
-    - docker-php-ext-install bcmath zip pdo_mysql gd
+    - docker-php-ext-configure gd --with-freetype-dir=/usr/include/ --with-jpeg-dir=/usr/include/ --with-png-dir=/usr/include/
+    - docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd
+    - docker-php-ext-install bcmath zip pdo_mysql
     - apk add --no-cache $PHPIZE_DEPS
     - pecl install xdebug
     - docker-php-ext-enable xdebug
