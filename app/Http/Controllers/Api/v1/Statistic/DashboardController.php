@@ -24,6 +24,7 @@ class DashboardController extends ReportController
     {
         return [
             'user_ids' => 'exists:users,id|array',
+            'project_ids' => 'nullable|exists:projects,id|array',
             'start_at' => 'date|required',
             'end_at' => 'date|required',
         ];
@@ -257,6 +258,7 @@ class DashboardController extends ReportController
         }
 
         $user_ids = $request->input('user_ids');
+        $project_ids = $request->input('project_ids');
 
         $timezone = $request->input('timezone') ?: 'UTC';
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
@@ -284,8 +286,13 @@ class DashboardController extends ReportController
             ->whereNull('i.deleted_at')
             ->orderBy('i.user_id')
             ->orderBy('i.task_id')
-            ->orderBy('i.start_at')
-            ->get();
+            ->orderBy('i.start_at');
+
+        if (!empty($project_ids)) {
+            $intervals = $intervals->whereIn('t.project_id', $project_ids);
+        }
+
+        $intervals = $intervals->get();
 
         $users = [];
         $previousInterval = false;
