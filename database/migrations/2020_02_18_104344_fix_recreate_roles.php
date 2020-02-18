@@ -11,14 +11,16 @@ class FixRecreateRoles extends Migration
      */
     public function up()
     {
-        DB::statement('SET FOREIGN_KEY_CHECKS = 0');
-        DB::statement('TRUNCATE role');
-        DB::statement('TRUNCATE rule');
-        DB::statement('SET FOREIGN_KEY_CHECKS = 1');
+        if (DB::table('role')->count() > 0) {
+            DB::statement('SET FOREIGN_KEY_CHECKS = 0');
+            DB::statement('TRUNCATE role');
+            DB::statement('TRUNCATE rule');
+            DB::statement('SET FOREIGN_KEY_CHECKS = 1');
 
-        Artisan::call('db:seed', ['--class' => 'RoleSeeder']);
+            Artisan::call('db:seed', ['--class' => 'RoleSeeder']);
 
-        DB::statement('UPDATE users SET role_id = 2 WHERE role_id > 3');
+            DB::statement('UPDATE users SET role_id = 2 WHERE role_id > 3');
+        }
     }
 
     /**
