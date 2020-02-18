@@ -35,6 +35,8 @@ class RoleSeeder extends Seeder
             ],
             'tasks' => [
                 'create',
+                'edit',
+                'remove',
             ],
             'time' => [
                 'project',
