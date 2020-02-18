@@ -1,5 +1,5 @@
 integration_testing:
-  image: php:7.2-alpine
+  image: php:7.4-alpine
   services:
     - name: mysql:latest
       alias: mysql
