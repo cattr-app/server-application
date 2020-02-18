@@ -38,4 +38,34 @@ class IntegrationObserver
 
         return $task;
     }
+
+    /**
+     * Observe task list
+     *
+     * @param array|Paginator $tasks
+     *
+     * @return array
+     */
+    public function taskList($tasks)
+    {
+        $items = $tasks->getCollection();
+        $taskIds = $items->map(function ($task) { return $task->id; })->toArray();
+        $gitlabTaskIds = DB::table('gitlab_tasks_relations')
+            ->whereIn('task_id', $taskIds)
+            ->get(['task_id'])
+            ->pluck('task_id')
+            ->toArray();
+
+        $items->transform(function ($item) use ($gitlabTaskIds) {
+            if (in_array($item->id, $gitlabTaskIds)) {
+                $item->integration = 'gitlab';
+            }
+
+            return $item;
+        });
+
+        $tasks->setCollection($items);
+
+        return $tasks;
+    }
 }

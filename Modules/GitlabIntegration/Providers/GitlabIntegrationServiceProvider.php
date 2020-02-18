@@ -18,6 +18,9 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
+        'answer.success.item.list.result.task' => [
+            'Modules\GitlabIntegration\Listeners\IntegrationObserver@taskList',
+        ],
         'item.edit.task' => [
             'Modules\GitlabIntegration\Listeners\IntegrationObserver@taskEdition',
         ],

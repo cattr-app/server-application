@@ -36,6 +36,9 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
         'item.edit.task' => [
             'Modules\RedmineIntegration\Listeners\IntegrationObserver@taskEdition',
         ],
+        'answer.success.item.list.result.task' => [
+            'Modules\RedmineIntegration\Listeners\IntegrationObserver@taskList',
+        ],
         'answer.success.item.show.user' => [
             'Modules\RedmineIntegration\Listeners\IntegrationObserver@userShow',
         ],

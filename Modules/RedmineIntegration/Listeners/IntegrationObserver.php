@@ -2,12 +2,15 @@
 
 namespace Modules\RedmineIntegration\Listeners;
 
+use App\Models\Property;
 use App\Models\User;
 use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
@@ -134,6 +137,35 @@ class IntegrationObserver
         }
 
         return $task;
+    }
+
+    /**
+     * Observe task list
+     *
+     * @param array|Paginator $tasks
+     *
+     * @return array
+     */
+    public function taskList($tasks)
+    {
+        $items = $tasks->getCollection();
+        $taskIds = $items->map(function ($task) { return $task->id; })->toArray();
+        $redmineTaskIds = Property::where([
+            'entity_type' => Property::TASK_CODE,
+            'name' => 'REDMINE_ID',
+        ])->whereIn('entity_id', $taskIds)->pluck('entity_id')->toArray();
+
+        $items->transform(function ($item) use ($redmineTaskIds) {
+            if (in_array($item->id, $redmineTaskIds)) {
+                $item->integration = 'redmine';
+            }
+
+            return $item;
+        });
+
+        $tasks->setCollection($items);
+
+        return $tasks;
     }
 
     public function rulesHook($rules)
