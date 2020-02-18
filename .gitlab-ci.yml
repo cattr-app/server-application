@@ -10,7 +10,7 @@ integration_testing:
   stage: test
   before_script:
     - apk update
-    - apk add libpng-dev freetype-dev libjpeg-turbo-dev libjpeg-turbo libpng freetype libzip
+    - apk add libpng-dev freetype-dev libjpeg-turbo-dev libjpeg-turbo libpng freetype libzip libzip-dev
     - docker-php-ext-install bcmath zip pdo_mysql gd
     - apk add --no-cache $PHPIZE_DEPS
     - pecl install xdebug
