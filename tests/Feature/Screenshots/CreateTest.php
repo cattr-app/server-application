@@ -12,32 +12,15 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CreateTest
- */
+
 class CreateTest extends TestCase
 {
     private const URI = '/v1/screenshots/create';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
+    private File $screenshotFile;
+    private TimeInterval $interval;
 
-    /**
-     * @var File
-     */
-    private $screenshot;
-
-    /**
-     * @var TimeInterval
-     */
-    private $interval;
-
-    /**
-     * @var string
-     */
-    private $screenshotName;
 
     protected function setUp(): void
     {
@@ -47,8 +30,8 @@ class CreateTest extends TestCase
 
         Storage::fake();
 
-        $this->screenshotName = Factory::create()->firstName . '.jpg';
-        $this->screenshot = UploadedFile::fake()->image($this->screenshotName);
+        $screenshotName = Factory::create()->firstName . '.jpg';
+        $this->screenshotFile = UploadedFile::fake()->image($screenshotName);
 
         $this->interval = IntervalFactory::create();
 
@@ -56,7 +39,7 @@ class CreateTest extends TestCase
 
     public function test_create(): void
     {
-        $requestData = ['time_interval_id' => $this->interval->id, 'screenshot' => $this->screenshot];
+        $requestData = ['time_interval_id' => $this->interval->id, 'screenshot' => $this->screenshotFile];
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
 

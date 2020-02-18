@@ -5,22 +5,14 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CreateTest
- */
+
 class CreateTest extends TestCase
 {
     private const URI = 'v1/roles/create';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
-    /**
-     * @var array
-     */
-    private $roleData;
+    private array $roleData;
 
     protected function setUp(): void
     {

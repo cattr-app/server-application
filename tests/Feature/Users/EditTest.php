@@ -7,22 +7,12 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 
-/**
- * Class EditTest
- */
 class EditTest extends TestCase
 {
     private const URI = 'v1/users/edit';
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var User
-     */
-    private $user;
+    private User $admin;
+    private User $user;
 
     protected function setUp(): void
     {
@@ -35,8 +25,7 @@ class EditTest extends TestCase
 
     public function test_edit(): void
     {
-        //TODO FIX if user has no access to editing requested user,
-        // then query will be empty and wrong error will return
+        // TODO FIX if user has no access to edit requested user, then query will be empty and wrong error will return
 
         $this->user->full_name = 'New Name';
 

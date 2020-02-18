@@ -6,22 +6,13 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RemoveTest
- */
+
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/users/remove';
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var User
-     */
-    private $user;
+    private User $admin;
+    private User $user;
 
     protected function setUp(): void
     {

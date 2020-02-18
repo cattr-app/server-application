@@ -6,17 +6,11 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RefreshTest
- */
 class RefreshTest extends TestCase
 {
     private const URI = 'auth/refresh';
 
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     protected function setUp(): void
     {

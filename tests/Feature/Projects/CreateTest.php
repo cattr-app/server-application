@@ -7,21 +7,14 @@ use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CreateTest
- */
+
 class CreateTest extends TestCase
 {
     private const URI = 'v1/projects/create';
 
-    /**
-     * @var User
-     */
-    private $admin;
-    /**
-     * @var array
-     */
-    private $projectData;
+    private User $admin;
+
+    private array $projectData;
 
     protected function setUp(): void
     {
@@ -29,7 +22,7 @@ class CreateTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->projectData = ProjectFactory::getRandomProjectData();
+        $this->projectData = ProjectFactory::createRandomModelData();
     }
 
     public function test_create(): void

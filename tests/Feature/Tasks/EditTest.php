@@ -9,29 +9,19 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
 
-/**
- * Class EditTest
- */
+
 class EditTest extends TestCase
 {
     private const URI = 'v1/tasks/edit';
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var Task
-     */
-    private $task;
+    private User $admin;
+    private Task $task;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
-
         $this->task = TaskFactory::create();
     }
 

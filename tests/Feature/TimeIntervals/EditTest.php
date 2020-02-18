@@ -10,22 +10,13 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class EditTest
- */
+
 class EditTest extends TestCase
 {
     private const URI = 'v1/time-intervals/edit';
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var TimeInterval
-     */
-    private $interval;
+    private User $admin;
+    private TimeInterval $interval;
 
     protected function setUp(): void
     {

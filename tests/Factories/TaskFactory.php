@@ -6,48 +6,34 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Faker\Factory as FakerFactory;
+use Illuminate\Database\Eloquent\Model;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 
-/**
- * Class TaskFactory
- */
-class TaskFactory extends AbstractFactory
+class TaskFactory extends Factory
 {
     private const DESCRIPTION_LENGTH = 10;
     private const PRIORITY_ID = 2;
 
-    /**
-     * @var int
-     */
-    private $needsIntervals = 0;
+    private int $intervalsAmount = 0;
 
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
+    private Project $project;
+    private Task $task;
 
-    /**
-     * @var Project
-     */
-    private $project;
+    protected function getModelInstance(): Model
+    {
+        return $this->task;
+    }
 
-    /**
-     * @param int $quantity
-     * @return self
-     */
     public function withIntervals(int $quantity = 1): self
     {
-        $this->needsIntervals = $quantity;
+        $this->intervalsAmount = $quantity;
 
         return $this;
     }
 
-    /**
-     * @param User $user
-     * @return self
-     */
     public function forUser(User $user): self
     {
         $this->user = $user;
@@ -55,10 +41,6 @@ class TaskFactory extends AbstractFactory
         return $this;
     }
 
-    /**
-     * @param Project $project
-     * @return self
-     */
     public function forProject(Project $project): self
     {
         $this->project = $project;
@@ -66,41 +48,29 @@ class TaskFactory extends AbstractFactory
         return $this;
     }
 
-
-    /**
-     * @param array $attributes
-     * @return Task
-     */
     public function create(array $attributes = []): Task
     {
-        $taskData = $this->getRandomTaskData();
+        $modelData = $this->createRandomModelData();
 
-        if ($attributes) {
-            $taskData = array_merge($taskData, $attributes);
-        }
+        $this->task = Task::make($modelData);
 
-        $task = Task::make($taskData);
+        $this->defineProject();
+        $this->defineUser();
 
-        $this->defineProject($task);
-        $this->defineUser($task);
+        $this->task->save();
 
-        $task->save();
-
-        if ($this->needsIntervals) {
-            $this->createIntervals($task);
+        if ($this->intervalsAmount) {
+            $this->createIntervals();
         }
 
         if ($this->timestampsHidden) {
-            $this->hideTimestamps($task);
+            $this->hideTimestamps();
         }
 
-        return $task;
+        return $this->task;
     }
 
-    /**
-     * @return array
-     */
-    public function getRandomTaskData(): array
+    public function createRandomModelData(): array
     {
         $faker = FakerFactory::create();
 
@@ -112,35 +82,26 @@ class TaskFactory extends AbstractFactory
         ];
     }
 
-    /**
-     * @param Task $task
-     */
-    private function defineProject(Task $task): void
+    private function defineProject(): void
     {
         $this->project = ProjectFactory::create();
 
-        $task->project_id = $this->project->id;
+        $this->task->project_id = $this->project->id;
     }
 
-    /**
-     * @param Task $task
-     */
-    private function defineUser(Task $task): void
+    private function defineUser(): void
     {
         $this->user = UserFactory::create();
 
-        $task->user_id = $this->user->id;
+        $this->task->user_id = $this->user->id;
     }
 
-    /**
-     * @param Task $task
-     */
-    private function createIntervals(Task $task): void
+    private function createIntervals(): void
     {
         do {
             IntervalFactory::forUser($this->user)
-                ->forTask($task)
+                ->forTask($this->task)
                 ->create();
-        } while (--$this->needsIntervals);
+        } while (--$this->intervalsAmount);
     }
 }

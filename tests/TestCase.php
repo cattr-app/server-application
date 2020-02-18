@@ -8,8 +8,6 @@ use Illuminate\Foundation\Testing\DatabaseTransactions;
 use Illuminate\Foundation\Testing\TestCase as BaseTestCase;
 
 /**
- * Class TestCase
- *
  * @method TestResponse get($uri, array $headers = [])
  * @method TestResponse getJson($uri, array $headers = [])
  * @method TestResponse post($uri, array $data = [], array $headers = [])
@@ -91,24 +89,14 @@ abstract class TestCase extends BaseTestCase
     public const HTTP_NOT_EXTENDED = 510;
     public const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;
 
-    /**
-     * @param UserContract $user
-     * @param null $driver
-     * @return $this|BaseTestCase
-     */
     public function actingAs(UserContract $user, $driver = null): self
     {
         /** @var User $user */
         $token = $user->tokens()->first()->token;
         $this->withHeader('Authorization', 'Bearer ' . $token);
-
         return $this;
     }
 
-    /**
-     * @param $response
-     * @return TestResponse
-     */
     protected function createTestResponse($response): TestResponse
     {
         return TestResponse::fromBaseResponse($response);

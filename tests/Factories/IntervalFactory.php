@@ -10,157 +10,88 @@ use Faker\Factory as FakerFactory;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 
-/**
- * Class IntervalFactory
- */
-class IntervalFactory extends AbstractFactory
+class IntervalFactory extends Factory
 {
-    /**
-     * @var User
-     */
-    private $user;
+    private ?User $user = null;
+    private ?Task $task = null;
+    private TimeInterval $interval;
 
-    /**
-     * @var Task
-     */
-    private $task;
+    protected function getModelInstance(): TimeInterval
+    {
+        return $this->interval;
+    }
 
-    /**
-     * @var bool
-     */
-    private $randomRelations = false;
-
-    /**
-     * @return array
-     */
-    public function getRandomIntervalData(): array
+    public function createRandomModelData(): array
     {
         $randomDateTime = FakerFactory::create()->unique()->dateTimeThisYear();
         $randomDateTime = Carbon::instance($randomDateTime);
 
         return [
-            'end_at' => $randomDateTime->toIso8601String(),
-            'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
-            'count_mouse' => random_int(1, 1000),
-            'count_keyboard' => random_int(1, 1000)
-        ];
+         'end_at' => $randomDateTime->toIso8601String(),
+         'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
+         'count_mouse' => random_int(1, 1000),
+         'count_keyboard' => random_int(1, 1000)
+      ];
     }
 
-    /**
-     * @return array
-     */
-    public function generateRandomIntervalData(): array
+    public function createRandomModelDataWithRelation(): array
     {
-        $randomDateTime = FakerFactory::create()->unique()->dateTimeThisYear();
-        $randomDateTime = Carbon::instance($randomDateTime);
-
-        return [
-            'task_id' => TaskFactory::create()->id,
-            'user_id' => UserFactory::create()->id,
-            'end_at' => $randomDateTime->toIso8601String(),
-            'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
-            'count_mouse' => random_int(1, 1000),
-            'count_keyboard' => random_int(1, 1000)
-        ];
+        return array_merge($this->createRandomModelData(), [
+         'task_id' => TaskFactory::create()->id,
+         'user_id' => UserFactory::create()->id,
+      ]);
     }
 
-    /**
-     * @return array
-     */
-    public function generateRandomManualIntervalData(): array
-    {
-        $randomDateTime = FakerFactory::create()->unique()->dateTimeThisYear();
-        $randomDateTime = Carbon::instance($randomDateTime);
-
-        return [
-            'task_id' => TaskFactory::create()->id,
-            'user_id' => UserFactory::create()->id,
-            'end_at' => $randomDateTime->toIso8601String(),
-            'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
-        ];
-    }
-
-    /**
-     * @param User $user
-     * @return self
-     */
     public function forUser(User $user): self
     {
         $this->user = $user;
-
         return $this;
     }
 
-    /**
-     * @param Task $task
-     *
-     * @return self
-     */
     public function forTask(Task $task): self
     {
         $this->task = $task;
-
         return $this;
     }
 
-    /**
-     * @param TimeInterval $interval
-     */
-    private function defineUser(TimeInterval $interval): void
+    private function defineUser(): void
     {
         if ($this->randomRelations || !$this->user) {
             $this->user = UserFactory::create();
         }
 
-        $interval->user_id = $this->user->id;
+        $this->interval->user_id = $this->user->id;
     }
 
-    /**
-     * @param TimeInterval $interval
-     */
-    private function defineTask(TimeInterval $interval): void
+    private function defineTask(): void
     {
         if ($this->randomRelations || !$this->task) {
             $this->task = TaskFactory::forUser($this->user)->create();
         }
 
-        $interval->task_id = $this->task->id;
+        $this->interval->task_id = $this->task->id;
     }
 
-    /**
-     * @return self
-     */
     public function withRandomRelations(): self
     {
         $this->randomRelations = true;
-
         return $this;
     }
 
-
-    /**
-     * @param array $attributes
-     * @return TimeInterval
-     */
-    public function create(array $attributes = []): TimeInterval
+    public function create(): TimeInterval
     {
-        $intervalData = $this->getRandomIntervalData();
+        $modelData = $this->createRandomModelData();
+        $this->interval = TimeInterval::make($modelData);
 
-        if ($attributes) {
-            $intervalData = array_merge($intervalData, $attributes);
-        }
-
-        $interval = TimeInterval::make($intervalData);
-
-        $this->defineUser($interval);
-        $this->defineTask($interval);
-
-        $interval->save();
+        $this->defineUser();
+        $this->defineTask();
 
         if ($this->timestampsHidden) {
-            $this->hideTimestamps($interval);
+            $this->hideTimestamps();
         }
 
-        return $interval;
+        $this->interval->save();
+
+        return $this->interval;
     }
 }

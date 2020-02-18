@@ -4,10 +4,8 @@ namespace Tests;
 
 use Illuminate\Foundation\Testing\TestResponse as BaseTestResponse;
 use PHPUnit\Framework\Assert as PHPUnit;
+use App\Exceptions\Entities\AuthorizationException;
 
-/**
- * Class TestResponse
-*/
 class TestResponse extends BaseTestResponse
 {
     public const HTTP_CONTINUE = 100;
@@ -74,15 +72,6 @@ class TestResponse extends BaseTestResponse
     public const HTTP_NOT_EXTENDED = 510;
     public const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;
 
-    /**
-     * Assert that the response has the given status code
-     * and correct error structure
-     *
-     * @param int $status
-     * @param string|null $type
-     * @param bool $hasInfo
-     * @return TestResponse
-     */
     public function assertError(int $status, string $type = null, bool $hasInfo = false): TestResponse
     {
         $this->assertStatus($status);
@@ -104,63 +93,31 @@ class TestResponse extends BaseTestResponse
         return $this;
     }
 
-    /**
-     * @param string $type
-     * @param bool $hasInfo
-     * @return TestResponse
-     */
-    public function assertUnauthorized(string $type = 'authorization.unauthorized', bool $hasInfo = false): TestResponse
+    public function assertUnauthorized(string $type = AuthorizationException::ERROR_TYPE_UNAUTHORIZED, bool $hasInfo = false): TestResponse
     {
         return $this->assertError(self::HTTP_UNAUTHORIZED, $type, $hasInfo);
     }
 
-    /**
-     * @param string $type
-     * @param bool $hasInfo
-     * @return TestResponse
-     */
-    public function assertForbidden(string $type = 'authorization.forbidden', bool $hasInfo = true): TestResponse
+    public function assertForbidden(string $type = AuthorizationException::ERROR_TYPE_FORBIDDEN, bool $hasInfo = true): TestResponse
     {
         return $this->assertError(self::HTTP_FORBIDDEN, $type, $hasInfo);
     }
 
-    /**
-     * @param string $type
-     * @param bool $hasInfo
-     * @return TestResponse
-     */
     public function assertValidationError(string $type = 'validation', bool $hasInfo = true): TestResponse
     {
         return $this->assertError(self::HTTP_BAD_REQUEST, $type, $hasInfo);
     }
 
-    /**
-     * @param string $type
-     * @param bool $hasInfo
-     * @return TestResponse
-     */
     public function assertNotFound(string $type = 'query.item_not_found', bool $hasInfo = false): TestResponse
     {
         return $this->assertError(self::HTTP_NOT_FOUND, $type, $hasInfo);
     }
 
-    /**
-     * @param string $type
-     * @param bool $hasInfo
-     * @return TestResponse
-     */
     public function assertConflict(string $type = 'query.item_already_exists', bool $hasInfo = false): TestResponse
     {
         return $this->assertError(self::HTTP_CONFLICT, $type, $hasInfo);
     }
 
-    /**
-     * Assert that the response has the given status code
-     * and correct structure
-     *
-     * @param int $status
-     * @return TestResponse
-     */
     public function assertSuccess(int $status = self::HTTP_OK): TestResponse
     {
         $this->assertStatus($status);

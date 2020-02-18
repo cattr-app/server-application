@@ -10,24 +10,15 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CountTest
- */
+
 class BulkRemoveTest extends TestCase
 {
     private const URI = 'v1/time-intervals/bulk-remove';
 
     private const INTERVALS_AMOUNT = 5;
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var Collection
-     */
-    private $intervals;
+    private User $admin;
+    private Collection $intervals;
 
     protected function setUp(): void
     {

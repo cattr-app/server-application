@@ -8,29 +8,19 @@ use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RemoveTest
- */
+
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/projects/remove';
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var Project
-     */
-    private $project;
+    private User $admin;
+    private Project $project;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
-
         $this->project = ProjectFactory::create();
     }
 

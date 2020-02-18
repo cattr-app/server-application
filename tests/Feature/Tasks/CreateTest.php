@@ -8,17 +8,12 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CreateTest
- */
+
 class CreateTest extends TestCase
 {
     private const URI = 'v1/tasks/create';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
     /**
      * @var array
      */
@@ -30,7 +25,7 @@ class CreateTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->taskData = array_merge(TaskFactory::getRandomTaskData(), [
+        $this->taskData = array_merge(TaskFactory::createRandomModelData(), [
             'project_id' => ProjectFactory::create()->id,
             'user_id' => UserFactory::create()->id
         ]);
