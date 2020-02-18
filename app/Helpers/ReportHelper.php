@@ -71,6 +71,7 @@ class ReportHelper
     {
         $collection = $collection->groupBy('project_name');
 
+        $intCounts = 0;
         $resultCollection = [];
         foreach ($collection as $projectName => $items) {
             foreach ($items as $item) {
@@ -104,6 +105,7 @@ class ReportHelper
                     ];
                 }
 
+                $intCounts += count($intervals);
                 foreach ($intervals as $interval) {
                     $taskDate = Carbon::parse($interval['start_at'])->format('Y-m-d');
                     $duration = Carbon::parse($interval['end_at'])->diffInSeconds($interval['start_at']);
@@ -131,6 +133,12 @@ class ReportHelper
                 foreach ($screenshotsCollection as $screen) {
                     // $createdAtFormatted --- '2019-12-30'
                     // $hoursScreenKey --- '11:00'
+
+                    // Handle situations when time_interval has no screenshots
+                    if (is_null($screen['id'])) {
+                        continue;
+                    }
+
                     $createdAtFormatted = Carbon::parse($screen['created_at'])->format('Y-m-d');
                     $hoursScreenKey = Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
 
@@ -283,6 +291,7 @@ class ReportHelper
             ->where($this->getTableName('timeInterval', 'start_at'), '>=', $startAt)
             ->where($this->getTableName('timeInterval', 'start_at'), '<', $endAt)
             ->whereIn($this->getTableName('user','id'), $uids)
+            ->whereNull($this->getTableName('timeInterval','deleted_at'))
             ->groupBy('task_id');
     }
 
@@ -318,13 +327,12 @@ class ReportHelper
             ) as intervals"
         ], [$timezoneOffset]);
 
-        return $query->join(
+        return $query->leftJoin(
                 $this->getTableName('screenshot'),
                 $this->getTableName('screenshot', 'time_interval_id'),
                 '=',
                 $this->getTableName('timeInterval', 'id')
             )->orderBy(DB::raw('ANY_VALUE('.$this->getTableName('screenshot', 'created_at').')'), 'ASC')
-             ->whereIn('project_id', $pids)
              ->whereIn('project_id', $pids);
     }
 

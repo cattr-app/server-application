@@ -4,7 +4,9 @@ namespace App\Http\Controllers\Api\v1;
 
 use App\Models\Project;
 use App\Models\Role;
+use App\Models\TimeInterval;
 use App\Models\User;
+use Carbon\Carbon;
 use Exception;
 use Illuminate\Support\Facades\Auth;
 use App\EventFilter\Facades\Filter;
@@ -165,6 +167,38 @@ class ProjectController extends ItemController
         }
 
         return parent::index($request);
+    }
+
+    public function show(Request $request): JsonResponse
+    {
+        Filter::listen($this->getEventUniqueName('answer.success.item.show'), function (Project $project) {
+            $totalTracked = 0;
+            $taskIDs = array_map(function ($task) {
+                return $task['id'];
+            }, $project->tasks->toArray());
+
+            $workers = DB::table('time_intervals AS i')
+                ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
+                ->leftJoin('users AS u', 'i.user_id', '=', 'u.id')
+                ->select('i.user_id', 'u.full_name', 'i.task_id', 'i.start_at', 'i.end_at', 't.task_name',
+                    DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
+                )
+                ->whereNull('i.deleted_at')
+                ->whereIn('task_id', $taskIDs)
+                ->orderBy('duration', 'desc')
+                ->groupBy('t.id')
+                ->get();
+
+            foreach ($workers as $worker) {
+                $totalTracked += $worker->duration;
+            }
+
+
+            $project->workers = $workers;
+            $project->total_spent_time = $totalTracked;
+            return $project;
+        });
+        return parent::show($request);
     }
 
     /**
