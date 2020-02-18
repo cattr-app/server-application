@@ -4,6 +4,7 @@ namespace Modules\GitlabIntegration\Listeners;
 
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
@@ -42,13 +43,18 @@ class IntegrationObserver
     /**
      * Observe task list
      *
-     * @param array|Paginator $tasks
+     * @param Collection|Paginator $tasks
      *
      * @return array
      */
     public function taskList($tasks)
     {
-        $items = $tasks->getCollection();
+        if ($tasks instanceof Paginator) {
+            $items = $tasks->getCollection();
+        } else {
+            $items = $tasks;
+        }
+
         $taskIds = $items->map(function ($task) { return $task->id; })->toArray();
         $gitlabTaskIds = DB::table('gitlab_tasks_relations')
             ->whereIn('task_id', $taskIds)
@@ -64,7 +70,11 @@ class IntegrationObserver
             return $item;
         });
 
-        $tasks->setCollection($items);
+        if ($tasks instanceof Paginator) {
+            $tasks->setCollection($items);
+        } else {
+            $tasks = $items;
+        }
 
         return $tasks;
     }

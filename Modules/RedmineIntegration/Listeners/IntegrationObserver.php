@@ -142,13 +142,18 @@ class IntegrationObserver
     /**
      * Observe task list
      *
-     * @param array|Paginator $tasks
+     * @param Collection|Paginator $tasks
      *
      * @return array
      */
     public function taskList($tasks)
     {
-        $items = $tasks->getCollection();
+        if ($tasks instanceof Paginator) {
+            $items = $tasks->getCollection();
+        } else {
+            $items = $tasks;
+        }
+
         $taskIds = $items->map(function ($task) { return $task->id; })->toArray();
         $redmineTaskIds = Property::where([
             'entity_type' => Property::TASK_CODE,
@@ -163,7 +168,11 @@ class IntegrationObserver
             return $item;
         });
 
-        $tasks->setCollection($items);
+        if ($tasks instanceof Paginator) {
+            $tasks->setCollection($items);
+        } else {
+            $tasks = $items;
+        }
 
         return $tasks;
     }
