@@ -30,6 +30,21 @@ class EmailReportsServiceProvider extends ServiceProvider
         $this->registerCommands();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         $this->loadViewsFrom(__DIR__.'/../Resources/views', 'emailreports');
+
+        Filter::listen('role.actions.list', static function ($rules) {
+            if (!isset($rules['email-reports'])) {
+                $rules['email-reports'] = [
+                    'list' => __('Email Reports list'),
+                    'show' => __('Email Reports show'),
+                    'edit' => __('Email Reports edit'),
+                    'remove' => __('Email Reports remove'),
+                    'create' => __('Email Reports create'),
+                    'count' => __('Email Reports count'),
+                ];
+            }
+
+            return $rules;
+        });
     }
 
     /**
