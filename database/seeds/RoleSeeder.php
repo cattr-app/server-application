@@ -35,6 +35,8 @@ class RoleSeeder extends Seeder
             ],
             'tasks' => [
                 'create',
+                'edit',
+                'remove',
             ],
             'time' => [
                 'project',
@@ -203,6 +205,17 @@ class RoleSeeder extends Seeder
                 'redmine',
                 'jira',
             ],
+            'email-reports' => [
+                'list',
+                'show',
+                'edit',
+                'remove',
+                'create',
+                'count',
+            ],
+            'invoices' => [
+                'list'
+            ]
         ];
 
         $this->addRules(1, $managerAllow);

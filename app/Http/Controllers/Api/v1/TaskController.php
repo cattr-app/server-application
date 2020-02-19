@@ -17,7 +17,7 @@ use Illuminate\Support\Facades\Route;
 
 /**
  * Class TaskController
-*/
+ */
 class TaskController extends ItemController
 {
     /**
@@ -517,6 +517,33 @@ class TaskController extends ItemController
         }
 
         return response()->json($activity);
+    }
+
+    public function show(Request $request): JsonResponse
+    {
+        Filter::listen($this->getEventUniqueName('answer.success.item.show'), function (Task $task) {
+            $totalTracked = 0;
+
+            $workers = DB::table('time_intervals AS i')
+                ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
+                ->join('users AS u', 'i.user_id', '=', 'u.id')
+                ->select('i.user_id', 'u.full_name', 'i.task_id', 'i.start_at', 'i.end_at',
+                    DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
+                )
+                ->whereNull('i.deleted_at')
+                ->where('task_id', $task->id)
+                ->groupBy('i.user_id')
+                ->get();
+
+            foreach ($workers as $worker) {
+                $totalTracked += $worker->duration;
+            }
+
+            $task->workers = $workers;
+            $task->total_spent_time = $totalTracked;
+            return $task;
+        });
+        return parent::show($request);
     }
 
     /**
