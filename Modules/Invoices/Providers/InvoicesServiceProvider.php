@@ -3,6 +3,7 @@
 namespace Modules\Invoices\Providers;
 
 use App\EventFilter\EventServiceProvider as ServiceProvider;
+use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Factory;
 
 class InvoicesServiceProvider extends ServiceProvider
@@ -17,6 +18,13 @@ class InvoicesServiceProvider extends ServiceProvider
         $this->registerConfig();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
         parent::boot();
+        Filter::listen('role.actions.list', static function ($data) {
+            $data['invoices'] = [
+                'list' => __('Invoices list'),
+            ];
+
+            return $data;
+        });
     }
 
     /**
