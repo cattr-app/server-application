@@ -2,12 +2,15 @@
 
 namespace Modules\RedmineIntegration\Listeners;
 
+use App\Models\Property;
 use App\Models\User;
 use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
+use Illuminate\Pagination\Paginator;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Arr;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
@@ -129,37 +132,49 @@ class IntegrationObserver
      */
     public function taskEdition($task)
     {
-        try {
-            $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($task->user_id);
-            /** @var array $userLocalRedmineTasksIds */
-            $redmineTask = Arr::first($userLocalRedmineTasksIds, function ($redmineTask) use ($task) {
-                return $redmineTask->task_id === $task->id;
-            });
-
-            if (isset($redmineTask)) {
-                // Get Redmine priority ID from an internal priority.
-                $priority_id = 2;
-                if (isset($task->priority_id) && $task->priority_id) {
-                    $priorities = $this->priority->getAll();
-                    $priority = Arr::first($priorities, function ($priority) use ($task) {
-                        return $priority['priority_id'] == $task->priority_id;
-                    });
-
-                    if (isset($priority)) {
-                        $priority_id = $priority['id'];
-                    }
-                }
-
-                $client = $this->clientFactory->createUserClient($task->user_id);
-                $client->issue->update($redmineTask->redmine_id, [
-                    'priority_id' => $priority_id,
-                ]);
-            }
-        } catch (Exception $e) {
-            Log::error("Can't update task in the Redmine: ".$e->getMessage());
+        if ($this->taskRepo->getRedmineTaskId($task->id)) {
+            abort(403, 'Access denied to edit a task from Redmine integration');
         }
 
         return $task;
+    }
+
+    /**
+     * Observe task list
+     *
+     * @param Collection|Paginator $tasks
+     *
+     * @return array
+     */
+    public function taskList($tasks)
+    {
+        if ($tasks instanceof Paginator) {
+            $items = $tasks->getCollection();
+        } else {
+            $items = $tasks;
+        }
+
+        $taskIds = $items->map(function ($task) { return $task->id; })->toArray();
+        $redmineTaskIds = Property::where([
+            'entity_type' => Property::TASK_CODE,
+            'name' => 'REDMINE_ID',
+        ])->whereIn('entity_id', $taskIds)->pluck('entity_id')->toArray();
+
+        $items->transform(function ($item) use ($redmineTaskIds) {
+            if (in_array($item->id, $redmineTaskIds)) {
+                $item->integration = 'redmine';
+            }
+
+            return $item;
+        });
+
+        if ($tasks instanceof Paginator) {
+            $tasks->setCollection($items);
+        } else {
+            $tasks = $items;
+        }
+
+        return $tasks;
     }
 
     public function rulesHook($rules)

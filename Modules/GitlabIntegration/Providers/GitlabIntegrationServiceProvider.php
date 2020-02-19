@@ -2,8 +2,8 @@
 
 namespace Modules\GitlabIntegration\Providers;
 
+use App\EventFilter\EventServiceProvider as ServiceProvider;
 use App\EventFilter\Facades\Filter;
-use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
 use Modules\GitlabIntegration\Console\SynchronizeTime;
 use Modules\GitlabIntegration\Console\Syncronize;
@@ -14,6 +14,18 @@ use Modules\GitlabIntegration\Helpers\TimeIntervalsHelper;
 */
 class GitlabIntegrationServiceProvider extends ServiceProvider
 {
+    /**
+     * @var array
+     */
+    protected $listen = [
+        'answer.success.item.list.result.task' => [
+            'Modules\GitlabIntegration\Listeners\IntegrationObserver@taskList',
+        ],
+        'item.edit.task' => [
+            'Modules\GitlabIntegration\Listeners\IntegrationObserver@taskEdition',
+        ],
+    ];
+
     /**
      * Boot the application events.
      *
@@ -33,6 +45,8 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
             $helper->createUnsyncedInterval($timeInterval);
             return $data;
         });
+
+        parent::boot();
     }
 
     /**
