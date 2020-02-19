@@ -26,7 +26,7 @@ class AppInstallCommand extends Command
      *
      * @var string
      */
-    protected $description = 'Amazing Time Basic Installation';
+    protected $description = 'Cattr Basic Installation';
 
     /**
      * @var Filesystem

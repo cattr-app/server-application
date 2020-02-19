@@ -19,13 +19,13 @@ class StatusController extends Controller
      * @apiName         Status
      * @apiGroup        Status
      *
-     * @apiSuccess {Boolean}  amazingtime  Indicates successful request when `TRUE`
+     * @apiSuccess {Boolean}  cattr  Indicates successful request when `TRUE`
      * @apiSuccess {String}   cat          A cat for you
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "amazingtime": true,
+     *    "cattr": true,
      *    "cat": "(=ㅇ༝ㅇ=)"
      *  }
      */
@@ -36,7 +36,7 @@ class StatusController extends Controller
     {
         return response()->json([
             'success' => true,
-            'amazingtime' => true,
+            'cattr' => true,
             'cat' => app(CatHelper::class)->getCat(),
         ]);
     }

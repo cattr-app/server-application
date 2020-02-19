@@ -1,4 +1,4 @@
-# Amazing Time Backend Application
+# Cattr Backend Application
 
 ## Installation
 

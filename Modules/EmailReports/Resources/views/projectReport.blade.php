@@ -42,7 +42,7 @@
 
 <div class="row best-wishes">
     <h2>Best wishes,</h2>
-    <h2>your Amazingtime.</h2>
+    <h2>your Cattr.</h2>
 </div>
 
 <div class="row afterwords">

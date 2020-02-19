@@ -39,7 +39,7 @@ class ProjectRedmineController extends AbstractRedmineController
     }
 
     /**
-     * Synchronize Redmine projects with AmazingTime projects
+     * Synchronize Redmine projects with Cattr projects
      *
      * @return JsonResponse
      */

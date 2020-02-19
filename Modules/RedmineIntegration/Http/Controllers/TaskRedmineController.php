@@ -21,7 +21,7 @@ class TaskRedmineController extends AbstractRedmineController
     }
 
     /**
-     * Synchronize Redmine tasks with AmazingTime tasks
+     * Synchronize Redmine tasks with Cattr tasks
      *
      * @return JsonResponse
      */

@@ -46,7 +46,7 @@ class TimeIntervalIntegrationHelper extends AbstractIntegrationHelper
             'spent_on' => $startDateTime->format('Y-m-d'),
             'hours' => round($diffHours, 2),
             'activity_id' => null,
-            'comments' => "Amazing Time Entry",
+            'comments' => "Cattr Entry",
         ];
 
         $client->time_entry->create($timeIntervalInfo);
