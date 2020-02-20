@@ -27,7 +27,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
     public function collection()
     {
         // Please verify that start_at and end_at are fetched in ISO format !
-        $queryData = request()->only('start_at', 'end_at', 'user_ids');
+        $queryData = request()->only('start_at', 'end_at', 'user_ids', 'project_ids');
         if (!Arr::has($queryData, ['start_at', 'end_at', 'user_ids'])) {
             throw new Exception('Requested data was not found in request body');
         }
@@ -93,13 +93,20 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
     protected function _getUnpreparedCollection(array $queryData): Collection
     {
         /** @noinspection PhpParamsInspection */
-        return DashboardReport::query()
+        $query = DashboardReport::query()
             ->whereIn('user_id', $queryData['user_ids'])
             ->where('start_at', '>=', $queryData['start_at'])
             ->where('start_at', '<', $queryData['end_at'])
             ->with('users')
-            ->orderBy('start_at')
-            ->get();
+            ->orderBy('start_at');
+
+        if (!empty($queryData['project_ids'])) {
+            $query = $query->whereHas('task', function ($query) use ($queryData) {
+                $query->whereIn('project_id', $queryData['project_ids']);
+            });
+        }
+
+        return $query->get();
     }
 
     /**

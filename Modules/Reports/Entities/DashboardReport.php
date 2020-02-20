@@ -3,7 +3,7 @@
 
 namespace Modules\Reports\Entities;
 
-
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,6 +21,13 @@ class DashboardReport extends Model
     public function users(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
+    }
 
+    /**
+     * @return BelongsTo
+     */
+    public function task(): BelongsTo
+    {
+        return $this->belongsTo(Task::class, 'task_id');
     }
 }
