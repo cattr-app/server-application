@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use App\Models\User;
+use DB;
+use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Config;
@@ -11,6 +13,7 @@ use Illuminate\Support\Facades\Schema;
 use GuzzleHttp\Exception\GuzzleException;
 use GuzzleHttp\Client;
 use MCStreetguy\ComposerParser\Factory as ComposerParser;
+use RuntimeException;
 
 class AppInstallCommand extends Command
 {
@@ -19,7 +22,7 @@ class AppInstallCommand extends Command
      *
      * @var string
      */
-    protected $signature = 'at:install';
+    protected $signature = 'cattr:install';
 
     /**
      * The console command description.
@@ -36,7 +39,7 @@ class AppInstallCommand extends Command
     /**
      * Create a new command instance.
      *
-     * @param  Filesystem  $filesystem
+     * @param Filesystem $filesystem
      */
     public function __construct(
         Filesystem $filesystem
@@ -57,23 +60,23 @@ class AppInstallCommand extends Command
         }
 
         try {
-            \DB::connection()->getPdo();
+            DB::connection()->getPdo();
 
             if (Schema::hasTable('migrations')) {
-                $this->error("Looks like the application was already installed. Please, make sure that database was flushed then try again");
+                $this->error('Looks like the application was already installed. Please, make sure that database was flushed then try again');
 
                 return -1;
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             // If we can't connect to the database that means that we're probably installing the app for the first time
         }
 
 
         $this->info("Welcome to CATTR installation wizard. First of, let's setup our application\n");
-        $this->info("For now, we will setup the .env file configuration. You can change it later at any time.");
+        $this->info('For now, we will setup the .env file configuration. You can change it later at any time.');
         $this->info("Let's connect to your database first");
 
-        if ($this->settingUpDatabase() != 0) {
+        if ($this->settingUpDatabase() !== 0) {
             return -1;
         }
 
@@ -88,26 +91,22 @@ class AppInstallCommand extends Command
 
         $this->settingUpEnvMigrateAndSeed();
 
-        $this->info("Creating admin user");
+        $this->info('Creating admin user');
         $admin = $this->createAdminUser($adminData);
         $this->info("Administrator with email {$admin->email} was created successfully");
 
-        $this->updateEnvData("RECAPTCHA_ENABLED", $this->choice("Enable RECaptcha", [
-            "true" => "Yes",
-            "false" => "No"
+        $this->updateEnvData('RECAPTCHA_ENABLED', $this->choice('Enable RECaptcha', [
+            'true' => 'Yes',
+            'false' => 'No'
         ], 'false'));
-        $this->call("config:cache");
-        $this->info("Application was installed successfully!");
+
+        $this->call('config:cache');
+
+        $this->info('Application was installed successfully!');
         return 0;
     }
 
-    /**
-     * Send information about the new instance on the server
-     *
-     * @param $adminEmail
-     * @return bool
-     */
-    protected function registerInstance($adminEmail)
+    protected function registerInstance(string $adminEmail): bool
     {
         try {
             $client = new Client();
@@ -149,10 +148,7 @@ class AppInstallCommand extends Command
         }
     }
 
-    /**
-     * @return User
-     */
-    protected function createAdminUser($admin): User
+    protected function createAdminUser(array $admin): User
     {
         return User::create([
             'full_name' => $admin['name'],
@@ -178,14 +174,11 @@ class AppInstallCommand extends Command
         ]);
     }
 
-    /**
-     * @return array
-     */
-    protected function askAdminCredentials()
+    protected function askAdminCredentials(): array
     {
-        $login = $this->ask("Admin E-Mail");
+        $login = $this->ask('Admin E-Mail');
         $password = Hash::make($this->secret("Admin ($login) Password"));
-        $name = $this->ask("Admin Full Name");
+        $name = $this->ask('Admin Full Name');
 
         return [
             'login' => $login,
@@ -194,55 +187,45 @@ class AppInstallCommand extends Command
         ];
     }
 
-    /**
-     * @return void
-     */
     protected function settingUpEnvMigrateAndSeed(): void
     {
-        $this->updateEnvData("APP_URL", $this->ask("API endpoint FULL URL"));
+        $this->updateEnvData('APP_URL',
+            $this->ask('API endpoint FULL URL'));
 
-        $this->updateEnvData("TRUSTED_FRONTEND_DOMAIN",
-            '"'.$this->ask("Please provide trusted frontend domains (e.g cattr.mycompany.com). If you have multiple frontend domains, you can separate them with commas").'"');
+        $this->updateEnvData('TRUSTED_FRONTEND_DOMAIN',
+            '"' . $this->ask('Please provide trusted frontend domains (e.g cattr.mycompany.com). If you have multiple frontend domains, you can separate them with commas') . '"');
 
-        $this->info("Setting up JWT secret key");
-        $this->call("jwt:secret");
+        $this->info('Setting up JWT secret key');
+        $this->call('jwt:secret');
 
-        $this->info("Switching off debug mode...");
-        $this->updateEnvData("APP_DEBUG", "false");
+        $this->info('Running up migrations');
+        $this->call('migrate');
 
-        $this->info("Running up migrations");
-        $this->call("migrate");
+        $this->info('Setting up default system roles');
+        $this->call('db:seed', ['--class' => 'RoleSeeder']);
 
-        $this->info("Setting up default system roles");
-        $this->call("db:seed", ['--class' => 'RoleSeeder']);
+        $this->info('Switching off debug mode...');
+        $this->updateEnvData('APP_DEBUG', 'false');
     }
 
-    /**
-     * @return int
-     */
-    protected function settingUpDatabase()
+    protected function settingUpDatabase(): int
     {
-        $this->updateEnvData(
-            "DB_CONNECTION",
-            $this->choice("Your database connection", array_keys(config("database.connections")), 0)
-        );
-
-        $this->updateEnvData("DB_HOST", $this->ask("CATTR database host", 'localhost'));
-        $this->updateEnvData("DB_PORT", $this->ask("CATTR database port", 3306));
-        $this->updateEnvData("DB_USERNAME", $this->ask("CATTR database username", 'root'));
-        $this->updateEnvData("DB_DATABASE", $this->ask("CATTR database name", 'app_cattr'));
-        $this->updateEnvData("DB_PASSWORD", $this->secret("CATTR database password"));
+        $this->updateEnvData('DB_HOST', $this->ask('CATTR database host', 'localhost'));
+        $this->updateEnvData('DB_PORT', $this->ask('CATTR database port', 3306));
+        $this->updateEnvData('DB_USERNAME', $this->ask('CATTR database username', 'root'));
+        $this->updateEnvData('DB_DATABASE', $this->ask('CATTR database name', 'app_cattr'));
+        $this->updateEnvData('DB_PASSWORD', $this->secret('CATTR database password'));
 
         $this->call('config:cache');
 
-        $this->info("Testing database connection...");
+        $this->info('Testing database connection...');
         try {
-            \DB::connection()->getPdo();
+            DB::connection()->getPdo();
 
             if (Schema::hasTable('migrations')) {
-                throw new \Exception("Looks like the application was already installed. Please, make sure that database was flushed and then try again.");
+                throw new RuntimeException('Looks like the application was already installed. Please, make sure that database was flushed and then try again.');
             }
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             $this->error($e->getMessage());
 
             return -1;
@@ -253,8 +236,8 @@ class AppInstallCommand extends Command
     }
 
     /**
-     * @param  string  $key
-     * @param          $value
+     * @param string $key
+     * @param  $value
      *
      * @return void
      */
@@ -262,7 +245,7 @@ class AppInstallCommand extends Command
     {
         file_put_contents($this->laravel->environmentFilePath(), preg_replace(
             $this->replacementPattern($key, $value),
-            $key.'='.$value,
+            $key . '=' . $value,
             file_get_contents($this->laravel->environmentFilePath())
         ));
         Config::set($key, $value);
@@ -271,14 +254,14 @@ class AppInstallCommand extends Command
     /**
      * Get a regex pattern that will match env APP_KEY with any random key.
      *
-     * @param  string  $key
-     * @param          $value
+     * @param string $key
+     * @param  $value
      *
      * @return string
      */
     protected function replacementPattern(string $key, $value): string
     {
-        $escaped = preg_quote('='.env($key), '/');
+        $escaped = preg_quote('=' . env($key), '/');
 
         return "/^{$key}=.*/m";
     }
