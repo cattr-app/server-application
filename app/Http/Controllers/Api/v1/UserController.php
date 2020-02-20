@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Mail\InviteUser;
+use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\User;
 use Illuminate\Support\Facades\Auth;
@@ -16,6 +17,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 use Exception;
+use function GuzzleHttp\Promise\task;
 
 /**
  * Class UserController
@@ -278,47 +280,8 @@ class UserController extends ItemController
      */
     public function create(Request $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        /**
-         * @var User $cls
-         */
-        $cls = $this->getItemClass();
-
-        Event::dispatch($this->getEventUniqueName('item.create.before'), $requestData);
-
-        $item = Filter::process(
-            $this->getEventUniqueName('item.create'),
-            $cls::create($this->filterRequestData($requestData))
-        );
-
-        $item->save();
-
-        Event::dispatch($this->getEventUniqueName('item.create.after'), [$item, $requestData]);
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
-                'res' => $item,
-            ])
-        );
+        Event::listen($this->getEventUniqueName('item.create.after'), static::class.'@'.'saveRelations');
+        return parent::create($request);
     }
 
     /**
@@ -547,6 +510,8 @@ class UserController extends ItemController
 
         Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
 
+        $item = $this->saveRelations($item, $requestData);
+
         return response()->json(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
                 'success' => true,
@@ -706,6 +671,29 @@ class UserController extends ItemController
         }
 
         return $query;
+    }
+
+    /**
+     * @param User $user
+     * @param $requestData array
+     * @return User
+     */
+    public function saveRelations(User $user, array $requestData): User
+    {
+        $user->projectsRelation()->delete();
+        $projectRoles = $requestData['project_roles'] ?? [];
+
+        $relations = [];
+        foreach ($projectRoles as $relation) {
+            $relations[] = new ProjectsUsers([
+                'project_id' => $relation['project_id'],
+                'role_id' => $relation['role_id'],
+                'user_id' => $user->id,
+            ]);
+        }
+
+        $user->projectsRelation()->saveMany($relations);
+        return $user;
     }
 }
 
