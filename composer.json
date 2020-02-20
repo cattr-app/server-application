@@ -27,11 +27,11 @@
     "sentry/sentry-laravel": "^1.5",
     "tymon/jwt-auth": "1.0.0-rc.5",
     "webpatser/laravel-uuid": "^3.0",
-    "wikimedia/composer-merge-plugin": "^1.4"
+    "wikimedia/composer-merge-plugin": "^1.4",
+    "laravel/telescope": "^2.1"
   },
   "require-dev": {
     "doctrine/dbal": "2.9.2",
-    "laravel/telescope": "^2.1",
     "mockery/mockery": "^1.3",
     "phpunit/phpunit": "^8.0",
     "sempro/phpunit-pretty-print": "^1.0"
