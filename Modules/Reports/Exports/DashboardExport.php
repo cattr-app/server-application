@@ -185,12 +185,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
             $date = Carbon::createFromFormat(static::SORTABLE_DAYS_FORMAT, $day);
             $key = $date->format(static::REPORT_DAYS_FORMAT);
 
-            $dayTimeObject = (new Carbon('@0'))->diff(new Carbon("@$timeWorked"));
-            $hours = $dayTimeObject->h + 24 * $dayTimeObject->days;
-            $minutes = ($dayTimeObject->i < 10 ? '0' : '') . $dayTimeObject->i;
-            $seconds = ($dayTimeObject->s < 10 ? '0' : '') . $dayTimeObject->s;
-
-            $daysData[$key] = "{$hours}:{$minutes}:{$seconds}";
+            $daysData[$key] = round($timeWorked / 60 / 60, static::ROUND_DIGITS);
         }
 
         $collection->push(array_merge($mainInfo, $daysData));
