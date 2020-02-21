@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\Rule;
 use Exception;

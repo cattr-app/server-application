@@ -7,6 +7,7 @@ use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
 use Lang;
 use Illuminate\Notifications\Messages\MailMessage;
 
+/** @codeCoverageIgnore  */
 class ResetPassword extends ResetPasswordNotification
 {
     /**

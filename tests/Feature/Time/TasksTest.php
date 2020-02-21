@@ -49,12 +49,10 @@ class TasksTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    //TODO ASK QUESTIONS
-//
-//    public function test_without_params(): void
-//    {
-//        $response = $this->actingAs($this->admin)->getJson(self::URI);
-//
-//        $response->assertValidationError();
-//    }
+    public function test_wrong_params(): void
+    {
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['task_id' => 'wrong']);
+
+        $response->assertValidationError();
+    }
 }
