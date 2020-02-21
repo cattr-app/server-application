@@ -31,7 +31,12 @@ class ListTest extends TestCase
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
         $response->assertOk();
-        $response->assertJson(Task::all()->toArray());
+        $tasks = Task::query()
+            ->orderByRaw('active > 0 DESC')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->toArray();
+        $response->assertJson($tasks);
     }
 
     public function test_unauthorized(): void
