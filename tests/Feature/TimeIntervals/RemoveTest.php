@@ -15,7 +15,6 @@ class RemoveTest extends TestCase
 {
     private const URI = 'v1/time-intervals/remove';
 
-
     private TimeInterval $interval;
     private User $admin;
 

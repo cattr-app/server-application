@@ -2,15 +2,21 @@
 
 namespace Tests\Factories;
 
+use App\Models\Project;
 use App\Models\ProjectsUsers;
+use App\Models\User;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 
 class ProjectUserFactory extends Factory
 {
-    private const DEFAULT_ROLE_ID = 1;
+    public const USER_ROLE = 2;
+    public const MANAGER_ROLE = 1;
+    public const AUDITOR_ROLE = 3;
 
     private ProjectsUsers $projectUser;
+    private ?User $user = null;
+    private ?int $roleId = null;
 
     protected function getModelInstance(): ProjectsUsers
     {
@@ -27,15 +33,42 @@ class ProjectUserFactory extends Factory
         return [
             'project_id' => ProjectFactory::create()->id,
             'user_id' => UserFactory::create()->id,
-            'role_id' => self::DEFAULT_ROLE_ID
+            'role_id' =>$this->getRandomRoleId()
         ];
     }
 
-    public function create(array $attributes = []): ProjectsUsers
-    {
-        $modelData = $this->createRandomModelData();
+     private function defineModelData(): array
+     {
+         $this->user ??= UserFactory::create();
+         $this->roleId ??= $this->getRandomRoleId();
 
-        $this->projectUser = ProjectsUsers::create($modelData);
+         return [
+             'project_id' => ProjectFactory::create()->id,
+             'user_id' => $this->user->id,
+             'role_id' => $this->roleId
+         ];
+     }
+
+    private function getRandomRoleId()
+    {
+        return array_random([self::USER_ROLE, self::MANAGER_ROLE, self::AUDITOR_ROLE]);
+    }
+
+    public function forUser(User $user): self
+    {
+        $this->user = $user;
+        return $this;
+    }
+
+    public function setRole(int $roleId): self
+    {
+        $this->roleId = $roleId;
+        return $this;
+    }
+
+    public function create(): ProjectsUsers
+    {
+        $this->projectUser = ProjectsUsers::create($this->defineModelData());
 
         if ($this->timestampsHidden) {
             $this->hideTimestamps();

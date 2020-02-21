@@ -16,8 +16,9 @@ class CreateTest extends TestCase
     private const URI = 'v1/time-intervals/create';
 
     private User $admin;
-    private array $intervalData;
     private Task $task;
+
+    private array $intervalData;
 
     protected function setUp(): void
     {

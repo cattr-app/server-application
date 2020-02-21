@@ -13,6 +13,7 @@ use Webpatser\Uuid\Uuid;
 
 /**
  * Class RegistrationController
+ * @codeCoverageIgnore until it is implemented on frontend
 */
 class RegistrationController extends Controller
 {

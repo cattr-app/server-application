@@ -7,6 +7,7 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Support\Facades\URL;
 use Illuminate\Queue\SerializesModels;
 
+/** @codeCoverageIgnore  */
 class Registration extends Mailable
 {
     use Queueable;

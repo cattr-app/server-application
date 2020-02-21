@@ -6,8 +6,6 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
-
 class ShowTest extends TestCase
 {
     private const URI = 'v1/users/show';
@@ -20,7 +18,6 @@ class ShowTest extends TestCase
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
-
         $this->user = UserFactory::create();
     }
 

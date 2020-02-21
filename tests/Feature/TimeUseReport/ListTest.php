@@ -17,9 +17,6 @@ class ListTest extends TestCase
 
     private const INTERVALS_AMOUNT = 10;
 
-    /**
-     * @var Collection
-     */
     private Collection $intervals;
 
     private User $admin;

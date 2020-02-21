@@ -7,8 +7,6 @@ use App\Models\User;
 use Tests\Facades\ProjectUserFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
-
-
 class ListTest extends TestCase
 {
     private const URI = 'v1/projects-users/list';
@@ -24,7 +22,7 @@ class ListTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        ProjectUserFactory::createMany(self::PROJECTS_USERS_AMOUNT);
+        ProjectUserFactory::create();
     }
 
     public function test_list(): void

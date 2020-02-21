@@ -23,7 +23,7 @@ class CountTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        ProjectUserFactory::createMany(self::PROJECTS_USERS_AMOUNT);
+        ProjectUserFactory::create();
     }
 
     public function test_count(): void
