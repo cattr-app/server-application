@@ -107,6 +107,35 @@ class TaskController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    public function index(Request $request): JsonResponse
+    {
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(),
+                $request->all() ?: []
+            )
+        );
+
+        $paginate = $request->get('paginate', false);
+        $currentPage = $request->get('page', 1);
+        $perPage = $request->get('perPage', 15);
+
+        if (!$request->has('orderBy')) {
+            $itemsQuery->orderByRaw('active > 0 DESC');
+            $itemsQuery->orderBy('created_at', 'desc');
+        }
+
+        return response()->json(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.result'),
+                $paginate ?
+                    $itemsQuery->paginate($perPage, ['*'], 'page', $currentPage)
+                    : $itemsQuery->get()
+            )
+        );
+    }
 
     /**
      * @api             {post} /v1/tasks/create Create
