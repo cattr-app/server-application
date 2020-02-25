@@ -293,7 +293,7 @@ class ReportHelper
             ->where($this->getTableName('timeInterval', 'deleted_at'), null)
             ->whereIn($this->getTableName('user','id'), $uids)
             ->whereNull($this->getTableName('timeInterval','deleted_at'))
-            ->groupBy('task_id');
+            ->groupBy(['task_id', 'user_id']);
     }
 
     /**
