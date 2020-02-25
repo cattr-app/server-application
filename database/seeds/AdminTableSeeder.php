@@ -19,7 +19,7 @@ class AdminTableSeeder extends Seeder
         $login = 'admin@example.com';
         $pass = 'admin';
 
-        if (!User::where('is_active', true)->exists()) {
+        if (!User::where('is_admin', true)->exists()) {
             $this->command->getOutput()->writeln('<fg=yellow>Create admin user</>');
 
             /** @var User $admin */
