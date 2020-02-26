@@ -8,6 +8,7 @@ return [
     'url' => env('APP_URL', 'http://localhost'),
     'password_reset_url' => env('PASSWORD_RESET_URL'),
     'timezone' => 'UTC',
+    'languages' => ['en', 'ru'],
     'locale' => 'en',
     'fallback_locale' => 'en',
     'key' => env('APP_KEY'),
