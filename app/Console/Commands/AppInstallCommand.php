@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Models\Property;
 use App\Models\User;
 use DB;
 use Exception;
@@ -91,6 +92,9 @@ class AppInstallCommand extends Command
 
         $this->settingUpEnvMigrateAndSeed();
 
+        $this->setLanguage();
+        $this->setTimeZone();
+
         $this->info('Creating admin user');
         $admin = $this->createAdminUser($adminData);
         $this->info("Administrator with email {$admin->email} was created successfully");
@@ -104,6 +108,32 @@ class AppInstallCommand extends Command
 
         $this->info('Application was installed successfully!');
         return 0;
+    }
+
+    public function setLanguage(): void
+    {
+        $language = $this->choice('Choose default language', config('app.languages'), 0);
+
+        Property::updateOrCreate([
+            'entity_type' => Property::COMPANY_CODE,
+            'entity_id' => 0,
+            'name' => 'language'], [
+            'value' => $language
+        ]);
+
+        $this->info(strtoupper($language) . ' language successfully set');
+    }
+
+    public function setTimeZone(): void
+    {
+        Property::updateOrCreate([
+            'entity_type' => Property::COMPANY_CODE,
+            'entity_id' => 0,
+            'name' => 'timezone'], [
+            'value' => 'UTC'
+        ]);
+
+        $this->info('Default time zone set to UTC');
     }
 
     protected function registerInstance(string $adminEmail): bool
