@@ -21,7 +21,7 @@ use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
 /**
  * Class Handler
-*/
+ */
 class Handler extends ExceptionHandler
 {
     /**
@@ -69,6 +69,17 @@ class Handler extends ExceptionHandler
      */
     public function render($request, Exception $exception)
     {
+        if ($exception instanceof ValidationException) {
+            $responseData = [
+                'success' => false,
+                'error_type' => 'validation',
+                'message' => 'Validation error',
+                'info' => $exception->errors()
+            ];
+
+            return new JsonResponse($responseData, 400);
+        }
+
         if (!config('app.json_errors')) {
             return parent::render($request, $exception);
         }
@@ -103,7 +114,6 @@ class Handler extends ExceptionHandler
         if ($exception instanceof AuthorizationException) {
             $statusCode = $exception->getStatusCode();
             $errorType = $exception->getType();
-
         } elseif ($isHttpException) {
             // Otherwise, if it is Laravel's HttpException we can access getStatusCode() method from exception
             // instance
@@ -121,12 +131,10 @@ class Handler extends ExceptionHandler
                 ]);
                 $errorType = 'http.request.wrong_method';
             }
-
         } elseif ($exception instanceof TokenExpiredException) {
             $message = $exception->getMessage();
             $errorType = 'authorization.token_expired';
             $statusCode = 401;
-
         } elseif ($code === 404 || $code === 401 || $code === 429 || $code == 420) {
             // If we have 404 or 401 code we will process it as an request status code
             $statusCode = $code;
