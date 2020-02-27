@@ -4,9 +4,12 @@ namespace Modules\CompanyManagement\Http\Controllers;
 
 use App\Models\Priority;
 use App\Models\Property;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
+use Illuminate\Validation\Rule;
 
-class CompanyManagementController extends Controller
+class CompanyManagement extends Controller
 {
     protected static $casts = [
         'gitlab_enabled' => 'int',
@@ -54,6 +57,15 @@ class CompanyManagementController extends Controller
         }
     }
 
+    public function setCompanyData(string $setting, string $value): void
+    {
+        Property::updateOrCreate([
+            'entity_type' => Property::COMPANY_CODE,
+            'entity_id' => 0,
+            'name' => $setting,
+        ], ['value' => $value]);
+    }
+
     /**
      * @return mixed
      */
@@ -71,23 +83,44 @@ class CompanyManagementController extends Controller
         return response()->json($toReturn);
     }
 
-    /**
-     * @return \Illuminate\Http\JsonResponse
-     */
-    public function save()
+    public function save(Request $request): JsonResponse
     {
-        $data = request()->except('token', 'internal_priorities');
+        $data = $request->except('token', 'internal_priorities');
         foreach ($data as $name => $value) {
-            Property::updateOrCreate([
-                'entity_type' => Property::COMPANY_CODE,
-                'entity_id' => 0,
-                'name' => $name,
-            ], ['value' => $this->encodeField($name, $value)]);
+            $this->setCompanyData($name, $this->encodeField($name, $value));
         }
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'message' => __('Company settings saved successfully')
-        ], 200);
+        ]);
+    }
+
+    public function editLanguage(Request $request): JsonResponse
+    {
+        $validatedData = $request->validate([
+            'language' => ['required', Rule::in(config('app.languages'))]
+        ]);
+
+        $this->setCompanyData('language', $validatedData['language']);
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => __('Language saved successfully')
+        ]);
+    }
+
+    public function editTimeZone(Request $request): JsonResponse
+    {
+        $validatedData = $request->validate([
+            'timezone' => 'required|timezone'
+        ]);
+
+        $this->setCompanyData('timezone', $validatedData['timezone']);
+
+        return new JsonResponse([
+            'success' => true,
+            'message' => __('Timezone saved successfully')
+        ]);
     }
 }

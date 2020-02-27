@@ -11,7 +11,9 @@
 |
 */
 
-Route::middleware('auth:api')->prefix('companymanagement')->group(function () {
-    Route::get('getData', 'CompanyManagementController@getData')->name('get-data');
-    Route::post('save', 'CompanyManagementController@save')->name('save');
+Route::middleware('auth:api')->prefix('companymanagement')->group(static function () {
+    Route::get('getData', 'CompanyManagement@getData')->name('get-data');
+    Route::post('save', 'CompanyManagement@save')->name('save');
+    Route::post('timezone/edit', 'CompanyManagement@editTimezone');
+    Route::post('language/edit', 'CompanyManagement@editLanguage');
 });

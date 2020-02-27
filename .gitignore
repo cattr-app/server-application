@@ -32,3 +32,4 @@ coverage/
 *.sql
 .DS_Store
 .phpunit.result.cache
+.php_cs.cache
