@@ -45,6 +45,7 @@ Route::group([
 
 // Routes for login/register processing
 Route::group([
+    'middleware' => 'throttle:120,1',
     'prefix' => 'auth',
 ], static function (Router $router) {
     $router->post('login', 'AuthController@login');
@@ -63,6 +64,7 @@ Route::group([
 
 // Temporary fix for missing v1 prefix in the url
 Route::group([
+    'middleware' => 'throttle:120,1',
     'prefix' => 'v1/auth',
 ], function (Router $router) {
     $router->post('login', 'AuthController@login');
@@ -88,7 +90,7 @@ Route::group([
 
 // Main API routes
 Route::group([
-    'middleware' => 'auth:api',
+    'middleware' => ['auth:api', 'throttle:120,1'],
     'prefix' => 'v1',
 ], static function (Router $router) {
     // Register routes
