@@ -3,6 +3,7 @@
 namespace Modules\EmailReports\StatisticExports;
 
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
@@ -10,6 +11,7 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Modules\EmailReports\Mail\InvoicesEmailReport;
 use Modules\EmailReports\Mail\ProjectReportEmailReport;
 use Modules\EmailReports\Models\EmailReports;
 use Modules\Reports\Exports\ProjectExport;
@@ -18,51 +20,18 @@ use Modules\Reports\Exports\ProjectExport;
  * Class ProjectReport
  * @package Modules\EmailReports\StatisticExports
  */
-class ProjectReport extends ProjectExport implements FromCollection, ShouldAutoSize
+class ProjectReport extends ProjectExport implements ExportableEmailReport
 {
     /**
-     * @var string
-     */
-    public $timezone;
-
-    /**
-     * @var array
-     */
-    public $projectIds;
-
-    /**
-     * @var string
-     */
-    public $startAt;
-
-    /**
-     * @var string
-     */
-    public $endAt;
-
-    /**
-     * @var array
-     */
-    public $recipients;
-
-    /**
+     * @param array $queryData
      * @return Collection
      * @throws \Exception
      */
-    public function collection(): Collection
+    public function exportCollection(array $queryData): Collection
     {
-        $queryData = [
-            'start_at'=> $this->startAt,
-            'end_at' => $this->endAt,
-            'uids' => User::all()->pluck('id')->toArray(),
-            'pids' => $this->projectIds
-        ];
-
-        foreach ($queryData as $key => $value) {
-            if (is_null($value)) {
-                Log::alert('We are missing ' . $key . ' and EmailReport will not be send for ' . print_r($this->recipients, true));
-                return collect([]);
-            }
+        if (!Arr::has($queryData, ['start_at', 'end_at', 'uids', 'pids'])) {
+            Log::alert('We are missing some of data needed for query! class Invoices');
+            return collect([]);
         }
 
         // Grouping prepared collection to groups by Project Name
@@ -104,40 +73,5 @@ class ProjectReport extends ProjectExport implements FromCollection, ShouldAutoS
         ]);
 
         return $returnableData;
-    }
-
-    /**
-     * @param $emailReport
-     * @param $frequency
-     * @throws \Exception
-     */
-    public function sendEmail($emailReport, $frequency)
-    {
-        $dates = EmailReports::getDatesToWorkWith($frequency);
-        $this->startAt = $dates['startAt'];
-        $this->endAt = $dates['endAt'];
-        $this->projectIds = $emailReport->projects()->pluck('project_id')->toArray();
-        $docType = EmailReports::getDocumentType($emailReport);
-
-        $file = $this->collection()->downloadExcel($emailReport->name . '.' . $docType['fsType'], $docType['type'])->getFile();
-
-        $this->recipients = $emailReport->emails()->pluck('email')->toArray();
-        Mail::to($this->recipients)
-            ->send(
-                new ProjectReportEmailReport(
-                    date('l\, m Y', strtotime($this->startAt)),
-                    date('l\, m Y', strtotime($this->endAt ?? 'yesterday')),
-                    $file,
-                    $emailReport->name . $docType['fsType']
-                )
-            );
-
-        if (Mail::failures()) {
-            Log::alert('Unfortunately we wasn\'t able to send messages for this recipients: ' . print_r(Mail::failures()));
-        }
-
-        if (file_exists($file->getPathname())) {
-            unlink($file->getPathname());
-        }
     }
 }

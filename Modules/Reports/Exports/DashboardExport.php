@@ -1,6 +1,5 @@
 <?php
 
-
 namespace Modules\Reports\Exports;
 
 use Exception;
@@ -8,13 +7,13 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Events\AfterSheet;
 use Modules\Reports\Entities\DashboardReport;
 
-class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
+/**
+ * Class DashboardExport
+ * @package Modules\Reports\Exports
+ */
+class DashboardExport implements Exportable
 {
     const SORTABLE_DAYS_FORMAT = 'Y-m-d';
     const REPORT_DAYS_FORMAT = 'l, d M Y';
@@ -24,7 +23,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
      * @return Collection
      * @throws Exception
      */
-    public function collection()
+    public function collection(): Collection
     {
         // Please verify that start_at and end_at are fetched in ISO format !
         $queryData = request()->only('start_at', 'end_at', 'user_ids', 'project_ids');
@@ -71,7 +70,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
     /**
      * Get processed, formatted and prepared-to-return collection
      *
-     * @param  array  $collectionData
+     * @param array $collectionData
      *
      * @return Collection
      * @throws Exception
@@ -86,7 +85,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
     /**
      * Get unprocessed collection from database
      *
-     * @param  array  $queryData
+     * @param array $queryData
      *
      * @return Builder[]|\Illuminate\Database\Eloquent\Collection
      */
@@ -112,7 +111,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
     /**
      * Preparing returnable collection for "collect" method
      *
-     * @param  Collection  $collection
+     * @param Collection $collection
      *
      * @return Collection
      */
@@ -131,7 +130,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
      * Here we'll need to format plain database data to workable format
      *
      * @param         $item
-     * @param  array  $plainData
+     * @param array $plainData
      * @param         $userId
      *
      * @return void
@@ -170,6 +169,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
      * @param $perDay
      * @param $totalTime
      * @return void
+     * @throws Exception
      */
     protected function addRowToCollection(Collection $collection, string $userName, $perDay, $totalTime): void
     {
@@ -199,20 +199,10 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
     }
 
     /**
-     * @return array
+     * @return string
      */
-    public function registerEvents(): array
+    public function getExporterName(): string
     {
-        return [
-            AfterSheet::class => function (AfterSheet $event) {
-                $headers = 'A1:W1';
-                $event->sheet->getDelegate()->getStyle($headers)->getFont()->setBold(true);
-
-                // TODO These maybe useless if ShouldAutoSize will work in a good way :)
-                $event->sheet->getDelegate()->getColumnDimension('A1:A9999')->setWidth(20);
-                $event->sheet->getDelegate()->getColumnDimension('B1:B9999')->setWidth(20);
-                $event->sheet->getDelegate()->getColumnDimension('C1:C9999')->setWidth(20);
-            }
-        ];
+        return 'dashboard';
     }
 }

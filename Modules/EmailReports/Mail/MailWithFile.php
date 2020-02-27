@@ -10,9 +10,9 @@ use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * Class EmailReportMail
- * @package Modules\EmailReports\Mail
+ * @package Modules\EmailReports\MailWithFile
  */
-class InvoicesEmailReport extends Mailable
+class MailWithFile extends Mailable
 {
     use Queueable, SerializesModels;
 
@@ -27,9 +27,9 @@ class InvoicesEmailReport extends Mailable
     public $toDate;
 
     /**
-     * @var File
+     * @var string
      */
-    public $attachedFile;
+    public $filePath;
 
     /**
      * @var string
@@ -37,26 +37,26 @@ class InvoicesEmailReport extends Mailable
     public $fileName;
 
     /**
-     * InvoicesEmailReport constructor.
+     * MailWithFile constructor.
      * @param string $fromDate
      * @param string $toDate
-     * @param File $attachedFile
+     * @param string $filePath
      * @param string $fileName
      */
-    public function __construct(string $fromDate, string $toDate, File $attachedFile, string $fileName)
+    public function __construct(string $fromDate, string $toDate, string $filePath, string $fileName)
     {
         $this->fromDate = $fromDate;
         $this->toDate = $toDate;
-        $this->attachedFile = $attachedFile;
+        $this->filePath = $filePath;
         $this->fileName = $fileName;
     }
 
     /**
-     * @return InvoicesEmailReport
+     * @return MailWithFile
      */
     public function build()
     {
-        return $this->view("emailreports::invoicesReport")
-                    ->attach($this->attachedFile, ['as' => $this->fileName]);
+        return $this->view("emailreports::mail")
+                    ->attach($this->filePath, ['as' => $this->fileName]);
     }
 }

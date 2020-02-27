@@ -2,12 +2,9 @@
 
 namespace Modules\Reports\Http\Controllers;
 
-use Modules\Reports\Exports\ProjectExport;
+use Modules\Reports\Exports\InvoicesExport;
 
-/**
- * Class ProjectReportsController
-*/
-class ProjectReportsController extends AbstractReportsController
+class InvoicesReportsController extends AbstractReportsController
 {
 
     /**
@@ -17,7 +14,7 @@ class ProjectReportsController extends AbstractReportsController
      */
     protected function exportClass(): string
     {
-        return ProjectExport::class;
+        return InvoicesExport::class;
     }
 
     /**
@@ -26,7 +23,7 @@ class ProjectReportsController extends AbstractReportsController
     public static function getControllerRules(): array
     {
         return [
-            'getReport' => 'invoices.list',
+            'getReport' => 'project-report.projects',
         ];
     }
 }

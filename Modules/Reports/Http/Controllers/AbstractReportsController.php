@@ -6,6 +6,10 @@ use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
+use Modules\Reports\Exports\Types\Csv;
+use Modules\Reports\Exports\Types\ExportType;
+use Modules\Reports\Exports\Types\Pdf;
+use Modules\Reports\Exports\Types\Xlsx;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
@@ -48,25 +52,38 @@ abstract class AbstractReportsController extends Controller
      */
     public function getReport()
     {
+        $report = false;
+        $writerType = '';
+        $fileNameType = '';
+
         switch ($this->request->headers->get('Accept')) {
             case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                $type = Excel::XLSX;
-                $fsType = 'xlsx';
+                $writerType = Excel::XLSX;
+                $fileNameType = 'xlsx';
+                $report = new Xlsx();
+
                 break;
             case 'text/csv':
-                $type = Excel::CSV;
-                $fsType = 'csv';
+                $writerType = Excel::CSV;
+                $fileNameType = 'csv';
+                $report = new Csv();
+
                 break;
             case 'application/pdf':
-                $type = Excel::MPDF;
-                $fsType = Excel::MPDF;
+                $writerType = Excel::MPDF;
+                $fileNameType = 'pdf';
+                $report = new Pdf();
                 break;
-            default:
-                return response()->json(['error' => 'There is no applicable accept header']);
         }
 
-        return $this->exporter->collection()
-            ->downloadExcel(time() . '_project_export.' . $fsType, $type, true);
+        if ($report && $report instanceof ExportType) {
+            $report->setExportableName($this->exporter->getExporterName());
+            $report->setFileNameType($fileNameType);
+            $report->setWriterType($writerType);
+            return $report->download($this->exporter->collection(), time() . '_project_export');
+        }
+
+        return response()->json(['error' => 'There is no applicable accept header']);
     }
 
     /**
