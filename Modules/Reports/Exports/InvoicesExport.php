@@ -85,6 +85,7 @@ class InvoicesExport extends ProjectExport
             'Task' => 'Total',
             'Time' => "{$time}",
             'Hours (decimal)' => round($totalTime, self::ROUND_DIGITS),
+            'Rate' => '',
             'Summary' => round($totalSummary, self::ROUND_DIGITS)
         ]);
 
@@ -136,6 +137,7 @@ class InvoicesExport extends ProjectExport
             'Task' => '',
             'Time' => "{$timeObject}",
             'Hours (decimal)' => round($projectDecimalTime, self::ROUND_DIGITS),
+            'Rate' => '',
             'Summary' => $this->summaryForUserTask
         ]);
     }

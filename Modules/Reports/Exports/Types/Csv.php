@@ -4,22 +4,12 @@ namespace Modules\Reports\Exports\Types;
 
 use Illuminate\Contracts\Support\Arrayable;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Sheet;
 
 class Csv extends AbstractType implements FromCollection, WithHeadings
 {
-    use Exportable {
-        download as exportDownload;
-    }
-
-    /**
-     * @var Collection
-     */
-    private $collection;
-
     /**
      * @return Collection
      */

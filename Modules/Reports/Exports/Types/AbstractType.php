@@ -60,12 +60,14 @@ class AbstractType implements ExportType
      * @param Collection $collection
      * @param string|null $fileName
      *
+     * @param string|null $writerType
+     * @param array|null $headers
      * @return \Illuminate\Http\Response|\Symfony\Component\HttpFoundation\BinaryFileResponse
      */
-    public function download(Collection $collection, string $fileName = null)
+    public function download(Collection $collection, string $fileName = null, string $writerType = null, array $headers = null)
     {
         $this->collection = $collection;
-        return $this->exportDownload($fileName . '.' . $this->fileNameType, $this->writerType);
+        return $this->exportDownload($fileName . '.' . $this->fileNameType, $this->writerType, $headers);
     }
 
     /**

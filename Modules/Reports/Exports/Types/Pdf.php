@@ -8,7 +8,7 @@ use Maatwebsite\Excel\Concerns\WithDrawings;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Hyperlink;
-use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\BaseDrawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use Request;
@@ -19,7 +19,7 @@ use Request;
  */
 class Pdf extends AbstractType implements FromView, WithEvents, WithDrawings
 {
-    const LOGO_HEIGHT = 180;
+    const LOGO_HEIGHT = 50;
 
     /**
      * @return View
@@ -46,8 +46,8 @@ class Pdf extends AbstractType implements FromView, WithEvents, WithDrawings
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
-                $fromCeil = 'B2';
-                $linkCeil = 'C2';
+                $fromCeil = 'B1';
+                $linkCeil = 'C1';
 
                 $fromText = "Exported from: "; // TODO Should be translated !!
 
@@ -56,28 +56,48 @@ class Pdf extends AbstractType implements FromView, WithEvents, WithDrawings
                 $link->setUrl($frontUrl);
 
                 // Disable table borders
-                $event->sheet->getDelegate()->setShowGridlines(false);
+                $event->sheet->getDelegate()->setShowGridlines(true);
 
                 // Set hyperlink to exported from
                 $event->sheet->getDelegate()->getCell($linkCeil)->setValue($frontUrl)->setHyperlink($link);
                 $event->sheet->getDelegate()->getCell($fromCeil)->setValue($fromText);
 
                 // Columns width formatting
-                $event->sheet->getDelegate()->getColumnDimension('A')->setWidth(20);
+                $event->sheet->getDelegate()->getColumnDimension('A')->setWidth(25);
                 $event->sheet->getDelegate()->getColumnDimension('B')->setAutoSize(true);
-                $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(20);
-                $event->sheet->getDelegate()->getColumnDimension('C')->setCollapsed(true);
-                $event->sheet->getDelegate()->getColumnDimension('D')->setWidth(20);
+                $event->sheet->getDelegate()->getColumnDimension('C')->setWidth(25);
 
-                $event->sheet->getDelegate()->getStyle('A1:' . $event->sheet->getDelegate()->getHighestDataColumn() . $this->collection->count())
-                    ->getAlignment()->setWrapText(true);
-                $event->sheet->getDelegate()->getColumnDimension('D')->setWidth(25);
+                $event->sheet->getDelegate()->getStyle('A1:' . $event->sheet->getDelegate()->getHighestColumn() . '1')
+                    ->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_NONE,
+                            ]
+                        ]
+                    ]);
 
-                // Set headers alignment 'center'
-                $event->sheet->getDelegate()->getStyle('A3:' . $event->sheet->getDelegate()->getHighestDataColumn() . $this->collection->count())
-                    ->getAlignment()->setHorizontal(Alignment::HORIZONTAL_CENTER);
-                $event->sheet->getDelegate()->getStyle('A3:' . $event->sheet->getDelegate()->getHighestDataColumn() . $this->collection->count())
-                    ->getAlignment()->setVertical(Alignment::VERTICAL_CENTER);
+                $event->sheet->getDelegate()->getStyle('A2:' .  $event->sheet->getDelegate()->getHighestColumn() . '2')
+                    ->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_NONE,
+                            ]
+                        ]
+                    ]);
+
+                $sortedCells = $event->sheet->getDelegate()->getCellCollection()->getSortedCoordinates();
+                $lastCell = $sortedCells[count($sortedCells) - 1];
+                $event->sheet->getDelegate()->getStyle('A3:' . $lastCell)
+                    ->applyFromArray([
+                        'borders' => [
+                            'allBorders' => [
+                                'borderStyle' => Border::BORDER_THIN,
+                                'color' => [
+                                    'rgb' => '000000'
+                                ]
+                            ],
+                        ],
+                    ]);
             }
         ];
     }

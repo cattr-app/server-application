@@ -31,39 +31,38 @@ $collection->each(function ($row) use ($headings, &$dates) {
 
 <br>
 <br>
-<div>
-    @foreach($dates as $title => $data)
-        <h3>{{ $title }}</h3>
-        <table>
-            <thead>
-            <tr>
-                <td style="font-weight: bold">
-                    {{ $headings[USER_INDEX] }}
+<br>
+@foreach($dates as $title => $data)
+    <h3>{{ $title }}</h3>
+    <table style="border: 1px solid black;">
+        <thead>
+        <tr style="border: 1px solid black;">
+            <td style="border: 1px solid black;font-weight: bold">
+                {{ $headings[USER_INDEX] }}
+            </td>
+            <td style="border: 1px solid black;font-weight: bold">
+                {{ $headings[TOTAL_INDEX] }}
+            </td>
+            <td style="border: 1px solid black;font-weight: bold">
+                {{ $headings[TOTAL_DECIMAL_INDEX] }}
+            </td>
+        </tr>
+        </thead>
+        <tbody>
+        @foreach($data as $userName => $values)
+            <tr style="border: 1px solid black;">
+                <td style="border: 1px solid black;font-style: italic;">
+                    {{ $values[$headings[USER_INDEX]] }}
                 </td>
-                <td style="font-weight: bold">
-                    {{ $headings[TOTAL_INDEX] }}
+                <td style="border: 1px solid black;">
+                    {{ $values[$headings[TOTAL_INDEX]] }}
                 </td>
-                <td style="font-weight: bold">
-                    {{ $headings[TOTAL_DECIMAL_INDEX] }}
+                <td style="border: 1px solid black;">
+                    {{ $values[$headings[TOTAL_DECIMAL_INDEX]] }}
                 </td>
             </tr>
-            </thead>
-            <tbody>
-            @foreach($data as $userName => $values)
-                <tr>
-                    <td style="font-style: italic;">
-                        {{ $values[$headings[USER_INDEX]] }}
-                    </td>
-                    <td>
-                        {{ $values[$headings[TOTAL_INDEX]] }}
-                    </td>
-                    <td>
-                        {{ $values[$headings[TOTAL_DECIMAL_INDEX]] }}
-                    </td>
-                </tr>
-            @endforeach
-            </tbody>
-        </table>
-    @endforeach
-</div>
+        @endforeach
+        </tbody>
+    </table>
+@endforeach
 
