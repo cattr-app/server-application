@@ -200,7 +200,8 @@ class SynchronizeTasks extends Command
         //get tasks assigned to current user
         $tasksData = $client->issue->all([
             'limit' => 1000,
-            'assigned_to_id' => $currentRedmineUserId
+            'assigned_to_id' => $currentRedmineUserId,
+            'status_id' => '*'
         ]);
 
         $tasks = $tasksData['issues'];
