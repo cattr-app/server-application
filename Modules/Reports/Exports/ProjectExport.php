@@ -9,10 +9,8 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 
-class ProjectExport implements FromCollection, ShouldAutoSize
+class ProjectExport implements Exportable
 {
     const ROUND_DIGITS = 3;
 
@@ -247,5 +245,13 @@ class ProjectExport implements FromCollection, ShouldAutoSize
         });
 
         return collect($resultCollection);
+    }
+
+    /**
+     * @return string
+     */
+    public function getExporterName(): string
+    {
+        return 'projectReport';
     }
 }

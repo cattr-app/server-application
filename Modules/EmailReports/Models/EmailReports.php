@@ -8,6 +8,10 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Maatwebsite\Excel\Excel;
 use Modules\EmailReports\StatisticExports\Invoices;
 use Modules\EmailReports\StatisticExports\ProjectReport;
+use Modules\Reports\Exports\Exportable;
+use Modules\Reports\Exports\Types\Csv;
+use Modules\Reports\Exports\Types\Pdf;
+use Modules\Reports\Exports\Types\Xlsx;
 
 /**
  * Class EmailReports
@@ -29,11 +33,11 @@ class EmailReports extends AbstractModel
 
     // TODO If we will have any new export type of statistic doc - we need to add it here and create a class in StatisticExport
     const AVAILABLE_STATISTIC_TYPES = [
-        0 => [
+        [
             'class' => Invoices::class,
             'name'  => 'Invoice Report'
         ],
-        1 => [
+        [
             'class' => ProjectReport::class,
             'name'  => 'Project Report'
         ],
@@ -98,28 +102,36 @@ class EmailReports extends AbstractModel
 
     /**
      * @param EmailReports $emailReport
-     * @return array
+     * @param Exportable $exporter
+     * @return Csv|Pdf|Xlsx
      */
-    public static function getDocumentType(EmailReports $emailReport): array
+    public static function getTypeExporter(EmailReports $emailReport, Exportable $exporter)
     {
         switch (trim(strtolower($emailReport->document_type))) {
             case 'csv':
-                $type = Excel::CSV;
-                $fsType = 'csv';
+                $writerType = Excel::CSV;
+                $fileNameType = 'csv';
+                $report = new Csv();
+
                 break;
             case 'pdf':
-                $type = Excel::MPDF;
-                $fsType = Excel::MPDF;
+                $writerType = Excel::MPDF;
+                $fileNameType = 'pdf';
+                $report = new Pdf();
+
                 break;
             default:
-                $type = Excel::XLSX;
-                $fsType = 'xlsx';
+                $writerType = Excel::XLSX;
+                $fileNameType = 'xlsx';
+                $report = new Xlsx();
+
+                break;
         }
 
-        return [
-            'type' => $type,
-            'fsType' => $fsType,
-        ];
+        $report->setExportableName($exporter->getExporterName());
+        $report->setFileNameType($fileNameType);
+        $report->setWriterType($writerType);
+        return $report;
     }
 
     /**
@@ -128,8 +140,7 @@ class EmailReports extends AbstractModel
      */
     public static function getExporterClass(EmailReports $emailReport)
     {
-        return self::AVAILABLE_STATISTIC_TYPES[$emailReport->statistic_type]['class'];
-
+        return app(self::AVAILABLE_STATISTIC_TYPES[$emailReport->statistic_type]['class']);
     }
 
     /**

@@ -118,8 +118,8 @@ class EmailReportsController extends ItemController
      */
     public function saveRelations(EmailReports $emailReport, array $requestData): EmailReports
     {
-        $projectIds = $requestData['project_ids'];
-        $requestEmails = $requestData['emails'];
+        $projectIds = $requestData['project_ids'] ?? [];
+        $requestEmails = $requestData['emails'] ?? [];
 
         $emailReport->projects()->delete();
         $emailReport->emails()->delete();
