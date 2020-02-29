@@ -26,7 +26,7 @@ class ProjectReportsController extends AbstractReportsController
     public static function getControllerRules(): array
     {
         return [
-            'getReport' => 'invoices.list',
+            'getReport' => 'project-report.projects',
         ];
     }
 }

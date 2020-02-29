@@ -23,7 +23,7 @@ class InvoicesReportsController extends AbstractReportsController
     public static function getControllerRules(): array
     {
         return [
-            'getReport' => 'project-report.projects',
+            'getReport' => 'invoices.list',
         ];
     }
 }
