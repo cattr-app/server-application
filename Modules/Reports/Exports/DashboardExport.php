@@ -26,8 +26,8 @@ class DashboardExport implements Exportable
     public function collection(): Collection
     {
         // Please verify that start_at and end_at are fetched in ISO format !
-        $queryData = request()->only('start_at', 'end_at', 'user_ids', 'project_ids');
-        if (!Arr::has($queryData, ['start_at', 'end_at', 'user_ids'])) {
+        $queryData = request()->only('start_at', 'end_at', 'user_ids', 'project_ids', 'order_by');
+        if (!Arr::has($queryData, ['start_at', 'end_at', 'user_ids', 'order_by'])) {
             throw new Exception('Requested data was not found in request body');
         }
 
@@ -55,6 +55,16 @@ class DashboardExport implements Exportable
 
             return $collection;
         });
+
+        $order = $queryData['order_by'] ?? 'asc';
+        $preparedCollection = $preparedCollection->toArray();
+
+        usort($preparedCollection, function ($a, $b) use ($order) {
+            return $order === 'asc'
+                ? $a['time_worked'] <=> $b['time_worked']
+                : -($a['time_worked'] <=> $b['time_worked']);
+        });
+        $preparedCollection = collect($preparedCollection);
 
         // Create collection which are going to be used for Excel lib
         $returnableData = collect([]);
