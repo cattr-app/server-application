@@ -61,7 +61,7 @@ class ReportsSender
         $isStored = $typeExporter->store($exporter->exportCollection($queryData), $filePath);
 
         if (!$isStored) {
-            Log::alert('Temp File was not saved!');
+            Log::error('Temp File was not saved!');
             return;
         }
 
@@ -77,12 +77,12 @@ class ReportsSender
             );
 
         if (Mail::failures()) {
-            Log::alert('Unfortunately we wasn\'t able to send messages for this recipients: ' . print_r(Mail::failures()));
+            Log::error('Unfortunately we wasn\'t able to send messages for this recipients: ' . var_dump(Mail::failures()));
         }
 
         if (Storage::exists($filePath)) {
             if(!Storage::delete($filePath)) {
-                Log::alert('File ' . $filePath . ' was not deleted!');
+                Log::error('File ' . $filePath . ' was not deleted!');
                 return;
             }
         }

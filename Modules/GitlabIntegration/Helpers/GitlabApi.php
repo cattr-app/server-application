@@ -6,6 +6,7 @@ use App\Models\Property;
 use App\Models\User;
 use Gitlab\Client;
 use Gitlab\ResultPager;
+use Illuminate\Support\Facades\Log;
 
 class GitlabApi
 {
@@ -58,11 +59,7 @@ class GitlabApi
         try {
             $this->client = Client::create($this->apiUrl)->authenticate($this->apiKey);
         } catch (\Throwable $throwable) {
-            print_r([
-                'code' => $throwable->getCode(),
-                'message' => $throwable->getMessage(),
-                'trace' => $throwable->getTrace()
-            ]);
+            Log::error($throwable);
             return null;
         }
         $this->pager = new ResultPager($this->client);
