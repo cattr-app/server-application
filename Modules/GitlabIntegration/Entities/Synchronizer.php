@@ -65,14 +65,8 @@ class Synchronizer
         try {
             $_userGitlabTasks = $this->api->getUserTasks();
         } catch (\Throwable $throwable) {
-            Log::alert("Tasks cant be fetched for user " . $user->full_name . "\n");
-            Log::alert(
-                print_r([
-                    'code' => $throwable->getCode(),
-                    'message' => $throwable->getMessage(),
-                    'trace' => $throwable->getTrace()
-                ])
-            );
+            Log::error("Tasks cant be fetched for user " . $user->full_name . "\n");
+            Log::error($throwable);
             return false;
         }
 
@@ -85,7 +79,7 @@ class Synchronizer
 
             $project = $this->fillProject($gitlabProjectData);
             if (!$project->save()) {
-                Log::alert("For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name);
+                Log::error("For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name);
                 continue;
             }
 
@@ -107,7 +101,7 @@ class Synchronizer
 
                 $task = $this->fillTask($gitlabTaskData, $project, $user);
                 if (!$task->save()) {
-                    Log::alert( "For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name);
+                    Log::error( "For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name);
                     continue;
                 }
 
@@ -221,11 +215,7 @@ class Synchronizer
                 try {
                     $project->forceDelete();
                 } catch (\Throwable $throwable) {
-                    Log::alert(print_r([
-                        'code' => $throwable->getCode(),
-                        'message' => $throwable->getMessage(),
-                        'trace' => $throwable->getTrace()
-                    ]));
+                    Log::error($throwable);
                 }
             }
             $this->entityResolver->removeProject($diffProjectId);
@@ -238,11 +228,7 @@ class Synchronizer
                 try {
                     $task->forceDelete();
                 } catch (\Throwable $throwable) {
-                    Log::alert(print_r([
-                        'code' => $throwable->getCode(),
-                        'message' => $throwable->getMessage(),
-                        'trace' => $throwable->getTrace()
-                    ]));
+                    Log::error($throwable);
                 }
             }
             $this->entityResolver->removeTask($diffTaskId);

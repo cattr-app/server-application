@@ -30,7 +30,7 @@ class ProjectReport extends ProjectExport implements ExportableEmailReport
     public function exportCollection(array $queryData): Collection
     {
         if (!Arr::has($queryData, ['start_at', 'end_at', 'uids', 'pids'])) {
-            Log::alert('We are missing some of data needed for query! class Invoices');
+            Log::error('We are missing some of data needed for query! class Invoices');
             return collect([]);
         }
 

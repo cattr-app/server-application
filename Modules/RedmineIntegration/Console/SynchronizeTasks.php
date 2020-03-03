@@ -7,6 +7,8 @@ use App\Models\Task;
 use App\Models\User;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Facades\Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
@@ -116,7 +118,7 @@ class SynchronizeTasks extends Command
      */
     public function synchronizeTasks()
     {
-        $users = User::all();
+        $users = User::whereId(30)->get();
 
         foreach ($users as $user) {
             try {
@@ -124,7 +126,11 @@ class SynchronizeTasks extends Command
                 $this->synchronizeUserTasks($user->id);
                 $this->synchronizeUserActivity($user->id);
             } catch (Exception $e) {
-                // TODO - Add error log
+                echo "Something went wrong while Redmine Task Sync !" . var_dump([
+                        'message' => $e->getMessage(),
+                        'trace' => $e->getTrace(),
+                    ]);
+                Log::error($e);
             }
         }
     }
@@ -132,8 +138,9 @@ class SynchronizeTasks extends Command
     /**
      * Synchronize tasks for current user
      *
-     * @param  int  $userId  User's id in our system
-    */
+     * @param int $userId User's id in our system
+     * @throws Exception
+     */
     public function synchronizeUserNewTasks(int $userId)
     {
         $userNewRedmineTasks = $this->userRepo->getUserNewRedmineTasks($userId);
@@ -186,28 +193,16 @@ class SynchronizeTasks extends Command
     /**
      * Synchronize task's for current user
      *
-     * @param  int  $userId
+     * @param int $userId
      *
-     * @return array
+     * @throws Exception
      */
-    public function synchronizeUserTasks(int $userId): array
+    public function synchronizeUserTasks(int $userId)
     {
         $client = $this->clientFactory->createUserClient($userId);
         //get current user's id
         $currentRedmineUser = $client->user->getCurrentUser();
         $currentRedmineUserId = $currentRedmineUser['user']['id'];
-
-        //get tasks assigned to current user
-        $tasksData = $client->issue->all([
-            'limit' => 1000,
-            'assigned_to_id' => $currentRedmineUserId,
-            'status_id' => '*'
-        ]);
-
-        $tasks = $tasksData['issues'];
-        $addedTasksCounter = 0;
-        $changedTasksCounter = 0;
-        $synchronizedTasks = [];
 
         $statuses = $this->status->getAll();
         $activeStatuses = array_filter($statuses, function ($status) {
@@ -219,133 +214,74 @@ class SynchronizeTasks extends Command
 
         $priorities = $this->priority->getAll();
 
-        foreach ($tasks as $taskFromRedmine) {
-            $synchronizedTasks[] = $taskFromRedmine['id'];
+        // Total user Tasks
+        $tasksInfo = $client->issue->all([
+            'limit' => 1,
+            'assigned_to_id' => $currentRedmineUserId,
+            'status_id' => '*'
+        ]);
 
-            $taskExist = (new Property)->where([
-                ['entity_type', '=', Property::TASK_CODE],
-                ['name', '=', 'REDMINE_ID'],
-                ['value', '=', $taskFromRedmine['id']]
-            ])->first();
+        $limit = 100;
+        $totalTasks = $tasksInfo['total_count'];
+        $chunkNums = (int) ceil($totalTasks / $limit);
 
-            //if task already exists => check if task's properties is changed
-            if ($taskExist != null) {
-                $task = Task::find($taskExist->entity_id);
-                $is_changed = false;
+        $synchronizedTasks = [];
+        for ($chunkNum = 0; $chunkNum <= $chunkNums; $chunkNum++) {
 
-                $user_redmine_url = $this->userRepo->getUserRedmineUrl($userId);
-                if (substr($user_redmine_url, -1) !== '/') {
-                    $user_redmine_url .= '/';
+            //get tasks assigned to current user
+            $tasksData = $client->issue->all([
+                'offset' => $limit * $chunkNum,
+                'limit' => $limit,
+                'assigned_to_id' => $currentRedmineUserId,
+                'status_id' => '*'
+            ]);
+
+            $tasks = $tasksData['issues'] ?? [];
+
+            foreach ($tasks as $taskFromRedmine) {
+                $synchronizedTasks[] = $taskFromRedmine['id'];
+
+                $taskExist = (new Property)->where([
+                    ['entity_type', '=', Property::TASK_CODE],
+                    ['name', '=', 'REDMINE_ID'],
+                    ['value', '=', $taskFromRedmine['id']]
+                ])->first();
+
+                //if task already exists => check if task's properties is changed
+                if ($taskExist != null) {
+                    $task = Task::find($taskExist->entity_id);
+
+                    // If we dont have a task by find method - task was soft deleted, need to delete it from Properties as well
+                    if (!$task) {
+                        $taskExist->forceDelete();
+                        continue;
+                    }
+
+                    $this->maybeUpdateTask($userId, $taskFromRedmine, $priorities, $activeStatusIDs, $task);
+                    continue;
                 }
 
-                // Get internal priority ID from a Redmine priority.
-                $priority = array_first($priorities, function ($priority) use ($taskFromRedmine) {
-                    return $priority['id'] === $taskFromRedmine['priority']['id'];
-                });
-                $priority_id = isset($priority) ? $priority['priority_id'] : 0;
-
-                $data = [
-                    'task_name' => $taskFromRedmine['subject'],
-                    'description' => $taskFromRedmine['description'],
-                    'active' => in_array($taskFromRedmine['status']['id'], $activeStatusIDs),
-                    'user_id' => $userId,
-                    'url' => $user_redmine_url.'issues/'.$taskFromRedmine['id'],
-                    'priority_id' => $priority_id,
-                ];
-
-                // Get project related to the task.
                 $projectProperty = Property::where([
                     ['entity_type', '=', Property::PROJECT_CODE],
                     ['name', '=', 'REDMINE_ID'],
                     ['value', '=', $taskFromRedmine['project']['id']]
                 ])->first();
 
-                // If project exists, update task project ID.
+                //if task's project exists in our system => add task
                 if ($projectProperty && $projectProperty->entity_id) {
-                    $data['project_id'] = $projectProperty->entity_id;
+                    $this->createNewlySyncedTask($priorities, $taskFromRedmine, $projectProperty, $userId, $activeStatusIDs);
                 }
-
-                foreach ($data as $key => $value) {
-                    if ($task->$key !== $value) {
-                        $task->$key = $value;
-                        $is_changed = true;
-                    }
-                }
-
-                $storedStatusId = $this->taskRepo->getRedmineStatusId($task->id);
-                $redmineStatusId = $taskFromRedmine['status']['id'];
-
-                if ($redmineStatusId != $storedStatusId) {
-                    $this->taskRepo->setRedmineStatusId($task->id, $redmineStatusId);
-                    $is_changed = true;
-                }
-
-                if ($is_changed) {
-                    $task->save();
-                    $changedTasksCounter++;
-                }
-
-                continue;
             }
 
-            $projectProperty = Property::where([
-                ['entity_type', '=', Property::PROJECT_CODE],
-                ['name', '=', 'REDMINE_ID'],
-                ['value', '=', $taskFromRedmine['project']['id']]
-            ])->first();
-
-            //if task's project exists in our system => add task
-            if ($projectProperty && $projectProperty->entity_id) {
-                // Get internal priority ID from a Redmine priority.
-                $priority = array_first($priorities, function ($priority) use ($taskFromRedmine) {
-                    return $priority['id'] === $taskFromRedmine['priority']['id'];
-                });
-                $priority_id = isset($priority) ? $priority['priority_id'] : 0;
-
-                $user_redmine_url = $this->userRepo->getUserRedmineUrl($userId);
-                if (substr($user_redmine_url, -1) !== '/') {
-                    $user_redmine_url .= '/';
-                }
-
-                //TODO: add assigned_by from our system
-                $taskInfo = [
-                    'project_id' => $projectProperty->entity_id,
-                    'task_name' => $taskFromRedmine['subject'],
-                    'description' => $taskFromRedmine['description'],
-                    'active' => in_array($taskFromRedmine['status']['id'], $activeStatusIDs),
-                    'user_id' => $userId,
-                    'assigned_by' => 1,
-                    'url' => $user_redmine_url.'issues/'.$taskFromRedmine['id'],
-                    'priority_id' => $priority_id,
-                ];
-
-                $task = Task::create($taskInfo);
-                $addedTasksCounter++;
-
-                //Add task redmine id property
-                Property::create([
-                    'entity_id' => $task->id,
-                    'entity_type' => Property::TASK_CODE,
-                    'name' => 'REDMINE_ID',
-                    'value' => $taskFromRedmine['id']
-                ]);
-            }
         }
 
         //check: if any task has been closed
-        $changedTasksCounter += $this->checkClosedTasks($userId, $synchronizedTasks);
-
-        return [
-            'added_tasks' => $addedTasksCounter,
-            'changed_tasks' => $changedTasksCounter
-        ];
+       $this->checkClosedTasks($userId, $synchronizedTasks);
     }
 
-    protected function checkClosedTasks(int $userId, array $redmineSynchronizedTasks): int
+    protected function checkClosedTasks(int $userId, array $redmineSynchronizedTasks)
     {
         $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($userId);
-        $closedTasksCounter = 0;
-
         foreach ($userLocalRedmineTasksIds as $taskIds) {
             if (!in_array($taskIds->redmine_id, $redmineSynchronizedTasks)) {
                 $localTask = Task::findOrFail($taskIds->task_id);
@@ -353,25 +289,20 @@ class SynchronizeTasks extends Command
                 if ($localTask && $localTask->active == 1) {
                     $localTask->active = 0;
                     $localTask->save();
-
-                    $closedTasksCounter++;
                 }
             }
         }
-
-        return $closedTasksCounter;
     }
 
     /**
      * Synchronize user task activity for userId
      *
-     * @param  int  $userId
+     * @param int $userId
      *
-     * @return
+     * @throws Exception
      */
     public function synchronizeUserActivity(int $userId)
     {
-        $userRepo = $this->userRepo;
         $taskRepo = $this->taskRepo;
         $client = $this->clientFactory->createUserClient($userId);
         $activeStatusId = $this->status->getActiveStatusID();
@@ -412,8 +343,9 @@ class SynchronizeTasks extends Command
     /**
      * get last user time activity
      *
-     * @param  string  $userId
+     * @param string $userId
      *
+     * @param $timeout
      * @return TimeActivity|null
      */
     protected function userTimeActivity(string $userId, $timeout)
@@ -472,5 +404,101 @@ class SynchronizeTasks extends Command
         }
 
         return in_array($redmineStatusId, $statusesList);
+    }
+
+    private function createNewlySyncedTask(array $priorities, array $taskFromRedmine, Model $projectProperty, int $userId, array $activeStatusIDs)
+    {
+        // Get internal priority ID from a Redmine priority.
+        $priority = array_first($priorities, function ($priority) use ($taskFromRedmine) {
+            return $priority['id'] === $taskFromRedmine['priority']['id'];
+        });
+        $priority_id = isset($priority) ? $priority['priority_id'] : 0;
+
+        $user_redmine_url = $this->userRepo->getUserRedmineUrl($userId);
+        if (substr($user_redmine_url, -1) !== '/') {
+            $user_redmine_url .= '/';
+        }
+
+        $taskInfo = [
+            'project_id' => $projectProperty->entity_id,
+            'task_name' => $taskFromRedmine['subject'],
+            'description' => $taskFromRedmine['description'],
+            'active' => in_array($taskFromRedmine['status']['id'], $activeStatusIDs),
+            'user_id' => $userId,
+            'assigned_by' => 1,
+            'url' => $user_redmine_url . 'issues/' . $taskFromRedmine['id'],
+            'priority_id' => $priority_id,
+        ];
+
+        $task = Task::create($taskInfo);
+
+        //Add task redmine id property
+        Property::create([
+            'entity_id' => $task->id,
+            'entity_type' => Property::TASK_CODE,
+            'name' => 'REDMINE_ID',
+            'value' => $taskFromRedmine['id']
+        ]);
+    }
+
+    private function maybeUpdateTask(int $userId, array $taskFromRedmine, array $priorities, array $activeStatusIDs, Task $task)
+    {
+        $user_redmine_url = $this->userRepo->getUserRedmineUrl($userId);
+        if (substr($user_redmine_url, -1) !== '/') {
+            $user_redmine_url .= '/';
+        }
+
+        // Get internal priority ID from a Redmine priority.
+        $priority = array_first($priorities, function ($priority) use ($taskFromRedmine) {
+            return $priority['id'] === $taskFromRedmine['priority']['id'];
+        });
+        $priority_id = isset($priority) ? $priority['priority_id'] : 0;
+
+        $data = [
+            'task_name' => $taskFromRedmine['subject'],
+            'description' => $taskFromRedmine['description'],
+            'active' => in_array($taskFromRedmine['status']['id'], $activeStatusIDs),
+            'user_id' => $userId,
+            'url' => $user_redmine_url . 'issues/' . $taskFromRedmine['id'],
+            'priority_id' => $priority_id,
+        ];
+
+        // Get project related to the task.
+        $projectProperty = Property::where([
+            ['entity_type', '=', Property::PROJECT_CODE],
+            ['name', '=', 'REDMINE_ID'],
+            ['value', '=', $taskFromRedmine['project']['id']]
+        ])->first();
+
+        // If project exists, update task project ID.
+        if ($projectProperty && $projectProperty->entity_id) {
+            $data['project_id'] = $projectProperty->entity_id;
+        }
+
+        $is_changed = $this->checkTaskFields($data, $task);
+
+        $storedStatusId = $this->taskRepo->getRedmineStatusId($task->id);
+        $redmineStatusId = $taskFromRedmine['status']['id'];
+
+        if ($redmineStatusId != $storedStatusId) {
+            $this->taskRepo->setRedmineStatusId($task->id, $redmineStatusId);
+            $is_changed = true;
+        }
+
+        if ($is_changed) {
+            $task->save();
+        }
+    }
+
+    private function checkTaskFields(array $data, Task $task)
+    {
+        foreach ($data as $key => $value) {
+            if ($task->$key !== $value) {
+                $task->$key = $value;
+                $changed = true;
+            }
+        }
+
+        return $changed ?? false;
     }
 }
