@@ -33,3 +33,4 @@ coverage/
 .DS_Store
 .phpunit.result.cache
 .php_cs.cache
+/storage/app/uploads/screenshots
