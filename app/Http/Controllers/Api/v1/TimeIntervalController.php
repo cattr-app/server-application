@@ -213,6 +213,10 @@ class TimeIntervalController extends ItemController
 
         //create screenshot
         if (isset($request->screenshot)) {
+            if( !Storage::exists('uploads/screenshots/thumbs') ){
+                Storage::makeDirectory('uploads/screenshots/thumbs');
+            }
+
             $path = Filter::process(
                 $this->getEventUniqueName('request.item.create'),
                 $request->screenshot->store('uploads/screenshots')
