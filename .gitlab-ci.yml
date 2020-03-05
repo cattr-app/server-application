@@ -41,3 +41,32 @@ apidoc_deploy:
     - npm run api-nsl
     - ssh cattr-deploy@docs.cattr.app 'rm -rf /srv/docs/api/*'
     - scp -r apidoc/* cattr-deploy@docs.cattr.app:/srv/docs/api
+
+live_deploy:
+  image: alpine
+  stage: deploy
+  only:
+    - release
+  before_script:
+    - 'which ssh-agent || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$CI_KEY" | base64 -d | ssh-add -
+    - mkdir ~/.ssh
+    - ssh-keyscan -H $CI_HOST >> ~/.ssh/known_hosts
+  script:
+    - ssh $CI_USER@$CI_HOST 'cd /opt/cattr/backend && git pull && php artisan migrate'
+
+demo_deploy:
+  image: alpine
+  stage: deploy
+  only:
+    - demo
+  before_script:
+    - 'which ssh-agent || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$DEMO_CI_KEY" | base64 -d | ssh-add -
+    - mkdir ~/.ssh
+    - ssh-keyscan -H $DEMO_CI_HOST >> ~/.ssh/known_hosts
+  script:
+    - ssh $DEMO_CI_USER@$DEMO_CI_HOST 'cd demo && docker-compose build --no-cache --force-rm'
+    - ssh $DEMO_CI_USER@$DEMO_CI_HOST 'cd demo && docker-compose down -v && docker-compose up -d'
