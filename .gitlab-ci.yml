@@ -52,7 +52,7 @@ live_deploy:
     - eval $(ssh-agent -s)
     - echo "$CI_KEY" | base64 -d | ssh-add -
     - mkdir ~/.ssh
-    - ssh-keyscan -H $CI_HOST >> ~/.ssh/known_hosts
+    - ssh-keyscan -H $CI_HOST -p $CI_PORT >> ~/.ssh/known_hosts
   script:
     - ssh $CI_USER@$CI_HOST -p $CI_PORT 'cd /opt/cattr/backend && git pull && php artisan migrate'
 
