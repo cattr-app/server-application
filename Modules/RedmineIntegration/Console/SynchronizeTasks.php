@@ -118,7 +118,7 @@ class SynchronizeTasks extends Command
      */
     public function synchronizeTasks()
     {
-        $users = User::whereId(30)->get();
+        $users = User::all();
 
         foreach ($users as $user) {
             try {
@@ -126,10 +126,10 @@ class SynchronizeTasks extends Command
                 $this->synchronizeUserTasks($user->id);
                 $this->synchronizeUserActivity($user->id);
             } catch (Exception $e) {
-                echo "Something went wrong while Redmine Task Sync !" . var_dump([
-                        'message' => $e->getMessage(),
-                        'trace' => $e->getTrace(),
-                    ]);
+                echo "Something went wrong while Redmine Task Sync ! \n";
+                echo "Error message: " . $e->getMessage() . "\n";
+                echo "Error trace: \n" . $e->getTraceAsString() . "\n\n";
+
                 Log::error($e);
             }
         }
@@ -201,8 +201,15 @@ class SynchronizeTasks extends Command
     {
         $client = $this->clientFactory->createUserClient($userId);
         //get current user's id
-        $currentRedmineUser = $client->user->getCurrentUser();
-        $currentRedmineUserId = $currentRedmineUser['user']['id'];
+        $currentRedmineUser = $client->user->getCurrentUser() ?: [];
+        $redmineUser = $currentRedmineUser['user'] ?? false;
+
+        if (!$redmineUser) {
+            // User have no redmine integration or wrong api key
+            return;
+        }
+
+        $currentRedmineUserId = $redmineUser['id'];
 
         $statuses = $this->status->getAll();
         $activeStatuses = array_filter($statuses, function ($status) {
@@ -227,7 +234,6 @@ class SynchronizeTasks extends Command
 
         $synchronizedTasks = [];
         for ($chunkNum = 0; $chunkNum <= $chunkNums; $chunkNum++) {
-
             //get tasks assigned to current user
             $tasksData = $client->issue->all([
                 'offset' => $limit * $chunkNum,
@@ -455,8 +461,8 @@ class SynchronizeTasks extends Command
         $priority_id = isset($priority) ? $priority['priority_id'] : 0;
 
         $data = [
-            'task_name' => $taskFromRedmine['subject'],
-            'description' => $taskFromRedmine['description'],
+            'task_name' => $taskFromRedmine['subject'] ?? '',
+            'description' => $taskFromRedmine['description'] ?? '',
             'active' => in_array($taskFromRedmine['status']['id'], $activeStatusIDs),
             'user_id' => $userId,
             'url' => $user_redmine_url . 'issues/' . $taskFromRedmine['id'],
