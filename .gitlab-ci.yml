@@ -54,7 +54,7 @@ live_deploy:
     - mkdir ~/.ssh
     - ssh-keyscan -H $CI_HOST >> ~/.ssh/known_hosts
   script:
-    - ssh $CI_USER@$CI_HOST 'cd /opt/cattr/backend && git pull && php artisan migrate'
+    - ssh $CI_USER@$CI_HOST -p $CI_PORT 'cd /opt/cattr/backend && git pull && php artisan migrate'
 
 demo_deploy:
   image: alpine
