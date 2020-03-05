@@ -210,6 +210,10 @@ class ScreenshotController extends ItemController
                 400);
         }
 
+        if( !Storage::exists('uploads/screenshots/thumbs') ){
+            Storage::makeDirectory('uploads/screenshots/thumbs');
+        }
+
         $screenStorePath = $request->screenshot->store('uploads/screenshots');
         $absoluteStorePath = Storage::disk()->path($screenStorePath);
         $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
