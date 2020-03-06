@@ -74,10 +74,10 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property string $deleted_at
  * @property bool $important
  * @property TimeInterval[] $timeIntervals
- * @property User[]         $user
- * @property User[]         $assigned
- * @property Project[]      $project
- * @property Priority       $priority
+ * @property User $user
+ * @property User $assigned
+ * @property Project $project
+ * @property Priority $priority
  * @method static bool|null forceDelete()
  * @method static QueryBuilder|Task onlyTrashed()
  * @method static bool|null restore()

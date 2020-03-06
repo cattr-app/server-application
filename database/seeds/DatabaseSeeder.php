@@ -6,12 +6,11 @@ class DatabaseSeeder extends Seeder
 {
     /**
      * Run the database seeds.
-     *
-     * @return void
      */
-    public function run()
+    public function run(): void
     {
         $this->call(RoleSeeder::class);
+        $this->call(ScreenshotSeeder::class);
         $this->call(AdminTableSeeder::class);
         $this->call(UsersTableSeeder::class);
         $this->call(TaskListSeeder::class);

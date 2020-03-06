@@ -11,15 +11,14 @@ use Illuminate\Database\Seeder;
 
 class TaskListSeeder extends Seeder
 {
-    /**
-     * @var Generator
-     */
-    protected $faker;
+
+    protected Generator $faker;
+
+    protected const PROTECTED_FILES = ['uploads/screenshots/.gitignore'];
 
     /**
      * Run the database seeds.
-     *
-     * @return void
+     * @throws Exception
      */
     public function run(): void
     {
@@ -34,17 +33,18 @@ class TaskListSeeder extends Seeder
         $this->command->getOutput()->writeln('<fg=green>Dummy data has been seeded</>');
     }
 
+    /**
+     * @throws Exception
+     */
     protected function seedProjects(User $user): void
     {
-        $faker = $this->faker;
-
         $this->command->getOutput()->writeln("<fg=yellow>- Seed data for user #{$user->id}</>");
 
         foreach (range(0, 4) as $i) {
             $project = Project::create([
                 'company_id' => $i,
-                'name' => $faker->text($i * 10 + 5),
-                'description' => $faker->text($i * 100 + 5),
+                'name' => $this->faker->text($i * 10 + 5),
+                'description' => $this->faker->text($i * 100 + 5),
             ]);
 
             $this->command->getOutput()->writeln("<fg=cyan>- Project #{$project->id}</>");
@@ -53,15 +53,16 @@ class TaskListSeeder extends Seeder
         }
     }
 
+    /**
+     * @throws Exception
+     */
     protected function seedTasks(Project $project, User $user): void
     {
-        $faker = $this->faker;
-
         foreach (range(0, 20) as $i) {
             $task = Task::create([
                 'project_id' => $project->id,
-                'task_name' => $faker->text(15 + $i),
-                'description' => $faker->text(100 + $i * 15),
+                'task_name' => $this->faker->text(15 + $i),
+                'description' => $this->faker->text(100 + $i * 15),
                 'active' => true,
                 'user_id' => $user->id,
                 'assigned_by' => $user->id,
@@ -74,23 +75,26 @@ class TaskListSeeder extends Seeder
         }
     }
 
+    /**
+     * @throws Exception
+     */
     protected function seedTimeIntervals(Task $task, User $user): void
     {
         static $time = [];
 
         if (!isset($time[$user->id])) {
-            $time[$user->id] = gmmktime(0, 0, 0);
+            $time[$user->id] = time();
         }
 
         foreach (range(0, 4) as $i) {
 
             $this->command->getOutput()->writeln("<fg=cyan>--- {$task->project->id}.{$task->id}. Interval #{$i}</>");
 
-            $offsetBetweenIntervals = rand(0, 60 * 60 * 5);
+            $intervalsOffset = random_int(0, 60 * 60 * 5);
 
-            $start = $time[$user->id] + $offsetBetweenIntervals;
-            $time[$user->id] += rand($offsetBetweenIntervals, 60 * 60 * 5);
-            $end = $time[$user->id];
+            $end = $time[$user->id] - $intervalsOffset;
+            $time[$user->id] -= random_int($intervalsOffset, 60 * 60 * 5);
+            $start = $time[$user->id];
 
             $interval = TimeInterval::create([
                 'task_id' => $task->id,
@@ -101,57 +105,20 @@ class TaskListSeeder extends Seeder
                 'count_keyboard' => 43
             ]);
 
-            $this->seedScreenshot($interval, $user);
+            $this->seedScreenshot($interval);
         }
     }
 
-    /** @var bool */
-    protected $_isScreenshotDownloaded = false;
-
-    protected $_filePath;
-
-    protected $_fileData;
-
-    protected function seedScreenshot(TimeInterval $interval, User $user): void
+    protected function seedScreenshot(TimeInterval $interval): void
     {
-        if ($this->_isScreenshotDownloaded === false) {
-            $placeholderLink = "https://via.placeholder.com/1600x900/{$this->random_color()}/{$this->random_color()}.png?"
-                .http_build_query([
-                    'text' => "#{$interval->id} - {$interval->task->task_name}",
-                ]);
-
-            $this->_isScreenshotDownloaded = true;
-            $this->_fileData = file_get_contents($placeholderLink);
-        }
-
-        $filePath = "uploads/screenshots/{$user->id}_{$interval->task_id}_{$interval->id}.png";
-
-        /** @var Illuminate\Filesystem\FilesystemAdapter $disk */
-        $disk = Storage::disk('local');
-
-        if (!$disk->exists($filePath)) {
-            $this->command->getOutput()->writeln('<fg=cyan>---- Generate Screenshot</>');
-
-
-            $disk->put($filePath, $this->_fileData);
-        }
-
-        $this->_filePath = $filePath;
-
+        $screenshots = array_diff(Storage::files('uploads/screenshots'), self::PROTECTED_FILES);
+        $path = $screenshots[array_rand($screenshots)];
+        $thumbnail = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
 
         Screenshot::create([
             'time_interval_id' => $interval->id,
-            'path' => $this->_filePath,
+            'path' => $path,
+            'thumbnail_path' => $thumbnail
         ]);
-    }
-
-    protected function random_color_part(): string
-    {
-        return str_pad(dechex(random_int(0, 255)), 2, '0', STR_PAD_LEFT);
-    }
-
-    protected function random_color(): string
-    {
-        return $this->random_color_part().$this->random_color_part().$this->random_color_part();
     }
 }
