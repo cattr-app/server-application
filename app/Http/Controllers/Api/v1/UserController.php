@@ -681,7 +681,7 @@ class UserController extends ItemController
     public function saveRelations(User $user, array $requestData): User
     {
         $user->projectsRelation()->delete();
-        $projectRoles = $requestData['project_roles'] ?? [];
+        $projectRoles = $requestData['projects_relation'] ?? [];
 
         $relations = [];
         foreach ($projectRoles as $relation) {
