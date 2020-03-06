@@ -11,21 +11,20 @@ use Symfony\Component\Console\Output\ConsoleOutput;
  */
 class AdminTableSeeder extends Seeder
 {
+    private const EMAIL = 'admin@example.com';
+    private const PASSWORD = 'admin';
+
     /**
      * Run the database seeds.
      */
     public function run(): void
     {
-        $login = 'admin@example.com';
-        $pass = 'admin';
-
         if (!User::where('is_admin', true)->exists()) {
             $this->command->getOutput()->writeln('<fg=yellow>Create admin user</>');
 
-            /** @var User $admin */
-            $admin = User::query()->updateOrCreate([
+            User::updateOrCreate([
                 'full_name' => 'Admin',
-                'email' => $login,
+                'email' => self::EMAIL,
                 'url' => '',
                 'company_id' => 1,
                 'payroll_access' => 1,
@@ -41,7 +40,7 @@ class AdminTableSeeder extends Seeder
                 'webcam_shots' => 0,
                 'screenshots_interval' => 9,
                 'active' => true,
-                'password' => bcrypt($pass),
+                'password' => bcrypt(self::PASSWORD),
                 'is_admin' => true,
                 'role_id' => 2,
             ]);
