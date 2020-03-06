@@ -21,14 +21,14 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule): void
     {
-        $schedule->command('redmine-synchronize:tasks')->everyMinute();
-        $schedule->command('redmine-synchronize:projects')->everyFiveMinutes();
-        $schedule->command('redmine-synchronize:users')->everyFiveMinutes();
-        $schedule->command('redmine-synchronize:time')->everyFiveMinutes();
-        $schedule->command('redmine-synchronize:priorities')->everyFifteenMinutes();
-        $schedule->command('redmine-synchronize:statuses')->everyFifteenMinutes();
-        $schedule->command('gitlab:sync')->everyMinute();
-        $schedule->command('gitlab:time:sync')->everyFiveMinutes();
+        $schedule->command('redmine-synchronize:tasks')->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command('redmine-synchronize:projects')->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command('redmine-synchronize:users')->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command('redmine-synchronize:time')->everyFiveMinutes()->withoutOverlapping();
+        $schedule->command('redmine-synchronize:priorities')->everyFifteenMinutes()->withoutOverlapping();
+        $schedule->command('redmine-synchronize:statuses')->everyFifteenMinutes()->withoutOverlapping();
+        $schedule->command('gitlab:sync')->everyMinute()->withoutOverlapping();
+        $schedule->command('gitlab:time:sync')->everyFiveMinutes()->withoutOverlapping();
     }
 
     /**
