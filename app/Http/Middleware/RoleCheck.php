@@ -24,8 +24,6 @@ class RoleCheck
         //TODO decomposition
 
         if (!auth()->check()) {
-            return new JsonResponse(['nice'=> 'auth-check']);
-
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 

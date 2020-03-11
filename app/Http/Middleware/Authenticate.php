@@ -30,11 +30,9 @@ class Authenticate extends BaseAuthenticate
      */
     public function handle($request, Closure $next, ...$guards)
     {
-
         try {
             JWTAuth::parseToken()->getClaim('exp');
         } catch (JWTException $exception) {
-            return new JsonResponse(['nice'=> $exception->getMessage()]);
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
