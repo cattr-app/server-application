@@ -234,6 +234,7 @@ class User extends Authenticatable implements JWTSubject
         'role_id',
         'is_admin',
         'user_language',
+        'type',
     ];
 
     /**
@@ -264,6 +265,7 @@ class User extends Authenticatable implements JWTSubject
         'is_admin' => 'integer',
         'role_id' => 'integer',
         'user_language' => 'string',
+        'type' => 'string',
     ];
 
 
