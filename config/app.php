@@ -65,8 +65,6 @@ return [
         Modules\EmailReports\Providers\ScheduleServiceProvider::class,
         Modules\CompanyManagement\Providers\CompanyManagementServiceProvider::class,
         Modules\Reports\Providers\ReportsServiceProvider::class,
-
-//        Backup\BackupServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,
     ],
