@@ -40,11 +40,13 @@ class Priority extends Model
         'name' => 'string',
     ];
 
-    /**
-     * @return HasMany
-     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'priority_id');
+    }
+
+    public static function getTableName(): string
+    {
+        return with(new static())->getTable();
     }
 }
