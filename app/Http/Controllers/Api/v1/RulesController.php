@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\EventFilter\Facades\Filter;
 use App\Models\Role;
 use App\Models\Rule;
-use App\EventFilter\Facades\Filter;
-use Illuminate\Support\Facades\Validator;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Validator;
 use Throwable;
 
 /**

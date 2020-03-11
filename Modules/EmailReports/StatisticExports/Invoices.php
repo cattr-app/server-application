@@ -2,22 +2,12 @@
 
 namespace Modules\EmailReports\StatisticExports;
 
-use App\Helpers\ReportHelper;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Mail;
 use Modules\EmailReports\Mail\InvoicesEmailReport;
-use Modules\EmailReports\Models\EmailReports;
-use Modules\Invoices\Models\Invoices as InvoiceModel;
-use Modules\Invoices\Models\UserDefaultRate;
 use Modules\Reports\Exports\InvoicesExport;
-use Modules\Reports\Exports\ProjectExport;
 
 /**
  * Class Invoices

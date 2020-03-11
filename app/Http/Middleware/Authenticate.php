@@ -2,13 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\Entities\AuthorizationException;
 use Closure;
 use Illuminate\Auth\Middleware\Authenticate as BaseAuthenticate;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Lang;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -30,9 +30,11 @@ class Authenticate extends BaseAuthenticate
      */
     public function handle($request, Closure $next, ...$guards)
     {
+
         try {
             JWTAuth::parseToken()->getClaim('exp');
         } catch (JWTException $exception) {
+            return new JsonResponse(['nice'=> $exception->getMessage()]);
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 

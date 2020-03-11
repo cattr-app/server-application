@@ -8,9 +8,9 @@ use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class ReportHelper
 {

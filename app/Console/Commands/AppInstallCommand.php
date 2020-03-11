@@ -6,13 +6,13 @@ use App\Models\Property;
 use App\Models\User;
 use DB;
 use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Client;
 use MCStreetguy\ComposerParser\Factory as ComposerParser;
 use RuntimeException;
 

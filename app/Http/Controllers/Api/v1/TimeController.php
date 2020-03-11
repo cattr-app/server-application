@@ -2,16 +2,16 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Models\Role;
-use Exception;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use App\EventFilter\Facades\Filter;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Role;
 use App\Models\TimeInterval;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class TimeController

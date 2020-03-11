@@ -2,22 +2,22 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\EventFilter\Facades\Filter;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
-use App\Rules\BetweenDate;
 use App\Models\User;
-use Exception;
-use Illuminate\Support\Facades\Auth;
+use App\Rules\BetweenDate;
 use Carbon\Carbon;
-use App\EventFilter\Facades\Filter;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -591,7 +591,7 @@ class TimeIntervalController extends ItemController
         $notFoundIds = array_diff($intervalsData->pluck('id')->toArray(), $foundIds);
 
         $itemsQuery->each(static function (Model $item) use ($intervalsData) {
-            $item->update(array_only($intervalsData->where('id', $item->id)->first(), 'task_id'));
+            $item->update(Arr::only($intervalsData->where('id', $item->id)->first(), 'task_id'));
         });
 
         $responseData = [

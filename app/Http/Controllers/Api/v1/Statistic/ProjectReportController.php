@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\EventFilter\Facades\Filter;
 use App\Helpers\ReportHelper;
 use App\Models\Project;
 use App\Models\ProjectReport;
 use App\Models\Property;
 use App\Models\TimeInterval;
-use Illuminate\Support\Facades\Auth;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
-use App\EventFilter\Facades\Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 class ProjectReportController extends ReportController

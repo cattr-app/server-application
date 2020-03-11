@@ -2,13 +2,14 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Models\ProjectsUsers;
 use App\EventFilter\Facades\Filter;
+use App\Models\ProjectsUsers;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -409,7 +410,7 @@ class ProjectsUsersController extends ItemController
 
         //filter excess params if they are provided
         $relations = collect($request->get('relations'))->map(static function ($relation) {
-            return array_only($relation, ['project_id', 'user_id']);
+            return Arr::only($relation, ['project_id', 'user_id']);
         });
 
         $filters = [

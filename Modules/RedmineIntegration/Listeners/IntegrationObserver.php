@@ -4,14 +4,11 @@ namespace Modules\RedmineIntegration\Listeners;
 
 use App\Models\Property;
 use App\Models\User;
-use Exception;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Pagination\Paginator;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;

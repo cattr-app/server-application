@@ -39,7 +39,7 @@ class TaskTest extends TestCase
 
         $this->requestData = [
             'start_at' => $this->intervals->min('start_at'),
-            'end_at' => Carbon::create($this->intervals->max('end_at'))->addMinute(),
+            'end_at' => $this->intervals->max('end_at')->addMinute(),
             'uid' => $this->intervals->first()->user->id
         ];
 

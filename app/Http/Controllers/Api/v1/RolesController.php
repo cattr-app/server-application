@@ -2,16 +2,14 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Models\ProjectsUsers;
+use App\EventFilter\Facades\Filter;
 use App\Models\Role;
 use App\Models\Rule;
 use Exception;
-use Illuminate\Support\Facades\Auth;
-use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Auth;
 
 /**
  * Class RolesController

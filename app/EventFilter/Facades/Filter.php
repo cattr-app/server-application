@@ -2,9 +2,9 @@
 
 namespace App\EventFilter\Facades;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Testing\Fakes\EventFake;
 
 /**

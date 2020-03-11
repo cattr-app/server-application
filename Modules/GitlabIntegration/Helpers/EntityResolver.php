@@ -4,8 +4,8 @@ namespace Modules\GitlabIntegration\Helpers;
 
 use App\Models\Project;
 use App\Models\Task;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Support\Facades\DB;
 
 /**
  * Class EntityResolver

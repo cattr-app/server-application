@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -70,7 +71,7 @@ use Storage;
  * @method static QueryBuilder|Screenshot withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class Screenshot extends AbstractModel
+class Screenshot extends Model
 {
     use SoftDeletes;
 

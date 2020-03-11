@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
@@ -34,7 +35,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|Property withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class Property extends AbstractModel
+class Property extends Model
 {
     use SoftDeletes;
 

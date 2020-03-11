@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Exceptions\Entities\AuthorizationException;
 use App\Models\User;
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class RoleCheck
@@ -23,6 +24,8 @@ class RoleCheck
         //TODO decomposition
 
         if (!auth()->check()) {
+            return new JsonResponse(['nice'=> 'auth-check']);
+
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
