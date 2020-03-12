@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Collection;
 
 /**
  * Class EntityResolver
-*/
+ */
 class EntityResolver
 {
     const PROJECTS_TABLE = 'gitlab_projects_relations';
@@ -91,7 +91,7 @@ class EntityResolver
     public function insertProject(int $gitlabId, Project $project): void
     {
         if (!$this->hasGitlabProject($gitlabId) && !in_array($gitlabId, $this->projectsToRemove)) {
-            $this->projectsToInsert []= [
+            $this->projectsToInsert [] = [
                 'gitlab_id' => $gitlabId,
                 'project_id' => $project->id
             ];
@@ -102,7 +102,7 @@ class EntityResolver
     public function insertTask(int $gitlabId, Task $task, int $gitlabTaskIid): void
     {
         if (!$this->hasGitlabTask($gitlabId) && !in_array($gitlabId, $this->tasksToDelete)) {
-            $this->tasksToInsert []= [
+            $this->tasksToInsert [] = [
                 'gitlab_id' => $gitlabId,
                 'task_id' => $task->id,
                 'gitlab_issue_iid' => $gitlabTaskIid // Need this field when run TimeSync
@@ -113,9 +113,15 @@ class EntityResolver
 
     public function maybeUpdateTask(int $gitlabId, int $gitlabIid)
     {
-        $taskRelations = $this->taskRelations->where('gitlab_issue_iid', '=', 0)->pluck('gitlab_id')->toArray();
+        $taskRelations = $this->taskRelations->where(
+            'gitlab_issue_iid',
+            '=',
+            0
+        )->pluck('gitlab_id')
+            ->toArray();
+
         if (in_array($gitlabId, $taskRelations)) {
-            $this->tasksToUpdate []= [
+            $this->tasksToUpdate [] = [
                 'gitlab_id' => $gitlabId,
                 'gitlab_issue_iid' => $gitlabIid
             ];
@@ -137,7 +143,7 @@ class EntityResolver
     public function removeProject(int $gitlabId): void
     {
         if ($this->hasGitlabProject($gitlabId)) {
-            $this->projectsToRemove []= $gitlabId;
+            $this->projectsToRemove [] = $gitlabId;
             unset($this->projects[$gitlabId]);
         }
     }
@@ -145,7 +151,7 @@ class EntityResolver
     public function removeTask(int $gitlabId): void
     {
         if ($this->hasGitlabTask($gitlabId)) {
-            $this->tasksToDelete []= $gitlabId;
+            $this->tasksToDelete [] = $gitlabId;
             unset($this->tasks[$gitlabId]);
         }
     }
@@ -168,7 +174,8 @@ class EntityResolver
         $this->clearProjects();
     }
 
-    private function clearTasks() {
+    private function clearTasks()
+    {
         $this->tasks = [];
         $this->tasksToInsert = [];
         $this->tasksToDelete = [];
@@ -185,6 +192,10 @@ class EntityResolver
 
     public static function getGitlabIdByProjectId(int $projectId)
     {
-        return DB::table(self::PROJECTS_TABLE)->where('project_id', '=', $projectId)->first(['gitlab_id']);
+        return DB::table(self::PROJECTS_TABLE)->where(
+            'project_id',
+            '=',
+            $projectId
+        )->first(['gitlab_id']);
     }
 }
