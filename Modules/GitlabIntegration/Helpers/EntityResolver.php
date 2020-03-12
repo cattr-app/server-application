@@ -131,13 +131,13 @@ class EntityResolver
     // difference between userProjects and our DB projects
     public function diffGitlabProjects(array $gitlabProjectsIds): array
     {
-        return array_diff($gitlabProjectsIds, array_keys($this->projects));
+        return array_diff(array_keys($this->projects), $gitlabProjectsIds);
     }
 
     // difference between userTasks and our DB tasks
     public function diffGitlabTasks(array $gitlabTasksIds): array
     {
-        return array_diff($gitlabTasksIds, array_keys($this->tasks));
+        return array_diff(array_keys($this->tasks), $gitlabTasksIds);
     }
 
     public function removeProject(int $gitlabId): void
