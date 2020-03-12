@@ -142,6 +142,11 @@ class ReportHelper
                     $createdAtFormatted = Carbon::parse($screen['created_at'])->format('Y-m-d');
                     $hoursScreenKey = Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
 
+                    // Don't add screenshots for dates without intervals
+                    if (!isset($resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$createdAtFormatted])) {
+                        continue;
+                    }
+
                     if (!array_key_exists($createdAtFormatted, $screensResultCollection)) {
                         $screensResultCollection[$createdAtFormatted] = [];
                     }
@@ -316,7 +321,7 @@ class ReportHelper
             "JSON_ARRAYAGG(
                 JSON_OBJECT(
                     'id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path,
-                    'created_at', screenshots.created_at
+                    'created_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?)
                 )
             ) as screens",
             "JSON_ARRAYAGG(
@@ -326,7 +331,7 @@ class ReportHelper
                     CONVERT_TZ(time_intervals.start_at, '+00:00', ?)
                 )
             ) as intervals"
-        ], [$timezoneOffset]);
+        ], [$timezoneOffset, $timezoneOffset]);
 
         return $query->leftJoin(
                 $this->getTableName('screenshot'),
