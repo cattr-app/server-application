@@ -32,29 +32,38 @@ class TimeSynchronizer
 
     public function synchronize()
     {
-        $timeIntervals =  $this->timeIntervalsHelper->getNotSyncedCollection();
+        $timeIntervals = $this->timeIntervalsHelper->getNotSyncedCollection();
 
         /** @var User $user */
         foreach (User::all() as $user) {
             $this->api = GitlabApi::buildFromUser($user);
             if (!$this->api) {
-                Log::info("Can`t instantiate an API for user " . $user->full_name ."\n");
+                Log::info("Can`t instantiate an API for user " . $user->full_name . "\n");
                 continue;
             }
 
             $userIntervals = TimeInterval::whereIn('id', $timeIntervals->pluck('time_interval_id'))
-                    ->where('user_id', '=', $user->id)
-                    ->get();
+                ->where('user_id', '=', $user->id)
+                ->get();
             $groupedIntervals = $userIntervals->groupBy('task_id');
 
             $durations = $this->calculateDuration($groupedIntervals);
-            $issueProjectRelations = $this->timeIntervalsHelper->getGitlabIssueProjectRelation(Task::whereIn('id', $groupedIntervals->keys())->get());
+            $issueProjectRelations = $this->timeIntervalsHelper->getGitlabIssueProjectRelation(
+                Task::whereIn('id',
+                    $groupedIntervals->keys())->get()
+            );
 
             foreach ($issueProjectRelations as $taskId => $relation) {
                 $glProjectId = $relation['gl_project_id'];
                 $glIssueIid = $relation['gl_issue_iid'];
                 $response = $this->api->sendUserTime($glProjectId, $glIssueIid, $durations[$taskId]['humanDuration']);
-                echo "Sending issue_iid " . $glIssueIid . " duration " . $durations[$taskId]['humanDuration'] . " for user " . $user->full_name . "\n";
+                echo "Sending issue_iid "
+                    . $glIssueIid
+                    . " duration "
+                    . $durations[$taskId]['humanDuration']
+                    . " for user "
+                    . $user->full_name
+                    . "\n";
 
                 if ($response && isset($response['total_time_spent'])) {
                     $this->timeIntervalsHelper->markAsSyncedIntervalByTaskId($taskId);
@@ -81,12 +90,16 @@ class TimeSynchronizer
             }
 
             foreach ($intervals as $interval) {
-                $durations[$taskId]['duration'] += Carbon::parse($interval->end_at)->diffInSeconds(Carbon::parse($interval->start_at));
+                $durations[$taskId]['duration'] += Carbon::parse($interval->end_at)
+                    ->diffInSeconds(Carbon::parse($interval->start_at));
             }
 
             // Set parts = 3 to see hours (if exists) minutes and seconds
-            $durations[$taskId]['humanDuration'] = Carbon::now()->subSeconds($durations[$taskId]['duration'])->diffForHumans(null, true, true, 3);
+            $durations[$taskId]['humanDuration'] = Carbon::now()
+                ->subSeconds($durations[$taskId]['duration'])
+                ->diffForHumans(null, true, true, 3);
         }
+
         return $durations;
     }
 }
