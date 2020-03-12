@@ -142,6 +142,11 @@ class ReportHelper
                     $createdAtFormatted = Carbon::parse($screen['created_at'])->format('Y-m-d');
                     $hoursScreenKey = Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
 
+                    // Don't add screenshots for dates without intervals
+                    if (!isset($resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$createdAtFormatted])) {
+                        continue;
+                    }
+
                     if (!array_key_exists($createdAtFormatted, $screensResultCollection)) {
                         $screensResultCollection[$createdAtFormatted] = [];
                     }
