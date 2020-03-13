@@ -154,7 +154,7 @@ class SyncTasks
         return [
             'task_name'   => $issue->fields->summary,
             'description' => $issue->fields->description,
-            'active'      => true,
+            'active'      => !isset($issue->fields->resolution),
             'assigned_by' => 0,
             'url'         => $issue->self,
             'created_at'  => $issue->fields->created,

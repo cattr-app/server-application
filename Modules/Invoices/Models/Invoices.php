@@ -3,16 +3,16 @@
 namespace Modules\Invoices\Models;
 
 use Eloquent as EloquentIdeHelper;
-use App\Models\AbstractModel;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class EmailReports
  * @package Modules\Invoices\Models
  * @mixin EloquentIdeHelper
  */
-class Invoices extends AbstractModel
+class Invoices extends Model
 {
     public $timestamps = false;
 

@@ -1,0 +1,29 @@
+{
+    "name": "amazingcat/trellointegration",
+    "description": "",
+    "authors": [
+        {
+            "name": "AmazingCat",
+            "email": "to@amazingcat.net"
+        }
+    ],
+    "extra": {
+        "laravel": {
+            "providers": [
+                "Modules\\TrelloIntegration\\Providers\\TrelloIntegrationServiceProvider"
+            ],
+            "aliases": {
+
+            }
+        }
+    },
+    "autoload": {
+        "psr-4": {
+            "Modules\\TrelloIntegration\\": ""
+        }
+    },
+    "require": {
+        "cdaguerre/php-trello-api": "@dev",
+        "php": ">=7.4"
+    }
+}

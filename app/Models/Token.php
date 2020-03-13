@@ -3,8 +3,8 @@
 namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 

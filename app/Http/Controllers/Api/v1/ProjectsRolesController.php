@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Models\ProjectsRoles;
 use App\EventFilter\Facades\Filter;
+use App\Models\ProjectsRoles;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;

@@ -5,6 +5,7 @@ namespace Tests\Feature\TimeIntervals;
 
 use App\Models\TimeInterval;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
@@ -63,7 +64,7 @@ class BulkRemoveTest extends TestCase
 
         $response->assertStatus(self::HTTP_MULTI_STATUS);
         $response->assertJson(['removed' => TimeInterval::all()->pluck('id')->toArray()]);
-        $response->assertJson(['not_found' => array_only($nonIntervals, 'id')]);
+        $response->assertJson(['not_found' => Arr::only($nonIntervals, 'id')]);
 
         foreach ($this->intervals as $interval) {
             $this->assertSoftDeleted('time_intervals', $interval->toArray());

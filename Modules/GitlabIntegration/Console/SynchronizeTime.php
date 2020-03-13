@@ -3,9 +3,8 @@
 
 namespace Modules\GitlabIntegration\Console;
 
-
 use Illuminate\Console\Command;
-use Modules\GitlabIntegration\Entities\TimeSynchronizer;
+use Modules\GitlabIntegration\Services\TimeSynchronizer;
 
 class SynchronizeTime extends Command
 {

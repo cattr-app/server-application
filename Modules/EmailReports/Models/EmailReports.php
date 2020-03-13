@@ -2,8 +2,8 @@
 
 namespace Modules\EmailReports\Models;
 
-use App\Models\AbstractModel;
 use Carbon\Carbon;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Maatwebsite\Excel\Excel;
 use Modules\EmailReports\StatisticExports\Invoices;
@@ -17,7 +17,7 @@ use Modules\Reports\Exports\Types\Xlsx;
  * Class EmailReports
  * @package Modules\EmailReports\Models
  */
-class EmailReports extends AbstractModel
+class EmailReports extends Model
 {
     public const SPACE = " ";
 

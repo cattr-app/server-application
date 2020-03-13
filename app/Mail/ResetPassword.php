@@ -4,8 +4,8 @@ namespace App\Mail;
 
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
-use Lang;
 use Illuminate\Notifications\Messages\MailMessage;
+use Lang;
 
 /** @codeCoverageIgnore  */
 class ResetPassword extends ResetPasswordNotification

@@ -3,8 +3,8 @@
 namespace Tests\Factories;
 
 use App\Models\Project;
-use Tests\Facades\TaskFactory;
 use Faker\Factory as FakerFactory;
+use Tests\Facades\TaskFactory;
 
 class ProjectFactory extends Factory
 {

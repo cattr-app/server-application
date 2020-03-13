@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-use Eloquent as EloquentIdeHelper;
 use App\Exceptions\Entities\AuthorizationException;
-use Illuminate\Support\Facades\Auth;
+use Eloquent as EloquentIdeHelper;
 use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Throwable;
 
 /**
@@ -65,7 +66,7 @@ use Throwable;
  * @method static QueryBuilder|Role withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class Role extends AbstractModel
+class Role extends Model
 {
     use SoftDeletes;
 

@@ -34,7 +34,7 @@ class TotalTest extends TestCase
     {
         $requestData = [
             'start_at' => $this->intervals->min('start_at'),
-            'end_at' => Carbon::create($this->intervals->max('end_at'))->addMinute(),
+            'end_at' => $this->intervals->max('end_at')->addMinute(),
             'user_id' => $this->admin->id
         ];
 
@@ -46,8 +46,8 @@ class TotalTest extends TestCase
         });
 
         $response->assertJson(['time' => $totalTime]);
-        $response->assertJson(['start' => $this->intervals->min('start_at')]);
-        $response->assertJson(['end' => $this->intervals->max('end_at')]);
+        $response->assertJsonFragment(['start' => $this->intervals->min('start_at')]);
+        $response->assertJsonFragment(['end' => $this->intervals->max('end_at')]);
     }
 
     public function test_unauthorized(): void

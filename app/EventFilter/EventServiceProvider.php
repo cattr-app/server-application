@@ -2,8 +2,8 @@
 
 namespace App\EventFilter;
 
-use Illuminate\Support\ServiceProvider;
 use App\EventFilter\Facades\Filter;
+use Illuminate\Support\ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {

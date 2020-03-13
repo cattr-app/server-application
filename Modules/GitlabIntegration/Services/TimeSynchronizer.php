@@ -1,8 +1,7 @@
 <?php
 
 
-namespace Modules\GitlabIntegration\Entities;
-
+namespace Modules\GitlabIntegration\Services;
 
 use App\Models\Task;
 use App\Models\TimeInterval;

@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\EventFilter\Facades\Filter;
 use App\Models\Project;
 use App\Models\Role;
-use App\Models\TimeInterval;
 use App\Models\User;
-use Carbon\Carbon;
 use Exception;
-use Illuminate\Support\Facades\Auth;
-use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 

@@ -6,13 +6,13 @@ use App\Models\Property;
 use App\Models\User;
 use DB;
 use Exception;
+use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use GuzzleHttp\Exception\GuzzleException;
-use GuzzleHttp\Client;
 use MCStreetguy\ComposerParser\Factory as ComposerParser;
 use RuntimeException;
 
@@ -222,7 +222,7 @@ class AppInstallCommand extends Command
         $this->updateEnvData('APP_URL',
             $this->ask('API endpoint FULL URL'));
 
-        $this->updateEnvData('TRUSTED_FRONTEND_DOMAIN',
+        $this->updateEnvData('ALLOWED_ORIGINS',
             '"' . $this->ask('Please provide trusted frontend domains (e.g cattr.mycompany.com). If you have multiple frontend domains, you can separate them with commas') . '"');
 
         $this->info('Setting up JWT secret key');

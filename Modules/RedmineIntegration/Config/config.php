@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Encryption\Encrypter;
-
 return [
     'name' => 'RedmineIntegration',
 

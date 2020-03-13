@@ -2,25 +2,20 @@
 
 namespace App\Models;
 
-use Eloquent as EloquentIdeHelper;
 use App\Mail\ResetPassword;
-use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
-use Fico7489\Laravel\EloquentJoin\Traits\EloquentJoin;
-use Illuminate\Database\Eloquent\Builder;
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-
-use Illuminate\Contracts\Auth\CanResetPassword;
-use Illuminate\Database\Eloquent\Collection;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
  * @apiDefine UserObject
@@ -191,8 +186,6 @@ class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use SoftDeletes;
-    use EloquentJoin;
-    use DateTrait;
 
     /**
      * table name from database
@@ -407,14 +400,6 @@ class User extends Authenticatable implements JWTSubject
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPassword($this->email, $token));
-    }
-
-    /**
-     * @return Builder|EloquentJoinBuilder
-     */
-    public static function joinQuery()
-    {
-        return static::query();
     }
 
     /**
