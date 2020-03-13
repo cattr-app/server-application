@@ -2,18 +2,12 @@
 
 namespace Modules\EmailReports\StatisticExports;
 
-use App\Models\User;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Storage;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Modules\EmailReports\Mail\InvoicesEmailReport;
 use Modules\EmailReports\Mail\ProjectReportEmailReport;
-use Modules\EmailReports\Models\EmailReports;
 use Modules\Reports\Exports\ProjectExport;
 
 /**

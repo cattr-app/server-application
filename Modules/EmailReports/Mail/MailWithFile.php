@@ -5,8 +5,6 @@ namespace Modules\EmailReports\Mail;
 use Illuminate\Bus\Queueable;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
-use Maatwebsite\Excel\Files\TemporaryFile;
-use Symfony\Component\HttpFoundation\File\File;
 
 /**
  * Class EmailReportMail

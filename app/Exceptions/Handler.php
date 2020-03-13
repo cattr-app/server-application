@@ -50,7 +50,7 @@ class Handler extends ExceptionHandler
      * @return void
      * @throws Exception
      */
-    public function report(Exception $exception): void
+    public function report(Throwable $exception): void
     {
         if (!config('app.debug') && app()->bound('sentry') && $this->shouldReport($exception)) {
             app('sentry')->captureException($exception);
@@ -67,7 +67,7 @@ class Handler extends ExceptionHandler
      *
      * @return JsonResponse|Response
      */
-    public function render($request, Exception $exception)
+    public function render($request, Throwable $exception)
     {
         if ($exception instanceof ValidationException) {
             $responseData = [
@@ -216,7 +216,7 @@ class Handler extends ExceptionHandler
      *
      * @return bool
      */
-    protected function isHttpException(Exception $e): bool
+    protected function isHttpException(Throwable $e): bool
     {
         return $e instanceof HttpExceptionInterface;
     }

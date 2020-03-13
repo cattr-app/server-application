@@ -2,19 +2,18 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\EventFilter\Facades\Filter;
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
 use Exception;
-use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\MassAssignmentException;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
-use Illuminate\Database\Eloquent\Model;
-use App\Models\DateTrait;
 use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Validator;
 
 /**
  * Class ItemController
@@ -481,16 +480,6 @@ abstract class ItemController extends Controller
         $cls = static::getItemClass();
         $model = new $cls();
         $helper = new QueryHelper();
-
-        foreach ($model->getDates() as $dateAttr) {
-            if (isset($filter[$dateAttr])) {
-                if (is_array($filter[$dateAttr])) {
-                    $filter[$dateAttr][1] = DateTrait::toStandardTime($filter[$dateAttr][1]);
-                } else {
-                    $filter[$dateAttr] = DateTrait::toStandardTime($filter[$dateAttr]);
-                }
-            }
-        }
 
         $helper->apply($query, $filter, $model);
 

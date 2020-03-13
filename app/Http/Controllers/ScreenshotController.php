@@ -3,8 +3,8 @@
 namespace App\Http\Controllers;
 
 use App\Models\Screenshot;
-use Illuminate\Http\Request;
 use Illuminate\Contracts\Routing\ResponseFactory;
+use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 

@@ -2,8 +2,8 @@
 
 namespace App\Providers;
 
-use App\Helpers\Lock\LockInterface;
 use App\Helpers\Lock\Lock;
+use App\Helpers\Lock\LockInterface;
 use Illuminate\Support\ServiceProvider;
 
 class LockServiceProvider extends ServiceProvider

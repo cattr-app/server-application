@@ -2,9 +2,9 @@
 
 namespace App\EventFilter;
 
+use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Foundation\Application;
 use Illuminate\Support\ServiceProvider;
-use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 
 class EventFilterServiceProvider extends ServiceProvider
 {

@@ -2,13 +2,13 @@
 
 namespace Modules\EmailReports\Models;
 
-use App\Models\AbstractModel;
+use Illuminate\Database\Eloquent\Model;
 
 /**
  * Class EmailReportsEmails
  * @package Modules\EmailReports\Models
  */
-class EmailReportsEmails extends AbstractModel
+class EmailReportsEmails extends Model
 {
     protected $fillable = [
         'email_reports_id',

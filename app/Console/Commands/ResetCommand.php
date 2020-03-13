@@ -2,10 +2,7 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Task;
-use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Storage;
 use Psr\SimpleCache\InvalidArgumentException;

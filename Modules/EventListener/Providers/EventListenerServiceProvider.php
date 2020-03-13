@@ -2,8 +2,8 @@
 
 namespace Modules\EventListener\Providers;
 
-use Illuminate\Database\Eloquent\Factory;
 use App\EventFilter\EventServiceProvider as ServiceProvider;
+use Illuminate\Database\Eloquent\Factory;
 
 class EventListenerServiceProvider extends ServiceProvider
 {

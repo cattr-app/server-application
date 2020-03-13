@@ -2,8 +2,8 @@
 
 namespace App\Console\Commands;
 
-use Illuminate\Console\Command;
 use App\Models\TimeInterval;
+use Illuminate\Console\Command;
 
 class RemoveDuplicateIntervals extends Command
 {

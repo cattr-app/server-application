@@ -2,9 +2,9 @@
 
 namespace Tests\Factories;
 
-use App\Models\Project;
 use App\Models\ProjectsUsers;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 
@@ -51,7 +51,7 @@ class ProjectUserFactory extends Factory
 
     private function getRandomRoleId()
     {
-        return array_random([self::USER_ROLE, self::MANAGER_ROLE, self::AUDITOR_ROLE]);
+        return Arr::random([self::USER_ROLE, self::MANAGER_ROLE, self::AUDITOR_ROLE]);
     }
 
     public function forUser(User $user): self

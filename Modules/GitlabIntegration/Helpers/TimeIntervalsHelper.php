@@ -5,9 +5,8 @@ namespace Modules\GitlabIntegration\Helpers;
 
 
 use App\Models\TimeInterval;
-use App\Models\User;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
 
 class TimeIntervalsHelper
 {

@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
-use App\Models\TimeInterval;
-use Illuminate\Support\Facades\Auth;
-use App\Models\Project;
-use Illuminate\Http\JsonResponse;
 use App\EventFilter\Facades\Filter;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
+use App\Models\Project;
+use App\Models\TimeInterval;
 use Carbon\Carbon;
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
 /**

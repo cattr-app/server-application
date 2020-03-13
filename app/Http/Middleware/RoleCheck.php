@@ -5,6 +5,7 @@ namespace App\Http\Middleware;
 use App\Exceptions\Entities\AuthorizationException;
 use App\Models\User;
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class RoleCheck

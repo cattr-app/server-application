@@ -2,9 +2,9 @@
 
 namespace Tests;
 
-use Illuminate\Foundation\Testing\TestResponse as BaseTestResponse;
-use PHPUnit\Framework\Assert as PHPUnit;
 use App\Exceptions\Entities\AuthorizationException;
+use Illuminate\Testing\TestResponse as BaseTestResponse;
+use PHPUnit\Framework\Assert as PHPUnit;
 
 class TestResponse extends BaseTestResponse
 {

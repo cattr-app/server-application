@@ -2,10 +2,10 @@
 
 namespace Modules\RedmineIntegration\Http\Controllers;
 
+use App\EventFilter\Facades\Filter;
 use App\Models\Priority;
 use App\Models\Property;
 use App\Models\User;
-use App\EventFilter\Facades\Filter;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;

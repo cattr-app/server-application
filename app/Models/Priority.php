@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
@@ -17,7 +18,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
  * @method static EloquentBuilder|Priority whereName($value)
  * @mixin EloquentIdeHelper
  */
-class Priority extends AbstractModel
+class Priority extends Model
 {
     /**
      * table name from database
@@ -39,17 +40,11 @@ class Priority extends AbstractModel
         'name' => 'string',
     ];
 
-    /**
-     * @return HasMany
-     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'priority_id');
     }
 
-    /**
-     * @return string
-     */
     public static function getTableName(): string
     {
         return with(new static())->getTable();

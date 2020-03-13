@@ -2,13 +2,11 @@
 
 namespace App\Exceptions\Entities;
 
-use Throwable;
-
-use Illuminate\Auth\Access\AuthorizationException as BaseAuthorizationException;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-
 use App\Exceptions\Interfaces\InfoExtendedException;
 use App\Exceptions\Interfaces\TypedException;
+use Illuminate\Auth\Access\AuthorizationException as BaseAuthorizationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 
 /**

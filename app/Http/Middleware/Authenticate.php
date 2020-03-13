@@ -2,13 +2,13 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\Entities\AuthorizationException;
 use Closure;
 use Illuminate\Auth\Middleware\Authenticate as BaseAuthenticate;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Lang;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
