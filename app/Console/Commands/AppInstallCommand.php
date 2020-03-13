@@ -222,7 +222,7 @@ class AppInstallCommand extends Command
         $this->updateEnvData('APP_URL',
             $this->ask('API endpoint FULL URL'));
 
-        $this->updateEnvData('TRUSTED_FRONTEND_DOMAIN',
+        $this->updateEnvData('ALLOWED_ORIGINS',
             '"' . $this->ask('Please provide trusted frontend domains (e.g cattr.mycompany.com). If you have multiple frontend domains, you can separate them with commas') . '"');
 
         $this->info('Setting up JWT secret key');
