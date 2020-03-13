@@ -72,19 +72,6 @@ class GitlabApi
         return $this->pager->fetchAll($this->client->api('projects'), 'all');
     }
 
-    public function getUserProjectById(int $id)
-    {
-        return $this->client->projects->show($id);
-    }
-
-    public function getUserTasksByProjectId(int $projectId)
-    {
-        return $this->pager->fetchAll($this->client->api('issues'), 'all', [$projectId, [
-            'scope' => 'assigned-to-me',
-            'state' => 'opened',
-        ]]);
-    }
-
     public function getUserTasks()
     {
         return $this->pager->fetchAll($this->client->api('issues'), 'all', [null, [

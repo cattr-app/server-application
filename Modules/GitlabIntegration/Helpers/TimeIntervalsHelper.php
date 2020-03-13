@@ -42,32 +42,11 @@ class TimeIntervalsHelper
             ->delete();
     }
 
-    public function getByIntervalId(int $timeIntervalId)
-    {
-        return DB::table(self::GIS_TABLE)
-            ->where('time_interval_id', '=', $timeIntervalId)
-            ->first();
-    }
-
-    public function getByTaskId(int $taskId)
-    {
-        return DB::table(self::GIS_TABLE)
-            ->where('task_id', '=', $taskId)
-            ->first();
-    }
-
     public function getNotSyncedCollection() : Collection
     {
         return DB::table(self::GIS_TABLE)
             ->where('is_synced', '=', false)
             ->orWhereNull('is_synced')
-            ->get();
-    }
-
-    public function getSyncedCollection() : Collection
-    {
-        return DB::table(self::GIS_TABLE)
-            ->where('is_synced', '=', true)
             ->get();
     }
 
@@ -83,13 +62,6 @@ class TimeIntervalsHelper
         return DB::table(self::GPR_TABLE)
             ->where('project_id', '=' ,$projectId)
             ->first();
-    }
-
-    public function getTasksByGitlabId(int $gitlabId) : Collection
-    {
-        return DB::table(self::GTR_TABLE)
-            ->where('gitlab_id', '=', $gitlabId)
-            ->get();
     }
 
     public function getGitlabIssueProjectRelation(Collection $tasks) : array
