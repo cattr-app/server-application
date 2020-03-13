@@ -31,8 +31,7 @@ class Synchronizer
 
     public function synchronizeAll()
     {
-        $users = User::whereId(30)->get();
-        foreach ($users as $user) {
+        foreach (User::all() as $user) {
             $this->synchronize($user);
         }
     }
@@ -43,6 +42,7 @@ class Synchronizer
 
         if (!$api) {
             Log::info("Can`t instantiate an API for user " . $user->full_name . "\n");
+            echo "Can`t instantiate an API for user " . $user->full_name . "\n";
             return false;
         }
 
@@ -51,6 +51,7 @@ class Synchronizer
         } catch (\Throwable $throwable) {
             Log::error("Projects cant be fetched for user " . $user->full_name . "\n");
             Log::error($throwable);
+            echo "Projects cant be fetched for user " . $user->full_name . "\n";
             return false;
         }
 
@@ -61,6 +62,7 @@ class Synchronizer
         } catch (\Throwable $throwable) {
             Log::error("Tasks cant be fetched for user " . $user->full_name . "\n");
             Log::error($throwable);
+            echo "Tasks cant be fetched for user " . $user->full_name . "\n";
             return false;
         }
 
@@ -70,10 +72,6 @@ class Synchronizer
 
     private function syncProjects(array $gitlabProjects)
     {
-        $projectIds = array_map( function ($project) {
-            return $project['id'];
-        }, $gitlabProjects);
-
         foreach ($gitlabProjects as $gitlabProject) {
             $projectMapping = [
                 self::COMPANY_ID  => 0,
@@ -92,6 +90,7 @@ class Synchronizer
             } else {
                 $project = Project::find($relation->project_id);
 
+                // If project was deleted in our system we have to remove relation as well
                 if (!$project) {
                     $relation->delete();
                     continue;
@@ -101,11 +100,6 @@ class Synchronizer
                 $project->description = $projectMapping[self::DESCRIPTION];
                 $project->save();
             }
-        }
-
-        $relationsToRemove = ProjectRelation::whereNotIn('gitlab_id', $projectIds)->get();
-        foreach ($relationsToRemove as $relationToRemove) {
-            $relationToRemove->delete();
         }
     }
 
@@ -118,7 +112,8 @@ class Synchronizer
         foreach ($gitlabTasks as $gitlabTask) {
             $projectID = ProjectRelation::where('gitlab_id', $gitlabTask['project_id'])->first()->project_id;
             if (!$projectID) {
-                Log::error("Project ID for gilab issue wasn`t found! {$gitlabTasks['name'] }");
+                Log::error("Project ID for gilab issue wasn`t found! {$gitlabTask['name'] }");
+                echo "Project ID for gilab issue wasn`t found! {$gitlabTask['name'] } \n";
                 continue;
             }
 
@@ -146,6 +141,7 @@ class Synchronizer
             } else {
                 $task = Task::find($taskRelation->task_id);
 
+                // If task was deleted in our system we have to remove relation as well
                 if (!$task) {
                     $taskRelation->delete();
                     continue;
@@ -161,6 +157,7 @@ class Synchronizer
             }
         }
 
+        // We`ve fetched only opened tasks, so if task is assigned to user it should be switched to inactive
         $relationsToRemove = TaskRelation::whereNotIn('gitlab_id', $taskIds)->get();
         foreach ($relationsToRemove as $relationToRemove) {
             $internalTask = Task::find($relationToRemove->task_id);
