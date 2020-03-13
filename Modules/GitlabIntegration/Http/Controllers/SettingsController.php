@@ -4,9 +4,12 @@ namespace Modules\GitlabIntegration\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use App\Models\Property;
+use Gitlab\Client;
+use Gitlab\ResultPager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Modules\GitlabIntegration\Helpers\GitlabApi;
 use Modules\GitlabIntegration\Helpers\UserProperties;
 
 class SettingsController extends Controller
@@ -17,12 +20,23 @@ class SettingsController extends Controller
     private $userProperties;
 
     /**
+     * @var Client
+     */
+    protected Client $client;
+
+    protected $apiUrl;
+
+    /**
      * SettingsController constructor.
      *
      * @param UserProperties $userProperties
+     * @param Client $client
      */
-    public function __construct(UserProperties $userProperties)
+    public function __construct(UserProperties $userProperties, Client $client)
     {
+        $this->client = $client;
+        $this->apiUrl = Property::where(['entity_type' => 'company', 'name' => 'gitlab_url'])->first();
+        $this->apiUrl = $this->apiUrl ? $this->apiUrl->value : null;
         $this->userProperties = $userProperties;
 
         parent::__construct();
@@ -69,16 +83,23 @@ class SettingsController extends Controller
     {
         $userId = $request->user()->id;
 
-        $validator = Validator::make(
-            $request->all(),
-            [
-                'apikey' => 'string|required'
-            ]
-        );
+        try {
+            Validator::make(
+                $request->all(),
+                [
+                    'apikey' => 'string|required'
+                ]
+            );
 
-        if ($validator->fails()) {
+            $client = Client::create($this->apiUrl)
+                ->authenticate($request->input('apikey'), Client::AUTH_URL_TOKEN);
+
+            $fetcher = new ResultPager($client);
+            $fetcher->fetch($client->api('users'), 'me');
+        } catch (\Throwable $throwable) {
             return response()->json([
                 'error' => 'Validation fail',
+                'message' => 'Invalid API Key'
             ], 400);
         }
 

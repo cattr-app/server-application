@@ -57,32 +57,19 @@ class GitlabApi
         }
 
         try {
-            $this->client = Client::create($this->apiUrl)->authenticate($this->apiKey);
+            $this->client = Client::create($this->apiUrl)->authenticate($this->apiKey, Client::AUTH_URL_TOKEN);
+            $this->pager = new ResultPager($this->client);
+            $this->pager->fetch($this->client->api('users'), 'me');
         } catch (\Throwable $throwable) {
             Log::error($throwable);
             return null;
         }
-        $this->pager = new ResultPager($this->client);
-
         return $this;
     }
 
     public function getUserProjects()
     {
         return $this->pager->fetchAll($this->client->api('projects'), 'all');
-    }
-
-    public function getUserProjectById(int $id)
-    {
-        return $this->client->projects->show($id);
-    }
-
-    public function getUserTasksByProjectId(int $projectId)
-    {
-        return $this->pager->fetchAll($this->client->api('issues'), 'all', [$projectId, [
-            'scope' => 'assigned-to-me',
-            'state' => 'opened',
-        ]]);
     }
 
     public function getUserTasks()
