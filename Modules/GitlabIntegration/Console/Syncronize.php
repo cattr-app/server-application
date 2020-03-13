@@ -3,7 +3,7 @@
 namespace Modules\GitlabIntegration\Console;
 
 use Illuminate\Console\Command;
-use Modules\GitlabIntegration\Entities\Synchronizer;
+use Modules\GitlabIntegration\Services\Synchronizer;
 
 class Syncronize extends Command
 {
