@@ -1,0 +1,13 @@
+{
+    "name": "TrelloIntegration",
+    "alias": "trellointegration",
+    "description": "",
+    "keywords": [],
+    "order": 0,
+    "providers": [
+        "Modules\\TrelloIntegration\\Providers\\TrelloIntegrationServiceProvider"
+    ],
+    "aliases": {},
+    "files": [],
+    "requires": []
+}
