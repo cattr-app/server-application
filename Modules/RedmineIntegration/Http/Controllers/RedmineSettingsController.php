@@ -10,13 +10,16 @@ use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
+use Modules\RedmineIntegration\Models\ClientFactory;
 use Modules\RedmineIntegration\Models\Settings;
 use Throwable;
 
 /**
  * Class RedmineSettingsController
-*/
+ */
 class RedmineSettingsController extends AbstractRedmineController
 {
 
@@ -37,11 +40,22 @@ class RedmineSettingsController extends AbstractRedmineController
      */
     protected $user;
 
-    public function __construct(Request $request, Settings $settings)
+    protected ClientFactory $clientFactory;
+
+
+    /**
+     * RedmineSettingsController constructor.
+     *
+     * @param Request $request
+     * @param Settings $settings
+     * @param ClientFactory $clientFactory
+     */
+    public function __construct(Request $request, Settings $settings, ClientFactory $clientFactory)
     {
         $this->request = $request;
         $this->settings = $settings;
         $this->user = auth()->user();
+        $this->clientFactory = $clientFactory;
 
         parent::__construct();
     }
@@ -61,24 +75,34 @@ class RedmineSettingsController extends AbstractRedmineController
     /**
      * Update user's redmine settings
      *
-     * @param  Request         $request
-     * @param  UserRepository  $userRepository
+     * @param Request $request
+     * @param UserRepository $userRepository
      *
      * @return JsonResponse
      */
     public function updateSettings(Request $request, UserRepository $userRepository)
     {
         $request = Filter::process('request.redmine.settings.update', $request);
-
         try {
             $this->validate(
                 $request,
                 Filter::process('validation.redmine.settings.update', $this->getValidationRules())
             );
+
+            $client = $this->clientFactory->createUserClient(auth()->user()->id, $request->input('redmine_api_key'));
+            $currentRedmineUser = $client->user->getCurrentUser() ?: [];
+
+            if (!($currentRedmineUser['user'] ?? false)) {
+                throw new \Exception(
+                    'Invalid API Key or Redmine is not available at the moment.'
+                );
+            }
+
         } catch (Throwable $e) {
             return response()->json(
                 Filter::process('answer.error.redmine.settings.update', [
                     'error' => 'Validation failed',
+                    'message' => $e->getMessage()
                 ]),
                 400
             );
@@ -103,9 +127,9 @@ class RedmineSettingsController extends AbstractRedmineController
     }
 
     /**
-     * @param  string  $evt
-     * @param  string  $name
-     * @param  mixed   $value
+     * @param string $evt
+     * @param string $name
+     * @param mixed $value
      *
      * @return RedmineSettingsController
      */
@@ -155,8 +179,8 @@ class RedmineSettingsController extends AbstractRedmineController
     /**
      * Returns user's redmine settings
      *
-     * @param  Request         $request
-     * @param  UserRepository  $userRepository
+     * @param Request $request
+     * @param UserRepository $userRepository
      *
      * @return JsonResponse
      */

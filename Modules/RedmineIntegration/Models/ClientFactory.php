@@ -40,14 +40,14 @@ class ClientFactory
         return new Client($url, $key);
     }
 
-    public function createUserClient(int $userID) : Client
+    public function createUserClient(int $userID, string $key = null) : Client
     {
         $url = $this->settings->getURL();
         if (empty($url)) {
             throw new \Exception('Empty URL', 404);
         }
 
-        $key = $this->userRepository->getUserRedmineApiKey($userID);
+        $key = $key ?? $this->userRepository->getUserRedmineApiKey($userID);
         if (empty($key)) {
             throw new \Exception('Empty API key', 404);
         }
