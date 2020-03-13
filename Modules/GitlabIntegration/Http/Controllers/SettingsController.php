@@ -19,7 +19,7 @@ class SettingsController extends Controller
     /**
      * SettingsController constructor.
      *
-     * @param  UserProperties  $userProperties
+     * @param UserProperties $userProperties
      */
     public function __construct(UserProperties $userProperties)
     {
@@ -40,7 +40,7 @@ class SettingsController extends Controller
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return array
      */
@@ -48,17 +48,20 @@ class SettingsController extends Controller
     {
         $userId = $request->user()->id;
         $apiKey = $this->userProperties->getApiKey($userId);
-        $hiddenKey = (bool)$apiKey ? preg_replace('/^(.{4}).*(.{4})$/i', '$1 ********* $2', $apiKey) : $apiKey;
+        $hiddenKey = (bool)$apiKey
+            ? preg_replace('/^(.{4}).*(.{4})$/i', '$1 ********* $2', $apiKey)
+            : $apiKey;
 
         return [
-            'enabled' => (bool)Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'gitlab_enabled'])->first()
-                ->value ?? false,
-            'apikey' =>  $hiddenKey
+            'enabled' => (bool)Property::where(['entity_type' => Property::COMPANY_CODE, 'name' => 'gitlab_enabled'])
+                    ->first()
+                    ->value ?? false,
+            'apikey' => $hiddenKey
         ];
     }
 
     /**
-     * @param  Request  $request
+     * @param Request $request
      *
      * @return JsonResponse
      */
@@ -67,7 +70,8 @@ class SettingsController extends Controller
         $userId = $request->user()->id;
 
         $validator = Validator::make(
-            $request->all(), [
+            $request->all(),
+            [
                 'apikey' => 'string|required'
             ]
         );

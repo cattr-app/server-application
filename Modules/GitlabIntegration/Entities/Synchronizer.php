@@ -67,6 +67,7 @@ class Synchronizer
         } catch (\Throwable $throwable) {
             Log::error("Tasks cant be fetched for user " . $user->full_name . "\n");
             Log::error($throwable);
+
             return false;
         }
 
@@ -75,11 +76,17 @@ class Synchronizer
         $userGitlabProjects = $this->api->getUserProjects();
         foreach ($userGitlabProjects as $gitlabProjectData) {
 
-            $gitlabProjectId = (int) $gitlabProjectData['id'];
+            $gitlabProjectId = (int)$gitlabProjectData['id'];
 
             $project = $this->fillProject($gitlabProjectData);
             if (!$project->save()) {
-                Log::error("For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name);
+                Log::error(
+                    "For some reason project "
+                    . $project->name
+                    . ' was not saved. User is '
+                    . $user->full_name
+                );
+
                 continue;
             }
 
@@ -88,7 +95,7 @@ class Synchronizer
                 $this->entityResolver->insertProject($gitlabProjectId, $project);
             }
 
-            $this->userGitlabProjectsIds []= $gitlabProjectId;
+            $this->userGitlabProjectsIds [] = $gitlabProjectId;
             Log::info("Project \"" . $project->name . "\" sync for " . $user->full_name . "\n");
 
             if (!isset($userGitlabTasks[$gitlabProjectId])) {
@@ -101,7 +108,13 @@ class Synchronizer
 
                 $task = $this->fillTask($gitlabTaskData, $project, $user);
                 if (!$task->save()) {
-                    Log::error( "For some reason project " . $project->name . ' was not saved. User is ' . $user->full_name);
+                    Log::error(
+                        "For some reason project "
+                        . $project->name
+                        . ' was not saved. User is '
+                        . $user->full_name
+                    );
+
                     continue;
                 }
 
@@ -112,7 +125,7 @@ class Synchronizer
 
                 $this->entityResolver->maybeUpdateTask($gitlabTaskId, $gitlabTaskIid);
 
-                $this->userGitlabTasksIds []= $gitlabTaskId;
+                $this->userGitlabTasksIds [] = $gitlabTaskId;
                 Log::info("Task \"" . $task->task_name . "\" attached to user " . $user->full_name . "\n");
             }
         }
@@ -140,10 +153,11 @@ class Synchronizer
 
             $result[$projectId][] = $taskData;
         }
+
         return $result;
     }
 
-    protected function fillProject(array $gitlabProjectData) : Project
+    protected function fillProject(array $gitlabProjectData): Project
     {
         $projectId = (int)$gitlabProjectData['id'];
 
@@ -174,7 +188,7 @@ class Synchronizer
         return $project;
     }
 
-    protected function fillTask($gitlabTaskData, Project $project, User $user) : Task
+    protected function fillTask($gitlabTaskData, Project $project, User $user): Task
     {
         $mapFromGitlabToTask = [
             self::PROJECT_ID => $project->id,
@@ -240,7 +254,7 @@ class Synchronizer
         $this->api = GitlabApi::buildFromUser($user);
 
         if (!$this->api) {
-            Log::info("Can`t instantiate an API for user " . $user->full_name ."\n");
+            Log::info("Can`t instantiate an API for user " . $user->full_name . "\n");
             return false;
         }
 
