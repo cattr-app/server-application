@@ -49,6 +49,10 @@
       "@php artisan migrate",
       "@config:update"
     ],
+    "dumphelpers": [
+      "@php artisan ide-helper:generate",
+      "@php artisan ide-helper:meta"
+    ],
     "config:init": [
       "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
       "@php -r \"if (!is_dir(__DIR__.'/public/uploads')) mkdir(__DIR__.'/public/uploads');\"",
@@ -58,9 +62,7 @@
       "@config:update"
     ],
     "config:update": [
-      "@php artisan package:discover",
-      "@php artisan ide-helper:generate",
-      "@php artisan ide-helper:meta"
+      "@php artisan package:discover"
     ],
     "post-install-cmd": [
       "Illuminate\\Foundation\\ComposerScripts::postInstall",
