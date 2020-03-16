@@ -26,8 +26,8 @@ class DashboardExport implements Exportable
     public function collection(): Collection
     {
         // Please verify that start_at and end_at are fetched in ISO format !
-        $queryData = request()->only('start_at', 'end_at', 'user_ids', 'project_ids', 'order_by');
-        if (!Arr::has($queryData, ['start_at', 'end_at', 'user_ids', 'order_by'])) {
+        $queryData = request()->only('start_at', 'end_at', 'user_ids', 'project_ids', 'order_by', 'order_dir');
+        if (!Arr::has($queryData, ['start_at', 'end_at', 'user_ids'])) {
             throw new Exception('Requested data was not found in request body');
         }
 
@@ -56,13 +56,14 @@ class DashboardExport implements Exportable
             return $collection;
         });
 
-        $order = $queryData['order_by'] ?? 'asc';
+        $orderBy = $queryData['order_by'] ?? 'name';
+        $orderDir = $queryData['order_dir'] ?? 'asc';
         $preparedCollection = $preparedCollection->toArray();
 
-        usort($preparedCollection, function ($a, $b) use ($order) {
-            return $order === 'asc'
-                ? $a['time_worked'] <=> $b['time_worked']
-                : -($a['time_worked'] <=> $b['time_worked']);
+        usort($preparedCollection, function ($a, $b) use ($orderBy, $orderDir) {
+            return $orderDir === 'asc'
+                ? $a[$orderBy] <=> $b[$orderBy]
+                : -($a[$orderBy] <=> $b[$orderBy]);
         });
         $preparedCollection = collect($preparedCollection);
 
