@@ -4,6 +4,7 @@ namespace Modules\RedmineIntegration\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
+use Nwidart\Modules\Facades\Module;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
@@ -38,14 +39,20 @@ class ScheduleServiceProvider extends ServiceProvider
 
     }
 
+    public static function isEnabled() {
+        return Module::isEnabled('RedmineIntegration');
+    }
 
     public function boot()
     {
-        $this->schedule = $this->app->make(Schedule::class);
         $this->app->booted(function () {
-            foreach (self::COMMAND_LIST as $command => $cron) {
-                $this->registerScheduleCommand(self::COMMAND_PREFIX.':'.$command, $cron);
-            }
+            $schedule = $this->app->make(Schedule::class);
+            $schedule->command('redmine-synchronize:tasks')->everyFiveMinutes()->withoutOverlapping()->when([static::class, 'isEnabled']);
+            $schedule->command('redmine-synchronize:projects')->everyFiveMinutes()->withoutOverlapping()->when([static::class, 'isEnabled']);
+            $schedule->command('redmine-synchronize:users')->everyFiveMinutes()->withoutOverlapping()->when([static::class, 'isEnabled']);
+            $schedule->command('redmine-synchronize:time')->everyFiveMinutes()->withoutOverlapping()->when([static::class, 'isEnabled']);
+            $schedule->command('redmine-synchronize:priorities')->everyFifteenMinutes()->withoutOverlapping()->when([static::class, 'isEnabled']);
+            $schedule->command('redmine-synchronize:statuses')->everyFifteenMinutes()->withoutOverlapping()->when([static::class, 'isEnabled']);
         });
     }
 
