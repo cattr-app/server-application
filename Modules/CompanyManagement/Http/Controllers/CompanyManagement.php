@@ -12,6 +12,7 @@ use Illuminate\Validation\Rule;
 class CompanyManagement extends Controller
 {
     protected static $casts = [
+        'color' => 'json',
         'gitlab_enabled' => 'int',
         'redmine_enabled' => 'int',
         'redmine_statuses' => 'json',
@@ -50,6 +51,11 @@ class CompanyManagement extends Controller
 
         switch (static::$casts[$name]) {
             case 'json':
+                // To avoid possible double encoding
+                if (is_string($value)) {
+                    return $value;
+                }
+
                 return json_encode($value);
 
             default:
