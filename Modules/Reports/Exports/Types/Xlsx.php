@@ -79,22 +79,6 @@ class Xlsx extends AbstractType implements FromCollection, WithEvents, WithHeadi
                         ],
                     ]);
 
-                // Set colors for main columns
-//                $event->sheet->getDelegate()->getStyle($headersCell)->getFill()
-//                    ->setFillType(Fill::FILL_SOLID)
-//                    ->getStartColor()
-//                    ->setARGB('b7ffaf');
-//
-//                $event->sheet->getDelegate()->getStyle($totalCells)->getFill()
-//                    ->setFillType(Fill::FILL_SOLID)
-//                    ->getStartColor()
-//                    ->setARGB('c7e2a3');
-//
-//                $event->sheet->getDelegate()->getStyle($totalDecimalCells)->getFill()
-//                    ->setFillType(Fill::FILL_SOLID)
-//                    ->getStartColor()
-//                    ->setARGB('c7e2a3');
-
                 // Set borders for main columns
                 $event->sheet->getDelegate()->getStyle($headersCell)->getBorders()
                     ->getAllBorders()
