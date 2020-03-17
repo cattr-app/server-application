@@ -519,6 +519,29 @@ class UserController extends ItemController
         );
     }
 
+    public function show(Request $request): JsonResponse
+    {
+        Filter::listen($this->getEventUniqueName('answer.success.item.show'), function ($item) {
+            $sortedRoles = [];
+            foreach ($item->projectsRelation as $projectRole) {
+                if (!array_key_exists($projectRole->role_id, $sortedRoles)) {
+                    $sortedRoles[$projectRole->role_id] = [
+                        'role' => $item->role,
+                        'user_id' => $item->id,
+                        'project_ids' => []
+                    ];
+                }
+
+                array_push($sortedRoles[$projectRole->role_id]['project_ids'], $projectRole->project_id);
+            }
+
+            $item->project_roles = $sortedRoles;
+            unset($item->projectsRelation);
+            return $item;
+        });
+        return parent::show($request);
+    }
+
     /**
      * @api             {post} /v1/users/remove Destroy
      * @apiDescription  Destroy User
@@ -680,15 +703,17 @@ class UserController extends ItemController
     public function saveRelations(User $user, array $requestData): User
     {
         $user->projectsRelation()->delete();
-        $projectRoles = $requestData['projects_relation'] ?? [];
+        $projectRoles = $requestData['project_roles'] ?? [];
 
         $relations = [];
-        foreach ($projectRoles as $relation) {
-            $relations[] = new ProjectsUsers([
-                'project_id' => $relation['project_id'],
-                'role_id' => $relation['role_id'],
-                'user_id' => $user->id,
-            ]);
+        foreach ($projectRoles as $roleID => $data) {
+            foreach ($data['project_ids'] as $projectID) {
+                $relations[] = new ProjectsUsers([
+                    'project_id' => $projectID,
+                    'role_id' => $roleID,
+                    'user_id' => $user->id,
+                ]);
+            }
         }
 
         $user->projectsRelation()->saveMany($relations);
