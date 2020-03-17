@@ -2,6 +2,7 @@
 
 namespace Modules\Reports\Exports;
 
+use DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -26,10 +27,31 @@ class DashboardExport implements Exportable
     public function collection(): Collection
     {
         // Please verify that start_at and end_at are fetched in ISO format !
-        $queryData = request()->only('start_at', 'end_at', 'user_ids', 'project_ids', 'order_by', 'order_dir');
+        $queryData = request()->only(
+            'start_at',
+            'end_at',
+            'user_ids',
+            'project_ids',
+            'order_by',
+            'order_dir'
+        );
+
         if (!Arr::has($queryData, ['start_at', 'end_at', 'user_ids'])) {
             throw new Exception('Requested data was not found in request body');
         }
+
+        $queryData['timezone'] = request()->post('timezone', 'UTC');
+
+        $queryData['start_at'] = Carbon::parse(
+            $queryData['start_at'],
+            $queryData['timezone']
+        )->tz('UTC')
+            ->toDateTimeString();
+        $queryData['end_at'] = Carbon::parse(
+            $queryData['end_at'],
+            $queryData['timezone']
+        )->tz('UTC')
+            ->toDateTimeString();
 
         // If selected one user or exporting report from Timeline tab
         $queryData['user_ids'] = is_array($queryData['user_ids']) ? $queryData['user_ids'] : [$queryData['user_ids']];
@@ -98,12 +120,21 @@ class DashboardExport implements Exportable
      *
      * @param array $queryData
      *
+     * @throws Exception
+     *
      * @return Builder[]|\Illuminate\Database\Eloquent\Collection
      */
     protected function _getUnpreparedCollection(array $queryData): Collection
     {
+        $timezone = $queryData['timezone'];
+        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
+
         /** @noinspection PhpParamsInspection */
-        $query = DashboardReport::query()
+        $query = DashboardReport::select([
+            '*',
+            DB::raw("(CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}')) as start_at"),
+            DB::raw("(CONVERT_TZ(end_at, '+00:00', '{$timezoneOffset}')) as end_at")
+        ])
             ->whereIn('user_id', $queryData['user_ids'])
             ->where('start_at', '>=', $queryData['start_at'])
             ->where('start_at', '<', $queryData['end_at'])
@@ -115,7 +146,6 @@ class DashboardExport implements Exportable
                 $query->whereIn('project_id', $queryData['project_ids']);
             });
         }
-
         return $query->get();
     }
 
