@@ -68,5 +68,5 @@ demo_deploy:
     - mkdir ~/.ssh
     - ssh-keyscan -H $DEMO_CI_HOST >> ~/.ssh/known_hosts
   script:
-    - ssh $DEMO_CI_USER@$DEMO_CI_HOST 'cd demo && docker-compose build --no-cache --force-rm'
-    - ssh $DEMO_CI_USER@$DEMO_CI_HOST 'cd demo && docker-compose down -v && docker-compose up -d'
+    - ssh $DEMO_CI_USER@$DEMO_CI_HOST 'cd demo && docker-compose build --no-cache --force-rm demo'
+    - ssh $DEMO_CI_USER@$DEMO_CI_HOST 'cd demo && docker-compose down -v && docker-compose up -d demo'
