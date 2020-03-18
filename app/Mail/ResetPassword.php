@@ -4,12 +4,18 @@ namespace App\Mail;
 
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Queue\SerializesModels;
 use Lang;
 
 /** @codeCoverageIgnore  */
-class ResetPassword extends ResetPasswordNotification
+class ResetPassword extends ResetPasswordNotification implements ShouldQueue
 {
+    use Queueable;
+    use SerializesModels;
+
     /**
      * User email.
      *
