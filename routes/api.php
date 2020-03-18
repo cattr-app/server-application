@@ -103,7 +103,6 @@ Route::group([
     $router->post('/projects/edit', 'Api\v1\ProjectController@edit');
     $router->any('/projects/show', 'Api\v1\ProjectController@show');
     $router->post('/projects/remove', 'Api\v1\ProjectController@destroy');
-//    $router->any('/projects/tasks', 'Api\v1\ProjectController@tasks');
 
     //Projects Users routes
     $router->any('/projects-users/list', 'Api\v1\ProjectsUsersController@index');
@@ -111,13 +110,6 @@ Route::group([
     $router->post('/projects-users/create', 'Api\v1\ProjectsUsersController@create');
     $router->post('/projects-users/remove', 'Api\v1\ProjectsUsersController@destroy');
     $router->post('/projects-users/bulk-remove', 'Api\v1\ProjectsUsersController@bulkDestroy');
-
-    /*  Deprecated
-        $router->any('/projects-roles/list', 'Api\v1\ProjectsRolesController@index');
-        $router->any('/projects-roles/count', 'Api\v1\ProjectsRolesController@count');
-        $router->post('/projects-roles/create', 'Api\v1\ProjectsRolesController@create');
-        $router->post('/projects-roles/remove', 'Api\v1\ProjectsRolesController@destroy');
-    */
 
     //Tasks routes
     $router->any('/tasks/list', 'Api\v1\TaskController@index');
@@ -127,14 +119,6 @@ Route::group([
     $router->post('/tasks/edit', 'Api\v1\TaskController@edit');
     $router->any('/tasks/show', 'Api\v1\TaskController@show');
     $router->post('/tasks/remove', 'Api\v1\TaskController@destroy');
-//    $router->any('/tasks/activity', 'Api\v1\TaskController@activity');
-
-    /*  Deprecated
-        $router->any('/task-comment/list', 'Api\v1\TaskCommentController@index');
-        $router->post('/task-comment/create', 'Api\v1\TaskCommentController@create');
-        $router->any('/task-comment/show', 'Api\v1\TaskCommentController@show');
-        $router->post('/task-comment/remove', 'Api\v1\TaskCommentController@destroy');
-       */
 
     //Users routes
     $router->any('/users/list', 'Api\v1\UserController@index');
@@ -147,7 +131,6 @@ Route::group([
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
     $router->any('/screenshots/count', 'Api\v1\ScreenshotController@count');
-//    $router->any('/screenshots/dashboard', 'Api\v1\ScreenshotController@dashboard');
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
     $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');
@@ -191,9 +174,7 @@ Route::group([
 
     // Statistic routes
     $router->any('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
-//    $router->any('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
     $router->any('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
-//    $router->any('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
     $router->any('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
     $router->any('/project-report/screenshots', 'Api\v1\Statistic\ProjectReportController@screenshots');
 });
