@@ -6,7 +6,7 @@ return [
     'debug' => env('APP_DEBUG', false),
     'json_errors' => env('JSON_ERRORS', true),
     'url' => env('APP_URL', 'http://localhost'),
-    'password_reset_url' => env('PASSWORD_RESET_URL'),
+    'frontend_url' => env('FRONTEND_APP_URL'),
     'timezone' => 'UTC',
     'languages' => ['en', 'ru'],
     'locale' => 'en',

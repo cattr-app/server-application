@@ -89,7 +89,7 @@ class RegistrationController extends Controller
      */
     public function create(Request $request): JsonResponse
     {
-        $email = $request->json()->get('email');
+        $email = $request->input('email');
         if (!isset($email)) {
             return response()->json([
                 'success' => false,
@@ -237,12 +237,12 @@ class RegistrationController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function postForm(Request $request, $key): JsonResponse
+    public function postForm(Request $request, string $key): JsonResponse
     {
-        $data = $request->json();
         $registration = Registration::where('key', $key)
             ->where('expires_at', '>=', time())
             ->first();
+
         if (!isset($registration)) {
             return response()->json([
                 'success' => false,
@@ -250,7 +250,7 @@ class RegistrationController extends Controller
             ], 404);
         }
 
-        if ($data->get('email') !== $registration->email) {
+        if ($request->input('email') !== $registration->email) {
             return response()->json([
                 'success' => false,
                 'error' => 'Email mismatch',
@@ -259,14 +259,14 @@ class RegistrationController extends Controller
 
         /** @var User $user */
         $user = User::create([
-            'full_name' => $data->get('fullName'),
-            'email' => $data->get('email'),
-            'password' => bcrypt($data->get('password')),
+            'full_name' => $request->input('full_name'),
+            'email' => $request->input('email'),
+            'password' => bcrypt($request->input('password')),
             'active' => true,
             'manual_time' => false,
             'screenshots_active' => true,
-            'computer_time_popup' => 5,
-            'screenshots_interval' => 5,
+            'computer_time_popup' => 3,
+            'screenshots_interval' => 10,
             'role_id' => 2,
         ]);
 

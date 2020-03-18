@@ -42,7 +42,7 @@ class ResetPassword extends ResetPasswordNotification implements ShouldQueue
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
         }
 
-        $resetUrl = config('app.password_reset_url') . "?email=$this->email&token=$this->token";
+        $resetUrl = config('app.frontend_url') . "/auth/password/reset?email={$this->email}&token={$this->token}";
 
         $locale = User::where('email', '=', $this->email)->first()->getAttribute('user_language');
         Lang::setLocale($locale);
