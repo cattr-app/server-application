@@ -3,12 +3,13 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\URL;
 
 /** @codeCoverageIgnore  */
-class Registration extends Mailable
+class Registration extends Mailable implements ShouldQueue
 {
     use Queueable;
     use SerializesModels;

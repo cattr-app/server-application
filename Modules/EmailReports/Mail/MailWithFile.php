@@ -3,6 +3,7 @@
 namespace Modules\EmailReports\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
@@ -10,7 +11,7 @@ use Illuminate\Queue\SerializesModels;
  * Class EmailReportMail
  * @package Modules\EmailReports\MailWithFile
  */
-class MailWithFile extends Mailable
+class MailWithFile extends Mailable implements ShouldQueue
 {
     use Queueable, SerializesModels;
 
