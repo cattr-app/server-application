@@ -36,7 +36,7 @@ class ResetPassword extends ResetPasswordNotification
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
         }
 
-        $resetUrl = config('app.frontend_url') . "?email={$this->email}&token={$this->token}";
+        $resetUrl = config('app.frontend_url') . "/auth/password/reset?email={$this->email}&token={$this->token}";
 
         $locale = User::where('email', '=', $this->email)->first()->getAttribute('user_language');
         Lang::setLocale($locale);
