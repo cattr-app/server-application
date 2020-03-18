@@ -4,6 +4,7 @@ namespace Modules\JiraIntegration\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
+use Nwidart\Modules\Facades\Module;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
@@ -17,11 +18,17 @@ class ScheduleServiceProvider extends ServiceProvider
         parent::__construct($app);
     }
 
+    public static function isEnabled() {
+        return Module::isEnabled('JiraIntegration');
+    }
+
     public function boot()
     {
-        $schedule = $this->app->make(Schedule::class);
-        $schedule->command('jira:sync-tasks')->everyFiveMinutes()->withoutOverlapping();
-        $schedule->command('jira:sync-time')->everyMinute()->withoutOverlapping();
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
+            $schedule->command('jira:sync-tasks')->everyFiveMinutes()->withoutOverlapping()->when([static::class, 'isEnabled']);
+            $schedule->command('jira:sync-time')->everyMinute()->withoutOverlapping()->when([static::class, 'isEnabled']);
+        });
     }
 
     /**
