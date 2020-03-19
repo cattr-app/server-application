@@ -89,7 +89,11 @@ class RegistrationController extends Controller
      */
     public function create(Request $request): JsonResponse
     {
-        $email = $request->input('email');
+        $email = $request->input('email') ?: $request->input('emails');
+        if (is_array($email)) {
+            return $this->sendMassInvites($emails = $email);
+        }
+
         if (!isset($email)) {
             return response()->json([
                 'success' => false,
@@ -128,6 +132,66 @@ class RegistrationController extends Controller
             'success' => true,
             'key' => $registration->key,
         ]);
+    }
+
+    protected function sendMassInvites($emails)
+    {
+        $countEmails = count($emails);
+        $users = User::whereIn('email', $emails)->get('email')->map(function ($el) {
+            return $el->getAttribute('email');
+        })->all();
+
+        if ($countEmails === count($users)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Users with this emails is already exists',
+            ], 400);
+        }
+
+        $usersEmails = '';
+        if (count($users) > 0) {
+            $usersEmails = implode(', ', $users);
+        }
+
+        if ($usersEmails) {
+            return response()->json([
+                'success' => false,
+                'error' => "These emails: {$usersEmails} is already exists",
+            ], 400);
+        }
+
+        $registrations = Registration::whereIn('email', $emails)
+            ->where('expires_at', '>=', time())
+            ->get(['email', 'key'])->map(function ($el) {
+                return $el->getAttribute('email');
+            })->all();
+
+        if (count($registrations) > 0) {
+            $registrationsEmails = implode(', ', $registrations);
+        }
+        if (isset($registrationsEmails)) {
+            return response()->json([
+                'success' => false,
+                'error' => "{$registrationsEmails} to these addresses is already sent",
+            ], 400);
+        }
+
+        $response = [];
+
+        foreach ($emails as $email) {
+            $registration = Registration::firstOrCreate([
+                'email' => $email,
+            ], [
+                'key' => (string)Uuid::generate(),
+                'expires_at' => time() + static::EXPIRATION_TIME,
+            ]);
+
+            Mail::to($email)->send(new RegistrationMail($registration->key));
+
+            $response['users'][] = ['email' => $email, 'key' => $registration->key];
+        }
+
+        return response()->json(['success' => true, $response]);
     }
 
     /**
