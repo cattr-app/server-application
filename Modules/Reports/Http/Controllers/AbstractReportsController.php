@@ -4,6 +4,7 @@ namespace Modules\Reports\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
 use Modules\Reports\Exports\Types\Csv;
@@ -14,7 +15,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Class AbstractReportsController
-*/
+ */
 abstract class AbstractReportsController extends Controller
 {
     /**
@@ -34,9 +35,6 @@ abstract class AbstractReportsController extends Controller
 
     /**
      * ReportsController constructor.
-     *
-     * @param  Request  $request
-     * @param  Excel    $exporter
      */
     public function __construct(Request $request, Excel $exporter)
     {
@@ -47,7 +45,12 @@ abstract class AbstractReportsController extends Controller
     }
 
     /**
-     * @return BinaryFileResponse
+     * Get data export class
+     */
+    abstract protected function exportClass(): string;
+
+    /**
+     * @return BinaryFileResponse|JsonResponse
      * @throws Exception
      */
     public function getReport()
@@ -83,13 +86,6 @@ abstract class AbstractReportsController extends Controller
             return $report->download($this->exporter->collection(), time() . '_project_export');
         }
 
-        return response()->json(['error' => 'There is no applicable accept header']);
+        return new JsonResponse(['error' => 'There is no applicable accept header']);
     }
-
-    /**
-     * Get data export class
-     *
-     * @return string
-     */
-    abstract protected function exportClass(): string;
 }

@@ -2,18 +2,16 @@
 
 use App\Models\Role;
 use App\Models\Rule;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddEmailReportsModulePermissions extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         $allowedForRoles = ['root', 'observer', 'manager', 'client'];
         $roleIDs = Role::whereIn('name', $allowedForRoles)->get()->pluck('id');
@@ -33,8 +31,8 @@ class AddEmailReportsModulePermissions extends Migration
             foreach ($roleIDs as $roleID) {
                 Rule::updateOrCreate([
                     'role_id' => $roleID,
-                    'object'  => $object,
-                    'action'  => $action,
+                    'object' => $object,
+                    'action' => $action,
                 ], ['allow' => 1]);
             }
         }
@@ -42,13 +40,9 @@ class AddEmailReportsModulePermissions extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('', function (Blueprint $table) {
-
-        });
+        // okay...
     }
 }

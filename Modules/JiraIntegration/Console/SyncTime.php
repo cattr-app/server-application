@@ -41,7 +41,7 @@ class SyncTime extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->service->synchronizeAll();
     }

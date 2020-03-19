@@ -9,6 +9,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TimeRelation extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'trello_time_relation';
 
     protected $fillable = [
@@ -23,28 +25,17 @@ class TimeRelation extends Model
         'user_id' => 'integer',
     ];
 
-    public $timestamps = false;
-
-    /**
-     * @return BelongsTo
-     */
-    public function taskRelation()
+    public function taskRelation(): BelongsTo
     {
         return $this->belongsTo(TaskRelation::class, 'trello_task_id', 'id');
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function timeInterval()
+    public function timeInterval(): BelongsTo
     {
         return $this->belongsTo(TimeInterval::class, 'time_interval_id', 'id');
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }

@@ -15,17 +15,11 @@ class DashboardReport extends Model
 
     protected $table = 'time_intervals';
 
-    /**
-     * @return BelongsTo
-     */
     public function users(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class, 'task_id');

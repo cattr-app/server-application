@@ -16,13 +16,13 @@ $headings = $collection->collapse()->keys();
     </thead>
     <tbody>
     @foreach($collection as $row)
-    <tr style="border: 1px solid black;">
-        @foreach($row as $value)
-            <td style="border: 1px solid black;font-style: italic;">
-                {{ $value }}
-            </td>
-        @endforeach
-    </tr>
+        <tr style="border: 1px solid black;">
+            @foreach($row as $value)
+                <td style="border: 1px solid black;font-style: italic;">
+                    {{ $value }}
+                </td>
+            @endforeach
+        </tr>
     @endforeach
     </tbody>
 </table>

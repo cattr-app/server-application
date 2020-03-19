@@ -8,6 +8,7 @@ use App\Models\User;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
@@ -22,7 +23,7 @@ use SimpleXMLElement;
 
 /**
  * Class SynchronizeTasks
-*/
+ */
 class SynchronizeTasks extends Command
 {
     /**
@@ -76,14 +77,6 @@ class SynchronizeTasks extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @param  UserRepository     $userRepo
-     * @param  ProjectRepository  $projectRepo
-     * @param  TaskRepository     $taskRepo
-     * @param  ClientFactory      $clientFactory
-     * @param  Settings           $settings
-     * @param  Status             $status
-     * @param  Priority           $priority
      */
     public function __construct(
         UserRepository $userRepo,
@@ -107,8 +100,8 @@ class SynchronizeTasks extends Command
 
     /**
      * Execute the console command.
-    */
-    public function handle()
+     */
+    public function handle(): void
     {
         $this->synchronizeTasks();
     }
@@ -116,7 +109,7 @@ class SynchronizeTasks extends Command
     /**
      * Synchronize tasks for all users
      */
-    public function synchronizeTasks()
+    public function synchronizeTasks(): void
     {
         $users = User::all();
 
@@ -127,7 +120,7 @@ class SynchronizeTasks extends Command
                 $this->synchronizeUserActivity($user->id);
             } catch (Exception $e) {
                 echo "Something went wrong while Redmine Task Sync ! \n";
-                echo "Error message: " . $e->getMessage() . "\n";
+                echo 'Error message: ' . $e->getMessage() . "\n";
                 echo "Error trace: \n" . $e->getTraceAsString() . "\n\n";
 
                 Log::error($e);
@@ -138,10 +131,9 @@ class SynchronizeTasks extends Command
     /**
      * Synchronize tasks for current user
      *
-     * @param int $userId User's id in our system
      * @throws Exception
      */
-    public function synchronizeUserNewTasks(int $userId)
+    public function synchronizeUserNewTasks(int $userId): void
     {
         $userNewRedmineTasks = $this->userRepo->getUserNewRedmineTasks($userId);
 
@@ -149,7 +141,7 @@ class SynchronizeTasks extends Command
 
         foreach ($userNewRedmineTasks as $task) {
             $redmineTask = $this->createRedmineTask($client, $task);
-            $this->taskRepo->setRedmineId($task->id, (int) $redmineTask->id);
+            $this->taskRepo->setRedmineId($task->id, (int)$redmineTask->id);
             $this->taskRepo->markAsOld($task->id);
         }
     }
@@ -157,19 +149,19 @@ class SynchronizeTasks extends Command
     /**
      * Create task in Redmine
      *
-     * @param  Redmine\Client  $client
+     * @param Redmine\Client $client
      * @param                  $task
      *
      * @return SimpleXMLElement
      */
-    public function createRedmineTask(Redmine\Client $client, $task)
+    public function createRedmineTask(Redmine\Client $client, $task): SimpleXMLElement
     {
         // Get Redmine priority ID from an internal priority.
         $priority_id = 2;
         if (isset($task->priority_id) && $task->priority_id) {
             $priorities = $this->priority->getAll();
-            $priority = array_first($priorities, function ($priority) use ($task) {
-                return $priority['priority_id'] == $task->priority_id;
+            $priority = array_first($priorities, static function ($priority) use ($task) {
+                return $priority['priority_id'] === $task->priority_id;
             });
 
             if (isset($priority)) {
@@ -193,11 +185,9 @@ class SynchronizeTasks extends Command
     /**
      * Synchronize task's for current user
      *
-     * @param int $userId
-     *
      * @throws Exception
      */
-    public function synchronizeUserTasks(int $userId)
+    public function synchronizeUserTasks(int $userId): void
     {
         $client = $this->clientFactory->createUserClient($userId);
         //get current user's id
@@ -212,10 +202,10 @@ class SynchronizeTasks extends Command
         $currentRedmineUserId = $redmineUser['id'];
 
         $statuses = $this->status->getAll();
-        $activeStatuses = array_filter($statuses, function ($status) {
+        $activeStatuses = array_filter($statuses, static function ($status) {
             return $status['is_active'] === true;
         });
-        $activeStatusIDs = array_map(function ($status) {
+        $activeStatusIDs = array_map(static function ($status) {
             return $status['id'];
         }, $activeStatuses);
 
@@ -230,7 +220,7 @@ class SynchronizeTasks extends Command
 
         $limit = 100;
         $totalTasks = $tasksInfo['total_count'];
-        $chunkNums = (int) ceil($totalTasks / $limit);
+        $chunkNums = (int)ceil($totalTasks / $limit);
 
         $synchronizedTasks = [];
         for ($chunkNum = 0; $chunkNum <= $chunkNums; $chunkNum++) {
@@ -254,7 +244,7 @@ class SynchronizeTasks extends Command
                 ])->first();
 
                 //if task already exists => check if task's properties is changed
-                if ($taskExist != null) {
+                if ($taskExist !== null) {
                     $task = Task::find($taskExist->entity_id);
 
                     // If we dont have a task by find method - task was soft deleted, need to delete it from Properties as well
@@ -278,144 +268,77 @@ class SynchronizeTasks extends Command
                     $this->createNewlySyncedTask($priorities, $taskFromRedmine, $projectProperty, $userId, $activeStatusIDs);
                 }
             }
-
         }
 
         //check: if any task has been closed
-       $this->checkClosedTasks($userId, $synchronizedTasks);
+        $this->checkClosedTasks($userId, $synchronizedTasks);
     }
 
-    protected function checkClosedTasks(int $userId, array $redmineSynchronizedTasks)
+    private function maybeUpdateTask(int $userId, array $taskFromRedmine, array $priorities, array $activeStatusIDs, Task $task): void
     {
-        $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($userId);
-        foreach ($userLocalRedmineTasksIds as $taskIds) {
-            if (!in_array($taskIds->redmine_id, $redmineSynchronizedTasks)) {
-                $localTask = Task::findOrFail($taskIds->task_id);
+        $user_redmine_url = $this->userRepo->getUserRedmineUrl($userId);
+        if (substr($user_redmine_url, -1) !== '/') {
+            $user_redmine_url .= '/';
+        }
 
-                if ($localTask && $localTask->active == 1) {
-                    $localTask->active = 0;
-                    $localTask->save();
-                }
+        // Get internal priority ID from a Redmine priority.
+        $priority = Arr::first($priorities, static function ($priority) use ($taskFromRedmine) {
+            return $priority['id'] === $taskFromRedmine['priority']['id'];
+        });
+        $priority_id = isset($priority) ? $priority['priority_id'] : 0;
+
+        $data = [
+            'task_name' => $taskFromRedmine['subject'] ?? '',
+            'description' => $taskFromRedmine['description'] ?? '',
+            'active' => in_array($taskFromRedmine['status']['id'], $activeStatusIDs),
+            'user_id' => $userId,
+            'url' => $user_redmine_url . 'issues/' . $taskFromRedmine['id'],
+            'priority_id' => $priority_id,
+        ];
+
+        // Get project related to the task.
+        $projectProperty = Property::where([
+            ['entity_type', '=', Property::PROJECT_CODE],
+            ['name', '=', 'REDMINE_ID'],
+            ['value', '=', $taskFromRedmine['project']['id']]
+        ])->first();
+
+        // If project exists, update task project ID.
+        if ($projectProperty && $projectProperty->entity_id) {
+            $data['project_id'] = $projectProperty->entity_id;
+        }
+
+        $is_changed = $this->checkTaskFields($data, $task);
+
+        $storedStatusId = $this->taskRepo->getRedmineStatusId($task->id);
+        $redmineStatusId = $taskFromRedmine['status']['id'];
+
+        if ($redmineStatusId !== $storedStatusId) {
+            $this->taskRepo->setRedmineStatusId($task->id, $redmineStatusId);
+            $is_changed = true;
+        }
+
+        if ($is_changed) {
+            $task->save();
+        }
+    }
+
+    private function checkTaskFields(array $data, Task $task): bool
+    {
+        foreach ($data as $key => $value) {
+            if ($task->$key !== $value) {
+                $task->$key = $value;
+                $changed = true;
             }
         }
+
+        return $changed ?? false;
     }
 
-    /**
-     * Synchronize user task activity for userId
-     *
-     * @param int $userId
-     *
-     * @throws Exception
-     */
-    public function synchronizeUserActivity(int $userId)
-    {
-        $taskRepo = $this->taskRepo;
-        $client = $this->clientFactory->createUserClient($userId);
-        $activeStatusId = $this->status->getActiveStatusID();
-        $inactiveStatusId = $this->status->getInactiveStatusID();
-        $activateOnStatuses = $this->status->getActivateOnStatuses();
-        $deactivateOnStatuses = $this->status->getDeactivateOnStatuses();
-        $timeout = $this->settings->getOnlineTimeout();
-        $timeActivity = $this->userTimeActivity($userId, $timeout);
-        $unactiveTasks = $this->unactiveTasks($userId, $timeActivity);
-
-
-        if ($activeStatusId && $timeActivity) {
-            $activeTaskId = $timeActivity->task_id;
-            $activeIssueId = $taskRepo->getRedmineTaskId($activeTaskId);
-            $currentStatusId = $taskRepo->getRedmineStatusId($activeTaskId);
-            if ($activeIssueId && $this->isInList($currentStatusId, $activateOnStatuses)) {
-                if ($currentStatusId != $activeStatusId) {
-                    $client->issue->update($activeIssueId, ['status_id' => $activeStatusId]);
-                    $taskRepo->setRedmineStatusId($activeTaskId, $activeStatusId);
-                }
-            }
-        }
-
-        if ($inactiveStatusId) {
-            foreach ($unactiveTasks as $task) { // is there any way to do it somehow else?
-                $currentStatusId = $taskRepo->getRedmineStatusId($task->id);
-                $issueId = $taskRepo->getRedmineTaskId($task->id);
-                if ($issueId && $this->isInList($currentStatusId, $deactivateOnStatuses)) {
-                    if ($currentStatusId != $inactiveStatusId) {
-                        $client->issue->update($issueId, ['status_id' => $inactiveStatusId]);
-                        $taskRepo->setRedmineStatusId($task->id, $inactiveStatusId);
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * get last user time activity
-     *
-     * @param string $userId
-     *
-     * @param $timeout
-     * @return TimeActivity|null
-     */
-    protected function userTimeActivity(string $userId, $timeout)
-    {
-
-        $query = TimeActivity::where('user_id', $userId);
-
-        if ($timeout) {
-            $onlineTimestamp = time() /* now */ - $timeout; // timestamp when task counting as in progress
-            $onlineDatetime = date('Y-m-d H:i:s', $onlineTimestamp);
-
-            $query->where('last_time_activity', '>', $onlineDatetime);
-        }
-
-        return $query->first();
-    }
-
-    /**
-     * get array of unactive tasks for $userId except for $timeActivity
-     *
-     * @param  string             $userId
-     * @param  TimeActivity|null  $timeActivity
-     *
-     * @return Collection of Task
-     */
-    protected function unactiveTasks(string $userId, $timeActivity)
-    {
-        $unactiveTaskQuery = Task::query()
-            ->where('user_id', $userId)
-            ->where('active', true);
-
-
-        if ($timeActivity) {
-            $unactiveTaskQuery->where('id', '!=', $timeActivity->task_id);
-        }
-
-        return $unactiveTaskQuery->get();
-    }
-
-    /**
-     * is status $redmineStatusId inside array $statusesList
-     *
-     * @param  string      $redmineStatusId
-     * @param  array|null  $statusesList
-     *
-     * @return boolean
-     */
-    protected function isInList(string $redmineStatusId, $statusesList)
-    {
-        if (!$redmineStatusId) {
-            return false;
-        }
-
-        if (!is_array($statusesList)) {
-            return false;
-        }
-
-        return in_array($redmineStatusId, $statusesList);
-    }
-
-    private function createNewlySyncedTask(array $priorities, array $taskFromRedmine, Model $projectProperty, int $userId, array $activeStatusIDs)
+    private function createNewlySyncedTask(array $priorities, array $taskFromRedmine, Model $projectProperty, int $userId, array $activeStatusIDs): void
     {
         // Get internal priority ID from a Redmine priority.
-        $priority = array_first($priorities, function ($priority) use ($taskFromRedmine) {
+        $priority = Arr::first($priorities, function ($priority) use ($taskFromRedmine) {
             return $priority['id'] === $taskFromRedmine['priority']['id'];
         });
         $priority_id = isset($priority) ? $priority['priority_id'] : 0;
@@ -447,64 +370,127 @@ class SynchronizeTasks extends Command
         ]);
     }
 
-    private function maybeUpdateTask(int $userId, array $taskFromRedmine, array $priorities, array $activeStatusIDs, Task $task)
+    protected function checkClosedTasks(int $userId, array $redmineSynchronizedTasks): void
     {
-        $user_redmine_url = $this->userRepo->getUserRedmineUrl($userId);
-        if (substr($user_redmine_url, -1) !== '/') {
-            $user_redmine_url .= '/';
-        }
+        $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($userId);
+        foreach ($userLocalRedmineTasksIds as $taskIds) {
+            if (!in_array($taskIds->redmine_id, $redmineSynchronizedTasks)) {
+                $localTask = Task::findOrFail($taskIds->task_id);
 
-        // Get internal priority ID from a Redmine priority.
-        $priority = array_first($priorities, function ($priority) use ($taskFromRedmine) {
-            return $priority['id'] === $taskFromRedmine['priority']['id'];
-        });
-        $priority_id = isset($priority) ? $priority['priority_id'] : 0;
-
-        $data = [
-            'task_name' => $taskFromRedmine['subject'] ?? '',
-            'description' => $taskFromRedmine['description'] ?? '',
-            'active' => in_array($taskFromRedmine['status']['id'], $activeStatusIDs),
-            'user_id' => $userId,
-            'url' => $user_redmine_url . 'issues/' . $taskFromRedmine['id'],
-            'priority_id' => $priority_id,
-        ];
-
-        // Get project related to the task.
-        $projectProperty = Property::where([
-            ['entity_type', '=', Property::PROJECT_CODE],
-            ['name', '=', 'REDMINE_ID'],
-            ['value', '=', $taskFromRedmine['project']['id']]
-        ])->first();
-
-        // If project exists, update task project ID.
-        if ($projectProperty && $projectProperty->entity_id) {
-            $data['project_id'] = $projectProperty->entity_id;
-        }
-
-        $is_changed = $this->checkTaskFields($data, $task);
-
-        $storedStatusId = $this->taskRepo->getRedmineStatusId($task->id);
-        $redmineStatusId = $taskFromRedmine['status']['id'];
-
-        if ($redmineStatusId != $storedStatusId) {
-            $this->taskRepo->setRedmineStatusId($task->id, $redmineStatusId);
-            $is_changed = true;
-        }
-
-        if ($is_changed) {
-            $task->save();
+                if ($localTask && $localTask->active == 1) {
+                    $localTask->active = 0;
+                    $localTask->save();
+                }
+            }
         }
     }
 
-    private function checkTaskFields(array $data, Task $task)
+    /**
+     * Synchronize user task activity for userId
+     *
+     * @throws Exception
+     */
+    public function synchronizeUserActivity(int $userId): void
     {
-        foreach ($data as $key => $value) {
-            if ($task->$key !== $value) {
-                $task->$key = $value;
-                $changed = true;
+        $taskRepo = $this->taskRepo;
+        $client = $this->clientFactory->createUserClient($userId);
+        $activeStatusId = $this->status->getActiveStatusID();
+        $inactiveStatusId = $this->status->getInactiveStatusID();
+        $activateOnStatuses = $this->status->getActivateOnStatuses();
+        $deactivateOnStatuses = $this->status->getDeactivateOnStatuses();
+        $timeout = $this->settings->getOnlineTimeout();
+        $timeActivity = $this->userTimeActivity($userId, $timeout);
+        $unactiveTasks = $this->unactiveTasks($userId, $timeActivity);
+
+
+        if ($activeStatusId && $timeActivity) {
+            $activeTaskId = $timeActivity->task_id;
+            $activeIssueId = $taskRepo->getRedmineTaskId($activeTaskId);
+            $currentStatusId = $taskRepo->getRedmineStatusId($activeTaskId);
+            if ($activeIssueId && $this->isInList($currentStatusId, $activateOnStatuses)) {
+                if ($currentStatusId !== $activeStatusId) {
+                    $client->issue->update($activeIssueId, ['status_id' => $activeStatusId]);
+                    $taskRepo->setRedmineStatusId($activeTaskId, $activeStatusId);
+                }
             }
         }
 
-        return $changed ?? false;
+        if ($inactiveStatusId) {
+            foreach ($unactiveTasks as $task) { // is there any way to do it somehow else?
+                $currentStatusId = $taskRepo->getRedmineStatusId($task->id);
+                $issueId = $taskRepo->getRedmineTaskId($task->id);
+                if ($issueId && $this->isInList($currentStatusId, $deactivateOnStatuses)) {
+                    if ($currentStatusId !== $inactiveStatusId) {
+                        $client->issue->update($issueId, ['status_id' => $inactiveStatusId]);
+                        $taskRepo->setRedmineStatusId($task->id, $inactiveStatusId);
+                    }
+                }
+            }
+        }
+    }
+
+    /**
+     * get last user time activity
+     *
+     * @param string $userId
+     *
+     * @param $timeout
+     * @return TimeActivity|null
+     */
+    protected function userTimeActivity(string $userId, $timeout): ?TimeActivity
+    {
+        $query = TimeActivity::where('user_id', $userId);
+
+        if ($timeout) {
+            $onlineTimestamp = time() /* now */ - $timeout; // timestamp when task counting as in progress
+            $onlineDatetime = date('Y-m-d H:i:s', $onlineTimestamp);
+
+            $query->where('last_time_activity', '>', $onlineDatetime);
+        }
+
+        return $query->first();
+    }
+
+    /**
+     * get array of unactive tasks for $userId except for $timeActivity
+     *
+     * @param string $userId
+     * @param TimeActivity|null $timeActivity
+     *
+     * @return Collection of Task
+     */
+    protected function unactiveTasks(string $userId, $timeActivity)
+    {
+        $unactiveTaskQuery = Task::query()
+            ->where('user_id', $userId)
+            ->where('active', true);
+
+
+        if ($timeActivity) {
+            $unactiveTaskQuery->where('id', '!=', $timeActivity->task_id);
+        }
+
+        return $unactiveTaskQuery->get();
+    }
+
+    /**
+     * is status $redmineStatusId inside array $statusesList
+     *
+     * @param string $redmineStatusId
+     * @param array|null $statusesList
+     *
+     * @return boolean
+     */
+    protected function isInList(string $redmineStatusId, $statusesList): bool
+    {
+        if (!$redmineStatusId) {
+            return false;
+        }
+
+        if (!is_array($statusesList)) {
+            return false;
+        }
+
+        return in_array($redmineStatusId, $statusesList);
     }
 }

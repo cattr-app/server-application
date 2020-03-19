@@ -2,8 +2,10 @@
 
 namespace Modules\JiraIntegration\Entities;
 
-use App\Models\{TimeInterval, User};
+use App\Models\TimeInterval;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $jira_task_id
@@ -16,6 +18,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class TimeRelation extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'jira_time_relation';
 
     protected $fillable = [
@@ -25,33 +29,22 @@ class TimeRelation extends Model
     ];
 
     protected $casts = [
-        'jira_task_id'     => 'integer',
+        'jira_task_id' => 'integer',
         'time_interval_id' => 'integer',
-        'user_id'          => 'integer',
+        'user_id' => 'integer',
     ];
 
-    public $timestamps = false;
-
-    /**
-     * @return BelongsTo
-     */
-    public function taskRelation()
+    public function taskRelation(): BelongsTo
     {
         return $this->belongsTo(TaskRelation::class, 'jira_task_id', 'id');
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function timeInterval()
+    public function timeInterval(): BelongsTo
     {
         return $this->belongsTo(TimeInterval::class, 'time_interval_id', 'id');
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }

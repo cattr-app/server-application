@@ -5,10 +5,6 @@ namespace Modules\EmailReports\Console;
 use Illuminate\Console\Command;
 use Modules\EmailReports\Entities\ReportsSender;
 
-/**
- * Class EmailReportsSender
- * @package Modules\EmailReports\Console
- */
 class EmailReportsSender extends Command
 {
     /**
@@ -32,7 +28,6 @@ class EmailReportsSender extends Command
 
     /**
      * SendSavedReports constructor.
-     * @param ReportsSender $repository
      */
     public function __construct(ReportsSender $repository)
     {
@@ -40,7 +35,7 @@ class EmailReportsSender extends Command
         $this->repository = $repository;
     }
 
-    public function handle()
+    public function handle(): void
     {
         $this->repository->send();
     }

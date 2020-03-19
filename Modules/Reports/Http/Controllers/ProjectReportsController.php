@@ -6,27 +6,22 @@ use Modules\Reports\Exports\ProjectExport;
 
 /**
  * Class ProjectReportsController
-*/
+ */
 class ProjectReportsController extends AbstractReportsController
 {
 
-    /**
-     * Get data export class
-     *
-     * @return string
-     */
-    protected function exportClass(): string
-    {
-        return ProjectExport::class;
-    }
-
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
             'getReport' => 'project-report.projects',
         ];
+    }
+
+    /**
+     * Get data export class
+     */
+    protected function exportClass(): string
+    {
+        return ProjectExport::class;
     }
 }

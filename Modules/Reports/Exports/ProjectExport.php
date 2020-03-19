@@ -12,7 +12,7 @@ use Illuminate\Support\Collection;
 
 class ProjectExport implements Exportable
 {
-    const ROUND_DIGITS = 3;
+    public const ROUND_DIGITS = 3;
 
     /**
      * @var ReportHelper
@@ -32,7 +32,6 @@ class ProjectExport implements Exportable
     }
 
     /**
-     * @return Collection
      * @throws Exception
      */
     public function collection(): Collection
@@ -84,56 +83,8 @@ class ProjectExport implements Exportable
     }
 
     /**
-     * @param Collection $collection
-     * @param string $projectName
-     * @param array $user
-     * @param array $task
-     * @throws Exception
-     */
-    protected function addRowToCollection(Collection $collection, string $projectName, array $user, array $task)
-    {
-        $time = (new Carbon('@0'))->diffForHumans(new Carbon("@{$task['duration']}"), true, true, 3);
-        $decimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@{$task['duration']}"));
-
-        $collection->push([
-            'Project' => $projectName,
-            'User' => $user['full_name'],
-            'Task' => $task['task_name'],
-            'Time' => "{$time}",
-            'Hours (decimal)' => round($decimalTime, self::ROUND_DIGITS)
-        ]);
-    }
-
-    /**
-     * Add subtotal record to existing collection
-     *
-     * @param Collection $collection
-     * @param string $projectName
-     * @param int|float $time
-     *
-     * @return void
-     * @throws Exception
-     */
-    protected function addSubtotalToCollection(Collection $collection, string $projectName, $time): void
-    {
-        $timeObject = (new Carbon('@0'))->diffForHumans(new Carbon("@$time"),true, true, 3);
-        $projectDecimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@$time"));
-
-        $collection->push([
-            'Project' => "Subtotal for $projectName",
-            'User' => '',
-            'Task' => '',
-            'Time' => "{$timeObject}",
-            'Hours (decimal)' => round($projectDecimalTime, self::ROUND_DIGITS)
-        ]);
-    }
-
-    /**
      * Get processed, formatted and prepared-to-return collection
      *
-     * @param  array  $collectionData
-     *
-     * @return Collection
      * @throws Exception
      */
     protected function getPreparedCollection(array $collectionData): Collection
@@ -144,10 +95,8 @@ class ProjectExport implements Exportable
 
     /**
      * Get unprocessed collection from database
-     *
-     * @param  array  $queryData
-     *
-     * @return Builder[]|\Illuminate\Database\Eloquent\Collection
+     ,*
+     * @throws Exception
      */
     protected function _getUnpreparedCollection(array $queryData): Collection
     {
@@ -163,15 +112,19 @@ class ProjectExport implements Exportable
             ->toDateTimeString();
 
         $projectReportCollection = $this->reportHelper->getBaseQuery(
-            $queryData['uids'], $startAt, $endAt, $timezoneOffset, [
-            "JSON_ARRAYAGG(
+            $queryData['uids'],
+            $startAt,
+            $endAt,
+            $timezoneOffset,
+            [
+                "JSON_ARRAYAGG(
                 JSON_OBJECT(
                     'id', time_intervals.id, 'user_id', time_intervals.user_id, 'task_id', time_intervals.task_id,
                     'end_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?), 'start_at',
                     CONVERT_TZ(time_intervals.start_at, '+00:00', ?)
                 )
             ) as intervals"
-        ],
+            ],
             [$timezoneOffset]
         )
             ->whereIn('project_id', $queryData['pids'])
@@ -205,9 +158,10 @@ class ProjectExport implements Exportable
                         'tasks_time' => 0,
                     ];
                 }
-                if (!array_key_exists($item->task_id,
-                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'])) {
-
+                if (!array_key_exists(
+                    $item->task_id,
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks']
+                )) {
                     $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id] = [
                         'task_name' => $item->task_name,
                         'id' => $item->task_id,
@@ -230,17 +184,17 @@ class ProjectExport implements Exportable
 
         foreach ($resultCollection as &$project) {
             foreach ($project['users'] as &$user) {
-                uasort($user['tasks'], function ($a, $b) {
+                uasort($user['tasks'], static function ($a, $b) {
                     return $a['duration'] < $b['duration'];
                 });
             }
 
-            uasort($project['users'], function ($a, $b) {
+            uasort($project['users'], static function ($a, $b) {
                 return $a['tasks_time'] < $b['tasks_time'];
             });
         }
 
-        uasort($resultCollection, function ($a, $b) {
+        uasort($resultCollection, static function ($a, $b) {
             return $a['project_time'] < $b['project_time'];
         });
 
@@ -248,8 +202,41 @@ class ProjectExport implements Exportable
     }
 
     /**
-     * @return string
+     * @throws Exception
      */
+    protected function addRowToCollection(Collection $collection, string $projectName, array $user, array $task): void
+    {
+        $time = (new Carbon('@0'))->diffForHumans(new Carbon("@{$task['duration']}"), true, true, 3);
+        $decimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@{$task['duration']}"));
+
+        $collection->push([
+            'Project' => $projectName,
+            'User' => $user['full_name'],
+            'Task' => $task['task_name'],
+            'Time' => "{$time}",
+            'Hours (decimal)' => round($decimalTime, self::ROUND_DIGITS)
+        ]);
+    }
+
+    /**
+     * Add subtotal record to existing collection
+     *
+     * @throws Exception
+     */
+    protected function addSubtotalToCollection(Collection $collection, string $projectName, $time): void
+    {
+        $timeObject = (new Carbon('@0'))->diffForHumans(new Carbon("@$time"), true, true, 3);
+        $projectDecimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@$time"));
+
+        $collection->push([
+            'Project' => "Subtotal for $projectName",
+            'User' => '',
+            'Task' => '',
+            'Time' => "{$timeObject}",
+            'Hours (decimal)' => round($projectDecimalTime, self::ROUND_DIGITS)
+        ]);
+    }
+
     public function getExporterName(): string
     {
         return 'projectReport';

@@ -2,13 +2,11 @@
 
 namespace Modules\RedmineIntegration\Console;
 
+use Exception;
 use Illuminate\Console\Command;
 use Log;
 use Modules\RedmineIntegration\Models\Priority;
 
-/**
- * Class SynchronizePriorities
-*/
 class SynchronizePriorities extends Command
 {
     /**
@@ -32,8 +30,6 @@ class SynchronizePriorities extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @param  Priority  $priority
      */
     public function __construct(Priority $priority)
     {
@@ -44,12 +40,12 @@ class SynchronizePriorities extends Command
 
     /**
      * Execute the console command.
-    */
-    public function handle()
+     */
+    public function handle(): void
     {
         try {
             $this->priority->synchronize();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($e);
         }
     }

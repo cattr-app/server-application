@@ -10,7 +10,7 @@ class BroadcastServiceProvider extends ServiceProvider
     /**
      * Register redmine websocket endpoints
      */
-    public function boot()
+    public function boot(): void
     {
         require __DIR__.'/../Routes/channels.php';
     }

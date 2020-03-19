@@ -1,19 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateEmailReportsEmailsTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('email_reports_emails', function (Blueprint $table) {
+        Schema::create('email_reports_emails', static function (Blueprint $table) {
             $table->integer('email_report_id');
             $table->string('email');
             $table->foreign('email_report_id')->references('id')->on('email_reports')->onDelete('cascade');
@@ -22,10 +20,8 @@ class CreateEmailReportsEmailsTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('email_reports_emails');
     }

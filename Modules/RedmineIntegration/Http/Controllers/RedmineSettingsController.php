@@ -6,6 +6,7 @@ use App\EventFilter\Facades\Filter;
 use App\Models\Priority;
 use App\Models\Property;
 use App\Models\User;
+use Exception;
 use Illuminate\Contracts\Auth\Authenticatable;
 use Illuminate\Foundation\Validation\ValidatesRequests;
 use Illuminate\Http\JsonResponse;
@@ -25,15 +26,8 @@ class RedmineSettingsController extends AbstractRedmineController
 
     use ValidatesRequests;
 
-    /**
-     * @var Request
-     */
-    protected $request;
-
-    /**
-     * @var Settings
-     */
-    protected $settings;
+    protected Request $request;
+    protected Settings $settings;
 
     /**
      * @var User|Authenticatable
@@ -43,13 +37,6 @@ class RedmineSettingsController extends AbstractRedmineController
     protected ClientFactory $clientFactory;
 
 
-    /**
-     * RedmineSettingsController constructor.
-     *
-     * @param Request $request
-     * @param Settings $settings
-     * @param ClientFactory $clientFactory
-     */
     public function __construct(Request $request, Settings $settings, ClientFactory $clientFactory)
     {
         $this->request = $request;
@@ -60,9 +47,6 @@ class RedmineSettingsController extends AbstractRedmineController
         parent::__construct();
     }
 
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -74,13 +58,8 @@ class RedmineSettingsController extends AbstractRedmineController
 
     /**
      * Update user's redmine settings
-     *
-     * @param Request $request
-     * @param UserRepository $userRepository
-     *
-     * @return JsonResponse
      */
-    public function updateSettings(Request $request, UserRepository $userRepository)
+    public function updateSettings(Request $request, UserRepository $userRepository): JsonResponse
     {
         $request = Filter::process('request.redmine.settings.update', $request);
         try {
@@ -93,13 +72,13 @@ class RedmineSettingsController extends AbstractRedmineController
             $currentRedmineUser = $client->user->getCurrentUser() ?: [];
 
             if (!($currentRedmineUser['user'] ?? false)) {
-                throw new \Exception(
+                throw new Exception(
                     'Invalid API Key or Redmine is not available at the moment.'
                 );
             }
 
         } catch (Throwable $e) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process('answer.error.redmine.settings.update', [
                     'error' => 'Validation failed',
                     'message' => $e->getMessage()
@@ -115,10 +94,20 @@ class RedmineSettingsController extends AbstractRedmineController
             $userRepository->markAsNew($this->user->id);
         }
 
-        return response()->json(Filter::process('answer.success.redmine.settings.change', 'Updated!'));
+        return new JsonResponse(Filter::process('answer.success.redmine.settings.change', 'Updated!'));
     }
 
-    protected function saveProperties()
+    /**
+     * Returns validation rules for 'updateSettings' request
+     */
+    public function getValidationRules(): array
+    {
+        return [
+            'redmine_api_key' => 'required',
+        ];
+    }
+
+    protected function saveProperties(): void
     {
         if (strpos($this->request->redmine_api_key, '*') !== false) {
             return;
@@ -165,26 +154,9 @@ class RedmineSettingsController extends AbstractRedmineController
     }
 
     /**
-     * Returns validation rules for 'updateSettings' request
-     *
-     * @return array
-     */
-    public function getValidationRules()
-    {
-        return [
-            'redmine_api_key' => 'required',
-        ];
-    }
-
-    /**
      * Returns user's redmine settings
-     *
-     * @param Request $request
-     * @param UserRepository $userRepository
-     *
-     * @return JsonResponse
      */
-    public function getSettings(Request $request, UserRepository $userRepository)
+    public function getSettings(Request $request, UserRepository $userRepository): JsonResponse
     {
         $userId = auth()->user()->id;
         $apiKey = $userRepository->getUserRedmineApiKey($userId);
@@ -194,14 +166,11 @@ class RedmineSettingsController extends AbstractRedmineController
             'enabled' => (bool)$this->settings->getEnabled(),
             'redmine_api_key' => $hiddenKey
         ];
-        return response()->json($settingsArray);
+        return new JsonResponse($settingsArray);
     }
 
-    /**
-     * @return JsonResponse
-     */
     public function getInternalPriorities(): JsonResponse
     {
-        return response()->json(Priority::all());
+        return new JsonResponse(Priority::all());
     }
 }

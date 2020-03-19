@@ -34,9 +34,6 @@ class SyncTime extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @param Service $service
-     * @param Settings $settings
      */
     public function __construct(Service $service, Settings $settings)
     {
@@ -48,7 +45,7 @@ class SyncTime extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->service->synchronizeAll();
     }

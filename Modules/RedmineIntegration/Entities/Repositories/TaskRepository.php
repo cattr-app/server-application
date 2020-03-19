@@ -6,7 +6,7 @@ use App\Models\Property;
 
 /**
  * Class TaskRepository
-*/
+ */
 class TaskRepository
 {
 
@@ -18,12 +18,8 @@ class TaskRepository
 
     /**
      * Returns Redmine ID for current task
-     *
-     * @param  int  $taskId
-     *
-     * @return string
      */
-    public function getRedmineTaskId(int $taskId)
+    public function getRedmineTaskId(int $taskId): ?string
     {
         $query = Property::where([
             ['entity_id', '=', $taskId],
@@ -34,9 +30,7 @@ class TaskRepository
         if (!$query->exists()) {
             return null;
         }
-        $taskRedmineIdProperty = $query->first();
-
-        return $taskRedmineIdProperty->value;
+        return $query->first()->value;
     }
 
     /**
@@ -44,9 +38,9 @@ class TaskRepository
      *
      * Adds a specific row to properties table
      *
-     * @param  int  $taskId
+     * @param int $taskId
      */
-    public function markAsNew(int $taskId)
+    public function markAsNew(int $taskId): void
     {
         Property::create([
             'entity_id' => $taskId,
@@ -61,9 +55,9 @@ class TaskRepository
      *
      * Adds a specific row to properties table
      *
-     * @param  int  $taskId
+     * @param int $taskId
      */
-    public function markAsOld(int $taskId)
+    public function markAsOld(int $taskId): void
     {
         Property::where('entity_id', '=', $taskId)
             ->where('entity_type', '=', Property::TASK_CODE)
@@ -80,10 +74,10 @@ class TaskRepository
     /**
      * Set redmine id for task
      *
-     * @param  int  $taskId         Task id in local system
-     * @param  int  $taskRedmineId  Task id in redmine
+     * @param int $taskId Task id in local system
+     * @param int $taskRedmineId Task id in redmine
      */
-    public function setRedmineId(int $taskId, int $taskRedmineId)
+    public function setRedmineId(int $taskId, int $taskRedmineId): void
     {
         Property::create([
             'entity_id' => $taskId,
@@ -96,26 +90,35 @@ class TaskRepository
 
     /**
      * get active task status id from taskId
-     *
-     * @param  string  $taskId
-     *
+     * @param $taskId
      * @return string
      */
-    public function getRedmineStatusId($taskId)
+    public function getRedmineStatusId($taskId): string
     {
         return $this->getProperty($taskId, static::STATUS_PROPERTY);
     }
 
     /**
+     * set active task status id for taskId
+     *
+     * @param $taskId
+     * @param $status_id
+     */
+    public function setRedmineStatusId($taskId, $status_id): void
+    {
+        $this->setProperty($taskId, static::STATUS_PROPERTY, $status_id);
+    }
+
+    /**
      * get property from taskId
      *
-     * @param  string  $taskId
-     * @param  string  $propertyName
-     * @param  string  $retOnUnset  optional
+     * @param $taskId
+     * @param string $propertyName
+     * @param string $retOnUnset optional
      *
      * @return string
      */
-    protected function getProperty($taskId, string $propertyName, string $retOnUnset = '')
+    protected function getProperty($taskId, string $propertyName, string $retOnUnset = ''): string
     {
         $property = Property::where([
             'entity_id' => $taskId,
@@ -131,26 +134,13 @@ class TaskRepository
     }
 
     /**
-     * set active task status id for taskId
-     *
-     * @param  string  $taskId
-     * @param  string  $status_id
-     *
-     * @return string
-     */
-    public function setRedmineStatusId($taskId, $status_id)
-    {
-        return $this->setProperty($taskId, static::STATUS_PROPERTY, $status_id);
-    }
-
-    /**
      * set property for taskId
      *
-     * @param  string  $taskId
-     * @param  string  $propertyName
-     * @param  mixed   $value
+     * @param string $taskId
+     * @param string $propertyName
+     * @param mixed $value
      */
-    protected function setProperty($taskId, string $propertyName, $value)
+    protected function setProperty($taskId, string $propertyName, $value): void
     {
         $params = [
             'entity_id' => $taskId,

@@ -9,25 +9,14 @@ use Exception;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 
-/**
- * Class TimeIntervalIntegrationHelper
-*/
 class TimeIntervalIntegrationHelper extends AbstractIntegrationHelper
 {
-    /**
-     * @param                     $userId
-     * @param                     $timeIntervalId
-     * @param  TaskRepository     $taskRepository
-     * @param  ProjectRepository  $projectRepository
-     *
-     * @throws Exception
-     */
     public function createInterval(
-        $userId,
-        $timeIntervalId,
+        int $userId,
+        int $timeIntervalId,
         TaskRepository $taskRepository,
         ProjectRepository $projectRepository
-    ) {
+    ): void {
         $client = $this->clientFactory->createUserClient($userId);
 
         $timeInterval = TimeInterval::where('id', '=', $timeIntervalId)->first();
@@ -46,7 +35,7 @@ class TimeIntervalIntegrationHelper extends AbstractIntegrationHelper
             'spent_on' => $startDateTime->format('Y-m-d'),
             'hours' => round($diffHours, 2),
             'activity_id' => null,
-            'comments' => "Cattr Entry",
+            'comments' => 'Cattr Entry',
         ];
 
         $client->time_entry->create($timeIntervalInfo);

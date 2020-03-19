@@ -4,31 +4,23 @@ namespace Modules\TrelloIntegration\Services;
 
 use App\Models\TimeInterval;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Carbon;
 use Modules\TrelloIntegration\Entities\Settings;
 use Modules\TrelloIntegration\Entities\TaskRelation;
 use Modules\TrelloIntegration\Entities\TimeRelation;
 use Trello\Client;
 
-/**
- * Class SyncTime
- * @package Modules\TrelloIntegration\Services
- */
 class SyncTime
 {
-    /** @var Settings */
     protected Settings $settings;
 
-    /**
-     * SyncTime constructor.
-     * @param Settings $settings
-     */
     public function __construct(Settings $settings)
     {
         $this->settings = $settings;
     }
 
-    public function synchronizeAll()
+    public function synchronizeAll(): void
     {
         // If the company integration isn't set, do the return
         if (!$this->settings->getEnabled()) {
@@ -43,12 +35,12 @@ class SyncTime
     }
 
     /**
-     * @param User $user
+     * @throws Exception
      */
-    public function synchronizeUserTime(User $user)
+    public function synchronizeUserTime(User $user): void
     {
         // If the company integration for user's integration isn't set, do the return
-        $apiKey = $this->settings->getUserApiKey($user->id);;
+        $apiKey = $this->settings->getUserApiKey($user->id);
         $appToken = $this->settings->getAuthToken();
         $organizationName = $this->settings->getOrganizationName();
 
@@ -80,17 +72,15 @@ class SyncTime
 
             if (!array_key_exists($projectName, $result)) {
                 $result[$projectName][$cardID] = [
-                    'card_id'  => $cardID,
+                    'card_id' => $cardID,
                     'duration' => 0,
                     'start_at' => $startAt->format('M d Y'),
-                    'end_at'   => $formattedEndAt,
+                    'end_at' => $formattedEndAt,
                 ];
             }
 
             $result[$projectName][$cardID]['duration'] += $duration;
-            $result[$projectName][$cardID]['end_at'] = $result[$projectName][$cardID]['end_at'] === $formattedEndAt
-                ? $result[$projectName][$cardID]['end_at']
-                : $formattedEndAt;
+            $result[$projectName][$cardID]['end_at'] = $formattedEndAt;
 
             $timeRelation->delete();
         }

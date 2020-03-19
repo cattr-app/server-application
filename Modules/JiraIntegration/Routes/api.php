@@ -1,6 +1,6 @@
 <?php
 
-use \Illuminate\Routing\Router;
+use Illuminate\Routing\Router;
 
 Route::middleware('auth:api')->group(function (Router $router) {
     $router->get('/settings', 'SettingsController@get')->name('settings.get');
