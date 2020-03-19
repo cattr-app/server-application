@@ -12,7 +12,7 @@ const TOTAL_DECIMAL_INDEX = 2;
  */
 $dates = [];
 $headings = $collection->collapse()->keys();
-$collection->each(function ($row) use ($headings, &$dates) {
+$collection->each(static function ($row) use ($headings, &$dates) {
     foreach ($row as $title => $value) {
         if (in_array($title, [$headings[USER_INDEX], $headings[TOTAL_INDEX], $headings[TOTAL_DECIMAL_INDEX]]) || intval($value) === 0) {
             continue;

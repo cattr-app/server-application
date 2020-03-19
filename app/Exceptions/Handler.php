@@ -4,6 +4,7 @@ namespace App\Exceptions;
 
 use App\Exceptions\Interfaces\InfoExtendedException;
 use App\Exceptions\Interfaces\TypedException;
+use Error;
 use Exception;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
@@ -11,11 +12,10 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Http\Response;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
+use RuntimeException;
 use Symfony\Component\HttpKernel\Exception\HttpException;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
 
@@ -45,9 +45,6 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param Exception $exception
-     *
-     * @return void
      * @throws Exception
      */
     public function report(Throwable $exception): void
@@ -60,12 +57,27 @@ class Handler extends ExceptionHandler
     }
 
     /**
+     * Convert an authentication exception into an unauthenticated response.
+     *
+     * @param Request $request
+     * @param AuthenticationException $exception
+     *
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws Throwable
+     */
+    protected function unauthenticated($request, AuthenticationException $exception)
+    {
+        return $this->render($request, $exception);
+    }
+
+    /**
      * Render an exception into an HTTP response.
      *
      * @param Request $request
-     * @param Exception $exception
+     * @param Throwable $exception
      *
-     * @return JsonResponse|Response
+     * @return \Symfony\Component\HttpFoundation\Response
+     * @throws Throwable
      */
     public function render($request, Throwable $exception)
     {
@@ -176,7 +188,7 @@ class Handler extends ExceptionHandler
             $errorType !== false && $errorType !== null ? ['error_type' => $errorType] : []
         );
 
-        return response()->json(
+        return new JsonResponse(
             $exceptionResult,
             $statusCode,
             [],
@@ -184,40 +196,10 @@ class Handler extends ExceptionHandler
         );
     }
 
-    /**
-     * Convert an authentication exception into an unauthenticated response.
-     *
-     * @param Request $request
-     * @param AuthenticationException $exception
-     *
-     * @return JsonResponse|Response
-     */
-    protected function unauthenticated($request, AuthenticationException $exception)
-    {
-        return $this->render($request, $exception);
-    }
-
-    /**
-     * @param Throwable $e
-     *
-     * @return bool
-     */
     protected function isDefaultPhpException(Throwable $e): bool
     {
-        return $e instanceof \Error ||
-            $e instanceof \RuntimeException ||
+        return $e instanceof Error ||
+            $e instanceof RuntimeException ||
             $e instanceof Exception;
-    }
-
-    /**
-     * Determine if the given exception is an HTTP exception.
-     *
-     * @param Exception $e
-     *
-     * @return bool
-     */
-    protected function isHttpException(Throwable $e): bool
-    {
-        return $e instanceof HttpExceptionInterface;
     }
 }

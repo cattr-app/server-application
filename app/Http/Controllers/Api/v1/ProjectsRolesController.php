@@ -22,33 +22,6 @@ use Illuminate\Support\Facades\Validator;
 class ProjectsRolesController extends ItemController
 {
     /**
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return ProjectsRoles::class;
-    }
-
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'project_id' => 'required|exists:projects,id',
-            'role_id' => 'required|exists:role,id',
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'projects-roles';
-    }
-
-    /**
      * @return array
      */
     public static function getControllerRules(): array
@@ -60,6 +33,57 @@ class ProjectsRolesController extends ItemController
             'bulkCreate' => 'projects-roles.bulk-create',
             'destroy' => 'projects-roles.remove',
             'bulkDestroy' => 'projects-roles.bulk-remove',
+        ];
+    }
+
+    public function getEventUniqueNamePart(): string
+    {
+        return 'projects-roles';
+    }
+
+    public function create(Request $request): JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        $cls = $this->getItemClass();
+
+        $item = Filter::process(
+            $this->getEventUniqueName('item.create'),
+            $cls::firstOrCreate($this->filterRequestData($requestData))
+        );
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                $item,
+            ])
+        );
+    }
+
+    /**
+     * @return array
+     */
+    public function getValidationRules(): array
+    {
+        return [
+            'project_id' => 'required|exists:projects,id',
+            'role_id' => 'required|exists:role,id',
         ];
     }
 
@@ -88,41 +112,13 @@ class ProjectsRolesController extends ItemController
      * @apiPermission   projects_roles_create
      * @apiPermission   projects_roles_full_access
      */
+
     /**
-     * @param Request $request
-     * @return JsonResponse
+     * @return string
      */
-    public function create(Request $request): JsonResponse
+    public function getItemClass(): string
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]), 400);
-        }
-
-        $cls = $this->getItemClass();
-
-        $item = Filter::process(
-            $this->getEventUniqueName('item.create'),
-            $cls::firstOrCreate($this->filterRequestData($requestData))
-        );
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                $item,
-            ])
-        );
+        return ProjectsRoles::class;
     }
 
     /**
@@ -137,9 +133,8 @@ class ProjectsRolesController extends ItemController
      * @apiPermission   projects_roles_remove
      * @apiPermission   projects_roles_full_access
      */
+
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
     public function destroy(Request $request): JsonResponse
@@ -155,7 +150,7 @@ class ProjectsRolesController extends ItemController
         );
 
         if ($validator->fails()) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                     'success' => false,
                     'error_type' => 'validation',
@@ -170,7 +165,8 @@ class ProjectsRolesController extends ItemController
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), $requestData
+                $this->getQuery(),
+                $requestData
             )
         );
 
@@ -179,15 +175,17 @@ class ProjectsRolesController extends ItemController
         if ($item) {
             $item->delete();
         } else {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                     'success' => false,
                     'error_type' => 'query.item_not_found',
                     'message' => 'Item not found',
-                ]), 404);
+                ]),
+                404
+            );
         }
 
-        return response()->json(
+        return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                 'message' => 'Item has been removed'
             ])

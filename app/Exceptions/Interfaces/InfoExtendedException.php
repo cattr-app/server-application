@@ -6,7 +6,7 @@ use Throwable;
 
 /**
  * Interface ReasonableException
-*/
+ */
 interface InfoExtendedException extends Throwable
 {
     /**

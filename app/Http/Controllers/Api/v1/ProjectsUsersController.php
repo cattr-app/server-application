@@ -12,41 +12,8 @@ use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * Class ProjectsUsersController
-*/
 class ProjectsUsersController extends ItemController
 {
-    /**
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return ProjectsUsers::class;
-    }
-
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'project_id' => 'required|exists:projects,id',
-            'user_id' => 'required|exists:users,id',
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'projects-users';
-    }
-
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -56,6 +23,54 @@ class ProjectsUsersController extends ItemController
             'bulkCreate' => 'projects-users.bulk-create',
             'destroy' => 'projects-users.remove',
             'bulkDestroy' => 'projects-users.bulk-remove',
+        ];
+    }
+
+    public function getEventUniqueNamePart(): string
+    {
+        return 'projects-users';
+    }
+
+    public function create(Request $request): JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
+                ]),
+                400
+            );
+        }
+
+        $cls = $this->getItemClass();
+
+        $item = Filter::process(
+            $this->getEventUniqueName('item.create'),
+            $cls::firstOrCreate($this->filterRequestData($requestData))
+        );
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                $item,
+            ])
+        );
+    }
+
+    public function getValidationRules(): array
+    {
+        return [
+            'project_id' => 'required|exists:projects,id',
+            'user_id' => 'required|exists:users,id',
         ];
     }
 
@@ -144,43 +159,10 @@ class ProjectsUsersController extends ItemController
      * @apiUse          ValidationError
      * @apiUse          ForbiddenError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function create(Request $request): JsonResponse
+
+    public function getItemClass(): string
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors(),
-                ]),
-                400
-            );
-        }
-
-        $cls = $this->getItemClass();
-
-        $item = Filter::process(
-            $this->getEventUniqueName('item.create'),
-            $cls::firstOrCreate($this->filterRequestData($requestData))
-        );
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                $item,
-            ])
-        );
+        return ProjectsUsers::class;
     }
 
     /**
@@ -259,9 +241,8 @@ class ProjectsUsersController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ItemNotFoundError
      */
+
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
     public function destroy(Request $request): JsonResponse
@@ -277,7 +258,7 @@ class ProjectsUsersController extends ItemController
         );
 
         if ($validator->fails()) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                     'success' => false,
                     'error_type' => 'validation',
@@ -300,7 +281,7 @@ class ProjectsUsersController extends ItemController
         /** @var Model $item */
         $item = $itemsQuery->first();
         if (!$item) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                     'success' => false,
                     'error_type' => 'query.item_not_found',
@@ -312,7 +293,7 @@ class ProjectsUsersController extends ItemController
 
         $item->delete();
 
-        return response()->json(
+        return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                 'success' => true,
                 'message' => 'Item has been removed'
@@ -379,8 +360,6 @@ class ProjectsUsersController extends ItemController
      * @apiUse          UnauthorizedError
      */
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
     public function bulkDestroy(Request $request): JsonResponse
@@ -397,7 +376,7 @@ class ProjectsUsersController extends ItemController
         );
 
         if ($validator->fails()) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkDestroy'), [
                     'success' => false,
                     'error_type' => 'validation',
@@ -443,7 +422,7 @@ class ProjectsUsersController extends ItemController
             $responseData['not_found'] = $notFoundRelations->values();
         }
 
-        return response()->json(
+        return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), $responseData),
             ($notFoundRelations->isNotEmpty()) ? 207 : 200
         );

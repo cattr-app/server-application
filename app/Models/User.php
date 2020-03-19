@@ -109,8 +109,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
 /**
- * Class User
- *
  * @property int $id
  * @property string $full_name
  * @property string $email
@@ -303,88 +301,57 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id')
             ->withPivot('role_id');
     }
 
-    /**
-     * @return HasMany
-     */
+    public function addToken(string $tokenString): Token
+    {
+        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
+        /** @var Token $token */
+        $token = $this->tokens()->create(['token' => $tokenString, 'expires_at' => $tokenExpires]);
+        return $token;
+
+    }
+
     public function tokens(): HasMany
     {
         return $this->hasMany(Token::class);
     }
 
-    /**
-     * @param $token
-     * @return Token
-     */
-    public function addToken($token): Token
-    {
-        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
-        /** @var Token $token */
-        $token = $this->tokens()->create(['token' => $token, 'expires_at' => $tokenExpires]);
-        return $token;
-
-    }
-
-    /**
-     * @param string $token
-     */
     public function invalidateToken(string $token)
     {
         $this->tokens()->where('token', $token)->delete();
     }
 
 
-    /**
-     * @param string $except
-     */
-    public function invalidateAllTokens(string $except = null)
+    public function invalidateAllTokens(?string $except = null)
     {
         $this->tokens()->where('token', '!=', $except)->delete();
     }
 
-    /**
-     * @return HasMany
-     */
     public function projectsRelation(): HasMany
     {
         return $this->hasMany(ProjectsUsers::class, 'user_id', 'id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function timeIntervals(): HasMany
     {
         return $this->hasMany(TimeInterval::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function properties(): HasMany
     {
         return $this->hasMany(Property::class, 'entity_id')
@@ -394,7 +361,7 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Send the password reset notification.
      *
-     * @param  string $token
+     * @param string $token
      * @return void
      */
     public function sendPasswordResetNotification($token): void

@@ -22,7 +22,7 @@ class ProjectReport extends ProjectExport implements ExportableEmailReport
         }
 
         // Grouping prepared collection to groups by Project Name
-        $preparedCollection = $this->getPreparedCollection($queryData)->mapToGroups(function ($item) {
+        $preparedCollection = $this->getPreparedCollection($queryData)->mapToGroups(static function ($item) {
             return [
                 $item['name'] => $item['users']
             ];

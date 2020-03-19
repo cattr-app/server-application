@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Class ProjectsRoles
- *
  * @property int $project_id
  * @property int $role_id
  * @property string $created_at
@@ -54,29 +52,19 @@ class ProjectsRoles extends Model
         'updated_at',
     ];
 
-    /**
-     * @param EloquentBuilder $query
-     * @return EloquentBuilder
-     */
-    protected function setKeysForSaveQuery(EloquentBuilder $query): EloquentBuilder
-    {
-        return $query->where('project_id', '=', $this->getAttribute('project_id'))
-            ->where('role_id', '=', $this->getAttribute('role_id'));
-    }
-
-    /**
-     * @return BelongsTo
-     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
+    }
+
+    protected function setKeysForSaveQuery(EloquentBuilder $query): EloquentBuilder
+    {
+        return $query->where('project_id', '=', $this->getAttribute('project_id'))
+            ->where('role_id', '=', $this->getAttribute('role_id'));
     }
 }

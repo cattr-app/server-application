@@ -10,16 +10,14 @@ class EventFilterServiceProvider extends ServiceProvider
 {
     /**
      * Register the service provider.
-     *
-     * @return void
      */
     public function register(): void
     {
         /** @var Application $app */
         $app = $this->app;
 
-        $app->singleton('filter', function ($app) {
-            return (new Dispatcher($app))->setQueueResolver(function () use ($app) {
+        $app->singleton('filter', static function ($app) {
+            return (new Dispatcher($app))->setQueueResolver(static function () use ($app) {
                 return $app->make(QueueFactoryContract::class);
             });
         });

@@ -144,7 +144,7 @@ class SyncTasks
 
         // Get only those tasks where user is a participant
         // Can`t rewrite as arrow function because of "use" outside scope variable
-        $trelloTasks = array_filter($trelloTasks, function ($task) use ($userTrelloId) {
+        $trelloTasks = array_filter($trelloTasks, static function ($task) use ($userTrelloId) {
             return in_array($userTrelloId, $task['idMembers']);
         });
 

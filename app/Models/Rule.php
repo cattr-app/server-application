@@ -864,8 +864,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 
 /**
- * Class Rule
- *
  * @property int $id
  * @property int $role_id
  * @property string $object
@@ -910,17 +908,6 @@ class Rule extends Model
         'allow',
     ];
 
-    /**
-     * @return BelongsTo
-     */
-    public function role(): BelongsTo
-    {
-        return $this->belongsTo(Role::class, 'role_id');
-    }
-
-    /**
-     * @return array
-     */
     public static function getActionList(): array
     {
         return Filter::process('role.actions.list', [
@@ -1060,6 +1047,11 @@ class Rule extends Model
                 'jira' => __('Jira integration'),
             ],
         ]);
+    }
+
+    public function role(): BelongsTo
+    {
+        return $this->belongsTo(Role::class, 'role_id');
     }
 
 }

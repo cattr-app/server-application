@@ -10,8 +10,6 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
 {
     /**
      * Register any application services.
-     *
-     * @return void
      */
     public function register(): void
     {
@@ -25,17 +23,15 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
             }
 
             return $entry->isReportableException() ||
-                   $entry->isFailedRequest() ||
-                   $entry->isFailedJob() ||
-                   $entry->isScheduledTask() ||
-                   $entry->hasMonitoredTag();
+                $entry->isFailedRequest() ||
+                $entry->isFailedJob() ||
+                $entry->isScheduledTask() ||
+                $entry->hasMonitoredTag();
         });
     }
 
     /**
      * Prevent sensitive request details from being logged by Telescope.
-     *
-     * @return void
      */
     protected function hideSensitiveRequestDetails(): void
     {

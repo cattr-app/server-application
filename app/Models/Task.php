@@ -148,10 +148,13 @@ class Task extends Model
         'deleted_at',
     ];
 
+    public static function getTableName(): string
+    {
+        return with(new static())->getTable();
+    }
+
     /**
      * Override parent boot and Call deleting event
-     *
-     * @return void
      */
     protected static function boot(): void
     {
@@ -163,51 +166,28 @@ class Task extends Model
         });
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class, 'project_id');
-    }
-
-    /**
-     * @return BelongsTo
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    /**
-     * @return BelongsTo
-     */
-    public function assigned(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'assigned_by');
-    }
-
-    /**
-     * @return HasMany
-     */
     public function timeIntervals(): HasMany
     {
         return $this->hasMany(TimeInterval::class, 'task_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function assigned(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
+    }
+
     public function priority(): BelongsTo
     {
         return $this->belongsTo(Priority::class, 'priority_id');
-    }
-
-    /**
-     * @return string
-     */
-    public static function getTableName(): string
-    {
-        return with(new static())->getTable();
     }
 }

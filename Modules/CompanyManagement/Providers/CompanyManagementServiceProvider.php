@@ -61,7 +61,7 @@ class CompanyManagementServiceProvider extends ServiceProvider
             $sourcePath => $viewPath
         ], 'views');
 
-        $this->loadViewsFrom(array_merge(array_map(function ($path) {
+        $this->loadViewsFrom(array_merge(array_map(static function ($path) {
             return $path . '/modules/companymanagement';
         }, Config::get('view.paths')), [$sourcePath]), 'companymanagement');
     }

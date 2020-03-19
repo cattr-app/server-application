@@ -25,7 +25,7 @@ class Priority extends CompanyProperty
         // Merge priorities info from the redmine with the stored priorities
         $priorities = array_map(static function (array $priority) use ($savedPriorities) {
             // Try find saved priority with the same ID
-            $savedPriority = Arr::first($savedPriorities, function ($savedPriority) use ($priority) {
+            $savedPriority = Arr::first($savedPriorities, static function ($savedPriority) use ($priority) {
                 return $savedPriority['id'] === $priority['id'];
             });
 

@@ -12,41 +12,9 @@ use Throwable;
 
 /**
  * Class RulesController
-*/
+ */
 class RulesController extends ItemController
 {
-    /**
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return Rule::class;
-    }
-
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'role_id' => 'required',
-            'object' => 'required',
-            'action' => 'required',
-            'allow' => 'required',
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'rule';
-    }
-
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -56,6 +24,63 @@ class RulesController extends ItemController
             'bulkEdit' => 'rules.bulk-edit',
             'actions' => 'rules.actions',
         ];
+    }
+
+    public function getItemClass(): string
+    {
+        return Rule::class;
+    }
+
+    public function getEventUniqueNamePart(): string
+    {
+        return 'rule';
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function edit(Request $request): JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.edit'), $request->all());
+        Role::updateRules();
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process($this->getEventUniqueName('validation.item.edit'), $this->getValidationRules())
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+
+        if (!Role::updateAllow(
+            $requestData['role_id'],
+            $requestData['object'],
+            $requestData['action'],
+            $requestData['allow']
+        )) {
+            return new JsonResponse([
+                'success' => false,
+                'error_type' => 'query.item_not_found',
+                'message' => 'Rule does not exist'
+            ], 404);
+        }
+        return new JsonResponse(Filter::process(
+            $this->getEventUniqueName('answer.success.item.edit'),
+            [
+                'success' => true,
+                'message' => 'Role successfully updated',
+            ]
+        ));
     }
 
     /**
@@ -178,49 +203,15 @@ class RulesController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Throwable
-     */
-    public function edit(Request $request): JsonResponse
+
+    public function getValidationRules(): array
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.edit'), $request->all());
-        Role::updateRules();
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process($this->getEventUniqueName('validation.item.edit'), $this->getValidationRules())
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-
-        if (!Role::updateAllow($requestData['role_id'], $requestData['object'], $requestData['action'],
-            $requestData['allow'])) {
-            return response()->json([
-                'success' => false,
-                'error_type' => 'query.item_not_found',
-                'message' => 'Rule does not exist'
-            ], 404);
-        }
-        return response()->json(Filter::process(
-            $this->getEventUniqueName('answer.success.item.edit'),
-            [
-                'success' => true,
-                'message' => 'Role successfully updated',
-            ]
-        ));
+        return [
+            'role_id' => 'required',
+            'object' => 'required',
+            'action' => 'required',
+            'allow' => 'required',
+        ];
     }
 
     /**
@@ -282,9 +273,7 @@ class RulesController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    /**
-     * @return JsonResponse
-     */
+
     public function actions(): JsonResponse
     {
         /** @var array[] $actionList */
@@ -302,7 +291,7 @@ class RulesController extends ItemController
             }
         }
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'res' => Filter::process(
                 $this->getEventUniqueName('answer.success.item.list'),
