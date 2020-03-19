@@ -28,7 +28,6 @@ class Syncronize extends Command
 
     /**
      * Create a new command instance.
-     * @param Synchronizer $synchronizer
      */
     public function __construct(Synchronizer $synchronizer)
     {
@@ -40,7 +39,7 @@ class Syncronize extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->synchronizer->synchronizeAll();
     }

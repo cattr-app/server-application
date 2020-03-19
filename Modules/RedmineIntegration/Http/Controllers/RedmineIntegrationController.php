@@ -7,24 +7,14 @@ use Modules\RedmineIntegration\Models\ClientFactory;
 
 /**
  * Class RedmineIntegrationController
-*/
+ */
 class RedmineIntegrationController extends AbstractRedmineController
 {
-    /**
-     * @var UserRepository
-     */
-    protected $userRepo;
-
-    /**
-     * @var ClientFactory
-     */
-    protected $clientFactory;
+    protected UserRepository $userRepo;
+    protected ClientFactory $clientFactory;
 
     /**
      * Create a new instance.
-     *
-     * @param  UserRepository  $userRepo
-     * @param  ClientFactory   $clientFactory
      */
     public function __construct(UserRepository $userRepo, ClientFactory $clientFactory)
     {

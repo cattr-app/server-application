@@ -2,24 +2,17 @@
 
 namespace Modules\EmailReports\StatisticExports;
 
+use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Modules\EmailReports\Mail\InvoicesEmailReport;
-use Modules\EmailReports\Mail\ProjectReportEmailReport;
 use Modules\Reports\Exports\ProjectExport;
 
-/**
- * Class ProjectReport
- * @package Modules\EmailReports\StatisticExports
- */
 class ProjectReport extends ProjectExport implements ExportableEmailReport
 {
     /**
-     * @param array $queryData
-     * @return Collection
-     * @throws \Exception
+     * @throws Exception
      */
     public function exportCollection(array $queryData): Collection
     {

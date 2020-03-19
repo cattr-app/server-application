@@ -8,12 +8,10 @@ class AddTrelloTasksConstraints extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('trello_tasks_relation', function (Blueprint $table) {
+        Schema::table('trello_tasks_relation', static function (Blueprint $table) {
             // the external key's limitations provides the data ingertity
             // by not letting the TaskRelation creation with the task missing from the system
             // and removing the TaskRelation when the linked task is completely removed from the system
@@ -21,9 +19,9 @@ class AddTrelloTasksConstraints extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::table('trello_tasks_relation', function (Blueprint $table) {
+        Schema::table('trello_tasks_relation', static function (Blueprint $table) {
             $table->dropForeign(['task_id']);
         });
     }

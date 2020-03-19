@@ -9,9 +9,6 @@ use Modules\GitlabIntegration\Console\SynchronizeTime;
 use Modules\GitlabIntegration\Console\Syncronize;
 use Modules\GitlabIntegration\Helpers\TimeIntervalsHelper;
 
-/**
- * Class GitlabIntegrationServiceProvider
-*/
 class GitlabIntegrationServiceProvider extends ServiceProvider
 {
     /**
@@ -31,7 +28,7 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerTranslations();
         $this->registerConfig();
@@ -50,37 +47,9 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->app->register(RouteServiceProvider::class);
-        $this->app->register(ScheduleServiceProvider::class);
-    }
-
-    /**
-     * Register config.
-     *
-     * @return void
-     */
-    protected function registerConfig()
-    {
-        $this->publishes([
-            __DIR__ . '/../Config/config.php' => config_path('gitlabintegration.php'),
-        ], 'config');
-        $this->mergeConfigFrom(
-            __DIR__ . '/../Config/config.php', 'gitlabintegration'
-        );
-    }
-
-    /**
      * Register translations.
-     *
-     * @return void
      */
-    public function registerTranslations()
+    public function registerTranslations(): void
     {
         $langPath = resource_path('lang/modules/gitlabintegration');
 
@@ -92,11 +61,23 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register an additional directory of factories.
-     *
-     * @return void
+     * Register config.
      */
-    public function registerFactories()
+    protected function registerConfig(): void
+    {
+        $this->publishes([
+            __DIR__ . '/../Config/config.php' => config_path('gitlabintegration.php'),
+        ], 'config');
+        $this->mergeConfigFrom(
+            __DIR__ . '/../Config/config.php',
+            'gitlabintegration'
+        );
+    }
+
+    /**
+     * Register an additional directory of factories.
+     */
+    public function registerFactories(): void
     {
         if (!app()->environment('production')) {
             app(Factory::class)->load(__DIR__ . '/../Database/factories');
@@ -105,10 +86,8 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
 
     /**
      * Register command
-     *
-     * @return void
      */
-    protected function registerCommands()
+    protected function registerCommands(): void
     {
         $this->commands([
             Syncronize::class,
@@ -117,12 +96,11 @@ class GitlabIntegrationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get the services provided by the provider.
-     *
-     * @return array
+     * Register the service provider.
      */
-    public function provides()
+    public function register(): void
     {
-        return [];
+        $this->app->register(ScheduleServiceProvider::class);
+        $this->app->register(RouteServiceProvider::class);
     }
 }

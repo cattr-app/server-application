@@ -8,18 +8,12 @@ use Illuminate\Pagination\Paginator;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Class IntegrationObserver
-*/
 class IntegrationObserver
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    /**
-     * Create the event listener.
-     */
-    public function __construct() {
-    }
 
     /**
      * Observe task edition
@@ -55,14 +49,16 @@ class IntegrationObserver
             $items = $tasks;
         }
 
-        $taskIds = $items->map(function ($task) { return $task->id; })->toArray();
+        $taskIds = $items->map(static function ($task) {
+            return $task->id;
+        })->toArray();
         $gitlabTaskIds = DB::table('gitlab_tasks_relations')
             ->whereIn('task_id', $taskIds)
             ->get(['task_id'])
             ->pluck('task_id')
             ->toArray();
 
-        $items->transform(function ($item) use ($gitlabTaskIds) {
+        $items->transform(static function ($item) use ($gitlabTaskIds) {
             if (in_array($item->id, $gitlabTaskIds)) {
                 $item->integration = 'gitlab';
             }

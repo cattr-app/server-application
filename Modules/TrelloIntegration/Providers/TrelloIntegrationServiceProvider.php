@@ -3,6 +3,7 @@
 namespace Modules\TrelloIntegration\Providers;
 
 use App\Models\TimeInterval;
+use Config;
 use Filter;
 use Illuminate\Support\ServiceProvider;
 use Illuminate\Database\Eloquent\Factory;
@@ -15,10 +16,8 @@ class TrelloIntegrationServiceProvider extends ServiceProvider
 {
     /**
      * Boot the application events.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerConfig();
         $this->registerFactories();
@@ -40,49 +39,61 @@ class TrelloIntegrationServiceProvider extends ServiceProvider
             $taskRelation = TaskRelation::where(['task_id' => $timeInterval->task_id])->first();
             if (isset($taskRelation)) {
                 TimeRelation::create([
-                    'trello_task_id'     => $taskRelation->id,
-                    'time_interval_id'   => $timeInterval->id,
-                    'user_id'            => $timeInterval->user_id,
+                    'trello_task_id' => $taskRelation->id,
+                    'time_interval_id' => $timeInterval->id,
+                    'user_id' => $timeInterval->user_id,
                 ]);
             }
 
             return $data;
         });
-
-    }
-
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->app->register(RouteServiceProvider::class);
-        $this->app->register(ScheduleServiceProvider::class);
     }
 
     /**
      * Register config.
-     *
-     * @return void
      */
-    protected function registerConfig()
+    protected function registerConfig(): void
     {
         $this->publishes([
             module_path('TrelloIntegration', 'Config/config.php') => config_path('trellointegration.php'),
         ], 'config');
         $this->mergeConfigFrom(
-            module_path('TrelloIntegration', 'Config/config.php'), 'trellointegration'
+            module_path('TrelloIntegration', 'Config/config.php'),
+            'trellointegration'
         );
     }
 
     /**
-     * Register views.
-     *
-     * @return void
+     * Register an additional directory of factories.
      */
-    public function registerViews()
+    public function registerFactories(): void
+    {
+        if ($this->app->runningInConsole() && !app()->environment('production')) {
+            app(Factory::class)->load(module_path('TrelloIntegration', 'Database/factories'));
+        }
+    }
+
+    protected function registerCommands(): void
+    {
+        $this->commands([
+            SyncTasks::class,
+            SyncTime::class,
+        ]);
+    }
+
+    /**
+     * Register the service provider.
+     */
+    public function register(): void
+    {
+        $this->app->register(ScheduleServiceProvider::class);
+        $this->app->register(RouteServiceProvider::class);
+    }
+
+    /**
+     * Register views.
+     */
+    public function registerViews(): void
     {
         $viewPath = resource_path('views/modules/trellointegration');
 
@@ -90,19 +101,17 @@ class TrelloIntegrationServiceProvider extends ServiceProvider
 
         $this->publishes([
             $sourcePath => $viewPath
-        ],'views');
+        ], 'views');
 
-        $this->loadViewsFrom(array_merge(array_map(function ($path) {
+        $this->loadViewsFrom(array_merge(array_map(static function ($path) {
             return $path . '/modules/trellointegration';
-        }, \Config::get('view.paths')), [$sourcePath]), 'trellointegration');
+        }, Config::get('view.paths')), [$sourcePath]), 'trellointegration');
     }
 
     /**
      * Register translations.
-     *
-     * @return void
      */
-    public function registerTranslations()
+    public function registerTranslations(): void
     {
         $langPath = resource_path('lang/modules/trellointegration');
 
@@ -111,35 +120,5 @@ class TrelloIntegrationServiceProvider extends ServiceProvider
         } else {
             $this->loadTranslationsFrom(module_path('TrelloIntegration', 'Resources/lang'), 'trellointegration');
         }
-    }
-
-    /**
-     * Register an additional directory of factories.
-     *
-     * @return void
-     */
-    public function registerFactories()
-    {
-        if (! app()->environment('production') && $this->app->runningInConsole()) {
-            app(Factory::class)->load(module_path('TrelloIntegration', 'Database/factories'));
-        }
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [];
-    }
-
-    protected function registerCommands()
-    {
-        $this->commands([
-            SyncTasks::class,
-            SyncTime::class,
-        ]);
     }
 }

@@ -7,41 +7,25 @@ use App\Models\User;
 use Gitlab\Client;
 use Gitlab\ResultPager;
 use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class GitlabApi
 {
-    /**
-     * @var User
-     */
-    protected $user;
-
-    /**
-     * @var UserProperties
-     */
-    protected $userProperties;
-
-    /**
-     * @var string
-     */
-    protected $apiUrl;
-    /**
-     * @var string
-     */
-    protected $apiKey;
-
-    /**
-     * @var Client
-     */
-    protected $client;
-
-    /**
-     * @var ResultPager
-     */
-    protected $pager;
+    protected User $user;
+    protected UserProperties $userProperties;
+    protected string $apiUrl;
+    protected string $apiKey;
+    protected Client $client;
+    protected ResultPager $pager;
 
     public function __construct(UserProperties $userProperties)
     {
         $this->userProperties = $userProperties;
+    }
+
+    public static function buildFromUser(User $user): ?GitlabApi
+    {
+        return app()->make(self::class)->init($user);
     }
 
     protected function init(User $user): ?GitlabApi
@@ -60,7 +44,7 @@ class GitlabApi
             $this->client = Client::create($this->apiUrl)->authenticate($this->apiKey, Client::AUTH_URL_TOKEN);
             $this->pager = new ResultPager($this->client);
             $this->pager->fetch($this->client->api('users'), 'me');
-        } catch (\Throwable $throwable) {
+        } catch (Throwable $throwable) {
             Log::error($throwable);
             return null;
         }
@@ -78,11 +62,6 @@ class GitlabApi
             'scope' => 'assigned-to-me',
             'state' => 'opened',
         ]]);
-    }
-
-    public static function buildFromUser(User $user): ?GitlabApi
-    {
-        return app()->make(self::class)->init($user);
     }
 
     public function sendUserTime($projectId, $issue_iid, $duration)

@@ -1,19 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateJiraTimeTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('jira_time_relation', function (Blueprint $table) {
+        Schema::create('jira_time_relation', static function (Blueprint $table) {
             $table->bigIncrements('id');
             $table->unsignedInteger('jira_task_id');
             $table->unsignedInteger('time_interval_id');
@@ -23,10 +21,8 @@ class CreateJiraTimeTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('jira_time_relation');
     }

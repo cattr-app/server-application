@@ -9,29 +9,16 @@ use Gitlab\ResultPager;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
-use Modules\GitlabIntegration\Helpers\GitlabApi;
 use Modules\GitlabIntegration\Helpers\UserProperties;
+use Throwable;
 
 class SettingsController extends Controller
 {
-    /**
-     * @var UserProperties
-     */
-    private $userProperties;
 
-    /**
-     * @var Client
-     */
     protected Client $client;
-
     protected $apiUrl;
+    private UserProperties $userProperties;
 
-    /**
-     * SettingsController constructor.
-     *
-     * @param UserProperties $userProperties
-     * @param Client $client
-     */
     public function __construct(UserProperties $userProperties, Client $client)
     {
         $this->client = $client;
@@ -42,9 +29,6 @@ class SettingsController extends Controller
         parent::__construct();
     }
 
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -53,12 +37,7 @@ class SettingsController extends Controller
         ];
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return array
-     */
-    public function get(Request $request)
+    public function get(Request $request): array
     {
         $userId = $request->user()->id;
         $apiKey = $this->userProperties->getApiKey($userId);
@@ -74,12 +53,7 @@ class SettingsController extends Controller
         ];
     }
 
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
-    public function set(Request $request)
+    public function set(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
 
@@ -96,19 +70,19 @@ class SettingsController extends Controller
 
             $fetcher = new ResultPager($client);
             $fetcher->fetch($client->api('users'), 'me');
-        } catch (\Throwable $throwable) {
-            return response()->json([
+        } catch (Throwable $throwable) {
+            return new JsonResponse([
                 'error' => 'Validation fail',
                 'message' => 'Invalid API Key'
             ], 400);
         }
 
         if (strpos($request->post('apikey'), '*') !== false) {
-            return response()->json(['success' => 'true', 'message' => 'Nothing to update!']);
+            return new JsonResponse(['success' => 'true', 'message' => 'Nothing to update!']);
         }
 
         $this->userProperties->setApiKey($userId, $request->post('apikey'));
 
-        return response()->json(['success' => 'true', 'message' => 'Settings saved successfully']);
+        return new JsonResponse(['success' => 'true', 'message' => 'Settings saved successfully']);
     }
 }

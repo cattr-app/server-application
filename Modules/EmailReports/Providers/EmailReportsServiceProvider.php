@@ -12,19 +12,11 @@ use Modules\EmailReports\Console\EmailReportsSender;
  */
 class EmailReportsServiceProvider extends ServiceProvider
 {
-    /**
-     * Indicates if loading of the provider is deferred.
-     *
-     * @var bool
-     */
-    protected $defer = false;
 
     /**
      * Boot the application events.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerConfig();
         $this->registerCommands();
@@ -49,20 +41,16 @@ class EmailReportsServiceProvider extends ServiceProvider
 
     /**
      * Register the service provider.
-     *
-     * @return void
      */
-    public function register()
+    public function register(): void
     {
         $this->app->register(RouteServiceProvider::class);
     }
 
     /**
      * Register config.
-     *
-     * @return void
      */
-    protected function registerConfig()
+    protected function registerConfig(): void
     {
         $this->publishes([
             __DIR__.'/../Config/config.php' => config_path('emailreports.php'),
@@ -72,17 +60,7 @@ class EmailReportsServiceProvider extends ServiceProvider
         );
     }
 
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [];
-    }
-
-    private function registerCommands()
+    private function registerCommands(): void
     {
         $this->commands([
             EmailReportsSender::class,

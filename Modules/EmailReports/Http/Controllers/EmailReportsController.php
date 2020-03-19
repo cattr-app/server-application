@@ -5,6 +5,7 @@ namespace Modules\EmailReports\Http\Controllers;
 use App\Http\Controllers\Api\v1\ItemController;
 use App\Models\Project;
 use Event;
+use Exception;
 use Filter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
@@ -14,15 +15,8 @@ use Modules\EmailReports\Models\EmailReports;
 use Modules\EmailReports\Models\EmailReportsEmails;
 use Modules\EmailReports\Models\EmailReportsProjects;
 
-/**
- * Class EmailReportsController
- * @package Modules\EmailReports\Http\Controllers
- */
 class EmailReportsController extends ItemController
 {
-    /**
-     * @return array
-     */
     public function getQueryWith(): array
     {
         return [
@@ -34,7 +28,7 @@ class EmailReportsController extends ItemController
     /**
      * Returns current item's class name
      *
-     * @return string|Model
+     * @return string
      */
     public function getItemClass(): string
     {
@@ -43,67 +37,55 @@ class EmailReportsController extends ItemController
 
     /**
      * Returns validation rules for current item
-     *
-     * @return array
      */
     public function getValidationRules(): array
     {
         return [
-            'name'    => 'required|string',
-            'emails.*'    => 'required|email',
-            'frequency'    => 'required|int',
-            'sending_day'    => 'required|date',
+            'name' => 'required|string',
+            'emails.*' => 'required|email',
+            'frequency' => 'required|int',
+            'sending_day' => 'required|date',
         ];
     }
 
     /**
      * Returns unique part of event name for current item
-     *
-     * @return string
      */
     public function getEventUniqueNamePart(): string
     {
         return 'email-reports';
     }
 
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function create(Request $request): JsonResponse
     {
-        Event::listen($this->getEventUniqueName('item.create.after'), static::class.'@'.'saveRelations');
+        Event::listen($this->getEventUniqueName('item.create.after'), static::class . '@' . 'saveRelations');
         return parent::create($request);
     }
 
     /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws \Exception
+     * @throws Exception
      */
     public function edit(Request $request): JsonResponse
     {
-        Event::listen($this->getEventUniqueName('item.edit.after'), static::class.'@'.'saveRelations');
+        Event::listen($this->getEventUniqueName('item.edit.after'), static::class . '@' . 'saveRelations');
         return parent::edit($request);
     }
 
     /**
      * Display the specified resource.
      *
-     * @param Request $request
-     * @return JsonResponse
      * @throws ModelNotFoundException
-     * @throws \Exception
+     * @throws Exception
      */
     public function show(Request $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('answer.success.item.show'), static function ($item) {
             $projectIds = collect($item->projects)->pluck('project_id')->toArray();
             $projects = Project::whereIn('id', $projectIds)
-                        ->pluck('name')
-                        ->toArray();
+                ->pluck('name')
+                ->toArray();
 
-            $item->project_names = implode(',' . EmailReports::SPACE, $projects);
+            $item->project_names = implode(',' . ' ', $projects);
             $item->project_ids = $projectIds;
             $item->emails = $item->emails->pluck('email')->toArray();
             return $item->unsetRelations();
@@ -111,11 +93,6 @@ class EmailReportsController extends ItemController
         return parent::show($request);
     }
 
-    /**
-     * @param $emailReport EmailReports
-     * @param $requestData array
-     * @return EmailReports
-     */
     public function saveRelations(EmailReports $emailReport, array $requestData): EmailReports
     {
         $projectIds = $requestData['project_ids'] ?? [];

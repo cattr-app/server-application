@@ -13,34 +13,33 @@ use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Events\AfterSheet;
 use Maatwebsite\Excel\Sheet;
 use PhpOffice\PhpSpreadsheet\Cell\Hyperlink;
+use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Style\Fill;
 use PhpOffice\PhpSpreadsheet\Worksheet\BaseDrawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
+use function is_object;
 
 class Xlsx extends AbstractType implements FromCollection, WithEvents, WithHeadings, WithDrawings, WithCustomStartCell
 {
-    const LOGO_HEIGHT = 50;
-    const COLUMN_HEIGHT = 14; // Value which is close to real one but adding one or few row(-s) of space
-    const START_CELL = self::LOGO_HEIGHT / self::COLUMN_HEIGHT;
+    public const LOGO_HEIGHT = 50;
+    public const COLUMN_HEIGHT = 14; // Value which is close to real one but adding one or few row(-s) of space
+    public const START_CELL = self::LOGO_HEIGHT / self::COLUMN_HEIGHT;
 
-    /**
-     * @return array
-     */
     public function registerEvents(): array
     {
         return [
             AfterSheet::class => function (AfterSheet $event) {
                 $usedCells = 'A1:Z' . ceil(($this->collection->count() + self::START_CELL));
-                $headersCell = 'A'. ceil(self::START_CELL) .':A' . ceil(($this->collection->count() + self::START_CELL));
-                $totalCells = 'B'. ceil(self::START_CELL) .':B' . ceil(($this->collection->count() + self::START_CELL));
-                $totalDecimalCells = 'C'. ceil(self::START_CELL) .':C' . ceil(($this->collection->count() + self::START_CELL));
+                $headersCell = 'A' . ceil(self::START_CELL) . ':A' . ceil(($this->collection->count() + self::START_CELL));
+                $totalCells = 'B' . ceil(self::START_CELL) . ':B' . ceil(($this->collection->count() + self::START_CELL));
+                $totalDecimalCells = 'C' . ceil(self::START_CELL) . ':C' . ceil(($this->collection->count() + self::START_CELL));
 
                 $fromCeil = 'B' . (ceil(self::START_CELL / 2));
                 $linkCeil = 'C' . (ceil(self::START_CELL / 2));
 
-                $fromText = "Exported from: "; // TODO Should be translated !!
+                $fromText = 'Exported from: '; // TODO Should be translated !!
 
                 $frontUrl = Request::server('HTTP_ORIGIN');
                 $link = new Hyperlink();
@@ -60,7 +59,8 @@ class Xlsx extends AbstractType implements FromCollection, WithEvents, WithHeadi
                             'horizontal' => Alignment::HORIZONTAL_CENTER,
                             'vertical' => Alignment::VERTICAL_CENTER,
                         ],
-                    ]);
+                    ]
+                );
 
                 $event->sheet->getDelegate()->getStyle($headersCell)->applyFromArray(
                     [
@@ -77,7 +77,8 @@ class Xlsx extends AbstractType implements FromCollection, WithEvents, WithHeadi
                                 'borderStyle' => Border::BORDER_MEDIUM,
                             ],
                         ],
-                    ]);
+                    ]
+                );
 
                 // Set borders for main columns
                 $event->sheet->getDelegate()->getStyle($headersCell)->getBorders()
@@ -103,14 +104,13 @@ class Xlsx extends AbstractType implements FromCollection, WithEvents, WithHeadi
     }
 
     /**
-     * @return array
      * @throws \Exception
      */
     public function headings(): array
     {
         $firstRow = $this->collection->first();
 
-        if ($firstRow instanceof Arrayable || \is_object($firstRow)) {
+        if ($firstRow instanceof Arrayable || is_object($firstRow)) {
             return array_keys(Sheet::mapArraybleRow($firstRow));
         }
 
@@ -119,7 +119,7 @@ class Xlsx extends AbstractType implements FromCollection, WithEvents, WithHeadi
 
     /**
      * @return BaseDrawing|BaseDrawing[]
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
      */
     public function drawings()
     {
@@ -134,18 +134,12 @@ class Xlsx extends AbstractType implements FromCollection, WithEvents, WithHeadi
         return $drawing;
     }
 
-    /**
-     * @return string
-     */
     public function startCell(): string
     {
         return 'A' . ceil(self::START_CELL);
     }
 
-    /**
-     * @return Collection
-     */
-    public function collection()
+    public function collection(): Collection
     {
         return $this->collection;
     }

@@ -15,37 +15,12 @@ use Modules\RedmineIntegration\Helpers\ProjectHelper;
 use Modules\RedmineIntegration\Models\Status;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-/**
- * Class PluginWebhookHelper
-*/
 class PluginWebhookHelper extends AbstractPluginWebhookHelper
 {
-    /**
-     * @var Property
-     */
-    protected $property;
+    protected Property $property;
+    protected ProjectHelper $projectHelper;
+    protected Status $status;
 
-    /**
-     * @var ProjectHelper
-     */
-    protected $projectHelper;
-
-    /**
-     * @var Status
-     */
-    protected $status;
-
-    /**
-     * PluginWebhookHelper constructor.
-     *
-     * @param  TaskRepository     $taskRepository
-     * @param  ProjectRepository  $projectRepository
-     * @param  UserRepository     $userRepository
-     * @param  Request            $request
-     * @param  Property           $property
-     * @param  ProjectHelper      $projectHelper
-     * @param  Status             $status
-     */
     public function __construct(
         TaskRepository $taskRepository,
         ProjectRepository $projectRepository,
@@ -64,8 +39,7 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
 
     /**
      * Process data saving from incoming request from plugin on redmine
-     *
-     * @return Task
+
      * @throws Exception
      */
     public function process(): Task
@@ -76,7 +50,7 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
     }
 
     /**
-     * @param  mixed|ParameterBag  $task
+     * @param mixed|ParameterBag $task
      *
      * @return Task|mixed|ParameterBag|void
      * @throws Exception
@@ -94,60 +68,34 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
     }
 
     /**
-     * @param  int  $redmineTaskId
-     *
-     * @return bool
+     * @throws Exception
      */
-    protected function taskExists(int $redmineTaskId): bool
+    protected function metaInformationUpdate(): void
     {
-        $task = $this->property->getProperty(Property::TASK_CODE, 'REDMINE_ID', [
-            'value' => $redmineTaskId
-        ]);
+        if (!$this->projectExists($this->getProjectDataFromRequest()['id'])) {
+            $this->insertProject($this->getProjectDataFromRequest());
+        }
 
-        return (bool) $task->count();
+        if (!$this->statusExists($this->getStatusDataFromRequest()['id'])) {
+            $this->insertStatus($this->getStatusDataFromRequest());
+        }
+
+        if (!$this->priorityExists($this->getPriorityDataFromRequest()['name'])) {
+            $this->insertPriority($this->getPriorityDataFromRequest());
+        }
     }
 
-    /**
-     * @param  int  $redmineProjectId
-     *
-     * @return bool
-     */
     protected function projectExists(int $redmineProjectId): bool
     {
         $project = $this->property->getProperty(Property::PROJECT_CODE, 'REDMINE_ID', [
             'value' => $redmineProjectId
         ]);
 
-        return (bool) $project->count();
+        return (bool)$project->count();
     }
 
     /**
-     * @param  int  $redmineStatusId
-     *
-     * @return bool
-     */
-    protected function statusExists(int $redmineStatusId): bool
-    {
-        return $this->status->existsByID($redmineStatusId);
-    }
-
-    /**
-     * @param  mixed|ParameterBag  $status
-     *
-     * @throws Exception
-     */
-    protected function insertStatus($status): void
-    {
-        $id = $status['id'] ?? 0;
-        $name = $status['name'] ?? '';
-        $active = !($status['is_closed'] ?? false);
-        $closed = $status['is_closed'] ?? false;
-
-        $this->status->add($id, $name, $active, $closed);
-    }
-
-    /**
-     * @param  mixed|ParameterBag  $project
+     * @param mixed|ParameterBag $project
      */
     protected function insertProject($project): void
     {
@@ -165,6 +113,26 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
         ]);
     }
 
+    protected function statusExists(int $redmineStatusId): bool
+    {
+        return $this->status->existsByID($redmineStatusId);
+    }
+
+    /**
+     * @param mixed|ParameterBag $status
+     *
+     * @throws Exception
+     */
+    protected function insertStatus($status): void
+    {
+        $id = $status['id'] ?? 0;
+        $name = $status['name'] ?? '';
+        $active = !($status['is_closed'] ?? false);
+        $closed = $status['is_closed'] ?? false;
+
+        $this->status->add($id, $name, $active, $closed);
+    }
+
     /**
      * @param $priorityName
      *
@@ -174,11 +142,11 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
     {
         $data = Priority::where('name', $priorityName)->count();
 
-        return (bool) $data;
+        return (bool)$data;
     }
 
     /**
-     * @param  mixed|ParameterBag  $priority
+     * @param mixed|ParameterBag $priority
      */
     protected function insertPriority($priority): void
     {
@@ -187,28 +155,17 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
         ]);
     }
 
-    /**
-     * @param $task
-     *
-     * @throws Exception
-     */
-    protected function metaInformationUpdate($task): void
+    protected function taskExists(int $redmineTaskId): bool
     {
-        if (!$this->projectExists($this->getProjectDataFromRequest()['id'])) {
-            $this->insertProject($this->getProjectDataFromRequest());
-        }
+        $task = $this->property->getProperty(Property::TASK_CODE, 'REDMINE_ID', [
+            'value' => $redmineTaskId
+        ]);
 
-        if (!$this->statusExists($this->getStatusDataFromRequest()['id'])) {
-            $this->insertStatus($this->getStatusDataFromRequest());
-        }
-
-        if (!$this->priorityExists($this->getPriorityDataFromRequest()['name'])) {
-            $this->insertPriority($this->getPriorityDataFromRequest());
-        }
+        return (bool)$task->count();
     }
 
     /**
-     * @param  mixed|ParameterBag  $task
+     * @param mixed|ParameterBag $task
      *
      * @return Task
      * @throws Exception
@@ -250,11 +207,22 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
     }
 
     /**
-     * @param  mixed|ParameterBag  $task
+     * @param $priorityId
+     *
+     * @return mixed
+     */
+    protected function getInternalPriority($priorityId)
+    {
+        // TODO: Change to priority id, not name
+        return Priority::where('name', $priorityId)->first();
+    }
+
+    /**
+     * @param mixed|ParameterBag $task
      *
      * @todo
      * @deprecated
-    */
+     */
     public function updateTask($task): void
     {
         $taskEav = Property::where([
@@ -266,18 +234,4 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
 
         $task = Task::find($taskId);
     }
-
-    /**
-     * @param $priorityId
-     *
-     * @return mixed
-     */
-    protected function getInternalPriority($priorityId)
-    {
-        // TODO: Change to priority id, not name
-        $priority = Priority::where('name', $priorityId)->first();
-
-        return $priority;
-    }
-
 }

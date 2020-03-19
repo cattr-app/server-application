@@ -12,9 +12,6 @@ use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Models\ClientFactory;
 use Modules\RedmineIntegration\Models\Settings;
 
-/**
- * Class SynchronizeTime
-*/
 class SynchronizeTime extends Command
 {
     /**
@@ -61,15 +58,6 @@ class SynchronizeTime extends Command
      */
     protected $settings;
 
-    /**
-     * Create a new command instance.
-     *
-     * @param  UserRepository     $userRepo
-     * @param  ProjectRepository  $projectRepo
-     * @param  TaskRepository     $taskRepo
-     * @param  ClientFactory      $clientFactory
-     * @param  Settings           $settings
-     */
     public function __construct(
         UserRepository $userRepo,
         TaskRepository $taskRepo,
@@ -88,8 +76,8 @@ class SynchronizeTime extends Command
 
     /**
      * Execute the console command.
-    */
-    public function handle()
+     */
+    public function handle(): void
     {
         $this->synchronizeTime();
     }
@@ -97,7 +85,7 @@ class SynchronizeTime extends Command
     /**
      * Synchronize time for selected users
      */
-    public function synchronizeTime()
+    public function synchronizeTime(): void
     {
         if (!$this->settings->getSendTime()) {
             return;
@@ -105,15 +93,13 @@ class SynchronizeTime extends Command
 
         $users = User::all();
         foreach ($users as $user) {
-
-            $intervalQuery = $this->timeRepo->getNotSyncedInvervals($user->id);
+            $intervalQuery = $this->timeRepo->getNotSyncedIntervals($user->id);
             $dates = [];
 
             $intervalQuery->orderBy('start_at');
 
             $intervalQuery->chunk(100, function ($intervals) use (&$dates) {
                 foreach ($intervals as $interval) {
-
                     $start_timestamp = strtotime($interval->start_at);
                     $end_timestamp = strtotime($interval->end_at);
                     $date = date("Y-m-d", $start_timestamp);
@@ -123,7 +109,7 @@ class SynchronizeTime extends Command
                     $issue_id = $this->taskRepo->getRedmineTaskId($task_id);
 
 
-                    if (is_null($issue_id)) {
+                    if ($issue_id === null) {
                         continue; // skip non-redmine tasks
                     }
 
@@ -135,17 +121,14 @@ class SynchronizeTime extends Command
                                 'intervals' => [$interval_id],
                             ]
                         ];
+                    } elseif (!isset($dates[$date][$issue_id])) {
+                        $dates[$date][$issue_id] = [
+                            'hours' => $hoursDiff,
+                            'intervals' => [$interval_id],
+                        ];
                     } else {
-                        if (!isset($dates[$date][$issue_id])) {
-                            $dates[$date][$issue_id] = [
-                                'hours' => $hoursDiff,
-                                'intervals' => [$interval_id],
-                            ];
-                        } else {
-                            $dates[$date][$issue_id]['hours'] += $hoursDiff;
-                            $dates[$date][$issue_id]['intervals'][] = $interval_id;
-
-                        }
+                        $dates[$date][$issue_id]['hours'] += $hoursDiff;
+                        $dates[$date][$issue_id]['intervals'][] = $interval_id;
                     }
                 }
             });
@@ -155,13 +138,11 @@ class SynchronizeTime extends Command
                     $this->sendTime($user, $date, $issue_id, $issue['hours'], $issue['intervals']);
                 }
             }
-
         }
-
     }
 
 
-    protected function sendTime($user, $date, $issue_id, $hours, $timeIntervalIds)
+    protected function sendTime($user, $date, $issue_id, $hours, $timeIntervalIds): void
     {
         try {
             $client = $this->clientFactory->createUserClient($user->id);
@@ -176,12 +157,10 @@ class SynchronizeTime extends Command
             $issent = isset($ret->id);
 
             if ($issent) {
-
                 foreach ($timeIntervalIds as $timeIntervalId) {
                     $this->timeRepo->markAsSynced($timeIntervalId);
                 }
             }
-
         } catch (Exception $e) {
         }
     }

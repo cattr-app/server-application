@@ -7,12 +7,9 @@ use Modules\RedmineIntegration\Helpers\TaskIntegrationHelper;
 
 /**
  * Class TaskRedmineController
-*/
+ */
 class TaskRedmineController extends AbstractRedmineController
 {
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -22,14 +19,12 @@ class TaskRedmineController extends AbstractRedmineController
 
     /**
      * Synchronize Redmine tasks with Cattr tasks
-     *
-     * @return JsonResponse
      */
     public function synchronize(): JsonResponse
     {
         $taskIntegration = app()->make(TaskIntegrationHelper::class);
 
-        return response()->json(
+        return new JsonResponse(
             app()->call(
                 [
                     $taskIntegration,

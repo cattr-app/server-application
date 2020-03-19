@@ -2,18 +2,16 @@
 
 use App\Models\Role;
 use App\Models\Rule;
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddInvoicesModulePermissions extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         $allowedForRoles = ['root', 'manager'];
         $roleIDs = Role::whereIn('name', $allowedForRoles)->get()->pluck('id');
@@ -21,21 +19,17 @@ class AddInvoicesModulePermissions extends Migration
         foreach ($roleIDs as $roleID) {
             Rule::updateOrCreate([
                 'role_id' => $roleID,
-                'object'  => 'invoices',
-                'action'  => 'list',
+                'object' => 'invoices',
+                'action' => 'list',
             ], ['allow' => 1]);
         }
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('', function (Blueprint $table) {
-
-        });
+        // okay...
     }
 }

@@ -17,7 +17,7 @@ class Settings extends CompanyProperty
         return isset($property) ? $property->value : 0;
     }
 
-    public function setEnabled(int $value)
+    public function setEnabled(int $value): void
     {
         $this->set(static::REDMINE_ENABLED, $value);
     }
@@ -29,7 +29,7 @@ class Settings extends CompanyProperty
         return isset($property) ? $property->value : '';
     }
 
-    public function setURL(string $value)
+    public function setURL(string $value): void
     {
         $this->set(static::REDMINE_URL, $value);
     }
@@ -41,7 +41,7 @@ class Settings extends CompanyProperty
         return isset($property) ? $property->value : '';
     }
 
-    public function setAPIKey(string $value)
+    public function setAPIKey(string $value): void
     {
         $this->set(static::REDMINE_API_KEY, $value);
     }
@@ -53,7 +53,7 @@ class Settings extends CompanyProperty
         return isset($property) ? $property->value : 0;
     }
 
-    public function setSendTime(int $value)
+    public function setSendTime(int $value): void
     {
         $this->set(static::REDMINE_SYNC, $value);
     }
@@ -65,7 +65,7 @@ class Settings extends CompanyProperty
         return isset($property) ? $property->value : 0;
     }
 
-    public function setOnlineTimeout(int $value)
+    public function setOnlineTimeout(int $value): void
     {
         $this->set(static::REDMINE_ONLINE_TIMEOUT, $value);
     }

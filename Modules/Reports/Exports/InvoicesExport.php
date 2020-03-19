@@ -4,15 +4,12 @@ namespace Modules\Reports\Exports;
 
 use App\Helpers\ReportHelper;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Modules\Invoices\Models\Invoices as InvoiceModel;
 use Modules\Invoices\Models\UserDefaultRate;
 
-/**
- * Class Invoices
- * @package Modules\EmailReports\StatisticExports
- */
 class InvoicesExport extends ProjectExport
 {
     /**
@@ -37,14 +34,13 @@ class InvoicesExport extends ProjectExport
     protected $summaryForUserTask;
 
     /**
-     * @return Collection
-     * @throws \Exception
+     * @throws Exception
      */
     public function collection(): Collection
     {
         $queryData = request()->only('start_at', 'end_at', 'uids', 'pids');
         if (!Arr::has($queryData, ['start_at', 'end_at', 'uids', 'pids'])) {
-            throw new \Exception('Requested data was not found in request body');
+            throw new Exception('Requested data was not found in request body');
         }
         // Grouping prepared collection to groups by Project Name
         $preparedCollection = $this->getPreparedCollection($queryData);
@@ -93,56 +89,6 @@ class InvoicesExport extends ProjectExport
     }
 
     /**
-     * @param Collection $collection
-     * @param string $projectName
-     * @param array $user
-     * @param array $task
-     * @throws \Exception
-     */
-    protected function addRowToCollection(Collection $collection, string $projectName, array $user, array $task)
-    {
-        $time = (new Carbon('@0'))->diffForHumans(new Carbon("@{$task['duration']}"), true, true, 3);
-        $decimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@{$task['duration']}"));
-        $this->summaryForUserTask = round($user['rate'] * $decimalTime, self::ROUND_DIGITS);
-
-        $collection->push([
-            'Project' => $projectName,
-            'User' => $user['full_name'],
-            'Task' => $task['task_name'],
-            'Time' => "{$time}",
-            'Hours (decimal)' => round($decimalTime, self::ROUND_DIGITS),
-            'Rate' => $user['rate'],
-            'Summary' => $this->summaryForUserTask
-        ]);
-    }
-
-    /**
-     * Add subtotal record to existing collection
-     *
-     * @param Collection $collection
-     * @param string $projectName
-     * @param int|float $time
-     *
-     * @return void
-     * @throws \Exception
-     */
-    protected function addSubtotalToCollection(Collection $collection, string $projectName, $time): void
-    {
-        $timeObject = (new Carbon('@0'))->diffForHumans(new Carbon("@$time"), true, true, 3);
-        $projectDecimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@$time"));
-
-        $collection->push([
-            'Project' => "Subtotal for $projectName",
-            'User' => '',
-            'Task' => '',
-            'Time' => "{$timeObject}",
-            'Hours (decimal)' => round($projectDecimalTime, self::ROUND_DIGITS),
-            'Rate' => '',
-            'Summary' => $this->summaryForUserTask
-        ]);
-    }
-
-    /**
      * @param $userId
      * @return int|mixed
      */
@@ -164,10 +110,48 @@ class InvoicesExport extends ProjectExport
     }
 
     /**
-     * @return string
+     * @throws Exception
      */
+    protected function addRowToCollection(Collection $collection, string $projectName, array $user, array $task): void
+    {
+        $time = (new Carbon('@0'))->diffForHumans(new Carbon("@{$task['duration']}"), true, true, 3);
+        $decimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@{$task['duration']}"));
+        $this->summaryForUserTask = round($user['rate'] * $decimalTime, self::ROUND_DIGITS);
+
+        $collection->push([
+            'Project' => $projectName,
+            'User' => $user['full_name'],
+            'Task' => $task['task_name'],
+            'Time' => "{$time}",
+            'Hours (decimal)' => round($decimalTime, self::ROUND_DIGITS),
+            'Rate' => $user['rate'],
+            'Summary' => $this->summaryForUserTask
+        ]);
+    }
+
+    /**
+     * Add subtotal record to existing collection
+     *
+     * @throws Exception
+     */
+    protected function addSubtotalToCollection(Collection $collection, string $projectName, $time): void
+    {
+        $timeObject = (new Carbon('@0'))->diffForHumans(new Carbon("@$time"), true, true, 3);
+        $projectDecimalTime = (new Carbon('@0'))->floatDiffInHours(new Carbon("@$time"));
+
+        $collection->push([
+            'Project' => "Subtotal for $projectName",
+            'User' => '',
+            'Task' => '',
+            'Time' => "{$timeObject}",
+            'Hours (decimal)' => round($projectDecimalTime, self::ROUND_DIGITS),
+            'Rate' => '',
+            'Summary' => $this->summaryForUserTask
+        ]);
+    }
+
     public function getExporterName(): string
     {
-        return "invoices";
+        return 'invoices';
     }
 }

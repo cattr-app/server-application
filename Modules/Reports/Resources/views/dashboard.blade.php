@@ -1,13 +1,14 @@
 <?php
 
 use Carbon\Carbon;
+use Illuminate\Support\Collection;
 
 const USER_INDEX = 0;
 const TOTAL_INDEX = 1;
 const TOTAL_DECIMAL_INDEX = 2;
 
 /**
- * @var $collection \Illuminate\Support\Collection
+ * @var $collection Collection
  */
 $dates = [];
 $headings = $collection->collapse()->keys();

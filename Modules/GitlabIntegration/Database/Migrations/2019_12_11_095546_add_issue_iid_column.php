@@ -1,31 +1,27 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddIssueIidColumn extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('gitlab_tasks_relations', function (Blueprint $table) {
+        Schema::table('gitlab_tasks_relations', static function (Blueprint $table) {
             $table->unsignedBigInteger('gitlab_issue_iid');
         });
     }
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('gitlab_tasks_relations', function (Blueprint $table) {
+        Schema::table('gitlab_tasks_relations', static function (Blueprint $table) {
             $table->dropColumn('gitlab_issue_iid');
         });
     }

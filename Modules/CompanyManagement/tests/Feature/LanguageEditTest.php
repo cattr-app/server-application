@@ -13,12 +13,15 @@ class LanguageEditTest extends TestCase
 
     private User $admin;
 
-    private function assertLanguageInDb(string $languagee): self
+    public function test_create(): void
     {
-        return $this->assertDatabaseHas('properties', [
-            'name' => 'language',
-            'value' => $languagee
-        ]);
+        $requestData = ['language' => 'en'];
+        $this->assertLanguageNotInDb($requestData['language']);
+
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
+
+        $response->assertSuccess();
+        $this->assertLanguageInDb($requestData['language']);
     }
 
     private function assertLanguageNotInDb(string $language): self
@@ -29,32 +32,12 @@ class LanguageEditTest extends TestCase
         ]);
     }
 
-    private function createLanguage(string $language): void
+    private function assertLanguageInDb(string $languagee): self
     {
-        Property::create([
-            'entity_type' => Property::COMPANY_CODE,
-            'entity_id' => 0,
+        return $this->assertDatabaseHas('properties', [
             'name' => 'language',
-            'value' => $language
+            'value' => $languagee
         ]);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->admin = UserFactory::asAdmin()->withTokens()->create();
-    }
-
-    public function test_create(): void
-    {
-        $requestData = ['language' => 'en'];
-        $this->assertLanguageNotInDb($requestData['language']);
-
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
-
-        $response->assertSuccess();
-        $this->assertLanguageInDb($requestData['language']);
     }
 
     public function test_update(): void
@@ -67,6 +50,16 @@ class LanguageEditTest extends TestCase
 
         $response->assertSuccess();
         $this->assertLanguageInDb($requestData['language']);
+    }
+
+    private function createLanguage(string $language): void
+    {
+        Property::create([
+            'entity_type' => Property::COMPANY_CODE,
+            'entity_id' => 0,
+            'name' => 'language',
+            'value' => $language
+        ]);
     }
 
     public function test_invalid(): void
@@ -83,5 +76,12 @@ class LanguageEditTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 
         $response->assertValidationError();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->admin = UserFactory::asAdmin()->withTokens()->create();
     }
 }

@@ -11,7 +11,7 @@
             overflow-x: hidden;
             padding: 20px;
 
-            font-family: YTSans,Roboto,Arial,Helvetica,sans-serif;
+            font-family: YTSans, Roboto, Arial, Helvetica, sans-serif;
             color: #282828;
         }
 
@@ -32,23 +32,23 @@
 </head>
 <body>
 
-    <div class="row greeting">
-        <h1>Hello,</h1>
-    </div>
+<div class="row greeting">
+    <h1>Hello,</h1>
+</div>
 
-    <div class="row main-text">
-        <h2>Please find attached the invoice for the period from {{$fromDate}} to {{$toDate}}</h2>
-    </div>
+<div class="row main-text">
+    <h2>Please find attached the invoice for the period from {{$fromDate}} to {{$toDate}}</h2>
+</div>
 
-    <div class="row best-wishes">
-        <h2>Best wishes,</h2>
-        <h2>your Cattr.</h2>
-    </div>
+<div class="row best-wishes">
+    <h2>Best wishes,</h2>
+    <h2>your Cattr.</h2>
+</div>
 
-    <div class="row afterwords">
-        <p>Please do not reply this message.</p>
-        <p>To cancel this email subscription contact with our manager.</p>
-    </div>
+<div class="row afterwords">
+    <p>Please do not reply this message.</p>
+    <p>To cancel this email subscription contact with our manager.</p>
+</div>
 </body>
 </html>
 

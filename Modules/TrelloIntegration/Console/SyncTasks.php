@@ -3,8 +3,6 @@
 namespace Modules\TrelloIntegration\Console;
 
 use Illuminate\Console\Command;
-use Symfony\Component\Console\Input\InputOption;
-use Symfony\Component\Console\Input\InputArgument;
 use Modules\TrelloIntegration\Services\SyncTasks as Service;
 
 class SyncTasks extends Command
@@ -30,8 +28,6 @@ class SyncTasks extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @param Service $service
      */
     public function __construct(Service $service)
     {
@@ -42,7 +38,7 @@ class SyncTasks extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->service->synchronizeAll();
     }

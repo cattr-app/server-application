@@ -2,17 +2,15 @@
 
 namespace Modules\RedmineIntegration\Http\Controllers;
 
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
 use Modules\RedmineIntegration\Helpers\TimeIntervalIntegrationHelper;
 
 /**
  * Class TimeEntryRedmineController
-*/
+ */
 class TimeEntryRedmineController extends AbstractRedmineController
 {
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -25,9 +23,9 @@ class TimeEntryRedmineController extends AbstractRedmineController
      *
      * Upload time interval with id == $timeIntercalId to Redmine by API
      *
-     * @param  Request  $request
+     * @throws BindingResolutionException
      */
-    public function create(Request $request)
+    public function create(Request $request): void
     {
         $timeIntervalIntegration = app()->make(TimeIntervalIntegrationHelper::class);
 
