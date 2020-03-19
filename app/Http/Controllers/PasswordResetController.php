@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * Class PasswordReset
-*/
 class PasswordResetController extends BaseController
 {
     /**
@@ -24,10 +21,6 @@ class PasswordResetController extends BaseController
      */
     private $recaptcha;
 
-    /**
-     * PasswordResetController constructor.
-     * @param RecaptchaHelper $recaptcha
-     */
     public function __construct(RecaptchaHelper $recaptcha)
     {
         $this->recaptcha = $recaptcha;
@@ -65,8 +58,6 @@ class PasswordResetController extends BaseController
      * @apiUse         InvalidPasswordResetDataError
      */
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws AuthorizationException
      */
     public function validate(Request $request): JsonResponse
@@ -90,7 +81,7 @@ class PasswordResetController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
-        return response()->json(['success' => true, 'message' => 'Password reset data is valid']);
+        return new JsonResponse(['success' => true, 'message' => 'Password reset data is valid']);
     }
 
     /**
@@ -127,8 +118,6 @@ class PasswordResetController extends BaseController
      * @apiUse         LimiterError
      */
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws AuthorizationException
      */
     public function request(Request $request): JsonResponse
@@ -154,7 +143,7 @@ class PasswordResetController extends BaseController
 
         Password::broker()->sendResetLink($credentials);
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'message' => 'Link for restore password has been sent to specified email',
         ]);
@@ -207,8 +196,6 @@ class PasswordResetController extends BaseController
      * @apiUse         UnauthorizedError
      */
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws AuthorizationException
      */
     public function process(Request $request): JsonResponse
@@ -251,7 +238,7 @@ class PasswordResetController extends BaseController
 
         $token = $user->addToken($tokenString);
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'access_token' => $token->token,
             'token_type' => 'bearer',

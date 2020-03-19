@@ -83,15 +83,14 @@ class RegistrationController extends Controller
      */
     /**
      * Creates a new registration token and sends an email to the specified address
-     * @param Request $request
-     * @return JsonResponse
+     *
      * @throws Exception
      */
     public function create(Request $request): JsonResponse
     {
         $email = $request->input('email');
         if (!isset($email)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'Email is required',
             ], 400);
@@ -99,7 +98,7 @@ class RegistrationController extends Controller
 
         $user = User::where('email', $email)->first();
         if (isset($user)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'User with this email is already exists',
             ], 400);
@@ -109,7 +108,7 @@ class RegistrationController extends Controller
             ->where('expires_at', '>=', time())
             ->first();
         if (isset($registration)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'E-Mail to this address is already sent',
             ], 400);
@@ -124,7 +123,7 @@ class RegistrationController extends Controller
 
         Mail::to($email)->send(new RegistrationMail($registration->key));
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'key' => $registration->key,
         ]);
@@ -170,13 +169,13 @@ class RegistrationController extends Controller
             ->where('expires_at', '>=', time())
             ->first();
         if (!isset($registration)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'Not found',
             ], 404);
         }
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'email' => $registration->email,
         ]);
@@ -244,14 +243,14 @@ class RegistrationController extends Controller
             ->first();
 
         if (!isset($registration)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'Not found',
             ], 404);
         }
 
         if ($request->input('email') !== $registration->email) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'Email mismatch',
             ], 400);
@@ -272,7 +271,7 @@ class RegistrationController extends Controller
 
         $registration->delete();
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'user_id' => $user->id,
         ]);

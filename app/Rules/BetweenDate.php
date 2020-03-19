@@ -7,15 +7,12 @@ use Illuminate\Contracts\Validation\Rule;
 class BetweenDate implements Rule
 {
 
-    protected $afterDate;
+    protected string $afterDate;
 
-    protected $beforeDate;
+    protected string $beforeDate;
 
     /**
      * Create a new rule instance.
-     *
-     * @param string $afterDate
-     * @param string $beforeDate
      */
     public function __construct(string $afterDate, string $beforeDate)
     {
@@ -26,8 +23,8 @@ class BetweenDate implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
+     * @param string $attribute
+     * @param mixed $value
      * @return bool
      */
     public function passes($attribute, $value): bool
@@ -41,8 +38,6 @@ class BetweenDate implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
     public function message(): string
     {

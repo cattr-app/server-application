@@ -8,8 +8,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * App\Models\Registration
- *
  * @property int $id
  * @property string $key
  * @property string $email

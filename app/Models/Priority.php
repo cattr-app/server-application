@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
- * Class Priority
- *
  * @property int $id
  * @property string $name
  * @property-read Collection|Task[] $tasks
@@ -40,13 +38,13 @@ class Priority extends Model
         'name' => 'string',
     ];
 
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'priority_id');
-    }
-
     public static function getTableName(): string
     {
         return with(new static())->getTable();
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'priority_id');
     }
 }

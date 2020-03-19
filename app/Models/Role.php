@@ -38,14 +38,11 @@ use Throwable;
  * @apiParam {String}   [with]        For add relation model in response
  * @apiParam {Object}   [users]       Roles's relation users. All params in <a href="#api-User-GetUserList" >@User</a>
  * @apiParam {Object}   [rules]       Roles's relation rules. All params in <a href="#api-Rule-GetRulesActions" >@Rules</a>
-
  *
  * @apiVersion 1.0.0
  */
 
 /**
- * Class Role
- *
  * @property int $id
  * @property string $name
  * @property string $created_at
@@ -97,58 +94,6 @@ class Role extends Model
         'updated_at',
         'deleted_at',
     ];
-
-    /**
-     * @return HasMany
-     */
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class, 'role_id', 'id');
-    }
-
-    /**
-     * Attach this role to user
-     *
-     * @param int|User $user
-     */
-    /*public function attachToUser($user)
-    {
-        $userId = $user;
-        if ($user instanceof User) {
-            $userId = $user->id;
-        }
-        $this->users()->attach($userId);
-    }*/
-
-    /**
-     * Detach this role from user
-     *
-     * @param int|User $user
-     */
-    /*public function detachFromUser($user)
-    {
-        $userId = $user;
-        if ($user instanceof User) {
-            $userId = $user->id;
-        }
-        $this->users()->detach($userId);
-    }*/
-
-    /**
-     * @return HasMany
-     */
-    public function rules(): HasMany
-    {
-        return $this->hasMany(Rule::class, 'role_id');
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function projects(): BelongsToMany
-    {
-        return $this->belongsToMany(Project::class, 'projects_roles', 'role_id', 'project_id');
-    }
 
     /**
      * @throws Exception
@@ -312,5 +257,20 @@ class Role extends Model
         }
 
         return false;
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class, 'role_id', 'id');
+    }
+
+    public function rules(): HasMany
+    {
+        return $this->hasMany(Rule::class, 'role_id');
+    }
+
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'projects_roles', 'role_id', 'project_id');
     }
 }

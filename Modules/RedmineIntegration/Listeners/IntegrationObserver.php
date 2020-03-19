@@ -131,7 +131,7 @@ class IntegrationObserver
             'name' => 'REDMINE_ID',
         ])->whereIn('entity_id', $taskIds)->pluck('entity_id')->toArray();
 
-        $items->transform(function ($item) use ($redmineTaskIds) {
+        $items->transform(static function ($item) use ($redmineTaskIds) {
             if (in_array($item->id, $redmineTaskIds)) {
                 $item->integration = 'redmine';
             }

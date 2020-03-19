@@ -114,7 +114,7 @@ class EventListenerServiceProvider extends ServiceProvider
             $sourcePath => $viewPath
         ], 'views');
 
-        $this->loadViewsFrom(array_merge(array_map(function ($path) {
+        $this->loadViewsFrom(array_merge(array_map(static function ($path) {
             return $path . '/modules/eventlistener';
         }, Config::get('view.paths')), [$sourcePath]), 'eventlistener');
     }

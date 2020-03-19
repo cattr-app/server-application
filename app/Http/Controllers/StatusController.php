@@ -6,9 +6,6 @@ use App\Helpers\CatHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
-/**
- * Class StatusController
-*/
 class StatusController extends Controller
 {
     /**
@@ -29,12 +26,9 @@ class StatusController extends Controller
      *    "cat": "(=ㅇ༝ㅇ=)"
      *  }
      */
-    /**
-     * @return JsonResponse
-     */
     public function index(): JsonResponse
     {
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'cattr' => true,
             'cat' => app(CatHelper::class)->getCat(),

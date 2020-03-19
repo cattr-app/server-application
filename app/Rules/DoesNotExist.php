@@ -7,21 +7,13 @@ use Illuminate\Support\Facades\DB;
 
 class DoesNotExist implements Rule
 {
-    /**
-     * @var string
-     */
-    protected $table;
 
-    /**
-     * @var int
-     */
-    protected $id;
+    protected string  $table;
+
+    protected int $id;
 
     /**
      * Create a new rule instance.
-     *
-     * @param string $table
-     * @param int $id
      */
     public function __construct(string $table, int $id)
     {
@@ -32,8 +24,8 @@ class DoesNotExist implements Rule
     /**
      * Determine if the validation rule passes.
      *
-     * @param  string  $attribute
-     * @param  mixed  $value
+     * @param string $attribute
+     * @param mixed $value
      * @return bool
      */
     public function passes($attribute, $value): bool
@@ -45,8 +37,6 @@ class DoesNotExist implements Rule
 
     /**
      * Get the validation error message.
-     *
-     * @return string
      */
     public function message(): string
     {

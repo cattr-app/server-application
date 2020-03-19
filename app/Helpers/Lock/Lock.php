@@ -6,14 +6,14 @@ class Lock implements LockInterface
 {
     protected $locked = false;
 
-    public function setLock(bool $lock): void
-    {
-        $this->locked = $lock;
-    }
-
     public function lock(): void
     {
         $this->setLock(true);
+    }
+
+    public function setLock(bool $lock): void
+    {
+        $this->locked = $lock;
     }
 
     public function unlock(): void

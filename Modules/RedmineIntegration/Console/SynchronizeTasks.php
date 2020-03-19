@@ -338,7 +338,7 @@ class SynchronizeTasks extends Command
     private function createNewlySyncedTask(array $priorities, array $taskFromRedmine, Model $projectProperty, int $userId, array $activeStatusIDs): void
     {
         // Get internal priority ID from a Redmine priority.
-        $priority = Arr::first($priorities, function ($priority) use ($taskFromRedmine) {
+        $priority = Arr::first($priorities, static function ($priority) use ($taskFromRedmine) {
             return $priority['id'] === $taskFromRedmine['priority']['id'];
         });
         $priority_id = isset($priority) ? $priority['priority_id'] : 0;

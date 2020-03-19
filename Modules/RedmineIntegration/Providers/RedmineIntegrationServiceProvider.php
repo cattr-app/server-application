@@ -90,7 +90,7 @@ class RedmineIntegrationServiceProvider extends ServiceProvider
             $sourcePath => $viewPath
         ], 'views');
 
-        $this->loadViewsFrom(array_merge(array_map(function ($path) {
+        $this->loadViewsFrom(array_merge(array_map(static function ($path) {
             return $path . '/modules/redmineintegration';
         }, Config::get('view.paths')), [$sourcePath]), 'redmineintegration');
     }
