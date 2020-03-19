@@ -4,16 +4,15 @@ namespace Modules\Invoices\Providers;
 
 use App\EventFilter\EventServiceProvider as ServiceProvider;
 use App\EventFilter\Facades\Filter;
+use Config;
 use Illuminate\Database\Eloquent\Factory;
 
 class InvoicesServiceProvider extends ServiceProvider
 {
     /**
      * Boot the application events.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerConfig();
         $this->loadMigrationsFrom(__DIR__ . '/../Database/Migrations');
@@ -28,11 +27,23 @@ class InvoicesServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the service provider.
-     *
-     * @return void
+     * Register config.
      */
-    public function register()
+    protected function registerConfig(): void
+    {
+        $this->publishes([
+            __DIR__ . '/../Config/config.php' => config_path('invoices.php'),
+        ], 'config');
+        $this->mergeConfigFrom(
+            __DIR__ . '/../Config/config.php',
+            'invoices'
+        );
+    }
+
+    /**
+     * Register the service provider.
+     */
+    public function register():void
     {
         $this->app->register(RouteServiceProvider::class);
     }
@@ -41,7 +52,7 @@ class InvoicesServiceProvider extends ServiceProvider
      * Register an additional directory of factories.
      * @source https://github.com/sebastiaanluca/laravel-resource-flow/blob/develop/src/Modules/ModuleServiceProvider.php#L66
      */
-    public function registerFactories()
+    public function registerFactories(): void
     {
         if (!app()->environment('production')) {
             app(Factory::class)->load(__DIR__ . '/../Database/factories');
@@ -49,26 +60,9 @@ class InvoicesServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register config.
-     *
-     * @return void
-     */
-    protected function registerConfig()
-    {
-        $this->publishes([
-            __DIR__ . '/../Config/config.php' => config_path('invoices.php'),
-        ], 'config');
-        $this->mergeConfigFrom(
-            __DIR__ . '/../Config/config.php', 'invoices'
-        );
-    }
-
-    /**
      * Register views.
-     *
-     * @return void
      */
-    public function registerViews()
+    public function registerViews(): void
     {
         $viewPath = resource_path('views/modules/invoices');
 
@@ -78,17 +72,15 @@ class InvoicesServiceProvider extends ServiceProvider
             $sourcePath => $viewPath
         ], 'views');
 
-        $this->loadViewsFrom(array_merge(array_map(function ($path) {
+        $this->loadViewsFrom(array_merge(array_map(static function ($path) {
             return $path . '/modules/invoices';
-        }, \Config::get('view.paths')), [$sourcePath]), 'invoices');
+        }, Config::get('view.paths')), [$sourcePath]), 'invoices');
     }
 
     /**
      * Register translations.
-     *
-     * @return void
      */
-    public function registerTranslations()
+    public function registerTranslations(): void
     {
         $langPath = resource_path('lang/modules/invoices');
 
@@ -97,15 +89,5 @@ class InvoicesServiceProvider extends ServiceProvider
         } else {
             $this->loadTranslationsFrom(__DIR__ . '/../Resources/lang', 'invoices');
         }
-    }
-
-    /**
-     * Get the services provided by the provider.
-     *
-     * @return array
-     */
-    public function provides()
-    {
-        return [];
     }
 }

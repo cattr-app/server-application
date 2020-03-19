@@ -66,7 +66,7 @@ Route::group([
 Route::group([
     'middleware' => 'throttle:120,1',
     'prefix' => 'v1/auth',
-], function (Router $router) {
+], static function (Router $router) {
     $router->post('login', 'AuthController@login');
     $router->post('logout', 'AuthController@logout');
     $router->post('logout-from-all', 'AuthController@logoutFromAll');

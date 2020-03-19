@@ -8,10 +8,6 @@ use Illuminate\Http\Request;
 use Illuminate\Http\Response;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-
-/**
- * Class ScreenshotController
-*/
 class ScreenshotController extends Controller
 {
     /**
@@ -49,6 +45,10 @@ class ScreenshotController extends Controller
         return response()->file($full_path);
     }
 
+    /**
+     * @param Request $request
+     * @return ResponseFactory|Response|BinaryFileResponse
+     */
     public function thumbnail(Request $request)
     {
         $path = $request->path();

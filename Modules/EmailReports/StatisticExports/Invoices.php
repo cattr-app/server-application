@@ -3,22 +3,16 @@
 namespace Modules\EmailReports\StatisticExports;
 
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Log;
-use Modules\EmailReports\Mail\InvoicesEmailReport;
 use Modules\Reports\Exports\InvoicesExport;
 
-/**
- * Class Invoices
- * @package Modules\EmailReports\StatisticExports
- */
 class Invoices extends InvoicesExport implements ExportableEmailReport
 {
     /**
-     * @param array $queryData
-     * @return Collection
-     * @throws \Exception
+     * @throws Exception
      */
     public function exportCollection(array $queryData): Collection
     {

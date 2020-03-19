@@ -34,3 +34,4 @@ coverage/
 .phpunit.result.cache
 .php_cs.cache
 /storage/app/uploads/screenshots
+modules_statuses.json

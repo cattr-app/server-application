@@ -3,7 +3,6 @@
 
 namespace Modules\RedmineIntegration\Http\Controllers;
 
-
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Http\Request;
@@ -14,22 +13,9 @@ use Throwable;
 
 class TaskUpdateController extends Controller
 {
-    /**
-     * @var Request
-     */
-    protected $request;
+    protected Request $request;
+    protected PluginWebhookHelper $pluginWebhookHelper;
 
-    /**
-     * @var PluginWebhookHelper
-     */
-    protected $pluginWebhookHelper;
-
-    /**
-     * TaskUpdateController constructor.
-     *
-     * @param  Request              $request
-     * @param  PluginWebhookHelper  $pluginWebhookHelper
-     */
     public function __construct(
         Request $request,
         PluginWebhookHelper $pluginWebhookHelper
@@ -48,7 +34,6 @@ class TaskUpdateController extends Controller
     /**
      * Accept task create/update from Redmine vie RedmineIntegration plugin
      *
-     * @return void
      * @throws Exception
      */
     public function handleUpdate(): void

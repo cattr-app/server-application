@@ -18,57 +18,40 @@ use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * Class UserController
-*/
 class UserController extends ItemController
 {
     public function __construct()
     {
-        Filter::listen('request.item.create.user', static::class.'@'.'requestUserCreateHook');
-        Filter::listen('request.item.edit.user', static::class.'@'.'requestUserCreateHook');
+        Filter::listen('request.item.create.user', static::class . '@' . 'requestUserCreateHook');
+        Filter::listen('request.item.edit.user', static::class . '@' . 'requestUserCreateHook');
 
-        Event::listen('item.edit.after.user', static::class.'@'.'changePasswordHook');
+        Event::listen('item.edit.after.user', static::class . '@' . 'changePasswordHook');
 
         parent::__construct();
     }
 
-    /**
-     * @param $user
-     * @param $requestData
-     * @return mixed
-     */
-    public function sendInviteHook($user, $requestData)
+    public function sendInviteHook(User $user, array $requestData): User
     {
         Mail::to($user->email)->send(new InviteUser($user->email, $requestData['password']));
         return $user;
     }
 
-    /**
-     * @param User $user
-     * @param $requestData
-     */
-    public function changePasswordHook($user, $requestData): void
+    public function changePasswordHook(User $user, array $requestData): void
     {
-        if ($user->change_password && !is_null($requestData['password'])) {
+        if ($user->change_password && $requestData['password'] !== null) {
             $user->change_password = false;
             $user->save();
         }
     }
 
-
-    /**
-     * @param $requestData
-     * @return mixed
-     */
-    public function requestUserCreateHook($requestData)
+    public function requestUserCreateHook(array $requestData): array
     {
         $send_invite = $requestData['send_invite'] ?? 0;
         $change_password = $requestData['change_password'] ?? 0;
 
         if ($send_invite) {
-            Event::listen('item.create.after.user', static::class.'@'.'sendInviteHook');
-            Event::listen('item.edit.after.user', static::class.'@'.'sendInviteHook');
+            Event::listen('item.create.after.user', static::class . '@' . 'sendInviteHook');
+            Event::listen('item.edit.after.user', static::class . '@' . 'sendInviteHook');
         } elseif ($change_password) {
             unset($requestData['change_password']);
         }
@@ -76,63 +59,126 @@ class UserController extends ItemController
         return $requestData;
     }
 
-
-    /**
-     * @return string
-     */
     public function getItemClass(): string
     {
         return User::class;
     }
 
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'full_name' => 'required',
-            'email' => 'required|unique:users,email',
-            'active' => 'required|boolean',
-            'password' => 'required|min:6',
-        ];
-    }
-
-    /**
-     * @return string
-     */
     public function getEventUniqueNamePart(): string
     {
         return 'user';
     }
 
-    /**
-     * @return array
-     */
-    public static function getControllerRules(): array
+    public function create(Request $request): JsonResponse
     {
-        return [
-            'index' => 'users.list',
-            'count' => 'users.list',
-            'create' => 'users.create',
-            'edit' => 'users.edit',
-            'show' => 'users.show',
-            'destroy' => 'users.remove',
-            'bulkEdit' => 'users.bulk-edit',
-            'relations' => 'users.relations',
-        ];
+        Event::listen($this->getEventUniqueName('item.create.after'), static::class . '@' . 'saveRelations');
+        return parent::create($request);
     }
 
     /**
-     * @param  array  $requestData
-     *
-     * @return array
+     * Display a listing of the resource.
+     * @throws Exception
      */
-    protected function filterRequestData(array $requestData): array
+    public function index(Request $request): JsonResponse
     {
-        $requestData['password'] = bcrypt($requestData['password']);
+        $withDeleted = $request->input('with_deleted') === true;
 
-        return $requestData;
+        return parent::index($request);
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function edit(Request $request): JsonResponse
+    {
+        $requestData = Filter::process(
+            $this->getEventUniqueName('request.item.edit'),
+            $request->all()
+        );
+        $idInt = is_int($request->get('id'));
+
+        if (!$idInt) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id',
+                ]),
+                400
+            );
+        }
+
+        $validationRules = $this->getValidationRules();
+        $validationRules['id'] = 'required';
+        $validationRules['email'] .= ',' . $request->get('id');
+        $validationRules['password'] = 'sometimes|min:6';
+
+        if (array_key_exists('password', $requestData) && $requestData['password'] === null) {
+            unset($requestData['password']);
+        }
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.edit'),
+                $validationRules
+            )
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(),
+                ['id' => $request->get('id')]
+            )
+        );
+        /** @var Model $item */
+        $item = $itemsQuery->first();
+
+        if (!$item) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'User not found',
+                ]),
+                404
+            );
+        }
+
+        if (isset($requestData['password'])) {
+            $item->fill($this->filterRequestData($requestData));
+        } else {
+            $item->fill($requestData);
+        }
+
+        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
+        $item->save();
+
+        Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
+
+        $item = $this->saveRelations($item, $requestData);
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
+                'res' => $item,
+            ])
+        );
     }
 
     /**
@@ -270,17 +316,15 @@ class UserController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-    /**
-     * Create item
-     *
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     */
-    public function create(Request $request): JsonResponse
+
+    public function getValidationRules(): array
     {
-        Event::listen($this->getEventUniqueName('item.create.after'), static::class.'@'.'saveRelations');
-        return parent::create($request);
+        return [
+            'full_name' => 'required',
+            'email' => 'required|unique:users,email',
+            'active' => 'required|boolean',
+            'password' => 'required|min:6',
+        ];
     }
 
     /**
@@ -340,19 +384,70 @@ class UserController extends ItemController
      * @apiUse         ForbiddenError
      * @apiUse         ValidationError
      */
-    /**
-     * Display a listing of the resource.
-     *
-     * @param Request $request
-     *
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function index(Request $request): JsonResponse
-    {
-        $withDeleted = $request->input('with_deleted') === true;
 
-        return parent::index($request);
+    /**
+     * @param bool $withRelations
+     * @param bool $withSoftDeleted
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $userId = $user->id;
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
+        $full_access = $user->allowed('users', 'full_access');
+        $action_method = Route::getCurrentRoute()->getActionMethod();
+
+        if ($full_access) {
+            return $query;
+        }
+
+        $rules = self::getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
+            }
+
+            $query->where(static function (Builder $query) use ($userId, $object, $action) {
+                $roleSubquery = static function (Builder $query) use ($userId, $object, $action) {
+                    $query->where('user_id', $userId)->whereHas(
+                        'role',
+                        static function (Builder $query) use ($object, $action) {
+                            $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                                $query->where([
+                                    'object' => $object,
+                                    'action' => $action,
+                                    'allow' => true,
+                                ])->select('id');
+                            })->select('id');
+                        }
+                    )->select('id');
+                };
+
+                // Filter by project roles of the user
+                // Users assigned to the project
+                $query->whereHas('projects.usersRelation', $roleSubquery);
+
+                // Users assigned to tasks in the project
+                $query->orWhereHas('tasks.project.usersRelation', $roleSubquery);
+
+                /*
+                // Users has tracked intervals in tasks of the project
+                $query->orWhereHas('timeIntervals.task.project.usersRelation', $roleSubquery);
+                */
+
+                // For read and edit access include own user data
+                $query->when($action !== 'remove', static function (Builder $query) use ($userId) {
+                    $query->orWhere('id', $userId);
+                });
+            });
+        }
+
+        return $query;
     }
 
     /**
@@ -423,105 +518,24 @@ class UserController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function edit(Request $request): JsonResponse
+
+    public static function getControllerRules(): array
     {
-        $requestData = Filter::process(
-            $this->getEventUniqueName('request.item.edit'),
-            $request->all()
-        );
-        $idInt = is_int($request->get('id'));
-
-        if (!$idInt) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid id',
-                ]),
-                400
-            );
-        }
-
-        $validationRules = $this->getValidationRules();
-        $validationRules['id'] = 'required';
-        $validationRules['email'] .= ','.$request->get('id');
-        $validationRules['password'] = 'sometimes|min:6';
-
-        if (array_key_exists('password', $requestData) && is_null($requestData['password'])) {
-            unset($requestData['password']);
-        }
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.edit'),
-                $validationRules
-            )
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(), ['id' => $request->get('id')]
-            )
-        );
-        /** @var Model $item */
-        $item = $itemsQuery->first();
-
-        if (!$item) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'User not found',
-                ]),
-                404
-            );
-        }
-
-        if (isset($requestData['password'])) {
-            $item->fill($this->filterRequestData($requestData));
-        } else {
-            $item->fill($requestData);
-        }
-
-        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
-        $item->save();
-
-        Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
-
-        $item = $this->saveRelations($item, $requestData);
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'success' => true,
-                'res' => $item,
-            ])
-        );
+        return [
+            'index' => 'users.list',
+            'count' => 'users.list',
+            'create' => 'users.create',
+            'edit' => 'users.edit',
+            'show' => 'users.show',
+            'destroy' => 'users.remove',
+            'bulkEdit' => 'users.bulk-edit',
+            'relations' => 'users.relations',
+        ];
     }
 
     public function show(Request $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('answer.success.item.show'), function ($item) {
+        Filter::listen($this->getEventUniqueName('answer.success.item.show'), static function ($item) {
             $sortedRoles = [];
             foreach ($item->projectsRelation as $projectRole) {
                 if (!array_key_exists($projectRole->role_id, $sortedRoles)) {
@@ -631,68 +645,11 @@ class UserController extends ItemController
      * @apiPermission   users_relations
      */
 
-    /**
-     * @param  bool  $withRelations
-     * @param  bool  $withSoftDeleted
-     *
-     * @return Builder
-     */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    protected function filterRequestData(array $requestData): array
     {
-        /** @var User $user */
-        $user = Auth::user();
-        $userId = $user->id;
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = $user->allowed('users', 'full_access');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
+        $requestData['password'] = bcrypt($requestData['password']);
 
-        if ($full_access) {
-            return $query;
-        }
-
-        $rules = self::getControllerRules();
-        $rule = $rules[$action_method] ?? null;
-        if (isset($rule)) {
-            [$object, $action] = explode('.', $rule);
-            // Check user default role
-            if (Role::can($user, $object, $action)) {
-                return $query;
-            }
-
-            $query->where(function (Builder $query) use ($userId, $object, $action) {
-                $roleSubquery = function (Builder $query) use ($userId, $object, $action) {
-                    $query->where('user_id', $userId)->whereHas('role',
-                        function (Builder $query) use ($object, $action) {
-                            $query->whereHas('rules', function (Builder $query) use ($object, $action) {
-                                $query->where([
-                                    'object' => $object,
-                                    'action' => $action,
-                                    'allow' => true,
-                                ])->select('id');
-                            })->select('id');
-                        })->select('id');
-                };
-
-                // Filter by project roles of the user
-                // Users assigned to the project
-                $query->whereHas('projects.usersRelation', $roleSubquery);
-
-                // Users assigned to tasks in the project
-                $query->orWhereHas('tasks.project.usersRelation', $roleSubquery);
-
-                /*
-                // Users has tracked intervals in tasks of the project
-                $query->orWhereHas('timeIntervals.task.project.usersRelation', $roleSubquery);
-                */
-
-                // For read and edit access include own user data
-                $query->when($action !== 'remove', function (Builder $query) use ($userId) {
-                    $query->orWhere('id', $userId);
-                });
-            });
-        }
-
-        return $query;
+        return $requestData;
     }
 
     /**
@@ -720,4 +677,3 @@ class UserController extends ItemController
         return $user;
     }
 }
-

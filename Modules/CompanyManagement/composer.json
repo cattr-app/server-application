@@ -13,7 +13,7 @@
                 "Modules\\CompanyManagement\\Providers\\CompanyManagementServiceProvider"
             ],
             "aliases": {
-                
+
             }
         }
     },

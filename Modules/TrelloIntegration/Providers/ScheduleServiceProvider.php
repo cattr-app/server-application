@@ -9,30 +9,30 @@ use Nwidart\Modules\Facades\Module;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
-    private const DAYLY = 'daily';
+    private const DAILY = 'daily';
     private const WEEKLY = 'weekly';
     private const MONTHLY = 'monthly';
 
-    public static function isEnabled() {
+    public static function isEnabled()
+    {
         return Module::isEnabled('TrelloIntegration');
     }
 
-    public function boot()
+    public function boot(Schedule $schedule): void
     {
-        $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->command('trello:sync-tasks')->everyFiveMinutes()->withoutOverlapping()->when([static::class, 'isEnabled']);
+        $this->app->booted(static function () use ($schedule) {
+            $schedule->command('trello:sync-tasks')->everyFiveMinutes()->withoutOverlapping();
 
-            $schedule->command('trello:sync-time')->daily()->when(fn(Settings $settings) =>
-                $settings->getTimeSyncPeriod() === self::DAYLY && static::isEnabled()
+            $schedule->command('trello:sync-time')->daily()->when(
+                fn (Settings $settings) => $settings->getTimeSyncPeriod() === self::DAILY
             );
 
-            $schedule->command('trello:sync-time')->weekly()->when(fn(Settings $settings) =>
-                $settings->getTimeSyncPeriod() === self::WEEKLY && static::isEnabled()
+            $schedule->command('trello:sync-time')->weekly()->when(
+                fn (Settings $settings) => $settings->getTimeSyncPeriod() === self::WEEKLY
             );
 
-            $schedule->command('trello:sync-time')->monthly()->when(fn(Settings $settings) =>
-                $settings->getTimeSyncPeriod() === self::MONTHLY && static::isEnabled()
+            $schedule->command('trello:sync-time')->monthly()->when(
+                fn (Settings $settings) => $settings->getTimeSyncPeriod() === self::MONTHLY
             );
         });
     }

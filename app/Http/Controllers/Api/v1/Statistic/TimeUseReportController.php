@@ -72,12 +72,6 @@ class TimeUseReportController extends ReportController
      *
      * @apiPermission   time_duration_list
      */
-    /**
-     * Handle the incoming request.
-     *
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function report(Request $request): JsonResponse
     {
         $validator = Validator::make(

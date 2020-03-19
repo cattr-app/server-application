@@ -9,8 +9,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
- * Class Token
- *
  * @property int $id
  * @property string $user_id
  * @property string $token
@@ -37,9 +35,6 @@ class Token extends Model
         'expires_at'
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

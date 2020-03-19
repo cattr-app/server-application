@@ -6,10 +6,8 @@ class AddUserLastTimeUsageView extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
         DB::statement('CREATE VIEW user_time_activity AS
             SELECT
@@ -39,10 +37,8 @@ class AddUserLastTimeUsageView extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         DB::statement('DROP VIEW user_time_activity');
     }

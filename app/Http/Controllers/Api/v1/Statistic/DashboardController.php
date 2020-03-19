@@ -12,41 +12,83 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * Class DashboardController
- */
 class DashboardController extends ReportController
 {
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'user_ids' => 'exists:users,id|array',
-            'project_ids' => 'nullable|exists:projects,id|array',
-            'start_at' => 'date|required',
-            'end_at' => 'date|required',
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'dashboard';
-    }
-
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
             'timeIntervals' => 'time-intervals.list',
             'timePerDay' => 'time-intervals.list',
         ];
+    }
+
+    public function getEventUniqueNamePart(): string
+    {
+        return 'dashboard';
+    }
+
+    public function timePerDay(Request $request): JsonResponse
+    {
+        $validator = Validator::make(
+            $request->all(),
+            $this->getValidationRules()
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse([
+                'success' => false,
+                'error_type' => 'validation',
+                'message' => 'Validation error',
+                'info' => $validator->errors(),
+            ], 400);
+        }
+
+        $uids = $request->input('user_ids', []);
+
+        $timezone = $request->input('timezone') ?: 'UTC';
+        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
+
+        $startAt = Carbon::parse($request->input('start_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
+
+        $endAt = Carbon::parse($request->input('end_at'), $timezone)
+            ->tz('UTC')
+            ->toDateTimeString();
+
+        $intervals = TimeInterval::select(
+            ['user_id',
+                DB::raw("DATE(CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}')) as date"),
+                DB::raw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as duration')]
+        )
+            ->whereIn('user_id', $uids)
+            ->where('start_at', '>=', $startAt)
+            ->where('start_at', '<', $endAt)
+            ->whereNull('deleted_at')
+            ->orderBy('start_at')
+            ->groupBy('date')
+            ->get()
+            ->groupBy('user_id')
+            ->map(static function ($intervals) {
+                $totalDuration = 0;
+
+                foreach ($intervals as $interval) {
+                    $interval->duration = (int)$interval->duration;
+                    $totalDuration += $interval->duration;
+                }
+
+                return [
+                    'intervals' => $intervals,
+                    'duration' => $totalDuration,
+                ];
+            });
+
+        $result = [
+            'success' => true,
+            'user_intervals' => $intervals,
+        ];
+
+        return new JsonResponse($result);
     }
 
     /**
@@ -106,71 +148,15 @@ class DashboardController extends ReportController
      * @apiUse          ForbiddenError
      * @apiUse          ValidationError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function timePerDay(Request $request): JsonResponse
+
+    public function getValidationRules(): array
     {
-        $validator = Validator::make(
-            $request->all(),
-            $this->getValidationRules()
-        );
-
-        if ($validator->fails()) {
-            return response()->json([
-                'success' => false,
-                'error_type' => 'validation',
-                'message' => 'Validation error',
-                'info' => $validator->errors(),
-            ], 400);
-        }
-
-        $uids = $request->input('user_ids', []);
-
-        $timezone = $request->input('timezone') ?: 'UTC';
-        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
-
-        $startAt = Carbon::parse($request->input('start_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $endAt = Carbon::parse($request->input('end_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $intervals = TimeInterval::select(['user_id',
-                DB::raw("DATE(CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}')) as date"),
-                DB::raw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as duration')]
-        )
-            ->whereIn('user_id', $uids)
-            ->where('start_at', '>=', $startAt)
-            ->where('start_at', '<', $endAt)
-            ->whereNull('deleted_at')
-            ->orderBy('start_at')
-            ->groupBy('date')
-            ->get()
-            ->groupBy('user_id')
-            ->map(function ($intervals) {
-                $totalDuration = 0;
-
-                foreach ($intervals as $interval) {
-                    $interval->duration = (int)$interval->duration;
-                    $totalDuration += $interval->duration;
-                }
-
-                return [
-                    'intervals' => $intervals,
-                    'duration' => $totalDuration,
-                ];
-            });
-
-        $result = [
-            'success' => true,
-            'user_intervals' => $intervals,
+        return [
+            'user_ids' => 'exists:users,id|array',
+            'project_ids' => 'nullable|exists:projects,id|array',
+            'start_at' => 'date|required',
+            'end_at' => 'date|required',
         ];
-
-        return response()->json($result);
     }
 
     /**
@@ -235,11 +221,9 @@ class DashboardController extends ReportController
      * @apiUse          ForbiddenError
      * @apiUse          ValidationError
      */
+
     /**
      * Handle the incoming request.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function timeIntervals(Request $request): JsonResponse
     {
@@ -249,7 +233,7 @@ class DashboardController extends ReportController
         );
 
         if ($validator->fails()) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error_type' => 'validation',
                 'message' => 'Validation error',
@@ -273,12 +257,18 @@ class DashboardController extends ReportController
 
         $intervals = DB::table('time_intervals AS i')
             ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-            ->select('i.user_id', 'i.id', 'i.task_id', 't.project_id', 'i.is_manual',
+            ->select(
+                'i.user_id',
+                'i.id',
+                'i.task_id',
+                't.project_id',
+                'i.is_manual',
                 DB::raw("CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}') as start_at"),
                 DB::raw("CONVERT_TZ(end_at, '+00:00', '{$timezoneOffset}') as end_at"),
                 DB::raw('TIMESTAMPDIFF(SECOND, i.start_at, i.end_at) as duration'),
                 DB::raw('UNIX_TIMESTAMP(start_at) as raw_start_at'),
-                DB::raw('UNIX_TIMESTAMP(end_at) as raw_end_at'))
+                DB::raw('UNIX_TIMESTAMP(end_at) as raw_end_at')
+            )
             ->whereIn('i.user_id', $user_ids)
             ->where('i.start_at', '>=', $startAt)
             ->where('i.start_at', '<', $endAt)
@@ -340,7 +330,7 @@ class DashboardController extends ReportController
 
         $results = ['userIntervals' => $users, 'success' => true];
 
-        return response()->json(
+        return new JsonResponse(
             Filter::process(
                 $this->getEventUniqueName('answer.success.report.show'),
                 $results

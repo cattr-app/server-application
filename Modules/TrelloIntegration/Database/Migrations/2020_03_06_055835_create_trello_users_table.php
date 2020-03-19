@@ -8,12 +8,10 @@ class CreateTrelloUsersTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('trello_users_relation', function (Blueprint $table) {
+        Schema::create('trello_users_relation', static function (Blueprint $table) {
             $table->string('id', 255)->primary();
             $table->unsignedInteger('user_id');
         });
@@ -21,10 +19,8 @@ class CreateTrelloUsersTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('trello_users');
     }

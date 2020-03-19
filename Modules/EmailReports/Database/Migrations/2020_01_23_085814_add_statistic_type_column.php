@@ -1,22 +1,22 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class AddStatisticTypeColumn extends Migration
 {
-    const PROJECT_REPORT_STATISTIC = 1;
+    public const PROJECT_REPORT_STATISTIC = 1;
+
     /**
      * Run the migrations.
      *
      * @return void
      */
-    public function up()
+    public function up(): void
     {
         if (!Schema::hasColumn('email_reports', 'statistic_type')) {
-            Schema::table('email_reports', function (Blueprint $table) {
-                // Check ReportsSender  AVAILABLE_STATISTIC_TYPES
+            Schema::table('email_reports', static function (Blueprint $table) {
                 $table->integer('statistic_type')->default(self::PROJECT_REPORT_STATISTIC);
             });
         }
@@ -27,9 +27,9 @@ class AddStatisticTypeColumn extends Migration
      *
      * @return void
      */
-    public function down()
+    public function down(): void
     {
-        Schema::table('email_reports', function (Blueprint $table) {
+        Schema::table('email_reports', static function (Blueprint $table) {
             $table->dropColumn('statistic_type');
         });
     }

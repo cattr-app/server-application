@@ -6,13 +6,7 @@ use Illuminate\Support\Collection;
 
 interface Exportable
 {
-    /**
-     * @return string
-     */
-    public function getExporterName(): string ;
+    public function getExporterName(): string;
 
-    /**
-     * @return Collection
-     */
-    public function collection(): Collection ;
+    public function collection(): Collection;
 }

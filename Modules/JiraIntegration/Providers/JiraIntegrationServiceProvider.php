@@ -5,17 +5,17 @@ namespace Modules\JiraIntegration\Providers;
 use App\EventFilter\Facades\Filter;
 use App\Models\TimeInterval;
 use Illuminate\Support\ServiceProvider;
-use Modules\JiraIntegration\Console\{SyncTasks, SyncTime};
-use Modules\JiraIntegration\Entities\{TaskRelation, TimeRelation};
+use Modules\JiraIntegration\Console\SyncTasks;
+use Modules\JiraIntegration\Console\SyncTime;
+use Modules\JiraIntegration\Entities\TaskRelation;
+use Modules\JiraIntegration\Entities\TimeRelation;
 
 class JiraIntegrationServiceProvider extends ServiceProvider
 {
     /**
      * Boot the application events.
-     *
-     * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         $this->registerConfig();
         $this->registerCommands();
@@ -27,9 +27,9 @@ class JiraIntegrationServiceProvider extends ServiceProvider
             $taskRelation = TaskRelation::where(['task_id' => $timeInterval->task_id])->first();
             if (isset($taskRelation)) {
                 TimeRelation::create([
-                    'jira_task_id'     => $taskRelation->id,
+                    'jira_task_id' => $taskRelation->id,
                     'time_interval_id' => $timeInterval->id,
-                    'user_id'          => $timeInterval->user_id,
+                    'user_id' => $timeInterval->user_id,
                 ]);
             }
 
@@ -38,22 +38,9 @@ class JiraIntegrationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        $this->app->register(RouteServiceProvider::class);
-        $this->app->register(ScheduleServiceProvider::class);
-    }
-
-    /**
      * Register config.
-     *
-     * @return void
      */
-    protected function registerConfig()
+    protected function registerConfig(): void
     {
         $this->publishes([
             module_path('JiraIntegration', 'Config/config.php') => config_path('jiraintegration.php'),
@@ -64,10 +51,8 @@ class JiraIntegrationServiceProvider extends ServiceProvider
 
     /**
      * Register command
-     *
-     * @return void
      */
-    protected function registerCommands()
+    protected function registerCommands(): void
     {
         $this->commands([
             SyncTasks::class,
@@ -76,12 +61,11 @@ class JiraIntegrationServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get the services provided by the provider.
-     *
-     * @return array
+     * Register the service provider.
      */
-    public function provides()
+    public function register(): void
     {
-        return [];
+        $this->app->register(ScheduleServiceProvider::class);
+        $this->app->register(RouteServiceProvider::class);
     }
 }

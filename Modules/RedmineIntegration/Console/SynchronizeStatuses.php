@@ -2,13 +2,11 @@
 
 namespace Modules\RedmineIntegration\Console;
 
+use Exception;
 use Illuminate\Console\Command;
 use Log;
 use Modules\RedmineIntegration\Models\Status;
 
-/**
- * Class SynchronizeStatuses
-*/
 class SynchronizeStatuses extends Command
 {
     /**
@@ -33,7 +31,7 @@ class SynchronizeStatuses extends Command
     /**
      * Create a new command instance.
      *
-     * @param  Status  $status
+     * @param Status $status
      */
     public function __construct(Status $status)
     {
@@ -45,11 +43,11 @@ class SynchronizeStatuses extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         try {
             $this->status->synchronize();
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             Log::error($e);
         }
     }

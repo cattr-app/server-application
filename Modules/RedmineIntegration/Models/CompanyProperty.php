@@ -9,7 +9,7 @@ abstract class CompanyProperty
     protected const ENTITY_TYPE = Property::COMPANY_CODE;
     protected const ENTITY_ID = 0;
 
-    protected function get(string $name): ?Property
+    protected function get(string $name)
     {
         return Property::where([
             'entity_type' => static::ENTITY_TYPE,

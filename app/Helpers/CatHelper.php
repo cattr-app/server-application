@@ -2,15 +2,9 @@
 
 namespace App\Helpers;
 
-/**
- * Class CatHelper
-*/
 class CatHelper
 {
-    /**
-     * @var string[]
-     */
-    protected static $cats = [
+    protected static array $cats = [
         '=^._.^=', '(=｀ェ´=)', '(=^ ◡ ^=)',
         '/ᐠ｡ꞈ｡ᐟ\\', '/ᐠ.ꞈ.ᐟ\\', '✧/ᐠ-ꞈ-ᐟ\\',
         '(ﾐචᆽචﾐ)', '(=චᆽච=)', '(=ㅇᆽㅇ=)', '(=ㅇ༝ㅇ=)',
@@ -19,9 +13,6 @@ class CatHelper
         '( ⓛ ﻌ ⓛ *)', ''
     ];
 
-    /**
-     * @return string
-     */
     public function getCat(): string
     {
         return self::$cats[array_rand(self::$cats)];

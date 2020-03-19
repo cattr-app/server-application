@@ -5,9 +5,6 @@ namespace Modules\RedmineIntegration\Entities\Repositories;
 use App\Models\Property;
 use Illuminate\Support\Facades\DB;
 
-/**
- * Class ProjectRepository
-*/
 class ProjectRepository
 {
     /**
@@ -30,14 +27,12 @@ class ProjectRepository
 
     /**
      * Returns all redmine project's ids
-     *
-     * @return array
      */
-    public function getRedmineProjectsIds()
+    public function getRedmineProjectsIds(): array
     {
         $redmineProjectIdsArray = [];
 
-        $redmineProjectsCollection = DB::table(Property::getTableName().' as prop')
+        $redmineProjectsCollection = DB::table(Property::getTableName() . ' as prop')
             ->select('prop.entity_id')
             ->where('prop.entity_type', '=', Property::PROJECT_CODE)
             ->where('prop.name', '=', 'REDMINE_ID')->get();

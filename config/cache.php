@@ -25,5 +25,5 @@ return [
         ],
     ],
 
-    'prefix' =>  preg_replace('#[^a-zA-Z0-9_\-]#', '_', env('APP_NAME', 'laravel')),
+    'prefix' => preg_replace('#[^a-zA-Z0-9_\-]#', '_', env('APP_NAME', 'laravel')),
 ];

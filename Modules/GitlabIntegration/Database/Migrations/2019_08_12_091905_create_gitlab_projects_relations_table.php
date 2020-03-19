@@ -1,19 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateGitlabProjectsRelationsTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('gitlab_projects_relations', function (Blueprint $table) {
+        Schema::create('gitlab_projects_relations', static function (Blueprint $table) {
             $table->unsignedBigInteger('gitlab_id');
             $table->unsignedBigInteger('project_id');
 
@@ -23,10 +21,8 @@ class CreateGitlabProjectsRelationsTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('gitlab_projects_relations');
     }

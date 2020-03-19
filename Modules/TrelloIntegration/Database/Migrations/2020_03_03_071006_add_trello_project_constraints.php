@@ -8,12 +8,10 @@ class AddTrelloProjectConstraints extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::table('trello_projects_relation', function (Blueprint $table) {
+        Schema::table('trello_projects_relation', static function (Blueprint $table) {
             // the external key's limitations provides the data ingertity
             // by not letting the ProjectRelation creation with the project missing from the system
             // and removing the ProjectRelation when the linked project is completely removed from the system
@@ -21,9 +19,9 @@ class AddTrelloProjectConstraints extends Migration
         });
     }
 
-    public function down()
+    public function down(): void
     {
-        Schema::table('trello_projects_relation', function (Blueprint $table) {
+        Schema::table('trello_projects_relation', static function (Blueprint $table) {
             $table->dropForeign(['project_id']);
         });
     }

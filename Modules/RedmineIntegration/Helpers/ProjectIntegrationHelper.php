@@ -12,7 +12,7 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
     /**
      * Synchronize projects for all users
      */
-    public function synchronizeProjects()
+    public function synchronizeProjects(): void
     {
         $users = User::all();
 
@@ -49,7 +49,7 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
                     ['value', '=', $projectFromRedmine['id']]
                 ])->first();
 
-                if ($projectExist != null) {
+                if ($projectExist !== null) {
                     continue;
                 }
 
@@ -73,7 +73,7 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
                 'added_projects' => $addedProjectsCounter
             ];
         } catch (Exception $e) {
-            if ($e->getCode() == 404) {
+            if ($e->getCode() === 404) {
                 return [
                     'added_projects' => [],
                     'notice' => 'This user does not have assigned Redmine URL',
