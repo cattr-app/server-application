@@ -57,6 +57,20 @@ live_deploy:
   script:
     - ssh $CI_USER@$CI_HOST 'cd /opt/cattr/cattr/backend && git pull && php artisan migrate'
 
+staging_deploy:
+  image: alpine
+  stage: deploy
+  only:
+    - staging
+  before_script:
+    - 'which ssh-agent || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$STAGING_KEY" | base64 -d | ssh-add -
+    - mkdir ~/.ssh
+    - ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
+  script:
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull && cp -f .env.staging .env && cp -f modules_statuses.staging.json modules_statuses.json && php artisan migrate'
+
 demo_deploy:
   image: alpine
   stage: deploy
