@@ -14,6 +14,7 @@ Homestead.json
 Homestead.yaml
 .env
 .env.testing
+.env.sentry
 *.log
 *.zip
 *.tar

@@ -54,8 +54,16 @@ live_deploy:
     - echo "$CI_KEY" | base64 -d | ssh-add -
     - mkdir ~/.ssh
     - ssh-keyscan -H $CI_HOST >> ~/.ssh/known_hosts
+    - curl -sL https://sentry.io/get-cli/ | sh
+    - sentry-cli releases new "$CI_COMMIT_SHORT_SHA"
   script:
+    - sentry-cli releases set-commits "$CI_COMMIT_SHORT_SHA" --auto
+    - start=$(date +%s)
     - ssh $CI_USER@$CI_HOST 'cd /opt/cattr/cattr/backend && git pull && php artisan migrate'
+    - now=$(date +%s)
+    - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "release" -t $((now-start))
+  after_script:
+    - sentry-cli releases finalize "$CI_COMMIT_SHORT_SHA"
 
 staging_deploy:
   image: alpine
@@ -68,8 +76,16 @@ staging_deploy:
     - echo "$STAGING_KEY" | base64 -d | ssh-add -
     - mkdir ~/.ssh
     - ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
+    - curl -sL https://sentry.io/get-cli/ | sh
+    - sentry-cli releases new "$CI_COMMIT_SHORT_SHA"
   script:
-    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull && cp -f .env.staging .env && cp -f modules_statuses.staging.json modules_statuses.json && php artisan migrate'
+    - sentry-cli releases set-commits "$CI_COMMIT_SHORT_SHA" --auto
+    - start=$(date +%s)
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull && cp -f .env.staging .env && cat .env.sentry >> .env && cp -f modules_statuses.staging.json modules_statuses.json && php artisan migrate'
+    - now=$(date +%s)
+    - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "release" -t $((now-start))
+  after_script:
+    - sentry-cli releases finalize "$CI_COMMIT_SHORT_SHA"
 
 demo_deploy:
   image: alpine
