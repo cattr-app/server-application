@@ -10,7 +10,7 @@ integration_testing:
   stage: test
   before_script:
     - apk update
-    - apk add libpng-dev freetype-dev libjpeg-turbo-dev libjpeg-turbo libpng freetype libzip libzip-dev
+    - apk add libpng-dev freetype-dev libjpeg-turbo-dev libjpeg-turbo libpng freetype libzip libzip-dev git
     - docker-php-ext-configure gd --with-jpeg=/usr/include/ --with-freetype=/usr/include/
     - docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd
     - docker-php-ext-install bcmath zip pdo_mysql
@@ -81,7 +81,7 @@ staging_deploy:
   script:
     - sentry-cli releases set-commits "$CI_COMMIT_SHORT_SHA" --auto
     - start=$(date +%s)
-    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull && cp -f .env.staging .env && cat .env.sentry >> .env && cp -f modules_statuses.staging.json modules_statuses.json && php artisan migrate'
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull && cp -f .env.staging .env && cat .env.sentry >> .env && cp -f modules_statuses.staging.json modules_statuses.json && php artisan config:cache && php artisan migrate'
     - now=$(date +%s)
     - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "release" -t $((now-start))
   after_script:
