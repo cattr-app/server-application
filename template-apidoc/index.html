@@ -9,14 +9,31 @@
   <link href="vendor/prettify.css" rel="stylesheet" media="screen">
   <link href="css/style.css" rel="stylesheet" media="screen, print">
   <link href="img/favicon.ico" rel="icon" type="image/x-icon">
+  <link
+    rel="stylesheet"
+    href="https://stackpath.bootstrapcdn.com/bootstrap/4.4.1/css/bootstrap.min.css"
+    integrity="sha384-Vkoo8x4CGsO3+Hhxv8T/Q5PaXtkKtu6ug5TOeNV6gBiFeWPGFN9MuhOf23Q9Ifjh"
+    crossorigin="anonymous"
+  />
   <script src="vendor/polyfill.js"></script>
 </head>
 <body>
 
 <header id="some-header">
-  <ul class="header-items">
-    <li>
-      <a href="" id="home-link" class="item">
+  <ul
+    class="header-container
+				row
+				flex-md-nowrap
+				row-cols-md-9
+				row-cols-sm-5
+				row-cols-3
+				justify-content-md-between
+				justify-content-center
+				align-items-center
+				"
+  >
+    <li class="item col-md-auto col">
+      <a href="https://cattr.app/" class="item">
         <img
           src="https://community.cattr.app/public/assets/logo-vdfl6su4.png"
           alt=""
@@ -25,33 +42,45 @@
       </a>
     </li>
 
-    <li><a class="item" href="https://cattr.app">Cattr</a></li>
-
-    <li>
-      <a class="item" href="https://community.cattr.app/public/"
-      >Forum</a
-      >
+    <li class="item col-md-auto col">
+      <a class="item-url" href="https://cattr.app">Cattr</a>
     </li>
 
-    <li class="multiple-item">
-      <a class="item" href="">Documentation</a>
-      <ul class="submenu">
-        <li><a href="https://docs.cattr.app/guide">User Guide</a></li>
-        <li><a href="https://docs.cattr.app/api">API</a></li>
-        <li><a href="https://docs.cattr.app/frontend">Frontend</a></li>
-        <li><a href="https://docs.cattr.app/backend#/">Backend</a></li>
-      </ul>
+    <li class="item col-md-auto col">
+      <a class="item-url" href="https://demo.cattr.app">Demo</a>
     </li>
 
-    <li class="multiple-item">
-      <a href="" class="item">Translation</a>
+    <li class="item col-md col">
+      <a class="item-url" href="https://community.cattr.app/public/">Community</a>
+    </li>
+
+
+    <li class="item col-md-auto col">
+      <a class="item-url" href="https://docs.cattr.app/">User Guide</a>
+    </li>
+
+    <li class="item col-md-auto col">
+      <a class="item-url" href="https://docs.cattr.app/api">API</a>
+    </li>
+
+    <li class="item col-md-auto col">
+      <a class="item-url" href="https://docs.cattr.app/frontend">Frontend</a>
+    </li>
+
+    <li class="item col-md-auto col">
+      <a class="item-url" href="https://docs.cattr.app/backend#/">Backend</a>
+    </li>
+
+    <li class="multiple-item col-md-auto col">
+      <a class="item-url" href="">Translations</a>
       <ul class="submenu">
-        <li><a href="#/en/">English</a></li>
-        <li><a href="#/ru/">Russian</a></li>
+        <li><a class="item-url" href="#/en/">English</a></li>
+        <li><a class="item-url" href="#/ru/">Russian</a></li>
       </ul>
     </li>
   </ul>
 </header>
+
 
 <script id="template-sidenav" type="text/x-handlebars-template">
 <nav id="scrollingNav">
