@@ -76,8 +76,8 @@ staging_deploy:
     - echo "$STAGING_KEY" | base64 -d | ssh-add -
     - mkdir ~/.ssh
     - ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
-    - apk add curl
-    - curl -sL https://sentry.io/get-cli/ | sh
+    - apk add curl bash
+    - curl -sL https://sentry.io/get-cli/ | bash
     - sentry-cli releases new "$CI_COMMIT_SHORT_SHA"
   script:
     - sentry-cli releases set-commits "$CI_COMMIT_SHORT_SHA" --auto
