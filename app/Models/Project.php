@@ -118,28 +118,15 @@ class Project extends Model
             return static::all(['id'])->pluck('id')->toArray();
         }
 
-        $user_project_ids = collect($user->projects)->pluck('id');
-        $project_ids = collect($user_project_ids);
+        $project_ids = collect($user->projects->pluck('id'));
 
         if (count($project_ids) <= 0) {
             return static::all(['id'])->pluck('id')->toArray();
         }
 
-        $user_tasks_project_id = collect($user->tasks)->flatMap(static function ($task) {
-            if (isset($task->project)) {
-                return collect($task->project->id);
-            }
-
-            return null;
-        });
-
-        $user_time_interval_project_id = collect($user->timeIntervals)->flatMap(static function ($interval) {
-            if (isset($interval->task->project)) {
-                return collect($interval->task->project->id);
-            }
-
-            return null;
-        });
+        $user_tasks_project_id = Task::where('user_id', $user->id)->pluck('project_id');
+        $user_time_interval_project_id = TimeInterval::join('tasks', 'time_intervals.task_id', '=', 'tasks.id')
+            ->where('time_intervals.user_id', $user->id)->pluck('tasks.project_id');
 
         $project_ids = collect([$project_ids, $user_tasks_project_id, $user_time_interval_project_id])->collapse();
 
