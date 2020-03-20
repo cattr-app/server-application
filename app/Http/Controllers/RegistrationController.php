@@ -143,7 +143,7 @@ class RegistrationController extends Controller
         if ($countEmails === count($users)) {
             return response()->json([
                 'success' => false,
-                'error' => 'users_exist',
+                'error' => 'Users with this emails is already exists',
             ], 400);
         }
 
@@ -155,7 +155,7 @@ class RegistrationController extends Controller
         if ($usersEmails) {
             return response()->json([
                 'success' => false,
-                'error' => ["these_emails", $usersEmails, "already_exists"],
+                'error' => "These users: {$usersEmails} is already exists"
             ], 400);
         }
 
@@ -171,7 +171,7 @@ class RegistrationController extends Controller
         if (isset($registrationsEmails)) {
             return response()->json([
                 'success' => false,
-                'error' => [$registrationsEmails, "already_sent"],
+                'error' => "These emails: {$registrationsEmails} to these addresses is already sent.",
             ], 400);
         }
 
