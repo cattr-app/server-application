@@ -215,7 +215,7 @@ class SynchronizeTasks extends Command
         $tasksInfo = $client->issue->all([
             'limit' => 1,
             'assigned_to_id' => $currentRedmineUserId,
-            'status_id' => '*'
+            'status_id' => 'open'
         ]);
 
         $limit = 100;
@@ -223,13 +223,13 @@ class SynchronizeTasks extends Command
         $chunkNums = (int)ceil($totalTasks / $limit);
 
         $synchronizedTasks = [];
-        for ($chunkNum = 0; $chunkNum <= $chunkNums; $chunkNum++) {
+        for ($chunkNum = 0; $chunkNum < $chunkNums; $chunkNum++) {
             //get tasks assigned to current user
             $tasksData = $client->issue->all([
                 'offset' => $limit * $chunkNum,
                 'limit' => $limit,
                 'assigned_to_id' => $currentRedmineUserId,
-                'status_id' => '*'
+                'status_id' => 'open'
             ]);
 
             $tasks = $tasksData['issues'] ?? [];
@@ -375,7 +375,7 @@ class SynchronizeTasks extends Command
         $userLocalRedmineTasksIds = $this->userRepo->getUserRedmineTasks($userId);
         foreach ($userLocalRedmineTasksIds as $taskIds) {
             if (!in_array($taskIds->redmine_id, $redmineSynchronizedTasks)) {
-                $localTask = Task::findOrFail($taskIds->task_id);
+                $localTask = Task::find($taskIds->task_id) ?: false;
 
                 if ($localTask && $localTask->active == 1) {
                     $localTask->active = 0;
