@@ -27,7 +27,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single'],
+            'channels' => ['single', 'sentry'],
         ],
         'single' => [
             'driver' => 'single',
@@ -54,6 +54,9 @@ return [
         'errorlog' => [
             'driver' => 'errorlog',
             'level' => env('APP_LOG_LEVEL', 'error'),
+        ],
+        'sentry' => [
+            'driver' => 'sentry',
         ],
     ],
 ];
