@@ -61,7 +61,7 @@ live_deploy:
     - start=$(date +%s)
     - ssh $CI_USER@$CI_HOST 'cd /opt/cattr/cattr/backend && git pull && php artisan migrate'
     - now=$(date +%s)
-    - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "release" -t $((now-start))
+    - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "$CI_COMMIT_REF_NAME" -t $((now-start))
   after_script:
     - sentry-cli releases finalize "$CI_COMMIT_SHORT_SHA"
 
@@ -84,7 +84,7 @@ staging_deploy:
     - start=$(date +%s)
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull && cp -f .env.staging .env && cat .env.sentry >> .env && cp -f modules_statuses.staging.json modules_statuses.json && php artisan config:cache && php artisan migrate'
     - now=$(date +%s)
-    - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "release" -t $((now-start))
+    - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "$CI_COMMIT_REF_NAME" -t $((now-start))
   after_script:
     - sentry-cli releases finalize "$CI_COMMIT_SHORT_SHA"
 
