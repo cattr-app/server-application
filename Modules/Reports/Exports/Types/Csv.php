@@ -10,22 +10,16 @@ use Maatwebsite\Excel\Sheet;
 
 class Csv extends AbstractType implements FromCollection, WithHeadings
 {
-    /**
-     * @return Collection
-     */
-    public function collection()
+    public function collection(): Collection
     {
         return $this->collection;
     }
 
-    /**
-     * @return array
-     */
     public function headings(): array
     {
         $firstRow = $this->collection->first();
 
-        if ($firstRow instanceof Arrayable || \is_object($firstRow)) {
+        if ($firstRow instanceof Arrayable || is_object($firstRow)) {
             return array_keys(Sheet::mapArraybleRow($firstRow));
         }
 

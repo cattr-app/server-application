@@ -5,7 +5,6 @@ namespace App\Http\Controllers;
 use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\RecaptchaHelper;
 use App\Models\Token;
-use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,9 +12,6 @@ use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\Validator;
 
 
-/**
- * Class AuthController
-*/
 class AuthController extends BaseController
 {
     /**
@@ -34,8 +30,6 @@ class AuthController extends BaseController
 
     /**
      * Create a new AuthController instance.
-     *
-     * @param  RecaptchaHelper  $recaptcha
      */
     public function __construct(RecaptchaHelper $recaptcha)
     {
@@ -88,8 +82,6 @@ class AuthController extends BaseController
      * @apiUse         LimiterError
      */
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws AuthorizationException
      */
     public function login(Request $request): JsonResponse
@@ -125,7 +117,7 @@ class AuthController extends BaseController
 
         $this->recaptcha->clearCaptchaAmounts();
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'access_token' => $token->token,
             'token_type' => 'bearer',
@@ -157,16 +149,13 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
+
     public function logout(Request $request): JsonResponse
     {
         $request->user()->invalidateToken($request->bearerToken());
         auth()->logout();
 
-        return response()->json(['success' => true, 'message' => 'Successfully logged out']);
+        return new JsonResponse(['success' => true, 'message' => 'Successfully logged out']);
     }
 
     /**
@@ -192,16 +181,13 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
+
     public function logoutFromAll(Request $request): JsonResponse
     {
         $request->user()->invalidateAllTokens();
         auth()->logout();
 
-        return response()->json(['success' => true, 'message' => 'Successfully logged out from all sessions']);
+        return new JsonResponse(['success' => true, 'message' => 'Successfully logged out from all sessions']);
     }
 
     /**
@@ -252,13 +238,10 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
+
     public function me(Request $request): JsonResponse
     {
-        return response()->json(['success' => true, 'user' => $request->user()]);
+        return new JsonResponse(['success' => true, 'user' => $request->user()]);
     }
 
     /**
@@ -279,20 +262,16 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
+
     public function refresh(Request $request): JsonResponse
     {
-        /** @var User $user $user */
         $user = $request->user();
 
         $user->invalidateToken($request->bearerToken());
         $token = auth()->refresh();
         $token = $user->addToken($token);
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'access_token' => $token->token,
             'token_type' => 'bearer',

@@ -4,9 +4,12 @@ namespace Modules\GitlabIntegration\Entities;
 
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class TaskRelation extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'gitlab_tasks_relations';
 
     protected $fillable = [
@@ -15,12 +18,9 @@ class TaskRelation extends Model
         'gitlab_issue_iid',
     ];
 
-    public $timestamps = false;
-
     protected $primaryKey = 'gitlab_id';
 
-    // Connection with the App\Models\Task
-    public function task()
+    public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class, 'task_id', 'id');
     }

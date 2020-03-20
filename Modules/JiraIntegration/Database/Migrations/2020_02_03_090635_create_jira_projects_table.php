@@ -1,19 +1,17 @@
 <?php
 
-use Illuminate\Support\Facades\Schema;
-use Illuminate\Database\Schema\Blueprint;
 use Illuminate\Database\Migrations\Migration;
+use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\Schema;
 
 class CreateJiraProjectsTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('jira_projects_relation', function (Blueprint $table) {
+        Schema::create('jira_projects_relation', static function (Blueprint $table) {
             $table->unsignedInteger('id')->primary();
             $table->unsignedInteger('project_id');
         });
@@ -21,10 +19,8 @@ class CreateJiraProjectsTable extends Migration
 
     /**
      * Reverse the migrations.
-     *
-     * @return void
      */
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('jira_projects_relation');
     }

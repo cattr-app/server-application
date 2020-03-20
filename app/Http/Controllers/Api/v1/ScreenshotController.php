@@ -3,11 +3,9 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\EventFilter\Facades\Filter;
-use App\Helpers\QueryHelper;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
-use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
@@ -20,52 +18,114 @@ use Intervention\Image\Facades\Image;
 
 /**
  * Class ScreenshotController
-*/
+ */
 class ScreenshotController extends ItemController
 {
-    // TODO: find out why it is done this way
-
-    /**
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return Screenshot::class;
-    }
-
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'time_interval_id' => 'exists:time_intervals,id|required',
-            'path' => 'required',
-        ];
-    }
-
-    /**
-     * @return string
-     */
     public function getEventUniqueNamePart(): string
     {
         return 'screenshot';
     }
 
     /**
-     * @return array
+     * @throws Exception
      */
-    public static function getControllerRules(): array
+    public function index(Request $request): JsonResponse
+    {
+        if ($request->get('user_id')) {
+            $request->offsetSet('timeInterval.user_id', $request->get('user_id'));
+            $request->offsetUnset('user_id');
+        }
+
+        if ($request->get('project_id')) {
+            $request->offsetSet('timeInterval.task.project_id', $request->get('project_id'));
+            $request->offsetUnset('project_id');
+        }
+
+        return parent::index($request);
+    }
+
+    public function create(Request $request): JsonResponse
+    {
+        // Request must contain screenshot
+        if (!isset($request->screenshot)) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'screenshot is required',
+                ]),
+                400
+            );
+        }
+
+        if (!Storage::exists('uploads/screenshots/thumbs')) {
+            Storage::makeDirectory('uploads/screenshots/thumbs');
+        }
+
+        $screenStorePath = $request->screenshot->store('uploads/screenshots');
+        $absoluteStorePath = Storage::disk()->path($screenStorePath);
+        $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
+
+        $screenshot = Image::make($path);
+
+        $thumbnail = $screenshot->resize(280, null, static function ($constraint) {
+            $constraint->aspectRatio();
+        });
+
+        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
+        Storage::put($thumbnailPath, (string)$thumbnail->encode());
+
+        // Get interval id
+        $timeIntervalID = ((int)$request->get('time_interval_id')) ?: null;
+
+        // Pack everything we need
+        $screenshotPack = [
+            'time_interval_id' => $timeIntervalID,
+            'path' => $path,
+            'thumbnail_path' => str_replace('.jpg', '-thumb.jpg', $thumbnailPath),
+        ];
+
+        $validator = Validator::make(
+            $screenshotPack,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.create'),
+                $this->getValidationRules()
+            )
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        $createdScreenshot = Filter::process(
+            $this->getEventUniqueName('item.create'),
+            Screenshot::create($screenshotPack)
+        );
+
+        // Respond to client
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success' => true,
+                'screenshot' => $createdScreenshot,
+            ]),
+            200
+        );
+    }
+
+    public function getValidationRules(): array
     {
         return [
-            'index' => 'screenshots.list',
-            'count' => 'screenshots.list',
-            'dashboard' => 'screenshots.dashboard',
-            'create' => 'screenshots.create',
-            'bulkCreate' => 'screenshots.bulk-create',
-            'edit' => 'screenshots.edit',
-            'show' => 'screenshots.show',
-            'destroy' => 'screenshots.remove',
+            'time_interval_id' => 'exists:time_intervals,id|required',
+            'path' => 'required',
         ];
     }
 
@@ -128,24 +188,45 @@ class ScreenshotController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+
     /**
-     * @param Request $request
-     * @return JsonResponse
+     * Remove the specified resource from storage
+     *
      * @throws Exception
      */
-    public function index(Request $request): JsonResponse
+    public function destroy(Request $request): JsonResponse
     {
-        if ($request->get('user_id')) {
-            $request->offsetSet('timeInterval.user_id', $request->get('user_id'));
-            $request->offsetUnset('user_id');
+        if (!isset($request->id)) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'screenshot id is required',
+                ]),
+                400
+            );
         }
 
-        if ($request->get('project_id')) {
-            $request->offsetSet('timeInterval.task.project_id', $request->get('project_id'));
-            $request->offsetUnset('project_id');
+        // Get screenshot model
+        $screenshotModel = $this->getItemClass();
+
+        // Find exact screenshot to be deleted
+        $screenshotToDel = $screenshotModel::where('id', $request->get('id'))->firstOrFail();
+
+        // Get associated time interval
+        $thisScreenshotTimeInterval = TimeInterval::where('id', $screenshotToDel->time_interval_id)->firstOrFail();
+
+        // If this screenshot is last
+        if ((int)$thisScreenshotTimeInterval->screenshots_count <= 1) {
+            // Delete interval with it
+            $thisScreenshotTimeInterval->delete();
+        } else {
+            // Or screenshot only otherwise
+            $screenshotToDel->delete();
         }
 
-        return parent::index($request);
+        return new JsonResponse(['success' => true, 'message' => 'Screenshot successfully deleted']);
     }
 
     /**
@@ -192,78 +273,10 @@ class ScreenshotController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function create(Request $request): JsonResponse
+
+    public function getItemClass(): string
     {
-        // Request must contain screenshot
-        if (!isset($request->screenshot)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'screenshot is required',
-                ]),
-                400);
-        }
-
-        if( !Storage::exists('uploads/screenshots/thumbs') ){
-            Storage::makeDirectory('uploads/screenshots/thumbs');
-        }
-
-        $screenStorePath = $request->screenshot->store('uploads/screenshots');
-        $absoluteStorePath = Storage::disk()->path($screenStorePath);
-        $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
-
-        $screenshot = Image::make($path);
-
-        $thumbnail = $screenshot->resize(280, null, static function ($constraint) {
-            $constraint->aspectRatio();
-        });
-
-        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
-        Storage::put($thumbnailPath, (string)$thumbnail->encode());
-
-        // Get interval id
-        $timeIntervalID = ((int)$request->get('time_interval_id')) ?: null;
-
-        // Pack everything we need
-        $screenshotPack = [
-            'time_interval_id' => $timeIntervalID,
-            'path' => $path,
-            'thumbnail_path' => str_replace('.jpg', '-thumb.jpg', $thumbnailPath),
-        ];
-
-        $validator = Validator::make(
-            $screenshotPack,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.create'), $this->getValidationRules()
-            )
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400);
-        }
-
-        $createdScreenshot = Filter::process($this->getEventUniqueName('item.create'),
-            Screenshot::create($screenshotPack));
-
-        // Respond to client
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
-                'screenshot' => $createdScreenshot,
-            ]), 200);
+        return Screenshot::class;
     }
 
     /**
@@ -301,48 +314,6 @@ class ScreenshotController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    /**
-     * Remove the specified resource from storage
-     *
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function destroy(Request $request): JsonResponse
-    {
-        if (!isset($request->id)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'screenshot id is required',
-                ]),
-                400);
-        }
-
-        // Get screenshot model
-        $screenshotModel = $this->getItemClass();
-
-        // Find exact screenshot to be deleted
-        $screenshotToDel = $screenshotModel::where('id', $request->get('id'))->firstOrFail();
-
-        // Get associated time interval
-        $thisScreenshotTimeInterval = TimeInterval::where('id', $screenshotToDel->time_interval_id)->firstOrFail();
-
-        // If this screenshot is last
-        if ((int) $thisScreenshotTimeInterval->screenshots_count <= 1) {
-            // Delete interval with it
-            $thisScreenshotTimeInterval->delete();
-
-        } else {
-            // Or screenshot only otherwise
-            $screenshotToDel->delete();
-
-        }
-
-        return response()->json(['success' => true, 'message' => 'Screenshot successfully deleted']);
-    }
 
     /**
      * @apiDeprecated   since 1.0.0
@@ -471,93 +442,10 @@ class ScreenshotController extends ItemController
      * @apiName         Dashboard
      * @apiGroup        Screenshot
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     * @deprecated
-     * @codeCoverageIgnore
-     */
-    public function dashboard(Request $request): JsonResponse
-    {
-        $timezone = Auth::user()->timezone;
-        if (!$timezone) {
-            $timezone = 'UTC';
-        }
-
-        $filters = $request->all();
-        unset($filters['with']);
-        is_int($request->get('user_id')) ? $filters['user_id'] = $request->get('user_id') : false;
-        $compareDate = Carbon::today($timezone)->setTimezone('UTC')->toDateTimeString();
-        $filters['start_at'] = ['>=', [$compareDate]];
-
-        $query = TimeInterval::with(['screenshots', 'task', 'task.project']);
-        $helper = new QueryHelper();
-        $helper->apply($query, $filters ?: [], new TimeInterval());
-        $baseQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.filter'),
-            $query
-        );
-
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery->orderBy('id', 'desc')
-        );
-
-        $intervals = $itemsQuery->get();
-
-        if (collect($intervals)->isEmpty()) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.success.item.list'),
-                []
-            ));
-        }
-
-        $items = [];
-
-        foreach ($intervals as $interval) {
-            $hasInterval = false;
-
-            $start_at = Carbon::parse($interval->start_at);
-            $minutes = $start_at->minute;
-            $minutes = $minutes > 9 ? (string) $minutes : '0'.$minutes;
-            $hour = $start_at->hour.':00:00';
-
-            foreach ($items as $itemkey => $item) {
-                if ($item['interval'] == $hour) {
-                    $hasInterval = true;
-                    break;
-                }
-            }
-
-            if ($hasInterval && isset($itemkey)) {
-                $items[$itemkey]['intervals'][(int) $minutes[0]][] = $interval->toArray();
-            } else {
-                $arr = [
-                    'interval' => $hour,
-                    'intervals' => [
-                        0 => [],
-                        1 => [],
-                        2 => [],
-                        3 => [],
-                        4 => [],
-                        5 => [],
-                    ],
-                ];
-
-                $arr['intervals'][(int) $minutes[0]][] = $interval->toArray();
-                $items[] = $arr;
-            }
-        }
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.list'), $items)
-        );
-    }
 
     /**
-     * @param  bool  $withRelations
-     *
+     * @param bool $withRelations
+     * @param bool $withSoftDeleted
      * @return Builder
      */
     protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
@@ -580,40 +468,60 @@ class ScreenshotController extends ItemController
                 return $query;
             }
 
-            $query->where(function (Builder $query) use ($user, $object, $action) {
+            $query->where(static function (Builder $query) use ($user, $object, $action) {
                 $user_id = $user->id;
 
                 // Filter by project roles of the user
-                $query->whereHas('timeInterval.task.project.usersRelation',
-                    function (Builder $query) use ($user_id, $object, $action) {
-                        $query->where('user_id', $user_id)->whereHas('role',
-                            function (Builder $query) use ($object, $action) {
-                                $query->whereHas('rules', function (Builder $query) use ($object, $action) {
+                $query->whereHas(
+                    'timeInterval.task.project.usersRelation',
+                    static function (Builder $query) use ($user_id, $object, $action) {
+                        $query->where('user_id', $user_id)->whereHas(
+                            'role',
+                            static function (Builder $query) use ($object, $action) {
+                                $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
                                     $query->where([
                                         'object' => $object,
                                         'action' => $action,
                                         'allow' => true,
                                     ])->select('id');
                                 })->select('id');
-                            })->select('id');
-                    });
+                            }
+                        )->select('id');
+                    }
+                );
 
                 // For read and delete access include user own intervals
-                $query->when($action !== 'edit', function (Builder $query) use ($user_id) {
-                    $query->orWhereHas('timeInterval', function (Builder $query) use ($user_id) {
+                $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
+                    $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
                         $query->where('user_id', $user_id)->select('user_id');
                     });
                 });
 
-                $query->when($action === 'edit' && (bool) $user->manual_time,
-                    function (Builder $query) use ($user_id) {
-                        $query->orWhereHas('timeInterval', function (Builder $query) use ($user_id) {
+                $query->when(
+                    $action === 'edit' && (bool)$user->manual_time,
+                    static function (Builder $query) use ($user_id) {
+                        $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
                             $query->where('user_id', $user_id)->select('user_id');
                         });
-                    });
+                    }
+                );
             });
         }
 
         return $query;
+    }
+
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'screenshots.list',
+            'count' => 'screenshots.list',
+            'dashboard' => 'screenshots.dashboard',
+            'create' => 'screenshots.create',
+            'bulkCreate' => 'screenshots.bulk-create',
+            'edit' => 'screenshots.edit',
+            'show' => 'screenshots.show',
+            'destroy' => 'screenshots.remove',
+        ];
     }
 }

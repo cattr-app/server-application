@@ -8,10 +8,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 class UserRelation extends Model
 {
-    protected $table = 'trello_users_relation';
-
     public $timestamps = false;
-
+    protected $table = 'trello_users_relation';
     protected $keyType = 'string';
 
     protected $fillable = [
@@ -19,10 +17,7 @@ class UserRelation extends Model
         'user_id',
     ];
 
-    /**
-     * @return BelongsTo
-     */
-    public function user()
+    public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id', 'id');
     }

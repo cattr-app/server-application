@@ -4,24 +4,13 @@ namespace Modules\RedmineIntegration\Helpers;
 
 use App\Models\Project;
 use App\Models\Property;
+use Exception;
 
 class ProjectHelper
 {
-    /**
-     * @var Project
-     */
-    protected $project;
-    /**
-     * @var Property
-     */
-    protected $property;
+    protected Project $project;
+    protected Property $property;
 
-    /**
-     * ProjectHelper constructor.
-     *
-     * @param  Project   $project
-     * @param  Property  $property
-     */
     public function __construct(
         Project $project,
         Property $property
@@ -31,10 +20,7 @@ class ProjectHelper
     }
 
     /**
-     * @param  int  $projectRedmineId
-     *
-     * @return Project
-     * @throws \Exception
+     * @throws Exception
      */
     public function getProjectByRedmineId(int $projectRedmineId): Project
     {
@@ -44,7 +30,7 @@ class ProjectHelper
             ->first();
 
         if (!$projectEav) {
-            throw new \Exception("There is no project task with id $projectRedmineId");
+            throw new Exception("There is no project task with id $projectRedmineId");
         }
 
         $internalProjectId = $projectEav->entity_id;

@@ -2,14 +2,19 @@
 
 namespace Modules\JiraIntegration\Services;
 
-use App\Models\{Project, Task, User};
+use App\Models\Project;
+use App\Models\Task;
+use App\Models\User;
 use Illuminate\Support\Facades\Log;
 use JiraRestApi\Configuration\ArrayConfiguration;
-use JiraRestApi\Issue\{Issue, IssueService};
+use JiraRestApi\Issue\Issue;
+use JiraRestApi\Issue\IssueService;
 use JiraRestApi\JiraException;
 use JiraRestApi\Project\Project as JiraProject;
 use JiraRestApi\Project\ProjectService;
-use Modules\JiraIntegration\Entities\{ProjectRelation, Settings, TaskRelation};
+use Modules\JiraIntegration\Entities\ProjectRelation;
+use Modules\JiraIntegration\Entities\Settings;
+use Modules\JiraIntegration\Entities\TaskRelation;
 
 class SyncTasks
 {
@@ -21,7 +26,7 @@ class SyncTasks
         $this->settings = $settings;
     }
 
-    public function synchronizeAll()
+    public function synchronizeAll(): void
     {
         $host = $this->settings->getHost();
         if (empty($host) || !$this->settings->getEnabled()) {
@@ -34,7 +39,7 @@ class SyncTasks
         }
     }
 
-    public function synchronizeAssignedIssues(User $user)
+    public function synchronizeAssignedIssues(User $user): void
     {
         $host = $this->settings->getHost();
         $token = $this->settings->getUserApiToken($user->id);
@@ -43,8 +48,8 @@ class SyncTasks
         }
 
         $config = new ArrayConfiguration([
-            'jiraHost'     => $host,
-            'jiraUser'     => $user->email,
+            'jiraHost' => $host,
+            'jiraUser' => $user->email,
             'jiraPassword' => $token,
         ]);
 
@@ -56,7 +61,7 @@ class SyncTasks
             foreach ($issues as $issue) {
                 $this->synchronizeIssue($projectService, $user, $issue);
             }
-        } catch(JiraException $e) {
+        } catch (JiraException $e) {
             Log::error($e);
         }
     }
@@ -84,7 +89,7 @@ class SyncTasks
         return $issues;
     }
 
-    protected function synchronizeIssue(ProjectService $projectService, User $user, Issue $issue)
+    protected function synchronizeIssue(ProjectService $projectService, User $user, Issue $issue): void
     {
         $jiraProjectID = (int)$issue->fields->getProjectId();
         $jiraProject = $projectService->get($jiraProjectID);
@@ -107,7 +112,7 @@ class SyncTasks
             $project = Project::create($projectData);
 
             $projectRelation = ProjectRelation::create([
-                'id'         => $jiraProjectID,
+                'id' => $jiraProjectID,
                 'project_id' => $project->id,
             ]);
         }
@@ -133,7 +138,7 @@ class SyncTasks
             $task = Task::create($taskData);
 
             TaskRelation::create([
-                'id'      => (int)$issue->id,
+                'id' => (int)$issue->id,
                 'task_id' => $task->id,
             ]);
         }
@@ -142,25 +147,25 @@ class SyncTasks
     protected function toInternalProjectData(JiraProject $project): array
     {
         return [
-            'company_id'  => 0,
-            'name'        => $project->name,
+            'company_id' => 0,
+            'name' => $project->name,
             'description' => $project->description,
-            'important'   => false,
+            'important' => false,
         ];
     }
 
     protected function toInternalTaskData(Issue $issue): array
     {
         return [
-            'task_name'   => $issue->fields->summary,
+            'task_name' => $issue->fields->summary,
             'description' => $issue->fields->description,
-            'active'      => !isset($issue->fields->resolution),
+            'active' => !isset($issue->fields->resolution),
             'assigned_by' => 0,
-            'url'         => $issue->self,
-            'created_at'  => $issue->fields->created,
-            'updated_at'  => $issue->fields->updated,
+            'url' => $issue->self,
+            'created_at' => $issue->fields->created,
+            'updated_at' => $issue->fields->updated,
             'priority_id' => 2,
-            'important'   => false,
+            'important' => false,
         ];
     }
 }

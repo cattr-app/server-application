@@ -3,22 +3,18 @@
 namespace Modules\EmailReports\Entities;
 
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Storage;
 use Modules\EmailReports\Mail\MailWithFile;
 use Modules\EmailReports\Models\EmailReports;
 
-/**
- * Class SavedReportsRepository
- * @package Modules\EmailReports\Entities
- */
 class ReportsSender
 {
-
     public const TEMP_FILE_DIR = 'EmailReports';
 
-    public function send()
+    public function send(): void
     {
         $map = [
             EmailReports::DAILY,
@@ -41,9 +37,9 @@ class ReportsSender
     /**
      * @param $emailReport EmailReports
      * @param $frequency
-     * @throws \Exception
+     * @throws Exception
      */
-    public function sendEmail(EmailReports $emailReport, $frequency)
+    public function sendEmail(EmailReports $emailReport, $frequency): void
     {
         $dates = EmailReports::getDatesToWorkWith($frequency);
 
@@ -80,11 +76,9 @@ class ReportsSender
             Log::error('Unfortunately we wasn\'t able to send messages for this recipients: ' . var_dump(Mail::failures()));
         }
 
-        if (Storage::exists($filePath)) {
-            if(!Storage::delete($filePath)) {
-                Log::error('File ' . $filePath . ' was not deleted!');
-                return;
-            }
+        if (Storage::exists($filePath) && !Storage::delete($filePath)) {
+            Log::error('File ' . $filePath . ' was not deleted!');
+            return;
         }
     }
 

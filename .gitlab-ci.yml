@@ -21,6 +21,7 @@ integration_testing:
   script:
     - composer install
     - cp .env.testing.example .env.testing
+    - cp modules_statuses.example.json modules_statuses.json
     - php artisan migrate --env=testing
     - php artisan db:seed --class=RoleSeeder --env=testing
     - vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/

@@ -14,6 +14,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class TaskRelation extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'jira_tasks_relation';
 
     protected $fillable = [
@@ -25,12 +27,7 @@ class TaskRelation extends Model
         'task_id' => 'integer',
     ];
 
-    public $timestamps = false;
-
-    /**
-     * @return BelongsTo
-     */
-    public function task()
+    public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class, 'task_id', 'id');
     }

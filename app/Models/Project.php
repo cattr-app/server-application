@@ -45,8 +45,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 
 /**
- * Class Project
- *
  * @property int $id
  * @property int $company_id
  * @property string $name
@@ -108,52 +106,6 @@ class Project extends Model
     ];
 
     /**
-     * Override parent boot and Call deleting event
-     *
-     * @return void
-     */
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::deleting(static function (Project $project) {
-            $project->tasks()->delete();
-        });
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'projects_users', 'project_id', 'user_id');
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function usersRelation(): HasMany
-    {
-        return $this->hasMany(ProjectsUsers::class, 'project_id', 'id');
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class, 'projects_roles', 'project_id', 'role_id');
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'project_id');
-    }
-
-    /**
      * @param User $user
      *
      * @return array
@@ -173,7 +125,7 @@ class Project extends Model
             return static::all(['id'])->pluck('id')->toArray();
         }
 
-        $user_tasks_project_id = collect($user->tasks)->flatMap(function ($task) {
+        $user_tasks_project_id = collect($user->tasks)->flatMap(static function ($task) {
             if (isset($task->project)) {
                 return collect($task->project->id);
             }
@@ -181,7 +133,7 @@ class Project extends Model
             return null;
         });
 
-        $user_time_interval_project_id = collect($user->timeIntervals)->flatMap(function ($interval) {
+        $user_time_interval_project_id = collect($user->timeIntervals)->flatMap(static function ($interval) {
             if (isset($interval->task->project)) {
                 return collect($interval->task->project->id);
             }
@@ -192,5 +144,37 @@ class Project extends Model
         $project_ids = collect([$project_ids, $user_tasks_project_id, $user_time_interval_project_id])->collapse();
 
         return $project_ids->toArray();
+    }
+
+    /**
+     * Override parent boot and Call deleting event
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::deleting(static function (Project $project) {
+            $project->tasks()->delete();
+        });
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'project_id');
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'projects_users', 'project_id', 'user_id');
+    }
+
+    public function usersRelation(): HasMany
+    {
+        return $this->hasMany(ProjectsUsers::class, 'project_id', 'id');
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'projects_roles', 'project_id', 'role_id');
     }
 }

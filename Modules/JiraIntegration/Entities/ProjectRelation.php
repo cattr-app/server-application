@@ -4,6 +4,7 @@ namespace Modules\JiraIntegration\Entities;
 
 use App\Models\Project;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
  * @property int $id
@@ -13,6 +14,8 @@ use Illuminate\Database\Eloquent\Model;
  */
 class ProjectRelation extends Model
 {
+    public $timestamps = false;
+
     protected $table = 'jira_projects_relation';
 
     protected $fillable = [
@@ -24,12 +27,8 @@ class ProjectRelation extends Model
         'project_id' => 'integer',
     ];
 
-    public $timestamps = false;
 
-    /**
-     * @return BelongsTo
-     */
-    public function project()
+    public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id', 'id');
     }

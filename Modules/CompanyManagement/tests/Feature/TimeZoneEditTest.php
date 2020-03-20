@@ -13,12 +13,15 @@ class TimeZoneEditTest extends TestCase
 
     private User $admin;
 
-    private function assertTimeZoneInDb(string $timezone): self
+    public function test_create(): void
     {
-        return $this->assertDatabaseHas('properties', [
-            'name' => 'timezone',
-            'value' => $timezone
-        ]);
+        $requestData = ['timezone' => 'UTC'];
+        $this->assertTimeZoneNotInDb($requestData['timezone']);
+
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
+
+        $response->assertSuccess();
+        $this->assertTimeZoneInDb($requestData['timezone']);
     }
 
     private function assertTimeZoneNotInDb(string $timezone): self
@@ -29,32 +32,12 @@ class TimeZoneEditTest extends TestCase
         ]);
     }
 
-    private function createTimeZone(string $timezone): void
+    private function assertTimeZoneInDb(string $timezone): self
     {
-        Property::create([
-            'entity_type' => Property::COMPANY_CODE,
-            'entity_id' => 0,
+        return $this->assertDatabaseHas('properties', [
             'name' => 'timezone',
             'value' => $timezone
         ]);
-    }
-
-    protected function setUp(): void
-    {
-        parent::setUp();
-
-        $this->admin = UserFactory::asAdmin()->withTokens()->create();
-    }
-
-    public function test_create(): void
-    {
-        $requestData = ['timezone' => 'UTC'];
-        $this->assertTimeZoneNotInDb($requestData['timezone']);
-
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
-
-        $response->assertSuccess();
-        $this->assertTimeZoneInDb($requestData['timezone']);
     }
 
     public function test_update(): void
@@ -67,6 +50,16 @@ class TimeZoneEditTest extends TestCase
 
         $response->assertSuccess();
         $this->assertTimeZoneInDb($requestData['timezone']);
+    }
+
+    private function createTimeZone(string $timezone): void
+    {
+        Property::create([
+            'entity_type' => Property::COMPANY_CODE,
+            'entity_id' => 0,
+            'name' => 'timezone',
+            'value' => $timezone
+        ]);
     }
 
     public function test_invalid(): void
@@ -83,5 +76,12 @@ class TimeZoneEditTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI);
 
         $response->assertValidationError();
+    }
+
+    protected function setUp(): void
+    {
+        parent::setUp();
+
+        $this->admin = UserFactory::asAdmin()->withTokens()->create();
     }
 }

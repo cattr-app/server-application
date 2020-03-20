@@ -220,10 +220,13 @@ class AppInstallCommand extends Command
     protected function settingUpEnvMigrateAndSeed(): void
     {
         $this->updateEnvData('APP_URL',
-            $this->ask('API endpoint FULL URL'));
+            $this->ask('API endpoint FULL URL (https://api.example.com)'));
 
+        $frontendUrl = $this->ask('Frontend application URL (https://example.com)');
         $this->updateEnvData('ALLOWED_ORIGINS',
-            '"' . $this->ask('Please provide trusted frontend domains (e.g cattr.mycompany.com). If you have multiple frontend domains, you can separate them with commas') . '"');
+            '"' . $frontendUrl . '"');
+        $this->updateEnvData('FRONTEND_APP_URL',
+            '"' . $frontendUrl . '"');
 
         $this->info('Setting up JWT secret key');
         $this->call('jwt:secret');

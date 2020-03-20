@@ -5,6 +5,7 @@ namespace Modules\TrelloIntegration\Services;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use Exception;
 use Illuminate\Support\Facades\Log;
 use Modules\TrelloIntegration\Entities\ProjectRelation;
 use Modules\TrelloIntegration\Entities\Settings;
@@ -12,27 +13,16 @@ use Modules\TrelloIntegration\Entities\TaskRelation;
 use Modules\TrelloIntegration\Entities\UserRelation;
 use Trello\Client;
 
-/**
- * Class SyncTasks
- * @package Modules\TrelloIntegration\Services
- */
 class SyncTasks
 {
-    /**
-     * @var Settings
-     */
     protected Settings $settings;
 
-    /**
-     * SyncTasks constructor.
-     * @param Settings $settings
-     */
     public function __construct(Settings $settings)
     {
         $this->settings = $settings;
     }
 
-    public function synchronizeAll()
+    public function synchronizeAll(): void
     {
         // If the company integration isn't set, do the return
         if (!$this->settings->getEnabled()) {
@@ -44,11 +34,11 @@ class SyncTasks
         foreach ($users as $user) {
             try {
                 $this->synchronizeAssignedIssues($user);
-            } catch (\Exception $e) {
+            } catch (Exception $e) {
                 echo "Something went wrong while Trello Tasks Synchronization\n";
                 echo "Skip user {$user->full_name} while sync \n";
                 echo "Error trace {$e->getTraceAsString()} \n\n";
-                Log::error("Something went wrong while Trello Tasks Synchronization");
+                Log::error('Something went wrong while Trello Tasks Synchronization');
                 Log::error("Skip user {$user->full_name} while sync");
                 Log::error("Error trace {$e->getTraceAsString()}");
             }
@@ -56,13 +46,12 @@ class SyncTasks
     }
 
     /**
-     * @param User $user
-     * @throws \Exception
+     * @throws Exception
      */
-    public function synchronizeAssignedIssues(User $user)
+    public function synchronizeAssignedIssues(User $user): void
     {
         // If the company integration for user's integration isn't set, do the return
-        $apiKey = $this->settings->getUserApiKey($user->id);;
+        $apiKey = $this->settings->getUserApiKey($user->id);
         $appToken = $this->settings->getAuthToken();
         $organizationName = $this->settings->getOrganizationName();
 
@@ -125,7 +114,7 @@ class SyncTasks
                 // If there no project - it was deleted from our app
                 if (!$project) {
                     $relation->delete();
-		            continue;
+                    continue;
                 }
 
                 $project->name = $projectMapping['name'];
@@ -139,14 +128,9 @@ class SyncTasks
     }
 
     /**
-     * @param Client $client
-     * @param string $boardId
-     * @param int $userId
-     * @param string $userTrelloId
-     * @param int $projectId
-     * @throws \Exception
+     * @throws Exception
      */
-    private function syncTasksByBoardId(Client $client, string $boardId, int $userId, string $userTrelloId, int $projectId)
+    private function syncTasksByBoardId(Client $client, string $boardId, int $userId, string $userTrelloId, int $projectId): void
     {
         $trelloTasks = $client->board()->cards()->all($boardId, [
             'closed'  => false,
@@ -160,7 +144,7 @@ class SyncTasks
 
         // Get only those tasks where user is a participant
         // Can`t rewrite as arrow function because of "use" outside scope variable
-        $trelloTasks = array_filter($trelloTasks, function ($task) use ($userTrelloId) {
+        $trelloTasks = array_filter($trelloTasks, static function ($task) use ($userTrelloId) {
             return in_array($userTrelloId, $task['idMembers']);
         });
 
@@ -194,7 +178,7 @@ class SyncTasks
                 // If there no project - it was deleted from our app
                 if (!$task) {
                     $relation->delete();
-		            continue;
+                    continue;
                 }
 
                 $task->task_name = $taskMapping['task_name'];

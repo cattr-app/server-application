@@ -13,14 +13,8 @@ use Modules\Reports\Exports\Types\Csv;
 use Modules\Reports\Exports\Types\Pdf;
 use Modules\Reports\Exports\Types\Xlsx;
 
-/**
- * Class EmailReports
- * @package Modules\EmailReports\Models
- */
 class EmailReports extends Model
 {
-    public const SPACE = " ";
-
     public const DAILY = 0;
     public const WEEKLY = 1;
     public const MONTHLY = 2;
@@ -32,14 +26,14 @@ class EmailReports extends Model
     ];
 
     // TODO If we will have any new export type of statistic doc - we need to add it here and create a class in StatisticExport
-    const AVAILABLE_STATISTIC_TYPES = [
+    public const AVAILABLE_STATISTIC_TYPES = [
         [
             'class' => Invoices::class,
-            'name'  => 'Invoice Report'
+            'name' => 'Invoice Report'
         ],
         [
             'class' => ProjectReport::class,
-            'name'  => 'Project Report'
+            'name' => 'Project Report'
         ],
     ];
 
@@ -107,7 +101,7 @@ class EmailReports extends Model
      */
     public static function getTypeExporter(EmailReports $emailReport, Exportable $exporter)
     {
-        switch (trim(strtolower($emailReport->document_type))) {
+        switch (strtolower(trim($emailReport->document_type))) {
             case 'csv':
                 $writerType = Excel::CSV;
                 $fileNameType = 'csv';
@@ -143,17 +137,11 @@ class EmailReports extends Model
         return app(self::AVAILABLE_STATISTIC_TYPES[$emailReport->statistic_type]['class']);
     }
 
-    /**
-     * @return HasMany
-     */
     public function projects(): HasMany
     {
         return $this->hasMany(EmailReportsProjects::class, 'email_projects_id', 'id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function emails(): HasMany
     {
         return $this->hasMany(EmailReportsEmails::class, 'email_report_id', 'id');

@@ -8,18 +8,16 @@ class CreateTrelloProjectTable extends Migration
 {
     /**
      * Run the migrations.
-     *
-     * @return void
      */
-    public function up()
+    public function up(): void
     {
-        Schema::create('trello_projects_relation', function (Blueprint $table) {
+        Schema::create('trello_projects_relation', static function (Blueprint $table) {
             $table->string('id', 255)->primary();
             $table->unsignedInteger('project_id');
         });
     }
 
-    public function down()
+    public function down(): void
     {
         Schema::dropIfExists('trello_projects_relation');
     }

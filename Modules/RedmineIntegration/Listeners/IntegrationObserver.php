@@ -16,48 +16,22 @@ use Modules\RedmineIntegration\Models\ClientFactory;
 use Modules\RedmineIntegration\Models\Priority;
 
 /**
- * Class IntegrationObserver
- *
  * @property ProjectRepository $projectRepo
- * @property TaskRepository    $taskRepo
-*/
+ * @property TaskRepository $taskRepo
+ */
 class IntegrationObserver
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
-
-    /**
-     * @var ProjectRepository
-     */
-    public $projectRepo;
-
-    /**
-     * @var TaskRepository
-     */
-    public $taskRepo;
-
-    /**
-     * @var UserRepository
-     */
-    public $userRepo;
-
-    /**
-     * @var ClientFactory
-     */
-    public $clientFactory;
-
-    /**
-     * @var Priority
-     */
-    public $priority;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
+    public ProjectRepository $projectRepo;
+    public TaskRepository $taskRepo;
+    public UserRepository $userRepo;
+    public ClientFactory $clientFactory;
+    public Priority $priority;
 
     /**
      * Create the event listener.
-     *
-     * @param  ProjectRepository  $projectRepo
-     * @param  TaskRepository     $taskRepo
-     * @param  UserRepository     $userRepo
-     * @param  ClientFactory      $clientFactory
-     * @param  Priority           $priority
      */
     public function __construct(
         ProjectRepository $projectRepo,
@@ -102,7 +76,6 @@ class IntegrationObserver
      */
     public function userAfterEdition($json)
     {
-
         $user = User::where('email', $json['res']->email)->first();
 
         return $json;
@@ -140,8 +113,7 @@ class IntegrationObserver
      * Observe task list
      *
      * @param Collection|Paginator $tasks
-     *
-     * @return array
+     * @return Paginator|Collection
      */
     public function taskList($tasks)
     {
@@ -151,13 +123,15 @@ class IntegrationObserver
             $items = $tasks;
         }
 
-        $taskIds = $items->map(function ($task) { return $task->id; })->toArray();
+        $taskIds = $items->map(static function ($task) {
+            return $task->id;
+        })->toArray();
         $redmineTaskIds = Property::where([
             'entity_type' => Property::TASK_CODE,
             'name' => 'REDMINE_ID',
         ])->whereIn('entity_id', $taskIds)->pluck('entity_id')->toArray();
 
-        $items->transform(function ($item) use ($redmineTaskIds) {
+        $items->transform(static function ($item) use ($redmineTaskIds) {
             if (in_array($item->id, $redmineTaskIds)) {
                 $item->integration = 'redmine';
             }
@@ -184,5 +158,4 @@ class IntegrationObserver
 
         return $rules;
     }
-
 }

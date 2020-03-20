@@ -29,7 +29,7 @@ class TimeSynchronizer
         $this->timeIntervalsHelper = $timeIntervalHelper;
     }
 
-    public function synchronize()
+    public function synchronize(): bool
     {
         $timeIntervals = $this->timeIntervalsHelper->getNotSyncedCollection();
 
@@ -37,7 +37,7 @@ class TimeSynchronizer
         foreach (User::all() as $user) {
             $this->api = GitlabApi::buildFromUser($user);
             if (!$this->api) {
-                Log::info("Can`t instantiate an API for user " . $user->full_name . "\n");
+                Log::info('Can`t instantiate an API for user ' . $user->full_name . "\n");
                 continue;
             }
 
@@ -48,19 +48,21 @@ class TimeSynchronizer
 
             $durations = $this->calculateDuration($groupedIntervals);
             $issueProjectRelations = $this->timeIntervalsHelper->getGitlabIssueProjectRelation(
-                Task::whereIn('id',
-                    $groupedIntervals->keys())->get()
+                Task::whereIn(
+                    'id',
+                    $groupedIntervals->keys()
+                )->get()
             );
 
             foreach ($issueProjectRelations as $taskId => $relation) {
                 $glProjectId = $relation['gl_project_id'];
                 $glIssueIid = $relation['gl_issue_iid'];
                 $response = $this->api->sendUserTime($glProjectId, $glIssueIid, $durations[$taskId]['humanDuration']);
-                echo "Sending issue_iid "
+                echo 'Sending issue_iid '
                     . $glIssueIid
-                    . " duration "
+                    . ' duration '
                     . $durations[$taskId]['humanDuration']
-                    . " for user "
+                    . ' for user '
                     . $user->full_name
                     . "\n";
 
@@ -77,10 +79,8 @@ class TimeSynchronizer
 
     /**
      * Method should return duration in human format f.e. "3h 30m"
-     * @param Collection $groupedIntervals
-     * @return array
      */
-    private function calculateDuration(Collection $groupedIntervals)
+    private function calculateDuration(Collection $groupedIntervals): array
     {
         $durations = [];
         foreach ($groupedIntervals as $taskId => $intervals) {

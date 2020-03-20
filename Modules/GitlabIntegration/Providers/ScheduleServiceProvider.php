@@ -4,40 +4,14 @@ namespace Modules\GitlabIntegration\Providers;
 
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
-use Nwidart\Modules\Facades\Module;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
-    /**
-     * ScheduleServiceProvider constructor.
-     *
-     * @param $app
-     */
-    public function __construct($app)
+    public function boot(Schedule $schedule): void
     {
-        parent::__construct($app);
-    }
-
-    public static function isEnabled() {
-        return Module::isEnabled('GitlabIntegration');
-    }
-
-    public function boot()
-    {
-        $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
-            $schedule->command('gitlab:sync')->everyFiveMinutes()->withoutOverlapping()->when([static::class, 'isEnabled']);
-            $schedule->command('gitlab:time:sync')->everyMinute()->withoutOverlapping()->when([static::class, 'isEnabled']);
+        $this->app->booted(static function () use ($schedule) {
+            $schedule->command('gitlab:sync')->everyFiveMinutes()->withoutOverlapping();
+            $schedule->command('gitlab:time:sync')->everyMinute()->withoutOverlapping();
         });
-    }
-
-    /**
-     * Register the service provider.
-     *
-     * @return void
-     */
-    public function register()
-    {
-        //
     }
 }

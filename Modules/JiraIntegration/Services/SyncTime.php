@@ -2,25 +2,28 @@
 
 namespace Modules\JiraIntegration\Services;
 
-use App\Models\{TimeInterval, User};
+use App\Models\TimeInterval;
+use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Support\Facades\Log;
 use JiraRestApi\Configuration\ArrayConfiguration;
-use JiraRestApi\Issue\{IssueService, Worklog};
+use JiraRestApi\Issue\IssueService;
+use JiraRestApi\Issue\Worklog;
 use JiraRestApi\JiraException;
-use Modules\JiraIntegration\Entities\{Settings, TaskRelation, TimeRelation};
+use Modules\JiraIntegration\Entities\Settings;
+use Modules\JiraIntegration\Entities\TaskRelation;
+use Modules\JiraIntegration\Entities\TimeRelation;
 
 class SyncTime
 {
-    /** @var Settings */
-    protected $settings;
+    protected Settings $settings;
 
     public function __construct(Settings $settings)
     {
         $this->settings = $settings;
     }
 
-    public function synchronizeAll()
+    public function synchronizeAll(): void
     {
         $host = $this->settings->getHost();
         if (empty($host) || !$this->settings->getEnabled()) {
@@ -33,7 +36,7 @@ class SyncTime
         }
     }
 
-    public function synchronizeUserTime(User $user)
+    public function synchronizeUserTime(User $user): void
     {
         $host = $this->settings->getHost();
         $token = $this->settings->getUserApiToken($user->id);
@@ -42,8 +45,8 @@ class SyncTime
         }
 
         $config = new ArrayConfiguration([
-            'jiraHost'     => $host,
-            'jiraUser'     => $user->email,
+            'jiraHost' => $host,
+            'jiraUser' => $user->email,
             'jiraPassword' => $token,
         ]);
 

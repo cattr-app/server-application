@@ -25,6 +25,20 @@ class CompanyManagement extends Controller
         'redmine_online_timeout' => 'int',
     ];
 
+    public function getData(): JsonResponse
+    {
+        $data = Property::where(['entity_type' => Property::COMPANY_CODE])->get();
+        $toReturn = [];
+        foreach ($data as $item) {
+            $name = $item->name;
+            $toReturn[$name] = $this->decodeField($name, $item->value);
+        }
+
+        $toReturn['internal_priorities'] = Priority::all();
+
+        return new JsonResponse($toReturn);
+    }
+
     protected function decodeField(string $name, $value)
     {
         if (!isset(static::$casts[$name])) {
@@ -43,52 +57,6 @@ class CompanyManagement extends Controller
         }
     }
 
-    protected function encodeField(string $name, $value)
-    {
-        if (!isset(static::$casts[$name])) {
-            return $value;
-        }
-
-        switch (static::$casts[$name]) {
-            case 'json':
-                // To avoid possible double encoding
-                if (is_string($value)) {
-                    return $value;
-                }
-
-                return json_encode($value);
-
-            default:
-                return $value;
-        }
-    }
-
-    public function setCompanyData(string $setting, string $value): void
-    {
-        Property::updateOrCreate([
-            'entity_type' => Property::COMPANY_CODE,
-            'entity_id' => 0,
-            'name' => $setting,
-        ], ['value' => $value]);
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getData()
-    {
-        $data = Property::where(['entity_type' => Property::COMPANY_CODE])->get();
-        $toReturn = [];
-        foreach ($data as $item) {
-            $name = $item->name;
-            $toReturn[$name] = $this->decodeField($name, $item->value);
-        }
-
-        $toReturn['internal_priorities'] = Priority::all();
-
-        return response()->json($toReturn);
-    }
-
     public function save(Request $request): JsonResponse
     {
         $data = $request->except('token', 'internal_priorities');
@@ -100,6 +68,34 @@ class CompanyManagement extends Controller
             'success' => true,
             'message' => __('Company settings saved successfully')
         ]);
+    }
+
+    public function setCompanyData(string $setting, string $value): void
+    {
+        Property::updateOrCreate([
+            'entity_type' => Property::COMPANY_CODE,
+            'entity_id' => 0,
+            'name' => $setting,
+        ], ['value' => $value]);
+    }
+
+    protected function encodeField(string $name, $value)
+    {
+        if (!isset(static::$casts[$name])) {
+            return $value;
+        }
+
+        $i = static::$casts[$name];
+        if ($i === 'json') {
+            // To avoid possible double encoding
+            if (is_string($value)) {
+                return $value;
+            }
+
+            return json_encode($value);
+        }
+
+        return $value;
     }
 
     public function editLanguage(Request $request): JsonResponse

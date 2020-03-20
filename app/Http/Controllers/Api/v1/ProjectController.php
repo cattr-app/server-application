@@ -14,9 +14,6 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Route;
 
-/**
- * Class ProjectController
-*/
 class ProjectController extends ItemController
 {
     /**
@@ -117,15 +114,13 @@ class ProjectController extends ItemController
      * @apiUse          ForbiddenError
      */
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
     public function index(Request $request): JsonResponse
     {
         $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
         $full_access = Role::can(Auth::user(), 'projects', 'full_access');
-        $direct_relation = $request->get('direct_relation') ? $request->get('direct_relation') : false;
+        $direct_relation = $request->get('direct_relation') ?: false;
         $request->offsetUnset('direct_relation');
 
         if ($direct_relation) {
@@ -136,14 +131,14 @@ class ProjectController extends ItemController
         }
 
         if ($project_relations_access && $request->get('user_id')) {
-            $usersId = collect($request->get('user_id'))->flatten(0)->filter(function ($val) {
+            $usersId = collect($request->get('user_id'))->flatten(0)->filter(static function ($val) {
                 return is_int($val);
             });
-            $attachedUsersId = collect(Auth::user()->projects)->flatMap(function ($project) {
+            $attachedUsersId = collect(Auth::user()->projects)->flatMap(static function ($project) {
                 return collect($project->users)->pluck('id');
             });
 
-            if (!collect($attachedUsersId)->contains($usersId->all()) && !$full_access) {
+            if (!$full_access && !collect($attachedUsersId)->contains($usersId->all())) {
                 // Add filter by projects attached to the current user for the indirectly related projects.
                 $projects = collect(Auth::user()->projects)->pluck('id')->toArray();
                 if (count($projects) > 0) {
@@ -152,7 +147,7 @@ class ProjectController extends ItemController
             }
 
             /** show all projects for full access if id in request === user->id */
-            if (collect($usersId)->contains(Auth::user()->id) && $full_access) {
+            if ($full_access && collect($usersId)->contains(Auth::user()->id)) {
                 true;
             } else {
                 $request->offsetSet('users.id', $request->get('user_id'));
@@ -169,16 +164,22 @@ class ProjectController extends ItemController
 
     public function show(Request $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('answer.success.item.show'), function (Project $project) {
+        Filter::listen($this->getEventUniqueName('answer.success.item.show'), static function (Project $project) {
             $totalTracked = 0;
-            $taskIDs = array_map(function ($task) {
+            $taskIDs = array_map(static function ($task) {
                 return $task['id'];
             }, $project->tasks->toArray());
 
             $workers = DB::table('time_intervals AS i')
                 ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
                 ->leftJoin('users AS u', 'i.user_id', '=', 'u.id')
-                ->select('i.user_id', 'u.full_name', 'i.task_id', 'i.start_at', 'i.end_at', 't.task_name',
+                ->select(
+                    'i.user_id',
+                    'u.full_name',
+                    'i.task_id',
+                    'i.start_at',
+                    'i.end_at',
+                    't.task_name',
                     DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
                 )
                 ->whereNull('i.deleted_at')
@@ -224,25 +225,29 @@ class ProjectController extends ItemController
         $itemId = is_int($request->get('id')) ? $request->get('id') : false;
 
         if (!$itemId) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'Invalid id',
-                ]), 400);
+                ]),
+                400
+            );
         }
 
         /* @var User $user */
         $user = auth()->user();
         $userProjectIds = Project::getUserRelatedProjectIds($user);
         if (!in_array($itemId, $userProjectIds)) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
                     'success' => false,
                     'error_type' => 'authorization.forbidden',
                     'message' => 'User has no access to this project',
-                ]), 403);
+                ]),
+                403
+            );
         }
 
         $project_info = DB::table('project_report')
@@ -293,7 +298,7 @@ class ProjectController extends ItemController
 
         $project_info->tasks = $tasks_query->get();
 
-        return response()->json(['success' => true, 'res' => $project_info]);
+        return new JsonResponse(['success' => true, 'res' => $project_info]);
     }
 
     /**
@@ -582,10 +587,11 @@ class ProjectController extends ItemController
                 return $query;
             }
 
-            $query->where(function (Builder $query) use ($user_id, $object, $action) {
+            $query->where(static function (Builder $query) use ($user_id, $object, $action) {
                 // Filter by project roles of the user
                 $query->whereHas('usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
-                    $query->where('user_id', $user_id)->whereHas('role',
+                    $query->where('user_id', $user_id)->whereHas(
+                        'role',
                         static function (Builder $query) use ($object, $action) {
                             $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
                                 $query->where([
@@ -594,11 +600,13 @@ class ProjectController extends ItemController
                                     'allow' => true,
                                 ])->select('id');
                             })->select('id');
-                        })->select('id');
+                        }
+                    )->select('id');
                 });
 
                 // For read-only access include projects where the user have assigned tasks or tracked intervals
-                $query->when($action !== 'edit' && $action !== 'remove',
+                $query->when(
+                    $action !== 'edit' && $action !== 'remove',
                     static function (Builder $query) use ($user_id) {
                         $query->orWhereHas('tasks', static function (Builder $query) use ($user_id) {
                             $query->where('user_id', $user_id)->select('user_id');
@@ -607,7 +615,8 @@ class ProjectController extends ItemController
                         $query->orWhereHas('tasks.timeIntervals', static function (Builder $query) use ($user_id) {
                             $query->where('user_id', $user_id)->select('user_id');
                         });
-                    });
+                    }
+                );
             });
         }
 

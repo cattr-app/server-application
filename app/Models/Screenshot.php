@@ -113,6 +113,21 @@ class Screenshot extends Model
         'deleted_at',
     ];
 
+    public static function createByInterval(TimeInterval $timeInterval, string $path = self::DEFAULT_PATH): Screenshot
+    {
+        $screenshot = Image::make(storage_path('app/' . $path));
+        $thumbnail = $screenshot->resize(280, null, fn (Constraint $constraint) => $constraint->aspectRatio());
+        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
+        Storage::put($thumbnailPath, (string)$thumbnail->encode());
+
+        $screenshotData = [
+            'time_interval_id' => $timeInterval->id,
+            'path' => $path,
+            'thumbnail_path' => $thumbnailPath,
+        ];
+
+        return self::create($screenshotData);
+    }
 
     public function timeInterval(): BelongsTo
     {
@@ -160,21 +175,4 @@ class Screenshot extends Model
         }
         return false;
     }
-
-    public static function createByInterval(TimeInterval $timeInterval, string $path = self::DEFAULT_PATH): Screenshot
-    {
-        $screenshot = Image::make(storage_path('app/' . $path));
-        $thumbnail = $screenshot->resize(280, null, fn (Constraint $constraint) => $constraint->aspectRatio());
-        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
-        Storage::put($thumbnailPath, (string)$thumbnail->encode());
-
-        $screenshotData = [
-            'time_interval_id' => $timeInterval->id,
-            'path' => $path,
-            'thumbnail_path' => $thumbnailPath,
-        ];
-
-        return self::create($screenshotData);
-    }
-
 }

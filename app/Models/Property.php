@@ -10,10 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
- * Class Property
- *
- * @property int    $id
- * @property int    $entity_id
+ * @property int $id
+ * @property int $entity_id
  * @property string $entity_type
  * @property string $name
  * @property string $value
@@ -80,9 +78,6 @@ class Property extends Model
         'deleted_at',
     ];
 
-    /**
-     * @return string
-     */
     public static function getTableName(): string
     {
         return with(new static())->getTable();
@@ -90,12 +85,6 @@ class Property extends Model
 
     /**
      * Get property from database
-     *
-     * @param  string  $scope
-     * @param  string  $key
-     * @param  array   $parameters
-     *
-     * @return Collection
      */
     public static function getProperty(string $scope, string $key, array $parameters = []): Collection
     {

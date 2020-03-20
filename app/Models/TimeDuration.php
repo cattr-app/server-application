@@ -38,9 +38,6 @@ class TimeDuration extends Model
         'date' => 'date',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');

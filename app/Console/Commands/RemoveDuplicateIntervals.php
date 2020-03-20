@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use App\Models\TimeInterval;
+use DB;
 use Illuminate\Console\Command;
 
 class RemoveDuplicateIntervals extends Command
@@ -22,24 +23,12 @@ class RemoveDuplicateIntervals extends Command
     protected $description = 'Removes duplicates in the Time intervals table';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
-        $interval_ids = \DB::table('time_intervals as ti1')
-            ->join('time_intervals as ti2', function ($join) {
+        $interval_ids = DB::table('time_intervals as ti1')
+            ->join('time_intervals as ti2', static function ($join) {
                 $join->on('ti2.start_at', '=', 'ti1.start_at');
                 $join->on('ti2.end_at', '=', 'ti1.end_at');
                 $join->on('ti2.user_id', '=', 'ti1.user_id');

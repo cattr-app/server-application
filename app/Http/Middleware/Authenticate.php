@@ -13,17 +13,14 @@ use Lang;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-/**
- * Class Authenticate
-*/
 class Authenticate extends BaseAuthenticate
 {
     public const DEFAULT_USER_LANGUAGE = 'en';
 
     /**
-     * @param  Request  $request
-     * @param  Closure  $next
-     * @param  mixed    ...$guards
+     * @param Request $request
+     * @param Closure $next
+     * @param mixed ...$guards
      *
      * @return JsonResponse|mixed
      * @throws AuthorizationException

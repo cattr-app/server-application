@@ -3,6 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 class LinkUploads extends Command
 {
@@ -24,6 +25,7 @@ class LinkUploads extends Command
      * Execute the console command.
      *
      * @return mixed
+     * @throws BindingResolutionException
      */
     public function handle()
     {
@@ -32,7 +34,8 @@ class LinkUploads extends Command
         }
 
         $this->laravel->make('files')->link(
-            storage_path('app/uploads'), public_path('uploads')
+            storage_path('app/uploads'),
+            public_path('uploads')
         );
 
         return $this->info('The [public/uploads] folder has been linked sucessfully');

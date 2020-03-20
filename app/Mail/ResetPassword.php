@@ -4,12 +4,18 @@ namespace App\Mail;
 
 use App\Models\User;
 use Illuminate\Auth\Notifications\ResetPassword as ResetPasswordNotification;
+use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Notifications\Messages\MailMessage;
+use Illuminate\Queue\SerializesModels;
 use Lang;
 
 /** @codeCoverageIgnore  */
-class ResetPassword extends ResetPasswordNotification
+class ResetPassword extends ResetPasswordNotification implements ShouldQueue
 {
+    use Queueable;
+    use SerializesModels;
+
     /**
      * User email.
      *
@@ -36,7 +42,7 @@ class ResetPassword extends ResetPasswordNotification
             return call_user_func(static::$toMailCallback, $notifiable, $this->token);
         }
 
-        $resetUrl = config('app.password_reset_url') . "?email=$this->email&token=$this->token";
+        $resetUrl = config('app.frontend_url') . "/auth/password/reset?email={$this->email}&token={$this->token}";
 
         $locale = User::where('email', '=', $this->email)->first()->getAttribute('user_language');
         Lang::setLocale($locale);

@@ -6,9 +6,6 @@ use Illuminate\Console\Command;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Models\ClientFactory;
 
-/**
- * Class SynchronizeProjects
-*/
 class SynchronizeUsers extends Command
 {
     /**
@@ -37,9 +34,6 @@ class SynchronizeUsers extends Command
 
     /**
      * Create a new command instance.
-     *
-     * @param  UserRepository  $userRepo
-     * @param  ClientFactory   $clientFactory
      */
     public function __construct(UserRepository $userRepo, ClientFactory $clientFactory)
     {
@@ -51,8 +45,8 @@ class SynchronizeUsers extends Command
 
     /**
      * Execute the console command.
-    */
-    public function handle()
+     */
+    public function handle(): void
     {
         $this->synchronizeNewUsers();
     }
@@ -62,7 +56,7 @@ class SynchronizeUsers extends Command
      *
      * Add row with user's redmine id to properties table
      */
-    public function synchronizeNewUsers()
+    public function synchronizeNewUsers(): void
     {
         $newRedmineUsers = $this->userRepo->getNewRedmineUsers();
 

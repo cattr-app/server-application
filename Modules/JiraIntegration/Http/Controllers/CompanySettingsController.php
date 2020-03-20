@@ -3,21 +3,14 @@
 namespace Modules\JiraIntegration\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\{JsonResponse, Request};
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Modules\JiraIntegration\Entities\Settings;
 
 class CompanySettingsController extends Controller
 {
-    /**
-     * @var Settings
-     */
-    private $settings;
+    private Settings $settings;
 
-    /**
-     * SettingsController constructor.
-     *
-     * @param  Settings  $settings
-     */
     public function __construct(Settings $settings)
     {
         parent::__construct();
@@ -25,9 +18,6 @@ class CompanySettingsController extends Controller
         $this->settings = $settings;
     }
 
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -36,27 +26,19 @@ class CompanySettingsController extends Controller
         ];
     }
 
-    /**
-     * @return array
-     */
-    public function get()
+    public function get(): array
     {
         return [
             'enabled' => $this->settings->getEnabled(),
-            'host'    => $this->settings->getHost(),
+            'host' => $this->settings->getHost(),
         ];
     }
 
-    /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     */
-    public function set(Request $request)
+    public function set(Request $request): JsonResponse
     {
         $this->settings->setEnabled($request->post('enabled'));
         $this->settings->setHost($request->post('host'));
 
-        return response()->json(['success' => 'true', 'message' => 'Settings saved successfully']);
+        return new JsonResponse(['success' => 'true', 'message' => 'Settings saved successfully']);
     }
 }

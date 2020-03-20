@@ -2,7 +2,7 @@
 
 namespace Modules\Reports\Exports;
 
-use DB;
+use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
@@ -10,18 +10,13 @@ use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Modules\Reports\Entities\DashboardReport;
 
-/**
- * Class DashboardExport
- * @package Modules\Reports\Exports
- */
 class DashboardExport implements Exportable
 {
-    const SORTABLE_DAYS_FORMAT = 'Y-m-d';
-    const REPORT_DAYS_FORMAT = 'l, d M Y';
-    const ROUND_DIGITS = 3;
+    public const SORTABLE_DAYS_FORMAT = 'Y-m-d';
+    public const REPORT_DAYS_FORMAT = 'l, d M Y';
+    public const ROUND_DIGITS = 3;
 
     /**
-     * @return Collection
      * @throws Exception
      */
     public function collection(): Collection
@@ -67,7 +62,7 @@ class DashboardExport implements Exportable
         $dates = array_unique($dates);
 
         // Adjust columns for each user
-        $preparedCollection = $preparedCollection->map(function ($collection) use ($dates) {
+        $preparedCollection = $preparedCollection->map(static function ($collection) use ($dates) {
             $missingDates = array_diff($dates, array_keys($collection['per_day']));
             foreach ($missingDates as $date) {
                 $collection['per_day'][$date] = 0;
@@ -82,7 +77,7 @@ class DashboardExport implements Exportable
         $orderDir = $queryData['order_dir'] ?? 'asc';
         $preparedCollection = $preparedCollection->toArray();
 
-        usort($preparedCollection, function ($a, $b) use ($orderBy, $orderDir) {
+        usort($preparedCollection, static function ($a, $b) use ($orderBy, $orderDir) {
             return $orderDir === 'asc'
                 ? $a[$orderBy] <=> $b[$orderBy]
                 : -($a[$orderBy] <=> $b[$orderBy]);
@@ -102,10 +97,6 @@ class DashboardExport implements Exportable
 
     /**
      * Get processed, formatted and prepared-to-return collection
-     *
-     * @param array $collectionData
-     *
-     * @return Collection
      * @throws Exception
      */
     protected function getPreparedCollection(array $collectionData): Collection
@@ -142,7 +133,7 @@ class DashboardExport implements Exportable
             ->orderBy('start_at');
 
         if (!empty($queryData['project_ids'])) {
-            $query = $query->whereHas('task', function ($query) use ($queryData) {
+            $query = $query->whereHas('task', static function ($query) use ($queryData) {
                 $query->whereIn('project_id', $queryData['project_ids']);
             });
         }
@@ -151,10 +142,6 @@ class DashboardExport implements Exportable
 
     /**
      * Preparing returnable collection for "collect" method
-     *
-     * @param Collection $collection
-     *
-     * @return Collection
      */
     protected function prepareCollection(Collection $collection): Collection
     {
@@ -205,11 +192,6 @@ class DashboardExport implements Exportable
     /**
      * Add subtotal record to existing collection
      *
-     * @param Collection $collection
-     * @param string $userName
-     * @param $perDay
-     * @param $totalTime
-     * @return void
      * @throws Exception
      */
     protected function addRowToCollection(Collection $collection, string $userName, $perDay, $totalTime): void
@@ -239,9 +221,6 @@ class DashboardExport implements Exportable
         $collection->push(array_merge($mainInfo, $daysData));
     }
 
-    /**
-     * @return string
-     */
     public function getExporterName(): string
     {
         return 'dashboard';

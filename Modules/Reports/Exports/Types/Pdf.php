@@ -8,22 +8,16 @@ use Maatwebsite\Excel\Concerns\WithDrawings;
 use Maatwebsite\Excel\Concerns\WithEvents;
 use Maatwebsite\Excel\Events\AfterSheet;
 use PhpOffice\PhpSpreadsheet\Cell\Hyperlink;
+use PhpOffice\PhpSpreadsheet\Exception;
 use PhpOffice\PhpSpreadsheet\Style\Border;
 use PhpOffice\PhpSpreadsheet\Worksheet\BaseDrawing;
 use PhpOffice\PhpSpreadsheet\Worksheet\Drawing;
 use Request;
 
-/**
- * Class Pdf
- * @package Modules\Reports\Exports\Types
- */
 class Pdf extends AbstractType implements FromView, WithEvents, WithDrawings
 {
-    const LOGO_HEIGHT = 50;
+    public const LOGO_HEIGHT = 50;
 
-    /**
-     * @return View
-     */
     public function view(): View
     {
         return view($this->getViewName(), [
@@ -31,25 +25,19 @@ class Pdf extends AbstractType implements FromView, WithEvents, WithDrawings
         ]);
     }
 
-    /**
-     * @return string
-     */
     public function getViewName(): string
     {
         return 'reports::' . $this->exporterName;
     }
 
-    /**
-     * @return array
-     */
     public function registerEvents(): array
     {
         return [
-            AfterSheet::class => function (AfterSheet $event) {
+            AfterSheet::class => static function (AfterSheet $event) {
                 $fromCeil = 'B1';
                 $linkCeil = 'C1';
 
-                $fromText = "Exported from: "; // TODO Should be translated !!
+                $fromText = 'Exported from: '; // TODO Should be translated !!
 
                 $frontUrl = Request::server('HTTP_ORIGIN');
                 $link = new Hyperlink();
@@ -76,7 +64,7 @@ class Pdf extends AbstractType implements FromView, WithEvents, WithDrawings
                         ]
                     ]);
 
-                $event->sheet->getDelegate()->getStyle('A2:' .  $event->sheet->getDelegate()->getHighestColumn() . '2')
+                $event->sheet->getDelegate()->getStyle('A2:' . $event->sheet->getDelegate()->getHighestColumn() . '2')
                     ->applyFromArray([
                         'borders' => [
                             'allBorders' => [
@@ -104,7 +92,7 @@ class Pdf extends AbstractType implements FromView, WithEvents, WithDrawings
 
     /**
      * @return BaseDrawing|BaseDrawing[]
-     * @throws \PhpOffice\PhpSpreadsheet\Exception
+     * @throws Exception
      */
     public function drawings()
     {

@@ -19,7 +19,7 @@ class Filter extends Facade
     /**
      * Replace the bound instance with a fake.
      *
-     * @param  array|string  $eventsToFake
+     * @param array|string $eventsToFake
      * @return void
      */
     public static function fake($eventsToFake = [])

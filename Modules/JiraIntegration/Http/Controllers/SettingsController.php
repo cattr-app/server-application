@@ -3,22 +3,15 @@
 namespace Modules\JiraIntegration\Http\Controllers;
 
 use App\Http\Controllers\Controller;
-use Illuminate\Http\{JsonResponse, Request};
+use Illuminate\Http\JsonResponse;
+use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
 use Modules\JiraIntegration\Entities\Settings;
 
 class SettingsController extends Controller
 {
-    /**
-     * @var Settings
-     */
-    private $settings;
+    private Settings $settings;
 
-    /**
-     * SettingsController constructor.
-     *
-     * @param  Settings  $settings
-     */
     public function __construct(Settings $settings)
     {
         parent::__construct();
@@ -26,9 +19,6 @@ class SettingsController extends Controller
         $this->settings = $settings;
     }
 
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -37,42 +27,32 @@ class SettingsController extends Controller
         ];
     }
 
-    /**
-     * @param  Request  $request
-     *
-     * @return array
-     */
-    public function get(Request $request)
+    public function get(Request $request): array
     {
         $userId = $request->user()->id;
         $apiToken = $this->settings->getUserApiToken($userId);
 
         return [
-            'enabled'   => $this->settings->getEnabled(),
-            'host'      => $this->settings->getHost(),
+            'enabled' => $this->settings->getEnabled(),
+            'host' => $this->settings->getHost(),
             'api_token' => preg_replace('/^(.{4}).*(.{4})$/i', '$1 ********* $2', $apiToken),
         ];
     }
 
-    /**
-     * @param  Request  $request
-     *
-     * @return JsonResponse
-     */
-    public function set(Request $request)
+    public function set(Request $request): JsonResponse
     {
         $validator = Validator::make($request->all(), ['api_token' => 'string|required']);
         if ($validator->fails()) {
-            return response()->json(['error' => 'Validation fail'], 400);
+            return new JsonResponse(['error' => 'Validation fail'], 400);
         }
 
         if (strpos($request->post('api_token'), '*') !== false) {
-            return response()->json(['success' => 'true', 'message' => 'Nothing to update!']);
+            return new JsonResponse(['success' => 'true', 'message' => 'Nothing to update!']);
         }
 
         $userId = $request->user()->id;
         $this->settings->setUserApiToken($userId, $request->post('api_token'));
 
-        return response()->json(['success' => 'true', 'message' => 'Settings saved successfully']);
+        return new JsonResponse(['success' => 'true', 'message' => 'Settings saved successfully']);
     }
 }
