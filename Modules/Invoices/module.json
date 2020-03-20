@@ -6,6 +6,7 @@
   "active": 1,
   "order": 0,
   "providers": [
+    "Modules\\Invoices\\Providers\\InvoicesServiceProvider"
   ],
   "aliases": {},
   "files": [
