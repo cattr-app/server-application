@@ -1,11 +1,10 @@
 <?php
 
 return [
-
-    'dsn' => env('SENTRY_LARAVEL_DSN', env('SENTRY_DSN')),
+    'dsn' => env('SENTRY_DSN', null),
 
     // capture release as git sha
-    // 'release' => trim(exec('git --git-dir ' . base_path('.git') . ' log --pretty="%h" -n1 HEAD')),
+    'release' => trim(exec('git --git-dir ' . base_path('.git') . ' log --pretty="%h" -n1 HEAD')),
 
     'breadcrumbs' => [
 
@@ -14,4 +13,5 @@ return [
 
     ],
 
+    'send_default_pii' => env('SENTRY_COLLECT_USERS', false)
 ];
