@@ -1,7 +1,5 @@
 <?php
 
-use Monolog\Logger;
-
 return [
     /*
     |--------------------------------------------------------------------------
@@ -60,7 +58,7 @@ return [
         ],
         'sentry' => [
             'driver' => 'sentry',
-            'level'  => Logger::WARNING,
+            'level'  => env('APP_LOG_LEVEL', 'error'),
         ],
     ],
 ];
