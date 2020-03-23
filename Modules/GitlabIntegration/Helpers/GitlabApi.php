@@ -31,11 +31,12 @@ class GitlabApi
     protected function init(User $user): ?GitlabApi
     {
         $this->user = $user;
-
-        $this->apiUrl = Property::where(['entity_type' => 'company', 'name' => 'gitlab_url'])->first();
-        $this->apiUrl = $this->apiUrl ? $this->apiUrl->value : null;
+        $url = Property::where(['entity_type' => 'company', 'name' => 'gitlab_url'])->first();
+        if (!$url) {
+            return null;
+        }
+        $this->apiUrl = $url->value ?: null;
         $this->apiKey = $this->userProperties->getApiKey($user->id);
-
         if (empty($this->apiUrl) || empty($this->apiKey)) {
             return null;
         }
