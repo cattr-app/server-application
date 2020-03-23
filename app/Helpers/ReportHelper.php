@@ -333,7 +333,8 @@ class ReportHelper
         string $endAt,
         $timezoneOffset
     ): Builder {
-        return $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
+        $projectIds = Project::getUserRelatedProjectIds(request()->user());
+        $query = $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
             "JSON_OBJECT(
                 'id', users.id, 'full_name', users.full_name, 'email', users.email, 'company_id',
                  users.company_id, 'avatar', users.avatar
@@ -345,6 +346,7 @@ class ReportHelper
                     )
                 ) as intervals"
         ], [$timezoneOffset]);
+        return $query->whereIn($this->getTableName('project', 'id'), $projectIds);
     }
 
     protected function getTableName(string $entity, ?string $column = null): string
