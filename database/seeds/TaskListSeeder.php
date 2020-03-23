@@ -6,9 +6,13 @@ use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Faker\Factory;
+use Faker\Factory as FakerFactory;
 use Faker\Generator;
 use Illuminate\Database\Seeder;
 
+/**
+ * Class TaskListSeeder
+ */
 class TaskListSeeder extends Seeder
 {
 
@@ -72,6 +76,7 @@ class TaskListSeeder extends Seeder
             $this->command->getOutput()->writeln("<fg=cyan>-- {$project->id}. Task #{$task->id}</>");
 
             $this->seedTimeIntervals($task, $user);
+
         }
     }
 
