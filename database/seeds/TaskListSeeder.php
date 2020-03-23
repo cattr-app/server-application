@@ -90,10 +90,10 @@ class TaskListSeeder extends Seeder
 
             $this->command->getOutput()->writeln("<fg=cyan>--- {$task->project->id}.{$task->id}. Interval #{$i}</>");
 
-            $intervalsOffset = random_int(0, 60 * 60 * 5);
+            $intervalsOffset = random_int(0, 60 * 20);
 
             $end = $time[$user->id] - $intervalsOffset;
-            $time[$user->id] -= random_int($intervalsOffset, 60 * 60 * 5);
+            $time[$user->id] -= $intervalsOffset + random_int(60 * 30, 60 * 50);
             $start = $time[$user->id];
 
             $interval = TimeInterval::create([
@@ -107,6 +107,8 @@ class TaskListSeeder extends Seeder
 
             $this->seedScreenshot($interval);
         }
+
+        $time[$user->id] -= random_int(0, 60 * 60 * 5);
     }
 
     protected function seedScreenshot(TimeInterval $interval): void
