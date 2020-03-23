@@ -156,9 +156,9 @@ class StatisticsSeeder extends Seeder
     {
         for ($i = 0; $i < 5; ++$i) {
             $task = $this->addTask($user, $project);
-            for ($j = 0; $j < 10; ++$j) {
-                $this->addTimeInterval($user, $task);
-            }
+                for ($j = 0; $j < 10; ++$j) {
+                    $this->addTimeInterval($user, $task);
+                }
         }
     }
 

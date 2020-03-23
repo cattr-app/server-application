@@ -3,6 +3,9 @@
 use App\Models\User;
 use Illuminate\Database\Seeder;
 
+/**
+ * Class UsersTableSeeder
+ */
 class UsersTableSeeder extends Seeder
 {
     private const USERS_AMOUNT = 10;
