@@ -31,7 +31,7 @@ class AdminTableSeeder extends Seeder
                 'billing_access' => 1,
                 'avatar' => '',
                 'screenshots_active' => 1,
-                'manual_time' => 0,
+                'manual_time' => 1,
                 'permanent_tasks' => 0,
                 'computer_time_popup' => 300,
                 'poor_time_popup' => '',
