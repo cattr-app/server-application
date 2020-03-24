@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers;
 
-use App\Models\Screenshot;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -10,12 +9,18 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ScreenshotController extends Controller
 {
+    /** @var ScreenshotControllerStrategyInterface */
+    protected $strategy;
+
     /**
+     * @param ScreenshotControllerStrategyInterface $strategy
+     *
      * @noinspection MagicMethodsValidityInspection
      * @noinspection PhpMissingParentConstructorInspection
      */
-    public function __construct()
+    public function __construct(ScreenshotControllerStrategyInterface $strategy)
     {
+        $this->strategy = $strategy;
     }
 
     /**
@@ -24,10 +29,7 @@ class ScreenshotController extends Controller
      */
     public function screenshot(Request $request)
     {
-        $path = $request->path();
-        $screenshot = Screenshot::with('timeInterval')
-            ->where('path', $path)
-            ->first();
+        $screenshot = $this->strategy->getScreenshot($request);
         if (!isset($screenshot)) {
             return response(null, 404);
         }
@@ -51,10 +53,7 @@ class ScreenshotController extends Controller
      */
     public function thumbnail(Request $request)
     {
-        $path = $request->path();
-        $screenshot = Screenshot::with('timeInterval')
-            ->where('thumbnail_path', $path)
-            ->first();
+        $screenshot = $this->strategy->getThumbnail($request);
         if (!isset($screenshot)) {
             return response(null, 404);
         }

@@ -5,6 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Property;
 use Illuminate\Console\Command;
 
+/**
+ * Class SetTimeZone
+ */
 class SetTimeZone extends Command
 {
     /**

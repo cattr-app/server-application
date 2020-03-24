@@ -213,6 +213,7 @@ class RotateScreenshots extends Command
                 'id' => $screenshot->id,
                 'path' => $path,
                 'thumb_path' => $thumb_path,
+                'relative_path' => $screenshot->path,
                 'size' => $size,
             ];
         }, $screenshots);
@@ -223,6 +224,14 @@ class RotateScreenshots extends Command
      */
     protected function removeScreenshotFiles($screenshot): void
     {
+        // Don't delete screenshot's file if multiple screenshots has the same file
+        $count = (int)DB::table('screenshots')
+            ->where('screenshots.path', $screenshot['relative_path'])
+            ->count('id');
+        if ($count > 1) {
+            return;
+        }
+
         if (file_exists($screenshot['path'])) {
             unlink($screenshot['path']);
         }

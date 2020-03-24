@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App;
 use App\EventFilter\Facades\Filter;
 use App\Mail\InviteUser;
 use App\Models\ProjectsUsers;
@@ -158,6 +159,10 @@ class UserController extends ItemController
                 ]),
                 404
             );
+        }
+
+        if (App::environment('demo')) {
+            unset($requestData['password']);
         }
 
         if (isset($requestData['password'])) {

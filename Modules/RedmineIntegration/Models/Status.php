@@ -2,6 +2,8 @@
 
 namespace Modules\RedmineIntegration\Models;
 
+use Illuminate\Support\Arr;
+
 class Status extends CompanyProperty
 {
     protected const REDMINE_STATUSES = 'redmine_statuses';
@@ -111,7 +113,7 @@ class Status extends CompanyProperty
         // Merge statuses info from the redmine with the active state of stored statuses
         $statuses = array_map(static function (array $redmineStatus) use ($savedStatuses) {
             // Try find saved status with the same ID
-            $savedStatus = array_first($savedStatuses, static function ($savedStatus) use ($redmineStatus) {
+            $savedStatus = Arr::first($savedStatuses, static function ($savedStatus) use ($redmineStatus) {
                 return $savedStatus['id'] === $redmineStatus['id'];
             });
 

@@ -23,6 +23,7 @@ class CompanyManagement extends Controller
         'redmine_deactivate_on_statuses' => 'json',
         'redmine_sync' => 'int',
         'redmine_online_timeout' => 'int',
+        'work_time' => 'int',
     ];
 
     public function getData(): JsonResponse

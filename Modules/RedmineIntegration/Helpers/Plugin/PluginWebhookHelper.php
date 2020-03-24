@@ -102,7 +102,8 @@ class PluginWebhookHelper extends AbstractPluginWebhookHelper
         $newProject = Project::create([
             'name' => $project['name'],
             'description' => $project['description'],
-            'important' => 0
+            'important' => 0,
+            'source' => 'redmine',
         ]);
 
         Property::insert([
