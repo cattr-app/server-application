@@ -4,6 +4,7 @@ namespace Modules\RedmineIntegration\Models;
 
 use App\Models\Priority as PriorityModel;
 use Illuminate\Support\Arr;
+use Modules\RedmineIntegration\Entities\ClientFactoryException;
 
 class Priority extends CompanyProperty
 {
@@ -16,6 +17,9 @@ class Priority extends CompanyProperty
         $this->clientFactory = $clientFactory;
     }
 
+    /**
+     * @throws ClientFactoryException
+     */
     public function synchronize(): void
     {
         $client = $this->clientFactory->createCompanyClient();

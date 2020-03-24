@@ -124,7 +124,7 @@ class SynchronizeTasks extends Command
                 echo 'Error message: ' . $e->getMessage() . "\n";
                 echo "Error trace: \n" . $e->getTraceAsString() . "\n\n";
 
-                Log::info($e);
+                Log::info($e->getMessage());
             }
         }
     }

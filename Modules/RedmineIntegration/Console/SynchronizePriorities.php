@@ -5,6 +5,7 @@ namespace Modules\RedmineIntegration\Console;
 use Exception;
 use Illuminate\Console\Command;
 use Log;
+use Modules\RedmineIntegration\Entities\ClientFactoryException;
 use Modules\RedmineIntegration\Models\Priority;
 
 class SynchronizePriorities extends Command
@@ -45,8 +46,8 @@ class SynchronizePriorities extends Command
     {
         try {
             $this->priority->synchronize();
-        } catch (Exception $e) {
-            Log::error($e);
+        } catch (ClientFactoryException $e) {
+            Log::info($e->getMessage());
         }
     }
 }

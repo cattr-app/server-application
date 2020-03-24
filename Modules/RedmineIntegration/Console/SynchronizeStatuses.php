@@ -5,6 +5,7 @@ namespace Modules\RedmineIntegration\Console;
 use Exception;
 use Illuminate\Console\Command;
 use Log;
+use Modules\RedmineIntegration\Entities\ClientFactoryException;
 use Modules\RedmineIntegration\Models\Status;
 
 class SynchronizeStatuses extends Command
@@ -47,8 +48,8 @@ class SynchronizeStatuses extends Command
     {
         try {
             $this->status->synchronize();
-        } catch (Exception $e) {
-            Log::error($e);
+        } catch (ClientFactoryException $e) {
+            Log::info($e->getMessage());
         }
     }
 }
