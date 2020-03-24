@@ -10,6 +10,7 @@ use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Log;
+use Modules\RedmineIntegration\Entities\ClientFactoryException;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
@@ -118,12 +119,12 @@ class SynchronizeTasks extends Command
                 $this->synchronizeUserNewTasks($user->id);
                 $this->synchronizeUserTasks($user->id);
                 $this->synchronizeUserActivity($user->id);
-            } catch (Exception $e) {
+            } catch (ClientFactoryException $e) {
                 echo "Something went wrong while Redmine Task Sync ! \n";
                 echo 'Error message: ' . $e->getMessage() . "\n";
                 echo "Error trace: \n" . $e->getTraceAsString() . "\n\n";
 
-                Log::error($e);
+                Log::info($e);
             }
         }
     }
@@ -131,7 +132,7 @@ class SynchronizeTasks extends Command
     /**
      * Synchronize tasks for current user
      *
-     * @throws Exception
+     * @throws ClientFactoryException
      */
     public function synchronizeUserNewTasks(int $userId): void
     {
@@ -160,7 +161,7 @@ class SynchronizeTasks extends Command
         $priority_id = 2;
         if (isset($task->priority_id) && $task->priority_id) {
             $priorities = $this->priority->getAll();
-            $priority = array_first($priorities, static function ($priority) use ($task) {
+            $priority = Arr::first($priorities, static function ($priority) use ($task) {
                 return $priority['priority_id'] === $task->priority_id;
             });
 
@@ -185,7 +186,7 @@ class SynchronizeTasks extends Command
     /**
      * Synchronize task's for current user
      *
-     * @throws Exception
+     * @throws ClientFactoryException
      */
     public function synchronizeUserTasks(int $userId): void
     {
@@ -388,7 +389,7 @@ class SynchronizeTasks extends Command
     /**
      * Synchronize user task activity for userId
      *
-     * @throws Exception
+     * @throws ClientFactoryException
      */
     public function synchronizeUserActivity(int $userId): void
     {
