@@ -16,6 +16,7 @@ class Synchronizer
     public const NAME = 'name';
     public const DESCRIPTION = 'description';
     public const IMPORTANT = 'important';
+    public const SOURCE = 'source';
 
     public const PROJECT_ID = 'project_id';
     public const TASK_NAME = 'task_name';
@@ -74,6 +75,7 @@ class Synchronizer
                 self::NAME => $gitlabProject['name'] ?? 'Gitlab Project without Name ?!',
                 self::DESCRIPTION => $gitlabProject['description'] ?? '',
                 self::IMPORTANT => false,
+                self::SOURCE => 'gitlab',
             ];
 
             $relation = ProjectRelation::whereGitlabId($gitlabProject['id'])->first();

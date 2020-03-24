@@ -53,6 +53,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
+ * @property string $source
  * @property User $users
  * @property Task[] $tasks
  * @property-read Collection|Role[] $roles
@@ -84,6 +85,7 @@ class Project extends Model
         'name',
         'description',
         'important',
+        'source',
     ];
 
     /**
@@ -94,6 +96,7 @@ class Project extends Model
         'name' => 'string',
         'description' => 'string',
         'important' => 'integer',
+        'source' => 'string',
     ];
 
     /**
