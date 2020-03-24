@@ -151,6 +151,7 @@ class SyncTasks
             'name' => $project->name,
             'description' => $project->description,
             'important' => false,
+            'source' => 'jira',
         ];
     }
 

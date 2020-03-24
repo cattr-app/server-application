@@ -56,7 +56,8 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
                 $projectInfo = [
                     'company_id' => 4,
                     'name' => $projectFromRedmine['name'],
-                    'description' => $projectFromRedmine['description']
+                    'description' => $projectFromRedmine['description'],
+                    'source' => 'redmine',
                 ];
 
                 $project = Project::create($projectInfo);

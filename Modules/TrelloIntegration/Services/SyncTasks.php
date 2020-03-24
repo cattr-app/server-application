@@ -98,6 +98,7 @@ class SyncTasks
                 'name'        => $board['name'] ?? 'Trello Board without Name',
                 'description' => $board['desc'] ?? '',
                 'important'   => false,
+                'source'      => 'trello',
             ];
             $relation = ProjectRelation::whereId($boardId)->first();
 
