@@ -67,7 +67,7 @@ class ReportsSender
                 new MailWithFile(
                     date('l\, m Y', strtotime($dates['startAt'])),
                     date('l\, m Y', strtotime($dates['endAt'] ?? 'yesterday')),
-                    $filePath,
+                    Storage::path($filePath),
                     $emailReport->name . '.' . $typeExporter->getFileNameType()
                 )
             );
