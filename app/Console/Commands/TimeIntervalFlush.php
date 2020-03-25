@@ -12,7 +12,7 @@ class TimeIntervalFlush extends Command
      *
      * @var string
      */
-    protected $signature = 'timeinterval:flush';
+    protected $signature = 'cattr:flush-time-intervals-cache';
 
     /**
      * The console command description.

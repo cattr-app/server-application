@@ -15,7 +15,7 @@ class SynchronizePriorities extends Command
      *
      * @var string
      */
-    protected $name = 'redmine-synchronize:priorities';
+    protected $name = 'redmine:priorities';
 
     /**
      * The console command description.

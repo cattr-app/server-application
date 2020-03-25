@@ -13,7 +13,7 @@ class RemoveDuplicateIntervals extends Command
      *
      * @var string
      */
-    protected $signature = 'amazing-time:remove-duplicate-intervals';
+    protected $signature = 'cattr:remove-duplicate-intervals';
 
     /**
      * The console command description.

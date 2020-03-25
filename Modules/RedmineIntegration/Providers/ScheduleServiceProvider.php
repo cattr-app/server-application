@@ -12,12 +12,12 @@ class ScheduleServiceProvider extends ServiceProvider
     {
         $this->app->booted(function () {
             $schedule = app(Schedule::class);
-            $schedule->command('redmine-synchronize:tasks')->everyFiveMinutes()->withoutOverlapping();
-            $schedule->command('redmine-synchronize:projects')->everyFiveMinutes()->withoutOverlapping();
-            $schedule->command('redmine-synchronize:users')->everyFiveMinutes()->withoutOverlapping();
-            $schedule->command('redmine-synchronize:time')->everyFiveMinutes()->withoutOverlapping();
-            $schedule->command('redmine-synchronize:priorities')->everyFifteenMinutes()->withoutOverlapping();
-            $schedule->command('redmine-synchronize:statuses')->everyFifteenMinutes()->withoutOverlapping();
+            $schedule->command('redmine:tasks')->everyFiveMinutes()->withoutOverlapping();
+            $schedule->command('redmine:projects')->everyFiveMinutes()->withoutOverlapping();
+            $schedule->command('redmine:users')->everyFiveMinutes()->withoutOverlapping();
+            $schedule->command('redmine:time')->everyFiveMinutes()->withoutOverlapping();
+            $schedule->command('redmine:priorities')->everyFifteenMinutes()->withoutOverlapping();
+            $schedule->command('redmine:statuses')->everyFifteenMinutes()->withoutOverlapping();
         });
     }
 }

@@ -15,7 +15,7 @@ class SynchronizeStatuses extends Command
      *
      * @var string
      */
-    protected $name = 'redmine-synchronize:statuses';
+    protected $name = 'redmine:statuses';
 
     /**
      * The console command description.

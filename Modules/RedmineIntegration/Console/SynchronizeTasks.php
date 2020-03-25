@@ -32,7 +32,7 @@ class SynchronizeTasks extends Command
      *
      * @var string
      */
-    protected $name = 'redmine-synchronize:tasks';
+    protected $name = 'redmine:tasks';
 
     /**
      * The console command description.
