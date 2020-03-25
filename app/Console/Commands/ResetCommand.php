@@ -27,6 +27,7 @@ class ResetCommand extends Command
     protected $description = 'Cattr flush database';
 
     protected array $protectedFiles = ['uploads/screenshots/.gitignore', 'uploads/screenshots/thumbs/.gitignore'];
+    protected array $protectedTables = ['migrations', 'jobs', 'failed_jobs'];
 
     /**
      * Execute the console command.
@@ -44,7 +45,7 @@ class ResetCommand extends Command
 
         $tables = DB::connection()->getDoctrineSchemaManager()->listTableNames();
         foreach ($tables as $table) {
-            if ($table !== 'migrations') {
+            if (!in_array($table, $this->protectedTables, true)) {
                 DB::table($table)->truncate();
             }
         }
