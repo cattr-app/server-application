@@ -20,8 +20,8 @@ class ScheduleServiceProvider extends ServiceProvider
 
     public function boot(): void
     {
-        $this->app->booted(static function () {
-            $schedule = $this->app->make(Schedule::class);
+        $this->app->booted(function () {
+            $schedule = app(Schedule::class);
 
             $schedule->command('trello:sync-tasks')->everyFiveMinutes()->withoutOverlapping();
 

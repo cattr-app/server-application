@@ -11,7 +11,7 @@ class ScheduleServiceProvider extends ServiceProvider
     public function boot(): void
     {
         $this->app->booted(function () {
-            $schedule = $this->app->make(Schedule::class);
+            $schedule = app(Schedule::class);
             $schedule->command('redmine-synchronize:tasks')->everyFiveMinutes()->withoutOverlapping();
             $schedule->command('redmine-synchronize:projects')->everyFiveMinutes()->withoutOverlapping();
             $schedule->command('redmine-synchronize:users')->everyFiveMinutes()->withoutOverlapping();
