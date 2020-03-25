@@ -96,9 +96,8 @@ class UserController extends ItemController
             $this->getEventUniqueName('request.item.edit'),
             $request->all()
         );
-        $idInt = is_int($request->get('id'));
 
-        if (!$idInt) {
+        if (!is_int($request->get('id'))) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                     'success' => false,
@@ -115,7 +114,7 @@ class UserController extends ItemController
         $validationRules['email'] .= ',' . $request->get('id');
         $validationRules['password'] = 'sometimes|min:6';
 
-        if (array_key_exists('password', $requestData) && $requestData['password'] === null) {
+        if (array_key_exists('password', $requestData) && $requestData['password'] == null) {
             unset($requestData['password']);
         }
 
