@@ -3,6 +3,7 @@
 namespace Modules\RedmineIntegration\Models;
 
 use Illuminate\Support\Arr;
+use Modules\RedmineIntegration\Entities\ClientFactoryException;
 
 class Status extends CompanyProperty
 {
@@ -104,6 +105,9 @@ class Status extends CompanyProperty
         $this->set(static::REDMINE_DEACTIVATE_ON_STATUSES, json_encode($value));
     }
 
+    /**
+     * @throws ClientFactoryException
+     */
     public function synchronize(): void
     {
         $client = $this->clientFactory->createCompanyClient();

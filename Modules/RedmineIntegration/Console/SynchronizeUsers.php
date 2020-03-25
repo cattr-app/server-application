@@ -3,6 +3,8 @@
 namespace Modules\RedmineIntegration\Console;
 
 use Illuminate\Console\Command;
+use Log;
+use Modules\RedmineIntegration\Entities\ClientFactoryException;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Modules\RedmineIntegration\Models\ClientFactory;
 
@@ -48,13 +50,18 @@ class SynchronizeUsers extends Command
      */
     public function handle(): void
     {
-        $this->synchronizeNewUsers();
+        try {
+            $this->synchronizeNewUsers();
+        } catch (ClientFactoryException $e) {
+            Log::info($e->getMessage());
+        }
     }
 
     /**
      * Synchronize users, who activated redmine integration with redmine users
      *
      * Add row with user's redmine id to properties table
+     * @throws ClientFactoryException
      */
     public function synchronizeNewUsers(): void
     {
