@@ -7,9 +7,10 @@ use Illuminate\Support\ServiceProvider;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
-    public function boot(Schedule $schedule): void
+    public function boot(): void
     {
-        $this->app->booted(static function () use ($schedule) {
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
             $schedule->command('jira:sync-tasks')->everyFiveMinutes()->withoutOverlapping();
             $schedule->command('jira:sync-time')->everyMinute()->withoutOverlapping();
         });

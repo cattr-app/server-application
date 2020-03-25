@@ -7,9 +7,10 @@ use Illuminate\Support\ServiceProvider;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
-    public function boot(Schedule $schedule): void
+    public function boot(): void
     {
-        $this->app->booted(static function () use ($schedule) {
+        $this->app->booted(function () {
+            $schedule = $this->app->make(Schedule::class);
             $schedule->command('gitlab:sync')->everyFiveMinutes()->withoutOverlapping();
             $schedule->command('gitlab:time:sync')->everyMinute()->withoutOverlapping();
         });

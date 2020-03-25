@@ -8,9 +8,9 @@ use Nwidart\Modules\Facades\Module;
 
 class ScheduleServiceProvider extends ServiceProvider
 {
-    public function boot(Schedule $schedule): void
+    public function boot(): void
     {
-        $this->app->booted(function () use ($schedule) {
+        $this->app->booted(function () {
             $schedule = $this->app->make(Schedule::class);
             $schedule->command('redmine-synchronize:tasks')->everyFiveMinutes()->withoutOverlapping();
             $schedule->command('redmine-synchronize:projects')->everyFiveMinutes()->withoutOverlapping();
