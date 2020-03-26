@@ -63,4 +63,10 @@ class UserProperties
     {
         return $this->set($userId, static::API_KEY, $apikey);
     }
+
+    public function removeApiKey(int $userId) {
+        return Property::where('entity_id', '=', $userId)
+            ->where('name', '=', self::API_KEY)
+            ->forceDelete();
+    }
 }
