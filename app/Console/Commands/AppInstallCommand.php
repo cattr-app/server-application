@@ -101,11 +101,11 @@ class AppInstallCommand extends Command
         $admin = $this->createAdminUser($adminData);
         $this->info("Administrator with email {$admin->email} was created successfully");
 
-        $enableRecaptcha = $this->choice('Enable ReCaptcha', ['Yes', 'No'], 1) === 'Yes';
+        $enableRecaptcha = $this->choice('Enable ReCaptcha 2', ['Yes', 'No'], 1) === 'Yes';
         $this->updateEnvData('RECAPTCHA_ENABLED', $enableRecaptcha ? 'true' : 'false');
         if ($enableRecaptcha) {
-            $this->updateEnvData('RECAPTCHA_SITE_KEY', $this->ask('ReCaptcha site key'));
-            $this->updateEnvData('RECAPTCHA_SECRET_KEY', $this->ask('ReCaptcha secret key'));
+            $this->updateEnvData('RECAPTCHA_SITE_KEY', $this->ask('ReCaptcha 2 site key'));
+            $this->updateEnvData('RECAPTCHA_SECRET_KEY', $this->ask('ReCaptcha 2 secret key'));
         }
 
         $this->call('config:cache');
@@ -220,7 +220,7 @@ class AppInstallCommand extends Command
         } while (!$appUrlIsValid);
         $this->updateEnvData('APP_URL', $appUrl);
 
-        $frontendUrl = $this->ask('Trusted frontend domains (e.g. cattr.acme.corp). In most cases, this domain will be the same as the backend (API) one. If you have multiple frontend domains, enter all of them separated by commas.');
+        $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, this domain will be the same as the backend (API) one.');
         $frontendUrl = preg_replace('/^https?:\/\//', '', $frontendUrl);
         $frontendUrl = preg_replace('/\/$/', '', $frontendUrl);
         $this->updateEnvData('ALLOWED_ORIGINS',
