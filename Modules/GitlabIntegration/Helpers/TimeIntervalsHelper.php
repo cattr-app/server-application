@@ -66,14 +66,15 @@ class TimeIntervalsHelper
                 if (!isset($result[$task->id])) {
                     $projectRelation = $this->getProjectRelation($projectId);
                     $taskRelation = $this->getTasksById($task->id);
-                    if (!$taskRelation) {
+                    if (!$projectRelation) {
                         Log::info("Can`t relation from project id: {$projectId} \n");
                         continue;
                     }
-                    if (!$projectRelation) {
+                    if (!$taskRelation) {
                         Log::info("Can`t relation from task id: {$task->id} \n");
                         continue;
                     }
+
                     $result[$task->id] = [
                         'gl_project_id' => $projectRelation->gitlab_id,
                         'gl_issue_iid' => $taskRelation->gitlab_issue_iid,
