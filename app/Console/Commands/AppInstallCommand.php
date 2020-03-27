@@ -14,6 +14,7 @@ use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use MCStreetguy\ComposerParser\Factory as ComposerParser;
+use PDOException;
 use RuntimeException;
 
 class AppInstallCommand extends Command
@@ -73,13 +74,14 @@ class AppInstallCommand extends Command
         }
 
 
-        $this->info("Welcome to CATTR installation wizard. First of, let's setup our application\n");
-        $this->info('For now, we will setup the .env file configuration. You can change it later at any time.');
+        $this->info("Welcome to Cattr installation wizard\n");
         $this->info("Let's connect to your database first");
 
         if ($this->settingUpDatabase() !== 0) {
             return -1;
         }
+
+        $this->setUrls();
 
         $this->info('Enter administrator credentials:');
         $adminData = $this->askAdminCredentials();
@@ -99,10 +101,12 @@ class AppInstallCommand extends Command
         $admin = $this->createAdminUser($adminData);
         $this->info("Administrator with email {$admin->email} was created successfully");
 
-        $this->updateEnvData('RECAPTCHA_ENABLED', $this->choice('Enable RECaptcha', [
-            'true' => 'Yes',
-            'false' => 'No'
-        ], 'false'));
+        $enableRecaptcha = $this->choice('Enable ReCaptcha 2', ['Yes', 'No'], 1) === 'Yes';
+        $this->updateEnvData('RECAPTCHA_ENABLED', $enableRecaptcha ? 'true' : 'false');
+        if ($enableRecaptcha) {
+            $this->updateEnvData('RECAPTCHA_SITE_KEY', $this->ask('ReCaptcha 2 site key'));
+            $this->updateEnvData('RECAPTCHA_SECRET_KEY', $this->ask('ReCaptcha 2 secret key'));
+        }
 
         $this->call('config:cache');
 
@@ -204,6 +208,27 @@ class AppInstallCommand extends Command
         ]);
     }
 
+    protected function setUrls(): void
+    {
+        $appUrlIsValid = false;
+        do {
+            $appUrl = $this->ask('Full URL to backend (API) application (example: http://cattr.acme.corp/)');
+            $appUrlIsValid = preg_match('/^https?:\/\//', $appUrl);
+            if (!$appUrlIsValid) {
+                $this->warn('URL should begin with http or https');
+            }
+        } while (!$appUrlIsValid);
+        $this->updateEnvData('APP_URL', $appUrl);
+
+        $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, this domain will be the same as the backend (API) one.');
+        $frontendUrl = preg_replace('/^https?:\/\//', '', $frontendUrl);
+        $frontendUrl = preg_replace('/\/$/', '', $frontendUrl);
+        $this->updateEnvData('ALLOWED_ORIGINS',
+            '"' . $frontendUrl . '"');
+        $this->updateEnvData('FRONTEND_APP_URL',
+            '"' . $frontendUrl . '"');
+    }
+
     protected function askAdminCredentials(): array
     {
         $login = $this->ask('Admin E-Mail');
@@ -219,17 +244,8 @@ class AppInstallCommand extends Command
 
     protected function settingUpEnvMigrateAndSeed(): void
     {
-        $this->updateEnvData('APP_URL',
-            $this->ask('API endpoint FULL URL (https://api.example.com)'));
-
-        $frontendUrl = $this->ask('Frontend application URL (https://example.com)');
-        $this->updateEnvData('ALLOWED_ORIGINS',
-            '"' . $frontendUrl . '"');
-        $this->updateEnvData('FRONTEND_APP_URL',
-            '"' . $frontendUrl . '"');
-
         $this->info('Setting up JWT secret key');
-        $this->call('jwt:secret');
+        $this->callSilent('jwt:secret', ['--force' => true]);
 
         $this->info('Running up migrations');
         $this->call('migrate');
@@ -237,33 +253,60 @@ class AppInstallCommand extends Command
         $this->info('Setting up default system roles');
         $this->call('db:seed', ['--class' => 'RoleSeeder']);
 
-        $this->info('Switching off debug mode...');
         $this->updateEnvData('APP_DEBUG', 'false');
+    }
+
+    protected function createDatabase(): void
+    {
+        $connectionName = config('database.default');
+        $databaseName = config("database.connections.{$connectionName}.database");
+
+        config(["database.connections.{$connectionName}.database" => null]);
+        DB::purge();
+
+        DB::statement("CREATE DATABASE IF NOT EXISTS $databaseName");
+
+        config(["database.connections.{$connectionName}.database" => $databaseName]);
+        DB::purge();
+
+        $this->info("Created database $databaseName.");
     }
 
     protected function settingUpDatabase(): int
     {
-        $this->updateEnvData('DB_HOST', $this->ask('CATTR database host', 'localhost'));
-        $this->updateEnvData('DB_PORT', $this->ask('CATTR database port', 3306));
-        $this->updateEnvData('DB_USERNAME', $this->ask('CATTR database username', 'root'));
-        $this->updateEnvData('DB_DATABASE', $this->ask('CATTR database name', 'app_cattr'));
-        $this->updateEnvData('DB_PASSWORD', $this->secret('CATTR database password'));
+        $this->updateEnvData('DB_HOST', $this->ask('database host', 'localhost'));
+        $this->updateEnvData('DB_PORT', $this->ask('database port', 3306));
+        $this->updateEnvData('DB_USERNAME', $this->ask('database username', 'root'));
+        $this->updateEnvData('DB_PASSWORD', $this->secret('database password'));
+        $this->updateEnvData('DB_DATABASE', $this->ask('database name', 'app_cattr'));
 
-        $this->call('config:cache');
-
-        $this->info('Testing database connection...');
         try {
             DB::connection()->getPdo();
 
             if (Schema::hasTable('migrations')) {
                 throw new RuntimeException('Looks like the application was already installed. Please, make sure that database was flushed and then try again.');
             }
+        } catch (PDOException $e) {
+            if ($e->getCode() !== 1049) {
+                $this->error($e->getMessage());
+
+                return -1;
+            }
+
+            try {
+                $this->createDatabase();
+            } catch (Exception $e) {
+                $this->error($e->getMessage());
+
+                return -1;
+            }
         } catch (Exception $e) {
             $this->error($e->getMessage());
 
             return -1;
         }
-        $this->info("Database testing successfully.\n");
+
+        $this->info("Database configuration successful.");
 
         return 0;
     }

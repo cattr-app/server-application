@@ -24,6 +24,9 @@ class ReportsSender
 
         foreach ($map as $frequency) {
             $emailReports = EmailReports::whereFrequency($frequency)->get();
+            if (empty($emailReports->toArray())) {
+                continue;
+            }
 
             foreach ($emailReports as $emailReport) {
                 if (!EmailReports::checkIsReportSendDay($emailReport->sending_day, $frequency)) {
@@ -37,6 +40,7 @@ class ReportsSender
     /**
      * @param $emailReport EmailReports
      * @param $frequency
+     *
      * @throws Exception
      */
     public function sendEmail(EmailReports $emailReport, $frequency): void
@@ -67,7 +71,7 @@ class ReportsSender
                 new MailWithFile(
                     date('l\, m Y', strtotime($dates['startAt'])),
                     date('l\, m Y', strtotime($dates['endAt'] ?? 'yesterday')),
-                    $filePath,
+                    Storage::path($filePath),
                     $emailReport->name . '.' . $typeExporter->getFileNameType()
                 )
             );

@@ -161,6 +161,23 @@ class UserController extends ItemController
             );
         }
 
+        if (!$item->is_admin) {
+            $userCanEdit = ['full_name', 'email', 'password', 'user_language'];
+            foreach ($requestData as $key => $value) {
+                if ($item->$key != $value && !in_array($key, $userCanEdit)) {
+                    return new JsonResponse(
+                        Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                            'success' => false,
+                            'error_type' => 'validation',
+                            'message' => 'Validation error',
+                            'info' => "Only admin can edit '$key' field",
+                        ]),
+                        400
+                    );
+                }
+            }
+        }
+
         if (App::environment('demo')) {
             unset($requestData['password']);
         }

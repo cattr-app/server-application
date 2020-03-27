@@ -5,6 +5,8 @@ namespace Modules\RedmineIntegration\Console;
 use App\Models\User;
 use Exception;
 use Illuminate\Console\Command;
+use Illuminate\Support\Facades\Log;
+use Modules\RedmineIntegration\Entities\ClientFactoryException;
 use Modules\RedmineIntegration\Entities\Repositories\ProjectRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\TimeIntervalRepository;
@@ -19,7 +21,7 @@ class SynchronizeTime extends Command
      *
      * @var string
      */
-    protected $name = 'redmine-synchronize:time';
+    protected $name = 'redmine:time';
 
     /**
      * The console command description.
@@ -161,7 +163,8 @@ class SynchronizeTime extends Command
                     $this->timeRepo->markAsSynced($timeIntervalId);
                 }
             }
-        } catch (Exception $e) {
+        } catch (ClientFactoryException $e) {
+            Log::info($e->getMessage());
         }
     }
 }

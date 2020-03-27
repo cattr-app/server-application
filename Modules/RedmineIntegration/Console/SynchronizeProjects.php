@@ -12,7 +12,7 @@ class SynchronizeProjects extends Command
      *
      * @var string
      */
-    protected $name = 'redmine-synchronize:projects';
+    protected $name = 'redmine:projects';
 
     /**
      * The console command description.

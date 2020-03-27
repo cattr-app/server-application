@@ -56,6 +56,13 @@ class SettingsController extends Controller
     public function set(Request $request): JsonResponse
     {
         $userId = $request->user()->id;
+        if (empty(trim($request->input('apikey')))) {
+            $apiKey = $this->userProperties->getApiKey($userId) ?? null;
+            if ($apiKey) {
+                $this->userProperties->removeApiKey($userId);
+                return new JsonResponse(['success' => 'true', 'message' => 'API Key is removed']);
+            }
+        }
 
         try {
             Validator::make(
@@ -80,7 +87,6 @@ class SettingsController extends Controller
         if (strpos($request->post('apikey'), '*') !== false) {
             return new JsonResponse(['success' => 'true', 'message' => 'Nothing to update!']);
         }
-
         $this->userProperties->setApiKey($userId, $request->post('apikey'));
 
         return new JsonResponse(['success' => 'true', 'message' => 'Settings saved successfully']);

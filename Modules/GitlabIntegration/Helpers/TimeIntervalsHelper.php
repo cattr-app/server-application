@@ -6,6 +6,7 @@ namespace Modules\GitlabIntegration\Helpers;
 use App\Models\TimeInterval;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\DB;
+use Log;
 
 class TimeIntervalsHelper
 {
@@ -65,6 +66,14 @@ class TimeIntervalsHelper
                 if (!isset($result[$task->id])) {
                     $projectRelation = $this->getProjectRelation($projectId);
                     $taskRelation = $this->getTasksById($task->id);
+                    if (!$projectRelation) {
+                        Log::info("Can`t relation from project id: {$projectId} \n");
+                        continue;
+                    }
+                    if (!$taskRelation) {
+                        Log::info("Can`t relation from task id: {$task->id} \n");
+                        continue;
+                    }
 
                     $result[$task->id] = [
                         'gl_project_id' => $projectRelation->gitlab_id,

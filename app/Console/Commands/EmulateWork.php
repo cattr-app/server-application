@@ -30,15 +30,14 @@ class EmulateWork extends Command
      */
     protected $description = 'Cattr Emulation of the work (only for demo)';
 
-    private $screenshotSource = 'https://via.placeholder.com/1920x1080/{background}/{text}.jpg?text=Screenshot';
-    private $intervalDuration = 300;
+    private int $intervalDuration = 300;
 
     protected array $protectedFiles = ['uploads/screenshots/.gitignore'];
 
     /**
      * @var Generator
      */
-    private $faker;
+    private Generator $faker;
 
     /**
      * Execute the console command.
@@ -75,7 +74,10 @@ class EmulateWork extends Command
     }
 
     /**
-     * @throws Exception
+     * @param int $taskId
+     * @param int $userId
+     * @param string $startAt
+     * @param string $endAt
      */
     protected function createTimeInterval(int $taskId, int $userId, string $startAt, string $endAt): void
     {
