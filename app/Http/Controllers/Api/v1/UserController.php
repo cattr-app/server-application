@@ -33,7 +33,12 @@ class UserController extends ItemController
 
     public function sendInviteHook(User $user, array $requestData): User
     {
+        if (!isset($requestData['password']) || empty($requestData['password'])) {
+            return $user;
+        }
+
         Mail::to($user->email)->send(new InviteUser($user->email, $requestData['password']));
+
         return $user;
     }
 
