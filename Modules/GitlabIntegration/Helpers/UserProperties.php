@@ -34,7 +34,7 @@ class UserProperties
         return $this->set($userId, static::URL, $url);
     }
 
-    protected function set($userId, string $propertyName, $value): Property
+    protected function set($userId, string $propertyName, $value = ''): Property
     {
         $params = [
             'entity_id' => $userId,
@@ -45,10 +45,6 @@ class UserProperties
         /** @var Property $property */
         $property = Property::query()->where($params)->first();
 
-        if (!$value) {
-            $value = '';
-        }
-
         if (!$property) {
             $params['value'] = $value;
             $property = Property::query()->create($params);
@@ -56,6 +52,7 @@ class UserProperties
             $property->value = $value;
             $property->save();
         }
+
         return $property;
     }
 
