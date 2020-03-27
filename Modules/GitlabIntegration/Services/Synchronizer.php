@@ -28,7 +28,7 @@ class Synchronizer
 
     public function synchronizeAll(): void
     {
-        foreach (User::where('active', 1)->get()->all() as $user) {
+        foreach (User::where('active', 1)->get() as $user) {
             $this->synchronize($user);
         }
     }
