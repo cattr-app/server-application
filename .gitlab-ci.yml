@@ -54,6 +54,7 @@ live_deploy:
     - echo "$CI_KEY" | base64 -d | ssh-add -
     - mkdir ~/.ssh
     - ssh-keyscan -H $CI_HOST >> ~/.ssh/known_hosts
+    - apk add curl bash
     - curl -sL https://sentry.io/get-cli/ | sh
     - sentry-cli releases new "$CI_COMMIT_SHORT_SHA"
   script:
