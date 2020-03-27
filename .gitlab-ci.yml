@@ -96,9 +96,9 @@ demo_deploy:
   before_script:
     - 'which ssh-agent || ( apk add --update openssh )'
     - eval $(ssh-agent -s)
-    - echo "$DEMO_CI_KEY" | base64 -d | ssh-add -
+    - echo "$DEMO_KEY" | base64 -d | ssh-add -
     - mkdir ~/.ssh
-    - ssh-keyscan -H $DEMO_CI_HOST >> ~/.ssh/known_hosts
+    - ssh-keyscan -H $DEMO_HOST >> ~/.ssh/known_hosts
   script:
-    - ssh $DEMO_CI_USER@$DEMO_CI_HOST 'cd demo && docker-compose build --no-cache --force-rm demo'
-    - ssh $DEMO_CI_USER@$DEMO_CI_HOST 'cd demo && docker-compose down -v && docker-compose up -d demo'
+    - ssh $DEMO_USER@$DEMO_HOST 'cd cattr/demo && docker-compose build --no-cache --force-rm demo'
+    - ssh $DEMO_USER@$DEMO_HOST 'cd cattr/demo && docker-compose down -v && docker-compose up -d demo'
