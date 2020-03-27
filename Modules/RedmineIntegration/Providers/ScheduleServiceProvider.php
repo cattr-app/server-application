@@ -16,8 +16,8 @@ class ScheduleServiceProvider extends ServiceProvider
             $schedule->command('redmine:projects')->everyFiveMinutes()->withoutOverlapping();
             $schedule->command('redmine:users')->everyFiveMinutes()->withoutOverlapping();
             $schedule->command('redmine:time')->everyFiveMinutes()->withoutOverlapping();
-            $schedule->command('redmine:priorities')->everyFifteenMinutes()->withoutOverlapping();
-            $schedule->command('redmine:statuses')->everyFifteenMinutes()->withoutOverlapping();
+            $schedule->command('redmine:priorities')->everyTenMinutes()->withoutOverlapping();
+            $schedule->command('redmine:statuses')->everyTenMinutes()->withoutOverlapping();
         });
     }
 }
