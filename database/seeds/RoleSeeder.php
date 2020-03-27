@@ -225,7 +225,7 @@ class RoleSeeder extends Seeder
             if ($rules->has($rule['object']) && collect($rules[$rule['object']])->has($rule['action'])) {
                 continue;
             }
-            $this->command->getOutput()->writeln("<fg=red>{$rule['object']} {$rule['action']} Not Found (Removed)</>");
+            $this->command->getOutput()->writeln("<fg=yellow>{$rule['object']} {$rule['action']} Not Found (Removed)</>");
             $rule->forceDelete();
         }
 
