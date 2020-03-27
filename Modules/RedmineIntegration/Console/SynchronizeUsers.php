@@ -15,7 +15,7 @@ class SynchronizeUsers extends Command
      *
      * @var string
      */
-    protected $name = 'redmine-synchronize:users';
+    protected $name = 'redmine:users';
 
     /**
      * The console command description.

@@ -21,7 +21,7 @@ class SynchronizeTime extends Command
      *
      * @var string
      */
-    protected $name = 'redmine-synchronize:time';
+    protected $name = 'redmine:time';
 
     /**
      * The console command description.
