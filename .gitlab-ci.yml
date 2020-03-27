@@ -39,7 +39,7 @@ apidoc_deploy:
     - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
     - npm install
   script:
-    - npm run api-nsl
+    - npm run custom-api
     - ssh cattr-deploy@docs.cattr.app 'rm -rf /srv/docs/api/*'
     - scp -r apidoc/* cattr-deploy@docs.cattr.app:/srv/docs/api
 
