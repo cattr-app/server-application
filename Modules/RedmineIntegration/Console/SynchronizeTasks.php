@@ -342,7 +342,7 @@ class SynchronizeTasks extends Command
         $priority = Arr::first($priorities, static function ($priority) use ($taskFromRedmine) {
             return $priority['id'] === $taskFromRedmine['priority']['id'];
         });
-        $priority_id = isset($priority) ? $priority['priority_id'] : 0;
+        $priority_id = $priority['priority_id'] ?? 0;
 
         $user_redmine_url = $this->userRepo->getUserRedmineUrl($userId);
         if (substr($user_redmine_url, -1) !== '/') {
