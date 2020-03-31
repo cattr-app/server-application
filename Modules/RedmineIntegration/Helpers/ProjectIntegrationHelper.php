@@ -42,6 +42,13 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
             $projectsData = $client->project->all([
                 'limit' => 1000
             ]);
+
+            if (!isset($projectsData['projects'])) {
+                return [
+                    'added_projects' => []
+                ];
+            }
+
             $projects = $projectsData['projects'];
             $addedProjectsCounter = 0;
             foreach ($projects as $projectFromRedmine) {

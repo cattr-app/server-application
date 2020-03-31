@@ -153,7 +153,7 @@ class SynchronizeTime extends Command
                 'issue_id' => $issue_id,
                 'spent_on' => $date,
                 'hours' => $hours,
-                'comments' => 'Upload from Amazing Time',
+                'comments' => 'Uploaded from Cattr',
             ]);
 
             $issent = isset($ret->id);
