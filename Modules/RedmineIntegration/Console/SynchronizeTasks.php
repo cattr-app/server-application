@@ -122,7 +122,7 @@ class SynchronizeTasks extends Command
             } catch (ClientFactoryException $e) {
                 echo "Something went wrong while Redmine Task Sync ! \n";
                 echo 'Error message: ' . $e->getMessage() . "\n";
-                echo "Error trace: \n" . $e->getTraceAsString() . "\n\n";
+                echo "User: $user->id, $user->email \n\n";
 
                 Log::info($e->getMessage());
             }
