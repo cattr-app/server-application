@@ -29,10 +29,8 @@ class AddForeignKeyToTokens extends Migration
      */
     public function down()
     {
-
         Schema::table('tokens', function (Blueprint $table) {
-            $table->integer('user_id')->change();
-            $table->dropForeign(['user_id']);
+            $table->dropForeign('tokens_user_id_foreign');
         });
     }
 }

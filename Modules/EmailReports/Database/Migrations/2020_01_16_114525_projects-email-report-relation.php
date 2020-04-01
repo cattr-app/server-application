@@ -37,7 +37,7 @@ class ProjectsEmailReportRelation extends Migration
     public function down(): void
     {
         Schema::dropIfExists('email_reports_projects');
-        if (!Schema::table('email_reports')->hasColumn('project_ids')) {
+        if (!Schema::hasColumn('email_reports', 'project_ids')) {
             Schema::table('email_reports', static function (Blueprint $table) {
                 $table->text('project_ids')->nullable();
                 $table->dropColumn('document_type')->nullable();
