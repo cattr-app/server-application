@@ -3,11 +3,7 @@
 return [
     'dsn' => env('SENTRY_LARAVEL_DSN', null),
 
-    // capture release as git sha
-    'release' =>
-        config('app.version')
-        . '@'
-        . trim(exec('git --git-dir ' . base_path('.git') . ' log --pretty="%h" -n1 HEAD')),
+    'release' => config('app.version'),
 
     'breadcrumbs' => [
 
