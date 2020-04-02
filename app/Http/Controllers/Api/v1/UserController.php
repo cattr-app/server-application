@@ -165,7 +165,7 @@ class UserController extends ItemController
             );
         }
 
-        if (!$item->is_admin) {
+        if (!auth()->user()->is_admin) {
             $userCanEdit = ['full_name', 'email', 'password', 'user_language'];
             foreach ($requestData as $key => $value) {
                 if ($item->$key != $value && !in_array($key, $userCanEdit)) {
