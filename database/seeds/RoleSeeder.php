@@ -50,6 +50,7 @@ class RoleSeeder extends Seeder
             'gitlab',
             'redmine',
             'jira',
+            'trello',
         ],
     ];
     private const AUDITOR_ALLOW = [
@@ -114,6 +115,7 @@ class RoleSeeder extends Seeder
             'gitlab',
             'redmine',
             'jira',
+            'trello',
         ],
     ];
     private const MANAGER_ALLOW = [
@@ -191,6 +193,7 @@ class RoleSeeder extends Seeder
             'gitlab',
             'redmine',
             'jira',
+            'trello',
         ],
         'email-reports' => [
             'list',
@@ -201,7 +204,7 @@ class RoleSeeder extends Seeder
             'count',
         ],
         'invoices' => [
-            'list'
+            'list',
         ]
     ];
 
@@ -225,7 +228,10 @@ class RoleSeeder extends Seeder
             if ($rules->has($rule['object']) && collect($rules[$rule['object']])->has($rule['action'])) {
                 continue;
             }
-            $this->command->getOutput()->writeln("<fg=yellow>{$rule['object']} {$rule['action']} Not Found (Removed)</>");
+
+            $this->command->getOutput()->writeln(
+                "<fg=yellow>{$rule['object']} {$rule['action']} Not Found (Removed)</>"
+            );
             $rule->forceDelete();
         }
 
