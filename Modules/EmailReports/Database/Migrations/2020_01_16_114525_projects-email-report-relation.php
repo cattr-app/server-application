@@ -40,7 +40,9 @@ class ProjectsEmailReportRelation extends Migration
         if (!Schema::hasColumn('email_reports', 'project_ids')) {
             Schema::table('email_reports', static function (Blueprint $table) {
                 $table->text('project_ids')->nullable();
-                $table->dropColumn('document_type')->nullable();
+                $table->dropColumn('document_type');
+                $table->tinyInteger('value');
+                $table->dropColumn('sending_day');
             });
         }
     }
