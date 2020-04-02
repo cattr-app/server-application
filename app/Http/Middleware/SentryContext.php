@@ -18,7 +18,7 @@ class SentryContext
      */
     public function handle($request, Closure $next)
     {
-        if (!config('sentry.send_default_pii') || auth()->check() || app()->bound('sentry')) {
+        if (!config('sentry.send_default_pii') || !auth()->check() || !app()->bound('sentry')) {
             return $next($request);
         }
 
