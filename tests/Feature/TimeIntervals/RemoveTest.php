@@ -10,22 +10,13 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RemoveTest
- */
+
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/time-intervals/remove';
 
-    /**
-     * @var TimeInterval
-     */
-    private $interval;
-
-    /**
-     * @var User
-     */
-    private $admin;
+    private TimeInterval $interval;
+    private User $admin;
 
     protected function setUp(): void
     {

@@ -3,16 +3,19 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
-class InviteUser extends Mailable
+/** @codeCoverageIgnore  */
+class InviteUser extends Mailable implements ShouldQueue
 {
     use Queueable;
     use SerializesModels;
 
     public $login;
     public $password;
+    public $url;
 
     /**
      * Create a new message instance.
@@ -24,6 +27,7 @@ class InviteUser extends Mailable
     {
         $this->login = $login;
         $this->password = $password;
+        $this->url = config('app.frontend_url');
     }
 
     /**
@@ -33,9 +37,6 @@ class InviteUser extends Mailable
      */
     public function build(): self
     {
-        return $this->view('emails.invite', [
-            'login' => $this->login,
-            'password' => $this->password,
-        ]);
+        return $this->markdown('emails.invite');
     }
 }

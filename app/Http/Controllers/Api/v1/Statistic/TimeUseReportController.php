@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
+use App\EventFilter\Facades\Filter;
 use App\Helpers\ReportHelper;
 use App\Models\Property;
-use App\EventFilter\Facades\Filter;
+use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Carbon\Carbon;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -71,12 +71,6 @@ class TimeUseReportController extends ReportController
      * @apiGroup        Time Duration
      *
      * @apiPermission   time_duration_list
-     */
-    /**
-     * Handle the incoming request.
-     *
-     * @param Request $request
-     * @return JsonResponse
      */
     public function report(Request $request): JsonResponse
     {

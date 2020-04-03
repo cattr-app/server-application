@@ -5,14 +5,13 @@ namespace App\Models;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
- * Class Property
- *
- * @property int    $id
- * @property int    $entity_id
+ * @property int $id
+ * @property int $entity_id
  * @property string $entity_type
  * @property string $name
  * @property string $value
@@ -34,10 +33,11 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|Property withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class Property extends AbstractModel
+class Property extends Model
 {
     use SoftDeletes;
 
+    public const APP_CODE = 'app';
     public const COMPANY_CODE = 'company';
     public const PROJECT_CODE = 'project';
     public const TASK_CODE = 'task';
@@ -79,9 +79,6 @@ class Property extends AbstractModel
         'deleted_at',
     ];
 
-    /**
-     * @return string
-     */
     public static function getTableName(): string
     {
         return with(new static())->getTable();
@@ -89,12 +86,6 @@ class Property extends AbstractModel
 
     /**
      * Get property from database
-     *
-     * @param  string  $scope
-     * @param  string  $key
-     * @param  array   $parameters
-     *
-     * @return Collection
      */
     public static function getProperty(string $scope, string $key, array $parameters = []): Collection
     {

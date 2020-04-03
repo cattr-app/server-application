@@ -6,67 +6,49 @@ use App\Models\Property;
 use App\Models\User;
 use Gitlab\Client;
 use Gitlab\ResultPager;
+use Illuminate\Support\Facades\Log;
+use Throwable;
 
 class GitlabApi
 {
-    /**
-     * @var User
-     */
-    protected $user;
-
-    /**
-     * @var UserProperties
-     */
-    protected $userProperties;
-
-    /**
-     * @var string
-     */
-    protected $apiUrl;
-    /**
-     * @var string
-     */
-    protected $apiKey;
-
-    /**
-     * @var Client
-     */
-    protected $client;
-
-    /**
-     * @var ResultPager
-     */
-    protected $pager;
+    protected User $user;
+    protected UserProperties $userProperties;
+    protected string $apiUrl;
+    protected string $apiKey;
+    protected Client $client;
+    protected ResultPager $pager;
 
     public function __construct(UserProperties $userProperties)
     {
         $this->userProperties = $userProperties;
     }
 
+    public static function buildFromUser(User $user): ?GitlabApi
+    {
+        return app()->make(self::class)->init($user);
+    }
+
     protected function init(User $user): ?GitlabApi
     {
         $this->user = $user;
-
-        $this->apiUrl = Property::where(['entity_type' => 'company', 'name' => 'gitlab_url'])->first();
-        $this->apiUrl = $this->apiUrl ? $this->apiUrl->value : null;
+        $url = Property::where(['entity_type' => 'company', 'name' => 'gitlab_url'])->first();
+        if (!$url) {
+            return null;
+        }
+        $this->apiUrl = $url->value ?: null;
         $this->apiKey = $this->userProperties->getApiKey($user->id);
-
         if (empty($this->apiUrl) || empty($this->apiKey)) {
             return null;
         }
 
         try {
-            $this->client = Client::create($this->apiUrl)->authenticate($this->apiKey);
-        } catch (\Throwable $throwable) {
-            print_r([
-                'code' => $throwable->getCode(),
-                'message' => $throwable->getMessage(),
-                'trace' => $throwable->getTrace()
-            ]);
+            $this->client = Client::create($this->apiUrl)->authenticate($this->apiKey, Client::AUTH_URL_TOKEN);
+            $this->pager = new ResultPager($this->client);
+            $this->pager->fetch($this->client->api('users'), 'me');
+        } catch (Throwable $throwable) {
+            Log::error($throwable);
             return null;
         }
-        $this->pager = new ResultPager($this->client);
-
         return $this;
     }
 
@@ -75,28 +57,29 @@ class GitlabApi
         return $this->pager->fetchAll($this->client->api('projects'), 'all');
     }
 
-    public function getUserProjectById(int $id)
-    {
-        return $this->client->projects->show($id);
-    }
-
-    public function getUserTasksByProjectId(int $projectId)
-    {
-        return $this->pager->fetchAll($this->client->api('issues'), 'all', [$projectId, [
-            'scope' => 'assigned-to-me'
-        ]]);
-    }
-
     public function getUserTasks()
     {
         return $this->pager->fetchAll($this->client->api('issues'), 'all', [null, [
-            'scope' => 'assigned-to-me'
+            'scope' => 'assigned-to-me',
+            'state' => 'opened',
         ]]);
     }
 
-    public static function buildFromUser(User $user): ?GitlabApi
+    /**
+     * @param int[] $iids
+     */
+    public function getClosedUserTasks(array $iids = [])
     {
-        return app()->make(self::class)->init($user);
+        $params = [
+            'scope' => 'assigned-to-me',
+            'state' => 'closed',
+        ];
+
+        if (!empty($iids)) {
+            $params['iids'] = $iids;
+        }
+
+        return $this->pager->fetchAll($this->client->api('issues'), 'all', [null, $params]);
     }
 
     public function sendUserTime($projectId, $issue_iid, $duration)

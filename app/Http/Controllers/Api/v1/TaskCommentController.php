@@ -2,14 +2,14 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\EventFilter\Facades\Filter;
 use App\Models\TaskComment;
 use Exception;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use App\EventFilter\Facades\Filter;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
 
 /**
@@ -23,27 +23,6 @@ use Illuminate\Support\Facades\Validator;
 class TaskCommentController extends ItemController
 {
     /**
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return TaskComment::class;
-    }
-
-
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'task_id' => 'required',
-            'content' => 'required',
-        ];
-    }
-
-
-    /**
      * @return array
      */
     public static function getControllerRules(): array
@@ -56,22 +35,6 @@ class TaskCommentController extends ItemController
         ];
     }
 
-    /**
-     * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/task-comment/create Create
-     * @apiDescription  Create Task Comment
-     *
-     * @apiVersion      1.0.0
-     * @apiName         CreateTaskComment
-     * @apiGroup        Task Comment
-     *
-     * @apiPermission   task_comment_create
-     * @apiPermission   task_comment_full_access
-     */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
     public function create(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
@@ -82,7 +45,7 @@ class TaskCommentController extends ItemController
         );
 
         if ($validator->fails()) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
                     'success' => false,
                     'error_type' => 'validation',
@@ -107,9 +70,8 @@ class TaskCommentController extends ItemController
         $full_access = $user->allowed('task-comment', 'full_access');
 
         if (!$full_access) {
-
             if ($item->task->user_id != $user->id) {
-                return response()->json([
+                return new JsonResponse([
                     'success' => false,
                     'error_type' => 'authorization.forbidden',
                     'message' => "Access denied to this task",
@@ -117,12 +79,44 @@ class TaskCommentController extends ItemController
             }
         }
 
-        return response()->json(
+        return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
                 'success' => true,
                 'res' => $item,
             ])
         );
+    }
+
+    /**
+     * @return array
+     */
+    public function getValidationRules(): array
+    {
+        return [
+            'task_id' => 'required',
+            'content' => 'required',
+        ];
+    }
+
+    /**
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /v1/task-comment/create Create
+     * @apiDescription  Create Task Comment
+     *
+     * @apiVersion      1.0.0
+     * @apiName         CreateTaskComment
+     * @apiGroup        Task Comment
+     *
+     * @apiPermission   task_comment_create
+     * @apiPermission   task_comment_full_access
+     */
+
+    /**
+     * @return string
+     */
+    public function getItemClass(): string
+    {
+        return TaskComment::class;
     }
 
     /**
@@ -146,8 +140,6 @@ class TaskCommentController extends ItemController
      * @apiPermission   task_comment_full_access
      */
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
     public function index(Request $request): JsonResponse
@@ -163,7 +155,7 @@ class TaskCommentController extends ItemController
         $full_access = $user->allowed('task-comment', 'full_access');
 
         if (!$full_access) {
-            $baseQuery->whereHas('task', function ($taskQuery) use ($user) {
+            $baseQuery->whereHas('task', static function ($taskQuery) use ($user) {
                 $taskQuery->where(['user_id' => $user->id]);
             });
         }
@@ -173,7 +165,7 @@ class TaskCommentController extends ItemController
             $baseQuery
         );
 
-        return response()->json(
+        return new JsonResponse(
             Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.result'),
                 $itemsQuery->get()
@@ -208,8 +200,6 @@ class TaskCommentController extends ItemController
      * @apiPermission   task_comment_full_access
      */
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
     public function destroy(Request $request): JsonResponse
@@ -218,20 +208,23 @@ class TaskCommentController extends ItemController
         $idInt = is_int($itemId);
 
         if (!$idInt) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'Invalid id',
-                ]), 400);
+                ]),
+                400
+            );
         }
 
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->applyQueryFilter(
-                $this->getQuery(), ['id' => $itemId]
+                $this->getQuery(),
+                ['id' => $itemId]
             )
         );
 
@@ -240,7 +233,7 @@ class TaskCommentController extends ItemController
 
         if (!$full_access) {
             $itemsQuery->where(['user_id' => $user->id])
-                ->whereHas('task', function ($taskQuery) use ($user) {
+                ->whereHas('task', static function ($taskQuery) use ($user) {
                     $taskQuery->where(['user_id' => $user->id]);
                 });
         }
@@ -249,7 +242,7 @@ class TaskCommentController extends ItemController
         $item = $itemsQuery->firstOrFail();
         $item->delete();
 
-        return response()->json(
+        return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
                 'success' => true,
                 'message' => 'Item has been removed'

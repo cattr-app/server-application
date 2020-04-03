@@ -8,40 +8,20 @@ use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Carbon\Carbon;
-use Illuminate\Support\Facades\DB;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
+use Illuminate\Support\Facades\DB;
+use RuntimeException;
 
 class ReportHelper
 {
-    /**
-     * @var Project
-     */
-    protected $project;
+    protected Project $project;
+    protected TimeInterval $timeInterval;
+    protected User $user;
+    protected Task $task;
+    protected Screenshot $screenshot;
 
     /**
-     * @var TimeInterval
-     */
-    protected $timeInterval;
-
-    /**
-     * @var User
-     */
-    protected $user;
-
-    /**
-     * @var Task
-     */
-    protected $task;
-
-    /**
-     * @var Screenshot
-     */
-    protected $screenshot;
-
-    /**
-     * ReportHelper constructor.
-     *
      * @param  Project       $project
      * @param  TimeInterval  $timeInterval
      * @param  User          $user
@@ -62,15 +42,11 @@ class ReportHelper
         $this->screenshot = $screenshot;
     }
 
-    /**
-     * @param $collection
-     *
-     * @return Collection
-     */
     public function getProcessedProjectReportCollection($collection): Collection
     {
         $collection = $collection->groupBy('project_name');
 
+        $intCounts = 0;
         $resultCollection = [];
         foreach ($collection as $projectName => $items) {
             foreach ($items as $item) {
@@ -92,9 +68,10 @@ class ReportHelper
                         'tasks_time' => 0,
                     ];
                 }
-                if (!array_key_exists($item->task_id,
-                    $resultCollection[$projectName]['users'][$item->user_id]['tasks'])) {
-
+                if (!array_key_exists(
+                    $item->task_id,
+                    $resultCollection[$projectName]['users'][$item->user_id]['tasks']
+                )) {
                     $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id] = [
                         'task_name' => $item->task_name,
                         'id' => $item->task_id,
@@ -104,13 +81,15 @@ class ReportHelper
                     ];
                 }
 
+                $intCounts += count($intervals);
                 foreach ($intervals as $interval) {
                     $taskDate = Carbon::parse($interval['start_at'])->format('Y-m-d');
                     $duration = Carbon::parse($interval['end_at'])->diffInSeconds($interval['start_at']);
 
                     if (!array_key_exists(
                         $taskDate,
-                        $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'])
+                        $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates']
+                    )
                     ) {
                         $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$taskDate] = 0;
                     }
@@ -131,8 +110,19 @@ class ReportHelper
                 foreach ($screenshotsCollection as $screen) {
                     // $createdAtFormatted --- '2019-12-30'
                     // $hoursScreenKey --- '11:00'
+
+                    // Handle situations when time_interval has no screenshots
+                    if ($screen['id'] === null) {
+                        continue;
+                    }
+
                     $createdAtFormatted = Carbon::parse($screen['created_at'])->format('Y-m-d');
                     $hoursScreenKey = Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
+
+                    // Don't add screenshots for dates without intervals
+                    if (!isset($resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$createdAtFormatted])) {
+                        continue;
+                    }
 
                     if (!array_key_exists($createdAtFormatted, $screensResultCollection)) {
                         $screensResultCollection[$createdAtFormatted] = [];
@@ -154,23 +144,22 @@ class ReportHelper
                         $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'],
                         $screensResultCollection
                     );
-
             }
         }
 
         foreach ($resultCollection as &$project) {
             foreach ($project['users'] as &$user) {
-                usort($user['tasks'], function ($a, $b) {
+                usort($user['tasks'], static function ($a, $b) {
                     return $a['duration'] < $b['duration'];
                 });
             }
 
-            usort($project['users'], function ($a, $b) {
+            usort($project['users'], static function ($a, $b) {
                 return $a['tasks_time'] < $b['tasks_time'];
             });
         }
 
-        usort($resultCollection, function ($a, $b) {
+        usort($resultCollection, static function ($a, $b) {
             return $a['project_time'] < $b['project_time'];
         });
 
@@ -213,13 +202,13 @@ class ReportHelper
             }
 
             // Sort User Tasks by total_time
-            usort($resultCollection[$userID]['tasks'], function($a, $b) {
-               return $a['total_time'] < $b['total_time'];
+            usort($resultCollection[$userID]['tasks'], static function ($a, $b) {
+                return $a['total_time'] < $b['total_time'];
             });
         }
 
         // Sort Users by total_time
-        usort($resultCollection, function($a, $b) {
+        usort($resultCollection, static function ($a, $b) {
             return $a['total_time'] < $b['total_time'];
         });
 
@@ -245,7 +234,8 @@ class ReportHelper
         array $rawSelect = [],
         array $bindings = []
     ): Builder {
-        $rawSelect = implode(', ',
+        $rawSelect = implode(
+            ', ',
             array_unique(
                 array_merge($rawSelect, [
                     'projects.id as project_id',
@@ -282,8 +272,10 @@ class ReportHelper
             )
             ->where($this->getTableName('timeInterval', 'start_at'), '>=', $startAt)
             ->where($this->getTableName('timeInterval', 'start_at'), '<', $endAt)
-            ->whereIn($this->getTableName('user','id'), $uids)
-            ->groupBy('task_id');
+            ->where($this->getTableName('timeInterval', 'deleted_at'), null)
+            ->whereIn($this->getTableName('user', 'id'), $uids)
+            ->whereNull($this->getTableName('timeInterval', 'deleted_at'))
+            ->groupBy(['task_id', 'user_id']);
     }
 
     /**
@@ -306,7 +298,7 @@ class ReportHelper
             "JSON_ARRAYAGG(
                 JSON_OBJECT(
                     'id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path,
-                    'created_at', screenshots.created_at
+                    'created_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?)
                 )
             ) as screens",
             "JSON_ARRAYAGG(
@@ -316,14 +308,14 @@ class ReportHelper
                     CONVERT_TZ(time_intervals.start_at, '+00:00', ?)
                 )
             ) as intervals"
-        ], [$timezoneOffset]);
+        ], [$timezoneOffset, $timezoneOffset]);
 
         return $query->leftJoin(
-                $this->getTableName('screenshot'),
-                $this->getTableName('screenshot', 'time_interval_id'),
-                '=',
-                $this->getTableName('timeInterval', 'id')
-            )->orderBy(DB::raw('ANY_VALUE('.$this->getTableName('screenshot', 'created_at').')'), 'ASC')
+            $this->getTableName('screenshot'),
+            $this->getTableName('screenshot', 'time_interval_id'),
+            '=',
+            $this->getTableName('timeInterval', 'id')
+        )->orderBy(DB::raw('ANY_VALUE('.$this->getTableName('screenshot', 'created_at').')'), 'ASC')
              ->whereIn('project_id', $pids);
     }
 
@@ -341,7 +333,8 @@ class ReportHelper
         string $endAt,
         $timezoneOffset
     ): Builder {
-        return $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
+        $projectIds = Project::getUserRelatedProjectIds(request()->user());
+        $query = $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
             "JSON_OBJECT(
                 'id', users.id, 'full_name', users.full_name, 'email', users.email, 'company_id',
                  users.company_id, 'avatar', users.avatar
@@ -353,19 +346,13 @@ class ReportHelper
                     )
                 ) as intervals"
         ], [$timezoneOffset]);
+        return $query->whereIn($this->getTableName('project', 'id'), $projectIds);
     }
 
-    /**
-     * @param  string       $entity
-     *
-     * @param  string|null  $column
-     *
-     * @return string
-     */
-    protected function getTableName(string $entity, string $column = null): string
+    protected function getTableName(string $entity, ?string $column = null): string
     {
         if (!property_exists(static::class, $entity)) {
-            throw new \RuntimeException("$entity does not exists on ".static::class);
+            throw new RuntimeException("$entity does not exists on ".static::class);
         }
 
         $tblName = $this->{$entity}->getTable();

@@ -4,9 +4,13 @@ namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Intervention\Image\Constraint;
+use Intervention\Image\Facades\Image;
+use Storage;
 
 /**
  * @apiDefine ScreenshotObject
@@ -41,8 +45,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 
 /**
- * Class Screenshot
- *
  * @property int $id
  * @property int $time_interval_id
  * @property string $path
@@ -69,9 +71,11 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|Screenshot withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class Screenshot extends AbstractModel
+class Screenshot extends Model
 {
     use SoftDeletes;
+
+    public const DEFAULT_PATH = 'storage/none.png';
 
     /**
      * table name from database
@@ -109,37 +113,56 @@ class Screenshot extends AbstractModel
         'deleted_at',
     ];
 
-    /**
-     * @return BelongsTo
-     */
+    public static function createByInterval(TimeInterval $timeInterval, string $path = self::DEFAULT_PATH): Screenshot
+    {
+        $screenshot = Image::make(storage_path('app/' . $path));
+        $thumbnail = $screenshot->resize(280, null, fn(Constraint $constraint) => $constraint->aspectRatio());
+        $thumbnailPath = str_replace(
+            'uploads/screenshots',
+            'uploads/screenshots/thumbs',
+            $path
+        );
+
+        Storage::put($thumbnailPath, (string)$thumbnail->encode());
+
+        $screenshotData = [
+            'time_interval_id' => $timeInterval->id,
+            'path' => $path,
+            'thumbnail_path' => $thumbnailPath,
+        ];
+
+        return self::create($screenshotData);
+    }
+
     public function timeInterval(): BelongsTo
     {
         return $this->belongsTo(TimeInterval::class, 'time_interval_id');
     }
 
-    /**
-     * @param null|User $user
-     * @return bool
-     */
-    public function access($user): bool
+    public function access(?User $user): bool
     {
         if (!isset($user)) {
             return false;
         }
 
-        $user_id = $this->timeInterval->user_id;
+        $userId = $this->timeInterval->user_id;
 
         // Allow root to see all screenshots.
         if (Role::can($user, 'screenshots', 'full_access')) {
             return true;
         }
 
-        // Allow user to see own screenshots.
-        if (Role::can($user, 'screenshots', 'list') && $user->id === $user_id) {
+        // Allow users with rule see all screenshots.
+        if (Role::can($user, 'screenshots', 'list')) {
             return true;
         }
 
-        // Allow manager to see screenshots of related users.
+        // Allow user to see own screenshots.
+        if ($user->id === $userId) {
+            return true;
+        }
+
+        // Allow a manager to see screenshots of related users.
         if (Role::can($user, 'screenshots', 'manager_access') && Role::can($user, 'projects', 'relations')) {
             $projectIds = $user->projects->pluck('id');
             $userIds = User::query()
@@ -151,15 +174,10 @@ class Screenshot extends AbstractModel
                     });
                 })->select('id')->get('id')->pluck('id');
 
-            if ($userIds->contains($user_id)) {
+            if ($userIds->contains($userId)) {
                 return true;
             }
         }
-        User::whereHas('timeIntervals', static function (EloquentBuilder $query) {
-            echo get_class($query);
-        });
-
         return false;
     }
-
 }

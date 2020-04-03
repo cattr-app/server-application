@@ -3,89 +3,61 @@
 namespace Tests\Factories;
 
 use App\Models\Project;
-use Tests\Facades\TaskFactory;
 use Faker\Factory as FakerFactory;
+use Tests\Facades\TaskFactory;
 
-/**
- * Class ProjectFactory
- */
-class ProjectFactory extends AbstractFactory
+class ProjectFactory extends Factory
 {
     private const COMPANY_ID = 1;
     private const DESCRIPTION_LENGTH = 300;
 
-    /**
-     * @var int
-     */
-    private $needsTasks = 0;
+    private int $needsTasks = 0;
+    private int $needsIntervals = 0;
+    private array $users = [];
+    private ?Project $project = null;
 
-    /**
-     * @var int
-     */
-    private $needsIntervals = 0;
 
-    /**
-     * @var array
-     */
-    private $users = 0;
+    protected function getModelInstance(): Project
+    {
+        return $this->project;
+    }
 
-    /**
-     * @param int $quantity
-     * @return self
-     */
     public function withTasks(int $quantity = 1): self
     {
         $this->needsTasks = $quantity;
-
         return $this;
     }
 
-    /**
-     * @param array $attributes
-     * @return Project
-     */
-    public function create(array $attributes = []): Project
+    public function create(): Project
     {
-        $projectData = $this->getRandomProjectData();
+        $modelData = $this->createRandomModelData();
 
-        if ($attributes) {
-            $projectData = array_merge($projectData, $attributes);
-        }
-
-        $project = Project::create($projectData);
+        $this->project = Project::create($modelData);
 
         if ($this->users) {
             foreach ($this->users as $user) {
-                $project->users()->attach($user->id);
+                $this->project->users()->attach($user->id);
             }
         }
 
         if ($this->needsTasks) {
-            $this->createTasks($project);
+            $this->createTasks();
         }
 
         if ($this->timestampsHidden) {
-            $this->hideTimestamps($project);
+            $this->hideTimestamps();
         }
 
-        return $project;
+        return $this->project;
     }
 
-    /**
-     * @param $users
-     * @return $this
-     */
-    public function forUsers($users): self
+    public function forUsers(array $users): self
     {
         $this->users = $users;
-
         return $this;
     }
 
-    /**
-     * @return array
-     */
-    public function getRandomProjectData(): array
+    public function createRandomModelData(): array
     {
         $faker = FakerFactory::create();
 
@@ -96,14 +68,11 @@ class ProjectFactory extends AbstractFactory
         ];
     }
 
-    /**
-     * @param Project $project
-     */
-    protected function createTasks(Project $project): void
+    protected function createTasks(): void
     {
         do {
             TaskFactory::withIntervals($this->needsIntervals)
-                ->forProject($project)
+                ->forProject($this->project)
                 ->create();
         } while (--$this->needsTasks);
     }

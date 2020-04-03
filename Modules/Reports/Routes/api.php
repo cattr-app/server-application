@@ -1,7 +1,5 @@
 <?php
 
-use Illuminate\Http\Request;
-
 /*
 |--------------------------------------------------------------------------
 | API Routes
@@ -18,4 +16,6 @@ Route::post('/reports/projects', 'ProjectReportsController@getReport');
 /**
  * Can be used for both Timeline and Team reports because the difference just in user_ids we receive
  */
-Route::get('/reports/dashboard', 'DashboardReportsController@getReport');
+Route::post('/reports/dashboard', 'DashboardReportsController@getReport');
+
+Route::post('/reports/invoices', 'InvoicesReportsController@getReport');

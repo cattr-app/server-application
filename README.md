@@ -31,9 +31,15 @@ php artisan serve
 - `php artisan db:seed --class=<SeederClassName>` - apply specific seeders only
 - `php artisan make:seeder <SeederClassName>` - create new seeder
 
+## Generate IDE helpers
+
+```
+composer dumphelpers
+```
+
 ## Generate documentation
 
 ```
 npm install
-npm run api
+npm run custom-api
 ```

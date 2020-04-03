@@ -12,7 +12,7 @@ class TimeIntervalFlush extends Command
      *
      * @var string
      */
-    protected $signature = 'timeinterval:flush';
+    protected $signature = 'cattr:intervals:flush-cache';
 
     /**
      * The console command description.
@@ -22,21 +22,9 @@ class TimeIntervalFlush extends Command
     protected $description = 'Flush cache table with time interval durations';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
-     *
-     * @return mixed
      */
-    public function handle()
+    public function handle(): void
     {
         DB::unprepared('CALL time_durations_cache_refresh()');
     }

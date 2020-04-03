@@ -2,20 +2,14 @@
 
 namespace App\Exceptions\Entities;
 
-use Throwable;
-
-use Illuminate\Auth\Access\AuthorizationException as BaseAuthorizationException;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-
 use App\Exceptions\Interfaces\InfoExtendedException;
 use App\Exceptions\Interfaces\TypedException;
+use Illuminate\Auth\Access\AuthorizationException as BaseAuthorizationException;
+use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
+use Throwable;
 
 
-/**
- * Class AuthorizationException
-*/
-class AuthorizationException extends BaseAuthorizationException
-    implements TypedException, InfoExtendedException, HttpExceptionInterface
+class AuthorizationException extends BaseAuthorizationException implements TypedException, InfoExtendedException, HttpExceptionInterface
 {
     /**
      * @apiDefine 400Error
@@ -209,6 +203,16 @@ class AuthorizationException extends BaseAuthorizationException
         parent::__construct($this->getMessageByType(), $this->getStatusCode(), $previous);
     }
 
+    public function getMessageByType(): string
+    {
+        return self::ERRORS[$this->type]['message'];
+    }
+
+    public function getStatusCode(): int
+    {
+        return self::ERRORS[$this->type]['code'];
+    }
+
     /**
      * @return mixed
      */
@@ -217,28 +221,9 @@ class AuthorizationException extends BaseAuthorizationException
         return $this->info;
     }
 
-    /**
-     * @return string
-     */
-    public function getMessageByType(): string
-    {
-        return self::ERRORS[$this->type]['message'];
-    }
-
-    /**
-     * @return string
-     */
     public function getType(): string
     {
         return $this->type;
-    }
-
-    /**
-     * @return int
-     */
-    public function getStatusCode(): int
-    {
-        return self::ERRORS[$this->type]['code'];
     }
 
     /**

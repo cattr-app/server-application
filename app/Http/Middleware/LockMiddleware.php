@@ -8,14 +8,9 @@ use Illuminate\Http\Request;
 
 class LockMiddleware
 {
-    protected $lock;
     protected const excludedPaths = ['show', 'list', 'dashboard', 'allowed-rules', 'count'];
+    protected Lock $lock;
 
-    /**
-     * LockMiddleware constructor.
-     *
-     * @param  Lock  $lock
-     */
     public function __construct(Lock $lock)
     {
         $this->lock = $lock;
@@ -37,7 +32,7 @@ class LockMiddleware
                     return $next($request);
                 }
             }
-            return response()->json(['status' => 'Payment Required'], 402);
+            return new JsonResponse(['status' => 'Payment Required'], 402);
         }
 
         return $next($request);

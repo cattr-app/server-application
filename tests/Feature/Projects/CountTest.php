@@ -8,19 +8,13 @@ use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CountTest
- */
 class CountTest extends TestCase
 {
     private const URI = 'v1/projects/count';
 
     private const PROJECTS_AMOUNT = 10;
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
     protected function setUp(): void
     {

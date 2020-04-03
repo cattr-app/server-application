@@ -6,22 +6,14 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CreateTest
- */
+
 class CreateTest extends TestCase
 {
     private const URI = 'v1/users/create';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
-    /**
-     * @var array
-     */
-    private $userData;
+    private array $userData;
 
     protected function setUp(): void
     {
@@ -29,7 +21,7 @@ class CreateTest extends TestCase
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
-        $this->userData = UserFactory::getRegistrationUserData();
+        $this->userData = UserFactory::createRandomRegistrationModelData();
     }
 
     public function test_create(): void

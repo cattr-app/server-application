@@ -9,29 +9,16 @@ use Tests\Facades\ProjectUserFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CountTest
- */
+
 class BulkRemoveTest extends TestCase
 {
     private const URI = 'v1/projects-users/bulk-remove';
 
     private const PROJECTS_USERS_AMOUNT = 5;
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var array
-     */
-    private $requestData;
-
-    /**
-     * @var Collection
-     */
-    private $projectsUsers;
+    private User $admin;
+    private array $requestData;
+    private Collection $projectsUsers;
 
     protected function setUp(): void
     {

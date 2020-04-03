@@ -4,6 +4,7 @@ namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -74,10 +75,10 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property string $deleted_at
  * @property bool $important
  * @property TimeInterval[] $timeIntervals
- * @property User[]         $user
- * @property User[]         $assigned
- * @property Project[]      $project
- * @property Priority       $priority
+ * @property User $user
+ * @property User $assigned
+ * @property Project $project
+ * @property Priority $priority
  * @method static bool|null forceDelete()
  * @method static QueryBuilder|Task onlyTrashed()
  * @method static bool|null restore()
@@ -98,7 +99,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|Task withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class Task extends AbstractModel
+class Task extends Model
 {
     use SoftDeletes;
 
@@ -147,10 +148,13 @@ class Task extends AbstractModel
         'deleted_at',
     ];
 
+    public static function getTableName(): string
+    {
+        return with(new static())->getTable();
+    }
+
     /**
      * Override parent boot and Call deleting event
-     *
-     * @return void
      */
     protected static function boot(): void
     {
@@ -162,51 +166,28 @@ class Task extends AbstractModel
         });
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class, 'project_id');
-    }
-
-    /**
-     * @return BelongsTo
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    /**
-     * @return BelongsTo
-     */
-    public function assigned(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'assigned_by');
-    }
-
-    /**
-     * @return HasMany
-     */
     public function timeIntervals(): HasMany
     {
         return $this->hasMany(TimeInterval::class, 'task_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
+    public function assigned(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'assigned_by');
+    }
+
     public function priority(): BelongsTo
     {
         return $this->belongsTo(Priority::class, 'priority_id');
-    }
-
-    /**
-     * @return string
-     */
-    public static function getTableName(): string
-    {
-        return with(new static())->getTable();
     }
 }

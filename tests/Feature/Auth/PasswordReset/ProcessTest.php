@@ -8,17 +8,11 @@ use Illuminate\Support\Facades\Hash;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class ProcessTest
- */
 class ProcessTest extends TestCase
 {
     private const URI = 'auth/password/reset/process';
 
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     protected function setUp(): void
     {
@@ -27,13 +21,7 @@ class ProcessTest extends TestCase
         $this->user = UserFactory::create();
     }
 
-    /**
-     * @param $email
-     * @param $token
-     * @param $createdAt
-     * @return array
-     */
-    protected function createReset($email, $token, $createdAt): array
+    protected function createReset(string $email, string $token, string $createdAt): array
     {
         DB::table('password_resets')->insert([
             'email' => $email,

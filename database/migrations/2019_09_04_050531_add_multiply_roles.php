@@ -28,7 +28,7 @@ class AddMultiplyRoles extends Migration
         echo "\n";
         foreach ($users as $index => $user) {
             /** @var \App\Models\User $user */
-            $user->roles()->attach($user->role_id);
+            $user->role()->associate($user->role_id)->save();
             echo "\rAttaching latests roles to users..." . ($index + 1) . "/" . $usersTotal . " (" . floor($usersTotal / ($index + 1) * 100.0) . "%)";
         }
         echo "\nAll roles attached to users!\n";

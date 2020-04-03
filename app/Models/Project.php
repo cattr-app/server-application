@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -44,8 +45,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 
 /**
- * Class Project
- *
  * @property int $id
  * @property int $company_id
  * @property string $name
@@ -54,6 +53,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
+ * @property string $source
  * @property User $users
  * @property Task[] $tasks
  * @property-read Collection|Role[] $roles
@@ -73,7 +73,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|Project withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class Project extends AbstractModel
+class Project extends Model
 {
     use SoftDeletes;
 
@@ -85,6 +85,7 @@ class Project extends AbstractModel
         'name',
         'description',
         'important',
+        'source',
     ];
 
     /**
@@ -95,6 +96,7 @@ class Project extends AbstractModel
         'name' => 'string',
         'description' => 'string',
         'important' => 'integer',
+        'source' => 'string',
     ];
 
     /**
@@ -105,52 +107,6 @@ class Project extends AbstractModel
         'created_at',
         'updated_at',
     ];
-
-    /**
-     * Override parent boot and Call deleting event
-     *
-     * @return void
-     */
-    protected static function boot(): void
-    {
-        parent::boot();
-
-        static::deleting(static function (Project $project) {
-            $project->tasks()->delete();
-        });
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function users(): BelongsToMany
-    {
-        return $this->belongsToMany(User::class, 'projects_users', 'project_id', 'user_id');
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function usersRelation(): HasMany
-    {
-        return $this->hasMany(ProjectsUsers::class, 'project_id', 'id');
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class, 'projects_roles', 'project_id', 'role_id');
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function tasks(): HasMany
-    {
-        return $this->hasMany(Task::class, 'project_id');
-    }
 
     /**
      * @param User $user
@@ -165,31 +121,50 @@ class Project extends AbstractModel
             return static::all(['id'])->pluck('id')->toArray();
         }
 
-        $user_project_ids = collect($user->projects)->pluck('id');
-        $project_ids = collect($user_project_ids);
+        $project_ids = collect($user->projects->pluck('id'));
 
         if (count($project_ids) <= 0) {
             return static::all(['id'])->pluck('id')->toArray();
         }
 
-        $user_tasks_project_id = collect($user->tasks)->flatMap(function ($task) {
-            if (isset($task->project)) {
-                return collect($task->project->id);
-            }
-
-            return null;
-        });
-
-        $user_time_interval_project_id = collect($user->timeIntervals)->flatMap(function ($interval) {
-            if (isset($interval->task->project)) {
-                return collect($interval->task->project->id);
-            }
-
-            return null;
-        });
+        $user_tasks_project_id = Task::where('user_id', $user->id)->pluck('project_id');
+        $user_time_interval_project_id = TimeInterval::join('tasks', 'time_intervals.task_id', '=', 'tasks.id')
+            ->where('time_intervals.user_id', $user->id)->pluck('tasks.project_id');
 
         $project_ids = collect([$project_ids, $user_tasks_project_id, $user_time_interval_project_id])->collapse();
 
         return $project_ids->toArray();
+    }
+
+    /**
+     * Override parent boot and Call deleting event
+     */
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::deleting(static function (Project $project) {
+            $project->tasks()->delete();
+        });
+    }
+
+    public function tasks(): HasMany
+    {
+        return $this->hasMany(Task::class, 'project_id');
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'projects_users', 'project_id', 'user_id');
+    }
+
+    public function usersRelation(): HasMany
+    {
+        return $this->hasMany(ProjectsUsers::class, 'project_id', 'id');
+    }
+
+    public function roles(): BelongsToMany
+    {
+        return $this->belongsToMany(Role::class, 'projects_roles', 'project_id', 'role_id');
     }
 }

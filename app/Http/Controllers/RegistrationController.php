@@ -4,8 +4,8 @@ namespace App\Http\Controllers;
 
 use App\Mail\Registration as RegistrationMail;
 use App\Models\Registration;
-use Exception;
 use App\Models\User;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Mail;
@@ -13,6 +13,7 @@ use Webpatser\Uuid\Uuid;
 
 /**
  * Class RegistrationController
+ * @codeCoverageIgnore until it is implemented on frontend
 */
 class RegistrationController extends Controller
 {
@@ -82,15 +83,18 @@ class RegistrationController extends Controller
      */
     /**
      * Creates a new registration token and sends an email to the specified address
-     * @param Request $request
-     * @return JsonResponse
+     *
      * @throws Exception
      */
     public function create(Request $request): JsonResponse
     {
-        $email = $request->json()->get('email');
+        $email = $request->input('email') ?: $request->input('emails');
+        if (is_array($email)) {
+            return $this->sendMassInvites($emails = $email);
+        }
+
         if (!isset($email)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'Email is required',
             ], 400);
@@ -98,7 +102,7 @@ class RegistrationController extends Controller
 
         $user = User::where('email', $email)->first();
         if (isset($user)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'User with this email is already exists',
             ], 400);
@@ -108,7 +112,7 @@ class RegistrationController extends Controller
             ->where('expires_at', '>=', time())
             ->first();
         if (isset($registration)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'E-Mail to this address is already sent',
             ], 400);
@@ -123,10 +127,70 @@ class RegistrationController extends Controller
 
         Mail::to($email)->send(new RegistrationMail($registration->key));
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'key' => $registration->key,
         ]);
+    }
+
+    protected function sendMassInvites($emails)
+    {
+        $countEmails = count($emails);
+        $users = User::whereIn('email', $emails)->get('email')->map(function ($el) {
+            return $el->getAttribute('email');
+        })->all();
+
+        if ($countEmails === count($users)) {
+            return response()->json([
+                'success' => false,
+                'error' => 'Users with this emails is already exists',
+            ], 400);
+        }
+
+        $usersEmails = '';
+        if (count($users) > 0) {
+            $usersEmails = implode(', ', $users);
+        }
+
+        if ($usersEmails) {
+            return response()->json([
+                'success' => false,
+                'error' => "These users: {$usersEmails} is already exists"
+            ], 400);
+        }
+
+        $registrations = Registration::whereIn('email', $emails)
+            ->where('expires_at', '>=', time())
+            ->get(['email', 'key'])->map(function ($el) {
+                return $el->getAttribute('email');
+            })->all();
+
+        if (count($registrations) > 0) {
+            $registrationsEmails = implode(', ', $registrations);
+        }
+        if (isset($registrationsEmails)) {
+            return response()->json([
+                'success' => false,
+                'error' => "These emails: {$registrationsEmails} to these addresses is already sent.",
+            ], 400);
+        }
+
+        $response = [];
+
+        foreach ($emails as $email) {
+            $registration = Registration::firstOrCreate([
+                'email' => $email,
+            ], [
+                'key' => (string)Uuid::generate(),
+                'expires_at' => time() + static::EXPIRATION_TIME,
+            ]);
+
+            Mail::to($email)->send(new RegistrationMail($registration->key));
+
+            $response['users'][] = ['email' => $email, 'key' => $registration->key];
+        }
+
+        return response()->json(['success' => true, $response]);
     }
 
     /**
@@ -169,13 +233,13 @@ class RegistrationController extends Controller
             ->where('expires_at', '>=', time())
             ->first();
         if (!isset($registration)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'Not found',
             ], 404);
         }
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'email' => $registration->email,
         ]);
@@ -236,21 +300,21 @@ class RegistrationController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function postForm(Request $request, $key): JsonResponse
+    public function postForm(Request $request, string $key): JsonResponse
     {
-        $data = $request->json();
         $registration = Registration::where('key', $key)
             ->where('expires_at', '>=', time())
             ->first();
+
         if (!isset($registration)) {
-            return response()->json([
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'Not found',
             ], 404);
         }
 
-        if ($data->get('email') !== $registration->email) {
-            return response()->json([
+        if ($request->input('email') !== $registration->email) {
+            return new JsonResponse([
                 'success' => false,
                 'error' => 'Email mismatch',
             ], 400);
@@ -258,20 +322,20 @@ class RegistrationController extends Controller
 
         /** @var User $user */
         $user = User::create([
-            'full_name' => $data->get('fullName'),
-            'email' => $data->get('email'),
-            'password' => bcrypt($data->get('password')),
+            'full_name' => $request->input('full_name'),
+            'email' => $request->input('email'),
+            'password' => bcrypt($request->input('password')),
             'active' => true,
             'manual_time' => false,
             'screenshots_active' => true,
-            'computer_time_popup' => 5,
-            'screenshots_interval' => 5,
+            'computer_time_popup' => 3,
+            'screenshots_interval' => 10,
             'role_id' => 2,
         ]);
 
         $registration->delete();
 
-        return response()->json([
+        return new JsonResponse([
             'success' => true,
             'user_id' => $user->id,
         ]);

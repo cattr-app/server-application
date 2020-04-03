@@ -2,40 +2,125 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\EventFilter\Facades\Filter;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
-use App\Rules\BetweenDate;
 use App\Models\User;
-use Exception;
-use Illuminate\Support\Facades\Auth;
+use App\Rules\BetweenDate;
 use Carbon\Carbon;
-use App\EventFilter\Facades\Filter;
+use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Storage;
-use Intervention\Image\Facades\Image;
+use Illuminate\Support\Arr;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
 
-/**
- * Class TimeIntervalController
- */
 class TimeIntervalController extends ItemController
 {
-    /**
-     * @return string
-     */
     public function getItemClass(): string
     {
         return TimeInterval::class;
     }
 
-    /**
-     * @return array
-     */
+    public function create(Request $request): JsonResponse
+    {
+        $intervalData = [
+            'task_id' => $request->input('task_id'),
+            'user_id' => $request->input('user_id'),
+            'start_at' => $request->input('start_at'),
+            'end_at' => $request->input('end_at'),
+            'count_mouse' => $request->input('count_mouse', 0),
+            'count_keyboard' => $request->input('count_keyboard', 0),
+            'is_manual' => $request->input('is_manual', 0)
+        ];
+
+        $validator = Validator::make(
+            $intervalData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.create'),
+                $this->getValidationRules()
+            )
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        $existing = TimeInterval::where('user_id', $intervalData['user_id'])
+            ->where('start_at', $intervalData['start_at'])
+            ->where('end_at', $intervalData['end_at'])
+            ->first();
+
+        if ($existing) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'query.item_already_exists',
+                    'message' => 'Interval already exists'
+                ]),
+                409
+            );
+        }
+
+        if (!$this->validateEndDate($intervalData)) {
+            if (strtotime($intervalData['start_at']) >= strtotime($intervalData['end_at'])) {
+                $message = 'End on interval must be later than start of interval.';
+            } else {
+                $message = 'Length of interval must be less than an hour.';
+            }
+
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => $message,
+                    'info' => 'Invalid interval'
+                ]),
+                400
+            );
+        }
+
+        $timeInterval = TimeInterval::create($intervalData);
+
+        //create screenshot
+        if (isset($request->screenshot)) {
+            if (!Storage::exists('uploads/screenshots/thumbs')) {
+                Storage::makeDirectory('uploads/screenshots/thumbs');
+            }
+
+            $path = Filter::process(
+                $this->getEventUniqueName('request.item.create'),
+                $request->screenshot->store('uploads/screenshots')
+            );
+
+            Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval, $path));
+        }
+
+        if ($timeInterval->is_manual) {
+            Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval));
+        }
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success' => true,
+                'interval' => $timeInterval,
+            ])
+        );
+    }
+
     public function getValidationRules(): array
     {
         return [
@@ -46,29 +131,6 @@ class TimeIntervalController extends ItemController
         ];
     }
 
-    /**
-     * @return array
-     */
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'time-intervals.list',
-            'count' => 'time-intervals.list',
-            'create' => 'time-intervals.create',
-            'bulkCreate' => 'time-intervals.bulk-create',
-            'edit' => 'time-intervals.edit',
-            'bulkEdit' => 'time-intervals.bulk-edit',
-            'show' => 'time-intervals.show',
-            'destroy' => 'time-intervals.remove',
-            'bulkDestroy' => 'time-intervals.bulk-remove',
-            'manualCreate' => 'time-intervals.create',
-        ];
-    }
-
-    /**
-     * @param array $intervalData
-     * @return bool
-     */
     public function validateEndDate(array $intervalData): bool
     {
         $start_at = $intervalData['start_at'] ?? '';
@@ -146,227 +208,10 @@ class TimeIntervalController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function create(Request $request): JsonResponse
+
+    public function getEventUniqueNamePart(): string
     {
-        $intervalData = [
-            'task_id' => $request->input('task_id'),
-            'user_id' => $request->input('user_id'),
-            'start_at' => $request->input('start_at'),
-            'end_at' => $request->input('end_at'),
-            'count_mouse' => $request->input('count_mouse'),
-            'count_keyboard' => $request->input('count_keyboard')
-        ];
-
-        $validator = Validator::make(
-            $intervalData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.create'),
-                $this->getValidationRules()
-            )
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        $existing = TimeInterval::where('user_id', $intervalData['user_id'])
-            ->where('start_at', $intervalData['start_at'])
-            ->where('end_at', $intervalData['end_at'])
-            ->first();
-
-        if ($existing) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'query.item_already_exists',
-                    'message' => 'Interval already exists'
-                ]),
-                409
-            );
-        }
-
-        if (!$this->validateEndDate($intervalData)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid interval'
-                ]),
-                400
-            );
-        }
-
-        $timeInterval = TimeInterval::create($intervalData);
-
-        //create screenshot
-        if (isset($request->screenshot)) {
-            $path = Filter::process(
-                $this->getEventUniqueName('request.item.create'),
-                $request->screenshot->store('uploads/screenshots')
-            );
-            $screenshot = Image::make(storage_path('app/' . $path));
-            $thumbnail = $screenshot->resize(280, null, static function ($constraint) {
-                $constraint->aspectRatio();
-            });
-            $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
-            Storage::put($thumbnailPath, (string)$thumbnail->encode());
-
-            $screenshotData = [
-                'time_interval_id' => $timeInterval->id,
-                'path' => $path,
-                'thumbnail_path' => $thumbnailPath,
-            ];
-
-            Filter::process('item.create.screenshot', Screenshot::create($screenshotData));
-        }
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
-                'interval' => $timeInterval,
-            ])
-        );
-    }
-
-    /**
-     * @api             {post} /v1/time-intervals/manual-create Manual Create
-     * @apiDescription  Manual Create Time Interval
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Manual Create
-     * @apiGroup        Time Interval
-     *
-     * @apiPermission   time_intervals_manual_create
-     *
-     * @apiParam {Integer}  task_id   Task id
-     * @apiParam {Integer}  user_id   User id
-     * @apiParam {String}   start_at  Interval time start
-     * @apiParam {String}   end_at    Interval time end
-     *
-     * @apiParamExample {json} Request Example
-     * {
-     *   "task_id": 1,
-     *   "user_id": 1,
-     *   "start_at": "2013-04-12T16:40:00-04:00",
-     *   "end_at": "2013-04-12T16:40:00-04:00"
-     * }
-     *
-     * @apiSuccess {Boolean}  success   Indicates successful request when `TRUE`
-     * @apiSuccess {Object}   interval  Interval
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "success": true,
-     *    "interval": {
-     *     "id": 2251,
-     *     "task_id": 1,
-     *     "start_at": "2013-04-12 20:40:00",
-     *     "end_at": "2013-04-12 20:40:00",
-     *     "is_manual": true,
-     *     "created_at": "2018-10-01 03:20:59",
-     *     "updated_at": "2018-10-01 03:20:59",
-     *     "count_mouse": 0,
-     *     "count_keyboard": 0,
-     *     "user_id": 1
-     *   }
-     * }
-     *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ForbiddenError
-     */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function manualCreate(Request $request): JsonResponse
-    {
-        /* TODO: Add permission validation to time management for other users */
-
-        // TODO DUPLICATED CODE
-
-        if (!$request->user()->manual_time) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'success' => false,
-                    'error_type' => 'authorization.forbidden',
-                    'message' => 'Access denied',
-                    'info' => 'User does not have access to manual time editing'
-                ]),
-                403
-            );
-        }
-
-        $intervalData = [
-            'task_id' => $request->input('task_id'),
-            'user_id' => $request->input('user_id'),
-            'start_at' => $request->input('start_at'),
-            'end_at' => $request->input('end_at'),
-            'is_manual' => true,
-        ];
-
-        $validator = Validator::make(
-            $intervalData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.create'),
-                $this->getValidationRules()
-            )
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        $existing = TimeInterval::where('user_id', $intervalData['user_id'])
-            ->where('start_at', $intervalData['start_at'])
-            ->where('end_at', $intervalData['end_at'])
-            ->first();
-
-        if ($existing) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'query.item_already_exists',
-                    'message' => 'Interval already exists'
-                ]),
-                409
-            );
-        }
-
-        $timeInterval = Filter::process(
-            $this->getEventUniqueName('item.create'),
-            TimeInterval::create($intervalData)
-        );
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
-                'interval' => $timeInterval,
-            ])
-        );
+        return 'timeinterval';
     }
 
     /**
@@ -380,11 +225,29 @@ class TimeIntervalController extends ItemController
      */
 
     /**
-     * @return string
+     * @throws Exception
      */
-    public function getEventUniqueNamePart(): string
+    public function index(Request $request): JsonResponse
     {
-        return 'timeinterval';
+        $filters = $request->all();
+        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : false;
+
+        $baseQuery = $this->applyQueryFilter(
+            $this->getQuery(),
+            $filters ?: []
+        );
+
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            $baseQuery
+        );
+
+        return new JsonResponse(
+            Filter::process(
+                $this->getEventUniqueName('answer.success.item.list.result'),
+                $itemsQuery->get()
+            )
+        );
     }
 
     /**
@@ -424,32 +287,61 @@ class TimeIntervalController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+
     /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
+     * @param bool $withRelations
+     * @param bool $withSoftDeleted
+     * @return Builder
      */
-    public function index(Request $request): JsonResponse
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
-        $filters = $request->all();
-        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : false;
+        /** @var User $user */
+        $user = Auth::user();
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
+        $full_access = $user->allowed('time-intervals', 'full_access');
+        $action_method = Route::getCurrentRoute()->getActionMethod();
 
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(),
-            $filters ?: []
-        );
+        if ($full_access) {
+            return $query;
+        }
 
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery
-        );
+        $rules = $this->getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
+            }
 
-        return response()->json(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.item.list.result'),
-                $itemsQuery->get()
-            )
-        );
+            $query->where(static function (Builder $query) use ($user, $object, $action) {
+                $user_id = $user->id;
+
+                // Filter by project roles of the user
+                $query->whereHas('task.project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
+                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
+                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                            $query->where([
+                                'object' => $object,
+                                'action' => $action,
+                                'allow' => true,
+                            ])->select('id');
+                        })->select('id');
+                    })->select('id');
+                });
+
+                // For read and delete access include user own intervals
+                $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
+                    $query->orWhere('user_id', $user_id)->select('user_id');
+                });
+
+                $query->when($action === 'edit' && (bool)$user->manual_time, static function (Builder $query) use ($user_id) {
+                    $query->orWhere('user_id', $user_id)->select('user_id');
+                });
+            });
+        }
+
+        return $query;
     }
 
     /**
@@ -540,90 +432,20 @@ class TimeIntervalController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function edit(Request $request): JsonResponse
+
+    public static function getControllerRules(): array
     {
-        $requestData = Filter::process(
-            $this->getEventUniqueName('request.item.edit'),
-            $request->all()
-        );
-
-        $validationRules = $this->getValidationRules();
-        $validationRules['id'] = 'required|integer';
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.edit'),
-                $validationRules
-            )
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        //create time interval
-        $requestData['start_at'] = (new Carbon($requestData['start_at']))->setTimezone('UTC')->toDateTimeString();
-        $requestData['end_at'] = (new Carbon($requestData['end_at']))->setTimezone('UTC')->toDateTimeString();
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery()
-            )
-        );
-
-        /** @var Model $item */
-        $item = collect($itemsQuery->get())->first(static function ($val, $key) use ($request) {
-            return $val['id'] === $request->get('id');
-        });
-
-        if (!$item) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found',
-                ]),
-                404
-            );
-        }
-
-        $item->fill($this->filterRequestData($requestData));
-        if (!$this->validateEndDate($requestData)) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid interval'
-                ]),
-                400
-            );
-        }
-        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
-        $item->save();
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'success' => true,
-                'res' => $item,
-            ])
-        );
+        return [
+            'index' => 'time-intervals.list',
+            'count' => 'time-intervals.list',
+            'create' => 'time-intervals.create',
+            'bulkCreate' => 'time-intervals.bulk-create',
+            'edit' => 'time-intervals.edit',
+            'bulkEdit' => 'time-intervals.bulk-edit',
+            'show' => 'time-intervals.show',
+            'destroy' => 'time-intervals.remove',
+            'bulkDestroy' => 'time-intervals.bulk-remove',
+        ];
     }
 
     /**
@@ -681,27 +503,31 @@ class TimeIntervalController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
      */
+
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
-    public function bulkEdit(Request $request): JsonResponse
+    public function edit(Request $request): JsonResponse
     {
-        $validationRules = [
-            'intervals' => 'required|array',
-            'intervals.*.id' => 'required|integer',
-            'intervals.*.task_id' => 'required|integer'
-        ];
+        $requestData = Filter::process(
+            $this->getEventUniqueName('request.item.edit'),
+            $request->all()
+        );
+
+        $validationRules = $this->getValidationRules();
+        $validationRules['id'] = 'required|integer';
 
         $validator = Validator::make(
-            Filter::process($this->getEventUniqueName('request.item.edit'), $request->all()),
-            Filter::process($this->getEventUniqueName('validation.item.edit'), $validationRules)
+            $requestData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.edit'),
+                $validationRules
+            )
         );
 
         if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
@@ -711,35 +537,54 @@ class TimeIntervalController extends ItemController
             );
         }
 
-        $intervalsData = collect($validator->validated()['intervals']);
+        //create time interval
+        $requestData['start_at'] = (new Carbon($requestData['start_at']))->setTimezone('UTC')->toDateTimeString();
+        $requestData['end_at'] = (new Carbon($requestData['end_at']))->setTimezone('UTC')->toDateTimeString();
 
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
-            $this->applyQueryFilter($this->getQuery(), ['id' => ['in', $intervalsData->pluck('id')->toArray()]])
+            $this->applyQueryFilter(
+                $this->getQuery()
+            )
         );
 
-        $foundIds = $itemsQuery->pluck('id')->toArray();
-        $notFoundIds = array_diff($intervalsData->pluck('id')->toArray(), $foundIds);
-
-        $itemsQuery->each(static function (Model $item) use ($intervalsData) {
-            $item->update(array_only($intervalsData->where('id', $item->id)->first(), 'task_id'));
+        /** @var Model $item */
+        $item = collect($itemsQuery->get())->first(static function ($val, $key) use ($request) {
+            return $val['id'] === $request->get('id');
         });
 
-        $responseData = [
-            'success' => true,
-            'message' => 'Intervals successfully updated',
-            'updated' => $foundIds
-        ];
-
-        if ($notFoundIds) {
-            $responseData['message'] = 'Some intervals have not been updated';
-            $responseData['not_found'] = array_values($notFoundIds);
+        if (!$item) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found',
+                ]),
+                404
+            );
         }
 
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.edit'), $responseData),
-            ($notFoundIds) ? 207 : 200
+        $item->fill($this->filterRequestData($requestData));
+        if (!$this->validateEndDate($requestData)) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid interval'
+                ]),
+                400
+            );
+        }
+        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
+        $item->save();
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
+                'res' => $item,
+            ])
         );
     }
 
@@ -851,9 +696,68 @@ class TimeIntervalController extends ItemController
      * @apiUse         ForbiddenError
      * @apiUse         UnauthorizedError
      */
+
     /**
-     * @param Request $request
-     * @return JsonResponse
+     * @throws Exception
+     */
+    public function bulkEdit(Request $request): JsonResponse
+    {
+        $validationRules = [
+            'intervals' => 'required|array',
+            'intervals.*.id' => 'required|integer',
+            'intervals.*.task_id' => 'required|integer'
+        ];
+
+        $validator = Validator::make(
+            Filter::process($this->getEventUniqueName('request.item.edit'), $request->all()),
+            Filter::process($this->getEventUniqueName('validation.item.edit'), $validationRules)
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        $intervalsData = collect($validator->validated()['intervals']);
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter($this->getQuery(), ['id' => ['in', $intervalsData->pluck('id')->toArray()]])
+        );
+
+        $foundIds = $itemsQuery->pluck('id')->toArray();
+        $notFoundIds = array_diff($intervalsData->pluck('id')->toArray(), $foundIds);
+
+        $itemsQuery->each(static function (Model $item) use ($intervalsData) {
+            $item->update(Arr::only($intervalsData->where('id', $item->id)->first(), 'task_id'));
+        });
+
+        $responseData = [
+            'success' => true,
+            'message' => 'Intervals successfully updated',
+            'updated' => $foundIds
+        ];
+
+        if ($notFoundIds) {
+            $responseData['message'] = 'Some intervals have not been updated';
+            $responseData['not_found'] = array_values($notFoundIds);
+        }
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), $responseData),
+            ($notFoundIds) ? 207 : 200
+        );
+    }
+
+    /**
      * @throws Exception
      */
     public function bulkDestroy(Request $request): JsonResponse
@@ -869,7 +773,7 @@ class TimeIntervalController extends ItemController
         );
 
         if ($validator->fails()) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.bulkDestroy'), [
                     'success' => false,
                     'error_type' => 'validation',
@@ -908,66 +812,9 @@ class TimeIntervalController extends ItemController
             $responseData['not_found'] = array_values($notFoundIds);
         }
 
-        return response()->json(
+        return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), $responseData),
             ($notFoundIds) ? 207 : 200
         );
-    }
-
-    /**
-     * @param bool $withRelations
-     *
-     * @param bool $withSoftDeleted
-     * @return Builder
-     */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
-    {
-        /** @var User $user */
-        $user = Auth::user();
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = $user->allowed('time-intervals', 'full_access');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
-
-        if ($full_access) {
-            return $query;
-        }
-
-        $rules = $this->getControllerRules();
-        $rule = $rules[$action_method] ?? null;
-        if (isset($rule)) {
-            [$object, $action] = explode('.', $rule);
-            // Check user default role
-            if (Role::can($user, $object, $action)) {
-                return $query;
-            }
-
-            $query->where(function (Builder $query) use ($user, $object, $action) {
-                $user_id = $user->id;
-
-                // Filter by project roles of the user
-                $query->whereHas('task.project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
-                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
-                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                            $query->where([
-                                'object' => $object,
-                                'action' => $action,
-                                'allow' => true,
-                            ])->select('id');
-                        })->select('id');
-                    })->select('id');
-                });
-
-                // For read and delete access include user own intervals
-                $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
-                    $query->orWhere('user_id', $user_id)->select('user_id');
-                });
-
-                $query->when($action === 'edit' && (bool)$user->manual_time, static function (Builder $query) use ($user_id) {
-                    $query->orWhere('user_id', $user_id)->select('user_id');
-                });
-            });
-        }
-
-        return $query;
     }
 }

@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
@@ -38,23 +39,21 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 
 /**
- * Class ProjectsUsers
- *
- * @property int     $project_id
- * @property int     $user_id
- * @property int     $role_id
- * @property string  $created_at
- * @property string  $updated_at
- * @property User    $user
+ * @property int $project_id
+ * @property int $user_id
+ * @property int $role_id
+ * @property string $created_at
+ * @property string $updated_at
+ * @property User $user
  * @property Project $project
- * @property Role    $role
+ * @property Role $role
  * @method static EloquentBuilder|ProjectsUsers whereCreatedAt($value)
  * @method static EloquentBuilder|ProjectsUsers whereProjectId($value)
  * @method static EloquentBuilder|ProjectsUsers whereUpdatedAt($value)
  * @method static EloquentBuilder|ProjectsUsers whereUserId($value)
  * @mixin EloquentIdeHelper
  */
-class ProjectsUsers extends AbstractModel
+class ProjectsUsers extends Model
 {
     /**
      * table name from database
@@ -89,38 +88,24 @@ class ProjectsUsers extends AbstractModel
         'updated_at',
     ];
 
-    /**
-     * @param  EloquentBuilder  $query
-     *
-     * @return EloquentBuilder
-     */
-    protected function setKeysForSaveQuery(Builder $query): EloquentBuilder
-    {
-        return $query->where('project_id', '=', $this->getAttribute('project_id'))
-            ->where('user_id', '=', $this->getAttribute('user_id'));
-    }
-
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function project(): BelongsTo
     {
         return $this->belongsTo(Project::class, 'project_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id');
+    }
+
+    protected function setKeysForSaveQuery(Builder $query): EloquentBuilder
+    {
+        return $query->where('project_id', '=', $this->getAttribute('project_id'))
+            ->where('user_id', '=', $this->getAttribute('user_id'));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace Modules\RedmineIntegration\Console;
 
+use Exception;
 use Illuminate\Console\Command;
 
 class GenerateSignature extends Command
@@ -33,10 +34,9 @@ class GenerateSignature extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
-     * @throws \Exception
+     * @throws Exception
      */
-    public function handle()
+    public function handle(): void
     {
         $key = $this->generateRandomKey();
 
@@ -50,29 +50,36 @@ class GenerateSignature extends Command
     /**
      * Generate a random key for the application.
      *
-     * @return string
-     * @throws \Exception
+     * @throws Exception
      */
-    protected function generateRandomKey()
+    protected function generateRandomKey(): string
     {
         return base64_encode(random_bytes(64));
     }
 
     /**
      * Set the application key in the environment file.
-     *
-     * @param  string  $key
-     *
-     * @return bool
      */
-    protected function setKeyInEnvironmentFile($key)
+    protected function setKeyInEnvironmentFile(string $key): bool
     {
         $this->writeNewEnvironmentFileWith($key);
         return true;
     }
 
     /**
-     * @return string
+     * Write a new environment file with the given key.
+     */
+    protected function writeNewEnvironmentFileWith(string $key): void
+    {
+        file_put_contents($this->getEnvFilePath(), preg_replace(
+            $this->keyReplacementPattern(),
+            'REQUEST_SIGNATURE=' . $key,
+            file_get_contents($this->getEnvFilePath())
+        ));
+    }
+
+    /**
+     * @return mixed
      */
     protected function getEnvFilePath()
     {
@@ -80,29 +87,11 @@ class GenerateSignature extends Command
     }
 
     /**
-     * Write a new environment file with the given key.
-     *
-     * @param  string  $key
-     *
-     * @return void
-     */
-    protected function writeNewEnvironmentFileWith($key)
-    {
-        file_put_contents($this->getEnvFilePath(), preg_replace(
-            $this->keyReplacementPattern(),
-            'REQUEST_SIGNATURE='.$key,
-            file_get_contents($this->getEnvFilePath())
-        ));
-    }
-
-    /**
      * Get a regex pattern that will match env REQUEST_SIGNATURE with any random key.
-     *
-     * @return string
      */
-    protected function keyReplacementPattern()
+    protected function keyReplacementPattern(): string
     {
-        $escaped = preg_quote('='.$this->laravel['config']['redmineintegration.request.signature'], '/');
+        $escaped = preg_quote('=' . $this->laravel['config']['redmineintegration.request.signature'], '/');
 
         return "/^REQUEST_SIGNATURE{$escaped}/m";
     }

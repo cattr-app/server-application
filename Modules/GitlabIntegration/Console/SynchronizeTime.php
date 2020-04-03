@@ -3,9 +3,8 @@
 
 namespace Modules\GitlabIntegration\Console;
 
-
 use Illuminate\Console\Command;
-use Modules\GitlabIntegration\Entities\TimeSynchronizer;
+use Modules\GitlabIntegration\Services\TimeSynchronizer;
 
 class SynchronizeTime extends Command
 {
@@ -30,7 +29,6 @@ class SynchronizeTime extends Command
 
     /**
      * Create a new command instance.
-     * @param TimeSynchronizer $timeSynchronizer
      */
     public function __construct(TimeSynchronizer $timeSynchronizer)
     {
@@ -42,7 +40,7 @@ class SynchronizeTime extends Command
     /**
      * Execute the console command.
      */
-    public function handle()
+    public function handle(): void
     {
         $this->timeSynchronizer->synchronize();
     }

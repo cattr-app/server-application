@@ -2,49 +2,34 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\Models\Role;
-use Exception;
-use Illuminate\Support\Facades\Auth;
-use Carbon\Carbon;
 use App\EventFilter\Facades\Filter;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Support\Facades\Validator;
+use App\Models\Role;
 use App\Models\TimeInterval;
+use Carbon\Carbon;
+use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\Validator;
 
-/**
- * Class TimeController
-*/
 class TimeController extends ItemController
 {
-    /**
-     * @return string
-     */
     public function getItemClass(): string
     {
         return TimeInterval::class;
     }
 
-    /**
-     * @return array
-     */
     public function getValidationRules(): array
     {
         return [];
     }
 
-    /**
-     * @return string
-     */
     public function getEventUniqueNamePart(): string
     {
         return 'time';
     }
 
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -99,10 +84,9 @@ class TimeController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          ValidationError
      */
+
     /**
      * Display a total of time
-     * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
     public function total(Request $request): JsonResponse
@@ -116,7 +100,7 @@ class TimeController extends ItemController
         $validator = Validator::make($request->all(), $validationRules);
 
         if ($validator->fails()) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.time.total'), [
                     'success' => false,
                     'error_type' => 'validation',
@@ -151,7 +135,7 @@ class TimeController extends ItemController
             'end' => $timeIntervals->max('end_at')
         ];
 
-        return response()->json(Filter::process(
+        return new JsonResponse(Filter::process(
             $this->getEventUniqueName('answer.success.item.list'),
             $responseData
         ));
@@ -234,8 +218,6 @@ class TimeController extends ItemController
     /**
      * Display the Tasks and theirs total time
      *
-     * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
     public function tasks(Request $request): JsonResponse
@@ -250,7 +232,7 @@ class TimeController extends ItemController
         $validator = Validator::make($request->all(), $validationRules);
 
         if ($validator->fails()) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.time.total'), [
                     'success' => false,
                     'error_type' => 'validation',
@@ -262,10 +244,10 @@ class TimeController extends ItemController
         }
 
         $filters = $request->all();
-        $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : False;
-        $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : False;
-        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : False;
-        $request->get('task_id') ? $filters['task_id'] = ['in', $request->get('task_id')] : False;
+        $request->get('start_at') ? $filters['start_at'] = ['>=', (string)$request->get('start_at')] : false;
+        $request->get('end_at') ? $filters['end_at'] = ['<=', (string)$request->get('end_at')] : false;
+        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : false;
+        $request->get('task_id') ? $filters['task_id'] = ['in', $request->get('task_id')] : false;
 
         $baseQuery = $this->applyQueryFilter(
             $this->getQuery(),
@@ -283,7 +265,7 @@ class TimeController extends ItemController
             ->with('task')
             ->get()
             ->groupBy(['task_id', 'user_id'])
-            ->map(function($taskIntervals, $taskId) use (&$totalTime) {
+            ->map(static function ($taskIntervals, $taskId) use (&$totalTime) {
                 $task = [];
 
                 foreach ($taskIntervals as $userId => $userIntervals) {
@@ -325,7 +307,7 @@ class TimeController extends ItemController
             ]
         ];
 
-        return response()->json(Filter::process(
+        return new JsonResponse(Filter::process(
             $this->getEventUniqueName('answer.success.item.list'),
             $response
         ));
@@ -359,7 +341,6 @@ class TimeController extends ItemController
 
     /**
      * @param bool $withRelations
-     *
      * @param bool $withSoftDeleted
      * @return Builder
      */
@@ -373,14 +354,14 @@ class TimeController extends ItemController
             return $query;
         }
 
-        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(function ($val) {
+        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(static function ($val) {
             return collect($val->id);
         });
         $time_intervals_id = collect([]);
 
         if ($project_relations_access) {
-            $attached_time_interval_id_to_project = collect(Auth::user()->projects)->flatMap(function ($project) {
-                return collect($project->tasks)->flatMap(function ($task) {
+            $attached_time_interval_id_to_project = collect(Auth::user()->projects)->flatMap(static function ($project) {
+                return collect($project->tasks)->flatMap(static function ($task) {
                     return collect($task->timeIntervals)->pluck('id');
                 });
             });

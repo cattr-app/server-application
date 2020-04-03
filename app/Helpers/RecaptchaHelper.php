@@ -8,19 +8,11 @@ use GuzzleHttp\Client;
 use Request;
 use Throwable;
 
-/**
- * Class RecaptchaHelper
-*/
 class RecaptchaHelper
 {
-    /**
-     * @var string $user
-     */
-    private $user;
-    /**
-     * @var bool $solved
-     */
-    private $solved = false;
+    private string $userEmail;
+
+    private bool $solved = false;
 
     /**
      * Increment amount of login tries for ip and login
@@ -57,7 +49,7 @@ class RecaptchaHelper
     private function getCaptchaCacheKey(): string
     {
         $ip = Request::ip();
-        $email = $this->user;
+        $email = $this->userEmail;
         return "AUTH_RECAPTCHA_LIMITER_{$ip}_{$email}_ATTEMPTS";
     }
 
@@ -84,7 +76,7 @@ class RecaptchaHelper
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_BANNED);
         }
 
-        $this->user = $credentials['email'];
+        $this->userEmail = $credentials['email'];
 
         if (isset($credentials['recaptcha'])) {
             $this->solve($credentials['recaptcha']);
@@ -92,8 +84,10 @@ class RecaptchaHelper
 
         if ($this->needsCaptcha()) {
             $this->incrementBanAmounts();
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_CAPTCHA,
-                ['site_key' => config('recaptcha.site_key')]);
+            throw new AuthorizationException(
+                AuthorizationException::ERROR_TYPE_CAPTCHA,
+                ['site_key' => config('recaptcha.site_key')]
+            );
         }
     }
 
@@ -199,7 +193,7 @@ class RecaptchaHelper
 
         $response = $response->getBody();
 
-        if (empty($response)) {
+        if ($response === null) {
             return;
         }
 

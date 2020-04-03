@@ -2,25 +2,20 @@
 
 namespace App\Models;
 
-use Eloquent as EloquentIdeHelper;
 use App\Mail\ResetPassword;
-use Fico7489\Laravel\EloquentJoin\EloquentJoinBuilder;
-use Fico7489\Laravel\EloquentJoin\Traits\EloquentJoin;
-use Illuminate\Database\Eloquent\Builder;
+use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Foundation\Auth\User as Authenticatable;
 use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
-use Tymon\JWTAuth\Contracts\JWTSubject;
 use Illuminate\Notifications\Notifiable;
-use Illuminate\Database\Eloquent\SoftDeletes;
-use Illuminate\Foundation\Auth\User as Authenticatable;
-
-use Illuminate\Contracts\Auth\CanResetPassword;
-use Illuminate\Database\Eloquent\Collection;
+use Tymon\JWTAuth\Contracts\JWTSubject;
 
 /**
  * @apiDefine UserObject
@@ -114,8 +109,6 @@ use Illuminate\Database\Eloquent\Collection;
 
 
 /**
- * Class User
- *
  * @property int $id
  * @property string $full_name
  * @property string $email
@@ -191,8 +184,6 @@ class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use SoftDeletes;
-    use EloquentJoin;
-    use DateTrait;
 
     /**
      * table name from database
@@ -234,6 +225,7 @@ class User extends Authenticatable implements JWTSubject
         'role_id',
         'is_admin',
         'user_language',
+        'type',
     ];
 
     /**
@@ -264,6 +256,7 @@ class User extends Authenticatable implements JWTSubject
         'is_admin' => 'integer',
         'role_id' => 'integer',
         'user_language' => 'string',
+        'type' => 'string',
     ];
 
 
@@ -308,88 +301,57 @@ class User extends Authenticatable implements JWTSubject
         return [];
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id')
             ->withPivot('role_id');
     }
 
-    /**
-     * @return HasMany
-     */
+    public function addToken(string $tokenString): Token
+    {
+        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
+        /** @var Token $token */
+        $token = $this->tokens()->create(['token' => $tokenString, 'expires_at' => $tokenExpires]);
+        return $token;
+
+    }
+
     public function tokens(): HasMany
     {
         return $this->hasMany(Token::class);
     }
 
-    /**
-     * @param $token
-     * @return Token
-     */
-    public function addToken($token): Token
-    {
-        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
-        /** @var Token $token */
-        $token = $this->tokens()->create(['token' => $token, 'expires_at' => $tokenExpires]);
-        return $token;
-
-    }
-
-    /**
-     * @param string $token
-     */
     public function invalidateToken(string $token)
     {
         $this->tokens()->where('token', $token)->delete();
     }
 
 
-    /**
-     * @param string $except
-     */
-    public function invalidateAllTokens(string $except = null)
+    public function invalidateAllTokens(?string $except = null)
     {
         $this->tokens()->where('token', '!=', $except)->delete();
     }
 
-    /**
-     * @return HasMany
-     */
     public function projectsRelation(): HasMany
     {
         return $this->hasMany(ProjectsUsers::class, 'user_id', 'id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function timeIntervals(): HasMany
     {
         return $this->hasMany(TimeInterval::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function properties(): HasMany
     {
         return $this->hasMany(Property::class, 'entity_id')
@@ -399,20 +361,12 @@ class User extends Authenticatable implements JWTSubject
     /**
      * Send the password reset notification.
      *
-     * @param  string $token
+     * @param string $token
      * @return void
      */
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPassword($this->email, $token));
-    }
-
-    /**
-     * @return Builder|EloquentJoinBuilder
-     */
-    public static function joinQuery()
-    {
-        return static::query();
     }
 
     /**

@@ -6,20 +6,23 @@ use App\Models\Project;
 use App\Models\Property;
 use App\Models\User;
 use Exception;
+use Illuminate\Support\Facades\Log;
+use Modules\RedmineIntegration\Entities\ClientFactoryException;
 
 class ProjectIntegrationHelper extends AbstractIntegrationHelper
 {
     /**
      * Synchronize projects for all users
      */
-    public function synchronizeProjects()
+    public function synchronizeProjects(): void
     {
         $users = User::all();
 
         foreach ($users as $user) {
             try {
                 $this->synchronizeUserProjects($user->id);
-            } catch (Exception $e) {
+            } catch (ClientFactoryException $e) {
+                Log::info($e->getMessage());
             }
         }
     }
@@ -30,7 +33,7 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
      * @param int $userId User's id in our system
      *
      * @return array Associative array ['added_projects' => count_of_added_projects]
-     * @throws Exception
+     * @throws ClientFactoryException
      */
     public function synchronizeUserProjects(int $userId): array
     {
@@ -39,6 +42,13 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
             $projectsData = $client->project->all([
                 'limit' => 1000
             ]);
+
+            if (!isset($projectsData['projects'])) {
+                return [
+                    'added_projects' => []
+                ];
+            }
+
             $projects = $projectsData['projects'];
             $addedProjectsCounter = 0;
             foreach ($projects as $projectFromRedmine) {
@@ -49,14 +59,15 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
                     ['value', '=', $projectFromRedmine['id']]
                 ])->first();
 
-                if ($projectExist != null) {
+                if ($projectExist !== null) {
                     continue;
                 }
 
                 $projectInfo = [
                     'company_id' => 4,
                     'name' => $projectFromRedmine['name'],
-                    'description' => $projectFromRedmine['description']
+                    'description' => $projectFromRedmine['description'],
+                    'source' => 'redmine',
                 ];
 
                 $project = Project::create($projectInfo);
@@ -72,8 +83,8 @@ class ProjectIntegrationHelper extends AbstractIntegrationHelper
             return [
                 'added_projects' => $addedProjectsCounter
             ];
-        } catch (Exception $e) {
-            if ($e->getCode() == 404) {
+        } catch (ClientFactoryException $e) {
+            if ($e->getCode() === 404) {
                 return [
                     'added_projects' => [],
                     'notice' => 'This user does not have assigned Redmine URL',

@@ -10,38 +10,19 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class ListTest
- */
+
 class ListTest extends TestCase
 {
     private const URI = 'v1/time-use-report/list';
 
     private const INTERVALS_AMOUNT = 10;
 
-    /**
-     * @var Collection
-     */
-    private $intervals;
+    private Collection $intervals;
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var int
-     */
-    private $duration;
-
-    /**
-     * @var array
-     */
-    private $userIds;
-    /**
-     * @var array
-     */
-    private $requestData;
+    private User $admin;
+    private int $duration = 0;
+    private array $userIds;
+    private array $requestData;
 
     protected function setUp(): void
     {
@@ -58,7 +39,7 @@ class ListTest extends TestCase
 
         $this->requestData = [
             'start_at' => $this->intervals->min('start_at'),
-            'end_at' => Carbon::create($this->intervals->max('end_at'))->addMinute(),
+            'end_at' => $this->intervals->max('end_at')->addMinute(),
             'user_ids' => $this->userIds
         ];
     }

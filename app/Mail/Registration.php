@@ -3,11 +3,12 @@
 namespace App\Mail;
 
 use Illuminate\Bus\Queueable;
+use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Mail\Mailable;
-use Illuminate\Support\Facades\URL;
 use Illuminate\Queue\SerializesModels;
 
-class Registration extends Mailable
+/** @codeCoverageIgnore  */
+class Registration extends Mailable implements ShouldQueue
 {
     use Queueable;
     use SerializesModels;
@@ -21,7 +22,7 @@ class Registration extends Mailable
      */
     public function __construct($key)
     {
-        $this->url = URL::to("auth/register/$key");
+        $this->url = config('app.frontend_url') . "/auth/register?token={$key}";
     }
 
     /**
@@ -31,6 +32,6 @@ class Registration extends Mailable
      */
     public function build(): self
     {
-        return $this->view('emails.registration');
+        return $this->markdown('emails.registration');
     }
 }

@@ -3,30 +3,20 @@
 namespace Tests\Feature\Time;
 
 use App\Models\User;
-use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class TasksTest
- */
+
 class TasksTest extends TestCase
 {
     private const URI = 'v1/time/tasks';
 
     private const INTERVALS_AMOUNT = 10;
 
-    /**
-     * @var Collection
-     */
-    private $intervals;
-
-    /**
-     * @var User
-     */
-    private $admin;
+    private Collection $intervals;
+    private User $admin;
 
     protected function setUp(): void
     {
@@ -41,7 +31,7 @@ class TasksTest extends TestCase
     {
         $requestData = [
             'start_at' => $this->intervals->min('start_at'),
-            'end_at' => Carbon::create($this->intervals->max('end_at'))->addMinute(),
+            'end_at' => $this->intervals->max('end_at')->addMinute(),
             'user_id' => $this->admin->id
         ];
 
@@ -58,12 +48,10 @@ class TasksTest extends TestCase
         $response->assertUnauthorized();
     }
 
-    //TODO ASK QUESTIONS
-//
-//    public function test_without_params(): void
-//    {
-//        $response = $this->actingAs($this->admin)->getJson(self::URI);
-//
-//        $response->assertValidationError();
-//    }
+    public function test_wrong_params(): void
+    {
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['task_id' => 'wrong']);
+
+        $response->assertValidationError();
+    }
 }

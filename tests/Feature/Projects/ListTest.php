@@ -8,28 +8,22 @@ use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class ListTest
- */
+
 class ListTest extends TestCase
 {
     private const URI = 'v1/projects/list';
 
     private const PROJECTS_AMOUNT = 10;
 
-    /**
-     * @var User
-     */
-    private $admin;
-    private $commonUser;
+    private User $admin;
+    private User $user;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
-
-        $this->commonUser = UserFactory::withTokens()->asUser()->create();
+        $this->user = UserFactory::withTokens()->asUser()->create();
 
         ProjectFactory::createMany(self::PROJECTS_AMOUNT);
     }
@@ -51,7 +45,7 @@ class ListTest extends TestCase
 
     public function test_common_user(): void
     {
-        $response = $this->actingAs($this->commonUser)->getJson(self::URI);
+        $response = $this->actingAs($this->user)->getJson(self::URI);
 
         $response->assertOk();
         $response->assertJson([]);

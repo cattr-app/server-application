@@ -9,37 +9,13 @@ use Modules\RedmineIntegration\Entities\Repositories\TaskRepository;
 use Modules\RedmineIntegration\Entities\Repositories\UserRepository;
 use Symfony\Component\HttpFoundation\ParameterBag;
 
-/**
- * Class AbstractPluginWebhookHelper
-*/
 abstract class AbstractPluginWebhookHelper
 {
-    /**
-     * @var TaskRepository
-     */
-    protected $taskRepository;
-    /**
-     * @var ProjectRepository
-     */
-    protected $projectRepository;
+    protected TaskRepository $taskRepository;
+    protected ProjectRepository $projectRepository;
+    protected UserRepository $userRepository;
+    protected Request $request;
 
-    /**
-     * @var UserRepository
-     */
-    protected $userRepository;
-    /**
-     * @var Request
-     */
-    protected $request;
-
-    /**
-     * PluginWebhookHelper constructor.
-     *
-     * @param  TaskRepository     $taskRepository
-     * @param  ProjectRepository  $projectRepository
-     * @param  UserRepository     $userRepository
-     * @param  Request            $request
-     */
     public function __construct(
         TaskRepository $taskRepository,
         ProjectRepository $projectRepository,

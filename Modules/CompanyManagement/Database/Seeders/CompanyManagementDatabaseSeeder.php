@@ -2,8 +2,8 @@
 
 namespace Modules\CompanyManagement\Database\Seeders;
 
-use Illuminate\Database\Seeder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Seeder;
 
 class CompanyManagementDatabaseSeeder extends Seeder
 {
@@ -12,7 +12,7 @@ class CompanyManagementDatabaseSeeder extends Seeder
      *
      * @return void
      */
-    public function run()
+    public function run(): void
     {
         Model::unguard();
 

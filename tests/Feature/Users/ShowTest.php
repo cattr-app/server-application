@@ -6,30 +6,18 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
-/**
- * Class ShowTest
- */
 class ShowTest extends TestCase
 {
     private const URI = 'v1/users/show';
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var User
-     */
-    private $user;
+    private User $admin;
+    private User $user;
 
     protected function setUp(): void
     {
         parent::setUp();
 
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
-
         $this->user = UserFactory::create();
     }
 

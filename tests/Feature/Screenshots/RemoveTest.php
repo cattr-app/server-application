@@ -8,21 +8,14 @@ use Tests\Facades\ScreenshotFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RemoveTest
- */
+
 class RemoveTest extends TestCase
 {
     private const URI = '/v1/screenshots/remove';
 
-    /**
-     * @var User
-     */
-    private $admin;
-    /**
-     * @var Screenshot
-     */
-    private $screenshot;
+    private User $admin;
+
+    private Screenshot $screenshot;
 
     protected function setUp(): void
     {

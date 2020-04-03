@@ -6,35 +6,23 @@ namespace Tests\Feature\TimeIntervals;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
+use Illuminate\Support\Arr;
 use Illuminate\Support\Collection;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class CountTest
- */
+
 class BulkEditTest extends TestCase
 {
     private const URI = 'v1/time-intervals/bulk-edit';
 
     private const INTERVALS_AMOUNT = 5;
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var Collection
-     */
-    private $intervals;
-
-    /**
-     * @var Task
-     */
-    private $newTask;
+    private User $admin;
+    private Collection $intervals;
+    private Task $newTask;
 
     protected function setUp(): void
     {
@@ -88,7 +76,7 @@ class BulkEditTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
 
         $response->assertJson(['updated' => TimeInterval::all()->pluck('id')->toArray()]);
-        $response->assertJson(['not_found' => array_only($nonIntervals, 'id')]);
+        $response->assertJson(['not_found' => Arr::only($nonIntervals, 'id')]);
 
         foreach ($this->intervals as $interval) {
             $this->assertDatabaseHas('time_intervals', $interval->toArray());

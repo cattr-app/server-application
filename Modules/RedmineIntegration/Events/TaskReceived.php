@@ -12,24 +12,17 @@ use Illuminate\Queue\SerializesModels;
 
 class TaskReceived implements ShouldBroadcast
 {
-    use Dispatchable, InteractsWithSockets, SerializesModels;
+    use Dispatchable;
+    use InteractsWithSockets;
+    use SerializesModels;
 
-    /**
-     * @var Task
-     */
-    public $task;
-
-    /**
-     * @var Project
-     */
-    public $project;
+    public Task $task;
+    public Project $project;
 
     /**
      * Create a new event instance.
-     *
-     * @param  Task  $task
      */
-    public function __construct($task)
+    public function __construct(Task $task)
     {
         $this->task = $task;
         $this->project = $task->project;
@@ -37,18 +30,13 @@ class TaskReceived implements ShouldBroadcast
 
     /**
      * Get the channels the event should be broadcast on.
-     *
-     * @return PrivateChannel
      */
-    public function broadcastOn()
+    public function broadcastOn(): PrivateChannel
     {
         return new PrivateChannel("task.updates.{$this->task->user_id}");
     }
 
-    /**
-     * @return string
-     */
-    public function broadcastAs()
+    public function broadcastAs(): string
     {
         return 'task.update';
     }

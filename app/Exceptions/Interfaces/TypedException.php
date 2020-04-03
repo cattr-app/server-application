@@ -6,7 +6,7 @@ use Throwable;
 
 /**
  * Interface TypedException
-*/
+ */
 interface TypedException extends Throwable
 {
     /**

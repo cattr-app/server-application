@@ -9,24 +9,16 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class TotalTest
- */
+
 class TotalTest extends TestCase
 {
     private const URI = 'v1/time/total';
 
     private const INTERVALS_AMOUNT = 10;
 
-    /**
-     * @var Collection
-     */
-    private $intervals;
+    private Collection $intervals;
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
     protected function setUp(): void
     {
@@ -42,7 +34,7 @@ class TotalTest extends TestCase
     {
         $requestData = [
             'start_at' => $this->intervals->min('start_at'),
-            'end_at' => Carbon::create($this->intervals->max('end_at'))->addMinute(),
+            'end_at' => $this->intervals->max('end_at')->addMinute(),
             'user_id' => $this->admin->id
         ];
 
@@ -54,8 +46,8 @@ class TotalTest extends TestCase
         });
 
         $response->assertJson(['time' => $totalTime]);
-        $response->assertJson(['start' => $this->intervals->min('start_at')]);
-        $response->assertJson(['end' => $this->intervals->max('end_at')]);
+        $response->assertJsonFragment(['start' => $this->intervals->min('start_at')]);
+        $response->assertJsonFragment(['end' => $this->intervals->max('end_at')]);
     }
 
     public function test_unauthorized(): void

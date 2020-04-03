@@ -3,36 +3,77 @@
 namespace Tests\Factories;
 
 use App\Models\ProjectsUsers;
+use App\Models\User;
+use Illuminate\Support\Arr;
 use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 
-/**
- * Class ProjectUserFactory
- */
-class ProjectUserFactory extends AbstractFactory
+class ProjectUserFactory extends Factory
 {
-    private const DEFAULT_ROLE_ID = 2;
+    public const USER_ROLE = 2;
+    public const MANAGER_ROLE = 1;
+    public const AUDITOR_ROLE = 3;
 
-    /**
-     * @return array
-     */
-    public function generateProjectUserData(): array
+    private ProjectsUsers $projectUser;
+    private ?User $user = null;
+    private ?int $roleId = null;
+
+    protected function getModelInstance(): ProjectsUsers
+    {
+        return $this->projectUser;
+    }
+
+    public function createRandomModelData(): array
+    {
+        return $this->createModelDataWithRelations();
+    }
+
+    public function createModelDataWithRelations(): array
     {
         return [
             'project_id' => ProjectFactory::create()->id,
             'user_id' => UserFactory::create()->id,
-            'role_id' => self::DEFAULT_ROLE_ID
+            'role_id' =>$this->getRandomRoleId()
         ];
     }
 
-    public function create(array $attributes = []): ProjectsUsers
-    {
-        $projectUserData = $this->generateProjectUserData();
+     private function defineModelData(): array
+     {
+         $this->user ??= UserFactory::create();
+         $this->roleId ??= $this->getRandomRoleId();
 
-        if ($attributes) {
-            $projectUserData = array_merge($projectUserData, $attributes);
+         return [
+             'project_id' => ProjectFactory::create()->id,
+             'user_id' => $this->user->id,
+             'role_id' => $this->roleId
+         ];
+     }
+
+    private function getRandomRoleId()
+    {
+        return Arr::random([self::USER_ROLE, self::MANAGER_ROLE, self::AUDITOR_ROLE]);
+    }
+
+    public function forUser(User $user): self
+    {
+        $this->user = $user;
+        return $this;
+    }
+
+    public function setRole(int $roleId): self
+    {
+        $this->roleId = $roleId;
+        return $this;
+    }
+
+    public function create(): ProjectsUsers
+    {
+        $this->projectUser = ProjectsUsers::create($this->defineModelData());
+
+        if ($this->timestampsHidden) {
+            $this->hideTimestamps();
         }
 
-        return ProjectsUsers::create($projectUserData);
+        return $this->projectUser;
     }
 }

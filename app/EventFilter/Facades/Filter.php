@@ -2,9 +2,9 @@
 
 namespace App\EventFilter\Facades;
 
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Events\Dispatcher;
 use Illuminate\Support\Facades\Facade;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Testing\Fakes\EventFake;
 
 /**
@@ -19,7 +19,7 @@ class Filter extends Facade
     /**
      * Replace the bound instance with a fake.
      *
-     * @param  array|string  $eventsToFake
+     * @param array|string $eventsToFake
      * @return void
      */
     public static function fake($eventsToFake = [])

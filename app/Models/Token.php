@@ -3,14 +3,12 @@
 namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 
 /**
- * Class Token
- *
  * @property int $id
  * @property string $user_id
  * @property string $token
@@ -37,9 +35,6 @@ class Token extends Model
         'expires_at'
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function user(): BelongsTo
     {
         return $this->belongsTo(User::class);

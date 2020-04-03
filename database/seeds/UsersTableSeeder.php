@@ -1,13 +1,15 @@
 <?php
 
 use App\Models\User;
-use App\Models\Rule;
 use Illuminate\Database\Seeder;
-use Symfony\Component\Console\Output\ConsoleOutput;
 
-
+/**
+ * Class UsersTableSeeder
+ */
 class UsersTableSeeder extends Seeder
 {
+    private const USERS_AMOUNT = 10;
+
     /**
      * Run the database seeds.
      */
@@ -17,9 +19,8 @@ class UsersTableSeeder extends Seeder
 
         $faker = Faker\Factory::create();
 
-        for ($i = 1; $i <= 10; ++$i) {
-            /** @var User $user */
-            $user = User::query()->create([
+        for ($i = 1; $i <= self::USERS_AMOUNT; ++$i) {
+            User::create([
                 'full_name' => $faker->name,
                 'email' => $faker->email,
                 'url' => '',
@@ -37,12 +38,11 @@ class UsersTableSeeder extends Seeder
                 'webcam_shots' => 0,
                 'screenshots_interval' => 9,
                 'active' => true,
-                'password' => bcrypt('qwaszx12345'),
+                'password' => bcrypt('password'),
                 'role_id' => 2,
             ]);
             $this->command->getOutput()->writeln("<fg=green>User #{$i}/50 has been created</>");
         }
-
         $this->command->getOutput()->writeln('<fg=green>10 Users has been created!</>');
     }
 }

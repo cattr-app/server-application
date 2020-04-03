@@ -2,52 +2,20 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\EventFilter\Facades\Filter;
 use App\Models\Role;
 use App\Models\Rule;
 use Exception;
-use Illuminate\Support\Facades\Auth;
-use App\EventFilter\Facades\Filter;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Event;
+use Illuminate\Support\Facades\Auth;
+use Validator;
 
-/**
- * Class RolesController
- */
 class RolesController extends ItemController
 {
     protected $disableQueryRoleCheck = false;
 
-    /**
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return Role::class;
-    }
-
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'name' => 'required',
-        ];
-    }
-
-    /**
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'role';
-    }
-
-    /**
-     * @return array
-     */
     public static function getControllerRules(): array
     {
         return [
@@ -58,9 +26,38 @@ class RolesController extends ItemController
             'show' => 'roles.show',
             'destroy' => 'roles.remove',
             'allowedRules' => 'roles.allowed-rules',
+            'projectRules' => 'roles.allowed-rules',
             'attachToUser' => 'roles.attach-user',
             'detachFromUser' => 'roles.detach-user',
         ];
+    }
+
+    public function getValidationRules(): array
+    {
+        return [
+            'name' => 'required',
+        ];
+    }
+
+    public function getEventUniqueNamePart(): string
+    {
+        return 'role';
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function index(Request $request): JsonResponse
+    {
+        $cls = $this->getItemClass();
+        //$cls::updateRules();
+
+        if ($request->get('user_id')) {
+            $request->offsetSet('users.id', $request->get('user_id'));
+            $request->offsetUnset('user_id');
+        }
+
+        return parent::index($request);
     }
 
     /**
@@ -104,22 +101,10 @@ class RolesController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function index(Request $request): JsonResponse
+
+    public function getItemClass(): string
     {
-        $cls = $this->getItemClass();
-        //$cls::updateRules();
-
-        if ($request->get('user_id')) {
-            $request->offsetSet('users.id', $request->get('user_id'));
-            $request->offsetUnset('user_id');
-        }
-
-        return parent::index($request);
+        return Role::class;
     }
 
     /**
@@ -362,10 +347,7 @@ class RolesController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     */
+
     public function allowedRules(Request $request): JsonResponse
     {
         $roleIds = Filter::process($this->getEventUniqueName('request.item.allowed-rules'), $request->get('ids', []));
@@ -397,13 +379,15 @@ class RolesController extends ItemController
         $roles = $user->is_admin ? $itemsQuery->get() : $itemsQuery->whereIn('role.id', $roleIds)->get();
 
         if (!$roles->count()) {
-            return response()->json(Filter::process(
-                $this->getEventUniqueName('answer.error.item.allowed-rules'),
-                [
-                    'success' => false,
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Roles not found'
-                ]),
+            return new JsonResponse(
+                Filter::process(
+                    $this->getEventUniqueName('answer.error.item.allowed-rules'),
+                    [
+                        'success' => false,
+                        'error_type' => 'query.item_not_found',
+                        'message' => 'Roles not found'
+                    ]
+                ),
                 400
             );
         }
@@ -433,10 +417,75 @@ class RolesController extends ItemController
         }
 
 
-        return response()->json([ 'success' => true, 'res' => Filter::process(
+        return new JsonResponse(['success' => true, 'res' => Filter::process(
             $this->getEventUniqueName('answer.success.item.allowed-rules'),
             $items
         )]);
+    }
+
+    /**
+     * @api             {get,post} /v1/roles/project-rules Project Rules
+     * @apiDescription  Get Rule allowed action for current user list
+     *
+     * @apiVersion      1.0.0
+     * @apiName         GetRulesProjectActionList
+     * @apiGroup        Role
+     *
+     * @apiPermission   roles_project_rules
+     * @apiPermission   roles_full_access
+     *
+     * @apiParamExample {json} Request Example
+     *  {}
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Object}   res      Rules indexed by project ID
+     *
+     * @apiUse RoleObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res":
+     *      {
+     *        "15": [
+     *          {
+     *            "object": "attached-users",
+     *            "action": "bulk-create",
+     *            "name": "Attached User relation multiple create"
+     *          },
+     *          {
+     *            "object": "attached-users",
+     *            "action": "bulk-remove",
+     *            "name": "Attached User relation multiple remove"
+     *          }
+     *        ]
+     *      }
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
+     */
+
+    /**
+     * @param bool $withRelations
+     *
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    {
+        $user = Auth::user();
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
+        $full_access = Role::can($user, 'roles', 'full_access');
+
+        if ($full_access || $this->disableQueryRoleCheck) {
+            return $query;
+        }
+
+        $query->where(['id' => $user->role_id]);
+
+        return $query;
     }
 
     /**
@@ -489,48 +538,49 @@ class RolesController extends ItemController
      * @apiUse         ForbiddenError
      * @apiUse         ValidationError
      */
-    /**
-     * @param Request $request
-     * @return JsonResponse
-     * @codeCoverageIgnore until it is implemented on frontend
-     */
-    public function attachToUser(Request $request): JsonResponse
+
+    public function projectRules(Request $request): JsonResponse
     {
-        $validator = \Validator::make($request->all(), [
-            'relations.*.user_id' => 'integer|exists:users,id',
-            'relations.*.role_id' => 'integer|exists:role,id',
-        ]);
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]), 400);
-        }
-
-        $relations = $request->post('relations');
-        foreach ($relations as $relation) {
-            $user_id = $relation['user_id'];
-            $role_id = $relation['role_id'];
-
-            /** @var Role $role */
-            $role = Role::query()->find($role_id);
-            if (!$role) {
-                continue;
-            }
-
-            $role->attachToUser($user_id);
-        }
-
-        return response()->json(
-            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'success' => true,
-                'res' => $relations,
-            ])
+        /** @var Builder $itemsQuery */
+        $this->disableQueryRoleCheck = true;
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->getQuery()
         );
+        $this->disableQueryRoleCheck = false;
+
+        $itemsQuery->with('rules');
+
+        $items = [];
+        $actionList = Rule::getActionList();
+        $user = $request->user();
+
+        foreach ($user->projectsRelation as $relation) {
+            /** @var Role $role */
+            $role = $relation->role;
+            /** @var Rule[] $rules */
+            $rules = $role->rules;
+
+            foreach ($rules as $rule) {
+                if (!$rule->allow) {
+                    continue;
+                }
+
+                $name = $actionList[$rule->object][$rule->action] ?? "$rule->object/$rule->action";
+                if (!array_key_exists($name, $items)) {
+                    $items[$relation->project_id][$name] = [
+                        'object' => $rule->object,
+                        'action' => $rule->action,
+                        'name' => $name,
+                    ];
+                }
+            }
+        }
+
+        return new JsonResponse(['success' => true, 'res' => Filter::process(
+            $this->getEventUniqueName('answer.success.item.project-rules'),
+            $items
+        )]);
     }
 
     /**
@@ -583,26 +633,71 @@ class RolesController extends ItemController
      * @apiUse         ForbiddenError
      * @apiUse         ValidationError
      */
+
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @codeCoverageIgnore until it is implemented on frontend
      */
-    public function detachFromUser(Request $request): JsonResponse
+    public function attachToUser(Request $request): JsonResponse
     {
-        $validator = \Validator::make($request->all(), [
+        $validator = Validator::make($request->all(), [
             'relations.*.user_id' => 'integer|exists:users,id',
             'relations.*.role_id' => 'integer|exists:role,id',
         ]);
 
         if ($validator->fails()) {
-            return response()->json(
+            return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
-                ]), 400);
+                ]),
+                400
+            );
+        }
+
+        $relations = $request->post('relations');
+        foreach ($relations as $relation) {
+            $user_id = $relation['user_id'];
+            $role_id = $relation['role_id'];
+
+            /** @var Role $role */
+            $role = Role::query()->find($role_id);
+            if (!$role) {
+                continue;
+            }
+
+            $role->attachToUser($user_id);
+        }
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
+                'res' => $relations,
+            ])
+        );
+    }
+
+    /**
+     * @codeCoverageIgnore until it is implemented on frontend
+     */
+    public function detachFromUser(Request $request): JsonResponse
+    {
+        $validator = Validator::make($request->all(), [
+            'relations.*.user_id' => 'integer|exists:users,id',
+            'relations.*.role_id' => 'integer|exists:role,id',
+        ]);
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
         }
 
         $relations = $request->post('relations');
@@ -619,31 +714,11 @@ class RolesController extends ItemController
             $role->detachFromUser($user_id);
         }
 
-        return response()->json(
+        return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
                 'success' => true,
                 'res' => $relations,
             ])
         );
-    }
-
-    /**
-     * @param  bool  $withRelations
-     *
-     * @return Builder
-     */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
-    {
-        $user = Auth::user();
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = Role::can($user, 'roles', 'full_access');
-
-        if ($full_access || $this->disableQueryRoleCheck) {
-            return $query;
-        }
-
-        $query->where(['id' => $user->role_id]);
-
-        return $query;
     }
 }

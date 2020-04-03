@@ -12,57 +12,27 @@ use Tests\Facades\UserFactory;
 use Tests\TestCase;
 use Tests\TestResponse;
 
-
-/**
- * Class ListTest
- */
 class ListTest extends TestCase
 {
     private const URI = 'v1/project-report/list';
 
     private const INTERVALS_AMOUNT = 10;
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
-    /**
-     * @var array
-     */
-    private $pids;
+    private array $pids;
+    private array $uids;
 
-    /**
-     * @var array
-     */
-    private $uids;
+    private Collection $intervals;
 
-    /**
-     * @var Collection
-     */
-    private $intervals;
-    /**
-     * @var int
-     */
-    private $duration;
-    /**
-     * @var array
-     */
-    private $requestData;
+    private int $duration = 0;
+    private array $requestData;
 
-    /**
-     * @param TestResponse $response
-     * @return Collection
-     */
     private function collectResponseProjects(TestResponse $response): Collection
     {
         return collect($response->json('projects'));
     }
 
-    /**
-     * @param TestResponse $response
-     * @return Collection
-     */
     private function collectResponseUsers(TestResponse $response): Collection
     {
         return $this->collectResponseProjects($response)->pluck('users')->collapse();
@@ -86,7 +56,7 @@ class ListTest extends TestCase
 
         $this->requestData = [
             'start_at' => $this->intervals->min('start_at'),
-            'end_at' => Carbon::create($this->intervals->max('end_at'))->addMinute(),
+            'end_at' => $this->intervals->max('end_at')->addMinute(),
             'uids' => $this->uids,
             'pids' => $this->pids
         ];

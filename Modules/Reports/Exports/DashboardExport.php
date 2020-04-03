@@ -1,36 +1,52 @@
 <?php
 
-
 namespace Modules\Reports\Exports;
 
+use Illuminate\Support\Facades\DB;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Carbon;
 use Illuminate\Support\Collection;
-use Maatwebsite\Excel\Concerns\FromCollection;
-use Maatwebsite\Excel\Concerns\ShouldAutoSize;
-use Maatwebsite\Excel\Concerns\WithEvents;
-use Maatwebsite\Excel\Events\AfterSheet;
 use Modules\Reports\Entities\DashboardReport;
 
-class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
+class DashboardExport implements Exportable
 {
-    const SORTABLE_DAYS_FORMAT = 'Y-m-d';
-    const REPORT_DAYS_FORMAT = 'l, d M Y';
-    const ROUND_DIGITS = 3;
+    public const SORTABLE_DAYS_FORMAT = 'Y-m-d';
+    public const REPORT_DAYS_FORMAT = 'l, d M Y';
+    public const ROUND_DIGITS = 3;
 
     /**
-     * @return Collection
      * @throws Exception
      */
-    public function collection()
+    public function collection(): Collection
     {
         // Please verify that start_at and end_at are fetched in ISO format !
-        $queryData = request()->only('start_at', 'end_at', 'user_ids');
+        $queryData = request()->only(
+            'start_at',
+            'end_at',
+            'user_ids',
+            'project_ids',
+            'order_by',
+            'order_dir'
+        );
+
         if (!Arr::has($queryData, ['start_at', 'end_at', 'user_ids'])) {
             throw new Exception('Requested data was not found in request body');
         }
+
+        $queryData['timezone'] = request()->post('timezone', 'UTC');
+
+        $queryData['start_at'] = Carbon::parse(
+            $queryData['start_at'],
+            $queryData['timezone']
+        )->tz('UTC')
+            ->toDateTimeString();
+        $queryData['end_at'] = Carbon::parse(
+            $queryData['end_at'],
+            $queryData['timezone']
+        )->tz('UTC')
+            ->toDateTimeString();
 
         // If selected one user or exporting report from Timeline tab
         $queryData['user_ids'] = is_array($queryData['user_ids']) ? $queryData['user_ids'] : [$queryData['user_ids']];
@@ -46,7 +62,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
         $dates = array_unique($dates);
 
         // Adjust columns for each user
-        $preparedCollection = $preparedCollection->map(function ($collection) use ($dates) {
+        $preparedCollection = $preparedCollection->map(static function ($collection) use ($dates) {
             $missingDates = array_diff($dates, array_keys($collection['per_day']));
             foreach ($missingDates as $date) {
                 $collection['per_day'][$date] = 0;
@@ -56,6 +72,17 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
 
             return $collection;
         });
+
+        $orderBy = $queryData['order_by'] ?? 'name';
+        $orderDir = $queryData['order_dir'] ?? 'asc';
+        $preparedCollection = $preparedCollection->toArray();
+
+        usort($preparedCollection, static function ($a, $b) use ($orderBy, $orderDir) {
+            return $orderDir === 'asc'
+                ? $a[$orderBy] <=> $b[$orderBy]
+                : -($a[$orderBy] <=> $b[$orderBy]);
+        });
+        $preparedCollection = collect($preparedCollection);
 
         // Create collection which are going to be used for Excel lib
         $returnableData = collect([]);
@@ -70,10 +97,6 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
 
     /**
      * Get processed, formatted and prepared-to-return collection
-     *
-     * @param  array  $collectionData
-     *
-     * @return Collection
      * @throws Exception
      */
     protected function getPreparedCollection(array $collectionData): Collection
@@ -86,28 +109,39 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
     /**
      * Get unprocessed collection from database
      *
-     * @param  array  $queryData
+     * @param array $queryData
+     *
+     * @throws Exception
      *
      * @return Builder[]|\Illuminate\Database\Eloquent\Collection
      */
     protected function _getUnpreparedCollection(array $queryData): Collection
     {
+        $timezone = $queryData['timezone'];
+        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
+
         /** @noinspection PhpParamsInspection */
-        return DashboardReport::query()
+        $query = DashboardReport::select([
+            '*',
+            DB::raw("(CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}')) as start_at"),
+            DB::raw("(CONVERT_TZ(end_at, '+00:00', '{$timezoneOffset}')) as end_at")
+        ])
             ->whereIn('user_id', $queryData['user_ids'])
             ->where('start_at', '>=', $queryData['start_at'])
             ->where('start_at', '<', $queryData['end_at'])
             ->with('users')
-            ->orderBy('start_at')
-            ->get();
+            ->orderBy('start_at');
+
+        if (!empty($queryData['project_ids'])) {
+            $query = $query->whereHas('task', static function ($query) use ($queryData) {
+                $query->whereIn('project_id', $queryData['project_ids']);
+            });
+        }
+        return $query->get();
     }
 
     /**
      * Preparing returnable collection for "collect" method
-     *
-     * @param  Collection  $collection
-     *
-     * @return Collection
      */
     protected function prepareCollection(Collection $collection): Collection
     {
@@ -124,7 +158,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
      * Here we'll need to format plain database data to workable format
      *
      * @param         $item
-     * @param  array  $plainData
+     * @param array $plainData
      * @param         $userId
      *
      * @return void
@@ -158,11 +192,7 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
     /**
      * Add subtotal record to existing collection
      *
-     * @param Collection $collection
-     * @param string $userName
-     * @param $perDay
-     * @param $totalTime
-     * @return void
+     * @throws Exception
      */
     protected function addRowToCollection(Collection $collection, string $userName, $perDay, $totalTime): void
     {
@@ -185,32 +215,14 @@ class DashboardExport implements FromCollection, WithEvents, ShouldAutoSize
             $date = Carbon::createFromFormat(static::SORTABLE_DAYS_FORMAT, $day);
             $key = $date->format(static::REPORT_DAYS_FORMAT);
 
-            $dayTimeObject = (new Carbon('@0'))->diff(new Carbon("@$timeWorked"));
-            $hours = $dayTimeObject->h + 24 * $dayTimeObject->days;
-            $minutes = ($dayTimeObject->i < 10 ? '0' : '') . $dayTimeObject->i;
-            $seconds = ($dayTimeObject->s < 10 ? '0' : '') . $dayTimeObject->s;
-
-            $daysData[$key] = "{$hours}:{$minutes}:{$seconds}";
+            $daysData[$key] = round($timeWorked / 60 / 60, static::ROUND_DIGITS);
         }
 
         $collection->push(array_merge($mainInfo, $daysData));
     }
 
-    /**
-     * @return array
-     */
-    public function registerEvents(): array
+    public function getExporterName(): string
     {
-        return [
-            AfterSheet::class => function (AfterSheet $event) {
-                $headers = 'A1:W1';
-                $event->sheet->getDelegate()->getStyle($headers)->getFont()->setBold(true);
-
-                // TODO These maybe useless if ShouldAutoSize will work in a good way :)
-                $event->sheet->getDelegate()->getColumnDimension('A1:A9999')->setWidth(20);
-                $event->sheet->getDelegate()->getColumnDimension('B1:B9999')->setWidth(20);
-                $event->sheet->getDelegate()->getColumnDimension('C1:C9999')->setWidth(20);
-            }
-        ];
+        return 'dashboard';
     }
 }

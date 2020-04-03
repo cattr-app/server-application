@@ -4,13 +4,18 @@ namespace Modules\Reports\Http\Controllers;
 
 use App\Http\Controllers\Controller;
 use Exception;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Maatwebsite\Excel\Excel;
+use Modules\Reports\Exports\Types\Csv;
+use Modules\Reports\Exports\Types\ExportType;
+use Modules\Reports\Exports\Types\Pdf;
+use Modules\Reports\Exports\Types\Xlsx;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 /**
  * Class AbstractReportsController
-*/
+ */
 abstract class AbstractReportsController extends Controller
 {
     /**
@@ -30,9 +35,6 @@ abstract class AbstractReportsController extends Controller
 
     /**
      * ReportsController constructor.
-     *
-     * @param  Request  $request
-     * @param  Excel    $exporter
      */
     public function __construct(Request $request, Excel $exporter)
     {
@@ -43,36 +45,47 @@ abstract class AbstractReportsController extends Controller
     }
 
     /**
-     * @return BinaryFileResponse
+     * Get data export class
+     */
+    abstract protected function exportClass(): string;
+
+    /**
+     * @return BinaryFileResponse|JsonResponse
      * @throws Exception
      */
     public function getReport()
     {
+        $report = false;
+        $writerType = '';
+        $fileNameType = '';
+
         switch ($this->request->headers->get('Accept')) {
             case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-                $type = Excel::XLSX;
-                $fsType = 'xlsx';
+                $writerType = Excel::XLSX;
+                $fileNameType = 'xlsx';
+                $report = new Xlsx();
+
                 break;
             case 'text/csv':
-                $type = Excel::CSV;
-                $fsType = 'csv';
+                $writerType = Excel::CSV;
+                $fileNameType = 'csv';
+                $report = new Csv();
+
                 break;
             case 'application/pdf':
-                $type = Excel::MPDF;
-                $fsType = Excel::MPDF;
+                $writerType = Excel::MPDF;
+                $fileNameType = 'pdf';
+                $report = new Pdf();
                 break;
-            default:
-                return response()->json(['error' => 'There is no applicable accept header']);
         }
 
-        return $this->exporter->collection()
-            ->downloadExcel(time() . '_project_export.' . $fsType, $type, true);
-    }
+        if ($report && $report instanceof ExportType) {
+            $report->setExportableName($this->exporter->getExporterName());
+            $report->setFileNameType($fileNameType);
+            $report->setWriterType($writerType);
+            return $report->download($this->exporter->collection(), time() . '_project_export');
+        }
 
-    /**
-     * Get data export class
-     *
-     * @return string
-     */
-    abstract protected function exportClass(): string;
+        return new JsonResponse(['error' => 'There is no applicable accept header']);
+    }
 }

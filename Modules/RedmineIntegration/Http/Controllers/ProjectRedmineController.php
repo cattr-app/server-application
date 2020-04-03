@@ -5,20 +5,17 @@ namespace Modules\RedmineIntegration\Http\Controllers;
 use Illuminate\Http\JsonResponse;
 use Modules\RedmineIntegration\Helpers\ProjectIntegrationHelper;
 
-/**
- * Class ProjectRedmineController
-*/
 class ProjectRedmineController extends AbstractRedmineController
 {
+    protected ProjectIntegrationHelper $projectIntegrationHelper;
 
-    /**
-     * @var ProjectIntegrationHelper
-     */
-    protected $projectIntegrationHelper;
+    public function __construct(ProjectIntegrationHelper $projectIntegrationHelper)
+    {
+        $this->projectIntegrationHelper = $projectIntegrationHelper;
 
-    /**
-     * @return array
-     */
+        parent::__construct();
+    }
+
     public static function getControllerRules(): array
     {
         return [
@@ -27,25 +24,11 @@ class ProjectRedmineController extends AbstractRedmineController
     }
 
     /**
-     * ProjectRedmineController constructor.
-     *
-     * @param  ProjectIntegrationHelper  $projectIntegrationHelper
-     */
-    public function __construct(ProjectIntegrationHelper $projectIntegrationHelper)
-    {
-        $this->projectIntegrationHelper = $projectIntegrationHelper;
-
-        parent::__construct();
-    }
-
-    /**
-     * Synchronize Redmine projects with AmazingTime projects
-     *
-     * @return JsonResponse
+     * Synchronize Redmine projects with Cattr projects
      */
     public function synchronize(): JsonResponse
     {
-        return response()->json(
+        return new JsonResponse(
             $this->projectIntegrationHelper->synchronizeUserProjects(auth()->id())
         );
     }

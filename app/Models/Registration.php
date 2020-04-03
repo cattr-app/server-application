@@ -4,11 +4,10 @@ namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
- * App\Models\Registration
- *
  * @property int $id
  * @property string $key
  * @property string $email
@@ -19,7 +18,7 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Registration whereKey($value)
  * @mixin EloquentIdeHelper
  */
-class Registration extends AbstractModel
+class Registration extends Model
 {
     /**
      * @var bool

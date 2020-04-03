@@ -2,16 +2,17 @@
 
 namespace App\Models;
 
-use Eloquent as EloquentIdeHelper;
 use App\Exceptions\Entities\AuthorizationException;
-use Illuminate\Support\Facades\Auth;
+use Eloquent as EloquentIdeHelper;
 use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Facades\Auth;
 use Throwable;
 
 /**
@@ -37,14 +38,11 @@ use Throwable;
  * @apiParam {String}   [with]        For add relation model in response
  * @apiParam {Object}   [users]       Roles's relation users. All params in <a href="#api-User-GetUserList" >@User</a>
  * @apiParam {Object}   [rules]       Roles's relation rules. All params in <a href="#api-Rule-GetRulesActions" >@Rules</a>
-
  *
  * @apiVersion 1.0.0
  */
 
 /**
- * Class Role
- *
  * @property int $id
  * @property string $name
  * @property string $created_at
@@ -65,7 +63,7 @@ use Throwable;
  * @method static QueryBuilder|Role withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class Role extends AbstractModel
+class Role extends Model
 {
     use SoftDeletes;
 
@@ -96,58 +94,6 @@ class Role extends AbstractModel
         'updated_at',
         'deleted_at',
     ];
-
-    /**
-     * @return HasMany
-     */
-    public function users(): HasMany
-    {
-        return $this->hasMany(User::class, 'role_id', 'id');
-    }
-
-    /**
-     * Attach this role to user
-     *
-     * @param int|User $user
-     */
-    /*public function attachToUser($user)
-    {
-        $userId = $user;
-        if ($user instanceof User) {
-            $userId = $user->id;
-        }
-        $this->users()->attach($userId);
-    }*/
-
-    /**
-     * Detach this role from user
-     *
-     * @param int|User $user
-     */
-    /*public function detachFromUser($user)
-    {
-        $userId = $user;
-        if ($user instanceof User) {
-            $userId = $user->id;
-        }
-        $this->users()->detach($userId);
-    }*/
-
-    /**
-     * @return HasMany
-     */
-    public function rules(): HasMany
-    {
-        return $this->hasMany(Rule::class, 'role_id');
-    }
-
-    /**
-     * @return BelongsToMany
-     */
-    public function projects(): BelongsToMany
-    {
-        return $this->belongsToMany(Project::class, 'projects_roles', 'role_id', 'project_id');
-    }
 
     /**
      * @throws Exception
@@ -311,5 +257,20 @@ class Role extends AbstractModel
         }
 
         return false;
+    }
+
+    public function users(): HasMany
+    {
+        return $this->hasMany(User::class, 'role_id', 'id');
+    }
+
+    public function rules(): HasMany
+    {
+        return $this->hasMany(Rule::class, 'role_id');
+    }
+
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'projects_roles', 'role_id', 'project_id');
     }
 }

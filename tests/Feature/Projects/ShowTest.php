@@ -8,24 +8,15 @@ use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class ShowTest
- */
+
 class ShowTest extends TestCase
 {
     private const URI = 'v1/projects/show';
 
-    /**
-     * @var User
-     */
-    private $admin;
-    private $assignedUser;
-    private $notAssignedUser;
-
-    /**
-     * @var Project
-     */
-    private $project;
+    private User $admin;
+    private User $assignedUser;
+    private User $notAssignedUser;
+    private Project $project;
 
     protected function setUp(): void
     {

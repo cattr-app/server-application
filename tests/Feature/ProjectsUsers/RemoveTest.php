@@ -8,27 +8,15 @@ use Tests\Facades\ProjectUserFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class RemoveTest
- */
+
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/projects-users/remove';
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
+    private ProjectsUsers $projectUser;
 
-    /**
-     * @var ProjectsUsers
-     */
-    private $projectUser;
-
-    /**
-     * @var array
-     */
-    private $requestData;
+    private array $requestData;
 
 
     protected function setUp(): void

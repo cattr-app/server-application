@@ -7,22 +7,13 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class ListTest
- */
+
 class ListTest extends TestCase
 {
     private const URI = 'v1/rules/list';
 
-    /**
-     * @var User
-     */
-    private $admin;
-
-    /**
-     * @var User
-     */
-    private $user;
+    private User $admin;
+    private User $user;
 
     protected function setUp(): void
     {

@@ -2,28 +2,25 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\Entities\AuthorizationException;
 use Closure;
 use Illuminate\Auth\Middleware\Authenticate as BaseAuthenticate;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
+use Illuminate\Support\Facades\DB;
 use Lang;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use Tymon\JWTAuth\Facades\JWTAuth;
 
-/**
- * Class Authenticate
-*/
 class Authenticate extends BaseAuthenticate
 {
     public const DEFAULT_USER_LANGUAGE = 'en';
 
     /**
-     * @param  Request  $request
-     * @param  Closure  $next
-     * @param  mixed    ...$guards
+     * @param Request $request
+     * @param Closure $next
+     * @param mixed ...$guards
      *
      * @return JsonResponse|mixed
      * @throws AuthorizationException

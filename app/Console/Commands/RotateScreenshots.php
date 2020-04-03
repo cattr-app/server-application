@@ -2,9 +2,9 @@
 
 namespace App\Console\Commands;
 
+use DB;
 use Illuminate\Console\Command;
 use Illuminate\Support\Facades\Storage;
-use App\Models\Screenshot;
 
 class RotateScreenshots extends Command
 {
@@ -23,19 +23,82 @@ class RotateScreenshots extends Command
     protected $description = 'Rotate screenshots';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
+     * Execute the console command.
      */
-    public function __construct()
+    public function handle(): void
     {
-        parent::__construct();
+        $path = $this->getAbsolutePath('uploads/screenshots');
+        $storageSize = (int)env('SCREENSHOTS_STORAGE_SIZE', -1) * 1024 * 1024;
+        if ($storageSize < 0) {
+            $storageSize = disk_total_space($path);
+            $spaceFree = disk_free_space($path);
+        } else {
+            $spaceUsed = $this->getDiskUsage($path);
+            $spaceFree = $storageSize - $spaceUsed;
+        }
+
+        $waterline = $this->getWaterline($storageSize);
+        if ($waterline === false) {
+            return;
+        }
+
+        $rotationStep = $this->getRotationStep($storageSize);
+        if ($rotationStep === false) {
+            return;
+        }
+
+        if ($spaceFree > $waterline) {
+            return;
+        }
+
+        $spaceRequired = $rotationStep - $spaceFree;
+        $count = (int)env('SCREENSHOTS_ROTATION_COUNT_PER_ITER', 10);
+        while ($spaceRequired > 0) {
+            $screenshots = $this->getScreenshotsToDelete($count);
+            if (empty($screenshots)) {
+                break;
+            }
+
+            $iterationFreed = array_reduce($screenshots, static function ($total, $screenshot) {
+                return $total + $screenshot['size'];
+            }, 0);
+
+            if ($iterationFreed < $spaceRequired) {
+                foreach ($screenshots as $screenshot) {
+                    $this->removeScreenshotFiles($screenshot);
+                }
+
+                $ids = array_reduce($screenshots, static function ($ids, $screenshot) {
+                    $ids[] = $screenshot['id'];
+                    return $ids;
+                }, []);
+
+                DB::table('screenshots')
+                    ->whereIn('id', $ids)
+                    ->update(['is_removed' => true]);
+
+                $spaceRequired -= $iterationFreed;
+            } else {
+                foreach ($screenshots as $screenshot) {
+                    $this->removeScreenshotFiles($screenshot);
+
+                    DB::table('screenshots')
+                        ->where('id', $screenshot['id'])
+                        ->update(['is_removed' => true]);
+
+                    $spaceRequired -= $screenshot['size'];
+                    if ($spaceRequired < 0) {
+                        break;
+                    }
+                }
+            }
+        }
     }
 
     /**
      * Returns absolute path for the relative to storage path.
      */
-    protected function getAbsolutePath(string $path) : string
+    protected function getAbsolutePath(string $path): string
     {
         $path = Storage::disk()->path($path);
         $path = str_replace(['/', '\\'], DIRECTORY_SEPARATOR, $path);
@@ -46,7 +109,7 @@ class RotateScreenshots extends Command
     /**
      * Returns disk space usage in bytes for a file or directory.
      */
-    protected function getDiskUsage(string $path) : int
+    protected function getDiskUsage(string $path): int
     {
         $io = popen("du -sk $path", 'r');
         $used = fgets($io, 4096);
@@ -64,14 +127,14 @@ class RotateScreenshots extends Command
     {
         $value = env('SCREENSHOTS_WATERLINE', false);
         if ($value === false) {
-            $this->error("SCREENSHOTS_WATERLINE is not set");
+            $this->error('SCREENSHOTS_WATERLINE is not set');
             return false;
         }
 
         $value = trim($value);
         if (substr($value, -1) === '%') {
             // Calculate percent of storage size
-            $value = substr($value, 0, strlen($value) - 1);
+            $value = substr($value, 0, -1);
             $value = floor($storageSize * $value / 100);
         } else {
             // Convert from megabytes
@@ -88,14 +151,14 @@ class RotateScreenshots extends Command
     {
         $value = env('SCREENSHOTS_ROTATION_STEP', false);
         if ($value === false) {
-            $this->error("SCREENSHOTS_ROTATION_STEP is not set");
+            $this->error('SCREENSHOTS_ROTATION_STEP is not set');
             return false;
         }
 
         $value = trim($value);
         if (substr($value, -1) === '%') {
             // Calculate percent of storage size
-            $value = substr($value, 0, strlen($value) - 1);
+            $value = substr($value, 0, -1);
             $value = floor($storageSize * $value / 100);
         } else {
             // Convert from megabytes
@@ -108,9 +171,9 @@ class RotateScreenshots extends Command
     /**
      * Returns array of screenshots to delete.
      */
-    protected function getScreenshotsToDelete(int $count) : array
+    protected function getScreenshotsToDelete(int $count): array
     {
-        $screenshots = \DB::table('screenshots')
+        $screenshots = DB::table('screenshots')
             ->leftJoin('time_intervals', 'screenshots.time_interval_id', '=', 'time_intervals.id')
             ->leftJoin('users', 'time_intervals.user_id', '=', 'users.id')
             ->leftJoin('tasks', 'time_intervals.task_id', '=', 'tasks.id')
@@ -150,6 +213,7 @@ class RotateScreenshots extends Command
                 'id' => $screenshot->id,
                 'path' => $path,
                 'thumb_path' => $thumb_path,
+                'relative_path' => $screenshot->path,
                 'size' => $size,
             ];
         }, $screenshots);
@@ -158,89 +222,22 @@ class RotateScreenshots extends Command
     /**
      * Removes files related to a screenshot.
      */
-    protected function removeScreenshotFiles($screenshot)
+    protected function removeScreenshotFiles($screenshot): void
     {
+        // Don't delete screenshot's file if multiple screenshots has the same file
+        $count = (int)DB::table('screenshots')
+            ->where('screenshots.path', $screenshot['relative_path'])
+            ->count('id');
+        if ($count > 1) {
+            return;
+        }
+
         if (file_exists($screenshot['path'])) {
             unlink($screenshot['path']);
         }
 
         if (file_exists($screenshot['thumb_path'])) {
             unlink($screenshot['thumb_path']);
-        }
-    }
-
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    public function handle()
-    {
-        $path = $this->getAbsolutePath('uploads/screenshots');
-        $storageSize = (int)env('SCREENSHOTS_STORAGE_SIZE', -1) * 1024 * 1024;
-        if ($storageSize < 0) {
-            $storageSize = disk_total_space($path);
-            $spaceFree = disk_free_space($path);
-        } else {
-            $spaceUsed = $this->getDiskUsage($path);
-            $spaceFree = $storageSize - $spaceUsed;
-        }
-
-        $waterline = $this->getWaterline($storageSize);
-        if ($waterline === false) {
-            return;
-        }
-
-        $rotationStep = $this->getRotationStep($storageSize);
-        if ($rotationStep === false) {
-            return;
-        }
-
-        if ($spaceFree > $waterline) {
-            return;
-        }
-
-        $spaceRequired = $rotationStep - $spaceFree;
-        $count = (int)env('SCREENSHOTS_ROTATION_COUNT_PER_ITER', 10);
-        while ($spaceRequired > 0) {
-            $screenshots = $this->getScreenshotsToDelete($count);
-            if (empty($screenshots)) {
-                break;
-            }
-
-            $iterationFreed = array_reduce($screenshots, function ($total, $screenshot) {
-                return $total + $screenshot['size'];
-            }, 0);
-
-            if ($iterationFreed < $spaceRequired) {
-                foreach ($screenshots as $screenshot) {
-                    $this->removeScreenshotFiles($screenshot);
-                }
-
-                $ids = array_reduce($screenshots, function ($ids, $screenshot) {
-                    $ids[] = $screenshot['id'];
-                    return $ids;
-                }, []);
-
-                \DB::table('screenshots')
-                    ->whereIn('id', $ids)
-                    ->update(['is_removed' => true]);
-
-                $spaceRequired -= $iterationFreed;
-            } else {
-                foreach ($screenshots as $screenshot) {
-                    $this->removeScreenshotFiles($screenshot);
-
-                    \DB::table('screenshots')
-                        ->where('id', $screenshot['id'])
-                        ->update(['is_removed' => true]);
-
-                    $spaceRequired -= $screenshot['size'];
-                    if ($spaceRequired < 0) {
-                        break;
-                    }
-                }
-            }
         }
     }
 }

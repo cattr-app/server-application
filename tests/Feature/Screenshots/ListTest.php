@@ -8,19 +8,14 @@ use Tests\Facades\ScreenshotFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class ListTest
- */
+
 class ListTest extends TestCase
 {
     private const URI = 'v1/screenshots/list';
 
     private const SCREENSHOTS_AMOUNT = 10;
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
     protected function setUp(): void
     {

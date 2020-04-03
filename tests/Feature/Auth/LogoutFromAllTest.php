@@ -7,17 +7,11 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class LogoutFromAllTest
- */
 class LogoutFromAllTest extends TestCase
 {
     private const URI = 'auth/logout-from-all';
 
-    /**
-     * @var User
-     */
-    private $user;
+    private User $user;
 
     protected function setUp(): void
     {

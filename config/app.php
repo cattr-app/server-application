@@ -1,12 +1,15 @@
 <?php
 
+use App\Helpers\Version;
+
 return [
     'name' => env('APP_NAME', 'Laravel'),
+    'version' => Version::get(),
     'env' => env('APP_ENV', 'production'),
     'debug' => env('APP_DEBUG', false),
     'json_errors' => env('JSON_ERRORS', true),
     'url' => env('APP_URL', 'http://localhost'),
-    'password_reset_url' => env('PASSWORD_RESET_URL'),
+    'frontend_url' => env('FRONTEND_APP_URL'),
     'timezone' => 'UTC',
     'languages' => ['en', 'ru'],
     'locale' => 'en',
@@ -52,17 +55,6 @@ return [
         App\EventFilter\EventFilterServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\LockServiceProvider::class,
-        // Tymon\JWTAuth\Providers\LaravelServiceProvider::class,
-
-        Modules\EventListener\Providers\EventListenerServiceProvider::class,
-        Modules\RedmineIntegration\Providers\RedmineIntegrationServiceProvider::class,
-        Modules\GitlabIntegration\Providers\GitlabIntegrationServiceProvider::class,
-        Modules\Invoices\Providers\InvoicesServiceProvider::class,
-        Modules\EmailReports\Providers\EmailReportsServiceProvider::class,
-        Modules\CompanyManagement\Providers\CompanyManagementServiceProvider::class,
-        Modules\Reports\Providers\ReportsServiceProvider::class,
-
-        Backup\BackupServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,
     ],

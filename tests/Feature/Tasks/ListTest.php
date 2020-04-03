@@ -8,19 +8,14 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-/**
- * Class ListTest
- */
+
 class ListTest extends TestCase
 {
     private const URI = 'v1/tasks/list';
 
     private const TASKS_AMOUNT = 10;
 
-    /**
-     * @var User
-     */
-    private $admin;
+    private User $admin;
 
     protected function setUp(): void
     {
@@ -36,7 +31,12 @@ class ListTest extends TestCase
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
         $response->assertOk();
-        $response->assertJson(Task::all()->toArray());
+        $tasks = Task::query()
+            ->orderByRaw('active > 0 DESC')
+            ->orderBy('created_at', 'desc')
+            ->get()
+            ->toArray();
+        $response->assertJson($tasks);
     }
 
     public function test_unauthorized(): void

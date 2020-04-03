@@ -5,6 +5,7 @@ namespace App\Models;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
@@ -50,8 +51,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 
 
 /**
- * Class TimeInterval
- *
  * @property int $id
  * @property int $task_id
  * @property int $user_id
@@ -84,7 +83,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|TimeInterval withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class TimeInterval extends AbstractModel
+class TimeInterval extends Model
 {
     use SoftDeletes;
 
@@ -144,33 +143,21 @@ class TimeInterval extends AbstractModel
         });
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function task(): BelongsTo
-    {
-        return $this->belongsTo(Task::class, 'task_id');
-    }
-
-    /**
-     * @return BelongsTo
-     */
-    public function user(): BelongsTo
-    {
-        return $this->belongsTo(User::class, 'user_id');
-    }
-
-    /**
-     * @return HasOne
-     */
     public function screenshot(): HasOne
     {
         return $this->hasOne(Screenshot::class, 'time_interval_id');
     }
 
-    /**
-     * @return HasMany
-     */
+    public function task(): BelongsTo
+    {
+        return $this->belongsTo(Task::class, 'task_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
+    }
+
     public function properties(): HasMany
     {
         return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::TIME_INTERVAL_CODE);

@@ -4,9 +4,7 @@ namespace Tests\Feature\Status;
 
 use Tests\TestCase;
 
-/**
- * Class IndexTest
- */
+
 class IndexTest extends TestCase
 {
     private const URI = 'status';

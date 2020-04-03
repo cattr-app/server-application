@@ -23,9 +23,9 @@
  */
 
 use Illuminate\Http\Request;
+use Illuminate\Routing\Route as RouteModel;
 use Illuminate\Routing\RouteCollection;
 use Illuminate\Routing\Router;
-use Illuminate\Routing\Route as RouteModel;
 use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -45,6 +45,7 @@ Route::group([
 
 // Routes for login/register processing
 Route::group([
+    'middleware' => 'throttle:120,1',
     'prefix' => 'auth',
 ], static function (Router $router) {
     $router->post('login', 'AuthController@login');
@@ -63,8 +64,9 @@ Route::group([
 
 // Temporary fix for missing v1 prefix in the url
 Route::group([
+    'middleware' => 'throttle:120,1',
     'prefix' => 'v1/auth',
-], function (Router $router) {
+], static function (Router $router) {
     $router->post('login', 'AuthController@login');
     $router->post('logout', 'AuthController@logout');
     $router->post('logout-from-all', 'AuthController@logoutFromAll');
@@ -88,7 +90,7 @@ Route::group([
 
 // Main API routes
 Route::group([
-    'middleware' => 'auth:api',
+    'middleware' => ['auth:api', 'throttle:120,1'],
     'prefix' => 'v1',
 ], static function (Router $router) {
     // Register routes
@@ -101,7 +103,6 @@ Route::group([
     $router->post('/projects/edit', 'Api\v1\ProjectController@edit');
     $router->any('/projects/show', 'Api\v1\ProjectController@show');
     $router->post('/projects/remove', 'Api\v1\ProjectController@destroy');
-//    $router->any('/projects/tasks', 'Api\v1\ProjectController@tasks');
 
     //Projects Users routes
     $router->any('/projects-users/list', 'Api\v1\ProjectsUsersController@index');
@@ -109,13 +110,6 @@ Route::group([
     $router->post('/projects-users/create', 'Api\v1\ProjectsUsersController@create');
     $router->post('/projects-users/remove', 'Api\v1\ProjectsUsersController@destroy');
     $router->post('/projects-users/bulk-remove', 'Api\v1\ProjectsUsersController@bulkDestroy');
-
-    /*  Deprecated
-        $router->any('/projects-roles/list', 'Api\v1\ProjectsRolesController@index');
-        $router->any('/projects-roles/count', 'Api\v1\ProjectsRolesController@count');
-        $router->post('/projects-roles/create', 'Api\v1\ProjectsRolesController@create');
-        $router->post('/projects-roles/remove', 'Api\v1\ProjectsRolesController@destroy');
-    */
 
     //Tasks routes
     $router->any('/tasks/list', 'Api\v1\TaskController@index');
@@ -125,14 +119,6 @@ Route::group([
     $router->post('/tasks/edit', 'Api\v1\TaskController@edit');
     $router->any('/tasks/show', 'Api\v1\TaskController@show');
     $router->post('/tasks/remove', 'Api\v1\TaskController@destroy');
-//    $router->any('/tasks/activity', 'Api\v1\TaskController@activity');
-
-    /*  Deprecated
-        $router->any('/task-comment/list', 'Api\v1\TaskCommentController@index');
-        $router->post('/task-comment/create', 'Api\v1\TaskCommentController@create');
-        $router->any('/task-comment/show', 'Api\v1\TaskCommentController@show');
-        $router->post('/task-comment/remove', 'Api\v1\TaskCommentController@destroy');
-       */
 
     //Users routes
     $router->any('/users/list', 'Api\v1\UserController@index');
@@ -145,7 +131,6 @@ Route::group([
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');
     $router->any('/screenshots/count', 'Api\v1\ScreenshotController@count');
-//    $router->any('/screenshots/dashboard', 'Api\v1\ScreenshotController@dashboard');
     $router->post('/screenshots/create', 'Api\v1\ScreenshotController@create');
     $router->post('/screenshots/edit', 'Api\v1\ScreenshotController@edit');
     $router->any('/screenshots/show', 'Api\v1\ScreenshotController@show');
@@ -160,7 +145,6 @@ Route::group([
     $router->any('/time-intervals/show', 'Api\v1\TimeIntervalController@show');
     $router->post('/time-intervals/remove', 'Api\v1\TimeIntervalController@destroy');
     $router->post('/time-intervals/bulk-remove', 'Api\v1\TimeIntervalController@bulkDestroy');
-    $router->post('/time-intervals/manual-create', 'Api\v1\TimeIntervalController@manualCreate');
 
     $router->any('/time-intervals/dashboard', 'Api\v1\Statistic\DashboardController@timeIntervals');
     $router->any('/time-intervals/day-duration', 'Api\v1\Statistic\DashboardController@timePerDay');
@@ -177,6 +161,7 @@ Route::group([
     $router->any('/roles/show', 'Api\v1\RolesController@show');
     $router->post('/roles/remove', 'Api\v1\RolesController@destroy');
     $router->any('/roles/allowed-rules', 'Api\v1\RolesController@allowedRules');
+    $router->any('/roles/project-rules', 'Api\v1\RolesController@projectRules');
     $router->post('/roles/attach-user', 'Api\v1\RolesController@attachToUser');
     $router->post('/roles/detach-user', 'Api\v1\RolesController@detachFromUser');
 
@@ -189,9 +174,7 @@ Route::group([
 
     // Statistic routes
     $router->any('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
-//    $router->any('/project-report/projects', 'Api\v1\Statistic\ProjectReportController@projects');
     $router->any('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
-//    $router->any('/time-duration/list', 'Api\v1\Statistic\ProjectReportController@days');
     $router->any('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
     $router->any('/project-report/screenshots', 'Api\v1\Statistic\ProjectReportController@screenshots');
 });
