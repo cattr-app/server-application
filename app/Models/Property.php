@@ -37,6 +37,7 @@ class Property extends Model
 {
     use SoftDeletes;
 
+    public const APP_CODE = 'app';
     public const COMPANY_CODE = 'company';
     public const PROJECT_CODE = 'project';
     public const TASK_CODE = 'task';

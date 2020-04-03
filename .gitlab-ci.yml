@@ -54,17 +54,15 @@ live_deploy:
     - echo "$CI_KEY" | base64 -d | ssh-add -
     - mkdir ~/.ssh
     - ssh-keyscan -H $CI_HOST >> ~/.ssh/known_hosts
-    - apk add curl bash
-    - curl -sL https://sentry.io/get-cli/ | sh
-    - sentry-cli releases new "$CI_COMMIT_SHORT_SHA"
   script:
-    - sentry-cli releases set-commits "$CI_COMMIT_SHORT_SHA" --auto
-    - start=$(date +%s)
-    - ssh $CI_USER@$CI_HOST 'cd /opt/cattr/cattr/backend && git pull && php artisan migrate'
-    - now=$(date +%s)
-    - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "$CI_COMMIT_REF_NAME" -t $((now-start))
-  after_script:
-    - sentry-cli releases finalize "$CI_COMMIT_SHORT_SHA"
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && git pull'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && composer install'
+    - ssh $CI_USER@$CI_HOST 'sentry-cli releases new $(php cattr/backend/artisan cattr:version)'
+    - ssh $CI_USER@$CI_HOST 'sentry-cli releases set-commits $(php cattr/backend/artisan cattr:version) --auto'
+    - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan config:cache'
+    - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan migrate'
+    - ssh $CI_USER@$CI_HOST 'sentry-cli releases deploys $(php cattr/backend/artisan cattr:version) new -e $(cat cattr/backend/.env | grep "APP_ENV=.*" | cut -d"=" -f 2)'
+    - ssh $CI_USER@$CI_HOST 'sentry-cli releases finalize $(php cattr/backend/artisan cattr:version)'
 
 staging_deploy:
   image: alpine
@@ -77,17 +75,17 @@ staging_deploy:
     - echo "$STAGING_KEY" | base64 -d | ssh-add -
     - mkdir ~/.ssh
     - ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
-    - apk add curl bash
-    - curl -sL https://sentry.io/get-cli/ | bash
-    - sentry-cli releases new "$CI_COMMIT_SHORT_SHA"
   script:
-    - sentry-cli releases set-commits "$CI_COMMIT_SHORT_SHA" --auto
-    - start=$(date +%s)
-    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull && cp -f .env.staging .env && cat .env.sentry >> .env && cp -f modules_statuses.staging.json modules_statuses.json && php artisan config:cache && php artisan migrate'
-    - now=$(date +%s)
-    - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "$CI_COMMIT_REF_NAME" -t $((now-start))
-  after_script:
-    - sentry-cli releases finalize "$CI_COMMIT_SHORT_SHA"
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull'
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer install'
+    - ssh $STAGING_USER@$STAGING_HOST 'sentry-cli releases new $(php backend/artisan cattr:version)'
+    - ssh $STAGING_USER@$STAGING_HOST 'sentry-cli releases set-commits $(php backend/artisan cattr:version) --auto'
+    - ssh $STAGING_USER@$STAGING_HOST 'cp -f .env.staging .env && cat .env.sentry >> .env'
+    - ssh $STAGING_USER@$STAGING_HOST 'cp -f modules_statuses.staging.json modules_statuses.json'
+    - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan config:cache'
+    - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan migrate'
+    - ssh $STAGING_USER@$STAGING_HOST 'sentry-cli releases deploys $(php backend/artisan cattr:version) new -e $(cat backend/.env | grep "APP_ENV=.*" | cut -d"=" -f 2)'
+    - ssh $STAGING_USER@$STAGING_HOST 'sentry-cli releases finalize $(php backend/artisan cattr:version)'
 
 demo_deploy:
   image: alpine

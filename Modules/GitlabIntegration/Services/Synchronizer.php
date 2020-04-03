@@ -28,7 +28,7 @@ class Synchronizer
 
     public function synchronizeAll(): void
     {
-        foreach (User::all() as $user) {
+        foreach (User::where('active', 1)->get() as $user) {
             $this->synchronize($user);
         }
     }
@@ -63,6 +63,7 @@ class Synchronizer
             return false;
         }
 
+        $this->checkClosedTasks($api, $user->id);
         $this->syncTasks($gitlabTasks, $user->id);
         return true;
     }
@@ -101,12 +102,27 @@ class Synchronizer
         }
     }
 
+    private function checkClosedTasks(GitlabApi $api, int $userID): void
+    {
+        // Get Gitlab's iids of active user's tasks, to check if they were closed
+        $relations = TaskRelation::whereHas('task', static function ($query) use ($userID) {
+            $query->where('user_id', $userID);
+            $query->where('active', true);
+        })->get();
+        $iids = $relations->pluck('gitlab_issue_iid')->toArray();
+
+        // Fetch closed Gitlab's tasks by iids, and get internal task ids
+        $gitlabTasks = $api->getClosedUserTasks($iids);
+        $gitlabIds = array_map(static fn ($task) => (int)$task['id'], $gitlabTasks);
+        $internalIds = $relations->whereIn('gitlab_id', $gitlabIds)->pluck('task_id')->toArray();
+
+        if (!empty($internalIds)) {
+            Task::whereIn('id', $internalIds)->update(['active' => false]);
+        }
+    }
+
     private function syncTasks(array $gitlabTasks, int $userID): void
     {
-        $taskIds = array_map(static function ($task) {
-            return $task['id'];
-        }, $gitlabTasks);
-
         foreach ($gitlabTasks as $gitlabTask) {
             $projectID = ProjectRelation::where('gitlab_id', $gitlabTask['project_id'])->first()->project_id;
             if (!$projectID) {
@@ -151,17 +167,8 @@ class Synchronizer
                 $task->task_name = $taskMapping[self::TASK_NAME];
                 $task->description = $taskMapping[self::DESCRIPTION];
                 $task->user_id = $taskMapping[self::USER_ID];
+                $task->active = true;
                 $task->save();
-            }
-        }
-
-        // We`ve fetched only opened tasks, so if task is assigned to user it should be switched to inactive
-        $relationsToRemove = TaskRelation::whereNotIn('gitlab_id', $taskIds)->get();
-        foreach ($relationsToRemove as $relationToRemove) {
-            $internalTask = Task::find($relationToRemove->task_id);
-            if ($internalTask && $internalTask->user_id === $userID) {
-                $internalTask->active = 0;
-                $internalTask->save();
             }
         }
     }

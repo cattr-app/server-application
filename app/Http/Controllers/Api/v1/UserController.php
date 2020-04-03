@@ -77,6 +77,7 @@ class UserController extends ItemController
 
     public function create(Request $request): JsonResponse
     {
+        $request->validate(['email' => 'required|email']);
         Event::listen($this->getEventUniqueName('item.create.after'), static::class . '@' . 'saveRelations');
         return parent::create($request);
     }
@@ -165,7 +166,7 @@ class UserController extends ItemController
             );
         }
 
-        if (!$item->is_admin) {
+        if (!auth()->user()->is_admin) {
             $userCanEdit = ['full_name', 'email', 'password', 'user_language'];
             foreach ($requestData as $key => $value) {
                 if ($item->$key != $value && !in_array($key, $userCanEdit)) {

@@ -22,6 +22,6 @@ class CreateTrelloUsersTable extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('trello_users');
+        Schema::dropIfExists('trello_users_relation');
     }
 }

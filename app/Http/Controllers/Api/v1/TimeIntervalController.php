@@ -76,11 +76,17 @@ class TimeIntervalController extends ItemController
         }
 
         if (!$this->validateEndDate($intervalData)) {
+            if (strtotime($intervalData['start_at']) >= strtotime($intervalData['end_at'])) {
+                $message = 'End on interval must be later than start of interval.';
+            } else {
+                $message = 'Length of interval must be less than an hour.';
+            }
+
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
                     'success' => false,
                     'error_type' => 'validation',
-                    'message' => 'Validation error',
+                    'message' => $message,
                     'info' => 'Invalid interval'
                 ]),
                 400

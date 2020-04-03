@@ -1045,6 +1045,8 @@ class Rule extends Model
             'integration' => [
                 'gitlab' => __('GitLab integration'),
                 'jira' => __('Jira integration'),
+                'redmine' => __('Redmine integration'),
+                'trello' => __('Trello integration'),
             ],
         ]);
     }
