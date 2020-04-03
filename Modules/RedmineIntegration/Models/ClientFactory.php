@@ -24,7 +24,10 @@ class ClientFactory
     {
         $url = $this->settings->getURL();
         if (empty($url)) {
-            throw new ClientFactoryException('Empty URL', 404);
+            throw new ClientFactoryException(
+                'Redmine URL is not set in the company settings. Please contact your administrator',
+                404
+            );
         }
 
         $key = $this->settings->getAPIKey();
