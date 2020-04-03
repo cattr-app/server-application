@@ -18,6 +18,12 @@ class TaskRelation extends Model
         'gitlab_issue_iid',
     ];
 
+    protected $casts = [
+        'gitlab_id' => 'int',
+        'task_id' => 'int',
+        'gitlab_issue_iid' => 'int',
+    ];
+
     protected $primaryKey = 'gitlab_id';
 
     public function task(): BelongsTo
