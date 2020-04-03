@@ -36,7 +36,6 @@ class RegisterInstance extends Command
      * Execute the console command.
      *
      * @param Client $client
-     * @param ComposerParser $composerParser
      * @return bool
      */
     public function handle(Client $client)

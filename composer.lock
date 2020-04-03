@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "794f67a4a3219a64a9077af20bb50471",
+    "content-hash": "4a0d889be39e33ed16eea6e782eba170",
     "packages": [
         {
             "name": "appzcoder/crud-generator",
@@ -2428,43 +2428,6 @@
                 "vector"
             ],
             "time": "2019-10-06T11:29:25+00:00"
-        },
-        {
-            "name": "mcstreetguy/composer-parser",
-            "version": "v1.1.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/MCStreetguy/ComposerParser.git",
-                "reference": "c4f15b82520a9a1780b3fdd0fde91cbc0f3a1add"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/MCStreetguy/ComposerParser/zipball/c4f15b82520a9a1780b3fdd0fde91cbc0f3a1add",
-                "reference": "c4f15b82520a9a1780b3fdd0fde91cbc0f3a1add",
-                "shasum": ""
-            },
-            "require-dev": {
-                "mcstreetguy/tempearly": "^0.4.2"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "MCStreetguy\\ComposerParser\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Maximilian Schmidt",
-                    "email": "maximilianschmidt404@gmail.com"
-                }
-            ],
-            "description": "A composer.json and lockfile parser.",
-            "homepage": "https://github.com/MCStreetguy/ComposerLockParser",
-            "time": "2019-09-12T19:31:18+00:00"
         },
         {
             "name": "monolog/monolog",
