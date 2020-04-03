@@ -23,6 +23,6 @@
         }
     },
     "require": {
-        "lesstif/php-jira-rest-client": "^1.43"
+        "lesstif/php-jira-rest-client": "^2.1.0"
     }
 }

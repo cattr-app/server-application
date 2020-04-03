@@ -21,8 +21,8 @@ class CreateUserDefaultRateForeignKeys extends Migration
      */
     public function down(): void
     {
-        Schema::table('invoices', static function (Blueprint $table) {
-            $table->dropForeign('user_id');
+        Schema::table('user_default_rate', static function (Blueprint $table) {
+            $table->dropForeign('user_default_rate_user_id_foreign');
         });
     }
 }

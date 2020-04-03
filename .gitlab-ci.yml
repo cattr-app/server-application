@@ -59,7 +59,7 @@ live_deploy:
   script:
     - sentry-cli releases set-commits "$CI_COMMIT_SHORT_SHA" --auto
     - start=$(date +%s)
-    - ssh $CI_USER@$CI_HOST 'cd /opt/cattr/cattr/backend && git pull && php artisan migrate'
+    - ssh $CI_USER@$CI_HOST 'cd /opt/cattr/cattr/backend && git pull && php artisan config:cache && php artisan migrate'
     - now=$(date +%s)
     - sentry-cli releases deploys "$CI_COMMIT_SHORT_SHA" new -e "$CI_COMMIT_REF_NAME" -t $((now-start))
   after_script:

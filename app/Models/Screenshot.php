@@ -75,8 +75,7 @@ class Screenshot extends Model
 {
     use SoftDeletes;
 
-    public const DEFAULT_PATH = 'public/none.png';
-    public const CAP_PATH = 'storage/none.png';
+    public const DEFAULT_PATH = 'storage/none.png';
 
     /**
      * table name from database
@@ -114,21 +113,21 @@ class Screenshot extends Model
         'deleted_at',
     ];
 
-    public static function createByInterval(TimeInterval $timeInterval, string $path = ''): Screenshot
+    public static function createByInterval(TimeInterval $timeInterval, string $path = self::DEFAULT_PATH): Screenshot
     {
-        $screenshot = Image::make(storage_path('app/' . ($path ?: self::DEFAULT_PATH)));
+        $screenshot = Image::make(storage_path('app/' . $path));
         $thumbnail = $screenshot->resize(280, null, fn(Constraint $constraint) => $constraint->aspectRatio());
         $thumbnailPath = str_replace(
             'uploads/screenshots',
             'uploads/screenshots/thumbs',
-            $path ?: self::DEFAULT_PATH
+            $path
         );
 
         Storage::put($thumbnailPath, (string)$thumbnail->encode());
 
         $screenshotData = [
             'time_interval_id' => $timeInterval->id,
-            'path' => $path ?: self::CAP_PATH,
+            'path' => $path,
             'thumbnail_path' => $thumbnailPath,
         ];
 

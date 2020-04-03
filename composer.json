@@ -1,103 +1,103 @@
 {
-  "name": "cattr/backend-application",
-  "description": "Backend Application for Cattr",
-  "version": "2.0.0",
-  "license": "SSPL-1.0",
-  "type": "project",
-  "require": {
-    "php": "^7.4",
-    "ext-json": "*",
-    "ext-pdo": "*",
-    "appzcoder/crud-generator": "^3.2.0",
-    "fruitcake/laravel-cors": "^1.0",
-    "fzaninotto/faker": "^1.9",
-    "intervention/image": "^2.5",
-    "kbsali/redmine-api": "^1.5",
-    "laravel/framework": "^7.0.8",
-    "laravel/telescope": "^3.1.1",
-    "laravel/tinker": "^2.0",
-    "m4tthumphrey/php-gitlab-api": "^9.15",
-    "mcstreetguy/composer-parser": "^1.1",
-    "nwidart/laravel-modules": "^6.2",
-    "php-http/guzzle6-adapter": "^2.0",
-    "predis/predis": "^1.1",
-    "sentry/sentry-laravel": "^1.5",
-    "tymon/jwt-auth": "^1.0",
-    "webpatser/laravel-uuid": "^3.0",
-    "doctrine/dbal": "2.9.2",
-    "wikimedia/composer-merge-plugin": "^1.4"
-  },
-  "require-dev": {
-    "barryvdh/laravel-ide-helper": "^2.6.7",
-    "mockery/mockery": "^1.3",
-    "phpunit/phpunit": "^8.0",
-    "roave/security-advisories": "dev-master",
-    "sempro/phpunit-pretty-print": "^1.0"
-  },
-  "autoload": {
-    "classmap": [
-      "database"
-    ],
-    "psr-4": {
-      "App\\": "app/",
-      "Modules\\": "Modules/"
+    "name": "cattr/backend-application",
+    "description": "Backend Application for Cattr",
+    "version": "2.2.2",
+    "license": "SSPL-1.0",
+    "type": "project",
+    "require": {
+        "php": "^7.4",
+        "ext-json": "*",
+        "ext-pdo": "*",
+        "appzcoder/crud-generator": "^3.2.0",
+        "fruitcake/laravel-cors": "^1.0",
+        "fzaninotto/faker": "^1.9",
+        "intervention/image": "^2.5",
+        "kbsali/redmine-api": "^1.5",
+        "laravel/framework": "^7.0.8",
+        "laravel/telescope": "^3.1.1",
+        "laravel/tinker": "^2.0",
+        "m4tthumphrey/php-gitlab-api": "^9.15",
+        "mcstreetguy/composer-parser": "^1.1",
+        "nwidart/laravel-modules": "^6.2",
+        "php-http/guzzle6-adapter": "^2.0",
+        "predis/predis": "^1.1",
+        "sentry/sentry-laravel": "^1.5",
+        "tymon/jwt-auth": "^1.0",
+        "webpatser/laravel-uuid": "^3.0",
+        "doctrine/dbal": "2.9.2",
+        "wikimedia/composer-merge-plugin": "^1.4"
+    },
+    "require-dev": {
+        "barryvdh/laravel-ide-helper": "^2.6.7",
+        "mockery/mockery": "^1.3",
+        "phpunit/phpunit": "^8.0",
+        "roave/security-advisories": "dev-master",
+        "sempro/phpunit-pretty-print": "^1.0"
+    },
+    "autoload": {
+        "classmap": [
+            "database"
+        ],
+        "psr-4": {
+            "App\\": "app/",
+            "Modules\\": "Modules/"
+        }
+    },
+    "scripts": {
+        "project:update": [
+            "@composer update",
+            "@php artisan migrate",
+            "@config:update"
+        ],
+        "dumphelpers": [
+            "@php artisan ide-helper:generate",
+            "@php artisan ide-helper:meta"
+        ],
+        "config:init": [
+            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+            "@php -r \"if (!is_dir(__DIR__.'/public/uploads')) mkdir(__DIR__.'/public/uploads');\"",
+            "@php -r \"if (!file_exists(__DIR__.'/public/uploads/screenshots')) symlink(__DIR__.'/storage/app/uploads/screenshots', __DIR__.'/public/uploads/screenshots');\"",
+            "@php artisan key:generate",
+            "@php artisan jwt:secret",
+            "@config:update"
+        ],
+        "config:update": [
+            "@php artisan package:discover"
+        ],
+        "post-install-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postInstall",
+            "@config:update"
+        ],
+        "post-update-cmd": [
+            "Illuminate\\Foundation\\ComposerScripts::postUpdate",
+            "@config:update"
+        ]
+    },
+    "config": {
+        "preferred-install": "dist",
+        "sort-packages": true,
+        "optimize-autoloader": true
+    },
+    "autoload-dev": {
+        "classmap": [
+            "tests/TestCase.php"
+        ],
+        "psr-4": {
+            "Tests\\": "tests/"
+        }
+    },
+    "extra": {
+        "merge-plugin": {
+            "include": [
+                "./Modules/*/composer.json"
+            ],
+            "recurse": true,
+            "replace": false,
+            "ignore-duplicates": false,
+            "merge-dev": true,
+            "merge-extra": false,
+            "merge-extra-deep": false,
+            "merge-scripts": false
+        }
     }
-  },
-  "scripts": {
-    "project:update": [
-      "@composer update",
-      "@php artisan migrate",
-      "@config:update"
-    ],
-    "dumphelpers": [
-      "@php artisan ide-helper:generate",
-      "@php artisan ide-helper:meta"
-    ],
-    "config:init": [
-      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-      "@php -r \"if (!is_dir(__DIR__.'/public/uploads')) mkdir(__DIR__.'/public/uploads');\"",
-      "@php -r \"if (!file_exists(__DIR__.'/public/uploads/screenshots')) symlink(__DIR__.'/storage/app/uploads/screenshots', __DIR__.'/public/uploads/screenshots');\"",
-      "@php artisan key:generate",
-      "@php artisan jwt:secret",
-      "@config:update"
-    ],
-    "config:update": [
-      "@php artisan package:discover"
-    ],
-    "post-install-cmd": [
-      "Illuminate\\Foundation\\ComposerScripts::postInstall",
-      "@config:update"
-    ],
-    "post-update-cmd": [
-      "Illuminate\\Foundation\\ComposerScripts::postUpdate",
-      "@config:update"
-    ]
-  },
-  "config": {
-    "preferred-install": "dist",
-    "sort-packages": true,
-    "optimize-autoloader": true
-  },
-  "autoload-dev": {
-    "classmap": [
-      "tests/TestCase.php"
-    ],
-    "psr-4": {
-      "Tests\\": "tests/"
-    }
-  },
-  "extra": {
-    "merge-plugin": {
-      "include": [
-        "./Modules/*/composer.json"
-      ],
-      "recurse": true,
-      "replace": false,
-      "ignore-duplicates": false,
-      "merge-dev": true,
-      "merge-extra": false,
-      "merge-extra-deep": false,
-      "merge-scripts": false
-    }
-  }
 }
