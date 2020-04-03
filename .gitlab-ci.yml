@@ -78,8 +78,8 @@ staging_deploy:
   script:
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer install'
-    - ssh $STAGING_USER@$STAGING_HOST 'cp -f .env.staging .env && cat .env.sentry >> .env'
-    - ssh $STAGING_USER@$STAGING_HOST 'cp -f modules_statuses.staging.json modules_statuses.json'
+    - ssh $STAGING_USER@$STAGING_HOST 'cp -f backend/.env.staging backend/.env && cat backend/.env.sentry >> backend/.env'
+    - ssh $STAGING_USER@$STAGING_HOST 'cp -f backend/modules_statuses.staging.json backend/modules_statuses.json'
     - ssh $STAGING_USER@$STAGING_HOST 'sentry-cli releases new $(php backend/artisan cattr:version)'
     - ssh $STAGING_USER@$STAGING_HOST 'sentry-cli releases set-commits $(php backend/artisan cattr:version) --auto'
     - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan config:cache'
