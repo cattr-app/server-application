@@ -77,6 +77,7 @@ class UserController extends ItemController
 
     public function create(Request $request): JsonResponse
     {
+        $request->validate(['email' => 'required|email']);
         Event::listen($this->getEventUniqueName('item.create.after'), static::class . '@' . 'saveRelations');
         return parent::create($request);
     }
