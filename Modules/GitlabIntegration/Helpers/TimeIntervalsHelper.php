@@ -58,30 +58,32 @@ class TimeIntervalsHelper
 
     public function getGitlabIssueProjectRelation(Collection $tasks): array
     {
-        $projectIds = $tasks->groupBy('project_id')->keys();
-
         $result = [];
-        foreach ($projectIds as $projectId) {
-            foreach ($tasks as $task) {
-                if (!isset($result[$task->id])) {
-                    $projectRelation = $this->getProjectRelation($projectId);
-                    $taskRelation = $this->getTasksById($task->id);
-                    if (!$projectRelation) {
-                        Log::info("Can`t relation from project id: {$projectId} \n");
-                        continue;
-                    }
-                    if (!$taskRelation) {
-                        Log::info("Can`t relation from task id: {$task->id} \n");
-                        continue;
-                    }
 
-                    $result[$task->id] = [
-                        'gl_project_id' => $projectRelation->gitlab_id,
-                        'gl_issue_iid' => $taskRelation->gitlab_issue_iid,
-                    ];
-                }
+        foreach ($tasks as $task) {
+            if (isset($result[$task->id])) {
+                continue;
             }
+
+            $projectRelation = $this->getProjectRelation($task->project_id);
+            $taskRelation = $this->getTasksById($task->id);
+
+            if (!$projectRelation) {
+                Log::info("Can`t relation from project id: {$task->project_id} \n");
+                continue;
+            }
+
+            if (!$taskRelation) {
+                Log::info("Can`t relation from task id: {$task->id} \n");
+                continue;
+            }
+
+            $result[$task->id] = [
+                'gl_project_id' => $projectRelation->gitlab_id,
+                'gl_issue_iid' => $taskRelation->gitlab_issue_iid,
+            ];
         }
+
         return $result;
     }
 

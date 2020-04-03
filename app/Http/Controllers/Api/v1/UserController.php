@@ -33,7 +33,12 @@ class UserController extends ItemController
 
     public function sendInviteHook(User $user, array $requestData): User
     {
+        if (!isset($requestData['password']) || empty($requestData['password'])) {
+            return $user;
+        }
+
         Mail::to($user->email)->send(new InviteUser($user->email, $requestData['password']));
+
         return $user;
     }
 
@@ -72,6 +77,7 @@ class UserController extends ItemController
 
     public function create(Request $request): JsonResponse
     {
+        $request->validate(['email' => 'required|email']);
         Event::listen($this->getEventUniqueName('item.create.after'), static::class . '@' . 'saveRelations');
         return parent::create($request);
     }
@@ -96,9 +102,8 @@ class UserController extends ItemController
             $this->getEventUniqueName('request.item.edit'),
             $request->all()
         );
-        $idInt = is_int($request->get('id'));
 
-        if (!$idInt) {
+        if (!is_int($request->get('id'))) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
                     'success' => false,
@@ -115,7 +120,7 @@ class UserController extends ItemController
         $validationRules['email'] .= ',' . $request->get('id');
         $validationRules['password'] = 'sometimes|min:6';
 
-        if (array_key_exists('password', $requestData) && $requestData['password'] === null) {
+        if (array_key_exists('password', $requestData) && $requestData['password'] == null) {
             unset($requestData['password']);
         }
 
@@ -161,7 +166,7 @@ class UserController extends ItemController
             );
         }
 
-        if (!$item->is_admin) {
+        if (!auth()->user()->is_admin) {
             $userCanEdit = ['full_name', 'email', 'password', 'user_language'];
             foreach ($requestData as $key => $value) {
                 if ($item->$key != $value && !in_array($key, $userCanEdit)) {

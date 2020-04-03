@@ -1,7 +1,10 @@
 <?php
 
+use App\Helpers\Version;
+
 return [
     'name' => env('APP_NAME', 'Laravel'),
+    'version' => Version::get(),
     'env' => env('APP_ENV', 'production'),
     'debug' => env('APP_DEBUG', false),
     'json_errors' => env('JSON_ERRORS', true),

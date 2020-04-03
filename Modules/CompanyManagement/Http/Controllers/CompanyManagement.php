@@ -62,7 +62,7 @@ class CompanyManagement extends Controller
     {
         $data = $request->except('token', 'internal_priorities');
         foreach ($data as $name => $value) {
-            $this->setCompanyData($name, $this->encodeField($name, $value));
+            $this->setCompanyData($name, $this->encodeField($name, $value) ?? '');
         }
 
         return new JsonResponse([

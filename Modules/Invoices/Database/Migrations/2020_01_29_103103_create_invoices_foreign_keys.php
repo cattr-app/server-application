@@ -23,8 +23,8 @@ class CreateInvoicesForeignKeys extends Migration
     public function down(): void
     {
         Schema::table('invoices', static function (Blueprint $table) {
-            $table->dropForeign('user_id');
-            $table->dropForeign('project_id');
+            $table->dropForeign('invoices_user_id_foreign');
+            $table->dropForeign('invoices_project_id_foreign');
         });
     }
 }

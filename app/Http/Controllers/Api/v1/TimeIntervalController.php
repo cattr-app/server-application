@@ -16,7 +16,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Facades\Route;
 use Illuminate\Support\Facades\Storage;
 use Illuminate\Support\Facades\Validator;
@@ -77,11 +76,17 @@ class TimeIntervalController extends ItemController
         }
 
         if (!$this->validateEndDate($intervalData)) {
+            if (strtotime($intervalData['start_at']) >= strtotime($intervalData['end_at'])) {
+                $message = 'End on interval must be later than start of interval.';
+            } else {
+                $message = 'Length of interval must be less than an hour.';
+            }
+
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
                     'success' => false,
                     'error_type' => 'validation',
-                    'message' => 'Validation error',
+                    'message' => $message,
                     'info' => 'Invalid interval'
                 ]),
                 400
@@ -96,17 +101,12 @@ class TimeIntervalController extends ItemController
                 Storage::makeDirectory('uploads/screenshots/thumbs');
             }
 
-            try {
-                $path = Filter::process(
-                    $this->getEventUniqueName('request.item.create'),
-                    $request->screenshot->store('uploads/screenshots')
-                );
+            $path = Filter::process(
+                $this->getEventUniqueName('request.item.create'),
+                $request->screenshot->store('uploads/screenshots')
+            );
 
-                Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval, $path));
-            } catch (\Symfony\Component\Mime\Exception\InvalidArgumentException $e) {
-                Log::error("Can't upload screenshot: " . $e->getMessage());
-                Log::error(print_r($_FILES, true));
-            }
+            Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval, $path));
         }
 
         if ($timeInterval->is_manual) {

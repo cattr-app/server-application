@@ -114,7 +114,7 @@ class FixTimeDurationsCache extends Migration
                 END IF;
             END');
 
-        DB::unprepared('CALL time_durations_cache_refresh()');
+        //DB::unprepared('CALL time_durations_cache_refresh()');
     }
 
     /**
@@ -218,6 +218,6 @@ class FixTimeDurationsCache extends Migration
                 WHERE `date` = `current_date`;
             END');
 
-        DB::unprepared('CALL time_durations_cache_refresh()');
+        //DB::unprepared('CALL time_durations_cache_refresh()');
     }
 }
