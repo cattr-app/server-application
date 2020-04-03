@@ -13,6 +13,7 @@ use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
 use PDOException;
 use RuntimeException;
+use Illuminate\Support\Facades\Validator;
 
 class AppInstallCommand extends Command
 {
@@ -87,8 +88,12 @@ class AppInstallCommand extends Command
 
         if (!$this->registerInstance($adminData['login'])) {
             // User did not confirm installation
+            $this->call('migrate:reset');
+            DB::statement("DROP TABLE migrations");
+
             $this->filesystem->delete(base_path('.env'));
-            $this->call('migrate:rollback');
+            $this->callSilent('cache:clear');
+            $this->callSilent('config:cache');
             return -1;
         }
 
@@ -119,7 +124,8 @@ class AppInstallCommand extends Command
         Property::updateOrCreate([
             'entity_type' => Property::COMPANY_CODE,
             'entity_id' => 0,
-            'name' => 'language'], [
+            'name' => 'language'
+        ], [
             'value' => $language
         ]);
 
@@ -131,7 +137,8 @@ class AppInstallCommand extends Command
         Property::updateOrCreate([
             'entity_type' => Property::COMPANY_CODE,
             'entity_id' => 0,
-            'name' => 'timezone'], [
+            'name' => 'timezone'
+        ], [
             'value' => 'UTC'
         ]);
 
@@ -195,12 +202,27 @@ class AppInstallCommand extends Command
 
     protected function askAdminCredentials(): array
     {
-        $login = $this->ask('Admin E-Mail');
-        $password = Hash::make($this->secret("Admin ($login) Password"));
+        do {
+            $email = $this->ask('Admin E-Mail');
+
+            $validator = Validator::make([
+                'email' => $email
+            ], [
+                'email' => 'email'
+            ]);
+
+            $emailIsValid = !$validator->fails();
+
+            if (!$emailIsValid) {
+                $this->warn('Email is incorrect');
+            }
+        } while (!$emailIsValid);
+
+        $password = Hash::make($this->secret("Password"));
         $name = $this->ask('Admin Full Name');
 
         return [
-            'login' => $login,
+            'login' => $email,
             'password' => $password,
             'name' => $name,
         ];
@@ -243,6 +265,8 @@ class AppInstallCommand extends Command
         $this->updateEnvData('DB_USERNAME', $this->ask('database username', 'root'));
         $this->updateEnvData('DB_PASSWORD', $this->secret('database password'));
         $this->updateEnvData('DB_DATABASE', $this->ask('database name', 'app_cattr'));
+
+        $this->callSilent('config:cache');
 
         try {
             DB::connection()->getPdo();

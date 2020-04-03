@@ -46,11 +46,7 @@ class RegisterInstance extends Command
             $composerJson = $composerParser::parse(base_path('composer.json'));
             $appVersion = $composerJson->getVersion();
 
-
-            $appVersion = '1.1.1';
-
-            // https://stats.cattr.app/v1/register
-            $response = $client->post('http://localhost:3000/v1/register', [
+            $response = $client->post('https://stats.cattr.app/v1/register', [
                 'json' => [
                     'ownerEmail' => $this->argument('adminEmail'),
                     'version' => $appVersion
