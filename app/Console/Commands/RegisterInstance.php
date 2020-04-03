@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Models\Property;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
-use MCStreetguy\ComposerParser\Factory as ComposerParser;
 
 class RegisterInstance extends Command
 {
@@ -40,11 +39,10 @@ class RegisterInstance extends Command
      * @param ComposerParser $composerParser
      * @return bool
      */
-    public function handle(Client $client, ComposerParser $composerParser)
+    public function handle(Client $client)
     {
         try {
-            $composerJson = $composerParser::parse(base_path('composer.json'));
-            $appVersion = $composerJson->getVersion();
+            $appVersion = config('app.version');
 
             $response = $client->post('https://stats.cattr.app/v1/register', [
                 'json' => [

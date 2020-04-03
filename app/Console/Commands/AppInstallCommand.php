@@ -93,7 +93,6 @@ class AppInstallCommand extends Command
 
             $this->filesystem->delete(base_path('.env'));
             $this->callSilent('cache:clear');
-            $this->callSilent('config:cache');
             return -1;
         }
 
@@ -265,8 +264,6 @@ class AppInstallCommand extends Command
         $this->updateEnvData('DB_USERNAME', $this->ask('database username', 'root'));
         $this->updateEnvData('DB_PASSWORD', $this->secret('database password'));
         $this->updateEnvData('DB_DATABASE', $this->ask('database name', 'app_cattr'));
-
-        $this->callSilent('config:cache');
 
         try {
             DB::connection()->getPdo();
