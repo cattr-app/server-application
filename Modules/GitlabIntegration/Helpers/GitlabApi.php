@@ -65,6 +65,23 @@ class GitlabApi
         ]]);
     }
 
+    /**
+     * @param int[] $iids
+     */
+    public function getClosedUserTasks(array $iids = [])
+    {
+        $params = [
+            'scope' => 'assigned-to-me',
+            'state' => 'closed',
+        ];
+
+        if (!empty($iids)) {
+            $params['iids'] = $iids;
+        }
+
+        return $this->pager->fetchAll($this->client->api('issues'), 'all', [null, $params]);
+    }
+
     public function sendUserTime($projectId, $issue_iid, $duration)
     {
         return $this->client->issues->addSpentTime($projectId, $issue_iid, $duration);
