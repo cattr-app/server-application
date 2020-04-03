@@ -6,16 +6,14 @@ use App\Models\Property;
 use App\Models\User;
 use DB;
 use Exception;
-use GuzzleHttp\Client;
-use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
 use Illuminate\Support\Facades\Config;
 use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Schema;
-use MCStreetguy\ComposerParser\Factory as ComposerParser;
 use PDOException;
 use RuntimeException;
+use Illuminate\Support\Facades\Validator;
 
 class AppInstallCommand extends Command
 {
@@ -86,13 +84,17 @@ class AppInstallCommand extends Command
         $this->info('Enter administrator credentials:');
         $adminData = $this->askAdminCredentials();
 
+        $this->settingUpEnvMigrateAndSeed();
+
         if (!$this->registerInstance($adminData['login'])) {
             // User did not confirm installation
+            $this->call('migrate:reset');
+            DB::statement("DROP TABLE migrations");
+
             $this->filesystem->delete(base_path('.env'));
+            $this->callSilent('cache:clear');
             return -1;
         }
-
-        $this->settingUpEnvMigrateAndSeed();
 
         $this->setLanguage();
         $this->setTimeZone();
@@ -121,7 +123,8 @@ class AppInstallCommand extends Command
         Property::updateOrCreate([
             'entity_type' => Property::COMPANY_CODE,
             'entity_id' => 0,
-            'name' => 'language'], [
+            'name' => 'language'
+        ], [
             'value' => $language
         ]);
 
@@ -133,7 +136,8 @@ class AppInstallCommand extends Command
         Property::updateOrCreate([
             'entity_type' => Property::COMPANY_CODE,
             'entity_id' => 0,
-            'name' => 'timezone'], [
+            'name' => 'timezone'
+        ], [
             'value' => 'UTC'
         ]);
 
@@ -142,44 +146,10 @@ class AppInstallCommand extends Command
 
     protected function registerInstance(string $adminEmail): bool
     {
-        try {
-            $client = new Client();
-
-            $composerJson = ComposerParser::parse(base_path('composer.json'));
-            $appVersion = $composerJson->getVersion();
-
-            $response = $client->post('https://stats.cattr.app/v1/register', [
-                'json' => [
-                    'ownerEmail' => $adminEmail,
-                    'version' => $appVersion
-                ]
-            ]);
-
-            $responseBody = json_decode($response->getBody()->getContents(), true);
-
-            if (isset($responseBody['flashMessage'])) {
-                $this->info($responseBody['flashMessage']);
-            }
-
-            if (isset($responseBody['updateVersion'])) {
-                $this->alert("New version is available: {$responseBody['updateVersion']}");
-            }
-
-            if ($responseBody['knownVulnerable']) {
-                return $this->confirm('You have a vulnerable version, are you sure you want to continue?');
-            }
-
-            return true;
-        } catch (GuzzleException $e) {
-            if ($e->getResponse()) {
-                $error = json_decode($e->getResponse()->getBody(), true);
-                $this->warn($error['message']);
-            } else {
-                $this->warn('Сould not get a response from the server to check the relevance of your version.');
-            }
-
-            return true;
-        }
+        return $this->call('cattr:register', [
+            'adminEmail' => $adminEmail,
+            '--i' => true
+        ]);
     }
 
     protected function createAdminUser(array $admin): User
@@ -231,12 +201,27 @@ class AppInstallCommand extends Command
 
     protected function askAdminCredentials(): array
     {
-        $login = $this->ask('Admin E-Mail');
-        $password = Hash::make($this->secret("Admin ($login) Password"));
+        do {
+            $email = $this->ask('Admin E-Mail');
+
+            $validator = Validator::make([
+                'email' => $email
+            ], [
+                'email' => 'email'
+            ]);
+
+            $emailIsValid = !$validator->fails();
+
+            if (!$emailIsValid) {
+                $this->warn('Email is incorrect');
+            }
+        } while (!$emailIsValid);
+
+        $password = Hash::make($this->secret("Password"));
         $name = $this->ask('Admin Full Name');
 
         return [
-            'login' => $login,
+            'login' => $email,
             'password' => $password,
             'name' => $name,
         ];
