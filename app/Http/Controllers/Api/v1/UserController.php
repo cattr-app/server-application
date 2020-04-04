@@ -44,7 +44,10 @@ class UserController extends ItemController
 
     public function changePasswordHook(User $user, array $requestData): void
     {
-        if ($user->change_password && $requestData['password'] !== null) {
+        if ($user->change_password
+            && array_key_exists('password', $requestData)
+            && $requestData['password'] != null
+        ) {
             $user->change_password = false;
             $user->save();
         }
