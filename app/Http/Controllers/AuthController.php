@@ -82,8 +82,6 @@ class AuthController extends BaseController
      * @apiUse         LimiterError
      */
     /**
-     * @param Request $request
-     * @return JsonResponse
      * @throws AuthorizationException
      */
     public function login(Request $request): JsonResponse

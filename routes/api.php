@@ -179,6 +179,12 @@ Route::group([
 
     // About
     $router->get('/about', 'Api\v1\AboutController');
+
+    //Company management
+    $router->get('/companymanagement/getData', 'Api\v1\CompanyManagementController@getData');
+    $router->post('/companymanagement/save', 'Api\v1\CompanyManagementController@save');
+    $router->post('/companymanagement/timezone/edit', 'Api\v1\CompanyManagementController@editTimezone');
+    $router->post('/companymanagement/language/edit', 'Api\v1\CompanyManagementController@editLanguage');
 });
 
 // Laravel router pass to fallback not non-exist urls only but wrong-method requests too.

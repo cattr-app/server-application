@@ -15,7 +15,7 @@ return [
     'locale' => 'en',
     'fallback_locale' => 'en',
     'key' => env('APP_KEY'),
-
+    'stats_collector_url' => env('STATS_COLLECTOR_URL'),
     'cipher' => 'AES-256-CBC',
     'log' => env('APP_LOG', 'single'),
     'recaptcha' => [

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Helpers\ModuleHelper;
 use App\Models\Property;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
@@ -43,10 +44,12 @@ class RegisterInstance extends Command
         try {
             $appVersion = config('app.version');
 
-            $response = $client->post('https://stats.cattr.app/v1/register', [
+            $response = $client->post(config('app.stats_collector_url') . '/register', [
                 'json' => [
                     'ownerEmail' => $this->argument('adminEmail'),
-                    'version' => $appVersion
+                    'version' => $appVersion,
+                    'modules' => ModuleHelper::getModulesInfo(),
+                    'image' => getenv('IMAGE_VERSION')
                 ]
             ]);
 

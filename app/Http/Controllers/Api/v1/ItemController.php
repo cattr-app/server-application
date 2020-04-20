@@ -439,6 +439,7 @@ abstract class ItemController extends Controller
             );
         }
 
+        $item = Filter::process($this->getEventUniqueName('item.remove'), $item);
         $item->delete();
 
         return new JsonResponse(

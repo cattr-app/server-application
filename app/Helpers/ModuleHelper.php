@@ -14,7 +14,7 @@ class ModuleHelper
         foreach (Module::all() as $name => $module) {
             $info[] = [
                 'name' => $name,
-                'version' => new Version($name),
+                'version' => (string)(new Version($name)),
                 'enabled' => $module->isEnabled()
             ];
         }

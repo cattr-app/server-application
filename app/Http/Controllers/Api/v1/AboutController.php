@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Helpers\ModuleHelper;
 use App\Models\Property;
 use GuzzleHttp\Client;
 use Illuminate\Http\JsonResponse;
@@ -9,61 +10,108 @@ use Illuminate\Routing\Controller;
 
 class AboutController extends Controller
 {
-    /**
-     * Root URL of the statistics server.
-     */
-    private const STATS_ROOT_URL = 'https://stats.cattr.app';
+    private Client $client;
+
+    private ?string $statsRootUrl;
+    private string $statsReleaseUrl;
+    private string $statsImagesUrl;
+    private string $statsModulesUrl;
+
+    public function __construct(Client $client)
+    {
+        $this->statsRootUrl = config('app.stats_collector_url');
+        $this->statsReleaseUrl = "$this->statsRootUrl/release/";
+        $this->statsImagesUrl = "$this->statsRootUrl/images/";
+        $this->statsModulesUrl = "$this->statsRootUrl/modules/";
+        $this->client = $client;
+    }
+
+    private function getInstanceId(): ?string
+    {
+        $instanceId = Property::getProperty(Property::APP_CODE, 'INSTANCE_ID')->first();
+        return $instanceId->value ?? null;
+    }
+
+    private function requestReleaseInfo(?string $instanceId = null): array
+    {
+        $url = $this->statsReleaseUrl . config('app.version');
+        $options = ['headers' => ($instanceId) ? ['x-cattr-instance' => $instanceId] : []];
+
+        return json_decode(
+            $this->client->get($url, $options)->getBody()->getContents(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+    }
+
+    private function requestModulesInfo($instanceId): array
+    {
+        $options = [
+            'json' => ModuleHelper::getModulesInfo(),
+            'headers' => ($instanceId) ? ['x-cattr-instance' => $instanceId] : []
+        ];
+
+
+        return json_decode(
+            $this->client->post($this->statsModulesUrl, $options)->getBody()->getContents(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+    }
+
+    private function requestImageInfo(string $imageVersion): array
+    {
+        $url = $this->statsImagesUrl . $imageVersion;
+        return json_decode(
+            $this->client->get($url)->getBody()->getContents(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR
+        );
+    }
 
     /**
      * Returns information about this instance.
-     *
-     * @param Client $client
-     * @return JsonResponse
      */
-    public function __invoke(Client $client): JsonResponse
+    public function __invoke(): JsonResponse
     {
-        $appVersion = config('app.version');
-        $instanceId = Property::getProperty(Property::APP_CODE, 'INSTANCE_ID')->first();
-
-        $headers = [];
-
-        if ($instanceId) {
-            $instanceId = $instanceId->getAttribute('value');
-
-            $headers[] = [
-                'x-cattr-instance' => $instanceId
-            ];
+        if (!$this->statsRootUrl) {
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Stats collector URL is not set'
+            ], 500);
         }
+
+        $instanceId = $this->getInstanceId();
+        $imageVersion = getenv('IMAGE_VERSION');
 
         try {
-            $resultMsg = null;
-            $knownVulnerable = null;
-            $updateVersion = null;
-
-            $response = $client->get("v1/version-check/{$appVersion}", [
-                'base_uri' => self::STATS_ROOT_URL,
-                'headers' => $headers
-            ]);
-
-            $responseBody = json_decode($response->getBody()->getContents(), true);
-
-            $knownVulnerable = $responseBody['knownVulnerable'];
-            $updateVersion = $responseBody['updateVersion'];
+            $releaseInfo = $this->requestReleaseInfo($instanceId);
+            $modulesInfo = $this->requestModulesInfo($instanceId);
+            $imageInfo = ($imageVersion) ? $this->requestImageInfo($imageVersion) : false;
         } catch (\Exception $e) {
-            $resultMsg = 'Failed to get information from the server';
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Failed to get information from the server'
+            ]);
         }
 
-        $result = [
+        return new JsonResponse([
             'success' => true,
-            'message' => $resultMsg,
-            'info' => [
-                'app_version' => $appVersion,
+            'app' => [
+                'version' => config('app.version'),
                 'instance_id' => $instanceId,
-                'known_vulnerable' => $knownVulnerable,
-                'update_version' => $updateVersion,
+                'vulnerable' => $releaseInfo['vulnerable'],
+                'last_version' => $releaseInfo['lastVersion'],
+            ],
+            'modules' => $modulesInfo['modules'],
+            'image' => (!$imageInfo) ? false : [
+                'version' => $imageVersion,
+                'vulnerable' => $imageInfo['vulnerable'],
+                'last_version' => $imageInfo['lastVersion']
             ]
-        ];
-
-        return response()->json($result);
+        ]);
     }
 }

@@ -1,5 +1,4 @@
 {
-  "CompanyManagement": true,
   "EmailReports": true,
   "EventListener": true,
   "GitlabIntegration": true,

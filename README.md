@@ -7,6 +7,8 @@ composer install
 composer run-script config:init
 ```
 
+Don't forget to init git submodules
+
 After should be edited `.env` file (e.g. for DB connection)
 
 ```
@@ -30,6 +32,13 @@ php artisan serve
 - `php artisan db:seed` - apply all DB seeders
 - `php artisan db:seed --class=<SeederClassName>` - apply specific seeders only
 - `php artisan make:seeder <SeederClassName>` - create new seeder
+
+Required seeders:
+
+- `php artisan db:seed --class=RoleSeeder`
+- `php artisan db:seed --class=CompanyManagementSeeder`
+
+App will not start without them
 
 ## Generate IDE helpers
 
