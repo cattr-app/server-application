@@ -369,6 +369,8 @@ abstract class ItemController extends Controller
             );
         }
 
+        Event::dispatch($this->getEventUniqueName('item.edit.before'), [$item, $requestData]);
+
         $item->fill($this->filterRequestData($requestData));
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
         $item->save();
@@ -439,8 +441,12 @@ abstract class ItemController extends Controller
             );
         }
 
+        Event::dispatch($this->getEventUniqueName('item.delete.before'), $item);
+
         $item = Filter::process($this->getEventUniqueName('item.remove'), $item);
         $item->delete();
+
+        Event::dispatch($this->getEventUniqueName('item.delete.after'), $item);
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
