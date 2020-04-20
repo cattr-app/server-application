@@ -2,34 +2,69 @@
 
 namespace App\Helpers;
 
-use TypeError;
+use Nwidart\Modules\Facades\Module;
+use InvalidArgumentException;
 
 class Version
 {
-    private const MAJOR = 'major';
-    private const MINOR = 'minor';
-    private const PATCH = 'patch';
+    protected int $major;
+    protected int $minor;
+    protected int $patch;
+    protected ?int $pre;
 
-    public const TYPES = [
-        self::MAJOR,
-        self::MINOR,
-        self::PATCH
-    ];
+    protected ?string $module;
 
-    private static function readComposerJson(): array
+    public function __construct(?string $module = null)
+    {
+        $this->module = $module;
+
+        $regexp = '/(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)((\-pre\.)(?<pre>\d+))?/';
+        $version = $this->readComposerJson()['version'];
+
+        preg_match($regexp, $version, $matches);
+
+        $this->major = (int)$matches['major'];
+        $this->minor = (int)$matches['minor'];
+        $this->patch = (int)$matches['patch'];
+        $this->pre = $matches['pre'] ?? null;
+    }
+
+    public function __toString(): string
+    {
+        $version = implode('.', [$this->major, $this->minor, $this->patch]);
+        $version .= isset($this->pre) ? '-pre.' . $this->pre : '';
+        return $version;
+    }
+
+    private static function resolveModuleComposerJsonPath(?string $module = null): string
+    {
+        if (!$module) {
+            return base_path('composer.json');
+        }
+
+        $foundModule = Module::find($module);
+        if (!$foundModule) {
+            throw new InvalidArgumentException('No such module: ' . $module);
+        }
+
+        return $foundModule->getPath() . '/' . 'composer.json';
+    }
+
+
+    private function readComposerJson(): array
     {
         return json_decode(
-            file_get_contents(base_path('composer.json')),
+            file_get_contents($this->resolveModuleComposerJsonPath($this->module)),
             true,
             512,
             JSON_THROW_ON_ERROR
         );
     }
 
-    private static function writeComposerJson(array $content): void
+    private function writeComposerJson(array $content): void
     {
         file_put_contents(
-            base_path('composer.json'),
+            $this->resolveModuleComposerJsonPath($this->module),
             json_encode(
                 $content,
                 JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES,
@@ -38,91 +73,70 @@ class Version
         );
     }
 
-    private static function set(string $version): string
+
+    protected function save(): self
     {
-        $content = self::readComposerJson();
-        $content['version'] = $version;
-        self::writeComposerJson($content);
-        return $version;
+        $content = $this->readComposerJson();
+        $content['version'] = $this->__toString();
+        $this->writeComposerJson($content);
+        return $this;
     }
 
-    private static function explodeVersion(string $version): array
-    {
-        $explodedVersion = explode('.', $version);
 
-        return [
-            self::MAJOR => (int)$explodedVersion[0],
-            self::MINOR => (int)$explodedVersion[1],
-            self::PATCH => (int)$explodedVersion[2]
-        ];
+    public function incrementMajor(): self
+    {
+        $this->major++;
+        $this->minor = 0;
+        $this->patch = 0;
+        $this->pre = null;
+
+        return $this->save();
     }
 
-    /**
-     * @throws TypeError
-     */
-    private static function validateType(string $type): void
+    public function incrementMinor(): self
     {
-        if (!in_array($type, self::TYPES, true)) {
-            throw new TypeError(
-                'Invalid version type. Available types: ' . implode(', ', self::TYPES)
-            );
-        }
+        $this->minor++;
+        $this->patch = 0;
+        $this->pre = null;
+        return $this->save();
     }
 
-    public static function increment(string $type): string
+    public function incrementPatch(): self
     {
-        self::validateType($type);
-
-        $version = self::explodeVersion(self::get());
-        ++$version[$type];
-
-        return self::set(implode('.', $version));
+        $this->patch++;
+        $this->pre = null;
+        return $this->save();
     }
 
-    public static function decrement(string $type): string
+    public function incrementPre(): self
     {
-        self::validateType($type);
-
-        $version = self::explodeVersion(self::get());
-        if ($version[$type] !== 0) {
-            --$version[$type];
-        }
-
-        return self::set(implode('.', $version));
+        (isset($this->pre)) ? $this->pre++ : $this->pre = 1;
+        return $this->save();
     }
 
-    public static function incrementMajor(): string
+    public function clearPre(): self
     {
-        return self::increment(self::MAJOR);
+        $this->pre = null;
+        return $this->save();
     }
 
-    public static function incrementMinor(): string
+    public function getMajor(): int
     {
-        return self::increment(self::MINOR);
+        return $this->major;
     }
 
-    public static function incrementPatch(): string
+    public function getMinor(): int
     {
-        return self::increment(self::PATCH);
+        return $this->minor;
     }
 
-    public static function decrementMajor(): string
+    public function getPatch(): int
     {
-        return self::decrement(self::MAJOR);
+        return $this->patch;
     }
 
-    public static function decrementMinor(): string
+    public function getPre(): ?int
     {
-        return self::decrement(self::MINOR);
-    }
-
-    public static function decrementPatch(): string
-    {
-        return self::decrement(self::PATCH);
-    }
-
-    public static function get(): string
-    {
-        return self::readComposerJson()['version'];
+        return $this->pre;
     }
 }

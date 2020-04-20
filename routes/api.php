@@ -87,7 +87,6 @@ Route::group([
     $router->get('/', 'StatusController@index');
 });
 
-
 // Main API routes
 Route::group([
     'middleware' => ['auth:api', 'throttle:120,1'],
@@ -177,6 +176,9 @@ Route::group([
     $router->any('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
     $router->any('/time-use-report/list', 'Api\v1\Statistic\TimeUseReportController@report');
     $router->any('/project-report/screenshots', 'Api\v1\Statistic\ProjectReportController@screenshots');
+
+    // About
+    $router->get('/about', 'Api\v1\AboutController');
 });
 
 // Laravel router pass to fallback not non-exist urls only but wrong-method requests too.

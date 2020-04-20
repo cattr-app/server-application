@@ -4,7 +4,7 @@ namespace App\Helpers;
 
 class CatHelper
 {
-    protected static array $cats = [
+    public const CATS = [
         '=^._.^=', '(=｀ェ´=)', '(=^ ◡ ^=)',
         '/ᐠ｡ꞈ｡ᐟ\\', '/ᐠ.ꞈ.ᐟ\\', '✧/ᐠ-ꞈ-ᐟ\\',
         '(ﾐචᆽචﾐ)', '(=චᆽච=)', '(=ㅇᆽㅇ=)', '(=ㅇ༝ㅇ=)',
@@ -13,8 +13,8 @@ class CatHelper
         '( ⓛ ﻌ ⓛ *)', ''
     ];
 
-    public function getCat(): string
+    public static function getCat(): string
     {
-        return self::$cats[array_rand(self::$cats)];
+        return self::CATS[array_rand(self::CATS)];
     }
 }

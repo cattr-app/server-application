@@ -1,0 +1,20 @@
+[submodule "Modules/RedmineIntegration"]
+	path = Modules/RedmineIntegration
+	url = https://git.amazingcat.net/AmazingTime/core/modules/redmine/backend.git
+	branch = master
+[submodule "Modules/GitlabIntegration"]
+	path = Modules/GitlabIntegration
+	url = https://git.amazingcat.net/AmazingTime/core/modules/gitlab/backend.git
+	branch = master
+[submodule "Modules/CompanyManagement"]
+	path = Modules/CompanyManagement
+	url = https://git.amazingcat.net/AmazingTime/core/modules/company-management.git
+	branch = master
+[submodule "Modules/Reports"]
+	path = Modules/Reports
+	url = https://git.amazingcat.net/AmazingTime/core/modules/reports.git
+	branch = master
+[submodule "Modules/EventListener"]
+	path = Modules/EventListener
+	url = https://git.amazingcat.net/AmazingTime/core/modules/event-listener.git
+	branch = master

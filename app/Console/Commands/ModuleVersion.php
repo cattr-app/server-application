@@ -4,28 +4,29 @@ namespace App\Console\Commands;
 
 use App\Helpers\Version;
 use Illuminate\Console\Command;
+use InvalidArgumentException;
 
-class VersionCommand extends Command
+class ModuleVersion extends Command
 {
     /**
      * The name and signature of the console command.
      *
      * @var string
      */
-    protected $signature = 'cattr:version';
+    protected $signature = 'module:version {module}';
 
     /**
      * The console command description.
      *
      * @var string
      */
-    protected $description = 'Get Cattr version';
+    protected $description = 'Get version of provided module';
 
     /**
      * Execute the console command.
      */
     public function handle(): void
     {
-        $this->info((string)new Version());
+        $this->info((string)new Version($this->argument('module')));
     }
 }

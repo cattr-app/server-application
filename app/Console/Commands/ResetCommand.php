@@ -33,7 +33,6 @@ class ResetCommand extends Command
      * Execute the console command.
      *
      * @return mixed
-     * @throws InvalidArgumentException
      */
     public function handle()
     {
@@ -59,6 +58,7 @@ class ResetCommand extends Command
         }
 
         if ($this->option('seed')) {
+            $this->call('module:seed');
             $this->call('db:seed');
         }
 

@@ -1,6 +1,6 @@
 {
-  "name": "cattr-backend",
-  "version": "0.0.0",
+  "name": "at-backend",
+  "version": "2.0.0",
   "main": "index.js",
   "author": "team@amazingcat.net",
   "license": "SSPL-1.0",
