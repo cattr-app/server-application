@@ -88,7 +88,8 @@ class UserFactory extends Factory
             'full_name' => $faker->name,
             'email' => $faker->unique()->safeEmail,
             'active' => 1,
-            'password' => $faker->password
+            'password' => $faker->password,
+            'screenshots_interval' => 5,
         ];
     }
 

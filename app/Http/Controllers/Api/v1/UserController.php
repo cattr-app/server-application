@@ -354,6 +354,7 @@ class UserController extends ItemController
             'email' => 'required|unique:users,email',
             'active' => 'required|boolean',
             'password' => 'required|min:6',
+            'screenshots_interval' => 'required|integer|min:1|max:15',
         ];
     }
 
