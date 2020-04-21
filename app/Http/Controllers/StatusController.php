@@ -37,8 +37,7 @@ class StatusController extends Controller
         return new JsonResponse([
             'success' => true,
             'cattr' => true,
-            'cat' => CatHelper::getCat(),
-            'modules' => ModuleHelper::getModulesInfo()
+            'cat' => CatHelper::getCat()
         ]);
     }
 }
