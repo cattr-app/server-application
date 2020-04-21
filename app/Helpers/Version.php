@@ -19,7 +19,7 @@ class Version
         $this->module = $module;
 
         $regexp = '/(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)((\-pre\.)(?<pre>\d+))?/';
-        $version = $this->readComposerJson()['version'];
+        $version = $this->readComposerJson()['version'] ?? '0.0.0';
 
         preg_match($regexp, $version, $matches);
 
