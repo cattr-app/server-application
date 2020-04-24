@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App\Helpers\ModuleHelper;
+use App\Helpers\Version;
 use App\Models\Property;
+use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
@@ -52,13 +54,16 @@ class AboutController extends Controller
             'headers' => ($instanceId) ? ['x-cattr-instance' => $instanceId] : []
         ];
 
+        return array_map(static function ($el) {
+            $el['version'] = (string)(new Version($el['name']));
 
-        return json_decode(
+            return $el;
+        }, json_decode(
             $this->client->post($this->statsModulesUrl, $options)->getBody()->getContents(),
             true,
             512,
             JSON_THROW_ON_ERROR
-        );
+        )['modules']);
     }
 
     private function requestImageInfo(string $imageVersion): array
@@ -91,7 +96,7 @@ class AboutController extends Controller
             $releaseInfo = $this->requestReleaseInfo($instanceId);
             $modulesInfo = $this->requestModulesInfo($instanceId);
             $imageInfo = ($imageVersion) ? $this->requestImageInfo($imageVersion) : false;
-        } catch (\Exception $e) {
+        } catch (Exception $e) {
             return new JsonResponse([
                 'success' => false,
                 'message' => 'Failed to get information from the server'
@@ -105,12 +110,14 @@ class AboutController extends Controller
                 'instance_id' => $instanceId,
                 'vulnerable' => $releaseInfo['vulnerable'],
                 'last_version' => $releaseInfo['lastVersion'],
+                'message' => $releaseInfo['flashMessage'],
             ],
-            'modules' => $modulesInfo['modules'],
+            'modules' => $modulesInfo,
             'image' => (!$imageInfo) ? false : [
                 'version' => $imageVersion,
                 'vulnerable' => $imageInfo['vulnerable'],
-                'last_version' => $imageInfo['lastVersion']
+                'last_version' => $imageInfo['lastVersion'],
+                'message' => $imageInfo['flashMessage'],
             ]
         ]);
     }

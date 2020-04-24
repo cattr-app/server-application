@@ -41,10 +41,19 @@ class RegisterInstance extends Command
      */
     public function handle(Client $client)
     {
+        if (Property::where([
+            'entity_type' => Property::APP_CODE,
+            'entity_id' => 0,
+            'name' => 'INSTANCE_ID',
+        ])->count()){
+            echo 'Application already registered';
+            return 1;
+        }
+
         try {
             $appVersion = config('app.version');
 
-            $response = $client->post(config('app.stats_collector_url') . '/register', [
+            $response = $client->post(config('app.stats_collector_url') . '/instance', [
                 'json' => [
                     'ownerEmail' => $this->argument('adminEmail'),
                     'version' => $appVersion,
@@ -64,15 +73,15 @@ class RegisterInstance extends Command
                 ]);
             }
 
-            if (isset($responseBody['flashMessage'])) {
-                $this->info($responseBody['flashMessage']);
+            if (isset($responseBody['release']['flashMessage'])) {
+                $this->info($responseBody['release']['flashMessage']);
             }
 
-            if (isset($responseBody['updateVersion'])) {
-                $this->alert("New version is available: {$responseBody['updateVersion']}");
+            if (isset($responseBody['release']['lastVersion']) && $responseBody['release']['lastVersion'] > $appVersion) {
+                $this->alert("New version is available: {$responseBody['release']['lastVersion']}");
             }
 
-            if ($responseBody['knownVulnerable']) {
+            if ($responseBody['release']['vulnerable']) {
                 if ($this->option('i')) {
                     // Interactive mode
                     return $this->confirm('You have a vulnerable version, are you sure you want to continue?');
