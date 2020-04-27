@@ -162,6 +162,10 @@ class Screenshot extends Model
             return true;
         }
 
+        if (Role::can($user, 'screenshots', 'show', $this->id)) {
+            return true;
+        }
+
         // Allow a manager to see screenshots of related users.
         if (Role::can($user, 'screenshots', 'manager_access') && Role::can($user, 'projects', 'relations')) {
             $projectIds = $user->projects->pluck('id');
