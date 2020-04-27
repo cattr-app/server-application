@@ -60,7 +60,7 @@ live_deploy:
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases new $(php artisan cattr:version)'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases set-commits $(php artisan cattr:version) --auto'
     - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan config:cache'
-    - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan migrate -f'
+    - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan migrate --force'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases deploys $(php artisan cattr:version) new -e $(cat .env | grep "APP_ENV=.*" | cut -d"=" -f 2)'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases finalize $(php artisan cattr:version)'
 
