@@ -298,7 +298,8 @@ class ReportHelper
             "JSON_ARRAYAGG(
                 JSON_OBJECT(
                     'id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path,
-                    'created_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?)
+                    'created_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?),
+                    'time_interval', JSON_OBJECT('start_at', DATE_FORMAT(time_intervals.start_at, '%Y-%m-%dT%TZ'))
                 )
             ) as screens",
             "JSON_ARRAYAGG(
