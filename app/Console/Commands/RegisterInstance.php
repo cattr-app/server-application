@@ -44,7 +44,7 @@ class RegisterInstance extends Command
         try {
             $appVersion = config('app.version');
 
-            $response = $client->post(config('app.stats_collector_url') . '/register', [
+            $response = $client->post(config('app.stats_collector_url') . '/instance', [
                 'json' => [
                     'ownerEmail' => $this->argument('adminEmail'),
                     'version' => $appVersion,
