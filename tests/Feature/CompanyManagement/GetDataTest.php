@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\CompanyManagement\Tests\Feature;
+namespace Tests\Feature\CompanyManagement;
 
 use App\Models\Property;
 use App\Models\User;

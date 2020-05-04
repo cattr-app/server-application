@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\CompanyManagement\Tests\Feature;
+namespace Tests\Feature\CompanyManagement;
 
 use App\Models\Property;
 use App\Models\User;
@@ -12,17 +12,6 @@ class TimeZoneEditTest extends TestCase
     private const URI = 'v1/companymanagement/timezone/edit';
 
     private User $admin;
-
-    public function test_create(): void
-    {
-        $requestData = ['timezone' => 'UTC'];
-        $this->assertTimeZoneNotInDb($requestData['timezone']);
-
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
-
-        $response->assertSuccess();
-        $this->assertTimeZoneInDb($requestData['timezone']);
-    }
 
     private function assertTimeZoneNotInDb(string $timezone): self
     {
@@ -54,10 +43,11 @@ class TimeZoneEditTest extends TestCase
 
     private function createTimeZone(string $timezone): void
     {
-        Property::create([
+        Property::updateOrCreate([
             'entity_type' => Property::COMPANY_CODE,
             'entity_id' => 0,
-            'name' => 'timezone',
+            'name' => 'timezone'
+        ], [
             'value' => $timezone
         ]);
     }

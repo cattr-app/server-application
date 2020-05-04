@@ -1,6 +1,6 @@
 <?php
 
-namespace Modules\CompanyManagement\Tests\Feature;
+namespace Tests\Feature\CompanyManagement;
 
 use App\Models\Property;
 use App\Models\User;
@@ -12,17 +12,6 @@ class LanguageEditTest extends TestCase
     private const URI = 'v1/companymanagement/language/edit';
 
     private User $admin;
-
-    public function test_create(): void
-    {
-        $requestData = ['language' => 'en'];
-        $this->assertLanguageNotInDb($requestData['language']);
-
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
-
-        $response->assertSuccess();
-        $this->assertLanguageInDb($requestData['language']);
-    }
 
     private function assertLanguageNotInDb(string $language): self
     {
@@ -54,10 +43,11 @@ class LanguageEditTest extends TestCase
 
     private function createLanguage(string $language): void
     {
-        Property::create([
+        Property::updateOrCreate([
             'entity_type' => Property::COMPANY_CODE,
             'entity_id' => 0,
-            'name' => 'language',
+            'name' => 'language'
+        ], [
             'value' => $language
         ]);
     }
