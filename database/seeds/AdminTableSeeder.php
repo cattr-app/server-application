@@ -20,11 +20,9 @@ class AdminTableSeeder extends Seeder
     public function run(): void
     {
         if (!User::where('is_admin', true)->exists()) {
-            $this->command->getOutput()->writeln('<fg=yellow>Create admin user</>');
-
             User::updateOrCreate([
-                'full_name' => 'Admin',
-                'email' => self::EMAIL,
+                'email' => self::EMAIL
+            ], [
                 'url' => '',
                 'company_id' => 1,
                 'payroll_access' => 1,
@@ -43,9 +41,8 @@ class AdminTableSeeder extends Seeder
                 'password' => bcrypt(self::PASSWORD),
                 'is_admin' => true,
                 'role_id' => 2,
+                'full_name' => 'Admin',
             ]);
-
-            $this->command->getOutput()->writeln('<fg=green>Admin user has been created</>');
         }
     }
 }

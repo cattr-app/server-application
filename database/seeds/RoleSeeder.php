@@ -213,8 +213,6 @@ class RoleSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->command->getOutput()->writeln('<fg=yellow>Add base roles</>');
-
         Role::updateOrCreate(['id' => 1], ['name' => 'manager']);
         Role::updateOrCreate(['id' => 2], ['name' => 'user']);
         Role::updateOrCreate(['id' => 3], ['name' => 'auditor']);
@@ -234,8 +232,6 @@ class RoleSeeder extends Seeder
             );
             $rule->forceDelete();
         }
-
-        $this->command->getOutput()->writeln('<fg=green>Base roles has been created</>');
     }
 
     private function addRules($roleId, $allowList): bool

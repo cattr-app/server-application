@@ -33,10 +33,9 @@ php artisan serve
 - `php artisan db:seed --class=<SeederClassName>` - apply specific seeders only
 - `php artisan make:seeder <SeederClassName>` - create new seeder
 
-Required seeders:
+Before you will be able to work with Cattr you should run:
 
-- `php artisan db:seed --class=RoleSeeder`
-- `php artisan db:seed --class=CompanyManagementSeeder`
+`php artisan db:seed --class=InitialSeeder`
 
 App will not start without them
 

@@ -15,18 +15,16 @@ class CompanyManagementSeeder extends Seeder
     {
         Model::unguard();
 
-        Property::create([
+        Property::updateOrCreate([
             'entity_type' => Property::COMPANY_CODE,
             'entity_id' => 0,
-            'name' => 'timezone',
-            'value' => 'UTC'
-        ]);
+            'name' => 'timezone'
+        ], ['value' => 'UTC']);
 
-        Property::create([
+        Property::updateOrCreate([
             'entity_type' => Property::COMPANY_CODE,
             'entity_id' => 0,
-            'name' => 'language',
-            'value' => 'en'
-        ]);
+            'name' => 'language'
+        ], ['value' => 'en']);
     }
 }
