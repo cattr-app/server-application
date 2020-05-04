@@ -235,8 +235,8 @@ class AppInstallCommand extends Command
         $this->info('Running up migrations');
         $this->call('migrate');
 
-        $this->info('Setting up default system roles');
-        $this->call('db:seed', ['--class' => 'RoleSeeder']);
+        $this->info('Running required seeders');
+        $this->call('db:seed', ['--class' => 'InitialSeeder']);
 
         $this->updateEnvData('APP_DEBUG', 'false');
     }

@@ -68,7 +68,8 @@ class RegisterInstance extends Command
                 Property::updateOrCreate([
                     'entity_type' => Property::APP_CODE,
                     'entity_id' => 0,
-                    'name' => 'INSTANCE_ID',
+                    'name' => 'INSTANCE_ID'
+                ], [
                     'value' => $responseBody['instanceId']
                 ]);
             }
@@ -85,9 +86,9 @@ class RegisterInstance extends Command
                 if ($this->option('i')) {
                     // Interactive mode
                     return $this->confirm('You have a vulnerable version, are you sure you want to continue?');
-                } else {
-                    $this->alert('You have a vulnerable version. Please update to the latest version.');
                 }
+
+                $this->alert('You have a vulnerable version. Please update to the latest version.');
             }
 
             return true;

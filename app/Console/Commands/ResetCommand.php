@@ -57,9 +57,13 @@ class ResetCommand extends Command
             Storage::delete($files);
         }
 
+        $this->call('db:seed', [
+            '--class' => 'InitialSeeder'
+        ]);
+
         if ($this->option('seed')) {
-            $this->call('module:seed');
             $this->call('db:seed');
+            $this->call('module:seed');
         }
 
         return 0;
