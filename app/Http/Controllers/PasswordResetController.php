@@ -10,7 +10,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
 use Illuminate\Support\Facades\Password;
 use Illuminate\Support\Facades\Validator;
 
@@ -221,7 +220,7 @@ class PasswordResetController extends BaseController
         $response = Password::broker()->reset(
             $request->all(),
             static function (User $user, string $password) {
-                $user->password = Hash::make($password);
+                $user->password = $password;
                 $user->save();
                 event(new PasswordResetEvent($user));
                 auth()->login($user);
