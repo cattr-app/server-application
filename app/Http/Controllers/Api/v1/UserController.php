@@ -93,7 +93,6 @@ class UserController extends ItemController
             'active' => 'required|boolean',
             'password' => 'required|min:6',
             'screenshots_interval' => 'sometimes|integer|min:1|max:15',
-            'user_language' => 'required'
         ];
     }
 
