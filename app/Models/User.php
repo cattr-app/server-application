@@ -196,7 +196,8 @@ class User extends Authenticatable implements JWTSubject
      * @var array
      */
     protected $with = [
-        'role', 'projectsRelation.role',
+        'role',
+        'projectsRelation.role',
     ];
 
     /**

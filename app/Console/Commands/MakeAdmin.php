@@ -41,7 +41,7 @@ class MakeAdmin extends Command
             'webcam_shots' => 0,
             'screenshots_interval' => 9,
             'active' => true,
-            'password' => bcrypt($this->argument('password')),
+            'password' => $this->argument('password'),
             'is_admin' => true,
             'role_id' => 2,
         ]);

@@ -76,7 +76,7 @@ class UserFactory extends Factory
             'webcam_shots' => 0,
             'screenshots_interval' => 5,
             'active' => 1,
-            'password' => bcrypt($fullName),
+            'password' => $fullName,
         ];
     }
 

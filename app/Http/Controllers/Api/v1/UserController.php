@@ -8,7 +8,6 @@ use App\Mail\InviteUser;
 use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\User;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
@@ -320,6 +319,9 @@ class UserController extends ItemController
      */
     public function edit(Request $request): JsonResponse
     {
+        $validationRules = $this->userEditRequest->rules();
+        $this->userEditRequest->validate($validationRules);
+
         $requestData = $this->userEditRequest->validated();
 
         $requestData = Filter::process(
@@ -338,21 +340,15 @@ class UserController extends ItemController
         /** @var Model $item */
         $item = $itemsQuery->first();
 
-        if (!auth()->user()->is_admin) {
-            $userCanEdit = ['full_name', 'email', 'password', 'user_language'];
-            foreach ($requestData as $key => $value) {
-                if ($item->$key != $value && !in_array($key, $userCanEdit)) {
-                    return new JsonResponse(
-                        Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                            'success' => false,
-                            'error_type' => 'validation',
-                            'message' => 'Validation error',
-                            'info' => "Only admin can edit '$key' field",
-                        ]),
-                        400
-                    );
-                }
-            }
+        if (!$item) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'User not found',
+                ]),
+                404
+            );
         }
 
         if (App::environment('demo')) {
