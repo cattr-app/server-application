@@ -324,7 +324,7 @@ class RegistrationController extends Controller
         $user = User::create([
             'full_name' => $request->input('full_name'),
             'email' => $request->input('email'),
-            'password' => bcrypt($request->input('password')),
+            'password' => $request->input('password'),
             'active' => true,
             'manual_time' => false,
             'screenshots_active' => true,

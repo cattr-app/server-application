@@ -217,7 +217,7 @@ class AppInstallCommand extends Command
             }
         } while (!$emailIsValid);
 
-        $password = Hash::make($this->secret("Password"));
+        $password = $this->secret("Password");
         $name = $this->ask('Admin Full Name');
 
         return [

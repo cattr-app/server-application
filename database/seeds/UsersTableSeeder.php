@@ -38,7 +38,7 @@ class UsersTableSeeder extends Seeder
                 'webcam_shots' => 0,
                 'screenshots_interval' => 9,
                 'active' => true,
-                'password' => bcrypt('password'),
+                'password' => 'password',
                 'role_id' => 2,
             ]);
             $this->command->getOutput()->writeln("<fg=green>User #{$i}/50 has been created</>");
