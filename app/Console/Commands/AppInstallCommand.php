@@ -86,7 +86,7 @@ class AppInstallCommand extends Command
 
         $this->settingUpEnvMigrateAndSeed();
 
-        if (!$this->registerInstance($adminData['login'])) {
+        if (!$this->registerInstance($adminData['email'])) {
             // User did not confirm installation
             $this->call('migrate:reset');
             DB::statement("DROP TABLE migrations");
@@ -97,11 +97,9 @@ class AppInstallCommand extends Command
         }
 
         $this->setLanguage();
-        $this->setTimeZone();
 
         $this->info('Creating admin user');
-        $admin = $this->createAdminUser($adminData);
-        $this->info("Administrator with email {$admin->email} was created successfully");
+        $this->call('cattr:make:admin', $adminData);
 
         $enableRecaptcha = $this->choice('Enable ReCaptcha 2', ['Yes', 'No'], 1) === 'Yes';
         $this->updateEnvData('RECAPTCHA_ENABLED', $enableRecaptcha ? 'true' : 'false');
@@ -131,50 +129,11 @@ class AppInstallCommand extends Command
         $this->info(strtoupper($language) . ' language successfully set');
     }
 
-    public function setTimeZone(): void
-    {
-        Property::updateOrCreate([
-            'entity_type' => Property::COMPANY_CODE,
-            'entity_id' => 0,
-            'name' => 'timezone'
-        ], [
-            'value' => 'UTC'
-        ]);
-
-        $this->info('Default time zone set to UTC');
-    }
-
     protected function registerInstance(string $adminEmail): bool
     {
         return $this->call('cattr:register', [
             'adminEmail' => $adminEmail,
             '--i' => true
-        ]);
-    }
-
-    protected function createAdminUser(array $admin): User
-    {
-        return User::create([
-            'full_name' => $admin['name'],
-            'email' => $admin['login'],
-            'url' => '',
-            'company_id' => 1,
-            'payroll_access' => 1,
-            'billing_access' => 1,
-            'avatar' => '',
-            'screenshots_active' => 1,
-            'manual_time' => 0,
-            'permanent_tasks' => 0,
-            'computer_time_popup' => 300,
-            'poor_time_popup' => '',
-            'blur_screenshots' => 0,
-            'web_and_app_monitoring' => 1,
-            'webcam_shots' => 0,
-            'screenshots_interval' => 9,
-            'active' => true,
-            'password' => $admin['password'],
-            'is_admin' => true,
-            'role_id' => 2,
         ]);
     }
 
@@ -221,9 +180,10 @@ class AppInstallCommand extends Command
         $name = $this->ask('Admin Full Name');
 
         return [
-            'login' => $email,
+            'email' => $email,
             'password' => $password,
             'name' => $name,
+            '--o' => true,
         ];
     }
 

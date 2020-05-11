@@ -2,6 +2,10 @@
 
 namespace App\Console;
 
+use App\Console\Commands\DemoReset;
+use App\Console\Commands\EmulateWork;
+use App\Console\Commands\PlanWork;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
 class Kernel extends ConsoleKernel
@@ -15,6 +19,21 @@ class Kernel extends ConsoleKernel
         //
     ];
 
+    /**
+     * Define the application's command schedule.
+     *
+     * @param  Schedule  $schedule
+     * @return void
+     */
+    protected function schedule(Schedule $schedule)
+    {
+        $schedule->command(EmulateWork::class)->everyFiveMinutes()->environments(['staging', 'demo'])->withoutOverlapping()->runInBackground();
+
+        $schedule->command(DemoReset::class)->cron('*/5 * * * *')->environments(['demo']);
+
+        $schedule->command(PlanWork::class)->daily()->environments(['staging']);
+        $schedule->command(DemoReset::class)->weeklyOn(1, '1:00')->environments(['staging']);
+    }
     /**
      * Register the Closure based commands for the application.
      */
