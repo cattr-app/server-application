@@ -1,7 +1,7 @@
 {
     "name": "cattr/backend-application",
     "description": "Backend Application for Cattr",
-    "version": "2.5.1",
+    "version": "2.6.0",
     "license": "SSPL-1.0",
     "type": "project",
     "require": {
