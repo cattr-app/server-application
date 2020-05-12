@@ -38,7 +38,7 @@ class AdminTableSeeder extends Seeder
                 'webcam_shots' => 0,
                 'screenshots_interval' => 9,
                 'active' => true,
-                'password' => bcrypt(self::PASSWORD),
+                'password' => self::PASSWORD,
                 'is_admin' => true,
                 'role_id' => 2,
                 'full_name' => 'Admin',

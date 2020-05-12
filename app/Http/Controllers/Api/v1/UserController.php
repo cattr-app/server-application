@@ -8,7 +8,6 @@ use App\Mail\InviteUser;
 use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\User;
-use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
@@ -17,12 +16,16 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Validator;
+use App\Http\Requests\v1\UserEditRequest;
 
 class UserController extends ItemController
 {
-    public function __construct()
+    protected UserEditRequest $userEditRequest;
+
+    public function __construct(UserEditRequest $userEditRequest)
     {
+        $this->userEditRequest = $userEditRequest;
+
         Filter::listen('request.item.create.user', static::class . '@' . 'requestUserCreateHook');
         Filter::listen('request.item.edit.user', static::class . '@' . 'requestUserCreateHook');
 
@@ -68,6 +71,31 @@ class UserController extends ItemController
         return $requestData;
     }
 
+    public static function getControllerRules(): array
+    {
+        return [
+            'index' => 'users.list',
+            'count' => 'users.list',
+            'create' => 'users.create',
+            'edit' => 'users.edit',
+            'show' => 'users.show',
+            'destroy' => 'users.remove',
+            'bulkEdit' => 'users.bulk-edit',
+            'relations' => 'users.relations',
+        ];
+    }
+
+    public function getValidationRules(): array
+    {
+        return [
+            'full_name' => 'required',
+            'email' => 'required|unique:users,email',
+            'active' => 'required|boolean',
+            'password' => 'required|min:6',
+            'screenshots_interval' => 'sometimes|integer|min:1|max:15',
+        ];
+    }
+
     public function getItemClass(): string
     {
         return User::class;
@@ -76,139 +104,6 @@ class UserController extends ItemController
     public function getEventUniqueNamePart(): string
     {
         return 'user';
-    }
-
-    public function create(Request $request): JsonResponse
-    {
-        $request->validate(['email' => 'required|email']);
-        Event::listen($this->getEventUniqueName('item.create.after'), static::class . '@' . 'saveRelations');
-        return parent::create($request);
-    }
-
-    /**
-     * Display a listing of the resource.
-     * @throws Exception
-     */
-    public function index(Request $request): JsonResponse
-    {
-        $withDeleted = $request->input('with_deleted') === true;
-
-        return parent::index($request);
-    }
-
-    /**
-     * @throws Exception
-     */
-    public function edit(Request $request): JsonResponse
-    {
-        $requestData = Filter::process(
-            $this->getEventUniqueName('request.item.edit'),
-            $request->all()
-        );
-
-        if (!is_int($request->get('id'))) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid id',
-                ]),
-                400
-            );
-        }
-
-        $validationRules = $this->getValidationRules();
-        $validationRules['id'] = 'required';
-        $validationRules['email'] .= ',' . $request->get('id');
-        $validationRules['password'] = 'sometimes|min:6';
-
-        if (array_key_exists('password', $requestData) && $requestData['password'] == null) {
-            unset($requestData['password']);
-        }
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.edit'),
-                $validationRules
-            )
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(),
-                ['id' => $request->get('id')]
-            )
-        );
-        /** @var Model $item */
-        $item = $itemsQuery->first();
-
-        if (!$item) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'User not found',
-                ]),
-                404
-            );
-        }
-
-        if (!auth()->user()->is_admin) {
-            $userCanEdit = ['full_name', 'email', 'password', 'user_language'];
-            foreach ($requestData as $key => $value) {
-                if ($item->$key != $value && !in_array($key, $userCanEdit)) {
-                    return new JsonResponse(
-                        Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                            'success' => false,
-                            'error_type' => 'validation',
-                            'message' => 'Validation error',
-                            'info' => "Only admin can edit '$key' field",
-                        ]),
-                        400
-                    );
-                }
-            }
-        }
-
-        if (App::environment('demo')) {
-            unset($requestData['password']);
-        }
-
-        if (isset($requestData['password'])) {
-            $item->fill($this->filterRequestData($requestData));
-        } else {
-            $item->fill($requestData);
-        }
-
-        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
-        $item->save();
-
-        Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
-
-        $item = $this->saveRelations($item, $requestData);
-
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'success' => true,
-                'res' => $item,
-            ])
-        );
     }
 
     /**
@@ -346,139 +241,11 @@ class UserController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-
-    public function getValidationRules(): array
+    public function create(Request $request): JsonResponse
     {
-        return [
-            'full_name' => 'required',
-            'email' => 'required|unique:users,email',
-            'active' => 'required|boolean',
-            'password' => 'required|min:6',
-            'screenshots_interval' => 'required|integer|min:1|max:15',
-        ];
-    }
-
-    /**
-     * @api             {get, post} /v1/users/show Show
-     * @apiDescription  Show User
-     *
-     * @apiVersion      1.0.0
-     * @apiName         ShowUser
-     * @apiGroup        User
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   users_show
-     * @apiPermission   users_full_access
-     *
-     * @apiParam {Integer} id   User id
-     *
-     * @apiParamExample {json} Request Example
-     * {
-     *   "id": 1
-     * }
-     *
-     * @apiUse UserObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "id": 1,
-     *    "full_name": "Admin",
-     *    "email": "admin@example.com",
-     *    "url": "",
-     *    "company_id": 1,
-     *    "payroll_access": 1,
-     *    "billing_access": 1,
-     *    "avatar": "",
-     *    "screenshots_active": 1,
-     *    "manual_time": 0,
-     *    "permanent_tasks": 0,
-     *    "computer_time_popup": 300,
-     *    "poor_time_popup": "",
-     *    "blur_screenshots": 0,
-     *    "role": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
-     *    "web_and_app_monitoring": 1,
-     *    "webcam_shots": 0,
-     *    "screenshots_interval": 9,
-     *    "active": 1,
-     *    "deleted_at": null,
-     *    "created_at": "2018-10-18 09:36:22",
-     *    "updated_at": "2018-10-18 09:36:22",
-     *    "role_id": 1,
-     *    "timezone": null,
-     *  }
-     *
-     * @apiUse         400Error
-     * @apiUse         UnauthorizedError
-     * @apiUse         ItemNotFoundError
-     * @apiUse         ForbiddenError
-     * @apiUse         ValidationError
-     */
-
-    /**
-     * @param bool $withRelations
-     * @param bool $withSoftDeleted
-     * @return Builder
-     */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
-    {
-        /** @var User $user */
-        $user = Auth::user();
-        $userId = $user->id;
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = $user->allowed('users', 'full_access');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
-
-        if ($full_access) {
-            return $query;
-        }
-
-        $rules = self::getControllerRules();
-        $rule = $rules[$action_method] ?? null;
-        if (isset($rule)) {
-            [$object, $action] = explode('.', $rule);
-            // Check user default role
-            if (Role::can($user, $object, $action)) {
-                return $query;
-            }
-
-            $query->where(static function (Builder $query) use ($userId, $object, $action) {
-                $roleSubquery = static function (Builder $query) use ($userId, $object, $action) {
-                    $query->where('user_id', $userId)->whereHas(
-                        'role',
-                        static function (Builder $query) use ($object, $action) {
-                            $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                                $query->where([
-                                    'object' => $object,
-                                    'action' => $action,
-                                    'allow' => true,
-                                ])->select('id');
-                            })->select('id');
-                        }
-                    )->select('id');
-                };
-
-                // Filter by project roles of the user
-                // Users assigned to the project
-                $query->whereHas('projects.usersRelation', $roleSubquery);
-
-                // Users assigned to tasks in the project
-                $query->orWhereHas('tasks.project.usersRelation', $roleSubquery);
-
-                /*
-                // Users has tracked intervals in tasks of the project
-                $query->orWhereHas('timeIntervals.task.project.usersRelation', $roleSubquery);
-                */
-
-                // For read and edit access include own user data
-                $query->when($action !== 'remove', static function (Builder $query) use ($userId) {
-                    $query->orWhere('id', $userId);
-                });
-            });
-        }
-
-        return $query;
+        $request->validate(['email' => 'required|email']);
+        Event::listen($this->getEventUniqueName('item.create.after'), static::class . '@' . 'saveRelations');
+        return parent::create($request);
     }
 
     /**
@@ -549,21 +316,123 @@ class UserController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-
-    public static function getControllerRules(): array
+    public function edit(Request $request): JsonResponse
     {
-        return [
-            'index' => 'users.list',
-            'count' => 'users.list',
-            'create' => 'users.create',
-            'edit' => 'users.edit',
-            'show' => 'users.show',
-            'destroy' => 'users.remove',
-            'bulkEdit' => 'users.bulk-edit',
-            'relations' => 'users.relations',
-        ];
+        $validationRules = $this->userEditRequest->rules();
+        $this->userEditRequest->validate($validationRules);
+
+        $requestData = $this->userEditRequest->validated();
+
+        $requestData = Filter::process(
+            $this->getEventUniqueName('request.item.edit'),
+            $requestData
+        );
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery(),
+                ['id' => $requestData['id']]
+            )
+        );
+        /** @var Model $item */
+        $item = $itemsQuery->first();
+
+        if (!$item) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'User not found',
+                ]),
+                404
+            );
+        }
+
+        if (App::environment('demo')) {
+            unset($requestData['password']);
+        }
+
+        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
+
+        $item->update($requestData);
+
+        Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
+
+        $item = $this->saveRelations($item, $requestData);
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
+                'res' => $item,
+            ])
+        );
     }
 
+    /**
+     * @api             {get, post} /v1/users/show Show
+     * @apiDescription  Show User
+     *
+     * @apiVersion      1.0.0
+     * @apiName         ShowUser
+     * @apiGroup        User
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   users_show
+     * @apiPermission   users_full_access
+     *
+     * @apiParam {Integer} id   User id
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "id": 1
+     * }
+     *
+     * @apiUse UserObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "id": 1,
+     *    "full_name": "Admin",
+     *    "email": "admin@example.com",
+     *    "url": "",
+     *    "company_id": 1,
+     *    "payroll_access": 1,
+     *    "billing_access": 1,
+     *    "avatar": "",
+     *    "screenshots_active": 1,
+     *    "manual_time": 0,
+     *    "permanent_tasks": 0,
+     *    "computer_time_popup": 300,
+     *    "poor_time_popup": "",
+     *    "blur_screenshots": 0,
+     *    "role": { "id": 2, "name": "user", "deleted_at": null, "created_at": "2018-10-12 11:44:08", "updated_at": "2018-10-12 11:44:08" },
+     *    "web_and_app_monitoring": 1,
+     *    "webcam_shots": 0,
+     *    "screenshots_interval": 9,
+     *    "active": 1,
+     *    "deleted_at": null,
+     *    "created_at": "2018-10-18 09:36:22",
+     *    "updated_at": "2018-10-18 09:36:22",
+     *    "role_id": 1,
+     *    "timezone": null,
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     * @apiUse         ForbiddenError
+     * @apiUse         ValidationError
+     */
+
+    /**
+     * @param bool $withRelations
+     * @param bool $withSoftDeleted
+     * @return Builder
+     */
     public function show(Request $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('answer.success.item.show'), static function ($item) {
@@ -676,13 +545,6 @@ class UserController extends ItemController
      * @apiPermission   users_relations
      */
 
-    protected function filterRequestData(array $requestData): array
-    {
-        $requestData['password'] = bcrypt($requestData['password']);
-
-        return $requestData;
-    }
-
     /**
      * @param User $user
      * @param $requestData array
@@ -706,5 +568,72 @@ class UserController extends ItemController
 
         $user->projectsRelation()->saveMany($relations);
         return $user;
+    }
+
+    /**
+     * Get Query Builder
+     *
+     * @param bool $withRelations
+     * @param bool $withSoftDeleted
+     * @return Builder
+     */
+    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    {
+        /** @var User $user */
+        $user = Auth::user();
+        $userId = $user->id;
+        $query = parent::getQuery($withRelations, $withSoftDeleted);
+        $full_access = $user->allowed('users', 'full_access');
+        $action_method = Route::getCurrentRoute()->getActionMethod();
+
+        if ($full_access) {
+            return $query;
+        }
+
+        $rules = self::getControllerRules();
+        $rule = $rules[$action_method] ?? null;
+        if (isset($rule)) {
+            [$object, $action] = explode('.', $rule);
+            // Check user default role
+            if (Role::can($user, $object, $action)) {
+                return $query;
+            }
+
+            $query->where(static function (Builder $query) use ($userId, $object, $action) {
+                $roleSubquery = static function (Builder $query) use ($userId, $object, $action) {
+                    $query->where('user_id', $userId)->whereHas(
+                        'role',
+                        static function (Builder $query) use ($object, $action) {
+                            $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                                $query->where([
+                                    'object' => $object,
+                                    'action' => $action,
+                                    'allow' => true,
+                                ])->select('id');
+                            })->select('id');
+                        }
+                    )->select('id');
+                };
+
+                // Filter by project roles of the user
+                // Users assigned to the project
+                $query->whereHas('projects.usersRelation', $roleSubquery);
+
+                // Users assigned to tasks in the project
+                $query->orWhereHas('tasks.project.usersRelation', $roleSubquery);
+
+                /*
+                // Users has tracked intervals in tasks of the project
+                $query->orWhereHas('timeIntervals.task.project.usersRelation', $roleSubquery);
+                */
+
+                // For read and edit access include own user data
+                $query->when($action !== 'remove', static function (Builder $query) use ($userId) {
+                    $query->orWhere('id', $userId);
+                });
+            });
+        }
+
+        return $query;
     }
 }
