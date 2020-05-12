@@ -152,8 +152,6 @@ class AppInstallCommand extends Command
         $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, this domain will be the same as the backend (API) one.');
         $frontendUrl = preg_replace('/^https?:\/\//', '', $frontendUrl);
         $frontendUrl = preg_replace('/\/$/', '', $frontendUrl);
-        $this->updateEnvData('ALLOWED_ORIGINS',
-            '"' . $frontendUrl . '"');
         $this->updateEnvData('FRONTEND_APP_URL',
             '"' . $frontendUrl . '"');
     }
