@@ -16,59 +16,19 @@ use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Event;
 use Illuminate\Support\Facades\Mail;
 use Illuminate\Support\Facades\Route;
-use App\Http\Requests\v1\UserEditRequest;
+use App\Http\Requests\v1\User\EditUserRequest;
+use App\Http\Requests\v1\User\SendInviteUserRequest;
+use Illuminate\Support\Str;
 
 class UserController extends ItemController
 {
-    protected UserEditRequest $userEditRequest;
+    protected EditUserRequest $editUserRequest;
 
-    public function __construct(UserEditRequest $userEditRequest)
+    public function __construct(EditUserRequest $editUserRequest)
     {
-        $this->userEditRequest = $userEditRequest;
-
-        Filter::listen('request.item.create.user', static::class . '@' . 'requestUserCreateHook');
-        Filter::listen('request.item.edit.user', static::class . '@' . 'requestUserCreateHook');
-
-        Event::listen('item.edit.after.user', static::class . '@' . 'changePasswordHook');
+        $this->editUserRequest = $editUserRequest;
 
         parent::__construct();
-    }
-
-    public function sendInviteHook(User $user, array $requestData): User
-    {
-        if (!isset($requestData['password']) || empty($requestData['password'])) {
-            return $user;
-        }
-
-        Mail::to($user->email)->send(new InviteUser($user->email, $requestData['password']));
-
-        return $user;
-    }
-
-    public function changePasswordHook(User $user, array $requestData): void
-    {
-        if ($user->change_password
-            && array_key_exists('password', $requestData)
-            && $requestData['password'] != null
-        ) {
-            $user->change_password = false;
-            $user->save();
-        }
-    }
-
-    public function requestUserCreateHook(array $requestData): array
-    {
-        $send_invite = $requestData['send_invite'] ?? 0;
-        $change_password = $requestData['change_password'] ?? 0;
-
-        if ($send_invite) {
-            Event::listen('item.create.after.user', static::class . '@' . 'sendInviteHook');
-            Event::listen('item.edit.after.user', static::class . '@' . 'sendInviteHook');
-        } elseif ($change_password) {
-            unset($requestData['change_password']);
-        }
-
-        return $requestData;
     }
 
     public static function getControllerRules(): array
@@ -82,6 +42,7 @@ class UserController extends ItemController
             'destroy' => 'users.remove',
             'bulkEdit' => 'users.bulk-edit',
             'relations' => 'users.relations',
+            'sendInvite' => 'users.edit',
         ];
     }
 
@@ -91,7 +52,7 @@ class UserController extends ItemController
             'full_name' => 'required',
             'email' => 'required|unique:users,email',
             'active' => 'required|boolean',
-            'password' => 'required|min:6',
+            'password' => 'sometimes|required|min:6',
             'screenshots_interval' => 'sometimes|integer|min:1|max:15',
         ];
     }
@@ -318,10 +279,10 @@ class UserController extends ItemController
      */
     public function edit(Request $request): JsonResponse
     {
-        $validationRules = $this->userEditRequest->rules();
-        $this->userEditRequest->validate($validationRules);
+        $validationRules = $this->editUserRequest->rules();
+        $this->editUserRequest->validate($validationRules);
 
-        $requestData = $this->userEditRequest->validated();
+        $requestData = $this->editUserRequest->validated();
 
         $requestData = Filter::process(
             $this->getEventUniqueName('request.item.edit'),
@@ -544,6 +505,44 @@ class UserController extends ItemController
      *
      * @apiPermission   users_relations
      */
+
+    /**
+     * TODO: apidoc
+     *
+     * @param Request $request
+     * @return JsonResponse
+     * @throws \Exception
+     */
+    public function sendInvite(SendInviteUserRequest $request)
+    {
+        $requestData = $request->validated();
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = $this->applyQueryFilter($this->getQuery(), ['id' => $requestData['id']]);
+        $item = $itemsQuery->first();
+        if (!$item) {
+            return new JsonResponse(
+                [
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found'
+                ],
+                404
+            );
+        }
+
+        $password = Str::random(16);
+        $item->password = $password;
+        $item->invitation_sent = true;
+        $item->save();
+
+        Mail::to($item->email)->send(new InviteUser($item->email, $password));
+
+        return new JsonResponse([
+            'success' => true,
+            'res' => $item,
+        ]);
+    }
 
     /**
      * @param User $user

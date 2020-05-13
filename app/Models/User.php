@@ -144,6 +144,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property Role $role
  * @property string|null $remember_token
  * @property int $change_password
+ * @property bool $invitation_sent
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
  * @property-read Collection|ProjectsUsers[] $projectsRelation
  * @property-read Collection|Property[] $properties
@@ -231,6 +232,7 @@ class User extends Authenticatable implements JWTSubject
         'is_admin',
         'user_language',
         'type',
+        'invitation_sent',
     ];
 
     /**
@@ -262,6 +264,7 @@ class User extends Authenticatable implements JWTSubject
         'role_id' => 'integer',
         'user_language' => 'string',
         'type' => 'string',
+        'invitation_sent' => 'boolean',
     ];
 
 

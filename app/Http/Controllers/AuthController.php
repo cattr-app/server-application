@@ -112,6 +112,11 @@ class AuthController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
+        if ($user->invitation_sent) {
+            $user->invitation_sent = false;
+            $user->save();
+        }
+
         /** @var Token $token */
         $token = $user->addToken($newToken);
 

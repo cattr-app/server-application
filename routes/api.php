@@ -126,6 +126,7 @@ Route::group([
     $router->post('/users/edit', 'Api\v1\UserController@edit');
     $router->any('/users/show', 'Api\v1\UserController@show');
     $router->post('/users/remove', 'Api\v1\UserController@destroy');
+    $router->post('/users/send-invite', 'Api\v1\UserController@sendInvite');
 
     //Screenshots routes
     $router->any('/screenshots/list', 'Api\v1\ScreenshotController@index');

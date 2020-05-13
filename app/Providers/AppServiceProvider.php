@@ -3,6 +3,8 @@
 namespace App\Providers;
 
 use App;
+use App\Models\User;
+use App\Observers\UserObserver;
 use App\Http\Controllers\DemoScreenshotControllerStrategy;
 use App\Http\Controllers\ScreenshotControllerStrategy;
 use App\Http\Controllers\ScreenshotControllerStrategyInterface;
@@ -26,6 +28,8 @@ class AppServiceProvider extends ServiceProvider
                 ScreenshotControllerStrategy::class
             );
         }
+
+        User::observe(UserObserver::class);
     }
 
     /**

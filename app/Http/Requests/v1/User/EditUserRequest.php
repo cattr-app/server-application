@@ -1,14 +1,15 @@
 <?php
 
-namespace App\Http\Requests\v1;
+namespace App\Http\Requests\v1\User;
 
+use App\Http\Requests\v1\ApiRequest;
 use App\Presenters\User\OrdinaryUserPresenter;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class UserEditRequest extends ApiRequest
+class EditUserRequest extends ApiRequest
 {
     /**
      * Determine if user authorized to make this request.
