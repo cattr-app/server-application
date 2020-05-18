@@ -31,16 +31,21 @@ use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
+Route::macro('staticRoute', function ($prefix, Router $router) {
+    Route::group([
+        'prefix' => $prefix
+    ], static function () use ($router) {
+        $router->get('{screenshot}', 'ScreenshotController@screenshot');
+        $router->get('thumbs/{screenshot}', 'ScreenshotController@thumbnail');
+    });
+});
+
 // Static content processing
 Route::group([
     'prefix' => 'uploads'
 ], static function (Router $router) {
-    $router->group([
-        'prefix' => 'screenshots'
-    ], static function (Router $router) {
-        $router->get('{screenshot}', 'ScreenshotController@screenshot');
-        $router->get('thumbs/{screenshot}', 'ScreenshotController@thumbnail');
-    });
+    Route::staticRoute('screenshots', $router);
+    Route::staticRoute('static', $router);
 });
 
 // Routes for login/register processing
