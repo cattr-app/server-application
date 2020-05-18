@@ -75,7 +75,7 @@ class Screenshot extends Model
 {
     use SoftDeletes;
 
-    public const DEFAULT_PATH = 'storage/none.png';
+    public const DEFAULT_PATH = 'uploads/static/none.png';
 
     /**
      * table name from database
