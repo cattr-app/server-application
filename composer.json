@@ -27,10 +27,12 @@
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.6.7",
+        "brainmaestro/composer-git-hooks": "^2.8",
         "mockery/mockery": "^1.3",
         "phpunit/phpunit": "^8.0",
         "roave/security-advisories": "dev-master",
-        "sempro/phpunit-pretty-print": "^1.0"
+        "sempro/phpunit-pretty-print": "^1.0",
+        "squizlabs/php_codesniffer": "3.*"
     },
     "autoload": {
         "classmap": [
@@ -42,6 +44,9 @@
         }
     },
     "scripts": {
+        "cghooks": "vendor/bin/cghooks",
+        "phpcs": "vendor/bin/phpcs --standard=./phpcs.xml --colors",
+        "phpcbf": "vendor/bin/phpcbf --standard=./phpcs.xml --colors",
         "project:update": [
             "@composer update",
             "@php artisan migrate",
@@ -64,11 +69,14 @@
         ],
         "post-install-cmd": [
             "Illuminate\\Foundation\\ComposerScripts::postInstall",
-            "@config:update"
+            "@config:update",
+            "cghooks add --ignore-lock",
+            "cghooks update"
         ],
         "post-update-cmd": [
             "Illuminate\\Foundation\\ComposerScripts::postUpdate",
-            "@config:update"
+            "@config:update",
+            "cghooks update"
         ]
     },
     "config": {
@@ -96,6 +104,16 @@
             "merge-extra": false,
             "merge-extra-deep": false,
             "merge-scripts": false
+        },
+        "hooks": {
+            "pre-commit": [
+                "OUTPUT=$(vendor/bin/phpcs --standard=./phpcs.xml)",
+                "RETVAL=$?",
+                "if [ $RETVAL -ne 0 ]; then",
+                "echo $OUTPUT | less",
+                "fi",
+                "exit $RETVAL"
+            ]
         }
     }
 }

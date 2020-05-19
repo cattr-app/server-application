@@ -13,7 +13,6 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class BulkEditTest extends TestCase
 {
     private const URI = 'v1/time-intervals/bulk-edit';

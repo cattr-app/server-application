@@ -1055,5 +1055,4 @@ class Rule extends Model
     {
         return $this->belongsTo(Role::class, 'role_id');
     }
-
 }

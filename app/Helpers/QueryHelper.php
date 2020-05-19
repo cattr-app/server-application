@@ -25,7 +25,7 @@ class QueryHelper
      *
      * @throws Exception
      */
-    public function apply($query, array $filter = [], $model, $first = true)
+    public function apply($query, $model, array $filter = [], $first = true)
     {
         $table = $model->getTable();
         $relations = [];
@@ -100,11 +100,11 @@ class QueryHelper
                 $relationQuery = $model->{$domain}();
                 if (!$first) {
                     $query->orWhereHas($domain, static function ($q) use ($self, $filters, $relationQuery, $first) {
-                        $self->apply($q, $filters, $relationQuery->getModel(), $first);
+                        $self->apply($q, $relationQuery->getModel(), $filters, $first);
                     });
                 } else {
                     $query->WhereHas($domain, static function ($q) use ($self, $filters, $relationQuery, $first) {
-                        $self->apply($q, $filters, $relationQuery->getModel(), $first);
+                        $self->apply($q, $relationQuery->getModel(), $filters, $first);
                     });
                 }
                 $first = false;

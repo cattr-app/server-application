@@ -63,7 +63,8 @@ class AppInstallCommand extends Command
             DB::connection()->getPdo();
 
             if (Schema::hasTable('migrations')) {
-                $this->error('Looks like the application was already installed. Please, make sure that database was flushed then try again');
+                $this->error('Looks like the application was already installed. '
+                    . 'Please, make sure that database was flushed then try again');
 
                 return -1;
             }
@@ -149,11 +150,14 @@ class AppInstallCommand extends Command
         } while (!$appUrlIsValid);
         $this->updateEnvData('APP_URL', $appUrl);
 
-        $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, this domain will be the same as the backend (API) one.');
+        $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, '
+            . 'this domain will be the same as the backend (API) one.');
         $frontendUrl = preg_replace('/^https?:\/\//', '', $frontendUrl);
         $frontendUrl = preg_replace('/\/$/', '', $frontendUrl);
-        $this->updateEnvData('FRONTEND_APP_URL',
-            '"' . $frontendUrl . '"');
+        $this->updateEnvData(
+            'FRONTEND_APP_URL',
+            '"' . $frontendUrl . '"'
+        );
     }
 
     protected function askAdminCredentials(): array
@@ -227,7 +231,8 @@ class AppInstallCommand extends Command
             DB::connection()->getPdo();
 
             if (Schema::hasTable('migrations')) {
-                throw new RuntimeException('Looks like the application was already installed. Please, make sure that database was flushed and then try again.');
+                throw new RuntimeException('Looks like the application was already installed. '
+                    . 'Please, make sure that database was flushed and then try again.');
             }
         } catch (PDOException $e) {
             if ($e->getCode() !== 1049) {

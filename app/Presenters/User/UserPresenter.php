@@ -42,5 +42,4 @@ class UserPresenter
     {
         return $this->model->{$name};
     }
-
 }

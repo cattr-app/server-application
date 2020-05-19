@@ -360,11 +360,13 @@ class TimeController extends ItemController
         $time_intervals_id = collect([]);
 
         if ($project_relations_access) {
-            $attached_time_interval_id_to_project = collect(Auth::user()->projects)->flatMap(static function ($project) {
-                return collect($project->tasks)->flatMap(static function ($task) {
-                    return collect($task->timeIntervals)->pluck('id');
-                });
-            });
+            $attached_time_interval_id_to_project = collect(Auth::user()->projects)->flatMap(
+                static function ($project) {
+                    return collect($project->tasks)->flatMap(static function ($task) {
+                        return collect($task->timeIntervals)->pluck('id');
+                    });
+                }
+            );
             $time_intervals_id = collect([$attached_time_interval_id_to_project])->collapse();
         }
 

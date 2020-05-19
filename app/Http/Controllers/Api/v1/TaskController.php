@@ -59,7 +59,8 @@ class TaskController extends ItemController
      *      "id": 2,
      *      "project_id": 1,
      *      "task_name": "Delectus.",
-     *      "description": "Et qui sed qui vero quis. Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
+     *      "description": "Et qui sed qui vero quis.
+     *                      Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
      *      "active": 1,
      *      "user_id": 1,
      *      "assigned_by": 1,
@@ -172,7 +173,8 @@ class TaskController extends ItemController
      *      "id": 2,
      *      "project_id": 1,
      *      "task_name": "Delectus.",
-     *      "description": "Et qui sed qui vero quis. Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
+     *      "description": "Et qui sed qui vero quis.
+     *                      Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
      *      "active": 1,
      *      "user_id": 1,
      *      "assigned_by": 1,
@@ -230,7 +232,8 @@ class TaskController extends ItemController
      *    "id": 2,
      *    "project_id": 1,
      *    "task_name": "Delectus.",
-     *    "description": "Et qui sed qui vero quis. Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
+     *    "description": "Et qui sed qui vero quis.
+     *                    Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
      *    "active": 1,
      *    "user_id": 1,
      *    "assigned_by": 1,
@@ -296,7 +299,8 @@ class TaskController extends ItemController
      *      "id": 2,
      *      "project_id": 1,
      *      "task_name": "Delectus.",
-     *      "description": "Et qui sed qui vero quis. Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
+     *      "description": "Et qui sed qui vero quis.
+     *                      Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
      *      "active": 1,
      *      "user_id": 1,
      *      "assigned_by": 1,
@@ -420,26 +424,35 @@ class TaskController extends ItemController
 
             $query->where(static function (Builder $query) use ($user_id, $object, $action) {
                 // Filter by project roles of the user
-                $query->whereHas('project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
-                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
-                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                            $query->where([
+                $query->whereHas(
+                    'project.usersRelation',
+                    static function (Builder $query) use ($user_id, $object, $action) {
+                        $query->where(
+                            'user_id',
+                            $user_id
+                        )->whereHas('role', static function (Builder $query) use ($object, $action) {
+                            $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                                $query->where([
                                 'object' => $object,
                                 'action' => $action,
                                 'allow' => true,
-                            ])->select('id');
+                                ])->select('id');
+                            })->select('id');
                         })->select('id');
-                    })->select('id');
-                });
+                    }
+                );
 
                 // For read-only access include tasks where the user is assigned or has tracked intervals
-                $query->when($action !== 'edit' && $action !== 'remove', static function (Builder $query) use ($user_id) {
-                    $query->orWhere('user_id', $user_id);
+                $query->when(
+                    $action !== 'edit' && $action !== 'remove',
+                    static function (Builder $query) use ($user_id) {
+                        $query->orWhere('user_id', $user_id);
 
-                    $query->orWhereHas('timeIntervals', static function (Builder $query) use ($user_id) {
-                        $query->where('user_id', $user_id)->select('user_id');
-                    });
-                });
+                        $query->orWhereHas('timeIntervals', static function (Builder $query) use ($user_id) {
+                            $query->where('user_id', $user_id)->select('user_id');
+                        });
+                    }
+                );
             });
         }
 

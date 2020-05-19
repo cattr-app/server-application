@@ -9,7 +9,6 @@ use Tests\Facades\ProjectUserFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class BulkRemoveTest extends TestCase
 {
     private const URI = 'v1/projects-users/bulk-remove';

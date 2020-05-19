@@ -34,7 +34,7 @@ class SetLanguage extends Command
             'entity_id' => 0,
             'name' => 'language'], [
             'value' => $language
-        ]);
+            ]);
 
         $this->info(strtoupper($language) . ' language successfully set');
     }

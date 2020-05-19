@@ -8,7 +8,6 @@ use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class ListTest extends TestCase
 {
     private const URI = 'v1/projects/list';

@@ -42,8 +42,7 @@ class TimeUseReportController extends ReportController
      */
     public function __construct(
         ReportHelper $reportHelper
-    )
-    {
+    ) {
         $companyTimezoneProperty = Property::getProperty(Property::COMPANY_CODE, 'TIMEZONE')->first();
         $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
         $this->reportHelper = $reportHelper;
@@ -77,7 +76,8 @@ class TimeUseReportController extends ReportController
         $validator = Validator::make(
             $request->all(),
             Filter::process(
-                $this->getEventUniqueName('validation.report.show'), [
+                $this->getEventUniqueName('validation.report.show'),
+                [
                     'user_ids' => 'exists:users,id|array',
                     'start_at' => 'required|date',
                     'end_at' => 'required|date',
@@ -88,12 +88,16 @@ class TimeUseReportController extends ReportController
         if ($validator->fails()) {
             return response()->json(
                 Filter::process(
-                    $this->getEventUniqueName('answer.error.report.show'), [
+                    $this->getEventUniqueName('answer.error.report.show'),
+                    [
                     'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
-                ]), 400);
+                    ]
+                ),
+                400
+            );
         }
 
         $user_ids = $request->input('user_ids', []);

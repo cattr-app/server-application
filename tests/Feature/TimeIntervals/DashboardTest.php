@@ -8,7 +8,6 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class DashboardTest extends TestCase
 {
     private const URI = 'v1/time-intervals/dashboard';

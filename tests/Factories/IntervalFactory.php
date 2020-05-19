@@ -31,7 +31,7 @@ class IntervalFactory extends Factory
          'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
          'count_mouse' => random_int(1, 1000),
          'count_keyboard' => random_int(1, 1000)
-      ];
+        ];
     }
 
     public function createRandomModelDataWithRelation(): array
@@ -39,7 +39,7 @@ class IntervalFactory extends Factory
         return array_merge($this->createRandomModelData(), [
          'task_id' => TaskFactory::create()->id,
          'user_id' => UserFactory::create()->id,
-      ]);
+        ]);
     }
 
     public function forUser(User $user): self

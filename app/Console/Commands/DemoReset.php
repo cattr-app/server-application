@@ -47,5 +47,4 @@ class DemoReset extends Command
 
         return 0;
     }
-
 }

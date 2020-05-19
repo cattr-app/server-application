@@ -5,7 +5,6 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class CreateTest extends TestCase
 {
     private const URI = 'v1/roles/create';

@@ -38,7 +38,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @apiParam {ISO8601}  [updated_at]   Update DateTime
  * @apiParam {ISO8601}  [deleted_at]   Delete DateTime or `NULL` if user wasn't deleted
  * @apiParam {String}   [with]         Related models to return in response
- * @apiParam {Object}   [users]        Users attached to project, all params in <a href="#api-User-GetUserList" >@User</a>
+ * @apiParam {Object}   [users]        Users attached to project,all params in <a href="#api-User-GetUserList">@User</a>
  * @apiParam {Object}   [tasks]        Tasks of project, all params in <a href="#api-Task-GetTaskList" >@Task</a>
  *
  * @apiVersion 1.0.0

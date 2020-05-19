@@ -8,7 +8,6 @@ use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class CountTest extends TestCase
 {
     private const URI = 'v1/tasks/count';

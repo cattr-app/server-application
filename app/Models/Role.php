@@ -37,7 +37,7 @@ use Throwable;
  * @apiParam {ISO8601}  [deleted_at]  Delete DateTime
  * @apiParam {String}   [with]        For add relation model in response
  * @apiParam {Object}   [users]       Roles's relation users. All params in <a href="#api-User-GetUserList" >@User</a>
- * @apiParam {Object}   [rules]       Roles's relation rules. All params in <a href="#api-Rule-GetRulesActions" >@Rules</a>
+ * @apiParam {Object}   [rules]      Roles's relation rules. All params in<a href="#api-Rule-GetRulesActions">@Rules</a>
  *
  * @apiVersion 1.0.0
  */
@@ -165,12 +165,18 @@ class Role extends Model
         if (!static::can($user, 'rules', 'full_access')) {
             throw_if(
                 $user->role_id === $rule->role_id,
-                new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN, 'You cannot change your own privileges')
+                new AuthorizationException(
+                    AuthorizationException::ERROR_TYPE_FORBIDDEN,
+                    'You cannot change your own privileges'
+                )
             );
         }
         throw_if(
             $role_id === 1 && $object === 'rules' && $action === 'full_access',
-            new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN, 'You cannot change rule management for root')
+            new AuthorizationException(
+                AuthorizationException::ERROR_TYPE_FORBIDDEN,
+                'You cannot change rule management for root'
+            )
         );
 
         $rule->allow = $allow;
