@@ -12,7 +12,6 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class CreateTest extends TestCase
 {
     private const URI = '/v1/screenshots/create';
@@ -34,7 +33,6 @@ class CreateTest extends TestCase
         $this->screenshotFile = UploadedFile::fake()->image($screenshotName);
 
         $this->interval = IntervalFactory::create();
-
     }
 
     public function test_create(): void

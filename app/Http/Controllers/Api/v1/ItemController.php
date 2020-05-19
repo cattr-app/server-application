@@ -97,7 +97,7 @@ abstract class ItemController extends Controller
         $model = new $cls();
         $helper = new QueryHelper();
 
-        $helper->apply($query, $filter, $model);
+        $helper->apply($query, $model, $filter);
 
         return Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.filter'),

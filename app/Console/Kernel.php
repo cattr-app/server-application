@@ -27,7 +27,11 @@ class Kernel extends ConsoleKernel
      */
     protected function schedule(Schedule $schedule)
     {
-        $schedule->command(EmulateWork::class)->everyFiveMinutes()->environments(['staging', 'demo'])->withoutOverlapping()->runInBackground();
+        $schedule->command(EmulateWork::class)
+            ->everyFiveMinutes()
+            ->environments(['staging', 'demo'])
+            ->withoutOverlapping()
+            ->runInBackground();
 
         $schedule->command(DemoReset::class)->cron('*/5 * * * *')->environments(['demo']);
 

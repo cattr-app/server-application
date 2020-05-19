@@ -32,8 +32,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @apiParam {ISO8601}  [created_at]  Creation DateTime
  * @apiParam {ISO8601}  [updated_at]  Update DateTime
  * @apiParam {ISO8601}  [deleted_at]  Delete DateTime
- * @apiParam {Object}   [user]        ProjectUser's relation user. All params in <a href="#api-User-GetUserList" >@User</a>
- * @apiParam {Object}   [project]     ProjectUser's relation project. All params in <a href="#api-Project-GetProjectList" >@Project</a>
+ * @apiParam {Object}   [user]        ProjectUser's relation user.
+ * All params in <a href="#api-User-GetUserList" >@User</a>
+ * @apiParam {Object}   [project]     ProjectUser's relation project.
+ * All params in <a href="#api-Project-GetProjectList" >@Project</a>
  *
  * @apiVersion 1.0.0
  */

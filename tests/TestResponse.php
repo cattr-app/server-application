@@ -93,13 +93,17 @@ class TestResponse extends BaseTestResponse
         return $this;
     }
 
-    public function assertUnauthorized(string $type = AuthorizationException::ERROR_TYPE_UNAUTHORIZED, bool $hasInfo = false): TestResponse
-    {
+    public function assertUnauthorized(
+        string $type = AuthorizationException::ERROR_TYPE_UNAUTHORIZED,
+        bool $hasInfo = false
+    ): TestResponse {
         return $this->assertError(self::HTTP_UNAUTHORIZED, $type, $hasInfo);
     }
 
-    public function assertForbidden(string $type = AuthorizationException::ERROR_TYPE_FORBIDDEN, bool $hasInfo = true): TestResponse
-    {
+    public function assertForbidden(
+        string $type = AuthorizationException::ERROR_TYPE_FORBIDDEN,
+        bool $hasInfo = true
+    ): TestResponse {
         return $this->assertError(self::HTTP_FORBIDDEN, $type, $hasInfo);
     }
 

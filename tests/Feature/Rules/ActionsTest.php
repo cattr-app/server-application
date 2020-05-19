@@ -7,7 +7,6 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class ActionsTest extends TestCase
 {
     private const URI = 'v1/rules/actions';

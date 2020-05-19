@@ -45,7 +45,7 @@ class RegisterInstance extends Command
             'entity_type' => Property::APP_CODE,
             'entity_id' => 0,
             'name' => 'INSTANCE_ID',
-        ])->count()){
+        ])->count()) {
             echo 'Application already registered';
             return 1;
         }
@@ -78,7 +78,9 @@ class RegisterInstance extends Command
                 $this->info($responseBody['release']['flashMessage']);
             }
 
-            if (isset($responseBody['release']['lastVersion']) && $responseBody['release']['lastVersion'] > $appVersion) {
+            if (isset($responseBody['release']['lastVersion'])
+                && $responseBody['release']['lastVersion'] > $appVersion
+            ) {
                 $this->alert("New version is available: {$responseBody['release']['lastVersion']}");
             }
 

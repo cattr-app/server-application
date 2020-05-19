@@ -8,8 +8,10 @@ use Illuminate\Auth\Access\AuthorizationException as BaseAuthorizationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
 use Throwable;
 
-
-class AuthorizationException extends BaseAuthorizationException implements TypedException, InfoExtendedException, HttpExceptionInterface
+class AuthorizationException extends BaseAuthorizationException implements
+    TypedException,
+    InfoExtendedException,
+    HttpExceptionInterface
 {
     /**
      * @apiDefine 400Error

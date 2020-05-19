@@ -6,7 +6,6 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/users/remove';

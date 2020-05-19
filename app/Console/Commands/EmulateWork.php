@@ -63,9 +63,12 @@ class EmulateWork extends Command
         foreach ($plan as $entry) {
             foreach ($entry['intervals'] as $interval) {
                 if ($timeFromBeginOfTheDay >= $interval['start'] && $timeFromBeginOfTheDay <= $interval['end']) {
-                    $this->createTimeInterval($interval['task'], $entry['user'],
+                    $this->createTimeInterval(
+                        $interval['task'],
+                        $entry['user'],
                         date('c', $now - $this->intervalDuration),
-                        date('c', $now));
+                        date('c', $now)
+                    );
                 }
             }
         }

@@ -53,7 +53,13 @@ class RoleCheck
         // Handled on the query level
         if ($object === 'users' && in_array($action, ['list', 'show', 'edit'])
             || in_array($object, ['projects', 'tasks']) && in_array($action, ['list', 'show'])
-            || in_array($object, ['screenshots', 'time-intervals']) && in_array($action, ['list', 'show', 'edit', 'remove'])) {
+            || in_array(
+                $object,
+                [
+                    'screenshots',
+                    'time-intervals'
+                ]
+            ) && in_array($action, ['list', 'show', 'edit', 'remove'])) {
             return $next($request);
         }
 

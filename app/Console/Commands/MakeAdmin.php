@@ -12,7 +12,8 @@ class MakeAdmin extends Command
      *
      * @var string
      */
-    protected $signature = 'cattr:make:admin {name : Administrator\'s name} {email : Administrator\'s email} {password : Administrator\'s password} {--o : Skip instance registration}';
+    protected $signature = 'cattr:make:admin {name : Administrator\'s name} {email : Administrator\'s email} '
+    . '{password : Administrator\'s password} {--o : Skip instance registration}';
 
     /**
      * The console command description.
@@ -23,7 +24,7 @@ class MakeAdmin extends Command
 
     public function handle(): void
     {
-        if(!$this->option('o') && !User::where(['is_admin' => true])->count() ){
+        if (!$this->option('o') && !User::where(['is_admin' => true])->count()) {
             $this->call('cattr:register', [
                 'adminEmail' => $this->argument('email')
             ]);

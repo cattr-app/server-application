@@ -6,7 +6,6 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/roles/remove';
@@ -28,7 +27,6 @@ class RemoveTest extends TestCase
 
         $response->assertSuccess();
         $this->assertSoftDeleted('role', ['id' => 1]);
-
     }
 
     public function test_unauthorized(): void

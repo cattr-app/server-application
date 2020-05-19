@@ -37,7 +37,7 @@ class SetTimeZone extends Command
             'entity_id' => 0,
             'name' => 'timezone'], [
             'value' => $timezone
-        ]);
+            ]);
 
         $this->info("$timezone time zone successfully set");
     }
