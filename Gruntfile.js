@@ -7,7 +7,7 @@ module.exports = function (grunt) {
       mypp: {
         src: './app/',
         dest: './apidoc/',
-        template: './template-apidoc/',
+        template: './resources/template-apidoc/',
         options: {
           debug: true,
           includeFilters: [".*\\.php$"],
