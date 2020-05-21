@@ -9,7 +9,6 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class TotalTest extends TestCase
 {
     private const URI = 'v1/time/total';
@@ -27,7 +26,6 @@ class TotalTest extends TestCase
         $this->admin = UserFactory::asAdmin()->withTokens()->create();
 
         $this->intervals = IntervalFactory::forUser($this->admin)->createMany(self::INTERVALS_AMOUNT);
-
     }
 
     public function test_total(): void

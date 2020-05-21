@@ -36,6 +36,7 @@ coverage/
 .php_cs.cache
 /storage/app/uploads/screenshots
 modules_statuses.json
+cghooks.lock
 
 Modules/*
 !Modules/.gitkeep

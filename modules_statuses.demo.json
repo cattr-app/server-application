@@ -1,0 +1,6 @@
+{
+  "EventListener": true,
+  "GitlabIntegration": true,
+  "RedmineIntegration": true,
+  "Reports": true
+}

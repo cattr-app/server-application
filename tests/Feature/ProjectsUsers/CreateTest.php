@@ -7,7 +7,6 @@ use Tests\Facades\ProjectUserFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class CreateTest extends TestCase
 {
     private const URI = 'v1/projects-users/create';

@@ -3,7 +3,6 @@
 
 namespace App\Helpers\Lock;
 
-
 interface LockInterface
 {
     public function setLock(bool $lock): void;

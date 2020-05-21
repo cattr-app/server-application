@@ -37,17 +37,17 @@ class ProjectUserFactory extends Factory
         ];
     }
 
-     private function defineModelData(): array
-     {
-         $this->user ??= UserFactory::create();
-         $this->roleId ??= $this->getRandomRoleId();
+    private function defineModelData(): array
+    {
+        $this->user ??= UserFactory::create();
+        $this->roleId ??= $this->getRandomRoleId();
 
-         return [
-             'project_id' => ProjectFactory::create()->id,
-             'user_id' => $this->user->id,
-             'role_id' => $this->roleId
-         ];
-     }
+        return [
+            'project_id' => ProjectFactory::create()->id,
+            'user_id' => $this->user->id,
+            'role_id' => $this->roleId
+        ];
+    }
 
     private function getRandomRoleId()
     {

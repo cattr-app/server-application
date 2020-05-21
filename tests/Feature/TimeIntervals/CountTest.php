@@ -9,7 +9,6 @@ use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class CountTest extends TestCase
 {
     private const URI = 'v1/time-intervals/count';

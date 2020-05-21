@@ -8,7 +8,6 @@ use Tests\Facades\ProjectFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-
 class RemoveTest extends TestCase
 {
     private const URI = 'v1/projects/remove';
@@ -32,7 +31,6 @@ class RemoveTest extends TestCase
 
         $response->assertSuccess();
         $this->assertSoftDeleted('projects', $this->project->only('id'));
-
     }
 
     public function test_unauthorized(): void

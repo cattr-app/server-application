@@ -4,11 +4,12 @@ namespace App\Http\Middleware;
 
 use App\Helpers\Lock\Lock;
 use Closure;
+use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
 class LockMiddleware
 {
-    protected const excludedPaths = ['show', 'list', 'dashboard', 'allowed-rules', 'count'];
+    protected const EXCLUDED_PATHS = ['show', 'list', 'dashboard', 'allowed-rules', 'count'];
     protected Lock $lock;
 
     public function __construct(Lock $lock)
@@ -28,7 +29,7 @@ class LockMiddleware
         if ($request instanceof Request && !$request->isMethod('get') && $this->lock->isLocked()) {
             $pathElements = explode('/', $request->path());
             foreach ($pathElements as $pathElement) {
-                if (in_array($pathElement, static::excludedPaths, true)) {
+                if (in_array($pathElement, static::EXCLUDED_PATHS, true)) {
                     return $next($request);
                 }
             }

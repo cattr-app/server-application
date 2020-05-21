@@ -318,26 +318,40 @@ class TimeIntervalController extends ItemController
                 $user_id = $user->id;
 
                 // Filter by project roles of the user
-                $query->whereHas('task.project.usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
-                    $query->where('user_id', $user_id)->whereHas('role', static function (Builder $query) use ($object, $action) {
-                        $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                            $query->where([
-                                'object' => $object,
-                                'action' => $action,
-                                'allow' => true,
-                            ])->select('id');
-                        })->select('id');
-                    })->select('id');
-                });
+                $query->whereHas(
+                    'task.project.usersRelation',
+                    static function (Builder $query) use ($user_id, $object, $action
+                    ) {
+                        $query->where(
+                            'user_id',
+                            $user_id
+                        )->whereHas(
+                            'role',
+                            static function (Builder $query) use ($object, $action) {
+                                $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
+                                    $query->where([
+                                        'object' => $object,
+                                        'action' => $action,
+                                        'allow' => true,
+                                    ])->select('id');
+                                })->select('id');
+                            }
+                        )->select('id');
+                    }
+                );
 
                 // For read and delete access include user own intervals
                 $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
                     $query->orWhere('user_id', $user_id)->select('user_id');
                 });
 
-                $query->when($action === 'edit' && (bool)$user->manual_time, static function (Builder $query) use ($user_id) {
-                    $query->orWhere('user_id', $user_id)->select('user_id');
-                });
+                $query->when(
+                    $action === 'edit' && (bool)$user->manual_time,
+                    static function (Builder $query) use ($user_id
+                    ) {
+                        $query->orWhere('user_id', $user_id)->select('user_id');
+                    }
+                );
             });
         }
 

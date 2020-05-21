@@ -91,7 +91,8 @@ class ReportHelper
                         $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates']
                     )
                     ) {
-                        $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$taskDate] = 0;
+                        $resultCollection
+                        [$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$taskDate] = 0;
                     }
 
                     $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]
@@ -120,7 +121,8 @@ class ReportHelper
                     $hoursScreenKey = Carbon::parse($screen['created_at'])->startOfHour()->format('H:i');
 
                     // Don't add screenshots for dates without intervals
-                    if (!isset($resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['dates'][$createdAtFormatted])) {
+                    if (!isset($resultCollection[$projectName]['users']
+                        [$item->user_id]['tasks'][$item->task_id]['dates'][$createdAtFormatted])) {
                         continue;
                     }
 
@@ -141,7 +143,8 @@ class ReportHelper
 
                 $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'] =
                     array_merge(
-                        $resultCollection[$projectName]['users'][$item->user_id]['tasks'][$item->task_id]['screenshots'],
+                        $resultCollection[$projectName]['users']
+                        [$item->user_id]['tasks'][$item->task_id]['screenshots'],
                         $screensResultCollection
                     );
             }

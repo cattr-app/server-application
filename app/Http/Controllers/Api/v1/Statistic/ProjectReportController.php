@@ -86,7 +86,13 @@ class ProjectReportController extends ReportController
         $pids = $pids ?? Project::getUserRelatedProjectIds(request()->user());
 
 
-        $collection = $this->reportHelper->getProjectReportQuery($uids, $pids, $startAt, $endAt, $timezoneOffset)->get();
+        $collection = $this->reportHelper->getProjectReportQuery(
+            $uids,
+            $pids,
+            $startAt,
+            $endAt,
+            $timezoneOffset
+        )->get();
         $resultCollection = $this->reportHelper->getProcessedProjectReportCollection($collection);
 
         $result = [

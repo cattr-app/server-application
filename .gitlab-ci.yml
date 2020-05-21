@@ -91,7 +91,7 @@ demo_deploy:
   image: alpine
   stage: deploy
   only:
-    - demo
+    - release
   before_script:
     - 'which ssh-agent || ( apk add --update openssh )'
     - eval $(ssh-agent -s)

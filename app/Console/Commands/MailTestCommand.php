@@ -30,8 +30,7 @@ class MailTestCommand extends Command
     {
         $destination = $this->argument('destination');
 
-        Mail::raw('Text to e-mail', static function($message) use ($destination)
-        {
+        Mail::raw('Text to e-mail', static function ($message) use ($destination) {
             $message->to($destination);
         });
     }
