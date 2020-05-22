@@ -12,13 +12,14 @@ use Illuminate\Support\Carbon;
  * @property string $key
  * @property string $email
  * @property Carbon $expires_at
- * @method static EloquentBuilder|Registration whereEmail($value)
- * @method static EloquentBuilder|Registration whereExpiresAt($value)
- * @method static EloquentBuilder|Registration whereId($value)
- * @method static EloquentBuilder|Registration whereKey($value)
+ * @method static EloquentBuilder|Invitation whereEmail($value)
+ * @method static EloquentBuilder|Invitation whereExpiresAt($value)
+ * @method static EloquentBuilder|Invitation whereId($value)
+ * @method static EloquentBuilder|Invitation whereKey($value)
+ * @method static EloquentBuilder|Invitation whereRoleId($value)
  * @mixin EloquentIdeHelper
  */
-class Registration extends Model
+class Invitation extends Model
 {
     /**
      * @var bool
@@ -32,6 +33,7 @@ class Registration extends Model
         'key',
         'email',
         'expires_at',
+        'role_id',
     ];
 
     /**
@@ -40,6 +42,7 @@ class Registration extends Model
     protected $casts = [
         'key' => 'string',
         'email' => 'string',
+        'role_id' => 'int',
     ];
 
     /**

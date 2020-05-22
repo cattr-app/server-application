@@ -129,4 +129,14 @@ class TestResponse extends BaseTestResponse
 
         return $this;
     }
+
+    public static function assertEquals(...$params): void
+    {
+        PHPUnit::assertEquals(...$params);
+    }
+
+    public static function assertNotEquals(...$params): void
+    {
+        PHPUnit::assertNotEquals(...$params);
+    }
 }

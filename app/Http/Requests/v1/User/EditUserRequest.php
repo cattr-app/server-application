@@ -2,14 +2,14 @@
 
 namespace App\Http\Requests\v1\User;
 
-use App\Http\Requests\v1\ApiRequest;
 use App\Presenters\User\OrdinaryUserPresenter;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
-class EditUserRequest extends ApiRequest
+class EditUserRequest extends FormRequest
 {
     /**
      * Determine if user authorized to make this request.

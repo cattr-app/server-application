@@ -4,7 +4,9 @@ namespace App\Providers;
 
 use App;
 use App\Models\User;
+use App\Models\Invitation;
 use App\Observers\UserObserver;
+use App\Observers\InvitationObserver;
 use App\Http\Controllers\DemoScreenshotControllerStrategy;
 use App\Http\Controllers\ScreenshotControllerStrategy;
 use App\Http\Controllers\ScreenshotControllerStrategyInterface;
@@ -30,6 +32,7 @@ class AppServiceProvider extends ServiceProvider
         }
 
         User::observe(UserObserver::class);
+        Invitation::observe(InvitationObserver::class);
     }
 
     /**
