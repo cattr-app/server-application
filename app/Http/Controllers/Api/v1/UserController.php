@@ -4,7 +4,7 @@ namespace App\Http\Controllers\Api\v1;
 
 use App;
 use App\EventFilter\Facades\Filter;
-use App\Mail\InviteUser;
+use App\Mail\UserCreated;
 use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\User;
@@ -22,15 +22,11 @@ use Illuminate\Support\Str;
 
 class UserController extends ItemController
 {
-    protected EditUserRequest $editUserRequest;
-
-    public function __construct(EditUserRequest $editUserRequest)
-    {
-        $this->editUserRequest = $editUserRequest;
-
-        parent::__construct();
-    }
-
+    /**
+     * Get the controller rules.
+     *
+     * @return array
+     */
     public static function getControllerRules(): array
     {
         return [
@@ -46,6 +42,11 @@ class UserController extends ItemController
         ];
     }
 
+    /**
+     * Get the validation rules.
+     *
+     * @return array
+     */
     public function getValidationRules(): array
     {
         return [
@@ -57,11 +58,21 @@ class UserController extends ItemController
         ];
     }
 
+    /**
+     * Get the model class.
+     *
+     * @return string
+     */
     public function getItemClass(): string
     {
         return User::class;
     }
 
+    /**
+     * Get the event unique name part.
+     *
+     * @return string
+     */
     public function getEventUniqueNamePart(): string
     {
         return 'user';
@@ -280,10 +291,7 @@ class UserController extends ItemController
      */
     public function edit(Request $request): JsonResponse
     {
-        $validationRules = $this->editUserRequest->rules();
-        $this->editUserRequest->validate($validationRules);
-
-        $requestData = $this->editUserRequest->validated();
+        $requestData = app(EditUserRequest::class)->validated();
 
         $requestData = Filter::process(
             $this->getEventUniqueName('request.item.edit'),
@@ -538,7 +546,7 @@ class UserController extends ItemController
         $item->invitation_sent = true;
         $item->save();
 
-        Mail::to($item->email)->send(new InviteUser($item->email, $password));
+        Mail::to($item->email)->send(new UserCreated($item->email, $password));
 
         return new JsonResponse([
             'success' => true,

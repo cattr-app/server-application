@@ -8,26 +8,21 @@ use Illuminate\Mail\Mailable;
 use Illuminate\Queue\SerializesModels;
 
 /** @codeCoverageIgnore  */
-class InviteUser extends Mailable implements ShouldQueue
+class UserInvited extends Mailable implements ShouldQueue
 {
     use Queueable;
     use SerializesModels;
 
-    public $login;
-    public $password;
     public $url;
 
     /**
      * Create a new message instance.
      *
-     * @param $login
-     * @param $password
+     * @param $key
      */
-    public function __construct($login, $password)
+    public function __construct($key)
     {
-        $this->login = $login;
-        $this->password = $password;
-        $this->url = config('app.frontend_url');
+        $this->url = config('app.frontend_url') . "/auth/register?token={$key}";
     }
 
     /**
@@ -37,6 +32,6 @@ class InviteUser extends Mailable implements ShouldQueue
      */
     public function build(): self
     {
-        return $this->markdown('emails.invite');
+        return $this->markdown('emails.registration');
     }
 }

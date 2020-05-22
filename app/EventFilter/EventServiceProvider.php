@@ -3,7 +3,7 @@
 namespace App\EventFilter;
 
 use App\EventFilter\Facades\Filter;
-use Illuminate\Support\ServiceProvider;
+use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -12,7 +12,9 @@ class EventServiceProvider extends ServiceProvider
      *
      * @var array
      */
-    protected $listen = [];
+    protected $listen = [
+        'App\Events\InvitationCreated' => ['App\Listeners\SendInvitationMail'],
+    ];
 
     /**
      * The subscriber classes to register.
@@ -28,6 +30,8 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot()
     {
+        parent::boot();
+
         foreach ($this->listens() as $event => $listeners) {
             foreach ($listeners as $listener) {
                 Filter::listen($event, $listener);
