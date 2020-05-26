@@ -56,6 +56,7 @@ live_deploy:
     - ssh-keyscan -H $CI_HOST >> ~/.ssh/known_hosts
   script:
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && git pull'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && git submodule update --init'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && composer install'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases new $(php artisan cattr:version)'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases set-commits $(php artisan cattr:version) --auto'
@@ -77,6 +78,7 @@ staging_deploy:
     - ssh-keyscan -H $STAGING_HOST >> ~/.ssh/known_hosts
   script:
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull'
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git submodule update --init'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer install'
     - ssh $STAGING_USER@$STAGING_HOST 'cp -f backend/.env.staging backend/.env && cat backend/.env.sentry >> backend/.env'
     - ssh $STAGING_USER@$STAGING_HOST 'cp -f backend/modules_statuses.staging.json backend/modules_statuses.json'
