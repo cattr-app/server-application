@@ -40,3 +40,6 @@ cghooks.lock
 
 Modules/*
 !Modules/.gitkeep
+
+bootstrap/cache/*
+!bootstrap/cache/.gitkeep
