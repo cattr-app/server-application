@@ -22,6 +22,7 @@
   <exclude-pattern>*.blade.php</exclude-pattern>
   <exclude-pattern>*.js</exclude-pattern>
   <exclude-pattern>app/DocsArchive/*</exclude-pattern>
+  <exclude-pattern>resources/*</exclude-pattern>
 
   <arg value="p"/>
 </ruleset>
