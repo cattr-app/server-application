@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use App\Helpers\Version;
 use Illuminate\Console\Command;
-use InvalidArgumentException;
+use JsonException;
 
 class ModuleVersion extends Command
 {
@@ -24,6 +24,7 @@ class ModuleVersion extends Command
 
     /**
      * Execute the console command.
+     * @throws JsonException
      */
     public function handle(): void
     {

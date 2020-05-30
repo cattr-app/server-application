@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Mail;
+use Mail;
 
 class MailTestCommand extends Command
 {

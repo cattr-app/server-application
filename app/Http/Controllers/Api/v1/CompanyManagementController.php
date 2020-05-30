@@ -8,10 +8,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller;
 use Illuminate\Validation\Rule;
+use JsonException;
 
 class CompanyManagementController extends Controller
 {
-    protected static $casts = [
+    protected static array $casts = [
         'color' => 'json',
         'gitlab_enabled' => 'int',
         'gitlab_time_sync_period' => 'int',
@@ -27,6 +28,10 @@ class CompanyManagementController extends Controller
         'work_time' => 'int',
     ];
 
+    /**
+     * @return JsonResponse
+     * @throws JsonException
+     */
     public function getData(): JsonResponse
     {
         $data = Property::where(['entity_type' => Property::COMPANY_CODE])->get();
@@ -41,6 +46,12 @@ class CompanyManagementController extends Controller
         return new JsonResponse($toReturn);
     }
 
+    /**
+     * @param string $name
+     * @param $value
+     * @return int|mixed
+     * @throws JsonException
+     */
     protected function decodeField(string $name, $value)
     {
         if (!isset(static::$casts[$name])) {
@@ -49,7 +60,7 @@ class CompanyManagementController extends Controller
 
         switch (static::$casts[$name]) {
             case 'json':
-                return json_decode($value, true);
+                return json_decode($value, true, 512, JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
 
             case 'int':
                 return (int)$value;
@@ -81,7 +92,13 @@ class CompanyManagementController extends Controller
         ], ['value' => $value]);
     }
 
-    protected function encodeField(string $name, $value)
+    /**
+     * @param string $name
+     * @param $value
+     * @return string
+     * @throws JsonException
+     */
+    protected function encodeField(string $name, $value): string
     {
         if (!isset(static::$casts[$name])) {
             return $value;
@@ -94,7 +111,7 @@ class CompanyManagementController extends Controller
                 return $value;
             }
 
-            return json_encode($value);
+            return json_encode($value, JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
         }
 
         return $value;

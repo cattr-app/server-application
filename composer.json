@@ -23,7 +23,9 @@
         "sentry/sentry-laravel": "^1.5",
         "tymon/jwt-auth": "^1.0",
         "webpatser/laravel-uuid": "^3.0",
-        "wikimedia/composer-merge-plugin": "^1.4"
+        "wikimedia/composer-merge-plugin": "^1.4",
+        "ext-gd": "*",
+        "ext-csprng": "*"
     },
     "require-dev": {
         "barryvdh/laravel-ide-helper": "^2.6.7",

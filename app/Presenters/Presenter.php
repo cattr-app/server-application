@@ -2,6 +2,8 @@
 
 namespace App\Presenters;
 
+use Illuminate\Database\Eloquent\Model;
+
 /**
  * Class Presenter
  * @package App\Presenters

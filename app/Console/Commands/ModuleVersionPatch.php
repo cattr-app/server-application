@@ -5,6 +5,7 @@ namespace App\Console\Commands;
 use Illuminate\Console\Command;
 use App\Helpers\Version;
 use InvalidArgumentException;
+use JsonException;
 use TypeError;
 
 class ModuleVersionPatch extends VersionPatchCommand
@@ -24,6 +25,9 @@ class ModuleVersionPatch extends VersionPatchCommand
     protected $description = 'Command description';
 
 
+    /**
+     * @throws JsonException
+     */
     protected function initVersion(): void
     {
         $this->version = new Version($this->argument('module'));

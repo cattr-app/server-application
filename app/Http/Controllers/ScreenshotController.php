@@ -10,7 +10,7 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 class ScreenshotController extends Controller
 {
     /** @var ScreenshotControllerStrategyInterface */
-    protected $strategy;
+    protected ScreenshotControllerStrategyInterface $strategy;
 
     /**
      * @param ScreenshotControllerStrategyInterface $strategy

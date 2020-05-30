@@ -6,6 +6,8 @@ use App\Helpers\ModuleHelper;
 use App\Models\Property;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
+use JsonException;
+use Exception;
 
 class RegisterInstance extends Command
 {
@@ -24,20 +26,11 @@ class RegisterInstance extends Command
     protected $description = 'Send instance data on the statistics server';
 
     /**
-     * Create a new command instance.
-     *
-     * @return void
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Execute the console command.
      *
      * @param Client $client
      * @return bool
+     * @throws JsonException
      */
     public function handle(Client $client)
     {
@@ -62,7 +55,8 @@ class RegisterInstance extends Command
                 ]
             ]);
 
-            $responseBody = json_decode($response->getBody()->getContents(), true);
+            $responseBody = json_decode($response->getBody()->getContents(), true, 512,
+                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
 
             if (isset($responseBody['instanceId'])) {
                 Property::updateOrCreate([
@@ -94,9 +88,10 @@ class RegisterInstance extends Command
             }
 
             return true;
-        } catch (GuzzleException $e) {
+        } catch (Exception $e) {
             if ($e->getResponse()) {
-                $error = json_decode($e->getResponse()->getBody(), true);
+                $error = json_decode($e->getResponse()->getBody(), true, 512,
+                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
                 $this->warn($error['message']);
             } else {
                 $this->warn('Сould not get a response from the server to check the relevance of your version.');

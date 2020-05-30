@@ -198,7 +198,7 @@ class RecaptchaHelper
         }
 
         try {
-            $data = json_decode($response, true);
+            $data = json_decode($response, true, 512, JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
         } catch (Throwable $throwable) {
             return;
         }

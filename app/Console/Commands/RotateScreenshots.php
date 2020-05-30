@@ -4,7 +4,7 @@ namespace App\Console\Commands;
 
 use DB;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
+use Storage;
 
 class RotateScreenshots extends Command
 {
@@ -97,6 +97,8 @@ class RotateScreenshots extends Command
 
     /**
      * Returns absolute path for the relative to storage path.
+     * @param string $path
+     * @return string
      */
     protected function getAbsolutePath(string $path): string
     {
@@ -108,6 +110,8 @@ class RotateScreenshots extends Command
 
     /**
      * Returns disk space usage in bytes for a file or directory.
+     * @param string $path
+     * @return int
      */
     protected function getDiskUsage(string $path): int
     {
@@ -122,6 +126,8 @@ class RotateScreenshots extends Command
 
     /**
      * Returns waterline in bytes. False if SCREENSHOTS_WATERLINE is not set.
+     * @param int $storageSize
+     * @return bool|float|int
      */
     protected function getWaterline(int $storageSize)
     {
@@ -146,6 +152,8 @@ class RotateScreenshots extends Command
 
     /**
      * Returns rotation step in bytes. False if SCREENSHOTS_ROTATION_STEP is not set.
+     * @param int $storageSize
+     * @return bool|float|int
      */
     protected function getRotationStep(int $storageSize)
     {
@@ -170,6 +178,8 @@ class RotateScreenshots extends Command
 
     /**
      * Returns array of screenshots to delete.
+     * @param int $count
+     * @return array
      */
     protected function getScreenshotsToDelete(int $count): array
     {
@@ -221,6 +231,7 @@ class RotateScreenshots extends Command
 
     /**
      * Removes files related to a screenshot.
+     * @param $screenshot
      */
     protected function removeScreenshotFiles($screenshot): void
     {

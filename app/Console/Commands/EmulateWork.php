@@ -5,11 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
 use Exception;
-use Faker\Factory;
-use Faker\Generator;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Cache;
+use Storage;
+use Cache;
 
 /**
  * Class EmulateWork
@@ -35,11 +33,6 @@ class EmulateWork extends Command
     protected array $protectedFiles = ['uploads/screenshots/.gitignore'];
 
     /**
-     * @var Generator
-     */
-    private Generator $faker;
-
-    /**
      * Execute the console command.
      *
      * @return mixed
@@ -53,8 +46,6 @@ class EmulateWork extends Command
             $this->call('cattr:demo:plan');
             return 1;
         }
-
-        $this->faker = Factory::create();
 
         $now = time();
 

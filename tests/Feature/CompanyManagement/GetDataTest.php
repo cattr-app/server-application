@@ -2,7 +2,6 @@
 
 namespace Tests\Feature\CompanyManagement;
 
-use App\Models\Property;
 use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;

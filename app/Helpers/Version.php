@@ -3,7 +3,7 @@
 namespace App\Helpers;
 
 use JsonException;
-use Nwidart\Modules\Facades\Module;
+use Module;
 use InvalidArgumentException;
 
 class Version

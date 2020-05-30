@@ -22,7 +22,7 @@ class Filter extends Facade
      * @param array|string $eventsToFake
      * @return void
      */
-    public static function fake($eventsToFake = [])
+    public static function fake($eventsToFake = []): void
     {
         static::swap($fake = new EventFake(static::getFacadeRoot(), $eventsToFake));
 
@@ -34,7 +34,7 @@ class Filter extends Facade
      *
      * @return string
      */
-    protected static function getFacadeAccessor()
+    protected static function getFacadeAccessor(): string
     {
         return 'filter';
     }
