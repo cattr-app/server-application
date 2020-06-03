@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\User;
@@ -10,9 +10,9 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
+use Auth;
+use DB;
+use Route;
 
 class ProjectController extends ItemController
 {
@@ -114,6 +114,8 @@ class ProjectController extends ItemController
      * @apiUse          ForbiddenError
      */
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function index(Request $request): JsonResponse
@@ -239,7 +241,7 @@ class ProjectController extends ItemController
         /* @var User $user */
         $user = auth()->user();
         $userProjectIds = Project::getUserRelatedProjectIds($user);
-        if (!in_array($itemId, $userProjectIds)) {
+        if (!in_array($itemId, $userProjectIds, true)) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
                     'success' => false,
@@ -564,6 +566,7 @@ class ProjectController extends ItemController
     /**
      * @param bool $withRelations
      *
+     * @param bool $withSoftDeleted
      * @return Builder
      */
     protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder

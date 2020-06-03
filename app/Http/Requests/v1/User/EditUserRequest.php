@@ -4,8 +4,8 @@ namespace App\Http\Requests\v1\User;
 
 use App\Presenters\User\OrdinaryUserPresenter;
 use Illuminate\Foundation\Http\FormRequest;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Request;
+use Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -14,7 +14,10 @@ class EditUserRequest extends FormRequest
     /**
      * Determine if user authorized to make this request.
      *
+     * @param Request $request
+     * @param OrdinaryUserPresenter $user
      * @return bool
+     * @throws ValidationException
      */
     public function authorize(Request $request, OrdinaryUserPresenter $user): bool
     {
@@ -28,10 +31,12 @@ class EditUserRequest extends FormRequest
         $fieldsDiff = array_diff($requestFields, $fillableFields);
 
         if (count($fieldsDiff) > 0) {
+            $errorMessages = [];
+
             foreach ($fieldsDiff as $fieldKey) {
                 $errorMessages[$fieldKey] = __('You don\'t have permission to edit this field');
             }
-            
+
             throw ValidationException::withMessages($errorMessages);
         }
 

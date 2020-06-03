@@ -3,7 +3,8 @@
 namespace App\Services;
 
 use App\Models\Invitation;
-use Webpatser\Uuid\Uuid;
+use Exception;
+use Uuid;
 
 class InvitationService
 {
@@ -17,18 +18,16 @@ class InvitationService
      *
      * @param array $user
      * @return Invitation|null
-     * @throws \Exception
+     * @throws Exception
      */
     public function create(array $user): ?Invitation
     {
-        $invitation = Invitation::create([
+        return Invitation::create([
             'email' => $user['email'],
             'key' => Uuid::generate(),
             'expires_at' => now()->addDays(self::EXPIRATION_TIME_IN_DAYS),
             'role_id' => $user['role_id']
         ]);
-
-        return $invitation;
     }
 
     /**
@@ -36,15 +35,13 @@ class InvitationService
      *
      * @param int $id
      * @return Invitation|null
-     * @throws \Exception
+     * @throws Exception
      */
     public function update(int $id): ?Invitation
     {
-        $invitation = tap(Invitation::find($id))->update([
+        return tap(Invitation::find($id))->update([
             'key' => Uuid::generate(),
             'expires_at' => now()->addDays(self::EXPIRATION_TIME_IN_DAYS)
         ]);
-        
-        return $invitation;
     }
 }

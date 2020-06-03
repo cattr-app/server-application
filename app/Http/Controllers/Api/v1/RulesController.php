@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Models\Role;
 use App\Models\Rule;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
+use Validator;
 use Throwable;
 
 /**
@@ -37,6 +37,8 @@ class RulesController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Throwable
      */
     public function edit(Request $request): JsonResponse

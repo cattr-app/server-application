@@ -9,6 +9,7 @@ use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use JsonException;
 
 class AboutController extends Controller
 {
@@ -34,19 +35,25 @@ class AboutController extends Controller
         return $instanceId->value ?? null;
     }
 
+    /**
+     * @param string|null $instanceId
+     * @return array
+     * @throws JsonException
+     */
     private function requestReleaseInfo(?string $instanceId = null): array
     {
         $url = $this->statsReleaseUrl . config('app.version');
         $options = ['headers' => ($instanceId) ? ['x-cattr-instance' => $instanceId] : []];
 
-        return json_decode(
-            $this->client->get($url, $options)->getBody()->getContents(),
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        );
+        return json_decode($this->client->get($url, $options)->getBody()->getContents(), true, 512,
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
     }
 
+    /**
+     * @param $instanceId
+     * @return array
+     * @throws JsonException
+     */
     private function requestModulesInfo($instanceId): array
     {
         $options = [
@@ -58,23 +65,20 @@ class AboutController extends Controller
             $el['version'] = (string)(new Version($el['name']));
 
             return $el;
-        }, json_decode(
-            $this->client->post($this->statsModulesUrl, $options)->getBody()->getContents(),
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        )['modules']);
+        }, json_decode($this->client->post($this->statsModulesUrl, $options)->getBody()->getContents(), true, 512,
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR)['modules']);
     }
 
+    /**
+     * @param string $imageVersion
+     * @return array
+     * @throws JsonException
+     */
     private function requestImageInfo(string $imageVersion): array
     {
         $url = $this->statsImagesUrl . $imageVersion;
-        return json_decode(
-            $this->client->get($url)->getBody()->getContents(),
-            true,
-            512,
-            JSON_THROW_ON_ERROR
-        );
+        return json_decode($this->client->get($url)->getBody()->getContents(), true, 512,
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
     }
 
     /**

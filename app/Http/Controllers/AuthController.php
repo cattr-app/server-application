@@ -9,7 +9,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\Validator;
+use Validator;
 
 class AuthController extends BaseController
 {
@@ -25,10 +25,11 @@ class AuthController extends BaseController
     /**
      * @var RecaptchaHelper
      */
-    protected $recaptcha;
+    protected RecaptchaHelper $recaptcha;
 
     /**
      * Create a new AuthController instance.
+     * @param RecaptchaHelper $recaptcha
      */
     public function __construct(RecaptchaHelper $recaptcha)
     {
@@ -81,6 +82,8 @@ class AuthController extends BaseController
      * @apiUse         LimiterError
      */
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws AuthorizationException
      */
     public function login(Request $request): JsonResponse
@@ -153,7 +156,10 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function logout(Request $request): JsonResponse
     {
         $request->user()->invalidateToken($request->bearerToken());
@@ -185,7 +191,10 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function logoutFromAll(Request $request): JsonResponse
     {
         $request->user()->invalidateAllTokens();
@@ -242,7 +251,10 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function me(Request $request): JsonResponse
     {
         return new JsonResponse(['success' => true, 'user' => $request->user()]);
@@ -266,7 +278,10 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function refresh(Request $request): JsonResponse
     {
         $user = $request->user();

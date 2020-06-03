@@ -7,7 +7,7 @@ use App\Models\Invitation;
 class InvitationCreated
 {
     /**
-     * @var
+     * @var Invitation
      */
     public Invitation $invitation;
 

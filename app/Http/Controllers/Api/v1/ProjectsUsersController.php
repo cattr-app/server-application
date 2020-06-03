@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Models\ProjectsUsers;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Validator;
+use Validator;
 
 class ProjectsUsersController extends ItemController
 {
@@ -52,6 +52,7 @@ class ProjectsUsersController extends ItemController
             );
         }
 
+        /** @var ProjectsUsers $cls */
         $cls = $this->getItemClass();
 
         $item = Filter::process(
@@ -243,6 +244,8 @@ class ProjectsUsersController extends ItemController
      */
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function destroy(Request $request): JsonResponse
@@ -360,6 +363,8 @@ class ProjectsUsersController extends ItemController
      * @apiUse          UnauthorizedError
      */
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function bulkDestroy(Request $request): JsonResponse

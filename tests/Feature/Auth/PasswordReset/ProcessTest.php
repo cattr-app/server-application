@@ -3,8 +3,8 @@
 namespace Tests\Feature\Auth\PasswordReset;
 
 use App\Models\User;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Hash;
+use DB;
+use Hash;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 

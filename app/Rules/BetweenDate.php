@@ -13,6 +13,8 @@ class BetweenDate implements Rule
 
     /**
      * Create a new rule instance.
+     * @param string $afterDate
+     * @param string $beforeDate
      */
     public function __construct(string $afterDate, string $beforeDate)
     {

@@ -2,15 +2,16 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\EventFilter\Facades\Filter;
+use Exception;
+use Filter;
 use App\Models\Role;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Route;
+use Auth;
+use DB;
+use Route;
 use function is_array;
 
 class TaskController extends ItemController
@@ -76,6 +77,11 @@ class TaskController extends ItemController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
     public function index(Request $request): JsonResponse
     {
@@ -413,7 +419,7 @@ class TaskController extends ItemController
             return $query;
         }
 
-        $rules = $this->getControllerRules();
+        $rules = self::getControllerRules();
         $rule = $rules[$action_method] ?? null;
         if (isset($rule)) {
             [$object, $action] = explode('.', $rule);

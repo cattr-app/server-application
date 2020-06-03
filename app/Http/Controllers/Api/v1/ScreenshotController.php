@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
@@ -10,11 +10,11 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
-use Intervention\Image\Facades\Image;
+use Auth;
+use Route;
+use Storage;
+use Validator;
+use Image;
 
 /**
  * Class ScreenshotController
@@ -27,6 +27,8 @@ class ScreenshotController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function index(Request $request): JsonResponse
@@ -192,6 +194,8 @@ class ScreenshotController extends ItemController
     /**
      * Remove the specified resource from storage
      *
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function destroy(Request $request): JsonResponse
@@ -209,6 +213,7 @@ class ScreenshotController extends ItemController
         }
 
         // Get screenshot model
+        /** @var Screenshot $screenshotModel */
         $screenshotModel = $this->getItemClass();
 
         // Find exact screenshot to be deleted

@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\TimeInterval;
@@ -15,10 +15,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Route;
-use Illuminate\Support\Facades\Storage;
-use Illuminate\Support\Facades\Validator;
+use Auth;
+use Route;
+use Storage;
+use Validator;
 
 class TimeIntervalController extends ItemController
 {
@@ -225,6 +225,8 @@ class TimeIntervalController extends ItemController
      */
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function index(Request $request): JsonResponse
@@ -519,6 +521,8 @@ class TimeIntervalController extends ItemController
      */
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function edit(Request $request): JsonResponse
@@ -712,6 +716,8 @@ class TimeIntervalController extends ItemController
      */
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function bulkEdit(Request $request): JsonResponse
@@ -772,6 +778,8 @@ class TimeIntervalController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function bulkDestroy(Request $request): JsonResponse

@@ -21,7 +21,7 @@ class ResetPassword extends ResetPasswordNotification implements ShouldQueue
      *
      * @var string
      */
-    public $email;
+    public string $email;
 
     public function __construct($email, $token)
     {

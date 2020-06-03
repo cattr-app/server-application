@@ -19,6 +19,11 @@ class StatisticsSeeder extends Seeder
 
     /**
      * Creates a new user.
+     * @param string $name
+     * @param string $email
+     * @param string $pass
+     * @param int $roleId
+     * @return User
      */
     protected function createUser(string $name, string $email, string $pass, int $roleId): User
     {
@@ -51,6 +56,10 @@ class StatisticsSeeder extends Seeder
 
     /**
      * Assignees user to a project.
+     * @param User $user
+     * @param Project $project
+     * @param int|null $roleId
+     * @return ProjectsUsers
      */
     protected function assignProject(User $user, Project $project, ?int $roleId = null): ProjectsUsers
     {
@@ -72,7 +81,9 @@ class StatisticsSeeder extends Seeder
 
     /**
      * Adds task for an user on a project.
-     * @throws Exception
+     * @param User $user
+     * @param Project $project
+     * @return Task
      */
     protected function addTask(User $user, Project $project): Task
     {
@@ -94,7 +105,9 @@ class StatisticsSeeder extends Seeder
 
     /**
      * Adds time interval for an user on a project.
-     * @throws Exception
+     * @param User $user
+     * @param Task $task
+     * @return TimeInterval
      */
     protected function addTimeInterval(User $user, Task $task): TimeInterval
     {
@@ -150,7 +163,8 @@ class StatisticsSeeder extends Seeder
 
     /**
      * Creates tasks and time intervals for an user on a project.
-     * @throws Exception
+     * @param User $user
+     * @param Project $project
      */
     protected function createTasks(User $user, Project $project): void
     {

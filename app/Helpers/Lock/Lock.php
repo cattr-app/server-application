@@ -4,7 +4,7 @@ namespace App\Helpers\Lock;
 
 class Lock implements LockInterface
 {
-    protected $locked = false;
+    protected bool $locked = false;
 
     public function lock(): void
     {

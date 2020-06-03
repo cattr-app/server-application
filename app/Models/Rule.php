@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;

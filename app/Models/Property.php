@@ -86,6 +86,10 @@ class Property extends Model
 
     /**
      * Get property from database
+     * @param string $scope
+     * @param string $key
+     * @param array $parameters
+     * @return Collection
      */
     public static function getProperty(string $scope, string $key, array $parameters = []): Collection
     {
