@@ -145,7 +145,7 @@ class Screenshot extends Model
             return false;
         }
 
-        $userId = $this->timeInterval->user_id;
+        $userId = optional($this->timeInterval)->user_id;
 
         // Allow root to see all screenshots.
         if (Role::can($user, 'screenshots', 'full_access')) {

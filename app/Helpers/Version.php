@@ -63,8 +63,12 @@ class Version
      */
     private function readComposerJson(): array
     {
-        return json_decode(file_get_contents(self::resolveModuleComposerJsonPath($this->module)), true, 512,
-            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
+        return json_decode(
+            file_get_contents(self::resolveModuleComposerJsonPath($this->module)),
+            true,
+            512,
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+        );
     }
 
     /**
