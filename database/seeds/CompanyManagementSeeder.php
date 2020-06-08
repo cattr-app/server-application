@@ -19,7 +19,7 @@ class CompanyManagementSeeder extends Seeder
             'entity_type' => Property::COMPANY_CODE,
             'entity_id' => 0,
             'name' => 'timezone'
-        ], ['value' => 'UTC']);
+        ], ['value' => 'Africa/Bamako']);
 
         Property::updateOrCreate([
             'entity_type' => Property::COMPANY_CODE,
