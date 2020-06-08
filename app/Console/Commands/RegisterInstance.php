@@ -55,8 +55,12 @@ class RegisterInstance extends Command
                 ]
             ]);
 
-            $responseBody = json_decode($response->getBody()->getContents(), true, 512,
-                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
+            $responseBody = json_decode(
+                $response->getBody()->getContents(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+            );
 
             if (isset($responseBody['instanceId'])) {
                 Property::updateOrCreate([
@@ -90,8 +94,12 @@ class RegisterInstance extends Command
             return true;
         } catch (Exception $e) {
             if ($e->getResponse()) {
-                $error = json_decode($e->getResponse()->getBody(), true, 512,
-                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
+                $error = json_decode(
+                    $e->getResponse()->getBody(),
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+                );
                 $this->warn($error['message']);
             } else {
                 $this->warn('Сould not get a response from the server to check the relevance of your version.');

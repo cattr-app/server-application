@@ -111,8 +111,12 @@ class ReportHelper
                     $resultCollection[$projectName]['project_time'] += $duration;
                 }
 
-                $screenshotsCollection = collect(json_decode($item->screens, true, 512,
-                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR));
+                $screenshotsCollection = collect(json_decode(
+                    $item->screens,
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+                ));
 
                 $screensResultCollection = [];
                 foreach ($screenshotsCollection as $screen) {
@@ -192,8 +196,12 @@ class ReportHelper
                 if (!array_key_exists($userID, $resultCollection)) {
                     $resultCollection[$userID] = [
                         'total_time' => 0,
-                        'user'       => collect(json_decode($item->user, true, 512,
-                            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR))
+                        'user'       => collect(json_decode(
+                            $item->user,
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+                        ))
                     ];
                 }
 
@@ -205,8 +213,12 @@ class ReportHelper
                     'total_time'   => 0,
                 ];
 
-                $intervals = collect(json_decode($item->intervals, true, 512,
-                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR));
+                $intervals = collect(json_decode(
+                    $item->intervals,
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+                ));
                 foreach ($intervals as $interval) {
                     $duration = Carbon::parse($interval['end_at'])->diffInSeconds($interval['start_at']);
                     $resultCollection[$userID]['tasks'][$item->task_id]['total_time'] += $duration;

@@ -45,8 +45,12 @@ class AboutController extends Controller
         $url = $this->statsReleaseUrl . config('app.version');
         $options = ['headers' => ($instanceId) ? ['x-cattr-instance' => $instanceId] : []];
 
-        return json_decode($this->client->get($url, $options)->getBody()->getContents(), true, 512,
-            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
+        return json_decode(
+            $this->client->get($url, $options)->getBody()->getContents(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+        );
     }
 
     /**
@@ -65,8 +69,12 @@ class AboutController extends Controller
             $el['version'] = (string)(new Version($el['name']));
 
             return $el;
-        }, json_decode($this->client->post($this->statsModulesUrl, $options)->getBody()->getContents(), true, 512,
-            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR)['modules']);
+        }, json_decode(
+            $this->client->post($this->statsModulesUrl, $options)->getBody()->getContents(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+        )['modules']);
     }
 
     /**
@@ -77,8 +85,12 @@ class AboutController extends Controller
     private function requestImageInfo(string $imageVersion): array
     {
         $url = $this->statsImagesUrl . $imageVersion;
-        return json_decode($this->client->get($url)->getBody()->getContents(), true, 512,
-            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR);
+        return json_decode(
+            $this->client->get($url)->getBody()->getContents(),
+            true,
+            512,
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+        );
     }
 
     /**
