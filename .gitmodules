@@ -10,7 +10,3 @@
 	path = Modules/Reports
 	url = https://git.amazingcat.net/AmazingTime/core/modules/reports.git
 	branch = master
-[submodule "Modules/EventListener"]
-	path = Modules/EventListener
-	url = https://git.amazingcat.net/AmazingTime/core/modules/event-listener.git
-	branch = master
