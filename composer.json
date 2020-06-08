@@ -107,7 +107,7 @@
         },
         "hooks": {
             "pre-commit": [
-                "OUTPUT=$(vendor/bin/phpcs --standard=./phpcs.xml)",
+                "OUTPUT=$(vendor/bin/phpcbf --standard=./phpcs.xml)",
                 "RETVAL=$?",
                 "if [ $RETVAL -ne 0 ]; then",
                 "echo $OUTPUT | less",
