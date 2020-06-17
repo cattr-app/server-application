@@ -11,7 +11,7 @@ use Illuminate\Http\Request;
  * Class RegistrationController
  * @codeCoverageIgnore until it is implemented on frontend
  */
-class RegistrationController
+class RegistrationController extends Controller
 {
     public function __construct()
     {

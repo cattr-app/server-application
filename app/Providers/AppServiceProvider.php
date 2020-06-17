@@ -3,13 +3,13 @@
 namespace App\Providers;
 
 use App;
-use App\Models\User;
-use App\Models\Invitation;
-use App\Observers\UserObserver;
-use App\Observers\InvitationObserver;
 use App\Http\Controllers\DemoScreenshotControllerStrategy;
 use App\Http\Controllers\ScreenshotControllerStrategy;
 use App\Http\Controllers\ScreenshotControllerStrategyInterface;
+use App\Models\Invitation;
+use App\Models\User;
+use App\Observers\InvitationObserver;
+use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -30,6 +30,11 @@ class AppServiceProvider extends ServiceProvider
                 ScreenshotControllerStrategy::class
             );
         }
+
+        $this->app->bind(
+            App\Contracts\Settings::class,
+            App\Services\SettingsService::class
+        );
 
         User::observe(UserObserver::class);
         Invitation::observe(InvitationObserver::class);

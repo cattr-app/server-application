@@ -1042,6 +1042,10 @@ class Rule extends Model
             'dashboard' => [
                 'manager_access' => __('Dashboard manager access'),
             ],
+            'company-settings' => [
+                'index' => __('Company settings list'),
+                'update' => __('Company settings update'),
+            ],
             'integration' => [
                 'gitlab' => __('GitLab integration'),
                 'jira' => __('Jira integration'),
