@@ -177,7 +177,6 @@ Route::group([
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
     $router->any('/rules/actions', 'Api\v1\RulesController@actions');
 
-
     // Statistic routes
     $router->any('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
     $router->any('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
@@ -187,11 +186,9 @@ Route::group([
     // About
     $router->get('/about', 'Api\v1\AboutController');
 
-    //Company management
-    $router->get('/companymanagement/getData', 'Api\v1\CompanyManagementController@getData');
-    $router->post('/companymanagement/save', 'Api\v1\CompanyManagementController@save');
-    $router->post('/companymanagement/timezone/edit', 'Api\v1\CompanyManagementController@editTimezone');
-    $router->post('/companymanagement/language/edit', 'Api\v1\CompanyManagementController@editLanguage');
+    //Company settings
+    $router->get('/company-settings', 'Api\v1\CompanySettingsController@index');
+    $router->patch('/company-settings', 'Api\v1\CompanySettingsController@update');
 });
 
 Route::any('(.*)', 'Controller@universalRoute');
