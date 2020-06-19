@@ -10,8 +10,6 @@
 /vendor
 /.idea
 /.vagrant
-Homestead.json
-Homestead.yaml
 .env
 .env.testing
 .env.sentry
@@ -37,6 +35,8 @@ coverage/
 /storage/app/uploads/screenshots
 modules_statuses.json
 cghooks.lock
+
+/storage/framework/tmp
 
 Modules/*
 !Modules/.gitkeep
