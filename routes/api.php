@@ -83,9 +83,10 @@ Route::group([
 });
 
 Route::group([
-    'prefix' => 'status',
+    'prefix' => 'v1/status',
 ], static function (Router $router) {
-    $router->get('/', 'StatusController@index');
+    $router->get('/backend', 'StatusController@index');
+    $router->post('/database', 'StatusController@statusDatabase');
 });
 
 // Main API routes
