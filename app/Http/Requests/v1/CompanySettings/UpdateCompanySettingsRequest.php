@@ -4,7 +4,7 @@ namespace App\Http\Requests\v1\CompanySettings;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class StoreCompanySettings extends FormRequest
+class UpdateCompanySettingsRequest extends FormRequest
 {
     /**
      * Determine if user authorized to make this request.
