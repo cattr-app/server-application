@@ -76,33 +76,26 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     * @api             {post} /invitations/create Create
-     * @apiDescription  Creates a unique invitation token and sends an email to the users
+     * @api             {post} /v1/invitations/show Show
+     * @apiDescription  Show invitation.
      *
      * @apiVersion      1.0.0
-     * @apiName         CreateInvitation
-     * @apiGroup        UserInvited
+     * @apiName         Show Invitation
+     * @apiGroup        Invitation
      *
      * @apiUse          AuthHeader
      *
-     * @apiPermission   register_create
-     *
-     * @apiParam {Array} email  List of emails for new users
+     * @apiParam {Integer} id  Invitation ID
      *
      * @apiParamExample {json} Request Example
-     *  {
-     *    "users": [
-     *      {
-     *          email: "test@example.com",
-     *          role_id: 1
-     *     }
-     *  ]
+     * {
+     *   "id": 1
+     * }
      *
      * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
-     * @apiSuccess {String}   res      Array of records containing the id, email, expiration date and key
+     * @apiSuccess {Array}    res      Array of records containing the id, email, key, expiration date and role id
+     *
+     * @apiUse InvitationObject
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
@@ -116,6 +109,93 @@ class InvitationController extends ItemController
      *          "expires_at": "2020-01-01T00:00:00.000000Z",
      *          "role_id": 1
      *      }
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     *
+     */
+
+    /**
+     * @api             {get} /v1/invitations/list List
+     * @apiDescription  Get list of invitations.
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Invitation List
+     * @apiGroup        Invitation
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {Array}   res      Array of records containing the id, email, key, expiration date and role id
+     *
+     * @apiUse InvitationObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": [
+     *      {
+     *          "id": 1
+     *          "email": "test@example.com",
+     *          "key": "06d4a090-9675-11ea-bf39-5f84c549e29c",
+     *          "expires_at": "2020-01-01T00:00:00.000000Z",
+     *          "role_id": 1
+     *      }
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     *
+     */
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     *
+     * @api             {post} /v1/invitations/create Create
+     * @apiDescription  Creates a unique invitation token and sends an email to the users
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Create Invitation
+     * @apiGroup        Invitation
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiParam {Array}    users          List of users to send an invitation to
+     * @apiParam {String}   users.email    User email
+     * @apiParam {Integer}  users.role_id  ID of the role that will be assigned to the created user
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "users": [
+     *      {
+     *        email: "test@example.com",
+     *        role_id: 1
+     *      }
+     *    ]
+     *  }
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   res      Array of records containing the id, email, key, expiration date and role id
+     *
+     * @apiUse InvitationObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "res": [
+     *      {
+     *          "id": 1
+     *          "email": "test@example.com",
+     *          "key": "06d4a090-9675-11ea-bf39-5f84c549e29c",
+     *          "expires_at": "2020-01-01T00:00:00.000000Z",
+     *          "role_id": 1
+     *      }
+     *    ]
      *  }
      *
      * @apiErrorExample {json} Email is not specified
@@ -169,18 +249,16 @@ class InvitationController extends ItemController
      * @return JsonResponse
      * @throws Exception
      *
-     * @api             {get} /invitations/resend Post
-     * @apiDescription  resends the expiration time of the invitation.
+     * @api             {post} /v1/invitations/resend Resend
+     * @apiDescription  Updates the token expiration date and sends an email to the user's email address.
      *
      * @apiVersion      1.0.0
-     * @apiName         UpdateInvitation
-     * @apiGroup        UserInvited
+     * @apiName         Update Invitation
+     * @apiGroup        Invitation
      *
      * @apiUse          AuthHeader
      *
-     * @apiPermission   register_resend
-     *
-     * @apiParam {Integer}  id  UserInvited id
+     * @apiParam {Integer}  id  Invitation ID
      *
      * @apiParamExample {json} Request Example
      *  {
@@ -188,12 +266,21 @@ class InvitationController extends ItemController
      *  }
      *
      * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
-     * @apiSuccess {Array}    res      UserInvited record
+     * @apiSuccess {Array}    res      Invitation data
+     *
+     * @apiUse InvitationObject
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "success": true,
+     *    "res": {
+     *      "id": 1
+     *      "email": "test@example.com",
+     *      "key": "06d4a090-9675-11ea-bf39-5f84c549e29c",
+     *      "expires_at": "2020-01-01T00:00:00.000000Z",
+     *      "role_id": 1
+     *    }
      *  }
      *
      * @apiErrorExample {json} The id does not exist
@@ -224,4 +311,37 @@ class InvitationController extends ItemController
             'res' => $invitation,
         ]);
     }
+
+    /**
+     * @api             {post} /v1/invitations/remove Destroy
+     * @apiDescription  Destroy User
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Destroy Invitation
+     * @apiGroup        Invitation
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiParam {Integer}  id  ID of the target invitation
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "id": 1
+     * }
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     * @apiSuccess {String}   message  Destroy status
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "message": "Item has been removed"
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
 }

@@ -93,12 +93,12 @@ Route::group([
     'middleware' => ['auth:api', 'throttle:120,1'],
     'prefix' => 'v1',
 ], static function (Router $router) {
-    // Register routes
-    $router->any('/invitations/list', 'Api\v1\InvitationController@index');
-    $router->any('/invitations/count', 'Api\v1\InvitationController@count');
+    //Invitations routes
+    $router->get('/invitations/list', 'Api\v1\InvitationController@index');
+    $router->get('/invitations/count', 'Api\v1\InvitationController@count');
     $router->post('/invitations/create', 'Api\v1\InvitationController@create');
     $router->post('/invitations/resend', 'Api\v1\InvitationController@resend');
-    $router->any('/invitations/show', 'Api\v1\InvitationController@show');
+    $router->post('/invitations/show', 'Api\v1\InvitationController@show');
     $router->post('/invitations/remove', 'Api\v1\InvitationController@destroy');
 
     //Projects routes
