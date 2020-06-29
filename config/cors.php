@@ -16,7 +16,7 @@ return [
     /*
      * Matches the request origin. `[*]` allows all origins.
      */
-    'allowed_origins' => explode(',', env('ALLOWED_ORIGINS')) ?? [],
+    'allowed_origins' => explode(',', env('ALLOWED_ORIGINS', '*')),
 
     /*
      * Matches the request origin with, similar to `Request::is()`
