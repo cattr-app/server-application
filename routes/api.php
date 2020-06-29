@@ -94,7 +94,7 @@ Route::group([
     'prefix' => 'v1',
 ], static function (Router $router) {
     //Invitations routes
-    $router->get('/invitations/list', 'Api\v1\InvitationController@index');
+    $router->any('/invitations/list', 'Api\v1\InvitationController@index');
     $router->get('/invitations/count', 'Api\v1\InvitationController@count');
     $router->post('/invitations/create', 'Api\v1\InvitationController@create');
     $router->post('/invitations/resend', 'Api\v1\InvitationController@resend');
