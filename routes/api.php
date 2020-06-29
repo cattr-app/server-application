@@ -83,10 +83,15 @@ Route::group([
 });
 
 Route::group([
-    'prefix' => 'v1/status',
+    'prefix' => 'v1/installation',
 ], static function (Router $router) {
-    $router->get('/backend', 'StatusController@index');
-    $router->post('/database', 'StatusController@statusDatabase');
+    $router->get('/status/backend', 'InstallationController@getStatusBackend');
+    $router->get('/status', 'InstallationController@getStatusOfLoading');
+    $router->post('/status/database', 'InstallationController@getStatusDatabase');
+    $router->post('/change/env', 'InstallationController@changeEnvFile');
+    $router->post('/registration/collector', 'InstallationController@registrationInCollector');
+    $router->post('/registration/admin', 'InstallationController@createAdmin');
+    $router->post('/set/config', 'InstallationController@setConfig');
 });
 
 // Main API routes
