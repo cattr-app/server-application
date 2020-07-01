@@ -197,13 +197,13 @@ class InstallationController extends Controller
             'email' => $request->input('email') ?? null,
             'password' => $request->input('password') ?? null,
             'timezone' => $request->input('timezone') ?? null,
-            'language' => $request->input('language') ?? null
+            'user_language' => $request->input('language') ?? null
         ];
 
         if (!$accountParams['email']
             || !$accountParams['password']
             || !$accountParams['timezone']
-            || !$accountParams['language']
+            || !$accountParams['user_language']
         ) {
             return new JsonResponse([
                 'success' => false,
@@ -214,7 +214,7 @@ class InstallationController extends Controller
             $admin->email = $accountParams['email'];
             $admin->password = $accountParams['password'];
             $admin->timezone = $accountParams['timezone'];
-            $admin->language = $accountParams['language'];
+            $admin->user_language = $accountParams['user_language'];
 
             if (!$admin->update()) {
                 return new JsonResponse([
