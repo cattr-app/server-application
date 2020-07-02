@@ -10,3 +10,7 @@
 	path = Modules/Reports
 	url = https://git.amazingcat.net/AmazingTime/core/modules/reports.git
 	branch = master
+[submodule "Modules/JiraIntegration"]
+	path = Modules/JiraIntegration
+	url = git@git.amazingcat.net:AmazingTime/core/modules/jira/backend.git
+	branch = master
