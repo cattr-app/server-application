@@ -10,23 +10,7 @@
 	path = Modules/Reports
 	url = https://git.amazingcat.net/AmazingTime/core/modules/reports.git
 	branch = master
-[submodule "Modules/EventListener"]
-	path = Modules/EventListener
-	url = https://git.amazingcat.net/AmazingTime/core/modules/event-listener.git
-	branch = master
 [submodule "Modules/JiraIntegration"]
 	path = Modules/JiraIntegration
 	url = git@git.amazingcat.net:AmazingTime/core/modules/jira/backend.git
-	branch = master
-[submodule "Modules/TrelloIntegration"]
-	path = Modules/TrelloIntegration
-	url = git@git.amazingcat.net:AmazingTime/core/modules/trello/backend.git
-	branch = master
-[submodule "Modules/EmailReports"]
-	path = Modules/EmailReports
-	url = git@git.amazingcat.net:AmazingTime/core/modules/email-reports/backend.git
-	branch = master
-[submodule "Modules/Invoices"]
-	path = Modules/Invoices
-	url = git@git.amazingcat.net:AmazingTime/core/modules/invoices/backend.git
 	branch = master

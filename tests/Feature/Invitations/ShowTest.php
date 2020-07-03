@@ -42,7 +42,7 @@ class ShowTest extends TestCase
 
     public function test_unauthorized(): void
     {
-        $response = $this->getJson(self::URI);
+        $response = $this->postJson(self::URI);
 
         $response->assertUnauthorized();
     }

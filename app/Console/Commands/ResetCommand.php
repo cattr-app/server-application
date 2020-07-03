@@ -3,9 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Storage;
-use Psr\SimpleCache\InvalidArgumentException;
+use DB;
+use Storage;
 
 /**
  * Class ResetCommand

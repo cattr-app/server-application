@@ -3,7 +3,7 @@
 namespace App\Rules;
 
 use Illuminate\Contracts\Validation\Rule;
-use Illuminate\Support\Facades\DB;
+use DB;
 
 class DoesNotExist implements Rule
 {
@@ -14,6 +14,8 @@ class DoesNotExist implements Rule
 
     /**
      * Create a new rule instance.
+     * @param string $table
+     * @param int $id
      */
     public function __construct(string $table, int $id)
     {

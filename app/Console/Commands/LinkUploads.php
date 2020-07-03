@@ -24,13 +24,13 @@ class LinkUploads extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
      * @throws BindingResolutionException
      */
-    public function handle()
+    public function handle(): void
     {
         if (file_exists(public_path('uploads'))) {
-            return $this->error('The [uploads] folder already exists');
+            $this->error('The [uploads] folder already exists');
+            return;
         }
 
         $this->laravel->make('files')->link(
@@ -38,6 +38,6 @@ class LinkUploads extends Command
             public_path('uploads')
         );
 
-        return $this->info('The [public/uploads] folder has been linked sucessfully');
+        $this->info('The [public/uploads] folder has been linked sucessfully');
     }
 }

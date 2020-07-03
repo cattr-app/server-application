@@ -2,19 +2,19 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Models\Role;
 use App\Models\Rule;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
+use Auth;
 use Validator;
 
 class RolesController extends ItemController
 {
-    protected $disableQueryRoleCheck = false;
+    protected bool $disableQueryRoleCheck = false;
 
     public static function getControllerRules(): array
     {
@@ -45,6 +45,8 @@ class RolesController extends ItemController
     }
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function index(Request $request): JsonResponse
@@ -302,6 +304,8 @@ class RolesController extends ItemController
      */
 
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @api             {get,post} /v1/roles/allowed-rules Allowed Rules
      * @apiDescription  Get Rule allowed action for current user list
      *
@@ -471,6 +475,7 @@ class RolesController extends ItemController
     /**
      * @param bool $withRelations
      *
+     * @param bool $withSoftDeleted
      * @return Builder
      */
     protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
@@ -539,6 +544,10 @@ class RolesController extends ItemController
      * @apiUse         ValidationError
      */
 
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function projectRules(Request $request): JsonResponse
     {
         /** @var Builder $itemsQuery */
@@ -558,7 +567,6 @@ class RolesController extends ItemController
         foreach ($user->projectsRelation as $relation) {
             /** @var Role $role */
             $role = $relation->role;
-            /** @var Rule[] $rules */
             $rules = $role->rules;
 
             foreach ($rules as $rule) {
@@ -636,6 +644,8 @@ class RolesController extends ItemController
 
     /**
      * @codeCoverageIgnore until it is implemented on frontend
+     * @param Request $request
+     * @return JsonResponse
      */
     public function attachToUser(Request $request): JsonResponse
     {
@@ -680,6 +690,8 @@ class RolesController extends ItemController
 
     /**
      * @codeCoverageIgnore until it is implemented on frontend
+     * @param Request $request
+     * @return JsonResponse
      */
     public function detachFromUser(Request $request): JsonResponse
     {

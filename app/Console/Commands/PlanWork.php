@@ -5,7 +5,7 @@ namespace App\Console\Commands;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Console\Command;
-use Illuminate\Support\Facades\Cache;
+use Cache;
 use Psr\SimpleCache\InvalidArgumentException;
 
 /**
@@ -29,7 +29,7 @@ class PlanWork extends Command
 
     // 1440 - limit of the time at a day
 
-    private $plans = [
+    private array $plans = [
         [['start' => 540, 'end' => 780], ['start' => 840, 'end' => 1080]],
         [['start' => 600, 'end' => 780], ['start' => 840, 'end' => 1140]],
         [

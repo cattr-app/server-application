@@ -11,19 +11,19 @@ use Illuminate\Http\Request;
  * Class RegistrationController
  * @codeCoverageIgnore until it is implemented on frontend
  */
-class RegistrationController
+class RegistrationController extends Controller
 {
     public function __construct()
     {
     }
 
     /**
-     * @api             {get} /auth/register/{key} Get
+     * @api             {get} /auth/register/{key} Get Form
      * @apiDescription  Returns invitation form data by a invitation token
      *
      * @apiVersion      1.0.0
      * @apiName         GetRegistration
-     * @apiGroup        UserInvited
+     * @apiGroup        Invitation
      *
      * @apiParam (Parameters from url) {String}  key  User invitation key
      *
@@ -71,12 +71,12 @@ class RegistrationController
     /**
      * Creates a new user.
      *
-     * @api             {post} /auth/register/{key} Post
+     * @api             {post} /auth/register/{key} Post Form
      * @apiDescription  Registers user by key
      *
      * @apiVersion      1.0.0
      * @apiName         PostRegistration
-     * @apiGroup        UserInvited
+     * @apiGroup        Invitation
      *
      * @apiParam (Parameters from url) {String}  key  User invitation key
      *

@@ -3,17 +3,15 @@
 namespace App\Console\Commands;
 
 use App\Models\Property;
-use App\Models\User;
 use DB;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Illuminate\Support\Facades\Config;
-use Illuminate\Support\Facades\Hash;
-use Illuminate\Support\Facades\Schema;
+use Config;
+use Schema;
 use PDOException;
 use RuntimeException;
-use Illuminate\Support\Facades\Validator;
+use Validator;
 
 class AppInstallCommand extends Command
 {
@@ -90,7 +88,7 @@ class AppInstallCommand extends Command
         if (!$this->registerInstance($adminData['email'])) {
             // User did not confirm installation
             $this->call('migrate:reset');
-            DB::statement("DROP TABLE migrations");
+            DB::statement('DROP TABLE migrations;');
 
             $this->filesystem->delete(base_path('.env'));
             $this->callSilent('cache:clear');

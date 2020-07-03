@@ -2,18 +2,16 @@
 
 namespace App\Http\Controllers\Api\v1;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Helpers\QueryHelper;
 use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\MassAssignmentException;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Validator;
+use Event;
+use Validator;
 
 abstract class ItemController extends Controller
 {
@@ -48,6 +46,8 @@ abstract class ItemController extends Controller
 
     /**
      * Display a listing of the resource.
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function index(Request $request): JsonResponse
@@ -77,6 +77,8 @@ abstract class ItemController extends Controller
 
     /**
      * Returns event's name with current item's unique part
+     * @param string $eventName
+     * @return String
      */
     protected function getEventUniqueName(string $eventName): String
     {
@@ -89,6 +91,9 @@ abstract class ItemController extends Controller
     abstract public function getEventUniqueNamePart(): string;
 
     /**
+     * @param Builder $query
+     * @param array $filter
+     * @return Builder
      * @throws Exception
      */
     protected function applyQueryFilter(Builder $query, array $filter = []): Builder
@@ -123,7 +128,7 @@ abstract class ItemController extends Controller
         $query = new Builder($cls::getQuery());
         $query->setModel(new $cls());
 
-        $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls));
+        $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls), true);
 
         if ($softDelete && !$withSoftDeleted) {
             if (method_exists($cls, 'getTable')) {
@@ -154,6 +159,8 @@ abstract class ItemController extends Controller
     /**
      * Display count of the resource
      *
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function count(Request $request): JsonResponse
@@ -197,6 +204,7 @@ abstract class ItemController extends Controller
             );
         }
 
+        /** @var Model $cls */
         $cls = $this->getItemClass();
 
         Event::dispatch($this->getEventUniqueName('item.create.before'), $requestData);
@@ -234,12 +242,13 @@ abstract class ItemController extends Controller
     /**
      * Display the specified resource.
      *
-     * @throws ModelNotFoundException
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function show(Request $request): JsonResponse
     {
-        $itemId = intval($request->input('id'));
+        $itemId = (int) $request->input('id');
 
         if (!$itemId) {
             return new JsonResponse(
@@ -287,8 +296,8 @@ abstract class ItemController extends Controller
     /**
      * Show the form for editing the specified resource.
      *
-     * @throws MassAssignmentException
-     * @throws ModelNotFoundException
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function edit(Request $request): JsonResponse
@@ -347,6 +356,7 @@ abstract class ItemController extends Controller
         });
 
         if (!$item) {
+            /** @var Model $cls */
             $cls = $this->getItemClass();
             if ($cls::find($request->get('id')) !== null) {
                 return new JsonResponse(
@@ -388,6 +398,8 @@ abstract class ItemController extends Controller
     /**
      * Remove the specified resource from storage.
      *
+     * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function destroy(Request $request): JsonResponse
@@ -419,6 +431,7 @@ abstract class ItemController extends Controller
         /** @var Model $item */
         $item = $itemsQuery->first();
         if (!$item) {
+            /** @var Model $cls */
             $cls = $this->getItemClass();
             if ($cls::find($request->get('id')) !== null) {
                 return new JsonResponse(

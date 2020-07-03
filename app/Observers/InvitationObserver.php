@@ -10,10 +10,10 @@ class InvitationObserver
     /**
      * Handle the invitation "created" event.
      *
-     * @param  \App\Models\Invitation  $invitation
+     * @param Invitation $invitation
      * @return void
      */
-    public function created(Invitation $invitation)
+    public function created(Invitation $invitation): void
     {
         event(new InvitationCreated($invitation));
     }
@@ -21,10 +21,10 @@ class InvitationObserver
     /**
      * Handle the invitation "updated" event.
      *
-     * @param  \App\Models\Invitation  $invitation
+     * @param Invitation $invitation
      * @return void
      */
-    public function updated(Invitation $invitation)
+    public function updated(Invitation $invitation): void
     {
         event(new InvitationCreated($invitation));
     }

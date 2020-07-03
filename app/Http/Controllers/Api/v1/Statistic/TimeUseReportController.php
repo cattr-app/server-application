@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api\v1\Statistic;
 use App\EventFilter\Facades\Filter;
 use App\Helpers\ReportHelper;
 use App\Models\Property;
+use App\Services\CoreSettingsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -37,14 +38,13 @@ class TimeUseReportController extends ReportController
     }
 
     /**
-     * ProjectReportController constructor.
+     * TimeUseReportController constructor.
+     * @param CoreSettingsService $settings
      * @param ReportHelper $reportHelper
      */
-    public function __construct(
-        ReportHelper $reportHelper
-    ) {
-        $companyTimezoneProperty = Property::getProperty(Property::COMPANY_CODE, 'TIMEZONE')->first();
-        $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
+    public function __construct(CoreSettingsService $settings, ReportHelper $reportHelper)
+    {
+        $this->timezone = $settings->get('timezone', 'UTC');
         $this->reportHelper = $reportHelper;
 
         parent::__construct();
@@ -90,10 +90,10 @@ class TimeUseReportController extends ReportController
                 Filter::process(
                     $this->getEventUniqueName('answer.error.report.show'),
                     [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
+                        'success' => false,
+                        'error_type' => 'validation',
+                        'message' => 'Validation error',
+                        'info' => $validator->errors()
                     ]
                 ),
                 400

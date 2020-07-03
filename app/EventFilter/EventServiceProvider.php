@@ -2,8 +2,10 @@
 
 namespace App\EventFilter;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
+use App\Events\InvitationCreated;
+use App\Listeners\SendInvitationMail;
 
 class EventServiceProvider extends ServiceProvider
 {
@@ -13,7 +15,7 @@ class EventServiceProvider extends ServiceProvider
      * @var array
      */
     protected $listen = [
-        'App\Events\InvitationCreated' => ['App\Listeners\SendInvitationMail'],
+        InvitationCreated::class => [SendInvitationMail::class],
     ];
 
     /**
@@ -28,7 +30,7 @@ class EventServiceProvider extends ServiceProvider
      *
      * @return void
      */
-    public function boot()
+    public function boot(): void
     {
         parent::boot();
 
@@ -44,19 +46,9 @@ class EventServiceProvider extends ServiceProvider
     }
 
     /**
-     * Get the events and handlers.
-     *
-     * @return array
-     */
-    public function listens()
-    {
-        return $this->listen;
-    }
-
-    /**
      * {@inheritdoc}
      */
-    public function register()
+    public function register(): void
     {
         //
     }

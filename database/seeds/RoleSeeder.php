@@ -46,6 +46,9 @@ class RoleSeeder extends Seeder
         ],
         'users' => [
         ],
+        'company-settings' => [
+            'index',
+        ],
         'integration' => [
             'gitlab',
             'redmine',
@@ -110,6 +113,9 @@ class RoleSeeder extends Seeder
             'manager_access',
             'list',
             'show',
+        ],
+        'company-settings' => [
+            'index',
         ],
         'integration' => [
             'gitlab',
@@ -188,6 +194,9 @@ class RoleSeeder extends Seeder
             'show',
             'edit',
             'bulk-edit',
+        ],
+        'company-settings' => [
+            'index',
         ],
         'integration' => [
             'gitlab',
