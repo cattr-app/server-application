@@ -10,7 +10,8 @@ use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Query\Builder;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\DB;
+use DB;
+use JsonException;
 use RuntimeException;
 
 class ReportHelper
@@ -42,6 +43,11 @@ class ReportHelper
         $this->screenshot = $screenshot;
     }
 
+    /**
+     * @param $collection
+     * @return Collection
+     * @throws JsonException
+     */
     public function getProcessedProjectReportCollection($collection): Collection
     {
         $collection = $collection->groupBy('project_name');
@@ -105,7 +111,12 @@ class ReportHelper
                     $resultCollection[$projectName]['project_time'] += $duration;
                 }
 
-                $screenshotsCollection = collect(json_decode($item->screens, true));
+                $screenshotsCollection = collect(json_decode(
+                    $item->screens,
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+                ));
 
                 $screensResultCollection = [];
                 foreach ($screenshotsCollection as $screen) {
@@ -173,6 +184,7 @@ class ReportHelper
      * @param $collection
      *
      * @return Collection
+     * @throws JsonException
      */
     public function getProcessedTimeUseReportCollection($collection): Collection
     {
@@ -184,7 +196,12 @@ class ReportHelper
                 if (!array_key_exists($userID, $resultCollection)) {
                     $resultCollection[$userID] = [
                         'total_time' => 0,
-                        'user'       => collect(json_decode($item->user))
+                        'user'       => collect(json_decode(
+                            $item->user,
+                            true,
+                            512,
+                            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+                        ))
                     ];
                 }
 
@@ -196,7 +213,12 @@ class ReportHelper
                     'total_time'   => 0,
                 ];
 
-                $intervals = collect(json_decode($item->intervals, true));
+                $intervals = collect(json_decode(
+                    $item->intervals,
+                    true,
+                    512,
+                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+                ));
                 foreach ($intervals as $interval) {
                     $duration = Carbon::parse($interval['end_at'])->diffInSeconds($interval['start_at']);
                     $resultCollection[$userID]['tasks'][$item->task_id]['total_time'] += $duration;

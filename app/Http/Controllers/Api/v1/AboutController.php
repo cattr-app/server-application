@@ -9,6 +9,7 @@ use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
+use JsonException;
 
 class AboutController extends Controller
 {
@@ -34,6 +35,11 @@ class AboutController extends Controller
         return $instanceId->value ?? null;
     }
 
+    /**
+     * @param string|null $instanceId
+     * @return array
+     * @throws JsonException
+     */
     private function requestReleaseInfo(?string $instanceId = null): array
     {
         $url = $this->statsReleaseUrl . config('app.version');
@@ -43,10 +49,15 @@ class AboutController extends Controller
             $this->client->get($url, $options)->getBody()->getContents(),
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
         );
     }
 
+    /**
+     * @param $instanceId
+     * @return array
+     * @throws JsonException
+     */
     private function requestModulesInfo($instanceId): array
     {
         $options = [
@@ -62,10 +73,15 @@ class AboutController extends Controller
             $this->client->post($this->statsModulesUrl, $options)->getBody()->getContents(),
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
         )['modules']);
     }
 
+    /**
+     * @param string $imageVersion
+     * @return array
+     * @throws JsonException
+     */
     private function requestImageInfo(string $imageVersion): array
     {
         $url = $this->statsImagesUrl . $imageVersion;
@@ -73,7 +89,7 @@ class AboutController extends Controller
             $this->client->get($url)->getBody()->getContents(),
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
         );
     }
 

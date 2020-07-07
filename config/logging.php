@@ -11,7 +11,7 @@ return [
     | one of the channels defined in the "channels" configuration array.
     |
     */
-    'default' => env('LOG_CHANNEL', 'stack'),
+    'default' => env('LOG_CHANNEL', 'single'),
     /*
     |--------------------------------------------------------------------------
     | Log Channels
@@ -28,7 +28,7 @@ return [
     'channels' => [
         'stack' => [
             'driver' => 'stack',
-            'channels' => ['single', 'sentry'],
+            'channels' => ['daily', 'sentry'],
         ],
         'single' => [
             'driver' => 'single',

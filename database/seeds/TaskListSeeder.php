@@ -38,6 +38,7 @@ class TaskListSeeder extends Seeder
     }
 
     /**
+     * @param User $user
      * @throws Exception
      */
     protected function seedProjects(User $user): void
@@ -58,6 +59,8 @@ class TaskListSeeder extends Seeder
     }
 
     /**
+     * @param Project $project
+     * @param User $user
      * @throws Exception
      */
     protected function seedTasks(Project $project, User $user): void
@@ -81,7 +84,8 @@ class TaskListSeeder extends Seeder
     }
 
     /**
-     * @throws Exception
+     * @param Task $task
+     * @param User $user
      */
     protected function seedTimeIntervals(Task $task, User $user): void
     {

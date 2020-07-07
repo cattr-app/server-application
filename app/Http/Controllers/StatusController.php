@@ -3,7 +3,6 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CatHelper;
-use App\Helpers\ModuleHelper;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 
@@ -27,8 +26,7 @@ class StatusController extends Controller
      *  {
      *    "success": true,
      *    "cattr": true,
-     *    "cat": "(=ㅇ༝ㅇ=)",
-     *    "modules": []
+     *    "cat": "(=ㅇ༝ㅇ=)"
      *  }
      */
     public function index(): JsonResponse

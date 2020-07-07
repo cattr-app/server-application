@@ -13,7 +13,7 @@ class UserInvited extends Mailable implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public $url;
+    public string $url;
 
     /**
      * Create a new message instance.

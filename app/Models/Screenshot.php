@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Intervention\Image\Constraint;
-use Intervention\Image\Facades\Image;
+use Image;
 use Storage;
 
 /**
@@ -145,7 +145,7 @@ class Screenshot extends Model
             return false;
         }
 
-        $userId = $this->timeInterval->user_id;
+        $userId = optional($this->timeInterval)->user_id;
 
         // Allow root to see all screenshots.
         if (Role::can($user, 'screenshots', 'full_access')) {

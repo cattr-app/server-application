@@ -3,7 +3,8 @@
 namespace App\Http\Controllers\Api\v1;
 
 use App;
-use App\EventFilter\Facades\Filter;
+use Exception;
+use Filter;
 use App\Mail\UserCreated;
 use App\Models\ProjectsUsers;
 use App\Models\Role;
@@ -12,10 +13,10 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Event;
-use Illuminate\Support\Facades\Mail;
-use Illuminate\Support\Facades\Route;
+use Auth;
+use Event;
+use Mail;
+use Route;
 use App\Http\Requests\v1\User\EditUserRequest;
 use App\Http\Requests\v1\User\SendInviteUserRequest;
 use Illuminate\Support\Str;
@@ -213,6 +214,10 @@ class UserController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function create(Request $request): JsonResponse
     {
         $request->validate(['email' => 'required|email']);
@@ -288,6 +293,11 @@ class UserController extends ItemController
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
     public function edit(Request $request): JsonResponse
     {
@@ -400,9 +410,9 @@ class UserController extends ItemController
      */
 
     /**
-     * @param bool $withRelations
-     * @param bool $withSoftDeleted
-     * @return Builder
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
      */
     public function show(Request $request): JsonResponse
     {
@@ -417,7 +427,7 @@ class UserController extends ItemController
                     ];
                 }
 
-                array_push($sortedRoles[$projectRole->role_id]['project_ids'], $projectRole->project_id);
+                $sortedRoles[$projectRole->role_id]['project_ids'][] = $projectRole->project_id;
             }
 
             $item->project_roles = $sortedRoles;
@@ -519,15 +529,14 @@ class UserController extends ItemController
     /**
      * TODO: apidoc
      *
-     * @param Request $request
+     * @param SendInviteUserRequest $request
      * @return JsonResponse
-     * @throws \Exception
+     * @throws Exception
      */
     public function sendInvite(SendInviteUserRequest $request)
     {
         $requestData = $request->validated();
 
-        /** @var Builder $itemsQuery */
         $itemsQuery = $this->applyQueryFilter($this->getQuery(), ['id' => $requestData['id']]);
         $item = $itemsQuery->first();
         if (!$item) {

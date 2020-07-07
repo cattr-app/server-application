@@ -3,7 +3,7 @@
 namespace Tests\Feature\Auth;
 
 use App\Models\User;
-use Illuminate\Support\Facades\Cache;
+use Cache;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 

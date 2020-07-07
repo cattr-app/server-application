@@ -25,7 +25,7 @@ class QueryHelper
      *
      * @throws Exception
      */
-    public function apply($query, $model, array $filter = [], $first = true)
+    public function apply($query, $model, array $filter = [], $first = true): void
     {
         $table = $model->getTable();
         $relations = [];
@@ -73,7 +73,7 @@ class QueryHelper
                 }
 
                 $relations[$domain][$filterParam] = $param;
-            } elseif (!in_array($key, static::RESERVED_REQUEST_KEYWORDS)) {
+            } elseif (!in_array($key, static::RESERVED_REQUEST_KEYWORDS, true)) {
                 [$operator, $value] = is_array($param) ? array_values($param) : ['=', $param];
 
                 if (is_array($value) && $operator === '=') {

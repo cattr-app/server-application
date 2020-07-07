@@ -9,16 +9,16 @@ use Illuminate\Auth\Events\PasswordReset as PasswordResetEvent;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Password;
-use Illuminate\Support\Facades\Validator;
+use DB;
+use Password;
+use Validator;
 
 class PasswordResetController extends BaseController
 {
     /**
      * @var RecaptchaHelper
      */
-    private $recaptcha;
+    private RecaptchaHelper $recaptcha;
 
     public function __construct(RecaptchaHelper $recaptcha)
     {
@@ -57,6 +57,8 @@ class PasswordResetController extends BaseController
      * @apiUse         InvalidPasswordResetDataError
      */
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws AuthorizationException
      */
     public function validate(Request $request): JsonResponse
@@ -117,6 +119,8 @@ class PasswordResetController extends BaseController
      * @apiUse         LimiterError
      */
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws AuthorizationException
      */
     public function request(Request $request): JsonResponse
@@ -195,6 +199,8 @@ class PasswordResetController extends BaseController
      * @apiUse         UnauthorizedError
      */
     /**
+     * @param Request $request
+     * @return JsonResponse
      * @throws AuthorizationException
      */
     public function process(Request $request): JsonResponse

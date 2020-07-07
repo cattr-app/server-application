@@ -2,27 +2,26 @@
 
 namespace App\Http\Controllers\Api\v1\Statistic;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Helpers\ReportHelper;
 use App\Models\Project;
 use App\Models\ProjectReport;
-use App\Models\Property;
+use App\Services\CoreSettingsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\DB;
-use Illuminate\Support\Facades\Validator;
+use DB;
+use Validator;
 
 class ProjectReportController extends ReportController
 {
     protected $timezone;
 
-    protected $reportHelper;
+    protected ReportHelper $reportHelper;
 
-    public function __construct(ReportHelper $reportHelper)
+    public function __construct(CoreSettingsService $settings, ReportHelper $reportHelper)
     {
-        $companyTimezoneProperty = Property::getProperty(Property::COMPANY_CODE, 'TIMEZONE')->first();
-        $this->timezone = $companyTimezoneProperty ? $companyTimezoneProperty->getAttribute('value') : 'UTC';
+        $this->timezone = $settings->get('timezone', 'UTC');
         $this->reportHelper = $reportHelper;
 
         parent::__construct();
@@ -234,7 +233,11 @@ class ProjectReportController extends ReportController
      *
      * @apiPermission   project_report_projects
      */
-
+    /**
+     * @param int $id
+     * @param Request $request
+     * @return JsonResponse
+     */
     public function task(int $id, Request $request): JsonResponse
     {
         $validator = Validator::make(

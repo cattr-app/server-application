@@ -13,8 +13,8 @@ class UserCreated extends Mailable implements ShouldQueue
     use Queueable;
     use SerializesModels;
 
-    public $login;
-    public $password;
+    public string $login;
+    public string $password;
     public $url;
 
     /**

@@ -2,10 +2,9 @@
 
 namespace App\Observers;
 
-use App\Mail\UserCreated as UserCreatedMail;
+use App\Mail\UserCreated;
 use App\Models\User;
-use App\Events\UserCreated;
-use Illuminate\Support\Facades\Mail;
+use Mail;
 use Illuminate\Support\Str;
 
 class UserObserver
@@ -13,7 +12,7 @@ class UserObserver
     /**
      * Handle the user "creating" event.
      *
-     * @param  \App\Models\User  $user
+     * @param User $user
      * @return void
      */
     public function creating(User $user): void
@@ -24,7 +23,7 @@ class UserObserver
             $user->password = $password;
             $user->invitation_sent = true;
 
-            Mail::to($user->email)->send(new UserCreatedMail($user->email, $password));
+            Mail::to($user->email)->send(new UserCreated($user->email, $password));
         }
     }
 }

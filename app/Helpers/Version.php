@@ -2,7 +2,8 @@
 
 namespace App\Helpers;
 
-use Nwidart\Modules\Facades\Module;
+use JsonException;
+use Module;
 use InvalidArgumentException;
 
 class Version
@@ -14,6 +15,11 @@ class Version
 
     protected ?string $module;
 
+    /**
+     * Version constructor.
+     * @param string|null $module
+     * @throws JsonException
+     */
     public function __construct(?string $module = null)
     {
         $this->module = $module;
@@ -51,20 +57,28 @@ class Version
     }
 
 
+    /**
+     * @return array
+     * @throws JsonException
+     */
     private function readComposerJson(): array
     {
         return json_decode(
-            file_get_contents($this->resolveModuleComposerJsonPath($this->module)),
+            file_get_contents(self::resolveModuleComposerJsonPath($this->module)),
             true,
             512,
-            JSON_THROW_ON_ERROR
+            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
         );
     }
 
+    /**
+     * @param array $content
+     * @throws JsonException
+     */
     private function writeComposerJson(array $content): void
     {
         file_put_contents(
-            $this->resolveModuleComposerJsonPath($this->module),
+            self::resolveModuleComposerJsonPath($this->module),
             json_encode(
                 $content,
                 JSON_THROW_ON_ERROR | JSON_PRETTY_PRINT | JSON_UNESCAPED_SLASHES,
@@ -74,6 +88,10 @@ class Version
     }
 
 
+    /**
+     * @return $this
+     * @throws JsonException
+     */
     protected function save(): self
     {
         $content = $this->readComposerJson();
@@ -83,6 +101,10 @@ class Version
     }
 
 
+    /**
+     * @return $this
+     * @throws JsonException
+     */
     public function incrementMajor(): self
     {
         $this->major++;
@@ -93,6 +115,10 @@ class Version
         return $this->save();
     }
 
+    /**
+     * @return $this
+     * @throws JsonException
+     */
     public function incrementMinor(): self
     {
         $this->minor++;
@@ -101,6 +127,10 @@ class Version
         return $this->save();
     }
 
+    /**
+     * @return $this
+     * @throws JsonException
+     */
     public function incrementPatch(): self
     {
         $this->patch++;
@@ -108,12 +138,20 @@ class Version
         return $this->save();
     }
 
+    /**
+     * @return $this
+     * @throws JsonException
+     */
     public function incrementPre(): self
     {
         (isset($this->pre)) ? $this->pre++ : $this->pre = 1;
         return $this->save();
     }
 
+    /**
+     * @return $this
+     * @throws JsonException
+     */
     public function clearPre(): self
     {
         $this->pre = null;

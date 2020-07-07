@@ -7,7 +7,7 @@ use App\Models\User;
 use Faker\Factory;
 use Illuminate\Http\Testing\File;
 use Illuminate\Http\UploadedFile;
-use Illuminate\Support\Facades\Storage;
+use Storage;
 use Tests\Facades\IntervalFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;

@@ -22,12 +22,10 @@
  * ]);
  */
 
-use Illuminate\Http\Request;
 use Illuminate\Routing\Route as RouteModel;
 use Illuminate\Routing\RouteCollection;
 use Illuminate\Routing\Router;
 use Illuminate\Support\Collection;
-use Illuminate\Support\Facades\Route;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 
@@ -60,8 +58,7 @@ Route::group([
     $router->get('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordResetController@request');
     $router->post('password/reset/validate', 'PasswordResetController@validate');
-    $router->post('password/reset/process', 'PasswordResetController@process')
-        ->name('password.reset.process');
+    $router->post('password/reset/process', 'PasswordResetController@process');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');
     $router->post('/register/{key}', 'RegistrationController@postForm');
@@ -79,8 +76,7 @@ Route::group([
     $router->get('me', 'AuthController@me');
     $router->post('password/reset/request', 'PasswordResetController@request');
     $router->post('password/reset/validate', 'PasswordResetController@validate');
-    $router->post('password/reset/process', 'PasswordResetController@process')
-        ->name('password.reset.process');
+    $router->post('password/reset/process', 'PasswordResetController@process');
 
     $router->get('/register/{key}', 'RegistrationController@getForm');
     $router->post('/register/{key}', 'RegistrationController@postForm');
@@ -97,12 +93,12 @@ Route::group([
     'middleware' => ['auth:api', 'throttle:120,1'],
     'prefix' => 'v1',
 ], static function (Router $router) {
-    // Register routes
+    //Invitations routes
     $router->any('/invitations/list', 'Api\v1\InvitationController@index');
-    $router->any('/invitations/count', 'Api\v1\InvitationController@count');
+    $router->get('/invitations/count', 'Api\v1\InvitationController@count');
     $router->post('/invitations/create', 'Api\v1\InvitationController@create');
     $router->post('/invitations/resend', 'Api\v1\InvitationController@resend');
-    $router->any('/invitations/show', 'Api\v1\InvitationController@show');
+    $router->post('/invitations/show', 'Api\v1\InvitationController@show');
     $router->post('/invitations/remove', 'Api\v1\InvitationController@destroy');
 
     //Projects routes
@@ -181,7 +177,6 @@ Route::group([
     $router->post('/rules/edit', 'Api\v1\RulesController@edit');
     $router->any('/rules/actions', 'Api\v1\RulesController@actions');
 
-
     // Statistic routes
     $router->any('/project-report/list', 'Api\v1\Statistic\ProjectReportController@report');
     $router->any('/project-report/list/tasks/{id}', 'Api\v1\Statistic\ProjectReportController@task');
@@ -191,47 +186,9 @@ Route::group([
     // About
     $router->get('/about', 'Api\v1\AboutController');
 
-    //Company management
-    $router->get('/companymanagement/getData', 'Api\v1\CompanyManagementController@getData');
-    $router->post('/companymanagement/save', 'Api\v1\CompanyManagementController@save');
-    $router->post('/companymanagement/timezone/edit', 'Api\v1\CompanyManagementController@editTimezone');
-    $router->post('/companymanagement/language/edit', 'Api\v1\CompanyManagementController@editLanguage');
+    //Company settings
+    $router->get('/company-settings', 'Api\v1\CompanySettingsController@index');
+    $router->patch('/company-settings', 'Api\v1\CompanySettingsController@update');
 });
 
-// Laravel router pass to fallback not non-exist urls only but wrong-method requests too.
-// So required to check if route have alternative request methods
-// throw not-found or wrong-method exceptions manually
-Route::any('(.*)', static function () {
-
-    /** @var Router $router */
-    $router = app('router');
-    /** @var Request $request */
-    $request = $router->getCurrentRequest();
-    /** @var RouteCollection $routes */
-    $routeCollection = $router->getRoutes();
-    /** @var string[] $methods */
-    $methods = array_diff(Router::$verbs, [$request->getMethod(), 'OPTIONS']);
-
-    foreach ($methods as $method) {
-        // Get all routes for method without fallback routes
-        /** @var Route[]|Collection $routes */
-        $routes = collect($routeCollection->get($method))->filter(static function ($route) {
-            /** @var RouteModel $route */
-            return !$route->isFallback && $route->uri !== '{fallbackPlaceholder}';
-        });
-
-        // Look if any route have match with current request
-        $mismatch = $routes->first(static function ($value) use ($request) {
-            /** @var RouteModel $value */
-            return $value->matches($request, false);
-        });
-
-        // Throw wrong-method exception if matches found
-        if ($mismatch !== null) {
-            throw new MethodNotAllowedHttpException([]);
-        }
-    }
-
-    // No matches, throw not-found exception
-    throw new NotFoundHttpException();
-});
+Route::any('(.*)', 'Controller@universalRoute');

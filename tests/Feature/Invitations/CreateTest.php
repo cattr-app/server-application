@@ -49,7 +49,7 @@ class CreateTest extends TestCase
         $response->assertForbidden();
     }
 
-    public function test_create_already_exists()
+    public function test_create_already_exists(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->invitationRequestData);
 

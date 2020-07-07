@@ -2,12 +2,14 @@
 
 namespace App\Helpers;
 
-use Nwidart\Modules\Facades\Module;
+use JsonException;
+use Module;
 
 class ModuleHelper
 {
     /**
      * Returns information about installed modules.
+     * @throws JsonException
      */
     public static function getModulesInfo(): array
     {

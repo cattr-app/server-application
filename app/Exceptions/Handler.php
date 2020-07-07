@@ -15,6 +15,7 @@ use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use RuntimeException;
+use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
@@ -45,6 +46,7 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
+     * @param Throwable $exception
      * @throws Exception
      */
     public function report(Throwable $exception): void
@@ -62,7 +64,7 @@ class Handler extends ExceptionHandler
      * @param Request $request
      * @param AuthenticationException $exception
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws Throwable
      */
     protected function unauthenticated($request, AuthenticationException $exception)
@@ -76,7 +78,7 @@ class Handler extends ExceptionHandler
      * @param Request $request
      * @param Throwable $exception
      *
-     * @return \Symfony\Component\HttpFoundation\Response
+     * @return Response
      * @throws Throwable
      */
     public function render($request, Throwable $exception)
@@ -147,7 +149,7 @@ class Handler extends ExceptionHandler
             $message = $exception->getMessage();
             $errorType = 'authorization.token_expired';
             $statusCode = 401;
-        } elseif ($code === 404 || $code === 401 || $code === 429 || $code == 420) {
+        } elseif ($code === 404 || $code === 401 || $code === 429 || $code === 420) {
             // If we have 404 or 401 code we will process it as an request status code
             $statusCode = $code;
 

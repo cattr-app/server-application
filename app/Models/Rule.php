@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
@@ -1041,6 +1041,10 @@ class Rule extends Model
             ],
             'dashboard' => [
                 'manager_access' => __('Dashboard manager access'),
+            ],
+            'company-settings' => [
+                'index' => __('Company settings list'),
+                'update' => __('Company settings update'),
             ],
             'integration' => [
                 'gitlab' => __('GitLab integration'),

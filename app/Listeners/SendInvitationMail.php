@@ -4,7 +4,7 @@ namespace App\Listeners;
 
 use App\Events\InvitationCreated;
 use App\Mail\UserInvited as UserInvitedMail;
-use Illuminate\Support\Facades\Mail;
+use Mail;
 
 class SendInvitationMail
 {

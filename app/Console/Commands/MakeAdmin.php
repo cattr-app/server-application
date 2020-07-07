@@ -51,6 +51,8 @@ class MakeAdmin extends Command
             'password' => $this->argument('password'),
             'is_admin' => true,
             'role_id' => 2,
+            'timezone' => 'Africa/Bamako',
+            'language' => 'en'
         ]);
 
         $this->info("Administrator with email {$admin->email} was created successfully");
