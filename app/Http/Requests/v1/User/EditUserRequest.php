@@ -4,8 +4,8 @@ namespace App\Http\Requests\v1\User;
 
 use App\Presenters\User\OrdinaryUserPresenter;
 use Illuminate\Foundation\Http\FormRequest;
-use Request;
-use Auth;
+use Illuminate\Http\Request;
+use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
