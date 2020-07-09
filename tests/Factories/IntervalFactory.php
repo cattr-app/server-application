@@ -29,8 +29,9 @@ class IntervalFactory extends Factory
         return [
          'end_at' => $randomDateTime->toIso8601String(),
          'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
-         'count_mouse' => random_int(1, 1000),
-         'count_keyboard' => random_int(1, 1000)
+         'activity_fill' => random_int(1, 100),
+         'mouse_fill' => random_int(1, 100),
+         'keyboard_fill' => random_int(1, 100),
         ];
     }
 

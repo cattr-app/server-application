@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api\v1;
 
+use App\Http\Requests\v1\TimeInterval\CreateTimeIntervalRequest;
 use Filter;
 use App\Models\Role;
 use App\Models\Screenshot;
@@ -29,35 +30,7 @@ class TimeIntervalController extends ItemController
 
     public function create(Request $request): JsonResponse
     {
-        $intervalData = [
-            'task_id' => $request->input('task_id'),
-            'user_id' => $request->input('user_id'),
-            'start_at' => $request->input('start_at'),
-            'end_at' => $request->input('end_at'),
-            'count_mouse' => $request->input('count_mouse', 0),
-            'count_keyboard' => $request->input('count_keyboard', 0),
-            'is_manual' => $request->input('is_manual', 0)
-        ];
-
-        $validator = Validator::make(
-            $intervalData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.create'),
-                $this->getValidationRules()
-            )
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
+        $intervalData = app(CreateTimeIntervalRequest::class)->validated();
 
         $existing = TimeInterval::where('user_id', $intervalData['user_id'])
             ->where('start_at', $intervalData['start_at'])
@@ -169,8 +142,9 @@ class TimeIntervalController extends ItemController
      * @apiParam {String}   start_at          Interval time start
      * @apiParam {String}   end_at            Interval time end
      *
-     * @apiParam {Integer}  [count_mouse]     Mouse events count
-     * @apiParam {Integer}  [count_keyboard]  Keyboard events count
+     * @apiParam {Integer}  [activity_fill]   Activity rate as a percentage
+     * @apiParam {Integer}  [mouse_fill]      Time spent using the mouse as a percentage
+     * @apiParam {Integer}  [keyboard_fill]   Time spent using the keyboard as a percentage
      *
      * @apiParamExample {json} Request Example
      * {
@@ -197,8 +171,9 @@ class TimeIntervalController extends ItemController
      *      "is_manual": true,
      *      "created_at": "2018-10-01 03:20:59",
      *      "updated_at": "2018-10-01 03:20:59",
-     *      "count_mouse": 0,
-     *      "count_keyboard": 0,
+     *      "activity_fill": 0,
+     *      "mouse_fill": 0,
+     *      "keyboard_fill": 0,
      *      "user_id": 1
      *    }
      *  }

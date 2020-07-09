@@ -26,8 +26,6 @@ class EditTest extends TestCase
 
     public function test_edit(): void
     {
-        $this->interval->count_keyboard += 5;
-
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->interval->toArray());
 
         $response->assertOk();

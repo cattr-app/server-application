@@ -324,7 +324,9 @@ class ReportHelper
                 JSON_OBJECT(
                     'id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path,
                     'created_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?),
-                    'time_interval', JSON_OBJECT('start_at', DATE_FORMAT(time_intervals.start_at, '%Y-%m-%dT%TZ'))
+                    'time_interval', JSON_OBJECT('start_at', DATE_FORMAT(time_intervals.start_at, '%Y-%m-%dT%TZ'),
+                    'activity_fill', time_intervals.activity_fill, 'mouse_fill', time_intervals.mouse_fill, 
+                    'keyboard_fill', time_intervals.keyboard_fill)
                 )
             ) as screens",
             "JSON_ARRAYAGG(
