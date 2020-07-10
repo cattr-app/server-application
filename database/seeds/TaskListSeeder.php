@@ -105,13 +105,18 @@ class TaskListSeeder extends Seeder
             $time[$user->id] -= $intervalsOffset + random_int(60 * 30, 60 * 50);
             $start = $time[$user->id];
 
+            $mouseFill = mt_rand(0, 100);
+            $keyboardFill = mt_rand(0, 100 - $mouseFill);
+            $activityFill = $mouseFill + $keyboardFill;
+
             $interval = TimeInterval::create([
                 'task_id' => $task->id,
                 'user_id' => $user->id,
                 'start_at' => date('Y-m-d H:i:s', $start),
                 'end_at' => date('Y-m-d H:i:s', $end),
-                'count_mouse' => 42,
-                'count_keyboard' => 43
+                'activity_fill' => $activityFill,
+                'mouse_fill' => $mouseFill,
+                'keyboard_fill' => $keyboardFill,
             ]);
 
             $this->seedScreenshot($interval);

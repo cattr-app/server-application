@@ -75,14 +75,19 @@ class EmulateWork extends Command
      */
     protected function createTimeInterval(int $taskId, int $userId, string $startAt, string $endAt): void
     {
+        $mouseFill = mt_rand(0, 100);
+        $keyboardFill = mt_rand(0, 100 - $mouseFill);
+        $activityFill = $mouseFill + $keyboardFill;
+
         $interval = TimeInterval::create([
             'task_id' => $taskId,
             'user_id' => $userId,
             'start_at' => $startAt,
             'end_at' => $endAt,
             'is_manual' => 0,
-            'count_mouse' => random_int(10, 62),
-            'count_keyboard' => random_int(10, 62),
+            'activity_fill' => $activityFill,
+            'mouse_fill' => $mouseFill,
+            'keyboard_fill' => $keyboardFill,
         ]);
 
         $this->seedScreenshot($interval);

@@ -173,8 +173,9 @@ class TimeController extends ItemController
      *    "project_id": 2,
      *    "start_at": "2005-01-01 00:00:00",
      *    "end_at": "2019-01-01 00:00:00",
-     *    "count_mouse": [">=", 30],
-     *    "count_keyboard": ["<=", 200],
+     *    "activity_fill": 42,
+     *    "mouse_fill": 43,
+     *    "keyboard_fill": 43,
      *    "id": [">", 1]
      *  }
      *

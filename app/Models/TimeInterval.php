@@ -32,20 +32,20 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  *
  * @apiVersion 1.0.0
  */
-
 /**
  * @apiDefine TimeIntervalParams
  *
- * @apiParam {Integer}  [id]              ID
- * @apiParam {Integer}  [task_id]         The ID of the linked task
- * @apiParam {Integer}  [user_id]         The ID of the linked user
- * @apiParam {String}   [start_at]        DateTime of interval beginning
- * @apiParam {String}   [end_at]          DateTime of interval ending
- * @apiParam {Integer}  [count_mouse]     Count of mouse events
- * @apiParam {Integer}  [count_keyboard]  Count of keyboard events
- * @apiParam {ISO8601}  [created_at]      Creation DateTime
- * @apiParam {ISO8601}  [updated_at]      Update DateTime
- * @apiParam {ISO8601}  [deleted_at]      Delete DateTime
+ * @apiParam {Integer}  [id]             ID
+ * @apiParam {Integer}  [task_id]        The ID of the linked task
+ * @apiParam {Integer}  [user_id]        The ID of the linked user
+ * @apiParam {String}   [start_at]       DateTime of interval beginning
+ * @apiParam {String}   [end_at]         DateTime of interval ending
+ * @apiParam {Integer}  [activity_fill]  Activity rate as a percentage
+ * @apiParam {Integer}  [mouse_fill]     Time spent using the mouse as a percentage
+ * @apiParam {Integer}  [keyboard_fill]  Time spent using the keyboard as a percentage
+ * @apiParam {ISO8601}  [created_at]     Creation DateTime
+ * @apiParam {ISO8601}  [updated_at]     Update DateTime
+ * @apiParam {ISO8601}  [deleted_at]     Delete DateTime
  *
  * @apiVersion 1.0.0
  */
@@ -63,8 +63,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property Task $task
  * @property User $user
  * @property Screenshot[] $screenshots
- * @property int $count_mouse
- * @property int $count_keyboard
+ * @property int $activity_fill
+ * @property int $mouse_fill
+ * @property int $keyboard_fill
  * @property-read Collection|Property[] $properties
  * @property-read Screenshot $screenshot
  * @method static bool|null forceDelete()
