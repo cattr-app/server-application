@@ -128,8 +128,9 @@ class StatisticsSeeder extends Seeder
             'user_id' => $user->id,
             'start_at' => date('Y-m-d H:i:s', $start),
             'end_at' => date('Y-m-d H:i:s', $end),
-            'count_mouse' => random_int(0, 150),
-            'count_keyboard' => random_int(0, 150)
+            'mouse_fill' => random_int(0, 150),
+            'keyboard_fill' => random_int(0, 150),
+            'activity_fill' => random_int(0, 150),
         ]);
 
         $this->command->getOutput()->writeln("<fg=cyan>Added time interval for task {$task->id} for user {$user->id}</>");
