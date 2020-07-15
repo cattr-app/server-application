@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class CreateTest extends TestCase
 {
-    private const URI = 'v1/projects-users/create';
+    private const URI = 'projects-users/create';
 
     private User $admin;
     private array $projectUserData;

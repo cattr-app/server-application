@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class ListTest extends TestCase
 {
-    private const URI = 'v1/users/list';
+    private const URI = 'users/list';
 
     private const USERS_AMOUNT = 10;
 

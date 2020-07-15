@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class CreateTest extends TestCase
 {
-    private const URI = '/v1/screenshots/create';
+    private const URI = '/screenshots/create';
 
     private User $admin;
     private File $screenshotFile;

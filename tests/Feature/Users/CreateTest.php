@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class CreateTest extends TestCase
 {
-    private const URI = 'v1/users/create';
+    private const URI = 'users/create';
 
     private User $admin;
 

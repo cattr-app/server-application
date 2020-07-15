@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class TasksTest extends TestCase
 {
-    private const URI = 'v1/time/tasks';
+    private const URI = 'time/tasks';
 
     private const INTERVALS_AMOUNT = 10;
 

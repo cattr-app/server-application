@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class CountTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/count';
+    private const URI = 'time-intervals/count';
 
     private const SCREENSHOTS_AMOUNT = 10;
 

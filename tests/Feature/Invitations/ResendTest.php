@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class ResendTest extends TestCase
 {
-    private const URI = 'v1/invitations/resend';
+    private const URI = 'invitations/resend';
 
     private User $user;
     private User $admin;

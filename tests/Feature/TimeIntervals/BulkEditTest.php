@@ -15,7 +15,7 @@ use Tests\TestCase;
 
 class BulkEditTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/bulk-edit';
+    private const URI = 'time-intervals/bulk-edit';
 
     private const INTERVALS_AMOUNT = 5;
 

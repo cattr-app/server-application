@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class RemoveTest extends TestCase
 {
-    private const URI = 'v1/roles/remove';
+    private const URI = 'roles/remove';
 
     private User $admin;
 

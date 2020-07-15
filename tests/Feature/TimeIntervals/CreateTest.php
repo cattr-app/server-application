@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class CreateTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/create';
+    private const URI = 'time-intervals/create';
 
     private User $admin;
     private Task $task;

@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class CountTest extends TestCase
 {
-    private const URI = 'v1/screenshots/count';
+    private const URI = 'screenshots/count';
 
     private const SCREENSHOTS_AMOUNT = 10;
 

@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class EditTest extends TestCase
 {
-    private const URI = 'v1/projects/edit';
+    private const URI = 'projects/edit';
 
     private User $admin;
 

@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class EditTest extends TestCase
 {
-    private const URI = 'v1/rules/edit';
+    private const URI = 'rules/edit';
 
     private User $admin;
     private User $user;

@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class ActionsTest extends TestCase
 {
-    private const URI = 'v1/rules/actions';
+    private const URI = 'rules/actions';
 
     private User $admin;
 

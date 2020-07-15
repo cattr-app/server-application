@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class ShowTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/show';
+    private const URI = 'time-intervals/show';
 
     private User $admin;
     private TimeInterval $interval;

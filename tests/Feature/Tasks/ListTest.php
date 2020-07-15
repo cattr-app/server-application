@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class ListTest extends TestCase
 {
-    private const URI = 'v1/tasks/list';
+    private const URI = 'tasks/list';
 
     private const TASKS_AMOUNT = 10;
 

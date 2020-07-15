@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class ShowTest extends TestCase
 {
-    private const URI = 'v1/invitations/show';
+    private const URI = 'invitations/show';
 
     private User $user;
     private User $admin;
