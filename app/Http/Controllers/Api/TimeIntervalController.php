@@ -1,8 +1,8 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1;
+namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\v1\TimeInterval\CreateTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;
 use Filter;
 use App\Models\Role;
 use App\Models\Screenshot;

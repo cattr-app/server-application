@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1;
+namespace App\Http\Controllers\Api;
 
 use App;
 use Exception;
@@ -17,8 +17,8 @@ use Auth;
 use Event;
 use Mail;
 use Route;
-use App\Http\Requests\v1\User\EditUserRequest;
-use App\Http\Requests\v1\User\SendInviteUserRequest;
+use App\Http\Requests\User\EditUserRequest;
+use App\Http\Requests\User\SendInviteUserRequest;
 use Illuminate\Support\Str;
 
 class UserController extends ItemController

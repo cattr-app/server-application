@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\v1\Invitation;
+namespace App\Http\Requests\User;
 
 use Illuminate\Foundation\Http\FormRequest;
 
-class UpdateInvitationRequest extends FormRequest
+class SendInviteUserRequest extends FormRequest
 {
     /**
      * Determine if user authorized to make this request.
@@ -24,7 +24,7 @@ class UpdateInvitationRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'id' => 'required|integer|exists:invitations,id'
+            'id' => 'required|int|exists:users,id'
         ];
     }
 }

@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1;
+namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\v1\CompanySettings\UpdateCompanySettingsRequest;
+use App\Http\Requests\CompanySettings\UpdateCompanySettingsRequest;
 use App\Models\Priority;
 use App\Services\CoreSettingsService;
 use Illuminate\Http\JsonResponse;

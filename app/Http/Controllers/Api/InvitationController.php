@@ -1,9 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1;
+namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\v1\Invitation\CreateInvitationRequest;
-use App\Http\Requests\v1\Invitation\UpdateInvitationRequest;
+use App\Http\Requests\Invitation\CreateInvitationRequest;
+use App\Http\Requests\Invitation\UpdateInvitationRequest;
 use App\Models\Invitation;
 use App\Services\InvitationService;
 use Exception;
