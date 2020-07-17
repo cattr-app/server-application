@@ -1,45 +1,58 @@
 server{
-	listen 80;
-	listen [::]:80;
+  listen 80;
+  listen [::]:80;
 
-	server_name cattr.local;
+  server_name cattr.local;
 
-	set $project_path "/path/to/your/cattr";
+  set $project_path "/path/to/your/cattr";
 
-	root '$project_path/frontend/output';
+  root '$project_path/frontend/output';
 
-	location / {
-		try_files $uri $uri/ /index.html;
-	}
+  location / {
+    try_files $uri $uri/ /index.html;
+  }
 
-	location /api {
-		root '$project_path/backend/public';
+  location /index.html {
+    expires epoch;
+    open_file_cache off;
+  }
 
-		rewrite ^/api/(.+)$ /$1 break;
+  error_page 500 502 503 403 @fallback;
 
-		try_files $uri $uri/ /api/index.php?$query_string;
+  location @fallback {
+    try_files $uri /500.html;
+  }
 
-		location ~ \.php$ {
-			fastcgi_pass unix:/var/run/php/php7.4-fpm.socket;
-			fastcgi_index index.php;
-			fastcgi_param SCRIPT_FILENAME $project_path/backend/public/index.php;
-			include /usr/local/etc/nginx/add/fastcgi;
-		}
-	}
+  location /api {
+    root '$project_path/backend/public';
 
-	location /telescope/telescope-api {
-		try_files $uri $uri/ /api/index.php?$query_string;
-	}
+    rewrite ^/api/(.+)$ /$1 break;
 
-	location /vendor {
-		root '$project_path/backend/public';
-	}
+    try_files $uri $uri/ /api/index.php?$query_string;
 
-	location /apidoc {
-		root '$project_path/backend/public';
-	}
+    client_max_body_size 12M;
 
-	location /telescope {
-		try_files $uri /api/$uri /api/$uri/;
-	}
+    location ~ \.php$ {
+      fastcgi_pass unix:/var/run/php/php7.4-fpm.socket;
+      fastcgi_index index.php;
+      fastcgi_param SCRIPT_FILENAME $project_path/backend/public/index.php;
+      include /usr/local/etc/nginx/add/fastcgi;
+    }
+  }
+
+  location /telescope/telescope-api {
+    try_files $uri $uri/ /api/index.php?$query_string;
+  }
+
+  location /vendor {
+    root '$project_path/backend/public';
+  }
+
+  location /apidoc {
+    root '$project_path/backend/public';
+  }
+
+  location /telescope {
+    try_files $uri /api/$uri /api/$uri/;
+  }
 }
