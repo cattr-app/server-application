@@ -1,0 +1,45 @@
+server{
+	listen 80;
+	listen [::]:80;
+
+	server_name cattr.local;
+
+	set $project_path "/path/to/your/cattr";
+
+	root '$project_path/frontend/output';
+
+	location / {
+		try_files $uri $uri/ /index.html;
+	}
+
+	location /api {
+		root '$project_path/backend/public';
+
+		rewrite ^/api/(.+)$ /$1 break;
+
+		try_files $uri $uri/ /api/index.php?$query_string;
+
+		location ~ \.php$ {
+			fastcgi_pass unix:/var/run/php/php7.4-fpm.socket;
+			fastcgi_index index.php;
+			fastcgi_param SCRIPT_FILENAME $project_path/backend/public/index.php;
+			include /usr/local/etc/nginx/add/fastcgi;
+		}
+	}
+
+	location /telescope/telescope-api {
+		try_files $uri $uri/ /api/index.php?$query_string;
+	}
+
+	location /vendor {
+		root '$project_path/backend/public';
+	}
+
+	location /apidoc {
+		root '$project_path/backend/public';
+	}
+
+	location /telescope {
+		try_files $uri /api/$uri /api/$uri/;
+	}
+}
