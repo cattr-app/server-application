@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\v1\TimeInterval;
+namespace App\Http\Requests\TimeInterval;
 
 use Illuminate\Foundation\Http\FormRequest;
 

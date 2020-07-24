@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1;
+namespace App\Http\Controllers\Api;
 
 use Exception;
 use Filter;
@@ -12,7 +12,6 @@ use Illuminate\Http\Request;
 use Auth;
 use DB;
 use Route;
-use function is_array;
 
 class TaskController extends ItemController
 {

@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class CountTest extends TestCase
 {
-    private const URI = 'v1/invitations/count';
+    private const URI = 'invitations/count';
 
     private User $admin;
     private User $user;

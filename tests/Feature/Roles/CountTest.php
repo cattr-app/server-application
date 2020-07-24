@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class CountTest extends TestCase
 {
-    private const URI = 'v1/roles/count';
+    private const URI = 'roles/count';
 
     private User $admin;
 

@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class CreateTest extends TestCase
 {
-    private const URI = 'v1/tasks/create';
+    private const URI = 'tasks/create';
 
     private User $admin;
     /**

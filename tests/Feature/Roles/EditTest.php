@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class EditTest extends TestCase
 {
-    private const URI = 'v1/roles/edit';
+    private const URI = 'roles/edit';
 
     private User $admin;
 

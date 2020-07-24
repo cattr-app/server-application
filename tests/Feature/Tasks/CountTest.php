@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class CountTest extends TestCase
 {
-    private const URI = 'v1/tasks/count';
+    private const URI = 'tasks/count';
 
     private const TASKS_AMOUNT = 10;
 

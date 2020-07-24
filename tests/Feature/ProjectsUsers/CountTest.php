@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class CountTest extends TestCase
 {
-    private const URI = 'v1/projects-users/count';
+    private const URI = 'projects-users/count';
 
     private const PROJECTS_USERS_AMOUNT = 10;
 

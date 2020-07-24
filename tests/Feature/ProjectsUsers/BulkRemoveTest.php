@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class BulkRemoveTest extends TestCase
 {
-    private const URI = 'v1/projects-users/bulk-remove';
+    private const URI = 'projects-users/bulk-remove';
 
     private const PROJECTS_USERS_AMOUNT = 5;
 

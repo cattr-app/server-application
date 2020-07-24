@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class BulkRemoveTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/bulk-remove';
+    private const URI = 'time-intervals/bulk-remove';
 
     private const INTERVALS_AMOUNT = 5;
 

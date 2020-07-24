@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class ListTest extends TestCase
 {
-    private const URI = 'v1/screenshots/list';
+    private const URI = 'screenshots/list';
 
     private const SCREENSHOTS_AMOUNT = 10;
 

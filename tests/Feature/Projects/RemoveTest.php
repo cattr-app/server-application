@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class RemoveTest extends TestCase
 {
-    private const URI = 'v1/projects/remove';
+    private const URI = 'projects/remove';
 
     private User $admin;
     private Project $project;

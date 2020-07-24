@@ -11,7 +11,7 @@ use Tests\TestCase;
 
 class TotalTest extends TestCase
 {
-    private const URI = 'v1/time/total';
+    private const URI = 'time/total';
 
     private const INTERVALS_AMOUNT = 10;
 

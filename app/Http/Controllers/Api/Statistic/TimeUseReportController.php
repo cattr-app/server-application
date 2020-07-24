@@ -1,10 +1,9 @@
 <?php
 
-namespace App\Http\Controllers\Api\v1\Statistic;
+namespace App\Http\Controllers\Api\Statistic;
 
 use App\EventFilter\Facades\Filter;
 use App\Helpers\ReportHelper;
-use App\Models\Property;
 use App\Services\CoreSettingsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;

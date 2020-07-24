@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class AllowedRulesTest extends TestCase
 {
-    private const URI = 'v1/roles/allowed-rules';
+    private const URI = 'roles/allowed-rules';
 
     private User $admin;
 

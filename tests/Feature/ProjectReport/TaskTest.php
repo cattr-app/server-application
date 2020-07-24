@@ -13,7 +13,7 @@ use Tests\TestCase;
 
 class TaskTest extends TestCase
 {
-    private const URI = 'v1/project-report/list/tasks';
+    private const URI = 'project-report/list/tasks';
 
     private User $admin;
 

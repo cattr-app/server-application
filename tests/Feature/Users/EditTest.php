@@ -9,7 +9,7 @@ use Faker\Factory as FakerFactory;
 
 class EditTest extends TestCase
 {
-    private const URI = 'v1/users/edit';
+    private const URI = 'users/edit';
 
     private User $admin;
     private User $user;

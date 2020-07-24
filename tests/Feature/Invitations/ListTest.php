@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class ListTest extends TestCase
 {
-    private const URI = 'v1/invitations/list';
+    private const URI = 'invitations/list';
 
     private User $user;
     private User $admin;

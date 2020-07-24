@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class CreateTest extends TestCase
 {
-    private const URI = 'v1/invitations/create';
+    private const URI = 'invitations/create';
 
     private User $user;
     private User $admin;
