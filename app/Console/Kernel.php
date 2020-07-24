@@ -8,6 +8,8 @@ use App\Console\Commands\PlanWork;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
 
+use Laravel\Telescope\Console\PruneCommand;
+
 class Kernel extends ConsoleKernel
 {
     /**
@@ -37,6 +39,8 @@ class Kernel extends ConsoleKernel
 
         $schedule->command(PlanWork::class)->daily()->environments(['staging']);
         $schedule->command(DemoReset::class)->weeklyOn(1, '1:00')->environments(['staging']);
+
+        $schedule->command(PruneCommand::class)->daily()->environments(['staging', 'local']);
     }
     /**
      * Register the Closure based commands for the application.
