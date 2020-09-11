@@ -110,8 +110,9 @@ class TaskListSeeder extends Seeder
                 'user_id' => $user->id,
                 'start_at' => date('Y-m-d H:i:s', $start),
                 'end_at' => date('Y-m-d H:i:s', $end),
-                'count_mouse' => 42,
-                'count_keyboard' => 43
+                'mouse_fill' => 42,
+                'keyboard_fill' => 43,
+                'activity_fill' => null
             ]);
 
             $this->seedScreenshot($interval);

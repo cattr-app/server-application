@@ -20,8 +20,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @apiSuccess {Integer}  timeInterval.user_id         The ID of the linked user
  * @apiSuccess {String}   timeInterval.start_at        DateTime of interval beginning
  * @apiSuccess {String}   timeInterval.end_at          DateTime of interval ending
- * @apiSuccess {Integer}  timeInterval.count_mouse     Count of mouse events
- * @apiSuccess {Integer}  timeInterval.count_keyboard  Count of keyboard events
+ * @apiSuccess {Integer}  timeInterval.activity_fill   Activity rate as a percentage
+ * @apiSuccess {Integer}  timeInterval.mouse_fill      Time spent using the mouse as a percentage
+ * @apiSuccess {Integer}  timeInterval.keyboard_fill   Time spent using the keyboard as a percentage
  * @apiSuccess {ISO8601}  timeInterval.created_at      Creation DateTime
  * @apiSuccess {ISO8601}  timeInterval.updated_at      Update DateTime
  * @apiSuccess {ISO8601}  timeInterval.deleted_at      Delete DateTime or `NULL` if wasn't deleted
@@ -69,8 +70,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static bool|null forceDelete()
  * @method static QueryBuilder|TimeInterval onlyTrashed()
  * @method static bool|null restore()
- * @method static EloquentBuilder|TimeInterval whereCountKeyboard($value)
- * @method static EloquentBuilder|TimeInterval whereCountMouse($value)
+ * @method static EloquentBuilder|TimeInterval whereActivityFill($value)
+ * @method static EloquentBuilder|TimeInterval whereMouseFill($value)
+ * @method static EloquentBuilder|TimeInterval whereKeyboardFill($value)
  * @method static EloquentBuilder|TimeInterval whereCreatedAt($value)
  * @method static EloquentBuilder|TimeInterval whereDeletedAt($value)
  * @method static EloquentBuilder|TimeInterval whereEndAt($value)
@@ -101,8 +103,9 @@ class TimeInterval extends Model
         'start_at',
         'user_id',
         'end_at',
-        'count_mouse',
-        'count_keyboard',
+        'activity_fill',
+        'mouse_fill',
+        'keyboard_fill',
         'is_manual',
     ];
 
@@ -112,8 +115,9 @@ class TimeInterval extends Model
     protected $casts = [
         'task_id' => 'integer',
         'user_id' => 'integer',
-        'count_mouse' => 'integer',
-        'count_keyboard' => 'integer',
+        'activity_fill' => 'integer',
+        'mouse_fill' => 'integer',
+        'keyboard_fill' => 'integer',
         'is_manual' => 'boolean',
     ];
 
