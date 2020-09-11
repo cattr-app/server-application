@@ -123,14 +123,18 @@ class StatisticsSeeder extends Seeder
         $time[$user->id] -= random_int($intervalsOffset, 60 * 60 * 5);
         $start = $time[$user->id];
 
+        $mouseFill = mt_rand(0, 100);
+        $keyboardFill = mt_rand(0, 100 - $mouseFill);
+        $activityFill = $mouseFill + $keyboardFill;
+
         $interval = TimeInterval::create([
             'task_id' => $task->id,
             'user_id' => $user->id,
             'start_at' => date('Y-m-d H:i:s', $start),
             'end_at' => date('Y-m-d H:i:s', $end),
-            'mouse_fill' => random_int(0, 150),
-            'keyboard_fill' => random_int(0, 150),
-            'activity_fill' => random_int(0, 150),
+            'activity_fill' => $activityFill,
+            'mouse_fill' => $mouseFill,
+            'keyboard_fill' => $keyboardFill,
         ]);
 
         $this->command->getOutput()->writeln("<fg=cyan>Added time interval for task {$task->id} for user {$user->id}</>");

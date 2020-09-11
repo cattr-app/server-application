@@ -422,8 +422,9 @@ class ProjectController extends ItemController
      *            "created_at": "2018-09-25 06:15:08",
      *            "updated_at": "2018-09-25 06:15:08",
      *            "deleted_at": null,
-     *            "count_mouse": 88,
-     *            "count_keyboard": 127,
+     *            "activity_fill": 88,
+     *            "mouse_fill": 40,
+     *            "keyboard_fill": 48,
      *            "user_id": 1
      *          },
      *          {
@@ -434,8 +435,9 @@ class ProjectController extends ItemController
      *            "created_at": "2018-09-25 06:15:08",
      *            "updated_at": "2018-09-25 06:15:08",
      *            "deleted_at": null,
-     *            "count_mouse": 117,
-     *            "count_keyboard": 23,
+     *            "activity_fill": 88,
+     *            "mouse_fill": 40,
+     *            "keyboard_fill": 48,
      *            "user_id": 1
      *          }
      *      }

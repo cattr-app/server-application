@@ -247,15 +247,16 @@ class TimeIntervalController extends ItemController
      *  HTTP/1.1 200 OK
      *  [
      *    {
-     *      "id":1,
-     *      "task_id":1,
-     *      "start_at":"2006-06-20 15:54:40",
-     *      "end_at":"2006-06-20 15:59:38",
-     *      "created_at":"2018-10-15 05:54:39",
-     *      "updated_at":"2018-10-15 05:54:39",
-     *      "deleted_at":null,
-     *      "count_mouse":42,
-     *      "count_keyboard":43,
+     *      "id": 1,
+     *      "task_id": 1,
+     *      "start_at": "2006-06-20 15:54:40",
+     *      "end_at": "2006-06-20 15:59:38",
+     *      "created_at": "2018-10-15 05:54:39",
+     *      "updated_at": "2018-10-15 05:54:39",
+     *      "deleted_at": null,
+     *      "activity_fill": 42,
+     *      "mouse_fill": 43,
+     *      "keyboard_fill": 43,
      *      "user_id":1
      *    }
      *  ]
@@ -368,8 +369,9 @@ class TimeIntervalController extends ItemController
      *   "created_at": "2018-09-25 06:15:08",
      *   "updated_at": "2018-09-25 06:15:08",
      *   "deleted_at": null,
-     *   "count_mouse": 88,
-     *   "count_keyboard": 127,
+     *   "activity_fill": 42,
+     *   "mouse_fill": 43,
+     *   "keyboard_fill": 43,
      *   "user_id": 1
      * }
      *
@@ -412,8 +414,9 @@ class TimeIntervalController extends ItemController
      *      "created_at":"2018-10-15 05:50:39",
      *      "updated_at":"2018-10-15 05:50:43",
      *      "deleted_at":null,
-     *      "count_mouse":42,
-     *      "count_keyboard":43,
+     *      "activity_fill": 42,
+     *      "mouse_fill": 43,
+     *      "keyboard_fill": 43,
      *      "user_id":1
      *    }
      *  }
