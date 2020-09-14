@@ -439,7 +439,7 @@ class User extends Authenticatable implements JWTSubject
             return false;
         }
 
-        return $this->last_activity->diffInMinutes(Carbon::now()) < 5;
+        return $this->last_activity->diffInSeconds(Carbon::now()) < config('app.user_activity.online_status_time');
     }
 
     /**
