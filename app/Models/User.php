@@ -435,6 +435,10 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getOnlineAttribute(): bool
     {
+        if (!isset($this->last_activity)) {
+            return false;
+        }
+
         return $this->last_activity->diffInMinutes(Carbon::now()) < 5;
     }
 

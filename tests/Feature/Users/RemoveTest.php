@@ -24,7 +24,9 @@ class RemoveTest extends TestCase
 
     public function test_remove(): void
     {
-        $this->assertDatabaseHas('users', $this->user->toArray());
+        $user = $this->user->toArray();
+        unset($user['online']);
+        $this->assertDatabaseHas('users', $user);
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->user->only('id'));
 

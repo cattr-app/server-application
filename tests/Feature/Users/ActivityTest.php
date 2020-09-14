@@ -6,7 +6,7 @@ use App\Models\User;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
 
-class ActivityTestT extends TestCase
+class ActivityTest extends TestCase
 {
     private const URI = 'users/activity';
 
