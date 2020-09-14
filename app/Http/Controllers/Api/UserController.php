@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App;
+use Carbon\Carbon;
 use Exception;
 use Filter;
 use App\Mail\UserCreated;
@@ -586,6 +587,35 @@ class UserController extends ItemController
 
         $user->projectsRelation()->saveMany($relations);
         return $user;
+    }
+
+    /**
+     * @api             {patch} /v1/users/activity Activity
+     * @apiDescription  Updates the time of the user's last activity
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Activity
+     * @apiGroup        User
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *  }
+     *
+     * @apiUse          UnauthorizedError
+     */
+    public function updateActivity(): JsonResponse
+    {
+        $user = auth()->user();
+        /* @var User $user */
+        $user->update(['last_activity' => Carbon::now()]);
+
+        return new JsonResponse(['success' => true]);
     }
 
     /**

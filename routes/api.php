@@ -96,6 +96,7 @@ Route::group([
     $router->any('users/show', 'Api\UserController@show');
     $router->post('users/remove', 'Api\UserController@destroy');
     $router->post('users/send-invite', 'Api\UserController@sendInvite');
+    $router->patch('users/activity', 'Api\UserController@updateActivity');
 
     //Screenshots routes
     $router->any('screenshots/list', 'Api\ScreenshotController@index');

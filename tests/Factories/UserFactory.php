@@ -3,6 +3,7 @@
 namespace Tests\Factories;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Faker\Factory as FakerFactory;
 use Illuminate\Database\Eloquent\Model;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -77,6 +78,7 @@ class UserFactory extends Factory
             'screenshots_interval' => 5,
             'active' => 1,
             'password' => $fullName,
+            'last_activity' => Carbon::now()->subMinutes(rand(1, 55)),
         ];
     }
 

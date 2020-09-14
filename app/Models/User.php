@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Mail\ResetPassword;
+use Carbon\Carbon;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -233,6 +234,7 @@ class User extends Authenticatable implements JWTSubject
         'user_language',
         'type',
         'invitation_sent',
+        'last_activity',
     ];
 
     /**
@@ -267,7 +269,6 @@ class User extends Authenticatable implements JWTSubject
         'invitation_sent' => 'boolean',
     ];
 
-
     /**
      * The attributes that should be mutated to dates.
      *
@@ -277,6 +278,7 @@ class User extends Authenticatable implements JWTSubject
         'created_at',
         'updated_at',
         'deleted_at',
+        'last_activity',
     ];
 
     /**
@@ -287,6 +289,15 @@ class User extends Authenticatable implements JWTSubject
     protected $hidden = [
         'password',
         'remember_token',
+    ];
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'online',
     ];
 
     /**
@@ -415,6 +426,16 @@ class User extends Authenticatable implements JWTSubject
     public function allowed(string $object, string $action, $id = null): bool
     {
         return Role::can($this, $object, $action, $id);
+    }
+
+    /**
+     * Get the user's online status.
+     *
+     * @return bool
+     */
+    public function getOnlineAttribute(): bool
+    {
+        return $this->last_activity->diffInMinutes(Carbon::now()) < 5;
     }
 
     /**
