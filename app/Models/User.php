@@ -34,15 +34,10 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @apiSuccess {ISO8601}  user.created_at               Creation DateTime
  * @apiSuccess {ISO8601}  user.updated_at               Update DateTime
  * @apiSuccess {ISO8601}  user.deleted_at               Delete DateTime or `NULL` if wasn't deleted
- * @apiSuccess {Boolean}  user.payroll_access          `Not used`
- * @apiSuccess {Boolean}  user.billing_access          `Not used`
  * @apiSuccess {String}   user.url                     `Not used`
- * @apiSuccess {Boolean}  user.permanent_tasks         `Not used`
  * @apiSuccess {Boolean}  user.computer_time_popup     `Not used`
- * @apiSuccess {Boolean}  user.poor_time_popup         `Not used`
  * @apiSuccess {Boolean}  user.blur_screenshots        `Not used`
  * @apiSuccess {Boolean}  user.web_and_app_monitoring  `Not used`
- * @apiSuccess {Boolean}  user.webcam_shots            `Not used`
  * @apiSuccess {String}   user.user_language            Language which is used for frontend translations and emails
  *
  * @apiVersion 1.0.0
@@ -64,15 +59,10 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @apiParam {ISO8601}  [created_at]               Creation DateTime
  * @apiParam {ISO8601}  [updated_at]               Update DateTime
  * @apiParam {ISO8601}  [deleted_at]               Delete DateTime
- * @apiParam {Boolean}  [payroll_access]          `Not used`
- * @apiParam {Boolean}  [billing_access]          `Not used`
  * @apiParam {String}   [url]                     `Not used`
- * @apiParam {Boolean}  [permanent_tasks]         `Not used`
  * @apiParam {Boolean}  [computer_time_popup]     `Not used`
- * @apiParam {Boolean}  [poor_time_popup]         `Not used`
  * @apiParam {Boolean}  [blur_screenshots]        `Not used`
  * @apiParam {Boolean}  [web_and_app_monitoring]  `Not used`
- * @apiParam {Boolean}  [webcam_shots]            `Not used`
  * @apiParam {String}   [user_language]            Language which is used for frontend translations and emails
  *
  * @apiVersion 1.0.0
@@ -94,15 +84,10 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @apiParam {ISO8601}  [users.created_at]               Creation DateTime
  * @apiParam {ISO8601}  [users.updated_at]               Update DateTime
  * @apiParam {ISO8601}  [users.deleted_at]               Delete DateTime
- * @apiParam {Boolean}  [users.payroll_access]          `Not used`
- * @apiParam {Boolean}  [users.billing_access]          `Not used`
  * @apiParam {String}   [users.url]                     `Not used`
- * @apiParam {Boolean}  [users.permanent_tasks]         `Not used`
  * @apiParam {Boolean}  [users.computer_time_popup]     `Not used`
- * @apiParam {Boolean}  [users.poor_time_popup]         `Not used`
  * @apiParam {Boolean}  [users.blur_screenshots]        `Not used`
  * @apiParam {Boolean}  [users.web_and_app_monitoring]  `Not used`
- * @apiParam {Boolean}  [users.webcam_shots]            `Not used`
  * @apiParam {String}   [users.user_language]            Language which is used for frontend translations and emails
  *
  * @apiVersion 1.0.0
@@ -116,17 +101,12 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property string $url
  * @property int $company_id
  * @property string $level
- * @property int $payroll_access
- * @property int $billing_access
  * @property string $avatar
  * @property int $screenshots_active
  * @property int $manual_time
- * @property int $permanent_tasks
  * @property int $computer_time_popup
- * @property string $poor_time_popup
  * @property int $blur_screenshots
  * @property int $web_and_app_monitoring
- * @property int $webcam_shots
  * @property int $screenshots_interval
  * @property int $active
  * @property string $password
@@ -154,7 +134,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static bool|null restore()
  * @method static EloquentBuilder|User whereActive($value)
  * @method static EloquentBuilder|User whereAvatar($value)
- * @method static EloquentBuilder|User whereBillingAccess($value)
  * @method static EloquentBuilder|User whereBlurScreenshots($value)
  * @method static EloquentBuilder|User whereChangePassword($value)
  * @method static EloquentBuilder|User whereCompanyId($value)
@@ -167,8 +146,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static EloquentBuilder|User whereImportant($value)
  * @method static EloquentBuilder|User whereManualTime($value)
  * @method static EloquentBuilder|User wherePassword($value)
- * @method static EloquentBuilder|User wherePayrollAccess($value)
- * @method static EloquentBuilder|User wherePermanentTasks($value)
  * @method static EloquentBuilder|User wherePoorTimePopup($value)
  * @method static EloquentBuilder|User whereRememberToken($value)
  * @method static EloquentBuilder|User whereScreenshotsActive($value)
@@ -177,7 +154,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static EloquentBuilder|User whereUpdatedAt($value)
  * @method static EloquentBuilder|User whereUrl($value)
  * @method static EloquentBuilder|User whereWebAndAppMonitoring($value)
- * @method static EloquentBuilder|User whereWebcamShots($value)
  * @method static QueryBuilder|User withTrashed()
  * @method static QueryBuilder|User withoutTrashed()
  * @mixin EloquentIdeHelper
@@ -211,17 +187,12 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'url',
         'company_id',
-        'payroll_access',
-        'billing_access',
         'avatar',
         'screenshots_active',
         'manual_time',
-        'permanent_tasks',
         'computer_time_popup',
-        'poor_time_popup',
         'blur_screenshots',
         'web_and_app_monitoring',
-        'webcam_shots',
         'screenshots_interval',
         'active',
         'password',
@@ -243,17 +214,12 @@ class User extends Authenticatable implements JWTSubject
         'email' => 'string',
         'url' => 'string',
         'company_id' => 'integer',
-        'payroll_access' => 'boolean',
-        'billing_access' => 'boolean',
         'avatar' => 'string',
         'screenshots_active' => 'integer',
         'manual_time' => 'integer',
-        'permanent_tasks' => 'boolean',
         'computer_time_popup' => 'integer',
-        'poor_time_popup' => 'integer',
         'blur_screenshots' => 'boolean',
         'web_and_app_monitoring' => 'boolean',
-        'webcam_shots' => 'boolean',
         'screenshots_interval' => 'integer',
         'active' => 'integer',
         'password' => 'string',
