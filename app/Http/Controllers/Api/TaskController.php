@@ -11,6 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Auth;
 use DB;
+use Parsedown;
 use Route;
 
 class TaskController extends ItemController
@@ -518,6 +519,8 @@ class TaskController extends ItemController
 
             $task->workers = $workers;
             $task->total_spent_time = $totalTracked;
+            $task->description = (new Parsedown())->text($task->description);
+
             return $task;
         });
         return parent::show($request);

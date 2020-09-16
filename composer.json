@@ -10,6 +10,7 @@
         "ext-pdo": "*",
         "appzcoder/crud-generator": "^3.2.0",
         "doctrine/dbal": "2.9.2",
+        "erusev/parsedown": "^1.7",
         "fruitcake/laravel-cors": "^1.0",
         "fzaninotto/faker": "^1.9",
         "intervention/image": "^2.5",
