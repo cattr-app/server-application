@@ -32,40 +32,6 @@ class TimeIntervalController extends ItemController
     {
         $intervalData = app(CreateTimeIntervalRequest::class)->validated();
 
-        $existing = TimeInterval::where('user_id', $intervalData['user_id'])
-            ->where('start_at', $intervalData['start_at'])
-            ->where('end_at', $intervalData['end_at'])
-            ->first();
-
-        if ($existing) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'query.item_already_exists',
-                    'message' => 'Interval already exists'
-                ]),
-                409
-            );
-        }
-
-        if (!$this->validateEndDate($intervalData)) {
-            if (strtotime($intervalData['start_at']) >= strtotime($intervalData['end_at'])) {
-                $message = 'End on interval must be later than start of interval.';
-            } else {
-                $message = 'Length of interval must be less than an hour.';
-            }
-
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => $message,
-                    'info' => 'Invalid interval'
-                ]),
-                400
-            );
-        }
-
         $timeInterval = TimeInterval::create($intervalData);
 
         //create screenshot
@@ -102,26 +68,6 @@ class TimeIntervalController extends ItemController
             'start_at' => 'date|required',
             'end_at' => 'date|required',
         ];
-    }
-
-    public function validateEndDate(array $intervalData): bool
-    {
-        $start_at = $intervalData['start_at'] ?? '';
-        $end_at_rules = [];
-        $timeOffset = 3600; /* one hour */
-        $beforeTimestamp = strtotime($start_at) + $timeOffset;
-        $beforeDate = date(DATE_ATOM, $beforeTimestamp);
-        $end_at_rules[] = new BetweenDate($start_at, $beforeDate);
-
-        $validator = Validator::make(
-            $intervalData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.create'),
-                ['end_at' => $end_at_rules]
-            )
-        );
-
-        return !$validator->fails();
     }
 
     /**
@@ -562,17 +508,6 @@ class TimeIntervalController extends ItemController
         }
 
         $item->fill($this->filterRequestData($requestData));
-        if (!$this->validateEndDate($requestData)) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid interval'
-                ]),
-                400
-            );
-        }
         $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
         $item->save();
 
