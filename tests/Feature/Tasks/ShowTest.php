@@ -4,6 +4,8 @@ namespace Tests\Feature\Tasks;
 
 use App\Models\Task;
 use App\Models\User;
+use Parsedown;
+use phpDocumentor\Reflection\DocBlock\Description;
 use Tests\Facades\TaskFactory;
 use Tests\Facades\UserFactory;
 use Tests\TestCase;
@@ -27,6 +29,8 @@ class ShowTest extends TestCase
     public function test_show(): void
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->only('id'));
+
+        $this->task->description = (new Parsedown())->text($this->task->description);
 
         $response->assertOk();
         $response->assertJson($this->task->toArray());
