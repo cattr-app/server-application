@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanySettings\UpdateCompanySettingsRequest;
+use App\Http\Resources\CompanySettings;
 use App\Models\Priority;
 use App\Services\CoreSettingsService;
 use Illuminate\Http\JsonResponse;
@@ -94,7 +95,7 @@ class CompanySettingsController extends Controller
      * @apiUse          UnauthorizedError
      *
      */
-    public function index(): JsonResponse
+    public function index(): CompanySettings
     {
         $settings = $this->settings->all();
         $priorities = $this->priorities->all();
@@ -102,10 +103,7 @@ class CompanySettingsController extends Controller
         $data = $settings;
         $data['internal_priorities'] = $priorities;
 
-        return new JsonResponse([
-            'success' => true,
-            'data' => $data,
-        ]);
+        return new CompanySettings($data);
     }
 
     /**
@@ -187,13 +185,14 @@ class CompanySettingsController extends Controller
      * @apiUse          UnauthorizedError
      *
      */
-    public function update(UpdateCompanySettingsRequest $request): JsonResponse
+    public function update(UpdateCompanySettingsRequest $request): CompanySettings
     {
         $settings = $this->settings->set($request->validated());
+        $priorities = $this->priorities->all();
 
-        return new JsonResponse([
-            'success' => true,
-            'data' => $settings,
-        ]);
+        $data = $settings;
+        $data['internal_priorities'] = $priorities;
+
+        return new CompanySettings($data);
     }
 }
