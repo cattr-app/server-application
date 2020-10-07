@@ -3,8 +3,6 @@
   "EventListener": true,
   "GitlabIntegration": true,
   "Invoices": true,
-  "JiraIntegration": true,
   "RedmineIntegration": true,
-  "Reports": true,
-  "TrelloIntegration": true
+  "Reports": true
 }
