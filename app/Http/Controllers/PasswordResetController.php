@@ -144,7 +144,7 @@ class PasswordResetController extends BaseController
 
         $this->recaptcha->clearCaptchaAmounts();
 
-        Password::broker()->sendResetLink($credentials);
+        Password::broker()->sendResetLink(['email' => $credentials['email']]);
 
         return new JsonResponse([
             'success' => true,
