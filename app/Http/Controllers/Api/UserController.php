@@ -401,7 +401,7 @@ class UserController extends ItemController
             foreach ($item->projectsRelation as $projectRole) {
                 if (!array_key_exists($projectRole->role_id, $sortedRoles)) {
                     $sortedRoles[$projectRole->role_id] = [
-                        'role' => $item->role,
+                        'role_id' => $projectRole->role_id,
                         'user_id' => $item->id,
                         'project_ids' => []
                     ];

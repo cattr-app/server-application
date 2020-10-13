@@ -69,9 +69,10 @@ class EditUserRequest extends FormRequest
             'computer_time_popup' => 'sometimes|required|int|min:1',
             'timezone' => 'sometimes|required|string',
             'role_id' => 'sometimes|required|int|exists:role,id',
-            'project_roles' => 'sometimes|required|array',
-            'projects_roles.*.project_ids.*.id' => 'sometimes|required|int|exists:projects,id',
-            'project_roles.*.role_id' => 'sometimes|required|int|exists:role,id',
+            'project_roles' => 'sometimes|present|array',
+            'project_roles.*.projects_ids.*' => 'required|array',
+            'projects_roles.*.project_ids.*.id' => 'required|int|exists:projects,id',
+            'project_roles.*.role_id' => 'required|int|exists:role,id',
             'type' => 'sometimes|required|string'
         ];
     }
