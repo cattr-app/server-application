@@ -17,8 +17,8 @@ class UserObserver
      */
     public function creating(User $user): void
     {
-        if (!$user->password && request()->input('send_invite')) {
-            $password = Str::random(16);
+        if (!$user->password || request('send_invite')) {
+            $password = request('password') ?? Str::random(16);
 
             $user->password = $password;
             $user->invitation_sent = true;
