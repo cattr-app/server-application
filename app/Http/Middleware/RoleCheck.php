@@ -67,9 +67,6 @@ class RoleCheck
             return $next($request);
         }
 
-        throw new AuthorizationException(
-            AuthorizationException::ERROR_TYPE_FORBIDDEN,
-            "Access denied to $object/$action/$id"
-        );
+        throw new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN);
     }
 }

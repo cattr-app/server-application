@@ -2,7 +2,6 @@
 
 namespace App\Exceptions\Entities;
 
-use App\Exceptions\Interfaces\InfoExtendedException;
 use App\Exceptions\Interfaces\TypedException;
 use Illuminate\Auth\Access\AuthorizationException as BaseAuthorizationException;
 use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
@@ -10,7 +9,6 @@ use Throwable;
 
 class AuthorizationException extends BaseAuthorizationException implements
     TypedException,
-    InfoExtendedException,
     HttpExceptionInterface
 {
     /**
@@ -47,9 +45,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      *    "success": false,
      *    "message": "Invalid captcha",
      *    "error_type": "authorization.captcha"
-     *    "info": {
-     *      "site_key": "6Le7R8IUAAAAAMCwR4b...."
-     *    }
      *  }
      *
      * @apiVersion 1.0.0
@@ -187,20 +182,13 @@ class AuthorizationException extends BaseAuthorizationException implements
     protected $type;
 
     /**
-     * @var mixed
-     */
-    protected $info;
-
-    /**
      * AuthorizationException constructor.
      * @param string $type
-     * @param string|array|null $info
      * @param Throwable|null $previous
      */
-    public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, $info = null, Throwable $previous = null)
+    public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, Throwable $previous = null)
     {
         $this->type = $type;
-        $this->info = $info;
 
         parent::__construct($this->getMessageByType(), $this->getStatusCode(), $previous);
     }
@@ -213,14 +201,6 @@ class AuthorizationException extends BaseAuthorizationException implements
     public function getStatusCode(): int
     {
         return self::ERRORS[$this->type]['code'];
-    }
-
-    /**
-     * @return mixed
-     */
-    public function getInfo()
-    {
-        return $this->info;
     }
 
     public function getType(): string

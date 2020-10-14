@@ -94,7 +94,7 @@ class LoginTest extends TestCase
 
         $response = $this->postJson(self::URI, $this->loginData);
 
-        $response->assertError(self::HTTP_TOO_MANY_REQUESTS, 'authorization.captcha', true);
+        $response->assertError(self::HTTP_TOO_MANY_REQUESTS, 'authorization.captcha');
     }
 
 //    public function test_ban(): void
