@@ -240,7 +240,7 @@ class Role extends Model
             }
         }
 
-        if (isset($projectID)) {
+        if (isset($projectID) && !is_array($projectID)) {
             // Get role of the user in the project
             $projectUserRelation = ProjectsUsers::where([
                 'project_id' => $projectID,
