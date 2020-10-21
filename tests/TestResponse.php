@@ -102,7 +102,7 @@ class TestResponse extends BaseTestResponse
 
     public function assertForbidden(
         string $type = AuthorizationException::ERROR_TYPE_FORBIDDEN,
-        bool $hasInfo = true
+        bool $hasInfo = false
     ): TestResponse {
         return $this->assertError(self::HTTP_FORBIDDEN, $type, $hasInfo);
     }
