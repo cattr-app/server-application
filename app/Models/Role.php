@@ -165,18 +165,12 @@ class Role extends Model
         if (!static::can($user, 'rules', 'full_access')) {
             throw_if(
                 $user->role_id === $rule->role_id,
-                new AuthorizationException(
-                    AuthorizationException::ERROR_TYPE_FORBIDDEN,
-                    'You cannot change your own privileges'
-                )
+                new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN)
             );
         }
         throw_if(
             $role_id === 1 && $object === 'rules' && $action === 'full_access',
-            new AuthorizationException(
-                AuthorizationException::ERROR_TYPE_FORBIDDEN,
-                'You cannot change rule management for root'
-            )
+            new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN)
         );
 
         $rule->allow = $allow;
