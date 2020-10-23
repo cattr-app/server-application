@@ -72,6 +72,7 @@ class UserFactory extends Factory
             'screenshots_interval' => 5,
             'active' => 1,
             'password' => $fullName,
+            'nonce' => 0,
         ];
     }
 
@@ -109,12 +110,12 @@ class UserFactory extends Factory
 
     protected function createTokens(): void
     {
-        $tokens = array_map(fn () => [
+        $tokens = array_map(fn() => [
             'token' => JWTAuth::fromUser($this->user),
             'expires_at' => now()->addDay()
         ], range(0, $this->tokensAmount));
 
-        $this->user->tokens()->createMany($tokens);
+        cache(["testing:{$this->user->id}:tokens" => $tokens]);
     }
 
     protected function assignRole(): void

@@ -27,7 +27,8 @@ class UpdateCompanySettingsRequest extends FormRequest
             'timezone' => 'sometimes|required|timezone',
             'language' => 'sometimes|required|string',
             'work_time' => 'sometimes|int',
-            'color' => 'present|array',
+            'color' => 'sometimes|present|array',
+            'auto_thinning' => 'sometimes|boolean',
         ];
     }
 }

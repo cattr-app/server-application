@@ -109,6 +109,8 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property int $web_and_app_monitoring
  * @property int $screenshots_interval
  * @property int $active
+ * @property int $nonce
+ * @property int $client_installed
  * @property string $password
  * @property string $timezone
  * @property string $user_language
@@ -122,7 +124,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property Task[]|Collection $tasks
  * @property TimeInterval[]|Collection $timeIntervals
  * @property Role $role
- * @property string|null $remember_token
  * @property int $change_password
  * @property bool $invitation_sent
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
@@ -204,6 +205,8 @@ class User extends Authenticatable implements JWTSubject
         'user_language',
         'type',
         'invitation_sent',
+        'nonce',
+        'client_installed'
     ];
 
     /**
@@ -231,6 +234,8 @@ class User extends Authenticatable implements JWTSubject
         'user_language' => 'string',
         'type' => 'string',
         'invitation_sent' => 'boolean',
+        'nonce' => 'integer',
+        'client_installed' => 'integer',
     ];
 
 
@@ -252,7 +257,7 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $hidden = [
         'password',
-        'remember_token',
+        'nonce',
     ];
 
     /**
@@ -272,7 +277,9 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims(): array
     {
-        return [];
+        return [
+            'nonce' => $this->nonce,
+        ];
     }
 
     /**
@@ -290,42 +297,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id')
             ->withPivot('role_id');
-    }
-
-    /**
-     * @param string $tokenString
-     * @return Token
-     */
-    public function addToken(string $tokenString): Token
-    {
-        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
-        /** @var Token $token */
-        $token = $this->tokens()->create(['token' => $tokenString, 'expires_at' => $tokenExpires]);
-        return $token;
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function tokens(): HasMany
-    {
-        return $this->hasMany(Token::class);
-    }
-
-    /**
-     * @param string $token
-     */
-    public function invalidateToken(string $token)
-    {
-        $this->tokens()->where('token', $token)->delete();
-    }
-
-    /**
-     * @param string|null $except
-     */
-    public function invalidateAllTokens(?string $except = null)
-    {
-        $this->tokens()->where('token', '!=', $except)->delete();
     }
 
     /**

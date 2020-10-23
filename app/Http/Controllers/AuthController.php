@@ -4,11 +4,12 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\RecaptchaHelper;
-use App\Models\Token;
-use Carbon\Carbon;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
+use Illuminate\Support\Str;
+use Psr\SimpleCache\InvalidArgumentException;
 use Validator;
 
 class AuthController extends BaseController
@@ -34,11 +35,11 @@ class AuthController extends BaseController
     public function __construct(RecaptchaHelper $recaptcha)
     {
         $this->recaptcha = $recaptcha;
-        $this->middleware('auth:api', ['except' => ['login']]);
+        $this->middleware('auth:api')->except(['login', 'authDesktopKey']);
     }
 
     /**
-     * @api            {post} /v1/auth/login Login
+     * @api            {post} /auth/login Login
      * @apiDescription Get user JWT
      *
      * @apiVersion     1.0.0
@@ -101,16 +102,21 @@ class AuthController extends BaseController
 
         $this->recaptcha->check($credentials);
 
-        if (!$newToken = auth()->setTTL(365 * 24 * 60)->attempt(['email' => $credentials['email'], 'password' =>
-            $credentials['password']])) {
+        if (!$newToken = auth()->setTTL(config('auth.lifetime_minutes.jwt'))->attempt([
+            'email' => $credentials['email'],
+            'password' =>
+                $credentials['password']
+        ])) {
             $this->recaptcha->incrementCaptchaAmounts();
             $this->recaptcha->check($credentials);
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
         $user = auth()->user();
-        if ($user && !$user->active) {
+        if (!$user || !$user->active) {
             $this->recaptcha->incrementCaptchaAmounts();
+
+            auth()->invalidate();
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
@@ -119,22 +125,18 @@ class AuthController extends BaseController
             $user->save();
         }
 
-        /** @var Token $token */
-        $token = $user->addToken($newToken);
-
         $this->recaptcha->clearCaptchaAmounts();
 
-        return new JsonResponse([
-            'success' => true,
-            'access_token' => $token->token,
-            'token_type' => 'bearer',
-            'expires_in' => Carbon::parse($token->expires_at)->toIso8601String(),
-            'user' => $user
-        ]);
+        if (preg_match('/' . config('auth.cattr-client-agent') . '/', $request->header('User_agent'))) {
+            $user->client_installed = 1;
+            $user->save();
+        }
+
+        return $this->respondWithToken($newToken);
     }
 
     /**
-     * @api            {post} /v1/auth/logout Logout
+     * @api            {post} /auth/logout Logout
      * @apiDescription Invalidate JWT
      *
      * @apiVersion     1.0.0
@@ -157,19 +159,17 @@ class AuthController extends BaseController
      * @apiUse         UnauthorizedError
      */
     /**
-     * @param Request $request
      * @return JsonResponse
      */
-    public function logout(Request $request): JsonResponse
+    public function logout(): JsonResponse
     {
-        $request->user()->invalidateToken($request->bearerToken());
         auth()->logout();
 
         return new JsonResponse(['success' => true, 'message' => 'Successfully logged out']);
     }
 
     /**
-     * @api            {post} /v1/auth/logout-from-all Logout from all
+     * @api            {post} /auth/logout-from-all Logout from all
      * @apiDescription Invalidate all user JWT
      *
      * @apiVersion     1.0.0
@@ -197,14 +197,17 @@ class AuthController extends BaseController
      */
     public function logoutFromAll(Request $request): JsonResponse
     {
-        $request->user()->invalidateAllTokens();
+        $user = $request->user();
+        ++$user->nonce;
+        $user->save();
+
         auth()->logout();
 
-        return new JsonResponse(['success' => true, 'message' => 'Successfully logged out from all sessions']);
+        return new JsonResponse(['success' => true, 'message' => 'Successfully reset all sessions']);
     }
 
     /**
-     * @api            {get} /v1/auth/me Me
+     * @api            {get} /auth/me Me
      * @apiDescription Get authenticated User Entity
      *
      * @apiVersion     1.0.0
@@ -256,7 +259,7 @@ class AuthController extends BaseController
     }
 
     /**
-     * @api            {post} /v1/auth/refresh Refresh
+     * @api            {post} /auth/refresh Refresh
      * @apiDescription Refreshes JWT
      *
      * @apiVersion     1.0.0
@@ -274,22 +277,140 @@ class AuthController extends BaseController
      * @apiUse         UnauthorizedError
      */
     /**
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function refresh(): JsonResponse
+    {
+        $token = auth()->setTTL(config('auth.lifetime_minutes.jwt'))->refresh();
+
+        return $this->respondWithToken($token);
+    }
+
+    /**
+     * @api            {get} /auth/desktop-key Issue key
+     * @apiDescription Issues key for desktop auth
+     *
+     * @apiVersion     1.0.0
+     * @apiName        Issue key
+     * @apiGroup       Auth
+     *
+     * @apiUse         AuthHeader
+     *
+     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
+     * @apiSuccess {String}   access_token  Token
+     * @apiSuccess {String}   token_type    Token Type
+     * @apiSuccess {String}   expires_in    Token TTL 8601String Date
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "access_token": "r6nPiGocAWdD5ZF60dTkUboVAWSXsUScpp7m9x9R",
+     *    "token_type": "desktop",
+     *    "expires_in": "2020-12-26T14:18:32+00:00"
+     *  }
+     *
+     * @apiUse         UnauthorizedError
+     */
+    /**
      * @param Request $request
      * @return JsonResponse
+     * @throws Exception
      */
-    public function refresh(Request $request): JsonResponse
+    public function issueDesktopKey(Request $request): JsonResponse
     {
-        $user = $request->user();
+        $token = Str::random(40);
 
-        $user->invalidateToken($request->bearerToken());
-        $token = auth()->refresh();
-        $token = $user->addToken($token);
+        $lifetime = now()->addMinutes(config('auth.lifetime_minutes.desktop_token'));
 
+        cache([
+            sha1($request->ip()) . ":$token" => $request->user()->id
+        ], $lifetime);
+
+        return $this->respondWithToken($token, 'desktop', config('auth.lifetime_minutes.desktop_token'));
+    }
+
+    /**
+     * @api            {post} /auth/desktop-key Key auth
+     * @apiDescription Exchange desktop key to JWT
+     *
+     * @apiVersion     1.0.0
+     * @apiName        Key auth
+     * @apiGroup       Auth
+     *
+     * @apiHeader {String} Desktop key for user auth
+     * @apiHeaderExample {json} Desktop Key Header Example
+     *  {
+     *    "Authorization": "desktop r6nPiGocAWdD5ZF60dTkUboVAWSXsUScpp7m9x9R"
+     *  }
+     *
+     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
+     * @apiSuccess {String}   access_token  Token
+     * @apiSuccess {String}   token_type    Token Type
+     * @apiSuccess {String}   expires_in    Token TTL 8601String Date
+     * @apiSuccess {Object}   user          User Entity
+     *
+     * @apiUse         UserObject
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "success": true,
+     *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
+     *    "token_type": "bearer",
+     *    "expires_in": "2020-12-26T14:18:32+00:00",
+     *    "user": {}
+     *  }
+     */
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     * @throws InvalidArgumentException
+     */
+    public function authDesktopKey(Request $request): JsonResponse
+    {
+        $token = $request->header('Authorization');
+
+        if (!$token) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        }
+
+        $token = explode(' ', $token);
+
+        if (count($token) !== 2 || $token[0] !== 'desktop' || !cache()->has(sha1($request->ip()) . ":$token[1]")) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        }
+
+        if (!auth()->byId(cache(sha1($request->ip()) . ":$token[1]")) || ((!$user = auth()->user()) && !$user->active)) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
+        }
+
+        return $this->respondWithToken(auth()->tokenById($user->id));
+    }
+
+    /**
+     * Helper for structuring answer with token
+     * @param string $token
+     * @param string $tokenType
+     * @param float|int $lifetime
+     * @return JsonResponse
+     */
+    private function respondWithToken(
+        string $token,
+        string $tokenType = 'bearer',
+        int $lifetime = null
+    ): JsonResponse {
         return new JsonResponse([
             'success' => true,
-            'access_token' => $token->token,
-            'token_type' => 'bearer',
-            'expires_in' => Carbon::parse($token->expires_at)->toIso8601String(),
+            'access_token' => $token,
+            'token_type' => $tokenType,
+            'expires_in' => now()->addMinutes($lifetime ?? config('auth.lifetime_minutes.jwt'))->toIso8601String(),
+            'user' => auth()->user(),
         ]);
     }
 
