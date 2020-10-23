@@ -70,7 +70,15 @@ class TaskCommentController extends ItemController
         $full_access = $user->allowed('task-comment', 'full_access');
 
         if (!$full_access) {
-            if ($item->task->user_id != $user->id) {
+            $userAssignedToTask = false;
+            foreach ($item->task->users as $taskUser) {
+                if ($taskUser->id == $user->id) {
+                    $userAssignedToTask = true;
+                    break;
+                }
+            }
+
+            if (!$userAssignedToTask) {
                 return new JsonResponse([
                     'success' => false,
                     'error_type' => 'authorization.forbidden',

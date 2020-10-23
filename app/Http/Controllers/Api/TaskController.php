@@ -6,6 +6,7 @@ use Exception;
 use Filter;
 use App\Models\Role;
 use App\Models\Task;
+use App\Models\TaskUsers;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -13,6 +14,8 @@ use Auth;
 use DB;
 use Parsedown;
 use Route;
+use Event;
+use Validator;
 
 class TaskController extends ItemController
 {
@@ -27,7 +30,8 @@ class TaskController extends ItemController
             'project_id' => 'exists:projects,id|required',
             'task_name' => 'required',
             'active' => 'required',
-            'user_id' => 'exists:users,id|required',
+            'users' => 'array',
+            'users.*' => 'exists:users,id',
             'priority_id' => 'exists:priorities,id|required',
         ];
     }
@@ -198,6 +202,55 @@ class TaskController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    public function create(Request $request): JsonResponse
+    {
+        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        /** @var Model $cls */
+        $cls = $this->getItemClass();
+
+        Event::dispatch($this->getEventUniqueName('item.create.before'), $requestData);
+
+        $item = Filter::process(
+            $this->getEventUniqueName('item.create'),
+            $cls::create($this->filterRequestData($requestData))
+        );
+
+        if (!empty($requestData['users'])) {
+            foreach ($requestData['users'] as $userId) {
+                TaskUsers::create([
+                    'task_id' => $item->id,
+                    'user_id' => $userId,
+                ]);
+            }
+        }
+
+        Event::dispatch($this->getEventUniqueName('item.create.after'), [$item, $requestData]);
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
+                'success' => true,
+                'res' => $item,
+            ])
+        );
+    }
 
     /**
      * @api             {post} /v1/tasks/show Show
@@ -324,6 +377,104 @@ class TaskController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
+    public function edit(Request $request): JsonResponse
+    {
+        $requestData = Filter::process(
+            $this->getEventUniqueName('request.item.edit'),
+            $request->all()
+        );
+
+        $validationRules = $this->getValidationRules();
+        $validationRules['id'] = ['required'];
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.edit'),
+                $validationRules
+            )
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors()
+                ]),
+                400
+            );
+        }
+
+        if (!is_int($request->get('id'))) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => 'Invalid id'
+                ]),
+                400
+            );
+        }
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery()
+            )
+        );
+
+        /** @var Model $item */
+        $item = collect($itemsQuery->get())->first(static function ($val, $key) use ($request) {
+            return $val['id'] === $request->get('id');
+        });
+
+        if (!$item) {
+            /** @var Model $cls */
+            $cls = $this->getItemClass();
+            if ($cls::find($request->get('id')) !== null) {
+                return new JsonResponse(
+                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                        'success' => false,
+                        'error_type' => 'authorization.forbidden',
+                        'message' => 'Access denied to this item',
+                    ]),
+                    403
+                );
+            }
+
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'success' => false,
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found',
+                ]),
+                404
+            );
+        }
+
+        Event::dispatch($this->getEventUniqueName('item.edit.before'), [$item, $requestData]);
+
+        $item->fill($this->filterRequestData($requestData));
+        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
+        $item->save();
+
+        if (!empty($requestData['users'])) {
+            $item->users()->sync($requestData['users']);
+        }
+
+        Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'success' => true,
+                'res' => $item,
+            ])
+        );
+    }
 
     /**
      * @api             {post} /v1/tasks/remove Destroy

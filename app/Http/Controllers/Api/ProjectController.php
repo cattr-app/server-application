@@ -613,7 +613,7 @@ class ProjectController extends ItemController
                 $query->when(
                     $action !== 'edit' && $action !== 'remove',
                     static function (Builder $query) use ($user_id) {
-                        $query->orWhereHas('tasks', static function (Builder $query) use ($user_id) {
+                        $query->orWhereHas('tasks.usersRelation', static function (Builder $query) use ($user_id) {
                             $query->where('user_id', $user_id)->select('user_id');
                         });
 

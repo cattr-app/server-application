@@ -6,6 +6,7 @@ use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -26,7 +27,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @apiSuccess {ISO8601}  task.updated_at     Update DateTime
  * @apiSuccess {ISO8601}  task.deleted_at     Delete DateTime or `NULL` if wasn't deleted
  * @apiSuccess {Array}    task.timeIntervals  Time intervals of the task
- * @apiSuccess {Array}    task.user           Linked users
+ * @apiSuccess {Array}    task.users          Linked users
  * @apiSuccess {Array}    task.assigned       Users, that assigned this task
  * @apiSuccess {Array}    task.project        The project that task belongs to
  * @apiSuccess {Object}   task.priority       Task priority
@@ -50,7 +51,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @apiParam {ISO8601}  [updated_at]     Update DateTime
  * @apiParam {ISO8601}  [deleted_at]     Delete DateTime
  * @apiParam {Array}    [timeIntervals]  Time intervals of the task
- * @apiParam {Array}    [user]           Linked users
+ * @apiParam {Array}    [users]          Linked users
  * @apiParam {Array}    [assigned]       Users, that assigned this task
  * @apiParam {Array}    [project]        The project that task belongs to
  * @apiParam {Object}   [priority]       Task priority
@@ -75,7 +76,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property string $deleted_at
  * @property bool $important
  * @property TimeInterval[] $timeIntervals
- * @property User $user
+ * @property User[] $users
  * @property User $assigned
  * @property Project $project
  * @property Priority $priority
@@ -176,9 +177,17 @@ class Task extends Model
         return $this->belongsTo(Project::class, 'project_id');
     }
 
-    public function user(): BelongsTo
+    /**
+     * @return HasMany
+     */
+    public function usersRelation(): HasMany
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->hasMany(TaskUsers::class, 'task_id', 'id');
+    }
+
+    public function users(): BelongsToMany
+    {
+        return $this->belongsToMany(User::class, 'tasks_users', 'task_id', 'user_id');
     }
 
     public function assigned(): BelongsTo

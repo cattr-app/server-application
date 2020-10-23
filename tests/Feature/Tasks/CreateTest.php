@@ -26,7 +26,7 @@ class CreateTest extends TestCase
 
         $this->taskData = array_merge(TaskFactory::createRandomModelData(), [
             'project_id' => ProjectFactory::create()->id,
-            'user_id' => UserFactory::create()->id
+            //'user_id' => UserFactory::create()->id
         ]);
     }
 
