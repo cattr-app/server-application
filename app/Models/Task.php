@@ -66,21 +66,21 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property int $user_id
  * @property int $assigned_by
  * @property int $priority_id
+ * @property int $active
  * @property string $task_name
  * @property string $description
- * @property int $active
  * @property string $url
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
- * @property TimeInterval[] $timeIntervals
  * @property User $user
  * @property User $assigned
  * @property Project $project
  * @property Priority $priority
+ * @property TimeInterval[] $timeIntervals
+ * @property-read int|null $time_intervals_count
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|Task onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|Task whereActive($value)
  * @method static EloquentBuilder|Task whereAssignedBy($value)
@@ -95,6 +95,10 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Task whereUpdatedAt($value)
  * @method static EloquentBuilder|Task whereUrl($value)
  * @method static EloquentBuilder|Task whereUserId($value)
+ * @method static EloquentBuilder|Task newModelQuery()
+ * @method static EloquentBuilder|Task newQuery()
+ * @method static EloquentBuilder|Task query()
+ * @method static QueryBuilder|Task onlyTrashed()
  * @method static QueryBuilder|Task withTrashed()
  * @method static QueryBuilder|Task withoutTrashed()
  * @mixin EloquentIdeHelper

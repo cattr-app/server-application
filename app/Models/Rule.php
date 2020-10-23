@@ -864,17 +864,18 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 
 /**
+ * App\Models\Rule
+ *
  * @property int $id
  * @property int $role_id
  * @property string $object
  * @property string $action
- * @property bool $allow
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ * @property bool $allow
  * @property Role $role
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|Rule onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|Rule whereAction($value)
  * @method static EloquentBuilder|Rule whereAllow($value)
@@ -884,6 +885,10 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Rule whereObject($value)
  * @method static EloquentBuilder|Rule whereRoleId($value)
  * @method static EloquentBuilder|Rule whereUpdatedAt($value)
+ * @method static EloquentBuilder|Rule newModelQuery()
+ * @method static EloquentBuilder|Rule newQuery()
+ * @method static EloquentBuilder|Rule query()
+ * @method static QueryBuilder|Rule onlyTrashed()
  * @method static QueryBuilder|Rule withTrashed()
  * @method static QueryBuilder|Rule withoutTrashed()
  * @mixin EloquentIdeHelper

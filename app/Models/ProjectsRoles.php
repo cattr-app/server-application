@@ -8,6 +8,8 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * App\Models\ProjectsRoles
+ *
  * @property int $project_id
  * @property int $role_id
  * @property string $created_at
@@ -18,6 +20,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static EloquentBuilder|ProjectsRoles whereProjectId($value)
  * @method static EloquentBuilder|ProjectsRoles whereRoleId($value)
  * @method static EloquentBuilder|ProjectsRoles whereUpdatedAt($value)
+ * @method static EloquentBuilder|ProjectsRoles newModelQuery()
+ * @method static EloquentBuilder|ProjectsRoles newQuery()
+ * @method static EloquentBuilder|ProjectsRoles query()
  * @mixin EloquentIdeHelper
  */
 class ProjectsRoles extends Model

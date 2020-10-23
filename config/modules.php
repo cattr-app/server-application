@@ -1,5 +1,6 @@
 <?php
 
+use App\Services\ModuleActivatorService;
 use Nwidart\Modules\Activators\FileActivator;
 
 return [
@@ -200,7 +201,12 @@ return [
             'cache-key' => 'activator.installed',
             'cache-lifetime' => 604800,
         ],
+        'amazing' => [
+            'class' => ModuleActivatorService::class,
+            'file_name' => 'modules',
+            'cache_key' => 'modules.active',
+        ],
     ],
 
-    'activator' => 'file',
+    'activator' => env('MODULES_ACTIVATOR_NAME', 'amazing'),
 ];

@@ -43,6 +43,8 @@ use Throwable;
  */
 
 /**
+ * App\Models\Role
+ *
  * @property int $id
  * @property string $name
  * @property string $created_at
@@ -50,15 +52,21 @@ use Throwable;
  * @property string $deleted_at
  * @property User[] $users
  * @property Rule[] $rules
+ * @property-read int|null $projects_count
+ * @property-read int|null $rules_count
+ * @property-read int|null $users_count
  * @property-read Collection|Project[] $projects
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|Role onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|Role whereCreatedAt($value)
  * @method static EloquentBuilder|Role whereDeletedAt($value)
  * @method static EloquentBuilder|Role whereId($value)
  * @method static EloquentBuilder|Role whereName($value)
  * @method static EloquentBuilder|Role whereUpdatedAt($value)
+ * @method static EloquentBuilder|Role newModelQuery()
+ * @method static EloquentBuilder|Role newQuery()
+ * @method static EloquentBuilder|Role query()
+ * @method static QueryBuilder|Role onlyTrashed()
  * @method static QueryBuilder|Role withTrashed()
  * @method static QueryBuilder|Role withoutTrashed()
  * @mixin EloquentIdeHelper

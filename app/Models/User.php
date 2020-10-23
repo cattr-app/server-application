@@ -95,13 +95,9 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
 /**
+ * App\Models\User
+ *
  * @property int $id
- * @property string $full_name
- * @property string $email
- * @property string $url
- * @property int $company_id
- * @property string $level
- * @property string $avatar
  * @property int $screenshots_active
  * @property int $manual_time
  * @property int $computer_time_popup
@@ -111,6 +107,15 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property int $active
  * @property int $nonce
  * @property int $client_installed
+ * @property int $company_id
+ * @property int $role_id
+ * @property int $change_password
+ * @property string $full_name
+ * @property string $email
+ * @property string $url
+ * @property string $level
+ * @property string $type
+ * @property string $avatar
  * @property string $password
  * @property string $timezone
  * @property string $user_language
@@ -119,19 +124,22 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property string $deleted_at
  * @property bool $is_admin
  * @property bool $important
- * @property int $role_id
+ * @property bool $invitation_sent
+ * @property Role $role
+ * @property string|null $remember_token
  * @property Project[]|Collection $projects
  * @property Task[]|Collection $tasks
  * @property TimeInterval[]|Collection $timeIntervals
- * @property Role $role
- * @property int $change_password
- * @property bool $invitation_sent
+ * @property-read int|null $notifications_count
+ * @property-read int|null $projects_count
+ * @property-read int|null $projects_relation_count
+ * @property-read int|null $properties_count
+ * @property-read int|null $tasks_count
+ * @property-read int|null $time_intervals_count
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
  * @property-read Collection|ProjectsUsers[] $projectsRelation
  * @property-read Collection|Property[] $properties
- * @property-read Collection|Token[] $tokens
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|User onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|User whereActive($value)
  * @method static EloquentBuilder|User whereAvatar($value)
@@ -155,6 +163,15 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static EloquentBuilder|User whereUpdatedAt($value)
  * @method static EloquentBuilder|User whereUrl($value)
  * @method static EloquentBuilder|User whereWebAndAppMonitoring($value)
+ * @method static EloquentBuilder|User newModelQuery()
+ * @method static EloquentBuilder|User whereInvitationSent($value)
+ * @method static EloquentBuilder|User whereIsAdmin($value)
+ * @method static EloquentBuilder|User whereRoleId($value)
+ * @method static EloquentBuilder|User whereType($value)
+ * @method static EloquentBuilder|User whereUserLanguage($value)
+ * @method static EloquentBuilder|User newQuery()
+ * @method static EloquentBuilder|User query()
+ * @method static QueryBuilder|User onlyTrashed()
  * @method static QueryBuilder|User withTrashed()
  * @method static QueryBuilder|User withoutTrashed()
  * @mixin EloquentIdeHelper
