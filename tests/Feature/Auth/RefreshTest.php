@@ -9,6 +9,7 @@ use Tests\TestCase;
 class RefreshTest extends TestCase
 {
     private const URI = 'auth/refresh';
+    private const TEST_URI = 'auth/me';
 
     private User $user;
 
@@ -21,13 +22,18 @@ class RefreshTest extends TestCase
 
     public function test_refresh(): void
     {
-        $token = $this->user->tokens()->first()->token;
-        $this->assertDatabaseHas('tokens', ['token' => $token]);
+        $token = cache("testing:{$this->user->id}:tokens");
 
-        $response = $this->actingAs($this->user)->postJson(self::URI);
+        $this->assertNotEmpty($token);
+        $this->assertNotEmpty($token[0]);
+        $this->assertNotEmpty($token[0]['token']);
+
+        $this->actingAs($token[0]['token'])->get(self::TEST_URI)->assertSuccess();
+
+        $response = $this->actingAs($token[0]['token'])->postJson(self::URI);
 
         $response->assertSuccess();
-        $this->assertDatabaseMissing('tokens', ['token' => $token]);
-        $this->assertDatabaseHas('tokens', ['token' => $response->decodeResponseJson('access_token')]);
+
+        $this->actingAs($token[0]['token'])->get(self::TEST_URI)->assertUnauthorized();
     }
 }

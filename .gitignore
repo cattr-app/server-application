@@ -37,6 +37,8 @@ modules_statuses.json
 cghooks.lock
 
 /storage/framework/tmp
+!/storage/framework/cache/.gitkeep
+/storage/framework/cache/*
 
 Modules/*
 !Modules/.gitkeep

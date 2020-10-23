@@ -6,10 +6,6 @@ use App;
 use App\Http\Controllers\DemoScreenshotControllerStrategy;
 use App\Http\Controllers\ScreenshotControllerStrategy;
 use App\Http\Controllers\ScreenshotControllerStrategyInterface;
-use App\Models\Invitation;
-use App\Models\User;
-use App\Observers\InvitationObserver;
-use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -36,8 +32,9 @@ class AppServiceProvider extends ServiceProvider
             App\Services\SettingsService::class
         );
 
-        User::observe(UserObserver::class);
-        Invitation::observe(InvitationObserver::class);
+        App\Models\User::observe(App\Observers\UserObserver::class);
+        App\Models\Invitation::observe(App\Observers\InvitationObserver::class);
+        App\Models\Screenshot::observe(App\Observers\ScreenshotObserver::class);
     }
 
     /**

@@ -2,9 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Console\Commands\RotateScreenshots;
 use App\Helpers\ModuleHelper;
+use App\Helpers\StorageCleanerHelper;
 use App\Helpers\Version;
 use App\Models\Property;
+use Artisan;
 use Exception;
 use GuzzleHttp\Client;
 use Illuminate\Http\JsonResponse;
@@ -136,5 +139,31 @@ class AboutController extends Controller
                 'message' => $imageInfo['flashMessage'],
             ]
         ]);
+    }
+
+    public function storage(): JsonResponse
+    {
+        return response()->json([
+            'success' => true,
+            'space' => [
+                'left' => StorageCleanerHelper::getFreeSpace(),
+                'used' => StorageCleanerHelper::getUsedSpace(),
+                'total' => config('cleaner.total_space'),
+            ],
+            'threshold' => config('cleaner.threshold'),
+            'need_thinning' => StorageCleanerHelper::needThinning(),
+            'screenshots_available' => StorageCleanerHelper::countAvailableScreenshots(),
+            'thinning' => [
+                'now' => cache('thinning_now'),
+                'last' => cache('last_thin'),
+            ]
+        ]);
+    }
+
+    public function startStorageClean(): JsonResponse
+    {
+        Artisan::queue(RotateScreenshots::class);
+
+        return response()->json(['success' => true, 'message' => 'Ok']);
     }
 }

@@ -4,6 +4,8 @@ namespace App\Services;
 
 use App\Contracts\Settings as SettingsInterface;
 use App\Models\Setting;
+use Exception;
+use RuntimeException;
 
 class SettingsService implements SettingsInterface
 {
@@ -11,6 +13,8 @@ class SettingsService implements SettingsInterface
      * @var Setting
      */
     protected Setting $model;
+
+    protected string $scope = '';
 
     /**
      * SettingsService constructor.
@@ -21,30 +25,69 @@ class SettingsService implements SettingsInterface
         $this->model = $setting;
     }
 
+    public function scope(string $moduleName): SettingsService
+    {
+        $this->scope = $moduleName;
+
+        return $this;
+    }
+
     /**
      * Get all settings.
      *
      * @param string $moduleName
      * @return mixed
+     * @throws Exception
      */
-    public function all(string $moduleName): array
+    public function all(string $moduleName = null): array
     {
-        return $this->prepareCollection($this->model->where(['module_name' => $moduleName])->get());
+        if ($moduleName === null && $this->scope === '') {
+            throw new RuntimeException('Scope for settings is missing');
+        }
+
+        $scope = $moduleName ?? $this->scope;
+
+        $this->scope = '';
+
+        return cache()->rememberForever("settings:$scope", function () use ($scope) {
+            return $this->prepareCollection($this->model->where(['module_name' => $scope])->get());
+        });
     }
 
     /**
      * Get the settings value by key.
      *
      * @param string $moduleName
-     * @param string $key
-     * @param null $default
-     * @return |null
+     * @param mixed $key
+     * @param mixed $default
+     * @return mixed|null
+     * @throws Exception
      */
-    public function get(string $moduleName, string $key, $default = null)
+    public function get(string $moduleName, $key = null, $default = null)
     {
-        $setting = $this->model->where(['module_name' => $moduleName, 'key' => $key])->get()->first();
+        if ($this->scope !== '') {
+            $scope = $this->scope;
+            $_key = $moduleName;
+            $_default = $key;
+        } else {
+            $scope = $moduleName;
+            $_key = $key;
+            $_default = $default;
+        }
 
-        return optional($setting)->value ?? $default;
+        $this->scope = '';
+
+        $cached = cache("settings:$scope");
+
+        if (!isset($cached[$_key])) {
+            $setting = $this->model->where(['module_name' => $scope, 'key' => $_key])->get()->first();
+
+            $cached[$_key] = optional($setting)->value ?? $_default;
+
+            cache(["settings:$scope" => $cached]);
+        }
+
+        return $cached[$_key];
     }
 
     /**
@@ -52,20 +95,33 @@ class SettingsService implements SettingsInterface
      *
      * An key value array can be passed as key.
      *
-     * @param string $moduleName
-     * @param $key
-     * @param null $value
+     * @param mixed $moduleName
+     * @param mixed $key
+     * @param mixed $value
      * @return array
+     * @throws Exception
      */
-    public function set(string $moduleName, $key, $value = null): array
+    public function set($moduleName, $key, $value = null): array
     {
-        if (is_array($key)) {
+        if ($this->scope !== '') {
+            $scope = $this->scope;
+            $_key = $moduleName;
+            $_value = $key;
+        } else {
+            $scope = $moduleName;
+            $_key = $key;
+            $_value = $value;
+        }
+
+        $this->scope = '';
+
+        if (is_array($_key)) {
             $settings = [];
 
-            foreach ($key as $_key => $_value) {
+            foreach ($_key as $__key => $_value) {
                 $setting = $this->model->updateOrCreate([
-                    'module_name' => $moduleName,
-                    'key' => $_key,
+                    'module_name' => $scope,
+                    'key' => $__key,
                 ], [
                     'value' => $_value
                 ]);
@@ -73,17 +129,36 @@ class SettingsService implements SettingsInterface
                 $settings = array_merge($settings, $this->prepare($setting));
             }
 
+            cache()->forget("settings:$scope");
             return $settings;
         }
 
         $setting = $this->model->updateOrCreate([
-            'module_name' => $moduleName,
-            'key' => $key,
+            'module_name' => $scope,
+            'key' => $_key,
         ], [
-            'value' => $value
+            'value' => $_value
         ]);
 
+        cache()->forget("settings:$scope");
         return $this->prepare($setting);
+    }
+
+    /**
+     * @param string $moduleName
+     * @throws Exception
+     */
+    public function flush(string $moduleName): void
+    {
+        if ($moduleName === null && $this->scope === '') {
+            throw new RuntimeException('Scope for settings is missing');
+        }
+
+        $scope = $moduleName ?? $this->scope;
+
+        $this->scope = '';
+
+        cache()->forget("settings:$scope");
     }
 
     /**

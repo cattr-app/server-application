@@ -89,11 +89,22 @@ abstract class TestCase extends BaseTestCase
     public const HTTP_NOT_EXTENDED = 510;
     public const HTTP_NETWORK_AUTHENTICATION_REQUIRED = 511;
 
-    public function actingAs(UserContract $user, $driver = null): self
+    public function actingAs($user, $driver = null, int $tokenOffset = 0): self
     {
-        /** @var User $user */
-        $token = $user->tokens()->first()->token;
-        $this->withHeader('Authorization', 'Bearer ' . $token);
+        $token = '';
+
+        if (!is_string($user)) {
+            $tokens = cache("testing:{$user->id}:tokens");
+
+            if ($tokens && isset($tokens[$tokenOffset])) {
+                $token = $tokens[$tokenOffset]['token'];
+            }
+        } else {
+            $token = $user;
+        }
+
+        $this->withHeader('Authorization', "Bearer $token");
+
         return $this;
     }
 

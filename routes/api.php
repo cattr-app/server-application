@@ -48,6 +48,9 @@ Route::group([
 
     $router->get('register/{key}', 'RegistrationController@getForm');
     $router->post('register/{key}', 'RegistrationController@postForm');
+
+    $router->get('desktop-key', 'AuthController@issueDesktopKey');
+    $router->put('desktop-key', 'AuthController@authDesktopKey');
 });
 
 Route::get('status', 'StatusController@index');
@@ -148,6 +151,8 @@ Route::group([
 
     // About
     $router->get('about', 'Api\AboutController');
+    $router->get('about/storage', 'Api\AboutController@storage');
+    $router->post('about/storage', 'Api\AboutController@startStorageClean');
 
     //Company settings
     $router->get('company-settings', 'Api\CompanySettingsController@index');

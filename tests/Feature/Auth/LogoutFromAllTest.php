@@ -10,6 +10,7 @@ use Tests\TestCase;
 class LogoutFromAllTest extends TestCase
 {
     private const URI = 'auth/logout-from-all';
+    private const TEST_URI = 'auth/me';
 
     private User $user;
 
@@ -22,19 +23,19 @@ class LogoutFromAllTest extends TestCase
 
     public function test_logout_from_all(): void
     {
-        $tokens = $this->user->tokens()->get()->toArray();
+        $tokens = cache("testing:{$this->user->id}:tokens");
 
         $this->assertNotEmpty($tokens);
 
         foreach ($tokens as $token) {
-            $this->assertDatabaseHas('tokens', $token);
+            $this->actingAs($token['token'])->get(self::TEST_URI)->assertSuccess();
         }
 
-        $response = $this->actingAs($this->user)->postJson(self::URI);
+        $response = $this->actingAs($tokens[0]['token'])->postJson(self::URI);
         $response->assertSuccess();
 
         foreach ($tokens as $token) {
-            $this->assertDatabaseMissing('tokens', $token);
+            $this->actingAs($token['token'])->get(self::TEST_URI)->assertUnauthorized();
         }
     }
 

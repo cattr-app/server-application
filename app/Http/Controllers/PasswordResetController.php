@@ -237,18 +237,14 @@ class PasswordResetController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        $tokenString = auth()->refresh();
-        /** @var User $user */
-        $user = auth()->user();
-
-        $token = $user->addToken($tokenString);
+        $token = auth()->setTTL(config('auth.lifetime_minutes.jwt'))->refresh();
 
         return new JsonResponse([
             'success' => true,
-            'access_token' => $token->token,
+            'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => $token->expires_at,
-            'user' => $user
+            'expires_in' => now()->addMinutes(config('auth.lifetime_minutes.jwt'))->toIso8601String(),
+            'user' => auth()->user(),
         ]);
     }
 }
