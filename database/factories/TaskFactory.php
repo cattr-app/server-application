@@ -1,24 +1,39 @@
 <?php
 
-/** @var Factory $factory */
+namespace Database\Factories;
 
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
-use Faker\Generator as Faker;
-use Illuminate\Database\Eloquent\Factory;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-$factory->define(Task::class, static function (Faker $faker) {
-    $projectId = Project::first()->id;
-    $userId = User::where(['email' => 'admin@example.com'])->first()->id;
+class TaskFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = Task::class;
 
-    return [
-        'project_id' => $projectId,
-        'task_name' => $faker->unique()->text,
-        'description' => $faker->unique()->text,
-        'active' => true,
-        'user_id' => $userId,
-        'assigned_by' => $userId,
-        'priority_id' => 2, // Normal
-    ];
-});
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition(): array
+    {
+        $projectId = Project::first()->id;
+        $userId = User::where(['email' => 'admin@example.com'])->first()->id;
+
+        return [
+            'project_id' => $projectId,
+            'task_name' => $this->faker->unique()->text,
+            'description' => $this->faker->unique()->text,
+            'active' => true,
+            'user_id' => $userId,
+            'assigned_by' => $userId,
+            'priority_id' => 2, // Normal
+        ];
+    }
+}

@@ -29,7 +29,7 @@ class StatusController extends Controller
      *    "cat": "(=ㅇ༝ㅇ=)"
      *  }
      */
-    public function index(): JsonResponse
+    public function __invoke(): JsonResponse
     {
         return new JsonResponse([
             'success' => true,
