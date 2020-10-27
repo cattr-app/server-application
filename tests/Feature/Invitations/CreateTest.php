@@ -53,7 +53,7 @@ class CreateTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->invitationRequestData);
 
-        $this->assertDatabaseHas((new Invitation)->getTable(), $response->decodeResponseJson('res')[0]);
+        $this->assertDatabaseHas((new Invitation)->getTable(), $response->decodeResponseJson()['res'][0]);
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->invitationRequestData);
 

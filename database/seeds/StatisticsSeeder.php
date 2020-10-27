@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\Project;
 use App\Models\ProjectsUsers;
 use App\Models\Role;

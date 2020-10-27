@@ -26,8 +26,6 @@ server{
   location /api {
     root '$project_path/backend/public';
 
-    rewrite ^/api/(.+)$ /$1 break;
-
     try_files $uri $uri/ /api/index.php?$query_string;
 
     client_max_body_size 12M;

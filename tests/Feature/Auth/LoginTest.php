@@ -36,7 +36,7 @@ class LoginTest extends TestCase
         $response = $this->postJson(self::URI, $this->loginData);
         $response->assertSuccess();
 
-        $this->actingAs($response->decodeResponseJson('access_token'))->get(self::TEST_URI)->assertSuccess();
+        $this->actingAs($response->decodeResponseJson()['access_token'])->get(self::TEST_URI)->assertSuccess();
     }
 
     public function test_wrong_credentials(): void

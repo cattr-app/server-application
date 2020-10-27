@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\Rule;
 use App\Models\Role;
 use Illuminate\Database\Seeder;

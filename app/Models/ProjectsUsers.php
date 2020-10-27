@@ -4,7 +4,6 @@ namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -105,9 +104,11 @@ class ProjectsUsers extends Model
         return $this->belongsTo(Role::class, 'role_id');
     }
 
-    protected function setKeysForSaveQuery(Builder $query): EloquentBuilder
+    protected function setKeysForSaveQuery($query): Builder
     {
-        return $query->where('project_id', '=', $this->getAttribute('project_id'))
+        $query->where('project_id', '=', $this->getAttribute('project_id'))
             ->where('user_id', '=', $this->getAttribute('user_id'));
+
+        return $query;
     }
 }

@@ -15,13 +15,13 @@
         "fzaninotto/faker": "^1.9",
         "intervention/image": "^2.5",
         "joshbrw/laravel-module-installer": "^0.1.4",
-        "laravel/framework": "^7.0.8",
-        "laravel/telescope": "^3.1.1",
+        "laravel/framework": "^8.0",
+        "laravel/telescope": "^4.0",
         "laravel/tinker": "^2.0",
-        "nwidart/laravel-modules": "^6.2",
+        "nwidart/laravel-modules": "^8",
         "php-http/guzzle6-adapter": "^2.0",
         "predis/predis": "^1.1",
-        "sentry/sentry-laravel": "^1.5",
+        "sentry/sentry-laravel": "^2.1",
         "tymon/jwt-auth": "^1.0",
         "webpatser/laravel-uuid": "^3.0",
         "wikimedia/composer-merge-plugin": "^1.4"
@@ -36,12 +36,11 @@
         "squizlabs/php_codesniffer": "3.*"
     },
     "autoload": {
-        "classmap": [
-            "database"
-        ],
         "psr-4": {
             "App\\": "app/",
-            "Modules\\": "Modules/"
+            "Modules\\": "Modules/",
+            "Database\\Factories\\": "database/factories/",
+            "Database\\Seeders\\": "database/seeds/"
         }
     },
     "scripts": {
