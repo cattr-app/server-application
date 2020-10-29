@@ -67,7 +67,7 @@ class ProjectsRoles extends Model
         return $this->belongsTo(Project::class, 'project_id');
     }
 
-    protected function setKeysForSaveQuery(EloquentBuilder $query): EloquentBuilder
+    protected function setKeysForSaveQuery($query): EloquentBuilder
     {
         return $query->where('project_id', '=', $this->getAttribute('project_id'))
             ->where('role_id', '=', $this->getAttribute('role_id'));

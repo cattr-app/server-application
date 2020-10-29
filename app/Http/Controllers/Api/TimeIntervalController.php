@@ -669,8 +669,10 @@ class TimeIntervalController extends ItemController
         $foundIds = $itemsQuery->pluck('id')->toArray();
         $notFoundIds = array_diff($intervalsData->pluck('id')->toArray(), $foundIds);
 
-        $itemsQuery->each(static function (Model $item) use ($intervalsData) {
-            $item->update(Arr::only($intervalsData->where('id', $item->id)->first(), 'task_id'));
+        $itemsQuery->each(function (Model $item) use ($intervalsData) {
+            $item->task_id = $intervalsData->where('id', $item->id)->first()['task_id'];
+            $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
+            $item->save();
         });
 
         $responseData = [

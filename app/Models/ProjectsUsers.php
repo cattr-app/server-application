@@ -112,7 +112,9 @@ class ProjectsUsers extends Model
 
     protected function setKeysForSaveQuery($query): EloquentBuilder
     {
-        return $query->where('project_id', '=', $this->getAttribute('project_id'))
+        $query->where('project_id', '=', $this->getAttribute('project_id'))
             ->where('user_id', '=', $this->getAttribute('user_id'));
+
+        return $query;
     }
 }
