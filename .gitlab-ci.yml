@@ -17,9 +17,9 @@ integration_testing:
     - apk add --no-cache $PHPIZE_DEPS
     - pecl install xdebug
     - docker-php-ext-enable xdebug
-    - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.16
   script:
-    - composer install
+    - COMPOSER_MEMORY_LIMIT=-1 composer install
     - cp .env.testing.example .env.testing
     - cp modules_statuses.example.json modules_statuses.json
     - php artisan migrate --env=testing

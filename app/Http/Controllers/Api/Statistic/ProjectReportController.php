@@ -82,7 +82,7 @@ class ProjectReportController extends ReportController
             ->tz('UTC')
             ->toDateTimeString();
 
-        $pids = $pids ?? Project::getUserRelatedProjectIds(request()->user());
+        $pids = $pids ?? Project::all();
 
 
         $collection = $this->reportHelper->getProjectReportQuery(
@@ -108,7 +108,7 @@ class ProjectReportController extends ReportController
     }
 
     /**
-     * @api             {get,post} /v1/project-report/list List
+     * @api             {get,post} /project-report/list List
      * @apiDescription  Get report
      *
      * @apiVersion      1.0.0
@@ -212,7 +212,7 @@ class ProjectReportController extends ReportController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {get,post} /v1/time-duration/list Days
+     * @api             {get,post} /time-duration/list Days
      * @apiDescription  Get report for days
      *
      * @apiVersion      1.0.0
@@ -224,7 +224,7 @@ class ProjectReportController extends ReportController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {get,post} /v1/project-report/projects Projects
+     * @api             {get,post} /project-report/projects Projects
      * @apiDescription  Get report for projects
      *
      * @apiVersion      1.0.0
@@ -297,7 +297,7 @@ class ProjectReportController extends ReportController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/project-report/screenshots Screenshots
+     * @api             {post} /project-report/screenshots Screenshots
      *
      * @apiVersion      1.0.0
      * @apiName         Screenshots

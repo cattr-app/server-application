@@ -50,7 +50,7 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function index(Request $request): JsonResponse
+    public function _index(Request $request): JsonResponse
     {
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
@@ -124,19 +124,19 @@ abstract class ItemController extends Controller
     {
         /** @var Model $cls */
         $cls = static::getItemClass();
+        $model = new $cls;
 
         $query = new Builder($cls::getQuery());
-        $query->setModel(new $cls());
+        $query->setModel($model);
 
-        $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls), true);
+        $modelScopes = $model->getGlobalScopes();
 
-        if ($softDelete && !$withSoftDeleted) {
-            if (method_exists($cls, 'getTable')) {
-                $table = (new $cls())->getTable();
-                $query->whereNull("$table.deleted_at");
-            } else {
-                $query->whereNull('deleted_at');
-            }
+        foreach ($modelScopes as $key => $value) {
+            $query->withGlobalScope($key, $value);
+        }
+
+        if ($withSoftDeleted) {
+            $query->withoutGlobalScope(\Illuminate\Database\Eloquent\SoftDeletingScope::class);
         }
 
         if ($withRelations) {
@@ -163,7 +163,7 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function count(Request $request): JsonResponse
+    public function _count(Request $request): JsonResponse
     {
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
@@ -183,7 +183,7 @@ abstract class ItemController extends Controller
         ]);
     }
 
-    public function create(Request $request): JsonResponse
+    public function _create(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
 
@@ -246,7 +246,7 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function show(Request $request): JsonResponse
+    public function _show(Request $request): JsonResponse
     {
         $itemId = (int) $request->input('id');
 
@@ -300,7 +300,7 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function edit(Request $request): JsonResponse
+    public function _edit(Request $request): JsonResponse
     {
         $requestData = Filter::process(
             $this->getEventUniqueName('request.item.edit'),
@@ -402,7 +402,7 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function destroy(Request $request): JsonResponse
+    public function _destroy(Request $request): JsonResponse
     {
         $itemId = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->get('id'));
         $idInt = is_int($itemId);

@@ -12,8 +12,10 @@ class ResendTest extends TestCase
 {
     private const URI = 'invitations/resend';
 
-    private User $user;
     private User $admin;
+    private User $manager;
+    private User $auditor;
+    private User $user;
 
     private Invitation $invitation;
 
@@ -21,8 +23,10 @@ class ResendTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = UserFactory::asUser()->withTokens()->create();
-        $this->admin = UserFactory::asAdmin()->withTokens()->create();
+        $this->admin = UserFactory::refresh()->asAdmin()->withTokens()->create();
+        $this->manager = UserFactory::refresh()->asManager()->withTokens()->create();
+        $this->auditor = UserFactory::refresh()->asAuditor()->withTokens()->create();
+        $this->user = UserFactory::refresh()->asUser()->withTokens()->create();
 
         $this->invitation = InvitationFactory::create();
     }
@@ -36,5 +40,26 @@ class ResendTest extends TestCase
             $response->decodeResponseJson()['res']['expires_at'],
             $this->invitation->expires_at->toISOString()
         );
+    }
+
+    public function test_resend_as_manager(): void
+    {
+        $response = $this->actingAs($this->manager)->postJson(self::URI, ['id' => $this->invitation->id]);
+
+        $response->assertForbidden();
+    }
+
+    public function test_resend_as_auditor(): void
+    {
+        $response = $this->actingAs($this->auditor)->postJson(self::URI, ['id' => $this->invitation->id]);
+
+        $response->assertForbidden();
+    }
+
+    public function test_resend_as_user(): void
+    {
+        $response = $this->actingAs($this->user)->postJson(self::URI, ['id' => $this->invitation->id]);
+
+        $response->assertForbidden();
     }
 }

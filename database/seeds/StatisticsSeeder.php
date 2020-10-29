@@ -3,7 +3,6 @@
 namespace Database\Seeders;
 
 use App\Models\Project;
-use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\Task;
@@ -60,16 +59,7 @@ class StatisticsSeeder extends Seeder
      */
     protected function assignProject(User $user, Project $project, ?int $roleId = null): ProjectsUsers
     {
-        $userProjectRole = [
-            'project_id' => $project->id,
-            'user_id' => $user->id,
-        ];
-
-        if (isset($roleId)) {
-            $userProjectRole['role_id'] = $roleId;
-        }
-
-        $relation = ProjectsUsers::create($userProjectRole);
+        $relation = $project->attach($user->id, ['role_id' => $roleId]);
 
         $this->command->getOutput()->writeln("<fg=green>{$user->full_name} assigned to project {$project->id}</>");
 

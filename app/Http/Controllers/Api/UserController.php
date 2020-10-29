@@ -6,43 +6,22 @@ use App;
 use Exception;
 use Filter;
 use App\Mail\UserCreated;
-use App\Models\ProjectsUsers;
-use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Auth;
 use Event;
 use Mail;
-use Route;
+use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\SendInviteUserRequest;
+use App\Http\Requests\User\ShowUserRequest;
+use App\Http\Requests\User\DestroyUserRequest;
 use Illuminate\Support\Str;
 
 class UserController extends ItemController
 {
-    /**
-     * Get the controller rules.
-     *
-     * @return array
-     */
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'users.list',
-            'count' => 'users.list',
-            'create' => 'users.create',
-            'edit' => 'users.edit',
-            'show' => 'users.show',
-            'destroy' => 'users.remove',
-            'bulkEdit' => 'users.bulk-edit',
-            'relations' => 'users.relations',
-            'sendInvite' => 'users.edit',
-        ];
-    }
-
     /**
      * Get the validation rules.
      *
@@ -50,13 +29,7 @@ class UserController extends ItemController
      */
     public function getValidationRules(): array
     {
-        return [
-            'full_name' => 'required',
-            'email' => 'required|unique:users,email',
-            'active' => 'required|boolean',
-            'password' => 'sometimes|required|min:6',
-            'screenshots_interval' => 'sometimes|integer|min:1|max:15',
-        ];
+        return [];
     }
 
     /**
@@ -80,7 +53,7 @@ class UserController extends ItemController
     }
 
     /**
-     * @api             {get, post} /v1/users/list List
+     * @api             {get, post} /users/list List
      * @apiDescription  Get list of Users with any params
      *
      * @apiVersion      1.0.0
@@ -150,9 +123,13 @@ class UserController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    public function index(Request $request): JsonResponse
+    {
+        return $this->_index($request);
+    }
 
     /**
-     * @api             {post} /v1/users/create Create
+     * @api             {post} /users/create Create
      * @apiDescription  Create User Entity
      *
      * @apiVersion      1.0.0
@@ -205,18 +182,16 @@ class UserController extends ItemController
      * @apiUse         ForbiddenError
      */
     /**
-     * @param Request $request
+     * @param CreateUserRequest $request
      * @return JsonResponse
      */
-    public function create(Request $request): JsonResponse
+    public function create(CreateUserRequest $request): JsonResponse
     {
-        $request->validate(['email' => 'required|email']);
-        Event::listen($this->getEventUniqueName('item.create.after'), static::class . '@' . 'saveRelations');
-        return parent::create($request);
+        return $this->_create($request);
     }
 
     /**
-     * @api             {post} /v1/users/edit Edit
+     * @api             {post} /users/edit Edit
      * @apiDescription  Edit User
      *
      * @apiVersion      1.0.0
@@ -284,9 +259,9 @@ class UserController extends ItemController
      * @return JsonResponse
      * @throws Exception
      */
-    public function edit(Request $request): JsonResponse
+    public function edit(EditUserRequest $request): JsonResponse
     {
-        $requestData = app(EditUserRequest::class)->validated();
+        $requestData = $request->validated();
 
         $requestData = Filter::process(
             $this->getEventUniqueName('request.item.edit'),
@@ -325,8 +300,6 @@ class UserController extends ItemController
 
         Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
 
-        $item = $this->saveRelations($item, $requestData);
-
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
                 'success' => true,
@@ -336,7 +309,7 @@ class UserController extends ItemController
     }
 
     /**
-     * @api             {get, post} /v1/users/show Show
+     * @api             {get, post} /users/show Show
      * @apiDescription  Show User
      *
      * @apiVersion      1.0.0
@@ -390,35 +363,17 @@ class UserController extends ItemController
      */
 
     /**
-     * @param Request $request
+     * @param ShowUserRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function show(Request $request): JsonResponse
+    public function show(ShowUserRequest $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('answer.success.item.show'), static function ($item) {
-            $sortedRoles = [];
-            foreach ($item->projectsRelation as $projectRole) {
-                if (!array_key_exists($projectRole->role_id, $sortedRoles)) {
-                    $sortedRoles[$projectRole->role_id] = [
-                        'role_id' => $projectRole->role_id,
-                        'user_id' => $item->id,
-                        'project_ids' => []
-                    ];
-                }
-
-                $sortedRoles[$projectRole->role_id]['project_ids'][] = $projectRole->project_id;
-            }
-
-            $item->project_roles = $sortedRoles;
-            unset($item->projectsRelation);
-            return $item;
-        });
-        return parent::show($request);
+        return $this->_show($request);
     }
 
     /**
-     * @api             {post} /v1/users/remove Destroy
+     * @api             {post} /users/remove Destroy
      * @apiDescription  Destroy User
      *
      * @apiVersion      1.0.0
@@ -452,10 +407,14 @@ class UserController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    public function destroy(DestroyUserRequest $request): JsonResponse
+    {
+        return $this->_destroy($request);
+    }
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/users/bulk-edit Bulk Edit
+     * @api             {post} /users/bulk-edit Bulk Edit
      * @apiDescription  Editing Multiple Users
      *
      * @apiVersion      1.0.0
@@ -467,7 +426,7 @@ class UserController extends ItemController
      */
 
     /**
-     * @api             {get,post} /v1/users/count Count
+     * @api             {get,post} /users/count Count
      * @apiDescription  Count Users
      *
      * @apiVersion      1.0.0
@@ -493,10 +452,14 @@ class UserController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    public function count(Request $request): JsonResponse
+    {
+        return $this->_count($request);
+    }
 
     /**
      * @apiDeprecated   since 1.0.0 use now (#Project_Users:List)
-     * @api             {post} /v1/users/relations Relations
+     * @api             {post} /users/relations Relations
      * @apiDescription  Show attached users and to whom the user is attached
      *
      * @apiVersion      1.0.0
@@ -544,92 +507,20 @@ class UserController extends ItemController
     }
 
     /**
-     * @param User $user
-     * @param $requestData array
-     * @return User
-     */
-    public function saveRelations(User $user, array $requestData): User
-    {
-        $user->projectsRelation()->delete();
-        $projectRoles = $requestData['project_roles'] ?? [];
-
-        $relations = [];
-        foreach ($projectRoles as $roleID => $data) {
-            foreach ($data['project_ids'] as $projectID) {
-                $relations[] = new ProjectsUsers([
-                    'project_id' => $projectID,
-                    'role_id' => $roleID,
-                    'user_id' => $user->id,
-                ]);
-            }
-        }
-
-        $user->projectsRelation()->saveMany($relations);
-        return $user;
-    }
-
-    /**
-     * Get Query Builder
-     *
      * @param bool $withRelations
      * @param bool $withSoftDeleted
      * @return Builder
      */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    public function getQuery($withRelations = true, $withSoftDeleted = false): Builder
     {
-        /** @var User $user */
-        $user = Auth::user();
-        $userId = $user->id;
         $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = $user->allowed('users', 'full_access');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
 
-        if ($full_access) {
-            return $query;
-        }
+        if (request('global_scope')) {
+            request()->request->remove('global_scope');
 
-        $rules = self::getControllerRules();
-        $rule = $rules[$action_method] ?? null;
-        if (isset($rule)) {
-            [$object, $action] = explode('.', $rule);
-            // Check user default role
-            if (Role::can($user, $object, $action)) {
-                return $query;
+            if (auth()->user()->hasProjectRole('manager')) {
+                $query->withoutGlobalScope(App\Scopes\UserScope::class);
             }
-
-            $query->where(static function (Builder $query) use ($userId, $object, $action) {
-                $roleSubquery = static function (Builder $query) use ($userId, $object, $action) {
-                    $query->where('user_id', $userId)->whereHas(
-                        'role',
-                        static function (Builder $query) use ($object, $action) {
-                            $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                                $query->where([
-                                    'object' => $object,
-                                    'action' => $action,
-                                    'allow' => true,
-                                ])->select('id');
-                            })->select('id');
-                        }
-                    )->select('id');
-                };
-
-                // Filter by project roles of the user
-                // Users assigned to the project
-                $query->whereHas('projects.usersRelation', $roleSubquery);
-
-                // Users assigned to tasks in the project
-                $query->orWhereHas('tasks.project.usersRelation', $roleSubquery);
-
-                /*
-                // Users has tracked intervals in tasks of the project
-                $query->orWhereHas('timeIntervals.task.project.usersRelation', $roleSubquery);
-                */
-
-                // For read and edit access include own user data
-                $query->when($action !== 'remove', static function (Builder $query) use ($userId) {
-                    $query->orWhere('id', $userId);
-                });
-            });
         }
 
         return $query;

@@ -4,9 +4,7 @@ use App\Http\Controllers\Api\AboutController;
 use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\ProjectController;
-use App\Http\Controllers\Api\ProjectsUsersController;
-use App\Http\Controllers\Api\RolesController;
-use App\Http\Controllers\Api\RulesController;
+use App\Http\Controllers\Api\ProjectMemberController;
 use App\Http\Controllers\Api\Statistic\DashboardController;
 use App\Http\Controllers\Api\Statistic\ProjectReportController;
 use App\Http\Controllers\Api\Statistic\TimeUseReportController;
@@ -14,6 +12,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TimeController;
 use App\Http\Controllers\Api\TimeIntervalController;
 use App\Http\Controllers\Api\UserController;
+use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegistrationController;
@@ -75,12 +74,8 @@ Route::group([
     $router->any('projects/show', [ProjectController::class, 'show']);
     $router->post('projects/remove', [ProjectController::class, 'destroy']);
 
-    //Projects Users routes
-    $router->any('projects-users/list', [ProjectsUsersController::class, 'index']);
-    $router->any('projects-users/count', [ProjectsUsersController::class, 'count']);
-    $router->post('projects-users/create', [ProjectsUsersController::class, 'create']);
-    $router->post('projects-users/remove', [ProjectsUsersController::class, 'destroy']);
-    $router->post('projects-users/bulk-remove', [ProjectsUsersController::class, 'bulkDestroy']);
+    $router->any('project-members/show', [ProjectMemberController::class, 'show']);
+    $router->post('project-members/bulk-edit', [ProjectMemberController::class, 'bulkEdit']);
 
     //Tasks routes
     $router->any('tasks/list', [TaskController::class, 'index']);
@@ -125,22 +120,8 @@ Route::group([
     $router->any('time/tasks', [TimeController::class, 'tasks']);
 
     //Role routes
-    $router->any('roles/list', [RolesController::class, 'index']);
-    $router->any('roles/count', [RolesController::class, 'count']);
-    $router->post('roles/create', [RolesController::class, 'create']);
-    $router->post('roles/edit', [RolesController::class, 'edit']);
-    $router->any('roles/show', [RolesController::class, 'show']);
-    $router->post('roles/remove', [RolesController::class, 'destroy']);
-    $router->any('roles/allowed-rules', [RolesController::class, 'allowedRules']);
-    $router->any('roles/project-rules', [RolesController::class, 'projectRules']);
-    $router->post('roles/attach-user', [RolesController::class, 'attachToUser']);
-    $router->post('roles/detach-user', [RolesController::class, 'detachFromUser']);
-
-    //Rule routes
-    $router->any('rules/list', [RulesController::class, 'index']);
-    $router->any('rules/count', [RulesController::class, 'count']);
-    $router->post('rules/edit', [RulesController::class, 'edit']);
-    $router->any('rules/actions', [RulesController::class, 'actions']);
+    $router->any('roles/list', [RoleController::class, 'index']);
+    $router->any('roles/count', [RoleController::class, 'count']);
 
     // Statistic routes
     $router->any('project-report/list', [ProjectReportController::class, 'report']);

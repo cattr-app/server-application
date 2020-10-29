@@ -72,6 +72,9 @@ class UserFactory extends Factory
             'screenshots_interval' => 5,
             'active' => 1,
             'password' => $fullName,
+            'user_language' => 'en',
+            'role_id' => 2,
+            'type' => 'employee',
             'nonce' => 0,
         ];
     }
@@ -86,6 +89,12 @@ class UserFactory extends Factory
             'active' => 1,
             'password' => $faker->password,
             'screenshots_interval' => 5,
+            'user_language' => 'en',
+            'screenshots_active' => true,
+            'computer_time_popup' => 10,
+            'timezone' => 'UTC',
+            'role_id' => 2,
+            'type' => 'employee'
         ];
     }
 
@@ -99,6 +108,18 @@ class UserFactory extends Factory
     {
         $this->roleId = self::USER_ROLE;
         $this->isAdmin = true;
+        return $this;
+    }
+
+    public function asManager(): self
+    {
+        $this->roleId = self::MANAGER_ROLE;
+        return $this;
+    }
+
+    public function asAuditor(): self
+    {
+        $this->roleId = self::AUDITOR_ROLE;
         return $this;
     }
 

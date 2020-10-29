@@ -3,9 +3,12 @@
 namespace App\Providers;
 
 use App;
-use App\Http\Controllers\DemoScreenshotControllerStrategy;
-use App\Http\Controllers\ScreenshotControllerStrategy;
-use App\Http\Controllers\ScreenshotControllerStrategyInterface;
+use App\Models\Invitation;
+use App\Models\User;
+use App\Models\Screenshot;
+use App\Observers\InvitationObserver;
+use App\Observers\UserObserver;
+use App\Observers\ScreenshotObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -17,13 +20,13 @@ class AppServiceProvider extends ServiceProvider
     {
         if (App::environment(['demo', 'staging'])) {
             $this->app->bind(
-                ScreenshotControllerStrategyInterface::class,
-                DemoScreenshotControllerStrategy::class
+                App\Contracts\ScreenshotService::class,
+                App\Services\DemoScreenshotService::class
             );
         } else {
             $this->app->bind(
-                ScreenshotControllerStrategyInterface::class,
-                ScreenshotControllerStrategy::class
+                App\Contracts\ScreenshotService::class,
+                App\Services\ScreenshotService::class
             );
         }
 
@@ -32,9 +35,9 @@ class AppServiceProvider extends ServiceProvider
             App\Services\SettingsService::class
         );
 
-        App\Models\User::observe(App\Observers\UserObserver::class);
-        App\Models\Invitation::observe(App\Observers\InvitationObserver::class);
-        App\Models\Screenshot::observe(App\Observers\ScreenshotObserver::class);
+        User::observe(UserObserver::class);
+        Invitation::observe(InvitationObserver::class);
+        Screenshot::observe(ScreenshotObserver::class);
     }
 
     /**

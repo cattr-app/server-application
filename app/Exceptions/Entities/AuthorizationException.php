@@ -173,7 +173,7 @@ class AuthorizationException extends BaseAuthorizationException implements
         self::ERROR_TYPE_VALIDATION_FAILED => ['code' => 400, 'message' => 'Invalid params'],
         self::ERROR_TYPE_USER_NOT_FOUND => ['code' => 404, 'message' => 'User with such email isn’t found'],
         self::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA => ['code' => 401, 'message' => 'Invalid password reset data'],
-        self::ERROR_TYPE_FORBIDDEN => ['code' => 403, 'message' => 'Access denied to this item']
+        self::ERROR_TYPE_FORBIDDEN => ['code' => 403, 'message' => 'This action is unauthorized']
     ];
 
     /**

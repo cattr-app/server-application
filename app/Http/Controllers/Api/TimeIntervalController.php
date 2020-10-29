@@ -2,7 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\TimeInterval\BulkDestroyTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\DestroyTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\EditTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\ShowTimeIntervalRequest;
 use Filter;
 use App\Models\Role;
 use App\Models\Screenshot;
@@ -28,9 +33,9 @@ class TimeIntervalController extends ItemController
         return TimeInterval::class;
     }
 
-    public function create(Request $request): JsonResponse
+    public function create(CreateTimeIntervalRequest $request): JsonResponse
     {
-        $intervalData = app(CreateTimeIntervalRequest::class)->validated();
+        $intervalData = $request->validated();
 
         $timeInterval = TimeInterval::create($intervalData);
 
@@ -62,16 +67,11 @@ class TimeIntervalController extends ItemController
 
     public function getValidationRules(): array
     {
-        return [
-            'task_id' => 'exists:tasks,id|required',
-            'user_id' => 'exists:users,id|required',
-            'start_at' => 'date|required',
-            'end_at' => 'date|required',
-        ];
+        return [];
     }
 
     /**
-     * @api             {post} /v1/time-intervals/create Create
+     * @api             {post} /time-intervals/create Create
      * @apiDescription  Create Time Interval
      *
      * @apiVersion      1.0.0
@@ -137,7 +137,7 @@ class TimeIntervalController extends ItemController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/time-intervals/bulk-create Bulk Create
+     * @api             {post} /time-intervals/bulk-create Bulk Create
      * @apiDescription  Create Time Intervals
      *
      * @apiVersion      1.0.0
@@ -174,7 +174,7 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api             {post} /v1/time-intervals/list List
+     * @api             {post} /time-intervals/list List
      * @apiDescription  Get list of Time Intervals
      *
      * @apiVersion      1.0.0
@@ -213,77 +213,7 @@ class TimeIntervalController extends ItemController
      */
 
     /**
-     * @param bool $withRelations
-     * @param bool $withSoftDeleted
-     * @return Builder
-     */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
-    {
-        /** @var User $user */
-        $user = Auth::user();
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = $user->allowed('time-intervals', 'full_access');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
-
-        if ($full_access) {
-            return $query;
-        }
-
-        $rules = $this->getControllerRules();
-        $rule = $rules[$action_method] ?? null;
-        if (isset($rule)) {
-            [$object, $action] = explode('.', $rule);
-            // Check user default role
-            if (Role::can($user, $object, $action)) {
-                return $query;
-            }
-
-            $query->where(static function (Builder $query) use ($user, $object, $action) {
-                $user_id = $user->id;
-
-                // Filter by project roles of the user
-                $query->whereHas(
-                    'task.project.usersRelation',
-                    static function (Builder $query) use ($user_id, $object, $action
-                    ) {
-                        $query->where(
-                            'user_id',
-                            $user_id
-                        )->whereHas(
-                            'role',
-                            static function (Builder $query) use ($object, $action) {
-                                $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                                    $query->where([
-                                        'object' => $object,
-                                        'action' => $action,
-                                        'allow' => true,
-                                    ])->select('id');
-                                })->select('id');
-                            }
-                        )->select('id');
-                    }
-                );
-
-                // For read and delete access include user own intervals
-                $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
-                    $query->orWhere('user_id', $user_id)->select('user_id');
-                });
-
-                $query->when(
-                    $action === 'edit' && (bool)$user->manual_time,
-                    static function (Builder $query) use ($user_id
-                    ) {
-                        $query->orWhere('user_id', $user_id)->select('user_id');
-                    }
-                );
-            });
-        }
-
-        return $query;
-    }
-
-    /**
-     * @api             {post} /v1/time-intervals/show Show
+     * @api             {post} /time-intervals/show Show
      * @apiDescription  Show Time Interval
      *
      * @apiVersion      1.0.0
@@ -327,9 +257,13 @@ class TimeIntervalController extends ItemController
      * @apiUse         ForbiddenError
      * @apiUse         ValidationError
      */
+    public function show(ShowTimeIntervalRequest $request): JsonResponse
+    {
+        return $this->_show($request);
+    }
 
     /**
-     * @api             {post} /v1/time-intervals/edit Edit
+     * @api             {post} /time-intervals/edit Edit
      * @apiDescription  Edit Time Interval
      *
      * @apiVersion      1.0.0
@@ -373,23 +307,8 @@ class TimeIntervalController extends ItemController
      * @apiUse         ItemNotFoundError
      */
 
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'time-intervals.list',
-            'count' => 'time-intervals.list',
-            'create' => 'time-intervals.create',
-            'bulkCreate' => 'time-intervals.bulk-create',
-            'edit' => 'time-intervals.edit',
-            'bulkEdit' => 'time-intervals.bulk-edit',
-            'show' => 'time-intervals.show',
-            'destroy' => 'time-intervals.remove',
-            'bulkDestroy' => 'time-intervals.bulk-remove',
-        ];
-    }
-
     /**
-     * @api             {post} /v1/time-intervals/bulk-edit Bulk Edit
+     * @api             {post} /time-intervals/bulk-edit Bulk Edit
      * @apiDescription  Multiple Edit TimeInterval to assign tasks to them
      *
      * @apiVersion      1.0.0
@@ -445,11 +364,11 @@ class TimeIntervalController extends ItemController
      */
 
     /**
-     * @param Request $request
+     * @param EditTimeIntervalRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function edit(Request $request): JsonResponse
+    public function edit(EditTimeIntervalRequest $request): JsonResponse
     {
         $requestData = Filter::process(
             $this->getEventUniqueName('request.item.edit'),
@@ -520,7 +439,7 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api             {post} /v1/users/remove Destroy
+     * @api             {post} /users/remove Destroy
      * @apiDescription  Destroy Time Interval
      *
      * @apiVersion      1.0.0
@@ -556,7 +475,7 @@ class TimeIntervalController extends ItemController
      */
 
     /**
-     * @api             {get,post} /v1/time-intervals/count Count
+     * @api             {get,post} /time-intervals/count Count
      * @apiDescription  Count Time Intervals
      *
      * @apiVersion      1.0.0
@@ -579,9 +498,13 @@ class TimeIntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    public function count(Request $request): JsonResponse
+    {
+        return $this->_count($request);
+    }
 
     /**
-     * @api            {post} /v1/time-intervals/bulk-remove Bulk Destroy
+     * @api            {post} /time-intervals/bulk-remove Bulk Destroy
      * @apiDescription Multiple Destroy TimeInterval
      *
      * @apiVersion     1.0.0
@@ -627,38 +550,19 @@ class TimeIntervalController extends ItemController
      * @apiUse         ForbiddenError
      * @apiUse         UnauthorizedError
      */
+    public function destroy(DestroyTimeIntervalRequest $request): JsonResponse
+    {
+        return $this->_destroy($request);
+    }
 
     /**
-     * @param Request $request
+     * @param BulkEditTimeIntervalRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function bulkEdit(Request $request): JsonResponse
+    public function bulkEdit(BulkEditTimeIntervalRequest $request): JsonResponse
     {
-        $validationRules = [
-            'intervals' => 'required|array',
-            'intervals.*.id' => 'required|integer',
-            'intervals.*.task_id' => 'required|integer'
-        ];
-
-        $validator = Validator::make(
-            Filter::process($this->getEventUniqueName('request.item.edit'), $request->all()),
-            Filter::process($this->getEventUniqueName('validation.item.edit'), $validationRules)
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkEdit'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        $intervalsData = collect($validator->validated()['intervals']);
+        $intervalsData = collect($request->validated()['intervals']);
 
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
@@ -666,72 +570,35 @@ class TimeIntervalController extends ItemController
             $this->applyQueryFilter($this->getQuery(), ['id' => ['in', $intervalsData->pluck('id')->toArray()]])
         );
 
-        $foundIds = $itemsQuery->pluck('id')->toArray();
-        $notFoundIds = array_diff($intervalsData->pluck('id')->toArray(), $foundIds);
-
-        $itemsQuery->each(function (Model $item) use ($intervalsData) {
-            $item->task_id = $intervalsData->where('id', $item->id)->first()['task_id'];
-            $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
-            $item->save();
+        $itemsQuery->each(static function (Model $item) use ($intervalsData) {
+            $item->update(Arr::only($intervalsData->where('id', $item->id)->first(), 'task_id'));
         });
 
         $responseData = [
             'success' => true,
             'message' => 'Intervals successfully updated',
-            'updated' => $foundIds
         ];
-
-        if ($notFoundIds) {
-            $responseData['message'] = 'Some intervals have not been updated';
-            $responseData['not_found'] = array_values($notFoundIds);
-        }
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), $responseData),
-            ($notFoundIds) ? 207 : 200
+            200
         );
     }
 
     /**
-     * @param Request $request
+     * @param BulkDestroyTimeIntervalRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function bulkDestroy(Request $request): JsonResponse
+    public function bulkDestroy(BulkDestroyTimeIntervalRequest $request): JsonResponse
     {
-        $validationRules = [
-            'intervals' => 'required|array',
-            'intervals.*' => 'integer'
-        ];
-
-        $validator = Validator::make(
-            Filter::process($this->getEventUniqueName('request.item.destroy'), $request->all()),
-            Filter::process($this->getEventUniqueName('validation.item.destroy'), $validationRules)
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.bulkDestroy'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        $intervalIds = $validator->validated()['intervals'];
+        $intervalIds = $request->validated()['intervals'];
 
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.query.prepare'),
             $this->applyQueryFilter($this->getQuery(), ['id' => ['in', $intervalIds]])
         );
-
-        $foundIds = $itemsQuery->pluck('id')->toArray();
-        $notFoundIds = array_diff($intervalIds, $foundIds);
-
 
         // to cascade screenshots soft deleting
         foreach ($itemsQuery->getModels() as $item) {
@@ -741,17 +608,11 @@ class TimeIntervalController extends ItemController
         $responseData = [
             'success' => true,
             'message' => 'Intervals successfully removed',
-            'removed' => $foundIds
         ];
-
-        if ($notFoundIds) {
-            $responseData['message'] = 'Some intervals have not been removed';
-            $responseData['not_found'] = array_values($notFoundIds);
-        }
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), $responseData),
-            ($notFoundIds) ? 207 : 200
+            200
         );
     }
 }
