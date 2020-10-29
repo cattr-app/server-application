@@ -48,6 +48,8 @@ class ProjectFactory extends Factory
             $this->hideTimestamps();
         }
 
+        $this->hideCanAttribute();
+
         return $this->project;
     }
 

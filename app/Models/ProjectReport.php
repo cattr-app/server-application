@@ -7,7 +7,15 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * App\Models\ProjectReport
+ *
  * @mixin EloquentIdeHelper
+ * @property-read \App\Models\Project $project
+ * @property-read \App\Models\Task $task
+ * @property-read \App\Models\User $user
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectReport newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectReport newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectReport query()
  */
 class ProjectReport extends Model
 {

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\Invitation\CountInvitationRequest;
 use App\Http\Requests\Invitation\CreateInvitationRequest;
+use App\Http\Requests\Invitation\ListInvitationRequest;
+use App\Http\Requests\Invitation\DestroyInvitationRequest;
+use App\Http\Requests\Invitation\ShowInvitationRequest;
 use App\Http\Requests\Invitation\UpdateInvitationRequest;
 use App\Models\Invitation;
 use App\Services\InvitationService;
@@ -26,23 +30,6 @@ class InvitationController extends ItemController
         parent::__construct();
 
         $this->service = $service;
-    }
-
-    /**
-     * Get the controller rules.
-     *
-     * @return array
-     */
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'invitation.list',
-            'count' => 'invitation.list',
-            'create' => 'invitation.create',
-            'resend' => 'invitation.resend',
-            'show' => 'invitation.show',
-            'destroy' => 'invitation.remove',
-        ];
     }
 
     /**
@@ -76,7 +63,7 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @api             {post} /v1/invitations/show Show
+     * @api             {post} /invitations/show Show
      * @apiDescription  Show invitation.
      *
      * @apiVersion      1.0.0
@@ -115,9 +102,13 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    public function show(ShowInvitationRequest $request): JsonResponse
+    {
+        return $this->_show($request);
+    }
 
     /**
-     * @api             {get} /v1/invitations/list List
+     * @api             {get} /invitations/list List
      * @apiDescription  Get list of invitations.
      *
      * @apiVersion      1.0.0
@@ -149,13 +140,17 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    public function index(ListInvitationRequest $request): JsonResponse
+    {
+        return $this->_index($request);
+    }
 
     /**
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
      *
-     * @api             {post} /v1/invitations/create Create
+     * @api             {post} /invitations/create Create
      * @apiDescription  Creates a unique invitation token and sends an email to the users
      *
      * @apiVersion      1.0.0
@@ -228,9 +223,9 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function create(Request $request): JsonResponse
+    public function create(CreateInvitationRequest $request): JsonResponse
     {
-        $requestData = app(CreateInvitationRequest::class)->validated();
+        $requestData = $request->validated();
 
         $invitations = [];
 
@@ -249,7 +244,7 @@ class InvitationController extends ItemController
      * @return JsonResponse
      * @throws Exception
      *
-     * @api             {post} /v1/invitations/resend Resend
+     * @api             {post} /invitations/resend Resend
      * @apiDescription  Updates the token expiration date and sends an email to the user's email address.
      *
      * @apiVersion      1.0.0
@@ -313,7 +308,7 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @api             {post} /v1/invitations/remove Destroy
+     * @api             {post} /invitations/remove Destroy
      * @apiDescription  Destroy User
      *
      * @apiVersion      1.0.0
@@ -344,4 +339,18 @@ class InvitationController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    public function destroy(DestroyInvitationRequest $request): JsonResponse
+    {
+        return $this->_destroy($request);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function count(CountInvitationRequest $request): JsonResponse
+    {
+        return $this->_count($request);
+    }
 }

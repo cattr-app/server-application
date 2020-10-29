@@ -40,6 +40,8 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 
 /**
+ * App\Models\ProjectsUsers
+ *
  * @property int $project_id
  * @property int $user_id
  * @property int $role_id
@@ -53,6 +55,10 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static EloquentBuilder|ProjectsUsers whereUpdatedAt($value)
  * @method static EloquentBuilder|ProjectsUsers whereUserId($value)
  * @mixin EloquentIdeHelper
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers whereRoleId($value)
  */
 class ProjectsUsers extends Model
 {

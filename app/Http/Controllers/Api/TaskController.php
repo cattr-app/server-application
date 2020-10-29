@@ -2,17 +2,17 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\Task\CreateTaskRequest;
+use App\Http\Requests\Task\DestroyTaskRequest;
+use App\Http\Requests\Task\EditTaskRequest;
+use App\Http\Requests\Task\ShowTaskRequest;
 use Exception;
 use Filter;
-use App\Models\Role;
 use App\Models\Task;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Auth;
 use DB;
-use Parsedown;
-use Route;
 
 class TaskController extends ItemController
 {
@@ -23,13 +23,7 @@ class TaskController extends ItemController
 
     public function getValidationRules(): array
     {
-        return [
-            'project_id' => 'exists:projects,id|required',
-            'task_name' => 'required',
-            'active' => 'required',
-            'user_id' => 'exists:users,id|required',
-            'priority_id' => 'exists:priorities,id|required',
-        ];
+        return [];
     }
 
     public function getEventUniqueNamePart(): string
@@ -38,7 +32,7 @@ class TaskController extends ItemController
     }
 
     /**
-     * @api             {post} /v1/tasks/list List
+     * @api             {post} /tasks/list List
      * @apiDescription  Get list of Tasks
      *
      * @apiVersion      1.0.0
@@ -98,11 +92,6 @@ class TaskController extends ItemController
         $currentPage = $request->get('page', 1);
         $perPage = $request->get('perPage', 15);
 
-        if (!$request->has('orderBy')) {
-            $itemsQuery->orderByRaw('active > 0 DESC');
-            $itemsQuery->orderBy('created_at', 'desc');
-        }
-
         return new JsonResponse(
             Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.result'),
@@ -113,27 +102,11 @@ class TaskController extends ItemController
         );
     }
 
-    protected function applyQueryFilter(Builder $query, array $filter = []): Builder
-    {
-        if (isset($filter['order_by'])) {
-            $order_by = $filter['order_by'];
-            [$column, $dir] = is_array($order_by) ? $order_by : [$order_by, 'asc'];
-            if ($column === 'projects.name') {
-                // Because Laravel haven't built-in for order by a field in a related table.
-                $query
-                    ->leftJoin('projects', 'tasks.project_id', '=', 'projects.id')
-                    ->orderBy('projects.name', $dir)
-                    ->select('tasks.*');
-
-                unset($filter['order_by']);
-            }
-        }
-
-        return parent::applyQueryFilter($query, $filter);
-    }
-
     /**
-     * @api             {post} /v1/tasks/create Create
+     * @param Request $request
+     * @return JsonResponse
+     *
+     * @api             {post} /tasks/create Create
      * @apiDescription  Create Task
      *
      * @apiVersion      1.0.0
@@ -198,68 +171,13 @@ class TaskController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    public function create(CreateTaskRequest $request): JsonResponse
+    {
+        return $this->_create($request);
+    }
 
     /**
-     * @api             {post} /v1/tasks/show Show
-     * @apiDescription  Show Task
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Show
-     * @apiGroup        Task
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   tasks_show
-     * @apiPermission   tasks_full_access
-     *
-     * @apiParam {Integer}  id  ID
-     *
-     * @apiUse          TaskParams
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *    "id": 1,
-     *    "project_id": ["=", [1,2,3]],
-     *    "active": 1,
-     *    "user_id": ["=", [1,2,3]],
-     *    "assigned_by": ["=", [1,2,3]],
-     *    "task_name": ["like", "%lorem%"],
-     *    "description": ["like", "%lorem%"],
-     *    "url": ["like", "%lorem%"],
-     *    "created_at": [">", "2019-01-01 00:00:00"],
-     *    "updated_at": ["<", "2019-01-01 00:00:00"]
-     *  }
-     *
-     * @apiUse          TaskObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "id": 2,
-     *    "project_id": 1,
-     *    "task_name": "Delectus.",
-     *    "description": "Et qui sed qui vero quis.
-     *                    Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
-     *    "active": 1,
-     *    "user_id": 1,
-     *    "assigned_by": 1,
-     *    "url": null,
-     *    "created_at": "2020-01-23T09:42:26+00:00",
-     *    "updated_at": "2020-01-23T09:42:26+00:00",
-     *    "deleted_at": null,
-     *    "priority_id": 2,
-     *    "important": 0
-     *  }
-     *
-     * @apiUse         400Error
-     * @apiUse         UnauthorizedError
-     * @apiUse         ItemNotFoundError
-     * @apiUse         ForbiddenError
-     * @apiUse         ValidationError
-     */
-
-    /**
-     * @api             {post} /v1/tasks/edit Edit
+     * @api             {post} /tasks/edit Edit
      * @apiDescription  Edit Task
      *
      * @apiVersion      1.0.0
@@ -324,9 +242,13 @@ class TaskController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
+    public function edit(EditTaskRequest $request): JsonResponse
+    {
+        return $this->_edit($request);
+    }
 
     /**
-     * @api             {post} /v1/tasks/remove Destroy
+     * @api             {post} /tasks/remove Destroy
      * @apiDescription  Destroy Task
      *
      * @apiVersion      1.0.0
@@ -360,9 +282,13 @@ class TaskController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    public function destroy(DestroyTaskRequest $request): JsonResponse
+    {
+        return $this->_destroy($request);
+    }
 
     /**
-     * @api             {get,post} /v1/tasks/count Count
+     * @api             {get,post} /tasks/count Count
      * @apiDescription  Count Tasks
      *
      * @apiVersion      1.0.0
@@ -388,111 +314,70 @@ class TaskController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-
-    /**
-     * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/tasks/dashboard Dashboard
-     * @apiDescription  Display task for dashboard
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Dashboard
-     * @apiGroup        Task
-     *
-     * @apiPermission   tasks_dashboard
-     * @apiPermission   tasks_full_access
-     */
-
-    /**
-     * @param bool $withRelations
-     * @param bool $withSoftDeleted
-     * @return Builder
-     */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    public function count(Request $request): JsonResponse
     {
-        $user = Auth::user();
-        $user_id = $user->id;
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = Role::can($user, 'tasks', 'full_access');
-        $action_method = Route::current()->getActionMethod();
-
-        if ($full_access) {
-            return $query;
-        }
-
-        $rules = self::getControllerRules();
-        $rule = $rules[$action_method] ?? null;
-        if (isset($rule)) {
-            [$object, $action] = explode('.', $rule);
-            // Check user default role
-            if (Role::can($user, $object, $action)) {
-                return $query;
-            }
-
-            $query->where(static function (Builder $query) use ($user_id, $object, $action) {
-                // Filter by project roles of the user
-                $query->whereHas(
-                    'project.usersRelation',
-                    static function (Builder $query) use ($user_id, $object, $action) {
-                        $query->where(
-                            'user_id',
-                            $user_id
-                        )->whereHas('role', static function (Builder $query) use ($object, $action) {
-                            $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                                $query->where([
-                                'object' => $object,
-                                'action' => $action,
-                                'allow' => true,
-                                ])->select('id');
-                            })->select('id');
-                        })->select('id');
-                    }
-                );
-
-                // For read-only access include tasks where the user is assigned or has tracked intervals
-                $query->when(
-                    $action !== 'edit' && $action !== 'remove',
-                    static function (Builder $query) use ($user_id) {
-                        $query->orWhere('user_id', $user_id);
-
-                        $query->orWhereHas('timeIntervals', static function (Builder $query) use ($user_id) {
-                            $query->where('user_id', $user_id)->select('user_id');
-                        });
-                    }
-                );
-            });
-        }
-
-        return $query;
+        return $this->_count($request);
     }
 
     /**
-     * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/tasks/activity Activity
-     * @apiDescription  Display tasks activity
+     * @api             {post} /tasks/show Show
+     * @apiDescription  Show Task
      *
      * @apiVersion      1.0.0
-     * @apiName         Activity
+     * @apiName         Show
      * @apiGroup        Task
      *
-     * @apiPermission   tasks_dashboard
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   tasks_show
      * @apiPermission   tasks_full_access
+     *
+     * @apiParam {Integer}  id  ID
+     *
+     * @apiUse          TaskParams
+     *
+     * @apiParamExample {json} Simple Request Example
+     *  {
+     *    "id": 1,
+     *    "project_id": ["=", [1,2,3]],
+     *    "active": 1,
+     *    "user_id": ["=", [1,2,3]],
+     *    "assigned_by": ["=", [1,2,3]],
+     *    "task_name": ["like", "%lorem%"],
+     *    "description": ["like", "%lorem%"],
+     *    "url": ["like", "%lorem%"],
+     *    "created_at": [">", "2019-01-01 00:00:00"],
+     *    "updated_at": ["<", "2019-01-01 00:00:00"]
+     *  }
+     *
+     * @apiUse          TaskObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "id": 2,
+     *    "project_id": 1,
+     *    "task_name": "Delectus.",
+     *    "description": "Et qui sed qui vero quis.
+     *                    Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
+     *    "active": 1,
+     *    "user_id": 1,
+     *    "assigned_by": 1,
+     *    "url": null,
+     *    "created_at": "2020-01-23T09:42:26+00:00",
+     *    "updated_at": "2020-01-23T09:42:26+00:00",
+     *    "deleted_at": null,
+     *    "priority_id": 2,
+     *    "important": 0
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     * @apiUse         ForbiddenError
+     * @apiUse         ValidationError
      */
-
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'tasks.list',
-            'count' => 'tasks.list',
-            'dashboard' => 'tasks.dashboard',
-            'create' => 'tasks.create',
-            'edit' => 'tasks.edit',
-            'show' => 'tasks.show',
-            'destroy' => 'tasks.remove',
-            'activity' => 'tasks.activity',
-        ];
-    }
-
-    public function show(Request $request): JsonResponse
+    public function show(ShowTaskRequest $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('answer.success.item.show'), static function (Task $task) {
             $totalTracked = 0;
@@ -519,10 +404,9 @@ class TaskController extends ItemController
 
             $task->workers = $workers;
             $task->total_spent_time = $totalTracked;
-            $task->description = (new Parsedown())->text($task->description);
 
             return $task;
         });
-        return parent::show($request);
+        return $this->_show($request);
     }
 }

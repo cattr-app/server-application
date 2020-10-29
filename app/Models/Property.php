@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
+ * App\Models\Property
+ *
  * @property int $id
  * @property int $entity_id
  * @property string $entity_type
@@ -32,6 +34,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|Property withTrashed()
  * @method static QueryBuilder|Property withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Property newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Property newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Property query()
  */
 class Property extends Model
 {
