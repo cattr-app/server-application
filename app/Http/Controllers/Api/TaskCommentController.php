@@ -47,7 +47,6 @@ class TaskCommentController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -72,7 +71,6 @@ class TaskCommentController extends ItemController
         if (!$full_access) {
             if ($item->task->user_id != $user->id) {
                 return new JsonResponse([
-                    'success' => false,
                     'error_type' => 'authorization.forbidden',
                     'message' => "Access denied to this task",
                 ], 403);
@@ -81,7 +79,6 @@ class TaskCommentController extends ItemController
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
                 'res' => $item,
             ])
         );
@@ -213,7 +210,6 @@ class TaskCommentController extends ItemController
         if (!$idInt) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'Invalid id',
@@ -247,7 +243,6 @@ class TaskCommentController extends ItemController
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'success' => true,
                 'message' => 'Item has been removed'
             ])
         );

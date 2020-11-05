@@ -35,7 +35,7 @@ class RemoveTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->user->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertSoftDeleted('users', $this->user->only('id'));
     }
 

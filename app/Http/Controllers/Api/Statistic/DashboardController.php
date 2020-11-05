@@ -36,7 +36,6 @@ class DashboardController extends ReportController
 
         if ($validator->fails()) {
             return new JsonResponse([
-                'success' => false,
                 'error_type' => 'validation',
                 'message' => 'Validation error',
                 'info' => $validator->errors(),
@@ -84,7 +83,6 @@ class DashboardController extends ReportController
             });
 
         $result = [
-            'success' => true,
             'user_intervals' => $intervals,
         ];
 
@@ -112,7 +110,6 @@ class DashboardController extends ReportController
      *    "end_at": "2013-04-12 20:41:00"
      *  }
      *
-     * @apiSuccess {Boolean}   success                            Indicates successful request when `TRUE`
      * @apiSuccess {Object}    user_intervals                     Response, keys => requested user ids
      * @apiSuccess {Object[]}  user_intervals.intervals           Intervals info
      * @apiSuccess {Integer}   user_intervals.intervals.user_id   Intervals user ID
@@ -123,7 +120,6 @@ class DashboardController extends ReportController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "user_intervals": {
      *      "2": {
      *        "intervals": [
@@ -180,7 +176,6 @@ class DashboardController extends ReportController
      *    "end_at": "2013-04-12 20:41:00"
      *  }
      *
-     * @apiSuccess {Boolean}   success                             Indicates successful request when `TRUE`
      * @apiSuccess {Object}    userIntervals                       Response, keys => requested user ids
      * @apiSuccess {Integer}   userIntervals.user_id               ID of the user
      * @apiSuccess {Object[]}  userIntervals.intervals             Intervals info
@@ -196,7 +191,6 @@ class DashboardController extends ReportController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "userIntervals": {
      *      "1": {
      *        "user_id": 1,
@@ -316,7 +310,7 @@ class DashboardController extends ReportController
             $previousInterval = $interval;
         }
 
-        $results = ['userIntervals' => $users, 'success' => true];
+        $results = ['userIntervals' => $users];
 
         return new JsonResponse(
             Filter::process(

@@ -60,14 +60,14 @@ class BulkEditTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->generateRequest());
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 
     public function test_bulk_edit_as_manager(): void
     {
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->generateRequest());
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 
     public function test_bulk_edit_as_auditor(): void
@@ -88,7 +88,7 @@ class BulkEditTest extends TestCase
     {
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->generateRequest());
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 
     public function test_bulk_edit_as_project_auditor(): void

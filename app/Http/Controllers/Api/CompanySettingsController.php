@@ -47,13 +47,11 @@ class CompanySettingsController extends Controller
      *
      * @apiUse          AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}   data  Contains an array of all company settings
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "data": {
      *      "timezone": "Europe/Moscow",
      *      "language": "en",
@@ -137,13 +135,11 @@ class CompanySettingsController extends Controller
      *    ]
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}   data  Contains an array of settings that changes were applied to
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "data": {
      *      "timezone": "Europe/Moscow",
      *      "language": "en",

@@ -73,7 +73,7 @@ class BulkEditTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         foreach ($this->intervals as $interval) {
             $this->assertDatabaseHas('time_intervals', $interval->toArray());
@@ -107,7 +107,7 @@ class BulkEditTest extends TestCase
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $requestData);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         foreach ($this->intervalsForManager as $interval) {
             $this->assertDatabaseHas('time_intervals', $interval->toArray());
@@ -141,7 +141,7 @@ class BulkEditTest extends TestCase
 
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $requestData);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         foreach ($this->intervalsForAuditor as $interval) {
             $this->assertDatabaseHas('time_intervals', $interval->toArray());
@@ -175,7 +175,7 @@ class BulkEditTest extends TestCase
 
         $response = $this->actingAs($this->user)->postJson(self::URI, $requestData);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         foreach ($this->intervalsForUser as $interval) {
             $this->assertDatabaseHas('time_intervals', $interval->toArray());

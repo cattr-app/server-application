@@ -156,7 +156,6 @@ class UserController extends ItemController
      *   "role_id": "3"
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res      User
      *
      * @apiUse UserObject
@@ -164,7 +163,6 @@ class UserController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "full_name": "John Doe",
      *      "email": "johndoe@example.com",
@@ -215,7 +213,6 @@ class UserController extends ItemController
      *   "active": "1"
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res      User
      *
      * @apiUse UserObject
@@ -223,7 +220,6 @@ class UserController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "id": 1,
      *      "full_name": "Jonni Tree",
@@ -282,7 +278,6 @@ class UserController extends ItemController
         if (!$item) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
                     'error_type' => 'query.item_not_found',
                     'message' => 'User not found',
                 ]),
@@ -302,7 +297,6 @@ class UserController extends ItemController
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'success' => true,
                 'res' => $item,
             ])
         );
@@ -392,13 +386,11 @@ class UserController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *
@@ -438,13 +430,11 @@ class UserController extends ItemController
      * @apiPermission   users_count
      * @apiPermission   users_full_access
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   total    Amount of users that we have
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "total": 2
      *  }
      *
@@ -485,7 +475,6 @@ class UserController extends ItemController
         if (!$item) {
             return new JsonResponse(
                 [
-                    'success' => false,
                     'error_type' => 'query.item_not_found',
                     'message' => 'Item not found'
                 ],
@@ -501,7 +490,6 @@ class UserController extends ItemController
         Mail::to($item->email)->send(new UserCreated($item->email, $password));
 
         return new JsonResponse([
-            'success' => true,
             'res' => $item,
         ]);
     }

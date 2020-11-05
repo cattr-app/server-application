@@ -40,7 +40,7 @@ class CreateTest extends TestCase
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->userData);
         unset($this->userData['password']);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDatabaseHas('users', $this->userData);
         $this->assertDatabaseHas('users', $response->json('res'));
     }

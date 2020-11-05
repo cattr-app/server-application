@@ -79,7 +79,6 @@ class InvitationController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}    res      Array of records containing the id, email, key, expiration date and role id
      *
      * @apiUse InvitationObject
@@ -87,7 +86,6 @@ class InvitationController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": [
      *      {
      *          "id": 1
@@ -117,7 +115,6 @@ class InvitationController extends ItemController
      *
      * @apiUse          AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}   res      Array of records containing the id, email, key, expiration date and role id
      *
      * @apiUse InvitationObject
@@ -125,7 +122,6 @@ class InvitationController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": [
      *      {
      *          "id": 1
@@ -173,7 +169,6 @@ class InvitationController extends ItemController
      *    ]
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   res      Array of records containing the id, email, key, expiration date and role id
      *
      * @apiUse InvitationObject
@@ -181,7 +176,6 @@ class InvitationController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": [
      *      {
      *          "id": 1
@@ -196,7 +190,6 @@ class InvitationController extends ItemController
      * @apiErrorExample {json} Email is not specified
      *  HTTP/1.1 400 Bad Request
      *  {
-     *     "success": false,
      *     "error_type": "validation",
      *     "message": "Validation error",
      *     "info": {
@@ -209,7 +202,6 @@ class InvitationController extends ItemController
      * @apiErrorExample {json} Email already exists
      *  HTTP/1.1 400 Bad Request
      *  {
-     *      "success": false,
      *      "error_type": "validation",
      *      "message": "Validation error",
      *      "info": {
@@ -234,7 +226,6 @@ class InvitationController extends ItemController
         }
 
         return new JsonResponse([
-            'success' => true,
             'res' => $invitations,
         ]);
     }
@@ -260,7 +251,6 @@ class InvitationController extends ItemController
      *    "id": 1
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}    res      Invitation data
      *
      * @apiUse InvitationObject
@@ -268,7 +258,6 @@ class InvitationController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "id": 1
      *      "email": "test@example.com",
@@ -281,7 +270,6 @@ class InvitationController extends ItemController
      * @apiErrorExample {json} The id does not exist
      *  HTTP/1.1 400 Bad Request
      *  {
-     *      "success": false,
      *      "error_type": "validation",
      *      "message": "Validation error",
      *      "info": {
@@ -302,7 +290,6 @@ class InvitationController extends ItemController
         $invitation = $this->service->update($requestData['id']);
 
         return new JsonResponse([
-            'success' => true,
             'res' => $invitation,
         ]);
     }
@@ -324,13 +311,11 @@ class InvitationController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *

@@ -165,4 +165,11 @@ class Project extends Model
     {
         return $this->belongsToMany(Role::class, 'projects_roles', 'project_id', 'role_id');
     }
+
+    public function getNameAttribute(): string
+    {
+        return $this->attributes['source'] === 'internal'
+            ? $this->attributes['name']
+            : ucfirst($this->attributes['source']) . ": {$this->attributes['name']}";
+    }
 }

@@ -59,7 +59,6 @@ class TimeIntervalController extends ItemController
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
                 'interval' => $timeInterval,
             ])
         );
@@ -100,7 +99,6 @@ class TimeIntervalController extends ItemController
      *   "end_at": "2013-04-12T16:40:00-04:00"
      * }
      *
-     * @apiSuccess {Boolean}  success   Indicates successful request when `TRUE`
      * @apiSuccess {Object}   interval  Interval
      *
      * @apiUse          TimeIntervalObject
@@ -108,7 +106,6 @@ class TimeIntervalController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "interval": {
      *      "id": 2251,
      *      "task_id": 1,
@@ -279,13 +276,11 @@ class TimeIntervalController extends ItemController
      *
      * @apiUse          TimeIntervalParams
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res      TimeInterval
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "id":1,
      *      "task_id":1,
@@ -335,7 +330,6 @@ class TimeIntervalController extends ItemController
      *   ]
      * }
      *
-     * @apiSuccess {Boolean}    success    Indicates successful request when `TRUE`
      * @apiSuccess {String}     message    Message from server
      * @apiSuccess {Integer[]}  updated    Updated intervals
      * @apiSuccess {Integer[]}  not_found  Not found intervals
@@ -343,7 +337,6 @@ class TimeIntervalController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Intervals successfully updated",
      *    "updated": [12, 123, 45],
      *  }
@@ -351,7 +344,6 @@ class TimeIntervalController extends ItemController
      * @apiSuccessExample {json} Not all intervals updated Response Example
      *  HTTP/1.1 207 Multi-Status
      *  {
-     *    "success": true,
      *    "message": "Some intervals have not been updated",
      *    "updated": [12, 123, 45],
      *    "not_found": [154, 77, 66]
@@ -389,7 +381,6 @@ class TimeIntervalController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -418,7 +409,6 @@ class TimeIntervalController extends ItemController
         if (!$item) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
                     'error_type' => 'query.item_not_found',
                     'message' => 'Item not found',
                 ]),
@@ -432,7 +422,6 @@ class TimeIntervalController extends ItemController
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'success' => true,
                 'res' => $item,
             ])
         );
@@ -458,13 +447,11 @@ class TimeIntervalController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *
@@ -484,13 +471,11 @@ class TimeIntervalController extends ItemController
      *
      * @apiUse          AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   total    Amount of users that we have
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "total": 2
      *  }
      *
@@ -523,7 +508,6 @@ class TimeIntervalController extends ItemController
      *   "intervals": [ 1, 2, 3 ]
      * }
      *
-     * @apiSuccess {Boolean}    success    Indicates successful request when `TRUE`
      * @apiSuccess {String}     message    Message from server
      * @apiSuccess {Integer[]}  removed    Removed intervals
      * @apiSuccess {Integer[]}  not_found  Not found intervals
@@ -531,7 +515,6 @@ class TimeIntervalController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Intervals successfully removed",
      *    "removed": [12, 123, 45],
      *  }
@@ -539,7 +522,6 @@ class TimeIntervalController extends ItemController
      * @apiSuccessExample {json} Not all intervals removed Response Example
      *  HTTP/1.1 207 Multi-Status
      *  {
-     *    "success": true,
      *    "message": "Some intervals have not been removed",
      *    "removed": [12, 123, 45],
      *    "not_found": [154, 77, 66]
@@ -575,7 +557,6 @@ class TimeIntervalController extends ItemController
         });
 
         $responseData = [
-            'success' => true,
             'message' => 'Intervals successfully updated',
         ];
 
@@ -606,7 +587,6 @@ class TimeIntervalController extends ItemController
         }
 
         $responseData = [
-            'success' => true,
             'message' => 'Intervals successfully removed',
         ];
 

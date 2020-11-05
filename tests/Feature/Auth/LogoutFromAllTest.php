@@ -28,11 +28,11 @@ class LogoutFromAllTest extends TestCase
         $this->assertNotEmpty($tokens);
 
         foreach ($tokens as $token) {
-            $this->actingAs($token['token'])->get(self::TEST_URI)->assertSuccess();
+            $this->actingAs($token['token'])->get(self::TEST_URI)->assertOk();
         }
 
         $response = $this->actingAs($tokens[0]['token'])->postJson(self::URI);
-        $response->assertSuccess();
+        $response->assertOk();
 
         foreach ($tokens as $token) {
             $this->actingAs($token['token'])->get(self::TEST_URI)->assertUnauthorized();

@@ -63,7 +63,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskData);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $this->taskData]);
         $this->assertDatabaseHas('tasks', $this->taskData);
     }
@@ -74,7 +74,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->taskData);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $this->taskData]);
         $this->assertDatabaseHas('tasks', $this->taskData);
     }
@@ -99,7 +99,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->taskData);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $this->taskData]);
         $this->assertDatabaseHas('tasks', $this->taskData);
     }

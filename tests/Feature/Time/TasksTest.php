@@ -35,7 +35,7 @@ class TasksTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
-        $response->assertSuccess();
+        $response->assertOk();
 
         //TODO CHECK RESPONSE CONTENT
     }

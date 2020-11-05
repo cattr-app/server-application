@@ -165,7 +165,6 @@ class ProjectController extends ItemController
      *      "description": "Code-monkey development group presents"
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res             Response
      *
      * @apiUse          ProjectObject
@@ -173,7 +172,6 @@ class ProjectController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "name": "SampleOriginalProjectName",
      *      "description": "Code-monkey development group presents",
@@ -320,13 +318,11 @@ class ProjectController extends ItemController
      * @apiParam {String}  description  Project description
      *
      * @apiSuccess {Object}   res      Response object
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      *
      * @apiUse          ProjectObject
      *
      * @apiSuccessExample {json} Response Example
      *  {
-     *    "success": true,
      *    "res": {
      *      "id": 1,
      *      "company_id": 0,
@@ -368,13 +364,11 @@ class ProjectController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *
@@ -402,13 +396,11 @@ class ProjectController extends ItemController
      * @apiPermission   projects_count
      * @apiPermission   projects_full_access
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   total    Amount of projects that we have
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "total": 2
      *  }
      *

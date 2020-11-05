@@ -39,7 +39,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->user->toArray());
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $this->user->toArray()]);
         $this->assertDatabaseHas('users', $this->user->only('id', 'full_name'));
     }
@@ -86,7 +86,7 @@ class EditTest extends TestCase
             $user->only('id', 'full_name', 'email', 'password', 'user_language')
         );
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $user->toArray()]);
         $this->assertDatabaseHas(
             'users',

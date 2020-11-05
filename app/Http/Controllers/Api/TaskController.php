@@ -139,7 +139,6 @@ class TaskController extends ItemController
      *    "priority_id": 1
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res      Task
      *
      * @apiUse TaskObject
@@ -147,7 +146,6 @@ class TaskController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "id": 2,
      *      "project_id": 1,
@@ -210,7 +208,6 @@ class TaskController extends ItemController
      *    "priority_id": 1
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res      Task
      *
      * @apiUse         TaskObject
@@ -218,7 +215,6 @@ class TaskController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "id": 2,
      *      "project_id": 1,
@@ -267,13 +263,11 @@ class TaskController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *
@@ -300,14 +294,13 @@ class TaskController extends ItemController
      * @apiPermission   tasks_count
      * @apiPermission   tasks_full_access
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   total    Amount of tasks that we have
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "total": 2
+     *
      *  }
      *
      * @apiUse          400Error

@@ -59,14 +59,14 @@ class ShowTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['project_id' => $this->project->id]);
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 
     public function test_show_as_manager(): void
     {
         $response = $this->actingAs($this->manager)->postJson(self::URI, ['project_id' => $this->project->id]);
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 
     public function test_show_as_auditor(): void
@@ -87,7 +87,7 @@ class ShowTest extends TestCase
     {
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, ['project_id' => $this->project->id]);
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 
     public function test_show_as_project_auditor(): void

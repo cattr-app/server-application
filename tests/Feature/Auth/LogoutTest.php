@@ -30,7 +30,7 @@ class LogoutTest extends TestCase
 
         $response = $this->actingAs($token[0]['token'])->postJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         $response = $this->actingAs($token[0]['token'])->get(self::TEST_URI);
 
