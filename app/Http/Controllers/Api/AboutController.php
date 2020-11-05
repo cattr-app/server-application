@@ -103,7 +103,6 @@ class AboutController extends Controller
     {
         if (!$this->statsRootUrl) {
             return new JsonResponse([
-                'success' => false,
                 'message' => 'Stats collector URL is not set'
             ], 500);
         }
@@ -117,13 +116,11 @@ class AboutController extends Controller
             $imageInfo = ($imageVersion) ? $this->requestImageInfo($imageVersion) : false;
         } catch (Exception $e) {
             return new JsonResponse([
-                'success' => false,
                 'message' => 'Failed to get information from the server'
             ]);
         }
 
         return new JsonResponse([
-            'success' => true,
             'app' => [
                 'version' => config('app.version'),
                 'instance_id' => $instanceId,
@@ -144,7 +141,6 @@ class AboutController extends Controller
     public function storage(): JsonResponse
     {
         return response()->json([
-            'success' => true,
             'space' => [
                 'left' => StorageCleanerHelper::getFreeSpace(),
                 'used' => StorageCleanerHelper::getUsedSpace(),
@@ -164,6 +160,6 @@ class AboutController extends Controller
     {
         Artisan::queue(RotateScreenshots::class);
 
-        return response()->json(['success' => true, 'message' => 'Ok']);
+        return response()->json(['message' => 'Ok']);
     }
 }

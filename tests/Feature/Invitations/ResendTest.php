@@ -35,7 +35,7 @@ class ResendTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->invitation->id]);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertNotEquals(
             $response->decodeResponseJson()['res']['expires_at'],
             $this->invitation->expires_at->toISOString()

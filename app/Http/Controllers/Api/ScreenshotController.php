@@ -52,7 +52,6 @@ class ScreenshotController extends ItemController
         if (!isset($request->screenshot)) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'screenshot is required',
@@ -99,7 +98,6 @@ class ScreenshotController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -116,7 +114,6 @@ class ScreenshotController extends ItemController
         // Respond to client
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
                 'screenshot' => $createdScreenshot,
             ]),
             200
@@ -203,7 +200,6 @@ class ScreenshotController extends ItemController
         if (!isset($request->id)) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'screenshot id is required',
@@ -231,7 +227,7 @@ class ScreenshotController extends ItemController
             $screenshotToDel->delete();
         }
 
-        return new JsonResponse(['success' => true, 'message' => 'Screenshot successfully deleted']);
+        return new JsonResponse(['message' => 'Screenshot successfully deleted']);
     }
 
     /**
@@ -251,7 +247,6 @@ class ScreenshotController extends ItemController
      *    "screenshot": <binary data>
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res      User
      *
      * @apiUse ScreenshotObject
@@ -259,7 +254,6 @@ class ScreenshotController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "id": 1,
      *      "time_interval_id": 1,
@@ -304,13 +298,11 @@ class ScreenshotController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *
@@ -343,13 +335,11 @@ class ScreenshotController extends ItemController
      *
      * @apiUse          AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   total    Amount of projects that we have
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "total": 2
      *  }
      *

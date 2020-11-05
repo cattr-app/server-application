@@ -58,7 +58,6 @@ class ProjectReportController extends ReportController
                 Filter::process(
                     $this->getEventUniqueName('answer.error.report.show'),
                     [
-                        'success' => false,
                         'error_type' => 'validation',
                         'message' => 'Validation error',
                         'info' => $validator->errors()
@@ -253,7 +252,6 @@ class ProjectReportController extends ReportController
                 Filter::process(
                     $this->getEventUniqueName('answer.error.report.show'),
                     [
-                        'success' => false,
                         'error_type' => 'validation',
                         'message' => 'Validation error',
                         'info' => $validator->errors()

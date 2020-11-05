@@ -55,7 +55,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $editedInterval->toArray());
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
     }
 
@@ -79,7 +79,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $editedInterval->toArray());
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
     }
 
@@ -104,7 +104,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $editedInterval->toArray());
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
     }
 
@@ -131,7 +131,7 @@ class EditTest extends TestCase
             ->actingAs($this->user)
             ->postJson(self::URI, $editedInterval->toArray());
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
     }
 

@@ -61,7 +61,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->toArray());
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $this->task->toArray()]);
         $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->task->description]);
     }
@@ -72,7 +72,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->task->toArray());
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $this->task->toArray()]);
         $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->task->description]);
     }
@@ -101,7 +101,7 @@ class EditTest extends TestCase
 
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->task->toArray());
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $this->task->toArray()]);
         $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->task->description]);
     }

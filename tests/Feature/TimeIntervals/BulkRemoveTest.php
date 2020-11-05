@@ -62,7 +62,7 @@ class BulkRemoveTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         foreach ($this->intervals as $interval) {
             $this->assertSoftDeleted('time_intervals', $interval->toArray());

@@ -58,7 +58,7 @@ class RemoveTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertSoftDeleted('tasks', $this->task->only('id'));
     }
 
@@ -68,7 +68,7 @@ class RemoveTest extends TestCase
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->task->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertSoftDeleted('tasks', $this->task->only('id'));
     }
 
@@ -87,7 +87,7 @@ class RemoveTest extends TestCase
 
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->task->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertSoftDeleted('tasks', $this->task->only('id'));
     }
 

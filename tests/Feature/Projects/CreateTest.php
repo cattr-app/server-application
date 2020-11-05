@@ -40,7 +40,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->projectData);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $this->projectData]);
         $this->assertDatabaseHas('projects', $this->projectData);
     }
@@ -51,7 +51,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->projectData);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['res' => $this->projectData]);
         $this->assertDatabaseHas('projects', $this->projectData);
     }

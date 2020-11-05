@@ -129,13 +129,11 @@ class RoleController extends ItemController
      *    "name": "test"
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res      Response object
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "name": "test",
      *      "updated_at": "2018-10-12 11:44:08",
@@ -165,13 +163,11 @@ class RoleController extends ItemController
      * @apiPermission   roles_count
      * @apiPermission   roles_full_access
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   total    Amount of projects that we have
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "total": 2
      *  }
      *
@@ -290,13 +286,11 @@ class RoleController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *
@@ -327,7 +321,6 @@ class RoleController extends ItemController
      *    "ids": 1
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object[]} res      Rules
      *
      * @apiUse RoleObject
@@ -335,7 +328,6 @@ class RoleController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res":
      *      [
      *        {
@@ -391,7 +383,6 @@ class RoleController extends ItemController
                 Filter::process(
                     $this->getEventUniqueName('answer.error.item.allowed-rules'),
                     [
-                        'success' => false,
                         'error_type' => 'query.item_not_found',
                         'message' => 'Roles not found'
                     ]
@@ -425,7 +416,7 @@ class RoleController extends ItemController
         }
 
 
-        return new JsonResponse(['success' => true, 'res' => Filter::process(
+        return new JsonResponse(['res' => Filter::process(
             $this->getEventUniqueName('answer.success.item.allowed-rules'),
             $items
         )]);
@@ -445,7 +436,6 @@ class RoleController extends ItemController
      * @apiParamExample {json} Request Example
      *  {}
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res      Rules indexed by project ID
      *
      * @apiUse RoleObject
@@ -453,7 +443,6 @@ class RoleController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res":
      *      {
      *        "15": [
@@ -498,7 +487,6 @@ class RoleController extends ItemController
      *    ]
      *  }
      *
-     * @apiSuccess {Boolean}   success  Indicates successful request when `TRUE`
      * @apiSuccess {Object[]}  res      Relations
      *
      * @apiUse RoleObject
@@ -506,7 +494,6 @@ class RoleController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": [
      *      {
      *        "object": "attached-users",
@@ -568,7 +555,7 @@ class RoleController extends ItemController
             }
         }
 
-        return new JsonResponse(['success' => true, 'res' => Filter::process(
+        return new JsonResponse(['res' => Filter::process(
             $this->getEventUniqueName('answer.success.item.project-rules'),
             $items
         )]);
@@ -596,7 +583,6 @@ class RoleController extends ItemController
      *    ]
      *  }
      *
-     * @apiSuccess {Boolean}   success  Indicates successful request when `TRUE`
      * @apiSuccess {Object[]}  res      Relations
      *
      * @apiUse RoleObject
@@ -604,7 +590,6 @@ class RoleController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": [
      *      {
      *        "object": "attached-users",
@@ -640,7 +625,6 @@ class RoleController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -665,7 +649,6 @@ class RoleController extends ItemController
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'success' => true,
                 'res' => $relations,
             ])
         );
@@ -686,7 +669,6 @@ class RoleController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -711,7 +693,6 @@ class RoleController extends ItemController
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'success' => true,
                 'res' => $relations,
             ])
         );

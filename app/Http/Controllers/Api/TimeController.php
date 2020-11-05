@@ -65,7 +65,6 @@ class TimeController extends ItemController
      *    "end_at": "2019-01-01 00:00:00"
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
      * @apiSuccess {Boolean}  time     Total time in seconds
      * @apiSuccess {String}   start    Datetime of first Time Interval start_at
      * @apiSuccess {String}   end      DateTime of last Time Interval end_at
@@ -73,7 +72,6 @@ class TimeController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "time": 338230,
      *    "start": "2020-01-23T19:42:27+00:00",
      *    "end": "2020-04-30T21:58:31+00:00"
@@ -104,7 +102,6 @@ class TimeController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.time.total'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -131,7 +128,6 @@ class TimeController extends ItemController
         });
 
         $responseData = [
-            'success' => true,
             'time' => $totalTime,
             'start' => $timeIntervals->min('start_at'),
             'end' => $timeIntervals->max('end_at')
@@ -239,7 +235,6 @@ class TimeController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.time.total'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -303,7 +298,6 @@ class TimeController extends ItemController
         $last = $itemsQuery->get()->last();
 
         $response = [
-            'success' => true,
             'tasks' => $tasks,
             'total' => [
                 'time' => $totalTime,

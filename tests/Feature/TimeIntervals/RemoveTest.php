@@ -52,7 +52,7 @@ class RemoveTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->timeInterval->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertSoftDeleted('time_intervals', ['id' => $this->timeInterval->id]);
     }
 
@@ -73,7 +73,7 @@ class RemoveTest extends TestCase
             ->actingAs($this->manager)
             ->postJson(self::URI, $this->timeIntervalForManager->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertSoftDeleted('time_intervals', ['id' => $this->timeIntervalForManager->id]);
     }
 
@@ -94,7 +94,7 @@ class RemoveTest extends TestCase
             ->actingAs($this->auditor)
             ->postJson(self::URI, $this->timeIntervalForAuditor->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertSoftDeleted('time_intervals', ['id' => $this->timeIntervalForAuditor->id]);
     }
 
@@ -115,7 +115,7 @@ class RemoveTest extends TestCase
             ->actingAs($this->user)
             ->postJson(self::URI, $this->timeIntervalForUser->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertSoftDeleted('time_intervals', ['id' => $this->timeIntervalForUser->id]);
     }
 

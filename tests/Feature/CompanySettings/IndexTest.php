@@ -25,13 +25,13 @@ class IndexTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 
     public function test_index_as_user(): void
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 }

@@ -85,7 +85,6 @@ class Handler extends ExceptionHandler
     {
         if ($exception instanceof ValidationException) {
             $responseData = [
-                'success' => false,
                 'error_type' => 'validation',
                 'message' => 'Validation error',
                 'info' => $exception->errors()
@@ -180,7 +179,6 @@ class Handler extends ExceptionHandler
         // Debug data will be passed to response body only if application currently in debug mode
         $exceptionResult = array_merge(
             [
-                'success' => false,
                 'message' => $message,
             ],
             $debugData !== false ? ['debug' => $debugData] : [],

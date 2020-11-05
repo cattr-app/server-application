@@ -38,7 +38,7 @@ class RemoveTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->invitation->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDeleted((new Invitation)->getTable(), $this->invitation->only('id'));
     }
 

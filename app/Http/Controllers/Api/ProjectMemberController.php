@@ -28,10 +28,17 @@ class ProjectMemberController extends Controller
     public function show(ShowProjectMemberRequest $request): JsonResponse
     {
         $data = $request->validated();
+        if (!$data) {
+            return new JsonResponse([], 400);
+        }
+
         $projectMembers = $this->projectMemberService->getMembers($data['project_id']);
 
+        if (!isset($projectMembers['id']) || !$projectMembers) {
+            return new JsonResponse([], 404);
+        }
+
         return new JsonResponse([
-            'success' => true,
             'data' => $projectMembers,
         ]);
     }
@@ -52,8 +59,6 @@ class ProjectMemberController extends Controller
 
         $this->projectMemberService->syncMembers($data['project_id'], $userRoles);
 
-        return new JsonResponse([
-            'success' => true,
-        ]);
+        return new JsonResponse();
     }
 }
