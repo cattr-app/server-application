@@ -603,7 +603,9 @@ class TaskController extends ItemController
                 $query->when(
                     $action !== 'edit' && $action !== 'remove',
                     static function (Builder $query) use ($user_id) {
-                        $query->orWhere('user_id', $user_id);
+                        $query->orWhereHas('usersRelation', static function (Builder $query) use ($user_id) {
+                            $query->where('user_id', $user_id)->select('user_id');
+                        });
 
                         $query->orWhereHas('timeIntervals', static function (Builder $query) use ($user_id) {
                             $query->where('user_id', $user_id)->select('user_id');
