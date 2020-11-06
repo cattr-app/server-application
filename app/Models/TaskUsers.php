@@ -49,7 +49,7 @@ class TaskUsers extends Model
         return $this->belongsTo(Task::class, 'task_id');
     }
 
-    protected function setKeysForSaveQuery(Builder $query): Builder
+    protected function setKeysForSaveQuery($query): Builder
     {
         return $query->where('task_id', '=', $this->getAttribute('task_id'))
             ->where('user_id', '=', $this->getAttribute('user_id'));
