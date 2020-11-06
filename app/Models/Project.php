@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Scopes\ProjectScope;
+use App\Traits\ExposePermissions;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -45,6 +47,8 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 
 /**
+ * App\Models\Project
+ *
  * @property int $id
  * @property int $company_id
  * @property string $name
@@ -72,10 +76,18 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|Project withTrashed()
  * @method static QueryBuilder|Project withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @property-read int|null $roles_count
+ * @property-read int|null $tasks_count
+ * @property-read int|null $users_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project whereSource($value)
  */
 class Project extends Model
 {
     use SoftDeletes;
+    use ExposePermissions;
 
     /**
      * @var array
@@ -109,32 +121,18 @@ class Project extends Model
     ];
 
     /**
-     * @param User $user
-     *
-     * @return array
+     * @var array
      */
-    public static function getUserRelatedProjectIds($user): array
-    {
-        $full_access = Role::can($user, 'projects', 'full_access');
+    protected $appends = ['can'];
 
-        if ($full_access) {
-            return static::all(['id'])->pluck('id')->toArray();
-        }
-
-        $project_ids = collect($user->projects->pluck('id'));
-
-        if (count($project_ids) <= 0) {
-            return static::all(['id'])->pluck('id')->toArray();
-        }
-
-        $user_tasks_project_id = Task::where('user_id', $user->id)->pluck('project_id');
-        $user_time_interval_project_id = TimeInterval::join('tasks', 'time_intervals.task_id', '=', 'tasks.id')
-            ->where('time_intervals.user_id', $user->id)->pluck('tasks.project_id');
-
-        $project_ids = collect([$project_ids, $user_tasks_project_id, $user_time_interval_project_id])->collapse();
-
-        return $project_ids->toArray();
-    }
+    /**
+     * @var array
+     */
+    protected $permissions = [
+        'update',
+        'update_members',
+        'destroy',
+    ];
 
     /**
      * Override parent boot and Call deleting event
@@ -142,6 +140,8 @@ class Project extends Model
     protected static function boot(): void
     {
         parent::boot();
+
+        static::addGlobalScope(new ProjectScope);
 
         static::deleting(static function (Project $project) {
             $project->tasks()->delete();
@@ -155,16 +155,21 @@ class Project extends Model
 
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'projects_users', 'project_id', 'user_id');
-    }
-
-    public function usersRelation(): HasMany
-    {
-        return $this->hasMany(ProjectsUsers::class, 'project_id', 'id');
+        return $this->belongsToMany(User::class, 'projects_users')
+            ->withPivot('role_id')
+            ->using(ProjectUserPivot::class)
+            ->withoutGlobalScopes();
     }
 
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'projects_roles', 'project_id', 'role_id');
+    }
+
+    public function getNameAttribute(): string
+    {
+        return $this->attributes['source'] === 'internal'
+            ? $this->attributes['name']
+            : ucfirst($this->attributes['source']) . ": {$this->attributes['name']}";
     }
 }

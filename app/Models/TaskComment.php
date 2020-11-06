@@ -37,6 +37,10 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|TaskComment withTrashed()
  * @method static QueryBuilder|TaskComment withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @property-read int|null $properties_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TaskComment newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TaskComment newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TaskComment query()
  */
 class TaskComment extends Model
 {

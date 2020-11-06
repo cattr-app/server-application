@@ -37,7 +37,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->intervalData);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDatabaseHas('time_intervals', $this->intervalData);
     }
 

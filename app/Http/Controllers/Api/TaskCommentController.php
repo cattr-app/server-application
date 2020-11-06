@@ -47,7 +47,6 @@ class TaskCommentController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -80,7 +79,6 @@ class TaskCommentController extends ItemController
 
             if (!$userAssignedToTask) {
                 return new JsonResponse([
-                    'success' => false,
                     'error_type' => 'authorization.forbidden',
                     'message' => "Access denied to this task",
                 ], 403);
@@ -89,7 +87,6 @@ class TaskCommentController extends ItemController
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
                 'res' => $item,
             ])
         );
@@ -108,7 +105,7 @@ class TaskCommentController extends ItemController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/task-comment/create Create
+     * @api             {post} /task-comment/create Create
      * @apiDescription  Create Task Comment
      *
      * @apiVersion      1.0.0
@@ -137,7 +134,7 @@ class TaskCommentController extends ItemController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/task-comment/list List
+     * @api             {post} /task-comment/list List
      * @apiDescription  Get list of Task Comments
      *
      * @apiVersion      1.0.0
@@ -183,7 +180,7 @@ class TaskCommentController extends ItemController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/task-comment/show Show
+     * @api             {post} /task-comment/show Show
      * @apiDescription  Show Task Comment
      *
      * @apiVersion      1.0.0
@@ -193,11 +190,14 @@ class TaskCommentController extends ItemController
      * @apiPermission   task_comment_show
      * @apiPermission   task_comment_full_access
      */
-
+    public function show(Request $request): JsonResponse
+    {
+        return $this->_show($request);
+    }
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/task-comment/remove Destroy
+     * @api             {post} /task-comment/remove Destroy
      * @apiDescription  Destroy Task Comment
      *
      * @apiVersion      1.0.0
@@ -218,7 +218,6 @@ class TaskCommentController extends ItemController
         if (!$idInt) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'Invalid id',
@@ -252,7 +251,6 @@ class TaskCommentController extends ItemController
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'success' => true,
                 'message' => 'Item has been removed'
             ])
         );

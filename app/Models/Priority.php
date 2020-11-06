@@ -9,12 +9,18 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 
 /**
+ * App\Models\Priority
+ *
  * @property int $id
  * @property string $name
  * @property-read Collection|Task[] $tasks
  * @method static EloquentBuilder|Priority whereId($value)
  * @method static EloquentBuilder|Priority whereName($value)
  * @mixin EloquentIdeHelper
+ * @property-read int|null $tasks_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Priority newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Priority newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Priority query()
  */
 class Priority extends Model
 {

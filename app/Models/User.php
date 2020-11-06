@@ -3,6 +3,8 @@
 namespace App\Models;
 
 use App\Mail\ResetPassword;
+use App\Scopes\UserScope;
+use App\Traits\HasRole;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -95,6 +97,8 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
 /**
+ * App\Models\User
+ *
  * @property int $id
  * @property string $full_name
  * @property string $email
@@ -109,6 +113,8 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property int $web_and_app_monitoring
  * @property int $screenshots_interval
  * @property int $active
+ * @property int $nonce
+ * @property int $client_installed
  * @property string $password
  * @property string $timezone
  * @property string $user_language
@@ -122,7 +128,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property Task[]|Collection $tasks
  * @property TimeInterval[]|Collection $timeIntervals
  * @property Role $role
- * @property string|null $remember_token
  * @property int $change_password
  * @property bool $invitation_sent
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
@@ -157,11 +162,28 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static QueryBuilder|User withTrashed()
  * @method static QueryBuilder|User withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @property string $type
+ * @property-read int|null $notifications_count
+ * @property-read int|null $projects_count
+ * @property-read int|null $projects_relation_count
+ * @property-read int|null $properties_count
+ * @property-read int|null $tasks_count
+ * @property-read int|null $time_intervals_count
+ * @property-read int|null $tokens_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereInvitationSent($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereIsAdmin($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereRoleId($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereType($value)
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereUserLanguage($value)
  */
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use SoftDeletes;
+    use HasRole;
 
     /**
      * table name from database
@@ -204,6 +226,8 @@ class User extends Authenticatable implements JWTSubject
         'user_language',
         'type',
         'invitation_sent',
+        'nonce',
+        'client_installed'
     ];
 
     /**
@@ -231,6 +255,8 @@ class User extends Authenticatable implements JWTSubject
         'user_language' => 'string',
         'type' => 'string',
         'invitation_sent' => 'boolean',
+        'nonce' => 'integer',
+        'client_installed' => 'integer',
     ];
 
 
@@ -252,8 +278,15 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $hidden = [
         'password',
-        'remember_token',
+        'nonce',
     ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::addGlobalScope(new UserScope);
+    }
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -272,7 +305,9 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims(): array
     {
-        return [];
+        return [
+            'nonce' => $this->nonce,
+        ];
     }
 
     /**
@@ -290,42 +325,6 @@ class User extends Authenticatable implements JWTSubject
     {
         return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id')
             ->withPivot('role_id');
-    }
-
-    /**
-     * @param string $tokenString
-     * @return Token
-     */
-    public function addToken(string $tokenString): Token
-    {
-        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
-        /** @var Token $token */
-        $token = $this->tokens()->create(['token' => $tokenString, 'expires_at' => $tokenExpires]);
-        return $token;
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function tokens(): HasMany
-    {
-        return $this->hasMany(Token::class);
-    }
-
-    /**
-     * @param string $token
-     */
-    public function invalidateToken(string $token)
-    {
-        $this->tokens()->where('token', $token)->delete();
-    }
-
-    /**
-     * @param string|null $except
-     */
-    public function invalidateAllTokens(?string $except = null)
-    {
-        $this->tokens()->where('token', '!=', $except)->delete();
     }
 
     /**
@@ -381,23 +380,16 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * @param string $object
-     * @param string $action
-     * @param string|null $id
-     * @return bool
-     */
-    public function allowed(string $object, string $action, $id = null): bool
-    {
-        return Role::can($this, $object, $action, $id);
-    }
-
-    /**
      * Set the user's password.
      *
-     * @param $value
+     * @param string $password
      */
-    public function setPasswordAttribute($value): void
+    public function setPasswordAttribute(string $password): void
     {
-        $this->attributes['password'] = Hash::make($value);
+        if (Hash::needsRehash($password)) {
+            $password = Hash::make($password);
+        }
+
+        $this->attributes['password'] = $password;
     }
 }

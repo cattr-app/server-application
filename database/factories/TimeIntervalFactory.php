@@ -1,21 +1,38 @@
 <?php
 
+namespace Database\Factories;
+
 use App\Models\TimeInterval;
-use Illuminate\Database\Eloquent\Factory;
+use Illuminate\Database\Eloquent\Factories\Factory;
 
-/** @var Factory $factory */
-$factory->define(TimeInterval::class, static function (Faker $faker) {
-    $mouseFill = mt_rand(0, 100);
-    $keyboardFill = mt_rand(0, 100 - $mouseFill);
-    $activityFill = $mouseFill + $keyboardFill;
+class TimeIntervalFactory extends Factory
+{
+    /**
+     * The name of the factory's corresponding model.
+     *
+     * @var string
+     */
+    protected $model = TimeInterval::class;
 
-    return [
-        'task_id' => 1,
-        'user_id' => 1,
-        'start_at' => date('Y-m-d H:i:s', now()),
-        'end_at' => date('Y-m-d H:i:s', now()->addMinutes(5)),
-        'activity_fill' => $activityFill,
-        'mouse_fill' => $mouseFill,
-        'keyboard_fill' => $keyboardFill,
-    ];
-});
+    /**
+     * Define the model's default state.
+     *
+     * @return array
+     */
+    public function definition(): array
+    {
+        $mouseFill = random_int(0, 100);
+        $keyboardFill = random_int(0, 100 - $mouseFill);
+        $activityFill = $mouseFill + $keyboardFill;
+
+        return [
+            'task_id' => 1,
+            'user_id' => 1,
+            'start_at' => date('Y-m-d H:i:s', now()),
+            'end_at' => date('Y-m-d H:i:s', now()->addMinutes(5)),
+            'activity_fill' => $activityFill,
+            'mouse_fill' => $mouseFill,
+            'keyboard_fill' => $keyboardFill,
+        ];
+    }
+}

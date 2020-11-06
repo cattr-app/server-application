@@ -48,6 +48,8 @@ class ProjectFactory extends Factory
             $this->hideTimestamps();
         }
 
+        $this->hideCanAttribute();
+
         return $this->project;
     }
 
@@ -65,6 +67,7 @@ class ProjectFactory extends Factory
             'company_id' => self::COMPANY_ID,
             'name' => $faker->company,
             'description' => $faker->text(self::DESCRIPTION_LENGTH),
+            'source' => 'internal',
         ];
     }
 

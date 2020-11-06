@@ -1,6 +1,4 @@
 {
-  "EmailReports": true,
-  "EventListener": true,
   "GitlabIntegration": true,
   "Invoices": true,
   "RedmineIntegration": true,

@@ -1,10 +1,11 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\User;
 use App\Models\Rule;
 use Illuminate\Database\Seeder;
 use Symfony\Component\Console\Output\ConsoleOutput;
-
 
 /**
  * Class AdminTableSeeder

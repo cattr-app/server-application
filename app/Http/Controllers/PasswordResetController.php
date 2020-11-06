@@ -42,13 +42,11 @@ class PasswordResetController extends BaseController
      *    "token": "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Message from server
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Password reset data is valid"
      *  }
      *
@@ -82,7 +80,7 @@ class PasswordResetController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA);
         }
 
-        return new JsonResponse(['success' => true, 'message' => 'Password reset data is valid']);
+        return new JsonResponse(['message' => 'Password reset data is valid']);
     }
 
     /**
@@ -102,13 +100,11 @@ class PasswordResetController extends BaseController
      *    "recaptcha": "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Message from server
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Link for restore password has been sent to specified email"
      *  }
      *
@@ -147,7 +143,6 @@ class PasswordResetController extends BaseController
         Password::broker()->sendResetLink(['email' => $credentials['email']]);
 
         return new JsonResponse([
-            'success' => true,
             'message' => 'Link for restore password has been sent to specified email',
         ]);
     }
@@ -174,7 +169,6 @@ class PasswordResetController extends BaseController
      *    "password": "amazingpassword"
      *  }
      *
-     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL in seconds
@@ -185,7 +179,6 @@ class PasswordResetController extends BaseController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
      *    "token_type": "bearer",
      *    "password": "amazingpassword",
@@ -237,18 +230,13 @@ class PasswordResetController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        $tokenString = auth()->refresh();
-        /** @var User $user */
-        $user = auth()->user();
-
-        $token = $user->addToken($tokenString);
+        $token = auth()->setTTL(config('auth.lifetime_minutes.jwt'))->refresh();
 
         return new JsonResponse([
-            'success' => true,
-            'access_token' => $token->token,
+            'access_token' => $token,
             'token_type' => 'bearer',
-            'expires_in' => $token->expires_at,
-            'user' => $user
+            'expires_in' => now()->addMinutes(config('auth.lifetime_minutes.jwt'))->toIso8601String(),
+            'user' => auth()->user(),
         ]);
     }
 }

@@ -38,7 +38,7 @@ class ValidateTest extends TestCase
 
         $response = $this->postJson(self::URI, $reset);
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 
     public function test_invalid_token(): void
@@ -68,7 +68,7 @@ class ValidateTest extends TestCase
 
         $response = $this->postJson(self::URI, $reset);
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 
     public function test_expired(): void

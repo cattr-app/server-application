@@ -2,10 +2,10 @@
 
 namespace App\Http\Requests\User;
 
+use App\Models\User;
 use App\Presenters\User\OrdinaryUserPresenter;
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
@@ -21,8 +21,12 @@ class EditUserRequest extends FormRequest
      */
     public function authorize(Request $request, OrdinaryUserPresenter $user): bool
     {
-        if (Auth::check() && Auth::user()->is_admin) {
+        if (auth()->check() && auth()->user()->hasRole('admin')) {
             return true;
+        }
+
+        if (!auth()->user()->can('update', User::find(request('id')))) {
+            return false;
         }
 
         $fillableFields = $user->getFillable();
