@@ -21,7 +21,6 @@ integration_testing:
   script:
     - COMPOSER_MEMORY_LIMIT=-1 composer install
     - cp .env.testing.example .env.testing
-    - cp modules_statuses.example.json modules_statuses.json
     - php artisan migrate --env=testing
     - php artisan db:seed --class=InitialSeeder --env=testing
     - vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
