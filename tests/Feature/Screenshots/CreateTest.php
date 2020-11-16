@@ -41,7 +41,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDatabaseHas('screenshots', $response->json('screenshot'));
         Storage::assertExists('uploads/screenshots/' . basename($response->json('screenshot.path')));
     }

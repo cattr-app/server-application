@@ -25,7 +25,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} Unauthorized
      *  HTTP/1.1 401 Unauthorized
      *  {
-     *    "success": false,
      *    "message": "Not authorized",
      *    "error_type": "authorization.unauthorized"
      *  }
@@ -42,7 +41,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} Captcha
      *  HTTP/1.1 429 Too Many Requests
      *  {
-     *    "success": false,
      *    "message": "Invalid captcha",
      *    "error_type": "authorization.captcha"
      *  }
@@ -56,7 +54,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} Limiter
      *  HTTP/1.1 423 Locked
      *  {
-     *    "success": false,
      *    "message": "Enhance Your Calm",
      *    "error_type": "authorization.banned_enhance_your_calm"
      *  }
@@ -70,7 +67,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} Token mismatch
      *  HTTP/1.1 401 Unauthorized
      *  {
-     *    "success": false,
      *    "message": "Token mismatch",
      *    "error_type": "authorization.token_mismatch"
      *  }
@@ -84,7 +80,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} Token expired
      *  HTTP/1.1 401 Unauthorized
      *  {
-     *    "success": false,
      *    "message": "Token expired",
      *    "error_type": "authorization.token_expired"
      *  }
@@ -98,7 +93,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} User deactivated
      *  HTTP/1.1 403 Forbidden
      *  {
-     *    "success": false,
      *    "message": "User deactivated",
      *    "error_type": "authorization.user_disabled"
      *  }
@@ -112,7 +106,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} Params validation
      *  HTTP/1.1 400 Bad Request
      *  {
-     *    "success": false,
      *    "message": "Invalid params",
      *    "error_type": "authorization.wrong_params"
      *  }
@@ -126,7 +119,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} No such user
      *  HTTP/1.1 404 Not Found
      *  {
-     *    "success": false,
      *    "message": "User with such email isn’t found",
      *    "error_type": "authorization.user_not_found"
      *  }
@@ -140,7 +132,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} Invalid password reset data
      *  HTTP/1.1 401 Unauthorized
      *  {
-     *    "success": false,
      *    "message": "Invalid password reset data",
      *    "error_type": "authorization.invalid_password_data"
      *  }
@@ -154,7 +145,6 @@ class AuthorizationException extends BaseAuthorizationException implements
      * @apiErrorExample {json} Forbidden
      *  HTTP/1.1 403 Forbidden
      *  {
-     *    "success": false,
      *    "message": "Access denied to this item",
      *    "error_type": "authorization.forbidden"
      *  }
@@ -173,7 +163,7 @@ class AuthorizationException extends BaseAuthorizationException implements
         self::ERROR_TYPE_VALIDATION_FAILED => ['code' => 400, 'message' => 'Invalid params'],
         self::ERROR_TYPE_USER_NOT_FOUND => ['code' => 404, 'message' => 'User with such email isn’t found'],
         self::ERROR_TYPE_INVALID_PASSWORD_RESET_DATA => ['code' => 401, 'message' => 'Invalid password reset data'],
-        self::ERROR_TYPE_FORBIDDEN => ['code' => 403, 'message' => 'Access denied to this item']
+        self::ERROR_TYPE_FORBIDDEN => ['code' => 403, 'message' => 'This action is unauthorized']
     ];
 
     /**

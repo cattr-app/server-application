@@ -35,6 +35,10 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Invitation newQuery()
  * @method static EloquentBuilder|Invitation query()
  * @mixin EloquentIdeHelper
+ * @property int|null $role_id
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Invitation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Invitation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Invitation query()
  */
 class Invitation extends Model
 {

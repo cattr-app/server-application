@@ -26,6 +26,10 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Priority newQuery()
  * @method static EloquentBuilder|Priority query()
  * @mixin EloquentIdeHelper
+ * @property-read int|null $tasks_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Priority newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Priority newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Priority query()
  */
 class Priority extends Model
 {

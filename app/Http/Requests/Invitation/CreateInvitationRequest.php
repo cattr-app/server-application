@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Invitation;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 
 class CreateInvitationRequest extends FormRequest
 {
@@ -13,7 +13,7 @@ class CreateInvitationRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return auth()->user()->hasRole('admin');
     }
 
     /**

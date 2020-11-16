@@ -26,7 +26,7 @@ class CountTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['total' => Invitation::count()]);
     }
 

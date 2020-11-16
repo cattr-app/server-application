@@ -70,6 +70,12 @@ use Throwable;
  * @method static QueryBuilder|Role withTrashed()
  * @method static QueryBuilder|Role withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @property-read int|null $projects_count
+ * @property-read int|null $rules_count
+ * @property-read int|null $users_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role query()
  */
 class Role extends Model
 {
@@ -104,179 +110,16 @@ class Role extends Model
     ];
 
     /**
-     * @throws Exception
+     * @return HasMany
      */
-    public static function updateRules(): void
-    {
-        /** @var array[] $actionList */
-        $actionList = Rule::getActionList();
-
-        /** @var Role $role */
-        foreach (static::where([])->get() as $role) {
-            foreach ($role->rules as $rule) {
-                if (isset($actionList[$rule->object][$rule->action])) {
-                    continue;
-                }
-
-                $rule->delete();
-            }
-
-            foreach ($actionList as $object => $actions) {
-                foreach ($actions as $action => $name) {
-                    $rule = Rule::withTrashed()->where([
-                        'role_id' => $role->id,
-                        'object' => $object,
-                        'action' => $action,
-                    ])->first();
-
-                    if (!$rule) {
-                        Rule::create([
-                            'role_id' => $role->id,
-                            'object' => $object,
-                            'action' => $action,
-                            'allow' => false,
-                        ]);
-                    } elseif ($rule->trashed()) {
-                        $rule->restore();
-                        $rule->allow = false;
-                        $rule->save();
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * @param $role_id
-     * @param $object
-     * @param $action
-     * @param $allow
-     *
-     * @return bool
-     * @throws  Throwable
-     */
-    public static function updateAllow($role_id, $object, $action, $allow): bool
-    {
-        /** @var Rule $rule */
-        $rule = Rule::query()->where([
-            'role_id' => $role_id,
-            'object' => $object,
-            'action' => $action,
-        ])->first();
-
-        $user = Auth::user();
-
-        if (!$rule) {
-            return false;
-        }
-
-        if (!static::can($user, 'rules', 'full_access')) {
-            throw_if(
-                $user->role_id === $rule->role_id,
-                new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN)
-            );
-        }
-        throw_if(
-            $role_id === 1 && $object === 'rules' && $action === 'full_access',
-            new AuthorizationException(AuthorizationException::ERROR_TYPE_FORBIDDEN)
-        );
-
-        $rule->allow = $allow;
-        return $rule->save();
-    }
-
-    /**
-     * @param $user
-     * @param $object
-     * @param $action
-     * @param $id
-     *
-     * @return bool
-     */
-    public static function can($user, $object, $action, $id = null): bool
-    {
-        if ((bool)$user->is_admin) {
-            return true;
-        }
-
-        // TODO: need refactoring
-
-        /** @var User $user */
-        $userRoleIds = [$user->role_id];
-
-        $projectID = request()->input('project_id', null);
-
-        // Check access to the specific entity
-        if (isset($id)) {
-            $projectID = null;
-
-            // Get ID of the related project
-            switch ($object) {
-                case 'projects':
-                    $projectID = $id;
-                    break;
-
-                case 'tasks':
-                    $task = Task::find($id);
-                    if (isset($task)) {
-                        $projectID = $task->project_id;
-                    }
-                    break;
-
-                case 'time-intervals':
-                    $interval = TimeInterval::with('task')->find($id);
-                    if (isset($interval)) {
-                        $projectID = $interval->task->project_id;
-                    }
-                    break;
-
-                case 'screenshots':
-                    $screenshot = Screenshot::with('timeInterval.task')->find($id);
-                    if (isset($screenshot)) {
-                        $projectID = $screenshot->timeInterval->task->project_id;
-                    }
-                    break;
-
-                default:
-                    break;
-            }
-        }
-
-        if (isset($projectID) && !is_array($projectID)) {
-            // Get role of the user in the project
-            $projectUserRelation = ProjectsUsers::where([
-                'project_id' => $projectID,
-                'user_id' => $user->id,
-            ])->first();
-            if (isset($projectUserRelation)) {
-                $userRoleIds[] = $projectUserRelation->role_id;
-            }
-        }
-
-        $rules = Rule::query()->whereIn('role_id', $userRoleIds)->where([
-            'object' => $object,
-            'action' => $action,
-        ])->get();
-
-        foreach ($rules as $rule) {
-            if ((bool)$rule->allow) {
-                return true;
-            }
-        }
-
-        return false;
-    }
-
     public function users(): HasMany
     {
         return $this->hasMany(User::class, 'role_id', 'id');
     }
 
-    public function rules(): HasMany
-    {
-        return $this->hasMany(Rule::class, 'role_id');
-    }
-
+    /**
+     * @return BelongsToMany
+     */
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'projects_roles', 'role_id', 'project_id');

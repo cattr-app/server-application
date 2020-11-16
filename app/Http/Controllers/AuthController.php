@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Str;
 use Psr\SimpleCache\InvalidArgumentException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
 class AuthController extends BaseController
@@ -57,7 +58,6 @@ class AuthController extends BaseController
      *    "recaptcha": "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
      *  }
      *
-     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {ISO8601}  expires_in    Token TTL
@@ -68,7 +68,6 @@ class AuthController extends BaseController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
      *    "token_type": "bearer",
      *    "expires_in": "2020-12-26T14:18:32+00:00",
@@ -145,13 +144,11 @@ class AuthController extends BaseController
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Message from server
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Successfully logged out"
      *  }
      *
@@ -165,7 +162,7 @@ class AuthController extends BaseController
     {
         auth()->logout();
 
-        return new JsonResponse(['success' => true, 'message' => 'Successfully logged out']);
+        return new JsonResponse(['message' => 'Successfully logged out']);
     }
 
     /**
@@ -178,13 +175,11 @@ class AuthController extends BaseController
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Message from server
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Successfully logged out from all sessions"
      *  }
      *
@@ -203,7 +198,7 @@ class AuthController extends BaseController
 
         auth()->logout();
 
-        return new JsonResponse(['success' => true, 'message' => 'Successfully reset all sessions']);
+        return new JsonResponse(['message' => 'Successfully reset all sessions']);
     }
 
     /**
@@ -216,7 +211,6 @@ class AuthController extends BaseController
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   user     User Entity
      *
      * @apiUse         UserObject
@@ -224,7 +218,6 @@ class AuthController extends BaseController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "user": {
      *      "id": 1,
      *      "full_name": "Admin",
@@ -255,7 +248,7 @@ class AuthController extends BaseController
      */
     public function me(Request $request): JsonResponse
     {
-        return new JsonResponse(['success' => true, 'user' => $request->user()]);
+        return new JsonResponse(['user' => $request->user()]);
     }
 
     /**
@@ -268,7 +261,6 @@ class AuthController extends BaseController
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL 8601String Date
@@ -297,7 +289,6 @@ class AuthController extends BaseController
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL 8601String Date
@@ -305,7 +296,6 @@ class AuthController extends BaseController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "access_token": "r6nPiGocAWdD5ZF60dTkUboVAWSXsUScpp7m9x9R",
      *    "token_type": "desktop",
      *    "expires_in": "2020-12-26T14:18:32+00:00"
@@ -345,7 +335,6 @@ class AuthController extends BaseController
      *    "Authorization": "desktop r6nPiGocAWdD5ZF60dTkUboVAWSXsUScpp7m9x9R"
      *  }
      *
-     * @apiSuccess {Boolean}  success       Indicates successful request when `TRUE`
      * @apiSuccess {String}   access_token  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {String}   expires_in    Token TTL 8601String Date
@@ -359,7 +348,6 @@ class AuthController extends BaseController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "access_token": "16184cf3b2510464a53c0e573c75740540fe...",
      *    "token_type": "bearer",
      *    "expires_in": "2020-12-26T14:18:32+00:00",
@@ -406,7 +394,6 @@ class AuthController extends BaseController
         int $lifetime = null
     ): JsonResponse {
         return new JsonResponse([
-            'success' => true,
             'access_token' => $token,
             'token_type' => $tokenType,
             'expires_in' => now()->addMinutes($lifetime ?? config('auth.lifetime_minutes.jwt'))->toIso8601String(),

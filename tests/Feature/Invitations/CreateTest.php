@@ -12,8 +12,10 @@ class CreateTest extends TestCase
 {
     private const URI = 'invitations/create';
 
-    private User $user;
     private User $admin;
+    private User $manager;
+    private User $auditor;
+    private User $user;
 
     private array $invitationRequestData;
     private array $invitationModelData;
@@ -22,8 +24,10 @@ class CreateTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = UserFactory::asUser()->withTokens()->create();
-        $this->admin = UserFactory::asAdmin()->withTokens()->create();
+        $this->admin = UserFactory::refresh()->asAdmin()->withTokens()->create();
+        $this->manager = UserFactory::refresh()->asManager()->withTokens()->create();
+        $this->auditor = UserFactory::refresh()->asAuditor()->withTokens()->create();
+        $this->user = UserFactory::refresh()->asUser()->withTokens()->create();
 
         $this->invitationRequestData = InvitationFactory::createRequestData();
         $this->invitationModelData = InvitationFactory::createRandomModelData();
@@ -33,13 +37,27 @@ class CreateTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->invitationRequestData);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         $this->assertDatabaseHas((new Invitation)->getTable(), $this->invitationRequestData['users'][0]);
 
         foreach ($response->json('res') as $invitation) {
             $this->assertDatabaseHas((new Invitation)->getTable(), $invitation);
         }
+    }
+
+    public function test_create_as_manager(): void
+    {
+        $response = $this->actingAs($this->manager)->postJson(self::URI, $this->invitationRequestData);
+
+        $response->assertForbidden();
+    }
+
+    public function test_create_as_auditor(): void
+    {
+        $response = $this->actingAs($this->auditor)->postJson(self::URI, $this->invitationRequestData);
+
+        $response->assertForbidden();
     }
 
     public function test_create_as_user(): void
@@ -57,7 +75,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->invitationRequestData);
 
-        $response->assertStatus(400);
+        $response->assertValidationError();
     }
 
     public function test_unauthorized(): void

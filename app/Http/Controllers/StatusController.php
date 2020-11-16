@@ -16,15 +16,12 @@ class StatusController extends Controller
      * @apiName         Status
      * @apiGroup        Status
      *
-     * @apiSuccess {Boolean}  success   Request status
-     * @apiSuccess {Boolean}  cattr     Indicates successful request when `TRUE`
      * @apiSuccess {String}   cat       A cat for you
      * @apiSuccess {Array}    modules   Information about installed modules
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "cattr": true,
      *    "cat": "(=ㅇ༝ㅇ=)"
      *  }
@@ -32,7 +29,6 @@ class StatusController extends Controller
     public function __invoke(): JsonResponse
     {
         return new JsonResponse([
-            'success' => true,
             'cattr' => true,
             'cat' => CatHelper::getCat(),
             'version' => config('app.version'),

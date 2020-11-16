@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\TimeIntervalScope;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -93,6 +94,12 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|TimeInterval withoutTrashed()
  * @method static QueryBuilder|TimeInterval onlyTrashed()
  * @mixin EloquentIdeHelper
+ * @property bool $is_manual
+ * @property-read int|null $properties_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TimeInterval newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TimeInterval newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TimeInterval query()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TimeInterval whereIsManual($value)
  */
 class TimeInterval extends Model
 {
@@ -150,6 +157,8 @@ class TimeInterval extends Model
     {
         parent::boot();
 
+        static::addGlobalScope(new TimeIntervalScope);
+
         static::deleting(static function ($intervals) {
             /** @var TimeInterval $intervals */
             $intervals->screenshot()->delete();
@@ -163,7 +172,7 @@ class TimeInterval extends Model
 
     public function task(): BelongsTo
     {
-        return $this->belongsTo(Task::class, 'task_id');
+        return $this->belongsTo(Task::class, 'task_id')->withoutGlobalScopes();
     }
 
     public function user(): BelongsTo

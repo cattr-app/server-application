@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Scopes\ScreenshotScope;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
@@ -75,6 +76,9 @@ use Storage;
  * @method static QueryBuilder|Screenshot withoutTrashed()
  * @method static QueryBuilder|Screenshot onlyTrashed()
  * @mixin EloquentIdeHelper
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Screenshot newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Screenshot newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Screenshot query()
  */
 class Screenshot extends Model
 {
@@ -118,6 +122,13 @@ class Screenshot extends Model
         'deleted_at',
     ];
 
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::addGlobalScope(new ScreenshotScope);
+    }
+
     public static function createByInterval(TimeInterval $timeInterval, string $path = self::DEFAULT_PATH): Screenshot
     {
         $screenshot = Image::make(storage_path('app/' . $path));
@@ -142,51 +153,5 @@ class Screenshot extends Model
     public function timeInterval(): BelongsTo
     {
         return $this->belongsTo(TimeInterval::class, 'time_interval_id');
-    }
-
-    public function access(?User $user): bool
-    {
-        if (!isset($user)) {
-            return false;
-        }
-
-        $userId = optional($this->timeInterval)->user_id;
-
-        // Allow root to see all screenshots.
-        if (Role::can($user, 'screenshots', 'full_access')) {
-            return true;
-        }
-
-        // Allow users with rule see all screenshots.
-        if (Role::can($user, 'screenshots', 'list')) {
-            return true;
-        }
-
-        // Allow user to see own screenshots.
-        if ($user->id === $userId) {
-            return true;
-        }
-
-        if (Role::can($user, 'screenshots', 'show', $this->id)) {
-            return true;
-        }
-
-        // Allow a manager to see screenshots of related users.
-        if (Role::can($user, 'screenshots', 'manager_access') && Role::can($user, 'projects', 'relations')) {
-            $projectIds = $user->projects->pluck('id');
-            $userIds = User::query()
-                ->whereHas('timeIntervals', static function (EloquentBuilder $query) use ($projectIds) {
-                    $query->whereHas('task', static function (EloquentBuilder $query) use ($projectIds) {
-                        $query->whereHas('project', static function (EloquentBuilder $query) use ($projectIds) {
-                            $query->whereIn('id', $projectIds);
-                        });
-                    });
-                })->select('id')->get('id')->pluck('id');
-
-            if ($userIds->contains($userId)) {
-                return true;
-            }
-        }
-        return false;
     }
 }

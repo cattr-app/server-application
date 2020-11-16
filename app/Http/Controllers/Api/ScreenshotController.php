@@ -43,7 +43,7 @@ class ScreenshotController extends ItemController
             $request->offsetUnset('project_id');
         }
 
-        return parent::index($request);
+        return $this->_index($request);
     }
 
     public function create(Request $request): JsonResponse
@@ -52,7 +52,6 @@ class ScreenshotController extends ItemController
         if (!isset($request->screenshot)) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'screenshot is required',
@@ -99,7 +98,6 @@ class ScreenshotController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -116,7 +114,6 @@ class ScreenshotController extends ItemController
         // Respond to client
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
                 'screenshot' => $createdScreenshot,
             ]),
             200
@@ -132,7 +129,7 @@ class ScreenshotController extends ItemController
     }
 
     /**
-     * @api             {get,post} /v1/screenshots/list List
+     * @api             {get,post} /screenshots/list List
      * @apiDescription  Get list of Screenshots
      *
      * @apiVersion      1.0.0
@@ -203,7 +200,6 @@ class ScreenshotController extends ItemController
         if (!isset($request->id)) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'screenshot id is required',
@@ -231,11 +227,11 @@ class ScreenshotController extends ItemController
             $screenshotToDel->delete();
         }
 
-        return new JsonResponse(['success' => true, 'message' => 'Screenshot successfully deleted']);
+        return new JsonResponse(['message' => 'Screenshot successfully deleted']);
     }
 
     /**
-     * @api             {post} /v1/screenshots/create Create
+     * @api             {post} /screenshots/create Create
      * @apiDescription  Create Screenshot
      *
      * @apiVersion     1.0.0
@@ -251,7 +247,6 @@ class ScreenshotController extends ItemController
      *    "screenshot": <binary data>
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res      User
      *
      * @apiUse ScreenshotObject
@@ -259,7 +254,6 @@ class ScreenshotController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "id": 1,
      *      "time_interval_id": 1,
@@ -285,7 +279,7 @@ class ScreenshotController extends ItemController
     }
 
     /**
-     * @api             {post} /v1/screenshots/remove Destroy
+     * @api             {post} /screenshots/remove Destroy
      * @apiDescription  Destroy Screenshot
      *
      * @apiVersion      1.0.0
@@ -304,13 +298,11 @@ class ScreenshotController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *
@@ -322,7 +314,7 @@ class ScreenshotController extends ItemController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/screenshots/bulk-create Bulk Create
+     * @api             {post} /screenshots/bulk-create Bulk Create
      * @apiDescription  Create Screenshot
      *
      * @apiVersion      1.0.0
@@ -334,7 +326,66 @@ class ScreenshotController extends ItemController
      */
 
     /**
-     * @api             {post} /v1/screenshots/show Show
+     * @api             {get,post} /screenshot/count Count
+     * @apiDescription  Count Screenshots
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Count
+     * @apiGroup        Screenshot
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiSuccess {String}   total    Amount of projects that we have
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "total": 2
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+    public function count(Request $request): JsonResponse
+    {
+        return $this->_count($request);
+    }
+
+    /**
+     * @api             {post} /screenshots/edit Edit
+     * @apiDescription  Edit Screenshot
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Edit
+     * @apiGroup        Screenshot
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   screenshots_edit
+     * @apiPermission   screenshots_full_access
+     *
+     * @apiParam {Integer}  id                ID
+     * @apiParam {Integer}  time_interval_id  Time Interval id
+     * @apiParam {String}   path              Image path URI
+     *
+     * @apiParamExample {json} Simple Request Example
+     *  {
+     *    "id": 1,
+     *    "time_interval_id": 2,
+     *    "path": "test"
+     *  }
+     *
+     * @apiUse         ScreenshotObject
+     *
+     * @apiUse         400Error
+     * @apiUse         ValidationError
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     */
+
+    /**
+     * @api             {post} /screenshots/show Show
      * @apiDescription  Show Screenshot
      *
      * @apiVersion      1.0.0
@@ -380,153 +431,8 @@ class ScreenshotController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-
-    /**
-     * @api             {post} /v1/screenshots/edit Edit
-     * @apiDescription  Edit Screenshot
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Edit
-     * @apiGroup        Screenshot
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   screenshots_edit
-     * @apiPermission   screenshots_full_access
-     *
-     * @apiParam {Integer}  id                ID
-     * @apiParam {Integer}  time_interval_id  Time Interval id
-     * @apiParam {String}   path              Image path URI
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *    "id": 1,
-     *    "time_interval_id": 2,
-     *    "path": "test"
-     *  }
-     *
-     * @apiUse         ScreenshotObject
-     *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ItemNotFoundError
-     */
-
-    /**
-     * @api             {get,post} /v1/screenshot/count Count
-     * @apiDescription  Count Screenshots
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Count
-     * @apiGroup        Screenshot
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
-     * @apiSuccess {String}   total    Amount of projects that we have
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "success": true,
-     *    "total": 2
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          ForbiddenError
-     * @apiUse          UnauthorizedError
-     */
-
-    /**
-     * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/screenshots/dashboard Dashboard
-     * @apiDescription  Get dashboard of Screenshots
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Dashboard
-     * @apiGroup        Screenshot
-     */
-
-    /**
-     * @param bool $withRelations
-     * @param bool $withSoftDeleted
-     * @return Builder
-     */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    public function show(Request $request): JsonResponse
     {
-        $user = Auth::user();
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = Role::can(Auth::user(), 'screenshots', 'full_access');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
-
-        if ($full_access) {
-            return $query;
-        }
-
-        $rules = $this->getControllerRules();
-        $rule = $rules[$action_method] ?? null;
-        if (isset($rule)) {
-            [$object, $action] = explode('.', $rule);
-            // Check user default role
-            if (Role::can($user, $object, $action)) {
-                return $query;
-            }
-
-            $query->where(static function (Builder $query) use ($user, $object, $action) {
-                $user_id = $user->id;
-
-                // Filter by project roles of the user
-                $query->whereHas(
-                    'timeInterval.task.project.usersRelation',
-                    static function (Builder $query) use ($user_id, $object, $action) {
-                        $query->where('user_id', $user_id)->whereHas(
-                            'role',
-                            static function (Builder $query) use ($object, $action) {
-                                $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                                    $query->where([
-                                        'object' => $object,
-                                        'action' => $action,
-                                        'allow' => true,
-                                    ])->select('id');
-                                })->select('id');
-                            }
-                        )->select('id');
-                    }
-                );
-
-                // For read and delete access include user own intervals
-                $query->when($action !== 'edit', static function (Builder $query) use ($user_id) {
-                    $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
-                        $query->where('user_id', $user_id)->select('user_id');
-                    });
-                });
-
-                $query->when(
-                    $action === 'edit' && (bool)$user->manual_time,
-                    static function (Builder $query) use ($user_id) {
-                        $query->orWhereHas('timeInterval', static function (Builder $query) use ($user_id) {
-                            $query->where('user_id', $user_id)->select('user_id');
-                        });
-                    }
-                );
-            });
-        }
-
-        return $query;
-    }
-
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'screenshots.list',
-            'count' => 'screenshots.list',
-            'dashboard' => 'screenshots.dashboard',
-            'create' => 'screenshots.create',
-            'bulkCreate' => 'screenshots.bulk-create',
-            'edit' => 'screenshots.edit',
-            'show' => 'screenshots.show',
-            'destroy' => 'screenshots.remove',
-        ];
+        return $this->_show($request);
     }
 }

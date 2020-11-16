@@ -28,11 +28,11 @@ class RefreshTest extends TestCase
         $this->assertNotEmpty($token[0]);
         $this->assertNotEmpty($token[0]['token']);
 
-        $this->actingAs($token[0]['token'])->get(self::TEST_URI)->assertSuccess();
+        $this->actingAs($token[0]['token'])->get(self::TEST_URI)->assertOk();
 
         $response = $this->actingAs($token[0]['token'])->postJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         $this->actingAs($token[0]['token'])->get(self::TEST_URI)->assertUnauthorized();
     }

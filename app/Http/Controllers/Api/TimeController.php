@@ -42,7 +42,7 @@ class TimeController extends ItemController
     }
 
     /**
-     * @api             {get,post} /v1/time/total Total
+     * @api             {get,post} /time/total Total
      * @apiDescription  Get total of Time
      *
      * @apiVersion      1.0.0
@@ -65,7 +65,6 @@ class TimeController extends ItemController
      *    "end_at": "2019-01-01 00:00:00"
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when TRUE
      * @apiSuccess {Boolean}  time     Total time in seconds
      * @apiSuccess {String}   start    Datetime of first Time Interval start_at
      * @apiSuccess {String}   end      DateTime of last Time Interval end_at
@@ -73,7 +72,6 @@ class TimeController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "time": 338230,
      *    "start": "2020-01-23T19:42:27+00:00",
      *    "end": "2020-04-30T21:58:31+00:00"
@@ -104,7 +102,6 @@ class TimeController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.time.total'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -131,7 +128,6 @@ class TimeController extends ItemController
         });
 
         $responseData = [
-            'success' => true,
             'time' => $totalTime,
             'start' => $timeIntervals->min('start_at'),
             'end' => $timeIntervals->max('end_at')
@@ -145,7 +141,7 @@ class TimeController extends ItemController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {get, post} /v1/time/project Project
+     * @api             {get, post} /time/project Project
      * @apiDescription  Get time of project
      *
      * @apiVersion      1.0.0
@@ -157,7 +153,7 @@ class TimeController extends ItemController
      */
 
     /**
-     * @api             {get,post} /v1/time/tasks Tasks
+     * @api             {get,post} /time/tasks Tasks
      * @apiDescription  Get tasks and its total time
      *
      * @apiVersion      1.0.0
@@ -239,7 +235,6 @@ class TimeController extends ItemController
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.time.total'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -303,7 +298,6 @@ class TimeController extends ItemController
         $last = $itemsQuery->get()->last();
 
         $response = [
-            'success' => true,
             'tasks' => $tasks,
             'total' => [
                 'time' => $totalTime,
@@ -320,7 +314,7 @@ class TimeController extends ItemController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {get, post} /v1/time/task Task
+     * @api             {get, post} /time/task Task
      * @apiDescription  Get task and its total time
      *
      * @apiVersion      1.0.0
@@ -333,7 +327,7 @@ class TimeController extends ItemController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {get,post} /v1/time/task-user TaskUser
+     * @api             {get,post} /time/task-user TaskUser
      * @apiDescription  Get time of user's single task
      *
      * @apiVersion      1.0.0
@@ -349,35 +343,4 @@ class TimeController extends ItemController
      * @param bool $withSoftDeleted
      * @return Builder
      */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
-    {
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = Role::can(Auth::user(), 'time', 'full_access');
-        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
-
-        if ($full_access) {
-            return $query;
-        }
-
-        $user_time_interval_id = collect(Auth::user()->timeIntervals)->flatMap(static function ($val) {
-            return collect($val->id);
-        });
-        $time_intervals_id = collect([]);
-
-        if ($project_relations_access) {
-            $attached_time_interval_id_to_project = collect(Auth::user()->projects)->flatMap(
-                static function ($project) {
-                    return collect($project->tasks)->flatMap(static function ($task) {
-                        return collect($task->timeIntervals)->pluck('id');
-                    });
-                }
-            );
-            $time_intervals_id = collect([$attached_time_interval_id_to_project])->collapse();
-        }
-
-        $time_intervals_id = collect([$time_intervals_id, $user_time_interval_id])->collapse()->unique();
-        $query->whereIn('time_intervals.id', $time_intervals_id);
-
-        return $query;
-    }
 }

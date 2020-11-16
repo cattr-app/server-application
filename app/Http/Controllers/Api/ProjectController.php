@@ -2,17 +2,18 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\Project\CreateProjectRequest;
+use App\Http\Requests\Project\EditProjectRequest;
+use App\Http\Requests\Project\DestroyProjectRequest;
+use App\Http\Requests\Project\ShowProjectRequest;
 use Filter;
 use App\Models\Project;
 use App\Models\Role;
-use App\Models\User;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Auth;
 use DB;
-use Route;
 
 class ProjectController extends ItemController
 {
@@ -29,10 +30,7 @@ class ProjectController extends ItemController
      */
     public function getValidationRules(): array
     {
-        return [
-            'name' => 'required',
-            'description' => 'required',
-        ];
+        return [];
     }
 
     /**
@@ -44,23 +42,7 @@ class ProjectController extends ItemController
     }
 
     /**
-     * @return array
-     */
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'projects.list',
-            'count' => 'projects.list',
-            'create' => 'projects.create',
-            'edit' => 'projects.edit',
-            'show' => 'projects.show',
-            'destroy' => 'projects.remove',
-            'tasks' => 'projects.tasks',
-        ];
-    }
-
-    /**
-     * @api             {get, post} /v1/projects/list List
+     * @api             {get, post} /projects/list List
      * @apiDescription  Get list of Projects
      *
      * @apiVersion      1.0.0
@@ -120,51 +102,10 @@ class ProjectController extends ItemController
      */
     public function index(Request $request): JsonResponse
     {
-        $project_relations_access = Role::can(Auth::user(), 'projects', 'relations');
-        $full_access = Role::can(Auth::user(), 'projects', 'full_access');
-        $direct_relation = $request->get('direct_relation') ?: false;
-        $request->offsetUnset('direct_relation');
-
-        if ($direct_relation) {
-            $projects = collect(Auth::user()->projects)->pluck('id')->toArray();
-            if (count($projects) > 0) {
-                $request->offsetSet('id', ['=', $projects]);
-            }
-        }
-
-        if ($project_relations_access && $request->get('user_id')) {
-            $usersId = collect($request->get('user_id'))->flatten(0)->filter(static function ($val) {
-                return is_int($val);
-            });
-            $attachedUsersId = collect(Auth::user()->projects)->flatMap(static function ($project) {
-                return collect($project->users)->pluck('id');
-            });
-
-            if (!$full_access && !collect($attachedUsersId)->contains($usersId->all())) {
-                // Add filter by projects attached to the current user for the indirectly related projects.
-                $projects = collect(Auth::user()->projects)->pluck('id')->toArray();
-                if (count($projects) > 0) {
-                    $request->offsetSet('tasks.project_id', ['=', $projects]);
-                }
-            }
-
-            /** show all projects for full access if id in request === user->id */
-            if ($full_access && collect($usersId)->contains(Auth::user()->id)) {
-                true;
-            } else {
-                $request->offsetSet('users.id', $request->get('user_id'));
-                if (!$direct_relation) {
-                    $request->offsetSet('tasks.user_id', $request->get('user_id'));
-                    $request->offsetSet('tasks.timeIntervals.user_id', $request->get('user_id'));
-                }
-            }
-            $request->offsetUnset('user_id');
-        }
-
-        return parent::index($request);
+        return parent::_index($request);
     }
 
-    public function show(Request $request): JsonResponse
+    public function show(ShowProjectRequest $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('answer.success.item.show'), static function (Project $project) {
             $totalTracked = 0;
@@ -199,112 +140,11 @@ class ProjectController extends ItemController
             $project->total_spent_time = $totalTracked;
             return $project;
         });
-        return parent::show($request);
+        return $this->_show($request);
     }
 
     /**
-     * @apiDeprecated   since 1.0.0
-     * @api             {get,post} /v1/projects/tasks Tasks
-     * @apiDescription  Get tasks that assigned to project
-     *
-     * @apiVersion      1.0.0
-     * @apiName         ProjectTasks
-     * @apiGroup        Project
-     *
-     * @apiPermission   projects_tasks
-     * @apiPermission   projects_full_access
-     */
-    /**
-     * Returns tasks info for a project.
-     *
-     * @param Request $request
-     * @deprecated
-     * @codeCoverageIgnore
-     * @return JsonResponse
-     */
-    public function tasks(Request $request): JsonResponse
-    {
-        $itemId = is_int($request->get('id')) ? $request->get('id') : false;
-
-        if (!$itemId) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'success' => false,
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid id',
-                ]),
-                400
-            );
-        }
-
-        /* @var User $user */
-        $user = auth()->user();
-        $userProjectIds = Project::getUserRelatedProjectIds($user);
-        if (!in_array($itemId, $userProjectIds, true)) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'success' => false,
-                    'error_type' => 'authorization.forbidden',
-                    'message' => 'User has no access to this project',
-                ]),
-                403
-            );
-        }
-
-        $project_info = DB::table('project_report')
-            ->select(
-                DB::raw('MIN(date) as start'),
-                DB::raw('MAX(date) as end'),
-                DB::raw('SUM(duration) as duration')
-            )
-            ->where([
-                ['project_id', '=', $itemId],
-            ])
-            ->first();
-
-        $tasks_query = DB::table('tasks')
-            ->leftJoin('project_report', 'tasks.id', '=', 'project_report.task_id')
-            ->select(
-                DB::raw('tasks.id as id'),
-                DB::raw('tasks.task_name as task_name'),
-                DB::raw('MIN(project_report.date) as start'),
-                DB::raw('MAX(project_report.date) as end'),
-                DB::raw('SUM(project_report.duration) as duration')
-            )
-            ->where([
-                ['tasks.project_id', '=', $itemId],
-            ])
-            ->groupBy(
-                'id',
-                'task_name'
-            );
-
-        if ($request->has('order_by')) {
-            $order_by = $request->get('order_by');
-            [$column, $dir] = is_array($order_by) ? $order_by : [$order_by, 'asc'];
-            if (in_array($column, [
-                'id',
-                'task_name',
-                'start',
-                'end',
-                'duration',
-            ])) {
-                $tasks_query->orderBy($column, $dir);
-            } else {
-                $tasks_query->orderBy('id', 'asc');
-            }
-        } else {
-            $tasks_query->orderBy('id', 'asc');
-        }
-
-        $project_info->tasks = $tasks_query->get();
-
-        return new JsonResponse(['success' => true, 'res' => $project_info]);
-    }
-
-    /**
-     * @api            {post} /v1/projects/create Create
+     * @api            {post} /projects/create Create
      * @apiDescription Create Project
      *
      * @apiVersion     1.0.0
@@ -325,7 +165,6 @@ class ProjectController extends ItemController
      *      "description": "Code-monkey development group presents"
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Object}   res             Response
      *
      * @apiUse          ProjectObject
@@ -333,7 +172,6 @@ class ProjectController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "name": "SampleOriginalProjectName",
      *      "description": "Code-monkey development group presents",
@@ -348,9 +186,13 @@ class ProjectController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
+    public function create(CreateProjectRequest $request): JsonResponse
+    {
+        return $this->_create($request);
+    }
 
     /**
-     * @api             {get, post} /v1/projects/show Show
+     * @api             {get, post} /projects/show Show
      * @apiDescription  Show Project
      *
      * @apiVersion      1.0.0
@@ -452,7 +294,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @api             {post} /v1/projects/edit Edit
+     * @api             {post} /projects/edit Edit
      * @apiDescription  Edit Project
      *
      * @apiVersion      1.0.0
@@ -476,13 +318,11 @@ class ProjectController extends ItemController
      * @apiParam {String}  description  Project description
      *
      * @apiSuccess {Object}   res      Response object
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      *
      * @apiUse          ProjectObject
      *
      * @apiSuccessExample {json} Response Example
      *  {
-     *    "success": true,
      *    "res": {
      *      "id": 1,
      *      "company_id": 0,
@@ -499,9 +339,13 @@ class ProjectController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
+    public function edit(EditProjectRequest $request): JsonResponse
+    {
+        return $this->_edit($request);
+    }
 
     /**
-     * @api             {post} /v1/projects/remove Destroy
+     * @api             {post} /projects/remove Destroy
      * @apiDescription  Destroy Project
      *
      * @apiVersion      1.0.0
@@ -520,13 +364,11 @@ class ProjectController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *
@@ -536,9 +378,13 @@ class ProjectController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ItemNotFoundError
      */
+    public function destroy(DestroyProjectRequest $request): JsonResponse
+    {
+        return $this->_destroy($request);
+    }
 
     /**
-     * @api             {get,post} /v1/projects/count Count
+     * @api             {get,post} /projects/count Count
      * @apiDescription  Count Projects
      *
      * @apiVersion      1.0.0
@@ -550,13 +396,11 @@ class ProjectController extends ItemController
      * @apiPermission   projects_count
      * @apiPermission   projects_full_access
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   total    Amount of projects that we have
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "total": 2
      *  }
      *
@@ -564,67 +408,8 @@ class ProjectController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-
-    /**
-     * @param bool $withRelations
-     *
-     * @param bool $withSoftDeleted
-     * @return Builder
-     */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    public function count(Request $request): JsonResponse
     {
-        $user = Auth::user();
-        $user_id = $user->id;
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
-        $full_access = Role::can($user, 'projects', 'full_access');
-        $action_method = Route::getCurrentRoute()->getActionMethod();
-
-        if ($full_access) {
-            return $query;
-        }
-
-        $rules = $this->getControllerRules();
-        $rule = $rules[$action_method] ?? null;
-        if (isset($rule)) {
-            [$object, $action] = explode('.', $rule);
-            // Check user default role
-            if (Role::can($user, $object, $action)) {
-                return $query;
-            }
-
-            $query->where(static function (Builder $query) use ($user_id, $object, $action) {
-                // Filter by project roles of the user
-                $query->whereHas('usersRelation', static function (Builder $query) use ($user_id, $object, $action) {
-                    $query->where('user_id', $user_id)->whereHas(
-                        'role',
-                        static function (Builder $query) use ($object, $action) {
-                            $query->whereHas('rules', static function (Builder $query) use ($object, $action) {
-                                $query->where([
-                                    'object' => $object,
-                                    'action' => $action,
-                                    'allow' => true,
-                                ])->select('id');
-                            })->select('id');
-                        }
-                    )->select('id');
-                });
-
-                // For read-only access include projects where the user have assigned tasks or tracked intervals
-                $query->when(
-                    $action !== 'edit' && $action !== 'remove',
-                    static function (Builder $query) use ($user_id) {
-                        $query->orWhereHas('tasks', static function (Builder $query) use ($user_id) {
-                            $query->where('user_id', $user_id)->select('user_id');
-                        });
-
-                        $query->orWhereHas('tasks.timeIntervals', static function (Builder $query) use ($user_id) {
-                            $query->where('user_id', $user_id)->select('user_id');
-                        });
-                    }
-                );
-            });
-        }
-
-        return $query;
+        return $this->_count($request);
     }
 }

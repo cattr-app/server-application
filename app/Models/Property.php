@@ -37,6 +37,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|Property withoutTrashed()
  * @method static QueryBuilder|Property onlyTrashed()
  * @mixin EloquentIdeHelper
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Property newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Property newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Property query()
  */
 class Property extends Model
 {

@@ -2,7 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\Invitation\CountInvitationRequest;
 use App\Http\Requests\Invitation\CreateInvitationRequest;
+use App\Http\Requests\Invitation\ListInvitationRequest;
+use App\Http\Requests\Invitation\DestroyInvitationRequest;
+use App\Http\Requests\Invitation\ShowInvitationRequest;
 use App\Http\Requests\Invitation\UpdateInvitationRequest;
 use App\Models\Invitation;
 use App\Services\InvitationService;
@@ -26,23 +30,6 @@ class InvitationController extends ItemController
         parent::__construct();
 
         $this->service = $service;
-    }
-
-    /**
-     * Get the controller rules.
-     *
-     * @return array
-     */
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'invitation.list',
-            'count' => 'invitation.list',
-            'create' => 'invitation.create',
-            'resend' => 'invitation.resend',
-            'show' => 'invitation.show',
-            'destroy' => 'invitation.remove',
-        ];
     }
 
     /**
@@ -76,7 +63,7 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @api             {post} /v1/invitations/show Show
+     * @api             {post} /invitations/show Show
      * @apiDescription  Show invitation.
      *
      * @apiVersion      1.0.0
@@ -92,7 +79,6 @@ class InvitationController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}    res      Array of records containing the id, email, key, expiration date and role id
      *
      * @apiUse InvitationObject
@@ -100,7 +86,6 @@ class InvitationController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": [
      *      {
      *          "id": 1
@@ -115,9 +100,13 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    public function show(ShowInvitationRequest $request): JsonResponse
+    {
+        return $this->_show($request);
+    }
 
     /**
-     * @api             {get} /v1/invitations/list List
+     * @api             {get} /invitations/list List
      * @apiDescription  Get list of invitations.
      *
      * @apiVersion      1.0.0
@@ -126,7 +115,6 @@ class InvitationController extends ItemController
      *
      * @apiUse          AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}   res      Array of records containing the id, email, key, expiration date and role id
      *
      * @apiUse InvitationObject
@@ -134,7 +122,6 @@ class InvitationController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": [
      *      {
      *          "id": 1
@@ -149,13 +136,17 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
+    public function index(ListInvitationRequest $request): JsonResponse
+    {
+        return $this->_index($request);
+    }
 
     /**
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
      *
-     * @api             {post} /v1/invitations/create Create
+     * @api             {post} /invitations/create Create
      * @apiDescription  Creates a unique invitation token and sends an email to the users
      *
      * @apiVersion      1.0.0
@@ -178,7 +169,6 @@ class InvitationController extends ItemController
      *    ]
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   res      Array of records containing the id, email, key, expiration date and role id
      *
      * @apiUse InvitationObject
@@ -186,7 +176,6 @@ class InvitationController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": [
      *      {
      *          "id": 1
@@ -201,7 +190,6 @@ class InvitationController extends ItemController
      * @apiErrorExample {json} Email is not specified
      *  HTTP/1.1 400 Bad Request
      *  {
-     *     "success": false,
      *     "error_type": "validation",
      *     "message": "Validation error",
      *     "info": {
@@ -214,7 +202,6 @@ class InvitationController extends ItemController
      * @apiErrorExample {json} Email already exists
      *  HTTP/1.1 400 Bad Request
      *  {
-     *      "success": false,
      *      "error_type": "validation",
      *      "message": "Validation error",
      *      "info": {
@@ -228,9 +215,9 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function create(Request $request): JsonResponse
+    public function create(CreateInvitationRequest $request): JsonResponse
     {
-        $requestData = app(CreateInvitationRequest::class)->validated();
+        $requestData = $request->validated();
 
         $invitations = [];
 
@@ -239,7 +226,6 @@ class InvitationController extends ItemController
         }
 
         return new JsonResponse([
-            'success' => true,
             'res' => $invitations,
         ]);
     }
@@ -249,7 +235,7 @@ class InvitationController extends ItemController
      * @return JsonResponse
      * @throws Exception
      *
-     * @api             {post} /v1/invitations/resend Resend
+     * @api             {post} /invitations/resend Resend
      * @apiDescription  Updates the token expiration date and sends an email to the user's email address.
      *
      * @apiVersion      1.0.0
@@ -265,7 +251,6 @@ class InvitationController extends ItemController
      *    "id": 1
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}    res      Invitation data
      *
      * @apiUse InvitationObject
@@ -273,7 +258,6 @@ class InvitationController extends ItemController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "res": {
      *      "id": 1
      *      "email": "test@example.com",
@@ -286,7 +270,6 @@ class InvitationController extends ItemController
      * @apiErrorExample {json} The id does not exist
      *  HTTP/1.1 400 Bad Request
      *  {
-     *      "success": false,
      *      "error_type": "validation",
      *      "message": "Validation error",
      *      "info": {
@@ -307,13 +290,12 @@ class InvitationController extends ItemController
         $invitation = $this->service->update($requestData['id']);
 
         return new JsonResponse([
-            'success' => true,
             'res' => $invitation,
         ]);
     }
 
     /**
-     * @api             {post} /v1/invitations/remove Destroy
+     * @api             {post} /invitations/remove Destroy
      * @apiDescription  Destroy User
      *
      * @apiVersion      1.0.0
@@ -329,13 +311,11 @@ class InvitationController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "message": "Item has been removed"
      *  }
      *
@@ -344,4 +324,18 @@ class InvitationController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
+    public function destroy(DestroyInvitationRequest $request): JsonResponse
+    {
+        return $this->_destroy($request);
+    }
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function count(CountInvitationRequest $request): JsonResponse
+    {
+        return $this->_count($request);
+    }
 }
