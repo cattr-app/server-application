@@ -19,6 +19,7 @@ use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\HttpKernel\Exception\HttpException;
 use Throwable;
 use Tymon\JWTAuth\Exceptions\TokenExpiredException;
+use Tymon\JWTAuth\Facades\JWTAuth;
 
 /**
  * Class Handler
@@ -152,7 +153,7 @@ class Handler extends ExceptionHandler
             // If we have 404 or 401 code we will process it as an request status code
             $statusCode = $code;
 
-            if ($code === 400 || !$request->bearerToken()) {
+            if ($code === 400 || !JWTAuth::getToken()) {
                 $errorType = 'authorization.unauthorized';
             }
             if ($code = 401) {

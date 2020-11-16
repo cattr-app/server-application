@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
@@ -48,12 +48,16 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @property string $created_at
  * @property string $updated_at
  * @property User $user
- * @property Project $project
  * @property Role $role
+ * @property Project $project
  * @method static EloquentBuilder|ProjectsUsers whereCreatedAt($value)
  * @method static EloquentBuilder|ProjectsUsers whereProjectId($value)
  * @method static EloquentBuilder|ProjectsUsers whereUpdatedAt($value)
  * @method static EloquentBuilder|ProjectsUsers whereUserId($value)
+ * @method static EloquentBuilder|ProjectsUsers whereRoleId($value)
+ * @method static EloquentBuilder|ProjectsUsers newModelQuery()
+ * @method static EloquentBuilder|ProjectsUsers newQuery()
+ * @method static EloquentBuilder|ProjectsUsers query()
  * @mixin EloquentIdeHelper
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers newQuery()
@@ -110,7 +114,7 @@ class ProjectsUsers extends Model
         return $this->belongsTo(Role::class, 'role_id');
     }
 
-    protected function setKeysForSaveQuery($query): Builder
+    protected function setKeysForSaveQuery($query): EloquentBuilder
     {
         $query->where('project_id', '=', $this->getAttribute('project_id'))
             ->where('user_id', '=', $this->getAttribute('user_id'));

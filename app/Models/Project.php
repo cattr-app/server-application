@@ -56,14 +56,17 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
- * @property bool $important
  * @property string $source
+ * @property bool $important
  * @property User $users
  * @property Task[] $tasks
+ * @property-read int|null $roles_count
+ * @property-read int|null $tasks_count
+ * @property-read int|null $users_count
+ * @property-read int|null $users_relation_count
  * @property-read Collection|Role[] $roles
  * @property-read Collection|ProjectsUsers[] $usersRelation
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|Project onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|Project whereCompanyId($value)
  * @method static EloquentBuilder|Project whereCreatedAt($value)
@@ -73,6 +76,11 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Project whereImportant($value)
  * @method static EloquentBuilder|Project whereName($value)
  * @method static EloquentBuilder|Project whereUpdatedAt($value)
+ * @method static EloquentBuilder|Project whereSource($value)
+ * @method static EloquentBuilder|Project newModelQuery()
+ * @method static EloquentBuilder|Project newQuery()
+ * @method static EloquentBuilder|Project query()
+ * @method static QueryBuilder|Project onlyTrashed()
  * @method static QueryBuilder|Project withTrashed()
  * @method static QueryBuilder|Project withoutTrashed()
  * @mixin EloquentIdeHelper

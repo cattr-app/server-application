@@ -58,21 +58,22 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property int $id
  * @property int $task_id
  * @property int $user_id
+ * @property int $activity_fill
+ * @property int $mouse_fill
+ * @property int $keyboard_fill
  * @property string $start_at
  * @property string $end_at
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
+ * @property bool $is_manual
  * @property Task $task
  * @property User $user
  * @property Screenshot[] $screenshots
- * @property int $activity_fill
- * @property int $mouse_fill
- * @property int $keyboard_fill
+ * @property-read Screenshot $screenshot*
+ * @property-read int|null $properties_count
  * @property-read Collection|Property[] $properties
- * @property-read Screenshot $screenshot
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|TimeInterval onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|TimeInterval whereActivityFill($value)
  * @method static EloquentBuilder|TimeInterval whereMouseFill($value)
@@ -85,8 +86,13 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|TimeInterval whereTaskId($value)
  * @method static EloquentBuilder|TimeInterval whereUpdatedAt($value)
  * @method static EloquentBuilder|TimeInterval whereUserId($value)
+ * @method static EloquentBuilder|TimeInterval whereIsManual($value)
+ * @method static EloquentBuilder|TimeInterval newModelQuery()
+ * @method static EloquentBuilder|TimeInterval newQuery()
+ * @method static EloquentBuilder|TimeInterval query()
  * @method static QueryBuilder|TimeInterval withTrashed()
  * @method static QueryBuilder|TimeInterval withoutTrashed()
+ * @method static QueryBuilder|TimeInterval onlyTrashed()
  * @mixin EloquentIdeHelper
  * @property bool $is_manual
  * @property-read int|null $properties_count

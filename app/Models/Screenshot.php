@@ -56,10 +56,9 @@ use Storage;
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
- * @property TimeInterval $timeInterval
  * @property bool $is_removed
+ * @property TimeInterval $timeInterval
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|Screenshot onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|Screenshot whereCreatedAt($value)
  * @method static EloquentBuilder|Screenshot whereDeletedAt($value)
@@ -70,8 +69,12 @@ use Storage;
  * @method static EloquentBuilder|Screenshot whereThumbnailPath($value)
  * @method static EloquentBuilder|Screenshot whereTimeIntervalId($value)
  * @method static EloquentBuilder|Screenshot whereUpdatedAt($value)
+ * @method static EloquentBuilder|Screenshot newModelQuery()
+ * @method static EloquentBuilder|Screenshot newQuery()
+ * @method static EloquentBuilder|Screenshot query()
  * @method static QueryBuilder|Screenshot withTrashed()
  * @method static QueryBuilder|Screenshot withoutTrashed()
+ * @method static QueryBuilder|Screenshot onlyTrashed()
  * @mixin EloquentIdeHelper
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Screenshot newModelQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Screenshot newQuery()
