@@ -30,7 +30,7 @@ class CreateTaskRequest extends FormRequest
             'project_id' => 'required|exists:projects,id',
             'task_name' => 'required|string',
             'description' => 'string',
-            'user_id' => 'required|exists:users,id',
+            'user_id' => 'exists:users,id|nullable',
             'active' => 'bool',
             'important' => 'bool',
             'priority_id' => 'required|exists:priorities,id',
