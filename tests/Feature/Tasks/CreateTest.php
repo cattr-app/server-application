@@ -57,6 +57,18 @@ class CreateTest extends TestCase
         $this->projectUser->projects()->attach($this->taskData['project_id'], ['role_id' => 2]);
     }
 
+    public function test_create_without_user(): void
+    {
+        $this->taskData['user_id'] = null;
+        $this->assertDatabaseMissing('tasks', $this->taskData);
+
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskData);
+
+        $response->assertSuccess();
+        $response->assertJson(['res' => $this->taskData]);
+        $this->assertDatabaseHas('tasks', $this->taskData);
+    }
+
     public function test_create_as_admin(): void
     {
         $this->assertDatabaseMissing('tasks', $this->taskData);
