@@ -98,7 +98,6 @@ Route::group([
     $router->any('screenshots/list', [ScreenshotController::class, 'index']);
     $router->any('screenshots/count', [ScreenshotController::class, 'count']);
     $router->post('screenshots/create', [ScreenshotController::class, 'create']);
-    $router->post('screenshots/edit', [ScreenshotController::class, 'edit']);
     $router->any('screenshots/show', [ScreenshotController::class, 'show']);
     $router->post('screenshots/remove', [ScreenshotController::class, 'destroy']);
 
