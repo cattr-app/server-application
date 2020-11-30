@@ -11,6 +11,7 @@ use Faker\Factory;
 use Faker\Factory as FakerFactory;
 use Faker\Generator;
 use Illuminate\Database\Seeder;
+use Storage;
 
 /**
  * Class TaskListSeeder
@@ -73,10 +74,11 @@ class TaskListSeeder extends Seeder
                 'task_name' => $this->faker->text(15 + $i),
                 'description' => $this->faker->text(100 + $i * 15),
                 'active' => true,
-                'user_id' => $user->id,
                 'assigned_by' => $user->id,
                 'priority_id' => 2, // Normal
             ]);
+
+            $task->users()->sync([$user->id]);
 
             $this->command->getOutput()->writeln("<fg=cyan>-- {$project->id}. Task #{$task->id}</>");
 
