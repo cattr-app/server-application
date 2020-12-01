@@ -212,7 +212,7 @@ class TaskController extends ItemController
      * @apiParam {Integer}  id           ID
      * @apiParam {Integer}  project_id   Project
      * @apiParam {Integer}  active       Is Task active. Available value: {0,1}
-     * @apiParam {Integer}  user_id      Task User
+     * @apiParam {Array}    users        Task Users
      * @apiParam {Integer}  priority_id  Priority ID
      *
      * @apiUse         TaskParams
@@ -222,7 +222,7 @@ class TaskController extends ItemController
      *    "id": 1,
      *    "project_id": 2,
      *    "active": 1,
-     *    "user_id": 3,
+     *    "users": [3],
      *    "assigned_by": 2,
      *    "task_name": "lorem",
      *    "description": "test",
@@ -244,7 +244,7 @@ class TaskController extends ItemController
      *      "description": "Et qui sed qui vero quis.
      *                      Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
      *      "active": 1,
-     *      "user_id": 1,
+     *      "users": [],
      *      "assigned_by": 1,
      *      "url": null,
      *      "created_at": "2020-01-23T09:42:26+00:00",
@@ -262,6 +262,17 @@ class TaskController extends ItemController
      */
     public function edit(EditTaskRequest $request): JsonResponse
     {
+        Filter::listen($this->getEventUniqueName('item.edit'), static function (Task $task) use ($request) {
+            $users = $request->get('users');
+            $task->users()->sync($users);
+            return $task;
+        });
+
+        Filter::listen($this->getEventUniqueName('answer.success.item.edit'), static function (array $data) {
+            $data['res'] = $data['res']->load('users');
+            return $data;
+        });
+
         return $this->_edit($request);
     }
 

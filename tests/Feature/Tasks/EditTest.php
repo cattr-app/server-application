@@ -33,6 +33,10 @@ class EditTest extends TestCase
 
     /** @var Task $task */
     private Task $task;
+    /** @var array $taskRequest */
+    private array $taskRequest;
+    /** @var array */
+    private $taskRequestWithMultipleUsers;
 
     protected function setUp(): void
     {
@@ -44,6 +48,18 @@ class EditTest extends TestCase
         $this->user = UserFactory::refresh()->asUser()->withTokens()->create();
 
         $this->task = TaskFactory::create();
+
+        $this->taskRequest = array_merge($this->task->toArray(), [
+            'users' => [UserFactory::create()->id],
+        ]);
+
+        $this->taskRequestWithMultipleUsers = array_merge($this->task->toArray(), [
+            'users' => [
+                UserFactory::create()->id,
+                UserFactory::create()->id,
+                UserFactory::create()->id,
+            ],
+        ]);
 
         $this->projectManager = UserFactory::refresh()->asUser()->withTokens()->create();
         $this->projectManager->projects()->attach($this->task->project_id, ['role_id' => 1]);
@@ -57,78 +73,153 @@ class EditTest extends TestCase
 
     public function test_edit_as_admin(): void
     {
-        $this->task->description = $this->faker->text;
+        $this->task->description = $this->taskRequest['description'] = $this->faker->text;
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->toArray());
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskRequest);
 
         $response->assertOk();
         $response->assertJson(['res' => $this->task->toArray()]);
-        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->task->description]);
+        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->taskRequest['description']]);
+
+        foreach ($this->taskRequest['users'] as $user) {
+            $this->assertDatabaseHas('tasks_users', [
+                'task_id' => $response->json()['res']['id'],
+                'user_id' => $user,
+            ]);
+        }
+    }
+
+    public function test_edit_with_multiple_users_as_admin(): void
+    {
+        $this->task->description = $this->taskRequestWithMultipleUsers['description'] = $this->faker->text;
+
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskRequestWithMultipleUsers);
+
+        $response->assertOk();
+        $response->assertJson(['res' => $this->task->toArray()]);
+        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->taskRequestWithMultipleUsers['description']]);
+
+        foreach ($this->taskRequestWithMultipleUsers['users'] as $user) {
+            $this->assertDatabaseHas('tasks_users', [
+                'task_id' => $response->json()['res']['id'],
+                'user_id' => $user,
+            ]);
+        }
     }
 
     public function test_edit_as_manager(): void
     {
-        $this->task->description = $this->faker->text;
+        $this->task->description = $this->taskRequest['description'] = $this->faker->text;
 
-        $response = $this->actingAs($this->manager)->postJson(self::URI, $this->task->toArray());
+        $response = $this->actingAs($this->manager)->postJson(self::URI, $this->taskRequest);
 
         $response->assertOk();
         $response->assertJson(['res' => $this->task->toArray()]);
-        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->task->description]);
+        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->taskRequest['description']]);
+
+        foreach ($this->taskRequest['users'] as $user) {
+            $this->assertDatabaseHas('tasks_users', [
+                'task_id' => $response->json()['res']['id'],
+                'user_id' => $user,
+            ]);
+        }
+    }
+
+    public function test_edit_with_multiple_users_as_manager(): void
+    {
+        $this->task->description = $this->taskRequestWithMultipleUsers['description'] = $this->faker->text;
+
+        $response = $this->actingAs($this->manager)->postJson(self::URI, $this->taskRequestWithMultipleUsers);
+
+        $response->assertOk();
+        $response->assertJson(['res' => $this->task->toArray()]);
+        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->taskRequestWithMultipleUsers['description']]);
+
+        foreach ($this->taskRequestWithMultipleUsers['users'] as $user) {
+            $this->assertDatabaseHas('tasks_users', [
+                'task_id' => $response->json()['res']['id'],
+                'user_id' => $user,
+            ]);
+        }
     }
 
     public function test_edit_as_auditor(): void
     {
-        $this->task->description = $this->faker->text;
+        $this->task->description = $this->taskRequest['description'] = $this->faker->text;
 
-        $response = $this->actingAs($this->auditor)->postJson(self::URI, $this->task->toArray());
+        $response = $this->actingAs($this->auditor)->postJson(self::URI, $this->taskRequest);
 
         $response->assertForbidden();
     }
 
     public function test_edit_as_user(): void
     {
-        $this->task->description = $this->faker->text;
+        $this->task->description = $this->taskRequest['description'] = $this->faker->text;
 
-        $response = $this->actingAs($this->user)->postJson(self::URI, $this->task->toArray());
+        $response = $this->actingAs($this->user)->postJson(self::URI, $this->taskRequest);
 
         $response->assertForbidden();
     }
 
     public function test_edit_as_project_manager(): void
     {
-        $this->task->description = $this->faker->text;
+        $this->task->description = $this->taskRequest['description'] = $this->faker->text;
 
-        $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->task->toArray());
+        $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->taskRequest);
 
         $response->assertOk();
         $response->assertJson(['res' => $this->task->toArray()]);
-        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->task->description]);
+        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->taskRequest['description']]);
+
+        foreach ($this->taskRequest['users'] as $user) {
+            $this->assertDatabaseHas('tasks_users', [
+                'task_id' => $response->json()['res']['id'],
+                'user_id' => $user,
+            ]);
+        }
+    }
+
+    public function test_edit_with_multiple_users_as_project_manager(): void
+    {
+        $this->task->description = $this->taskRequestWithMultipleUsers['description'] = $this->faker->text;
+
+        $response = $this->actingAs($this->projectManager)->postJson(self::URI, $this->taskRequestWithMultipleUsers);
+
+        $response->assertOk();
+        $response->assertJson(['res' => $this->task->toArray()]);
+        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'description' => $this->taskRequestWithMultipleUsers['description']]);
+
+        foreach ($this->taskRequestWithMultipleUsers['users'] as $user) {
+            $this->assertDatabaseHas('tasks_users', [
+                'task_id' => $response->json()['res']['id'],
+                'user_id' => $user,
+            ]);
+        }
     }
 
     public function test_edit_as_project_auditor(): void
     {
-        $this->task->description = $this->faker->text;
+        $this->task->description = $this->taskRequest['description'] = $this->faker->text;
 
-        $response = $this->actingAs($this->projectAuditor)->postJson(self::URI, $this->task->toArray());
+        $response = $this->actingAs($this->projectAuditor)->postJson(self::URI, $this->taskRequest);
 
         $response->assertForbidden();
     }
 
     public function test_edit_as_project_project_user(): void
     {
-        $this->task->description = $this->faker->text;
+        $this->task->description = $this->taskRequest['description'] = $this->faker->text;
 
-        $response = $this->actingAs($this->projectUser)->postJson(self::URI, $this->task->toArray());
+        $response = $this->actingAs($this->projectUser)->postJson(self::URI, $this->taskRequest);
 
         $response->assertForbidden();
     }
 
     public function test_edit_not_existing(): void
     {
-        $this->task->id = Task::withoutGlobalScopes()->count() + 20;
+        $this->taskRequest['id'] = Task::withoutGlobalScopes()->count() + 20;
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->toArray());
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskRequest);
 
         $response->assertValidationError();
     }
