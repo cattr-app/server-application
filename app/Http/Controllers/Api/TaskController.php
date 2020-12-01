@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use DB;
+use Illuminate\Support\Arr;
 
 class TaskController extends ItemController
 {
@@ -103,6 +104,16 @@ class TaskController extends ItemController
     }
 
     /**
+     * Opportunity to filtering request data
+     *
+     * Override this in child class for filtering
+     */
+    protected function filterRequestData(array $requestData): array
+    {
+        return Arr::except($requestData, ['users']);
+    }
+
+    /**
      * @param Request $request
      * @return JsonResponse
      *
@@ -123,7 +134,7 @@ class TaskController extends ItemController
      * @apiParam {String}   description  Description
      * @apiParam {String}   url          Url
      * @apiParam {Integer}  active       Active/Inactive Task. Available value: {0,1}
-     * @apiParam {Integer}  user_id      User
+     * @apiParam {Array}    users        Users
      * @apiParam {Integer}  assigned_by  User who assigned task
      * @apiParam {Integer}  priority_id  Priority ID
      *
@@ -133,7 +144,7 @@ class TaskController extends ItemController
      *    "task_name":"retr",
      *    "description":"fdgfd",
      *    "active":1,
-     *    "user_id":"3",
+     *    "users":[3],
      *    "assigned_by":"1",
      *    "url":"URL",
      *    "priority_id": 1
@@ -153,7 +164,7 @@ class TaskController extends ItemController
      *      "description": "Et qui sed qui vero quis.
      *                      Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
      *      "active": 1,
-     *      "user_id": 1,
+     *      "users": [],
      *      "assigned_by": 1,
      *      "url": null,
      *      "created_at": "2020-01-23T09:42:26+00:00",
@@ -171,6 +182,17 @@ class TaskController extends ItemController
      */
     public function create(CreateTaskRequest $request): JsonResponse
     {
+        Filter::listen($this->getEventUniqueName('item.create'), static function (Task $task) use ($request) {
+            $users = $request->get('users');
+            $task->users()->sync($users);
+            return $task;
+        });
+
+        Filter::listen($this->getEventUniqueName('answer.success.item.create'), static function (array $data) {
+            $data['res'] = $data['res']->load('users');
+            return $data;
+        });
+
         return $this->_create($request);
     }
 
