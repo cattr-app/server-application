@@ -201,17 +201,9 @@ class Task extends Model
         return $this->belongsTo(Project::class, 'project_id')->withoutGlobalScopes();
     }
 
-    /**
-     * @return HasMany
-     */
-    public function usersRelation(): HasMany
-    {
-        return $this->hasMany(TaskUsers::class, 'task_id', 'id');
-    }
-
     public function users(): BelongsToMany
     {
-        return $this->belongsToMany(User::class, 'tasks_users', 'task_id', 'user_id');
+        return $this->belongsToMany(User::class, 'tasks_users', 'task_id', 'user_id')->withoutGlobalScopes();
     }
 
     /**

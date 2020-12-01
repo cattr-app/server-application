@@ -69,15 +69,7 @@ class TaskCommentController extends ItemController
         $full_access = $user->allowed('task-comment', 'full_access');
 
         if (!$full_access) {
-            $userAssignedToTask = false;
-            foreach ($item->task->users as $taskUser) {
-                if ($taskUser->id == $user->id) {
-                    $userAssignedToTask = true;
-                    break;
-                }
-            }
-
-            if (!$userAssignedToTask) {
+            if (!$item->task->users->where(['id' => $user->id])->exists()) {
                 return new JsonResponse([
                     'error_type' => 'authorization.forbidden',
                     'message' => "Access denied to this task",
