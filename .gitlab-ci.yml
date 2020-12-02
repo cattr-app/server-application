@@ -15,7 +15,7 @@ integration_testing:
     - docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd
     - docker-php-ext-install bcmath zip pdo_mysql
     - apk add --no-cache $PHPIZE_DEPS
-    - pecl install xdebug
+    - pecl install xdebug-2.9.8
     - docker-php-ext-enable xdebug
     - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.16
   script:
