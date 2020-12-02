@@ -25,7 +25,6 @@ class UpdateCompanySettingsRequest extends FormRequest
     {
         return [
             'timezone' => 'sometimes|required|timezone',
-            'language' => 'sometimes|required|string',
             'work_time' => 'sometimes|int',
             'color' => 'sometimes|required|array',
             'auto_thinning' => 'sometimes|boolean',
