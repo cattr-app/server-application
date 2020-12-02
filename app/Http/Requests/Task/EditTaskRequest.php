@@ -31,7 +31,7 @@ class EditTaskRequest extends FormRequest
             'id' => 'required|int|exists:tasks,id',
             'project_id' => 'sometimes|required|exists:projects,id|',
             'task_name' => 'sometimes|required|string',
-            'description' => 'present',
+            'description' => 'string',
             'users' => 'sometimes|array',
             'users.*' => 'required|exists:users,id',
             'active' => 'bool',

@@ -8,7 +8,6 @@ use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Faker\Factory;
-use Faker\Factory as FakerFactory;
 use Faker\Generator;
 use Illuminate\Database\Seeder;
 use Storage;

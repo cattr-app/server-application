@@ -71,6 +71,17 @@ class EditTest extends TestCase
         $this->projectUser->projects()->attach($this->task->project_id, ['role_id' => 2]);
     }
 
+    public function test_edit_without_user(): void
+    {
+        $this->task->user_id = null;
+
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->task->toArray());
+
+        $response->assertSuccess();
+        $response->assertJson(['res' => $this->task->toArray()]);
+        $this->assertDatabaseHas('tasks', ['id' => $this->task->id, 'user_id' => null]);
+    }
+
     public function test_edit_as_admin(): void
     {
         $this->task->description = $this->taskRequest['description'] = $this->faker->text;

@@ -353,38 +353,6 @@ class ScreenshotController extends ItemController
     }
 
     /**
-     * @api             {post} /screenshots/edit Edit
-     * @apiDescription  Edit Screenshot
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Edit
-     * @apiGroup        Screenshot
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   screenshots_edit
-     * @apiPermission   screenshots_full_access
-     *
-     * @apiParam {Integer}  id                ID
-     * @apiParam {Integer}  time_interval_id  Time Interval id
-     * @apiParam {String}   path              Image path URI
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *    "id": 1,
-     *    "time_interval_id": 2,
-     *    "path": "test"
-     *  }
-     *
-     * @apiUse         ScreenshotObject
-     *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ItemNotFoundError
-     */
-
-    /**
      * @api             {post} /screenshots/show Show
      * @apiDescription  Show Screenshot
      *
