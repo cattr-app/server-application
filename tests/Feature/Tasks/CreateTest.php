@@ -72,10 +72,11 @@ class CreateTest extends TestCase
 
     public function test_create_without_user(): void
     {
-        $this->taskData['user_id'] = null;
+        $this->taskRequest['users'] = [];
+
         $this->assertDatabaseMissing('tasks', $this->taskData);
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskData);
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->taskRequest);
 
         $response->assertSuccess();
         $response->assertJson(['res' => $this->taskData]);
