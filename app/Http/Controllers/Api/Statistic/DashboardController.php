@@ -294,7 +294,7 @@ class DashboardController extends ReportController
 
             // Merge with the previous interval if it is consecutive and has the same task
             if ($previousInterval !== false
-                && (int)$interval->raw_start_at - (int)$previousInterval->raw_end_at <= 1
+                && (int)$interval->raw_start_at - (int)$previousInterval->raw_end_at <= 5
                 && $interval->is_manual === $previousInterval->is_manual
                 && $interval->user_id === $previousInterval->user_id
                 && $interval->task_id === $previousInterval->task_id) {
