@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Scopes\TaskScope;
+use App\Traits\ExposePermissions;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
@@ -9,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Parsedown;
 
 /**
  * @apiDefine TaskObject
@@ -66,21 +69,21 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property int $user_id
  * @property int $assigned_by
  * @property int $priority_id
+ * @property int $active
  * @property string $task_name
  * @property string $description
- * @property int $active
  * @property string $url
  * @property string $created_at
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
- * @property TimeInterval[] $timeIntervals
  * @property User $user
  * @property User $assigned
  * @property Project $project
  * @property Priority $priority
+ * @property TimeInterval[] $timeIntervals
+ * @property-read int|null $time_intervals_count
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|Task onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|Task whereActive($value)
  * @method static EloquentBuilder|Task whereAssignedBy($value)
@@ -95,13 +98,22 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Task whereUpdatedAt($value)
  * @method static EloquentBuilder|Task whereUrl($value)
  * @method static EloquentBuilder|Task whereUserId($value)
+ * @method static EloquentBuilder|Task newModelQuery()
+ * @method static EloquentBuilder|Task newQuery()
+ * @method static EloquentBuilder|Task query()
+ * @method static QueryBuilder|Task onlyTrashed()
  * @method static QueryBuilder|Task withTrashed()
  * @method static QueryBuilder|Task withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @property-read int|null $time_intervals_count
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Task newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Task newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Task query()
  */
 class Task extends Model
 {
     use SoftDeletes;
+    use ExposePermissions;
 
     /**
      * table name from database
@@ -148,6 +160,14 @@ class Task extends Model
         'deleted_at',
     ];
 
+    /**
+     * @var array
+     */
+    protected $appends = ['can'];
+
+    /**
+     * @return string
+     */
     public static function getTableName(): string
     {
         return with(new static())->getTable();
@@ -160,34 +180,59 @@ class Task extends Model
     {
         parent::boot();
 
+        static::addGlobalScope(new TaskScope);
+
         static::deleting(static function (Task $task) {
             /** @var Task $tasks */
             $task->timeIntervals()->delete();
         });
     }
 
+    /**
+     * @return HasMany
+     */
     public function timeIntervals(): HasMany
     {
         return $this->hasMany(TimeInterval::class, 'task_id');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function project(): BelongsTo
     {
-        return $this->belongsTo(Project::class, 'project_id');
+        return $this->belongsTo(Project::class, 'project_id')->withoutGlobalScopes();
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function user(): BelongsTo
     {
-        return $this->belongsTo(User::class, 'user_id');
+        return $this->belongsTo(User::class, 'user_id')->withoutGlobalScopes();
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function assigned(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_by');
     }
 
+    /**
+     * @return BelongsTo
+     */
     public function priority(): BelongsTo
     {
         return $this->belongsTo(Priority::class, 'priority_id');
+    }
+
+    /**
+     * @return string
+     */
+    public function getDescription(): string
+    {
+        return (new Parsedown())->text($this->description);
     }
 }

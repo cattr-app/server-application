@@ -1,7 +1,10 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\User;
 use Illuminate\Database\Seeder;
+use Faker;
 
 /**
  * Class UsersTableSeeder
@@ -25,17 +28,12 @@ class UsersTableSeeder extends Seeder
                 'email' => $faker->email,
                 'url' => '',
                 'company_id' => 1,
-                'payroll_access' => 0,
-                'billing_access' => 0,
                 'avatar' => '',
                 'screenshots_active' => 1,
                 'manual_time' => 0,
-                'permanent_tasks' => 0,
                 'computer_time_popup' => 300,
-                'poor_time_popup' => '',
                 'blur_screenshots' => 0,
                 'web_and_app_monitoring' => 1,
-                'webcam_shots' => 0,
                 'screenshots_interval' => 9,
                 'active' => true,
                 'password' => 'password',

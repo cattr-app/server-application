@@ -61,7 +61,7 @@ class TimeUseReportController extends ReportController
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @api             {post} /v1/time-duration/list Report
+     * @api             {post} /time-duration/list Report
      * @apiDescription  Show attached users and to whom the user is attached
      *
      * @apiVersion      1.0.0
@@ -89,7 +89,6 @@ class TimeUseReportController extends ReportController
                 Filter::process(
                     $this->getEventUniqueName('answer.error.report.show'),
                     [
-                        'success' => false,
                         'error_type' => 'validation',
                         'message' => 'Validation error',
                         'info' => $validator->errors()

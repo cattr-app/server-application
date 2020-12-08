@@ -58,9 +58,12 @@ return [
         App\EventFilter\EventServiceProvider::class,
         App\EventFilter\EventFilterServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
+        App\Providers\TelescopeServiceProvider::class,
         App\Providers\LockServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,
+
+        App\Providers\SettingsServiceProvider::class,
     ],
     'aliases' => [
 
@@ -100,5 +103,7 @@ return [
         'Validator' => Illuminate\Support\Facades\Validator::class,
         'View' => Illuminate\Support\Facades\View::class,
         'Sentry' => Sentry\Laravel\Facade::class,
+
+        'Settings' => App\Facades\SettingsFacade::class
     ],
 ];

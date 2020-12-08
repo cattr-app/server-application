@@ -16,9 +16,12 @@ class IntervalFactory extends Factory
     private ?Task $task = null;
     private TimeInterval $interval;
 
-    protected function getModelInstance(): TimeInterval
+    public function createRandomModelDataWithRelation(): array
     {
-        return $this->interval;
+        return array_merge($this->createRandomModelData(), [
+            'task_id' => TaskFactory::create()->id,
+            'user_id' => UserFactory::create()->id,
+        ]);
     }
 
     public function createRandomModelData(): array
@@ -27,20 +30,12 @@ class IntervalFactory extends Factory
         $randomDateTime = Carbon::instance($randomDateTime);
 
         return [
-         'end_at' => $randomDateTime->toIso8601String(),
-         'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
-         'activity_fill' => random_int(1, 100),
-         'mouse_fill' => random_int(1, 100),
-         'keyboard_fill' => random_int(1, 100),
+            'end_at' => $randomDateTime->toIso8601String(),
+            'start_at' => $randomDateTime->subSeconds(random_int(1, 3600))->toIso8601String(),
+            'activity_fill' => random_int(1, 100),
+            'mouse_fill' => random_int(1, 100),
+            'keyboard_fill' => random_int(1, 100),
         ];
-    }
-
-    public function createRandomModelDataWithRelation(): array
-    {
-        return array_merge($this->createRandomModelData(), [
-         'task_id' => TaskFactory::create()->id,
-         'user_id' => UserFactory::create()->id,
-        ]);
     }
 
     public function forUser(User $user): self
@@ -53,24 +48,6 @@ class IntervalFactory extends Factory
     {
         $this->task = $task;
         return $this;
-    }
-
-    private function defineUser(): void
-    {
-        if ($this->randomRelations || !$this->user) {
-            $this->user = UserFactory::create();
-        }
-
-        $this->interval->user_id = $this->user->id;
-    }
-
-    private function defineTask(): void
-    {
-        if ($this->randomRelations || !$this->task) {
-            $this->task = TaskFactory::forUser($this->user)->create();
-        }
-
-        $this->interval->task_id = $this->task->id;
     }
 
     public function withRandomRelations(): self
@@ -93,6 +70,29 @@ class IntervalFactory extends Factory
 
         $this->interval->save();
 
+        return $this->interval;
+    }
+
+    private function defineUser(): void
+    {
+        if ($this->randomRelations || !$this->user) {
+            $this->user = UserFactory::create();
+        }
+
+        $this->interval->user_id = $this->user->id;
+    }
+
+    private function defineTask(): void
+    {
+        if ($this->randomRelations || !$this->task) {
+            $this->task = TaskFactory::forUser($this->user)->create();
+        }
+
+        $this->interval->task_id = $this->task->id;
+    }
+
+    protected function getModelInstance(): TimeInterval
+    {
         return $this->interval;
     }
 }

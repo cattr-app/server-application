@@ -28,7 +28,7 @@ class RequestTest extends TestCase
 
         $response = $this->postJson(self::URI, ['email' => $this->user->email]);
 
-        $response->assertSuccess();
+        $response->assertOk();
         Notification::assertSentTo($this->user, ResetPassword::class);
     }
 

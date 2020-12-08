@@ -12,6 +12,6 @@ class IndexTest extends TestCase
     {
         $response = $this->getJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
     }
 }

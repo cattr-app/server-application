@@ -20,7 +20,6 @@ abstract class ItemController extends Controller
      * @apiErrorExample {json} No such item
      *  HTTP/1.1 404 Not Found
      *  {
-     *    "success": false,
      *    "message": "Item not found",
      *    "error_type": "query.item_not_found"
      *  }
@@ -33,7 +32,6 @@ abstract class ItemController extends Controller
      * @apiErrorExample {json} Validation error
      *  HTTP/1.1 400 Bad Request
      *  {
-     *    "success": false,
      *    "message": "Validation error",
      *    "error_type": "validation",
      *    "info": "Invalid id"
@@ -50,7 +48,7 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function index(Request $request): JsonResponse
+    public function _index(Request $request): JsonResponse
     {
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
@@ -124,19 +122,19 @@ abstract class ItemController extends Controller
     {
         /** @var Model $cls */
         $cls = static::getItemClass();
+        $model = new $cls;
 
         $query = new Builder($cls::getQuery());
-        $query->setModel(new $cls());
+        $query->setModel($model);
 
-        $softDelete = in_array('Illuminate\Database\Eloquent\SoftDeletes', class_uses($cls), true);
+        $modelScopes = $model->getGlobalScopes();
 
-        if ($softDelete && !$withSoftDeleted) {
-            if (method_exists($cls, 'getTable')) {
-                $table = (new $cls())->getTable();
-                $query->whereNull("$table.deleted_at");
-            } else {
-                $query->whereNull('deleted_at');
-            }
+        foreach ($modelScopes as $key => $value) {
+            $query->withGlobalScope($key, $value);
+        }
+
+        if ($withSoftDeleted) {
+            $query->withoutGlobalScope(\Illuminate\Database\Eloquent\SoftDeletingScope::class);
         }
 
         if ($withRelations) {
@@ -163,7 +161,7 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function count(Request $request): JsonResponse
+    public function _count(Request $request): JsonResponse
     {
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
@@ -175,7 +173,6 @@ abstract class ItemController extends Controller
         );
 
         return new JsonResponse([
-            'success' => true,
             'total' => Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.count.query.prepare'),
                 $itemsQuery->count()
@@ -183,7 +180,7 @@ abstract class ItemController extends Controller
         ]);
     }
 
-    public function create(Request $request): JsonResponse
+    public function _create(Request $request): JsonResponse
     {
         $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
 
@@ -195,7 +192,6 @@ abstract class ItemController extends Controller
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -218,7 +214,6 @@ abstract class ItemController extends Controller
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'success' => true,
                 'res' => $item,
             ])
         );
@@ -246,14 +241,13 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function show(Request $request): JsonResponse
+    public function _show(Request $request): JsonResponse
     {
         $itemId = (int) $request->input('id');
 
         if (!$itemId) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'Invalid id'
@@ -280,7 +274,6 @@ abstract class ItemController extends Controller
         if (!$item) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'success' => false,
                     'error_type' => 'query.item_not_found',
                     'message' => 'Item not found'
                 ]),
@@ -300,7 +293,7 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function edit(Request $request): JsonResponse
+    public function _edit(Request $request): JsonResponse
     {
         $requestData = Filter::process(
             $this->getEventUniqueName('request.item.edit'),
@@ -321,7 +314,6 @@ abstract class ItemController extends Controller
         if ($validator->fails()) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => $validator->errors()
@@ -333,7 +325,6 @@ abstract class ItemController extends Controller
         if (!is_int($request->get('id'))) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'Invalid id'
@@ -361,7 +352,6 @@ abstract class ItemController extends Controller
             if ($cls::find($request->get('id')) !== null) {
                 return new JsonResponse(
                     Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                        'success' => false,
                         'error_type' => 'authorization.forbidden',
                         'message' => 'Access denied to this item',
                     ]),
@@ -371,7 +361,6 @@ abstract class ItemController extends Controller
 
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'success' => false,
                     'error_type' => 'query.item_not_found',
                     'message' => 'Item not found',
                 ]),
@@ -389,7 +378,6 @@ abstract class ItemController extends Controller
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'success' => true,
                 'res' => $item,
             ])
         );
@@ -402,7 +390,7 @@ abstract class ItemController extends Controller
      * @return JsonResponse
      * @throws Exception
      */
-    public function destroy(Request $request): JsonResponse
+    public function _destroy(Request $request): JsonResponse
     {
         $itemId = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->get('id'));
         $idInt = is_int($itemId);
@@ -410,7 +398,6 @@ abstract class ItemController extends Controller
         if (!$idInt) {
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
-                    'success' => false,
                     'error_type' => 'validation',
                     'message' => 'Validation error',
                     'info' => 'Invalid id',
@@ -436,7 +423,6 @@ abstract class ItemController extends Controller
             if ($cls::find($request->get('id')) !== null) {
                 return new JsonResponse(
                     Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                        'success' => false,
                         'error_type' => 'authorization.forbidden',
                         'message' => 'Access denied to this item'
                     ]),
@@ -446,7 +432,6 @@ abstract class ItemController extends Controller
 
             return new JsonResponse(
                 Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                    'success' => false,
                     'error_type' => 'query.item_not_found',
                     'message' => 'Item not found',
                 ]),
@@ -463,7 +448,6 @@ abstract class ItemController extends Controller
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'success' => true,
                 'message' => 'Item has been removed'
             ])
         );

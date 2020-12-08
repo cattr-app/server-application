@@ -27,20 +27,17 @@ class RegistrationController extends Controller
      *
      * @apiParam (Parameters from url) {String}  key  User invitation key
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {String}   email    UserInvited email
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "email": "test@example.com"
      *  }
      *
      * @apiErrorExample {json} Email not found
      *  HTTP/1.1 404 Not found
      *  {
-     *    "success": false,
      *    "error": "Not found"
      *  }
      *
@@ -57,13 +54,11 @@ class RegistrationController extends Controller
 
         if (!isset($invitation)) {
             return new JsonResponse([
-                'success' => false,
                 'message' => __('The specified key has expired or does not exist')
             ], 404);
         }
 
         return new JsonResponse([
-            'success' => true,
             'email' => $invitation->email,
         ]);
     }
@@ -91,27 +86,23 @@ class RegistrationController extends Controller
      *    "fullName": "John Doe"
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Number}   user_id  New user ID
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "user_id": 2
      *  }
      *
      * @apiErrorExample {json} Email not found
      *  HTTP/1.1 404 Not found
      *  {
-     *    "success": false,
      *    "message": "The specified key has expired or does not exist"
      *  }
      *
      * @apiErrorExample {json} Email mismatch
      *  HTTP/1.1 400 Bad request
      *  {
-     *    "success": false,
      *    "message": "The email address does not match the key"
      *  }
      *
@@ -129,14 +120,12 @@ class RegistrationController extends Controller
 
         if (!isset($invitation)) {
             return new JsonResponse([
-                'success' => false,
                 'message' => __('The specified key has expired or does not exist'),
             ], 404);
         }
 
         if ($request->input('email') !== $invitation->email) {
             return new JsonResponse([
-                'success' => false,
                 'message' => __('The email address does not match the key'),
             ], 400);
         }
@@ -157,7 +146,6 @@ class RegistrationController extends Controller
         $invitation->delete();
 
         return new JsonResponse([
-            'success' => true,
             'user_id' => $user->id,
         ]);
     }

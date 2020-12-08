@@ -1,7 +1,8 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\Project;
-use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\Task;
@@ -32,17 +33,12 @@ class StatisticsSeeder extends Seeder
             'email' => $email,
             'url' => '',
             'company_id' => 1,
-            'payroll_access' => 1,
-            'billing_access' => 1,
             'avatar' => '',
             'screenshots_active' => 1,
             'manual_time' => 0,
-            'permanent_tasks' => 0,
             'computer_time_popup' => 300,
-            'poor_time_popup' => '',
             'blur_screenshots' => 0,
             'web_and_app_monitoring' => 1,
-            'webcam_shots' => 0,
             'screenshots_interval' => 9,
             'active' => true,
             'password' => $pass,
@@ -63,16 +59,7 @@ class StatisticsSeeder extends Seeder
      */
     protected function assignProject(User $user, Project $project, ?int $roleId = null): ProjectsUsers
     {
-        $userProjectRole = [
-            'project_id' => $project->id,
-            'user_id' => $user->id,
-        ];
-
-        if (isset($roleId)) {
-            $userProjectRole['role_id'] = $roleId;
-        }
-
-        $relation = ProjectsUsers::create($userProjectRole);
+        $relation = $project->attach($user->id, ['role_id' => $roleId]);
 
         $this->command->getOutput()->writeln("<fg=green>{$user->full_name} assigned to project {$project->id}</>");
 

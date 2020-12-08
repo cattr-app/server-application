@@ -37,7 +37,7 @@ class TotalTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
-        $response->assertSuccess();
+        $response->assertOk();
 
         $totalTime = $this->intervals->sum(static function ($interval) {
             return Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);

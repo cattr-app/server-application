@@ -64,20 +64,19 @@ class UserFactory extends Factory
             'email' => $faker->unique()->safeEmail,
             'url' => '',
             'company_id' => 1,
-            'payroll_access' => 0,
-            'billing_access' => 0,
             'avatar' => '',
             'screenshots_active' => 1,
             'manual_time' => 0,
-            'permanent_tasks' => 0,
             'computer_time_popup' => 300,
-            'poor_time_popup' => '',
             'blur_screenshots' => 0,
             'web_and_app_monitoring' => 1,
-            'webcam_shots' => 0,
             'screenshots_interval' => 5,
             'active' => 1,
             'password' => $fullName,
+            'user_language' => 'en',
+            'role_id' => 2,
+            'type' => 'employee',
+            'nonce' => 0,
             'last_activity' => Carbon::now()->subMinutes(rand(1, 55)),
         ];
     }
@@ -92,6 +91,12 @@ class UserFactory extends Factory
             'active' => 1,
             'password' => $faker->password,
             'screenshots_interval' => 5,
+            'user_language' => 'en',
+            'screenshots_active' => true,
+            'computer_time_popup' => 10,
+            'timezone' => 'UTC',
+            'role_id' => 2,
+            'type' => 'employee'
         ];
     }
 
@@ -108,6 +113,18 @@ class UserFactory extends Factory
         return $this;
     }
 
+    public function asManager(): self
+    {
+        $this->roleId = self::MANAGER_ROLE;
+        return $this;
+    }
+
+    public function asAuditor(): self
+    {
+        $this->roleId = self::AUDITOR_ROLE;
+        return $this;
+    }
+
     public function asUser(): self
     {
         $this->roleId = self::USER_ROLE;
@@ -116,12 +133,12 @@ class UserFactory extends Factory
 
     protected function createTokens(): void
     {
-        $tokens = array_map(fn () => [
+        $tokens = array_map(fn() => [
             'token' => JWTAuth::fromUser($this->user),
             'expires_at' => now()->addDay()
         ], range(0, $this->tokensAmount));
 
-        $this->user->tokens()->createMany($tokens);
+        cache(["testing:{$this->user->id}:tokens" => $tokens]);
     }
 
     protected function assignRole(): void

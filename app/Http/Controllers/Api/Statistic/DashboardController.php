@@ -36,7 +36,6 @@ class DashboardController extends ReportController
 
         if ($validator->fails()) {
             return new JsonResponse([
-                'success' => false,
                 'error_type' => 'validation',
                 'message' => 'Validation error',
                 'info' => $validator->errors(),
@@ -84,7 +83,6 @@ class DashboardController extends ReportController
             });
 
         $result = [
-            'success' => true,
             'user_intervals' => $intervals,
         ];
 
@@ -92,7 +90,7 @@ class DashboardController extends ReportController
     }
 
     /**
-     * @api             {post} /v1/time-intervals/day-duration Day Duration
+     * @api             {post} /time-intervals/day-duration Day Duration
      * @apiDescription  Get info for dashboard summed by days
      *
      * @apiVersion      1.0.0
@@ -112,7 +110,6 @@ class DashboardController extends ReportController
      *    "end_at": "2013-04-12 20:41:00"
      *  }
      *
-     * @apiSuccess {Boolean}   success                            Indicates successful request when `TRUE`
      * @apiSuccess {Object}    user_intervals                     Response, keys => requested user ids
      * @apiSuccess {Object[]}  user_intervals.intervals           Intervals info
      * @apiSuccess {Integer}   user_intervals.intervals.user_id   Intervals user ID
@@ -123,7 +120,6 @@ class DashboardController extends ReportController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "user_intervals": {
      *      "2": {
      *        "intervals": [
@@ -160,7 +156,7 @@ class DashboardController extends ReportController
     }
 
     /**
-     * @api             {post} /v1/time-intervals/dashboard Dashboard
+     * @api             {post} /time-intervals/dashboard Dashboard
      * @apiDescription  Get info for dashboard
      *
      * @apiVersion      1.0.0
@@ -180,7 +176,6 @@ class DashboardController extends ReportController
      *    "end_at": "2013-04-12 20:41:00"
      *  }
      *
-     * @apiSuccess {Boolean}   success                             Indicates successful request when `TRUE`
      * @apiSuccess {Object}    userIntervals                       Response, keys => requested user ids
      * @apiSuccess {Integer}   userIntervals.user_id               ID of the user
      * @apiSuccess {Object[]}  userIntervals.intervals             Intervals info
@@ -196,7 +191,6 @@ class DashboardController extends ReportController
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "userIntervals": {
      *      "1": {
      *        "user_id": 1,
@@ -229,22 +223,10 @@ class DashboardController extends ReportController
      */
     public function timeIntervals(Request $request): JsonResponse
     {
-        $validator = Validator::make(
-            $request->all(),
-            $this->getValidationRules()
-        );
+        $request->validate($this->getValidationRules());
 
-        if ($validator->fails()) {
-            return new JsonResponse([
-                'success' => false,
-                'error_type' => 'validation',
-                'message' => 'Validation error',
-                'info' => $validator->errors(),
-            ], 400);
-        }
-
-        $user_ids = $request->input('user_ids');
-        $project_ids = $request->input('project_ids');
+        $userIds = $request->input('user_ids');
+        $projectIds = $request->input('project_ids');
 
         $timezone = $request->input('timezone') ?: 'UTC';
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
@@ -257,31 +239,30 @@ class DashboardController extends ReportController
             ->tz('UTC')
             ->toDateTimeString();
 
-        $intervals = DB::table('time_intervals AS i')
-            ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
+        $intervals = TimeInterval::with('task', 'task.project')
             ->select(
-                'i.user_id',
-                'i.id',
-                'i.task_id',
-                't.project_id',
-                'i.is_manual',
+                'user_id',
+                'id',
+                'task_id',
+                'is_manual',
                 DB::raw("CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}') as start_at"),
                 DB::raw("CONVERT_TZ(end_at, '+00:00', '{$timezoneOffset}') as end_at"),
-                DB::raw('TIMESTAMPDIFF(SECOND, i.start_at, i.end_at) as duration'),
+                DB::raw('TIMESTAMPDIFF(SECOND, start_at, end_at) as duration'),
                 DB::raw('UNIX_TIMESTAMP(start_at) as raw_start_at'),
                 DB::raw('UNIX_TIMESTAMP(end_at) as raw_end_at')
             )
-            ->whereIn('i.user_id', $user_ids)
-            ->where('i.start_at', '>=', $startAt)
-            ->where('i.start_at', '<', $endAt)
-            ->whereIn('t.project_id', Project::getUserRelatedProjectIds(Auth::user()))
-            ->whereNull('i.deleted_at')
-            ->orderBy('i.user_id')
-            ->orderBy('i.task_id')
-            ->orderBy('i.start_at');
+            ->whereIn('user_id', $userIds)
+            ->where('start_at', '>=', $startAt)
+            ->where('start_at', '<', $endAt)
+            ->whereNull('deleted_at')
+            ->orderBy('user_id')
+            ->orderBy('task_id')
+            ->orderBy('start_at');
 
-        if (!empty($project_ids)) {
-            $intervals = $intervals->whereIn('t.project_id', $project_ids);
+        if (!empty($projectIds)) {
+            $intervals = $intervals->whereHas('task', function ($query) use ($projectIds) {
+                $query->whereIn('tasks.project_id', $projectIds);
+            });
         }
 
         $intervals = $intervals->get();
@@ -304,17 +285,16 @@ class DashboardController extends ReportController
                 'id' => (int)$interval->id,
                 'ids' => [(int)$interval->id],
                 'user_id' => (int)$user_id,
-                'task_id' => (int)$interval->task_id,
-                'project_id' => (int)$interval->project_id,
                 'is_manual' => (int)$interval->is_manual,
                 'duration' => $duration,
                 'start_at' => Carbon::parse($interval->start_at)->toIso8601String(),
                 'end_at' => Carbon::parse($interval->end_at)->toIso8601String(),
+                'task' => $interval->task,
             ];
 
             // Merge with the previous interval if it is consecutive and has the same task
             if ($previousInterval !== false
-                && (int)$interval->raw_start_at - (int)$previousInterval->raw_end_at <= 1
+                && (int)$interval->raw_start_at - (int)$previousInterval->raw_end_at <= 5
                 && $interval->is_manual === $previousInterval->is_manual
                 && $interval->user_id === $previousInterval->user_id
                 && $interval->task_id === $previousInterval->task_id) {
@@ -330,7 +310,7 @@ class DashboardController extends ReportController
             $previousInterval = $interval;
         }
 
-        $results = ['userIntervals' => $users, 'success' => true];
+        $results = ['userIntervals' => $users];
 
         return new JsonResponse(
             Filter::process(

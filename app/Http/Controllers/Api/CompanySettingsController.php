@@ -3,7 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
+use App\Http\Requests\CompanySettings\IndexCompanySettingsRequest;
 use App\Http\Requests\CompanySettings\UpdateCompanySettingsRequest;
+use App\Http\Resources\CompanySettings;
 use App\Models\Priority;
 use App\Services\CoreSettingsService;
 use Illuminate\Http\JsonResponse;
@@ -34,22 +36,9 @@ class CompanySettingsController extends Controller
     }
 
     /**
-     * Returns the controller rules.
-     *
-     * @return array
-     */
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'company-settings.index',
-            'update' => 'company-settings.update',
-        ];
-    }
-
-    /**
      * @return JsonResponse
      *
-     * @api             {get} /v1/company-settings/index List
+     * @api             {get} /company-settings/index List
      * @apiDescription  Returns all company settings.
      *
      * @apiVersion      1.0.0
@@ -58,13 +47,11 @@ class CompanySettingsController extends Controller
      *
      * @apiUse          AuthHeader
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}   data  Contains an array of all company settings
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "data": {
      *      "timezone": "Europe/Moscow",
      *      "language": "en",
@@ -94,7 +81,7 @@ class CompanySettingsController extends Controller
      * @apiUse          UnauthorizedError
      *
      */
-    public function index(): JsonResponse
+    public function index(IndexCompanySettingsRequest $request): CompanySettings
     {
         $settings = $this->settings->all();
         $priorities = $this->priorities->all();
@@ -103,17 +90,14 @@ class CompanySettingsController extends Controller
         $data['internal_priorities'] = $priorities;
         $data['heartbeat_period'] = config('app.user_activity.online_status_time');
 
-        return new JsonResponse([
-            'success' => true,
-            'data' => $data,
-        ]);
+        return new CompanySettings($data);
     }
 
     /**
      * @param UpdateCompanySettingsRequest $request
      * @return JsonResponse
      *
-     * @api             {patch} /v1/company-settings/update Update
+     * @api             {patch} /company-settings/update Update
      * @apiDescription  Updates the specified company settings.
      *
      * @apiVersion      1.0.0
@@ -152,13 +136,11 @@ class CompanySettingsController extends Controller
      *    ]
      *  }
      *
-     * @apiSuccess {Boolean}  success  Indicates successful request when `TRUE`
      * @apiSuccess {Array}   data  Contains an array of settings that changes were applied to
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "success": true,
      *    "data": {
      *      "timezone": "Europe/Moscow",
      *      "language": "en",
@@ -188,13 +170,14 @@ class CompanySettingsController extends Controller
      * @apiUse          UnauthorizedError
      *
      */
-    public function update(UpdateCompanySettingsRequest $request): JsonResponse
+    public function update(UpdateCompanySettingsRequest $request): CompanySettings
     {
         $settings = $this->settings->set($request->validated());
+        $priorities = $this->priorities->all();
 
-        return new JsonResponse([
-            'success' => true,
-            'data' => $settings,
-        ]);
+        $data = $settings;
+        $data['internal_priorities'] = $priorities;
+
+        return new CompanySettings($data);
     }
 }

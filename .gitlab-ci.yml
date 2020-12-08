@@ -15,13 +15,12 @@ integration_testing:
     - docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd
     - docker-php-ext-install bcmath zip pdo_mysql
     - apk add --no-cache $PHPIZE_DEPS
-    - pecl install xdebug
+    - pecl install xdebug-2.9.8
     - docker-php-ext-enable xdebug
-    - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
+    - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.16
   script:
-    - composer install
+    - COMPOSER_MEMORY_LIMIT=-1 composer install
     - cp .env.testing.example .env.testing
-    - cp modules_statuses.example.json modules_statuses.json
     - php artisan migrate --env=testing
     - php artisan db:seed --class=InitialSeeder --env=testing
     - vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
@@ -80,10 +79,13 @@ staging_deploy:
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git submodule update --init'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer install'
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer dump-autoload'
     - ssh $STAGING_USER@$STAGING_HOST 'cp -f backend/.env.staging backend/.env && cat backend/.env.sentry >> backend/.env'
     - ssh $STAGING_USER@$STAGING_HOST 'cp -f backend/modules_statuses.staging.json backend/modules_statuses.json'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases new $(php artisan cattr:version)'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases set-commits $(php artisan cattr:version) --auto'
+    - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan route:clear'
+    - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan cache:clear'
     - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan config:cache'
     - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan migrate --force'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases deploys $(php artisan cattr:version) new -e $(cat .env | grep "APP_ENV=.*" | cut -d"=" -f 2)'

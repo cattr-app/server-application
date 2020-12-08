@@ -299,6 +299,7 @@ class ReportHelper
             ->where($this->getTableName('timeInterval', 'start_at'), '<', $endAt)
             ->where($this->getTableName('timeInterval', 'deleted_at'), null)
             ->whereIn($this->getTableName('user', 'id'), $uids)
+            ->whereIn($this->getTableName('timeInterval', 'id'), TimeInterval::all()->pluck('id'))
             ->whereNull($this->getTableName('timeInterval', 'deleted_at'))
             ->groupBy(['task_id', 'user_id']);
     }
@@ -361,7 +362,7 @@ class ReportHelper
         string $endAt,
         $timezoneOffset
     ): Builder {
-        $projectIds = Project::getUserRelatedProjectIds(request()->user());
+        $projectIds = Project::all()->pluck('id');
         $query = $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
             "JSON_OBJECT(
                 'id', users.id, 'full_name', users.full_name, 'email', users.email, 'company_id',

@@ -3,10 +3,35 @@
 namespace App\Models;
 
 use Eloquent as EloquentIdeHelper;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
+ * App\Models\ProjectReport
+ *
+ * @property int $user_id
+ * @property int $task_id
+ * @property int $project_id
+ * @property string $user_name
+ * @property string $task_name
+ * @property string $project_name
+ * @property string $date
+ * @property string|null $duration
+ * @property-read Task $task
+ * @property-read User $user
+ * @property-read Project $project
+ * @method static Builder|ProjectReport whereDate($value)
+ * @method static Builder|ProjectReport whereDuration($value)
+ * @method static Builder|ProjectReport whereProjectId($value)
+ * @method static Builder|ProjectReport whereProjectName($value)
+ * @method static Builder|ProjectReport whereTaskId($value)
+ * @method static Builder|ProjectReport whereTaskName($value)
+ * @method static Builder|ProjectReport whereUserId($value)
+ * @method static Builder|ProjectReport whereUserName($value)
+ * @method static Builder|ProjectReport newModelQuery()
+ * @method static Builder|ProjectReport newQuery()
+ * @method static Builder|ProjectReport query()
  * @mixin EloquentIdeHelper
  */
 class ProjectReport extends Model

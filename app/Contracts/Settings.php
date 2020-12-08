@@ -12,17 +12,23 @@ interface Settings
 
     /**
      * @param string $moduleName
-     * @param string $key
+     * @param mixed $key
      * @param null $default
      * @return mixed
      */
-    public function get(string $moduleName, string $key, $default = null);
+    public function get(string $moduleName, $key, $default = null);
 
     /**
-     * @param string $moduleName
-     * @param $key
+     * @param mixed $moduleName
+     * @param mixed $key
      * @param null $value
      * @return mixed
      */
-    public function set(string $moduleName, $key, $value = null);
+    public function set($moduleName, $key, $value = null);
+
+    /**
+     * @param string $moduleName
+     * @return mixed
+     */
+    public function flush(string $moduleName);
 }

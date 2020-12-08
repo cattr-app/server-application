@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\CompanySettings;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\FormRequest;
 
 class UpdateCompanySettingsRequest extends FormRequest
 {
@@ -13,7 +13,7 @@ class UpdateCompanySettingsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return true;
+        return auth()->user()->hasRole('admin');
     }
 
     /**
@@ -25,9 +25,9 @@ class UpdateCompanySettingsRequest extends FormRequest
     {
         return [
             'timezone' => 'sometimes|required|timezone',
-            'language' => 'sometimes|required|string',
             'work_time' => 'sometimes|int',
             'color' => 'sometimes|required|array',
+            'auto_thinning' => 'sometimes|boolean',
         ];
     }
 }

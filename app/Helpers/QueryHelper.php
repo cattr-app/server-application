@@ -73,7 +73,10 @@ class QueryHelper
                 }
 
                 $relations[$domain][$filterParam] = $param;
-            } elseif (!in_array($key, static::RESERVED_REQUEST_KEYWORDS, true)) {
+            } elseif (!in_array($key, static::RESERVED_REQUEST_KEYWORDS, true) &&
+                !in_array($key, $model->getHidden(), true) &&
+                Schema::hasColumn($table, $key)
+            ) {
                 [$operator, $value] = is_array($param) ? array_values($param) : ['=', $param];
 
                 if (is_array($value) && $operator === '=') {

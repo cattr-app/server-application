@@ -12,5 +12,7 @@ return [
 
     ],
 
-    'send_default_pii' => env('SENTRY_COLLECT_USERS', false)
+    'send_default_pii' => env('SENTRY_COLLECT_USERS', false),
+
+    'traces_sample_rate' => env('SENTRY_TRACES_SIMPLE_RATE', 0.0),
 ];
