@@ -2,7 +2,7 @@
 
 namespace App\Scopes;
 
-use Auth;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -16,7 +16,11 @@ class ScreenshotScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
+        /** @var User|null user */
         $user = auth()->user();
+        if (!isset($user)) {
+            abort(404);
+        }
 
         if ($user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
             return $builder;

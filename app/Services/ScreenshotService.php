@@ -14,7 +14,7 @@ class ScreenshotService implements ScreenshotServiceInterface
      * @param Request $request
      * @return Screenshot
      */
-    public function getScreenshot(Request $request): Screenshot
+    public function getScreenshot(Request $request): ?Screenshot
     {
         return Screenshot::with('timeInterval')
             ->where('path', $request->path())
@@ -27,7 +27,7 @@ class ScreenshotService implements ScreenshotServiceInterface
      * @param Request $request
      * @return Screenshot
      */
-    public function getThumbnail(Request $request): Screenshot
+    public function getThumbnail(Request $request): ?Screenshot
     {
         return Screenshot::with('timeInterval')
             ->where('thumbnail_path', $request->path())
