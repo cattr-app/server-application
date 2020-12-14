@@ -13,6 +13,10 @@ class UpdateUserIdColumnToTasksTable extends Migration
      */
     public function up()
     {
+        if (!Schema::hasColumn('tasks', 'user_id')) {
+            return;
+        }
+
         Schema::table('tasks', function (Blueprint $table) {
             $table->unsignedInteger('user_id')->nullable()->change();
         });
@@ -25,6 +29,10 @@ class UpdateUserIdColumnToTasksTable extends Migration
      */
     public function down()
     {
+        if (!Schema::hasColumn('tasks', 'user_id')) {
+            return;
+        }
+
         Schema::disableForeignKeyConstraints();
 
         Schema::table('tasks', function (Blueprint $table) {

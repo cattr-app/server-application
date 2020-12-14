@@ -176,7 +176,7 @@ class Project extends Model
 
     public function getNameAttribute(): string
     {
-        return $this->attributes['source'] === 'internal'
+        return empty($this->attributes['source']) || $this->attributes['source'] === 'internal'
             ? $this->attributes['name']
             : ucfirst($this->attributes['source']) . ": {$this->attributes['name']}";
     }

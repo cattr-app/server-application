@@ -59,10 +59,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static EloquentBuilder|ProjectsUsers newQuery()
  * @method static EloquentBuilder|ProjectsUsers query()
  * @mixin EloquentIdeHelper
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectsUsers whereRoleId($value)
  */
 class ProjectsUsers extends Model
 {
