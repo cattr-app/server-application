@@ -8,6 +8,7 @@ use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
@@ -29,7 +30,7 @@ use Parsedown;
  * @apiSuccess {ISO8601}  task.updated_at     Update DateTime
  * @apiSuccess {ISO8601}  task.deleted_at     Delete DateTime or `NULL` if wasn't deleted
  * @apiSuccess {Array}    task.timeIntervals  Time intervals of the task
- * @apiSuccess {Array}    task.user           Linked users
+ * @apiSuccess {Array}    task.users          Linked users
  * @apiSuccess {Array}    task.assigned       Users, that assigned this task
  * @apiSuccess {Array}    task.project        The project that task belongs to
  * @apiSuccess {Object}   task.priority       Task priority
@@ -53,7 +54,7 @@ use Parsedown;
  * @apiParam {ISO8601}  [updated_at]     Update DateTime
  * @apiParam {ISO8601}  [deleted_at]     Delete DateTime
  * @apiParam {Array}    [timeIntervals]  Time intervals of the task
- * @apiParam {Array}    [user]           Linked users
+ * @apiParam {Array}    [users]          Linked users
  * @apiParam {Array}    [assigned]       Users, that assigned this task
  * @apiParam {Array}    [project]        The project that task belongs to
  * @apiParam {Object}   [priority]       Task priority
@@ -77,10 +78,10 @@ use Parsedown;
  * @property string $updated_at
  * @property string $deleted_at
  * @property bool $important
- * @property User $user
  * @property User $assigned
  * @property Project $project
  * @property Priority $priority
+ * @property User[] $users
  * @property TimeInterval[] $timeIntervals
  * @property-read int|null $time_intervals_count
  * @method static bool|null forceDelete()
@@ -105,10 +106,6 @@ use Parsedown;
  * @method static QueryBuilder|Task withTrashed()
  * @method static QueryBuilder|Task withoutTrashed()
  * @mixin EloquentIdeHelper
- * @property-read int|null $time_intervals_count
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Task newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Task newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Task query()
  */
 class Task extends Model
 {
@@ -129,7 +126,6 @@ class Task extends Model
         'task_name',
         'description',
         'active',
-        'user_id',
         'assigned_by',
         'url',
         'priority_id',
@@ -144,7 +140,6 @@ class Task extends Model
         'task_name' => 'string',
         'description' => 'string',
         'active' => 'integer',
-        'user_id' => 'integer',
         'assigned_by' => 'integer',
         'url' => 'string',
         'priority_id' => 'integer',
@@ -204,12 +199,9 @@ class Task extends Model
         return $this->belongsTo(Project::class, 'project_id')->withoutGlobalScopes();
     }
 
-    /**
-     * @return BelongsTo
-     */
-    public function user(): BelongsTo
+    public function users(): BelongsToMany
     {
-        return $this->belongsTo(User::class, 'user_id')->withoutGlobalScopes();
+        return $this->belongsToMany(User::class, 'tasks_users', 'task_id', 'user_id')->withoutGlobalScopes();
     }
 
     /**

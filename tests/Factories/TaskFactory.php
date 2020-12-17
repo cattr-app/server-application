@@ -59,6 +59,10 @@ class TaskFactory extends Factory
 
         $this->task->save();
 
+        if (isset($this->user)) {
+            $this->task->users()->attach($this->user->id);
+        }
+
         if ($this->intervalsAmount) {
             $this->createIntervals();
         }
@@ -96,8 +100,6 @@ class TaskFactory extends Factory
         if (!isset($this->user)) {
             $this->user = UserFactory::create();
         }
-
-        $this->task->user_id = $this->user->id;
     }
 
     private function createIntervals(): void

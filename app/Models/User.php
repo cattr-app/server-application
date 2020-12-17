@@ -362,11 +362,11 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * @return HasMany
+     * @return BelongsToMany
      */
-    public function tasks(): HasMany
+    public function tasks(): BelongsToMany
     {
-        return $this->hasMany(Task::class, 'user_id');
+        return $this->belongsToMany(Task::class, 'tasks_users', 'user_id', 'task_id');
     }
 
     /**
