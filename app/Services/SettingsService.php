@@ -6,6 +6,7 @@ use App\Contracts\Settings as SettingsInterface;
 use App\Models\Setting;
 use Exception;
 use RuntimeException;
+use Schema;
 
 class SettingsService implements SettingsInterface
 {
@@ -80,7 +81,10 @@ class SettingsService implements SettingsInterface
         $cached = cache("settings:$scope");
 
         if (!isset($cached[$_key])) {
-            $setting = $this->model->where(['module_name' => $scope, 'key' => $_key])->get()->first();
+            $setting = Schema::hasTable($this->model->getTable()) ? $this->model->where([
+                'module_name' => $scope,
+                'key' => $_key
+            ])->get()->first() : null;
 
             $cached[$_key] = optional($setting)->value ?? $_default;
 
