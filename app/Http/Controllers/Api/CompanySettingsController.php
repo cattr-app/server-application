@@ -88,6 +88,7 @@ class CompanySettingsController extends Controller
 
         $data = $settings;
         $data['internal_priorities'] = $priorities;
+        $data['heartbeat_period'] = config('app.user_activity.online_status_time');
 
         return new CompanySettings($data);
     }

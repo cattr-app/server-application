@@ -3,6 +3,7 @@
 namespace Tests\Factories;
 
 use App\Models\User;
+use Carbon\Carbon;
 use Faker\Factory as FakerFactory;
 use Illuminate\Database\Eloquent\Model;
 use Tymon\JWTAuth\Facades\JWTAuth;
@@ -76,6 +77,7 @@ class UserFactory extends Factory
             'role_id' => 2,
             'type' => 'employee',
             'nonce' => 0,
+            'last_activity' => Carbon::now()->subMinutes(rand(1, 55)),
         ];
     }
 

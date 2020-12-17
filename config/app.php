@@ -21,7 +21,10 @@ return [
     'recaptcha' => [
         'enabled' => env('RECAPTCHA_ENABLED', false)
     ],
-
+    'user_activity' => [
+        'online_status_time' => 60,
+        'heartbeat_period' => 30,
+    ],
     'log_level' => env('APP_LOG_LEVEL', 'debug'),
     'providers' => [
         Illuminate\Auth\AuthServiceProvider::class,

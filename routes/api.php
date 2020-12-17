@@ -93,6 +93,7 @@ Route::group([
     $router->any('users/show', [UserController::class, 'show']);
     $router->post('users/remove', [UserController::class, 'destroy']);
     $router->post('users/send-invite', [UserController::class, 'sendInvite']);
+    $router->patch('users/activity', [UserController::class, 'updateActivity']);
 
     //Screenshots routes
     $router->any('screenshots/list', [ScreenshotController::class, 'index']);

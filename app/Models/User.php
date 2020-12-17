@@ -5,6 +5,7 @@ namespace App\Models;
 use App\Mail\ResetPassword;
 use App\Scopes\UserScope;
 use App\Traits\HasRole;
+use Carbon\Carbon;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -242,7 +243,8 @@ class User extends Authenticatable implements JWTSubject
         'type',
         'invitation_sent',
         'nonce',
-        'client_installed'
+        'client_installed',
+        'last_activity',
     ];
 
     /**
@@ -274,7 +276,6 @@ class User extends Authenticatable implements JWTSubject
         'client_installed' => 'integer',
     ];
 
-
     /**
      * The attributes that should be mutated to dates.
      *
@@ -284,6 +285,7 @@ class User extends Authenticatable implements JWTSubject
         'created_at',
         'updated_at',
         'deleted_at',
+        'last_activity',
     ];
 
     /**
@@ -302,6 +304,15 @@ class User extends Authenticatable implements JWTSubject
 
         static::addGlobalScope(new UserScope);
     }
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'online',
+    ];
 
     /**
      * Get the identifier that will be stored in the subject claim of the JWT.
@@ -384,6 +395,19 @@ class User extends Authenticatable implements JWTSubject
     public function sendPasswordResetNotification($token): void
     {
         $this->notify(new ResetPassword($this->email, $token));
+    }
+    /**
+     * Get the user's online status.
+     *
+     * @return bool
+     */
+    public function getOnlineAttribute(): bool
+    {
+        if (!isset($this->last_activity)) {
+            return false;
+        }
+
+        return $this->last_activity->diffInSeconds(Carbon::now()) < config('app.user_activity.online_status_time');
     }
 
     /**

@@ -42,7 +42,10 @@ class CreateTest extends TestCase
 
         $response->assertOk();
         $this->assertDatabaseHas('users', $this->userData);
-        $this->assertDatabaseHas('users', $response->json('res'));
+
+        $responseData = $response->json('res');
+        unset($responseData['online']);
+        $this->assertDatabaseHas('users', $responseData);
     }
 
     public function test_create_as_manager(): void
