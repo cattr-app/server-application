@@ -8,8 +8,10 @@ use App\Models\Screenshot;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
+use App\Services\ProjectMemberService;
 use Faker\Factory as FakerFactory;
 use Illuminate\Database\Seeder;
+use Storage;
 
 /**
  * Creates additional users to statistics tests.
@@ -17,6 +19,17 @@ use Illuminate\Database\Seeder;
 class StatisticsSeeder extends Seeder
 {
     protected array $protectedFiles = ['uploads/screenshots/.gitignore'];
+
+    protected ProjectMemberService $projectMemberService;
+
+    /**
+     * ProjectMemberController constructor.
+     * @param ProjectMemberService $projectMemberService
+     */
+    public function __construct(ProjectMemberService $projectMemberService)
+    {
+        $this->projectMemberService = $projectMemberService;
+    }
 
     /**
      * Creates a new user.
@@ -55,15 +68,13 @@ class StatisticsSeeder extends Seeder
      * @param User $user
      * @param Project $project
      * @param int|null $roleId
-     * @return ProjectsUsers
+     * @return array
      */
-    protected function assignProject(User $user, Project $project, ?int $roleId = null): ProjectsUsers
+    protected function assignProject(User $user, Project $project, ?int $roleId = 1): array
     {
-        $relation = $project->attach($user->id, ['role_id' => $roleId]);
-
-        $this->command->getOutput()->writeln("<fg=green>{$user->full_name} assigned to project {$project->id}</>");
-
-        return $relation;
+        return $this->projectMemberService->syncMembers($project->id, [
+            $user->id => ['role_id' => $roleId],
+        ]);
     }
 
     /**
@@ -81,7 +92,6 @@ class StatisticsSeeder extends Seeder
             'task_name' => $faker->text(random_int(15, 50)),
             'description' => $faker->text(random_int(100, 1000)),
             'active' => true,
-            'user_id' => $user->id,
             'assigned_by' => $user->id,
         ]);
 

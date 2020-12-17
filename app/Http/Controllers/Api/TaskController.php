@@ -197,6 +197,7 @@ class TaskController extends ItemController
     }
 
     /**
+     * @throws Exception
      * @api             {post} /tasks/edit Edit
      * @apiDescription  Edit Task
      *
