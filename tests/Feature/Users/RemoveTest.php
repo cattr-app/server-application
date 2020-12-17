@@ -31,7 +31,7 @@ class RemoveTest extends TestCase
 
     public function test_remove_as_admin(): void
     {
-        $user = $this->user->toArray();
+        $user = $this->user->makeHidden('online')->toArray();
         unset($user['online']);
         $this->assertDatabaseHas('users', $user);
 
@@ -43,7 +43,7 @@ class RemoveTest extends TestCase
 
     public function test_remove_as_manager(): void
     {
-        $this->assertDatabaseHas('users', $this->user->toArray());
+        $this->assertDatabaseHas('users', $this->user->makeHidden('online')->toArray());
 
         $response = $this->actingAs($this->manager)->postJson(self::URI, $this->user->only('id'));
 
@@ -52,7 +52,7 @@ class RemoveTest extends TestCase
 
     public function test_remove_as_auditor(): void
     {
-        $this->assertDatabaseHas('users', $this->user->toArray());
+        $this->assertDatabaseHas('users', $this->user->makeHidden('online')->toArray());
 
         $response = $this->actingAs($this->auditor)->postJson(self::URI, $this->user->only('id'));
 
@@ -61,7 +61,7 @@ class RemoveTest extends TestCase
 
     public function test_remove_as_user(): void
     {
-        $this->assertDatabaseHas('users', $this->user->toArray());
+        $this->assertDatabaseHas('users', $this->user->makeHidden('online')->toArray());
 
         $response = $this->actingAs($this->user)->postJson(self::URI, $this->user->only('id'));
 
