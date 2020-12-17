@@ -24,7 +24,7 @@ integration_testing:
     - cp modules_statuses.example.json modules_statuses.json
     - php artisan migrate --env=testing
     - php artisan db:seed --class=InitialSeeder --env=testing
-    - vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
+    - php -c .testing.ini vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
 
 apidoc_deploy:
   image: node:alpine
@@ -57,13 +57,13 @@ live_deploy:
   script:
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && git pull'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && git submodule update --init'
-    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && composer install'
-    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases new $(php artisan cattr:version)'
-    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases set-commits $(php artisan cattr:version) --auto'
-    - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan config:cache'
-    - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan migrate --force'
-    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases deploys $(php artisan cattr:version) new -e $(cat .env | grep "APP_ENV=.*" | cut -d"=" -f 2)'
-    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases finalize $(php artisan cattr:version)'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && composer7.4 install'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases new $(php7.4 artisan cattr:version)'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases set-commits $(php7.4 artisan cattr:version) --auto'
+    - ssh $CI_USER@$CI_HOST 'php7.4 cattr/backend/artisan config:cache'
+    - ssh $CI_USER@$CI_HOST 'php7.4 cattr/backend/artisan migrate --force'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases deploys $(php7.4 artisan cattr:version) new -e $(cat .env | grep "APP_ENV=.*" | cut -d"=" -f 2)'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases finalize $(php7.4 artisan cattr:version)'
 
 staging_deploy:
   image: alpine
