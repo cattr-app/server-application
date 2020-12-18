@@ -12,7 +12,7 @@ use Tests\TestCase;
 
 class ListTest extends TestCase
 {
-    private const URI = 'v1/time-use-report/list';
+    private const URI = 'time-use-report/list';
 
     private const INTERVALS_AMOUNT = 10;
 

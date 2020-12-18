@@ -55,10 +55,6 @@ class Kernel extends HttpKernel
             SubstituteBindings::class,
         ],
 
-        'role' => [
-            RoleCheck::class
-        ],
-
         'api' => [
             'bindings',
         ],

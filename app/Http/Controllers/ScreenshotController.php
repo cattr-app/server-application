@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Contracts\ScreenshotService;
 use Illuminate\Contracts\Routing\ResponseFactory;
 use Illuminate\Http\Request;
 use Illuminate\Http\Response;
@@ -9,18 +10,16 @@ use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ScreenshotController extends Controller
 {
-    /** @var ScreenshotControllerStrategyInterface */
-    protected ScreenshotControllerStrategyInterface $strategy;
+    /** @var ScreenshotService $screenshotService */
+    protected ScreenshotService $screenshotService;
 
     /**
-     * @param ScreenshotControllerStrategyInterface $strategy
-     *
-     * @noinspection MagicMethodsValidityInspection
-     * @noinspection PhpMissingParentConstructorInspection
+     * ScreenshotController constructor.
+     * @param ScreenshotService $screenshotService
      */
-    public function __construct(ScreenshotControllerStrategyInterface $strategy)
+    public function __construct(ScreenshotService $screenshotService)
     {
-        $this->strategy = $strategy;
+        $this->screenshotService = $screenshotService;
     }
 
     /**
@@ -29,14 +28,9 @@ class ScreenshotController extends Controller
      */
     public function screenshot(Request $request)
     {
-        $screenshot = $this->strategy->getScreenshot($request);
+        $screenshot = $this->screenshotService->getScreenshot($request);
         if (!isset($screenshot)) {
             return response(null, 404);
-        }
-
-        $user = $request->user();
-        if (!$screenshot->access($user)) {
-            return response(null, 403);
         }
 
         $full_path = storage_path('app/' . $screenshot->path);
@@ -53,14 +47,9 @@ class ScreenshotController extends Controller
      */
     public function thumbnail(Request $request)
     {
-        $screenshot = $this->strategy->getThumbnail($request);
+        $screenshot = $this->screenshotService->getThumbnail($request);
         if (!isset($screenshot)) {
             return response(null, 404);
-        }
-
-        $user = $request->user();
-        if (!$screenshot->access($user)) {
-            return response(null, 403);
         }
 
         $full_path = storage_path('app/' . $screenshot->thumbnail_path);

@@ -84,10 +84,7 @@ class RecaptchaHelper
 
         if ($this->needsCaptcha()) {
             $this->incrementBanAmounts();
-            throw new AuthorizationException(
-                AuthorizationException::ERROR_TYPE_CAPTCHA,
-                ['site_key' => config('recaptcha.site_key')]
-            );
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_CAPTCHA);
         }
     }
 

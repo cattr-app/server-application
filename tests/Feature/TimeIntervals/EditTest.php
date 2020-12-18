@@ -1,5 +1,6 @@
 <?php
 
+
 namespace Tests\Feature\TimeIntervals;
 
 use App\Models\TimeInterval;
@@ -10,38 +11,128 @@ use Tests\TestCase;
 
 class EditTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/edit';
+    private const URI = 'time-intervals/edit';
 
+    /** @var User $admin */
     private User $admin;
-    private TimeInterval $interval;
+    /** @var User $manager */
+    private User $manager;
+    /** @var User $auditor */
+    private User $auditor;
+    /** @var User $user */
+    private User $user;
+
+    /** @var TimeInterval $timeInterval */
+    private TimeInterval $timeInterval;
+    /** @var TimeInterval $timeIntervalForManager */
+    private TimeInterval $timeIntervalForManager;
+    /** @var TimeInterval $timeIntervalForAuditor */
+    private TimeInterval $timeIntervalForAuditor;
+    /** @var TimeInterval $timeIntervalForUser */
+    private TimeInterval $timeIntervalForUser;
 
     protected function setUp(): void
     {
         parent::setUp();
 
-        $this->admin = UserFactory::asAdmin()->withTokens()->create();
+        $this->admin = UserFactory::refresh()->asAdmin()->withTokens()->create();
+        $this->manager = UserFactory::refresh()->asManager()->withTokens()->create();
+        $this->auditor = UserFactory::refresh()->asAuditor()->withTokens()->create();
+        $this->user = UserFactory::refresh()->asUser()->withTokens()->create();
 
-        $this->interval = IntervalFactory::create();
+        $this->timeInterval = IntervalFactory::create();
+        $this->timeIntervalForManager = IntervalFactory::forUser($this->manager)->create();
+        $this->timeIntervalForAuditor = IntervalFactory::forUser($this->auditor)->create();
+        $this->timeIntervalForUser = IntervalFactory::forUser($this->user)->create();
     }
 
-    public function test_edit(): void
+    public function test_edit_as_admin(): void
     {
-        $this->interval->count_keyboard += 5;
+        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->interval->toArray());
+        $editedInterval = clone $this->timeInterval;
+        $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
+
+        $response = $this->actingAs($this->admin)->postJson(self::URI, $editedInterval->toArray());
 
         $response->assertOk();
-        $response->assertJson(['res' => $this->interval->toArray()]);
-        $this->assertDatabaseHas('time_intervals', $this->interval->toArray());
+        $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
     }
 
-    public function test_not_existing_interval(): void
+    public function test_edit_as_manager(): void
     {
-        ++$this->interval->id;
+        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
 
-        $response = $this->actingAs($this->admin)->postJson(self::URI, $this->interval->toArray());
+        $editedInterval = clone $this->timeInterval;
+        $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
 
-        $response->assertNotFound();
+        $response = $this->actingAs($this->manager)->postJson(self::URI, $editedInterval->toArray());
+        $response->assertForbidden();
+    }
+
+    public function test_edit_your_own_as_manager(): void
+    {
+        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+
+        $editedInterval = clone $this->timeIntervalForManager;
+        $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
+
+        $response = $this->actingAs($this->manager)->postJson(self::URI, $editedInterval->toArray());
+
+        $response->assertOk();
+        $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
+    }
+
+    public function test_edit_as_auditor(): void
+    {
+        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+
+        $editedInterval = clone $this->timeInterval;
+        $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
+
+        $response = $this->actingAs($this->auditor)->postJson(self::URI, $editedInterval->toArray());
+
+        $response->assertForbidden();
+    }
+
+    public function test_edit_your_own_as_auditor(): void
+    {
+        $this->assertDatabaseHas('time_intervals', $this->timeIntervalForAuditor->toArray());
+
+        $editedInterval = clone $this->timeIntervalForAuditor;
+        $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
+
+        $response = $this->actingAs($this->auditor)->postJson(self::URI, $editedInterval->toArray());
+
+        $response->assertOk();
+        $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
+    }
+
+    public function test_edit_as_user(): void
+    {
+        $this->assertDatabaseHas('time_intervals', $this->timeInterval->toArray());
+
+        $editedInterval = clone $this->timeInterval;
+        $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
+
+        $response = $this->actingAs($this->user)->postJson(self::URI, $editedInterval->toArray());
+
+        $response->assertForbidden();
+    }
+
+    public function test_edit_your_own_as_user(): void
+    {
+        $this->assertDatabaseHas('time_intervals', $this->timeIntervalForManager->toArray());
+
+        $editedInterval = clone $this->timeIntervalForUser;
+        $editedInterval->user_id = UserFactory::refresh()->asUser()->create()->id;
+
+        $response = $this
+            ->actingAs($this->user)
+            ->postJson(self::URI, $editedInterval->toArray());
+
+        $response->assertOk();
+        $this->assertDatabaseHas('time_intervals', $editedInterval->toArray());
     }
 
     public function test_unauthorized(): void

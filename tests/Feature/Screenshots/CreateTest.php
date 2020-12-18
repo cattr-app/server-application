@@ -14,7 +14,7 @@ use Tests\TestCase;
 
 class CreateTest extends TestCase
 {
-    private const URI = '/v1/screenshots/create';
+    private const URI = '/screenshots/create';
 
     private User $admin;
     private File $screenshotFile;
@@ -41,7 +41,7 @@ class CreateTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDatabaseHas('screenshots', $response->json('screenshot'));
         Storage::assertExists('uploads/screenshots/' . basename($response->json('screenshot.path')));
     }

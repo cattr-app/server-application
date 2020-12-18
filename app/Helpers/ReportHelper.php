@@ -299,6 +299,7 @@ class ReportHelper
             ->where($this->getTableName('timeInterval', 'start_at'), '<', $endAt)
             ->where($this->getTableName('timeInterval', 'deleted_at'), null)
             ->whereIn($this->getTableName('user', 'id'), $uids)
+            ->whereIn($this->getTableName('timeInterval', 'id'), TimeInterval::all()->pluck('id'))
             ->whereNull($this->getTableName('timeInterval', 'deleted_at'))
             ->groupBy(['task_id', 'user_id']);
     }
@@ -324,7 +325,9 @@ class ReportHelper
                 JSON_OBJECT(
                     'id', screenshots.id, 'path', screenshots.path, 'thumbnail_path', screenshots.thumbnail_path,
                     'created_at', CONVERT_TZ(time_intervals.end_at, '+00:00', ?),
-                    'time_interval', JSON_OBJECT('start_at', DATE_FORMAT(time_intervals.start_at, '%Y-%m-%dT%TZ'))
+                    'time_interval', JSON_OBJECT('start_at', DATE_FORMAT(time_intervals.start_at, '%Y-%m-%dT%TZ'),
+                    'activity_fill', time_intervals.activity_fill, 'mouse_fill', time_intervals.mouse_fill, 
+                    'keyboard_fill', time_intervals.keyboard_fill)
                 )
             ) as screens",
             "JSON_ARRAYAGG(
@@ -359,7 +362,7 @@ class ReportHelper
         string $endAt,
         $timezoneOffset
     ): Builder {
-        $projectIds = Project::getUserRelatedProjectIds(request()->user());
+        $projectIds = Project::all()->pluck('id');
         $query = $this->getBaseQuery($uids, $startAt, $endAt, $timezoneOffset, [
             "JSON_OBJECT(
                 'id', users.id, 'full_name', users.full_name, 'email', users.email, 'company_id',

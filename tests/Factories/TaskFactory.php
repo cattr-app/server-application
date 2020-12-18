@@ -18,8 +18,8 @@ class TaskFactory extends Factory
 
     private int $intervalsAmount = 0;
 
-    private User $user;
-    private Project $project;
+    private ?User $user = null;
+    private ?Project $project = null;
     private Task $task;
 
     protected function getModelInstance(): Model
@@ -59,6 +59,10 @@ class TaskFactory extends Factory
 
         $this->task->save();
 
+        if (isset($this->user)) {
+            $this->task->users()->attach($this->user->id);
+        }
+
         if ($this->intervalsAmount) {
             $this->createIntervals();
         }
@@ -84,16 +88,18 @@ class TaskFactory extends Factory
 
     private function defineProject(): void
     {
-        $this->project = ProjectFactory::create();
+        if (!isset($this->project)) {
+            $this->project = ProjectFactory::create();
+        }
 
         $this->task->project_id = $this->project->id;
     }
 
     private function defineUser(): void
     {
-        $this->user = UserFactory::create();
-
-        $this->task->user_id = $this->user->id;
+        if (!isset($this->user)) {
+            $this->user = UserFactory::create();
+        }
     }
 
     private function createIntervals(): void

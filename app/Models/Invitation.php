@@ -8,16 +8,37 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Support\Carbon;
 
 /**
+ * @apiDefine InvitationObject
+ *
+ * @apiSuccess {Integer}  invitation.id          ID
+ * @apiSuccess {String}   invitation.email       Email
+ * @apiSuccess {String}   invitation.key         Unique invitation token
+ * @apiSuccess {String}   invitation.expires_at  The token expiration time
+ * @apiSuccess {String}   invitation.role_id     ID of the role that will be assigned to the created user
+ *
+ */
+
+/**
+ * App\Models\Invitation
+ *
  * @property int $id
  * @property string $key
  * @property string $email
  * @property Carbon $expires_at
+ * @property int|null $role_id
  * @method static EloquentBuilder|Invitation whereEmail($value)
  * @method static EloquentBuilder|Invitation whereExpiresAt($value)
  * @method static EloquentBuilder|Invitation whereId($value)
  * @method static EloquentBuilder|Invitation whereKey($value)
  * @method static EloquentBuilder|Invitation whereRoleId($value)
+ * @method static EloquentBuilder|Invitation newModelQuery()
+ * @method static EloquentBuilder|Invitation newQuery()
+ * @method static EloquentBuilder|Invitation query()
  * @mixin EloquentIdeHelper
+ * @property int|null $role_id
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Invitation newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Invitation newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Invitation query()
  */
 class Invitation extends Model
 {

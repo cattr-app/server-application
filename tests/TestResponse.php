@@ -75,13 +75,12 @@ class TestResponse extends BaseTestResponse
     public function assertError(int $status, string $type = null, bool $hasInfo = false): TestResponse
     {
         $this->assertStatus($status);
-        $this->assertJson(['success' => false]);
 
         if ($type) {
             $this->assertJson(['error_type' => $type]);
         }
 
-        $structure = ['success', 'message', 'error_type'];
+        $structure = ['message', 'error_type'];
         if ($hasInfo) {
             $structure[] = 'info';
         } else {
@@ -102,7 +101,7 @@ class TestResponse extends BaseTestResponse
 
     public function assertForbidden(
         string $type = AuthorizationException::ERROR_TYPE_FORBIDDEN,
-        bool $hasInfo = true
+        bool $hasInfo = false
     ): TestResponse {
         return $this->assertError(self::HTTP_FORBIDDEN, $type, $hasInfo);
     }
@@ -125,7 +124,6 @@ class TestResponse extends BaseTestResponse
     public function assertSuccess(int $status = self::HTTP_OK): TestResponse
     {
         $this->assertStatus($status);
-        $this->assertJson(['success' => true]);
 
         return $this;
     }

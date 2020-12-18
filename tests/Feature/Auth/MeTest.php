@@ -23,7 +23,7 @@ class MeTest extends TestCase
     {
         $response = $this->actingAs($this->user)->getJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['user' => $this->user->toArray()]);
     }
 

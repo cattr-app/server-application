@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class TasksTest extends TestCase
 {
-    private const URI = 'v1/time/tasks';
+    private const URI = 'time/tasks';
 
     private const INTERVALS_AMOUNT = 10;
 
@@ -35,7 +35,7 @@ class TasksTest extends TestCase
         ];
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $requestData);
-        $response->assertSuccess();
+        $response->assertOk();
 
         //TODO CHECK RESPONSE CONTENT
     }

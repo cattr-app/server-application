@@ -43,7 +43,7 @@ class ProcessTest extends TestCase
 
         $response = $this->postJson(self::URI, $reset);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         $this->user->refresh();
 
@@ -78,7 +78,7 @@ class ProcessTest extends TestCase
 
         $response = $this->postJson(self::URI, $reset);
 
-        $response->assertSuccess();
+        $response->assertOk();
 
         $this->user->refresh();
 

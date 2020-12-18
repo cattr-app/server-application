@@ -9,7 +9,7 @@ use Tests\TestCase;
 
 class CountTest extends TestCase
 {
-    private const URI = 'v1/invitations/count';
+    private const URI = 'invitations/count';
 
     private User $admin;
     private User $user;
@@ -26,7 +26,7 @@ class CountTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['total' => Invitation::count()]);
     }
 

@@ -28,4 +28,16 @@ class IntervalFactory extends Facade
     {
         return BaseIntervalFactory::class;
     }
+
+    /**
+     * Resolve a new instance for the facade
+     *
+     * @return mixed
+     */
+    public static function refresh()
+    {
+        static::clearResolvedInstance(static::getFacadeAccessor());
+
+        return static::getFacadeRoot();
+    }
 }

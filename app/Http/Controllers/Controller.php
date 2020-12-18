@@ -23,7 +23,6 @@ class Controller extends BaseController
 
     public function __construct()
     {
-        $this->middleware('role');
     }
 
     public static function getControllerRules(): array

@@ -49,4 +49,9 @@ class CoreSettingsService
     {
         return $this->settings->get(self::MODULE_NAME, $key, $default);
     }
+
+    public function flush(): void
+    {
+        $this->settings->flush(self::MODULE_NAME);
+    }
 }

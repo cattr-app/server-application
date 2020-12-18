@@ -14,7 +14,7 @@ use Tests\TestResponse;
 
 class ListTest extends TestCase
 {
-    private const URI = 'v1/project-report/list';
+    private const URI = 'project-report/list';
 
     private const INTERVALS_AMOUNT = 10;
 
