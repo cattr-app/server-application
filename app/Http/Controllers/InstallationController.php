@@ -17,22 +17,8 @@ class InstallationController extends Controller
 {
     public function getStatusOfLoading(): JsonResponse
     {
-        $envFilePath = app()->environmentFilePath();
-        if (file_exists($envFilePath) && User::where(['is_admin' => 1])->first()) {
-            return new JsonResponse([
-                'status' => true,
-            ]);
-        }
-
         return new JsonResponse([
-            'status' => false,
-        ]);
-    }
-
-    public function getStatusBackend(): JsonResponse
-    {
-        return new JsonResponse([
-            'success' => true,
+            'status' => file_exists(app()->environmentFilePath()) && User::where(['is_admin' => 1])->count(),
         ]);
     }
 
@@ -58,19 +44,15 @@ class InstallationController extends Controller
             'database.connections.mysql.host' => $dbData['host'],
         ]);
 
-        Artisan::call('config:clear');
-
         try {
             DB::connection()->getPDO();
+
+            abort_if(!DB::connection()->getDatabaseName(), 400);
         } catch (\Exception $e) {
-            return new JsonResponse([
-                'success' => false,
-            ], 400);
+            abort(400);
         }
 
-        return new JsonResponse([
-            'success' => true,
-        ]);
+        return new JsonResponse(DB::connection()->getDatabaseName());
     }
 
     public function registrationInCollector(Request $request, Client $client): JsonResponse
@@ -143,12 +125,12 @@ class InstallationController extends Controller
                     'success' => false,
                     'message' => $error['message']
                 ], 400);
-            } else {
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => 'Сould not get a response from the server to check the relevance of your version.',
-                ], 400);
             }
+
+            return new JsonResponse([
+                'success' => false,
+                'message' => 'Сould not get a response from the server to check the relevance of your version.',
+            ], 400);
         }
     }
 
@@ -194,10 +176,10 @@ class InstallationController extends Controller
     public function createAdmin(Request $request): JsonResponse
     {
         $accountParams = [
-            'email' => $request->input('email') ?? null,
-            'password' => $request->input('password') ?? null,
-            'timezone' => $request->input('timezone') ?? null,
-            'user_language' => $request->input('language') ?? null
+            'email' => $request->input('email'),
+            'password' => $request->input('password'),
+            'timezone' => $request->input('timezone'),
+            'user_language' => $request->input('language')
         ];
 
         if (!$accountParams['email']
@@ -209,54 +191,27 @@ class InstallationController extends Controller
                 'success' => false,
             ], 400);
         }
-        $admin = User::where(['is_admin' => 1])->first();
-        if ($admin) {
-            $admin->email = $accountParams['email'];
-            $admin->password = $accountParams['password'];
-            $admin->timezone = $accountParams['timezone'];
-            $admin->user_language = $accountParams['user_language'];
 
-            if (!$admin->update()) {
-                return new JsonResponse([
-                    'success' => false,
-                ], 400);
-            }
+        $admin = User::firstOrNew(['is_admin' => 1]);
 
-            return new JsonResponse([
-                'success' => true,
-            ]);
-        }
+        $admin->fill(
+            array_merge([
+                'full_name' => 'Admin',
+                'active' => true,
+                'is_admin' => true,
+                'role_id' => 2,
+            ], $accountParams)
+        );
 
-        User::create(array_merge([
-            'full_name' => 'Admin',
-            'url' => '',
-            'company_id' => 1,
-            'payroll_access' => 1,
-            'billing_access' => 1,
-            'avatar' => '',
-            'screenshots_active' => 1,
-            'manual_time' => 1,
-            'permanent_tasks' => 0,
-            'computer_time_popup' => 300,
-            'poor_time_popup' => '',
-            'blur_screenshots' => 0,
-            'web_and_app_monitoring' => 1,
-            'webcam_shots' => 0,
-            'screenshots_interval' => 9,
-            'active' => true,
-            'is_admin' => true,
-            'role_id' => 2,
-        ], $accountParams));
+        abort_if(!$admin->save(), 400);
 
-        return new JsonResponse([
-            'success' => true,
-        ]);
+        return new JsonResponse();
     }
 
     public function setConfig(): JsonResponse
     {
         $a = $_SERVER;
 
-        return new JsonResponse(200);
+        return new JsonResponse();
     }
 }

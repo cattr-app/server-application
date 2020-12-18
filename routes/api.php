@@ -14,6 +14,7 @@ use App\Http\Controllers\Api\TimeIntervalController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InstallationController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Api\ScreenshotController;
@@ -57,13 +58,12 @@ Route::get('status', [StatusController::class, '__invoke']);
 Route::group([
     'prefix' => 'installation',
 ], static function (Router $router) {
-    $router->get('/status/backend', 'InstallationController@getStatusBackend');
-    $router->get('/status', 'InstallationController@getStatusOfLoading');
-    $router->post('/status/database', 'InstallationController@getStatusDatabase');
-    $router->post('/change/env', 'InstallationController@changeEnvFile');
-    $router->post('/registration/collector', 'InstallationController@registrationInCollector');
-    $router->post('/registration/admin', 'InstallationController@createAdmin');
-    $router->post('/set/config', 'InstallationController@setConfig');
+    $router->get('/status', [InstallationController::class, 'getStatusOfLoading']);
+    $router->post('/status/database', [InstallationController::class, 'getStatusDatabase']);
+    $router->post('/change/env', [InstallationController::class, 'changeEnvFile']);
+    $router->post('/registration/collector', [InstallationController::class, 'registrationInCollector']);
+    $router->post('/registration/admin', [InstallationController::class, 'createAdmin']);
+    $router->post('/set/config', [InstallationController::class, 'setConfig']);
 });
 
 // Main API routes
