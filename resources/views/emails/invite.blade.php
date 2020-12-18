@@ -1,14 +1,14 @@
 @component('mail::message')
-# Welcome to {{ config('app.name') }}
+# {{ __('emails.invite.welcome', ['name' => config('app.name')]) }}
 
-Use these credentials for your first login: <br>
+{{ __('emails.invite.use_these_credentials') }}: <br>
 
-<strong>Login:</strong> {{ $login }}<br>
-<strong>Password:</strong> {{ $password }}
+<strong>{{ __('emails.invite.login') }}:</strong> {{ $login }}<br>
+<strong>{{ __('emails.invite.password') }}:</strong> {{ $password }}
 
 @component('mail::button', ['url' => config('app.frontend_url')])
-    Login
+    {{ __('emails.invite.login_btn') }}
 @endcomponent
 
-Regards, {{ config('app.name') }}
+{{ __('emails.invite.regards', ['name' => config('app.name')]) }}
 @endcomponent

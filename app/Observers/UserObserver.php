@@ -4,11 +4,19 @@ namespace App\Observers;
 
 use App\Mail\UserCreated;
 use App\Models\User;
+use App\Services\SettingsService;
 use Mail;
 use Illuminate\Support\Str;
 
 class UserObserver
 {
+    protected SettingsService $settingsService;
+
+    public function __construct(SettingsService $settingsService)
+    {
+        $this->settingsService = $settingsService;
+    }
+
     /**
      * Handle the user "creating" event.
      *
@@ -23,7 +31,9 @@ class UserObserver
             $user->password = $password;
             $user->invitation_sent = true;
 
-            Mail::to($user->email)->send(new UserCreated($user->email, $password));
+            $language = $this->settingsService->get('core', 'language', 'en');
+
+            Mail::to($user->email)->locale($language)->send(new UserCreated($user->email, $password));
         }
     }
 }

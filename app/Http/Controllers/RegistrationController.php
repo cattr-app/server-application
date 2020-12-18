@@ -4,6 +4,7 @@ namespace App\Http\Controllers;
 
 use App\Models\Invitation;
 use App\Models\User;
+use App\Services\SettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 
@@ -13,8 +14,11 @@ use Illuminate\Http\Request;
  */
 class RegistrationController extends Controller
 {
-    public function __construct()
+    protected SettingsService $settingsService;
+
+    public function __construct(SettingsService $settingsService)
     {
+        $this->settingsService = $settingsService;
     }
 
     /**
@@ -130,6 +134,8 @@ class RegistrationController extends Controller
             ], 400);
         }
 
+        $language = $this->settingsService->get('core', 'language', 'en');
+
         /** @var User $user */
         $user = User::create([
             'full_name' => $request->input('full_name'),
@@ -141,6 +147,7 @@ class RegistrationController extends Controller
             'computer_time_popup' => 3,
             'screenshots_interval' => 10,
             'role_id' => $invitation->role_id,
+            'user_language' => $language,
         ]);
 
         $invitation->delete();

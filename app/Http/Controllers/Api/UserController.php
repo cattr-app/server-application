@@ -19,10 +19,18 @@ use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\SendInviteUserRequest;
 use App\Http\Requests\User\ShowUserRequest;
 use App\Http\Requests\User\DestroyUserRequest;
+use App\Services\SettingsService;
 use Illuminate\Support\Str;
 
 class UserController extends ItemController
 {
+    protected SettingsService $settingsService;
+
+    public function __construct(SettingsService $settingsService)
+    {
+        $this->settingsService = $settingsService;
+    }
+
     /**
      * Get the validation rules.
      *
@@ -488,7 +496,9 @@ class UserController extends ItemController
         $item->invitation_sent = true;
         $item->save();
 
-        Mail::to($item->email)->send(new UserCreated($item->email, $password));
+        $language = $this->settingsService->get('core', 'language', 'en');
+
+        Mail::to($item->email)->locale($language)->send(new UserCreated($item->email, $password));
 
         return new JsonResponse([
             'res' => $item,

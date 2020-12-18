@@ -28,6 +28,7 @@ class UpdateCompanySettingsRequest extends FormRequest
             'work_time' => 'sometimes|int',
             'color' => 'sometimes|required|array',
             'auto_thinning' => 'sometimes|boolean',
+            'language' => 'sometimes|string',
         ];
     }
 }
