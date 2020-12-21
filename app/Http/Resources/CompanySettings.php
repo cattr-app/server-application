@@ -20,6 +20,7 @@ class CompanySettings extends JsonResource
             'work_time' => $this['work_time'] ?? 0,
             'color' => $this['color'] ?? [],
             'internal_priorities' => $this['internal_priorities'] ?? [],
+            'heartbeat_period' => config('app.user_activity.online_status_time'),
         ];
     }
 }
