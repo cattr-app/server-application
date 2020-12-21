@@ -25,4 +25,12 @@ return [
         'regards' => 'Regards, :name',
     ],
 
+    'registration' => [
+        'welcome' => 'Welcome to :name!',
+        'invited' => 'You\'ve been invited to :name.',
+        'registration' => 'Please complete the registration account by following this link.',
+        'create' => 'Create account',
+        'regards' => 'Regards, :name',
+    ],
+
 ];
