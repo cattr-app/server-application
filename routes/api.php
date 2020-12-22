@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\ScreenshotController;
 use App\Http\Controllers\ScreenshotController as ScreenshotStaticController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StatusController;
+use App\Http\Middleware\EnsureIsInstalled;
 use Illuminate\Routing\Router;
 
 // Static content processing
@@ -33,7 +34,7 @@ Route::group([
 
 // Routes for login/register processing
 Route::group([
-    'middleware' => 'throttle:120,1',
+    'middleware' => [EnsureIsInstalled::class, 'throttle:120,1'],
     'prefix' => 'auth',
 ], static function (Router $router) {
     $router->post('login', [AuthController::class, 'login']);
@@ -48,7 +49,6 @@ Route::group([
     $router->get('register/{key}', [RegistrationController::class, 'getForm']);
     $router->post('register/{key}', [RegistrationController::class, 'postForm']);
 
-
     $router->get('desktop-key', [AuthController::class, 'issueDesktopKey']);
     $router->put('desktop-key', [AuthController::class, 'authDesktopKey']);
 });
@@ -56,19 +56,19 @@ Route::group([
 Route::get('status', [StatusController::class, '__invoke']);
 
 Route::group([
-    'prefix' => 'installation',
+    'prefix' => 'setup',
 ], static function (Router $router) {
-    $router->get('/status', [InstallationController::class, 'getStatusOfLoading']);
-    $router->post('/status/database', [InstallationController::class, 'getStatusDatabase']);
-    $router->post('/change/env', [InstallationController::class, 'changeEnvFile']);
-    $router->post('/registration/collector', [InstallationController::class, 'registrationInCollector']);
-    $router->post('/registration/admin', [InstallationController::class, 'createAdmin']);
-    $router->post('/set/config', [InstallationController::class, 'setConfig']);
+    $router->get('status', [InstallationController::class, 'getStatusOfLoading']);
+    $router->post('database', [InstallationController::class, 'checkDatabaseInfo']);
+    $router->post('change/env', [InstallationController::class, 'changeEnvFile']);
+    $router->post('registration/collector', [InstallationController::class, 'registrationInCollector']);
+    $router->post('registration/admin', [InstallationController::class, 'createAdmin']);
+    $router->post('set/config', [InstallationController::class, 'setConfig']);
 });
 
 // Main API routes
 Route::group([
-    'middleware' => ['auth:api', 'throttle:120,1'],
+    'middleware' => ['auth:api', 'throttle:120,1', EnsureIsInstalled::class],
 ], static function (Router $router) {
     //Invitations routes
     $router->any('invitations/list', [InvitationController::class, 'index']);
@@ -128,7 +128,7 @@ Route::group([
     $router->any('time-intervals/day-duration', [DashboardController::class, 'timePerDay']);
 
     //Time routes
-    $router->any('time/total', [TimeController::class , 'total']);
+    $router->any('time/total', [TimeController::class, 'total']);
     $router->any('time/tasks', [TimeController::class, 'tasks']);
 
     //Role routes

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\ModuleHelper;
+use App\Http\Requests\Installation\CheckDatabaseInfoRequest;
 use Illuminate\Routing\Controller;
 use App\Models\Property;
 use App\Models\User;
@@ -22,37 +23,23 @@ class InstallationController extends Controller
         ]);
     }
 
-    public function getStatusDatabase(Request $request): JsonResponse
+    public function checkDatabaseInfo(CheckDatabaseInfoRequest $request): JsonResponse
     {
-        $dbData = [
-            'host' => $request->input('host_name'),
-            'database' => $request->input('database_name'),
-            'username' => $request->input('user_name'),
-            'password' => $request->input('password'),
-        ];
-
-        if (!$dbData['host'] || !$dbData['database'] || !$dbData['username'] || !$dbData['password']) {
-            return new JsonResponse([
-                'success' => false,
-            ], 400);
-        }
-
         config([
-            'database.connections.mysql.password' => $dbData['password'],
-            'database.connections.mysql.database' => $dbData['database'],
-            'database.connections.mysql.username' => $dbData['username'],
-            'database.connections.mysql.host' => $dbData['host'],
+            'database.connections.mysql.password' => $request->input('password'),
+            'database.connections.mysql.database' => $request->input('database'),
+            'database.connections.mysql.username' => $request->input('user'),
+            'database.connections.mysql.host' => $request->input('host'),
         ]);
 
         try {
-            DB::connection()->getPDO();
+            DB::reconnect('mysql');
+            DB::connection('mysql')->getPDO();
 
-            abort_if(!DB::connection()->getDatabaseName(), 400);
+            return new JsonResponse(['status' => (bool) DB::connection()->getDatabaseName()]);
         } catch (\Exception $e) {
-            abort(400);
+            return new JsonResponse(['status' => false]);
         }
-
-        return new JsonResponse(DB::connection()->getDatabaseName());
     }
 
     public function registrationInCollector(Request $request, Client $client): JsonResponse

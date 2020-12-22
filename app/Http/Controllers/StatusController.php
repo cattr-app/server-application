@@ -3,9 +3,11 @@
 namespace App\Http\Controllers;
 
 use App\Helpers\CatHelper;
+use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use Filter;
+use Settings;
 
 class StatusController extends Controller
 {
@@ -27,12 +29,17 @@ class StatusController extends Controller
      *    "cat": "(=ㅇ༝ㅇ=)"
      *  }
      */
+    /**
+     * @return JsonResponse
+     * @throws Exception
+     */
     public function __invoke(): JsonResponse
     {
         return new JsonResponse([
             'cattr' => true,
             'cat' => CatHelper::getCat(),
             'version' => config('app.version'),
+            'installed' => (bool)Settings::scope('core')->get('installed'),
         ]);
     }
 }

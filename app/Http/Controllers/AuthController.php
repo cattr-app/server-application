@@ -10,6 +10,7 @@ use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Str;
 use Psr\SimpleCache\InvalidArgumentException;
+use Settings;
 use Tymon\JWTAuth\Facades\JWTAuth;
 use Validator;
 
@@ -318,7 +319,9 @@ class AuthController extends BaseController
             sha1($request->ip()) . ":$token" => $request->user()->id
         ], $lifetime);
 
-        return $this->respondWithToken($token, 'desktop', config('auth.lifetime_minutes.desktop_token'));
+        return $this->respondWithToken($token, 'desktop', config('auth.lifetime_minutes.desktop_token'), [
+            'frontend_uri' => Settings::scope('core')->get('frontend_uri'),
+        ]);
     }
 
     /**
@@ -374,7 +377,8 @@ class AuthController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        if (!auth()->byId(cache(sha1($request->ip()) . ":$token[1]")) || ((!$user = auth()->user()) && !$user->active)) {
+        if (!auth()->byId(cache(sha1($request->ip()) . ":$token[1]")) ||
+            ((!$user = auth()->user()) && !$user->active)) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
@@ -385,20 +389,22 @@ class AuthController extends BaseController
      * Helper for structuring answer with token
      * @param string $token
      * @param string $tokenType
-     * @param float|int $lifetime
+     * @param int|null $lifetime
+     * @param array $additionalInfo
      * @return JsonResponse
      */
     private function respondWithToken(
         string $token,
         string $tokenType = 'bearer',
-        int $lifetime = null
+        int $lifetime = null,
+        array $additionalInfo = []
     ): JsonResponse {
-        return new JsonResponse([
+        return new JsonResponse(array_merge([
             'access_token' => $token,
             'token_type' => $tokenType,
             'expires_in' => now()->addMinutes($lifetime ?? config('auth.lifetime_minutes.jwt'))->toIso8601String(),
             'user' => auth()->user(),
-        ]);
+        ], $additionalInfo));
     }
 
     /**
