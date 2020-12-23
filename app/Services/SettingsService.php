@@ -50,9 +50,11 @@ class SettingsService implements SettingsInterface
 
         $this->scope = '';
 
-        return cache()->rememberForever("settings:$scope", function () use ($scope) {
-            return $this->prepareCollection($this->model->where(['module_name' => $scope])->get());
-        });
+        $result = $this->prepareCollection($this->model->where(['module_name' => $scope])->get());
+
+        cache()->forever("settings:$scope", $result);
+
+        return $result;
     }
 
     /**
