@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use DB;
+use Settings;
 use Storage;
 
 /**
@@ -64,6 +65,8 @@ class ResetCommand extends Command
             $this->call('db:seed');
             $this->call('module:seed');
         }
+
+        Settings::scope('core')->set('installed', true);
 
         return 0;
     }
