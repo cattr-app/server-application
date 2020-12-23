@@ -2,203 +2,100 @@
 
 namespace App\Http\Controllers;
 
-use App\Helpers\ModuleHelper;
+use App\Console\Commands\MakeAdmin;
+use App\Console\Commands\ResetCommand;
 use App\Http\Requests\Installation\CheckDatabaseInfoRequest;
+use App\Http\Requests\Installation\SaveSetupRequest;
+use Artisan;
+use EnvEditor\EnvFile;
+use Illuminate\Foundation\Console\ConfigCacheCommand;
 use Illuminate\Routing\Controller;
-use App\Models\Property;
-use App\Models\User;
-use GuzzleHttp\Client;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Artisan;
 use Illuminate\Support\Facades\DB;
-use Exception;
+use Settings;
+use Tymon\JWTAuth\Console\JWTGenerateSecretCommand;
 
 class InstallationController extends Controller
 {
-    public function getStatusOfLoading(): JsonResponse
-    {
-        return new JsonResponse([
-            'status' => file_exists(app()->environmentFilePath()) && User::where(['is_admin' => 1])->count(),
-        ]);
-    }
-
     public function checkDatabaseInfo(CheckDatabaseInfoRequest $request): JsonResponse
     {
         config([
-            'database.connections.mysql.password' => $request->input('password'),
+            'database.connections.mysql.password' => $request->input('db_password'),
             'database.connections.mysql.database' => $request->input('database'),
-            'database.connections.mysql.username' => $request->input('user'),
-            'database.connections.mysql.host' => $request->input('host'),
+            'database.connections.mysql.username' => $request->input('db_user'),
+            'database.connections.mysql.host' => $request->input('db_host'),
         ]);
 
         try {
             DB::reconnect('mysql');
             DB::connection('mysql')->getPDO();
 
-            return new JsonResponse(['status' => (bool) DB::connection()->getDatabaseName()]);
+            return new JsonResponse(['status' => (bool)DB::connection()->getDatabaseName()]);
         } catch (\Exception $e) {
             return new JsonResponse(['status' => false]);
         }
     }
 
-    public function registrationInCollector(Request $request, Client $client): JsonResponse
+    public function save(SaveSetupRequest $request): JsonResponse
     {
-        $email = $request->input('email') ?? null;
-        if (!$email) {
-            return new JsonResponse([
-                'success' => false,
-            ], 400);
-        }
-
-        if (Property::where([
-            'entity_type' => Property::APP_CODE,
-            'entity_id' => 0,
-            'name' => 'INSTANCE_ID',
-        ])->count()) {
-            return new JsonResponse([
-                'success' => true,
-                'message' => 'Application already registered'
-            ]);
-        }
-
-        try {
-            $appVersion = config('app.version');
-
-            $response = $client->post(config('app.stats_collector_url') . '/instance', [
-                'json' => [
-                    'ownerEmail' => $email,
-                    'version' => $appVersion,
-                    'modules' => ModuleHelper::getModulesInfo(),
-                    'image' => getenv('IMAGE_VERSION')
-                ]
-            ]);
-
-            $responseBody = json_decode(
-                $response->getBody()->getContents(),
-                true,
-                512,
-                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-            );
-
-            if (isset($responseBody['instanceId'])) {
-                Property::updateOrCreate([
-                    'entity_type' => Property::APP_CODE,
-                    'entity_id' => 0,
-                    'name' => 'INSTANCE_ID'
-                ], [
-                    'value' => $responseBody['instanceId']
-                ]);
-            }
-
-            return new JsonResponse([
-                'success' => true,
-            ]);
-        } catch (Exception $e) {
-            if ($e->getResponse()) {
-                $envFilePath = app()->environmentFilePath();
-                if ($str = file_exists($envFilePath)) {
-                    unlink($envFilePath);
-                }
-
-                $error = json_decode(
-                    $e->getResponse()->getBody(),
-                    true,
-                    512,
-                    JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-                );
-
-                return new JsonResponse([
-                    'success' => false,
-                    'message' => $error['message']
-                ], 400);
-            }
-
-            return new JsonResponse([
-                'success' => false,
-                'message' => 'Сould not get a response from the server to check the relevance of your version.',
-            ], 400);
-        }
-    }
-
-    public function changeEnvFile(Request $request): JsonResponse
-    {
-        $envValues = $request->toArray();
         $envFilepath = app()->environmentFilePath();
 
-        if ($file = file_exists($envFilepath)) {
-            $str = file_get_contents($envFilepath);
-        } else {
+        if (!file_exists($envFilepath)) {
             copy(base_path('.env.example'), $envFilepath);
-            $str = file_get_contents($envFilepath);
         }
 
-        foreach ($envValues as $envKey => $envValue) {
-            $str .= "\n"; // In case the searched variable is in the last line without \n
-            $keyPosition = strpos($str, "{$envKey}=");
-            $endOfLinePosition = strpos($str, "\n", $keyPosition);
-            $oldLine = substr($str, $keyPosition, $endOfLinePosition - $keyPosition);
+        $envFile = EnvFile::loadFrom($envFilepath);
 
-            // If key does not exist, add it
-            if (!$keyPosition || !$endOfLinePosition || !$oldLine) {
-                $str .= "{$envKey}={$envValue}\n";
-            } else {
-                $str = str_replace($oldLine, "{$envKey}={$envValue}", $str);
-            }
+        if (!env('IMAGE_VERSION')) {
+            $envFile->setValue('DB_HOST', $request->input('db_host'));
+            $envFile->setValue('DB_USERNAME', $request->input('db_user'));
+            $envFile->setValue('DB_PASSWORD', $request->input('db_password'));
+            $envFile->setValue('DB_DATABASE', $request->input('database'));
+            $envFile->setValue('DB_PORT', 3306);
         }
 
-        $str = substr($str, 0, -1);
-        if (!file_put_contents($envFilepath, $str)) {
-            return new JsonResponse([
-                'success' => false,
-            ], 400);
-        }
+        $envFile->setValue('RECAPTCHA_ENABLED', $request->input('captcha_enabled'));
+        $envFile->setValue('RECAPTCHA_SITE_KEY', (string)$request->input('secret_key'));
+        $envFile->setValue('RECAPTCHA_SECRET_KEY', (string)$request->input('site_key'));
+        $envFile->setValue('RECAPTCHA_GOOGLE_URL', 'https://www.google.com/recaptcha/api/siteverify');
 
-        return new JsonResponse([
-            'success' => true,
-            'is_docker' => env('IMAGE') ? true : false,
-        ]);
-    }
+        $envFile->setValue('FRONTEND_APP_URL', $request->input('origin'));
+        $envFile->setValue('MAIL_FROM_ADDRESS', 'no-reply@' . explode('//', $request->input('origin'))[1]);
 
-    public function createAdmin(Request $request): JsonResponse
-    {
-        $accountParams = [
-            'email' => $request->input('email'),
+        $envFile->setValue('APP_DEBUG', 'false');
+
+        $envFile->saveTo($envFilepath);
+
+        Artisan::call(JWTGenerateSecretCommand::class, ['--force' => true]);
+        Artisan::call(ConfigCacheCommand::class);
+
+        $connectionName = config('database.default');
+        $databaseName = config("database.connections.{$connectionName}.database");
+
+        config(["database.connections.{$connectionName}.database" => null]);
+        DB::purge();
+
+        DB::statement("CREATE DATABASE IF NOT EXISTS $databaseName");
+
+        config(["database.connections.{$connectionName}.database" => $databaseName]);
+        DB::purge();
+
+        Artisan::call(ResetCommand::class, ['--force' => true]);
+
+        Settings::scope('core')->set('language', $request->input('language'));
+        Settings::scope('core')->set('timezone', $request->input('timezone'));
+
+        Artisan::call('migrate', ['--force' => true]);
+        Artisan::call('db:seed', ['--class' => 'InitialSeeder']);
+
+        Artisan::call(MakeAdmin::class, [
             'password' => $request->input('password'),
-            'timezone' => $request->input('timezone'),
-            'user_language' => $request->input('language')
-        ];
+            'name' => 'admin',
+            'email' => $request->input('email')
+        ]);
 
-        if (!$accountParams['email']
-            || !$accountParams['password']
-            || !$accountParams['timezone']
-            || !$accountParams['user_language']
-        ) {
-            return new JsonResponse([
-                'success' => false,
-            ], 400);
-        }
+        Settings::scope('core')->set('installed', true);
 
-        $admin = User::firstOrNew(['is_admin' => 1]);
-
-        $admin->fill(
-            array_merge([
-                'full_name' => 'Admin',
-                'active' => true,
-                'is_admin' => true,
-                'role_id' => 2,
-            ], $accountParams)
-        );
-
-        abort_if(!$admin->save(), 400);
-
-        return new JsonResponse();
-    }
-
-    public function setConfig(): JsonResponse
-    {
-        $a = $_SERVER;
-
-        return new JsonResponse();
+        return new JsonResponse(['status' => true]);
     }
 }

@@ -14,10 +14,10 @@ class CheckDatabaseInfoRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'host' => 'required|string',
+            'db_host' => 'required|string',
             'database' => 'required|string',
-            'user' => 'required|string',
-            'password' => 'required|string',
+            'db_user' => 'required|string',
+            'db_password' => 'required|string',
         ];
     }
 }

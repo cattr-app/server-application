@@ -36,8 +36,6 @@ class CompanySettingsController extends Controller
     }
 
     /**
-     * @return JsonResponse
-     *
      * @api             {get} /company-settings/index List
      * @apiDescription  Returns all company settings.
      *
@@ -80,6 +78,10 @@ class CompanySettingsController extends Controller
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      *
+     */
+    /**
+     * @param IndexCompanySettingsRequest $request
+     * @return CompanySettings
      */
     public function index(IndexCompanySettingsRequest $request): CompanySettings
     {

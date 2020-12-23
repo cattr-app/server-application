@@ -58,12 +58,8 @@ Route::get('status', [StatusController::class, '__invoke']);
 Route::group([
     'prefix' => 'setup',
 ], static function (Router $router) {
-    $router->get('status', [InstallationController::class, 'getStatusOfLoading']);
     $router->post('database', [InstallationController::class, 'checkDatabaseInfo']);
-    $router->post('change/env', [InstallationController::class, 'changeEnvFile']);
-    $router->post('registration/collector', [InstallationController::class, 'registrationInCollector']);
-    $router->post('registration/admin', [InstallationController::class, 'createAdmin']);
-    $router->post('set/config', [InstallationController::class, 'setConfig']);
+    $router->put('save', [InstallationController::class, 'save']);
 });
 
 // Main API routes

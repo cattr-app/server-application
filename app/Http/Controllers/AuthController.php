@@ -320,7 +320,7 @@ class AuthController extends BaseController
         ], $lifetime);
 
         return $this->respondWithToken($token, 'desktop', config('auth.lifetime_minutes.desktop_token'), [
-            'frontend_uri' => Settings::scope('core')->get('frontend_uri'),
+            'frontend_uri' => config('frontend_url'),
         ]);
     }
 
