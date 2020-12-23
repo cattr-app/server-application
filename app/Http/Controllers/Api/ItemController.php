@@ -8,6 +8,7 @@ use App\Http\Controllers\Controller;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\SoftDeletingScope;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Event;
@@ -134,7 +135,7 @@ abstract class ItemController extends Controller
         }
 
         if ($withSoftDeleted) {
-            $query->withoutGlobalScope(\Illuminate\Database\Eloquent\SoftDeletingScope::class);
+            $query->withoutGlobalScope(SoftDeletingScope::class);
         }
 
         if ($withRelations) {
