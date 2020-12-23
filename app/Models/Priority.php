@@ -44,6 +44,7 @@ class Priority extends Model
      */
     protected $fillable = [
         'name',
+        'color',
     ];
 
     /**
@@ -51,6 +52,7 @@ class Priority extends Model
      */
     protected $casts = [
         'name' => 'string',
+        'color' => 'string',
     ];
 
     public static function getTableName(): string
