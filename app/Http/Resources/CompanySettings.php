@@ -12,7 +12,7 @@ class CompanySettings extends JsonResource
      * @param  \Illuminate\Http\Request  $request
      * @return array
      */
-    public function toArray($request)
+    public function toArray($request): array
     {
         return [
             'timezone' => $this['timezone'] ?? null,
@@ -21,6 +21,7 @@ class CompanySettings extends JsonResource
             'color' => $this['color'] ?? [],
             'internal_priorities' => $this['internal_priorities'] ?? [],
             'heartbeat_period' => config('app.user_activity.online_status_time'),
+            'auto_thinning' => (bool) ($this['auto_thinning'] ?? false),
         ];
     }
 }
