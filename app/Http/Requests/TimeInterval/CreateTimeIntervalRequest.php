@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\TimeInterval;
 
-use App\Rules\TimeInterval;
+use App\Models\User;
 use App\Rules\TimeIntervalDoesNotExist;
 use Carbon\Carbon;
 use Illuminate\Foundation\Http\FormRequest;
@@ -37,7 +37,7 @@ class CreateTimeIntervalRequest extends FormRequest
                 'bail',
                 'after:start_at',
                 new TimeIntervalDoesNotExist(
-                    auth()->user(),
+                    User::find($this->user_id),
                     Carbon::parse($this->start_at),
                     Carbon::parse($this->end_at)
                 ),
