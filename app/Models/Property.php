@@ -10,6 +10,8 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
 /**
+ * App\Models\Property
+ *
  * @property int $id
  * @property int $entity_id
  * @property string $entity_type
@@ -19,7 +21,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property string $updated_at
  * @property string $deleted_at
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|Property onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|Property whereCreatedAt($value)
  * @method static EloquentBuilder|Property whereDeletedAt($value)
@@ -29,9 +30,16 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|Property whereName($value)
  * @method static EloquentBuilder|Property whereUpdatedAt($value)
  * @method static EloquentBuilder|Property whereValue($value)
+ * @method static EloquentBuilder|Property newModelQuery()
+ * @method static EloquentBuilder|Property newQuery()
+ * @method static EloquentBuilder|Property query()
  * @method static QueryBuilder|Property withTrashed()
  * @method static QueryBuilder|Property withoutTrashed()
+ * @method static QueryBuilder|Property onlyTrashed()
  * @mixin EloquentIdeHelper
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Property newModelQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Property newQuery()
+ * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Property query()
  */
 class Property extends Model
 {

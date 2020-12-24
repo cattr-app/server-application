@@ -1,5 +1,5 @@
 {
-	"authHost": "http://at.loc/api",
+	"authHost": "http://cattr.loc/api",
 	"authEndpoint": "/broadcasting/auth",
 	"clients": [
 		{
@@ -30,7 +30,7 @@
 	},
 	"apiOriginAllow": {
 		"allowCors": true,
-		"allowOrigin": "http://api.at.loc/",
+		"allowOrigin": "http://api.cattr.loc/",
 		"allowMethods": "GET, POST",
 		"allowHeaders": "Origin, Content-Type, X-Auth-Token, X-Requested-With, Accept, Authorization, X-CSRF-TOKEN, X-Socket-Id"
 	}

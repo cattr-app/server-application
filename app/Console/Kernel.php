@@ -5,8 +5,13 @@ namespace App\Console;
 use App\Console\Commands\DemoReset;
 use App\Console\Commands\EmulateWork;
 use App\Console\Commands\PlanWork;
+use App\Console\Commands\RotateScreenshots;
+use Exception;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+
+use Laravel\Telescope\Console\PruneCommand;
+use Settings;
 
 class Kernel extends ConsoleKernel
 {
@@ -22,8 +27,9 @@ class Kernel extends ConsoleKernel
     /**
      * Define the application's command schedule.
      *
-     * @param  Schedule  $schedule
+     * @param Schedule $schedule
      * @return void
+     * @throws Exception
      */
     protected function schedule(Schedule $schedule): void
     {
@@ -33,11 +39,17 @@ class Kernel extends ConsoleKernel
             ->withoutOverlapping()
             ->runInBackground();
 
-        $schedule->command(DemoReset::class)->cron('* */3 * * *')->environments(['demo']);
+        $schedule->command(DemoReset::class)->cron('0 */3 * * *')->environments('demo');
 
-        $schedule->command(PlanWork::class)->daily()->environments(['staging']);
-        $schedule->command(DemoReset::class)->weeklyOn(1, '1:00')->environments(['staging']);
+        $schedule->command(PlanWork::class)->daily()->environments('staging');
+        $schedule->command(DemoReset::class)->weeklyOn(1, '1:00')->environments('staging');
+
+        // Telescope
+        $schedule->command(PruneCommand::class)->daily()->environments(['staging', 'local']);
+
+        $schedule->command(RotateScreenshots::class)->weekly()->when(Settings::scope('core')->get('auto_thinning'));
     }
+
     /**
      * Register the Closure based commands for the application.
      */

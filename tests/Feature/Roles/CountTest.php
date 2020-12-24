@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class CountTest extends TestCase
 {
-    private const URI = 'v1/roles/count';
+    private const URI = 'roles/count';
 
     private User $admin;
 
@@ -23,7 +23,7 @@ class CountTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['total' => Role::count()]);
     }
 

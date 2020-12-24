@@ -4,16 +4,21 @@ namespace Tests\Feature\Invitations;
 
 use App\Models\User;
 use App\Models\invitation;
+use Illuminate\Foundation\Testing\WithFaker;
 use Tests\Facades\UserFactory;
 use Tests\Facades\InvitationFactory;
 use Tests\TestCase;
 
 class RemoveTest extends TestCase
 {
-    private const URI = 'v1/invitations/remove';
+    use WithFaker;
 
-    private User $user;
+    private const URI = 'invitations/remove';
+
     private User $admin;
+    private User $manager;
+    private User $auditor;
+    private User $user;
 
     private invitation $invitation;
 
@@ -21,8 +26,10 @@ class RemoveTest extends TestCase
     {
         parent::setUp();
 
-        $this->user = UserFactory::asUser()->withTokens()->create();
-        $this->admin = UserFactory::asAdmin()->withTokens()->create();
+        $this->admin = UserFactory::refresh()->asAdmin()->withTokens()->create();
+        $this->manager = UserFactory::refresh()->asManager()->withTokens()->create();
+        $this->auditor = UserFactory::refresh()->asAuditor()->withTokens()->create();
+        $this->user = UserFactory::refresh()->asUser()->withTokens()->create();
 
         $this->invitation = InvitationFactory::create();
     }
@@ -31,8 +38,29 @@ class RemoveTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->invitation->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertDeleted((new Invitation)->getTable(), $this->invitation->only('id'));
+    }
+
+    public function test_remove_as_manager(): void
+    {
+        $response = $this->actingAs($this->manager)->postJson(self::URI, $this->invitation->only('id'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_remove_as_auditor(): void
+    {
+        $response = $this->actingAs($this->auditor)->postJson(self::URI, $this->invitation->only('id'));
+
+        $response->assertForbidden();
+    }
+
+    public function test_not_existing(): void
+    {
+        $response = $this->actingAs($this->admin)->postJson(self::URI, ['id' => $this->faker->randomNumber()]);
+
+        $response->assertValidationError();
     }
 
     public function test_remove_as_user(): void

@@ -1,14 +1,16 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\Project;
 use App\Models\Screenshot;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Faker\Factory;
-use Faker\Factory as FakerFactory;
 use Faker\Generator;
 use Illuminate\Database\Seeder;
+use Storage;
 
 /**
  * Class TaskListSeeder
@@ -71,10 +73,11 @@ class TaskListSeeder extends Seeder
                 'task_name' => $this->faker->text(15 + $i),
                 'description' => $this->faker->text(100 + $i * 15),
                 'active' => true,
-                'user_id' => $user->id,
                 'assigned_by' => $user->id,
                 'priority_id' => 2, // Normal
             ]);
+
+            $task->users()->sync([$user->id]);
 
             $this->command->getOutput()->writeln("<fg=cyan>-- {$project->id}. Task #{$task->id}</>");
 
@@ -105,13 +108,18 @@ class TaskListSeeder extends Seeder
             $time[$user->id] -= $intervalsOffset + random_int(60 * 30, 60 * 50);
             $start = $time[$user->id];
 
+            $mouseFill = mt_rand(0, 100);
+            $keyboardFill = mt_rand(0, 100 - $mouseFill);
+            $activityFill = $mouseFill + $keyboardFill;
+
             $interval = TimeInterval::create([
                 'task_id' => $task->id,
                 'user_id' => $user->id,
                 'start_at' => date('Y-m-d H:i:s', $start),
                 'end_at' => date('Y-m-d H:i:s', $end),
-                'count_mouse' => 42,
-                'count_keyboard' => 43
+                'activity_fill' => $activityFill,
+                'mouse_fill' => $mouseFill,
+                'keyboard_fill' => $keyboardFill,
             ]);
 
             $this->seedScreenshot($interval);

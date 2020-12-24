@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class DashboardTest extends TestCase
 {
-    private const URI = 'v1/time-intervals/dashboard';
+    private const URI = 'time-intervals/dashboard';
 
     private const INTERVALS_AMOUNT = 2;
 

@@ -1,5 +1,7 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\Property;
 use App\Services\CoreSettingsService;
 use Illuminate\Database\Eloquent\Model;
@@ -28,9 +30,14 @@ class CompanyManagementSeeder extends Seeder
      */
     public function run(): void
     {
-        Model::unguard();
-
-        $this->settings->set('timezone', 'UTC');
-        $this->settings->set('language', 'en');
+        if (!$this->settings->get('timezone')) {
+            $this->settings->set('timezone', 'UTC');
+        }
+        if (!$this->settings->get('language')) {
+            $this->settings->set('language', 'en');
+        }
+        if (!$this->settings->get('auto_thinning')) {
+            $this->settings->set('auto_thinning', true);
+        }
     }
 }

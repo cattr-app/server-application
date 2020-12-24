@@ -105,6 +105,8 @@ return [
         ],
     ],
 
+    'time_interval_does_not_exist' => 'The time for this interval already exists.',
+
     /*
     |--------------------------------------------------------------------------
     | Custom Validation Attributes

@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class ShowTest extends TestCase
 {
-    private const URI = '/v1/screenshots/show';
+    private const URI = '/screenshots/show';
 
     private User $admin;
     private Screenshot $screenshot;

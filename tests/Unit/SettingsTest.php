@@ -23,6 +23,9 @@ class SettingsTest extends TestCase
     {
         $service = resolve(SettingsService::class);
 
+        $service->set('test', 'language', 'en');
+        $service->set('test', 'key', 'value');
+
         $settings = $service->all('test');
 
         $this->assertDatabaseHas((new Setting)->getTable(), ['value' => reset($settings)]);

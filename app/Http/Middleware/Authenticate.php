@@ -12,6 +12,7 @@ use DB;
 use Lang;
 use Tymon\JWTAuth\Exceptions\JWTException;
 use JWTAuth;
+use Tymon\JWTAuth\Exceptions\TokenBlacklistedException;
 
 class Authenticate extends BaseAuthenticate
 {
@@ -40,11 +41,20 @@ class Authenticate extends BaseAuthenticate
         $user = Auth::user();
 
         if (!$user || !$user->active) {
-            DB::table('tokens')->where('user_id', $user->id)->delete();
+            auth()->invalidate();
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
-        Lang::setLocale($user->user_language ? $user->user_language : self::DEFAULT_USER_LANGUAGE);
+        try {
+            if (auth()->payload()->get('nonce') !== $user->nonce) {
+                auth()->invalidate();
+                throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+            }
+        } catch (TokenBlacklistedException $e) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        }
+
+        Lang::setLocale($user->user_language ?: self::DEFAULT_USER_LANGUAGE);
         return $next($request);
     }
 }

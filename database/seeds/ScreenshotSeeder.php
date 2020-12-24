@@ -1,7 +1,11 @@
 <?php
 
+namespace Database\Seeders;
+
 use Illuminate\Database\Seeder;
+use Image;
 use Intervention\Image\Constraint;
+use Storage;
 
 class ScreenshotSeeder extends Seeder
 {

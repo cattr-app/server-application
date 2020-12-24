@@ -26,4 +26,9 @@ abstract class Factory
     {
         $this->getModelInstance()->makeHidden(['created_at', 'updated_at', 'deleted_at']);
     }
+
+    protected function hideCanAttribute(): void
+    {
+        $this->getModelInstance()->makeHidden(['can']);
+    }
 }

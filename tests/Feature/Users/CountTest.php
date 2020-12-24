@@ -8,7 +8,7 @@ use Tests\TestCase;
 
 class CountTest extends TestCase
 {
-    private const URI = 'v1/users/count';
+    private const URI = 'users/count';
 
     private const USERS_AMOUNT = 10;
 
@@ -27,7 +27,7 @@ class CountTest extends TestCase
     {
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
-        $response->assertSuccess();
+        $response->assertOk();
         $response->assertJson(['total' => User::count()]);
     }
 

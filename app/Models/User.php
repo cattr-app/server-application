@@ -3,6 +3,9 @@
 namespace App\Models;
 
 use App\Mail\ResetPassword;
+use App\Scopes\UserScope;
+use App\Traits\HasRole;
+use Carbon\Carbon;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -34,15 +37,10 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @apiSuccess {ISO8601}  user.created_at               Creation DateTime
  * @apiSuccess {ISO8601}  user.updated_at               Update DateTime
  * @apiSuccess {ISO8601}  user.deleted_at               Delete DateTime or `NULL` if wasn't deleted
- * @apiSuccess {Boolean}  user.payroll_access          `Not used`
- * @apiSuccess {Boolean}  user.billing_access          `Not used`
  * @apiSuccess {String}   user.url                     `Not used`
- * @apiSuccess {Boolean}  user.permanent_tasks         `Not used`
  * @apiSuccess {Boolean}  user.computer_time_popup     `Not used`
- * @apiSuccess {Boolean}  user.poor_time_popup         `Not used`
  * @apiSuccess {Boolean}  user.blur_screenshots        `Not used`
  * @apiSuccess {Boolean}  user.web_and_app_monitoring  `Not used`
- * @apiSuccess {Boolean}  user.webcam_shots            `Not used`
  * @apiSuccess {String}   user.user_language            Language which is used for frontend translations and emails
  *
  * @apiVersion 1.0.0
@@ -64,15 +62,10 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @apiParam {ISO8601}  [created_at]               Creation DateTime
  * @apiParam {ISO8601}  [updated_at]               Update DateTime
  * @apiParam {ISO8601}  [deleted_at]               Delete DateTime
- * @apiParam {Boolean}  [payroll_access]          `Not used`
- * @apiParam {Boolean}  [billing_access]          `Not used`
  * @apiParam {String}   [url]                     `Not used`
- * @apiParam {Boolean}  [permanent_tasks]         `Not used`
  * @apiParam {Boolean}  [computer_time_popup]     `Not used`
- * @apiParam {Boolean}  [poor_time_popup]         `Not used`
  * @apiParam {Boolean}  [blur_screenshots]        `Not used`
  * @apiParam {Boolean}  [web_and_app_monitoring]  `Not used`
- * @apiParam {Boolean}  [webcam_shots]            `Not used`
  * @apiParam {String}   [user_language]            Language which is used for frontend translations and emails
  *
  * @apiVersion 1.0.0
@@ -94,15 +87,10 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @apiParam {ISO8601}  [users.created_at]               Creation DateTime
  * @apiParam {ISO8601}  [users.updated_at]               Update DateTime
  * @apiParam {ISO8601}  [users.deleted_at]               Delete DateTime
- * @apiParam {Boolean}  [users.payroll_access]          `Not used`
- * @apiParam {Boolean}  [users.billing_access]          `Not used`
  * @apiParam {String}   [users.url]                     `Not used`
- * @apiParam {Boolean}  [users.permanent_tasks]         `Not used`
  * @apiParam {Boolean}  [users.computer_time_popup]     `Not used`
- * @apiParam {Boolean}  [users.poor_time_popup]         `Not used`
  * @apiParam {Boolean}  [users.blur_screenshots]        `Not used`
  * @apiParam {Boolean}  [users.web_and_app_monitoring]  `Not used`
- * @apiParam {Boolean}  [users.webcam_shots]            `Not used`
  * @apiParam {String}   [users.user_language]            Language which is used for frontend translations and emails
  *
  * @apiVersion 1.0.0
@@ -110,25 +98,27 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
 
 
 /**
+ * App\Models\User
+ *
  * @property int $id
+ * @property int $screenshots_active
+ * @property int $manual_time
+ * @property int $computer_time_popup
+ * @property int $blur_screenshots
+ * @property int $web_and_app_monitoring
+ * @property int $screenshots_interval
+ * @property int $active
+ * @property int $nonce
+ * @property int $client_installed
+ * @property int $company_id
+ * @property int $role_id
+ * @property int $change_password
  * @property string $full_name
  * @property string $email
  * @property string $url
- * @property int $company_id
  * @property string $level
- * @property int $payroll_access
- * @property int $billing_access
+ * @property string $type
  * @property string $avatar
- * @property int $screenshots_active
- * @property int $manual_time
- * @property int $permanent_tasks
- * @property int $computer_time_popup
- * @property string $poor_time_popup
- * @property int $blur_screenshots
- * @property int $web_and_app_monitoring
- * @property int $webcam_shots
- * @property int $screenshots_interval
- * @property int $active
  * @property string $password
  * @property string $timezone
  * @property string $user_language
@@ -137,24 +127,25 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @property string $deleted_at
  * @property bool $is_admin
  * @property bool $important
- * @property int $role_id
+ * @property bool $invitation_sent
+ * @property Role $role
+ * @property string|null $remember_token
  * @property Project[]|Collection $projects
  * @property Task[]|Collection $tasks
  * @property TimeInterval[]|Collection $timeIntervals
- * @property Role $role
- * @property string|null $remember_token
- * @property int $change_password
- * @property bool $invitation_sent
+ * @property-read int|null $notifications_count
+ * @property-read int|null $projects_count
+ * @property-read int|null $projects_relation_count
+ * @property-read int|null $properties_count
+ * @property-read int|null $tasks_count
+ * @property-read int|null $time_intervals_count
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
  * @property-read Collection|ProjectsUsers[] $projectsRelation
  * @property-read Collection|Property[] $properties
- * @property-read Collection|Token[] $tokens
  * @method static bool|null forceDelete()
- * @method static QueryBuilder|User onlyTrashed()
  * @method static bool|null restore()
  * @method static EloquentBuilder|User whereActive($value)
  * @method static EloquentBuilder|User whereAvatar($value)
- * @method static EloquentBuilder|User whereBillingAccess($value)
  * @method static EloquentBuilder|User whereBlurScreenshots($value)
  * @method static EloquentBuilder|User whereChangePassword($value)
  * @method static EloquentBuilder|User whereCompanyId($value)
@@ -167,8 +158,6 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static EloquentBuilder|User whereImportant($value)
  * @method static EloquentBuilder|User whereManualTime($value)
  * @method static EloquentBuilder|User wherePassword($value)
- * @method static EloquentBuilder|User wherePayrollAccess($value)
- * @method static EloquentBuilder|User wherePermanentTasks($value)
  * @method static EloquentBuilder|User wherePoorTimePopup($value)
  * @method static EloquentBuilder|User whereRememberToken($value)
  * @method static EloquentBuilder|User whereScreenshotsActive($value)
@@ -177,15 +166,25 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static EloquentBuilder|User whereUpdatedAt($value)
  * @method static EloquentBuilder|User whereUrl($value)
  * @method static EloquentBuilder|User whereWebAndAppMonitoring($value)
- * @method static EloquentBuilder|User whereWebcamShots($value)
+ * @method static EloquentBuilder|User newModelQuery()
+ * @method static EloquentBuilder|User whereInvitationSent($value)
+ * @method static EloquentBuilder|User whereIsAdmin($value)
+ * @method static EloquentBuilder|User whereRoleId($value)
+ * @method static EloquentBuilder|User whereType($value)
+ * @method static EloquentBuilder|User whereUserLanguage($value)
+ * @method static EloquentBuilder|User newQuery()
+ * @method static EloquentBuilder|User query()
+ * @method static QueryBuilder|User onlyTrashed()
  * @method static QueryBuilder|User withTrashed()
  * @method static QueryBuilder|User withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @property-read int|null $tokens_count
  */
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use SoftDeletes;
+    use HasRole;
 
     /**
      * table name from database
@@ -211,17 +210,12 @@ class User extends Authenticatable implements JWTSubject
         'email',
         'url',
         'company_id',
-        'payroll_access',
-        'billing_access',
         'avatar',
         'screenshots_active',
         'manual_time',
-        'permanent_tasks',
         'computer_time_popup',
-        'poor_time_popup',
         'blur_screenshots',
         'web_and_app_monitoring',
-        'webcam_shots',
         'screenshots_interval',
         'active',
         'password',
@@ -233,6 +227,9 @@ class User extends Authenticatable implements JWTSubject
         'user_language',
         'type',
         'invitation_sent',
+        'nonce',
+        'client_installed',
+        'last_activity',
     ];
 
     /**
@@ -243,17 +240,12 @@ class User extends Authenticatable implements JWTSubject
         'email' => 'string',
         'url' => 'string',
         'company_id' => 'integer',
-        'payroll_access' => 'boolean',
-        'billing_access' => 'boolean',
         'avatar' => 'string',
         'screenshots_active' => 'integer',
         'manual_time' => 'integer',
-        'permanent_tasks' => 'boolean',
         'computer_time_popup' => 'integer',
-        'poor_time_popup' => 'integer',
         'blur_screenshots' => 'boolean',
         'web_and_app_monitoring' => 'boolean',
-        'webcam_shots' => 'boolean',
         'screenshots_interval' => 'integer',
         'active' => 'integer',
         'password' => 'string',
@@ -265,8 +257,9 @@ class User extends Authenticatable implements JWTSubject
         'user_language' => 'string',
         'type' => 'string',
         'invitation_sent' => 'boolean',
+        'nonce' => 'integer',
+        'client_installed' => 'integer',
     ];
-
 
     /**
      * The attributes that should be mutated to dates.
@@ -277,6 +270,7 @@ class User extends Authenticatable implements JWTSubject
         'created_at',
         'updated_at',
         'deleted_at',
+        'last_activity',
     ];
 
     /**
@@ -286,7 +280,23 @@ class User extends Authenticatable implements JWTSubject
      */
     protected $hidden = [
         'password',
-        'remember_token',
+        'nonce',
+    ];
+
+    protected static function boot(): void
+    {
+        parent::boot();
+
+        static::addGlobalScope(new UserScope);
+    }
+
+    /**
+     * The accessors to append to the model's array form.
+     *
+     * @var array
+     */
+    protected $appends = [
+        'online',
     ];
 
     /**
@@ -306,7 +316,9 @@ class User extends Authenticatable implements JWTSubject
      */
     public function getJWTCustomClaims(): array
     {
-        return [];
+        return [
+            'nonce' => $this->nonce,
+        ];
     }
 
     /**
@@ -327,42 +339,6 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * @param string $tokenString
-     * @return Token
-     */
-    public function addToken(string $tokenString): Token
-    {
-        $tokenExpires = date('Y-m-d H:i:s', time() + 60 * auth()->factory()->getTTL());
-        /** @var Token $token */
-        $token = $this->tokens()->create(['token' => $tokenString, 'expires_at' => $tokenExpires]);
-        return $token;
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function tokens(): HasMany
-    {
-        return $this->hasMany(Token::class);
-    }
-
-    /**
-     * @param string $token
-     */
-    public function invalidateToken(string $token)
-    {
-        $this->tokens()->where('token', $token)->delete();
-    }
-
-    /**
-     * @param string|null $except
-     */
-    public function invalidateAllTokens(?string $except = null)
-    {
-        $this->tokens()->where('token', '!=', $except)->delete();
-    }
-
-    /**
      * @return HasMany
      */
     public function projectsRelation(): HasMany
@@ -371,11 +347,11 @@ class User extends Authenticatable implements JWTSubject
     }
 
     /**
-     * @return HasMany
+     * @return BelongsToMany
      */
-    public function tasks(): HasMany
+    public function tasks(): BelongsToMany
     {
-        return $this->hasMany(Task::class, 'user_id');
+        return $this->belongsToMany(Task::class, 'tasks_users', 'user_id', 'task_id');
     }
 
     /**
@@ -405,25 +381,31 @@ class User extends Authenticatable implements JWTSubject
     {
         $this->notify(new ResetPassword($this->email, $token));
     }
-
     /**
-     * @param string $object
-     * @param string $action
-     * @param string|null $id
+     * Get the user's online status.
+     *
      * @return bool
      */
-    public function allowed(string $object, string $action, $id = null): bool
+    public function getOnlineAttribute(): bool
     {
-        return Role::can($this, $object, $action, $id);
+        if (!isset($this->last_activity)) {
+            return false;
+        }
+
+        return $this->last_activity->diffInSeconds(Carbon::now()) < config('app.user_activity.online_status_time');
     }
 
     /**
      * Set the user's password.
      *
-     * @param $value
+     * @param string $password
      */
-    public function setPasswordAttribute($value): void
+    public function setPasswordAttribute(string $password): void
     {
-        $this->attributes['password'] = Hash::make($value);
+        if (Hash::needsRehash($password)) {
+            $password = Hash::make($password);
+        }
+
+        $this->attributes['password'] = $password;
     }
 }

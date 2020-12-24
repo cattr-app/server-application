@@ -1,14 +1,17 @@
 <?php
 
+namespace Database\Seeders;
+
 use App\Models\Project;
-use App\Models\ProjectsUsers;
 use App\Models\Role;
 use App\Models\Screenshot;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
+use App\Services\ProjectMemberService;
 use Faker\Factory as FakerFactory;
 use Illuminate\Database\Seeder;
+use Storage;
 
 /**
  * Creates additional users to statistics tests.
@@ -16,6 +19,17 @@ use Illuminate\Database\Seeder;
 class StatisticsSeeder extends Seeder
 {
     protected array $protectedFiles = ['uploads/screenshots/.gitignore'];
+
+    protected ProjectMemberService $projectMemberService;
+
+    /**
+     * ProjectMemberController constructor.
+     * @param ProjectMemberService $projectMemberService
+     */
+    public function __construct(ProjectMemberService $projectMemberService)
+    {
+        $this->projectMemberService = $projectMemberService;
+    }
 
     /**
      * Creates a new user.
@@ -32,17 +46,12 @@ class StatisticsSeeder extends Seeder
             'email' => $email,
             'url' => '',
             'company_id' => 1,
-            'payroll_access' => 1,
-            'billing_access' => 1,
             'avatar' => '',
             'screenshots_active' => 1,
             'manual_time' => 0,
-            'permanent_tasks' => 0,
             'computer_time_popup' => 300,
-            'poor_time_popup' => '',
             'blur_screenshots' => 0,
             'web_and_app_monitoring' => 1,
-            'webcam_shots' => 0,
             'screenshots_interval' => 9,
             'active' => true,
             'password' => $pass,
@@ -59,24 +68,13 @@ class StatisticsSeeder extends Seeder
      * @param User $user
      * @param Project $project
      * @param int|null $roleId
-     * @return ProjectsUsers
+     * @return array
      */
-    protected function assignProject(User $user, Project $project, ?int $roleId = null): ProjectsUsers
+    protected function assignProject(User $user, Project $project, ?int $roleId = 1): array
     {
-        $userProjectRole = [
-            'project_id' => $project->id,
-            'user_id' => $user->id,
-        ];
-
-        if (isset($roleId)) {
-            $userProjectRole['role_id'] = $roleId;
-        }
-
-        $relation = ProjectsUsers::create($userProjectRole);
-
-        $this->command->getOutput()->writeln("<fg=green>{$user->full_name} assigned to project {$project->id}</>");
-
-        return $relation;
+        return $this->projectMemberService->syncMembers($project->id, [
+            $user->id => ['role_id' => $roleId],
+        ]);
     }
 
     /**
@@ -94,7 +92,6 @@ class StatisticsSeeder extends Seeder
             'task_name' => $faker->text(random_int(15, 50)),
             'description' => $faker->text(random_int(100, 1000)),
             'active' => true,
-            'user_id' => $user->id,
             'assigned_by' => $user->id,
         ]);
 
@@ -123,13 +120,18 @@ class StatisticsSeeder extends Seeder
         $time[$user->id] -= random_int($intervalsOffset, 60 * 60 * 5);
         $start = $time[$user->id];
 
+        $mouseFill = mt_rand(0, 100);
+        $keyboardFill = mt_rand(0, 100 - $mouseFill);
+        $activityFill = $mouseFill + $keyboardFill;
+
         $interval = TimeInterval::create([
             'task_id' => $task->id,
             'user_id' => $user->id,
             'start_at' => date('Y-m-d H:i:s', $start),
             'end_at' => date('Y-m-d H:i:s', $end),
-            'count_mouse' => random_int(0, 150),
-            'count_keyboard' => random_int(0, 150)
+            'activity_fill' => $activityFill,
+            'mouse_fill' => $mouseFill,
+            'keyboard_fill' => $keyboardFill,
         ]);
 
         $this->command->getOutput()->writeln("<fg=cyan>Added time interval for task {$task->id} for user {$user->id}</>");

@@ -10,7 +10,7 @@ use Tests\TestCase;
 
 class RemoveTest extends TestCase
 {
-    private const URI = '/v1/screenshots/remove';
+    private const URI = '/screenshots/remove';
 
     private User $admin;
 
@@ -31,7 +31,7 @@ class RemoveTest extends TestCase
 
         $response = $this->actingAs($this->admin)->postJson(self::URI, $this->screenshot->only('id'));
 
-        $response->assertSuccess();
+        $response->assertOk();
         $this->assertSoftDeleted('screenshots', $this->screenshot->only('id'));
     }
 
