@@ -27,7 +27,8 @@ class CreateProjectRequest extends FormRequest
         return [
             'name' => 'required|string',
             'description' => 'required|string',
-            'important' => 'sometimes|required|bool'
+            'important' => 'sometimes|required|bool',
+            'default_priority_id' => 'sometimes|integer|exists:priorities,id',
         ];
     }
 }
