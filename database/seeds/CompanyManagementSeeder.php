@@ -36,8 +36,8 @@ class CompanyManagementSeeder extends Seeder
         if (!$this->settings->get('language')) {
             $this->settings->set('language', 'en');
         }
-        if (!$this->settings->get('auto-thinning')) {
-            $this->settings->set('auto-thinning', true);
+        if (!$this->settings->get('auto_thinning')) {
+            $this->settings->set('auto_thinning', true);
         }
     }
 }

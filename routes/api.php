@@ -15,12 +15,14 @@ use App\Http\Controllers\Api\TimeIntervalController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\AuthController;
+use App\Http\Controllers\InstallationController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Api\ScreenshotController;
 use App\Http\Controllers\ScreenshotController as ScreenshotStaticController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StatusController;
+use App\Http\Middleware\EnsureIsInstalled;
 use Illuminate\Routing\Router;
 
 // Static content processing
@@ -33,7 +35,7 @@ Route::group([
 
 // Routes for login/register processing
 Route::group([
-    'middleware' => 'throttle:120,1',
+    'middleware' => [EnsureIsInstalled::class, 'throttle:120,1'],
     'prefix' => 'auth',
 ], static function (Router $router) {
     $router->post('login', [AuthController::class, 'login']);
@@ -48,16 +50,22 @@ Route::group([
     $router->get('register/{key}', [RegistrationController::class, 'getForm']);
     $router->post('register/{key}', [RegistrationController::class, 'postForm']);
 
-
     $router->get('desktop-key', [AuthController::class, 'issueDesktopKey']);
     $router->put('desktop-key', [AuthController::class, 'authDesktopKey']);
 });
 
 Route::get('status', [StatusController::class, '__invoke']);
 
+Route::group([
+    'prefix' => 'setup',
+], static function (Router $router) {
+    $router->post('database', [InstallationController::class, 'checkDatabaseInfo']);
+    $router->put('save', [InstallationController::class, 'save']);
+});
+
 // Main API routes
 Route::group([
-    'middleware' => ['auth:api', 'throttle:120,1'],
+    'middleware' => ['auth:api', 'throttle:120,1', EnsureIsInstalled::class],
 ], static function (Router $router) {
     //Invitations routes
     $router->any('invitations/list', [InvitationController::class, 'index']);
@@ -125,7 +133,7 @@ Route::group([
     $router->any('time-intervals/day-duration', [DashboardController::class, 'timePerDay']);
 
     //Time routes
-    $router->any('time/total', [TimeController::class , 'total']);
+    $router->any('time/total', [TimeController::class, 'total']);
     $router->any('time/tasks', [TimeController::class, 'tasks']);
 
     //Role routes
