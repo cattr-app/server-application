@@ -12,7 +12,7 @@ class TimeIntervalDoesNotExist implements Rule
     /**
      * @var User
      */
-    private User $user;
+    private ?User $user;
 
     /**
      * @var Carbon
@@ -28,11 +28,11 @@ class TimeIntervalDoesNotExist implements Rule
      * Create a new rule instance.
      *
      * TimeInterval constructor.
-     * @param User $user
+     * @param User|null $user
      * @param Carbon $startAt
      * @param Carbon $endAt
      */
-    public function __construct(User $user, Carbon $startAt, Carbon $endAt)
+    public function __construct(?User $user, Carbon $startAt, Carbon $endAt)
     {
         $this->user = $user;
         $this->startAt = $startAt;
@@ -48,7 +48,7 @@ class TimeIntervalDoesNotExist implements Rule
      */
     public function passes($attribute, $value): bool
     {
-        return !TimeInterval::where('user_id', $this->user->id)
+        return !TimeInterval::where('user_id', optional($this->user)->id)
             ->where(function ($query) {
                 $query
                     ->whereBetween('start_at', [$this->startAt, $this->endAt])
