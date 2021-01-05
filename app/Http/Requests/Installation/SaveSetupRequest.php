@@ -14,10 +14,10 @@ class SaveSetupRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'db_host' => 'required|string',
-            'database' => 'required|string',
-            'db_user' => 'required|string',
-            'db_password' => 'required|string',
+            'db_host' => 'sometimes|required|string',
+            'database' => 'sometimes|required|string',
+            'db_user' => 'sometimes|required|string',
+            'db_password' => 'sometimes|required|string',
             'captcha_enabled' => 'required|boolean',
             'email' => 'required|email',
             'password' => 'required|string',
