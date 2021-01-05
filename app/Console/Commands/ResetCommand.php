@@ -58,7 +58,8 @@ class ResetCommand extends Command
         }
 
         $this->call('db:seed', [
-            '--class' => 'InitialSeeder'
+            '--class' => 'InitialSeeder',
+            '--force' => true
         ]);
 
         if ($this->option('seed')) {
