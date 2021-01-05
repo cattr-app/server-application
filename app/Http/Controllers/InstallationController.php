@@ -80,21 +80,18 @@ class InstallationController extends Controller
         config(["database.connections.{$connectionName}.database" => $databaseName]);
         DB::purge();
 
+        Artisan::call('migrate', ['--force' => true]);
+
         Artisan::call(ResetCommand::class, ['--force' => true]);
 
         Settings::scope('core')->set('language', $request->input('language'));
         Settings::scope('core')->set('timezone', $request->input('timezone'));
-
-        Artisan::call('migrate', ['--force' => true]);
-        Artisan::call('db:seed', ['--class' => 'InitialSeeder']);
 
         Artisan::call(MakeAdmin::class, [
             'password' => $request->input('password'),
             'name' => 'admin',
             'email' => $request->input('email')
         ]);
-
-        Settings::scope('core')->set('installed', true);
 
         return new JsonResponse(['status' => true]);
     }
