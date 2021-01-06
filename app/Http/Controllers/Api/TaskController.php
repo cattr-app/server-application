@@ -6,6 +6,7 @@ use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
 use App\Http\Requests\Task\EditTaskRequest;
 use App\Http\Requests\Task\ShowTaskRequest;
+use App\Models\Priority;
 use App\Models\Project;
 use Exception;
 use Filter;
@@ -216,8 +217,12 @@ class TaskController extends ItemController
                 $project = Project::where(['id' => $data['project_id']])->first();
                 if (isset($project) && !empty($project->default_priority_id)) {
                     $data['priority_id'] = $project->default_priority_id;
+                } elseif ($this->settings->get('default_priority_id') !== null) {
+                    $data['priority_id'] = $this->settings->get('default_priority_id');
+                } elseif (($priority = Priority::query()->first()) !== null) {
+                    $data['priority_id'] = $priority->id;
                 } else {
-                    $data['priority_id'] = $this->settings->get('default_priority_id', 2);
+                    throw new Exception('Priorities should be configured to create tasks.');
                 }
             }
 
