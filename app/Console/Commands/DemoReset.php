@@ -30,9 +30,7 @@ class DemoReset extends Command
      */
     public function handle()
     {
-        $this->call('down', [
-            '--message' => 'Data reset'
-        ]);
+        $this->call('down');
 
         $this->call('cattr:reset', [
             '--force' => true,

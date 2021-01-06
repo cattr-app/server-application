@@ -32,6 +32,7 @@
     <env name="CACHE_DRIVER" value="array"/>
     <env name="SESSION_DRIVER" value="array"/>
     <env name="QUEUE_DRIVER" value="sync"/>
-    <env name="TELESCOPE_ENABLED" value="false"/>
+    <env name="TELESCOPE_ENABLED" value="0"/>
   </php>
+  <server name="TELESCOPE_ENABLED" value="0"/>
 </phpunit>

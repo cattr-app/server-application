@@ -1,6 +1,6 @@
 {
     "GitlabIntegration": true,
-   "JiraIntegration": true,
+    "JiraIntegration": true,
     "RedmineIntegration": true,
     "Reports": true,
     "TrelloIntegration": false

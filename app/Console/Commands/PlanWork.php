@@ -7,6 +7,7 @@ use App\Models\User;
 use Illuminate\Console\Command;
 use Cache;
 use Psr\SimpleCache\InvalidArgumentException;
+use Illuminate\Database\Eloquent\Builder;
 
 /**
  * Class PlanWork
@@ -198,7 +199,9 @@ class PlanWork extends Command
         while (count($users)) {
             $user = $this->getRandomValue($users);
 
-            $tasks = Task::where(['user_id' => $user['id']])->get()->toArray();
+            $tasks = Task::whereHas('users', function (Builder $query) use ($user) {
+                $query->where('id', '=', $user['id']);
+            })->get()->toArray();
 
             if (!count($tasks)) {
                 continue;

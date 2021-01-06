@@ -50,9 +50,11 @@ class SettingsService implements SettingsInterface
 
         $this->scope = '';
 
-        return cache()->rememberForever("settings:$scope", function () use ($scope) {
-            return $this->prepareCollection($this->model->where(['module_name' => $scope])->get());
-        });
+        $result = $this->prepareCollection($this->model->where(['module_name' => $scope])->get());
+
+        cache()->forever("settings:$scope", $result);
+
+        return $result;
     }
 
     /**
@@ -81,10 +83,14 @@ class SettingsService implements SettingsInterface
         $cached = cache("settings:$scope");
 
         if (!isset($cached[$_key])) {
-            $setting = Schema::hasTable($this->model->getTable()) ? $this->model->where([
-                'module_name' => $scope,
-                'key' => $_key
-            ])->get()->first() : null;
+            try {
+                $setting = $this->model->where([
+                    'module_name' => $scope,
+                    'key' => $_key
+                ])->get()->first();
+            } catch (\Exception $e) {
+                $setting = null;
+            }
 
             $cached[$_key] = optional($setting)->value ?? $_default;
 

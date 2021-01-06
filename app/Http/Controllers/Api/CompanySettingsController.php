@@ -36,8 +36,6 @@ class CompanySettingsController extends Controller
     }
 
     /**
-     * @return JsonResponse
-     *
      * @api             {get} /company-settings/index List
      * @apiDescription  Returns all company settings.
      *
@@ -81,6 +79,10 @@ class CompanySettingsController extends Controller
      * @apiUse          UnauthorizedError
      *
      */
+    /**
+     * @param IndexCompanySettingsRequest $request
+     * @return CompanySettings
+     */
     public function index(IndexCompanySettingsRequest $request): CompanySettings
     {
         $settings = $this->settings->all();
@@ -88,7 +90,6 @@ class CompanySettingsController extends Controller
 
         $data = $settings;
         $data['internal_priorities'] = $priorities;
-        $data['heartbeat_period'] = config('app.user_activity.online_status_time');
 
         return new CompanySettings($data);
     }

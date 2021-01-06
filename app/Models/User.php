@@ -178,22 +178,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static QueryBuilder|User withTrashed()
  * @method static QueryBuilder|User withoutTrashed()
  * @mixin EloquentIdeHelper
- * @property string $type
- * @property-read int|null $notifications_count
- * @property-read int|null $projects_count
- * @property-read int|null $projects_relation_count
- * @property-read int|null $properties_count
- * @property-read int|null $tasks_count
- * @property-read int|null $time_intervals_count
  * @property-read int|null $tokens_count
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereInvitationSent($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereIsAdmin($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereRoleId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereType($value)
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\User whereUserLanguage($value)
  */
 class User extends Authenticatable implements JWTSubject
 {

@@ -11,6 +11,7 @@ use Config;
 use Schema;
 use PDOException;
 use RuntimeException;
+use Settings;
 use Validator;
 
 class AppInstallCommand extends Command
@@ -108,6 +109,7 @@ class AppInstallCommand extends Command
         }
 
         $this->call('config:cache');
+        Settings::scope('core')->set('installed', true);
 
         $this->info('Application was installed successfully!');
         return 0;
@@ -117,13 +119,7 @@ class AppInstallCommand extends Command
     {
         $language = $this->choice('Choose default language', config('app.languages'), 0);
 
-        Property::updateOrCreate([
-            'entity_type' => Property::COMPANY_CODE,
-            'entity_id' => 0,
-            'name' => 'language'
-        ], [
-            'value' => $language
-        ]);
+        Settings::scope('core')->set('language', $language);
 
         $this->info(strtoupper($language) . ' language successfully set');
     }
