@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App;
+use Settings;
 use Carbon\Carbon;
 use Exception;
 use Filter;
@@ -19,18 +20,10 @@ use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\SendInviteUserRequest;
 use App\Http\Requests\User\ShowUserRequest;
 use App\Http\Requests\User\DestroyUserRequest;
-use App\Services\SettingsService;
 use Illuminate\Support\Str;
 
 class UserController extends ItemController
 {
-    protected SettingsService $settingsService;
-
-    public function __construct(SettingsService $settingsService)
-    {
-        $this->settingsService = $settingsService;
-    }
-
     /**
      * Get the validation rules.
      *
@@ -496,7 +489,7 @@ class UserController extends ItemController
         $item->invitation_sent = true;
         $item->save();
 
-        $language = $this->settingsService->get('core', 'language', 'en');
+        $language = Settings::get('core', 'language', 'en');
 
         Mail::to($item->email)->locale($language)->send(new UserCreated($item->email, $password));
 

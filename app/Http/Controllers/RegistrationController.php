@@ -4,9 +4,9 @@ namespace App\Http\Controllers;
 
 use App\Models\Invitation;
 use App\Models\User;
-use App\Services\SettingsService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Settings;
 
 /**
  * Class RegistrationController
@@ -14,13 +14,6 @@ use Illuminate\Http\Request;
  */
 class RegistrationController extends Controller
 {
-    protected SettingsService $settingsService;
-
-    public function __construct(SettingsService $settingsService)
-    {
-        $this->settingsService = $settingsService;
-    }
-
     /**
      * @api             {get} /auth/register/{key} Get Form
      * @apiDescription  Returns invitation form data by a invitation token
@@ -134,7 +127,7 @@ class RegistrationController extends Controller
             ], 400);
         }
 
-        $language = $this->settingsService->get('core', 'language', 'en');
+        $language = Settings::get('core', 'language', 'en');
 
         /** @var User $user */
         $user = User::create([
