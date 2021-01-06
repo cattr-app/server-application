@@ -4,18 +4,11 @@ namespace App\Listeners;
 
 use App\Events\InvitationCreated;
 use App\Mail\UserInvited as UserInvitedMail;
-use App\Services\SettingsService;
 use Mail;
+use Settings;
 
 class SendInvitationMail
 {
-    protected SettingsService $settingsService;
-
-    public function __construct(SettingsService $settingsService)
-    {
-        $this->settingsService = $settingsService;
-    }
-
     /**
      * Handle the given event.
      *
@@ -26,7 +19,7 @@ class SendInvitationMail
         $email = $event->invitation->email;
         $key = $event->invitation->key;
 
-        $language = $this->settingsService->get('core', 'language', 'en');
+        $language = Settings::get('core', 'language', 'en');
 
         Mail::to($email)->locale($language)->send(new UserInvitedMail($key));
     }
