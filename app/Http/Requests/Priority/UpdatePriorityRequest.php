@@ -28,7 +28,7 @@ class UpdatePriorityRequest extends FormRequest
         return [
             'id' => 'required|integer|exists:priorities,id',
             'name' => 'required|string',
-            'color' => 'sometimes|string|regex:/^#[a-f0-9]{6}$/i',
+            'color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
         ];
     }
 }
