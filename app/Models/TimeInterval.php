@@ -94,12 +94,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|TimeInterval withoutTrashed()
  * @method static QueryBuilder|TimeInterval onlyTrashed()
  * @mixin EloquentIdeHelper
- * @property bool $is_manual
- * @property-read int|null $properties_count
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TimeInterval newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TimeInterval newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TimeInterval query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\TimeInterval whereIsManual($value)
  */
 class TimeInterval extends Model
 {

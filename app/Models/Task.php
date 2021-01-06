@@ -19,7 +19,6 @@ use Parsedown;
  *
  * @apiSuccess {Integer}  task.id             ID
  * @apiSuccess {Integer}  task.project_id     The ID of the linked project
- * @apiSuccess {Integer}  task.user_id        The ID of the linked user
  * @apiSuccess {Integer}  task.assigned_by    The ID of the user that assigned task
  * @apiSuccess {Integer}  task.priority_id    The ID of the priority
  * @apiSuccess {String}   task.task_name      Name of the task
@@ -43,7 +42,6 @@ use Parsedown;
  *
  * @apiParam {Integer}  [id]             ID
  * @apiParam {Integer}  [project_id]     The ID of the linked project
- * @apiParam {Integer}  [user_id]        The ID of the linked user
  * @apiParam {Integer}  [assigned_by]    The ID of the user that assigned task
  * @apiParam {Integer}  [priority_id]    The ID of the priority
  * @apiParam {String}   [task_name]      Name of the task
