@@ -3,6 +3,7 @@
 use App\Http\Controllers\Api\AboutController;
 use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\InvitationController;
+use App\Http\Controllers\Api\PriorityController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectMemberController;
 use App\Http\Controllers\Api\Statistic\DashboardController;
@@ -73,6 +74,14 @@ Route::group([
     $router->post('invitations/resend', [InvitationController::class, 'resend']);
     $router->post('invitations/show', [InvitationController::class, 'show']);
     $router->post('invitations/remove', [InvitationController::class, 'destroy']);
+
+    //Priorities routes
+    $router->any('priorities/list', [PriorityController::class, 'index']);
+    $router->get('priorities/count', [PriorityController::class, 'count']);
+    $router->post('priorities/create', [PriorityController::class, 'create']);
+    $router->post('priorities/edit', [PriorityController::class, 'edit']);
+    $router->any('priorities/show', [PriorityController::class, 'show']);
+    $router->post('priorities/remove', [PriorityController::class, 'destroy']);
 
     //Projects routes
     $router->any('projects/list', [ProjectController::class, 'index']);

@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 
@@ -57,9 +58,11 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property string $updated_at
  * @property string $deleted_at
  * @property string $source
+ * @property int $default_priority_id
  * @property bool $important
  * @property User $users
  * @property Task[] $tasks
+ * @property Priority|null $defaultPriority
  * @property-read int|null $roles_count
  * @property-read int|null $tasks_count
  * @property-read int|null $users_count
@@ -106,6 +109,7 @@ class Project extends Model
         'description',
         'important',
         'source',
+        'default_priority_id',
     ];
 
     /**
@@ -117,6 +121,7 @@ class Project extends Model
         'description' => 'string',
         'important' => 'integer',
         'source' => 'string',
+        'default_priority_id' => 'integer',
     ];
 
     /**
@@ -172,6 +177,11 @@ class Project extends Model
     public function roles(): BelongsToMany
     {
         return $this->belongsToMany(Role::class, 'projects_roles', 'project_id', 'role_id');
+    }
+
+    public function defaultPriority(): HasOne
+    {
+        return $this->hasOne(Priority::class, 'id', 'default_priority_id');
     }
 
     public function getNameAttribute(): string

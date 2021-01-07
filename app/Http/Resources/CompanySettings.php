@@ -22,6 +22,7 @@ class CompanySettings extends JsonResource
             'internal_priorities' => $this['internal_priorities'] ?? [],
             'heartbeat_period' => config('app.user_activity.online_status_time'),
             'auto_thinning' => (bool) ($this['auto_thinning'] ?? false),
+            'default_priority_id' => (int) ($this['default_priority_id'] ?? 2),
         ];
     }
 }

@@ -60,7 +60,7 @@ class TaskPolicy
      */
     public function update(User $user, Task $task): bool
     {
-        if ($task->project->source !== 'internal') {
+        if (isset($task->project) && $task->project->source !== 'internal') {
             return false;
         }
 
@@ -88,7 +88,7 @@ class TaskPolicy
      */
     public function destroy(User $user, Task $task): bool
     {
-        if ($task->project->source !== 'internal') {
+        if (isset($task->project) && $task->project->source !== 'internal') {
             return false;
         }
 
