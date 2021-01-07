@@ -6,9 +6,12 @@ use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
 use App\Http\Requests\Task\EditTaskRequest;
 use App\Http\Requests\Task\ShowTaskRequest;
+use App\Models\Priority;
+use App\Models\Project;
 use Exception;
 use Filter;
 use App\Models\Task;
+use App\Services\CoreSettingsService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -17,6 +20,22 @@ use Illuminate\Support\Arr;
 
 class TaskController extends ItemController
 {
+    /**
+     * @var CoreSettingsService
+     */
+    protected CoreSettingsService $settings;
+
+    /**
+     * CompanySettingsController constructor.
+     * @param CoreSettingsService $settings
+     */
+    public function __construct(CoreSettingsService $settings)
+    {
+        parent::__construct();
+
+        $this->settings = $settings;
+    }
+
     public function getItemClass(): string
     {
         return Task::class;
@@ -190,6 +209,23 @@ class TaskController extends ItemController
 
         Filter::listen($this->getEventUniqueName('answer.success.item.create'), static function (array $data) {
             $data['res'] = $data['res']->load('users');
+            return $data;
+        });
+
+        Filter::listen($this->getEventUniqueName('request.item.create'), function (array $data) {
+            if (empty($data['priority_id'])) {
+                $project = Project::where(['id' => $data['project_id']])->first();
+                if (isset($project) && !empty($project->default_priority_id)) {
+                    $data['priority_id'] = $project->default_priority_id;
+                } elseif ($this->settings->get('default_priority_id') !== null) {
+                    $data['priority_id'] = $this->settings->get('default_priority_id');
+                } elseif (($priority = Priority::query()->first()) !== null) {
+                    $data['priority_id'] = $priority->id;
+                } else {
+                    throw new Exception('Priorities should be configured to create tasks.');
+                }
+            }
+
             return $data;
         });
 

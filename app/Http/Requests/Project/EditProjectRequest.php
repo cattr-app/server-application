@@ -31,6 +31,7 @@ class EditProjectRequest extends FormRequest
             'id' => 'required|int|exists:projects,id',
             'name' => 'sometimes|required|string',
             'description' => 'sometimes|required|string',
+            'default_priority_id' => 'sometimes|integer|exists:priorities,id',
         ];
     }
 }

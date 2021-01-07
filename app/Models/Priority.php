@@ -2,7 +2,6 @@
 
 namespace App\Models;
 
-use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -44,6 +43,7 @@ class Priority extends Model
      */
     protected $fillable = [
         'name',
+        'color',
     ];
 
     /**
@@ -51,6 +51,7 @@ class Priority extends Model
      */
     protected $casts = [
         'name' => 'string',
+        'color' => 'string',
     ];
 
     public static function getTableName(): string

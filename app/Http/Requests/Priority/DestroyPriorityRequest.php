@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\CompanySettings;
+namespace App\Http\Requests\Priority;
 
 use App\Http\Requests\FormRequest;
 
-class UpdateCompanySettingsRequest extends FormRequest
+class DestroyPriorityRequest extends FormRequest
 {
     /**
      * Determine if user authorized to make this request.
@@ -13,7 +13,9 @@ class UpdateCompanySettingsRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()->hasRole('admin');
+        /** @var User $user */
+        $user = auth()->user();
+        return $user->hasRole('admin');
     }
 
     /**
@@ -24,10 +26,7 @@ class UpdateCompanySettingsRequest extends FormRequest
     public function rules(): array
     {
         return [
-            'timezone' => 'sometimes|required|timezone',
-            'work_time' => 'sometimes|int',
-            'auto_thinning' => 'sometimes|boolean',
-            'default_priority_id' => 'sometimes|int',
+            'id' => 'required|int|exists:priorities,id',
         ];
     }
 }
