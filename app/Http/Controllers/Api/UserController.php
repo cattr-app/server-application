@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App;
+use Settings;
 use Carbon\Carbon;
 use Exception;
 use Filter;
@@ -488,7 +489,9 @@ class UserController extends ItemController
         $item->invitation_sent = true;
         $item->save();
 
-        Mail::to($item->email)->send(new UserCreated($item->email, $password));
+        $language = Settings::get('core', 'language', 'en');
+
+        Mail::to($item->email)->locale($language)->send(new UserCreated($item->email, $password));
 
         return new JsonResponse([
             'res' => $item,

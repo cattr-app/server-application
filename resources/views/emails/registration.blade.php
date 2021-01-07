@@ -1,13 +1,13 @@
 @component('mail::message')
-# Welcome to {{ config('app.name') }}!
+# {{ __('emails.registration.welcome', ['name' => config('app.name')]) }}
 
-You've been invited to {{ config('app.name') }}.
+{{ __('emails.registration.invited', ['name' => config('app.name')]) }}
 
-Please complete the registration account by following this link.
+{{ __('emails.registration.registration') }}
 
 @component('mail::button', ['url' => $url])
-    Create account
+    {{ __('emails.registration.create') }}
 @endcomponent
 
-Regards, {{ config('app.name') }}
+{{ __('emails.registration.regards', ['name' => config('app.name')]) }}
 @endcomponent

@@ -6,6 +6,7 @@ use App\Mail\UserCreated;
 use App\Models\User;
 use Mail;
 use Illuminate\Support\Str;
+use Settings;
 
 class UserObserver
 {
@@ -23,7 +24,9 @@ class UserObserver
             $user->password = $password;
             $user->invitation_sent = true;
 
-            Mail::to($user->email)->send(new UserCreated($user->email, $password));
+            $language = Settings::get('core', 'language', 'en');
+
+            Mail::to($user->email)->locale($language)->send(new UserCreated($user->email, $password));
         }
     }
 }

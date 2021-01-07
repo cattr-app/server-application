@@ -6,6 +6,7 @@ use App\Models\Invitation;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Settings;
 
 /**
  * Class RegistrationController
@@ -13,10 +14,6 @@ use Illuminate\Http\Request;
  */
 class RegistrationController extends Controller
 {
-    public function __construct()
-    {
-    }
-
     /**
      * @api             {get} /auth/register/{key} Get Form
      * @apiDescription  Returns invitation form data by a invitation token
@@ -130,6 +127,8 @@ class RegistrationController extends Controller
             ], 400);
         }
 
+        $language = Settings::get('core', 'language', 'en');
+
         /** @var User $user */
         $user = User::create([
             'full_name' => $request->input('full_name'),
@@ -141,6 +140,7 @@ class RegistrationController extends Controller
             'computer_time_popup' => 3,
             'screenshots_interval' => 10,
             'role_id' => $invitation->role_id,
+            'user_language' => $language,
         ]);
 
         $invitation->delete();
