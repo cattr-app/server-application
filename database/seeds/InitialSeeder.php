@@ -16,6 +16,7 @@ class InitialSeeder extends Seeder
     {
         $this->call(RoleSeeder::class);
         $this->call(PrioritiesSeeder::class);
+        $this->call(StatusSeeder::class);
         $this->call(CompanyManagementSeeder::class);
     }
 }

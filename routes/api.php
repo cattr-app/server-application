@@ -19,6 +19,7 @@ use App\Http\Controllers\InstallationController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Api\ScreenshotController;
+use App\Http\Controllers\Api\StatusController as ApiStatusController;
 use App\Http\Controllers\ScreenshotController as ScreenshotStaticController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StatusController;
@@ -82,6 +83,14 @@ Route::group([
     $router->post('priorities/edit', [PriorityController::class, 'edit']);
     $router->any('priorities/show', [PriorityController::class, 'show']);
     $router->post('priorities/remove', [PriorityController::class, 'destroy']);
+
+    //Statuses routes
+    $router->any('statuses/list', [ApiStatusController::class, 'index']);
+    $router->get('statuses/count', [ApiStatusController::class, 'count']);
+    $router->post('statuses/create', [ApiStatusController::class, 'create']);
+    $router->post('statuses/edit', [ApiStatusController::class, 'edit']);
+    $router->any('statuses/show', [ApiStatusController::class, 'show']);
+    $router->post('statuses/remove', [ApiStatusController::class, 'destroy']);
 
     //Projects routes
     $router->any('projects/list', [ProjectController::class, 'index']);
