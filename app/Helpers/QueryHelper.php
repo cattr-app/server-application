@@ -80,12 +80,12 @@ class QueryHelper
                 [$operator, $value] = is_array($param) ? array_values($param) : ['=', $param];
 
                 if (is_array($value) && $operator === '=') {
-                    $query->whereIn($key, $value);
+                    $query->whereIn("$table.$key", $value);
                 } elseif ($operator === 'in') {
                     $inArgs = is_array($value) ? $value : [$value];
-                    $query->whereIn($key, $inArgs);
+                    $query->whereIn("$table.$key", $inArgs);
                 } else {
-                    $query->where($key, $operator, $value);
+                    $query->where("$table.$key", $operator, $value);
                 }
             }
         }

@@ -108,6 +108,12 @@ class TaskController extends ItemController
             )
         );
 
+        $itemsQuery = $itemsQuery
+            ->leftJoin('statuses as s', 'tasks.status_id', '=', 's.id')
+            ->select('tasks.*')
+            ->orderBy('s.active', 'desc')
+            ->orderBy('tasks.created_at', 'desc');
+
         $paginate = $request->get('paginate', false);
         $currentPage = $request->get('page', 1);
         $perPage = $request->get('perPage', 15);
@@ -470,6 +476,7 @@ class TaskController extends ItemController
 
             return $task;
         });
+
         return $this->_show($request);
     }
 }
