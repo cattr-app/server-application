@@ -109,7 +109,7 @@ class TaskController extends ItemController
         );
 
         $itemsQuery = $itemsQuery
-            ->join('statuses as s', 'tasks.status_id', '=', 's.id')
+            ->leftJoin('statuses as s', 'tasks.status_id', '=', 's.id')
             ->select('tasks.*')
             ->orderBy('s.active', 'desc')
             ->orderBy('tasks.created_at', 'desc');
