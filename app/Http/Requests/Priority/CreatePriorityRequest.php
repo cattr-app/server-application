@@ -27,7 +27,7 @@ class CreatePriorityRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'color' => 'sometimes|string|regex:/^#[a-f0-9]{6}$/i',
+            'color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
         ];
     }
 

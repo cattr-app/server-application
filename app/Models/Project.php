@@ -184,6 +184,14 @@ class Project extends Model
         return $this->hasOne(Priority::class, 'id', 'default_priority_id');
     }
 
+    /**
+     * @return BelongsToMany
+     */
+    public function statuses(): BelongsToMany
+    {
+        return $this->belongsToMany(Status::class, 'projects_statuses', 'project_id', 'status_id')->withPivot('color');
+    }
+
     public function getNameAttribute(): string
     {
         return empty($this->attributes['source']) || $this->attributes['source'] === 'internal'

@@ -28,6 +28,7 @@ class CreateStatusRequest extends FormRequest
         return [
             'name' => 'required|string',
             'active' => 'sometimes|boolean',
+            'color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
         ];
     }
 }

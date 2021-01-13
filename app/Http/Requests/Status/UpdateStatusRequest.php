@@ -29,6 +29,7 @@ class UpdateStatusRequest extends FormRequest
             'id' => 'required|integer|exists:statuses,id',
             'name' => 'required|string',
             'active' => 'sometimes|boolean',
+            'color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
         ];
     }
 }

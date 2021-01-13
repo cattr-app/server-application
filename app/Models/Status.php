@@ -6,6 +6,7 @@ use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
@@ -47,6 +48,7 @@ class Status extends Model
     protected $fillable = [
         'name',
         'active',
+        'color',
     ];
 
     /**
@@ -55,6 +57,7 @@ class Status extends Model
     protected $casts = [
         'name' => 'string',
         'active' => 'boolean',
+        'color' => 'string',
     ];
 
     public static function getTableName(): string
@@ -65,5 +68,13 @@ class Status extends Model
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'status_id');
+    }
+
+    /**
+     * @return BelongsToMany
+     */
+    public function projects(): BelongsToMany
+    {
+        return $this->belongsToMany(Project::class, 'projects_statuses', 'status_id', 'project_id')->withPivot('color');
     }
 }
