@@ -20,6 +20,7 @@ use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Api\ScreenshotController;
 use App\Http\Controllers\Api\StatusController as ApiStatusController;
+use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\ScreenshotController as ScreenshotStaticController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StatusController;
@@ -110,6 +111,12 @@ Route::group([
     $router->post('tasks/edit', [TaskController::class, 'edit']);
     $router->any('tasks/show', [TaskController::class, 'show']);
     $router->post('tasks/remove', [TaskController::class, 'destroy']);
+
+    // Task comments
+    $router->any('/task-comment/list', [TaskCommentController::class, 'index']);
+    $router->post('/task-comment/create', [TaskCommentController::class, 'create']);
+    $router->any('/task-comment/show', [TaskCommentController::class, 'show']);
+    $router->post('/task-comment/remove', [TaskCommentController::class, 'destroy']);
 
     //Users routes
     $router->any('users/list', [UserController::class, 'index']);

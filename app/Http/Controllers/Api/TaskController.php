@@ -11,11 +11,14 @@ use App\Models\Project;
 use Exception;
 use Filter;
 use App\Models\Task;
+use App\Models\TaskHistory;
+use App\Models\User;
 use App\Services\CoreSettingsService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use DB;
+use Event;
 use Illuminate\Support\Arr;
 
 class TaskController extends ItemController
@@ -307,8 +310,33 @@ class TaskController extends ItemController
     {
         Filter::listen($this->getEventUniqueName('item.edit'), static function (Task $task) use ($request) {
             $users = $request->get('users');
-            $task->users()->sync($users);
+            $changes = $task->users()->sync($users);
+            if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
+                TaskHistory::create([
+                    'task_id' => $task->id,
+                    'user_id' => auth()->id(),
+                    'field' => 'users',
+                    'new_value' => json_encode(User::query()->withoutGlobalScopes()->whereIn('id', $users)->select('id', 'full_name')->get()->toArray()),
+                ]);
+            }
+
             return $task;
+        });
+
+        Event::listen($this->getEventUniqueName('item.edit.after'), static function (Task $item, array $requestData) {
+            $changes = $item->getChanges();
+            foreach ($changes as $key => $value) {
+                if (in_array($key, ['relative_position', 'created_at', 'updated_at', 'deleted_at'])) {
+                    continue;
+                }
+
+                TaskHistory::create([
+                    'task_id' => $item->id,
+                    'user_id' => auth()->id(),
+                    'field' => $key,
+                    'new_value' => $value,
+                ]);
+            }
         });
 
         Filter::listen($this->getEventUniqueName('answer.success.item.edit'), static function (array $data) {

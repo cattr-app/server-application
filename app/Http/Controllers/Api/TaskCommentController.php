@@ -37,51 +37,13 @@ class TaskCommentController extends ItemController
 
     public function create(Request $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
+        Filter::listen($this->getEventUniqueName('request.item.create'), static function (array $data) {
+            $data['user_id'] = Auth::id();
 
-        $validator = Validator::make(
-            $requestData,
-            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-        );
+            return $data;
+        });
 
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        $user = Auth::user();
-        $cls = $this->getItemClass();
-
-        $item = new $cls;
-
-        $item->fill($this->filterRequestData($requestData));
-        $item->user_id = $user->id;
-        $item = Filter::process($this->getEventUniqueName('item.create'), $item);
-        $item->save();
-
-
-        $full_access = $user->allowed('task-comment', 'full_access');
-
-        if (!$full_access) {
-            if (!$item->task->users->where(['id' => $user->id])->exists()) {
-                return new JsonResponse([
-                    'error_type' => 'authorization.forbidden',
-                    'message' => "Access denied to this task",
-                ], 403);
-            }
-        }
-
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'res' => $item,
-            ])
-        );
+        return $this->_create($request);
     }
 
     /**

@@ -132,6 +132,8 @@ class Task extends Model
         'priority_id',
         'status_id',
         'important',
+        'relative_position',
+        'due_date',
     ];
 
     /**
@@ -146,6 +148,7 @@ class Task extends Model
         'priority_id' => 'integer',
         'status_id' => 'integer',
         'important' => 'integer',
+        'relative_position' => 'float',
     ];
 
     /**
@@ -155,6 +158,7 @@ class Task extends Model
         'created_at',
         'updated_at',
         'deleted_at',
+        'due_date',
     ];
 
     /**
@@ -191,6 +195,14 @@ class Task extends Model
     public function timeIntervals(): HasMany
     {
         return $this->hasMany(TimeInterval::class, 'task_id');
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class, 'task_id');
     }
 
     /**
@@ -236,5 +248,13 @@ class Task extends Model
     public function getDescription(): string
     {
         return (new Parsedown())->text($this->description);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function changes(): HasMany
+    {
+        return $this->hasMany(TaskHistory::class, 'task_id');
     }
 }
