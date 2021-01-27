@@ -14,7 +14,7 @@ class AddRelativePositionToTasksTable extends Migration
     public function up()
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->decimal('relative_position', 64, 32)->default(0);
+            $table->decimal('relative_position', 64, 30)->default(0);
         });
     }
 
