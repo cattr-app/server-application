@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\EventFilter\Facades\Filter;
 use App\Models\TaskComment;
+use App\Models\User;
+use App\Notifications\CommentMention;
 use Exception;
+use Event;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Settings;
 
 /**
  * Class TaskCommentController
@@ -41,6 +45,19 @@ class TaskCommentController extends ItemController
             $data['user_id'] = Auth::id();
 
             return $data;
+        });
+
+        Event::listen($this->getEventUniqueName('item.create.after'), static function (TaskComment $item, array $requestData) {
+            if (preg_match_all('/@([0-9a-zа-я._-]+)/i', $item->content, $matches)) {
+                foreach ($matches[1] as $userName) {
+                    $user = User::query()->whereRaw("REPLACE(full_name, ' ', '') = ?", [$userName])->first();
+                    if ($user) {
+                        /** @var User $user */
+                        $language = !empty($user->user_language) ? $user->user_language : Settings::get('core', 'language', 'en');
+                        $user->notify((new CommentMention($item))->locale($language));
+                    }
+                }
+            }
         });
 
         return $this->_create($request);
