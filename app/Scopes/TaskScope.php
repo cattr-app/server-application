@@ -30,7 +30,7 @@ class TaskScope implements Scope
             ->whereHas('users', static function (Builder $builder) use ($user) {
                 $builder->where('id', $user->id);
             })
-            ->whereHas('project.users', static function (Builder $builder) use ($user) {
+            ->orWhereHas('project.users', static function (Builder $builder) use ($user) {
                 $builder->where('projects_users.role_id', 2);
             })
             ->orWhereHas('project.users', static function (Builder $builder) use ($user) {
