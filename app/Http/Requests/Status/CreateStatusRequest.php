@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Status;
 
 use App\Http\Requests\FormRequest;
+use App\Models\User;
 
 class CreateStatusRequest extends FormRequest
 {
