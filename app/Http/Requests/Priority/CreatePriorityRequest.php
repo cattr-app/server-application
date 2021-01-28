@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Priority;
 
 use App\Http\Requests\FormRequest;
+use App\Models\User;
 
 class CreatePriorityRequest extends FormRequest
 {
