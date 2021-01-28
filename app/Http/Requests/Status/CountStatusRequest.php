@@ -3,7 +3,6 @@
 namespace App\Http\Requests\Status;
 
 use App\Http\Requests\FormRequest;
-use App\Models\User;
 
 class CountStatusRequest extends FormRequest
 {
@@ -14,9 +13,7 @@ class CountStatusRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        /** @var User $user */
-        $user = auth()->user();
-        return $user->hasRole('admin');
+        return true;
     }
 
     /**
