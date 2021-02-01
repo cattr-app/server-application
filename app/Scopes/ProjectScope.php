@@ -22,8 +22,12 @@ class ProjectScope implements Scope
             return $builder;
         }
 
-        return $builder->whereHas('users', function (Builder $query) use ($user) {
-            $query->where('user_id', $user->id);
-        });
+        return $builder
+            ->whereHas('users', function (Builder $query) use ($user) {
+                $query->where('user_id', $user->id);
+            })
+            ->orWhereHas('tasks.users', static function (Builder $builder) use ($user) {
+                $builder->where('user_id', $user->id);
+            });
     }
 }
