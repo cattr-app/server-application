@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Auth;
+use Illuminate\Support\Carbon;
 use Throwable;
 
 /**
@@ -28,8 +29,9 @@ use Throwable;
  */
 
 /**
- * @apiDefine RoleParams
+ * App\Models\Role
  *
+ * @apiDefine RoleParams
  * @apiParam {Integer}  [id]          ID
  * @apiParam {Integer}  [name]        Name
  * @apiParam {ISO8601}  [created_at]  Creation DateTime
@@ -38,45 +40,30 @@ use Throwable;
  * @apiParam {String}   [with]        For add relation model in response
  * @apiParam {Object}   [users]       Roles's relation users. All params in <a href="#api-User-GetUserList" >@User</a>
  * @apiParam {Object}   [rules]      Roles's relation rules. All params in<a href="#api-Rule-GetRulesActions">@Rules</a>
- *
  * @apiVersion 1.0.0
- */
-
-/**
- * App\Models\Role
- *
  * @property int $id
  * @property string $name
- * @property string $created_at
- * @property string $updated_at
- * @property string $deleted_at
- * @property User[] $users
- * @property Rule[] $rules
- * @property-read int|null $projects_count
- * @property-read int|null $rules_count
- * @property-read int|null $users_count
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property-read Collection|Project[] $projects
- * @method static bool|null forceDelete()
- * @method static bool|null restore()
+ * @property-read int|null $projects_count
+ * @property-read Collection|User[] $users
+ * @property-read int|null $users_count
+ * @method static EloquentBuilder|Role newModelQuery()
+ * @method static EloquentBuilder|Role newQuery()
+ * @method static QueryBuilder|Role onlyTrashed()
+ * @method static EloquentBuilder|Role query()
  * @method static EloquentBuilder|Role whereCreatedAt($value)
  * @method static EloquentBuilder|Role whereDeletedAt($value)
  * @method static EloquentBuilder|Role whereId($value)
  * @method static EloquentBuilder|Role whereName($value)
  * @method static EloquentBuilder|Role whereUpdatedAt($value)
- * @method static EloquentBuilder|Role newModelQuery()
- * @method static EloquentBuilder|Role newQuery()
- * @method static EloquentBuilder|Role query()
- * @method static QueryBuilder|Role onlyTrashed()
  * @method static QueryBuilder|Role withTrashed()
  * @method static QueryBuilder|Role withoutTrashed()
  * @mixin EloquentIdeHelper
- * @property-read int|null $projects_count
- * @property-read int|null $rules_count
- * @property-read int|null $users_count
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Role query()
  */
+
 class Role extends Model
 {
     use SoftDeletes;

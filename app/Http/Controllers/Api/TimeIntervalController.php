@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Contracts\ScreenshotService;
 use App\Http\Requests\TimeInterval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;
@@ -9,11 +10,7 @@ use App\Http\Requests\TimeInterval\DestroyTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\EditTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\ShowTimeIntervalRequest;
 use Filter;
-use App\Models\Role;
-use App\Models\Screenshot;
 use App\Models\TimeInterval;
-use App\Models\User;
-use App\Rules\BetweenDate;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -21,13 +18,24 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
-use Auth;
-use Route;
-use Storage;
 use Validator;
 
 class TimeIntervalController extends ItemController
 {
+    /** @var ScreenshotService $screenshotService */
+    protected ScreenshotService $screenshotService;
+
+    /**
+     * ScreenshotController constructor.
+     * @param ScreenshotService $screenshotService
+     */
+    public function __construct(ScreenshotService $screenshotService)
+    {
+        $this->screenshotService = $screenshotService;
+
+        parent::__construct();
+    }
+
     public function getItemClass(): string
     {
         return TimeInterval::class;
@@ -39,22 +47,8 @@ class TimeIntervalController extends ItemController
 
         $timeInterval = TimeInterval::create($intervalData);
 
-        //create screenshot
-        if (isset($request->screenshot)) {
-            if (!Storage::exists('uploads/screenshots/thumbs')) {
-                Storage::makeDirectory('uploads/screenshots/thumbs');
-            }
-
-            $path = Filter::process(
-                $this->getEventUniqueName('request.item.create'),
-                $request->screenshot->store('uploads/screenshots')
-            );
-
-            Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval, $path));
-        }
-
-        if ($timeInterval->is_manual) {
-            Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval));
+        if ($request->hasFile('screenshot') && optional($request->file('screenshot'))->isValid()) {
+            $this->screenshotService->saveScreenshot($request->file('screenshot'), $timeInterval);
         }
 
         return new JsonResponse(
@@ -210,6 +204,9 @@ class TimeIntervalController extends ItemController
      */
 
     /**
+     * @param ShowTimeIntervalRequest $request
+     * @return JsonResponse
+     * @throws Exception
      * @api             {post} /time-intervals/show Show
      * @apiDescription  Show Time Interval
      *

@@ -5,10 +5,8 @@ namespace App\Providers;
 use App;
 use App\Models\Invitation;
 use App\Models\User;
-use App\Models\Screenshot;
 use App\Observers\InvitationObserver;
 use App\Observers\UserObserver;
-use App\Observers\ScreenshotObserver;
 use Illuminate\Support\ServiceProvider;
 
 class AppServiceProvider extends ServiceProvider
@@ -21,12 +19,12 @@ class AppServiceProvider extends ServiceProvider
         if (App::environment(['demo', 'staging'])) {
             $this->app->bind(
                 App\Contracts\ScreenshotService::class,
-                App\Services\DemoScreenshotService::class
+                App\Services\Screenshots\DemoScreenshotService::class
             );
         } else {
             $this->app->bind(
                 App\Contracts\ScreenshotService::class,
-                App\Services\ScreenshotService::class
+                App\Services\Screenshots\ProductionScreenshotService::class
             );
         }
 
@@ -37,7 +35,6 @@ class AppServiceProvider extends ServiceProvider
 
         User::observe(UserObserver::class);
         Invitation::observe(InvitationObserver::class);
-        Screenshot::observe(ScreenshotObserver::class);
     }
 
     /**

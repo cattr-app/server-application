@@ -7,6 +7,7 @@ use App\Traits\ExposePermissions;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -31,8 +32,9 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  */
 
 /**
- * @apiDefine ProjectParams
+ * App\Models\Project
  *
+ * @apiDefine ProjectParams
  * @apiParam {Integer}  [id]           ID
  * @apiParam {Integer}  [company_id]   Company ID
  * @apiParam {String}   [name]         Name
@@ -43,62 +45,49 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @apiParam {String}   [with]         Related models to return in response
  * @apiParam {Object}   [users]        Users attached to project,all params in <a href="#api-User-GetUserList">@User</a>
  * @apiParam {Object}   [tasks]        Tasks of project, all params in <a href="#api-Task-GetTaskList" >@Task</a>
- *
  * @apiVersion 1.0.0
- */
-
-/**
- * App\Models\Project
- *
  * @property int $id
- * @property int $company_id
+ * @property int|null $company_id
  * @property string $name
  * @property string $description
- * @property string $created_at
- * @property string $updated_at
- * @property string $deleted_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property int $important
  * @property string $source
- * @property int $default_priority_id
- * @property bool $important
- * @property User $users
- * @property Task[] $tasks
- * @property Priority|null $defaultPriority
+ * @property int|null $default_priority_id
+ * @property-read \App\Models\Priority|null $defaultPriority
+ * @property-read array $can
+ * @property-read Collection|\App\Models\Role[] $roles
  * @property-read int|null $roles_count
+ * @property-read Collection|\App\Models\Task[] $tasks
  * @property-read int|null $tasks_count
+ * @property-read Collection|\App\Models\User[] $users
  * @property-read int|null $users_count
- * @property-read int|null $users_relation_count
- * @property-read Collection|Role[] $roles
- * @property-read Collection|ProjectsUsers[] $usersRelation
- * @method static bool|null forceDelete()
- * @method static bool|null restore()
+ * @method static EloquentBuilder|Project newModelQuery()
+ * @method static EloquentBuilder|Project newQuery()
+ * @method static QueryBuilder|Project onlyTrashed()
+ * @method static EloquentBuilder|Project query()
  * @method static EloquentBuilder|Project whereCompanyId($value)
  * @method static EloquentBuilder|Project whereCreatedAt($value)
+ * @method static EloquentBuilder|Project whereDefaultPriorityId($value)
  * @method static EloquentBuilder|Project whereDeletedAt($value)
  * @method static EloquentBuilder|Project whereDescription($value)
  * @method static EloquentBuilder|Project whereId($value)
  * @method static EloquentBuilder|Project whereImportant($value)
  * @method static EloquentBuilder|Project whereName($value)
- * @method static EloquentBuilder|Project whereUpdatedAt($value)
  * @method static EloquentBuilder|Project whereSource($value)
- * @method static EloquentBuilder|Project newModelQuery()
- * @method static EloquentBuilder|Project newQuery()
- * @method static EloquentBuilder|Project query()
- * @method static QueryBuilder|Project onlyTrashed()
+ * @method static EloquentBuilder|Project whereUpdatedAt($value)
  * @method static QueryBuilder|Project withTrashed()
  * @method static QueryBuilder|Project withoutTrashed()
  * @mixin EloquentIdeHelper
- * @property-read int|null $roles_count
- * @property-read int|null $tasks_count
- * @property-read int|null $users_count
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project query()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project whereSource($value)
  */
+
 class Project extends Model
 {
     use SoftDeletes;
     use ExposePermissions;
+    use HasFactory;
 
     /**
      * @var array

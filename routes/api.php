@@ -19,19 +19,10 @@ use App\Http\Controllers\InstallationController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Api\ScreenshotController;
-use App\Http\Controllers\ScreenshotController as ScreenshotStaticController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StatusController;
 use App\Http\Middleware\EnsureIsInstalled;
 use Illuminate\Routing\Router;
-
-// Static content processing
-Route::group([
-    'prefix' => 'uploads'
-], static function (Router $router) {
-    $router->get('screenshots/{screenshot}', [ScreenshotStaticController::class, 'screenshot']);
-    $router->get('screenshots/thumbs/{screenshot}', [ScreenshotStaticController::class, 'thumbnail']);
-});
 
 // Routes for login/register processing
 Route::group([
@@ -113,11 +104,8 @@ Route::group([
     $router->patch('users/activity', [UserController::class, 'updateActivity']);
 
     //Screenshots routes
-    $router->any('screenshots/list', [ScreenshotController::class, 'index']);
-    $router->any('screenshots/count', [ScreenshotController::class, 'count']);
-    $router->post('screenshots/create', [ScreenshotController::class, 'create']);
-    $router->any('screenshots/show', [ScreenshotController::class, 'show']);
-    $router->post('screenshots/remove', [ScreenshotController::class, 'destroy']);
+    $router->get('screenshot/{id}', [ScreenshotController::class, 'show'])->where('id', '[0-9]+');
+    $router->get('screenshot/thumb/{id}', [ScreenshotController::class, 'showThumb'])->where('id', '[0-9]+');
 
     //Time Intervals routes
     $router->any('time-intervals/list', [TimeIntervalController::class, 'index']);

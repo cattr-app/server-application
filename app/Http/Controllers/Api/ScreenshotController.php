@@ -2,133 +2,84 @@
 
 namespace App\Http\Controllers\Api;
 
-use Filter;
-use App\Models\Role;
-use App\Models\Screenshot;
-use App\Models\TimeInterval;
-use Exception;
-use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Auth;
-use Route;
+use App\Contracts\ScreenshotService;
+use App\Http\Requests\ScreenshotRequest;
 use Storage;
-use Validator;
-use Image;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
-/**
- * Class ScreenshotController
- */
-class ScreenshotController extends ItemController
+class ScreenshotController
 {
-    public function getEventUniqueNamePart(): string
+    protected ScreenshotService $screenshotService;
+
+    public function __construct(ScreenshotService $screenshotService)
     {
-        return 'screenshot';
+        $this->screenshotService = $screenshotService;
     }
 
     /**
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
+     * @api             {get} /screenshot/:id Screenshot
+     * @apiDescription  Get Screenshot
+     *
+     * @apiVersion      3.5.0
+     * @apiName         Show
+     * @apiGroup        Screenshot
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   time_intervals_show
+     * @apiPermission   time_intervals_full_access
+     *
+     * @apiParam {Integer}  id  ID of the target Time interval
+     *
+     * @apiSuccess {Raw}    <>  Screenshot data
+     *
+     * @apiUse          400Error
+     * @apiUse          NotFoundError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
      */
-    public function index(Request $request): JsonResponse
+    /**
+     * @param ScreenshotRequest $request
+     * @return BinaryFileResponse
+     */
+    public function show(ScreenshotRequest $request): BinaryFileResponse
     {
-        if ($request->get('user_id')) {
-            $request->offsetSet('timeInterval.user_id', $request->get('user_id'));
-            $request->offsetUnset('user_id');
-        }
-
-        if ($request->get('project_id')) {
-            $request->offsetSet('timeInterval.task.project_id', $request->get('project_id'));
-            $request->offsetUnset('project_id');
-        }
-
-        return $this->_index($request);
-    }
-
-    public function create(Request $request): JsonResponse
-    {
-        // Request must contain screenshot
-        if (!isset($request->screenshot)) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'screenshot is required',
-                ]),
-                400
-            );
-        }
-
-        if (!Storage::exists('uploads/screenshots/thumbs')) {
-            Storage::makeDirectory('uploads/screenshots/thumbs');
-        }
-
-        $screenStorePath = $request->screenshot->store('uploads/screenshots');
-        $absoluteStorePath = Storage::disk()->path($screenStorePath);
-        $path = Filter::process($this->getEventUniqueName('request.item.create'), $absoluteStorePath);
-
-        $screenshot = Image::make($path);
-
-        $thumbnail = $screenshot->resize(280, null, static function ($constraint) {
-            $constraint->aspectRatio();
-        });
-
-        $thumbnailPath = str_replace('uploads/screenshots', 'uploads/screenshots/thumbs', $path);
-        Storage::put($thumbnailPath, (string)$thumbnail->encode());
-
-        // Get interval id
-        $timeIntervalID = ((int)$request->get('time_interval_id')) ?: null;
-
-        // Pack everything we need
-        $screenshotPack = [
-            'time_interval_id' => $timeIntervalID,
-            'path' => $path,
-            'thumbnail_path' => str_replace('.jpg', '-thumb.jpg', $thumbnailPath),
-        ];
-
-        $validator = Validator::make(
-            $screenshotPack,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.create'),
-                $this->getValidationRules()
-            )
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        $createdScreenshot = Filter::process(
-            $this->getEventUniqueName('item.create'),
-            Screenshot::create($screenshotPack)
-        );
-
-        // Respond to client
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'screenshot' => $createdScreenshot,
-            ]),
-            200
-        );
-    }
-
-    public function getValidationRules(): array
-    {
-        return [
-            'time_interval_id' => 'exists:time_intervals,id|required',
-            'path' => 'required',
-        ];
+        return response()->file(Storage::path($this->screenshotService->getScreenshotPath($request->route('id'))));
     }
 
     /**
+     * @api             {get} /screenshot/:id Thumb
+     * @apiDescription  Get Screenshot Thumbnail
+     *
+     * @apiVersion      3.5.0
+     * @apiName         ShowThumb
+     * @apiGroup        Screenshot
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   time_intervals_show
+     * @apiPermission   time_intervals_full_access
+     *
+     * @apiParam {Integer}  id  ID of the target Time interval
+     *
+     * @apiSuccess {Raw}    <>  Screenshot data
+     *
+     * @apiUse          400Error
+     * @apiUse          NotFoundError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+    /**
+     * @param ScreenshotRequest $request
+     * @return BinaryFileResponse
+     */
+    public function showThumb(ScreenshotRequest $request): BinaryFileResponse
+    {
+        return response()->file(Storage::path($this->screenshotService->getThumbPath($request->route('id'))));
+    }
+
+    /**
+     * @apiDeprecated since 3.5.0
      * @api             {get,post} /screenshots/list List
      * @apiDescription  Get list of Screenshots
      *
@@ -187,50 +138,8 @@ class ScreenshotController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-
     /**
-     * Remove the specified resource from storage
-     *
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function destroy(Request $request): JsonResponse
-    {
-        if (!isset($request->id)) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'screenshot id is required',
-                ]),
-                400
-            );
-        }
-
-        // Get screenshot model
-        /** @var Screenshot $screenshotModel */
-        $screenshotModel = $this->getItemClass();
-
-        // Find exact screenshot to be deleted
-        $screenshotToDel = $screenshotModel::where('id', $request->get('id'))->firstOrFail();
-
-        // Get associated time interval
-        $thisScreenshotTimeInterval = TimeInterval::where('id', $screenshotToDel->time_interval_id)->firstOrFail();
-
-        // If this screenshot is last
-        if ((int)$thisScreenshotTimeInterval->screenshots_count <= 1) {
-            // Delete interval with it
-            $thisScreenshotTimeInterval->delete();
-        } else {
-            // Or screenshot only otherwise
-            $screenshotToDel->delete();
-        }
-
-        return new JsonResponse(['message' => 'Screenshot successfully deleted']);
-    }
-
-    /**
+     * @apiDeprecated since 3.5.0
      * @api             {post} /screenshots/create Create
      * @apiDescription  Create Screenshot
      *
@@ -272,13 +181,8 @@ class ScreenshotController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-
-    public function getItemClass(): string
-    {
-        return Screenshot::class;
-    }
-
     /**
+     * @apiDeprecated since 3.5.0
      * @api             {post} /screenshots/remove Destroy
      * @apiDescription  Destroy Screenshot
      *
@@ -326,6 +230,7 @@ class ScreenshotController extends ItemController
      */
 
     /**
+     * @apiDeprecated  since 3.5.0
      * @api             {get,post} /screenshot/count Count
      * @apiDescription  Count Screenshots
      *
@@ -347,12 +252,8 @@ class ScreenshotController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function count(Request $request): JsonResponse
-    {
-        return $this->_count($request);
-    }
-
     /**
+     * @apiDeprecated since 3.5.0
      * @api             {post} /screenshots/show Show
      * @apiDescription  Show Screenshot
      *
@@ -399,8 +300,4 @@ class ScreenshotController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-    public function show(Request $request): JsonResponse
-    {
-        return $this->_show($request);
-    }
 }

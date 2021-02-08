@@ -2,46 +2,23 @@
 
 namespace App\Helpers;
 
-use App\Models\Screenshot;
+use App\Contracts\ScreenshotService;
+use App\Models\TimeInterval;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
-use RuntimeException;
+use Storage;
 
 class StorageCleanerHelper
 {
-    private const SCREENSHOTS_PATH = 'app/uploads/screenshots';
-    private const THUMBNAILS_PATH = self::SCREENSHOTS_PATH . '/thumbs';
 
     public static function getFreeSpace(): float
     {
-        return disk_free_space(storage_path(self::SCREENSHOTS_PATH));
+        return disk_free_space(Storage::path(ScreenshotService::PARENT_FOLDER));
     }
 
     public static function getUsedSpace(): float
     {
         return config('cleaner.total_space') - self::getFreeSpace();
-    }
-
-    public static function getPath($scope = 'screenshots'): ?string
-    {
-        switch ($scope) {
-            case 'screenshots':
-                $path = self::SCREENSHOTS_PATH;
-                break;
-            case 'thumbnails':
-                $path = self::THUMBNAILS_PATH;
-                break;
-            default:
-                return null;
-        }
-
-        if (!file_exists(storage_path($path))
-            && !mkdir($concurrentDirectory = storage_path($path), 0777, true)
-            && !is_dir($concurrentDirectory)
-        ) {
-            throw new RuntimeException(sprintf('Directory "%s" was not created', $concurrentDirectory));
-        }
-
-        return $path;
     }
 
     public static function needThinning(): bool
@@ -59,6 +36,8 @@ class StorageCleanerHelper
 
         cache(['thinning_now' => true]);
 
+        $service = app()->make(ScreenshotService::class);
+
         while (self::getUsedSpace() > self::getWaterlineBorder()) {
             $availableScreenshots = self::getAvailableScreenshots();
 
@@ -67,7 +46,7 @@ class StorageCleanerHelper
             }
 
             foreach ($availableScreenshots as $screenshot) {
-                $screenshot->delete();
+                $service->destroyScreenshot($screenshot);
             }
         }
 
@@ -75,14 +54,49 @@ class StorageCleanerHelper
         cache(['last_thin' => now()]);
     }
 
-    public static function getAvailableScreenshots(): object
+    /**
+     * @return array
+     * @throws BindingResolutionException
+     */
+    public static function getAvailableScreenshots(): array
     {
-        return self::getScreenshotsCollection()->limit(config('cleaner.page_size'))->get();
+        $service = app()->make(ScreenshotService::class);
+
+        $collection = self::getScreenshotsCollection();
+
+        $result = [];
+        $i = 0;
+
+        foreach ($collection->cursor() as $interval) {
+            if (Storage::exists($service->getScreenshotPath($interval))) {
+                $result[] = $interval->id;
+            }
+
+            if ($i >= config('cleaner.page_size')) {
+                break;
+            }
+        }
+
+        return $result;
     }
 
+    /**
+     * @return int
+     * @throws BindingResolutionException
+     */
     public static function countAvailableScreenshots(): int
     {
-        return self::getScreenshotsCollection()->count();
+        $count = 0;
+
+        $service = app()->make(ScreenshotService::class);
+
+        $collection = self::getScreenshotsCollection();
+
+        foreach ($collection->cursor() as $interval) {
+            $count += (int)Storage::exists($service->getScreenshotPath($interval));
+        }
+
+        return $count;
     }
 
     private static function getWaterlineBorder(): float
@@ -94,12 +108,12 @@ class StorageCleanerHelper
 
     private static function getScreenshotsCollection()
     {
-        return Screenshot::whereHas('timeInterval.task', function (Builder $query) {
+        return TimeInterval::whereHas('task', function (Builder $query) {
             $query->where('important', '=', 0);
         })
-            ->whereHas('timeInterval.task.project', function (Builder $query) {
+            ->whereHas('task.project', function (Builder $query) {
                 $query->where('important', '=', 0);
-            })->whereHas('timeInterval.user', function (Builder $query) {
+            })->whereHas('user', function (Builder $query) {
                 $query->where('permanent_screenshots', '=', 0);
             })->orderBy('id');
     }

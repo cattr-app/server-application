@@ -2,16 +2,18 @@
 
 namespace App\Models;
 
+use App\Contracts\ScreenshotService;
 use App\Scopes\TimeIntervalScope;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Storage;
 
 /**
  * @apiDefine TimeIntervalObject
@@ -69,8 +71,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property bool $is_manual
  * @property Task $task
  * @property User $user
- * @property Screenshot[] $screenshots
- * @property-read Screenshot $screenshot*
  * @property-read int|null $properties_count
  * @property-read Collection|Property[] $properties
  * @method static bool|null forceDelete()
@@ -98,6 +98,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 class TimeInterval extends Model
 {
     use SoftDeletes;
+    use HasFactory;
 
     /**
      * table name from database
@@ -142,6 +143,12 @@ class TimeInterval extends Model
         'deleted_at',
     ];
 
+    protected $appends = ['has_screenshot'];
+    /**
+     * @var ScreenshotService
+     */
+    private ScreenshotService $screenshotService;
+
     /**
      * Override parent boot and Call deleting event
      *
@@ -153,15 +160,18 @@ class TimeInterval extends Model
 
         static::addGlobalScope(new TimeIntervalScope);
 
-        static::deleting(static function ($intervals) {
-            /** @var TimeInterval $intervals */
-            $intervals->screenshot()->delete();
+        static::deleting(function ($interval) {
+            /** @var TimeInterval $interval */
+
+            $this->screenshotService->destroyScreenshot($interval);
         });
     }
 
-    public function screenshot(): HasOne
+    public function __construct(array $attributes = [])
     {
-        return $this->hasOne(Screenshot::class, 'time_interval_id');
+        $this->screenshotService = app()->make(ScreenshotService::class);
+
+        parent::__construct($attributes);
     }
 
     public function task(): BelongsTo
@@ -177,5 +187,10 @@ class TimeInterval extends Model
     public function properties(): HasMany
     {
         return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::TIME_INTERVAL_CODE);
+    }
+
+    public function getHasScreenshotAttribute(): bool
+    {
+        return Storage::exists($this->screenshotService->getScreenshotPath($this));
     }
 }

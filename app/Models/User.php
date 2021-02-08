@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -179,12 +180,20 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static QueryBuilder|User withoutTrashed()
  * @mixin EloquentIdeHelper
  * @property-read int|null $tokens_count
+ * @property int $permanent_screenshots
+ * @property \Illuminate\Support\Carbon $last_activity
+ * @property-read bool $online
+ * @method static EloquentBuilder|User whereClientInstalled($value)
+ * @method static EloquentBuilder|User whereLastActivity($value)
+ * @method static EloquentBuilder|User whereNonce($value)
+ * @method static EloquentBuilder|User wherePermanentScreenshots($value)
  */
 class User extends Authenticatable implements JWTSubject
 {
     use Notifiable;
     use SoftDeletes;
     use HasRole;
+    use HasFactory;
 
     /**
      * table name from database

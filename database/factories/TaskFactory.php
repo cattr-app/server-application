@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -23,17 +22,12 @@ class TaskFactory extends Factory
      */
     public function definition(): array
     {
-        $projectId = Project::first()->id;
-        $userId = User::where(['email' => 'admin@example.com'])->first()->id;
-
         return [
-            'project_id' => $projectId,
-            'task_name' => $this->faker->unique()->text,
-            'description' => $this->faker->unique()->text,
+            'task_name' => $this->faker->sentence(3),
+            'description' => $this->faker->paragraph,
             'active' => true,
-            'user_id' => $userId,
-            'assigned_by' => $userId,
-            'priority_id' => 2, // Normal
+            'assigned_by' => fn() => User::where(['is_admin' => 1])->first()->id,
+            'important' => $this->faker->boolean
         ];
     }
 }
