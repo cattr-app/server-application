@@ -2,6 +2,7 @@
 
 namespace App\Scopes;
 
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -15,7 +16,7 @@ class ProjectScope implements Scope
      */
     public function apply(Builder $builder, Model $model): Builder
     {
-        /** @var \App\Models\User $user */
+        /** @var User $user */
         $user = auth()->user();
 
         if (!$user || $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
@@ -25,9 +26,6 @@ class ProjectScope implements Scope
         return $builder
             ->whereHas('users', function (Builder $query) use ($user) {
                 $query->where('user_id', $user->id);
-            })
-            ->orWhereHas('tasks.users', static function (Builder $builder) use ($user) {
-                $builder->where('user_id', $user->id);
             });
     }
 }
