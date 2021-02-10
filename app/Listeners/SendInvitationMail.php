@@ -5,6 +5,7 @@ namespace App\Listeners;
 use App\Events\InvitationCreated;
 use App\Mail\UserInvited as UserInvitedMail;
 use Mail;
+use Settings;
 
 class SendInvitationMail
 {
@@ -18,6 +19,8 @@ class SendInvitationMail
         $email = $event->invitation->email;
         $key = $event->invitation->key;
 
-        Mail::to($email)->send(new UserInvitedMail($key));
+        $language = Settings::get('core', 'language', 'en');
+
+        Mail::to($email)->locale($language)->send(new UserInvitedMail($key));
     }
 }
