@@ -108,7 +108,8 @@ class ShowTest extends TestCase
             ->actingAs($this->assignedUser)
             ->postJson(self::URI, $this->assignedTask->only('id'));
 
-        $response->assertForbidden();
+        $response->assertOk();
+        $response->assertJson($this->assignedTask->toArray());
     }
 
     public function test_show_as_project_manager(): void
@@ -131,7 +132,8 @@ class ShowTest extends TestCase
     {
         $response = $this->actingAs($this->projectUser)->postJson(self::URI, $this->task->only('id'));
 
-        $response->assertForbidden();
+        $response->assertOk();
+        $response->assertJson($this->task->toArray());
     }
 
     public function test_show_as_assigned_project_user(): void
