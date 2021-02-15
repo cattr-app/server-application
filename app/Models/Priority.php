@@ -14,6 +14,8 @@ use Illuminate\Support\Carbon;
  * @apiSuccess {Integer}  project.id            ID
  * @apiSuccess {String}   project.name          Name
  * @apiSuccess {String}   project.color         Color
+ * @apiSuccess {ISO8601}  project.created_at    Creation DateTime
+ * @apiSuccess {ISO8601}  project.updated_at    Update DateTime
  * @apiVersion 1.0.0
  */
 
