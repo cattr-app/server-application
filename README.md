@@ -68,9 +68,11 @@ npm install
 npm run custom-api
 ```
 
+Then you can open [apidoc/index.html](apidoc/index.html)
+
 ## Links
 
-https://github.com/cattr-app/desktop-application – Cattr Desktop Application. You can also download the built app for 
+https://github.com/cattr-app/desktop-application – Cattr Desktop Application. You can also download the built app for
 any OS from the [official site](https://cattr.app/desktop/).
 
 https://github.com/cattr-app/frontend-application – Cattr Frontend Application.
