@@ -11,11 +11,14 @@ use Illuminate\Support\Carbon;
 /**
  * @apiDefine PriorityObject
  *
- * @apiSuccess {Integer}  project.id            ID
- * @apiSuccess {String}   project.name          Name
- * @apiSuccess {String}   project.color         Color
- * @apiSuccess {ISO8601}  project.created_at    Creation DateTime
- * @apiSuccess {ISO8601}  project.updated_at    Update DateTime
+ * @apiSuccess {Integer}  priority.id            ID
+ * @apiSuccess {String}   priority.name          Name
+ * @apiSuccess {String}   priority.tasks_count   Amount of tasks with that priority
+ * @apiSuccess {ISO8601}  priority.created_at    Creation DateTime
+ * @apiSuccess {ISO8601}  priority.updated_at    Update DateTime
+ * @apiSuccess {ISO8601}  priority.deleted_at    Delete DateTime or `NULL` if wasn't deleted
+ * @apiSuccess {Array}    [priority.tasks]       Tasks with that priority
+ *
  * @apiVersion 1.0.0
  */
 
@@ -36,10 +39,6 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Priority newQuery()
  * @method static EloquentBuilder|Priority query()
  * @mixin EloquentIdeHelper
- * @property-read int|null $tasks_count
- * @method static EloquentBuilder|Priority newModelQuery()
- * @method static EloquentBuilder|Priority newQuery()
- * @method static EloquentBuilder|Priority query()
  */
 class Priority extends Model
 {
