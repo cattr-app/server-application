@@ -72,6 +72,8 @@ class PriorityController extends ItemController
      *
      * @apiSuccess {Object}   res      Priority
      *
+     * @apiUse          PriorityObject
+     *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
@@ -102,6 +104,8 @@ class PriorityController extends ItemController
      * @apiUse          AuthHeader
      *
      * @apiSuccess {Object}   res      Priority
+     *
+     * @apiUse          PriorityObject
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
@@ -147,6 +151,9 @@ class PriorityController extends ItemController
      *
      * @apiSuccess {Object}   res      Priority
      *
+     * @apiUse          PriorityObject
+     *
+     *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
@@ -189,6 +196,8 @@ class PriorityController extends ItemController
      *  }
      *
      * @apiSuccess {Object}   res      Priority
+     *
+     * @apiUse          PriorityObject
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK

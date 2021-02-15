@@ -9,6 +9,15 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
+ * @apiDefine PriorityObject
+ *
+ * @apiSuccess {Integer}  project.id            ID
+ * @apiSuccess {String}   project.name          Name
+ * @apiSuccess {String}   project.color         Color
+ * @apiVersion 1.0.0
+ */
+
+/**
  * App\Models\Priority
  *
  * @property int $id
@@ -26,9 +35,9 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Priority query()
  * @mixin EloquentIdeHelper
  * @property-read int|null $tasks_count
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Priority newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Priority newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Priority query()
+ * @method static EloquentBuilder|Priority newModelQuery()
+ * @method static EloquentBuilder|Priority newQuery()
+ * @method static EloquentBuilder|Priority query()
  */
 class Priority extends Model
 {
