@@ -46,6 +46,7 @@ class CreateTimeIntervalRequest extends FormRequest
             'mouse_fill' => 'int|between:0,100',
             'keyboard_fill' => 'int|between:0,100',
             'is_manual' => 'bool',
+            'location'=> 'array'
         ];
     }
 }

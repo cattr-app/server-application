@@ -5,6 +5,8 @@ namespace App\Models;
 use App\Contracts\ScreenshotService;
 use App\Scopes\TimeIntervalScope;
 use Eloquent as EloquentIdeHelper;
+use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -99,6 +101,7 @@ class TimeInterval extends Model
 {
     use SoftDeletes;
     use HasFactory;
+    use SpatialTrait;
 
     /**
      * table name from database
@@ -118,6 +121,7 @@ class TimeInterval extends Model
         'mouse_fill',
         'keyboard_fill',
         'is_manual',
+        'location'
     ];
 
     /**
@@ -148,6 +152,10 @@ class TimeInterval extends Model
      * @var ScreenshotService
      */
     private ScreenshotService $screenshotService;
+
+    protected array $spatialFields = [
+        'location'
+    ];
 
     /**
      * Override parent boot and Call deleting event
@@ -192,5 +200,18 @@ class TimeInterval extends Model
     public function getHasScreenshotAttribute(): bool
     {
         return Storage::exists($this->screenshotService->getScreenshotPath($this));
+    }
+
+    public function getLocationAttribute(Point $value): array
+    {
+        return [
+            'lat' => $value->getLat(),
+            'lng' => $value->getLng(),
+        ];
+    }
+
+    public function setLocationAttribute(array $value): void
+    {
+        $this->attributes['location'] = new Point($value['lat'], $value['lng']);
     }
 }

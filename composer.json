@@ -13,6 +13,7 @@
         "erusev/parsedown": "^1.7",
         "fruitcake/laravel-cors": "^1.0",
         "fzaninotto/faker": "^1.9",
+        "grimzy/laravel-mysql-spatial": "^5.0",
         "intervention/image": "^2.5",
         "joshbrw/laravel-module-installer": "^0.1.4",
         "k-adam/env-editor": "^1.0",
