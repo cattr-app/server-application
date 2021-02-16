@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Priority;
 use App\Models\Project;
 use App\Models\Screenshot;
 use App\Models\Status;
@@ -75,7 +76,7 @@ class TaskListSeeder extends Seeder
                 'description' => $this->faker->text(100 + $i * 15),
                 'status_id' => Status::inRandomOrder()->first()->id,
                 'assigned_by' => $user->id,
-                'priority_id' => 2, // Normal
+                'priority_id' => Priority::inRandomOrder()->first()->id,
             ]);
 
             $task->users()->sync([$user->id]);
