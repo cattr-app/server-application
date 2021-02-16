@@ -2,6 +2,7 @@
 
 namespace Database\Seeders;
 
+use App\Models\Priority;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\Screenshot;
@@ -94,6 +95,7 @@ class StatisticsSeeder extends Seeder
             'description' => $faker->text(random_int(100, 1000)),
             'status_id' => Status::inRandomOrder()->first()->id,
             'assigned_by' => $user->id,
+            'priority_id' => Priority::inRandomOrder()->first()->id,
         ]);
 
         $this->command->getOutput()->writeln("<fg=cyan>Added task {$task->id} to project {$project->id}</>");
