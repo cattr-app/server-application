@@ -5,6 +5,7 @@ namespace Database\Seeders;
 use App\Models\Project;
 use App\Models\Role;
 use App\Models\Screenshot;
+use App\Models\Status;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
@@ -91,7 +92,7 @@ class StatisticsSeeder extends Seeder
             'project_id' => $project->id,
             'task_name' => $faker->text(random_int(15, 50)),
             'description' => $faker->text(random_int(100, 1000)),
-            'active' => true,
+            'status_id' => Status::inRandomOrder()->first()->id,
             'assigned_by' => $user->id,
         ]);
 
