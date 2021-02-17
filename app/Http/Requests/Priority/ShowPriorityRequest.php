@@ -13,9 +13,7 @@ class ShowPriorityRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        /** @var User $user */
-        $user = auth()->user();
-        return $user->hasRole('admin');
+        return true;
     }
 
     /**
