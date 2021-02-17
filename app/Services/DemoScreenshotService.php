@@ -17,7 +17,7 @@ class DemoScreenshotService implements ScreenshotServiceInterface
     public function getScreenshot(Request $request): ?Screenshot
     {
         return Screenshot::withoutGlobalScopes()->with('timeInterval')
-            ->where('path', $request->screenshot)
+            ->where('id', $request->screenshot)
             ->first();
     }
 
@@ -30,7 +30,7 @@ class DemoScreenshotService implements ScreenshotServiceInterface
     public function getThumbnail(Request $request): ?Screenshot
     {
         return Screenshot::withoutGlobalScopes()->with('timeInterval')
-            ->where('thumbnail_path', $request->screenshot)
+            ->where('id', $request->screenshot)
             ->first();
     }
 }
