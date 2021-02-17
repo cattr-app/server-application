@@ -1,10 +1,11 @@
 <?php
 
-namespace App\Http\Requests\Priority;
+namespace App\Http\Requests\Status;
 
 use App\Http\Requests\FormRequest;
+use App\Models\User;
 
-class CreatePriorityRequest extends FormRequest
+class CreateStatusRequest extends FormRequest
 {
     /**
      * Determine if user authorized to make this request.
@@ -27,19 +28,8 @@ class CreatePriorityRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
+            'active' => 'sometimes|boolean',
             'color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
-        ];
-    }
-
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array
-     */
-    public function attributes(): array
-    {
-        return [
-            'users.*.email' => 'Email'
         ];
     }
 }

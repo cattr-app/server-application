@@ -76,7 +76,15 @@ class ListTest extends TestCase
         $response = $this->actingAs($this->admin)->getJson(self::URI);
 
         $response->assertOk();
-        $response->assertJson(Task::all()->toArray());
+
+        $tasks = Task::query()
+            ->leftJoin('statuses as s', 'tasks.status_id', '=', 's.id')
+            ->select('tasks.*')
+            ->orderBy('s.active', 'desc')
+            ->orderBy('tasks.created_at', 'desc')
+            ->get();
+
+        $response->assertJson($tasks->toArray());
     }
 
     public function test_list_as_manager(): void
@@ -84,7 +92,15 @@ class ListTest extends TestCase
         $response = $this->actingAs($this->manager)->getJson(self::URI);
 
         $response->assertOk();
-        $response->assertJson(Task::all()->toArray());
+
+        $tasks = Task::query()
+            ->leftJoin('statuses as s', 'tasks.status_id', '=', 's.id')
+            ->select('tasks.*')
+            ->orderBy('s.active', 'desc')
+            ->orderBy('tasks.created_at', 'desc')
+            ->get();
+
+        $response->assertJson($tasks->toArray());
     }
 
     public function test_list_as_auditor(): void
@@ -92,7 +108,15 @@ class ListTest extends TestCase
         $response = $this->actingAs($this->auditor)->getJson(self::URI);
 
         $response->assertOk();
-        $response->assertJson(Task::all()->toArray());
+
+        $tasks = Task::query()
+            ->leftJoin('statuses as s', 'tasks.status_id', '=', 's.id')
+            ->select('tasks.*')
+            ->orderBy('s.active', 'desc')
+            ->orderBy('tasks.created_at', 'desc')
+            ->get();
+
+        $response->assertJson($tasks->toArray());
     }
 
     public function test_list_as_user(): void

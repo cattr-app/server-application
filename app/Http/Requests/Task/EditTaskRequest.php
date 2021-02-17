@@ -37,6 +37,9 @@ class EditTaskRequest extends FormRequest
             'active' => 'bool',
             'important' => 'bool',
             'priority_id' => 'sometimes|required|exists:priorities,id',
+            'status_id' => 'sometimes|required|exists:statuses,id',
+            'relative_position' => 'sometimes|required|numeric',
+            'due_date' => 'sometimes|nullable|date',
         ];
     }
 }

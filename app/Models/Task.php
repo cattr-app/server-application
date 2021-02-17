@@ -21,6 +21,7 @@ use Parsedown;
  * @apiSuccess {Integer}  task.project_id     The ID of the linked project
  * @apiSuccess {Integer}  task.assigned_by    The ID of the user that assigned task
  * @apiSuccess {Integer}  task.priority_id    The ID of the priority
+ * @apiSuccess {Integer}  task.status_id      The ID of the status
  * @apiSuccess {String}   task.task_name      Name of the task
  * @apiSuccess {String}   task.description    Description of the task
  * @apiSuccess {Boolean}  task.active         Indicates active task when `TRUE`
@@ -33,6 +34,7 @@ use Parsedown;
  * @apiSuccess {Array}    task.assigned       Users, that assigned this task
  * @apiSuccess {Array}    task.project        The project that task belongs to
  * @apiSuccess {Object}   task.priority       Task priority
+ * @apiSuccess {Object}   task.status         Task status
  *
  * @apiVersion 1.0.0
  */
@@ -44,9 +46,9 @@ use Parsedown;
  * @apiParam {Integer}  [project_id]     The ID of the linked project
  * @apiParam {Integer}  [assigned_by]    The ID of the user that assigned task
  * @apiParam {Integer}  [priority_id]    The ID of the priority
+ * @apiParam {Integer}  [status_id]      The ID of the status
  * @apiParam {String}   [task_name]      Name of the task
  * @apiParam {String}   [description]    Description of the task
- * @apiParam {Boolean}  [active]         Indicates active task when `TRUE`
  * @apiParam {String}   [important]      Indicates important task when `TRUE`
  * @apiParam {ISO8601}  [created_at]     Creation DateTime
  * @apiParam {ISO8601}  [updated_at]     Update DateTime
@@ -56,6 +58,7 @@ use Parsedown;
  * @apiParam {Array}    [assigned]       Users, that assigned this task
  * @apiParam {Array}    [project]        The project that task belongs to
  * @apiParam {Object}   [priority]       Task priority
+ * @apiParam {Object}   [status]         Task status
  *
  * @apiVersion 1.0.0
  */
@@ -68,7 +71,7 @@ use Parsedown;
  * @property int $user_id
  * @property int $assigned_by
  * @property int $priority_id
- * @property int $active
+ * @property int $status_id
  * @property string $task_name
  * @property string $description
  * @property string $url
@@ -79,6 +82,7 @@ use Parsedown;
  * @property User $assigned
  * @property Project $project
  * @property Priority $priority
+ * @property Status $status
  * @property User[] $users
  * @property TimeInterval[] $timeIntervals
  * @property-read int|null $time_intervals_count
@@ -123,11 +127,13 @@ class Task extends Model
         'project_id',
         'task_name',
         'description',
-        'active',
         'assigned_by',
         'url',
         'priority_id',
+        'status_id',
         'important',
+        'relative_position',
+        'due_date',
     ];
 
     /**
@@ -137,11 +143,12 @@ class Task extends Model
         'project_id' => 'integer',
         'task_name' => 'string',
         'description' => 'string',
-        'active' => 'integer',
         'assigned_by' => 'integer',
         'url' => 'string',
         'priority_id' => 'integer',
+        'status_id' => 'integer',
         'important' => 'integer',
+        'relative_position' => 'float',
     ];
 
     /**
@@ -151,6 +158,7 @@ class Task extends Model
         'created_at',
         'updated_at',
         'deleted_at',
+        'due_date',
     ];
 
     /**
@@ -190,6 +198,14 @@ class Task extends Model
     }
 
     /**
+     * @return HasMany
+     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class, 'task_id');
+    }
+
+    /**
      * @return BelongsTo
      */
     public function project(): BelongsTo
@@ -219,10 +235,26 @@ class Task extends Model
     }
 
     /**
+     * @return BelongsTo
+     */
+    public function status(): BelongsTo
+    {
+        return $this->belongsTo(Status::class, 'status_id');
+    }
+
+    /**
      * @return string
      */
     public function getDescription(): string
     {
         return (new Parsedown())->text($this->description);
+    }
+
+    /**
+     * @return HasMany
+     */
+    public function changes(): HasMany
+    {
+        return $this->hasMany(TaskHistory::class, 'task_id');
     }
 }

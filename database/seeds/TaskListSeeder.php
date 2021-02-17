@@ -2,8 +2,10 @@
 
 namespace Database\Seeders;
 
+use App\Models\Priority;
 use App\Models\Project;
 use App\Models\Screenshot;
+use App\Models\Status;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
@@ -72,9 +74,9 @@ class TaskListSeeder extends Seeder
                 'project_id' => $project->id,
                 'task_name' => $this->faker->text(15 + $i),
                 'description' => $this->faker->text(100 + $i * 15),
-                'active' => true,
+                'status_id' => Status::inRandomOrder()->first()->id,
                 'assigned_by' => $user->id,
-                'priority_id' => 2, // Normal
+                'priority_id' => Priority::inRandomOrder()->first()->id,
             ]);
 
             $task->users()->sync([$user->id]);

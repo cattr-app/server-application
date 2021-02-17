@@ -20,9 +20,7 @@ class TaskScope implements Scope
         $user = auth()->user();
 
         if (!$user || $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
-            return $builder
-                ->orderBy('active', 'desc')
-                ->orderBy('created_at', 'desc');
+            return $builder;
         }
 
         return $builder
@@ -35,8 +33,6 @@ class TaskScope implements Scope
                     // If the user is a project auditor they can see all the project tasks
                     ->where('user_id', $user->id)
                     ->whereIn('projects_users.role_id', [1, 2, 3]);
-            })
-            ->orderBy('active', 'desc')
-            ->orderBy('created_at', 'desc');
+            });
     }
 }

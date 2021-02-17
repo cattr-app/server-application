@@ -2,7 +2,9 @@
 
 namespace Database\Factories;
 
+use App\Models\Priority;
 use App\Models\Project;
+use App\Models\Status;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -30,10 +32,10 @@ class TaskFactory extends Factory
             'project_id' => $projectId,
             'task_name' => $this->faker->unique()->text,
             'description' => $this->faker->unique()->text,
-            'active' => true,
+            'status_id' => Status::inRandomOrder()->first()->id,
             'user_id' => $userId,
             'assigned_by' => $userId,
-            'priority_id' => 2, // Normal
+            'priority_id' => Priority::inRandomOrder()->first()->id,
         ];
     }
 }

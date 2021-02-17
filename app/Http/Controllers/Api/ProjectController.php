@@ -188,6 +188,24 @@ class ProjectController extends ItemController
      */
     public function create(CreateProjectRequest $request): JsonResponse
     {
+        Filter::listen($this->getEventUniqueName('item.create'), static function (Project $project) use ($request) {
+            if ($request->has('statuses')) {
+                $statuses = [];
+                foreach ($request->get('statuses') as $status) {
+                    $statuses[$status['id']] = ['color' => $status['color']];
+                }
+
+                $project->statuses()->sync($statuses);
+            }
+
+            return $project;
+        });
+
+        Filter::listen($this->getEventUniqueName('answer.success.item.create'), static function (array $data) {
+            $data['res'] = $data['res']->load('statuses');
+            return $data;
+        });
+
         return $this->_create($request);
     }
 
@@ -341,6 +359,24 @@ class ProjectController extends ItemController
      */
     public function edit(EditProjectRequest $request): JsonResponse
     {
+        Filter::listen($this->getEventUniqueName('item.edit'), static function (Project $project) use ($request) {
+            if ($request->has('statuses')) {
+                $statuses = [];
+                foreach ($request->get('statuses') as $status) {
+                    $statuses[$status['id']] = ['color' => $status['color']];
+                }
+
+                $project->statuses()->sync($statuses);
+            }
+
+            return $project;
+        });
+
+        Filter::listen($this->getEventUniqueName('answer.success.item.edit'), static function (array $data) {
+            $data['res'] = $data['res']->load('statuses');
+            return $data;
+        });
+
         return $this->_edit($request);
     }
 

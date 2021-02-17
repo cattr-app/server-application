@@ -2,7 +2,9 @@
 
 namespace Tests\Factories;
 
+use App\Models\Priority;
 use App\Models\Project;
+use App\Models\Status;
 use App\Models\Task;
 use App\Models\User;
 use Faker\Factory as FakerFactory;
@@ -14,7 +16,6 @@ use Tests\Facades\UserFactory;
 class TaskFactory extends Factory
 {
     private const DESCRIPTION_LENGTH = 10;
-    private const PRIORITY_ID = 2;
 
     private int $intervalsAmount = 0;
 
@@ -81,8 +82,8 @@ class TaskFactory extends Factory
         return [
             'task_name' => $faker->jobTitle,
             'description' => $faker->text(self::DESCRIPTION_LENGTH),
-            'active' => true,
-            'priority_id' => self::PRIORITY_ID,
+            'priority_id' => Priority::min('id'),
+            'status_id' => Status::min('id'),
         ];
     }
 
