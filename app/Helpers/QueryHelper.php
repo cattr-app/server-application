@@ -14,7 +14,13 @@ use function is_array;
 class QueryHelper
 {
     public const RESERVED_REQUEST_KEYWORDS = [
-        'with', 'withCount', 'paginate', 'perPage', 'page', 'with_deleted', 'search',
+        'with',
+        'withCount',
+        'paginate',
+        'perPage',
+        'page',
+        'with_deleted',
+        'search',
     ];
 
     /**
@@ -79,13 +85,15 @@ class QueryHelper
             ) {
                 [$operator, $value] = is_array($param) ? array_values($param) : ['=', $param];
 
-                if (is_array($value) && $operator === '=') {
-                    $query->whereIn("$table.$key", $value);
+                if (is_array($value)) {
+                    if ($operator === '=') {
+                        $query->whereIn("$table.$key", $value);
+                    } elseif ($operator === 'between' && count($value) >= 2) {
+                        $query->whereBetween("$table.$key", [$value[0], $value[1]]);
+                    }
                 } elseif ($operator === 'in') {
                     $inArgs = is_array($value) ? $value : [$value];
                     $query->whereIn("$table.$key", $inArgs);
-                } elseif (is_array($value) && count($value) >= 2 && $operator === 'between') {
-                    $query->whereBetween("$table.$key", [$value[0], $value[1]]);
                 } else {
                     $query->where("$table.$key", $operator, $value);
                 }
