@@ -308,6 +308,23 @@ class TaskController extends ItemController
      */
     public function edit(EditTaskRequest $request): JsonResponse
     {
+        Filter::listen($this->getEventUniqueName('request.item.edit'), function (array $data) {
+            if (empty($data['priority_id'])) {
+                $project = Project::where(['id' => $data['project_id']])->first();
+                if (isset($project) && !empty($project->default_priority_id)) {
+                    $data['priority_id'] = $project->default_priority_id;
+                } elseif ($this->settings->get('default_priority_id') !== null) {
+                    $data['priority_id'] = $this->settings->get('default_priority_id');
+                } elseif (($priority = Priority::query()->first()) !== null) {
+                    $data['priority_id'] = $priority->id;
+                } else {
+                    throw new Exception('Priorities should be configured to edit tasks.');
+                }
+            }
+
+            return $data;
+        });
+
         Filter::listen($this->getEventUniqueName('item.edit'), static function (Task $task) use ($request) {
             $users = $request->get('users');
             $changes = $task->users()->sync($users);
