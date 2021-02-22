@@ -29,10 +29,6 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Status newQuery()
  * @method static EloquentBuilder|Status query()
  * @mixin EloquentIdeHelper
- * @property-read int|null $tasks_count
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Status newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Status newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Status query()
  */
 class Status extends Model
 {
