@@ -218,6 +218,13 @@ class ScreenshotController extends ItemController
         // Get associated time interval
         $thisScreenshotTimeInterval = TimeInterval::where('id', $screenshotToDel->time_interval_id)->firstOrFail();
 
+        if (auth()->user()->cannot('destroy', $thisScreenshotTimeInterval)) {
+            return new JsonResponse([
+                "message" => "This action is unauthorized",
+                "error_type" => "authorization.forbidden"
+            ], 403);
+        }
+
         // If this screenshot is last
         if ((int)$thisScreenshotTimeInterval->screenshots_count <= 1) {
             // Delete interval with it
