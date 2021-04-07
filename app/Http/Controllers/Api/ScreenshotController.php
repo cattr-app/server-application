@@ -44,7 +44,13 @@ class ScreenshotController
      */
     public function show(ScreenshotRequest $request): BinaryFileResponse
     {
-        return response()->file(Storage::path($this->screenshotService->getScreenshotPath($request->route('id'))));
+        $path = $this->screenshotService->getScreenshotPath($request->route('id'));
+        if (!Storage::exists($path)) {
+            abort(404);
+        }
+
+        $fullPath = Storage::path($path);
+        return response()->file($fullPath);
     }
 
     /**
@@ -75,7 +81,13 @@ class ScreenshotController
      */
     public function showThumb(ScreenshotRequest $request): BinaryFileResponse
     {
-        return response()->file(Storage::path($this->screenshotService->getThumbPath($request->route('id'))));
+        $path = $this->screenshotService->getThumbPath($request->route('id'));
+        if (!Storage::exists($path)) {
+            abort(404);
+        }
+
+        $fullPath = Storage::path($path);
+        return response()->file($fullPath);
     }
 
     /**
