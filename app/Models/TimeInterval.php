@@ -202,8 +202,12 @@ class TimeInterval extends Model
         return Storage::exists($this->screenshotService->getScreenshotPath($this));
     }
 
-    public function getLocationAttribute(Point $value): array
+    public function getLocationAttribute(?Point $value): ?array
     {
+        if (!isset($value)) {
+            return null;
+        }
+
         return [
             'lat' => $value->getLat(),
             'lng' => $value->getLng(),
