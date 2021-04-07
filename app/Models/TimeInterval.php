@@ -168,10 +168,10 @@ class TimeInterval extends Model
 
         static::addGlobalScope(new TimeIntervalScope);
 
-        static::deleting(function ($interval) {
+        static::deleting(static function ($interval) {
             /** @var TimeInterval $interval */
-
-            $this->screenshotService->destroyScreenshot($interval);
+            $screenshotService = app()->make(ScreenshotService::class);
+            $screenshotService->destroyScreenshot($interval);
         });
     }
 
