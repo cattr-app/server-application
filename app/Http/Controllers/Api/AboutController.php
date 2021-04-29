@@ -27,7 +27,7 @@ class AboutController extends Controller
     {
         $this->statsRootUrl = config('app.stats_collector_url');
         $this->statsReleaseUrl = "$this->statsRootUrl/release/";
-        $this->statsImagesUrl = "$this->statsRootUrl/images/";
+        $this->statsImagesUrl = "$this->statsRootUrl/image/";
         $this->statsModulesUrl = "$this->statsRootUrl/modules/";
         $this->client = $client;
     }
