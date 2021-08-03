@@ -3,9 +3,9 @@
 namespace Tests\Feature\Invitations;
 
 use App\Models\User;
-use App\Models\invitation;
+use App\Models\Invitation;
 use Tests\Facades\UserFactory;
-use Tests\Facades\invitationFactory;
+use Tests\Facades\InvitationFactory;
 use Tests\TestCase;
 
 class ResendTest extends TestCase
