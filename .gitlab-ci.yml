@@ -1,5 +1,5 @@
 integration_testing:
-  image: php:7.4-alpine
+  image: php:7.4-alpine3.13
   services:
     - name: mysql:latest
       alias: mysql
@@ -17,7 +17,7 @@ integration_testing:
     - apk add --no-cache $PHPIZE_DEPS
     - pecl install xdebug-2.9.8
     - docker-php-ext-enable xdebug
-    - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer --version=1.10.16
+    - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   script:
     - COMPOSER_MEMORY_LIMIT=-1 composer install
     - cp .env.testing.example .env.testing
