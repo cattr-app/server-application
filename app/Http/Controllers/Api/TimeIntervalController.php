@@ -8,6 +8,9 @@ use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\DestroyTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\EditTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\ShowTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\TrackAppRequest;
+use App\Jobs\AssignAppsToTimeInterval;
+use App\Models\TrackedApplication;
 use Filter;
 use App\Models\Role;
 use App\Models\Screenshot;
@@ -56,6 +59,8 @@ class TimeIntervalController extends ItemController
         if ($timeInterval->is_manual) {
             Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval));
         }
+
+        AssignAppsToTimeInterval::dispatchAfterResponse($timeInterval);
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
@@ -594,5 +599,12 @@ class TimeIntervalController extends ItemController
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), $responseData),
             200
         );
+    }
+
+    public function trackApp(TrackAppRequest $request): JsonResponse
+    {
+        return new JsonResponse([
+            'res' => TrackedApplication::create($request->validated())
+        ]);
     }
 }

@@ -148,6 +148,8 @@ Route::group([
     $router->any('time-intervals/dashboard', [DashboardController::class, 'timeIntervals']);
     $router->any('time-intervals/day-duration', [DashboardController::class, 'timePerDay']);
 
+    $router->put('time-intervals/app', [TimeIntervalController::class, 'trackApp']);
+
     //Time routes
     $router->any('time/total', [TimeController::class, 'total']);
     $router->any('time/tasks', [TimeController::class, 'tasks']);
