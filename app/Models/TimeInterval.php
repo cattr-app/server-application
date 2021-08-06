@@ -94,6 +94,7 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|TimeInterval withoutTrashed()
  * @method static QueryBuilder|TimeInterval onlyTrashed()
  * @mixin EloquentIdeHelper
+ * @property-read \App\Models\Screenshot|null $screenshot
  */
 class TimeInterval extends Model
 {
@@ -177,5 +178,10 @@ class TimeInterval extends Model
     public function properties(): HasMany
     {
         return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::TIME_INTERVAL_CODE);
+    }
+
+    public function apps(): HasMany
+    {
+        return $this->hasMany(TrackedApplication::class, 'time_interval_id');
     }
 }

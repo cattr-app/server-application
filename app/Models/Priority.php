@@ -39,6 +39,8 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Priority newQuery()
  * @method static EloquentBuilder|Priority query()
  * @mixin EloquentIdeHelper
+ * @property string|null $color
+ * @method static EloquentBuilder|Priority whereColor($value)
  */
 class Priority extends Model
 {

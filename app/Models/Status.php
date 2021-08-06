@@ -42,6 +42,10 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Status newQuery()
  * @method static EloquentBuilder|Status query()
  * @mixin EloquentIdeHelper
+ * @property string|null $color
+ * @property-read Collection|\App\Models\Project[] $projects
+ * @property-read int|null $projects_count
+ * @method static EloquentBuilder|Status whereColor($value)
  */
 class Status extends Model
 {

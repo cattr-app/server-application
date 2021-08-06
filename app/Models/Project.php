@@ -94,6 +94,10 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project newQuery()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project query()
  * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Project whereSource($value)
+ * @property-read array $can
+ * @property-read Collection|\App\Models\Status[] $statuses
+ * @property-read int|null $statuses_count
+ * @method static EloquentBuilder|Project whereDefaultPriorityId($value)
  */
 class Project extends Model
 {
