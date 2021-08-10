@@ -333,6 +333,7 @@ class TaskController extends ItemController
                     'task_id' => $task->id,
                     'user_id' => auth()->id(),
                     'field' => 'users',
+                    'old_value' => json_encode($task->users()->withoutGlobalScopes()->whereIn('id', $users)->select('id', 'full_name')->get()->toArray()),
                     'new_value' => json_encode(User::query()->withoutGlobalScopes()->whereIn('id', $users)->select('id', 'full_name')->get()->toArray()),
                 ]);
             }
@@ -343,7 +344,7 @@ class TaskController extends ItemController
         Event::listen($this->getEventUniqueName('item.edit.after'), static function (Task $item, array $requestData) {
             $changes = $item->getChanges();
             foreach ($changes as $key => $value) {
-                if (in_array($key, ['relative_position', 'created_at', 'updated_at', 'deleted_at'])) {
+                if (in_array($key, ['description', 'relative_position', 'created_at', 'updated_at', 'deleted_at'])) {
                     continue;
                 }
 
@@ -351,6 +352,7 @@ class TaskController extends ItemController
                     'task_id' => $item->id,
                     'user_id' => auth()->id(),
                     'field' => $key,
+                    'old_value' => $item->getOriginal($key),
                     'new_value' => $value,
                 ]);
             }

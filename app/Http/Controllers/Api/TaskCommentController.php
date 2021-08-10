@@ -63,6 +63,11 @@ class TaskCommentController extends ItemController
         return $this->_create($request);
     }
 
+    public function edit(Request $request): JsonResponse
+    {
+        return $this->_edit($request);
+    }
+
     /**
      * @return array
      */
@@ -128,7 +133,7 @@ class TaskCommentController extends ItemController
         );
 
         $user = Auth::user();
-        $full_access = $user->allowed('task-comment', 'full_access');
+        $full_access = $user->hasRole('admin') || $user->hasRole('manager');
 
         if (!$full_access) {
             $baseQuery->whereHas('task', static function ($taskQuery) use ($user) {
@@ -207,7 +212,7 @@ class TaskCommentController extends ItemController
         );
 
         $user = Auth::user();
-        $full_access = $user->allowed('task-comment', 'full_access');
+        $full_access = $user->hasRole('admin') || $user->hasRole('manager');
 
         if (!$full_access) {
             $itemsQuery->where(['user_id' => $user->id])

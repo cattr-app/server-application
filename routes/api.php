@@ -115,6 +115,7 @@ Route::group([
     // Task comments
     $router->any('/task-comment/list', [TaskCommentController::class, 'index']);
     $router->post('/task-comment/create', [TaskCommentController::class, 'create']);
+    $router->post('task-comment/edit', [TaskCommentController::class, 'edit']);
     $router->any('/task-comment/show', [TaskCommentController::class, 'show']);
     $router->post('/task-comment/remove', [TaskCommentController::class, 'destroy']);
 

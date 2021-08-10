@@ -19,6 +19,7 @@ class TaskHistory extends Model
         'task_id',
         'user_id',
         'field',
+        'old_value',
         'new_value',
     ];
 
