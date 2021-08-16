@@ -66,7 +66,8 @@ class CreateUserRequest extends FormRequest
             'computer_time_popup' => 'required|int|min:1',
             'timezone' => 'required|string',
             'role_id' => 'required|int|exists:role,id',
-            'type' => 'required|string'
+            'type' => 'required|string',
+            'web_and_app_monitoring' => 'sometimes|required|bool',
         ];
     }
 }
