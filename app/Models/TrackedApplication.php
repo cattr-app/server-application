@@ -40,6 +40,7 @@ class TrackedApplication extends Model
     protected $fillable = [
         'title',
         'executable',
+        'user_id',
     ];
 
     protected $dates = [
@@ -58,5 +59,10 @@ class TrackedApplication extends Model
     public function timeInterval(): BelongsTo
     {
         return $this->belongsTo(TimeInterval::class, 'time_interval_id');
+    }
+
+    public function user(): BelongsTo
+    {
+        return $this->belongsTo(User::class, 'user_id');
     }
 }

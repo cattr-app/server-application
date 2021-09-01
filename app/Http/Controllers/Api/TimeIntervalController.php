@@ -60,7 +60,10 @@ class TimeIntervalController extends ItemController
             Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval));
         }
 
-        AssignAppsToTimeInterval::dispatchAfterResponse($timeInterval);
+        $user = User::find($request->user_id);
+        if ($user->web_and_app_monitoring) {
+            AssignAppsToTimeInterval::dispatchAfterResponse($timeInterval);
+        }
 
         return new JsonResponse(
             Filter::process($this->getEventUniqueName('answer.success.item.create'), [
@@ -603,8 +606,13 @@ class TimeIntervalController extends ItemController
 
     public function trackApp(TrackAppRequest $request): JsonResponse
     {
-        return new JsonResponse([
-            'res' => TrackedApplication::create($request->validated())
-        ]);
+        $user = auth()->user();
+        if (!isset($user)) {
+            abort(401);
+        }
+
+        $item = TrackedApplication::create(array_merge($request->validated(), ['user_id' => $user->id]));
+
+        return new JsonResponse(['res' => $item]);
     }
 }
