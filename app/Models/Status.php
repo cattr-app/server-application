@@ -11,6 +11,19 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
+ * @apiDefine StatusObject
+ *
+ * @apiSuccess {Integer}  status.id              ID
+ * @apiSuccess {String}   status.name            Status name
+ * @apiSuccess {Boolean}  status.active          Active status
+ * @apiSuccess {String}   status.color           Color
+ * @apiSuccess {ISO8601}  status.created_at      Creation DateTime
+ * @apiSuccess {ISO8601}  status.updated_at      Update DateTime
+ *
+ * @apiVersion 1.0.0
+ */
+
+/**
  * App\Models\Status
  *
  * @property int $id
@@ -29,10 +42,10 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Status newQuery()
  * @method static EloquentBuilder|Status query()
  * @mixin EloquentIdeHelper
- * @property-read int|null $tasks_count
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Status newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Status newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\Status query()
+ * @property string|null $color
+ * @property-read Collection|\App\Models\Project[] $projects
+ * @property-read int|null $projects_count
+ * @method static EloquentBuilder|Status whereColor($value)
  */
 class Status extends Model
 {

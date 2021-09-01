@@ -45,3 +45,4 @@ Modules/*
 
 bootstrap/cache/*
 !bootstrap/cache/.gitkeep
+/public/vendor/

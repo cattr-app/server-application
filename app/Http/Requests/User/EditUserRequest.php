@@ -77,7 +77,8 @@ class EditUserRequest extends FormRequest
             'project_roles.*.projects_ids.*' => 'required|array',
             'projects_roles.*.project_ids.*.id' => 'required|int|exists:projects,id',
             'project_roles.*.role_id' => 'required|int|exists:role,id',
-            'type' => 'sometimes|required|string'
+            'type' => 'sometimes|required|string',
+            'web_and_app_monitoring' => 'sometimes|required|bool',
         ];
     }
 }

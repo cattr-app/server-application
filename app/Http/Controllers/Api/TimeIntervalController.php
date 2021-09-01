@@ -8,6 +8,9 @@ use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\DestroyTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\EditTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\ShowTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\TrackAppRequest;
+use App\Jobs\AssignAppsToTimeInterval;
+use App\Models\TrackedApplication;
 use Filter;
 use App\Models\Role;
 use App\Models\Screenshot;
@@ -55,6 +58,11 @@ class TimeIntervalController extends ItemController
 
         if ($timeInterval->is_manual) {
             Filter::process('item.create.screenshot.manual', Screenshot::createByInterval($timeInterval));
+        }
+
+        $user = User::find($request->user_id);
+        if ($user->web_and_app_monitoring) {
+            AssignAppsToTimeInterval::dispatchAfterResponse($timeInterval);
         }
 
         return new JsonResponse(
@@ -553,7 +561,7 @@ class TimeIntervalController extends ItemController
         );
 
         $itemsQuery->each(static function (Model $item) use ($intervalsData) {
-            $item->update(Arr::only($intervalsData->where('id', $item->id)->first(), 'task_id'));
+            $item->update(Arr::only($intervalsData->where('id', $item->id)->first() ?: [], 'task_id'));
         });
 
         $responseData = [
@@ -594,5 +602,17 @@ class TimeIntervalController extends ItemController
             Filter::process($this->getEventUniqueName('answer.success.item.remove'), $responseData),
             200
         );
+    }
+
+    public function trackApp(TrackAppRequest $request): JsonResponse
+    {
+        $user = auth()->user();
+        if (!isset($user)) {
+            abort(401);
+        }
+
+        $item = TrackedApplication::create(array_merge($request->validated(), ['user_id' => $user->id]));
+
+        return new JsonResponse(['res' => $item]);
     }
 }

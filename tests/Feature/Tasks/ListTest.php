@@ -132,7 +132,11 @@ class ListTest extends TestCase
         $response = $this->actingAs($this->assignedUser)->getJson(self::URI);
 
         $response->assertOk();
-        $response->assertExactJson($this->assignedTask->toArray());
+        $response->assertExactJson(
+            Task::query()
+                ->where('id', '=', $this->assignedTask->id)
+                ->get()->toArray()
+        );
     }
 
     public function test_list_as_project_manager(): void
