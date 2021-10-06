@@ -7,7 +7,6 @@ use App\Console\Commands\DemoReset;
 use App\Console\Commands\EmulateWork;
 use App\Console\Commands\PlanWork;
 use App\Console\Commands\RotateScreenshots;
-use App\Jobs\AssignAppsToTimeInterval;
 use Exception;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -46,7 +45,7 @@ class Kernel extends ConsoleKernel
         $schedule->command(PlanWork::class)->daily()->environments('staging');
         $schedule->command(DemoReset::class)->weeklyOn(1, '1:00')->environments('staging');
 
-        $schedule->job(new AssignAppsToTimeInterval())->everyMinute();
+
         // Telescope
         $schedule->command(PruneCommand::class)->daily()->environments(['staging', 'local']);
 
