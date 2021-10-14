@@ -14,7 +14,7 @@ class AssignAppsToTimeInterval implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    public int $uniqueFor = 300;
+    public int $uniqueFor = 60;
 
     protected TimeInterval $_interval;
 
@@ -30,11 +30,11 @@ class AssignAppsToTimeInterval implements ShouldQueue, ShouldBeUnique
 
     public function handle(): void
     {
-        TrackedApplication::query()
+        DB::table('tracked_applications')
             ->whereNull('time_interval_id')
             ->where('user_id', $this->_interval->user_id)
-            ->where('created_at', '>=', $this->_interval->start_at)
-            ->where('created_at', '<=', $this->_interval->end_at)
+            ->where('created_at', '>', $this->_interval->start_at->setTimezone('UTC'))
+            ->where('created_at', '<', $this->_interval->end_at->setTimezone('UTC'))
             ->update(['time_interval_id' => $this->_interval->id]);
     }
 }
