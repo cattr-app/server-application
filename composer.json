@@ -1,14 +1,13 @@
 {
     "name": "cattr/backend-application",
     "description": "Backend Application for Cattr",
-    "version": "3.5.0-alpha",
+    "version": "3.5.0-beta",
     "license": "SSPL-1.0",
     "type": "project",
     "require": {
         "php": "^8.0",
         "ext-json": "*",
         "ext-pdo": "*",
-        "appzcoder/crud-generator": "^3.2.0",
         "doctrine/dbal": "^2.9.2",
         "erusev/parsedown": "^1.7",
         "fruitcake/laravel-cors": "^1.0",

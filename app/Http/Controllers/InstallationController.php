@@ -8,6 +8,7 @@ use App\Http\Requests\Installation\CheckDatabaseInfoRequest;
 use App\Http\Requests\Installation\SaveSetupRequest;
 use Artisan;
 use EnvEditor\EnvFile;
+use Exception;
 use Illuminate\Foundation\Console\ConfigCacheCommand;
 use Illuminate\Routing\Controller;
 use Illuminate\Http\JsonResponse;
@@ -31,7 +32,7 @@ class InstallationController extends Controller
             DB::connection('mysql')->getPDO();
 
             return new JsonResponse(['status' => (bool)DB::connection()->getDatabaseName()]);
-        } catch (\Exception $e) {
+        } catch (Exception) {
             return new JsonResponse(['status' => false]);
         }
     }
