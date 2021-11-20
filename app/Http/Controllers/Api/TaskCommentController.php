@@ -4,13 +4,17 @@ namespace App\Http\Controllers\Api;
 
 use App\EventFilter\Facades\Filter;
 use App\Models\TaskComment;
+use App\Models\User;
+use App\Notifications\CommentMention;
 use Exception;
+use Event;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
 use Illuminate\Support\Facades\Validator;
+use Settings;
 
 /**
  * Class TaskCommentController
@@ -37,51 +41,26 @@ class TaskCommentController extends ItemController
 
     public function create(Request $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
+        Filter::listen($this->getEventUniqueName('request.item.create'), static function (array $data) {
+            $data['user_id'] = Auth::id();
 
-        $validator = Validator::make(
-            $requestData,
-            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-        );
+            return $data;
+        });
 
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        $user = Auth::user();
-        $cls = $this->getItemClass();
-
-        $item = new $cls;
-
-        $item->fill($this->filterRequestData($requestData));
-        $item->user_id = $user->id;
-        $item = Filter::process($this->getEventUniqueName('item.create'), $item);
-        $item->save();
-
-
-        $full_access = $user->allowed('task-comment', 'full_access');
-
-        if (!$full_access) {
-            if (!$item->task->users->where(['id' => $user->id])->exists()) {
-                return new JsonResponse([
-                    'error_type' => 'authorization.forbidden',
-                    'message' => "Access denied to this task",
-                ], 403);
+        Event::listen($this->getEventUniqueName('item.create.after'), static function (TaskComment $item, array $requestData) {
+            if (preg_match_all('/@([0-9a-zа-я._-]+)/i', $item->content, $matches)) {
+                foreach ($matches[1] as $userName) {
+                    $user = User::query()->whereRaw("REPLACE(full_name, ' ', '') = ?", [$userName])->first();
+                    if ($user) {
+                        /** @var User $user */
+                        $language = !empty($user->user_language) ? $user->user_language : Settings::get('core', 'language', 'en');
+                        $user->notify((new CommentMention($item))->locale($language));
+                    }
+                }
             }
-        }
+        });
 
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'res' => $item,
-            ])
-        );
+        return $this->_create($request);
     }
 
     /**

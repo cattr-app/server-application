@@ -11,7 +11,7 @@ class Version
     protected int $major;
     protected int $minor;
     protected int $patch;
-    protected ?int $pre;
+    protected ?string $pre;
 
     protected ?string $module;
 
@@ -24,7 +24,7 @@ class Version
     {
         $this->module = $module;
 
-        $regexp = '/(?<major>\d+)\.(?<minor>\d+)\.(?<patch>\d+)((\-pre\.)(?<pre>\d+))?/';
+        $regexp = '/^(?P<major>0|[1-9]\d*)\.(?P<minor>0|[1-9]\d*)\.(?P<patch>0|[1-9]\d*)(?:-(?P<prerelease>(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*)(?:\.(?:0|[1-9]\d*|\d*[a-zA-Z-][0-9a-zA-Z-]*))*))?(?:\+(?P<buildmetadata>[0-9a-zA-Z-]+(?:\.[0-9a-zA-Z-]+)*))?$/';
         $version = $this->readComposerJson()['version'] ?? '0.0.0';
 
         preg_match($regexp, $version, $matches);
@@ -32,13 +32,13 @@ class Version
         $this->major = (int)$matches['major'];
         $this->minor = (int)$matches['minor'];
         $this->patch = (int)$matches['patch'];
-        $this->pre = $matches['pre'] ?? null;
+        $this->pre = $matches['prerelease'] ?? null;
     }
 
     public function __toString(): string
     {
         $version = implode('.', [$this->major, $this->minor, $this->patch]);
-        $version .= isset($this->pre) ? '-pre.' . $this->pre : '';
+        $version .= isset($this->pre) ? '-' . $this->pre : '';
         return $version;
     }
 

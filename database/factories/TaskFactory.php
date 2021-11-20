@@ -2,6 +2,8 @@
 
 namespace Database\Factories;
 
+use App\Models\Priority;
+use App\Models\Status;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
@@ -27,7 +29,9 @@ class TaskFactory extends Factory
             'description' => $this->faker->paragraph,
             'active' => true,
             'assigned_by' => fn() => User::where(['is_admin' => 1])->first()->id,
-            'important' => $this->faker->boolean
+            'important' => $this->faker->boolean,
+            'priority_id' => Priority::inRandomOrder()->first()->id,
+            'status_id' => Status::inRandomOrder()->first()->id,
         ];
     }
 }

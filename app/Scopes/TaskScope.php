@@ -20,9 +20,7 @@ class TaskScope implements Scope
         $user = auth()->user();
 
         if (!$user || $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
-            return $builder
-                ->orderBy('active', 'desc')
-                ->orderBy('created_at', 'desc');
+            return $builder;
         }
 
         return $builder

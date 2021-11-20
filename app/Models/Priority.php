@@ -10,6 +10,20 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
+ * @apiDefine PriorityObject
+ *
+ * @apiSuccess {Integer}  priority.id            ID
+ * @apiSuccess {String}   priority.name          Name
+ * @apiSuccess {String}   priority.tasks_count   Amount of tasks with that priority
+ * @apiSuccess {ISO8601}  priority.created_at    Creation DateTime
+ * @apiSuccess {ISO8601}  priority.updated_at    Update DateTime
+ * @apiSuccess {ISO8601}  priority.deleted_at    Delete DateTime or `NULL` if wasn't deleted
+ * @apiSuccess {Array}    [priority.tasks]       Tasks with that priority
+ *
+ * @apiVersion 1.0.0
+ */
+
+/**
  * App\Models\Priority
  *
  * @property int $id
@@ -26,6 +40,9 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Priority whereCreatedAt($value)
  * @method static EloquentBuilder|Priority whereId($value)
  * @method static EloquentBuilder|Priority whereName($value)
+ * @method static EloquentBuilder|Priority newModelQuery()
+ * @method static EloquentBuilder|Priority newQuery()
+ * @method static EloquentBuilder|Priority query()
  * @method static EloquentBuilder|Priority whereUpdatedAt($value)
  * @mixin Eloquent
  */

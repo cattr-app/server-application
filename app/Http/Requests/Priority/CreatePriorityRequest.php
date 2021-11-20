@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Priority;
 
 use App\Http\Requests\FormRequest;
+use App\Models\User;
 
 class CreatePriorityRequest extends FormRequest
 {
@@ -27,7 +28,7 @@ class CreatePriorityRequest extends FormRequest
     {
         return [
             'name' => 'required|string',
-            'color' => 'sometimes|string|regex:/^#[a-f0-9]{6}$/i',
+            'color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
         ];
     }
 

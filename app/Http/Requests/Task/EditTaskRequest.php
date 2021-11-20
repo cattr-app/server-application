@@ -36,7 +36,10 @@ class EditTaskRequest extends FormRequest
             'users.*' => 'required|exists:users,id',
             'active' => 'bool',
             'important' => 'bool',
-            'priority_id' => 'sometimes|required|exists:priorities,id',
+            'priority_id' => 'sometimes|nullable|exists:priorities,id',
+            'status_id' => 'sometimes|required|exists:statuses,id',
+            'relative_position' => 'sometimes|required|numeric',
+            'due_date' => 'sometimes|nullable|date',
         ];
     }
 }

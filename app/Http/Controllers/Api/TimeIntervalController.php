@@ -557,7 +557,7 @@ class TimeIntervalController extends ItemController
         );
 
         $itemsQuery->each(static function (Model $item) use ($intervalsData) {
-            $item->update(Arr::only($intervalsData->where('id', $item->id)->first(), 'task_id'));
+            $item->update(Arr::only($intervalsData->where('id', $item->id)->first() ?: [], 'task_id'));
         });
 
         $responseData = [
