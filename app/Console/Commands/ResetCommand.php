@@ -4,6 +4,8 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use DB;
+use Illuminate\Database\Console\Seeds\SeedCommand;
+use Nwidart\Modules\Commands\SeedCommand as ModuleSeedCommand;
 use Settings;
 use Storage;
 
@@ -57,14 +59,14 @@ class ResetCommand extends Command
             Storage::delete($files);
         }
 
-        $this->call('db:seed', [
+        $this->call(SeedCommand::class, [
             '--class' => 'InitialSeeder',
             '--force' => true
         ]);
 
         if ($this->option('seed')) {
-            $this->call('db:seed');
-            $this->call('module:seed');
+            $this->call(SeedCommand::class);
+            $this->call(ModuleSeedCommand::class);
         }
 
         Settings::scope('core')->set('installed', true);

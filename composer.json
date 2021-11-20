@@ -8,6 +8,7 @@
         "php": "^7.4",
         "ext-json": "*",
         "ext-pdo": "*",
+        "ext-csprng": "*",
         "appzcoder/crud-generator": "^3.2.0",
         "doctrine/dbal": "^2.9.2",
         "erusev/parsedown": "^1.7",
