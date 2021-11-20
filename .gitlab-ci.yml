@@ -23,7 +23,7 @@ integration_testing:
     - cp .env.testing.example .env.testing
     - php artisan migrate --env=testing
     - php artisan db:seed --class=InitialSeeder --env=testing
-    - php -c .testing.ini vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
+    - XDEBUG_MODE=coverage php -c .testing.ini vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
 
 apidoc_deploy:
   image: node:alpine
