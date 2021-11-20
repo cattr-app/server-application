@@ -5,15 +5,13 @@
     "license": "SSPL-1.0",
     "type": "project",
     "require": {
-        "php": "^7.4",
+        "php": "^8.0",
         "ext-json": "*",
         "ext-pdo": "*",
-        "ext-csprng": "*",
         "appzcoder/crud-generator": "^3.2.0",
         "doctrine/dbal": "^2.9.2",
         "erusev/parsedown": "^1.7",
         "fruitcake/laravel-cors": "^1.0",
-        "fzaninotto/faker": "^1.9",
         "grimzy/laravel-mysql-spatial": "^5.0",
         "intervention/image": "^2.5",
         "joshbrw/laravel-module-installer": "^2.0.1",
@@ -26,7 +24,7 @@
         "predis/predis": "^1.1",
         "sentry/sentry-laravel": "^2.1",
         "tymon/jwt-auth": "^1.0",
-        "webpatser/laravel-uuid": "^3.0",
+        "webpatser/laravel-uuid": "^4.0",
         "wikimedia/composer-merge-plugin": "2.0.1"
     },
     "require-dev": {

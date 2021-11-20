@@ -1,5 +1,5 @@
 integration_testing:
-  image: php:7.4-alpine3.13
+  image: php:8.0.13-alpine3.13
   services:
     - name: mysql:latest
       alias: mysql
@@ -19,7 +19,7 @@ integration_testing:
     - docker-php-ext-enable xdebug
     - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   script:
-    - COMPOSER_MEMORY_LIMIT=-1 composer install
+    - COMPOSER_MEMORY_LIMIT=-1 composer install --ignore-platform-reqs
     - cp .env.testing.example .env.testing
     - php artisan migrate --env=testing
     - php artisan db:seed --class=InitialSeeder --env=testing
@@ -56,7 +56,7 @@ live_deploy:
   script:
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && git pull'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && git submodule update --init'
-    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && composer7.4 install'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && composer7.4 install --ignore-platform-reqs'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases new $(php7.4 artisan cattr:version)'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases set-commits $(php7.4 artisan cattr:version) --auto'
     - ssh $CI_USER@$CI_HOST 'php7.4 cattr/backend/artisan config:cache'
@@ -78,7 +78,7 @@ staging_deploy:
   script:
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git submodule update --init'
-    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer7.4 install'
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer7.4 install --ignore-platform-reqs'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer7.4 dump-autoload'
     - ssh $STAGING_USER@$STAGING_HOST 'cp -f backend/.env.staging backend/.env && cat backend/.env.sentry >> backend/.env'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases new $(php7.4 artisan cattr:version)'
