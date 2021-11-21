@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
 use App\Helpers\StorageCleanerHelper;
+use Illuminate\Contracts\Container\BindingResolutionException;
 
 class RotateScreenshots extends Command
 {
@@ -23,6 +24,8 @@ class RotateScreenshots extends Command
 
     /**
      * Execute the console command.
+     *
+     * @throws BindingResolutionException
      */
     public function handle(): void
     {

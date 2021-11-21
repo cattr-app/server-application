@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
 use App\Http\Requests\ScreenshotRequest;
+use Illuminate\Http\JsonResponse;
 use Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
@@ -20,7 +21,7 @@ class ScreenshotController
      * @api             {get} /screenshot/:id Screenshot
      * @apiDescription  Get Screenshot
      *
-     * @apiVersion      3.5.0
+     * @apiVersion      4.0.0
      * @apiName         Show
      * @apiGroup        Screenshot
      *
@@ -57,7 +58,7 @@ class ScreenshotController
      * @api             {get} /screenshot/:id Thumb
      * @apiDescription  Get Screenshot Thumbnail
      *
-     * @apiVersion      3.5.0
+     * @apiVersion      4.0.0
      * @apiName         ShowThumb
      * @apiGroup        Screenshot
      *
@@ -91,7 +92,7 @@ class ScreenshotController
     }
 
     /**
-     * @apiDeprecated since 3.5.0
+     * @apiDeprecated since 4.0.0
      * @api             {get,post} /screenshots/list List
      * @apiDescription  Get list of Screenshots
      *
@@ -151,56 +152,7 @@ class ScreenshotController
      * @apiUse         ForbiddenError
      */
     /**
-     * @apiDeprecated since 3.5.0
-     * Remove the specified resource from storage
-     *
-     * @param Request $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function destroy(Request $request): JsonResponse
-    {
-        if (!isset($request->id)) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'screenshot id is required',
-                ]),
-                400
-            );
-        }
-
-        // Get screenshot model
-        /** @var Screenshot $screenshotModel */
-        $screenshotModel = $this->getItemClass();
-
-        // Find exact screenshot to be deleted
-        $screenshotToDel = $screenshotModel::where('id', $request->get('id'))->firstOrFail();
-
-        // Get associated time interval
-        $thisScreenshotTimeInterval = TimeInterval::where('id', $screenshotToDel->time_interval_id)->firstOrFail();
-
-        if (auth()->user()->cannot('destroy', $thisScreenshotTimeInterval)) {
-            return new JsonResponse([
-                "message" => "This action is unauthorized",
-                "error_type" => "authorization.forbidden"
-            ], 403);
-        }
-
-        // If this screenshot is last
-        if ((int)$thisScreenshotTimeInterval->screenshots_count <= 1) {
-            // Delete interval with it
-            $thisScreenshotTimeInterval->delete();
-        } else {
-            // Or screenshot only otherwise
-            $screenshotToDel->delete();
-        }
-
-        return new JsonResponse(['message' => 'Screenshot successfully deleted']);
-    }
-
-    /**
+     * @apiDeprecated since 4.0.0
      * @api             {post} /screenshots/create Create
      * @apiDescription  Create Screenshot
      *
@@ -243,7 +195,7 @@ class ScreenshotController
      * @apiUse         ForbiddenError
      */
     /**
-     * @apiDeprecated since 3.5.0
+     * @apiDeprecated since 4.0.0
      * @api             {post} /screenshots/remove Destroy
      * @apiDescription  Destroy Screenshot
      *
@@ -314,7 +266,7 @@ class ScreenshotController
      * @apiUse          UnauthorizedError
      */
     /**
-     * @apiDeprecated since 3.5.0
+     * @apiDeprecated since 4.0.0
      * @api             {post} /screenshots/show Show
      * @apiDescription  Show Screenshot
      *

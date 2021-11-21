@@ -28,6 +28,9 @@ class StorageCleanerHelper
             >= config('cleaner.threshold');
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     public static function thin($force = false): void
     {
         if ((!$force && !self::needThinning()) || cache('thinning_now')) {
@@ -106,7 +109,7 @@ class StorageCleanerHelper
             * (1 - config('cleaner.waterline') * 0.01);
     }
 
-    private static function getScreenshotsCollection()
+    private static function getScreenshotsCollection(): Builder|TimeInterval|\Illuminate\Database\Query\Builder
     {
         return TimeInterval::whereHas('task', function (Builder $query) {
             $query->where('important', '=', 0);

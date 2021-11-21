@@ -61,6 +61,7 @@ live_deploy:
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases set-commits $(php7.4 artisan cattr:version) --auto'
     - ssh $CI_USER@$CI_HOST 'php7.4 cattr/backend/artisan config:cache'
     - ssh $CI_USER@$CI_HOST 'php7.4 cattr/backend/artisan migrate --force'
+    - ssh $CI_USER@$CI_HOST 'php7.4 cattr/backend/artisan queue:restart'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases deploys $(php7.4 artisan cattr:version) new -e $(cat .env | grep "APP_ENV=.*" | cut -d"=" -f 2)'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases finalize $(php7.4 artisan cattr:version)'
 
@@ -87,6 +88,7 @@ staging_deploy:
     - ssh $STAGING_USER@$STAGING_HOST 'php7.4 backend/artisan cache:clear'
     - ssh $STAGING_USER@$STAGING_HOST 'php7.4 backend/artisan config:cache'
     - ssh $STAGING_USER@$STAGING_HOST 'php7.4 backend/artisan migrate --force'
+    - ssh $STAGING_USER@$STAGING_HOST 'php7.4 cattr/backend/artisan queue:restart'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases deploys $(php artisan cattr:version) new -e $(cat .env | grep "APP_ENV=.*" | cut -d"=" -f 2)'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases finalize $(php artisan cattr:version)'
 

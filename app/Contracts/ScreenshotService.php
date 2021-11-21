@@ -2,6 +2,8 @@
 
 namespace App\Contracts;
 
+use App\Jobs\GenerateScreenshotThumbnail;
+use App\Models\TimeInterval;
 use Image;
 use Intervention\Image\Constraint;
 use Storage;
@@ -13,23 +15,40 @@ abstract class ScreenshotService
     public const THUMBS_FOLDER = 'thumbs/';
     private const THUMB_WIDTH = 280;
 
-    abstract public function getScreenshotPath($interval): string;
-    abstract public function getThumbPath($interval): string;
+    /** Get screenshot path by interval */
+    abstract public function getScreenshotPath(TimeInterval|int $interval): string;
+    /** Get screenshot thumbnail path by interval */
+    abstract public function getThumbPath(TimeInterval|int $interval): string;
 
     public function saveScreenshot($file, $timeInterval): void
+    {
+        if (!Storage::exists(self::PARENT_FOLDER)) {
+            Storage::makeDirectory(self::PARENT_FOLDER);
+        }
+
+        $path = is_string($file) ? $file : $file->path();
+
+        $image = Image::make($path);
+
+        Storage::put($this->getScreenshotPath($timeInterval), (string)$image->encode(self::FILE_FORMAT));
+
+        GenerateScreenshotThumbnail::dispatch($timeInterval);
+    }
+
+    public function createThumbnail(TimeInterval|int $timeInterval): void
     {
         if (!Storage::exists(self::PARENT_FOLDER . self::THUMBS_FOLDER)) {
             Storage::makeDirectory(self::PARENT_FOLDER . self::THUMBS_FOLDER);
         }
 
-        $image = Image::make(is_string($file) ? $file : $file->path());
+        $image = Image::make(Storage::path($this->getScreenshotPath($timeInterval)));
+
         $thumb = $image->resize(self::THUMB_WIDTH, null, fn(Constraint $constraint) => $constraint->aspectRatio());
 
-        Storage::put(static::getScreenshotPath($timeInterval), (string)$thumb->encode(self::FILE_FORMAT));
-        Storage::put(static::getThumbPath($timeInterval), (string)$image->encode(self::FILE_FORMAT));
+        Storage::put($this->getThumbPath($timeInterval), (string)$thumb->encode(self::FILE_FORMAT));
     }
 
-    public function destroyScreenshot($interval): void
+    public function destroyScreenshot(TimeInterval|int $interval): void
     {
         Storage::delete($this->getScreenshotPath($interval));
         Storage::delete($this->getThumbPath($interval));

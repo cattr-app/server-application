@@ -31,7 +31,7 @@ class DemoDataSeeder extends Seeder
     {
         return Task::factory()->for($user, 'assigned')->hasAttached($user)->has(
             call_user_func_array(
-                [TimeInterval::factory()->for($user)->count(self::INTERVALS_AMOUNT), 'sequence'],
+                [TimeInterval::factory()->for($user)->count(self::INTERVALS_AMOUNT)->withScreenshot(), 'sequence'],
                 array_map(
                     static function ($key) {
                         return [

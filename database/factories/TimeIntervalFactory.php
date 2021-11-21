@@ -3,6 +3,7 @@
 namespace Database\Factories;
 
 use App\Contracts\ScreenshotService;
+use App\Helpers\FakeScreenshotGenerator;
 use App\Models\TimeInterval;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
@@ -23,24 +24,10 @@ class TimeIntervalFactory extends Factory
         ];
     }
 
-    public function configure(): TimeIntervalFactory
+    public function withScreenshot(): TimeIntervalFactory
     {
         return $this->afterCreating(function (TimeInterval $timeInterval) {
-            $image = imagecreatetruecolor(1920, 1080);
-            $background = imagecolorallocate($image, random_int(0, 255), random_int(0, 255), random_int(0, 255));
-
-            imagefill($image, 0, 0, $background);
-
-            $tmpFile = tmpfile();
-            $filePath = stream_get_meta_data($tmpFile)['uri'];
-
-            imagejpeg($image, $filePath);
-            imagedestroy($image);
-
-            app()->make(ScreenshotService::class)->saveScreenshot(
-                $filePath,
-                $timeInterval
-            );
+            FakeScreenshotGenerator::runForTimeInterval($timeInterval);
         });
     }
 }

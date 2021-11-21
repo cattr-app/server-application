@@ -85,7 +85,7 @@ class QueryHelper
             ) {
                 [$operator, $value] = is_array($param) ? array_values($param) : ['=', $param];
 
-                if (is_array($value)) {
+                if (is_array($value) && $operator !== 'in') {
                     if ($operator === '=') {
                         $query->whereIn("$table.$key", $value);
                     } elseif ($operator === 'between' && count($value) >= 2) {

@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
+use App\Helpers\QueryHelper;
 use App\Http\Requests\TimeInterval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;

@@ -2,19 +2,12 @@
 
 namespace App\Services\Screenshots;
 
-use App\Models\Screenshot;
 use App\Contracts\ScreenshotService as ScreenshotServiceInterface;
 use App\Models\TimeInterval;
 
 class DemoScreenshotService extends ScreenshotServiceInterface
 {
-    /**
-     * Get screenshot by request path.
-     *
-     * @param TimeInterval|int $interval
-     * @return Screenshot
-     */
-    public function getScreenshotPath($interval): string
+    public function getScreenshotPath(TimeInterval|int $interval): string
     {
         return self::PARENT_FOLDER . hash(
             'sha256',
@@ -22,13 +15,7 @@ class DemoScreenshotService extends ScreenshotServiceInterface
         ) . '.' . self::FILE_FORMAT;
     }
 
-    /**
-     * Get screenshot thumbnail by request path.
-     *
-     * @param TimeInterval|int $interval
-     * @return Screenshot
-     */
-    public function getThumbPath($interval): string
+    public function getThumbPath(TimeInterval|int $interval): string
     {
         return self::PARENT_FOLDER . self::THUMBS_FOLDER . hash(
             'sha256',

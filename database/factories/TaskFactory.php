@@ -27,7 +27,6 @@ class TaskFactory extends Factory
         return [
             'task_name' => $this->faker->sentence(3),
             'description' => $this->faker->paragraph,
-            'active' => true,
             'assigned_by' => fn() => User::where(['is_admin' => 1])->first()->id,
             'important' => $this->faker->boolean,
             'priority_id' => Priority::inRandomOrder()->first()->id,
