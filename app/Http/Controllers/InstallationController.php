@@ -60,6 +60,12 @@ class InstallationController extends Controller
         $envFile->setValue('RECAPTCHA_SECRET_KEY', (string)$request->input('site_key'));
         $envFile->setValue('RECAPTCHA_GOOGLE_URL', 'https://www.google.com/recaptcha/api/siteverify');
 
+        $envFile->setValue('MAIL_ADDRESS', $request->input('mail_address'));
+        $envFile->setValue('MAIL_PASS', $request->input('mail_pass'));
+        $envFile->setValue('MAIL_SERVER', $request->input('mail_host'));
+        $envFile->setValue('MAIL_PORT', (int)$request->input('mail_port'));
+        $envFile->setValue('MAIL_SECURITY', $request->input('encryption'));
+
         $envFile->setValue('FRONTEND_APP_URL', $request->input('origin'));
         $envFile->setValue('MAIL_FROM_ADDRESS', 'no-reply@' . explode('//', $request->input('origin'))[1]);
 
