@@ -5,6 +5,7 @@ namespace App\Http\Requests\TimeInterval;
 use App\Models\User;
 use App\Rules\TimeIntervalDoesNotExist;
 use Carbon\Carbon;
+use Exception;
 use Illuminate\Foundation\Http\FormRequest;
 
 class CreateTimeIntervalRequest extends FormRequest
@@ -23,7 +24,7 @@ class CreateTimeIntervalRequest extends FormRequest
      * Get the validation rules that apply to the request.
      *
      * @return array
-     * @throws \Exception
+     * @throws Exception
      */
     public function rules(): array
     {
@@ -45,8 +46,9 @@ class CreateTimeIntervalRequest extends FormRequest
             'activity_fill' => 'int|between:0,100',
             'mouse_fill' => 'int|between:0,100',
             'keyboard_fill' => 'int|between:0,100',
-            'is_manual' => 'bool',
-            'location'=> 'array'
+            'is_manual' => 'sometimes|bool',
+            'location'=> 'sometimes|array',
+            'screenshot' => 'sometimes|required|image',
         ];
     }
 }

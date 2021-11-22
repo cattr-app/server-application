@@ -145,6 +145,9 @@ class Handler extends ExceptionHandler
                 ]);
                 $errorType = 'http.request.wrong_method';
             }
+        } elseif ($exception instanceof ModelNotFoundException) {
+            $statusCode = 404;
+            $errorType = 'http.request.model_not_found';
         } elseif ($exception instanceof TokenExpiredException) {
             $message = $exception->getMessage();
             $errorType = 'authorization.token_expired';

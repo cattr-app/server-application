@@ -1,10 +1,12 @@
 <?php
 
-namespace App\Http\Requests;
+namespace App\Http\Requests\TimeInterval;
 
+use App\Http\Requests\AuthorizesAfterValidation;
+use App\Http\Requests\FormRequest;
 use App\Models\TimeInterval;
 
-class ScreenshotRequest extends FormRequest
+class PutScreenshotRequest extends FormRequest
 {
     use AuthorizesAfterValidation;
 
@@ -15,15 +17,13 @@ class ScreenshotRequest extends FormRequest
      */
     public function authorizeValidated(): bool
     {
-        $timeInterval =  TimeInterval::find($this->route('id'));
-
-        abort_unless($timeInterval, 404);
-
-        return $this->user()->can('view', $timeInterval);
+        return true;
     }
 
     public function rules(): array
     {
-        return [];
+        return [
+            'screenshot' => 'required|image',
+        ];
     }
 }

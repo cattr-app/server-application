@@ -7,6 +7,7 @@ use App\Console\Commands\DemoReset;
 use App\Console\Commands\EmulateWork;
 use App\Console\Commands\PlanWork;
 use App\Console\Commands\RotateScreenshots;
+use App\Jobs\ClearExpiredApps;
 use Exception;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -51,7 +52,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->command(RotateScreenshots::class)->weekly()->when(Settings::scope('core')->get('auto_thinning'));
 
-        $schedule->command(ClearExpiredTrackedApps::class)->daily();
+        $schedule->job(new ClearExpiredApps)->daily();
     }
 
     /**

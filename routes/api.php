@@ -120,8 +120,12 @@ Route::group([
     $router->patch('users/activity', [UserController::class, 'updateActivity']);
 
     //Screenshots routes
-    $router->get('screenshot/{id}', [ScreenshotController::class, 'show'])->where('id', '[0-9]+');
-    $router->get('screenshot/thumb/{id}', [ScreenshotController::class, 'showThumb'])->where('id', '[0-9]+');
+    $router->get('time-intervals/{interval}/screenshot', [TimeIntervalController::class, 'showScreenshot'])
+           ->where('interval', '[0-9]+');
+    $router->get('time-intervals/{interval}/thumb', [TimeIntervalController::class, 'showThumbnail'])
+           ->where('interval', '[0-9]+');
+    $router->post('time-intervals/{interval}/screenshot', [TimeIntervalController::class, 'putScreenshot'])
+           ->where('interval', '[0-9]+');
 
     //Time Intervals routes
     $router->any('time-intervals/list', [TimeIntervalController::class, 'index']);

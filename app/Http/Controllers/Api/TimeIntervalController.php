@@ -3,41 +3,35 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
-use App\Helpers\QueryHelper;
 use App\Http\Requests\TimeInterval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\DestroyTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\EditTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\PutScreenshotRequest;
+use App\Http\Requests\TimeInterval\ScreenshotRequest;
 use App\Http\Requests\TimeInterval\ShowTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\TrackAppRequest;
 use App\Jobs\AssignAppsToTimeInterval;
 use App\Models\TrackedApplication;
+use App\Models\User;
 use Filter;
 use App\Models\TimeInterval;
 use Carbon\Carbon;
 use Exception;
-use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Storage;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Validator;
 
 class TimeIntervalController extends ItemController
 {
-    /** @var ScreenshotService $screenshotService */
-    protected ScreenshotService $screenshotService;
-
-    /**
-     * ScreenshotController constructor.
-     * @param ScreenshotService $screenshotService
-     */
-    public function __construct(ScreenshotService $screenshotService)
+    public function __construct(protected ScreenshotService $screenshotService)
     {
-        $this->screenshotService = $screenshotService;
-
         parent::__construct();
     }
 
@@ -56,9 +50,8 @@ class TimeIntervalController extends ItemController
             $this->screenshotService->saveScreenshot($request->file('screenshot'), $timeInterval);
         }
 
-        $user = User::find($request->user_id);
-        if ($user->web_and_app_monitoring) {
-            AssignAppsToTimeInterval::dispatchAfterSync($timeInterval);
+        if (User::find($intervalData['user_id'])->web_and_app_monitoring) {
+            AssignAppsToTimeInterval::dispatchAfterResponse($timeInterval);
         }
 
         return new JsonResponse(
@@ -66,11 +59,6 @@ class TimeIntervalController extends ItemController
                 'interval' => $timeInterval,
             ])
         );
-    }
-
-    public function getValidationRules(): array
-    {
-        return [];
     }
 
     /**
@@ -125,10 +113,10 @@ class TimeIntervalController extends ItemController
      *    }
      *  }
      *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ForbiddenError
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
      */
 
     public function getEventUniqueNamePart(): string
@@ -137,17 +125,8 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @apiDeprecated   since 1.0.0
-     * @api             {post} /time-intervals/bulk-create Bulk Create
-     * @apiDescription  Create Time Intervals
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Bulk Create
-     * @apiGroup        Time Interval
-     */
-
-    /**
      * @param Request $request
+     *
      * @return JsonResponse
      * @throws Exception
      */
@@ -156,14 +135,12 @@ class TimeIntervalController extends ItemController
         $filters = $request->all();
         $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : false;
 
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery(),
-            $filters ?: []
-        );
-
         $itemsQuery = Filter::process(
             $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery
+            $this->applyQueryFilter(
+                $this->getQuery(),
+                $filters ?: []
+            )
         );
 
         $paginate = $request->get('paginate', false);
@@ -181,46 +158,18 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @api             {post} /time-intervals/list List
-     * @apiDescription  Get list of Time Intervals
+     * @apiDeprecated   since 1.0.0
+     * @api             {post} /time-intervals/bulk-create Bulk Create
+     * @apiDescription  Create Time Intervals
      *
      * @apiVersion      1.0.0
-     * @apiName         List
+     * @apiName         Bulk Create
      * @apiGroup        Time Interval
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   time_intervals_list
-     * @apiPermission   time_intervals_full_access
-     *
-     * @apiUse          TimeIntervalParams
-     * @apiUse          TimeIntervalObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  [
-     *    {
-     *      "id": 1,
-     *      "task_id": 1,
-     *      "start_at": "2006-06-20 15:54:40",
-     *      "end_at": "2006-06-20 15:59:38",
-     *      "created_at": "2018-10-15 05:54:39",
-     *      "updated_at": "2018-10-15 05:54:39",
-     *      "deleted_at": null,
-     *      "activity_fill": 42,
-     *      "mouse_fill": 43,
-     *      "keyboard_fill": 43,
-     *      "user_id":1
-     *    }
-     *  ]
-     *
-     * @apiUse         400Error
-     * @apiUse         UnauthorizedError
-     * @apiUse         ForbiddenError
      */
 
     /**
      * @param ShowTimeIntervalRequest $request
+     *
      * @return JsonResponse
      * @throws Exception
      * @api             {post} /time-intervals/show Show
@@ -261,15 +210,127 @@ class TimeIntervalController extends ItemController
      *   "user_id": 1
      * }
      *
-     * @apiUse         400Error
-     * @apiUse         UnauthorizedError
-     * @apiUse         ItemNotFoundError
-     * @apiUse         ForbiddenError
-     * @apiUse         ValidationError
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ItemNotFoundError
+     * @apiUse          ForbiddenError
+     * @apiUse          ValidationError
      */
     public function show(ShowTimeIntervalRequest $request): JsonResponse
     {
         return $this->_show($request);
+    }
+
+    /**
+     * @api             {post} /time-intervals/list List
+     * @apiDescription  Get list of Time Intervals
+     *
+     * @apiVersion      1.0.0
+     * @apiName         List
+     * @apiGroup        Time Interval
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   time_intervals_list
+     * @apiPermission   time_intervals_full_access
+     *
+     * @apiUse          TimeIntervalParams
+     * @apiUse          TimeIntervalObject
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  [
+     *    {
+     *      "id": 1,
+     *      "task_id": 1,
+     *      "start_at": "2006-06-20 15:54:40",
+     *      "end_at": "2006-06-20 15:59:38",
+     *      "created_at": "2018-10-15 05:54:39",
+     *      "updated_at": "2018-10-15 05:54:39",
+     *      "deleted_at": null,
+     *      "activity_fill": 42,
+     *      "mouse_fill": 43,
+     *      "keyboard_fill": 43,
+     *      "user_id":1
+     *    }
+     *  ]
+     *
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     */
+
+    /**
+     * @param EditTimeIntervalRequest $request
+     *
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function edit(EditTimeIntervalRequest $request): JsonResponse
+    {
+        $requestData = Filter::process(
+            $this->getEventUniqueName('request.item.edit'),
+            $request->all()
+        );
+
+        $validationRules = $this->getValidationRules();
+        $validationRules['id'] = 'required|integer';
+
+        $validator = Validator::make(
+            $requestData,
+            Filter::process(
+                $this->getEventUniqueName('validation.item.edit'),
+                $validationRules
+            )
+        );
+
+        if ($validator->fails()) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error_type' => 'validation',
+                    'message' => 'Validation error',
+                    'info' => $validator->errors(),
+                ]),
+                400
+            );
+        }
+
+        //create time interval
+        $requestData['start_at'] = (new Carbon($requestData['start_at']))->setTimezone('UTC')->toDateTimeString();
+        $requestData['end_at'] = (new Carbon($requestData['end_at']))->setTimezone('UTC')->toDateTimeString();
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter(
+                $this->getQuery()
+            )
+        );
+
+        /** @var Model $item */
+        $item = collect($itemsQuery->get())->first(static function ($val, $key) use ($request) {
+            return $val['id'] === $request->get('id');
+        });
+
+        if (!$item) {
+            return new JsonResponse(
+                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
+                    'error_type' => 'query.item_not_found',
+                    'message' => 'Item not found',
+                ]),
+                404
+            );
+        }
+
+        $item->fill($this->filterRequestData($requestData));
+        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
+        $item->save();
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
+                'res' => $item,
+            ])
+        );
     }
 
     /**
@@ -309,10 +370,10 @@ class TimeIntervalController extends ItemController
      *    }
      *  }
      *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ItemNotFoundError
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          UnauthorizedError
+     * @apiUse          ItemNotFoundError
      */
 
     /**
@@ -368,80 +429,40 @@ class TimeIntervalController extends ItemController
      * @apiUse          ForbiddenError
      */
 
-    /**
-     * @param EditTimeIntervalRequest $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function edit(EditTimeIntervalRequest $request): JsonResponse
+    public function getValidationRules(): array
     {
-        $requestData = Filter::process(
-            $this->getEventUniqueName('request.item.edit'),
-            $request->all()
-        );
-
-        $validationRules = $this->getValidationRules();
-        $validationRules['id'] = 'required|integer';
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process(
-                $this->getEventUniqueName('validation.item.edit'),
-                $validationRules
-            )
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
-
-        //create time interval
-        $requestData['start_at'] = (new Carbon($requestData['start_at']))->setTimezone('UTC')->toDateTimeString();
-        $requestData['end_at'] = (new Carbon($requestData['end_at']))->setTimezone('UTC')->toDateTimeString();
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery()
-            )
-        );
-
-        /** @var Model $item */
-        $item = collect($itemsQuery->get())->first(static function ($val, $key) use ($request) {
-            return $val['id'] === $request->get('id');
-        });
-
-        if (!$item) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found',
-                ]),
-                404
-            );
-        }
-
-        $item->fill($this->filterRequestData($requestData));
-        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
-        $item->save();
-
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'res' => $item,
-            ])
-        );
+        return [];
     }
 
     /**
-     * @api             {post} /users/remove Destroy
+     * @api             {get,post} /time-intervals/count Count
+     * @apiDescription  Count Time Intervals
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Count
+     * @apiGroup        Time Interval
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiSuccess {String}   total    Amount of users that we have
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "total": 2
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+    public function count(Request $request): JsonResponse
+    {
+        return $this->_count($request);
+    }
+
+    /**
+     * @api             {post} /time-intervals/remove Destroy
      * @apiDescription  Destroy Time Interval
      *
      * @apiVersion      1.0.0
@@ -473,43 +494,51 @@ class TimeIntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-
-    /**
-     * @api             {get,post} /time-intervals/count Count
-     * @apiDescription  Count Time Intervals
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Count
-     * @apiGroup        Time Interval
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiSuccess {String}   total    Amount of users that we have
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "total": 2
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          ForbiddenError
-     * @apiUse          UnauthorizedError
-     */
-    public function count(Request $request): JsonResponse
+    public function destroy(DestroyTimeIntervalRequest $request): JsonResponse
     {
-        return $this->_count($request);
+        return $this->_destroy($request);
     }
 
     /**
-     * @api            {post} /time-intervals/bulk-remove Bulk Destroy
-     * @apiDescription Multiple Destroy TimeInterval
+     * @param BulkEditTimeIntervalRequest $request
      *
-     * @apiVersion     1.0.0
-     * @apiName        Bulk Destroy
-     * @apiGroup       Time Interval
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function bulkEdit(BulkEditTimeIntervalRequest $request): JsonResponse
+    {
+        $intervalsData = collect($request->validated()['intervals']);
+
+        /** @var Builder $itemsQuery */
+        $itemsQuery = Filter::process(
+            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            $this->applyQueryFilter($this->getQuery(), ['id' => ['in', $intervalsData->pluck('id')->toArray()]])
+        );
+
+        $itemsQuery->each(static function (Model $item) use ($intervalsData) {
+            $item->update(Arr::only($intervalsData->where('id', $item->id)->first() ?: [], 'task_id'));
+        });
+
+        $responseData = [
+            'message' => 'Intervals successfully updated',
+        ];
+
+        return new JsonResponse(
+            Filter::process($this->getEventUniqueName('answer.success.item.edit'), $responseData),
+            200
+        );
+    }
+
+    /**
+     * @throws Exception
+     * @api             {post} /time-intervals/bulk-remove Bulk Destroy
+     * @apiDescription  Multiple Destroy TimeInterval
      *
-     * @apiUse         AuthHeader
+     * @apiVersion      1.0.0
+     * @apiName         Bulk Destroy
+     * @apiGroup        Time Interval
+     *
+     * @apiUse          AuthHeader
      *
      * @apiPermission   time_intervals_bulk_remove
      * @apiPermission   time_intervals_full_access
@@ -540,49 +569,11 @@ class TimeIntervalController extends ItemController
      *    "not_found": [154, 77, 66]
      *  }
      *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         ForbiddenError
-     * @apiUse         UnauthorizedError
-     */
-    public function destroy(DestroyTimeIntervalRequest $request): JsonResponse
-    {
-        return $this->_destroy($request);
-    }
-
-    /**
-     * @param BulkEditTimeIntervalRequest $request
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function bulkEdit(BulkEditTimeIntervalRequest $request): JsonResponse
-    {
-        $intervalsData = collect($request->validated()['intervals']);
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
-            $this->applyQueryFilter($this->getQuery(), ['id' => ['in', $intervalsData->pluck('id')->toArray()]])
-        );
-
-        $itemsQuery->each(static function (Model $item) use ($intervalsData) {
-            $item->update(Arr::only($intervalsData->where('id', $item->id)->first() ?: [], 'task_id'));
-        });
-
-        $responseData = [
-            'message' => 'Intervals successfully updated',
-        ];
-
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.edit'), $responseData),
-            200
-        );
-    }
-
-    /**
-     * @param BulkDestroyTimeIntervalRequest $request
-     * @return JsonResponse
-     * @throws Exception
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     *
      */
     public function bulkDestroy(BulkDestroyTimeIntervalRequest $request): JsonResponse
     {
@@ -619,5 +610,44 @@ class TimeIntervalController extends ItemController
         $item = TrackedApplication::create(array_merge($request->validated(), ['user_id' => $user->id]));
 
         return new JsonResponse(['res' => $item]);
+    }
+
+    public function showScreenshot(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
+    {
+        $path = $this->screenshotService->getScreenshotPath($interval);
+        if (!Storage::exists($path)) {
+            abort(404);
+        }
+
+        $fullPath = Storage::path($path);
+
+        return response()->file($fullPath);
+    }
+
+    public function showThumbnail(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
+    {
+        $path = $this->screenshotService->getThumbPath($interval);
+        if (!Storage::exists($path)) {
+            abort(404);
+        }
+
+        $fullPath = Storage::path($path);
+
+        return response()->file($fullPath);
+    }
+
+    public function putScreenshot(PutScreenshotRequest $request, TimeInterval $interval): JsonResponse
+    {
+        $data = $request->validated();
+
+        abort_if(
+            Storage::exists($this->screenshotService->getScreenshotPath($interval)),
+            409,
+            __('Screenshot for requested interval already exists')
+        );
+
+        $this->screenshotService->saveScreenshot($data['screenshot'], $interval);
+
+        return response()->json('', 204);
     }
 }

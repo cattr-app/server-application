@@ -8,6 +8,7 @@
         "php": "^8.0",
         "ext-json": "*",
         "ext-pdo": "*",
+        "ext-gd": "*",
         "doctrine/dbal": "^2.9.2",
         "erusev/parsedown": "^1.7",
         "fakerphp/faker": "^1.16",

@@ -40,13 +40,8 @@ use Illuminate\Support\Carbon;
  * @method static EloquentBuilder|Priority whereCreatedAt($value)
  * @method static EloquentBuilder|Priority whereId($value)
  * @method static EloquentBuilder|Priority whereName($value)
- * @method static EloquentBuilder|Priority newModelQuery()
- * @method static EloquentBuilder|Priority newQuery()
- * @method static EloquentBuilder|Priority query()
  * @method static EloquentBuilder|Priority whereUpdatedAt($value)
  * @mixin Eloquent
- * @property string|null $color
- * @method static EloquentBuilder|Priority whereColor($value)
  */
 class Priority extends Model
 {

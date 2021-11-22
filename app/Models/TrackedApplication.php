@@ -3,30 +3,32 @@
 namespace App\Models;
 
 use App\Scopes\ScreenshotScope;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\TrackedApplication
  *
- * @property int $id
- * @property string $title
- * @property string $executable
- * @property int|null $time_interval_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\TimeInterval|null $timeInterval
- * @method static \Illuminate\Database\Eloquent\Builder|TrackedApplication newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|TrackedApplication newQuery()
+ * @property int                    $id
+ * @property string                 $title
+ * @property string                 $executable
+ * @property int|null               $time_interval_id
+ * @property Carbon|null            $created_at
+ * @property Carbon|null            $updated_at
+ * @property-read TimeInterval|null $timeInterval
+ * @method static Builder|TrackedApplication newModelQuery()
+ * @method static Builder|TrackedApplication newQuery()
  * @method static \Illuminate\Database\Query\Builder|TrackedApplication onlyTrashed()
- * @method static \Illuminate\Database\Eloquent\Builder|TrackedApplication query()
- * @method static \Illuminate\Database\Eloquent\Builder|TrackedApplication whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TrackedApplication whereExecutable($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TrackedApplication whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TrackedApplication whereTimeIntervalId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TrackedApplication whereTitle($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TrackedApplication whereUpdatedAt($value)
+ * @method static Builder|TrackedApplication query()
+ * @method static Builder|TrackedApplication whereCreatedAt($value)
+ * @method static Builder|TrackedApplication whereExecutable($value)
+ * @method static Builder|TrackedApplication whereId($value)
+ * @method static Builder|TrackedApplication whereTimeIntervalId($value)
+ * @method static Builder|TrackedApplication whereTitle($value)
+ * @method static Builder|TrackedApplication whereUpdatedAt($value)
  * @method static \Illuminate\Database\Query\Builder|TrackedApplication withTrashed()
  * @method static \Illuminate\Database\Query\Builder|TrackedApplication withoutTrashed()
  * @mixin \Eloquent
