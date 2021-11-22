@@ -109,8 +109,17 @@ use Parsedown;
  * @method static QueryBuilder|Task withTrashed()
  * @method static QueryBuilder|Task withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @property float $relative_position
+ * @property \Illuminate\Support\Carbon|null $due_date
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TaskHistory[] $changes
+ * @property-read int|null $changes_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TaskComment[] $comments
+ * @property-read int|null $comments_count
  * @property-read array $can
  * @property-read int|null $users_count
+ * @method static EloquentBuilder|Task whereDueDate($value)
+ * @method static EloquentBuilder|Task whereRelativePosition($value)
+ * @method static EloquentBuilder|Task whereStatusId($value)
  */
 class Task extends Model
 {

@@ -218,4 +218,9 @@ class TimeInterval extends Model
     {
         $this->attributes['location'] = new Point($value['lat'], $value['lng']);
     }
+
+    public function apps(): HasMany
+    {
+        return $this->hasMany(TrackedApplication::class, 'time_interval_id');
+    }
 }
