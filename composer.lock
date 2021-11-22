@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "06ffb0a9e5d4bba712b3fffc1dceb917",
+    "content-hash": "08ab5f27fa4fdcff39400a9f073a5bf7",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -1943,57 +1943,6 @@
                 "source": "https://github.com/joshbrw/laravel-module-installer/tree/v2.0.1"
             },
             "time": "2021-01-17T21:51:00+00:00"
-        },
-        {
-            "name": "k-adam/env-editor",
-            "version": "1.0.0",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/K-Adam/php-env-editor.git",
-                "reference": "b9d0169e61e2675e687b98a3233015f1e35e93d6"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/K-Adam/php-env-editor/zipball/b9d0169e61e2675e687b98a3233015f1e35e93d6",
-                "reference": "b9d0169e61e2675e687b98a3233015f1e35e93d6",
-                "shasum": ""
-            },
-            "require": {
-                "php": "^7.2"
-            },
-            "require-dev": {
-                "phpunit/phpunit": "^8.5"
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "EnvEditor\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Adam Kecskes",
-                    "email": "kecskes.adam@outlook.com"
-                }
-            ],
-            "description": ".env editor library",
-            "keywords": [
-                "dot-env",
-                "env",
-                "env-editor",
-                "env-loader",
-                "env-php",
-                "env-writer"
-            ],
-            "support": {
-                "issues": "https://github.com/K-Adam/php-env-editor/issues",
-                "source": "https://github.com/K-Adam/php-env-editor/tree/1.0.0"
-            },
-            "time": "2020-03-28T21:19:49+00:00"
         },
         {
             "name": "kbsali/redmine-api",
@@ -12588,7 +12537,8 @@
     "platform": {
         "php": "^8.0",
         "ext-json": "*",
-        "ext-pdo": "*"
+        "ext-pdo": "*",
+        "ext-gd": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.1.0"

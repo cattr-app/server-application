@@ -2,12 +2,13 @@
 
 namespace App\Http\Controllers;
 
+use App;
 use App\Console\Commands\MakeAdmin;
 use App\Console\Commands\ResetCommand;
+use App\Helpers\EnvUpdater;
 use App\Http\Requests\Installation\CheckDatabaseInfoRequest;
 use App\Http\Requests\Installation\SaveSetupRequest;
 use Artisan;
-use EnvEditor\EnvFile;
 use Exception;
 use Illuminate\Foundation\Console\ConfigCacheCommand;
 use Illuminate\Routing\Controller;
@@ -39,39 +40,39 @@ class InstallationController extends Controller
 
     public function save(SaveSetupRequest $request): JsonResponse
     {
-        $envFilepath = app()->environmentFilePath();
+        $envFilepath = App::environmentFilePath();
 
         if (!file_exists($envFilepath)) {
             copy(base_path('.env.example'), $envFilepath);
         }
 
-        $envFile = EnvFile::loadFrom($envFilepath);
-
         if (!env('IMAGE_VERSION')) {
-            $envFile->setValue('DB_HOST', $request->input('db_host'));
-            $envFile->setValue('DB_USERNAME', $request->input('db_user'));
-            $envFile->setValue('DB_PASSWORD', $request->input('db_password'));
-            $envFile->setValue('DB_DATABASE', $request->input('database'));
-            $envFile->setValue('DB_PORT', 3306);
+            EnvUpdater::bulkSet([
+                'DB_HOST' => $request->input('db_host'),
+                'DB_USERNAME' => $request->input('db_user'),
+                'DB_PASSWORD' => $request->input('db_password'),
+                'DB_DATABASE' => $request->input('database'),
+                'DB_PORT' => 3306,
+            ]);
         }
 
-        $envFile->setValue('RECAPTCHA_ENABLED', $request->input('captcha_enabled'));
-        $envFile->setValue('RECAPTCHA_SITE_KEY', (string)$request->input('secret_key'));
-        $envFile->setValue('RECAPTCHA_SECRET_KEY', (string)$request->input('site_key'));
-        $envFile->setValue('RECAPTCHA_GOOGLE_URL', 'https://www.google.com/recaptcha/api/siteverify');
+        EnvUpdater::bulkSet([
+            'RECAPTCHA_ENABLED' => $request->input('captcha_enabled'),
+            'RECAPTCHA_SITE_KEY' => (string)$request->input('secret_key'),
+            'RECAPTCHA_SECRET_KEY' => (string)$request->input('site_key'),
+            'RECAPTCHA_GOOGLE_URL' => 'https://www.google.com/recaptcha/api/siteverify',
 
-        $envFile->setValue('MAIL_ADDRESS', $request->input('mail_address'));
-        $envFile->setValue('MAIL_PASS', $request->input('mail_pass'));
-        $envFile->setValue('MAIL_SERVER', $request->input('mail_host'));
-        $envFile->setValue('MAIL_PORT', (int)$request->input('mail_port'));
-        $envFile->setValue('MAIL_SECURITY', $request->input('encryption'));
+            'MAIL_ADDRESS' => $request->input('mail_address'),
+            'MAIL_PASS' => $request->input('mail_pass'),
+            'MAIL_SERVER' => $request->input('mail_host'),
+            'MAIL_PORT' => (int)$request->input('mail_port'),
+            'MAIL_SECURITY' => $request->input('encryption'),
 
-        $envFile->setValue('FRONTEND_APP_URL', $request->input('origin'));
-        $envFile->setValue('MAIL_FROM_ADDRESS', 'no-reply@' . explode('//', $request->input('origin'))[1]);
+            'FRONTEND_APP_URL' => $request->input('origin'),
+            'MAIL_FROM_ADDRESS' => 'no-reply@' . explode('//', $request->input('origin'))[1],
 
-        $envFile->setValue('APP_DEBUG', 'false');
-
-        $envFile->saveTo($envFilepath);
+            'APP_DEBUG' => 'false',
+        ]);
 
         Artisan::call(JWTGenerateSecretCommand::class, ['--force' => true]);
         Artisan::call(ConfigCacheCommand::class);
@@ -97,7 +98,7 @@ class InstallationController extends Controller
         Artisan::call(MakeAdmin::class, [
             'password' => $request->input('password'),
             'name' => 'admin',
-            'email' => $request->input('email')
+            'email' => $request->input('email'),
         ]);
 
         return new JsonResponse(['status' => true]);

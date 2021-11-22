@@ -16,7 +16,6 @@
         "grimzy/laravel-mysql-spatial": "^5.0",
         "intervention/image": "^2.5",
         "joshbrw/laravel-module-installer": "^2.0.1",
-        "k-adam/env-editor": "^1.0",
         "laravel/framework": "^8.0",
         "laravel/telescope": "^4.0",
         "laravel/tinker": "^2.0",

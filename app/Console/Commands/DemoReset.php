@@ -25,12 +25,7 @@ class DemoReset extends Command
      */
     protected $description = 'Cattr demo flush';
 
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    public function handle()
+    public function handle(): int
     {
         $this->call(DownCommand::class);
 

@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use DB;
 use Illuminate\Database\Console\Seeds\SeedCommand;
@@ -33,9 +34,9 @@ class ResetCommand extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @throws Exception
      */
-    public function handle()
+    public function handle(): int
     {
         if (!$this->option('force') && !$this->confirm('Are you sure want to drop data for your Cattr instance?')) {
             return 0;
