@@ -6,8 +6,6 @@ use App\Models\User;
 use App\Presenters\User\OrdinaryUserPresenter;
 use App\Http\Requests\FormRequest;
 use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
-use Illuminate\Validation\Rule;
 use Illuminate\Validation\ValidationException;
 
 class CreateUserRequest extends FormRequest

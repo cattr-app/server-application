@@ -84,6 +84,7 @@ use Illuminate\Support\Carbon;
  * @mixin EloquentIdeHelper
  * @property-read Collection|Status[] $statuses
  * @property-read int|null            $statuses_count
+ * @method static \Database\Factories\ProjectFactory factory(...$parameters)
  */
 
 class Project extends Model

@@ -120,6 +120,7 @@ use Parsedown;
  * @method static EloquentBuilder|Task whereDueDate($value)
  * @method static EloquentBuilder|Task whereRelativePosition($value)
  * @method static EloquentBuilder|Task whereStatusId($value)
+ * @method static \Database\Factories\TaskFactory factory(...$parameters)
  */
 class Task extends Model
 {

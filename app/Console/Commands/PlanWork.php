@@ -186,12 +186,12 @@ class PlanWork extends Command
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @return int
      * @throws InvalidArgumentException
      */
-    public function handle()
+    public function handle(): int
     {
-        $users = User::where(['is_admin' => '0'])->get()->toArray();
+        $users = User::where(['is_admin' => false])->get()->toArray();
 
         $plan = [];
         $plans = $this->plans;
@@ -228,7 +228,7 @@ class PlanWork extends Command
      * @param $array
      * @return mixed
      */
-    public function getRandomValue(&$array)
+    public function getRandomValue(&$array): mixed
     {
         shuffle($array);
         return array_pop($array);

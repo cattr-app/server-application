@@ -3,7 +3,7 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
-use App\Helpers\StorageCleanerHelper;
+use App\Helpers\StorageCleaner;
 use Illuminate\Contracts\Container\BindingResolutionException;
 
 class RotateScreenshots extends Command
@@ -29,21 +29,21 @@ class RotateScreenshots extends Command
      */
     public function handle(): void
     {
-        if (!StorageCleanerHelper::needThinning()) {
+        if (!StorageCleaner::needThinning()) {
             $this->info('Time for thinning hasn\'t come');
             return;
         }
 
-        $this->info('For thinning available ' . StorageCleanerHelper::countAvailableScreenshots() . ' screenshots');
+        $this->info('For thinning available ' . StorageCleaner::countAvailableScreenshots() . ' screenshots');
 
-        $spaceBefore = StorageCleanerHelper::getUsedSpace();
+        $spaceBefore = StorageCleaner::getUsedSpace();
 
         $this->info('Started thinning...');
 
-        StorageCleanerHelper::thin();
+        StorageCleaner::thin();
 
         $this->info('Totally freed ' . round(
-            ($spaceBefore - StorageCleanerHelper::getUsedSpace()) / 1024 / 1024,
+            ($spaceBefore - StorageCleaner::getUsedSpace()) / 1024 / 1024,
             3
         ) . 'MB');
     }

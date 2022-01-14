@@ -1,6 +1,6 @@
 <?php
 
-namespace App\EventFilter\Facades;
+namespace App\Facades;
 
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Events\Dispatcher;
@@ -14,7 +14,7 @@ use Illuminate\Support\Testing\Fakes\EventFake;
  * @method static process(string $event, mixed $payload)
  * @mixin Dispatcher
  */
-class Filter extends Facade
+class FilterFacade extends Facade
 {
     /**
      * Replace the bound instance with a fake.

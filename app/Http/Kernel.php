@@ -3,7 +3,6 @@
 namespace App\Http;
 
 use App\Http\Middleware\Authenticate;
-use App\Http\Middleware\LockMiddleware;
 use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SentryContext;
 use App\Http\Middleware\TrimStrings;
@@ -36,7 +35,6 @@ class Kernel extends HttpKernel
         TrimStrings::class,
         ConvertEmptyStringsToNull::class,
         HandleCors::class,
-        LockMiddleware::class,
         SentryContext::class
     ];
 

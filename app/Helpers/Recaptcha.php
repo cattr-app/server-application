@@ -8,7 +8,7 @@ use GuzzleHttp\Client;
 use Request;
 use Throwable;
 
-class RecaptchaHelper
+class Recaptcha
 {
     private string $userEmail;
 

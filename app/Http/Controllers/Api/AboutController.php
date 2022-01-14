@@ -4,15 +4,16 @@ namespace App\Http\Controllers\Api;
 
 use App\Console\Commands\RotateScreenshots;
 use App\Helpers\ModuleHelper;
-use App\Helpers\StorageCleanerHelper;
+use App\Helpers\StorageCleaner;
 use App\Helpers\Version;
-use App\Models\Property;
 use Artisan;
 use Exception;
 use GuzzleHttp\Client;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use JsonException;
+use Settings;
 
 class AboutController extends Controller
 {
@@ -30,12 +31,6 @@ class AboutController extends Controller
         $this->statsImagesUrl = "$this->statsRootUrl/image/";
         $this->statsModulesUrl = "$this->statsRootUrl/modules/";
         $this->client = $client;
-    }
-
-    private function getInstanceId(): ?string
-    {
-        $instanceId = Property::getProperty(Property::APP_CODE, 'INSTANCE_ID')->first();
-        return $instanceId->value ?? null;
     }
 
     /**
@@ -107,7 +102,7 @@ class AboutController extends Controller
             ], 500);
         }
 
-        $instanceId = $this->getInstanceId();
+        $instanceId = Settings::scope('core')->get('instance');
         $imageVersion = getenv('IMAGE_VERSION');
 
         try {
@@ -138,17 +133,20 @@ class AboutController extends Controller
         ]);
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
     public function storage(): JsonResponse
     {
         return response()->json([
             'space' => [
-                'left' => StorageCleanerHelper::getFreeSpace(),
-                'used' => StorageCleanerHelper::getUsedSpace(),
+                'left' => StorageCleaner::getFreeSpace(),
+                'used' => StorageCleaner::getUsedSpace(),
                 'total' => config('cleaner.total_space'),
             ],
             'threshold' => config('cleaner.threshold'),
-            'need_thinning' => StorageCleanerHelper::needThinning(),
-            'screenshots_available' => StorageCleanerHelper::countAvailableScreenshots(),
+            'need_thinning' => StorageCleaner::needThinning(),
+            'screenshots_available' => StorageCleaner::countAvailableScreenshots(),
             'thinning' => [
                 'now' => cache('thinning_now'),
                 'last' => cache('last_thin'),

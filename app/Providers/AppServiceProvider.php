@@ -16,23 +16,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        if (App::environment(['demo', 'staging'])) {
-            $this->app->bind(
-                App\Contracts\ScreenshotService::class,
-                App\Services\Screenshots\DemoScreenshotService::class
-            );
-        } else {
-            $this->app->bind(
-                App\Contracts\ScreenshotService::class,
-                App\Services\Screenshots\ProductionScreenshotService::class
-            );
-        }
-
-        $this->app->bind(
-            App\Contracts\Settings::class,
-            App\Services\SettingsService::class
-        );
-
         User::observe(UserObserver::class);
         Invitation::observe(InvitationObserver::class);
     }

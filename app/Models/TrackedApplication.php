@@ -32,6 +32,7 @@ use Illuminate\Support\Carbon;
  * @method static \Illuminate\Database\Query\Builder|TrackedApplication withTrashed()
  * @method static \Illuminate\Database\Query\Builder|TrackedApplication withoutTrashed()
  * @mixin \Eloquent
+ * @property-read \App\Models\User $user
  */
 class TrackedApplication extends Model
 {

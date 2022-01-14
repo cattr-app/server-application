@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\Entities\AuthorizationException;
-use App\Helpers\RecaptchaHelper;
+use App\Helpers\Recaptcha;
 use App\Models\User;
 use Illuminate\Auth\Events\PasswordReset as PasswordResetEvent;
 use Illuminate\Http\JsonResponse;
@@ -16,11 +16,11 @@ use Validator;
 class PasswordResetController extends BaseController
 {
     /**
-     * @var RecaptchaHelper
+     * @var Recaptcha
      */
-    private RecaptchaHelper $recaptcha;
+    private Recaptcha $recaptcha;
 
-    public function __construct(RecaptchaHelper $recaptcha)
+    public function __construct(Recaptcha $recaptcha)
     {
         $this->recaptcha = $recaptcha;
     }

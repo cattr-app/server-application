@@ -1,29 +1,31 @@
 <?php
 
-namespace App\EventFilter;
+namespace App\Helpers;
 
 use Closure;
 use Illuminate\Events\Dispatcher as LaravelDispatcher;
 
-class Dispatcher extends LaravelDispatcher
+class FilterDispatcher extends LaravelDispatcher
 {
     /**
+     * @inerhitDoc
      * @param $event
      * @param mixed $payload
      * @return mixed
      */
-    public function process($event, $payload)
+    public function process($event, mixed $payload): mixed
     {
         return $this->dispatch($event, [$payload]);
     }
 
     /**
+     * @inerhitDoc
      * @param object|string $event
      * @param array $payload
      * @param bool $halt
      * @return mixed
      */
-    public function dispatch($event, $payload = [], $halt = false)
+    public function dispatch($event, mixed $payload = [], $halt = false): mixed
     {
         foreach ($this->getListeners($event) as $listener) {
             $response = $listener($event, $payload);

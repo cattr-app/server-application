@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Property;
 use Illuminate\Console\Command;
+use Settings;
 
 /**
  * Class SetTimeZone
@@ -29,15 +30,11 @@ class SetTimeZone extends Command
         $timezone = $this->argument('timezone');
         if (!in_array($timezone, timezone_identifiers_list(), true)) {
             $this->error('Invalid time zone format');
+
             return;
         }
 
-        Property::updateOrCreate([
-            'entity_type' => Property::COMPANY_CODE,
-            'entity_id' => 0,
-            'name' => 'timezone'], [
-            'value' => $timezone
-            ]);
+        Settings::scope('core')->set('timezone', $timezone);
 
         $this->info("$timezone time zone successfully set");
     }

@@ -187,6 +187,7 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static EloquentBuilder|User whereLastActivity($value)
  * @method static EloquentBuilder|User whereNonce($value)
  * @method static EloquentBuilder|User wherePermanentScreenshots($value)
+ * @method static \Database\Factories\UserFactory factory(...$parameters)
  */
 class User extends Authenticatable implements JWTSubject
 {

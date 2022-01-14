@@ -32,13 +32,7 @@ class EmulateWork extends Command
 
     protected array $protectedFiles = ['uploads/screenshots/.gitignore'];
 
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     * @throws Exception
-     */
-    public function handle()
+    public function handle(): int
     {
         $plan = Cache::get('usersPlan');
 

@@ -3,11 +3,11 @@
 namespace App\Console\Commands;
 
 use App\Helpers\ModuleHelper;
-use App\Models\Property;
 use GuzzleHttp\Client;
 use Illuminate\Console\Command;
 use JsonException;
 use Exception;
+use Settings;
 
 class RegisterInstance extends Command
 {
@@ -29,16 +29,13 @@ class RegisterInstance extends Command
      * Execute the console command.
      *
      * @param Client $client
-     * @return bool
+     *
+     * @return int
      * @throws JsonException
      */
-    public function handle(Client $client)
+    public function handle(Client $client): int
     {
-        if (Property::where([
-            'entity_type' => Property::APP_CODE,
-            'entity_id' => 0,
-            'name' => 'INSTANCE_ID',
-        ])->count()) {
+        if (Settings::scope('core')->get('instance')) {
             echo 'Application already registered';
             return 1;
         }
@@ -63,13 +60,7 @@ class RegisterInstance extends Command
             );
 
             if (isset($responseBody['instanceId'])) {
-                Property::updateOrCreate([
-                    'entity_type' => Property::APP_CODE,
-                    'entity_id' => 0,
-                    'name' => 'INSTANCE_ID'
-                ], [
-                    'value' => $responseBody['instanceId']
-                ]);
+                Settings::scope('core')->set('instance', $responseBody['instanceId']);
             }
 
             if (isset($responseBody['release']['flashMessage'])) {
@@ -91,7 +82,7 @@ class RegisterInstance extends Command
                 $this->alert('You have a vulnerable version. Please update to the latest version.');
             }
 
-            return true;
+            return 0;
         } catch (Exception $e) {
             if ($e->getResponse()) {
                 $error = json_decode(
@@ -105,7 +96,7 @@ class RegisterInstance extends Command
                 $this->warn('Сould not get a response from the server to check the relevance of your version.');
             }
 
-            return true;
+            return 0;
         }
     }
 }

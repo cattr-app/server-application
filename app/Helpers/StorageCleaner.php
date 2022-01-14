@@ -8,7 +8,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Storage;
 
-class StorageCleanerHelper
+class StorageCleaner
 {
 
     public static function getFreeSpace(): float

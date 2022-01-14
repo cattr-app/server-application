@@ -51,19 +51,19 @@ return [
         Illuminate\View\ViewServiceProvider::class,
 
         Laravel\Tinker\TinkerServiceProvider::class,
+        Intervention\Image\ImageServiceProvider::class,
+        Sentry\Laravel\ServiceProvider::class,
 
         App\Providers\AppServiceProvider::class,
         App\Providers\AuthServiceProvider::class,
         App\Providers\BroadcastServiceProvider::class,
-        App\EventFilter\EventServiceProvider::class,
-        App\EventFilter\EventFilterServiceProvider::class,
+        App\Providers\EventServiceProvider::class,
+        App\Providers\FilterServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
         App\Providers\TelescopeServiceProvider::class,
-        App\Providers\LockServiceProvider::class,
-        Intervention\Image\ImageServiceProvider::class,
-        Sentry\Laravel\ServiceProvider::class,
 
         App\Providers\SettingsServiceProvider::class,
+        App\Providers\ScreenshotsServiceProvider::class,
     ],
     'aliases' => [
 
@@ -80,7 +80,6 @@ return [
         'DB' => Illuminate\Support\Facades\DB::class,
         'Eloquent' => Illuminate\Database\Eloquent\Model::class,
         'Event' => Illuminate\Support\Facades\Event::class,
-        'Filter' => App\EventFilter\Facades\Filter::class,
         'File' => Illuminate\Support\Facades\File::class,
         'Gate' => Illuminate\Support\Facades\Gate::class,
         'Hash' => Illuminate\Support\Facades\Hash::class,
@@ -104,6 +103,7 @@ return [
         'View' => Illuminate\Support\Facades\View::class,
         'Sentry' => Sentry\Laravel\Facade::class,
 
-        'Settings' => App\Facades\SettingsFacade::class
+        'Settings' => App\Facades\SettingsFacade::class,
+        'Filter' => App\Facades\FilterFacade::class,
     ],
 ];

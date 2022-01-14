@@ -96,6 +96,30 @@ use Storage;
  * @method static QueryBuilder|TimeInterval withoutTrashed()
  * @method static QueryBuilder|TimeInterval onlyTrashed()
  * @mixin EloquentIdeHelper
+ * @property array|null $location
+ * @property-read Collection|\App\Models\TrackedApplication[] $apps
+ * @property-read int|null $apps_count
+ * @property-read bool $has_screenshot
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval comparison($geometryColumn, $geometry, $relationship)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval contains($geometryColumn, $geometry)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval crosses($geometryColumn, $geometry)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval disjoint($geometryColumn, $geometry)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval distance($geometryColumn, $geometry, $distance)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval distanceExcludingSelf($geometryColumn, $geometry, $distance)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval distanceSphere($geometryColumn, $geometry, $distance)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval distanceSphereExcludingSelf($geometryColumn, $geometry, $distance)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval distanceSphereValue($geometryColumn, $geometry)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval distanceValue($geometryColumn, $geometry)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval doesTouch($geometryColumn, $geometry)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval equals($geometryColumn, $geometry)
+ * @method static \Database\Factories\TimeIntervalFactory factory(...$parameters)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval intersects($geometryColumn, $geometry)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval orderByDistance($geometryColumn, $geometry, $direction = 'asc')
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval orderByDistanceSphere($geometryColumn, $geometry, $direction = 'asc')
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval orderBySpatial($geometryColumn, $geometry, $orderFunction, $direction = 'asc')
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval overlaps($geometryColumn, $geometry)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval whereLocation($value)
+ * @method static \Grimzy\LaravelMysqlSpatial\Eloquent\Builder|TimeInterval within($geometryColumn, $polygon)
  */
 class TimeInterval extends Model
 {

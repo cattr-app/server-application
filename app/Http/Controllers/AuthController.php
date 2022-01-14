@@ -3,7 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\Entities\AuthorizationException;
-use App\Helpers\RecaptchaHelper;
+use App\Helpers\Recaptcha;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -26,15 +26,16 @@ class AuthController extends BaseController
      */
 
     /**
-     * @var RecaptchaHelper
+     * @var Recaptcha
      */
-    protected RecaptchaHelper $recaptcha;
+    protected Recaptcha $recaptcha;
 
     /**
      * Create a new AuthController instance.
-     * @param RecaptchaHelper $recaptcha
+     *
+     * @param Recaptcha $recaptcha
      */
-    public function __construct(RecaptchaHelper $recaptcha)
+    public function __construct(Recaptcha $recaptcha)
     {
         $this->recaptcha = $recaptcha;
         $this->middleware('auth:api')->except(['login', 'authDesktopKey']);

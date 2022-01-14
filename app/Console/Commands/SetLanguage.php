@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Property;
 use Illuminate\Console\Command;
+use Settings;
 
 class SetLanguage extends Command
 {
@@ -29,12 +30,7 @@ class SetLanguage extends Command
             return;
         }
 
-        Property::updateOrCreate([
-            'entity_type' => Property::COMPANY_CODE,
-            'entity_id' => 0,
-            'name' => 'language'], [
-            'value' => $language
-            ]);
+        Settings::scope('core')->set('language', $language);
 
         $this->info(strtoupper($language) . ' language successfully set');
     }
