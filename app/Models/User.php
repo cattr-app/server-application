@@ -6,6 +6,7 @@ use App\Mail\ResetPassword;
 use App\Scopes\UserScope;
 use App\Traits\HasRole;
 use Carbon\Carbon;
+use Database\Factories\UserFactory;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -20,7 +21,7 @@ use Illuminate\Notifications\DatabaseNotification;
 use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
 use Hash;
-use Tymon\JWTAuth\Contracts\JWTSubject;
+use Laravel\Sanctum\HasApiTokens;
 
 /**
  * @apiDefine UserObject
@@ -187,14 +188,15 @@ use Tymon\JWTAuth\Contracts\JWTSubject;
  * @method static EloquentBuilder|User whereLastActivity($value)
  * @method static EloquentBuilder|User whereNonce($value)
  * @method static EloquentBuilder|User wherePermanentScreenshots($value)
- * @method static \Database\Factories\UserFactory factory(...$parameters)
+ * @method static UserFactory factory(...$parameters)
  */
-class User extends Authenticatable implements JWTSubject
+class User extends Authenticatable
 {
     use Notifiable;
     use SoftDeletes;
     use HasRole;
     use HasFactory;
+    use HasApiTokens;
 
     /**
      * table name from database
@@ -308,28 +310,6 @@ class User extends Authenticatable implements JWTSubject
     protected $appends = [
         'online',
     ];
-
-    /**
-     * Get the identifier that will be stored in the subject claim of the JWT.
-     *
-     * @return mixed
-     */
-    public function getJWTIdentifier()
-    {
-        return $this->getKey();
-    }
-
-    /**
-     * Return a key value array, containing any custom claims to be added to the JWT.
-     *
-     * @return array
-     */
-    public function getJWTCustomClaims(): array
-    {
-        return [
-            'nonce' => $this->nonce,
-        ];
-    }
 
     /**
      * @return BelongsTo

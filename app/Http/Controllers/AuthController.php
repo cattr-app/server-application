@@ -25,20 +25,8 @@ class AuthController extends BaseController
      *  }
      */
 
-    /**
-     * @var Recaptcha
-     */
-    protected Recaptcha $recaptcha;
-
-    /**
-     * Create a new AuthController instance.
-     *
-     * @param Recaptcha $recaptcha
-     */
-    public function __construct(Recaptcha $recaptcha)
+    public function __construct(protected Recaptcha $recaptcha)
     {
-        $this->recaptcha = $recaptcha;
-        $this->middleware('auth:api')->except(['login', 'authDesktopKey']);
     }
 
     /**
@@ -85,6 +73,7 @@ class AuthController extends BaseController
      */
     /**
      * @param Request $request
+     *
      * @return JsonResponse
      * @throws AuthorizationException
      */
@@ -103,10 +92,10 @@ class AuthController extends BaseController
 
         $this->recaptcha->check($credentials);
 
-        if (!$newToken = auth()->setTTL(config('auth.lifetime_minutes.jwt'))->attempt([
+        if (!auth()->attempt([
             'email' => $credentials['email'],
             'password' =>
-                $credentials['password']
+                $credentials['password'],
         ])) {
             $this->recaptcha->incrementCaptchaAmounts();
             $this->recaptcha->check($credentials);
@@ -116,8 +105,6 @@ class AuthController extends BaseController
         $user = auth()->user();
         if (!$user || !$user->active) {
             $this->recaptcha->incrementCaptchaAmounts();
-
-            auth()->invalidate();
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
@@ -133,7 +120,7 @@ class AuthController extends BaseController
             $user->save();
         }
 
-        return $this->respondWithToken($newToken);
+        return $this->respondWithToken($request->user()->createToken(Str::uuid())->plainTextToken);
     }
 
     /**
@@ -157,12 +144,11 @@ class AuthController extends BaseController
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-    /**
-     * @return JsonResponse
-     */
-    public function logout(): JsonResponse
+    public function logout(Request $request): JsonResponse
     {
         auth()->logout();
+
+        $request->user()->currentAccessToken()->delete();
 
         return new JsonResponse(['message' => 'Successfully logged out']);
     }
@@ -190,15 +176,14 @@ class AuthController extends BaseController
      */
     /**
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function logoutFromAll(Request $request): JsonResponse
     {
-        $user = $request->user();
-        ++$user->nonce;
-        $user->save();
-
         auth()->logout();
+
+        $request->user()->tokens()->delete();
 
         return new JsonResponse(['message' => 'Successfully reset all sessions']);
     }
@@ -246,39 +231,12 @@ class AuthController extends BaseController
      */
     /**
      * @param Request $request
+     *
      * @return JsonResponse
      */
     public function me(Request $request): JsonResponse
     {
         return new JsonResponse(['user' => $request->user()]);
-    }
-
-    /**
-     * @api            {post} /auth/refresh Refresh
-     * @apiDescription Refreshes JWT
-     *
-     * @apiVersion     1.0.0
-     * @apiName        Refresh
-     * @apiGroup       Auth
-     *
-     * @apiUse         AuthHeader
-     *
-     * @apiSuccess {String}   access_token  Token
-     * @apiSuccess {String}   token_type    Token Type
-     * @apiSuccess {String}   expires_in    Token TTL 8601String Date
-     *
-     * @apiUse         400Error
-     * @apiUse         UnauthorizedError
-     */
-    /**
-     * @return JsonResponse
-     * @throws Exception
-     */
-    public function refresh(): JsonResponse
-    {
-        $token = auth()->setTTL(config('auth.lifetime_minutes.jwt'))->refresh();
-
-        return $this->respondWithToken($token);
     }
 
     /**
@@ -307,6 +265,7 @@ class AuthController extends BaseController
      */
     /**
      * @param Request $request
+     *
      * @return JsonResponse
      * @throws Exception
      */
@@ -317,7 +276,7 @@ class AuthController extends BaseController
         $lifetime = now()->addMinutes(config('auth.lifetime_minutes.desktop_token'));
 
         cache([
-            sha1($request->ip()) . ":$token" => $request->user()->id
+            sha1($request->ip()) . ":$token" => $request->user()->id,
         ], $lifetime);
 
         return $this->respondWithToken($token, 'desktop', config('auth.lifetime_minutes.desktop_token'), [
@@ -360,6 +319,7 @@ class AuthController extends BaseController
      */
     /**
      * @param Request $request
+     *
      * @return JsonResponse
      * @throws Exception
      * @throws InvalidArgumentException
@@ -378,8 +338,8 @@ class AuthController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        if (!auth()->byId(cache(sha1($request->ip()) . ":$token[1]")) ||
-            ((!$user = auth()->user()) && !$user->active)) {
+        if (!auth()->byId(cache(sha1($request->ip()) . ":$token[1]"))
+            || ((!$user = auth()->user()) && !$user->active)) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
@@ -388,10 +348,12 @@ class AuthController extends BaseController
 
     /**
      * Helper for structuring answer with token
-     * @param string $token
-     * @param string $tokenType
+     *
+     * @param string   $token
+     * @param string   $tokenType
      * @param int|null $lifetime
-     * @param array $additionalInfo
+     * @param array    $additionalInfo
+     *
      * @return JsonResponse
      */
     private function respondWithToken(
@@ -407,26 +369,4 @@ class AuthController extends BaseController
             'user' => auth()->user(),
         ], $additionalInfo));
     }
-
-    /**
-     * @apiDeprecated since 1.0.0 use now (#Password_Reset:Process)
-     * @api {post} /api/auth/reset Reset
-     * @apiDescription Get user JWT
-     *
-     *
-     * @apiVersion 1.0.0
-     * @apiName Reset
-     * @apiGroup Auth
-     */
-
-    /**
-     * @apiDeprecated since 1.0.0 use now (#Password_Reset:Request)
-     * @api {post} /api/auth/send-reset Send reset e-mail
-     * @apiDescription Get user JWT
-     *
-     *
-     * @apiVersion 1.0.0
-     * @apiName Send reset
-     * @apiGroup Auth
-     */
 }

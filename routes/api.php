@@ -31,19 +31,23 @@ Route::group([
     'middleware' => [EnsureIsInstalled::class, 'throttle:120,1'],
     'prefix' => 'auth',
 ], static function (Router $router) {
+    $router->group(['middleware' => ['auth:sanctum']], static function (Router $router) {
+        $router->post('logout', [AuthController::class, 'logout']);
+        $router->post('logout-from-all', [AuthController::class, 'logoutFromAll']);
+        $router->post('refresh', [AuthController::class, 'refresh']);
+        $router->get('me', [AuthController::class, 'me']);
+        $router->post('password/reset/request', [PasswordResetController::class, 'request']);
+        $router->post('password/reset/validate', [PasswordResetController::class, 'validate']);
+        $router->post('password/reset/process', [PasswordResetController::class, 'process']);
+
+        $router->get('register/{key}', [RegistrationController::class, 'getForm']);
+        $router->post('register/{key}', [RegistrationController::class, 'postForm']);
+
+        $router->get('desktop-key', [AuthController::class, 'issueDesktopKey']);
+    });
+
     $router->post('login', [AuthController::class, 'login']);
-    $router->post('logout', [AuthController::class, 'logout']);
-    $router->post('logout-from-all', [AuthController::class, 'logoutFromAll']);
-    $router->post('refresh', [AuthController::class, 'refresh']);
-    $router->get('me', [AuthController::class, 'me']);
-    $router->post('password/reset/request', [PasswordResetController::class, 'request']);
-    $router->post('password/reset/validate', [PasswordResetController::class, 'validate']);
-    $router->post('password/reset/process', [PasswordResetController::class, 'process']);
 
-    $router->get('register/{key}', [RegistrationController::class, 'getForm']);
-    $router->post('register/{key}', [RegistrationController::class, 'postForm']);
-
-    $router->get('desktop-key', [AuthController::class, 'issueDesktopKey']);
     $router->put('desktop-key', [AuthController::class, 'authDesktopKey']);
 });
 
@@ -58,7 +62,7 @@ Route::group([
 
 // Main API routes
 Route::group([
-    'middleware' => ['auth:api', 'throttle:120,1', EnsureIsInstalled::class],
+    'middleware' => ['auth:sanctum', 'throttle:120,1', EnsureIsInstalled::class],
 ], static function (Router $router) {
     //Invitations routes
     $router->any('invitations/list', [InvitationController::class, 'index']);
