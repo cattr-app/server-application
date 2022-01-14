@@ -102,7 +102,7 @@ class ProjectController extends ItemController
      */
     public function index(Request $request): JsonResponse
     {
-        return parent::_index($request);
+        return $this->_index($request);
     }
 
     public function show(ShowProjectRequest $request): JsonResponse
