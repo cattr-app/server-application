@@ -51,9 +51,6 @@ class RoleController extends ItemController
      */
     public function index(Request $request): JsonResponse
     {
-        $cls = $this->getItemClass();
-        //$cls::updateRules();
-
         if ($request->get('user_id')) {
             $request->offsetSet('users.id', $request->get('user_id'));
             $request->offsetUnset('user_id');

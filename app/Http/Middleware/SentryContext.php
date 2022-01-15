@@ -14,9 +14,10 @@ class SentryContext
      *
      * @param Request $request
      * @param Closure $next
+     *
      * @return mixed
      */
-    public function handle($request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
         if (!config('sentry.send_default_pii') || !auth()->check() || !app()->bound('sentry')) {
             return $next($request);
@@ -25,10 +26,10 @@ class SentryContext
         $user = auth()->user();
         configureScope(static function (Scope $scope) use ($user): void {
             $scope->setUser([
-                'id' => $user->id,
-                'email' => $user->email,
-                'is_admin' => $user->is_admin,
-                'role' => $user->role->name
+                'id' => optional($user)->id,
+                'email' => optional($user)->email,
+                'is_admin' => optional($user)->is_admin,
+                'role' => optional($user)->role->name
             ]);
         });
 

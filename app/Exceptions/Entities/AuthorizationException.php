@@ -2,14 +2,9 @@
 
 namespace App\Exceptions\Entities;
 
-use App\Exceptions\Interfaces\TypedException;
-use Illuminate\Auth\Access\AuthorizationException as BaseAuthorizationException;
-use Symfony\Component\HttpKernel\Exception\HttpExceptionInterface;
-use Throwable;
+use Flugg\Responder\Exceptions\Http\HttpException;
 
-class AuthorizationException extends BaseAuthorizationException implements
-    TypedException,
-    HttpExceptionInterface
+class AuthorizationException extends HttpException
 {
     /**
      * @apiDefine 400Error
@@ -102,6 +97,7 @@ class AuthorizationException extends BaseAuthorizationException implements
     public const ERROR_TYPE_USER_DISABLED = 'authorization.user_disabled';
 
     /**
+     * @apiDeprecated since 4.0.0
      * @apiDefine ParamsValidationError
      * @apiErrorExample {json} Params validation
      *  HTTP/1.1 400 Bad Request
@@ -166,44 +162,11 @@ class AuthorizationException extends BaseAuthorizationException implements
         self::ERROR_TYPE_FORBIDDEN => ['code' => 403, 'message' => 'This action is unauthorized']
     ];
 
-    /**
-     * @var string
-     */
-    protected $type;
-
-    /**
-     * AuthorizationException constructor.
-     * @param string $type
-     * @param Throwable|null $previous
-     */
-    public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED, Throwable $previous = null)
+    public function __construct($type = self::ERROR_TYPE_UNAUTHORIZED)
     {
-        $this->type = $type;
+        $this->errorCode = $type;
+        $this->status = self::ERRORS[$type]['code'];
 
-        parent::__construct($this->getMessageByType(), $this->getStatusCode(), $previous);
-    }
-
-    public function getMessageByType(): string
-    {
-        return self::ERRORS[$this->type]['message'];
-    }
-
-    public function getStatusCode(): int
-    {
-        return self::ERRORS[$this->type]['code'];
-    }
-
-    public function getType(): string
-    {
-        return $this->type;
-    }
-
-    /**
-     * @codeCoverageIgnore
-     * @return array
-     */
-    public function getHeaders(): array
-    {
-        return [];
+        parent::__construct(self::ERRORS[$type]['message']);
     }
 }

@@ -16,10 +16,10 @@
  *
  * @apiParam {Integer}  id  ID of the target Time interval
  *
- * @apiSuccess {Raw}    <>  Screenshot data
+ * @apiSuccess {Raw}    data  Screenshot data
  *
  * @apiUse          400Error
- * @apiUse          NotFoundError
+ * @apiUse          ItemNotFoundError
  * @apiUse          ForbiddenError
  * @apiUse          UnauthorizedError
  */
@@ -40,10 +40,10 @@
  *
  * @apiParam {Integer}  id  ID of the target Time interval
  *
- * @apiSuccess {Raw}    <>  Screenshot data
+ * @apiSuccess {Raw}    data  Screenshot data
  *
  * @apiUse          400Error
- * @apiUse          NotFoundError
+ * @apiUse          ItemNotFoundError
  * @apiUse          ForbiddenError
  * @apiUse          UnauthorizedError
  */

@@ -170,9 +170,6 @@ class AppInstallCommand extends Command
 
     protected function settingUpEnvMigrateAndSeed(): void
     {
-        $this->info('Setting up JWT secret key');
-        $this->callSilent('jwt:secret', ['--force' => true]);
-
         $this->info('Running up migrations');
         $this->call('migrate');
 

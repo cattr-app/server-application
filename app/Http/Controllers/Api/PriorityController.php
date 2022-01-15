@@ -16,14 +16,6 @@ use Illuminate\Http\Request;
 class PriorityController extends ItemController
 {
     /**
-     * PriorityController constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
-    /**
      * Get the validation rules.
      *
      * @return array
@@ -121,7 +113,7 @@ class PriorityController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function index(ListPriorityRequest $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         return $this->_index($request);
     }

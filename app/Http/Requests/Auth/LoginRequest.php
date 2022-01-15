@@ -1,10 +1,10 @@
 <?php
 
-namespace App\Http\Requests\CompanySettings;
+namespace App\Http\Requests\Auth;
 
 use App\Http\Requests\FormRequest;
 
-class IndexCompanySettingsRequest extends FormRequest
+class LoginRequest extends FormRequest
 {
     /**
      * Determine if user authorized to make this request.
@@ -23,6 +23,10 @@ class IndexCompanySettingsRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [];
+        return [
+            'email' => 'required',
+            'password' => 'required',
+            'recaptcha' => 'sometimes|string'
+        ];
     }
 }

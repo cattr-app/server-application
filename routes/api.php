@@ -31,7 +31,7 @@ Route::group([
     'middleware' => [EnsureIsInstalled::class, 'throttle:120,1'],
     'prefix' => 'auth',
 ], static function (Router $router) {
-    $router->group(['middleware' => ['auth:sanctum']], static function (Router $router) {
+    $router->middleware('auth:sanctum')->group(static function (Router $router) {
         $router->post('logout', [AuthController::class, 'logout']);
         $router->post('logout-from-all', [AuthController::class, 'logoutFromAll']);
         $router->post('refresh', [AuthController::class, 'refresh']);
@@ -108,10 +108,10 @@ Route::group([
     $router->post('tasks/remove', [TaskController::class, 'destroy']);
 
     // Task comments
-    $router->any('/task-comment/list', [TaskCommentController::class, 'index']);
-    $router->post('/task-comment/create', [TaskCommentController::class, 'create']);
-    $router->any('/task-comment/show', [TaskCommentController::class, 'show']);
-    $router->post('/task-comment/remove', [TaskCommentController::class, 'destroy']);
+    $router->any('task-comment/list', [TaskCommentController::class, 'index']);
+    $router->post('task-comment/create', [TaskCommentController::class, 'create']);
+    $router->any('task-comment/show', [TaskCommentController::class, 'show']);
+    $router->post('task-comment/remove', [TaskCommentController::class, 'destroy']);
 
     //Users routes
     $router->any('users/list', [UserController::class, 'index']);

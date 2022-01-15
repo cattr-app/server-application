@@ -121,7 +121,7 @@ class StatusController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function index(ListStatusRequest $request): JsonResponse
+    public function index(Request $request): JsonResponse
     {
         return $this->_index($request);
     }

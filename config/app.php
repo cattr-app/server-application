@@ -105,5 +105,8 @@ return [
 
         'Settings' => App\Facades\SettingsFacade::class,
         'Filter' => App\Facades\FilterFacade::class,
+
+        'Responder' => Flugg\Responder\Facades\Responder::class,
+        'Transformation' => Flugg\Responder\Facades\Transformation::class,
     ],
 ];

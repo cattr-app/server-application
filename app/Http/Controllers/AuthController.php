@@ -4,15 +4,14 @@ namespace App\Http\Controllers;
 
 use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\Recaptcha;
+use App\Http\Requests\Auth\LoginRequest;
+use App\Http\Transformers\AuthTokenTransformer;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Str;
 use Psr\SimpleCache\InvalidArgumentException;
-use Settings;
-use Tymon\JWTAuth\Facades\JWTAuth;
-use Validator;
 
 class AuthController extends BaseController
 {
@@ -31,9 +30,9 @@ class AuthController extends BaseController
 
     /**
      * @api            {post} /auth/login Login
-     * @apiDescription Get user JWT
+     * @apiDescription Get user Token
      *
-     * @apiVersion     1.0.0
+     * @apiVersion     4.0.0
      * @apiName        Login
      * @apiGroup       Auth
      *
@@ -48,7 +47,7 @@ class AuthController extends BaseController
      *    "recaptcha": "03AOLTBLR5UtIoenazYWjaZ4AFZiv1OWegWV..."
      *  }
      *
-     * @apiSuccess {String}   access_token  Token
+     * @apiSuccess {Object}   data  Token
      * @apiSuccess {String}   token_type    Token Type
      * @apiSuccess {ISO8601}  expires_in    Token TTL
      * @apiSuccess {Object}   user          User Entity
@@ -71,31 +70,15 @@ class AuthController extends BaseController
      * @apiUse         CaptchaError
      * @apiUse         LimiterError
      */
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     * @throws AuthorizationException
-     */
-    public function login(Request $request): JsonResponse
+    public function login(LoginRequest $request): JsonResponse
     {
         $credentials = $request->only(['email', 'password', 'recaptcha']);
-
-        $validator = Validator::make($request->all(), [
-            'email' => 'required',
-            'password' => 'required',
-        ]);
-
-        if ($validator->fails()) {
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_VALIDATION_FAILED);
-        }
 
         $this->recaptcha->check($credentials);
 
         if (!auth()->attempt([
             'email' => $credentials['email'],
-            'password' =>
-                $credentials['password'],
+            'password' => $credentials['password'],
         ])) {
             $this->recaptcha->incrementCaptchaAmounts();
             $this->recaptcha->check($credentials);
@@ -120,123 +103,77 @@ class AuthController extends BaseController
             $user->save();
         }
 
-        return $this->respondWithToken($request->user()->createToken(Str::uuid())->plainTextToken);
+        return responder()->success([
+            'token' => $user->createToken(Str::uuid())->plainTextToken,
+        ], new AuthTokenTransformer)->respond();
     }
 
     /**
      * @api            {post} /auth/logout Logout
-     * @apiDescription Invalidate JWT
+     * @apiDescription Invalidate current token
      *
-     * @apiVersion     1.0.0
+     * @apiVersion     4.0.0
      * @apiName        Logout
      * @apiGroup       Auth
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {String}   message  Message from server
-     *
      * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "message": "Successfully logged out"
-     *  }
+     *  HTTP/1.1 204 OK
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
     public function logout(Request $request): JsonResponse
     {
-        auth()->logout();
-
         $request->user()->currentAccessToken()->delete();
 
-        return new JsonResponse(['message' => 'Successfully logged out']);
+        return responder()->success()->respond(204);
     }
 
     /**
      * @api            {post} /auth/logout-from-all Logout from all
-     * @apiDescription Invalidate all user JWT
+     * @apiDescription Invalidate all user tokens
      *
-     * @apiVersion     1.0.0
+     * @apiVersion     4.0.0
      * @apiName        Logout all
      * @apiGroup       Auth
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {String}   message  Message from server
-     *
      * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "message": "Successfully logged out from all sessions"
-     *  }
+     *  HTTP/1.1 204 OK
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
     public function logoutFromAll(Request $request): JsonResponse
     {
-        auth()->logout();
-
         $request->user()->tokens()->delete();
 
-        return new JsonResponse(['message' => 'Successfully reset all sessions']);
+        return responder()->success()->respond(204);
     }
 
     /**
      * @api            {get} /auth/me Me
      * @apiDescription Get authenticated User Entity
      *
-     * @apiVersion     1.0.0
+     * @apiVersion     4.0.0
      * @apiName        Me
      * @apiGroup       Auth
      *
      * @apiUse         AuthHeader
      *
-     * @apiSuccess {Object}   user     User Entity
+     * @apiSuccess {Object}   data     User Entity
      *
      * @apiUse         UserObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "user": {
-     *      "id": 1,
-     *      "full_name": "Admin",
-     *      "email": "admin@example.com",
-     *      "url": "",
-     *      "company_id": 1,
-     *      "avatar": "",
-     *      "screenshots_active": 1,
-     *      "manual_time": 0,
-     *      "computer_time_popup": 300,
-     *      "blur_screenshots": 0,
-     *      "web_and_app_monitoring": 1,
-     *      "screenshots_interval": 9,
-     *      "active": "active",
-     *      "deleted_at": null,
-     *      "created_at": "2018-09-25 06:15:08",
-     *      "updated_at": "2018-09-25 06:15:08",
-     *      "timezone": null
-     *    }
-     *  }
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
      */
-    /**
-     * @param Request $request
-     *
-     * @return JsonResponse
-     */
     public function me(Request $request): JsonResponse
     {
-        return new JsonResponse(['user' => $request->user()]);
+        return responder()->success($request->user())->respond();
     }
 
     /**
@@ -279,9 +216,11 @@ class AuthController extends BaseController
             sha1($request->ip()) . ":$token" => $request->user()->id,
         ], $lifetime);
 
-        return $this->respondWithToken($token, 'desktop', config('auth.lifetime_minutes.desktop_token'), [
-            'frontend_uri' => config('app.frontend_url'),
-        ]);
+        return responder()->success([
+            'token' => $token,
+            'type' => 'desktop',
+            'expires' => now()->addMinutes(config('auth.lifetime_minutes.desktop_token'))->toIso8601String(),
+        ], new AuthTokenTransformer)->meta(['frontend_uri' => config('app.frontend_url')])->respond();
     }
 
     /**
@@ -338,35 +277,14 @@ class AuthController extends BaseController
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        if (!auth()->byId(cache(sha1($request->ip()) . ":$token[1]"))
-            || ((!$user = auth()->user()) && !$user->active)) {
+        $user = auth()->loginUsingId(cache(sha1($request->ip()) . ":$token[1]"));
+
+        if (!optional($user)->active) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
-        return $this->respondWithToken(auth()->tokenById($user->id));
-    }
-
-    /**
-     * Helper for structuring answer with token
-     *
-     * @param string   $token
-     * @param string   $tokenType
-     * @param int|null $lifetime
-     * @param array    $additionalInfo
-     *
-     * @return JsonResponse
-     */
-    private function respondWithToken(
-        string $token,
-        string $tokenType = 'bearer',
-        int $lifetime = null,
-        array $additionalInfo = []
-    ): JsonResponse {
-        return new JsonResponse(array_merge([
-            'access_token' => $token,
-            'token_type' => $tokenType,
-            'expires_in' => now()->addMinutes($lifetime ?? config('auth.lifetime_minutes.jwt'))->toIso8601String(),
-            'user' => auth()->user(),
-        ], $additionalInfo));
+        return responder()->success([
+            'token' => $user->createToken(Str::uuid())->plainTextToken,
+        ], new AuthTokenTransformer)->respond();
     }
 }

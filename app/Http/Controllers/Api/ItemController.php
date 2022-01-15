@@ -46,7 +46,6 @@ abstract class ItemController extends Controller
     /**
      * Display a listing of the resource.
      * @param Request $request
-     * @return JsonResponse
      * @throws Exception
      */
     public function _index(Request $request): JsonResponse
@@ -64,14 +63,14 @@ abstract class ItemController extends Controller
         $currentPage = $request->get('page', 1);
         $perPage = $request->get('perPage', 15);
 
-        return new JsonResponse(
+        return responder()->success(
             Filter::process(
                 $this->getEventUniqueName('answer.success.item.list.result'),
                 $paginate ?
                     $itemsQuery->paginate($perPage, ['*'], 'page', $currentPage)
                     : $itemsQuery->get()
             )
-        );
+        )->respond();
     }
 
     /**
