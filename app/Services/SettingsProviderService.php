@@ -31,7 +31,7 @@ class SettingsProviderService implements SettingsProvider
     /**
      * @inerhitDoc
      */
-    public function all(): array
+    final public function all(): array
     {
         $scope = $this->scope;
 
@@ -59,7 +59,7 @@ class SettingsProviderService implements SettingsProvider
     /**
      * @inerhitDoc
      */
-    public function get(string $key = null, mixed $default = null): mixed
+    final public function get(string $key = null, mixed $default = null): mixed
     {
         $scope = $this->scope;
 
@@ -95,7 +95,7 @@ class SettingsProviderService implements SettingsProvider
     /**
      * @inerhitDoc
      */
-    public function set(mixed $key, mixed $value = null): void
+    final public function set(mixed $key, mixed $value = null): void
     {
         $scope = $this->scope;
 
@@ -131,7 +131,7 @@ class SettingsProviderService implements SettingsProvider
     /**
      * @inerhitDoc
      */
-    public function flush(): void
+    final public function flush(): void
     {
         $scope = $this->scope;
 
