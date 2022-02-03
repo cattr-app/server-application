@@ -11,7 +11,7 @@ class CompanySettingsTransformer extends Transformer
         return [
             'timezone' => $input['timezone'] ?? null,
             'language' => $input['language'] ?? null,
-            'work_time' => $input['work_time'] ?? 0,
+            'work_time' => (int)($input['work_time'] ?? 0),
             'color' => $input['color'] ?? [],
             'internal_priorities' => $input['internal_priorities'] ?? [],
             'heartbeat_period' => config('app.user_activity.online_status_time'),
