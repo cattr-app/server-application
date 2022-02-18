@@ -3,6 +3,7 @@
 namespace App\Http\Requests\CompanySettings;
 
 use App\Http\Requests\FormRequest;
+use Filter;
 
 class UpdateCompanySettingsRequest extends FormRequest
 {
@@ -23,12 +24,12 @@ class UpdateCompanySettingsRequest extends FormRequest
      */
     public function rules(): array
     {
-        return [
+        return Filter::process('validation.item.edit.settings', [
             'timezone' => 'sometimes|required|timezone',
             'work_time' => 'sometimes|int',
             'auto_thinning' => 'sometimes|boolean',
             'language' => 'sometimes|string',
             'default_priority_id' => 'sometimes|int',
-        ];
+        ]);
     }
 }
