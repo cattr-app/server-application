@@ -14,8 +14,6 @@ class SendInvitationMail
         $email = $event->invitation->email;
         $key = $event->invitation->key;
 
-        $language = Settings::scope('core')->get('language', 'en');
-
-        Mail::to($email)->locale($language)->send(new UserInvitedMail($key));
+        Mail::to($email)->locale(Settings::scope('core')->get('language', 'en'))->send(new UserInvitedMail($key));
     }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Events\InvitationCreated;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
@@ -63,5 +64,10 @@ class Invitation extends Model
      */
     protected $dates = [
         'expires_at',
+    ];
+
+    protected $dispatchesEvents = [
+        'created' => InvitationCreated::class,
+        'updated' => InvitationCreated::class,
     ];
 }

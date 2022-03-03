@@ -19,12 +19,12 @@ class UserObserver
     public function creating(User $user): void
     {
         if (!$user->password || request('send_invite')) {
-            $password = request('password') ?? Str::random(16);
+            $password = request('password') ?? Str::random();
 
             $user->password = $password;
             $user->invitation_sent = true;
 
-            $language = Settings::get('core', 'language', 'en');
+            $language = Settings::scope('core')->get('language', 'en');
 
             Mail::to($user->email)->locale($language)->send(new UserCreated($user->email, $password));
         }

@@ -3,11 +3,11 @@
 namespace App\Providers;
 
 use App;
-use App\Models\Invitation;
 use App\Models\User;
-use App\Observers\InvitationObserver;
 use App\Observers\UserObserver;
+use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
+use Laravel\Telescope\Console\PruneCommand;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -17,7 +17,6 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         User::observe(UserObserver::class);
-        Invitation::observe(InvitationObserver::class);
     }
 
     /**
@@ -28,6 +27,9 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.debug') && App::environment(['local', 'staging'])) {
             $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
             $this->app->register(TelescopeServiceProvider::class);
+            $this->app->booted(function () {
+                $this->app->make(Schedule::class)->command(PruneCommand::class)->daily();
+            });
         }
     }
 }
