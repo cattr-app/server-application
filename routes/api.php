@@ -18,7 +18,6 @@ use App\Http\Controllers\AuthController;
 use App\Http\Controllers\InstallationController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegistrationController;
-use App\Http\Controllers\Api\ScreenshotController;
 use App\Http\Controllers\Api\StatusController as ApiStatusController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Controller;
