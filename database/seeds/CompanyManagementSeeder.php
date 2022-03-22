@@ -18,5 +18,7 @@ class CompanyManagementSeeder extends Seeder
         if (!Settings::scope('core')->get('auto_thinning')) {
             Settings::scope('core')->set('auto_thinning', true);
         }
+
+        Settings::scope('core')->set('installed', true);
     }
 }

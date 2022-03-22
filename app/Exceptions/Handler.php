@@ -3,22 +3,17 @@
 namespace App\Exceptions;
 
 use App\Exceptions\Entities\MethodNotAllowedException;
-use App\Exceptions\Interfaces\InfoExtendedException;
-use App\Exceptions\Interfaces\TypedException;
-use Error;
 use Exception;
 use Flugg\Responder\Exceptions\ConvertsExceptions;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
-use RuntimeException;
 use Symfony\Component\HttpFoundation\Response;
-use Symfony\Component\HttpKernel\Exception\HttpException;
+use Flugg\Responder\Exceptions\Http\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
 use Throwable;
 
@@ -51,28 +46,27 @@ class Handler extends ExceptionHandler
      *
      * This is a great spot to send exceptions to Sentry, Bugsnag, etc.
      *
-     * @param Throwable $exception
-     *
-     * @throws Exception
-     */
-    public function report(Throwable $exception): void
-    {
-        if (!config('app.debug') && app()->bound('sentry') && $this->shouldReport($exception)) {
-            app('sentry')->captureException($exception);
-        }
-
-        parent::report($exception);
-    }
-
-    /**
-     * Convert an authentication exception into an unauthenticated response.
-     *
-     * @param Request                 $request
-     * @param AuthenticationException $exception
-     *
-     * @return Response
+     * @param Throwable $e
      * @throws Throwable
      */
+    public function report(Throwable $e): void
+    {
+        if ($this->shouldReport($e) && !config('app.debug') && app()->bound('sentry')) {
+            app('sentry')->captureException($e);
+        }
+
+        parent::report($e);
+    }
+
+//    /**
+//     * Convert an authentication exception into an unauthenticated response.
+//     *
+//     * @param Request                 $request
+//     * @param AuthenticationException $exception
+//     *
+//     * @return Response
+//     * @throws Throwable
+//     */
 //    protected function unauthenticated($request, AuthenticationException $exception)
 //    {
 //        return $this->render($request, $exception);
