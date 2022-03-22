@@ -2,13 +2,13 @@
 
 namespace App\Http\Controllers\Api\Statistic;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Helpers\ReportHelper;
-use App\Services\CoreSettingsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Validator;
+use Settings;
 
 /**
  * Class TimeUseReportController
@@ -19,16 +19,6 @@ use Illuminate\Support\Facades\Validator;
 class TimeUseReportController extends ReportController
 {
     /**
-     * @var ReportHelper
-     */
-    protected $reportHelper;
-
-    /**
-     * @var mixed
-     */
-    protected $timezone;
-
-    /**
      * @return string
      */
     public function getEventUniqueNamePart(): string
@@ -38,15 +28,10 @@ class TimeUseReportController extends ReportController
 
     /**
      * TimeUseReportController constructor.
-     * @param CoreSettingsService $settings
      * @param ReportHelper $reportHelper
      */
-    public function __construct(CoreSettingsService $settings, ReportHelper $reportHelper)
+    public function __construct(protected ReportHelper $reportHelper)
     {
-        $this->timezone = $settings->get('timezone', 'UTC');
-        $this->reportHelper = $reportHelper;
-
-        parent::__construct();
     }
 
     /**
@@ -103,7 +88,7 @@ class TimeUseReportController extends ReportController
         $timezone = $request->input('timezone', []);
 
         if (!$timezone) {
-            $timezone = $this->timezone;
+            $timezone = Settings::scope('core')->get('timezone', 'UTC');
         }
 
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');

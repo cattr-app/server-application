@@ -6,24 +6,17 @@ use Filter;
 use App\Helpers\ReportHelper;
 use App\Models\Project;
 use App\Models\ProjectReport;
-use App\Services\CoreSettingsService;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use DB;
+use Settings;
 use Validator;
 
 class ProjectReportController extends ReportController
 {
-    protected $timezone;
-
-    protected ReportHelper $reportHelper;
-
-    public function __construct(CoreSettingsService $settings, ReportHelper $reportHelper)
+    public function __construct(protected ReportHelper $reportHelper)
     {
-        $this->timezone = $settings->get('timezone', 'UTC');
-        $this->reportHelper = $reportHelper;
-
         parent::__construct();
     }
 
@@ -70,7 +63,7 @@ class ProjectReportController extends ReportController
         $uids = $request->input('uids', []);
         $pids = $request->input('pids', []);
 
-        $timezone = $this->timezone;
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)
@@ -263,7 +256,7 @@ class ProjectReportController extends ReportController
 
         $uid = $request->uid;
 
-        $timezone = $this->timezone;
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
         $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P'); # Format +00:00
 
         $startAt = Carbon::parse($request->input('start_at'), $timezone)

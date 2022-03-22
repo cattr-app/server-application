@@ -13,32 +13,16 @@ use Filter;
 use App\Models\Task;
 use App\Models\TaskHistory;
 use App\Models\User;
-use App\Services\CoreSettingsService;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use DB;
 use Event;
 use Illuminate\Support\Arr;
+use Settings;
 
 class TaskController extends ItemController
 {
-    /**
-     * @var CoreSettingsService
-     */
-    protected CoreSettingsService $settings;
-
-    /**
-     * CompanySettingsController constructor.
-     * @param CoreSettingsService $settings
-     */
-    public function __construct(CoreSettingsService $settings)
-    {
-        parent::__construct();
-
-        $this->settings = $settings;
-    }
-
     public function getItemClass(): string
     {
         return Task::class;
@@ -221,13 +205,13 @@ class TaskController extends ItemController
             return $data;
         });
 
-        Filter::listen($this->getEventUniqueName('request.item.create'), function (array $data) {
+        Filter::listen($this->getEventUniqueName('request.item.create'), static function (array $data) {
             if (empty($data['priority_id'])) {
                 $project = Project::where(['id' => $data['project_id']])->first();
                 if (isset($project) && !empty($project->default_priority_id)) {
                     $data['priority_id'] = $project->default_priority_id;
-                } elseif ($this->settings->get('default_priority_id') !== null) {
-                    $data['priority_id'] = $this->settings->get('default_priority_id');
+                } elseif (Settings::scope('core')->get('default_priority_id') !== null) {
+                    $data['priority_id'] = Settings::scope('core')->get('default_priority_id');
                 } elseif (($priority = Priority::query()->first()) !== null) {
                     $data['priority_id'] = $priority->id;
                 } else {
@@ -308,13 +292,13 @@ class TaskController extends ItemController
      */
     public function edit(EditTaskRequest $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('request.item.edit'), function (array $data) {
+        Filter::listen($this->getEventUniqueName('request.item.edit'), static function (array $data) {
             if (empty($data['priority_id'])) {
                 $project = Project::where(['id' => $data['project_id']])->first();
                 if (isset($project) && !empty($project->default_priority_id)) {
                     $data['priority_id'] = $project->default_priority_id;
-                } elseif ($this->settings->get('default_priority_id') !== null) {
-                    $data['priority_id'] = $this->settings->get('default_priority_id');
+                } elseif (Settings::scope('core')->get('default_priority_id') !== null) {
+                    $data['priority_id'] = Settings::scope('core')->get('default_priority_id');
                 } elseif (($priority = Priority::query()->first()) !== null) {
                     $data['priority_id'] = $priority->id;
                 } else {
