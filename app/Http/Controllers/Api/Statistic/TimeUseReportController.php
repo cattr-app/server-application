@@ -13,8 +13,6 @@ use Settings;
 /**
  * Class TimeUseReportController
  *
- * @deprecated
- * @codeCoverageIgnore
  */
 class TimeUseReportController extends ReportController
 {
@@ -83,7 +81,7 @@ class TimeUseReportController extends ReportController
             );
         }
 
-        $user_ids = $request->input('user_ids', []);
+        $user_ids = $request->input('users', []);
 
         $timezone = $request->input('timezone', []);
 

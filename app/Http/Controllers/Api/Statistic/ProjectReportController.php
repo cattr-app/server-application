@@ -2,103 +2,47 @@
 
 namespace App\Http\Controllers\Api\Statistic;
 
-use Filter;
-use App\Helpers\ReportHelper;
+use App\Http\Requests\Reports\ProjectReportRequest;
+use App\Models\User;
 use App\Models\Project;
-use App\Models\ProjectReport;
+use App\Reports\ProjectReportExport;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use DB;
+use Illuminate\Http\Response;
 use Settings;
-use Validator;
+use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProjectReportController extends ReportController
 {
-    public function __construct(protected ReportHelper $reportHelper)
+    public function __invoke(ProjectReportRequest $request): JsonResponse
     {
-        parent::__construct();
-    }
-
-    public static function getControllerRules(): array
-    {
-        return [
-            'report' => 'project-report.list',
-            'projects' => 'project-report.projects',
-            'task' => 'project-report.list',
-            'days' => 'time-duration.list',
-            'screenshots' => 'project-report.screenshots'
-        ];
-    }
-
-    public function getEventUniqueNamePart(): string
-    {
-        return 'project-report';
-    }
-
-    public function report(Request $request): JsonResponse
-    {
-        $validator = Validator::make(
-            $request->all(),
-            Filter::process(
-                $this->getEventUniqueName('validation.report.show'),
-                $this->getValidationRules()
-            )
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process(
-                    $this->getEventUniqueName('answer.error.report.show'),
-                    [
-                        'error_type' => 'validation',
-                        'message' => 'Validation error',
-                        'info' => $validator->errors()
-                    ]
-                ),
-                400
-            );
-        }
-
-        $uids = $request->input('uids', []);
-        $pids = $request->input('pids', []);
-
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
-        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
 
-        $startAt = Carbon::parse($request->input('start_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $endAt = Carbon::parse($request->input('end_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $pids = $pids ?? Project::all();
-
-
-        $collection = $this->reportHelper->getProjectReportQuery(
-            $uids,
-            $pids,
-            $startAt,
-            $endAt,
-            $timezoneOffset
-        )->get();
-        $resultCollection = $this->reportHelper->getProcessedProjectReportCollection($collection);
-
-        $result = [
-            'projects' => $resultCollection,
-            'timezone' => "{$timezone} ($timezoneOffset)"
-        ];
-
-        return new JsonResponse(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.report.show'),
-                $result
-            )
-        );
+        return responder()->success(
+            (new ProjectReportExport(
+                $request->input('users', User::all()->pluck('id')->toArray()),
+                $request->input('projects', Project::all()->pluck('id')->toArray()),
+                Carbon::parse($request->input('start_at'))
+                    ->setTimezone($timezone),
+                Carbon::parse($request->input('end_at'))
+                    ->setTimezone($timezone),
+            ))->getReport()
+        )->respond();
     }
 
+    public function download(ProjectReportRequest $request): Response|BinaryFileResponse
+    {
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+
+        return (new ProjectReportExport(
+            $request->input('users', User::all()->pluck('id')->toArray()),
+            $request->input('projects', Project::all()->pluck('id')->toArray()),
+            Carbon::parse($request->input('start_at'))
+                ->setTimezone($timezone),
+            Carbon::parse($request->input('end_at'))
+                ->setTimezone($timezone),
+        ))->download('report.xlsx');
+    }
     /**
      * @api             {get,post} /project-report/list List
      * @apiDescription  Get report
@@ -191,17 +135,6 @@ class ProjectReportController extends ReportController
      * @apiUse          UnauthorizedError
      * @apiUse          ValidationError
      */
-
-    public function getValidationRules(): array
-    {
-        return [
-            'uids' => 'exists:users,id|array',
-            'pids' => 'exists:projects,id|array',
-            'start_at' => 'required|date',
-            'end_at' => 'required|date',
-        ];
-    }
-
     /**
      * @apiDeprecated   since 1.0.0
      * @api             {get,post} /time-duration/list Days
@@ -225,66 +158,6 @@ class ProjectReportController extends ReportController
      *
      * @apiPermission   project_report_projects
      */
-    /**
-     * @param int $id
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function task(int $id, Request $request): JsonResponse
-    {
-        $validator = Validator::make(
-            $request->all(),
-            Filter::process(
-                $this->getEventUniqueName('validation.report.show'),
-                $this->getValidationRules()
-            )
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process(
-                    $this->getEventUniqueName('answer.error.report.show'),
-                    [
-                        'error_type' => 'validation',
-                        'message' => 'Validation error',
-                        'info' => $validator->errors()
-                    ]
-                ),
-                400
-            );
-        }
-
-        $uid = $request->uid;
-
-        $timezone = Settings::scope('core')->get('timezone', 'UTC');
-        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P'); # Format +00:00
-
-        $startAt = Carbon::parse($request->input('start_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $endAt = Carbon::parse($request->input('end_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $report = ProjectReport::query()
-            ->select(
-                DB::raw("DATE(CONVERT_TZ(date, '+00:00', '{$timezoneOffset}')) as date"),
-                DB::raw('SUM(duration) as duration')
-            )
-            ->where('task_id', $id)
-            ->where('user_id', $uid)
-            ->where('date', '>=', $startAt)
-            ->where('date', '<', $endAt)
-            ->get(['date', 'duration']);
-
-        return new JsonResponse(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.report.show'),
-                $report
-            )
-        );
-    }
 
     /**
      * @apiDeprecated   since 1.0.0
@@ -293,5 +166,17 @@ class ProjectReportController extends ReportController
      * @apiVersion      1.0.0
      * @apiName         Screenshots
      * @apiGroup        Project Report
+     */
+
+    /**
+     * @apiDeprecated   since 4.0.0
+     * @api             {get,post} /project-report/list/tasks/{id} Task
+     * @apiDescription  Get report for task
+     *
+     * @apiVersion      1.0.0
+     * @apiName         Projects
+     * @apiGroup        Project Report
+     *
+     * @apiPermission   project_report_task
      */
 }

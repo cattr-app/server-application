@@ -17,19 +17,11 @@ use Illuminate\Http\Request;
 class InvitationController extends ItemController
 {
     /**
-     * @var InvitationService
-     */
-    protected InvitationService $service;
-
-    /**
      * InvitationController constructor.
      * @param InvitationService $service
      */
-    public function __construct(InvitationService $service)
+    public function __construct(protected InvitationService $service)
     {
-        parent::__construct();
-
-        $this->service = $service;
     }
 
     /**

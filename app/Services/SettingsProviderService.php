@@ -41,9 +41,7 @@ class SettingsProviderService implements SettingsProvider
 
         $result = $this->model->whereModuleName($scope)
                               ->get()
-                              ->map(static function (Setting $item) {
-                                  return [$item->key => $item->value];
-                              })
+                              ->map(static fn (Setting $item) => [$item->key => $item->value])
                               ->collapse()
                               ->toArray();
 

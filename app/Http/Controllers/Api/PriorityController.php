@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Priority\CountPriorityRequest;
 use App\Http\Requests\Priority\CreatePriorityRequest;
-use App\Http\Requests\Priority\ListPriorityRequest;
 use App\Http\Requests\Priority\ShowPriorityRequest;
 use App\Http\Requests\Priority\UpdatePriorityRequest;
 use App\Http\Requests\Project\DestroyProjectRequest;

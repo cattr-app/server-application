@@ -2,6 +2,8 @@
 
 namespace App\Providers;
 
+use Illuminate\Console\Scheduling\Schedule;
+use Laravel\Telescope\Console\PruneCommand;
 use Laravel\Telescope\IncomingEntry;
 use Laravel\Telescope\Telescope;
 use Laravel\Telescope\TelescopeApplicationServiceProvider;
@@ -13,7 +15,9 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
      */
     public function register(): void
     {
-        // Telescope::night();
+        Telescope::night();
+
+        $this->app->register(\Laravel\Telescope\TelescopeServiceProvider::class);
 
         $this->hideSensitiveRequestDetails();
 
@@ -27,6 +31,10 @@ class TelescopeServiceProvider extends TelescopeApplicationServiceProvider
                 $entry->isFailedJob() ||
                 $entry->isScheduledTask() ||
                 $entry->hasMonitoredTag();
+        });
+
+        $this->app->booted(function () {
+            $this->app->make(Schedule::class)->command(PruneCommand::class)->daily();
         });
     }
 

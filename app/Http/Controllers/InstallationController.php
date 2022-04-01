@@ -15,7 +15,6 @@ use Illuminate\Routing\Controller;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Facades\DB;
 use Settings;
-use Tymon\JWTAuth\Console\JWTGenerateSecretCommand;
 
 class InstallationController extends Controller
 {
@@ -74,7 +73,6 @@ class InstallationController extends Controller
             'APP_DEBUG' => 'false',
         ]);
 
-        Artisan::call(JWTGenerateSecretCommand::class, ['--force' => true]);
         Artisan::call(ConfigCacheCommand::class);
 
         $connectionName = config('database.default');

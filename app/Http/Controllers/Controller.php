@@ -21,10 +21,6 @@ class Controller extends BaseController
     use DispatchesJobs;
     use ValidatesRequests;
 
-    public function __construct()
-    {
-    }
-
     public static function getControllerRules(): array
     {
         return [];

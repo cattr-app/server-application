@@ -18,7 +18,6 @@ class CompanySettingsController extends Controller
      */
     public function __construct(protected Priority $priorities)
     {
-        parent::__construct();
     }
 
     /**

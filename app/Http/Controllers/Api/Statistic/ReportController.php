@@ -10,9 +10,4 @@ abstract class ReportController extends Controller
     {
         return "{$eventName}.{$this->getEventUniqueNamePart()}";
     }
-
-    /**
-     * Returns unique part of event name for current item
-     */
-    abstract public function getEventUniqueNamePart(): string;
 }

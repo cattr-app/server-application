@@ -8,11 +8,9 @@ use App\Http\Requests\Project\DestroyProjectRequest;
 use App\Http\Requests\Project\ShowProjectRequest;
 use Filter;
 use App\Models\Project;
-use App\Models\Role;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Auth;
 use DB;
 
 class ProjectController extends ItemController

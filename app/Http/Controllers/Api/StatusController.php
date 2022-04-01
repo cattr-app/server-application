@@ -4,7 +4,6 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Status\CountStatusRequest;
 use App\Http\Requests\Status\CreateStatusRequest;
-use App\Http\Requests\Status\ListStatusRequest;
 use App\Http\Requests\Status\ShowStatusRequest;
 use App\Http\Requests\Status\UpdateStatusRequest;
 use App\Http\Requests\Status\DestroyStatusRequest;
@@ -15,14 +14,6 @@ use Illuminate\Http\Request;
 
 class StatusController extends ItemController
 {
-    /**
-     * StatusController constructor.
-     */
-    public function __construct()
-    {
-        parent::__construct();
-    }
-
     /**
      * Get the validation rules.
      *

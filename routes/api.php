@@ -154,9 +154,10 @@ Route::group([
     $router->any('roles/count', [RoleController::class, 'count']);
 
     // Statistic routes
-    $router->any('project-report/list', [ProjectReportController::class, 'report']);
-    $router->any('project-report/list/tasks/{id}', [ProjectReportController::class, 'task']);
-    $router->any('time-use-report/list', [TimeUseReportController::class, 'report']);
+    $router->post('report/project', [ProjectReportController::class, '__invoke']);
+    $router->post('report/project/download', [ProjectReportController::class, 'download']);
+    $router->post('time/report', [TimeUseReportController::class, '__invoke']);
+    $router->post('time/report/download', [TimeUseReportController::class, 'download']);
 
     // About
     $router->get('about', [AboutController::class, '__invoke']);

@@ -32,7 +32,6 @@ class TimeIntervalController extends ItemController
 {
     public function __construct(protected ScreenshotService $screenshotService)
     {
-        parent::__construct();
     }
 
     public function getItemClass(): string
