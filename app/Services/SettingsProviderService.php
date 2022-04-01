@@ -5,6 +5,7 @@ namespace App\Services;
 use App\Contracts\SettingsProvider;
 use App\Models\Setting;
 use Exception;
+use PDOException;
 
 class SettingsProviderService implements SettingsProvider
 {
@@ -40,10 +41,10 @@ class SettingsProviderService implements SettingsProvider
         }
 
         $result = $this->model->whereModuleName($scope)
-                              ->get()
-                              ->map(static fn (Setting $item) => [$item->key => $item->value])
-                              ->collapse()
-                              ->toArray();
+            ->get()
+            ->map(static fn(Setting $item) => [$item->key => $item->value])
+            ->collapse()
+            ->toArray();
 
         try {
             cache()->forever("settings:$scope", $result);
@@ -71,21 +72,23 @@ class SettingsProviderService implements SettingsProvider
             if (!isset($cached[$key])) {
                 $cached[$key] = optional(
                     $this->model::where([
-                                        'module_name' => $scope,
-                                        'key' => $key,
-                                    ])->first()
+                            'module_name' => $scope,
+                            'key' => $key,
+                        ])->first()
                 )->value ?? $default;
 
                 cache(["settings:$scope" => $cached]);
             }
 
             return $cached[$key];
+        } catch (PDOException) {
+            return $default;
         } catch (Exception) {
             return optional(
                 $this->model::where([
-                           'module_name' => $scope,
-                           'key' => $key,
-                       ])->first()
+                        'module_name' => $scope,
+                        'key' => $key,
+                    ])->first()
             )->value ?? $default;
         }
     }
