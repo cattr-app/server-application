@@ -19,118 +19,95 @@ class AboutController extends Controller
 {
     private Client $client;
 
-    private ?string $statsRootUrl;
-    private string $statsReleaseUrl;
-    private string $statsImagesUrl;
-    private string $statsModulesUrl;
-
-    public function __construct(Client $client)
+    public function __construct()
     {
-        $this->statsRootUrl = config('app.stats_collector_url');
-        $this->statsReleaseUrl = "$this->statsRootUrl/release/";
-        $this->statsImagesUrl = "$this->statsRootUrl/image/";
-        $this->statsModulesUrl = "$this->statsRootUrl/modules/";
-        $this->client = $client;
-    }
-
-    /**
-     * @param string|null $instanceId
-     * @return array
-     * @throws JsonException
-     */
-    private function requestReleaseInfo(?string $instanceId = null): array
-    {
-        $url = $this->statsReleaseUrl . config('app.version');
-        $options = ['headers' => ($instanceId) ? ['x-cattr-instance' => $instanceId] : []];
-
-        return json_decode(
-            $this->client->get($url, $options)->getBody()->getContents(),
-            true,
-            512,
-            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-        );
-    }
-
-    /**
-     * @param $instanceId
-     * @return array
-     * @throws JsonException
-     */
-    private function requestModulesInfo($instanceId): array
-    {
-        $options = [
-            'json' => ModuleHelper::getModulesInfo(),
-            'headers' => ($instanceId) ? ['x-cattr-instance' => $instanceId] : []
-        ];
-
-        return array_map(static function ($el) {
-            $el['version'] = (string)(new Version($el['name']));
-
-            return $el;
-        }, json_decode(
-            $this->client->post($this->statsModulesUrl, $options)->getBody()->getContents(),
-            true,
-            512,
-            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-        )['modules']);
-    }
-
-    /**
-     * @param string $imageVersion
-     * @return array
-     * @throws JsonException
-     */
-    private function requestImageInfo(string $imageVersion): array
-    {
-        $url = $this->statsImagesUrl . $imageVersion;
-        return json_decode(
-            $this->client->get($url)->getBody()->getContents(),
-            true,
-            512,
-            JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
-        );
+        $this->client = new Client([
+            'base_uri' => config('app.stats_collector_url') . '/v2/',
+            'headers' => ['x-cattr-instance' => Settings::scope('core')->get('instance')],
+        ]);
     }
 
     /**
      * Returns information about this instance.
+     * @throws JsonException
      */
     public function __invoke(): JsonResponse
     {
-        if (!$this->statsRootUrl) {
-            return new JsonResponse([
-                'message' => 'Stats collector URL is not set'
-            ], 500);
-        }
+        $imageVersion = getenv('IMAGE_VERSION', true) ?: null;
 
-        $instanceId = Settings::scope('core')->get('instance');
-        $imageVersion = getenv('IMAGE_VERSION');
+        $releaseInfo = $this->requestReleaseInfo();
+        $modulesInfo = $this->requestModulesInfo();
+        $imageInfo = ($imageVersion) ? $this->requestImageInfo($imageVersion) : false;
 
-        try {
-            $releaseInfo = $this->requestReleaseInfo($instanceId);
-            $modulesInfo = $this->requestModulesInfo($instanceId);
-            $imageInfo = ($imageVersion) ? $this->requestImageInfo($imageVersion) : false;
-        } catch (Exception $e) {
-            return new JsonResponse([
-                'message' => 'Failed to get information from the server'
-            ]);
-        }
-
-        return new JsonResponse([
+        return responder()->success([
             'app' => [
                 'version' => config('app.version'),
-                'instance_id' => $instanceId,
-                'vulnerable' => $releaseInfo['vulnerable'],
-                'last_version' => $releaseInfo['lastVersion'],
-                'message' => $releaseInfo['flashMessage'],
+                'instance_id' => Settings::scope('core')->get('instance'),
+                'vulnerable' => optional($releaseInfo)->vulnerable,
+                'last_version' => optional($releaseInfo)->lastVersion,
+                'message' => optional($releaseInfo)->flashMessage,
             ],
             'modules' => $modulesInfo,
-            'image' => (!$imageInfo) ? false : [
+            'image' => [
                 'version' => $imageVersion,
-                'vulnerable' => $imageInfo['vulnerable'],
-                'last_version' => $imageInfo['lastVersion'],
-                'message' => $imageInfo['flashMessage'],
+                'vulnerable' => optional($imageInfo)->vulnerable,
+                'last_version' => optional($imageInfo)->lastVersion,
+                'message' => optional($imageInfo)->flashMessage,
             ]
-        ]);
+        ])->respond();
+    }
+
+    private function requestReleaseInfo(): ?object
+    {
+        try {
+            return json_decode(
+                $this->client->get('release/' . config('app.version'))->getBody()->getContents(),
+                false,
+                512,
+                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+            );
+        } catch (Exception) {
+            return null;
+        }
+    }
+
+    /**
+     * @throws JsonException
+     */
+    private function requestModulesInfo(): array
+    {
+        $options = [
+            'json' => ModuleHelper::getModulesInfo(),
+        ];
+
+        try {
+            return array_map(static function ($el) {
+                $el['version'] = (string)(new Version($el['name']));
+
+                return $el;
+            }, json_decode(
+                $this->client->post('modules', $options)->getBody()->getContents(),
+                true,
+                512,
+                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+            )['modules']);
+        } catch (Exception) {
+            return ModuleHelper::getModulesInfo();
+        }
+    }
+
+    private function requestImageInfo(string $imageVersion): ?object
+    {
+        try {
+            return json_decode(
+                $this->client->get("image/$imageVersion")->getBody()->getContents(),
+                false,
+                512,
+                JSON_THROW_ON_ERROR | JSON_THROW_ON_ERROR
+            );
+        } catch (Exception) {
+            return null;
+        }
     }
 
     /**
@@ -138,7 +115,7 @@ class AboutController extends Controller
      */
     public function storage(): JsonResponse
     {
-        return response()->json([
+        return responder()->success([
             'space' => [
                 'left' => StorageCleaner::getFreeSpace(),
                 'used' => StorageCleaner::getUsedSpace(),
@@ -151,13 +128,13 @@ class AboutController extends Controller
                 'now' => cache('thinning_now'),
                 'last' => cache('last_thin'),
             ]
-        ]);
+        ])->respond();
     }
 
     public function startStorageClean(): JsonResponse
     {
         Artisan::queue(RotateScreenshots::class);
 
-        return response()->json(['message' => 'Ok']);
+        return responder()->success()->respond(204);
     }
 }
