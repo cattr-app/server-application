@@ -1,10 +1,12 @@
-openapi: 3.0.0
+openapi: 3.1.0
 info:
-  version: '4.0.0'
+  version: '3.0.4'
   title: 'Cattr'
 servers:
   - url: 'http://localhost:8000'
     description: 'Local server served by Artisan'
+  - url: 'https://demo.cattr.app/api'
+    description: 'Demo Cattr server'
 paths:
   /user:
     get:
@@ -69,4 +71,4 @@ components:
       type: http
       scheme: bearer
 security:
-  - bearerAuth: [] 
+  - bearerAuth: []

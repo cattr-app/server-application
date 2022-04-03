@@ -164,6 +164,8 @@ Route::group([
     $router->get('about/storage', [AboutController::class, 'storage']);
     $router->post('about/storage', [AboutController::class, 'startStorageClean']);
 
+    $router->get('about/reports', [AboutController::class, 'reports']);
+
     //Company settings
     $router->get('company-settings', [CompanySettingsController::class, 'index']);
     $router->patch('company-settings', [CompanySettingsController::class, 'update']);

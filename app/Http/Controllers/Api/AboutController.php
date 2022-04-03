@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Console\Commands\RotateScreenshots;
 use App\Helpers\ModuleHelper;
+use App\Helpers\ReportHelper;
 use App\Helpers\StorageCleaner;
 use App\Helpers\Version;
 use Artisan;
@@ -13,6 +14,7 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use JsonException;
+use Nette\Utils\Json;
 use Settings;
 
 class AboutController extends Controller
@@ -25,6 +27,13 @@ class AboutController extends Controller
             'base_uri' => config('app.stats_collector_url') . '/v2/',
             'headers' => ['x-cattr-instance' => Settings::scope('core')->get('instance')],
         ]);
+    }
+
+    public function reports(): JsonResponse
+    {
+        return responder()->success([
+            'types' => ReportHelper::getAvailableReportFormats(),
+        ])->respond();
     }
 
     /**

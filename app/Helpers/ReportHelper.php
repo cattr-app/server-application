@@ -8,8 +8,10 @@ use App\Models\TimeInterval;
 use App\Models\User;
 use Carbon\Carbon;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
 use JsonException;
+use Maatwebsite\Excel\Excel;
 use RuntimeException;
 
 class ReportHelper
@@ -86,6 +88,25 @@ class ReportHelper
         });
 
         return collect($resultCollection);
+    }
+
+    public static function getReportFormat(Request $request)
+    {
+        $format = array_flip(self::getAvailableReportFormats())[$request->header('accept')] ?? null;
+
+        return $format === 'pdf' ? Excel::MPDF : $format;
+    }
+
+    public static function getAvailableReportFormats(): array
+    {
+        return [
+            strtolower(Excel::CSV) => 'text/csv',
+            strtolower(Excel::XLSX) => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'pdf' => 'application/pdf',
+            strtolower(Excel::XLS) => 'application/vnd.ms-excel',
+            strtolower(Excel::ODS) => 'application/vnd.oasis.opendocument.spreadsheet',
+            strtolower(Excel::HTML) => 'text/html',
+        ];
     }
 
     /**

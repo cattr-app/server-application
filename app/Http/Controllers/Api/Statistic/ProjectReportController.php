@@ -2,15 +2,15 @@
 
 namespace App\Http\Controllers\Api\Statistic;
 
+use App\Helpers\ReportHelper;
 use App\Http\Requests\Reports\ProjectReportRequest;
+use App\Jobs\GenerateAndSendReport;
 use App\Models\User;
 use App\Models\Project;
 use App\Reports\ProjectReportExport;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Response;
 use Settings;
-use Symfony\Component\HttpFoundation\BinaryFileResponse;
 
 class ProjectReportController extends ReportController
 {
@@ -26,22 +26,28 @@ class ProjectReportController extends ReportController
                     ->setTimezone($timezone),
                 Carbon::parse($request->input('end_at'))
                     ->setTimezone($timezone),
-            ))->getReport()
+            ))->collection()
         )->respond();
     }
 
-    public function download(ProjectReportRequest $request): Response|BinaryFileResponse
+    public function download(ProjectReportRequest $request): JsonResponse
     {
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 
-        return (new ProjectReportExport(
-            $request->input('users', User::all()->pluck('id')->toArray()),
-            $request->input('projects', Project::all()->pluck('id')->toArray()),
-            Carbon::parse($request->input('start_at'))
-                ->setTimezone($timezone),
-            Carbon::parse($request->input('end_at'))
-                ->setTimezone($timezone),
-        ))->download('report.xlsx');
+        GenerateAndSendReport::dispatchAfterResponse(
+            new ProjectReportExport(
+                $request->input('users', User::all()->pluck('id')->toArray()),
+                $request->input('projects', Project::all()->pluck('id')->toArray()),
+                Carbon::parse($request->input('start_at'))
+                    ->setTimezone($timezone),
+                Carbon::parse($request->input('end_at'))
+                    ->setTimezone($timezone),
+            ),
+            $request->user(),
+            ReportHelper::getReportFormat($request),
+        );
+
+        return responder()->success()->respond(204);
     }
     /**
      * @api             {get,post} /project-report/list List
