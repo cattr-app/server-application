@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Models\TaskComment;
 use App\Models\User;
 use App\Notifications\CommentMention;
