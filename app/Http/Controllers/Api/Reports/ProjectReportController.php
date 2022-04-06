@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Statistic;
+namespace App\Http\Controllers\Api\Reports;
 
 use App\Helpers\ReportHelper;
 use App\Http\Requests\Reports\ProjectReportRequest;
@@ -26,7 +26,7 @@ class ProjectReportController extends ReportController
                     ->setTimezone($timezone),
                 Carbon::parse($request->input('end_at'))
                     ->setTimezone($timezone),
-            ))->collection()
+            ))->collection(),
         )->respond();
     }
 

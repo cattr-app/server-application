@@ -24,6 +24,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Settings;
 use Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Validator;
@@ -42,6 +43,10 @@ class TimeIntervalController extends ItemController
     public function create(CreateTimeIntervalRequest $request): JsonResponse
     {
         $intervalData = $request->validated();
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+
+        $intervalData['start_at'] = Carbon::parse($intervalData['start_at'])->setTimezone($timezone);
+        $intervalData['end_at'] = Carbon::parse($intervalData['end_at'])->setTimezone($timezone);
 
         $timeInterval = TimeInterval::create($intervalData);
 

@@ -6,9 +6,9 @@ use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\PriorityController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectMemberController;
-use App\Http\Controllers\Api\Statistic\DashboardController;
-use App\Http\Controllers\Api\Statistic\ProjectReportController;
-use App\Http\Controllers\Api\Statistic\TimeUseReportController;
+use App\Http\Controllers\Api\Reports\DashboardController;
+use App\Http\Controllers\Api\Reports\ProjectReportController;
+use App\Http\Controllers\Api\Reports\TimeUseReportController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TimeController;
 use App\Http\Controllers\Api\TimeIntervalController;
@@ -140,9 +140,6 @@ Route::group([
     $router->post('time-intervals/remove', [TimeIntervalController::class, 'destroy']);
     $router->post('time-intervals/bulk-remove', [TimeIntervalController::class, 'bulkDestroy']);
 
-    $router->any('time-intervals/dashboard', [DashboardController::class, 'timeIntervals']);
-    $router->any('time-intervals/day-duration', [DashboardController::class, 'timePerDay']);
-
     $router->put('time-intervals/app', [TimeIntervalController::class, 'trackApp']);
 
     //Time routes
@@ -156,8 +153,9 @@ Route::group([
     // Statistic routes
     $router->post('report/project', [ProjectReportController::class, '__invoke']);
     $router->post('report/project/download', [ProjectReportController::class, 'download']);
-    $router->post('time/report', [TimeUseReportController::class, '__invoke']);
-    $router->post('time/report/download', [TimeUseReportController::class, 'download']);
+    $router->post('report/time', [TimeUseReportController::class, '__invoke']);
+    $router->post('report/time/download', [TimeUseReportController::class, 'download']);
+    $router->post('report/dashboard', [DashboardController::class, '__invoke']);
 
     // About
     $router->get('about', [AboutController::class, '__invoke']);

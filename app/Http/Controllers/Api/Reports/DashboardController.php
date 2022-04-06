@@ -1,19 +1,38 @@
 <?php
 
-namespace App\Http\Controllers\Api\Statistic;
+namespace App\Http\Controllers\Api\Reports;
 
-use Filter;
+use App\Http\Requests\Reports\DashboardRequest;
 use App\Models\Project;
+use App\Models\User;
+use App\Reports\DashboardExport;
+use Filter;
 use App\Models\TimeInterval;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Auth;
 use DB;
+use Settings;
 use Validator;
 
 class DashboardController extends ReportController
 {
+    public function __invoke(DashboardRequest $request): JsonResponse
+    {
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+
+        return responder()->success(
+            (new DashboardExport(
+                $request->input('users') ?? User::all()->pluck('id')->toArray(),
+                $request->input('projects') ?? Project::all()->pluck('id')->toArray(),
+                Carbon::parse($request->input('start_at'))
+                    ->setTimezone($timezone),
+                Carbon::parse($request->input('end_at'))
+                    ->setTimezone($timezone),
+            ))->collection()->all(),
+        )->respond();
+    }
+
     public static function getControllerRules(): array
     {
         return [

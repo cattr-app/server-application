@@ -140,7 +140,7 @@ class ReportHelper
             ->whereBetween('time_intervals.start_at', [$startAt, $endAt])
             ->whereNull('time_intervals.deleted_at')
             ->whereIn('users.id', $users)
-            ->groupBy(['tasks.id', 'users.id'])
+            ->groupBy(['tasks.id', 'users.id', 'time_intervals.start_at'])
             ->orderBy('time_intervals.start_at');
     }
 

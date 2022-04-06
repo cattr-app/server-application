@@ -22,8 +22,8 @@ class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize
     use Exportable;
 
     public function __construct(
-        private array $users,
-        private array $projects,
+        private ?array $users,
+        private ?array $projects,
         private Carbon $startAt,
         private Carbon $endAt
     ) {
@@ -37,6 +37,7 @@ class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize
             $el->hour = $date->hour;
             $el->day = $date->format('Y-m-d');
             $el->minute = round($date->minute, -1);
+            $el->duration = Carbon::make($el->end_at)?->diffInSeconds(Carbon::make($el->start_at));
 
             return $el;
         })->groupBy('project_id')->map(
@@ -47,7 +48,7 @@ class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize
                     static fn(
                         $acc,
                         $el
-                    ) => $acc + Carbon::make($el->end_at)?->diffInSeconds(Carbon::make($el->start_at)),
+                    ) => $acc + $el->duration,
                     0
                 ),
                 'users' => $collection->groupBy('user_id')->map(
@@ -59,7 +60,7 @@ class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize
                             static fn(
                                 $acc,
                                 $el
-                            ) => $acc + Carbon::make($el->end_at)?->diffInSeconds(Carbon::make($el->start_at)),
+                            ) => $acc + $el->duration,
                             0
                         ),
                         'tasks' => $collection->groupBy('task_id')->map(
@@ -70,7 +71,7 @@ class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize
                                     static fn(
                                         $acc,
                                         $el
-                                    ) => $acc + Carbon::make($el->end_at)?->diffInSeconds(Carbon::make($el->start_at)),
+                                    ) => $acc + $el->duration,
                                     0
                                 ),
                                 'intervals' => $collection->groupBy('day')->map(
@@ -80,7 +81,7 @@ class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize
                                             static fn(
                                                 $acc,
                                                 $el
-                                            ) => $acc + Carbon::make($el->end_at)?->diffInSeconds(Carbon::make($el->start_at)),
+                                            ) => $acc + $el->duration,
                                             0
                                         ),
                                         'items' => $collection->groupBy('hour')->map(
@@ -101,7 +102,6 @@ class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize
      * @param $row
      * @return array
      * @throws Exception
-     * @TODO
      */
     public function map($row): array
     {

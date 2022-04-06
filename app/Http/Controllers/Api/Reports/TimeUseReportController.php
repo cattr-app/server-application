@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Controllers\Api\Statistic;
+namespace App\Http\Controllers\Api\Reports;
 
 use Filter;
 use App\Helpers\ReportHelper;

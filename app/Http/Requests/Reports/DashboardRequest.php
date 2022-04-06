@@ -5,7 +5,7 @@ namespace App\Http\Requests\Reports;
 use App\Http\Requests\FormRequest;
 use Filter;
 
-class ProjectReportRequest extends FormRequest
+class DashboardRequest extends FormRequest
 {
     /**
      * Determine if user authorized to make this request.
@@ -14,7 +14,7 @@ class ProjectReportRequest extends FormRequest
      */
     public function authorize(): bool
     {
-        return auth()->user()->hasRole('admin');
+        return true;
     }
 
     /**
@@ -24,7 +24,7 @@ class ProjectReportRequest extends FormRequest
      */
     public function rules(): array
     {
-        return Filter::process('validation.report.show.project', [
+        return Filter::process('validation.report.show.dashboard', [
             'users' => 'nullable|exists:users,id|array',
             'projects' => 'nullable|exists:projects,id|array',
             'start_at' => 'required|date',
