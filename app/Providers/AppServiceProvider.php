@@ -5,9 +5,7 @@ namespace App\Providers;
 use App;
 use App\Models\User;
 use App\Observers\UserObserver;
-use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Support\ServiceProvider;
-use Laravel\Telescope\Console\PruneCommand;
 
 class AppServiceProvider extends ServiceProvider
 {

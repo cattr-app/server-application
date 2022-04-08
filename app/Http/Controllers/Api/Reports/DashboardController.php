@@ -6,16 +6,11 @@ use App\Http\Requests\Reports\DashboardRequest;
 use App\Models\Project;
 use App\Models\User;
 use App\Reports\DashboardExport;
-use Filter;
-use App\Models\TimeInterval;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use DB;
 use Settings;
-use Validator;
 
-class DashboardController extends ReportController
+class DashboardController
 {
     public function __invoke(DashboardRequest $request): JsonResponse
     {
@@ -25,87 +20,10 @@ class DashboardController extends ReportController
             (new DashboardExport(
                 $request->input('users') ?? User::all()->pluck('id')->toArray(),
                 $request->input('projects') ?? Project::all()->pluck('id')->toArray(),
-                Carbon::parse($request->input('start_at'))
-                    ->setTimezone($timezone),
-                Carbon::parse($request->input('end_at'))
-                    ->setTimezone($timezone),
+                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
             ))->collection()->all(),
         )->respond();
-    }
-
-    public static function getControllerRules(): array
-    {
-        return [
-            'timeIntervals' => 'time-intervals.list',
-            'timePerDay' => 'time-intervals.list',
-        ];
-    }
-
-    public function getEventUniqueNamePart(): string
-    {
-        return 'dashboard';
-    }
-
-    public function timePerDay(Request $request): JsonResponse
-    {
-        $validator = Validator::make(
-            $request->all(),
-            $this->getValidationRules()
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse([
-                'error_type' => 'validation',
-                'message' => 'Validation error',
-                'info' => $validator->errors(),
-            ], 400);
-        }
-
-        $uids = $request->input('user_ids', []);
-
-        $timezone = $request->input('timezone') ?: 'UTC';
-        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
-
-        $startAt = Carbon::parse($request->input('start_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $endAt = Carbon::parse($request->input('end_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $intervals = TimeInterval::select(
-            ['user_id',
-                DB::raw("DATE(CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}')) as date"),
-                DB::raw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as duration')]
-        )
-            ->whereIn('user_id', $uids)
-            ->where('start_at', '>=', $startAt)
-            ->where('start_at', '<', $endAt)
-            ->whereNull('deleted_at')
-            ->orderBy('start_at')
-            ->groupBy('date')
-            ->get()
-            ->groupBy('user_id')
-            ->map(static function ($intervals) {
-                $totalDuration = 0;
-
-                foreach ($intervals as $interval) {
-                    $interval->duration = (int)$interval->duration;
-                    $totalDuration += $interval->duration;
-                }
-
-                return [
-                    'intervals' => $intervals,
-                    'duration' => $totalDuration,
-                ];
-            });
-
-        $result = [
-            'user_intervals' => $intervals,
-        ];
-
-        return new JsonResponse($result);
     }
 
     /**
@@ -163,16 +81,6 @@ class DashboardController extends ReportController
      * @apiUse          ForbiddenError
      * @apiUse          ValidationError
      */
-
-    public function getValidationRules(): array
-    {
-        return [
-            'user_ids' => 'exists:users,id|array',
-            'project_ids' => 'nullable|exists:projects,id|array',
-            'start_at' => 'date|required',
-            'end_at' => 'date|required',
-        ];
-    }
 
     /**
      * @api             {post} /time-intervals/dashboard Dashboard
@@ -234,108 +142,4 @@ class DashboardController extends ReportController
      * @apiUse          ForbiddenError
      * @apiUse          ValidationError
      */
-
-    /**
-     * Handle the incoming request.
-     * @param Request $request
-     * @return JsonResponse
-     */
-    public function timeIntervals(Request $request): JsonResponse
-    {
-        $request->validate($this->getValidationRules());
-
-        $userIds = $request->input('user_ids');
-        $projectIds = $request->input('project_ids');
-
-        $timezone = $request->input('timezone') ?: 'UTC';
-        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
-
-        $startAt = Carbon::parse($request->input('start_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $endAt = Carbon::parse($request->input('end_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $intervals = TimeInterval::with('task', 'task.project')
-            ->select(
-                'user_id',
-                'id',
-                'task_id',
-                'is_manual',
-                DB::raw("CONVERT_TZ(start_at, '+00:00', '{$timezoneOffset}') as start_at"),
-                DB::raw("CONVERT_TZ(end_at, '+00:00', '{$timezoneOffset}') as end_at"),
-                DB::raw('TIMESTAMPDIFF(SECOND, start_at, end_at) as duration'),
-                DB::raw('UNIX_TIMESTAMP(start_at) as raw_start_at'),
-                DB::raw('UNIX_TIMESTAMP(end_at) as raw_end_at')
-            )
-            ->whereIn('user_id', $userIds)
-            ->where('start_at', '>=', $startAt)
-            ->where('start_at', '<', $endAt)
-            ->whereNull('deleted_at')
-            ->orderBy('user_id')
-            ->orderBy('task_id')
-            ->orderBy('start_at');
-
-        if (!empty($projectIds)) {
-            $intervals = $intervals->whereHas('task', function ($query) use ($projectIds) {
-                $query->whereIn('tasks.project_id', $projectIds);
-            });
-        }
-
-        $intervals = $intervals->get();
-
-        $users = [];
-        $previousInterval = false;
-        foreach ($intervals as $interval) {
-            $user_id = (int)$interval->user_id;
-            $duration = (int)$interval->duration;
-
-            if (!isset($users[$user_id])) {
-                $users[$user_id] = [
-                    'user_id' => $user_id,
-                    'intervals' => [],
-                    'duration' => 0,
-                ];
-            }
-
-            $intervalData = [
-                'id' => (int)$interval->id,
-                'ids' => [(int)$interval->id],
-                'user_id' => (int)$user_id,
-                'is_manual' => (int)$interval->is_manual,
-                'duration' => $duration,
-                'start_at' => Carbon::parse($interval->start_at)->toIso8601String(),
-                'end_at' => Carbon::parse($interval->end_at)->toIso8601String(),
-                'task' => $interval->task,
-            ];
-
-            // Merge with the previous interval if it is consecutive and has the same task
-            if ($previousInterval !== false
-                && (int)$interval->raw_start_at - (int)$previousInterval->raw_end_at <= 5
-                && $interval->is_manual === $previousInterval->is_manual
-                && $interval->user_id === $previousInterval->user_id
-                && $interval->task_id === $previousInterval->task_id) {
-                $previousIndex = count($users[$user_id]['intervals']) - 1;
-                $users[$user_id]['intervals'][$previousIndex]['ids'][] = $intervalData['id'];
-                $users[$user_id]['intervals'][$previousIndex]['duration'] += $intervalData['duration'];
-                $users[$user_id]['intervals'][$previousIndex]['end_at'] = $intervalData['end_at'];
-            } else {
-                $users[$user_id]['intervals'][] = $intervalData;
-            }
-
-            $users[$user_id]['duration'] += $duration;
-            $previousInterval = $interval;
-        }
-
-        $results = ['userIntervals' => $users];
-
-        return new JsonResponse(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.report.show'),
-                $results
-            )
-        );
-    }
 }

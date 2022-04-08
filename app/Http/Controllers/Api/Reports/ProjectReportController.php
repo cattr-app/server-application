@@ -12,7 +12,7 @@ use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
 use Settings;
 
-class ProjectReportController extends ReportController
+class ProjectReportController
 {
     public function __invoke(ProjectReportRequest $request): JsonResponse
     {
@@ -22,11 +22,9 @@ class ProjectReportController extends ReportController
             (new ProjectReportExport(
                 $request->input('users', User::all()->pluck('id')->toArray()),
                 $request->input('projects', Project::all()->pluck('id')->toArray()),
-                Carbon::parse($request->input('start_at'))
-                    ->setTimezone($timezone),
-                Carbon::parse($request->input('end_at'))
-                    ->setTimezone($timezone),
-            ))->collection(),
+                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
+            ))->collection()->all(),
         )->respond();
     }
 

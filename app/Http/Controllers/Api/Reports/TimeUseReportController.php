@@ -2,44 +2,30 @@
 
 namespace App\Http\Controllers\Api\Reports;
 
-use Filter;
-use App\Helpers\ReportHelper;
+use App\Http\Requests\Reports\TimeUseReportRequest;
+use App\Models\User;
+use App\Reports\TimeUseReportExport;
 use Carbon\Carbon;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Validator;
 use Settings;
 
 /**
  * Class TimeUseReportController
  *
  */
-class TimeUseReportController extends ReportController
+class TimeUseReportController
 {
-    /**
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
+    public function __invoke(TimeUseReportRequest $request): JsonResponse
     {
-        return 'time-use-report';
-    }
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
 
-    /**
-     * TimeUseReportController constructor.
-     * @param ReportHelper $reportHelper
-     */
-    public function __construct(protected ReportHelper $reportHelper)
-    {
-    }
-
-    /**
-     * @return array
-     */
-    public static function getControllerRules(): array
-    {
-        return [
-            'report' => 'time-use-report.list',
-        ];
+        return responder()->success(
+            (new TimeUseReportExport(
+                $request->input('users') ?? User::all()->pluck('id')->toArray(),
+                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
+            ))->collection()->all(),
+        )->respond();
     }
 
     /**
@@ -53,60 +39,4 @@ class TimeUseReportController extends ReportController
      *
      * @apiPermission   time_duration_list
      */
-    public function report(Request $request): JsonResponse
-    {
-        $validator = Validator::make(
-            $request->all(),
-            Filter::process(
-                $this->getEventUniqueName('validation.report.show'),
-                [
-                    'user_ids' => 'exists:users,id|array',
-                    'start_at' => 'required|date',
-                    'end_at' => 'required|date',
-                ]
-            )
-        );
-
-        if ($validator->fails()) {
-            return response()->json(
-                Filter::process(
-                    $this->getEventUniqueName('answer.error.report.show'),
-                    [
-                        'error_type' => 'validation',
-                        'message' => 'Validation error',
-                        'info' => $validator->errors()
-                    ]
-                ),
-                400
-            );
-        }
-
-        $user_ids = $request->input('users', []);
-
-        $timezone = $request->input('timezone', []);
-
-        if (!$timezone) {
-            $timezone = Settings::scope('core')->get('timezone', 'UTC');
-        }
-
-        $timezoneOffset = (new Carbon())->setTimezone($timezone)->format('P');
-
-        $startAt = Carbon::parse($request->input('start_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $endAt = Carbon::parse($request->input('end_at'), $timezone)
-            ->tz('UTC')
-            ->toDateTimeString();
-
-        $collection = $this->reportHelper->getTimeUseReportQuery($user_ids, $startAt, $endAt, $timezoneOffset)->get();
-        $resultCollection = $this->reportHelper->getProcessedTimeUseReportCollection($collection);
-
-        return response()->json(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.report.show'),
-                $resultCollection
-            )
-        );
-    }
 }

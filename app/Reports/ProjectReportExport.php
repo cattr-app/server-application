@@ -44,46 +44,22 @@ class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize
             static fn(Collection $collection, int $key) => [
                 'id' => $key,
                 'name' => $collection->first()->project_name,
-                'time' => $collection->reduce(
-                    static fn(
-                        $acc,
-                        $el
-                    ) => $acc + $el->duration,
-                    0
-                ),
+                'time' => $collection->sum('duration'),
                 'users' => $collection->groupBy('user_id')->map(
                     static fn(Collection $collection, int $key) => [
                         'id' => $key,
                         'full_name' => $collection->first()->user_name,
                         'email' => $collection->first()->user_email,
-                        'time' => $collection->reduce(
-                            static fn(
-                                $acc,
-                                $el
-                            ) => $acc + $el->duration,
-                            0
-                        ),
+                        'time' => $collection->sum('duration'),
                         'tasks' => $collection->groupBy('task_id')->map(
                             static fn(Collection $collection, int $key) => [
                                 'id' => $key,
                                 'task_name' => $collection->first()->task_name,
-                                'time' => $collection->reduce(
-                                    static fn(
-                                        $acc,
-                                        $el
-                                    ) => $acc + $el->duration,
-                                    0
-                                ),
+                                'time' => $collection->sum('duration'),
                                 'intervals' => $collection->groupBy('day')->map(
                                     static fn(Collection $collection, string $key) => [
                                         'date' => $key,
-                                        'time' => $collection->reduce(
-                                            static fn(
-                                                $acc,
-                                                $el
-                                            ) => $acc + $el->duration,
-                                            0
-                                        ),
+                                        'time' => $collection->sum('duration'),
                                         'items' => $collection->groupBy('hour')->map(
                                             static fn(Collection $collection
                                             ) => $collection->groupBy('minute')->values()->first(),
