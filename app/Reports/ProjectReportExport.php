@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles, AppReport
+class ProjectReportExport extends AppReport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles
 {
     use Exportable;
 
@@ -155,6 +155,6 @@ class ProjectReportExport implements FromCollection, WithMapping, ShouldAutoSize
 
     public function getLocalizedReportName(): string
     {
-        return __('Project Report');
+        return __('Project_Report');
     }
 }

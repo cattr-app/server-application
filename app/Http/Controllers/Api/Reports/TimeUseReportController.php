@@ -20,11 +20,11 @@ class TimeUseReportController
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 
         return responder()->success(
-            (new TimeUseReportExport(
+            TimeUseReportExport::init(
                 $request->input('users') ?? User::all()->pluck('id')->toArray(),
                 Carbon::parse($request->input('start_at'))->setTimezone($timezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($timezone),
-            ))->collection()->all(),
+            )->collection()->all(),
         )->respond();
     }
 

@@ -9,8 +9,10 @@ use App\Models\User;
 use App\Models\Project;
 use App\Reports\ProjectReportExport;
 use Carbon\Carbon;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\JsonResponse;
 use Settings;
+use Throwable;
 
 class ProjectReportController
 {
@@ -19,34 +21,38 @@ class ProjectReportController
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 
         return responder()->success(
-            (new ProjectReportExport(
+            ProjectReportExport::init(
                 $request->input('users', User::all()->pluck('id')->toArray()),
                 $request->input('projects', Project::all()->pluck('id')->toArray()),
                 Carbon::parse($request->input('start_at'))->setTimezone($timezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($timezone),
-            ))->collection()->all(),
+            )->collection()->all(),
         )->respond();
     }
 
+    /**
+     * @throws Throwable
+     */
     public function download(ProjectReportRequest $request): JsonResponse
     {
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 
-        GenerateAndSendReport::dispatchAfterResponse(
-            new ProjectReportExport(
+        $job = new GenerateAndSendReport(
+            ProjectReportExport::init(
                 $request->input('users', User::all()->pluck('id')->toArray()),
                 $request->input('projects', Project::all()->pluck('id')->toArray()),
-                Carbon::parse($request->input('start_at'))
-                    ->setTimezone($timezone),
-                Carbon::parse($request->input('end_at'))
-                    ->setTimezone($timezone),
+                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
             ),
             $request->user(),
             ReportHelper::getReportFormat($request),
         );
 
-        return responder()->success()->respond(204);
+        app(Dispatcher::class)->dispatchSync($job);
+
+        return responder()->success(['url' => $job->getPublicPath()])->respond();
     }
+
     /**
      * @api             {get,post} /project-report/list List
      * @apiDescription  Get report

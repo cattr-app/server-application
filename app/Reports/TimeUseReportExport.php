@@ -14,7 +14,7 @@ use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class TimeUseReportExport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles, AppReport
+class TimeUseReportExport extends AppReport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles
 {
     use Exportable;
 
@@ -76,7 +76,7 @@ class TimeUseReportExport implements FromCollection, WithMapping, ShouldAutoSize
 
     public function getLocalizedReportName(): string
     {
-        return __('Time Use Report');
+        return __('Time_Use_Report');
     }
 
     public function headings(): array

@@ -12,6 +12,7 @@ use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
+use Maatwebsite\Excel\Excel;
 use Storage;
 use Throwable;
 
@@ -19,13 +20,26 @@ class GenerateAndSendReport implements ShouldQueue, ShouldBeUnique
 {
     use Dispatchable, InteractsWithQueue, Queueable;
 
-    public int $uniqueFor = 3600;
+    public int $uniqueFor = 60;
+    private string $dir;
+
+    private const STORAGE_DRIVE = 'public';
+
+    public function getPublicPath(): string
+    {
+        return Storage::drive(self::STORAGE_DRIVE)->url($this->getReportPath());
+    }
 
     /**
      * @throws Throwable
      */
-    public function __construct(private AppReport $report, private User $user, private ?string $type)
-    {
+    public function __construct(
+        private AppReport $report,
+        private User $user,
+        private ?string $type,
+    ) {
+        $this->dir = Str::uuid();
+
         throw_unless($type, ValidationException::withMessages(['Wrong accept mime type']));
     }
 
@@ -34,21 +48,26 @@ class GenerateAndSendReport implements ShouldQueue, ShouldBeUnique
      */
     public function handle(): void
     {
-        $dir = Str::uuid();
+        Storage::drive(self::STORAGE_DRIVE)->makeDirectory("reports/$this->dir");
 
-        Storage::makeDirectory("reports/$dir");
+        $fileName = $this->getReportPath();
 
-        $fileName = "/reports/$dir/" . $this->report->getLocalizedReportName() . '.' . ($this->type === 'mpdf' ? 'pdf' : $this->type);
-
-        $this->report->store($fileName, 'local', ucfirst($this->type));
+        $this->report->store($fileName, self::STORAGE_DRIVE, $this->type === 'pdf' ? Excel::MPDF : Str::ucfirst($this->type));
 
         $this->user->notify((new ReportGenerated($fileName)));
 
-        ClearReportDir::dispatch($dir)->delay(now()->addHour());
+        dispatch(
+            static fn() => Storage::drive(self::STORAGE_DRIVE)->deleteDirectory("reports/$this->dir")
+        )->delay(now()->addHour());
     }
 
     public function uniqueId(): string
     {
-        return $this->user->id . $this->report->getReportId() . $this->type;
+        return "{$this->user->id}_{$this->report->getReportId()}_$this->type";
+    }
+
+    private function getReportPath(): string
+    {
+        return "/reports/$this->dir/{$this->report->getLocalizedReportName()}.$this->type";
     }
 }

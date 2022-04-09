@@ -18,20 +18,18 @@ class ReportHelper
 {
     public static function getReportFormat(Request $request)
     {
-        $format = array_flip(self::getAvailableReportFormats())[$request->header('accept')] ?? null;
-
-        return $format === 'pdf' ? Excel::MPDF : $format;
+        return array_flip(self::getAvailableReportFormats())[$request->header('accept')] ?? null;
     }
 
     public static function getAvailableReportFormats(): array
     {
         return [
-            strtolower(Excel::CSV) => 'text/csv',
-            strtolower(Excel::XLSX) => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
+            'csv' => 'text/csv',
+            'xlsx' => 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet',
             'pdf' => 'application/pdf',
-            strtolower(Excel::XLS) => 'application/vnd.ms-excel',
-            strtolower(Excel::ODS) => 'application/vnd.oasis.opendocument.spreadsheet',
-            strtolower(Excel::HTML) => 'text/html',
+            'xls' => 'application/vnd.ms-excel',
+            'ods' => 'application/vnd.oasis.opendocument.spreadsheet',
+            'html' => 'text/html',
         ];
     }
 

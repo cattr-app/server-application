@@ -150,8 +150,8 @@ Route::group([
         $router->post('report/project', [ProjectReportController::class, '__invoke']);
         $router->post('report/project/download', [ProjectReportController::class, 'download']);
         $router->post('report/time', [TimeUseReportController::class, '__invoke']);
-        $router->post('report/time/download', [TimeUseReportController::class, 'download']);
         $router->post('report/dashboard', [DashboardController::class, '__invoke']);
+        $router->post('report/dashboard/download', [DashboardController::class, 'download']);
 
         // About
         $router->get('about', [AboutController::class, '__invoke']);

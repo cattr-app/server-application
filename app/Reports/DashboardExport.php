@@ -17,7 +17,7 @@ use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DashboardExport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles, AppReport
+class DashboardExport extends AppReport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles
 {
     use Exportable;
 
@@ -48,36 +48,19 @@ class DashboardExport implements FromCollection, WithMapping, ShouldAutoSize, Wi
      */
     public function map($row): array
     {
-        return array_merge(
-            $row['users']
-                ->map(static fn($collection) => $collection['tasks'])->flatten(1)
-                ->map(static fn($collection) => array_merge(
-                    $collection['intervals']->map(
-                        static fn($collection) => $collection['items']
-                    )->flatten(2)->map(
-                        static fn($collection) => array_values($collection->only([
-                            'project_name',
-                            'user_name',
-                            'task_name'
-                        ]))
-                    )->flatten(1)->all(),
+        return $row->groupBy('user_id')->map(
+            static function ($collection) {
+                $interval = CarbonInterval::seconds($collection->sum('duration'));
+
+                return array_merge(
+                    array_values($collection->first()->only(['user_name'])),
                     [
-                        CarbonInterval::seconds($collection['time'])->cascade()->forHumans(),
-                        round(CarbonInterval::seconds($collection['time'])->totalHours, 3)
+                        $interval->cascade()->forHumans(),
+                        round($interval->totalHours, 3)
                     ]
-                ))
-                ->all(),
-            [
-                [
-                    'Subtotal for ' . $row['name'],
-                    '',
-                    '',
-                    CarbonInterval::seconds($row['time'])->cascade()->forHumans(),
-                    round(CarbonInterval::seconds($row['time'])->totalHours, 3),
-                ],
-                []
-            ]
-        );
+                );
+            }
+        )->all();
     }
 
     private function queryReport(): Collection
@@ -121,6 +104,6 @@ class DashboardExport implements FromCollection, WithMapping, ShouldAutoSize, Wi
 
     public function getLocalizedReportName(): string
     {
-        return __('Dashboard Report');
+        return __('Dashboard_Report');
     }
 }

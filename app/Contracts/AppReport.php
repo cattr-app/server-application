@@ -2,11 +2,16 @@
 
 namespace App\Contracts;
 
-interface AppReport
+abstract class AppReport
 {
-    public function getReportId(): string;
+    final public static function init(...$arguments): self
+    {
+        return new static(...$arguments);
+    }
 
-    public function getLocalizedReportName(): string;
+    abstract public function getReportId(): string;
 
-    public function store(string $filePath = null, string $disk = null, string $writerType = null, $diskOptions = []);
+    abstract public function getLocalizedReportName(): string;
+
+    abstract public function store(string $filePath = null, string $disk = null, string $writerType = null, $diskOptions = []);
 }

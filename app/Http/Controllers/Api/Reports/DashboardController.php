@@ -2,13 +2,17 @@
 
 namespace App\Http\Controllers\Api\Reports;
 
+use App\Helpers\ReportHelper;
 use App\Http\Requests\Reports\DashboardRequest;
+use App\Jobs\GenerateAndSendReport;
 use App\Models\Project;
 use App\Models\User;
 use App\Reports\DashboardExport;
 use Carbon\Carbon;
+use Illuminate\Contracts\Bus\Dispatcher;
 use Illuminate\Http\JsonResponse;
 use Settings;
+use Throwable;
 
 class DashboardController
 {
@@ -17,13 +21,36 @@ class DashboardController
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 
         return responder()->success(
-            (new DashboardExport(
+            DashboardExport::init(
                 $request->input('users') ?? User::all()->pluck('id')->toArray(),
                 $request->input('projects') ?? Project::all()->pluck('id')->toArray(),
                 Carbon::parse($request->input('start_at'))->setTimezone($timezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($timezone),
-            ))->collection()->all(),
+            )->collection()->all(),
         )->respond();
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function download(DashboardRequest $request): JsonResponse
+    {
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+
+        $job = new GenerateAndSendReport(
+            DashboardExport::init(
+                $request->input('users') ?? User::all()->pluck('id')->toArray(),
+                $request->input('projects') ?? Project::all()->pluck('id')->toArray(),
+                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
+            ),
+            $request->user(),
+            ReportHelper::getReportFormat($request),
+        );
+
+        app(Dispatcher::class)->dispatchSync($job);
+
+        return responder()->success(['url' => $job->getPublicPath()])->respond();
     }
 
     /**
