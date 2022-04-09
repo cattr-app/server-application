@@ -80,7 +80,7 @@ abstract class ItemController extends Controller
      */
     protected function getEventUniqueName(string $eventName): String
     {
-        return "{$eventName}.{$this->getEventUniqueNamePart()}";
+        return "$eventName.{$this->getEventUniqueNamePart()}";
     }
 
     /**
@@ -113,12 +113,7 @@ abstract class ItemController extends Controller
      */
     abstract public function getItemClass(): string;
 
-    /**
-     * @param bool $withRelations
-     * @param bool $withSoftDeleted
-     * @return Builder
-     */
-    protected function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    protected function getQuery(bool $withRelations = true, bool $withSoftDeleted = false): Builder
     {
         /** @var Model $cls */
         $cls = static::getItemClass();

@@ -532,7 +532,7 @@ class UserController extends ItemController
      * @param bool $withSoftDeleted
      * @return Builder
      */
-    public function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    public function getQuery(bool $withRelations = true, bool $withSoftDeleted = false): Builder
     {
         $query = parent::getQuery($withRelations, $withSoftDeleted);
 
