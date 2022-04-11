@@ -7,6 +7,46 @@ use Illuminate\Events\Dispatcher as LaravelDispatcher;
 
 class FilterDispatcher extends LaravelDispatcher
 {
+    public static function getQueryPrepareFilterName(): string
+    {
+        return 'query.prepare.' . request()?->route()?->getName();
+    }
+
+    public static function getQueryGetFilterName(): string
+    {
+        return 'query.get.' . request()?->route()?->getName();
+    }
+
+    public static function getQueryFiltrationFilterName(): string
+    {
+        return 'query.filter.' . request()?->route()?->getName();
+    }
+
+    public static function getSuccessResponseFilterName(): string
+    {
+        return 'response.success.' . request()?->route()?->getName();
+    }
+
+    public static function getErrorResponseFilterName(): string
+    {
+        return 'response.error.' . request()?->route()?->getName();
+    }
+
+    public static function getValidationFilterName(): string
+    {
+        return 'validation.' . request()?->route()?->getName();
+    }
+
+    public static function getAuthFilterName(): string
+    {
+        return 'authorize.' . request()?->route()?->getName();
+    }
+
+    public static function getAuthValidationFilterName(): string
+    {
+        return 'authorize.validated' . request()?->route()?->getName();
+    }
+
     /**
      * @inerhitDoc
      * @param $event

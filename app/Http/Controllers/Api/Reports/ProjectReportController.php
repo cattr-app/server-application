@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Reports;
 
 use App\Helpers\ReportHelper;
-use App\Http\Requests\Reports\ProjectReportRequest;
+use App\Http\Requests\Reports\ProjectReportRequestCattr;
 use App\Jobs\GenerateAndSendReport;
 use App\Models\User;
 use App\Models\Project;
@@ -16,7 +16,7 @@ use Throwable;
 
 class ProjectReportController
 {
-    public function __invoke(ProjectReportRequest $request): JsonResponse
+    public function __invoke(ProjectReportRequestCattr $request): JsonResponse
     {
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 
@@ -33,7 +33,7 @@ class ProjectReportController
     /**
      * @throws Throwable
      */
-    public function download(ProjectReportRequest $request): JsonResponse
+    public function download(ProjectReportRequestCattr $request): JsonResponse
     {
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 

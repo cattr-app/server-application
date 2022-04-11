@@ -9,9 +9,14 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\SoftDeletingScope;
+use Illuminate\Foundation\Http\FormRequest;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Event;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 use Validator;
 
 abstract class ItemController extends Controller
@@ -46,30 +51,22 @@ abstract class ItemController extends Controller
     /**
      * Display a listing of the resource.
      * @param Request $request
+     * @return JsonResponse
      * @throws Exception
      */
     public function _index(Request $request): JsonResponse
     {
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            Filter::getQueryPrepareFilterName(),
             $this->applyQueryFilter(
                 $this->getQuery(),
                 $request->all() ?: []
             )
         );
 
-        $paginate = $request->get('paginate', false);
-        $currentPage = $request->get('page', 1);
-        $perPage = $request->get('perPage', 15);
-
         return responder()->success(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.item.list.result'),
-                $paginate ?
-                    $itemsQuery->paginate($perPage, ['*'], 'page', $currentPage)
-                    : $itemsQuery->get()
-            )
+            $request->header('X-Paginate', true) ? $itemsQuery->paginate() : $itemsQuery->get()
         )->respond();
     }
 
@@ -78,7 +75,7 @@ abstract class ItemController extends Controller
      * @param string $eventName
      * @return String
      */
-    protected function getEventUniqueName(string $eventName): String
+    protected function getEventUniqueName(string $eventName): string
     {
         return "$eventName.{$this->getEventUniqueNamePart()}";
     }
@@ -103,7 +100,7 @@ abstract class ItemController extends Controller
         $helper->apply($query, $model, $filter);
 
         return Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.filter'),
+            Filter::getQueryFiltrationFilterName(),
             $query
         );
     }
@@ -139,7 +136,7 @@ abstract class ItemController extends Controller
         }
 
         return Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.get'),
+            Filter::getQueryGetFilterName(),
             $query
         );
     }
@@ -160,40 +157,22 @@ abstract class ItemController extends Controller
     {
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
+            filter::getQueryPrepareFilterName(),
             $this->applyQueryFilter(
                 $this->getQuery(),
                 $request->all() ?: []
             )
         );
 
-        return new JsonResponse([
-            'total' => Filter::process(
-                $this->getEventUniqueName('answer.success.item.list.count.query.prepare'),
-                $itemsQuery->count()
-            )
-        ]);
+        return responder()->success(['total' => $itemsQuery->count()])->respond();
     }
 
-    public function _create(Request $request): JsonResponse
+    /**
+     * @throws Throwable
+     */
+    public function _create(FormRequest $request): JsonResponse
     {
-        $requestData = Filter::process($this->getEventUniqueName('request.item.create'), $request->all());
-
-        $validator = Validator::make(
-            $requestData,
-            Filter::process($this->getEventUniqueName('validation.item.create'), $this->getValidationRules())
-        );
-
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.create'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
+        $requestData = $request->validated();
 
         /** @var Model $cls */
         $cls = $this->getItemClass();
@@ -207,11 +186,7 @@ abstract class ItemController extends Controller
 
         Event::dispatch($this->getEventUniqueName('item.create.after'), [$item, $requestData]);
 
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.create'), [
-                'res' => $item,
-            ])
-        );
+        return responder()->success($item)->respond();
     }
 
     /**
@@ -235,21 +210,13 @@ abstract class ItemController extends Controller
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
+     * @throws Throwable
      */
     public function _show(Request $request): JsonResponse
     {
-        $itemId = (int) $request->input('id');
+        $itemId = (int)$request->input('id');
 
-        if (!$itemId) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid id'
-                ]),
-                400
-            );
-        }
+        throw_unless($itemId, ValidationException::withMessages(['Invalid id']));
 
         $filters = [
             'id' => $itemId
@@ -257,7 +224,7 @@ abstract class ItemController extends Controller
         $request->get('with') ? $filters['with'] = $request->get('with') : false;
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            Filter::getQueryPrepareFilterName(),
             $this->applyQueryFilter(
                 $this->getQuery(),
                 $filters ?: []
@@ -266,19 +233,9 @@ abstract class ItemController extends Controller
 
         $item = $itemsQuery->first();
 
-        if (!$item) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.show'), [
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found'
-                ]),
-                404
-            );
-        }
+        throw_unless($item, new NotFoundHttpException);
 
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.show'), $item)
-        );
+        return responder()->success($item)->respond();
     }
 
     /**
@@ -287,6 +244,7 @@ abstract class ItemController extends Controller
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
+     * @throws Throwable
      */
     public function _edit(Request $request): JsonResponse
     {
@@ -306,31 +264,13 @@ abstract class ItemController extends Controller
             )
         );
 
-        if ($validator->fails()) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => $validator->errors()
-                ]),
-                400
-            );
-        }
+        throw_if($validator->fails(), ValidationException::withMessages($validator->messages()->all()));
 
-        if (!is_int($request->get('id'))) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid id'
-                ]),
-                400
-            );
-        }
+        throw_unless(is_int($request->get('id')), ValidationException::withMessages(['Invalid id']));
 
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            filter::getQueryPrepareFilterName(),
             $this->applyQueryFilter(
                 $this->getQuery()
             )
@@ -344,23 +284,9 @@ abstract class ItemController extends Controller
         if (!$item) {
             /** @var Model $cls */
             $cls = $this->getItemClass();
-            if ($cls::find($request->get('id')) !== null) {
-                return new JsonResponse(
-                    Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                        'error_type' => 'authorization.forbidden',
-                        'message' => 'Access denied to this item',
-                    ]),
-                    403
-                );
-            }
+            throw_if($cls::find($request->get('id'))?->count(), new AccessDeniedHttpException);
 
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found',
-                ]),
-                404
-            );
+            throw new NotFoundHttpException;
         }
 
         Event::dispatch($this->getEventUniqueName('item.edit.before'), [$item, $requestData]);
@@ -371,11 +297,7 @@ abstract class ItemController extends Controller
 
         Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
 
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'res' => $item,
-            ])
-        );
+        return responder()->success($item)->respond();
     }
 
     /**
@@ -383,27 +305,17 @@ abstract class ItemController extends Controller
      *
      * @param Request $request
      * @return JsonResponse
-     * @throws Exception
+     * @throws Throwable
      */
     public function _destroy(Request $request): JsonResponse
     {
         $itemId = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->get('id'));
-        $idInt = is_int($itemId);
 
-        if (!$idInt) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid id',
-                ]),
-                400
-            );
-        }
+        throw_unless(is_int($itemId), ValidationException::withMessages(['Invalid id']));
 
         /** @var Builder $itemsQuery */
         $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
+            filter::getQueryPrepareFilterName(),
             $this->applyQueryFilter(
                 $this->getQuery(),
                 ['id' => $itemId]
@@ -415,23 +327,9 @@ abstract class ItemController extends Controller
         if (!$item) {
             /** @var Model $cls */
             $cls = $this->getItemClass();
-            if ($cls::find($request->get('id')) !== null) {
-                return new JsonResponse(
-                    Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                        'error_type' => 'authorization.forbidden',
-                        'message' => 'Access denied to this item'
-                    ]),
-                    403
-                );
-            }
+            throw_if($cls::find($request->get('id'))?->count(), new AccessDeniedHttpException);
 
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.remove'), [
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found',
-                ]),
-                404
-            );
+            throw new NotFoundHttpException;
         }
 
         Event::dispatch($this->getEventUniqueName('item.delete.before'), $item);
@@ -441,10 +339,6 @@ abstract class ItemController extends Controller
 
         Event::dispatch($this->getEventUniqueName('item.delete.after'), $item);
 
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'message' => 'Item has been removed'
-            ])
-        );
+        return responder()->success()->respond(204);
     }
 }

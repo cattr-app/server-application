@@ -14,8 +14,8 @@ return [
     */
 
     'serializers' => [
-        'success' => Flugg\Responder\Serializers\SuccessSerializer::class,
-        'error' => Flugg\Responder\Serializers\ErrorSerializer::class,
+        'success' => App\Http\Responses\CattrSuccessResponse::class,
+        'error' => App\Http\Responses\CattrErrorResponse::class,
     ],
 
     /*

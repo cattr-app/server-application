@@ -34,7 +34,6 @@ class Controller extends BaseController
      */
     public function universalRoute(Request $request): void
     {
-
         /** @var Router $router */
         $router = app('router');
         /** @var RouteCollection $routes */

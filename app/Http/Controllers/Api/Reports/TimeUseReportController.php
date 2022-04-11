@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api\Reports;
 
-use App\Http\Requests\Reports\TimeUseReportRequest;
+use App\Http\Requests\Reports\TimeUseReportRequestCattr;
 use App\Models\User;
 use App\Reports\TimeUseReportExport;
 use Carbon\Carbon;
@@ -15,7 +15,7 @@ use Settings;
  */
 class TimeUseReportController
 {
-    public function __invoke(TimeUseReportRequest $request): JsonResponse
+    public function __invoke(TimeUseReportRequestCattr $request): JsonResponse
     {
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 

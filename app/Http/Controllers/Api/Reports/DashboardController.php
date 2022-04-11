@@ -3,7 +3,7 @@
 namespace App\Http\Controllers\Api\Reports;
 
 use App\Helpers\ReportHelper;
-use App\Http\Requests\Reports\DashboardRequest;
+use App\Http\Requests\Reports\DashboardRequestCattr;
 use App\Jobs\GenerateAndSendReport;
 use App\Models\Project;
 use App\Models\User;
@@ -16,7 +16,7 @@ use Throwable;
 
 class DashboardController
 {
-    public function __invoke(DashboardRequest $request): JsonResponse
+    public function __invoke(DashboardRequestCattr $request): JsonResponse
     {
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 
@@ -33,7 +33,7 @@ class DashboardController
     /**
      * @throws Throwable
      */
-    public function download(DashboardRequest $request): JsonResponse
+    public function download(DashboardRequestCattr $request): JsonResponse
     {
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
 

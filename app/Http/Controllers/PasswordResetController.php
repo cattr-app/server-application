@@ -15,14 +15,8 @@ use Validator;
 
 class PasswordResetController extends BaseController
 {
-    /**
-     * @var Recaptcha
-     */
-    private Recaptcha $recaptcha;
-
-    public function __construct(Recaptcha $recaptcha)
+    public function __construct(private Recaptcha $recaptcha)
     {
-        $this->recaptcha = $recaptcha;
     }
 
     /**

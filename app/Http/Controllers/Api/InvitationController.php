@@ -2,12 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Invitation\CountInvitationRequest;
-use App\Http\Requests\Invitation\CreateInvitationRequest;
-use App\Http\Requests\Invitation\ListInvitationRequest;
-use App\Http\Requests\Invitation\DestroyInvitationRequest;
-use App\Http\Requests\Invitation\ShowInvitationRequest;
-use App\Http\Requests\Invitation\UpdateInvitationRequest;
+use App\Http\Requests\Invitation\CountInvitationRequestCattr;
+use App\Http\Requests\Invitation\CreateInvitationRequestCattr;
+use App\Http\Requests\Invitation\ListInvitationRequestCattr;
+use App\Http\Requests\Invitation\DestroyInvitationRequestCattr;
+use App\Http\Requests\Invitation\ShowInvitationRequestCattr;
+use App\Http\Requests\Invitation\UpdateInvitationRequestCattr;
 use App\Models\Invitation;
 use App\Services\InvitationService;
 use Exception;
@@ -55,6 +55,7 @@ class InvitationController extends ItemController
     }
 
     /**
+     * @throws Exception
      * @api             {post} /invitations/show Show
      * @apiDescription  Show invitation.
      *
@@ -92,12 +93,13 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function show(ShowInvitationRequest $request): JsonResponse
+    public function show(ShowInvitationRequestCattr $request): JsonResponse
     {
         return $this->_show($request);
     }
 
     /**
+     * @throws Exception
      * @api             {get} /invitations/list List
      * @apiDescription  Get list of invitations.
      *
@@ -128,16 +130,15 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function index(ListInvitationRequest $request): JsonResponse
+    public function index(ListInvitationRequestCattr $request): JsonResponse
     {
         return $this->_index($request);
     }
 
     /**
-     * @param Request $request
+     * @param CreateInvitationRequestCattr $request
      * @return JsonResponse
      * @throws Exception
-     *
      * @api             {post} /invitations/create Create
      * @apiDescription  Creates a unique invitation token and sends an email to the users
      *
@@ -205,9 +206,8 @@ class InvitationController extends ItemController
      *
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
-     *
      */
-    public function create(CreateInvitationRequest $request): JsonResponse
+    public function create(CreateInvitationRequestCattr $request): JsonResponse
     {
         $requestData = $request->validated();
 
@@ -217,13 +217,11 @@ class InvitationController extends ItemController
             $invitations[] = $this->service->create($user);
         }
 
-        return new JsonResponse([
-            'res' => $invitations,
-        ]);
+        return responder()->success($invitations)->respond();
     }
 
     /**
-     * @param UpdateInvitationRequest $request
+     * @param UpdateInvitationRequestCattr $request
      * @return JsonResponse
      * @throws Exception
      *
@@ -275,18 +273,17 @@ class InvitationController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function resend(UpdateInvitationRequest $request): JsonResponse
+    public function resend(UpdateInvitationRequestCattr $request): JsonResponse
     {
         $requestData = $request->validated();
 
         $invitation = $this->service->update($requestData['id']);
 
-        return new JsonResponse([
-            'res' => $invitation,
-        ]);
+        return responder()->success($invitation)->respond();
     }
 
     /**
+     * @throws Exception
      * @api             {post} /invitations/remove Destroy
      * @apiDescription  Destroy User
      *
@@ -316,17 +313,17 @@ class InvitationController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function destroy(DestroyInvitationRequest $request): JsonResponse
+    public function destroy(DestroyInvitationRequestCattr $request): JsonResponse
     {
         return $this->_destroy($request);
     }
 
     /**
-     * @param Request $request
+     * @param CountInvitationRequestCattr $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function count(CountInvitationRequest $request): JsonResponse
+    public function count(CountInvitationRequestCattr $request): JsonResponse
     {
         return $this->_count($request);
     }

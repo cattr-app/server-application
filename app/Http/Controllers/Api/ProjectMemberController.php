@@ -3,10 +3,13 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProjectMember\BulkEditProjectMemberRequest;
-use App\Http\Requests\ProjectMember\ShowProjectMemberRequest;
+use App\Http\Requests\ProjectMember\BulkEditProjectMemberRequestCattr;
+use App\Http\Requests\ProjectMember\ShowProjectMemberRequestCattr;
 use App\Services\ProjectMemberService;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class ProjectMemberController extends Controller
 {
@@ -22,32 +25,28 @@ class ProjectMemberController extends Controller
     }
 
     /**
-     * @param ShowProjectMemberRequest $request
+     * @param ShowProjectMemberRequestCattr $request
      * @return JsonResponse
+     * @throws Throwable
      */
-    public function show(ShowProjectMemberRequest $request): JsonResponse
+    public function show(ShowProjectMemberRequestCattr $request): JsonResponse
     {
         $data = $request->validated();
-        if (!$data) {
-            return new JsonResponse([], 400);
-        }
+
+        throw_unless($data, ValidationException::withMessages([]));
 
         $projectMembers = $this->projectMemberService->getMembers($data['project_id']);
 
-        if (!isset($projectMembers['id']) || !$projectMembers) {
-            return new JsonResponse([], 404);
-        }
+        throw_if(!isset($projectMembers['id']) || !$projectMembers, new NotFoundHttpException);
 
-        return new JsonResponse([
-            'data' => $projectMembers,
-        ]);
+        return responder()->success($projectMembers)->respond();
     }
 
     /**
-     * @param BulkEditProjectMemberRequest $request
+     * @param BulkEditProjectMemberRequestCattr $request
      * @return JsonResponse
      */
-    public function bulkEdit(BulkEditProjectMemberRequest $request): JsonResponse
+    public function bulkEdit(BulkEditProjectMemberRequestCattr $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -59,6 +58,6 @@ class ProjectMemberController extends Controller
 
         $this->projectMemberService->syncMembers($data['project_id'], $userRoles);
 
-        return new JsonResponse();
+        return responder()->success()->respond(204);
     }
 }
