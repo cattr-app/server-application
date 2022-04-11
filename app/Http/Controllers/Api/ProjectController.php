@@ -2,17 +2,15 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Project\CreateProjectRequest;
-use App\Http\Requests\Project\EditProjectRequest;
-use App\Http\Requests\Project\DestroyProjectRequest;
-use App\Http\Requests\Project\ShowProjectRequest;
+use App\Http\Requests\Project\CreateProjectRequestCattr;
+use App\Http\Requests\Project\EditProjectRequestCattr;
+use App\Http\Requests\Project\DestroyProjectRequestCattr;
+use App\Http\Requests\Project\ShowProjectRequestCattr;
 use Filter;
 use App\Models\Project;
-use App\Models\Role;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Auth;
 use DB;
 
 class ProjectController extends ItemController
@@ -102,16 +100,19 @@ class ProjectController extends ItemController
      */
     public function index(Request $request): JsonResponse
     {
-        return parent::_index($request);
+        return $this->_index($request);
     }
 
-    public function show(ShowProjectRequest $request): JsonResponse
+    /**
+     * @throws Exception
+     */
+    public function show(ShowProjectRequestCattr $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('answer.success.item.show'), static function (Project $project) {
+        Filter::listen(Filter::getSuccessResponseFilterName(), static function ($project) {
             $totalTracked = 0;
             $taskIDs = array_map(static function ($task) {
                 return $task['id'];
-            }, $project->tasks->toArray());
+            }, $project['tasks']);
 
             $workers = DB::table('time_intervals AS i')
                 ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
@@ -135,11 +136,13 @@ class ProjectController extends ItemController
                 $totalTracked += $worker->duration;
             }
 
-
-            $project->workers = $workers;
-            $project->total_spent_time = $totalTracked;
+            $project['workers'] = $workers;
+            $project['total_spent_time'] = $totalTracked;
             return $project;
         });
+
+        Filter::listen(Filter::getQueryPrepareFilterName(), static fn($query) => $query->with('tasks'));
+
         return $this->_show($request);
     }
 
@@ -186,7 +189,7 @@ class ProjectController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-    public function create(CreateProjectRequest $request): JsonResponse
+    public function create(CreateProjectRequestCattr $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('item.create'), static function (Project $project) use ($request) {
             if ($request->has('statuses')) {
@@ -201,10 +204,7 @@ class ProjectController extends ItemController
             return $project;
         });
 
-        Filter::listen($this->getEventUniqueName('answer.success.item.create'), static function (array $data) {
-            $data['res'] = $data['res']->load('statuses');
-            return $data;
-        });
+        Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('statuses'));
 
         return $this->_create($request);
     }
@@ -312,6 +312,7 @@ class ProjectController extends ItemController
      */
 
     /**
+     * @throws Exception
      * @api             {post} /projects/edit Edit
      * @apiDescription  Edit Project
      *
@@ -357,7 +358,7 @@ class ProjectController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-    public function edit(EditProjectRequest $request): JsonResponse
+    public function edit(EditProjectRequestCattr $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('item.edit'), static function (Project $project) use ($request) {
             if ($request->has('statuses')) {
@@ -372,15 +373,13 @@ class ProjectController extends ItemController
             return $project;
         });
 
-        Filter::listen($this->getEventUniqueName('answer.success.item.edit'), static function (array $data) {
-            $data['res'] = $data['res']->load('statuses');
-            return $data;
-        });
+        Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('statuses'));
 
         return $this->_edit($request);
     }
 
     /**
+     * @throws Exception
      * @api             {post} /projects/remove Destroy
      * @apiDescription  Destroy Project
      *
@@ -414,12 +413,13 @@ class ProjectController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ItemNotFoundError
      */
-    public function destroy(DestroyProjectRequest $request): JsonResponse
+    public function destroy(DestroyProjectRequestCattr $request): JsonResponse
     {
         return $this->_destroy($request);
     }
 
     /**
+     * @throws Exception
      * @api             {get,post} /projects/count Count
      * @apiDescription  Count Projects
      *

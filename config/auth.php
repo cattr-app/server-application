@@ -2,19 +2,20 @@
 
 return [
     'defaults' => [
-        'guard' => 'api',
+        'guard' => 'web',
         'passwords' => 'users',
     ],
 
     'guards' => [
-        'api' => [
-            'driver' => 'jwt',
-            'provider' => 'users',
-        ],
         'web' => [
             'driver' => 'session',
             'provider' => 'users'
-        ]
+        ],
+        'api' => [
+            'driver' => 'token',
+            'provider' => 'users',
+            'hash' => false,
+        ],
     ],
 
     'providers' => [
@@ -35,7 +36,6 @@ return [
     'cattr-client-agent' => 'Cattr\-Desktop\/v*',
 
     'lifetime_minutes' => [
-        'jwt' => env('AUTH_JWT_LIFETIME_MINUTES', 365 * 24 * 60),
         'desktop_token' => env('AUTH_DESKTOP_TOKEN_LIFETIME_MINUTES', 10),
     ],
 ];

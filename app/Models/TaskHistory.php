@@ -2,32 +2,35 @@
 
 namespace App\Models;
 
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * App\Models\TaskHistory
  *
- * @property int $id
- * @property int $task_id
- * @property int $user_id
- * @property string $field
- * @property string $new_value
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property-read \App\Models\Task $task
- * @property-read \App\Models\User $user
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory query()
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory whereCreatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory whereField($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory whereId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory whereNewValue($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory whereTaskId($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory whereUpdatedAt($value)
- * @method static \Illuminate\Database\Eloquent\Builder|TaskHistory whereUserId($value)
- * @mixin \Eloquent
+ * @property int         $id
+ * @property int         $task_id
+ * @property int         $user_id
+ * @property string      $field
+ * @property string      $new_value
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property-read Task   $task
+ * @property-read User   $user
+ * @method static Builder|TaskHistory newModelQuery()
+ * @method static Builder|TaskHistory newQuery()
+ * @method static Builder|TaskHistory query()
+ * @method static Builder|TaskHistory whereCreatedAt($value)
+ * @method static Builder|TaskHistory whereField($value)
+ * @method static Builder|TaskHistory whereId($value)
+ * @method static Builder|TaskHistory whereNewValue($value)
+ * @method static Builder|TaskHistory whereTaskId($value)
+ * @method static Builder|TaskHistory whereUpdatedAt($value)
+ * @method static Builder|TaskHistory whereUserId($value)
+ * @mixin Eloquent
  */
 class TaskHistory extends Model
 {
@@ -39,29 +42,32 @@ class TaskHistory extends Model
     /**
      * @var array
      */
-    protected $fillable = [
-        'task_id',
-        'user_id',
-        'field',
-        'new_value',
-    ];
+    protected $fillable
+        = [
+            'task_id',
+            'user_id',
+            'field',
+            'new_value',
+        ];
 
     /**
      * @var array
      */
-    protected $casts = [
-        'task_id' => 'integer',
-        'user_id' => 'integer',
-        'field' => 'string',
-    ];
+    protected $casts
+        = [
+            'task_id' => 'integer',
+            'user_id' => 'integer',
+            'field' => 'string',
+        ];
 
     /**
      * @var array
      */
-    protected $dates = [
-        'created_at',
-        'updated_at',
-    ];
+    protected $dates
+        = [
+            'created_at',
+            'updated_at',
+        ];
 
     /**
      * @return string

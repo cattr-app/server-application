@@ -2,12 +2,11 @@
 
 namespace App\Console\Commands;
 
-use App\Models\Property;
+use App\Helpers\EnvUpdater;
 use DB;
 use Exception;
 use Illuminate\Console\Command;
 use Illuminate\Filesystem\Filesystem;
-use Config;
 use Schema;
 use PDOException;
 use RuntimeException;
@@ -30,29 +29,13 @@ class AppInstallCommand extends Command
      */
     protected $description = 'Cattr Basic Installation';
 
-    /**
-     * @var Filesystem
-     */
-    protected $filesystem;
-
-    /**
-     * Create a new command instance.
-     *
-     * @param Filesystem $filesystem
-     */
     public function __construct(
-        Filesystem $filesystem
+        protected Filesystem $filesystem
     ) {
         parent::__construct();
-        $this->filesystem = $filesystem;
     }
 
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    public function handle()
+    public function handle(): int
     {
         if (!$this->filesystem->exists($this->laravel->environmentFilePath())) {
             $this->filesystem->copy(base_path('.env.example'), $this->laravel->environmentFilePath());
@@ -67,7 +50,7 @@ class AppInstallCommand extends Command
 
                 return -1;
             }
-        } catch (Exception $e) {
+        } catch (Exception) {
             // If we can't connect to the database that means that we're probably installing the app for the first time
         }
 
@@ -102,10 +85,12 @@ class AppInstallCommand extends Command
         $this->call('cattr:make:admin', $adminData);
 
         $enableRecaptcha = $this->choice('Enable ReCaptcha 2', ['Yes', 'No'], 1) === 'Yes';
-        $this->updateEnvData('RECAPTCHA_ENABLED', $enableRecaptcha ? 'true' : 'false');
+        EnvUpdater::set('RECAPTCHA_ENABLED', $enableRecaptcha ? 'true' : 'false');
         if ($enableRecaptcha) {
-            $this->updateEnvData('RECAPTCHA_SITE_KEY', $this->ask('ReCaptcha 2 site key'));
-            $this->updateEnvData('RECAPTCHA_SECRET_KEY', $this->ask('ReCaptcha 2 secret key'));
+            EnvUpdater::bulkSet([
+                'RECAPTCHA_SITE_KEY' => $this->ask('ReCaptcha 2 site key'),
+                'RECAPTCHA_SECRET_KEY' => $this->ask('ReCaptcha 2 secret key'),
+            ]);
         }
 
         $this->call('config:cache');
@@ -142,13 +127,13 @@ class AppInstallCommand extends Command
                 $this->warn('URL should begin with http or https');
             }
         } while (!$appUrlIsValid);
-        $this->updateEnvData('APP_URL', $appUrl);
+        EnvUpdater::set('APP_URL', $appUrl);
 
         $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, '
             . 'this domain will be the same as the backend (API) one.');
         $frontendUrl = preg_replace('/^https?:\/\//', '', $frontendUrl);
         $frontendUrl = preg_replace('/\/$/', '', $frontendUrl);
-        $this->updateEnvData(
+        EnvUpdater::set(
             'FRONTEND_APP_URL',
             '"' . $frontendUrl . '"'
         );
@@ -185,16 +170,13 @@ class AppInstallCommand extends Command
 
     protected function settingUpEnvMigrateAndSeed(): void
     {
-        $this->info('Setting up JWT secret key');
-        $this->callSilent('jwt:secret', ['--force' => true]);
-
         $this->info('Running up migrations');
         $this->call('migrate');
 
         $this->info('Running required seeders');
         $this->call('db:seed', ['--class' => 'InitialSeeder']);
 
-        $this->updateEnvData('APP_DEBUG', 'false');
+        EnvUpdater::set('APP_DEBUG', 'false');
     }
 
     protected function createDatabase(): void
@@ -215,11 +197,13 @@ class AppInstallCommand extends Command
 
     protected function settingUpDatabase(): int
     {
-        $this->updateEnvData('DB_HOST', $this->ask('database host', 'localhost'));
-        $this->updateEnvData('DB_PORT', $this->ask('database port', 3306));
-        $this->updateEnvData('DB_USERNAME', $this->ask('database username', 'root'));
-        $this->updateEnvData('DB_PASSWORD', $this->secret('database password'));
-        $this->updateEnvData('DB_DATABASE', $this->ask('database name', 'app_cattr'));
+        EnvUpdater::bulkSet([
+            'DB_HOST' => $this->ask('database host', 'localhost'),
+            'DB_PORT' => $this->ask('database port', 3306),
+            'DB_USERNAME' => $this->ask('database username', 'root'),
+            'DB_PASSWORD' => $this->secret('database password'),
+            'DB_DATABASE' => $this->ask('database name', 'app_cattr'),
+        ]);
 
         try {
             DB::connection()->getPdo();
@@ -251,36 +235,5 @@ class AppInstallCommand extends Command
         $this->info("Database configuration successful.");
 
         return 0;
-    }
-
-    /**
-     * @param string $key
-     * @param  $value
-     *
-     * @return void
-     */
-    protected function updateEnvData(string $key, $value): void
-    {
-        file_put_contents($this->laravel->environmentFilePath(), preg_replace(
-            $this->replacementPattern($key, $value),
-            $key . '=' . $value,
-            file_get_contents($this->laravel->environmentFilePath())
-        ));
-        Config::set($key, $value);
-    }
-
-    /**
-     * Get a regex pattern that will match env APP_KEY with any random key.
-     *
-     * @param string $key
-     * @param  $value
-     *
-     * @return string
-     */
-    protected function replacementPattern(string $key, $value): string
-    {
-        $escaped = preg_quote('=' . env($key), '/');
-
-        return "/^{$key}=.*/m";
     }
 }

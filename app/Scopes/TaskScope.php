@@ -30,9 +30,10 @@ class TaskScope implements Scope
             })
             ->orWhereHas('project.users', static function (Builder $builder) use ($user) {
                 $builder
-                    // If the user is a project auditor they can see all the project tasks
                     ->where('user_id', $user->id)
                     ->whereIn('projects_users.role_id', [1, 2, 3]);
-            });
+            })
+            ->orderBy('active', 'desc')
+            ->orderBy('created_at', 'desc');
     }
 }

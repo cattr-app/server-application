@@ -3,7 +3,7 @@
 namespace App\Scopes;
 
 use App\Models\TimeInterval;
-use Auth;
+use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -17,6 +17,7 @@ class TimeIntervalScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
+        /** @var User $user */
         $user = auth()->user();
 
         if (!$user) {

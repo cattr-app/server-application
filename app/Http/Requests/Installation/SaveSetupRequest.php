@@ -2,16 +2,16 @@
 
 namespace App\Http\Requests\Installation;
 
-use Illuminate\Foundation\Http\FormRequest;
+use App\Http\Requests\CattrFormRequest;
 
-class SaveSetupRequest extends FormRequest
+class SaveSetupRequest extends CattrFormRequest
 {
     /**
      * Get the validation rules that apply to the request.
      *
      * @return array
      */
-    public function rules(): array
+    public function _rules(): array
     {
         return [
             'db_host' => 'sometimes|required|string',
@@ -27,5 +27,13 @@ class SaveSetupRequest extends FormRequest
             'site_key' => 'nullable|string',
             'origin' => 'required|string'
         ];
+    }
+
+    /**
+     * @inheritDoc
+     */
+    protected function _authorize(): bool
+    {
+        return true;
     }
 }

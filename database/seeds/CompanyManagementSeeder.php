@@ -2,42 +2,23 @@
 
 namespace Database\Seeders;
 
-use App\Models\Property;
-use App\Services\CoreSettingsService;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Seeder;
+use Settings;
 
 class CompanyManagementSeeder extends Seeder
 {
-    /**
-     * @var CoreSettingsService
-     */
-    protected CoreSettingsService $settings;
-
-    /**
-     * CompanyManagementSeeder constructor.
-     * @param CoreSettingsService $settings
-     */
-    public function __construct(CoreSettingsService $settings)
-    {
-        $this->settings = $settings;
-    }
-
-    /**
-     * Run the database seeds.
-     *
-     * @return void
-     */
     public function run(): void
     {
-        if (!$this->settings->get('timezone')) {
-            $this->settings->set('timezone', 'UTC');
+        if (!Settings::scope('core')->get('timezone')) {
+            Settings::scope('core')->set('timezone', 'UTC');
         }
-        if (!$this->settings->get('language')) {
-            $this->settings->set('language', 'en');
+        if (!Settings::scope('core')->get('language')) {
+            Settings::scope('core')->set('language', 'en');
         }
-        if (!$this->settings->get('auto_thinning')) {
-            $this->settings->set('auto_thinning', true);
+        if (!Settings::scope('core')->get('auto_thinning')) {
+            Settings::scope('core')->set('auto_thinning', true);
         }
+
+        Settings::scope('core')->set('installed', true);
     }
 }

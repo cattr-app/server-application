@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use Eloquent;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
@@ -29,18 +30,18 @@ use Illuminate\Support\Carbon;
  * @property string $name
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read int|null $tasks_count
+ * @property string|null $color
  * @property-read Collection|Task[] $tasks
- * @method static EloquentBuilder|Priority whereCreatedAt($value)
- * @method static EloquentBuilder|Priority whereUpdatedAt($value)
- * @method static EloquentBuilder|Priority whereId($value)
- * @method static EloquentBuilder|Priority whereName($value)
+ * @property-read int|null $tasks_count
  * @method static EloquentBuilder|Priority newModelQuery()
  * @method static EloquentBuilder|Priority newQuery()
  * @method static EloquentBuilder|Priority query()
- * @mixin EloquentIdeHelper
- * @property string|null $color
  * @method static EloquentBuilder|Priority whereColor($value)
+ * @method static EloquentBuilder|Priority whereCreatedAt($value)
+ * @method static EloquentBuilder|Priority whereId($value)
+ * @method static EloquentBuilder|Priority whereName($value)
+ * @method static EloquentBuilder|Priority whereUpdatedAt($value)
+ * @mixin Eloquent
  */
 class Priority extends Model
 {

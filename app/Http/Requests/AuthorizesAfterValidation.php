@@ -2,12 +2,15 @@
 
 namespace App\Http\Requests;
 
+use App\Helpers\FilterDispatcher;
+use Filter;
+
 trait AuthorizesAfterValidation
 {
     /**
      * @return bool
      */
-    public function authorize(): bool
+    public function _authorize(): bool
     {
         return true;
     }
@@ -15,10 +18,10 @@ trait AuthorizesAfterValidation
     /**
      * @param $validator
      */
-    public function withValidator($validator)
+    public function withValidator($validator): void
     {
         $validator->after(function ($validator) {
-            if (! $validator->failed() && ! $this->authorizeValidated()) {
+            if (! $validator->failed() && ! Filter::process(Filter::getAuthValidationFilterName(), $this->authorizeValidated())) {
                 $this->failedAuthorization();
             }
         });
@@ -27,5 +30,5 @@ trait AuthorizesAfterValidation
     /**
      * @return mixed
      */
-    abstract public function authorizeValidated();
+    abstract public function authorizeValidated(): mixed;
 }

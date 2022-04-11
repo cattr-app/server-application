@@ -2,16 +2,22 @@
 
 namespace App\Models;
 
+use App\Contracts\ScreenshotService;
 use App\Scopes\TimeIntervalScope;
+use Database\Factories\TimeIntervalFactory;
 use Eloquent as EloquentIdeHelper;
+use Grimzy\LaravelMysqlSpatial\Eloquent\Builder;
+use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
+use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
-use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Storage;
 
 /**
  * @apiDefine TimeIntervalObject
@@ -69,8 +75,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property bool $is_manual
  * @property Task $task
  * @property User $user
- * @property Screenshot[] $screenshots
- * @property-read Screenshot $screenshot*
  * @property-read int|null $properties_count
  * @property-read Collection|Property[] $properties
  * @method static bool|null forceDelete()
@@ -94,11 +98,36 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|TimeInterval withoutTrashed()
  * @method static QueryBuilder|TimeInterval onlyTrashed()
  * @mixin EloquentIdeHelper
- * @property-read \App\Models\Screenshot|null $screenshot
+ * @property array|null $location
+ * @property-read Collection|\App\Models\TrackedApplication[] $apps
+ * @property-read int|null $apps_count
+ * @property-read bool $has_screenshot
+ * @method static Builder|TimeInterval comparison($geometryColumn, $geometry, $relationship)
+ * @method static Builder|TimeInterval contains($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval crosses($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval disjoint($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval distance($geometryColumn, $geometry, $distance)
+ * @method static Builder|TimeInterval distanceExcludingSelf($geometryColumn, $geometry, $distance)
+ * @method static Builder|TimeInterval distanceSphere($geometryColumn, $geometry, $distance)
+ * @method static Builder|TimeInterval distanceSphereExcludingSelf($geometryColumn, $geometry, $distance)
+ * @method static Builder|TimeInterval distanceSphereValue($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval distanceValue($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval doesTouch($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval equals($geometryColumn, $geometry)
+ * @method static TimeIntervalFactory factory(...$parameters)
+ * @method static Builder|TimeInterval intersects($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval orderByDistance($geometryColumn, $geometry, $direction = 'asc')
+ * @method static Builder|TimeInterval orderByDistanceSphere($geometryColumn, $geometry, $direction = 'asc')
+ * @method static Builder|TimeInterval orderBySpatial($geometryColumn, $geometry, $orderFunction, $direction = 'asc')
+ * @method static Builder|TimeInterval overlaps($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval whereLocation($value)
+ * @method static Builder|TimeInterval within($geometryColumn, $polygon)
  */
 class TimeInterval extends Model
 {
     use SoftDeletes;
+    use HasFactory;
+    use SpatialTrait;
 
     /**
      * table name from database
@@ -118,6 +147,7 @@ class TimeInterval extends Model
         'mouse_fill',
         'keyboard_fill',
         'is_manual',
+        'location',
     ];
 
     /**
@@ -143,6 +173,16 @@ class TimeInterval extends Model
         'deleted_at',
     ];
 
+    protected $appends = ['has_screenshot'];
+    /**
+     * @var ScreenshotService
+     */
+    private ScreenshotService $screenshotService;
+
+    protected array $spatialFields = [
+        'location'
+    ];
+
     /**
      * Override parent boot and Call deleting event
      *
@@ -154,15 +194,18 @@ class TimeInterval extends Model
 
         static::addGlobalScope(new TimeIntervalScope);
 
-        static::deleting(static function ($intervals) {
-            /** @var TimeInterval $intervals */
-            $intervals->screenshot()->delete();
+        static::deleting(static function ($interval) {
+            /** @var TimeInterval $interval */
+            $screenshotService = app()->make(ScreenshotService::class);
+            $screenshotService->destroyScreenshot($interval);
         });
     }
 
-    public function screenshot(): HasOne
+    public function __construct(array $attributes = [])
     {
-        return $this->hasOne(Screenshot::class, 'time_interval_id');
+        $this->screenshotService = app()->make(ScreenshotService::class);
+
+        parent::__construct($attributes);
     }
 
     public function task(): BelongsTo
@@ -178,6 +221,28 @@ class TimeInterval extends Model
     public function properties(): HasMany
     {
         return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::TIME_INTERVAL_CODE);
+    }
+
+    public function getHasScreenshotAttribute(): bool
+    {
+        return Storage::exists($this->screenshotService->getScreenshotPath($this));
+    }
+
+    public function getLocationAttribute(?Point $value): ?array
+    {
+        if (!isset($value)) {
+            return null;
+        }
+
+        return [
+            'lat' => $value->getLat(),
+            'lng' => $value->getLng(),
+        ];
+    }
+
+    public function setLocationAttribute(array $value): void
+    {
+        $this->attributes['location'] = new Point($value['lat'], $value['lng']);
     }
 
     public function apps(): HasMany

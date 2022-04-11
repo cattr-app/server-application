@@ -6,17 +6,7 @@ use App\Models\Invitation;
 
 class InvitationCreated
 {
-    /**
-     * @var Invitation
-     */
-    public Invitation $invitation;
-
-    /**
-     * InvitationCreated constructor.
-     * @param $invitation
-     */
-    public function __construct(Invitation $invitation)
+    public function __construct(public Invitation $invitation)
     {
-        $this->invitation = $invitation;
     }
 }

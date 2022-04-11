@@ -45,9 +45,9 @@ class ModuleActivatorService implements ActivatorInterface
                 foreach (ModuleModel::all()->toArray() as $module) {
                     $databaseModules[$module['name']] = $module['enabled'];
                 }
-            } catch (\Exception $e) {
+            } catch (Exception) {
                 // We can't communicate with db - then do nothing
-                // This can happens on first install when we are trying to migrate over clear database
+                // This can happen on first install when we are trying to migrate over clear database
             }
 
             return array_merge(

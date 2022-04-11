@@ -21,11 +21,6 @@ class MailTestCommand extends Command
      */
     protected $description = 'Test mail sending';
 
-    /**
-     * Execute the console command.
-     *
-     * @return void
-     */
     public function handle(): void
     {
         $destination = $this->argument('destination');

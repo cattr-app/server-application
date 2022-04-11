@@ -2,10 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\EventFilter\Facades\Filter;
+use Filter;
 use App\Models\TaskComment;
 use App\Models\User;
-use App\Notifications\CommentMention;
 use Exception;
 use Event;
 use Illuminate\Database\Eloquent\Builder;
@@ -13,16 +12,10 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Illuminate\Support\Facades\Validator;
 use Settings;
 
 /**
  * Class TaskCommentController
- * @deprecated
- * @codeCoverageIgnore
- *
- * @codeCoverageIgnore
- * @deprecated
  */
 class TaskCommentController extends ItemController
 {
@@ -45,19 +38,6 @@ class TaskCommentController extends ItemController
             $data['user_id'] = Auth::id();
 
             return $data;
-        });
-
-        Event::listen($this->getEventUniqueName('item.create.after'), static function (TaskComment $item, array $requestData) {
-            if (preg_match_all('/@([0-9a-zа-я._-]+)/i', $item->content, $matches)) {
-                foreach ($matches[1] as $userName) {
-                    $user = User::query()->whereRaw("REPLACE(full_name, ' ', '') = ?", [$userName])->first();
-                    if ($user) {
-                        /** @var User $user */
-                        $language = !empty($user->user_language) ? $user->user_language : Settings::get('core', 'language', 'en');
-                        $user->notify((new CommentMention($item))->locale($language));
-                    }
-                }
-            }
         });
 
         return $this->_create($request);
@@ -128,7 +108,7 @@ class TaskCommentController extends ItemController
         );
 
         $user = Auth::user();
-        $full_access = $user->allowed('task-comment', 'full_access');
+        $full_access = $user?->allowed('task-comment', 'full_access');
 
         if (!$full_access) {
             $baseQuery->whereHas('task', static function ($taskQuery) use ($user) {
@@ -141,16 +121,12 @@ class TaskCommentController extends ItemController
             $baseQuery
         );
 
-        return new JsonResponse(
-            Filter::process(
-                $this->getEventUniqueName('answer.success.item.list.result'),
-                $itemsQuery->get()
-            )
-        );
+        return responder()->success($itemsQuery->get())->respond();
     }
 
     /**
      * @apiDeprecated   since 1.0.0
+     * @throws Exception
      * @api             {post} /task-comment/show Show
      * @apiDescription  Show Task Comment
      *
@@ -220,10 +196,6 @@ class TaskCommentController extends ItemController
         $item = $itemsQuery->firstOrFail();
         $item->delete();
 
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.remove'), [
-                'message' => 'Item has been removed'
-            ])
-        );
+        return responder()->success()->respond(204);
     }
 }

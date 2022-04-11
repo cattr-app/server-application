@@ -3,8 +3,6 @@
 namespace App\Http;
 
 use App\Http\Middleware\Authenticate;
-use App\Http\Middleware\LockMiddleware;
-use App\Http\Middleware\RedirectIfAuthenticated;
 use App\Http\Middleware\SentryContext;
 use App\Http\Middleware\TrimStrings;
 use Fruitcake\Cors\HandleCors;
@@ -16,10 +14,15 @@ use Illuminate\Foundation\Http\Kernel as HttpKernel;
 use Illuminate\Foundation\Http\Middleware\CheckForMaintenanceMode;
 use Illuminate\Foundation\Http\Middleware\ConvertEmptyStringsToNull;
 use Illuminate\Foundation\Http\Middleware\ValidatePostSize;
+use Illuminate\Http\Middleware\TrustProxies;
 use Illuminate\Routing\Middleware\SubstituteBindings;
 use Illuminate\Routing\Middleware\ThrottleRequests;
+use Illuminate\Routing\Middleware\ValidateSignature;
 use Illuminate\Session\Middleware\StartSession;
 use Illuminate\View\Middleware\ShareErrorsFromSession;
+use Laravel\Sanctum\Http\Middleware\CheckAbilities;
+use Laravel\Sanctum\Http\Middleware\CheckForAnyAbility;
+use Laravel\Sanctum\Http\Middleware\EnsureFrontendRequestsAreStateful;
 
 class Kernel extends HttpKernel
 {
@@ -36,8 +39,8 @@ class Kernel extends HttpKernel
         TrimStrings::class,
         ConvertEmptyStringsToNull::class,
         HandleCors::class,
-        LockMiddleware::class,
-        SentryContext::class
+        SentryContext::class,
+        TrustProxies::class,
     ];
 
     /**
@@ -55,7 +58,8 @@ class Kernel extends HttpKernel
         ],
 
         'api' => [
-            'bindings',
+            SubstituteBindings::class,
+            EnsureFrontendRequestsAreStateful::class,
         ],
     ];
 
@@ -71,7 +75,9 @@ class Kernel extends HttpKernel
         'auth.basic' => AuthenticateWithBasicAuth::class,
         'bindings' => SubstituteBindings::class,
         'can' => Authorize::class,
-        'guest' => RedirectIfAuthenticated::class,
         'throttle' => ThrottleRequests::class,
+        'abilities' => CheckAbilities::class,
+        'ability' => CheckForAnyAbility::class,
+        'signed' => ValidateSignature::class,
     ];
 }

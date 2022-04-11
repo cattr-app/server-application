@@ -15,11 +15,11 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Event;
 use Mail;
-use App\Http\Requests\User\CreateUserRequest;
-use App\Http\Requests\User\EditUserRequest;
-use App\Http\Requests\User\SendInviteUserRequest;
-use App\Http\Requests\User\ShowUserRequest;
-use App\Http\Requests\User\DestroyUserRequest;
+use App\Http\Requests\User\CreateUserRequestCattr;
+use App\Http\Requests\User\EditUserRequestCattr;
+use App\Http\Requests\User\SendInviteUserRequestCattr;
+use App\Http\Requests\User\ShowUserRequestCattr;
+use App\Http\Requests\User\DestroyUserRequestCattr;
 use Illuminate\Support\Str;
 
 class UserController extends ItemController
@@ -182,10 +182,10 @@ class UserController extends ItemController
      * @apiUse         ForbiddenError
      */
     /**
-     * @param CreateUserRequest $request
+     * @param CreateUserRequestCattr $request
      * @return JsonResponse
      */
-    public function create(CreateUserRequest $request): JsonResponse
+    public function create(CreateUserRequestCattr $request): JsonResponse
     {
         return $this->_create($request);
     }
@@ -257,7 +257,7 @@ class UserController extends ItemController
      * @return JsonResponse
      * @throws Exception
      */
-    public function edit(EditUserRequest $request): JsonResponse
+    public function edit(EditUserRequestCattr $request): JsonResponse
     {
         $requestData = $request->validated();
 
@@ -359,11 +359,11 @@ class UserController extends ItemController
      */
 
     /**
-     * @param ShowUserRequest $request
+     * @param ShowUserRequestCattr $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function show(ShowUserRequest $request): JsonResponse
+    public function show(ShowUserRequestCattr $request): JsonResponse
     {
         return $this->_show($request);
     }
@@ -401,7 +401,7 @@ class UserController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function destroy(DestroyUserRequest $request): JsonResponse
+    public function destroy(DestroyUserRequestCattr $request): JsonResponse
     {
         return $this->_destroy($request);
     }
@@ -464,11 +464,11 @@ class UserController extends ItemController
     /**
      * TODO: apidoc
      *
-     * @param SendInviteUserRequest $request
+     * @param SendInviteUserRequestCattr $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function sendInvite(SendInviteUserRequest $request)
+    public function sendInvite(SendInviteUserRequestCattr $request)
     {
         $requestData = $request->validated();
 
@@ -532,7 +532,7 @@ class UserController extends ItemController
      * @param bool $withSoftDeleted
      * @return Builder
      */
-    public function getQuery($withRelations = true, $withSoftDeleted = false): Builder
+    public function getQuery(bool $withRelations = true, bool $withSoftDeleted = false): Builder
     {
         $query = parent::getQuery($withRelations, $withSoftDeleted);
 

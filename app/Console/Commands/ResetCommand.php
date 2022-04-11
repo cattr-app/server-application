@@ -2,8 +2,11 @@
 
 namespace App\Console\Commands;
 
+use Exception;
 use Illuminate\Console\Command;
 use DB;
+use Illuminate\Database\Console\Seeds\SeedCommand;
+use Nwidart\Modules\Commands\SeedCommand as ModuleSeedCommand;
 use Settings;
 use Storage;
 
@@ -26,15 +29,14 @@ class ResetCommand extends Command
      */
     protected $description = 'Cattr flush database';
 
-    protected array $protectedFiles = ['uploads/screenshots/.gitignore', 'uploads/screenshots/thumbs/.gitignore'];
     protected array $protectedTables = ['migrations', 'jobs', 'failed_jobs'];
 
     /**
      * Execute the console command.
      *
-     * @return mixed
+     * @throws Exception
      */
-    public function handle()
+    public function handle(): int
     {
         if (!$this->option('force') && !$this->confirm('Are you sure want to drop data for your Cattr instance?')) {
             return 0;
@@ -52,19 +54,17 @@ class ResetCommand extends Command
         DB::statement('SET FOREIGN_KEY_CHECKS=1;');
 
         if ($this->option('images')) {
-            $files = array_diff(Storage::allFiles('uploads/screenshots'), $this->protectedFiles);
-
-            Storage::delete($files);
+            Storage::deleteDirectory('uploads/screenshots');
         }
 
-        $this->call('db:seed', [
+        $this->call(SeedCommand::class, [
             '--class' => 'InitialSeeder',
             '--force' => true
         ]);
 
         if ($this->option('seed')) {
-            $this->call('db:seed');
-            $this->call('module:seed');
+            $this->call(SeedCommand::class);
+            $this->call(ModuleSeedCommand::class);
         }
 
         Settings::scope('core')->set('installed', true);

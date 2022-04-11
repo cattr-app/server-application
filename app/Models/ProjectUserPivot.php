@@ -2,15 +2,17 @@
 
 namespace App\Models;
 
+use Eloquent;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\Pivot;
 
 /**
  * App\Models\ProjectUserPivot
  *
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectUserPivot newModelQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectUserPivot newQuery()
- * @method static \Illuminate\Database\Eloquent\Builder|\App\Models\ProjectUserPivot query()
- * @mixin \Eloquent
+ * @method static Builder|ProjectUserPivot newModelQuery()
+ * @method static Builder|ProjectUserPivot newQuery()
+ * @method static Builder|ProjectUserPivot query()
+ * @mixin Eloquent
  */
 class ProjectUserPivot extends Pivot
 {

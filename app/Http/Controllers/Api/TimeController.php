@@ -3,18 +3,27 @@
 namespace App\Http\Controllers\Api;
 
 use Filter;
-use App\Models\Role;
 use App\Models\TimeInterval;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Auth;
 use Validator;
 
 class TimeController extends ItemController
 {
+    public static function getControllerRules(): array
+    {
+        return [
+            'total' => 'time.total',
+            'project' => 'time.project',
+            'tasks' => 'time.tasks',
+            'task' => 'time.task',
+            'taskUser' => 'time.task-user',
+        ];
+    }
+
     public function getItemClass(): string
     {
         return TimeInterval::class;
@@ -28,17 +37,6 @@ class TimeController extends ItemController
     public function getEventUniqueNamePart(): string
     {
         return 'time';
-    }
-
-    public static function getControllerRules(): array
-    {
-        return [
-            'total' => 'time.total',
-            'project' => 'time.project',
-            'tasks' => 'time.tasks',
-            'task' => 'time.task',
-            'taskUser' => 'time.task-user',
-        ];
     }
 
     /**
@@ -123,20 +121,13 @@ class TimeController extends ItemController
 
         $timeIntervals = $itemsQuery->get();
 
-        $totalTime = $timeIntervals->sum(static function ($interval) {
-            return Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
-        });
+        $totalTime = $timeIntervals->sum(static fn($el) => Carbon::parse($el->end_at)->diffInSeconds($el->start_at));
 
-        $responseData = [
+        return responder()->success([
             'time' => $totalTime,
             'start' => $timeIntervals->min('start_at'),
             'end' => $timeIntervals->max('end_at')
-        ];
-
-        return new JsonResponse(Filter::process(
-            $this->getEventUniqueName('answer.success.item.list'),
-            $responseData
-        ));
+        ])->respond();
     }
 
     /**
@@ -297,19 +288,14 @@ class TimeController extends ItemController
         $first = $itemsQuery->get()->first();
         $last = $itemsQuery->get()->last();
 
-        $response = [
+        return responder()->success([
             'tasks' => $tasks,
             'total' => [
                 'time' => $totalTime,
                 'start' => $first ? Carbon::parse($first->start_at)->toISOString() : null,
                 'end' => $last ? Carbon::parse($last->end_at)->toISOString() : null,
             ]
-        ];
-
-        return new JsonResponse(Filter::process(
-            $this->getEventUniqueName('answer.success.item.list'),
-            $response
-        ));
+        ])->respond();
     }
 
     /**
@@ -336,11 +322,5 @@ class TimeController extends ItemController
      *
      * @apiPermission   time_task_user
      * @apiPermission   time_full_access
-     */
-
-    /**
-     * @param bool $withRelations
-     * @param bool $withSoftDeleted
-     * @return Builder
      */
 }

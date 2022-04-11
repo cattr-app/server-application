@@ -2,9 +2,11 @@
 
 namespace App\Http\Middleware;
 
+use App\Exceptions\Entities\InstallationException;
 use Closure;
 use Illuminate\Http\Request;
 use Settings;
+use Throwable;
 
 class EnsureIsInstalled
 {
@@ -14,10 +16,11 @@ class EnsureIsInstalled
      * @param Request $request
      * @param Closure $next
      * @return mixed
+     * @throws Throwable
      */
-    public function handle(Request $request, Closure $next)
+    public function handle(Request $request, Closure $next): mixed
     {
-        abort_unless(Settings::scope('core')->get('installed'), 400, 'You need to run installation');
+        throw_unless(Settings::scope('core')->get('installed'), InstallationException::class);
 
         return $next($request);
     }

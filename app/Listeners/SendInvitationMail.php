@@ -9,18 +9,11 @@ use Settings;
 
 class SendInvitationMail
 {
-    /**
-     * Handle the given event.
-     *
-     * @param InvitationCreated $event
-     */
     public function handle(InvitationCreated $event): void
     {
         $email = $event->invitation->email;
         $key = $event->invitation->key;
 
-        $language = Settings::get('core', 'language', 'en');
-
-        Mail::to($email)->locale($language)->send(new UserInvitedMail($key));
+        Mail::to($email)->locale(Settings::scope('core')->get('language', 'en'))->send(new UserInvitedMail($key));
     }
 }

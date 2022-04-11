@@ -35,11 +35,11 @@ class StatusController extends Controller
      */
     public function __invoke(): JsonResponse
     {
-        return new JsonResponse([
+        return responder()->success([
             'cattr' => true,
             'cat' => CatHelper::getCat(),
             'version' => config('app.version'),
             'installed' => (bool)Settings::scope('core')->get('installed'),
-        ]);
+        ])->respond();
     }
 }

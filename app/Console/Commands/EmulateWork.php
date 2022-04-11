@@ -32,13 +32,7 @@ class EmulateWork extends Command
 
     protected array $protectedFiles = ['uploads/screenshots/.gitignore'];
 
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     * @throws Exception
-     */
-    public function handle()
+    public function handle(): int
     {
         $plan = Cache::get('usersPlan');
 
@@ -75,8 +69,8 @@ class EmulateWork extends Command
      */
     protected function createTimeInterval(int $taskId, int $userId, string $startAt, string $endAt): void
     {
-        $mouseFill = mt_rand(0, 100);
-        $keyboardFill = mt_rand(0, 100 - $mouseFill);
+        $mouseFill = random_int(0, 100);
+        $keyboardFill = random_int(0, 100 - $mouseFill);
         $activityFill = $mouseFill + $keyboardFill;
 
         $interval = TimeInterval::create([

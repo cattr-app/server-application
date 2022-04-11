@@ -16,6 +16,10 @@ class ScreenshotScope implements Scope
      */
     public function apply(Builder $builder, Model $model)
     {
+        if (app()->runningInConsole()) {
+            return $builder;
+        }
+
         /** @var User|null user */
         $user = auth()->user();
         if (!isset($user)) {

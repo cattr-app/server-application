@@ -1,5 +1,5 @@
 integration_testing:
-  image: php:7.4-alpine3.13
+  image: php:8.0.13-alpine3.13
   services:
     - name: mysql:latest
       alias: mysql
@@ -15,15 +15,15 @@ integration_testing:
     - docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd
     - docker-php-ext-install bcmath zip pdo_mysql
     - apk add --no-cache $PHPIZE_DEPS
-    - pecl install xdebug-2.9.8
+    - pecl install xdebug
     - docker-php-ext-enable xdebug
     - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   script:
-    - COMPOSER_MEMORY_LIMIT=-1 composer install
+    - COMPOSER_MEMORY_LIMIT=-1 composer install --ignore-platform-reqs
     - cp .env.testing.example .env.testing
     - php artisan migrate --env=testing
     - php artisan db:seed --class=InitialSeeder --env=testing
-    - php -c .testing.ini vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
+    - XDEBUG_MODE=coverage php -c .testing.ini vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
 
 apidoc_deploy:
   image: node:alpine
@@ -56,11 +56,12 @@ live_deploy:
   script:
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && git pull'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && git submodule update --init'
-    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && composer7.4 install'
-    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases new $(php7.4 artisan cattr:version)'
-    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases set-commits $(php7.4 artisan cattr:version) --auto'
-    - ssh $CI_USER@$CI_HOST 'php7.4 cattr/backend/artisan config:cache'
-    - ssh $CI_USER@$CI_HOST 'php7.4 cattr/backend/artisan migrate --force'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && composer install --ignore-platform-reqs'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases new $(php artisan cattr:version)'
+    - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases set-commits $(php artisan cattr:version) --auto'
+    - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan config:cache'
+    - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan migrate --force'
+    - ssh $CI_USER@$CI_HOST 'php cattr/backend/artisan queue:restart'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases deploys $(php7.4 artisan cattr:version) new -e $(cat .env | grep "APP_ENV=.*" | cut -d"=" -f 2)'
     - ssh $CI_USER@$CI_HOST 'cd cattr/backend && sentry-cli releases finalize $(php7.4 artisan cattr:version)'
 
@@ -78,15 +79,16 @@ staging_deploy:
   script:
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git pull'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && git submodule update --init'
-    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer7.4 install'
-    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer7.4 dump-autoload'
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer install --ignore-platform-reqs'
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && composer dump-autoload'
     - ssh $STAGING_USER@$STAGING_HOST 'cp -f backend/.env.staging backend/.env && cat backend/.env.sentry >> backend/.env'
-    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases new $(php7.4 artisan cattr:version)'
-    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases set-commits $(php7.4 artisan cattr:version) --auto'
-    - ssh $STAGING_USER@$STAGING_HOST 'php7.4 backend/artisan route:clear'
-    - ssh $STAGING_USER@$STAGING_HOST 'php7.4 backend/artisan cache:clear'
-    - ssh $STAGING_USER@$STAGING_HOST 'php7.4 backend/artisan config:cache'
-    - ssh $STAGING_USER@$STAGING_HOST 'php7.4 backend/artisan migrate --force'
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases new $(php artisan cattr:version)'
+    - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases set-commits $(php artisan cattr:version) --auto'
+    - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan route:clear'
+    - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan cache:clear'
+    - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan config:cache'
+    - ssh $STAGING_USER@$STAGING_HOST 'php backend/artisan migrate --force'
+    - ssh $STAGING_USER@$STAGING_HOST 'php cattr/backend/artisan queue:restart'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases deploys $(php artisan cattr:version) new -e $(cat .env | grep "APP_ENV=.*" | cut -d"=" -f 2)'
     - ssh $STAGING_USER@$STAGING_HOST 'cd backend && sentry-cli releases finalize $(php artisan cattr:version)'
 

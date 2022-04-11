@@ -3,7 +3,6 @@
 namespace Database\Factories;
 
 use App\Models\Priority;
-use App\Models\Project;
 use App\Models\Status;
 use App\Models\Task;
 use App\Models\User;
@@ -25,17 +24,13 @@ class TaskFactory extends Factory
      */
     public function definition(): array
     {
-        $projectId = Project::first()->id;
-        $userId = User::where(['email' => 'admin@example.com'])->first()->id;
-
         return [
-            'project_id' => $projectId,
-            'task_name' => $this->faker->unique()->text,
-            'description' => $this->faker->unique()->text,
-            'status_id' => Status::inRandomOrder()->first()->id,
-            'user_id' => $userId,
-            'assigned_by' => $userId,
+            'task_name' => $this->faker->sentence(3),
+            'description' => $this->faker->paragraph,
+            'assigned_by' => fn() => User::where(['is_admin' => 1])->first()->id,
+            'important' => $this->faker->boolean,
             'priority_id' => Priority::inRandomOrder()->first()->id,
+            'status_id' => Status::inRandomOrder()->first()->id,
         ];
     }
 }

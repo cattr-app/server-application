@@ -2,6 +2,7 @@
 
 namespace App\Console\Commands;
 
+use App\Jobs\ClearExpiredApps;
 use App\Models\TrackedApplication;
 use Illuminate\Console\Command;
 
@@ -28,17 +29,20 @@ class ClearExpiredTrackedApps extends Command
      */
     public function handle(): int
     {
-        $items = TrackedApplication::where(
-            'created_at',
-            '<=',
-            now()->subDay()->toIso8601String()
-        )->withoutGlobalScopes();
+        $this->info(
+            sprintf(
+                'Found %d items for deletion',
+                TrackedApplication::where(
+                    'created_at',
+                    '<=',
+                    now()->subDay()->toIso8601String()
+                )->withoutGlobalScopes()->count()
+            )
+        );
 
-        $this->info('Found ' . $items->count() . ' items for deletion');
+        ClearExpiredApps::dispatch();
 
-        $items->delete();
-
-        $this->info('Done');
+        $this->info('Clearance job dispatched');
 
         return 0;
     }

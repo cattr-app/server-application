@@ -15,6 +15,8 @@ use Settings;
 class RegistrationController extends Controller
 {
     /**
+     * @param $key
+     * @return JsonResponse
      * @api             {get} /auth/register/{key} Get Form
      * @apiDescription  Returns invitation form data by a invitation token
      *
@@ -40,8 +42,6 @@ class RegistrationController extends Controller
      *
      * @apiUse          400Error
      *
-     * @param $key
-     * @return JsonResponse
      */
     public function getForm($key): JsonResponse
     {
@@ -55,14 +55,15 @@ class RegistrationController extends Controller
             ], 404);
         }
 
-        return new JsonResponse([
-            'email' => $invitation->email,
-        ]);
+        return responder()->success(['email' => $invitation->email])->respond();
     }
 
     /**
      * Creates a new user.
      *
+     * @param Request $request
+     * @param string $key
+     * @return JsonResponse
      * @api             {post} /auth/register/{key} Post Form
      * @apiDescription  Registers user by key
      *
@@ -105,9 +106,6 @@ class RegistrationController extends Controller
      *
      * @apiUse          400Error
      *
-     * @param Request $request
-     * @param string $key
-     * @return JsonResponse
      */
     public function postForm(Request $request, string $key): JsonResponse
     {
@@ -127,7 +125,7 @@ class RegistrationController extends Controller
             ], 400);
         }
 
-        $language = Settings::get('core', 'language', 'en');
+        $language = Settings::scope('core')->get('language', 'en');
 
         /** @var User $user */
         $user = User::create([
@@ -145,8 +143,6 @@ class RegistrationController extends Controller
 
         $invitation->delete();
 
-        return new JsonResponse([
-            'user_id' => $user->id,
-        ]);
+        return responder()->success(['user_id' => $user->id])->respond();
     }
 }

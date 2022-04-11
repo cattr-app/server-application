@@ -21,10 +21,6 @@ class Controller extends BaseController
     use DispatchesJobs;
     use ValidatesRequests;
 
-    public function __construct()
-    {
-    }
-
     public static function getControllerRules(): array
     {
         return [];
@@ -38,7 +34,6 @@ class Controller extends BaseController
      */
     public function universalRoute(Request $request): void
     {
-
         /** @var Router $router */
         $router = app('router');
         /** @var RouteCollection $routes */

@@ -13,10 +13,10 @@ class UserScope implements Scope
      * @param Model $model
      * @return Builder
      */
-    public function apply(Builder $builder, Model $model)
+    public function apply(Builder $builder, Model $model): ?Builder
     {
         if (!auth()->hasUser()) {
-            return;
+            return null;
         }
 
         $user = auth()->user();

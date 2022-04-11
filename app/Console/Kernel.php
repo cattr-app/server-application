@@ -7,6 +7,7 @@ use App\Console\Commands\DemoReset;
 use App\Console\Commands\EmulateWork;
 use App\Console\Commands\PlanWork;
 use App\Console\Commands\RotateScreenshots;
+use App\Jobs\ClearExpiredApps;
 use Exception;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -45,12 +46,9 @@ class Kernel extends ConsoleKernel
         $schedule->command(PlanWork::class)->daily()->environments('staging');
         $schedule->command(DemoReset::class)->weeklyOn(1, '1:00')->environments('staging');
 
-        // Telescope
-        $schedule->command(PruneCommand::class)->daily()->environments(['staging', 'local']);
-
         $schedule->command(RotateScreenshots::class)->weekly()->when(Settings::scope('core')->get('auto_thinning'));
 
-        $schedule->command(ClearExpiredTrackedApps::class)->daily();
+        $schedule->job(new ClearExpiredApps)->daily();
     }
 
     /**
@@ -59,6 +57,5 @@ class Kernel extends ConsoleKernel
     protected function commands(): void
     {
         $this->load(__DIR__ . '/Commands');
-        require base_path('routes/console.php');
     }
 }

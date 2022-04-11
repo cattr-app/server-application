@@ -6,6 +6,7 @@ use App\Scopes\TaskScope;
 use App\Traits\ExposePermissions;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
@@ -119,11 +120,13 @@ use Parsedown;
  * @method static EloquentBuilder|Task whereDueDate($value)
  * @method static EloquentBuilder|Task whereRelativePosition($value)
  * @method static EloquentBuilder|Task whereStatusId($value)
+ * @method static \Database\Factories\TaskFactory factory(...$parameters)
  */
 class Task extends Model
 {
     use SoftDeletes;
     use ExposePermissions;
+    use HasFactory;
 
     /**
      * table name from database

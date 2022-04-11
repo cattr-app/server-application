@@ -3,6 +3,8 @@
 namespace App\Console\Commands;
 
 use Illuminate\Console\Command;
+use Illuminate\Foundation\Console\DownCommand;
+use Illuminate\Foundation\Console\UpCommand;
 
 /**
  * Class DemoReset
@@ -23,25 +25,20 @@ class DemoReset extends Command
      */
     protected $description = 'Cattr demo flush';
 
-    /**
-     * Execute the console command.
-     *
-     * @return mixed
-     */
-    public function handle()
+    public function handle(): int
     {
-        $this->call('down');
+        $this->call(DownCommand::class);
 
-        $this->call('cattr:reset', [
+        $this->call(ResetCommand::class, [
             '--force' => true,
             '--seed' => true,
             '--images' => true
         ]);
 
-        $this->call('cattr:demo:plan');
-        $this->call('cattr:demo:emulate');
+        $this->call(PlanWork::class);
+        $this->call(EmulateWork::class);
 
-        $this->call('up');
+        $this->call(UpCommand::class);
 
         return 0;
     }
