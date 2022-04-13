@@ -25,5 +25,10 @@ class AppServiceProvider extends ServiceProvider
         if (config('app.debug') && App::environment(['local', 'staging'])) {
             $this->app->register(TelescopeServiceProvider::class);
         }
+
+        $this->app->bind(
+            App\Contracts\ScreenshotService::class,
+            App\Services\ProductionScreenshotService::class
+        );
     }
 }

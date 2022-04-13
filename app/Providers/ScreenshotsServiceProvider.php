@@ -13,12 +13,12 @@ class ScreenshotsServiceProvider extends ServiceProvider implements DeferrablePr
         if (App::environment(['demo', 'staging'])) {
             $this->app->bind(
                 App\Contracts\ScreenshotService::class,
-                App\Services\Screenshots\DemoScreenshotService::class
+                \Modules\Demo\Services\DemoScreenshotService::class
             );
         } else {
             $this->app->bind(
                 App\Contracts\ScreenshotService::class,
-                App\Services\Screenshots\ProductionScreenshotService::class
+                App\Services\ProductionScreenshotService::class
             );
         }
     }

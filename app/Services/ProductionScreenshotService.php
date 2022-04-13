@@ -1,25 +1,22 @@
 <?php
 
-namespace App\Services\Screenshots;
+namespace App\Services;
 
 use App\Contracts\ScreenshotService as ScreenshotServiceInterface;
 use App\Models\TimeInterval;
 
-class DemoScreenshotService extends ScreenshotServiceInterface
+class ProductionScreenshotService extends ScreenshotServiceInterface
 {
     public function getScreenshotPath(TimeInterval|int $interval): string
     {
-        return self::PARENT_FOLDER . hash(
-            'sha256',
-            substr(optional($interval)->id ?: $interval, -1)
-        ) . '.' . self::FILE_FORMAT;
+        return self::PARENT_FOLDER . hash('sha256', optional($interval)->id ?: $interval) . '.' . self::FILE_FORMAT;
     }
 
     public function getThumbPath(TimeInterval|int $interval): string
     {
         return self::PARENT_FOLDER . self::THUMBS_FOLDER . hash(
             'sha256',
-            substr(optional($interval)->id ?: $interval, -1)
+            optional($interval)->id ?: $interval
         ) . '.' . self::FILE_FORMAT;
     }
 }
