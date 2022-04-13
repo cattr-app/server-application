@@ -132,24 +132,15 @@ class TimeIntervalController extends ItemController
      */
     public function index(Request $request): JsonResponse
     {
-        $filters = $request->all();
-        $request->get('project_id') ? $filters['task.project_id'] = $request->get('project_id') : false;
+        Filter::listen(Filter::getQueryPrepareFilterName(), static function ($filters) use ($request) {
+            if ($request->get('project_id')) {
+                $filters['task.project_id'] = $request->get('project_id');
+            }
 
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(),
-                $filters ?: []
-            )
-        );
+            return $filters;
+        });
 
-        $paginate = $request->get('paginate', false);
-        $currentPage = $request->get('page', 1);
-        $perPage = $request->get('perPage', 15);
-
-        return responder()->success($paginate ?
-            $itemsQuery->paginate($perPage, ['*'], 'page', $currentPage)
-            : $itemsQuery->get())->respond();
+        return $this->_index($request);
     }
 
     /**

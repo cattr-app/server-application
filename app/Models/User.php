@@ -103,53 +103,62 @@ use Laravel\Sanctum\HasApiTokens;
  * App\Models\User
  *
  * @property int $id
- * @property int $screenshots_active
- * @property int $manual_time
- * @property int $computer_time_popup
- * @property int $blur_screenshots
- * @property int $web_and_app_monitoring
- * @property int $screenshots_interval
- * @property int $active
- * @property int $nonce
- * @property int $client_installed
- * @property int $company_id
- * @property int $role_id
- * @property int $change_password
  * @property string $full_name
  * @property string $email
- * @property string $url
- * @property string $level
- * @property string $type
- * @property string $avatar
+ * @property string|null $url
+ * @property int|null $company_id
+ * @property string|null $avatar
+ * @property int|null $screenshots_active
+ * @property int|null $manual_time
+ * @property int|null $computer_time_popup
+ * @property bool|null $blur_screenshots
+ * @property bool|null $web_and_app_monitoring
+ * @property int|null $screenshots_interval
+ * @property int $active
  * @property string $password
- * @property string $timezone
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property string|null $timezone
+ * @property int $important
+ * @property int $change_password
+ * @property int $is_admin
+ * @property int $role_id
  * @property string $user_language
- * @property string $created_at
- * @property string $updated_at
- * @property string $deleted_at
- * @property bool $is_admin
- * @property bool $important
+ * @property string $type
  * @property bool $invitation_sent
- * @property Role $role
- * @property string|null $remember_token
- * @property Project[]|Collection $projects
- * @property Task[]|Collection $tasks
- * @property TimeInterval[]|Collection $timeIntervals
- * @property-read int|null $notifications_count
- * @property-read int|null $projects_count
- * @property-read int|null $projects_relation_count
- * @property-read int|null $properties_count
- * @property-read int|null $tasks_count
- * @property-read int|null $time_intervals_count
+ * @property int $nonce
+ * @property int $client_installed
+ * @property int $permanent_screenshots
+ * @property \Illuminate\Support\Carbon $last_activity
+ * @property-read bool $online
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
- * @property-read Collection|ProjectsUsers[] $projectsRelation
- * @property-read Collection|Property[] $properties
- * @method static bool|null forceDelete()
- * @method static bool|null restore()
+ * @property-read int|null $notifications_count
+ * @property-read Collection|\App\Models\Project[] $projects
+ * @property-read int|null $projects_count
+ * @property-read Collection|\App\Models\ProjectsUsers[] $projectsRelation
+ * @property-read int|null $projects_relation_count
+ * @property-read Collection|\App\Models\Property[] $properties
+ * @property-read int|null $properties_count
+ * @property-read \App\Models\Role $role
+ * @property-read Collection|\App\Models\Task[] $tasks
+ * @property-read int|null $tasks_count
+ * @property-read Collection|\App\Models\TimeInterval[] $timeIntervals
+ * @property-read int|null $time_intervals_count
+ * @property-read Collection|\Laravel\Sanctum\PersonalAccessToken[] $tokens
+ * @property-read int|null $tokens_count
+ * @method static EloquentBuilder|User active()
+ * @method static EloquentBuilder|User admin()
+ * @method static \Database\Factories\UserFactory factory(...$parameters)
+ * @method static EloquentBuilder|User newModelQuery()
+ * @method static EloquentBuilder|User newQuery()
+ * @method static QueryBuilder|User onlyTrashed()
+ * @method static EloquentBuilder|User query()
  * @method static EloquentBuilder|User whereActive($value)
  * @method static EloquentBuilder|User whereAvatar($value)
  * @method static EloquentBuilder|User whereBlurScreenshots($value)
  * @method static EloquentBuilder|User whereChangePassword($value)
+ * @method static EloquentBuilder|User whereClientInstalled($value)
  * @method static EloquentBuilder|User whereCompanyId($value)
  * @method static EloquentBuilder|User whereComputerTimePopup($value)
  * @method static EloquentBuilder|User whereCreatedAt($value)
@@ -158,37 +167,25 @@ use Laravel\Sanctum\HasApiTokens;
  * @method static EloquentBuilder|User whereFullName($value)
  * @method static EloquentBuilder|User whereId($value)
  * @method static EloquentBuilder|User whereImportant($value)
+ * @method static EloquentBuilder|User whereInvitationSent($value)
+ * @method static EloquentBuilder|User whereIsAdmin($value)
+ * @method static EloquentBuilder|User whereLastActivity($value)
  * @method static EloquentBuilder|User whereManualTime($value)
+ * @method static EloquentBuilder|User whereNonce($value)
  * @method static EloquentBuilder|User wherePassword($value)
- * @method static EloquentBuilder|User wherePoorTimePopup($value)
- * @method static EloquentBuilder|User whereRememberToken($value)
+ * @method static EloquentBuilder|User wherePermanentScreenshots($value)
+ * @method static EloquentBuilder|User whereRoleId($value)
  * @method static EloquentBuilder|User whereScreenshotsActive($value)
  * @method static EloquentBuilder|User whereScreenshotsInterval($value)
  * @method static EloquentBuilder|User whereTimezone($value)
+ * @method static EloquentBuilder|User whereType($value)
  * @method static EloquentBuilder|User whereUpdatedAt($value)
  * @method static EloquentBuilder|User whereUrl($value)
- * @method static EloquentBuilder|User whereWebAndAppMonitoring($value)
- * @method static EloquentBuilder|User newModelQuery()
- * @method static EloquentBuilder|User whereInvitationSent($value)
- * @method static EloquentBuilder|User whereIsAdmin($value)
- * @method static EloquentBuilder|User whereRoleId($value)
- * @method static EloquentBuilder|User whereType($value)
  * @method static EloquentBuilder|User whereUserLanguage($value)
- * @method static EloquentBuilder|User newQuery()
- * @method static EloquentBuilder|User query()
- * @method static QueryBuilder|User onlyTrashed()
+ * @method static EloquentBuilder|User whereWebAndAppMonitoring($value)
  * @method static QueryBuilder|User withTrashed()
  * @method static QueryBuilder|User withoutTrashed()
  * @mixin EloquentIdeHelper
- * @property-read int|null $tokens_count
- * @property int $permanent_screenshots
- * @property \Illuminate\Support\Carbon $last_activity
- * @property-read bool $online
- * @method static EloquentBuilder|User whereClientInstalled($value)
- * @method static EloquentBuilder|User whereLastActivity($value)
- * @method static EloquentBuilder|User whereNonce($value)
- * @method static EloquentBuilder|User wherePermanentScreenshots($value)
- * @method static UserFactory factory(...$parameters)
  */
 class User extends Authenticatable
 {
@@ -397,5 +394,15 @@ class User extends Authenticatable
         }
 
         $this->attributes['password'] = $password;
+    }
+
+    public function scopeAdmin(EloquentBuilder $query): EloquentBuilder
+    {
+        return $query->where('is_admin', true);
+    }
+
+    public function scopeActive(EloquentBuilder $query): EloquentBuilder
+    {
+        return $query->where('active', true);
     }
 }

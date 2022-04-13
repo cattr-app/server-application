@@ -35,36 +35,27 @@ use Illuminate\Support\Carbon;
 /**
  * App\Models\Project
  *
- * @apiDefine ProjectParams
- * @apiParam {Integer}  [id]           ID
- * @apiParam {Integer}  [company_id]   Company ID
- * @apiParam {String}   [name]         Name
- * @apiParam {String}   [description]  Description of project
- * @apiParam {ISO8601}  [created_at]   Creation DateTime
- * @apiParam {ISO8601}  [updated_at]   Update DateTime
- * @apiParam {ISO8601}  [deleted_at]   Delete DateTime or `NULL` if user wasn't deleted
- * @apiParam {String}   [with]         Related models to return in response
- * @apiParam {Object}   [users]        Users attached to project,all params in <a href="#api-User-GetUserList">@User</a>
- * @apiParam {Object}   [tasks]        Tasks of project, all params in <a href="#api-Task-GetTaskList" >@Task</a>
- * @apiVersion 1.0.0
- * @property int                                $id
- * @property int|null                           $company_id
- * @property string                 $name
- * @property string                 $description
- * @property Carbon|null            $deleted_at
- * @property Carbon|null            $created_at
- * @property Carbon|null            $updated_at
- * @property int                    $important
- * @property string                 $source
- * @property int|null               $default_priority_id
- * @property-read Priority|null     $defaultPriority
- * @property-read array             $can
- * @property-read Collection|Role[] $roles
- * @property-read int|null          $roles_count
- * @property-read Collection|Task[] $tasks
- * @property-read int|null          $tasks_count
- * @property-read Collection|User[] $users
- * @property-read int|null          $users_count
+ * @property int $id
+ * @property int|null $company_id
+ * @property string $name
+ * @property string $description
+ * @property Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property int $important
+ * @property string $source
+ * @property int|null $default_priority_id
+ * @property-read \App\Models\Priority|null $defaultPriority
+ * @property-read array $can
+ * @property-read Collection|\App\Models\Role[] $roles
+ * @property-read int|null $roles_count
+ * @property-read Collection|\App\Models\Status[] $statuses
+ * @property-read int|null $statuses_count
+ * @property-read Collection|\App\Models\Task[] $tasks
+ * @property-read int|null $tasks_count
+ * @property-read Collection|\App\Models\User[] $users
+ * @property-read int|null $users_count
+ * @method static \Database\Factories\ProjectFactory factory(...$parameters)
  * @method static EloquentBuilder|Project newModelQuery()
  * @method static EloquentBuilder|Project newQuery()
  * @method static QueryBuilder|Project onlyTrashed()
@@ -82,9 +73,6 @@ use Illuminate\Support\Carbon;
  * @method static QueryBuilder|Project withTrashed()
  * @method static QueryBuilder|Project withoutTrashed()
  * @mixin EloquentIdeHelper
- * @property-read Collection|Status[] $statuses
- * @property-read int|null            $statuses_count
- * @method static \Database\Factories\ProjectFactory factory(...$parameters)
  */
 
 class Project extends Model

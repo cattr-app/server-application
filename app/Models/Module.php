@@ -19,12 +19,11 @@ use Illuminate\Support\Carbon;
  * @method static Builder|Module newQuery()
  * @method static Builder|Module query()
  * @method static Builder|Module whereCreatedAt($value)
+ * @method static Builder|Module whereEnabled($value)
  * @method static Builder|Module whereId($value)
  * @method static Builder|Module whereName($value)
- * @method static Builder|Module whereStatus($value)
  * @method static Builder|Module whereUpdatedAt($value)
  * @mixin Eloquent
- * @method static Builder|Module whereEnabled($value)
  */
 class Module extends Model
 {

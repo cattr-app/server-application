@@ -2,7 +2,6 @@
 
 namespace Database\Factories;
 
-use App\Contracts\ScreenshotService;
 use App\Helpers\FakeScreenshotGenerator;
 use App\Models\TimeInterval;
 use Illuminate\Database\Eloquent\Factories\Factory;

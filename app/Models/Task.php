@@ -69,58 +69,53 @@ use Parsedown;
  *
  * @property int $id
  * @property int $project_id
- * @property int $user_id
- * @property int $assigned_by
- * @property int $priority_id
- * @property int $status_id
  * @property string $task_name
- * @property string $description
- * @property string $url
- * @property string $created_at
- * @property string $updated_at
- * @property string $deleted_at
- * @property bool $important
- * @property User $assigned
- * @property Project $project
- * @property Priority $priority
- * @property Status $status
- * @property User[] $users
- * @property TimeInterval[] $timeIntervals
- * @property-read int|null $time_intervals_count
- * @method static bool|null forceDelete()
- * @method static bool|null restore()
- * @method static EloquentBuilder|Task whereActive($value)
- * @method static EloquentBuilder|Task whereAssignedBy($value)
- * @method static EloquentBuilder|Task whereCreatedAt($value)
- * @method static EloquentBuilder|Task whereDeletedAt($value)
- * @method static EloquentBuilder|Task whereDescription($value)
- * @method static EloquentBuilder|Task whereId($value)
- * @method static EloquentBuilder|Task whereImportant($value)
- * @method static EloquentBuilder|Task wherePriorityId($value)
- * @method static EloquentBuilder|Task whereProjectId($value)
- * @method static EloquentBuilder|Task whereTaskName($value)
- * @method static EloquentBuilder|Task whereUpdatedAt($value)
- * @method static EloquentBuilder|Task whereUrl($value)
- * @method static EloquentBuilder|Task whereUserId($value)
- * @method static EloquentBuilder|Task newModelQuery()
- * @method static EloquentBuilder|Task newQuery()
- * @method static EloquentBuilder|Task query()
- * @method static QueryBuilder|Task onlyTrashed()
- * @method static QueryBuilder|Task withTrashed()
- * @method static QueryBuilder|Task withoutTrashed()
- * @mixin EloquentIdeHelper
+ * @property string|null $description
+ * @property int $assigned_by
+ * @property string|null $url
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property int $priority_id
+ * @property int $important
+ * @property int|null $status_id
  * @property float $relative_position
  * @property \Illuminate\Support\Carbon|null $due_date
+ * @property-read \App\Models\User $assigned
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TaskHistory[] $changes
  * @property-read int|null $changes_count
  * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TaskComment[] $comments
  * @property-read int|null $comments_count
  * @property-read array $can
+ * @property-read \App\Models\Priority $priority
+ * @property-read \App\Models\Project $project
+ * @property-read \App\Models\Status|null $status
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TimeInterval[] $timeIntervals
+ * @property-read int|null $time_intervals_count
+ * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\User[] $users
  * @property-read int|null $users_count
+ * @method static \Database\Factories\TaskFactory factory(...$parameters)
+ * @method static EloquentBuilder|Task newModelQuery()
+ * @method static EloquentBuilder|Task newQuery()
+ * @method static QueryBuilder|Task onlyTrashed()
+ * @method static EloquentBuilder|Task query()
+ * @method static EloquentBuilder|Task whereAssignedBy($value)
+ * @method static EloquentBuilder|Task whereCreatedAt($value)
+ * @method static EloquentBuilder|Task whereDeletedAt($value)
+ * @method static EloquentBuilder|Task whereDescription($value)
  * @method static EloquentBuilder|Task whereDueDate($value)
+ * @method static EloquentBuilder|Task whereId($value)
+ * @method static EloquentBuilder|Task whereImportant($value)
+ * @method static EloquentBuilder|Task wherePriorityId($value)
+ * @method static EloquentBuilder|Task whereProjectId($value)
  * @method static EloquentBuilder|Task whereRelativePosition($value)
  * @method static EloquentBuilder|Task whereStatusId($value)
- * @method static \Database\Factories\TaskFactory factory(...$parameters)
+ * @method static EloquentBuilder|Task whereTaskName($value)
+ * @method static EloquentBuilder|Task whereUpdatedAt($value)
+ * @method static EloquentBuilder|Task whereUrl($value)
+ * @method static QueryBuilder|Task withTrashed()
+ * @method static QueryBuilder|Task withoutTrashed()
+ * @mixin EloquentIdeHelper
  */
 class Task extends Model
 {

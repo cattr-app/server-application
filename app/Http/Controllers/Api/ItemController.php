@@ -66,7 +66,7 @@ abstract class ItemController extends Controller
         );
 
         return responder()->success(
-            $request->header('X-Paginate', true) ? $itemsQuery->paginate() : $itemsQuery->get()
+            $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate() : $itemsQuery->get()
         )->respond();
     }
 

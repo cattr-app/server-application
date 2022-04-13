@@ -12,27 +12,31 @@ use Illuminate\Support\Carbon;
 /**
  * App\Models\TrackedApplication
  *
- * @property int                    $id
- * @property string                 $title
- * @property string                 $executable
- * @property int|null               $time_interval_id
- * @property Carbon|null            $created_at
- * @property Carbon|null            $updated_at
- * @property-read TimeInterval|null $timeInterval
+ * @property int $id
+ * @property string $title
+ * @property string $executable
+ * @property int|null $time_interval_id
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property int|null $user_id
+ * @property-read \App\Models\TimeInterval|null $timeInterval
+ * @property-read \App\Models\User|null $user
  * @method static Builder|TrackedApplication newModelQuery()
  * @method static Builder|TrackedApplication newQuery()
  * @method static \Illuminate\Database\Query\Builder|TrackedApplication onlyTrashed()
  * @method static Builder|TrackedApplication query()
  * @method static Builder|TrackedApplication whereCreatedAt($value)
+ * @method static Builder|TrackedApplication whereDeletedAt($value)
  * @method static Builder|TrackedApplication whereExecutable($value)
  * @method static Builder|TrackedApplication whereId($value)
  * @method static Builder|TrackedApplication whereTimeIntervalId($value)
  * @method static Builder|TrackedApplication whereTitle($value)
  * @method static Builder|TrackedApplication whereUpdatedAt($value)
+ * @method static Builder|TrackedApplication whereUserId($value)
  * @method static \Illuminate\Database\Query\Builder|TrackedApplication withTrashed()
  * @method static \Illuminate\Database\Query\Builder|TrackedApplication withoutTrashed()
  * @mixin \Eloquent
- * @property-read \App\Models\User $user
  */
 class TrackedApplication extends Model
 {

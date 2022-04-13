@@ -1,123 +1,123 @@
 {
-    "name": "cattr/backend-application",
-    "description": "Backend Application for Cattr",
-    "version": "4.0.0-alpha",
-    "license": "SSPL-1.0",
-    "type": "project",
-    "require": {
-        "php": "^8.0",
-        "ext-gd": "*",
-        "ext-json": "*",
-        "ext-pdo": "*",
-        "doctrine/dbal": "^2.9.2",
-        "erusev/parsedown": "^1.7",
-        "fakerphp/faker": "^1.16",
-        "flugger/laravel-responder": "^3.1",
-        "fruitcake/laravel-cors": "^1.0",
-        "grimzy/laravel-mysql-spatial": "^5.0",
-        "intervention/image": "^2.5",
-        "joshbrw/laravel-module-installer": "^2.0.1",
-        "laravel/framework": "^8.0",
-        "laravel/sanctum": "^2.14",
-        "laravel/telescope": "^4.0",
-        "laravel/tinker": "^2.0",
-        "maatwebsite/excel": "^3.1",
-        "mpdf/mpdf": "^8.0",
-        "nwidart/laravel-modules": "^8",
-        "php-http/guzzle6-adapter": "^2.0",
-        "predis/predis": "^1.1",
-        "psr/simple-cache": "^1.0",
-        "sentry/sentry-laravel": "^2.12",
-        "webpatser/laravel-uuid": "^4.0",
-        "wikimedia/composer-merge-plugin": "2.0.1"
-    },
-    "require-dev": {
-        "barryvdh/laravel-ide-helper": "^2.6.7",
-        "brainmaestro/composer-git-hooks": "^2.8",
-        "mockery/mockery": "^1.3",
-        "phpunit/phpunit": "^9.5.8",
-        "roave/security-advisories": "dev-latest",
-        "sempro/phpunit-pretty-print": "^1.0",
-        "squizlabs/php_codesniffer": "3.*"
-    },
-    "autoload": {
-        "psr-4": {
-            "App\\": "app/",
-            "Modules\\": "Modules/",
-            "Database\\Factories\\": "database/factories/",
-            "Database\\Seeders\\": "database/seeds/"
-        }
-    },
-    "scripts": {
-        "cghooks": "vendor/bin/cghooks",
-        "phpcs": "vendor/bin/phpcs --standard=./phpcs.xml --colors",
-        "phpcbf": "vendor/bin/phpcbf --standard=./phpcs.xml --colors",
-        "project:update": [
-            "@composer update",
-            "@php artisan migrate",
-            "@config:update"
-        ],
-        "dumphelpers": [
-            "@php artisan ide-helper:generate",
-            "@php artisan ide-helper:meta"
-        ],
-        "config:init": [
-            "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-            "@php -r \"if (!is_dir(__DIR__.'/public/uploads')) mkdir(__DIR__.'/public/uploads');\"",
-            "@php -r \"if (!file_exists(__DIR__.'/public/uploads/screenshots')) symlink(__DIR__.'/storage/app/uploads/screenshots', __DIR__.'/public/uploads/screenshots');\"",
-            "@php artisan key:generate",
-            "@config:update"
-        ],
-        "config:update": [
-            "@php artisan package:discover"
-        ],
-        "post-install-cmd": [
-            "Illuminate\\Foundation\\ComposerScripts::postInstall",
-            "@config:update",
-            "cghooks add --ignore-lock",
-            "cghooks update"
-        ],
-        "post-update-cmd": [
-            "Illuminate\\Foundation\\ComposerScripts::postUpdate",
-            "@config:update",
-            "cghooks update"
-        ]
-    },
-    "config": {
-        "preferred-install": "dist",
-        "sort-packages": true,
-        "optimize-autoloader": true
-    },
-    "autoload-dev": {
-        "classmap": [
-            "tests/TestCase.php"
-        ],
-        "psr-4": {
-            "Tests\\": "tests/"
-        }
-    },
-    "extra": {
-        "merge-plugin": {
-            "include": [
-                "./Modules/*/composer.json"
-            ],
-            "recurse": true,
-            "replace": false,
-            "ignore-duplicates": false,
-            "merge-dev": true,
-            "merge-extra": false,
-            "merge-extra-deep": false,
-            "merge-scripts": false
-        },
-        "hooks": {
-            "pre-commit": [
-                "OUTPUT=$(vendor/bin/phpcbf --standard=./phpcs.xml)",
-                "RETVAL=$?",
-                "if [ $RETVAL -ne 0 ]; then",
-                "echo $OUTPUT | less",
-                "fi",
-                "exit $RETVAL"
-            ]
-        }
+  "name": "cattr/backend-application",
+  "description": "Backend Application for Cattr",
+  "version": "4.0.0-alpha",
+  "license": "SSPL-1.0",
+  "type": "project",
+  "require": {
+    "php": "^8.0",
+    "ext-gd": "*",
+    "ext-json": "*",
+    "ext-pdo": "*",
+    "doctrine/dbal": "^2.9.2",
+    "erusev/parsedown": "^1.7",
+    "fakerphp/faker": "^1.16",
+    "flugger/laravel-responder": "^3.1",
+    "fruitcake/laravel-cors": "^1.0",
+    "grimzy/laravel-mysql-spatial": "^5.0",
+    "intervention/image": "^2.5",
+    "joshbrw/laravel-module-installer": "^2.0.1",
+    "laravel/framework": "^8.0",
+    "laravel/sanctum": "^2.14",
+    "laravel/telescope": "^4.0",
+    "laravel/tinker": "^2.0",
+    "maatwebsite/excel": "^3.1",
+    "mpdf/mpdf": "^8.0",
+    "nwidart/laravel-modules": "^8",
+    "php-http/guzzle6-adapter": "^2.0",
+    "predis/predis": "^1.1",
+    "psr/simple-cache": "^1.0",
+    "sentry/sentry-laravel": "^2.12",
+    "webpatser/laravel-uuid": "^4.0",
+    "wikimedia/composer-merge-plugin": "2.0.1"
+  },
+  "require-dev": {
+    "barryvdh/laravel-ide-helper": "^2.6.7",
+    "brainmaestro/composer-git-hooks": "^2.8",
+    "mockery/mockery": "^1.3",
+    "phpunit/phpunit": "^9.5.8",
+    "roave/security-advisories": "dev-latest",
+    "sempro/phpunit-pretty-print": "^1.0",
+    "squizlabs/php_codesniffer": "3.*"
+  },
+  "autoload": {
+    "psr-4": {
+      "App\\": "app/",
+      "Modules\\": "Modules/",
+      "Database\\Factories\\": "database/factories/",
+      "Database\\Seeders\\": "database/seeds/"
     }
+  },
+  "scripts": {
+    "cghooks": "vendor/bin/cghooks",
+    "phpcs": "vendor/bin/phpcs --standard=./phpcs.xml --colors",
+    "phpcbf": "vendor/bin/phpcbf --standard=./phpcs.xml --colors",
+    "project:update": [
+      "@composer update",
+      "@php artisan migrate",
+      "@config:update"
+    ],
+    "dumphelpers": [
+      "@php artisan ide-helper:generate",
+      "@php artisan ide-helper:meta"
+    ],
+    "config:init": [
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+      "@php -r \"if (!is_dir(__DIR__.'/public/uploads')) mkdir(__DIR__.'/public/uploads');\"",
+      "@php -r \"if (!file_exists(__DIR__.'/public/uploads/screenshots')) symlink(__DIR__.'/storage/app/uploads/screenshots', __DIR__.'/public/uploads/screenshots');\"",
+      "@php artisan key:generate",
+      "@config:update"
+    ],
+    "config:update": [
+      "@php artisan package:discover"
+    ],
+    "post-install-cmd": [
+      "Illuminate\\Foundation\\ComposerScripts::postInstall",
+      "@config:update",
+      "cghooks add --ignore-lock",
+      "cghooks update"
+    ],
+    "post-update-cmd": [
+      "Illuminate\\Foundation\\ComposerScripts::postUpdate",
+      "@config:update",
+      "cghooks update"
+    ]
+  },
+  "config": {
+    "preferred-install": "dist",
+    "sort-packages": true,
+    "optimize-autoloader": true
+  },
+  "autoload-dev": {
+    "classmap": [
+      "tests/TestCase.php"
+    ],
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
+  "extra": {
+    "merge-plugin": {
+      "include": [
+        "./Modules/*/composer.json"
+      ],
+      "recurse": true,
+      "replace": false,
+      "ignore-duplicates": false,
+      "merge-dev": true,
+      "merge-extra": false,
+      "merge-extra-deep": false,
+      "merge-scripts": false
+    },
+    "hooks": {
+      "pre-commit": [
+        "OUTPUT=$(vendor/bin/phpcbf --standard=./phpcs.xml)",
+        "RETVAL=$?",
+        "if [ $RETVAL -ne 0 ]; then",
+        "echo $OUTPUT | less",
+        "fi",
+        "exit $RETVAL"
+      ]
+    }
+  }
 }

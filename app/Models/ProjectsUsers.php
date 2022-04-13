@@ -44,20 +44,20 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $project_id
  * @property int $user_id
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
  * @property int $role_id
- * @property string $created_at
- * @property string $updated_at
- * @property User $user
- * @property Role $role
- * @property Project $project
- * @method static EloquentBuilder|ProjectsUsers whereCreatedAt($value)
- * @method static EloquentBuilder|ProjectsUsers whereProjectId($value)
- * @method static EloquentBuilder|ProjectsUsers whereUpdatedAt($value)
- * @method static EloquentBuilder|ProjectsUsers whereUserId($value)
- * @method static EloquentBuilder|ProjectsUsers whereRoleId($value)
+ * @property-read \App\Models\Project $project
+ * @property-read \App\Models\Role $role
+ * @property-read \App\Models\User $user
  * @method static EloquentBuilder|ProjectsUsers newModelQuery()
  * @method static EloquentBuilder|ProjectsUsers newQuery()
  * @method static EloquentBuilder|ProjectsUsers query()
+ * @method static EloquentBuilder|ProjectsUsers whereCreatedAt($value)
+ * @method static EloquentBuilder|ProjectsUsers whereProjectId($value)
+ * @method static EloquentBuilder|ProjectsUsers whereRoleId($value)
+ * @method static EloquentBuilder|ProjectsUsers whereUpdatedAt($value)
+ * @method static EloquentBuilder|ProjectsUsers whereUserId($value)
  * @mixin EloquentIdeHelper
  */
 class ProjectsUsers extends Model

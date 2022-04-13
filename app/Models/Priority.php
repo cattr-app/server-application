@@ -31,7 +31,7 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
  * @property string|null $color
- * @property-read Collection|Task[] $tasks
+ * @property-read Collection|\App\Models\Task[] $tasks
  * @property-read int|null $tasks_count
  * @method static EloquentBuilder|Priority newModelQuery()
  * @method static EloquentBuilder|Priority newQuery()

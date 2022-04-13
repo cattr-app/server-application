@@ -11,12 +11,6 @@ use Illuminate\Support\Carbon;
 /**
  * App\Models\Invitation
  *
- * @apiDefine InvitationObject
- * @apiSuccess {Integer}  invitation.id          ID
- * @apiSuccess {String}   invitation.email       Email
- * @apiSuccess {String}   invitation.key         Unique invitation token
- * @apiSuccess {String}   invitation.expires_at  The token expiration time
- * @apiSuccess {String}   invitation.role_id     ID of the role that will be assigned to the created user
  * @property int $id
  * @property string $key
  * @property string $email

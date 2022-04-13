@@ -31,21 +31,21 @@ use Illuminate\Support\Carbon;
  * @property bool $active
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read int|null $tasks_count
- * @property-read Collection|Task[] $tasks
- * @method static EloquentBuilder|Status whereCreatedAt($value)
- * @method static EloquentBuilder|Status whereUpdatedAt($value)
- * @method static EloquentBuilder|Status whereId($value)
- * @method static EloquentBuilder|Status whereName($value)
- * @method static EloquentBuilder|Status whereActive($value)
- * @method static EloquentBuilder|Status newModelQuery()
- * @method static EloquentBuilder|Status newQuery()
- * @method static EloquentBuilder|Status query()
- * @mixin EloquentIdeHelper
  * @property string|null $color
  * @property-read Collection|\App\Models\Project[] $projects
  * @property-read int|null $projects_count
+ * @property-read Collection|\App\Models\Task[] $tasks
+ * @property-read int|null $tasks_count
+ * @method static EloquentBuilder|Status newModelQuery()
+ * @method static EloquentBuilder|Status newQuery()
+ * @method static EloquentBuilder|Status query()
+ * @method static EloquentBuilder|Status whereActive($value)
  * @method static EloquentBuilder|Status whereColor($value)
+ * @method static EloquentBuilder|Status whereCreatedAt($value)
+ * @method static EloquentBuilder|Status whereId($value)
+ * @method static EloquentBuilder|Status whereName($value)
+ * @method static EloquentBuilder|Status whereUpdatedAt($value)
+ * @mixin EloquentIdeHelper
  */
 class Status extends Model
 {

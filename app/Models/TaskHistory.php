@@ -11,15 +11,15 @@ use Illuminate\Support\Carbon;
 /**
  * App\Models\TaskHistory
  *
- * @property int         $id
- * @property int         $task_id
- * @property int         $user_id
- * @property string      $field
- * @property string      $new_value
+ * @property int $id
+ * @property int $task_id
+ * @property int $user_id
+ * @property string $field
+ * @property string $new_value
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Task   $task
- * @property-read User   $user
+ * @property-read \App\Models\Task $task
+ * @property-read \App\Models\User $user
  * @method static Builder|TaskHistory newModelQuery()
  * @method static Builder|TaskHistory newQuery()
  * @method static Builder|TaskHistory query()

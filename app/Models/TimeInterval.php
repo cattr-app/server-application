@@ -63,45 +63,24 @@ use Storage;
  *
  * @property int $id
  * @property int $task_id
+ * @property \Illuminate\Support\Carbon $start_at
+ * @property \Illuminate\Support\Carbon $end_at
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
  * @property int $user_id
- * @property int $activity_fill
- * @property int $mouse_fill
- * @property int $keyboard_fill
- * @property string $start_at
- * @property string $end_at
- * @property string $created_at
- * @property string $updated_at
- * @property string $deleted_at
  * @property bool $is_manual
- * @property Task $task
- * @property User $user
- * @property-read int|null $properties_count
- * @property-read Collection|Property[] $properties
- * @method static bool|null forceDelete()
- * @method static bool|null restore()
- * @method static EloquentBuilder|TimeInterval whereActivityFill($value)
- * @method static EloquentBuilder|TimeInterval whereMouseFill($value)
- * @method static EloquentBuilder|TimeInterval whereKeyboardFill($value)
- * @method static EloquentBuilder|TimeInterval whereCreatedAt($value)
- * @method static EloquentBuilder|TimeInterval whereDeletedAt($value)
- * @method static EloquentBuilder|TimeInterval whereEndAt($value)
- * @method static EloquentBuilder|TimeInterval whereId($value)
- * @method static EloquentBuilder|TimeInterval whereStartAt($value)
- * @method static EloquentBuilder|TimeInterval whereTaskId($value)
- * @method static EloquentBuilder|TimeInterval whereUpdatedAt($value)
- * @method static EloquentBuilder|TimeInterval whereUserId($value)
- * @method static EloquentBuilder|TimeInterval whereIsManual($value)
- * @method static EloquentBuilder|TimeInterval newModelQuery()
- * @method static EloquentBuilder|TimeInterval newQuery()
- * @method static EloquentBuilder|TimeInterval query()
- * @method static QueryBuilder|TimeInterval withTrashed()
- * @method static QueryBuilder|TimeInterval withoutTrashed()
- * @method static QueryBuilder|TimeInterval onlyTrashed()
- * @mixin EloquentIdeHelper
+ * @property int|null $activity_fill
+ * @property int|null $mouse_fill
+ * @property int|null $keyboard_fill
  * @property array|null $location
  * @property-read Collection|\App\Models\TrackedApplication[] $apps
  * @property-read int|null $apps_count
  * @property-read bool $has_screenshot
+ * @property-read Collection|\App\Models\Property[] $properties
+ * @property-read int|null $properties_count
+ * @property-read \App\Models\Task $task
+ * @property-read \App\Models\User $user
  * @method static Builder|TimeInterval comparison($geometryColumn, $geometry, $relationship)
  * @method static Builder|TimeInterval contains($geometryColumn, $geometry)
  * @method static Builder|TimeInterval crosses($geometryColumn, $geometry)
@@ -114,14 +93,33 @@ use Storage;
  * @method static Builder|TimeInterval distanceValue($geometryColumn, $geometry)
  * @method static Builder|TimeInterval doesTouch($geometryColumn, $geometry)
  * @method static Builder|TimeInterval equals($geometryColumn, $geometry)
- * @method static TimeIntervalFactory factory(...$parameters)
+ * @method static \Database\Factories\TimeIntervalFactory factory(...$parameters)
  * @method static Builder|TimeInterval intersects($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval newModelQuery()
+ * @method static Builder|TimeInterval newQuery()
+ * @method static QueryBuilder|TimeInterval onlyTrashed()
  * @method static Builder|TimeInterval orderByDistance($geometryColumn, $geometry, $direction = 'asc')
  * @method static Builder|TimeInterval orderByDistanceSphere($geometryColumn, $geometry, $direction = 'asc')
  * @method static Builder|TimeInterval orderBySpatial($geometryColumn, $geometry, $orderFunction, $direction = 'asc')
  * @method static Builder|TimeInterval overlaps($geometryColumn, $geometry)
+ * @method static Builder|TimeInterval query()
+ * @method static Builder|TimeInterval whereActivityFill($value)
+ * @method static Builder|TimeInterval whereCreatedAt($value)
+ * @method static Builder|TimeInterval whereDeletedAt($value)
+ * @method static Builder|TimeInterval whereEndAt($value)
+ * @method static Builder|TimeInterval whereId($value)
+ * @method static Builder|TimeInterval whereIsManual($value)
+ * @method static Builder|TimeInterval whereKeyboardFill($value)
  * @method static Builder|TimeInterval whereLocation($value)
+ * @method static Builder|TimeInterval whereMouseFill($value)
+ * @method static Builder|TimeInterval whereStartAt($value)
+ * @method static Builder|TimeInterval whereTaskId($value)
+ * @method static Builder|TimeInterval whereUpdatedAt($value)
+ * @method static Builder|TimeInterval whereUserId($value)
+ * @method static QueryBuilder|TimeInterval withTrashed()
  * @method static Builder|TimeInterval within($geometryColumn, $polygon)
+ * @method static QueryBuilder|TimeInterval withoutTrashed()
+ * @mixin EloquentIdeHelper
  */
 class TimeInterval extends Model
 {

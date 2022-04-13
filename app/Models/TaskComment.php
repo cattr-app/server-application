@@ -18,15 +18,17 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property int $task_id
  * @property int $user_id
  * @property string $content
- * @property string $created_at
- * @property string $updated_at
- * @property string $deleted_at
- * @property Task $task
- * @property User $user
+ * @property \Illuminate\Support\Carbon|null $created_at
+ * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property-read Collection|\App\Models\Property[] $properties
  * @property-read int|null $properties_count
- * @property-read Collection|Property[] $properties
- * @method static bool|null forceDelete()
- * @method static bool|null restore()
+ * @property-read \App\Models\Task $task
+ * @property-read \App\Models\User $user
+ * @method static EloquentBuilder|TaskComment newModelQuery()
+ * @method static EloquentBuilder|TaskComment newQuery()
+ * @method static QueryBuilder|TaskComment onlyTrashed()
+ * @method static EloquentBuilder|TaskComment query()
  * @method static EloquentBuilder|TaskComment whereContent($value)
  * @method static EloquentBuilder|TaskComment whereCreatedAt($value)
  * @method static EloquentBuilder|TaskComment whereDeletedAt($value)
@@ -34,12 +36,8 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static EloquentBuilder|TaskComment whereTaskId($value)
  * @method static EloquentBuilder|TaskComment whereUpdatedAt($value)
  * @method static EloquentBuilder|TaskComment whereUserId($value)
- * @method static EloquentBuilder|TaskComment newModelQuery()
- * @method static EloquentBuilder|TaskComment newQuery()
- * @method static EloquentBuilder|TaskComment query()
  * @method static QueryBuilder|TaskComment withTrashed()
  * @method static QueryBuilder|TaskComment withoutTrashed()
- * @method static QueryBuilder|TaskComment onlyTrashed()
  * @mixin EloquentIdeHelper
  */
 class TaskComment extends Model
