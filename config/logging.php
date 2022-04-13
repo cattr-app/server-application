@@ -59,6 +59,7 @@ return [
         'sentry' => [
             'driver' => 'sentry',
             'level'  => env('SENTRY_LOG_LEVEL', 'warning'),
+            'bubble' => true,
         ],
     ],
 ];

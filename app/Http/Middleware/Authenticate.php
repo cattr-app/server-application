@@ -15,12 +15,12 @@ class Authenticate extends BaseAuthenticate
     {
         $this->authenticate($request, $guards);
 
-        if (!optional(auth()->user())->active) {
-            optional(optional(auth()->user())->currentAccessToken())->delete();
+        if (!$request->user()->active) {
+            $request->user()->tokens()->whereId($request->user()->currentAccessToken()->id)->delete();
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
         }
 
-        Lang::setLocale(optional(auth()->user())->user_language ?: self::DEFAULT_USER_LANGUAGE);
+        Lang::setLocale($request->user()->user_language ?: self::DEFAULT_USER_LANGUAGE);
         return $next($request);
     }
 }
