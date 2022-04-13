@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "976a60b8f410765a31db3894f3f4b722",
+    "content-hash": "78a9fe0103007f9cee3529732a352e44",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -187,86 +187,6 @@
                 }
             ],
             "time": "2020-10-02T12:38:20+00:00"
-        },
-        {
-            "name": "cybercog/youtrack-rest-php",
-            "version": "6.3.1",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/cybercog/youtrack-rest-php.git",
-                "reference": "55e56f48290ed4f045e150c34dec5cc77242f15a"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/cybercog/youtrack-rest-php/zipball/55e56f48290ed4f045e150c34dec5cc77242f15a",
-                "reference": "55e56f48290ed4f045e150c34dec5cc77242f15a",
-                "shasum": ""
-            },
-            "require": {
-                "ext-json": "*",
-                "guzzlehttp/guzzle": "^6.2",
-                "php": "^7.1|^8.0"
-            },
-            "require-dev": {
-                "mockery/mockery": "^1.0",
-                "phpstan/phpstan": "^0.12.32",
-                "phpunit/phpunit": "^7.0|^8.0|^9.0"
-            },
-            "suggest": {
-                "cybercog/laravel-youtrack-sdk": "Laravel integration with PHP YouTrack SDK.",
-                "cybercog/youtrack-php-sdk": "PHP YouTrack SDK."
-            },
-            "type": "library",
-            "autoload": {
-                "psr-4": {
-                    "Cog\\YouTrack\\Rest\\": "src/",
-                    "Cog\\Contracts\\YouTrack\\Rest\\": "contracts/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Anton Komarev",
-                    "email": "anton@komarev.com",
-                    "homepage": "https://komarev.com",
-                    "role": "Developer"
-                }
-            ],
-            "description": "YouTrack REST API PHP Client.",
-            "homepage": "https://komarev.com/sources/php-youtrack-rest",
-            "keywords": [
-                "api",
-                "bugtracker",
-                "client",
-                "cog",
-                "cybercog",
-                "helpdesk",
-                "issues",
-                "jetbrains",
-                "laravel",
-                "pm",
-                "rest",
-                "tickets",
-                "youtrack",
-                "yt"
-            ],
-            "support": {
-                "docs": "https://github.com/cybercog/youtrack-rest-php/wiki",
-                "email": "open@cybercog.su",
-                "issues": "https://github.com/cybercog/youtrack-rest-php/issues",
-                "source": "https://github.com/cybercog/youtrack-rest-php",
-                "wiki": "https://github.com/cybercog/youtrack-rest-php/wiki"
-            },
-            "funding": [
-                {
-                    "url": "https://paypal.me/antonkomarev",
-                    "type": "custom"
-                }
-            ],
-            "time": "2021-01-01T18:07:08+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -2099,6 +2019,63 @@
             "time": "2021-01-17T21:51:00+00:00"
         },
         {
+            "name": "kbsali/redmine-api",
+            "version": "v2.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/kbsali/php-redmine-api.git",
+                "reference": "8919f81c85a35cd16cd08b519b90a926b7d199ca"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/kbsali/php-redmine-api/zipball/8919f81c85a35cd16cd08b519b90a926b7d199ca",
+                "reference": "8919f81c85a35cd16cd08b519b90a926b7d199ca",
+                "shasum": ""
+            },
+            "require": {
+                "ext-curl": "*",
+                "ext-json": "*",
+                "ext-simplexml": "*",
+                "php": "^7.4 || ^8.0",
+                "psr/http-client": "^1.0",
+                "psr/http-factory": "^1.0"
+            },
+            "require-dev": {
+                "friendsofphp/php-cs-fixer": "3.6.0",
+                "guzzlehttp/psr7": "2.1.0",
+                "php-mock/php-mock-phpunit": "2.6.0",
+                "phpunit/phpunit": "9.5.10"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Redmine\\": "src/Redmine/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Kevin Saliou",
+                    "email": "kevin@saliou.name",
+                    "homepage": "http://kevin.saliou.name"
+                }
+            ],
+            "description": "Redmine API client",
+            "homepage": "https://github.com/kbsali/php-redmine-api",
+            "keywords": [
+                "api",
+                "redmine"
+            ],
+            "support": {
+                "issues": "https://github.com/kbsali/php-redmine-api/issues",
+                "source": "https://github.com/kbsali/php-redmine-api/tree/v2.2.0"
+            },
+            "time": "2022-03-01T09:22:51+00:00"
+        },
+        {
             "name": "laravel/framework",
             "version": "v8.73.1",
             "source": {
@@ -2935,6 +2912,90 @@
                 }
             ],
             "time": "2021-09-25T08:23:19+00:00"
+        },
+        {
+            "name": "m4tthumphrey/php-gitlab-api",
+            "version": "11.5.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/GitLabPHP/Client.git",
+                "reference": "d3364fd373f1ec8588dbd65afb527ea4cdcad8b4"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/GitLabPHP/Client/zipball/d3364fd373f1ec8588dbd65afb527ea4cdcad8b4",
+                "reference": "d3364fd373f1ec8588dbd65afb527ea4cdcad8b4",
+                "shasum": ""
+            },
+            "require": {
+                "ext-json": "*",
+                "ext-xml": "*",
+                "php": "^7.2.5 || ^8.0",
+                "php-http/cache-plugin": "^1.7.2",
+                "php-http/client-common": "^2.3",
+                "php-http/discovery": "^1.12",
+                "php-http/httplug": "^2.2",
+                "php-http/multipart-stream-builder": "^1.1.2",
+                "psr/cache": "^1.0 || ^2.0",
+                "psr/http-client-implementation": "^1.0",
+                "psr/http-factory-implementation": "^1.0",
+                "psr/http-message": "^1.0",
+                "symfony/options-resolver": "^3.4 || ^4.0 || ^5.0 || ^6.0",
+                "symfony/polyfill-php80": "^1.17"
+            },
+            "require-dev": {
+                "bamarni/composer-bin-plugin": "^1.4.1",
+                "guzzlehttp/guzzle": "^7.2",
+                "http-interop/http-factory-guzzle": "^1.0"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Gitlab\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Fabien Bourigault",
+                    "email": "bourigaultfabien@gmail.com",
+                    "homepage": "https://github.com/fbourigault"
+                },
+                {
+                    "name": "Graham Campbell",
+                    "email": "hello@gjcampbell.co.uk",
+                    "homepage": "https://github.com/GrahamCampbell"
+                },
+                {
+                    "name": "Matt Humphrey",
+                    "email": "matth@windsor-telecom.co.uk",
+                    "homepage": "https://github.com/m4tthumphrey"
+                },
+                {
+                    "name": "Miguel Piedrafita",
+                    "email": "github@miguelpiedrafita.com",
+                    "homepage": "https://github.com/m1guelpf"
+                }
+            ],
+            "description": "GitLab API v4 client for PHP",
+            "keywords": [
+                "api",
+                "gitlab"
+            ],
+            "support": {
+                "issues": "https://github.com/GitLabPHP/Client/issues",
+                "source": "https://github.com/GitLabPHP/Client/tree/11.5.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/GrahamCampbell",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-01-23T18:43:46+00:00"
         },
         {
             "name": "maatwebsite/excel",
@@ -4056,6 +4117,65 @@
             "time": "2020-10-15T08:29:30+00:00"
         },
         {
+            "name": "php-http/cache-plugin",
+            "version": "1.7.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-http/cache-plugin.git",
+                "reference": "63bc3f7242825c9a817db8f78e4c9703b0c471e2"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-http/cache-plugin/zipball/63bc3f7242825c9a817db8f78e4c9703b0c471e2",
+                "reference": "63bc3f7242825c9a817db8f78e4c9703b0c471e2",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1 || ^8.0",
+                "php-http/client-common": "^1.9 || ^2.0",
+                "php-http/message-factory": "^1.0",
+                "psr/cache": "^1.0 || ^2.0 || ^3.0",
+                "symfony/options-resolver": "^2.6 || ^3.0 || ^4.0 || ^5.0 || ^6.0"
+            },
+            "require-dev": {
+                "phpspec/phpspec": "^5.1 || ^6.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.6-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Http\\Client\\Common\\Plugin\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Márk Sági-Kazár",
+                    "email": "mark.sagikazar@gmail.com"
+                }
+            ],
+            "description": "PSR-6 Cache plugin for HTTPlug",
+            "homepage": "http://httplug.io",
+            "keywords": [
+                "cache",
+                "http",
+                "httplug",
+                "plugin"
+            ],
+            "support": {
+                "issues": "https://github.com/php-http/cache-plugin/issues",
+                "source": "https://github.com/php-http/cache-plugin/tree/1.7.5"
+            },
+            "time": "2022-01-18T12:24:56+00:00"
+        },
+        {
             "name": "php-http/client-common",
             "version": "2.4.0",
             "source": {
@@ -4456,6 +4576,68 @@
             "time": "2015-12-19T14:08:53+00:00"
         },
         {
+            "name": "php-http/multipart-stream-builder",
+            "version": "1.2.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-http/multipart-stream-builder.git",
+                "reference": "11c1d31f72e01c738bbce9e27649a7cca829c30e"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-http/multipart-stream-builder/zipball/11c1d31f72e01c738bbce9e27649a7cca829c30e",
+                "reference": "11c1d31f72e01c738bbce9e27649a7cca829c30e",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1 || ^8.0",
+                "php-http/discovery": "^1.7",
+                "php-http/message-factory": "^1.0.2",
+                "psr/http-factory": "^1.0",
+                "psr/http-message": "^1.0"
+            },
+            "require-dev": {
+                "nyholm/psr7": "^1.0",
+                "php-http/message": "^1.5",
+                "phpunit/phpunit": "^7.5.15 || ^8.5 || ^9.3"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Http\\Message\\MultipartStream\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Tobias Nyholm",
+                    "email": "tobias.nyholm@gmail.com"
+                }
+            ],
+            "description": "A builder class that help you create a multipart stream",
+            "homepage": "http://php-http.org",
+            "keywords": [
+                "factory",
+                "http",
+                "message",
+                "multipart stream",
+                "stream"
+            ],
+            "support": {
+                "issues": "https://github.com/php-http/multipart-stream-builder/issues",
+                "source": "https://github.com/php-http/multipart-stream-builder/tree/1.2.0"
+            },
+            "time": "2021-05-21T08:32:01+00:00"
+        },
+        {
             "name": "php-http/promise",
             "version": "1.1.0",
             "source": {
@@ -4750,6 +4932,55 @@
                 }
             ],
             "time": "2021-10-05T19:02:38+00:00"
+        },
+        {
+            "name": "psr/cache",
+            "version": "2.0.0",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/php-fig/cache.git",
+                "reference": "213f9dbc5b9bfbc4f8db86d2838dc968752ce13b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/php-fig/cache/zipball/213f9dbc5b9bfbc4f8db86d2838dc968752ce13b",
+                "reference": "213f9dbc5b9bfbc4f8db86d2838dc968752ce13b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=8.0.0"
+            },
+            "type": "library",
+            "extra": {
+                "branch-alias": {
+                    "dev-master": "1.0.x-dev"
+                }
+            },
+            "autoload": {
+                "psr-4": {
+                    "Psr\\Cache\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "PHP-FIG",
+                    "homepage": "https://www.php-fig.org/"
+                }
+            ],
+            "description": "Common interface for caching libraries",
+            "keywords": [
+                "cache",
+                "psr",
+                "psr-6"
+            ],
+            "support": {
+                "source": "https://github.com/php-fig/cache/tree/2.0.0"
+            },
+            "time": "2021-02-03T23:23:37+00:00"
         },
         {
             "name": "psr/container",
@@ -5568,20 +5799,20 @@
         },
         {
             "name": "sentry/sentry-laravel",
-            "version": "2.10.2",
+            "version": "2.12.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/getsentry/sentry-laravel.git",
-                "reference": "82cf98c830d73f80dc67cf21381da4ede4c3989e"
+                "reference": "35b8807019e4ca300e4530c2b784517475296fca"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/getsentry/sentry-laravel/zipball/82cf98c830d73f80dc67cf21381da4ede4c3989e",
-                "reference": "82cf98c830d73f80dc67cf21381da4ede4c3989e",
+                "url": "https://api.github.com/repos/getsentry/sentry-laravel/zipball/35b8807019e4ca300e4530c2b784517475296fca",
+                "reference": "35b8807019e4ca300e4530c2b784517475296fca",
                 "shasum": ""
             },
             "require": {
-                "illuminate/support": "5.0 - 5.8 | ^6.0 | ^7.0 | ^8.0",
+                "illuminate/support": "5.0 - 5.8 | ^6.0 | ^7.0 | ^8.0 | ^9.0",
                 "nyholm/psr7": "^1.0",
                 "php": "^7.2 | ^8.0",
                 "sentry/sdk": "^3.1",
@@ -5590,9 +5821,9 @@
             },
             "require-dev": {
                 "friendsofphp/php-cs-fixer": "2.18.*",
-                "laravel/framework": "5.0 - 5.8 | ^6.0 | ^7.0 | ^8.0",
-                "mockery/mockery": "1.3.*",
-                "orchestra/testbench": "3.1 - 3.8 | ^4.7 | ^5.1 | ^6.0",
+                "laravel/framework": "5.0 - 5.8 | ^6.0 | ^7.0 | ^8.0 | ^9.0",
+                "mockery/mockery": "^1.3",
+                "orchestra/testbench": "3.1 - 3.8 | ^4.7 | ^5.1 | ^6.0 | ^7.0",
                 "phpunit/phpunit": "^5.7 | ^6.5 | ^7.5 | ^8.4 | ^9.3"
             },
             "suggest": {
@@ -5643,7 +5874,7 @@
             ],
             "support": {
                 "issues": "https://github.com/getsentry/sentry-laravel/issues",
-                "source": "https://github.com/getsentry/sentry-laravel/tree/2.10.2"
+                "source": "https://github.com/getsentry/sentry-laravel/tree/2.12.0"
             },
             "funding": [
                 {
@@ -5655,7 +5886,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2021-11-16T19:20:42+00:00"
+            "time": "2022-04-05T10:05:19+00:00"
         },
         {
             "name": "setasign/fpdi",
