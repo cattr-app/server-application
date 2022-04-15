@@ -5,7 +5,7 @@
   "license": "SSPL-1.0",
   "type": "project",
   "require": {
-    "php": "^8.1",
+    "php": "^8",
     "ext-gd": "*",
     "ext-json": "*",
     "ext-pdo": "*",
