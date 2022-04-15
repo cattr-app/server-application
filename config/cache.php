@@ -1,7 +1,7 @@
 <?php
 
 return [
-    'default' => env('CACHE_DRIVER', 'file'),
+    'default' => env('CACHE_DRIVER', 'octane'),
 
     'stores' => [
         'array' => [
@@ -23,6 +23,8 @@ return [
             'driver' => 'redis',
             'connection' => 'default',
         ],
+
+        'octane' => ['driver' => 'octane'],
     ],
 
     'prefix' => preg_replace('#[^a-zA-Z0-9_\-]#', '_', env('APP_NAME', 'laravel')),
