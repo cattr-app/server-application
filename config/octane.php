@@ -188,8 +188,6 @@ return [
         'public/**/*.php',
         'resources/**/*.php',
         'routes',
-        'composer.lock',
-        '.env',
     ],
 
     /*
