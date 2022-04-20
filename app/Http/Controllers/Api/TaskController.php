@@ -87,15 +87,6 @@ class TaskController extends ItemController
      */
     public function index(Request $request): JsonResponse
     {
-        Filter::listen(
-            Filter::getQueryPrepareFilterName(),
-            static fn($itemsQuery) => $itemsQuery
-            ->leftJoin('statuses as s', 'tasks.status_id', '=', 's.id')
-            ->select('tasks.*')
-            ->orderBy('s.active', 'desc')
-            ->orderBy('tasks.created_at', 'desc')
-        );
-
         return $this->_index($request);
     }
 

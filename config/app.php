@@ -10,7 +10,7 @@ return [
     'json_errors' => env('JSON_ERRORS', true),
     'url' => env('APP_URL', 'http://localhost'),
     'frontend_url' => env('FRONTEND_APP_URL'),
-    'timezone' => 'UTC',
+    'timezone' => date_default_timezone_get(),
     'languages' => ['en', 'ru'],
     'locale' => 'en',
     'fallback_locale' => 'en',

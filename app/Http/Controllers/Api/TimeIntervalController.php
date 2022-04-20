@@ -55,7 +55,7 @@ class TimeIntervalController extends ItemController
         }
 
         if (User::find($intervalData['user_id'])->web_and_app_monitoring) {
-            AssignAppsToTimeInterval::dispatchAfterResponse($timeInterval);
+            AssignAppsToTimeInterval::dispatch($timeInterval);
         }
 
         return responder()->success($timeInterval)->respond();
