@@ -2,6 +2,7 @@
 
 namespace App\Scopes;
 
+use App\Models\Role;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -19,7 +20,7 @@ class UserScope implements Scope
             return null;
         }
 
-        $user = auth()->user();
+        $user = request()->user();
 
         if ($user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
             return $builder;
@@ -27,23 +28,15 @@ class UserScope implements Scope
 
         return $builder
             ->where('id', $user->id)
-            ->orWhereHas('projectsRelation', function (Builder $builder) use ($user) {
-                $builder
-                    ->whereIn('project_id', function ($builder) use ($user) {
-                        $builder
-                            ->from('projects_users')
-                            ->select('project_id')
-                            ->where(function ($builder) use ($user) {
-                                $builder
-                                    ->where('user_id', $user->id)
-                                    ->where('role_id', 1);
-                            })
-                            ->orWhere(function ($builder) use ($user) {
-                                $builder
-                                    ->where('user_id', $user->id)
-                                    ->where('role_id', 3);
-                            });
-                    });
-            });
+            ->orWhereHas('projectsRelation', static fn(Builder $builder) => $builder
+                ->whereIn('project_id', static fn(Builder $builder) => $builder
+                    ->from('projects_users')
+                    ->select('project_id')
+                    ->where(static fn(Builder $builder) => $builder
+                        ->where('user_id', $user->id)
+                        ->where('role_id', Role::getIdByName('manager')))
+                    ->orWhere(static fn(Builder $builder) => $builder
+                        ->where('user_id', $user->id)
+                        ->where('role_id', Role::getIdByName('auditor')))));
     }
 }

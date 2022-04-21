@@ -2,10 +2,13 @@
 
 namespace App\Scopes;
 
+use App\Exceptions\Entities\AuthorizationException;
+use App\Models\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Throwable;
 
 class TaskScope implements Scope
 {
@@ -13,11 +16,13 @@ class TaskScope implements Scope
      * @param Builder $builder
      * @param Model $model
      * @return Builder
+     * @throws Throwable
      */
     public function apply(Builder $builder, Model $model): Builder
     {
-        /** @var User $user */
-        $user = auth()->user();
+        $user = request()->user();
+
+        throw_unless($user, new AuthorizationException);
 
         if (!$user || $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
             return $builder;
@@ -25,14 +30,17 @@ class TaskScope implements Scope
 
         return $builder
             // A user with the user project role sees only their own tasks
-            ->whereHas('users', static function (Builder $builder) use ($user) {
-                $builder->where('id', $user->id);
-            })
-            ->orWhereHas('project.users', static function (Builder $builder) use ($user) {
-                $builder
-                    ->where('user_id', $user->id)
-                    ->whereIn('projects_users.role_id', [1, 2, 3]);
-            })
+            ->whereHas('users', static fn(Builder $builder) => $builder->where('id', $user->id))
+            ->orWhereHas('project.users', static fn(Builder $builder) => $builder
+                ->where('user_id', $user->id)
+                ->whereIn(
+                    'projects_users.role_id',
+                    [
+                        Role::getIdByName('manager'),
+                        Role::getIdByName('user'),
+                        Role::getIdByName('auditor'),
+                    ],
+                ))
             ->orderBy('created_at', 'desc');
     }
 }
