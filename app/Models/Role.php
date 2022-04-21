@@ -101,4 +101,12 @@ class Role extends Model
     {
         return $this->belongsToMany(Project::class, 'projects_roles', 'role_id', 'project_id');
     }
+
+    public static function getIdByName(string $name): ?int
+    {
+        return cache()->rememberForever(
+            "role_id.$name",
+            static fn() => optional(self::firstWhere('name', $name))->id,
+        );
+    }
 }

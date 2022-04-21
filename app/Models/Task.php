@@ -4,8 +4,10 @@ namespace App\Models;
 
 use App\Scopes\TaskScope;
 use App\Traits\ExposePermissions;
+use Database\Factories\TaskFactory;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -13,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Carbon;
 use Parsedown;
 
 /**
@@ -73,28 +76,28 @@ use Parsedown;
  * @property string|null $description
  * @property int $assigned_by
  * @property string|null $url
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int $priority_id
  * @property int $important
  * @property int|null $status_id
  * @property float $relative_position
- * @property \Illuminate\Support\Carbon|null $due_date
- * @property-read \App\Models\User $assigned
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TaskHistory[] $changes
+ * @property Carbon|null $due_date
+ * @property-read User $assigned
+ * @property-read Collection|TaskHistory[] $changes
  * @property-read int|null $changes_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TaskComment[] $comments
+ * @property-read Collection|TaskComment[] $comments
  * @property-read int|null $comments_count
  * @property-read array $can
- * @property-read \App\Models\Priority $priority
- * @property-read \App\Models\Project $project
- * @property-read \App\Models\Status|null $status
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\TimeInterval[] $timeIntervals
+ * @property-read Priority $priority
+ * @property-read Project $project
+ * @property-read Status|null $status
+ * @property-read Collection|TimeInterval[] $timeIntervals
  * @property-read int|null $time_intervals_count
- * @property-read \Illuminate\Database\Eloquent\Collection|\App\Models\User[] $users
+ * @property-read Collection|User[] $users
  * @property-read int|null $users_count
- * @method static \Database\Factories\TaskFactory factory(...$parameters)
+ * @method static TaskFactory factory(...$parameters)
  * @method static EloquentBuilder|Task newModelQuery()
  * @method static EloquentBuilder|Task newQuery()
  * @method static QueryBuilder|Task onlyTrashed()
@@ -175,17 +178,6 @@ class Task extends Model
      */
     protected $appends = ['can'];
 
-    /**
-     * @return string
-     */
-    public static function getTableName(): string
-    {
-        return with(new static())->getTable();
-    }
-
-    /**
-     * Override parent boot and Call deleting event
-     */
     protected static function boot(): void
     {
         parent::boot();
@@ -193,33 +185,24 @@ class Task extends Model
         static::addGlobalScope(new TaskScope);
 
         static::deleting(static function (Task $task) {
-            /** @var Task $tasks */
             $task->timeIntervals()->delete();
+        });
+
+        static::created(static function (Task $task) {
+            dispatch(static function () use ($task) {
+                foreach ($task->users as $user) {
+                    $task->project->users()->firstOrCreate(
+                        ['user_id' => $user->id],
+                        ['role_id' => Role::getIdByName('user')]
+                    );
+                }
+            });
         });
     }
 
-    /**
-     * @return HasMany
-     */
     public function timeIntervals(): HasMany
     {
         return $this->hasMany(TimeInterval::class, 'task_id');
-    }
-
-    /**
-     * @return HasMany
-     */
-    public function comments(): HasMany
-    {
-        return $this->hasMany(TaskComment::class, 'task_id');
-    }
-
-    /**
-     * @return BelongsTo
-     */
-    public function project(): BelongsTo
-    {
-        return $this->belongsTo(Project::class, 'project_id')->withoutGlobalScopes();
     }
 
     public function users(): BelongsToMany
@@ -227,41 +210,36 @@ class Task extends Model
         return $this->belongsToMany(User::class, 'tasks_users', 'task_id', 'user_id')->withoutGlobalScopes();
     }
 
-    /**
-     * @return BelongsTo
-     */
+    public function comments(): HasMany
+    {
+        return $this->hasMany(TaskComment::class, 'task_id');
+    }
+
+    public function project(): BelongsTo
+    {
+        return $this->belongsTo(Project::class, 'project_id')->withoutGlobalScopes();
+    }
+
     public function assigned(): BelongsTo
     {
         return $this->belongsTo(User::class, 'assigned_by');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function priority(): BelongsTo
     {
         return $this->belongsTo(Priority::class, 'priority_id');
     }
 
-    /**
-     * @return BelongsTo
-     */
     public function status(): BelongsTo
     {
         return $this->belongsTo(Status::class, 'status_id');
     }
 
-    /**
-     * @return string
-     */
     public function getDescription(): string
     {
         return (new Parsedown())->text($this->description);
     }
 
-    /**
-     * @return HasMany
-     */
     public function changes(): HasMany
     {
         return $this->hasMany(TaskHistory::class, 'task_id');
