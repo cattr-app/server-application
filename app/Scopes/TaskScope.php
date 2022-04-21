@@ -33,7 +33,6 @@ class TaskScope implements Scope
                     ->where('user_id', $user->id)
                     ->whereIn('projects_users.role_id', [1, 2, 3]);
             })
-            ->orderBy('active', 'desc')
             ->orderBy('created_at', 'desc');
     }
 }
