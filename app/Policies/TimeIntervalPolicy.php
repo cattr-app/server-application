@@ -11,11 +11,7 @@ class TimeIntervalPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * @param User $user
-     * @return bool
-     */
-    public function before(User $user)
+    public function before(User $user): bool
     {
         if ($user->hasRole('admin')) {
             return true;
@@ -31,7 +27,11 @@ class TimeIntervalPolicy
      */
     public function view(User $user, TimeInterval $timeInterval): bool
     {
-        return TimeInterval::find(optional($timeInterval)->id)->exists();
+        return cache()->remember(
+            "role_user_interval_{$user->id}_$timeInterval->id",
+            config('cache.role_caching_ttl'),
+            static fn() => TimeInterval::whereId($timeInterval->id)->exists(),
+        );
     }
 
     /**

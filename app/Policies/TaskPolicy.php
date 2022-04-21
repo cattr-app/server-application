@@ -20,7 +20,11 @@ class TaskPolicy
      */
     public function view(User $user, Task $task): bool
     {
-        return Task::find(optional($task)->id)->exists();
+        return cache()->remember(
+            "role_user_task_{$user->id}_$task->id",
+            config('cache.role_caching_ttl'),
+            static fn() => Task::whereId($task->id)->exists(),
+        );
     }
 
     /**

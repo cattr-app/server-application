@@ -21,7 +21,11 @@ class ProjectPolicy
      */
     public function view(User $user, Project $project): bool
     {
-        return Project::find(optional($project)->id)->exists();
+        return cache()->remember(
+            "role_user_project_{$user->id}_$project->id",
+            config('cache.role_caching_ttl'),
+            static fn() => Project::whereId($project->id)->exists()
+        );
     }
 
     /**

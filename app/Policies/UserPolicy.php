@@ -13,7 +13,7 @@ class UserPolicy
      * @param User $user
      * @return bool
      */
-    public function before(User $user)
+    public function before(User $user): bool
     {
         if ($user->hasRole('admin')) {
             return true;
@@ -29,7 +29,11 @@ class UserPolicy
      */
     public function view(User $user, User $model): bool
     {
-        return User::find(optional($model)->id)->exists();
+        return cache()->remember(
+            "role_user_user_{$user->id}_$model->id",
+            config('cache.role_caching_ttl'),
+            static fn () => User::whereId($model->id)->exists(),
+        );
     }
 
     /**

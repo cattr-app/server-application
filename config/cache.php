@@ -28,4 +28,6 @@ return [
     ],
 
     'prefix' => preg_replace('#[^a-zA-Z0-9_\-]#', '_', env('APP_NAME', 'laravel')),
+
+    'role_caching_ttl' => 3600,
 ];
