@@ -59,7 +59,7 @@ trait HasRole
         return cache()->remember(
             "role_project_{$role}_$projectId",
             config('cache.role_caching_ttl'),
-            self::whereHas(
+            static fn() => self::whereHas(
                 'projectsRelation',
                 static fn(Builder $query) => $query
                     ->where('user_id', $userId)

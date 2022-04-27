@@ -11,7 +11,7 @@ class TimeIntervalPolicy
 {
     use HandlesAuthorization;
 
-    public function before(User $user): bool
+    public function before(User $user): ?bool
     {
         if ($user->hasRole('admin')) {
             return true;
