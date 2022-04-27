@@ -8,7 +8,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Throwable;
-use Illuminate\Database\Query\Builder as QBuilder;
 
 class ScreenshotScope implements Scope
 {
@@ -33,8 +32,8 @@ class ScreenshotScope implements Scope
         }
 
         return $builder
-            ->whereHas('timeInterval', static fn(QBuilder $query) => $query->where('user_id', $user->id))
-            ->orWhereHas('timeInterval.task.project.users', static fn(QBuilder $query) => $query
+            ->whereHas('timeInterval', static fn($query) => $query->where('user_id', $user->id))
+            ->orWhereHas('timeInterval.task.project.users', static fn($query) => $query
                 ->where('projects_users.user_id', $user->id)
                 ->where('projects_users.role_id', Role::getIdByName('auditor')));
     }

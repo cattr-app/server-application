@@ -7,7 +7,6 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Throwable;
-use Illuminate\Database\Query\Builder as QBuilder;
 
 class ProjectScope implements Scope
 {
@@ -27,6 +26,6 @@ class ProjectScope implements Scope
             return $builder;
         }
 
-        return $builder->whereHas('users', static fn(QBuilder $query) => $query->where('user_id', $user->id));
+        return $builder->whereHas('users', static fn($query) => $query->where('user_id', $user->id));
     }
 }
