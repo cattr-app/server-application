@@ -55,13 +55,14 @@ trait HasRole
      */
     public function hasProjectRole(string $role, int $projectId = null): bool
     {
+        $userId = $this->id;
         return cache()->remember(
             "role_project_{$role}_$projectId",
             config('cache.role_caching_ttl'),
             self::whereHas(
                 'projectsRelation',
                 static fn(Builder $query) => $query
-                    ->where('user_id', $this->id)
+                    ->where('user_id', $userId)
                     ->when($projectId, static fn(Builder $query) => $query->where('project_id', $projectId))
                     ->whereHas('role', static fn(Builder $query) => $query->where('name', $role))
             )->exists(),

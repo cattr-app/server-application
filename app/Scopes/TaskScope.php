@@ -4,10 +4,10 @@ namespace App\Scopes;
 
 use App\Exceptions\Entities\AuthorizationException;
 use App\Models\Role;
-use App\Models\User;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Illuminate\Database\Query\Builder as QBuilder;
 use Throwable;
 
 class TaskScope implements Scope
@@ -30,8 +30,8 @@ class TaskScope implements Scope
 
         return $builder
             // A user with the user project role sees only their own tasks
-            ->whereHas('users', static fn(Builder $builder) => $builder->where('id', $user->id))
-            ->orWhereHas('project.users', static fn(Builder $builder) => $builder
+            ->whereHas('users', static fn(QBuilder $builder) => $builder->where('id', $user->id))
+            ->orWhereHas('project.users', static fn(QBuilder $builder) => $builder
                 ->where('user_id', $user->id)
                 ->whereIn(
                     'projects_users.role_id',
