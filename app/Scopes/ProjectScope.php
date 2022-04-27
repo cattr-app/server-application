@@ -3,7 +3,7 @@
 namespace App\Scopes;
 
 use App\Exceptions\Entities\AuthorizationException;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Throwable;
@@ -26,6 +26,6 @@ class ProjectScope implements Scope
             return $builder;
         }
 
-        return $builder->whereHas('users', static fn($query) => $query->where('user_id', $user->id));
+        return $builder->whereHas('users', static fn(Builder $query) => $query->where('user_id', $user->id));
     }
 }

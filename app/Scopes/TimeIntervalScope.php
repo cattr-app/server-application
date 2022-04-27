@@ -3,7 +3,7 @@
 namespace App\Scopes;
 
 use App\Models\Role;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 
@@ -28,10 +28,10 @@ class TimeIntervalScope implements Scope
 
         return $builder
             ->where('time_intervals.user_id', $user->id)
-            ->orWhereHas('task.project.users', static fn($builder) => $builder
+            ->orWhereHas('task.project.users', static fn(Builder $builder) => $builder
                 ->where('projects_users.user_id', $user->id)
                 ->where('projects_users.role_id', Role::getIdByName('manager')))
-            ->orWhereHas('task.project.users', static fn($builder) => $builder
+            ->orWhereHas('task.project.users', static fn(Builder $builder) => $builder
                 ->where('projects_users.user_id', $user->id)
                 ->where('projects_users.role_id', Role::getIdByName('auditor')));
     }

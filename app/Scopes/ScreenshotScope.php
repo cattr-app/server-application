@@ -4,7 +4,7 @@ namespace App\Scopes;
 
 use App\Exceptions\Entities\AuthorizationException;
 use App\Models\Role;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Throwable;
@@ -32,8 +32,8 @@ class ScreenshotScope implements Scope
         }
 
         return $builder
-            ->whereHas('timeInterval', static fn($query) => $query->where('user_id', $user->id))
-            ->orWhereHas('timeInterval.task.project.users', static fn($query) => $query
+            ->whereHas('timeInterval', static fn(Builder $query) => $query->where('user_id', $user->id))
+            ->orWhereHas('timeInterval.task.project.users', static fn(Builder $query) => $query
                 ->where('projects_users.user_id', $user->id)
                 ->where('projects_users.role_id', Role::getIdByName('auditor')));
     }

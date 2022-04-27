@@ -4,7 +4,7 @@ namespace App\Scopes;
 
 use App\Exceptions\Entities\AuthorizationException;
 use App\Models\Role;
-use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Throwable;
@@ -29,8 +29,8 @@ class TaskScope implements Scope
 
         return $builder
             // A user with the user project role sees only their own tasks
-            ->whereHas('users', static fn($builder) => $builder->where('id', $user->id))
-            ->orWhereHas('project.users', static fn($builder) => $builder
+            ->whereHas('users', static fn(Builder $builder) => $builder->where('id', $user->id))
+            ->orWhereHas('project.users', static fn(Builder $builder) => $builder
                 ->where('user_id', $user->id)
                 ->whereIn(
                     'projects_users.role_id',
