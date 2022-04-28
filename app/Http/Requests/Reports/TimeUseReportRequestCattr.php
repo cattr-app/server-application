@@ -14,7 +14,7 @@ class TimeUseReportRequestCattr extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return auth()->user()?->hasRole('admin');
+        return true;
     }
 
     /**
