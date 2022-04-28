@@ -208,7 +208,6 @@ class TaskController extends ItemController
             }
         });
 
-        Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('users'));
 
         return $this->_edit($request);
     }
@@ -288,7 +287,6 @@ class TaskController extends ItemController
             return $task;
         });
 
-        Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('users'));
 
         Filter::listen($this->getEventUniqueName('request.item.create'), static function (array $data) {
             if (empty($data['priority_id'])) {
