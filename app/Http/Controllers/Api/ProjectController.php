@@ -204,7 +204,6 @@ class ProjectController extends ItemController
             return $project;
         });
 
-        Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('statuses'));
 
         return $this->_create($request);
     }
@@ -372,9 +371,6 @@ class ProjectController extends ItemController
 
             return $project;
         });
-
-        Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('statuses'));
-
         return $this->_edit($request);
     }
 
