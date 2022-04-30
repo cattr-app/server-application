@@ -2,35 +2,14 @@
   "name": "cattr-backend",
   "version": "4.0.0-alpha",
   "author": "team@amazingcat.net",
-  "license": "SSPL-1.0",
+  "license": "SEE LICENSE IN LICENSE",
   "scripts": {
-    "api": "php -r \"if (!file_exists(__DIR__.'/public/apidoc')) { mkdir(__DIR__.'/apidoc') ; symlink(__DIR__.'/apidoc/', __DIR__.'/public/apidoc'); }\" ; node node_modules/apidoc/bin/apidoc -i app/ -o apidoc",
-    "api-nsl": "node node_modules/apidoc/bin/apidoc -i app/ -o apidoc",
-    "custom-api": "node node_modules/grunt-apidoc/bin/grunt-apidoc apidoc"
-  },
-  "apidoc": {
-    "template": {
-      "forceLanguage": "en"
-    }
-  },
-  "husky": {
-    "hooks": {
-      "commit-msg": "commitlint -E HUSKY_GIT_PARAMS",
-      "post-checkout": "echo $HUSKY_GIT_STDIN | lfs-hooks/post-checkout $HUSKY_GIT_PARAMS",
-      "post-commit": "echo $HUSKY_GIT_STDIN | lfs-hooks/post-commit $HUSKY_GIT_PARAMS",
-      "post-merge": "echo $HUSKY_GIT_STDIN | lfs-hooks/post-merge $HUSKY_GIT_PARAMS",
-      "pre-push": "echo $HUSKY_GIT_STDIN | lfs-hooks/pre-push $HUSKY_GIT_PARAMS"
-    }
-  },
-  "dependencies": {
-    "apidoc": "^0.50.3",
-    "laravel-echo-server": "^1.6.2"
+    "prepare": "node -e \"try { require('husky').install() } catch (e) {if (e.code !== 'MODULE_NOT_FOUND') throw e}\""
   },
   "devDependencies": {
     "@commitlint/cli": "^16.0.2",
     "@commitlint/config-conventional": "^16.0.0",
-    "grunt": "^1.4.1",
-    "grunt-apidoc": "^0.11.0",
-    "husky": "^7.0.4"
+    "chokidar": "^3.5.3",
+    "husky": "^7.0.0"
   }
 }
