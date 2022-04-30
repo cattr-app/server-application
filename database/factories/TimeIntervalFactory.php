@@ -13,13 +13,12 @@ class TimeIntervalFactory extends Factory
     public function definition(): array
     {
         return [
+            'is_manual' => false,
             'start_at' => now()->subMinutes(5)->toDateTimeString(),
             'end_at' => now()->toDateTimeString(),
             'mouse_fill' => $this->faker->numberBetween(0, 100),
             'keyboard_fill' => $this->faker->numberBetween(0, 100),
-            'activity_fill' => function (array $attributes) {
-                return +$attributes['keyboard_fill'] + $attributes['mouse_fill'];
-            },
+            'activity_fill' => static fn(array $attributes) => +$attributes['keyboard_fill'] + $attributes['mouse_fill'],
         ];
     }
 

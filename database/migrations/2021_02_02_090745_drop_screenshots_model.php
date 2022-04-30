@@ -1,10 +1,10 @@
 <?php
 
+use App\Jobs\GenerateScreenshotThumbnail;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Schema;
 
-class DropScreenshotsModel extends Migration
-{
+return new class extends Migration {
     /**
      * Run the migrations.
      *
@@ -16,19 +16,21 @@ class DropScreenshotsModel extends Migration
             Storage::makeDirectory('screenshots/thumbs');
         }
 
-        DB::table('screenshots')->orderBy('id')->chunk(1000, static function ($screenshots) {
-            foreach ($screenshots as $screenshot) {
+        DB::table('screenshots')
+            ->lazyById()
+            ->each(static function ($screenshot) {
                 $fileName = hash('sha256', $screenshot->time_interval_id) . '.jpg';
+
+                if (!$screenshot->path) {
+                    return;
+                }
 
                 if (Storage::exists($screenshot->path)) {
                     Storage::move($screenshot->path, 'screenshots/' . $fileName);
                 }
 
-                if (Storage::exists($screenshot->thumbnail_path)) {
-                    Storage::move($screenshot->thumbnail_path, 'screenshots/thumbs/' . $fileName);
-                }
-            }
-        });
+                GenerateScreenshotThumbnail::dispatch($screenshot->time_interval_id);
+            });
 
         Storage::deleteDirectory('uploads/screenshots');
 
@@ -44,4 +46,4 @@ class DropScreenshotsModel extends Migration
     {
         //
     }
-}
+};

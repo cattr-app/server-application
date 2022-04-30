@@ -17,7 +17,7 @@ class GenerateScreenshotThumbnail implements ShouldQueue, ShouldBeUnique
 
     public int $uniqueFor = 3600;
 
-    public function __construct(private TimeInterval|int $interval)
+    public function __construct(private readonly TimeInterval|int $interval)
     {
     }
 
