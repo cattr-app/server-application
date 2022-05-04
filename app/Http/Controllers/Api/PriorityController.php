@@ -11,13 +11,14 @@ use App\Models\Priority;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 class PriorityController extends ItemController
 {
     protected const MODEL = Priority::class;
 
     /**
-     * @throws Exception
+     * @throws Throwable
      * @api             {post} /priorities/show Show
      * @apiDescription  Show priority.
      *
@@ -94,6 +95,7 @@ class PriorityController extends ItemController
     /**
      * @param CreatePriorityRequest $request
      * @return JsonResponse
+     * @throws Throwable
      * @api             {post} /priorities/create Create
      * @apiDescription  Creates priority
      *
@@ -136,7 +138,7 @@ class PriorityController extends ItemController
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      * @api             {post} /priorities/edit Edit
      * @apiDescription  Edit Priority
      *
@@ -182,7 +184,7 @@ class PriorityController extends ItemController
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      * @api             {post} /priorities/remove Destroy
      * @apiDescription  Destroy User
      *

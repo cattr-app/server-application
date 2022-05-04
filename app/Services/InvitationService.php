@@ -20,7 +20,7 @@ class InvitationService
      * @return Invitation|null
      * @throws Exception
      */
-    public function create(array $user): ?Invitation
+    public static function create(array $user): ?Invitation
     {
         return Invitation::create([
             'email' => $user['email'],
@@ -37,7 +37,7 @@ class InvitationService
      * @return Invitation|null
      * @throws Exception
      */
-    public function update(int $id): ?Invitation
+    public static function update(int $id): ?Invitation
     {
         return tap(Invitation::find($id))->update([
             'key' => Uuid::generate(),

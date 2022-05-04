@@ -10,7 +10,6 @@ use App\Http\Requests\Status\DestroyStatusRequest;
 use App\Models\Status;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Throwable;
 
 class StatusController extends ItemController
@@ -59,7 +58,7 @@ class StatusController extends ItemController
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      * @api             {get} /statuses/list List
      * @apiDescription  Get list of statuses.
      *
@@ -137,7 +136,6 @@ class StatusController extends ItemController
     }
 
     /**
-     * @throws Exception
      * @throws Throwable
      * @api             {post} /statuses/edit Edit
      * @apiDescription  Edit Status
@@ -184,7 +182,6 @@ class StatusController extends ItemController
     }
 
     /**
-     * @throws Exception
      * @throws Throwable
      * @api             {post} /statuses/remove Destroy
      * @apiDescription  Destroy User
