@@ -203,6 +203,7 @@ class TaskController extends ItemController
      * @param CreateTaskRequest $request
      * @return JsonResponse
      *
+     * @throws Throwable
      * @api             {post} /tasks/create Create
      * @apiDescription  Create Task
      *
@@ -296,7 +297,7 @@ class TaskController extends ItemController
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      * @api             {post} /tasks/remove Destroy
      * @apiDescription  Destroy Task
      *

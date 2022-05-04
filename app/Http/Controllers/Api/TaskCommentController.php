@@ -4,43 +4,28 @@ namespace App\Http\Controllers\Api;
 
 use Filter;
 use App\Models\TaskComment;
-use App\Models\User;
 use Exception;
-use Event;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Support\Facades\Auth;
-use Settings;
+use Throwable;
 
-/**
- * Class TaskCommentController
- */
 class TaskCommentController extends ItemController
 {
     protected const MODEL = TaskComment::class;
 
-    /**
-     * @return array
-     */
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'task-comment.list',
-            'create' => 'task-comment.create',
-            'show' => 'task-comment.show',
-            'destroy' => 'task-comment.remove',
-        ];
-    }
-
     public function create(Request $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('request.item.create'), static function (array $data) {
-            $data['user_id'] = Auth::id();
+        Filter::listen(
+            Filter::getActionFilterName(),
+            static function (TaskComment $data) {
+                $data->user_id = auth()->id();
 
-            return $data;
-        });
+                return $data;
+            }
+        );
 
         return $this->_create($request);
     }
@@ -77,31 +62,25 @@ class TaskCommentController extends ItemController
     {
         $filters = $request->all();
 
-        $baseQuery = $this->applyQueryFilter(
-            $this->getQuery()->with('user'),
-            $filters ?: []
-        );
+        $baseQuery = $this->getQuery($filters ?: [])->with('user');
 
-        $user = Auth::user();
-        $full_access = $user?->allowed('task-comment', 'full_access');
-
-        if (!$full_access) {
-            $baseQuery->whereHas('task', static function ($taskQuery) use ($user) {
-                $taskQuery->where(['user_id' => $user->id]);
-            });
+        if (!request()->user()->allowed('task-comment', 'full_access')) {
+            $baseQuery->whereHas(
+                'task',
+                static fn(Builder $taskQuery) => $taskQuery->where(
+                    'user_id',
+                    '=',
+                    request()->user()->id
+                )
+            );
         }
 
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.list.query.prepare'),
-            $baseQuery
-        );
-
-        return responder()->success($itemsQuery->get())->respond();
+        return responder()->success($baseQuery->get())->respond();
     }
 
     /**
      * @apiDeprecated   since 1.0.0
-     * @throws Exception
+     * @throws Throwable
      * @api             {post} /task-comment/show Show
      * @apiDescription  Show Task Comment
      *

@@ -14,22 +14,6 @@ class RoleController extends ItemController
 {
     protected const MODEL = Role::class;
 
-    public static function getControllerRules(): array
-    {
-        return [
-            'index' => 'roles.list',
-            'count' => 'roles.list',
-            'create' => 'roles.create',
-            'edit' => 'roles.edit',
-            'show' => 'roles.show',
-            'destroy' => 'roles.remove',
-            'allowedRules' => 'roles.allowed-rules',
-            'projectRules' => 'roles.allowed-rules',
-            'attachToUser' => 'roles.attach-user',
-            'detachFromUser' => 'roles.detach-user',
-        ];
-    }
-
     /**
      * @param Request $request
      * @return JsonResponse

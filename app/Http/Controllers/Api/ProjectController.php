@@ -84,7 +84,7 @@ class ProjectController extends ItemController
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function show(ShowProjectRequest $request): JsonResponse
     {
@@ -127,6 +127,7 @@ class ProjectController extends ItemController
     }
 
     /**
+     * @throws Throwable
      * @api            {post} /projects/create Create
      * @apiDescription Create Project
      *
@@ -291,7 +292,7 @@ class ProjectController extends ItemController
      */
 
     /**
-     * @throws Exception
+     * @throws Throwable
      * @api             {post} /projects/edit Edit
      * @apiDescription  Edit Project
      *

@@ -13,17 +13,6 @@ use Throwable;
 
 class ProjectMemberController extends Controller
 {
-    protected ProjectMemberService $projectMemberService;
-
-    /**
-     * ProjectMemberController constructor.
-     * @param ProjectMemberService $projectMemberService
-     */
-    public function __construct(ProjectMemberService $projectMemberService)
-    {
-        $this->projectMemberService = $projectMemberService;
-    }
-
     /**
      * @param ShowProjectMemberRequest $request
      * @return JsonResponse
@@ -35,7 +24,7 @@ class ProjectMemberController extends Controller
 
         throw_unless($data, ValidationException::withMessages([]));
 
-        $projectMembers = $this->projectMemberService->getMembers($data['project_id']);
+        $projectMembers = ProjectMemberService::getMembers($data['project_id']);
 
         throw_if(!isset($projectMembers['id']) || !$projectMembers, new NotFoundHttpException);
 
@@ -56,7 +45,7 @@ class ProjectMemberController extends Controller
             $userRoles[$value['user_id']] = ['role_id' => $value['role_id']];
         }
 
-        $this->projectMemberService->syncMembers($data['project_id'], $userRoles);
+        ProjectMemberService::syncMembers($data['project_id'], $userRoles);
 
         return responder()->success()->respond(204);
     }

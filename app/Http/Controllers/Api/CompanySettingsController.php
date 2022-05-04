@@ -12,15 +12,6 @@ use Settings;
 class CompanySettingsController extends Controller
 {
     /**
-     * CompanySettingsController constructor.
-     *
-     * @param Priority $priorities
-     */
-    public function __construct(protected Priority $priorities)
-    {
-    }
-
-    /**
      * @api             {get} /company-settings/index List
      * @apiDescription  Returns all company settings.
      *
@@ -62,16 +53,13 @@ class CompanySettingsController extends Controller
      *
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
-     *
      */
     public function index(): JsonResponse
     {
         return responder()->success(
             array_merge(
                 Settings::scope('core')->all(),
-                [
-                    'internal_priorities' => $this->priorities->all(),
-                ]
+                ['internal_priorities' => Priority::all()]
             ),
             new CompanySettingsTransformer
         )->respond();

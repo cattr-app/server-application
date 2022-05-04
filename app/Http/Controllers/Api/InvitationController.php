@@ -11,6 +11,7 @@ use App\Http\Requests\Invitation\UpdateInvitationRequest;
 use App\Models\Invitation;
 use App\Services\InvitationService;
 use Exception;
+use Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Throwable;
@@ -18,14 +19,6 @@ use Throwable;
 class InvitationController extends ItemController
 {
     protected const MODEL = Invitation::class;
-
-    /**
-     * InvitationController constructor.
-     * @param InvitationService $service
-     */
-    public function __construct(protected InvitationService $service)
-    {
-    }
 
     /**
      * @throws Throwable
@@ -182,12 +175,12 @@ class InvitationController extends ItemController
      */
     public function create(CreateInvitationRequest $request): JsonResponse
     {
-        $requestData = $request->validated();
+        $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
         $invitations = [];
 
         foreach ($requestData['users'] as $user) {
-            $invitations[] = $this->service->create($user);
+            $invitations[] = InvitationService::create($user);
         }
 
         return responder()->success($invitations)->respond();
@@ -248,15 +241,15 @@ class InvitationController extends ItemController
      */
     public function resend(UpdateInvitationRequest $request): JsonResponse
     {
-        $requestData = $request->validated();
+        $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
-        $invitation = $this->service->update($requestData['id']);
+        $invitation = InvitationService::update($requestData['id']);
 
         return responder()->success($invitation)->respond();
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      * @api             {post} /invitations/remove Destroy
      * @apiDescription  Destroy User
      *
