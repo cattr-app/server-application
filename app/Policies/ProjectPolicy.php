@@ -10,6 +10,13 @@ class ProjectPolicy
 {
     use HandlesAuthorization;
 
+    public function before(User $user): ?bool
+    {
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+    }
+
     /**
      * Determine if the given project can be viewed by the user.
      *
@@ -26,6 +33,11 @@ class ProjectPolicy
             config('cache.role_caching_ttl'),
             static fn() => Project::whereId($project->id)->exists()
         );
+    }
+
+    public function viewAny(): bool
+    {
+        return true;
     }
 
     /**
@@ -102,18 +114,6 @@ class ProjectPolicy
             return false;
         }
 
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-
-        if ($user->hasRole('manager')) {
-            return true;
-        }
-
-        if ($user->hasProjectRole('manager', $project->id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasRole('manager') || $user->hasProjectRole('manager', $project->id);
     }
 }

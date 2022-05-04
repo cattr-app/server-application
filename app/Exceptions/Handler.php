@@ -3,13 +3,11 @@
 namespace App\Exceptions;
 
 use App\Exceptions\Entities\MethodNotAllowedException;
-use Exception;
 use Flugg\Responder\Exceptions\ConvertsExceptions;
 use Illuminate\Auth\Access\AuthorizationException;
 use Illuminate\Auth\AuthenticationException;
 use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
-use Illuminate\Http\Request;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpFoundation\Response;
@@ -49,7 +47,7 @@ class Handler extends ExceptionHandler
      * @param Throwable $e
      * @throws Throwable
      */
-    public function report(Throwable $e): void
+    public function report(Throwable $e)
     {
         if ($this->shouldReport($e) && !config('app.debug') && app()->bound('sentry')) {
             app('sentry')->captureException($e);

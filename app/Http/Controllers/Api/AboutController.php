@@ -14,7 +14,6 @@ use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Routing\Controller;
 use JsonException;
-use Nette\Utils\Json;
 use Settings;
 
 class AboutController extends Controller

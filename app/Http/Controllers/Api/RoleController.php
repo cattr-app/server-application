@@ -12,7 +12,7 @@ use Validator;
 
 class RoleController extends ItemController
 {
-    protected bool $disableQueryRoleCheck = false;
+    protected const MODEL = Role::class;
 
     public static function getControllerRules(): array
     {
@@ -28,18 +28,6 @@ class RoleController extends ItemController
             'attachToUser' => 'roles.attach-user',
             'detachFromUser' => 'roles.detach-user',
         ];
-    }
-
-    public function getValidationRules(): array
-    {
-        return [
-            'name' => 'required',
-        ];
-    }
-
-    public function getEventUniqueNamePart(): string
-    {
-        return 'role';
     }
 
     /**
@@ -98,11 +86,6 @@ class RoleController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
      */
-
-    public function getItemClass(): string
-    {
-        return Role::class;
-    }
 
     /**
      * @api             {post} /roles/create Create

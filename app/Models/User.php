@@ -9,6 +9,7 @@ use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -368,32 +369,21 @@ class User extends Authenticatable
     {
         $this->notify(new ResetPassword($this->email, $token));
     }
-    /**
-     * Get the user's online status.
-     *
-     * @return bool
-     */
-    public function getOnlineAttribute(): bool
-    {
-        if (!isset($this->last_activity)) {
-            return false;
-        }
 
-        return $this->last_activity->diffInSeconds(Carbon::now()) < config('app.user_activity.online_status_time');
+    protected function online(): Attribute
+    {
+        return Attribute::make(
+            get: static fn($value, $attributes) => $attributes['last_activity'] &&
+                Carbon::parse($attributes['last_activity'])->diffInSeconds(Carbon::now())
+                < config('app.user_activity.online_status_time'),
+        );
     }
 
-    /**
-     * Set the user's password.
-     *
-     * @param string $password
-     */
-    public function setPasswordAttribute(string $password): void
+    protected function password(): Attribute
     {
-        if (Hash::needsRehash($password)) {
-            $password = Hash::make($password);
-        }
-
-        $this->attributes['password'] = $password;
+        return Attribute::make(
+            set: static fn($value) => Hash::needsRehash($value) ? Hash::make($value) : $value,
+        );
     }
 
     public function scopeAdmin(EloquentBuilder $query): EloquentBuilder

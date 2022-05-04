@@ -2,10 +2,10 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Task\CreateTaskRequestCattr;
-use App\Http\Requests\Task\DestroyTaskRequestCattr;
-use App\Http\Requests\Task\EditTaskRequestCattr;
-use App\Http\Requests\Task\ShowTaskRequestCattr;
+use App\Http\Requests\Task\CreateTaskRequest;
+use App\Http\Requests\Task\DestroyTaskRequest;
+use App\Http\Requests\Task\EditTaskRequest;
+use App\Http\Requests\Task\ShowTaskRequest;
 use App\Models\Priority;
 use App\Models\Project;
 use Exception;
@@ -24,20 +24,7 @@ use Throwable;
 
 class TaskController extends ItemController
 {
-    public function getItemClass(): string
-    {
-        return Task::class;
-    }
-
-    public function getValidationRules(): array
-    {
-        return [];
-    }
-
-    public function getEventUniqueNamePart(): string
-    {
-        return 'task';
-    }
+    protected const MODEL = Task::class;
 
     /**
      * @api             {post} /tasks/list List
@@ -155,7 +142,7 @@ class TaskController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-    public function edit(EditTaskRequestCattr $request): JsonResponse
+    public function edit(EditTaskRequest $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('request.item.edit'), static function (array $data) {
             if (empty($data['priority_id'])) {
@@ -213,7 +200,7 @@ class TaskController extends ItemController
     }
 
     /**
-     * @param CreateTaskRequestCattr $request
+     * @param CreateTaskRequest $request
      * @return JsonResponse
      *
      * @api             {post} /tasks/create Create
@@ -279,7 +266,7 @@ class TaskController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-    public function create(CreateTaskRequestCattr $request): JsonResponse
+    public function create(CreateTaskRequest $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('item.create'), static function (Task $task) use ($request) {
             $users = $request->get('users');
@@ -342,7 +329,7 @@ class TaskController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function destroy(DestroyTaskRequestCattr $request): JsonResponse
+    public function destroy(DestroyTaskRequest $request): JsonResponse
     {
         return $this->_destroy($request);
     }
@@ -438,7 +425,7 @@ class TaskController extends ItemController
      * @apiUse         ForbiddenError
      * @apiUse         ValidationError
      */
-    public function show(ShowTaskRequestCattr $request): JsonResponse
+    public function show(ShowTaskRequest $request): JsonResponse
     {
         Filter::listen(Filter::getSuccessResponseFilterName(), static function ($task) {
             $totalTracked = 0;

@@ -2,11 +2,11 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Priority\CountPriorityRequestCattr;
-use App\Http\Requests\Priority\CreatePriorityRequestCattr;
-use App\Http\Requests\Priority\ShowPriorityRequestCattr;
-use App\Http\Requests\Priority\UpdatePriorityRequestCattr;
-use App\Http\Requests\Project\DestroyProjectRequestCattr;
+use App\Http\Requests\Priority\CountPriorityRequest;
+use App\Http\Requests\Priority\CreatePriorityRequest;
+use App\Http\Requests\Priority\ShowPriorityRequest;
+use App\Http\Requests\Priority\UpdatePriorityRequest;
+use App\Http\Requests\Project\DestroyProjectRequest;
 use App\Models\Priority;
 use Exception;
 use Illuminate\Http\JsonResponse;
@@ -14,35 +14,7 @@ use Illuminate\Http\Request;
 
 class PriorityController extends ItemController
 {
-    /**
-     * Get the validation rules.
-     *
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [];
-    }
-
-    /**
-     * Get the event unique name part.
-     *
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'priority';
-    }
-
-    /**
-     * Get the model class.
-     *
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return Priority::class;
-    }
+    protected const MODEL = Priority::class;
 
     /**
      * @throws Exception
@@ -80,7 +52,7 @@ class PriorityController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function show(ShowPriorityRequestCattr $request): JsonResponse
+    public function show(ShowPriorityRequest $request): JsonResponse
     {
         return $this->_show($request);
     }
@@ -120,7 +92,7 @@ class PriorityController extends ItemController
     }
 
     /**
-     * @param CreatePriorityRequestCattr $request
+     * @param CreatePriorityRequest $request
      * @return JsonResponse
      * @api             {post} /priorities/create Create
      * @apiDescription  Creates priority
@@ -158,7 +130,7 @@ class PriorityController extends ItemController
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      */
-    public function create(CreatePriorityRequestCattr $request): JsonResponse
+    public function create(CreatePriorityRequest $request): JsonResponse
     {
         return $this->_create($request);
     }
@@ -204,7 +176,7 @@ class PriorityController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-    public function edit(UpdatePriorityRequestCattr $request): JsonResponse
+    public function edit(UpdatePriorityRequest $request): JsonResponse
     {
         return $this->_edit($request);
     }
@@ -240,17 +212,17 @@ class PriorityController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function destroy(DestroyProjectRequestCattr $request): JsonResponse
+    public function destroy(DestroyProjectRequest $request): JsonResponse
     {
         return $this->_destroy($request);
     }
 
     /**
-     * @param CountPriorityRequestCattr $request
+     * @param CountPriorityRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function count(CountPriorityRequestCattr $request): JsonResponse
+    public function count(CountPriorityRequest $request): JsonResponse
     {
         return $this->_count($request);
     }

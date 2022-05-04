@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Controllers\Controller;
 use Filter;
-use App\Models\TimeInterval;
 use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
@@ -11,7 +11,7 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
 
-class TimeController extends ItemController
+class TimeController extends Controller
 {
     public static function getControllerRules(): array
     {
@@ -23,22 +23,6 @@ class TimeController extends ItemController
             'taskUser' => 'time.task-user',
         ];
     }
-
-    public function getItemClass(): string
-    {
-        return TimeInterval::class;
-    }
-
-    public function getValidationRules(): array
-    {
-        return [];
-    }
-
-    public function getEventUniqueNamePart(): string
-    {
-        return 'time';
-    }
-
     /**
      * @api             {get,post} /time/total Total
      * @apiDescription  Get total of Time
