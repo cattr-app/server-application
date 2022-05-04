@@ -22,11 +22,12 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
     use Exportable;
 
     public function __construct(
-        private ?array $users,
-        private ?array $projects,
-        private Carbon $startAt,
-        private Carbon $endAt
-    ) {
+        private readonly ?array $users,
+        private readonly ?array $projects,
+        private readonly Carbon $startAt,
+        private readonly Carbon $endAt
+    )
+    {
     }
 
     public function collection(): Collection
@@ -102,7 +103,7 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
                 ->all(),
             [
                 [
-                    'Subtotal for ' . $row['name'],
+                    "Subtotal for ${$row['name']}",
                     '',
                     '',
                     CarbonInterval::seconds($row['time'])->cascade()->forHumans(),

@@ -19,10 +19,11 @@ class TimeUseReportExport extends AppReport implements FromCollection, WithMappi
     use Exportable;
 
     public function __construct(
-        private ?array $users,
-        private Carbon $startAt,
-        private Carbon $endAt
-    ) {
+        private readonly ?array $users,
+        private readonly Carbon $startAt,
+        private readonly Carbon $endAt
+    )
+    {
     }
 
     public function collection(): Collection
@@ -50,6 +51,12 @@ class TimeUseReportExport extends AppReport implements FromCollection, WithMappi
                 )->values(),
             ],
         )->values();
+    }
+
+    public function map($row): array
+    {
+        // TODO: Implement map() method.
+        return [];
     }
 
     private function queryReport(): Collection
@@ -82,11 +89,6 @@ class TimeUseReportExport extends AppReport implements FromCollection, WithMappi
     public function headings(): array
     {
         return [];
-    }
-
-    public function map($row): array
-    {
-        // TODO: Implement map() method.
     }
 
     public function styles(Worksheet $sheet): array
