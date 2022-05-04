@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "b03a4e64bd33db9629eeba85cc54dd45",
+    "content-hash": "a902040961616666ef7bb533da649895",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -9450,71 +9450,6 @@
                 "source": "https://github.com/hamcrest/hamcrest-php/tree/v2.0.1"
             },
             "time": "2020-07-09T08:09:16+00:00"
-        },
-        {
-            "name": "jkocik/laravel-profiler",
-            "version": "2.0.3",
-            "source": {
-                "type": "git",
-                "url": "https://github.com/jkocik/laravel-profiler.git",
-                "reference": "cda42631f802f32507ba0908cac52c335a494953"
-            },
-            "dist": {
-                "type": "zip",
-                "url": "https://api.github.com/repos/jkocik/laravel-profiler/zipball/cda42631f802f32507ba0908cac52c335a494953",
-                "reference": "cda42631f802f32507ba0908cac52c335a494953",
-                "shasum": ""
-            },
-            "require": {
-                "guzzlehttp/guzzle": "^5.0 || ^6.0 || ^7.0",
-                "php": ">=7.2"
-            },
-            "require-dev": {
-                "fzaninotto/faker": "^1.5",
-                "mockery/mockery": "^1.0",
-                "php-coveralls/php-coveralls": "^2.1",
-                "php-mock/php-mock": "^2.0",
-                "phpunit/phpunit": "^8",
-                "predis/predis": "^1.1"
-            },
-            "type": "library",
-            "extra": {
-                "laravel": {
-                    "providers": [
-                        "JKocik\\Laravel\\Profiler\\ServiceProvider"
-                    ]
-                }
-            },
-            "autoload": {
-                "files": [
-                    "src/Services/helpers.php"
-                ],
-                "psr-4": {
-                    "JKocik\\Laravel\\Profiler\\": "src/"
-                }
-            },
-            "notification-url": "https://packagist.org/downloads/",
-            "license": [
-                "MIT"
-            ],
-            "authors": [
-                {
-                    "name": "Janusz Kocik",
-                    "email": "janusz.kocik@gmail.com"
-                }
-            ],
-            "description": "Profiler for Laravel Framework",
-            "homepage": "https://github.com/jkocik/laravel-profiler",
-            "keywords": [
-                "debugbar",
-                "laravel",
-                "profiler"
-            ],
-            "support": {
-                "issues": "https://github.com/jkocik/laravel-profiler/issues",
-                "source": "https://github.com/jkocik/laravel-profiler/tree/2.0.3"
-            },
-            "time": "2021-05-12T21:42:38+00:00"
         },
         {
             "name": "mockery/mockery",

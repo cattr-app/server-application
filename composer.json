@@ -34,7 +34,6 @@
   },
   "require-dev": {
     "cattr/laravel-ide-helper": "dev-master",
-    "jkocik/laravel-profiler": "^2.0",
     "mockery/mockery": "^1.5",
     "phpunit/phpunit": "^9.5",
     "roave/security-advisories": "dev-latest",
