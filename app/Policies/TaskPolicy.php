@@ -13,7 +13,7 @@ class TaskPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->hasRole('admin')) {
+        if ($user->hasRole('user')) {
             return true;
         }
     }

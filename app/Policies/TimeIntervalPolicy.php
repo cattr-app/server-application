@@ -11,9 +11,10 @@ class TimeIntervalPolicy
 {
     public function before(User $user): ?bool
     {
-        if ($user->hasRole('admin')) {
+        if ($user->hasRole('user') || $user->hasRole('admin') || $user->hasRole('auditor')) {
             return true;
         }
+        return false;
     }
 
     public function view(User $user, TimeInterval $timeInterval): bool
@@ -29,7 +30,7 @@ class TimeIntervalPolicy
     {
         $projectId = self::getProjectIdByTaskId($taskId);
 
-        if ($manual){
+        if ($manual) {
             if ($user->id !== $targetUserId) {
                 return $user->hasRole('manager') || $user->hasProjectRole('manager', $projectId);
             }

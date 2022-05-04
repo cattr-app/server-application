@@ -12,9 +12,7 @@ class ProjectPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->hasRole('admin')) {
-            return true;
-        }
+        return $user->hasRole('user');
     }
 
     /**
