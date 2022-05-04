@@ -3,7 +3,7 @@
 namespace App\Http\Requests\Priority;
 
 use App\Http\Requests\CattrFormRequest;
-use App\Models\User;
+use App\Models\Priority;
 
 class CreatePriorityRequest extends CattrFormRequest
 {
@@ -14,9 +14,7 @@ class CreatePriorityRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        /** @var User $user */
-        $user = auth()->user();
-        return $user->hasRole('admin');
+        return $this->user()->can('create', Priority::class);
     }
 
     /**

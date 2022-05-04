@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Http\Requests\Priority\CountPriorityRequest;
 use App\Http\Requests\Priority\CreatePriorityRequest;
+use App\Http\Requests\Priority\ListPriorityRequest;
 use App\Http\Requests\Priority\ShowPriorityRequest;
 use App\Http\Requests\Priority\UpdatePriorityRequest;
 use App\Http\Requests\Project\DestroyProjectRequest;
@@ -87,7 +88,7 @@ class PriorityController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListPriorityRequest $request): JsonResponse
     {
         return $this->_index($request);
     }

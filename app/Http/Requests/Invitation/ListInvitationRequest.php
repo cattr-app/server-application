@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Invitation;
 
 use App\Http\Requests\CattrFormRequest;
+use App\Models\Invitation;
 
 class ListInvitationRequest extends CattrFormRequest
 {
@@ -13,7 +14,7 @@ class ListInvitationRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return $this->user()->hasRole('admin');
+        return $this->user()->can('view', Invitation::class);
     }
 
     /**

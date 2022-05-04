@@ -8,6 +8,7 @@ use App\Http\Requests\TimeInterval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\DestroyTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\EditTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\ListTimeIntervalRequest;
 use App\Http\Requests\TimeInterval\PutScreenshotRequest;
 use App\Http\Requests\TimeInterval\ScreenshotRequest;
 use App\Http\Requests\TimeInterval\ShowTimeIntervalRequest;
@@ -42,12 +43,12 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @param Request $request
+     * @param ListTimeIntervalRequest $request
      *
      * @return JsonResponse
      * @throws Exception
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListTimeIntervalRequest $request): JsonResponse
     {
         Filter::listen(Filter::getRequestFilterName(), static function ($filters) use ($request) {
             if ($request->get('project_id')) {
@@ -260,7 +261,7 @@ class TimeIntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function count(Request $request): JsonResponse
+    public function count(ListTimeIntervalRequest $request): JsonResponse
     {
         return $this->_count($request);
     }

@@ -425,7 +425,7 @@ class UserController extends ItemController
 
         Event::dispatch(Filter::getAfterActionEventName(), [$requestId, $item]);
 
-        $language = Settings::scope('core')->get( 'language', 'en');
+        $language = Settings::scope('core')->get('language', 'en');
 
         Mail::to($item->email)->locale($language)->send(new UserCreated($item->email, $password));
 

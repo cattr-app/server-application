@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\Role\ListRoleRequest;
 use Filter;
 use App\Models\Role;
 use Exception;
@@ -15,11 +16,11 @@ class RoleController extends ItemController
     protected const MODEL = Role::class;
 
     /**
-     * @param Request $request
+     * @param ListRoleRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListRoleRequest $request): JsonResponse
     {
         if ($request->get('user_id')) {
             $request->offsetSet('users.id', $request->get('user_id'));
@@ -138,12 +139,13 @@ class RoleController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function count(Request $request): JsonResponse
+    public function count(ListRoleRequest $request): JsonResponse
     {
         return $this->_count($request);
     }
 
     /**
+     *
      * @api             {post} /roles/show Show
      * @apiDescription  Get Role Entity
      *

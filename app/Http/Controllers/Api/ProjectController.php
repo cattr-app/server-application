@@ -11,7 +11,6 @@ use Filter;
 use App\Models\Project;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use DB;
 use Throwable;
 
@@ -185,6 +184,7 @@ class ProjectController extends ItemController
             return $project;
         });
 
+        Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('statuses'));
 
         return $this->_create($request);
     }
@@ -353,6 +353,7 @@ class ProjectController extends ItemController
             return $project;
         });
 
+        Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('statuses'));
 
         return $this->_edit($request);
     }

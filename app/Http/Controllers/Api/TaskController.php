@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
 use App\Http\Requests\Task\EditTaskRequest;
+use App\Http\Requests\Task\ListTaskRequest;
 use App\Http\Requests\Task\ShowTaskRequest;
 use App\Models\Priority;
 use App\Models\Project;
@@ -68,11 +69,11 @@ class TaskController extends ItemController
      * @apiUse         ForbiddenError
      */
     /**
-     * @param Request $request
+     * @param ListTaskRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListTaskRequest $request): JsonResponse
     {
         return $this->_index($request);
     }
@@ -362,7 +363,7 @@ class TaskController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function count(Request $request): JsonResponse
+    public function count(ListTaskRequest $request): JsonResponse
     {
         return $this->_count($request);
     }

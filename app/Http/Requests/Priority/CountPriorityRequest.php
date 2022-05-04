@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Priority;
 
 use App\Http\Requests\CattrFormRequest;
+use App\Models\Invitation;
 
 class CountPriorityRequest extends CattrFormRequest
 {
@@ -13,7 +14,7 @@ class CountPriorityRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return true;
+        return $this->user()->can('view', Invitation::class);
     }
 
     /**

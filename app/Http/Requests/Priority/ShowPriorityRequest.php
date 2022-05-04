@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Priority;
 
 use App\Http\Requests\CattrFormRequest;
+use App\Models\Priority;
 
 class ShowPriorityRequest extends CattrFormRequest
 {
@@ -13,7 +14,7 @@ class ShowPriorityRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return true;
+        return $this->user()->can('view', Priority::class);
     }
 
     /**
