@@ -22,11 +22,12 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
     use Exportable;
 
     public function __construct(
-        private ?array $users,
-        private ?array $projects,
-        private Carbon $startAt,
-        private Carbon $endAt
-    ) {
+        private readonly ?array $users,
+        private readonly ?array $projects,
+        private readonly Carbon $startAt,
+        private readonly Carbon $endAt
+    )
+    {
     }
 
     public function collection(): Collection

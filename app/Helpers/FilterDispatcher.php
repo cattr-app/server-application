@@ -49,17 +49,17 @@ class FilterDispatcher extends LaravelDispatcher
 
     public static function getBeforeActionEventName(): string
     {
-        return 'event.before.action' . request()?->route()?->getName();
+        return 'event.before.action.' . request()?->route()?->getName();
     }
 
     public static function getAfterActionEventName(): string
     {
-        return 'event.after.action' . request()?->route()?->getName();
+        return 'event.after.action.' . request()?->route()?->getName();
     }
 
     public static function getActionFilterName(): string
     {
-        return 'filter.action' . request()?->route()?->getName();
+        return 'filter.action.' . request()?->route()?->getName();
     }
 
     /**
