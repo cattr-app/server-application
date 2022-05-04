@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App;
+use App\Http\Requests\User\ListUsersRequest;
 use Settings;
 use Carbon\Carbon;
 use Exception;
@@ -15,46 +16,21 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Event;
 use Mail;
-use App\Http\Requests\User\CreateUserRequestCattr;
-use App\Http\Requests\User\EditUserRequestCattr;
-use App\Http\Requests\User\SendInviteUserRequestCattr;
-use App\Http\Requests\User\ShowUserRequestCattr;
-use App\Http\Requests\User\DestroyUserRequestCattr;
+use App\Http\Requests\User\CreateUserRequest;
+use App\Http\Requests\User\EditUserRequest;
+use App\Http\Requests\User\SendInviteUserRequest;
+use App\Http\Requests\User\ShowUserRequest;
+use App\Http\Requests\User\DestroyUserRequest;
 use Illuminate\Support\Str;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+use Throwable;
 
 class UserController extends ItemController
 {
-    /**
-     * Get the validation rules.
-     *
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [];
-    }
+    protected const MODEL = User::class;
 
     /**
-     * Get the model class.
-     *
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return User::class;
-    }
-
-    /**
-     * Get the event unique name part.
-     *
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'user';
-    }
-
-    /**
+     * @throws Exception
      * @api             {get, post} /users/list List
      * @apiDescription  Get list of Users with any params
      *
@@ -125,7 +101,7 @@ class UserController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListUsersRequest $request): JsonResponse
     {
         return $this->_index($request);
     }
@@ -182,10 +158,11 @@ class UserController extends ItemController
      * @apiUse         ForbiddenError
      */
     /**
-     * @param CreateUserRequestCattr $request
+     * @param CreateUserRequest $request
      * @return JsonResponse
+     * @throws Throwable
      */
-    public function create(CreateUserRequestCattr $request): JsonResponse
+    public function create(CreateUserRequest $request): JsonResponse
     {
         return $this->_create($request);
     }
@@ -253,55 +230,13 @@ class UserController extends ItemController
      * @apiUse         ItemNotFoundError
      */
     /**
-     * @param Request $request
+     * @param EditUserRequest $request
      * @return JsonResponse
-     * @throws Exception
+     * @throws Throwable
      */
-    public function edit(EditUserRequestCattr $request): JsonResponse
+    public function edit(EditUserRequest $request): JsonResponse
     {
-        $requestData = $request->validated();
-
-        $requestData = Filter::process(
-            $this->getEventUniqueName('request.item.edit'),
-            $requestData
-        );
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(),
-                ['id' => $requestData['id']]
-            )
-        );
-        /** @var Model $item */
-        $item = $itemsQuery->first();
-
-        if (!$item) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.edit'), [
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'User not found',
-                ]),
-                404
-            );
-        }
-
-        if (App::environment('demo')) {
-            unset($requestData['password']);
-        }
-
-        $item = Filter::process($this->getEventUniqueName('item.edit'), $item);
-
-        $item->update($requestData);
-
-        Event::dispatch($this->getEventUniqueName('item.edit.after'), [$item, $requestData]);
-
-        return new JsonResponse(
-            Filter::process($this->getEventUniqueName('answer.success.item.edit'), [
-                'res' => $item,
-            ])
-        );
+        return $this->_edit($request);
     }
 
     /**
@@ -359,16 +294,18 @@ class UserController extends ItemController
      */
 
     /**
-     * @param ShowUserRequestCattr $request
+     * @param ShowUserRequest $request
      * @return JsonResponse
      * @throws Exception
+     * @throws Throwable
      */
-    public function show(ShowUserRequestCattr $request): JsonResponse
+    public function show(ShowUserRequest $request): JsonResponse
     {
         return $this->_show($request);
     }
 
     /**
+     * @throws Throwable
      * @api             {post} /users/remove Destroy
      * @apiDescription  Destroy User
      *
@@ -401,7 +338,7 @@ class UserController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function destroy(DestroyUserRequestCattr $request): JsonResponse
+    public function destroy(DestroyUserRequest $request): JsonResponse
     {
         return $this->_destroy($request);
     }
@@ -420,6 +357,7 @@ class UserController extends ItemController
      */
 
     /**
+     * @throws Exception
      * @api             {get,post} /users/count Count
      * @apiDescription  Count Users
      *
@@ -444,7 +382,7 @@ class UserController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function count(Request $request): JsonResponse
+    public function count(ListUsersRequest $request): JsonResponse
     {
         return $this->_count($request);
     }
@@ -464,38 +402,34 @@ class UserController extends ItemController
     /**
      * TODO: apidoc
      *
-     * @param SendInviteUserRequestCattr $request
+     * @param SendInviteUserRequest $request
      * @return JsonResponse
-     * @throws Exception
+     * @throws Throwable
      */
-    public function sendInvite(SendInviteUserRequestCattr $request)
+    public function sendInvite(SendInviteUserRequest $request): JsonResponse
     {
-        $requestData = $request->validated();
+        $requestId = Filter::process(Filter::getRequestFilterName(), $request->validated('id'));
 
-        $itemsQuery = $this->applyQueryFilter($this->getQuery(), ['id' => $requestData['id']]);
-        $item = $itemsQuery->first();
-        if (!$item) {
-            return new JsonResponse(
-                [
-                    'error_type' => 'query.item_not_found',
-                    'message' => 'Item not found'
-                ],
-                404
-            );
-        }
+        $itemsQuery = $this->getQuery(['id' => $requestId]);
 
-        $password = Str::random(16);
+        Event::dispatch(Filter::getBeforeActionEventName(), $requestId);
+
+        $item = Filter::process(Filter::getActionFilterName(), $itemsQuery->first());
+
+        $password = Str::random();
         $item->password = $password;
         $item->invitation_sent = true;
         $item->save();
 
-        $language = Settings::get('core', 'language', 'en');
+        throw_unless($item, new NotFoundHttpException);
+
+        Event::dispatch(Filter::getAfterActionEventName(), [$requestId, $item]);
+
+        $language = Settings::scope('core')->get( 'language', 'en');
 
         Mail::to($item->email)->locale($language)->send(new UserCreated($item->email, $password));
 
-        return new JsonResponse([
-            'res' => $item,
-        ]);
+        return responder()->success()->respond(204);
     }
 
     /**
@@ -520,26 +454,30 @@ class UserController extends ItemController
      */
     public function updateActivity(): JsonResponse
     {
-        $user = auth()->user();
-        /* @var User $user */
-        $user->update(['last_activity' => Carbon::now()]);
+        $user = request()->user();
 
-        return new JsonResponse(['success' => true]);
+        Event::dispatch(Filter::getBeforeActionEventName(), $user);
+
+        Filter::process(Filter::getActionFilterName(), $user)->update(['last_activity' => Carbon::now()]);
+
+        Event::dispatch(Filter::getAfterActionEventName(), $user);
+
+        return responder()->success()->respond(204);
     }
 
     /**
-     * @param bool $withRelations
-     * @param bool $withSoftDeleted
+     * @param array $filter
      * @return Builder
+     * @throws Exception
      */
-    public function getQuery(bool $withRelations = true, bool $withSoftDeleted = false): Builder
+    protected function getQuery(array $filter = []): Builder
     {
-        $query = parent::getQuery($withRelations, $withSoftDeleted);
+        $query = parent::getQuery($filter);
 
         if (request('global_scope')) {
             request()->request->remove('global_scope');
 
-            if (auth()->user()->hasProjectRole('manager')) {
+            if (request()->user()->hasProjectRole('manager')) {
                 $query->withoutGlobalScope(App\Scopes\UserScope::class);
             }
         }

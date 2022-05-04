@@ -3,15 +3,15 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
-use App\Http\Requests\TimeInterval\BulkDestroyTimeIntervalRequestCattr;
-use App\Http\Requests\TimeInterval\BulkEditTimeIntervalRequestCattr;
-use App\Http\Requests\TimeInterval\CreateTimeIntervalRequestCattr;
-use App\Http\Requests\TimeInterval\DestroyTimeIntervalRequestCattr;
-use App\Http\Requests\TimeInterval\EditTimeIntervalRequestCattr;
-use App\Http\Requests\TimeInterval\PutScreenshotRequestCattr;
-use App\Http\Requests\TimeInterval\ScreenshotRequestCattr;
-use App\Http\Requests\TimeInterval\ShowTimeIntervalRequestCattr;
-use App\Http\Requests\TimeInterval\TrackAppRequestCattr;
+use App\Http\Requests\TimeInterval\BulkDestroyTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\BulkEditTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\DestroyTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\EditTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\PutScreenshotRequest;
+use App\Http\Requests\TimeInterval\ScreenshotRequest;
+use App\Http\Requests\TimeInterval\ShowTimeIntervalRequest;
+use App\Http\Requests\TimeInterval\TrackAppRequest;
 use App\Jobs\AssignAppsToTimeInterval;
 use App\Models\TrackedApplication;
 use App\Models\User;
@@ -31,16 +31,13 @@ use Validator;
 
 class TimeIntervalController extends ItemController
 {
+    protected const MODEL = TimeInterval::class;
+
     public function __construct(protected ScreenshotService $screenshotService)
     {
     }
 
-    public function getItemClass(): string
-    {
-        return TimeInterval::class;
-    }
-
-    public function create(CreateTimeIntervalRequestCattr $request): JsonResponse
+    public function create(CreateTimeIntervalRequest $request): JsonResponse
     {
         $intervalData = $request->validated();
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
@@ -121,7 +118,7 @@ class TimeIntervalController extends ItemController
 
     public function getEventUniqueNamePart(): string
     {
-        return 'timeinterval';
+        return 'interval';
     }
 
     /**
@@ -154,7 +151,7 @@ class TimeIntervalController extends ItemController
      */
 
     /**
-     * @param ShowTimeIntervalRequestCattr $request
+     * @param ShowTimeIntervalRequest $request
      *
      * @return JsonResponse
      * @throws Exception
@@ -202,7 +199,7 @@ class TimeIntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          ValidationError
      */
-    public function show(ShowTimeIntervalRequestCattr $request): JsonResponse
+    public function show(ShowTimeIntervalRequest $request): JsonResponse
     {
         return $this->_show($request);
     }
@@ -247,12 +244,12 @@ class TimeIntervalController extends ItemController
      */
 
     /**
-     * @param EditTimeIntervalRequestCattr $request
+     * @param EditTimeIntervalRequest $request
      *
      * @return JsonResponse
      * @throws Exception
      */
-    public function edit(EditTimeIntervalRequestCattr $request): JsonResponse
+    public function edit(EditTimeIntervalRequest $request): JsonResponse
     {
         $requestData = Filter::process(
             $this->getEventUniqueName('request.item.edit'),
@@ -478,18 +475,18 @@ class TimeIntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function destroy(DestroyTimeIntervalRequestCattr $request): JsonResponse
+    public function destroy(DestroyTimeIntervalRequest $request): JsonResponse
     {
         return $this->_destroy($request);
     }
 
     /**
-     * @param BulkEditTimeIntervalRequestCattr $request
+     * @param BulkEditTimeIntervalRequest $request
      *
      * @return JsonResponse
      * @throws Exception
      */
-    public function bulkEdit(BulkEditTimeIntervalRequestCattr $request): JsonResponse
+    public function bulkEdit(BulkEditTimeIntervalRequest $request): JsonResponse
     {
         $intervalsData = collect($request->validated()['intervals']);
 
@@ -552,7 +549,7 @@ class TimeIntervalController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function bulkDestroy(BulkDestroyTimeIntervalRequestCattr $request): JsonResponse
+    public function bulkDestroy(BulkDestroyTimeIntervalRequest $request): JsonResponse
     {
         $intervalIds = $request->validated()['intervals'];
 
@@ -570,7 +567,7 @@ class TimeIntervalController extends ItemController
         return responder()->success()->respond(204);
     }
 
-    public function trackApp(TrackAppRequestCattr $request): JsonResponse
+    public function trackApp(TrackAppRequest $request): JsonResponse
     {
         $user = auth()->user();
         if (!isset($user)) {
@@ -582,7 +579,7 @@ class TimeIntervalController extends ItemController
         return responder()->success($item)->respond();
     }
 
-    public function showScreenshot(ScreenshotRequestCattr $request, TimeInterval $interval): BinaryFileResponse
+    public function showScreenshot(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
     {
         $path = $this->screenshotService->getScreenshotPath($interval);
         if (!Storage::exists($path)) {
@@ -594,7 +591,7 @@ class TimeIntervalController extends ItemController
         return response()->file($fullPath);
     }
 
-    public function showThumbnail(ScreenshotRequestCattr $request, TimeInterval $interval): BinaryFileResponse
+    public function showThumbnail(ScreenshotRequest $request, TimeInterval $interval): BinaryFileResponse
     {
         $path = $this->screenshotService->getThumbPath($interval);
         if (!Storage::exists($path)) {
@@ -606,7 +603,7 @@ class TimeIntervalController extends ItemController
         return response()->file($fullPath);
     }
 
-    public function putScreenshot(PutScreenshotRequestCattr $request, TimeInterval $interval): JsonResponse
+    public function putScreenshot(PutScreenshotRequest $request, TimeInterval $interval): JsonResponse
     {
         $data = $request->validated();
 

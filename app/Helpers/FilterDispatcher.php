@@ -7,44 +7,59 @@ use Illuminate\Events\Dispatcher as LaravelDispatcher;
 
 class FilterDispatcher extends LaravelDispatcher
 {
-    public static function getQueryPrepareFilterName(): string
+    public static function getRequestFilterName(): string
     {
-        return 'query.prepare.' . request()?->route()?->getName();
+        return 'filter.request.' . request()?->route()?->getName();
     }
 
-    public static function getQueryGetFilterName(): string
+    public static function getQueryFilterName(): string
     {
-        return 'query.get.' . request()?->route()?->getName();
+        return 'filter.query.get.' . request()?->route()?->getName();
     }
 
-    public static function getQueryFiltrationFilterName(): string
+    public static function getQueryAdditionalRelationsFilterName(): string
     {
-        return 'query.filter.' . request()?->route()?->getName();
+        return 'filter.query.with.' . request()?->route()?->getName();
     }
 
     public static function getSuccessResponseFilterName(): string
     {
-        return 'response.success.' . request()?->route()?->getName();
+        return 'filter.response.success.' . request()?->route()?->getName();
     }
 
     public static function getErrorResponseFilterName(): string
     {
-        return 'response.error.' . request()?->route()?->getName();
+        return 'filter.response.error.' . request()?->route()?->getName();
     }
 
     public static function getValidationFilterName(): string
     {
-        return 'validation.' . request()?->route()?->getName();
+        return 'filter.validation.' . request()?->route()?->getName();
     }
 
     public static function getAuthFilterName(): string
     {
-        return 'authorize.' . request()?->route()?->getName();
+        return 'filter.authorize.' . request()?->route()?->getName();
     }
 
     public static function getAuthValidationFilterName(): string
     {
-        return 'authorize.validated' . request()?->route()?->getName();
+        return 'filter.authorize.validated' . request()?->route()?->getName();
+    }
+
+    public static function getBeforeActionEventName(): string
+    {
+        return 'event.before.action' . request()?->route()?->getName();
+    }
+
+    public static function getAfterActionEventName(): string
+    {
+        return 'event.after.action' . request()?->route()?->getName();
+    }
+
+    public static function getActionFilterName(): string
+    {
+        return 'filter.action' . request()?->route()?->getName();
     }
 
     /**

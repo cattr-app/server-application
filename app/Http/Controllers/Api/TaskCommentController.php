@@ -19,6 +19,8 @@ use Settings;
  */
 class TaskCommentController extends ItemController
 {
+    protected const MODEL = TaskComment::class;
+
     /**
      * @return array
      */
@@ -44,17 +46,6 @@ class TaskCommentController extends ItemController
     }
 
     /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'task_id' => 'required',
-            'content' => 'required',
-        ];
-    }
-
-    /**
      * @apiDeprecated   since 1.0.0
      * @api             {post} /task-comment/create Create
      * @apiDescription  Create Task Comment
@@ -66,22 +57,6 @@ class TaskCommentController extends ItemController
      * @apiPermission   task_comment_create
      * @apiPermission   task_comment_full_access
      */
-
-    /**
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return TaskComment::class;
-    }
-
-    /**
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'taskcomment';
-    }
 
     /**
      * @apiDeprecated   since 1.0.0

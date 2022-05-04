@@ -3,17 +3,16 @@
 namespace App\Helpers;
 
 use Exception;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
-use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Support\Facades\Schema;
 use RuntimeException;
-use Schema;
 use function is_array;
 
 class QueryHelper
 {
-    public const RESERVED_REQUEST_KEYWORDS = [
+    private const RESERVED_REQUEST_KEYWORDS = [
         'with',
         'withCount',
         'paginate',
@@ -24,14 +23,9 @@ class QueryHelper
     ];
 
     /**
-     * @param QueryBuilder|EloquentBuilder $query
-     * @param array $filter
-     * @param Model $model
-     * @param bool $first
-     *
      * @throws Exception
      */
-    public function apply($query, $model, array $filter = [], $first = true): void
+    public static function apply(Builder $query, Model $model, array $filter = [], bool $first = true): void
     {
         $table = $model->getTable();
         $relations = [];
@@ -57,19 +51,19 @@ class QueryHelper
         }
 
         if (isset($filter['with'])) {
-            $query->with($this->getRelationsFilter($filter['with']));
+            $query->with(self::getRelationsFilter($filter['with']));
         }
 
         if (isset($filter['withCount'])) {
-            $query->withCount($this->getRelationsFilter($filter['withCount']));
+            $query->withCount(self::getRelationsFilter($filter['withCount']));
         }
 
         if (isset($filter['search']['query'], $filter['search']['fields'])) {
-            $query = $this->buildSearchQuery($query, $filter['search']['query'], $filter['search']['fields']);
+            $query = self::buildSearchQuery($query, $filter['search']['query'], $filter['search']['fields']);
         }
 
         foreach ($filter as $key => $param) {
-            if (strpos($key, '.') !== false) {
+            if (str_contains($key, '.')) {
                 $params = explode('.', $key);
                 $domain = array_shift($params);
                 $filterParam = implode('.', $params);
@@ -79,9 +73,9 @@ class QueryHelper
                 }
 
                 $relations[$domain][$filterParam] = $param;
-            } elseif (!in_array($key, static::RESERVED_REQUEST_KEYWORDS, true) &&
-                      !in_array($key, $model->getHidden(), true) &&
-                      Schema::hasColumn($table, $key)
+            } elseif (Schema::hasColumn($table, $key) &&
+                !in_array($key, static::RESERVED_REQUEST_KEYWORDS, true) &&
+                !in_array($key, $model->getHidden(), true)
             ) {
                 [$operator, $value] = is_array($param) ? array_values($param) : ['=', $param];
 
@@ -100,24 +94,22 @@ class QueryHelper
             }
         }
 
-        $self = $this;
-
         if (!empty($relations)) {
             foreach ($relations as $domain => $filters) {
                 if (!method_exists($model, $domain)) {
                     $cls = get_class($model);
-                    throw new RuntimeException("Unknown relation {$cls}::{$domain}()");
+                    throw new RuntimeException("Unknown relation $cls::$domain()");
                 }
 
                 /** @var Relation $relationQuery */
                 $relationQuery = $model->{$domain}();
                 if (!$first) {
-                    $query->orWhereHas($domain, static function ($q) use ($self, $filters, $relationQuery, $first) {
-                        $self->apply($q, $relationQuery->getModel(), $filters, $first);
+                    $query->orWhereHas($domain, static function ($q) use ($filters, $relationQuery, $first) {
+                        self::apply($q, $relationQuery->getModel(), $filters, $first);
                     });
                 } else {
-                    $query->WhereHas($domain, static function ($q) use ($self, $filters, $relationQuery, $first) {
-                        $self->apply($q, $relationQuery->getModel(), $filters, $first);
+                    $query->whereHas($domain, static function ($q) use ($filters, $relationQuery, $first) {
+                        self::apply($q, $relationQuery->getModel(), $filters, $first);
                     });
                 }
                 $first = false;
@@ -126,54 +118,45 @@ class QueryHelper
     }
 
     /**
-     * @param array|string $filter
-     *
-     * @return array
      * @throws Exception
      */
-    protected function getRelationsFilter($filter): array
+    private static function getRelationsFilter(array|string $filter): array
     {
-        if (!is_array($filter)) {
-            if (is_string($filter)) {
-                $filter = explode(',', str_replace(' ', '', $filter));
-            } else {
-                throw new \RuntimeException(
-                    'Relation filter must be a type of array or string, ' . gettype($filter) . ' given in'
-                );
-            }
+        if (is_string($filter)) {
+            $filter = explode(',', str_replace(' ', '', $filter));
         }
 
         return $filter;
     }
 
     /**
-     * @param EloquentBuilder|QueryBuilder $query
+     * @param Builder $query
      * @param string $search
      * @param string[] $fields
      *
-     * @return EloquentBuilder|QueryBuilder
+     * @return Builder
      */
-    protected function buildSearchQuery($query, string $search, array $fields)
+    private static function buildSearchQuery(Builder $query, string $search, array $fields): Builder
     {
         $value = "%$search%";
 
         return $query->where(static function ($query) use ($value, $fields) {
             $field = array_shift($fields);
-            if (strpos($field, '.') !== false) {
+            if (str_contains($field, '.')) {
                 [$relation, $relationField] = explode('.', $field);
-                $query->whereHas($relation, static function ($query) use ($relationField, $value) {
-                    $query->where($relationField, 'like', $value);
-                });
+                $query->whereHas($relation, static fn (Builder $query) =>
+                    $query->where($relationField, 'like', $value)
+                );
             } else {
                 $query->where($field, 'like', $value);
             }
 
             foreach ($fields as $field) {
-                if (strpos($field, '.') !== false) {
+                if (str_contains($field, '.')) {
                     [$relation, $relationField] = explode('.', $field);
-                    $query->orWhereHas($relation, static function ($query) use ($relationField, $value) {
-                        $query->where($relationField, 'like', $value);
-                    });
+                    $query->orWhereHas($relation, static fn (Builder $query) =>
+                        $query->where($relationField, 'like', $value)
+                    );
                 } else {
                     $query->orWhere($field, 'like', $value);
                 }

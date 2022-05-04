@@ -63,6 +63,7 @@ return [
         App\Providers\TelescopeServiceProvider::class,
 
         App\Providers\SettingsServiceProvider::class,
+        App\Providers\ScreenshotsServiceProvider::class,
     ],
     'aliases' => [
 

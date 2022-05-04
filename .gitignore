@@ -21,7 +21,7 @@
 *.lock
 !composer.lock
 *-lock.json
-!package-lock.json
+!yarn.lock
 *.phar
 _ide_helper.php
 .phpstorm.meta.php

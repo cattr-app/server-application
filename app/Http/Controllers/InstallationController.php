@@ -6,7 +6,7 @@ use App;
 use App\Console\Commands\MakeAdmin;
 use App\Console\Commands\ResetCommand;
 use App\Helpers\EnvUpdater;
-use App\Http\Requests\Installation\CheckDatabaseInfoRequestCattr;
+use App\Http\Requests\Installation\CheckDatabaseInfoRequest;
 use App\Http\Requests\Installation\SaveSetupRequest;
 use Artisan;
 use Exception;
@@ -19,7 +19,7 @@ use Throwable;
 
 class InstallationController extends Controller
 {
-    public function checkDatabaseInfo(CheckDatabaseInfoRequestCattr $request): JsonResponse
+    public function checkDatabaseInfo(CheckDatabaseInfoRequest $request): JsonResponse
     {
         config([
             'database.connections.mysql.password' => $request->input('db_password'),

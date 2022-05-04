@@ -5,7 +5,7 @@
   "license": "SSPL-1.0",
   "type": "project",
   "require": {
-    "php": "^8",
+    "php": "~8.1",
     "ext-gd": "*",
     "ext-json": "*",
     "ext-pdo": "*",
@@ -34,6 +34,7 @@
   },
   "require-dev": {
     "cattr/laravel-ide-helper": "dev-master",
+    "jkocik/laravel-profiler": "^2.0",
     "mockery/mockery": "^1.5",
     "phpunit/phpunit": "^9.5",
     "roave/security-advisories": "dev-latest",
@@ -49,8 +50,6 @@
     }
   },
   "scripts": {
-    "phpcs": "vendor/bin/phpcs --standard=./phpcs.xml --colors",
-    "phpcbf": "vendor/bin/phpcbf --standard=./phpcs.xml --colors",
     "project:update": [
       "@composer update",
       "@php artisan migrate",
@@ -118,16 +117,6 @@
       "merge-extra": false,
       "merge-extra-deep": false,
       "merge-scripts": false
-    },
-    "hooks": {
-      "pre-commit": [
-        "OUTPUT=$(vendor/bin/phpcbf --standard=./phpcs.xml)",
-        "RETVAL=$?",
-        "if [ $RETVAL -ne 0 ]; then",
-        "echo $OUTPUT | less",
-        "fi",
-        "exit $RETVAL"
-      ]
     }
   }
 }

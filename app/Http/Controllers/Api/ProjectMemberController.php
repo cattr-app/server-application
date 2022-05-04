@@ -3,8 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App\Http\Controllers\Controller;
-use App\Http\Requests\ProjectMember\BulkEditProjectMemberRequestCattr;
-use App\Http\Requests\ProjectMember\ShowProjectMemberRequestCattr;
+use App\Http\Requests\ProjectMember\BulkEditProjectMemberRequest;
+use App\Http\Requests\ProjectMember\ShowProjectMemberRequest;
 use App\Services\ProjectMemberService;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -25,11 +25,11 @@ class ProjectMemberController extends Controller
     }
 
     /**
-     * @param ShowProjectMemberRequestCattr $request
+     * @param ShowProjectMemberRequest $request
      * @return JsonResponse
      * @throws Throwable
      */
-    public function show(ShowProjectMemberRequestCattr $request): JsonResponse
+    public function show(ShowProjectMemberRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -43,10 +43,10 @@ class ProjectMemberController extends Controller
     }
 
     /**
-     * @param BulkEditProjectMemberRequestCattr $request
+     * @param BulkEditProjectMemberRequest $request
      * @return JsonResponse
      */
-    public function bulkEdit(BulkEditProjectMemberRequestCattr $request): JsonResponse
+    public function bulkEdit(BulkEditProjectMemberRequest $request): JsonResponse
     {
         $data = $request->validated();
 

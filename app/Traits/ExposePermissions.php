@@ -15,11 +15,7 @@ trait ExposePermissions
         $permissions = $this->permissions ?? ['update', 'destroy'];
 
         foreach ($permissions as $permission) {
-            if (auth()->check() && auth()->user()->can(Str::camel($permission), $this)) {
-                $allowedPermissions[$permission] = true;
-            } else {
-                $allowedPermissions[$permission] = false;
-            }
+            $allowedPermissions[$permission] = request()->user()->can(Str::camel($permission), $this);
         }
 
         return $allowedPermissions;

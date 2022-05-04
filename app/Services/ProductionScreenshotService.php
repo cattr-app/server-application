@@ -2,10 +2,10 @@
 
 namespace App\Services;
 
-use App\Contracts\ScreenshotService as ScreenshotServiceInterface;
+use App\Contracts\ScreenshotService as ScreenshotServiceContract;
 use App\Models\TimeInterval;
 
-class ProductionScreenshotService extends ScreenshotServiceInterface
+class ProductionScreenshotService extends ScreenshotServiceContract
 {
     public function getScreenshotPath(TimeInterval|int $interval): string
     {

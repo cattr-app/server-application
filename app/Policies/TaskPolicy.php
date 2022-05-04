@@ -11,6 +11,13 @@ class TaskPolicy
 {
     use HandlesAuthorization;
 
+    public function before(User $user): ?bool
+    {
+        if ($user->hasRole('admin')) {
+            return true;
+        }
+    }
+
     /**
      * Determine if the given task can be viewed by the user.
      *

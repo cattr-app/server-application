@@ -2,42 +2,22 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Project\CreateProjectRequestCattr;
-use App\Http\Requests\Project\EditProjectRequestCattr;
-use App\Http\Requests\Project\DestroyProjectRequestCattr;
-use App\Http\Requests\Project\ShowProjectRequestCattr;
+use App\Http\Requests\Project\CreateProjectRequest;
+use App\Http\Requests\Project\EditProjectRequest;
+use App\Http\Requests\Project\DestroyProjectRequest;
+use App\Http\Requests\Project\ListProjectRequest;
+use App\Http\Requests\Project\ShowProjectRequest;
 use Filter;
 use App\Models\Project;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use DB;
+use Throwable;
 
 class ProjectController extends ItemController
 {
-    /**
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return Project::class;
-    }
-
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [];
-    }
-
-    /**
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'project';
-    }
+    protected const MODEL = Project::class;
 
     /**
      * @api             {get, post} /projects/list List
@@ -94,11 +74,11 @@ class ProjectController extends ItemController
      * @apiUse          ForbiddenError
      */
     /**
-     * @param Request $request
+     * @param ListProjectRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListProjectRequest $request): JsonResponse
     {
         return $this->_index($request);
     }
@@ -106,7 +86,7 @@ class ProjectController extends ItemController
     /**
      * @throws Exception
      */
-    public function show(ShowProjectRequestCattr $request): JsonResponse
+    public function show(ShowProjectRequest $request): JsonResponse
     {
         Filter::listen(Filter::getSuccessResponseFilterName(), static function ($project) {
             $totalTracked = 0;
@@ -189,7 +169,7 @@ class ProjectController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ForbiddenError
      */
-    public function create(CreateProjectRequestCattr $request): JsonResponse
+    public function create(CreateProjectRequest $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('item.create'), static function (Project $project) use ($request) {
             if ($request->has('statuses')) {
@@ -357,7 +337,7 @@ class ProjectController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-    public function edit(EditProjectRequestCattr $request): JsonResponse
+    public function edit(EditProjectRequest $request): JsonResponse
     {
         Filter::listen($this->getEventUniqueName('item.edit'), static function (Project $project) use ($request) {
             if ($request->has('statuses')) {
@@ -371,11 +351,13 @@ class ProjectController extends ItemController
 
             return $project;
         });
+
+
         return $this->_edit($request);
     }
 
     /**
-     * @throws Exception
+     * @throws Throwable
      * @api             {post} /projects/remove Destroy
      * @apiDescription  Destroy Project
      *
@@ -409,7 +391,7 @@ class ProjectController extends ItemController
      * @apiUse          UnauthorizedError
      * @apiUse          ItemNotFoundError
      */
-    public function destroy(DestroyProjectRequestCattr $request): JsonResponse
+    public function destroy(DestroyProjectRequest $request): JsonResponse
     {
         return $this->_destroy($request);
     }
@@ -440,7 +422,7 @@ class ProjectController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function count(Request $request): JsonResponse
+    public function count(ListProjectRequest $request): JsonResponse
     {
         return $this->_count($request);
     }

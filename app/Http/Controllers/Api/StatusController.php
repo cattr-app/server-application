@@ -2,50 +2,23 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Status\CountStatusRequestCattr;
-use App\Http\Requests\Status\CreateStatusRequestCattr;
-use App\Http\Requests\Status\ShowStatusRequestCattr;
-use App\Http\Requests\Status\UpdateStatusRequestCattr;
-use App\Http\Requests\Status\DestroyStatusRequestCattr;
+use App\Http\Requests\Status\ListStatusRequest;
+use App\Http\Requests\Status\CreateStatusRequest;
+use App\Http\Requests\Status\ShowStatusRequestStatus;
+use App\Http\Requests\Status\UpdateStatusRequest;
+use App\Http\Requests\Status\DestroyStatusRequest;
 use App\Models\Status;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
+use Throwable;
 
 class StatusController extends ItemController
 {
-    /**
-     * Get the validation rules.
-     *
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [];
-    }
+    protected const MODEL = Status::class;
 
     /**
-     * Get the event unique name part.
-     *
-     * @return string
-     */
-    public function getEventUniqueNamePart(): string
-    {
-        return 'status';
-    }
-
-    /**
-     * Get the model class.
-     *
-     * @return string
-     */
-    public function getItemClass(): string
-    {
-        return Status::class;
-    }
-
-    /**
-     * @throws Exception
+     * @throws Throwable
      * @api             {post} /statuses/show Show
      * @apiDescription  Show status.
      *
@@ -80,7 +53,7 @@ class StatusController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function show(ShowStatusRequestCattr $request): JsonResponse
+    public function show(ShowStatusRequestStatus $request): JsonResponse
     {
         return $this->_show($request);
     }
@@ -114,14 +87,15 @@ class StatusController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListStatusRequest $request): JsonResponse
     {
         return $this->_index($request);
     }
 
     /**
-     * @param CreateStatusRequestCattr $request
+     * @param CreateStatusRequest $request
      * @return JsonResponse
+     * @throws Throwable
      * @api             {post} /statuses/create Create
      * @apiDescription  Creates status
      *
@@ -157,13 +131,14 @@ class StatusController extends ItemController
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      */
-    public function create(CreateStatusRequestCattr $request): JsonResponse
+    public function create(CreateStatusRequest $request): JsonResponse
     {
         return $this->_create($request);
     }
 
     /**
      * @throws Exception
+     * @throws Throwable
      * @api             {post} /statuses/edit Edit
      * @apiDescription  Edit Status
      *
@@ -203,13 +178,14 @@ class StatusController extends ItemController
      * @apiUse         UnauthorizedError
      * @apiUse         ItemNotFoundError
      */
-    public function edit(UpdateStatusRequestCattr $request): JsonResponse
+    public function edit(UpdateStatusRequest $request): JsonResponse
     {
         return $this->_edit($request);
     }
 
     /**
      * @throws Exception
+     * @throws Throwable
      * @api             {post} /statuses/remove Destroy
      * @apiDescription  Destroy User
      *
@@ -239,17 +215,17 @@ class StatusController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function destroy(DestroyStatusRequestCattr $request): JsonResponse
+    public function destroy(DestroyStatusRequest $request): JsonResponse
     {
         return $this->_destroy($request);
     }
 
     /**
-     * @param CountStatusRequestCattr $request
+     * @param ListStatusRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function count(CountStatusRequestCattr $request): JsonResponse
+    public function count(ListStatusRequest $request): JsonResponse
     {
         return $this->_count($request);
     }
