@@ -14,7 +14,7 @@ class ShowInvitationRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return $this->user()->can('view', Invitation::class);
+        return $this->user()->can('view', Invitation::find(request('id')));
     }
 
     /**

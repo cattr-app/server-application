@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Status;
 
 use App\Http\Requests\CattrFormRequest;
+use App\Models\Status;
 
 class ListStatusRequest extends CattrFormRequest
 {
@@ -13,7 +14,7 @@ class ListStatusRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return true;
+        return $this->user()->can('view', Status::class);
     }
 
     /**

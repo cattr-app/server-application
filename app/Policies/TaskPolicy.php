@@ -17,6 +17,10 @@ class TaskPolicy
             return true;
         }
     }
+    public function viewAny(User $user): bool
+    {
+        return true;
+    }
 
     /**
      * Determine if the given task can be viewed by the user.

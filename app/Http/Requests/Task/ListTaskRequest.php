@@ -19,7 +19,7 @@ class ListTaskRequest extends CattrFormRequest
      */
     public function authorizeValidated(): bool
     {
-        return $this->user()->can('view', Task::class);
+        return $this->user()->can('viewAny', Task::class);
     }
 
     public function _rules(): array

@@ -14,7 +14,7 @@ class ShowPriorityRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return $this->user()->can('view', Priority::class);
+        return $this->user()->can('view', Priority::find(request('id')));
     }
 
     /**

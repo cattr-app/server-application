@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Status;
 
 use App\Http\Requests\CattrFormRequest;
+use App\Models\Status;
 use App\Models\User;
 
 class DestroyStatusRequest extends CattrFormRequest
@@ -14,7 +15,7 @@ class DestroyStatusRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return request()->user()->hasRole('admin');
+        return $this->user()->can('delete', Status::class);
     }
 
     /**

@@ -19,7 +19,7 @@ class ListRoleRequest extends CattrFormRequest
      */
     public function authorizeValidated(): bool
     {
-        return $this->user()->can('viewAny', Role::class);
+        return $this->user()->can('view', Role::class);
     }
 
     public function _rules(): array

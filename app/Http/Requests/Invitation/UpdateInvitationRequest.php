@@ -14,7 +14,7 @@ class UpdateInvitationRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return $this->user()->can('update', Invitation::class);
+        return $this->user()->can('update', Invitation::find(request('id')));
     }
 
     /**

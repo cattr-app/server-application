@@ -4,7 +4,6 @@ namespace App\Http\Requests\Priority;
 
 use App\Http\Requests\CattrFormRequest;
 use App\Models\Priority;
-use App\Models\User;
 
 class DestroyPriorityRequest extends CattrFormRequest
 {
@@ -26,7 +25,7 @@ class DestroyPriorityRequest extends CattrFormRequest
     public function _rules(): array
     {
         return [
-            'id' => 'required|int|exists:priorities,id',
+            'id' => 'required|integer|exists:priorities,id',
         ];
     }
 }

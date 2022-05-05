@@ -3,6 +3,7 @@
 namespace App\Http\Requests\Status;
 
 use App\Http\Requests\CattrFormRequest;
+use App\Models\Status;
 use App\Models\User;
 
 class CreateStatusRequest extends CattrFormRequest
@@ -14,7 +15,7 @@ class CreateStatusRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return request()->user()->hasRole('admin');
+        return $this->user()->can('create', Status::class);
     }
 
     /**

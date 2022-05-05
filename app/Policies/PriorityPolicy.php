@@ -18,8 +18,7 @@ class PriorityPolicy
      */
     public function view(User $user): bool
     {
-        return $user->hasRole('user') || $user->hasRole('manager')
-            || $user->hasRole('auditor') || $user->hasRole('admin');
+        return true;
     }
 
     /**
@@ -30,30 +29,28 @@ class PriorityPolicy
      */
     public function create(User $user): bool
     {
-        return $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor');
+        return $user->isAdmin() || $user->hasRole('manager') || $user->hasRole('auditor');
     }
 
     /**
      * Determine whether the user can update the model.
      *
      * @param User $user
-     * @param Priority $priority
      * @return bool
      */
-    public function update(User $user, Priority $priority): bool
+    public function update(User $user): bool
     {
-        return $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor');
+        return $user->isAdmin() || $user->hasRole('manager') || $user->hasRole('auditor');
     }
 
     /**
      * Determine whether the user can delete the model.
      *
      * @param User $user
-     * @param Priority $priority
      * @return bool
      */
-    public function delete(User $user, Priority $priority): bool
+    public function delete(User $user): bool
     {
-        return $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor');
+        return $user->isAdmin() || $user->hasRole('manager') || $user->hasRole('auditor');
     }
 }

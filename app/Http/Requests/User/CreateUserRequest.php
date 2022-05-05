@@ -3,7 +3,7 @@
 namespace App\Http\Requests\User;
 
 use App\Models\User;
-use App\Presenters\User\OrdinaryUserPresenter;
+//use App\Presenters\User\OrdinaryUserPresenter;
 use App\Http\Requests\CattrFormRequest;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Http\Request;
