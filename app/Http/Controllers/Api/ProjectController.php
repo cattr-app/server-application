@@ -120,7 +120,7 @@ class ProjectController extends ItemController
             return $project;
         });
 
-        Filter::listen(Filter::getQueryPrepareFilterName(), static fn($query) => $query->with('tasks'));
+        Filter::listen(Filter::getRequestFilterName(), static fn($query) => $query->with('tasks'));
 
         return $this->_show($request);
     }
