@@ -19,14 +19,14 @@ class UserPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->isAdmin()) {
+        if ($user->isAdmin() || $user->hasRole('user')) {
             return true;
         }
     }
 
     public function viewAny(User $user): bool
     {
-        return true;
+        return $user->isAdmin();
     }
 
     public function view(User $user, User $model): bool
@@ -38,9 +38,9 @@ class UserPolicy
         );
     }
 
-    public function create(): bool
+    public function create(User $user): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     /**
@@ -63,9 +63,9 @@ class UserPolicy
         return $user->id === $model->id;
     }
 
-    public function destroy(): bool
+    public function destroy(User $user): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     public function sendInvite(): bool
