@@ -1,6 +1,6 @@
 <?php
 
-namespace App\Http\Requests\TimeInterval;
+namespace App\Http\Requests\Interval;
 
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Http\Requests\CattrFormRequest;
@@ -10,11 +10,6 @@ class PutScreenshotRequest extends CattrFormRequest
 {
     use AuthorizesAfterValidation;
 
-    /**
-     * Determine if user authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorizeValidated(): bool
     {
         return true;

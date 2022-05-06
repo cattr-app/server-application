@@ -11,7 +11,7 @@ use App\Http\Controllers\Api\Reports\ProjectReportController;
 use App\Http\Controllers\Api\Reports\TimeUseReportController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\TimeController;
-use App\Http\Controllers\Api\TimeIntervalController;
+use App\Http\Controllers\Api\IntervalController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\AuthController;
@@ -123,24 +123,24 @@ Route::group([
         $router->post('users/send-invite', [UserController::class, 'sendInvite'])->name('users.invite');
         $router->patch('users/activity', [UserController::class, 'updateActivity'])->name('users.ping');
 
-        $router->post('time-intervals/{interval}/screenshot', [TimeIntervalController::class, 'putScreenshot'])
+        $router->post('time-intervals/{interval}/screenshot', [IntervalController::class, 'putScreenshot'])
             ->where('interval', '[0-9]+')->name('intervals.screenshot.put');
 
         //Time Intervals routes
-        $router->any('time-intervals/list', [TimeIntervalController::class, 'index'])->name('intervals.list');
-        $router->any('time-intervals/count', [TimeIntervalController::class, 'count'])->name('intervals.count');
-        $router->post('time-intervals/create', [TimeIntervalController::class, 'create'])->name('intervals.create');
-        $router->post('time-intervals/edit', [TimeIntervalController::class, 'edit'])->name('intervals.edit');
-        $router->post('time-intervals/bulk-edit', [TimeIntervalController::class, 'bulkEdit'])->name('intervals.edit.bulk');
-        $router->any('time-intervals/show', [TimeIntervalController::class, 'show'])->name('intervals.show');
-        $router->post('time-intervals/remove', [TimeIntervalController::class, 'destroy'])->name('intervals.destroy');
-        $router->post('time-intervals/bulk-remove', [TimeIntervalController::class, 'bulkDestroy'])->name('intervals.destroy.bulk');
+        $router->any('time-intervals/list', [IntervalController::class, 'index'])->name('intervals.list');
+        $router->any('time-intervals/count', [IntervalController::class, 'count'])->name('intervals.count');
+        $router->post('time-intervals/create', [IntervalController::class, 'create'])->name('intervals.create');
+        $router->post('time-intervals/edit', [IntervalController::class, 'edit'])->name('intervals.edit');
+        $router->post('time-intervals/bulk-edit', [IntervalController::class, 'bulkEdit'])->name('intervals.edit.bulk');
+        $router->any('time-intervals/show', [IntervalController::class, 'show'])->name('intervals.show');
+        $router->post('time-intervals/remove', [IntervalController::class, 'destroy'])->name('intervals.destroy');
+        $router->post('time-intervals/bulk-remove', [IntervalController::class, 'bulkDestroy'])->name('intervals.destroy.bulk');
 
-        $router->put('time-intervals/app', [TimeIntervalController::class, 'trackApp'])->name('intervals.app');
+        $router->put('time-intervals/app', [IntervalController::class, 'trackApp'])->name('intervals.app');
 
         //Time routes
-        $router->any('time/total', [TimeController::class, 'total'])->name('time.total');
-        $router->any('time/tasks', [TimeController::class, 'tasks'])->name('time.tasks');
+        $router->any('time/total', [IntervalController::class, 'total'])->name('time.total');
+        $router->any('time/tasks', [IntervalController::class, 'tasks'])->name('time.tasks');
 
         //Role routes
         $router->any('roles/list', [RoleController::class, 'index'])->name('roles.list');
@@ -166,9 +166,9 @@ Route::group([
     });
 
     //Screenshots routes
-    $router->get('time-intervals/{interval}/screenshot', [TimeIntervalController::class, 'showScreenshot'])
+    $router->get('time-intervals/{interval}/screenshot', [IntervalController::class, 'showScreenshot'])
            ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
-    $router->get('time-intervals/{interval}/thumb', [TimeIntervalController::class, 'showThumbnail'])
+    $router->get('time-intervals/{interval}/thumb', [IntervalController::class, 'showThumbnail'])
            ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
 });
 

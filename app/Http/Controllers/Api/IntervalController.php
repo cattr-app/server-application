@@ -3,16 +3,18 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
-use App\Http\Requests\TimeInterval\BulkDestroyTimeIntervalRequest;
-use App\Http\Requests\TimeInterval\BulkEditTimeIntervalRequest;
-use App\Http\Requests\TimeInterval\CreateTimeIntervalRequest;
-use App\Http\Requests\TimeInterval\DestroyTimeIntervalRequest;
-use App\Http\Requests\TimeInterval\EditTimeIntervalRequest;
-use App\Http\Requests\TimeInterval\ListTimeIntervalRequest;
-use App\Http\Requests\TimeInterval\PutScreenshotRequest;
-use App\Http\Requests\TimeInterval\ScreenshotRequest;
-use App\Http\Requests\TimeInterval\ShowTimeIntervalRequest;
-use App\Http\Requests\TimeInterval\TrackAppRequest;
+use App\Http\Requests\Interval\BulkDestroyTimeIntervalRequest;
+use App\Http\Requests\Interval\BulkEditTimeIntervalRequest;
+use App\Http\Requests\Interval\CreateTimeIntervalRequest;
+use App\Http\Requests\Interval\DestroyTimeIntervalRequest;
+use App\Http\Requests\Interval\EditTimeIntervalRequest;
+use App\Http\Requests\Interval\IntervalTasksRequest;
+use App\Http\Requests\Interval\IntervalTotalRequest;
+use App\Http\Requests\Interval\ListIntervalRequest;
+use App\Http\Requests\Interval\PutScreenshotRequest;
+use App\Http\Requests\Interval\ScreenshotRequest;
+use App\Http\Requests\Interval\ShowIntervalRequest;
+use App\Http\Requests\Interval\TrackAppRequest;
 use App\Jobs\AssignAppsToTimeInterval;
 use App\Models\TrackedApplication;
 use App\Models\User;
@@ -34,7 +36,7 @@ use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 use Validator;
 
-class TimeIntervalController extends ItemController
+class IntervalController extends ItemController
 {
     protected const MODEL = TimeInterval::class;
 
@@ -43,12 +45,12 @@ class TimeIntervalController extends ItemController
     }
 
     /**
-     * @param ListTimeIntervalRequest $request
+     * @param ListIntervalRequest $request
      *
      * @return JsonResponse
      * @throws Exception
      */
-    public function index(ListTimeIntervalRequest $request): JsonResponse
+    public function index(ListIntervalRequest $request): JsonResponse
     {
         Filter::listen(Filter::getRequestFilterName(), static function ($filters) use ($request) {
             if ($request->get('project_id')) {
@@ -120,7 +122,7 @@ class TimeIntervalController extends ItemController
      */
 
     /**
-     * @param ShowTimeIntervalRequest $request
+     * @param ShowIntervalRequest $request
      *
      * @return JsonResponse
      * @throws Throwable
@@ -168,7 +170,7 @@ class TimeIntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          ValidationError
      */
-    public function show(ShowTimeIntervalRequest $request): JsonResponse
+    public function show(ShowIntervalRequest $request): JsonResponse
     {
         return $this->_show($request);
     }
@@ -261,7 +263,7 @@ class TimeIntervalController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function count(ListTimeIntervalRequest $request): JsonResponse
+    public function count(ListIntervalRequest $request): JsonResponse
     {
         return $this->_count($request);
     }
@@ -572,5 +574,111 @@ class TimeIntervalController extends ItemController
         $this->screenshotService->saveScreenshot($data['screenshot'], $interval);
 
         return responder()->success()->respond(204);
+    }
+
+    /**
+     * Display a total of time
+     * @param IntervalTotalRequest $request
+     * @return JsonResponse
+     * @throws Exception
+     */
+    public function total(IntervalTotalRequest $request): JsonResponse
+    {
+        $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
+
+        $filters = [
+            'start_at' => ['>=', $requestData['start_at']],
+            'end_at' => ['<=', $requestData['end_at']],
+            'user_id' => ['=', $requestData['user_id']]
+        ];
+
+        $itemsQuery = $this->getQuery($filters);
+
+        Event::dispatch(Filter::getBeforeActionEventName(), $filters);
+
+        $timeIntervals = Filter::process(Filter::getActionFilterName(), $itemsQuery->get());
+
+        Event::dispatch(Filter::getAfterActionEventName(), [$timeIntervals, $filters]);
+
+        $totalTime = $timeIntervals->sum(static fn($el) => Carbon::parse($el->end_at)->diffInSeconds($el->start_at));
+
+        return responder()->success([
+            'time' => $totalTime,
+            'start' => $timeIntervals->min('start_at'),
+            'end' => $timeIntervals->max('end_at'),
+        ])->respond();
+    }
+
+    /**
+     * @throws Exception
+     */
+    public function tasks(IntervalTasksRequest $request): JsonResponse
+    {
+        $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
+
+        $filters = [];
+
+        if (isset($requestData['start_at'])) {
+            $filters['start_at'] = ['>=', $requestData['start_at']];
+        }
+
+        if (isset($requestData['end_at'])) {
+            $filters['end_at'] = ['<=', $requestData['end_at']];
+        }
+
+        if (isset($requestData['project_id'])) {
+            $filters['task.project_id'] = $requestData['project_id'];
+        }
+
+        if (isset($requestData['task_id'])) {
+            $filters['task_id'] = ['in', $requestData['task_id']];
+        }
+
+        $itemsQuery = $this->getQuery($filters ?: []);
+
+        $tasks = $itemsQuery
+            ->with('task')
+            ->get()
+            ->groupBy(['task_id', 'user_id'])
+            ->map(static function ($taskIntervals, $taskId) use (&$totalTime) {
+                $task = [];
+
+                foreach ($taskIntervals as $userId => $userIntervals) {
+                    $taskTime = 0;
+
+                    foreach ($userIntervals as $interval) {
+                        $taskTime += Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
+                    }
+
+                    $firstUserInterval = $userIntervals->first();
+                    $lastUserInterval = $userIntervals->last();
+
+                    $task = [
+                        'id' => $taskId,
+                        'user_id' => $userId,
+                        'project_id' => $userIntervals[0]['task']['project_id'],
+                        'time' => $taskTime,
+                        'start' => Carbon::parse($firstUserInterval->start_at)->toISOString(),
+                        'end' => Carbon::parse($lastUserInterval->end_at)->toISOString()
+                    ];
+
+                    $totalTime += $taskTime;
+                }
+
+                return $task;
+            })
+            ->values();
+
+        $first = $itemsQuery->get()->first();
+        $last = $itemsQuery->get()->last();
+
+        return responder()->success([
+            'tasks' => $tasks,
+            'total' => [
+                'time' => $totalTime,
+                'start' => $first ? Carbon::parse($first->start_at)->toISOString() : null,
+                'end' => $last ? Carbon::parse($last->end_at)->toISOString() : null,
+            ]
+        ])->respond();
     }
 }
