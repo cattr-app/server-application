@@ -80,7 +80,7 @@ class TaskCommentController extends ItemController
 
         $baseQuery = $this->getQuery($filters ?: [])->with('user');
 
-        if (!request()->user()->allowed('task-comment', 'full_access')) {
+        if (!request()->user()->can('edit', TaskComment::class)) {
             $baseQuery->whereHas(
                 'task',
                 static fn(Builder $taskQuery) => $taskQuery->where(

@@ -18,11 +18,13 @@ class SaveTaskEditHistory implements ShouldQueue
 
     private Carbon $timestamp;
     private array $changes;
+    private array $original;
 
-    public function __construct(protected Task $task, protected User $author, array $changes = null)
+    public function __construct(protected Task $task, protected User $author, array $changes = null, array $original = null)
     {
         $this->timestamp = now();
         $this->changes = $changes ?: $task->getChanges();
+        $this->original = $original ?: $task->getOriginal();
     }
 
     public function handle(): void
@@ -37,6 +39,7 @@ class SaveTaskEditHistory implements ShouldQueue
                 'user_id' => $this->author->id,
                 'field' => $key,
                 'new_value' => $value,
+                'old_value' => $this->original[$key],
             ])->updateQuietly(['created_at' => $this->timestamp]);
         }
     }
