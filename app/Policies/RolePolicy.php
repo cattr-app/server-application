@@ -12,9 +12,7 @@ class RolePolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 
     public function viewAny(): bool

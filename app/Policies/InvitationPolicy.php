@@ -4,7 +4,6 @@ namespace App\Policies;
 
 use Illuminate\Auth\Access\HandlesAuthorization;
 use App\Models\User;
-use App\Models\Invitation;
 
 class InvitationPolicy
 {
@@ -12,9 +11,7 @@ class InvitationPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 
     public function view(): bool

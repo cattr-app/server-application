@@ -8,6 +8,7 @@ use App\Models\Project;
 use App\Models\Role;
 use App\Models\Status;
 use App\Models\Task;
+use App\Models\TaskComment;
 use App\Models\TimeInterval;
 use App\Models\User;
 use App\Policies\InvitationPolicy;
@@ -15,6 +16,7 @@ use App\Policies\PriorityPolicy;
 use App\Policies\ProjectPolicy;
 use App\Policies\RolePolicy;
 use App\Policies\StatusPolicy;
+use App\Policies\TaskCommentPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\TimeIntervalPolicy;
 use App\Policies\UserPolicy;
@@ -36,6 +38,7 @@ class AuthServiceProvider extends ServiceProvider
         Priority::class => PriorityPolicy::class,
         Status::class => StatusPolicy::class,
         Invitation::class => InvitationPolicy::class,
+        TaskComment::class => TaskCommentPolicy::class,
     ];
 
     /**
