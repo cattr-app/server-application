@@ -2,21 +2,17 @@
 
 namespace App\Policies;
 
+use App\Models\TaskComment;
 use App\Models\User;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
-class PriorityPolicy
+class TaskCommentPolicy
 {
     use HandlesAuthorization;
 
-    public function before(User $user): ?bool
+    public function before(User $user): bool
     {
         return $user->isAdmin();
-    }
-
-    public function view(): bool
-    {
-        return true;
     }
 
     public function viewAny(): bool
@@ -24,15 +20,23 @@ class PriorityPolicy
         return true;
     }
 
+    public function view(): bool
+    {
+        return true;
+    }
+
+
     public function create(): bool
     {
         return false;
     }
 
+
     public function update(): bool
     {
         return false;
     }
+
 
     public function destroy(): bool
     {

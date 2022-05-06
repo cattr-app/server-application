@@ -2,9 +2,8 @@
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
 use App\Models\User;
-use App\Models\Status;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
 class StatusPolicy
 {
@@ -12,9 +11,7 @@ class StatusPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin();
     }
 
     public function view(): bool

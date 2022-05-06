@@ -2,12 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Status\ListStatusRequest;
+
+
+use App\Models\Status;
 use App\Http\Requests\Status\CreateStatusRequest;
+use App\Http\Requests\Status\DestroyStatusRequest;
+use App\Http\Requests\Status\ListStatusRequest;
 use App\Http\Requests\Status\ShowStatusRequestStatus;
 use App\Http\Requests\Status\UpdateStatusRequest;
-use App\Http\Requests\Status\DestroyStatusRequest;
-use App\Models\Status;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Throwable;
