@@ -188,6 +188,7 @@ return [
         'public/**/*.php',
         'resources/**/*.php',
         'routes',
+        'Modules/**/*.php',
     ],
 
     /*

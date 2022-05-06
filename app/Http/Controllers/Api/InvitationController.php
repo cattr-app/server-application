@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Invitation\CountInvitationRequest;
 use App\Http\Requests\Invitation\CreateInvitationRequest;
 use App\Http\Requests\Invitation\ListInvitationRequest;
 use App\Http\Requests\Invitation\DestroyInvitationRequest;
@@ -13,7 +12,6 @@ use App\Services\InvitationService;
 use Exception;
 use Filter;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Throwable;
 
 class InvitationController extends ItemController
@@ -285,11 +283,11 @@ class InvitationController extends ItemController
     }
 
     /**
-     * @param CountInvitationRequest $request
+     * @param ListInvitationRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function count(CountInvitationRequest $request): JsonResponse
+    public function count(ListInvitationRequest $request): JsonResponse
     {
         return $this->_count($request);
     }

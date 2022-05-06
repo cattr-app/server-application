@@ -1,30 +1,20 @@
 <?php
 
-namespace App\Http\Requests\TimeInterval;
+namespace App\Http\Requests\Interval;
 
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\TimeInterval;
 
-class ShowTimeIntervalRequest extends CattrFormRequest
+class ShowIntervalRequest extends CattrFormRequest
 {
     use AuthorizesAfterValidation;
 
-    /**
-     * Determine if user authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorizeValidated(): bool
     {
         return $this->user()->can('view', TimeInterval::find(request('id')));
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function _rules(): array
     {
         return [

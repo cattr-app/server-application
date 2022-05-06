@@ -12,20 +12,11 @@ class ProjectPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->hasRole('admin')) {
+        if ($user->isAdmin()) {
             return true;
         }
     }
 
-    /**
-     * Determine if the given project can be viewed by the user.
-     *
-     * The user can see the project if it exists in the user's scope.
-     *
-     * @param User $user
-     * @param Project $project
-     * @return bool
-     */
     public function view(User $user, Project $project): bool
     {
         return cache()->remember(
@@ -40,74 +31,25 @@ class ProjectPolicy
         return true;
     }
 
-    /**
-     * Determine if the given project can be created by the user.
-     *
-     * @param User $user
-     * @return bool
-     */
     public function create(User $user): bool
     {
-        return $user->hasRole('admin') || $user->hasRole('manager');
+        return $user->hasRole('manager');
     }
 
-    /**
-     * Determine if the given project can be updated by the user.
-     *
-     * @param User $user
-     * @param Project $project
-     * @return bool
-     */
     public function update(User $user, Project $project): bool
     {
         if ($project->source !== 'internal') {
             return false;
         }
 
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-
-        if ($user->hasRole('manager')) {
-            return true;
-        }
-
-        if ($user->hasProjectRole('manager', $project->id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasRole('manager') || $user->hasProjectRole('manager', $project->id);
     }
 
-    /**
-     * @param User $user
-     * @param Project $project
-     * @return bool
-     */
     public function updateMembers(User $user, Project $project): bool
     {
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-
-        if ($user->hasRole('manager')) {
-            return true;
-        }
-
-        if ($user->hasProjectRole('manager', $project->id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasRole('manager') || $user->hasProjectRole('manager', $project->id);
     }
 
-    /**
-     * Determine if the given project can be destroyed by the user.
-     *
-     * @param User $user
-     * @param Project $project
-     * @return bool
-     */
     public function destroy(User $user, Project $project): bool
     {
         if ($project->source !== 'internal') {

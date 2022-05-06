@@ -19,14 +19,14 @@ class UserPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->hasRole('admin')) {
+        if ($user->isAdmin()) {
             return true;
         }
     }
 
     public function viewAny(User $user): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     public function view(User $user, User $model): bool
@@ -38,9 +38,9 @@ class UserPolicy
         );
     }
 
-    public function create(): bool
+    public function create(User $user): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     /**
@@ -48,7 +48,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        $extraFields = array_diff(array_keys(request()->except('id')), self::ALLOWED_EDITABLE_FIELDS);
+        $extraFields = array_diff(array_keys(request()?->except('id')), self::ALLOWED_EDITABLE_FIELDS);
 
         if (count($extraFields)) {
             $errorMessages = [];
@@ -63,9 +63,9 @@ class UserPolicy
         return $user->id === $model->id;
     }
 
-    public function destroy(): bool
+    public function destroy(User $user): bool
     {
-        return false;
+        return $user->isAdmin();
     }
 
     public function sendInvite(): bool

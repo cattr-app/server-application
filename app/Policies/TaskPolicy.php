@@ -13,9 +13,14 @@ class TaskPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->hasRole('admin')) {
+        if ($user->isAdmin()) {
             return true;
         }
+    }
+
+    public function viewAny(User $user): bool
+    {
+        return true;
     }
 
     /**

@@ -1,19 +1,19 @@
 <?php
 
-namespace App\Http\Requests\Project;
+namespace App\Http\Requests\Interval;
 
 use App\Helpers\QueryHelper;
 use App\Http\Requests\AuthorizesAfterValidation;
-use App\Models\Project;
+use App\Models\TimeInterval;
 use App\Http\Requests\CattrFormRequest;
 
-class ListProjectRequest extends CattrFormRequest
+class ListIntervalRequest extends CattrFormRequest
 {
     use AuthorizesAfterValidation;
 
     public function authorizeValidated(): bool
     {
-        return $this->user()->can('viewAny', Project::class);
+        return $this->user()->can('view', TimeInterval::class);
     }
 
     public function _rules(): array

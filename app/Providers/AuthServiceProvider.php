@@ -2,11 +2,19 @@
 
 namespace App\Providers;
 
+use App\Models\Invitation;
+use App\Models\Priority;
 use App\Models\Project;
+use App\Models\Role;
+use App\Models\Status;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
+use App\Policies\InvitationPolicy;
+use App\Policies\PriorityPolicy;
 use App\Policies\ProjectPolicy;
+use App\Policies\RolePolicy;
+use App\Policies\StatusPolicy;
 use App\Policies\TaskPolicy;
 use App\Policies\TimeIntervalPolicy;
 use App\Policies\UserPolicy;
@@ -24,6 +32,10 @@ class AuthServiceProvider extends ServiceProvider
         Task::class => TaskPolicy::class,
         User::class => UserPolicy::class,
         TimeInterval::class => TimeIntervalPolicy::class,
+        Role::class => RolePolicy::class,
+        Priority::class => PriorityPolicy::class,
+        Status::class => StatusPolicy::class,
+        Invitation::class => InvitationPolicy::class,
     ];
 
     /**

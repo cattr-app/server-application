@@ -1,22 +1,23 @@
 <?php
 
-namespace App\Http\Requests\Project;
+namespace App\Http\Requests\Role;
 
+use App\Helpers\QueryHelper;
 use App\Http\Requests\AuthorizesAfterValidation;
-use App\Models\Project;
+use App\Models\Role;
 use App\Http\Requests\CattrFormRequest;
 
-class ShowProjectRequest extends CattrFormRequest
+class ListRoleRequest extends CattrFormRequest
 {
     use AuthorizesAfterValidation;
 
     public function authorizeValidated(): bool
     {
-        return $this->user()->can('view', Project::find(request('id')));
+        return $this->user()->can('viewAny', Role::class);
     }
 
     public function _rules(): array
     {
-        return ['id' => 'required|int|exists:projects,id'];
+        return QueryHelper::getValidationRules();
     }
 }

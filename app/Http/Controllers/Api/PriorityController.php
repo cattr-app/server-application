@@ -2,15 +2,14 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Priority\CountPriorityRequest;
 use App\Http\Requests\Priority\CreatePriorityRequest;
+use App\Http\Requests\Priority\DestroyPriorityRequest;
+use App\Http\Requests\Priority\ListPriorityRequest;
 use App\Http\Requests\Priority\ShowPriorityRequest;
 use App\Http\Requests\Priority\UpdatePriorityRequest;
-use App\Http\Requests\Project\DestroyProjectRequest;
 use App\Models\Priority;
 use Exception;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Throwable;
 
 class PriorityController extends ItemController
@@ -87,7 +86,7 @@ class PriorityController extends ItemController
      * @apiUse          UnauthorizedError
      *
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListPriorityRequest $request): JsonResponse
     {
         return $this->_index($request);
     }
@@ -214,17 +213,17 @@ class PriorityController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function destroy(DestroyProjectRequest $request): JsonResponse
+    public function destroy(DestroyPriorityRequest $request): JsonResponse
     {
         return $this->_destroy($request);
     }
 
     /**
-     * @param CountPriorityRequest $request
+     * @param ListPriorityRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function count(CountPriorityRequest $request): JsonResponse
+    public function count(ListPriorityRequest $request): JsonResponse
     {
         return $this->_count($request);
     }

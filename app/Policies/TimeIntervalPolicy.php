@@ -11,7 +11,7 @@ class TimeIntervalPolicy
 {
     public function before(User $user): ?bool
     {
-        if ($user->hasRole('admin')) {
+        if ($user->isAdmin()) {
             return true;
         }
     }
@@ -29,7 +29,7 @@ class TimeIntervalPolicy
     {
         $projectId = self::getProjectIdByTaskId($taskId);
 
-        if ($manual){
+        if ($manual) {
             if ($user->id !== $targetUserId) {
                 return $user->hasRole('manager') || $user->hasProjectRole('manager', $projectId);
             }

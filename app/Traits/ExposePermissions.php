@@ -2,22 +2,21 @@
 
 namespace App\Traits;
 
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Support\Str;
 
 trait ExposePermissions
 {
-    /**
-     * @return array
-     */
-    public function getCanAttribute(): array
+    protected function can(): Attribute
     {
-        $allowedPermissions = [];
-        $permissions = $this->permissions ?? ['update', 'destroy'];
-
-        foreach ($permissions as $permission) {
-            $allowedPermissions[$permission] = request()->user()->can(Str::camel($permission), $this);
-        }
-
-        return $allowedPermissions;
+        $model = $this;
+        return new Attribute(
+            get: static function() use ($model) {
+                return collect($model::PERMISSIONS)
+                    ->mapWithKeys(static fn($item) => [
+                        $item => request()->user()->can(Str::camel($item), $model)
+                    ]);
+            }
+        );
     }
 }

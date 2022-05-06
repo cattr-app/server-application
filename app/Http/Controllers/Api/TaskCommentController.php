@@ -30,6 +30,22 @@ class TaskCommentController extends ItemController
         return $this->_create($request);
     }
 
+    public function edit(Request $request): JsonResponse
+    {
+        return $this->_edit($request);
+    }
+
+    /**
+     * @return array
+     */
+    public function getValidationRules(): array
+    {
+        return [
+            'task_id' => 'required',
+            'content' => 'required',
+        ];
+    }
+
     /**
      * @apiDeprecated   since 1.0.0
      * @api             {post} /task-comment/create Create
@@ -64,7 +80,7 @@ class TaskCommentController extends ItemController
 
         $baseQuery = $this->getQuery($filters ?: [])->with('user');
 
-        if (!request()->user()->allowed('task-comment', 'full_access')) {
+        if (!request()->user()->can('edit', TaskComment::class)) {
             $baseQuery->whereHas(
                 'task',
                 static fn(Builder $taskQuery) => $taskQuery->where(
@@ -137,7 +153,7 @@ class TaskCommentController extends ItemController
         );
 
         $user = Auth::user();
-        $full_access = $user->allowed('task-comment', 'full_access');
+        $full_access = $user->hasRole('admin') || $user->hasRole('manager');
 
         if (!$full_access) {
             $itemsQuery->where(['user_id' => $user->id])

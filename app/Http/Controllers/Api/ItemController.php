@@ -57,9 +57,18 @@ abstract class ItemController extends Controller
 
         $itemsQuery = $this->getQuery($requestData);
 
-        return responder()->success(
-            $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate() : $itemsQuery->get()
-        )->respond();
+        Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
+
+        $items = $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate() : $itemsQuery->get();
+
+        Filter::process(
+            Filter::getActionFilterName(),
+            $items,
+        );
+
+        Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
+
+        return responder()->success($items)->respond();
     }
 
     /**
@@ -76,7 +85,7 @@ abstract class ItemController extends Controller
 
         $item = Filter::process(
             Filter::getActionFilterName(),
-            $cls::create($requestData)
+            $cls::create($requestData),
         );
 
         Event::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
@@ -139,10 +148,13 @@ abstract class ItemController extends Controller
 
         Event::dispatch(Filter::getBeforeActionEventName(), $requestId);
 
-        $item = Filter::process(Filter::getActionFilterName(), $item);
-        $item->delete();
-
-        Event::dispatch(Filter::getBeforeActionEventName(), $item);
+        Event::dispatch(
+            Filter::getAfterActionEventName(),
+            tap(
+                Filter::process(Filter::getActionFilterName(), $item),
+                static fn($item) => $item->delete(),
+            )
+        );
 
         return responder()->success()->respond(204);
     }
@@ -160,7 +172,9 @@ abstract class ItemController extends Controller
 
         $count = Filter::process(Filter::getActionFilterName(), $itemsQuery->count());
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$requestData, $count]);
+        Event::dispatch(Filter::getAfterActionEventName(), [$count, $requestData]);
+
+        clock()->event();
 
         return responder()->success(['total' => $count])->respond();
     }
@@ -180,7 +194,7 @@ abstract class ItemController extends Controller
             'id' => $itemId
         ];
 
-        if ($requestData['with']) {
+        if (!empty($requestData['with'])) {
             $filters['with'] = $requestData['with'];
         }
 
@@ -192,7 +206,7 @@ abstract class ItemController extends Controller
 
         throw_unless($item, new NotFoundHttpException);
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$filters, $item]);
+        Event::dispatch(Filter::getAfterActionEventName(), [$item, $filters]);
 
         return responder()->success($item)->respond();
     }
@@ -218,8 +232,6 @@ abstract class ItemController extends Controller
         foreach (Filter::process(Filter::getQueryAdditionalRelationsFilterName(), []) as $with) {
             $query->with($with);
         }
-
-        Log::debug(json_encode($filter));
 
         QueryHelper::apply($query, $model, $filter);
 

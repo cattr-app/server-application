@@ -11,8 +11,14 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Validator;
 
+/**
+ * @deprecated
+ */
 class TimeController extends Controller
 {
+    /**
+     * @deprecated
+     */
     public static function getControllerRules(): array
     {
         return [
@@ -70,6 +76,7 @@ class TimeController extends Controller
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
+     * @deprecated
      */
     public function total(Request $request): JsonResponse
     {
@@ -195,6 +202,7 @@ class TimeController extends Controller
      * @param Request $request
      * @return JsonResponse
      * @throws Exception
+     * @deprecated
      */
     public function tasks(Request $request): JsonResponse
     {

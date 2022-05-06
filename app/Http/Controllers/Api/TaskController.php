@@ -5,7 +5,9 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
 use App\Http\Requests\Task\EditTaskRequest;
+use App\Http\Requests\Task\ListTaskRequest;
 use App\Http\Requests\Task\ShowTaskRequest;
+use App\Jobs\SaveTaskEditHistory;
 use App\Models\Priority;
 use App\Models\Project;
 use Exception;
@@ -68,11 +70,11 @@ class TaskController extends ItemController
      * @apiUse         ForbiddenError
      */
     /**
-     * @param Request $request
+     * @param ListTaskRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListTaskRequest $request): JsonResponse
     {
         return $this->_index($request);
     }
@@ -144,57 +146,48 @@ class TaskController extends ItemController
      */
     public function edit(EditTaskRequest $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('request.item.edit'), static function (array $data) {
-            if (empty($data['priority_id'])) {
-                $project = Project::where(['id' => $data['project_id']])->first();
-                if (isset($project) && !empty($project->default_priority_id)) {
-                    $data['priority_id'] = $project->default_priority_id;
-                } elseif (Settings::scope('core')->get('default_priority_id') !== null) {
-                    $data['priority_id'] = Settings::scope('core')->get('default_priority_id');
-                } elseif (($priority = Priority::query()->first()) !== null) {
-                    $data['priority_id'] = $priority->id;
-                } else {
-                    throw new Exception('Priorities should be configured to edit tasks.');
+        Filter::listen(
+            Filter::getRequestFilterName(),
+            static function (array $requestData) {
+                if (!empty($requestData['priority_id'])) {
+                    return $requestData;
                 }
+
+                if (($project = Project::findOrFail($requestData['project_id'])) && !empty($project->default_priority_id)) {
+                    $requestData['priority_id'] = $project->default_priority_id;
+                    return $requestData;
+                }
+
+                if ($priority = Settings::scope('core')->get('default_priority_id')) {
+                    $requestData['priority_id'] = $priority;
+                    return $requestData;
+                }
+
+                $requestData['priority_id'] = Priority::firstOrFail()->id;
+
+                return $requestData;
             }
+        );
 
-            return $data;
-        });
-
-        Filter::listen($this->getEventUniqueName('item.edit'), static function (Task $task) use ($request) {
-            $users = $request->get('users');
-            $changes = $task->users()->sync($users);
+        Event::listen(Filter::getAfterActionEventName(), static function (array $data) use ($request) {
+            $oldUsers = (string) $data[0]->users()->select('id', 'full_name');
+            $changes = $data[0]->users()->sync($request->get('users'));
             if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
-                TaskHistory::create([
-                    'task_id' => $task->id,
-                    'user_id' => auth()->id(),
-                    'field' => 'users',
-                    'new_value' => json_encode(User::query()->withoutGlobalScopes()->whereIn('id', $users)->select(
-                        'id',
-                        'full_name'
-                    )->get()->toArray(), JSON_THROW_ON_ERROR),
-                ]);
+                SaveTaskEditHistory::dispatch(
+                    $data[0],
+                    $request->user(),
+                    [
+                        'users' => (string)User::withoutGlobalScopes()
+                            ->whereIn('id', $request->get('users'))
+                            ->select(['id', 'full_name'])
+                    ],
+                    [
+                        'users' => $oldUsers,
+                    ]
+                );
             }
-
-            return $task;
+            SaveTaskEditHistory::dispatch($data[0], request()->user());
         });
-
-        Event::listen($this->getEventUniqueName('item.edit.after'), static function (Task $item, array $requestData) {
-            $changes = $item->getChanges();
-            foreach ($changes as $key => $value) {
-                if (in_array($key, ['relative_position', 'created_at', 'updated_at', 'deleted_at'])) {
-                    continue;
-                }
-
-                TaskHistory::create([
-                    'task_id' => $item->id,
-                    'user_id' => auth()->id(),
-                    'field' => $key,
-                    'new_value' => $value,
-                ]);
-            }
-        });
-
 
         return $this->_edit($request);
     }
@@ -269,29 +262,33 @@ class TaskController extends ItemController
      */
     public function create(CreateTaskRequest $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('item.create'), static function (Task $task) use ($request) {
-            $users = $request->get('users');
-            $task->users()->sync($users);
-            return $task;
-        });
+        Event::listen(
+            Filter::getAfterActionEventName(),
+            static fn(Task $task) => $task->users()->sync($request->get('users'))
+        );
 
-
-        Filter::listen($this->getEventUniqueName('request.item.create'), static function (array $data) {
-            if (empty($data['priority_id'])) {
-                $project = Project::where(['id' => $data['project_id']])->first();
-                if (isset($project) && !empty($project->default_priority_id)) {
-                    $data['priority_id'] = $project->default_priority_id;
-                } elseif (Settings::scope('core')->get('default_priority_id') !== null) {
-                    $data['priority_id'] = Settings::scope('core')->get('default_priority_id');
-                } elseif (($priority = Priority::query()->first()) !== null) {
-                    $data['priority_id'] = $priority->id;
-                } else {
-                    throw new Exception('Priorities should be configured to create tasks.');
+        Filter::listen(
+            Filter::getRequestFilterName(),
+            static function (array $requestData) {
+                if (!empty($requestData['priority_id'])) {
+                    return $requestData;
                 }
-            }
 
-            return $data;
-        });
+                if (($project = Project::findOrFail($requestData['project_id'])) && !empty($project->default_priority_id)) {
+                    $requestData['priority_id'] = $project->default_priority_id;
+                    return $requestData;
+                }
+
+                if ($priority = Settings::scope('core')->get('default_priority_id')) {
+                    $requestData['priority_id'] = $priority;
+                    return $requestData;
+                }
+
+                $requestData['priority_id'] = Priority::firstOrFail()->id;
+
+                return $requestData;
+            }
+        );
 
         return $this->_create($request);
     }
@@ -362,7 +359,7 @@ class TaskController extends ItemController
      * @apiUse          ForbiddenError
      * @apiUse          UnauthorizedError
      */
-    public function count(Request $request): JsonResponse
+    public function count(ListTaskRequest $request): JsonResponse
     {
         return $this->_count($request);
     }
@@ -429,9 +426,10 @@ class TaskController extends ItemController
     public function show(ShowTaskRequest $request): JsonResponse
     {
         Filter::listen(Filter::getSuccessResponseFilterName(), static function ($task) {
-            $totalTracked = 0;
+            $task['total_spent_time'] = 0;
+            $task['workers'] = [];
 
-            $workers = DB::table('time_intervals AS i')
+            DB::table('time_intervals AS i')
                 ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
                 ->join('users AS u', 'i.user_id', '=', 'u.id')
                 ->select(
@@ -445,28 +443,15 @@ class TaskController extends ItemController
                 ->whereNull('i.deleted_at')
                 ->where('task_id', $task['id'])
                 ->groupBy('i.user_id')
-                ->get();
-
-            foreach ($workers as $worker) {
-                $totalTracked += $worker->duration;
-            }
-
-            $task['workers'] = $workers;
-            $task['total_spent_time'] = $totalTracked;
+                ->get()
+                ->each(static function ($worker) use (&$task) {
+                    $task['total_spent_time'] += $worker->duration;
+                    $task['workers'][] = $worker;
+                });
 
             return $task;
         });
 
         return $this->_show($request);
-    }
-
-    /**
-     * Opportunity to filtering request data
-     *
-     * Override this in child class for filtering
-     */
-    protected function filterRequestData(array $requestData): array
-    {
-        return Arr::except($requestData, ['users']);
     }
 }
