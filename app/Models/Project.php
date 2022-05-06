@@ -117,10 +117,6 @@ class Project extends Model
 
     protected const PERMISSIONS = ['update', 'update_members', 'destroy'];
 
-    /**
-     * @var array
-     */
-    protected $appends = ['can'];
 
     /**
      * Override parent boot and Call deleting event
