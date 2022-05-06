@@ -42,13 +42,13 @@ class TaskHistory extends Model
     /**
      * @var array
      */
-    protected $fillable
-        = [
-            'task_id',
-            'user_id',
-            'field',
-            'new_value',
-        ];
+    protected $fillable = [
+        'task_id',
+        'user_id',
+        'field',
+        'old_value',
+        'new_value',
+    ];
 
     /**
      * @var array
