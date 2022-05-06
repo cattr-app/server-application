@@ -2,7 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Priority\CountPriorityRequest;
 use App\Http\Requests\Priority\CreatePriorityRequest;
 use App\Http\Requests\Priority\DestroyPriorityRequest;
 use App\Http\Requests\Priority\ListPriorityRequest;
@@ -220,11 +219,11 @@ class PriorityController extends ItemController
     }
 
     /**
-     * @param CountPriorityRequest $request
+     * @param ListPriorityRequest $request
      * @return JsonResponse
      * @throws Exception
      */
-    public function count(CountPriorityRequest $request): JsonResponse
+    public function count(ListPriorityRequest $request): JsonResponse
     {
         return $this->_count($request);
     }

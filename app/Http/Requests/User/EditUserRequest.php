@@ -10,9 +10,6 @@ use Illuminate\Validation\ValidationException;
 
 class EditUserRequest extends CattrFormRequest
 {
-    /**
-     * @throws ValidationException
-     */
     public function _authorize(): bool
     {
         return $this->user()->can('update', User::find(request('id')));

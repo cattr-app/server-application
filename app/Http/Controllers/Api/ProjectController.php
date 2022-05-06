@@ -7,6 +7,7 @@ use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\Project\DestroyProjectRequest;
 use App\Http\Requests\Project\ListProjectRequest;
 use App\Http\Requests\Project\ShowProjectRequest;
+use Event;
 use Filter;
 use App\Models\Project;
 use Exception;
@@ -171,7 +172,7 @@ class ProjectController extends ItemController
      */
     public function create(CreateProjectRequest $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('item.create'), static function (Project $project) use ($request) {
+        Event::listen(Filter::getAfterActionEventName(), static function (Project $project) use ($request) {
             if ($request->has('statuses')) {
                 $statuses = [];
                 foreach ($request->get('statuses') as $status) {
@@ -180,8 +181,6 @@ class ProjectController extends ItemController
 
                 $project->statuses()->sync($statuses);
             }
-
-            return $project;
         });
 
         Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('statuses'));
@@ -340,7 +339,7 @@ class ProjectController extends ItemController
      */
     public function edit(EditProjectRequest $request): JsonResponse
     {
-        Filter::listen($this->getEventUniqueName('item.edit'), static function (Project $project) use ($request) {
+        Event::listen(Filter::getAfterActionEventName(), static function (Project $project) use ($request) {
             if ($request->has('statuses')) {
                 $statuses = [];
                 foreach ($request->get('statuses') as $status) {
@@ -349,8 +348,6 @@ class ProjectController extends ItemController
 
                 $project->statuses()->sync($statuses);
             }
-
-            return $project;
         });
 
         Filter::listen(Filter::getSuccessResponseFilterName(), static fn($data) => $data->load('statuses'));

@@ -11,23 +11,11 @@ use Illuminate\Validation\ValidationException;
 
 class CreateUserRequest extends CattrFormRequest
 {
-    /**
-     * Determine if user authorized to make this request.
-     *
-     * @return bool
-     * @throws BindingResolutionException
-     * @throws ValidationException
-     */
     public function _authorize(): bool
     {
         return $this->user()->can('create', User::class);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function _rules(): array
     {
         return [

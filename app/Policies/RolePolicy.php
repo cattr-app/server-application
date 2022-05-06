@@ -10,13 +10,14 @@ class RolePolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param User $user
-     * @return bool
-     */
-    public function view(User $user): bool
+    public function before(User $user): ?bool
+    {
+        if ($user->isAdmin()) {
+            return true;
+        }
+    }
+
+    public function viewAny(): bool
     {
         return true;
     }

@@ -2,28 +2,24 @@
 
 namespace App\Http\Requests\Task;
 
+use App\Helpers\QueryHelper;
 use App\Http\Requests\AuthorizesAfterValidation;
-use App\Http\Requests\QueryHelperTrait;
-use App\Models\Task;
 use App\Http\Requests\CattrFormRequest;
 
 class ListTaskRequest extends CattrFormRequest
 {
     use AuthorizesAfterValidation;
-    use QueryHelperTrait;
 
-    /**
-     * Determine if user authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorizeValidated(): bool
     {
-        return $this->user()->can('viewAny', Task::class);
+        return true;
     }
 
     public function _rules(): array
     {
-        return $this->helperRules();
+        return array_merge(QueryHelper::getValidationRules(), [
+            'project_id' => 'sometimes|array',
+            'status_id' => 'sometimes|array',
+        ]);
     }
 }

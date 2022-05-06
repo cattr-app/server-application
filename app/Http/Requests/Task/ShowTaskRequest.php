@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Task;
 
+use App\Helpers\QueryHelper;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Models\Task;
 use App\Http\Requests\CattrFormRequest;
@@ -10,25 +11,15 @@ class ShowTaskRequest extends CattrFormRequest
 {
     use AuthorizesAfterValidation;
 
-    /**
-     * Determine if user authorized to make this request.
-     *
-     * @return bool
-     */
     public function authorizeValidated(): bool
     {
         return $this->user()->can('view', Task::find(request('id')));
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function _rules(): array
     {
-        return [
+        return array_merge(QueryHelper::getValidationRules(), [
             'id' => 'required|int',
-        ];
+        ]);
     }
 }

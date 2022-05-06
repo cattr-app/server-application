@@ -19,7 +19,7 @@ class UserPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->isAdmin() || $user->hasRole('user')) {
+        if ($user->isAdmin()) {
             return true;
         }
     }
@@ -48,7 +48,7 @@ class UserPolicy
      */
     public function update(User $user, User $model): bool
     {
-        $extraFields = array_diff(array_keys(request()->except('id')), self::ALLOWED_EDITABLE_FIELDS);
+        $extraFields = array_diff(array_keys(request()?->except('id')), self::ALLOWED_EDITABLE_FIELDS);
 
         if (count($extraFields)) {
             $errorMessages = [];

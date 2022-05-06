@@ -7,21 +7,11 @@ use App\Models\Priority;
 
 class CreatePriorityRequest extends CattrFormRequest
 {
-    /**
-     * Determine if user authorized to make this request.
-     *
-     * @return bool
-     */
     public function _authorize(): bool
     {
         return $this->user()->can('create', Priority::class);
     }
 
-    /**
-     * Get the validation rules that apply to the request.
-     *
-     * @return array
-     */
     public function _rules(): array
     {
         return [
@@ -30,11 +20,6 @@ class CreatePriorityRequest extends CattrFormRequest
         ];
     }
 
-    /**
-     * Get custom attributes for validator errors.
-     *
-     * @return array
-     */
     public function attributes(): array
     {
         return [

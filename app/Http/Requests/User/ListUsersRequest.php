@@ -10,7 +10,7 @@ class ListUsersRequest extends CattrFormRequest
 {
     public function _authorize(): bool
     {
-        return $this->user()->can('view', User::class);
+        return $this->user()->can('viewAny', User::class);
     }
 
     protected function _rules(): array

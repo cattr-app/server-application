@@ -10,48 +10,35 @@ class StatusPolicy
 {
     use HandlesAuthorization;
 
-    /**
-     * Determine whether the user can view the model.
-     *
-     * @param User $user
-     * @return bool
-     */
-    public function view(User $user): bool
+    public function before(User $user): ?bool
     {
-        return $user->hasRole('user') || $user->hasRole('manager')
-            || $user->hasRole('auditor') || $user->isAdmin();
+        if ($user->isAdmin()) {
+            return true;
+        }
     }
 
-    /**
-     * Determine whether the user can create models.
-     *
-     * @param User $user
-     * @return bool
-     */
-    public function create(User $user): bool
+    public function view(): bool
     {
-        return $user->isAdmin() || $user->hasRole('manager') || $user->hasRole('auditor');
+        return true;
     }
 
-    /**
-     * Determine whether the user can update the model.
-     *
-     * @param User $user
-     * @return bool
-     */
-    public function update(User $user): bool
+    public function viewAny(): bool
     {
-        return $user->isAdmin() || $user->hasRole('manager') || $user->hasRole('auditor');
+        return true;
     }
 
-    /**
-     * Determine whether the user can delete the model.
-     *
-     * @param User $user
-     * @return bool
-     */
-    public function delete(User $user): bool
+    public function create(): bool
     {
-        return $user->isAdmin() || $user->hasRole('manager') || $user->hasRole('auditor');
+        return false;
+    }
+
+    public function update(): bool
+    {
+        return false;
+    }
+
+    public function destroy(): bool
+    {
+        return false;
     }
 }

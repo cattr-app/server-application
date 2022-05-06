@@ -14,7 +14,7 @@ class DestroyInvitationRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return $this->user()->can('delete', Invitation::class);
+        return $this->user()->can('destroy', Invitation::find(request('id')));
     }
 
     /**

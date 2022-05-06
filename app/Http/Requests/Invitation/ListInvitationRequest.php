@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Invitation;
 
+use App\Helpers\QueryHelper;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\Invitation;
 
@@ -14,7 +15,7 @@ class ListInvitationRequest extends CattrFormRequest
      */
     public function _authorize(): bool
     {
-        return $this->user()->can('view', Invitation::class);
+        return $this->user()->can('viewAny', Invitation::class);
     }
 
     /**
@@ -24,6 +25,6 @@ class ListInvitationRequest extends CattrFormRequest
      */
     public function _rules(): array
     {
-        return [];
+        return QueryHelper::getValidationRules();
     }
 }
