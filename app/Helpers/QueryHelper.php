@@ -3,12 +3,14 @@
 namespace App\Helpers;
 
 use Exception;
+use Filter;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Contracts\Database\Query\Builder;
+use Illuminate\Pagination\AbstractPaginator;
+use Illuminate\Support\Collection;
 use Illuminate\Support\Facades\Schema;
 use RuntimeException;
-use function is_array;
 
 class QueryHelper
 {
@@ -55,7 +57,7 @@ class QueryHelper
         }
 
         if (isset($filter['withCount'])) {
-            $query->withCount(self::getRelationsFilter($filter['withCount']));
+            $query->withCount($filter['withCount']);
         }
 
         if (isset($filter['search']['query'], $filter['search']['fields'])) {
@@ -120,10 +122,29 @@ class QueryHelper
     /**
      * @throws Exception
      */
-    private static function getRelationsFilter(array|string $filter): array
+    private static function getRelationsFilter(array $filter): array
     {
-        if (is_string($filter)) {
-            $filter = explode(',', str_replace(' ', '', $filter));
+        $key = array_search('can', $filter, true);
+        if ($key !== false) {
+            array_splice($filter, $key, 1);
+
+            Filter::listen(Filter::getActionFilterName(), static function ($data) {
+                if ($data instanceof Model) {
+                    $data->append('can');
+                    return $data;
+                }
+
+                if ($data instanceof Collection) {
+                    return $data->map(static fn(Model $el) => $el->append('can'));
+                }
+
+                if ($data instanceof AbstractPaginator) {
+                    $data->setCollection($data->getCollection()->map(static fn(Model $el) => $el->append('can')));
+                    return $data;
+                }
+
+                return $data;
+            });
         }
 
         return $filter;

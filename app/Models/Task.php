@@ -173,10 +173,7 @@ class Task extends Model
         'due_date',
     ];
 
-    /**
-     * @var array
-     */
-    protected $appends = ['can'];
+    protected const PERMISSIONS = ['update', 'destroy'];
 
     protected static function boot(): void
     {

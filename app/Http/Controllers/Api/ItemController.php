@@ -57,9 +57,18 @@ abstract class ItemController extends Controller
 
         $itemsQuery = $this->getQuery($requestData);
 
-        return responder()->success(
-            $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate() : $itemsQuery->get()
-        )->respond();
+        Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
+
+        $items = $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate() : $itemsQuery->get();
+
+        Filter::process(
+            Filter::getActionFilterName(),
+            $items,
+        );
+
+        Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
+
+        return responder()->success($items)->respond();
     }
 
     /**
@@ -76,7 +85,7 @@ abstract class ItemController extends Controller
 
         $item = Filter::process(
             Filter::getActionFilterName(),
-            $cls::create($requestData)
+            $cls::create($requestData),
         );
 
         Event::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
