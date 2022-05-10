@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "299ebce193c022a6dcc43df0f59edbbe",
+    "content-hash": "136df66f0ce694941007d624dc11d849",
     "packages": [
         {
             "name": "asm89/stack-cors",
@@ -256,6 +256,58 @@
                 }
             ],
             "time": "2022-02-21T13:15:14+00:00"
+        },
+        {
+            "name": "czproject/git-php",
+            "version": "v4.0.5",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/czproject/git-php.git",
+                "reference": "24f4e51cc536a723b7838686284d1c21c6de088b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/czproject/git-php/zipball/24f4e51cc536a723b7838686284d1c21c6de088b",
+                "reference": "24f4e51cc536a723b7838686284d1c21c6de088b",
+                "shasum": ""
+            },
+            "require": {
+                "php": ">=5.6.0"
+            },
+            "require-dev": {
+                "nette/tester": "^2.0"
+            },
+            "type": "library",
+            "autoload": {
+                "classmap": [
+                    "src/"
+                ]
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "BSD-3-Clause"
+            ],
+            "authors": [
+                {
+                    "name": "Jan Pecha",
+                    "email": "janpecha@email.cz"
+                }
+            ],
+            "description": "Library for work with Git repository in PHP.",
+            "keywords": [
+                "git"
+            ],
+            "support": {
+                "issues": "https://github.com/czproject/git-php/issues",
+                "source": "https://github.com/czproject/git-php/tree/v4.0.5"
+            },
+            "funding": [
+                {
+                    "url": "https://www.paypal.com/donate?hosted_button_id=EPSKR7MGVV7KC",
+                    "type": "custom"
+                }
+            ],
+            "time": "2022-04-27T12:20:53+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
@@ -11913,8 +11965,8 @@
     "aliases": [],
     "minimum-stability": "dev",
     "stability-flags": {
-        "flugger/laravel-responder": 20,
         "cattr/laravel-mysql-spatial": 20,
+        "flugger/laravel-responder": 20,
         "roave/security-advisories": 20
     },
     "prefer-stable": true,

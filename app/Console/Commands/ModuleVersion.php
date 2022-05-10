@@ -4,7 +4,6 @@ namespace App\Console\Commands;
 
 use App\Helpers\Version;
 use Illuminate\Console\Command;
-use JsonException;
 
 class ModuleVersion extends Command
 {
@@ -13,7 +12,7 @@ class ModuleVersion extends Command
      *
      * @var string
      */
-    protected $signature = 'module:version {module}';
+    protected $signature = 'cattr:module:version {module}';
 
     /**
      * The console command description.
@@ -24,7 +23,6 @@ class ModuleVersion extends Command
 
     /**
      * Execute the console command.
-     * @throws JsonException
      */
     public function handle(): void
     {
