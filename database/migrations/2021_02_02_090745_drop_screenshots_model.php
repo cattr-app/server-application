@@ -1,6 +1,6 @@
 <?php
 
-use App\Jobs\GenerateScreenshotThumbnail;
+use App\Contracts\ScreenshotService;
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Support\Facades\Schema;
 
@@ -12,24 +12,13 @@ return new class extends Migration {
      */
     public function up(): void
     {
-        if (!Storage::exists('screenshots/thumbs')) {
-            Storage::makeDirectory('screenshots/thumbs');
-        }
-
         DB::table('screenshots')
             ->lazyById()
             ->each(static function ($screenshot) {
-                $fileName = hash('sha256', $screenshot->time_interval_id) . '.jpg';
-
-                if (!$screenshot->path) {
-                    return;
-                }
-
-                if (Storage::exists($screenshot->path)) {
-                    Storage::move($screenshot->path, 'screenshots/' . $fileName);
-                }
-
-                GenerateScreenshotThumbnail::dispatch($screenshot->time_interval_id);
+                app(ScreenshotService::class)->saveScreenshot(
+                    Storage::path($screenshot->path),
+                    $screenshot->time_interval_id
+                );
             });
 
         Storage::deleteDirectory('uploads/screenshots');

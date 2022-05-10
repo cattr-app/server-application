@@ -46,15 +46,15 @@ use Illuminate\Support\Carbon;
  * @property int $important
  * @property string $source
  * @property int|null $default_priority_id
- * @property-read \App\Models\Priority|null $defaultPriority
+ * @property-read Priority|null $defaultPriority
  * @property-read array $can
- * @property-read Collection|\App\Models\Role[] $roles
+ * @property-read Collection|Role[] $roles
  * @property-read int|null $roles_count
- * @property-read Collection|\App\Models\Status[] $statuses
+ * @property-read Collection|Status[] $statuses
  * @property-read int|null $statuses_count
- * @property-read Collection|\App\Models\Task[] $tasks
+ * @property-read Collection|Task[] $tasks
  * @property-read int|null $tasks_count
- * @property-read Collection|\App\Models\User[] $users
+ * @property-read Collection|User[] $users
  * @property-read int|null $users_count
  * @method static ProjectFactory factory(...$parameters)
  * @method static EloquentBuilder|Project newModelQuery()

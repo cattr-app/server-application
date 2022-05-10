@@ -9,7 +9,7 @@ use Eloquent as EloquentIdeHelper;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder;
 use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
 use Grimzy\LaravelMysqlSpatial\Types\Point;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -17,6 +17,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Carbon;
 use Storage;
 
 /**
@@ -63,24 +64,24 @@ use Storage;
  *
  * @property int $id
  * @property int $task_id
- * @property \Illuminate\Support\Carbon $start_at
- * @property \Illuminate\Support\Carbon $end_at
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
+ * @property Carbon $start_at
+ * @property Carbon $end_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
  * @property int $user_id
  * @property bool $is_manual
  * @property int|null $activity_fill
  * @property int|null $mouse_fill
  * @property int|null $keyboard_fill
  * @property array|null $location
- * @property-read Collection|\App\Models\TrackedApplication[] $apps
+ * @property-read Collection|TrackedApplication[] $apps
  * @property-read int|null $apps_count
  * @property-read bool $has_screenshot
- * @property-read Collection|\App\Models\Property[] $properties
+ * @property-read Collection|Property[] $properties
  * @property-read int|null $properties_count
- * @property-read \App\Models\Task $task
- * @property-read \App\Models\User $user
+ * @property-read Task $task
+ * @property-read User $user
  * @method static Builder|TimeInterval comparison($geometryColumn, $geometry, $relationship)
  * @method static Builder|TimeInterval contains($geometryColumn, $geometry)
  * @method static Builder|TimeInterval crosses($geometryColumn, $geometry)
@@ -93,7 +94,7 @@ use Storage;
  * @method static Builder|TimeInterval distanceValue($geometryColumn, $geometry)
  * @method static Builder|TimeInterval doesTouch($geometryColumn, $geometry)
  * @method static Builder|TimeInterval equals($geometryColumn, $geometry)
- * @method static \Database\Factories\TimeIntervalFactory factory(...$parameters)
+ * @method static TimeIntervalFactory factory(...$parameters)
  * @method static Builder|TimeInterval intersects($geometryColumn, $geometry)
  * @method static Builder|TimeInterval newModelQuery()
  * @method static Builder|TimeInterval newQuery()
@@ -172,14 +173,20 @@ class TimeInterval extends Model
     ];
 
     protected $appends = ['has_screenshot'];
+    protected array $spatialFields = [
+        'location'
+    ];
     /**
      * @var ScreenshotService
      */
     private ScreenshotService $screenshotService;
 
-    protected array $spatialFields = [
-        'location'
-    ];
+    public function __construct(array $attributes = [])
+    {
+        $this->screenshotService = app()->make(ScreenshotService::class);
+
+        parent::__construct($attributes);
+    }
 
     /**
      * Override parent boot and Call deleting event
@@ -199,13 +206,6 @@ class TimeInterval extends Model
         });
     }
 
-    public function __construct(array $attributes = [])
-    {
-        $this->screenshotService = app()->make(ScreenshotService::class);
-
-        parent::__construct($attributes);
-    }
-
     public function task(): BelongsTo
     {
         return $this->belongsTo(Task::class, 'task_id')->withoutGlobalScopes();
@@ -221,26 +221,19 @@ class TimeInterval extends Model
         return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::TIME_INTERVAL_CODE);
     }
 
-    public function getHasScreenshotAttribute(): bool
+    public function hasScreenshot(): Attribute
     {
-        return Storage::exists($this->screenshotService->getScreenshotPath($this));
+        return Attribute::make(
+            get: static fn($value) => Storage::exists($this->screenshotService->getScreenshotPath($value['id'])),
+        )->shouldCache();
     }
 
-    public function getLocationAttribute(?Point $value): ?array
+    public function location(): Attribute
     {
-        if (!isset($value)) {
-            return null;
-        }
-
-        return [
-            'lat' => $value->getLat(),
-            'lng' => $value->getLng(),
-        ];
-    }
-
-    public function setLocationAttribute(array $value): void
-    {
-        $this->attributes['location'] = new Point($value['lat'], $value['lng']);
+        return Attribute::make(
+            get: static fn($value) => $value ? ['lat' => $value->getLat(), 'lng' => $value->getLng()] : null,
+            set: static fn($value) => new Point($value['lat'], $value['lng']),
+        )->shouldCache();
     }
 
     public function apps(): HasMany

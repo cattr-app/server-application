@@ -10,13 +10,13 @@ trait ExposePermissions
     protected function can(): Attribute
     {
         $model = $this;
-        return new Attribute(
+        return Attribute::make(
             get: static function() use ($model) {
                 return collect($model::PERMISSIONS)
                     ->mapWithKeys(static fn($item) => [
                         $item => request()->user()->can(Str::camel($item), $model)
                     ]);
             }
-        );
+        )->shouldCache();
     }
 }
