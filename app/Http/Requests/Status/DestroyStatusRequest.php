@@ -10,7 +10,7 @@ class DestroyStatusRequest extends CattrFormRequest
 {
     public function _authorize(): bool
     {
-        return $this->user()->can('delete', Status::class);
+        return $this->user()->can('destroy', Status::class);
     }
 
     public function _rules(): array

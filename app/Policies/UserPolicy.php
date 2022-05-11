@@ -19,14 +19,12 @@ class UserPolicy
 
     public function before(User $user): ?bool
     {
-        if ($user->isAdmin()) {
-            return true;
-        }
+        return $user->isAdmin() ?: null;
     }
 
     public function viewAny(User $user): bool
     {
-        return $user->isAdmin();
+        return true;
     }
 
     public function view(User $user, User $model): bool

@@ -2,10 +2,11 @@
 
 namespace App\Policies;
 
-use Illuminate\Auth\Access\HandlesAuthorization;
+use App\Models\TaskComment;
 use App\Models\User;
+use Illuminate\Auth\Access\HandlesAuthorization;
 
-class InvitationPolicy
+class TaskCommentPolicy
 {
     use HandlesAuthorization;
 
@@ -14,28 +15,31 @@ class InvitationPolicy
         return $user->isAdmin() ?: null;
     }
 
-    public function view(): bool
-    {
-        return false;
-    }
-
     public function viewAny(): bool
     {
-        return false;
+        return true;
     }
 
-    public function create(): bool
+    public function view(): bool
     {
-        return false;
+        return true;
     }
+
+
+    public function create(User $user): bool
+    {
+        return true;
+    }
+
 
     public function update(): bool
     {
-        return false;
+        return true;
     }
+
 
     public function destroy(): bool
     {
-        return false;
+        return true;
     }
 }

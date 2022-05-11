@@ -2,6 +2,12 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Http\Requests\Status\DestroyStatusRequest;
+use App\Http\Requests\TaskComment\CreateTaskCommentRequest;
+use App\Http\Requests\TaskComment\DestroyTaskCommentRequest;
+use App\Http\Requests\TaskComment\ListTaskCommentRequest;
+use App\Http\Requests\TaskComment\ShowTaskCommentRequestStatus;
+use App\Http\Requests\TaskComment\UpdateTaskCommentRequest;
 use Filter;
 use App\Models\TaskComment;
 use Exception;
@@ -16,7 +22,7 @@ class TaskCommentController extends ItemController
 {
     protected const MODEL = TaskComment::class;
 
-    public function create(Request $request): JsonResponse
+    public function create(CreateTaskCommentRequest $request): JsonResponse
     {
         Filter::listen(
             Filter::getActionFilterName(),
@@ -30,7 +36,7 @@ class TaskCommentController extends ItemController
         return $this->_create($request);
     }
 
-    public function edit(Request $request): JsonResponse
+    public function edit(UpdateTaskCommentRequest $request): JsonResponse
     {
         return $this->_edit($request);
     }
@@ -74,7 +80,7 @@ class TaskCommentController extends ItemController
     /**
      * @throws Exception
      */
-    public function index(Request $request): JsonResponse
+    public function index(ListTaskCommentRequest $request): JsonResponse
     {
         $filters = $request->all();
 
@@ -107,7 +113,7 @@ class TaskCommentController extends ItemController
      * @apiPermission   task_comment_show
      * @apiPermission   task_comment_full_access
      */
-    public function show(Request $request): JsonResponse
+    public function show(ShowTaskCommentRequestStatus $request): JsonResponse
     {
         return $this->_show($request);
     }
@@ -127,7 +133,7 @@ class TaskCommentController extends ItemController
     /**
      * @throws Exception
      */
-    public function destroy(Request $request): JsonResponse
+    public function destroy(DestroyTaskCommentRequest $request): JsonResponse
     {
         $itemId = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->get('id'));
         $idInt = is_int($itemId);

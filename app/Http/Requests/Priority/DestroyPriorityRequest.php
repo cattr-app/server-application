@@ -9,7 +9,7 @@ class DestroyPriorityRequest extends CattrFormRequest
 {
     public function _authorize(): bool
     {
-        return $this->user()->can('delete', Priority::find(request('id')));
+        return $this->user()->can('destroy', Priority::find(request('id')));
     }
 
     public function _rules(): array
