@@ -11,7 +11,7 @@ class InvitationPolicy
 
     public function before(User $user): ?bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() ?: null;
     }
 
     public function view(): bool

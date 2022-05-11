@@ -11,7 +11,7 @@ class TimeIntervalPolicy
 {
     public function before(User $user): ?bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() ?: null;
     }
 
     public function view(User $user, TimeInterval $timeInterval): bool

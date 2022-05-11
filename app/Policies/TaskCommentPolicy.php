@@ -10,9 +10,9 @@ class TaskCommentPolicy
 {
     use HandlesAuthorization;
 
-    public function before(User $user): bool
+    public function before(User $user): ?bool
     {
-        return $user->isAdmin();
+        return $user->isAdmin() ?: null;
     }
 
     public function viewAny(): bool
@@ -26,20 +26,20 @@ class TaskCommentPolicy
     }
 
 
-    public function create(): bool
+    public function create(User $user): bool
     {
-        return false;
+        return true;
     }
 
 
     public function update(): bool
     {
-        return false;
+        return true;
     }
 
 
     public function destroy(): bool
     {
-        return false;
+        return true;
     }
 }
