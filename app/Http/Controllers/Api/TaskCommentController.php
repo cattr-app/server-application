@@ -22,6 +22,9 @@ class TaskCommentController extends ItemController
 {
     protected const MODEL = TaskComment::class;
 
+    /**
+     * @throws Throwable
+     */
     public function create(CreateTaskCommentRequest $request): JsonResponse
     {
         Filter::listen(
@@ -36,20 +39,12 @@ class TaskCommentController extends ItemController
         return $this->_create($request);
     }
 
+    /**
+     * @throws Throwable
+     */
     public function edit(UpdateTaskCommentRequest $request): JsonResponse
     {
         return $this->_edit($request);
-    }
-
-    /**
-     * @return array
-     */
-    public function getValidationRules(): array
-    {
-        return [
-            'task_id' => 'required',
-            'content' => 'required',
-        ];
     }
 
     /**
@@ -82,22 +77,25 @@ class TaskCommentController extends ItemController
      */
     public function index(ListTaskCommentRequest $request): JsonResponse
     {
-        $filters = $request->all();
+        Filter::listen(
+            Filter::getQueryFilterName(),
+            static function ($query) use ($request) {
+                if (!$request->user()->can('edit', TaskComment::class)) {
+                    $query = $query->whereHas(
+                        'task',
+                        static fn(Builder $taskQuery) => $taskQuery->where(
+                            'user_id',
+                            '=',
+                            $request->user()->id
+                        )
+                    );
+                }
 
-        $baseQuery = $this->getQuery($filters ?: [])->with('user');
+                return $query->with('user');
+            }
+        );
 
-        if (!request()->user()->can('edit', TaskComment::class)) {
-            $baseQuery->whereHas(
-                'task',
-                static fn(Builder $taskQuery) => $taskQuery->where(
-                    'user_id',
-                    '=',
-                    request()->user()->id
-                )
-            );
-        }
-
-        return responder()->success($baseQuery->get())->respond();
+        return $this->_index($request);
     }
 
     /**
@@ -131,47 +129,19 @@ class TaskCommentController extends ItemController
      * @apiPermission   task_comment_full_access
      */
     /**
-     * @throws Exception
+     * @throws Throwable
      */
     public function destroy(DestroyTaskCommentRequest $request): JsonResponse
     {
-        $itemId = Filter::process($this->getEventUniqueName('request.item.destroy'), $request->get('id'));
-        $idInt = is_int($itemId);
+        $user = $request->user();
 
-        if (!$idInt) {
-            return new JsonResponse(
-                Filter::process($this->getEventUniqueName('answer.error.item.destroy'), [
-                    'error_type' => 'validation',
-                    'message' => 'Validation error',
-                    'info' => 'Invalid id',
-                ]),
-                400
-            );
-        }
-
-        /** @var Builder $itemsQuery */
-        $itemsQuery = Filter::process(
-            $this->getEventUniqueName('answer.success.item.query.prepare'),
-            $this->applyQueryFilter(
-                $this->getQuery(),
-                ['id' => $itemId]
-            )
+        Filter::listen(
+            Filter::getQueryFilterName(),
+            static fn($query) => $user->hasRole('admin') || $user->hasRole('manager') ? $query :
+                $query->where(['user_id' => $user->id])
+                    ->whereHas('task', static fn($taskQuery) => $taskQuery->where(['user_id' => $user->id]))
         );
 
-        $user = Auth::user();
-        $full_access = $user->hasRole('admin') || $user->hasRole('manager');
-
-        if (!$full_access) {
-            $itemsQuery->where(['user_id' => $user->id])
-                ->whereHas('task', static function ($taskQuery) use ($user) {
-                    $taskQuery->where(['user_id' => $user->id]);
-                });
-        }
-
-        /** @var Model $item */
-        $item = $itemsQuery->firstOrFail();
-        $item->delete();
-
-        return responder()->success()->respond(204);
+        return $this->_destroy($request);
     }
 }
