@@ -1,5 +1,5 @@
 integration_testing:
-  image: php:8.0.13-alpine3.13
+  image: php:8.1-cli
   services:
     - name: mysql:latest
       alias: mysql
@@ -9,14 +9,12 @@ integration_testing:
     MYSQL_ROOT_PASSWORD: secret
   stage: test
   before_script:
-    - apk update
-    - apk add libpng-dev freetype-dev libjpeg-turbo-dev libjpeg-turbo libpng freetype libzip libzip-dev git
+    - apt-get update
+    - apt-get install libpng-dev freetype-dev libjpeg-turbo-dev libjpeg-turbo libpng freetype libzip libzip-dev git
     - docker-php-ext-configure gd --with-jpeg=/usr/include/ --with-freetype=/usr/include/
-    - docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd
-    - docker-php-ext-install bcmath zip pdo_mysql
-    - apk add --no-cache $PHPIZE_DEPS
+    - docker-php-ext-install -j$(getconf _NPROCESSORS_ONLN) gd bcmath zip pdo_mysql
     - pecl install xdebug
-    - docker-php-ext-enable xdebug
+    - docker-php-ext-enable xdebug bcmath zip pdo_mysql gd
     - curl --silent --show-error https://getcomposer.org/installer | php -- --install-dir=/usr/local/bin --filename=composer
   script:
     - COMPOSER_MEMORY_LIMIT=-1 composer install --ignore-platform-reqs
@@ -24,23 +22,6 @@ integration_testing:
     - php artisan migrate --env=testing
     - php artisan db:seed --class=InitialSeeder --env=testing
     - XDEBUG_MODE=coverage php -c .testing.ini vendor/phpunit/phpunit/phpunit --coverage-text --colors=never --configuration phpunit.xml tests/Feature/
-
-apidoc_deploy:
-  image: node:alpine
-  stage: deploy
-  only:
-    - release
-  before_script:
-    - 'which ssh-agent || ( apk add --update openssh )'
-    - eval $(ssh-agent -s)
-    - echo "$CI_SSH_DEPLOY_SECRET" | ssh-add -
-    - mkdir -p ~/.ssh
-    - '[[ -f /.dockerenv ]] && echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config'
-    - npm install
-  script:
-    - npm run custom-api
-    - ssh cattr-deploy@docs.cattr.app 'rm -rf /srv/docs/api/*'
-    - scp -r apidoc/* cattr-deploy@docs.cattr.app:/srv/docs/api
 
 live_deploy:
   image: alpine
