@@ -1,0 +1,30 @@
+stages:
+  - test
+  - deploy
+
+sast:
+  variables:
+    SAST_EXCLUDED_ANALYZERS: bandit, brakeman, eslint, flawfinder, gosec, kubesec,
+      nodejs-scan, pmd-apex, security-code-scan, sobelow, spotbugs
+  stage: test
+
+publish:
+  image: docker:19.03.12
+  stage: deploy
+  only:
+    - tags
+  services:
+    - docker:19.03.12-dind
+  script:
+    - export APP_VERSION=$(echo "$CI_COMMIT_TAG" | sed 's/^v//g')
+    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+    - docker build -t $CI_REGISTRY_IMAGE:$APP_VERSION --build-arg APP_VERSION=$APP_VERSION .
+    - docker image tag $CI_REGISTRY_IMAGE:$APP_VERSION $CI_REGISTRY_IMAGE:latest
+    - docker push $CI_REGISTRY_IMAGE:$APP_VERSION
+    - docker push $CI_REGISTRY_IMAGE:latest
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
