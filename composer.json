@@ -106,7 +106,7 @@
     "repositories": [
       {
         "type": "composer",
-        "url": "https://git.amazingcat.net/api/v4/group/AmazingTime/-/packages/composer/"
+        "url": "https://git.amazingcat.net/api/v4/group/cattr/-/packages/composer/"
       }
     ],
     "minimum-stability": "dev",

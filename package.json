@@ -11,5 +11,6 @@
     "@commitlint/config-conventional": "^16.0.0",
     "chokidar": "^3.5.3",
     "husky": "^7.0.0"
-  }
+  },
+  "packageManager": "yarn@3.2.0"
 }

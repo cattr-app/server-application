@@ -49,10 +49,7 @@ bootstrap/cache/*
 !bootstrap/cache/.gitkeep
 /public/vendor/
 
-.yarn/*
-!.yarn/cache
-!.yarn/patches
-!.yarn/plugins
-!.yarn/releases
-!.yarn/sdks
-!.yarn/versions
+.git
+
+public/storage
+Dockerfile
