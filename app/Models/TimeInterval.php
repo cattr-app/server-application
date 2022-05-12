@@ -234,7 +234,7 @@ class TimeInterval extends Model
     {
         return Attribute::make(
             get: static fn($value) => $value ? ['lat' => $value->getLat(), 'lng' => $value->getLng()] : null,
-            set: static fn($value) => new Point($value['lat'], $value['lng']),
+            set: static fn($value) => !$value ?? new Point($value['lat'], $value['lng']),
         )->shouldCache();
     }
 
