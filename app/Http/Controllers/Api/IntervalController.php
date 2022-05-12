@@ -523,13 +523,12 @@ class IntervalController extends ItemController
 
         Event::listen(
             Filter::getAfterActionEventName(),
-            static function (array $data) use ($request, $screenshotService) {
+            static function ($data) use ($request, $screenshotService) {
                 if ($request->hasFile('screenshot') && optional($request->file('screenshot'))->isValid()) {
-                    $screenshotService->saveScreenshot($request->file('screenshot'), $data[0]);
+                    $screenshotService->saveScreenshot($request->file('screenshot'), $data);
                 }
-
-                if (User::find($data[1]['user_id'])->web_and_app_monitoring) {
-                    AssignAppsToTimeInterval::dispatch($data[0]);
+                if (User::find($data['user_id'])->web_and_app_monitoring) {
+                    AssignAppsToTimeInterval::dispatch($data);
                 }
             }
         );
