@@ -64,34 +64,36 @@ class QueryHelper
             $query = self::buildSearchQuery($query, $filter['search']['query'], $filter['search']['fields']);
         }
 
-        foreach ($filter as $key => $param) {
-            if (str_contains($key, '.')) {
-                $params = explode('.', $key);
-                $domain = array_shift($params);
-                $filterParam = implode('.', $params);
+        if (isset($filter['where'])) {
+            foreach ($filter['where'] as $key => $param) {
+                if (str_contains($key, '.')) {
+                    $params = explode('.', $key);
+                    $domain = array_shift($params);
+                    $filterParam = implode('.', $params);
 
-                if (!isset($relations[$domain])) {
-                    $relations[$domain] = [];
-                }
-
-                $relations[$domain][$filterParam] = $param;
-            } elseif (Schema::hasColumn($table, $key) &&
-                !in_array($key, static::RESERVED_REQUEST_KEYWORDS, true) &&
-                !in_array($key, $model->getHidden(), true)
-            ) {
-                [$operator, $value] = is_array($param) ? array_values($param) : ['=', $param];
-
-                if (is_array($value) && $operator !== 'in') {
-                    if ($operator === '=') {
-                        $query->whereIn("$table.$key", $value);
-                    } elseif ($operator === 'between' && count($value) >= 2) {
-                        $query->whereBetween("$table.$key", [$value[0], $value[1]]);
+                    if (!isset($relations[$domain])) {
+                        $relations[$domain] = [];
                     }
-                } elseif ($operator === 'in') {
-                    $inArgs = is_array($value) ? $value : [$value];
-                    $query->whereIn("$table.$key", $inArgs);
-                } else {
-                    $query->where("$table.$key", $operator, $value);
+
+                    $relations[$domain][$filterParam] = $param;
+                } elseif (Schema::hasColumn($table, $key) &&
+                    !in_array($key, static::RESERVED_REQUEST_KEYWORDS, true) &&
+                    !in_array($key, $model->getHidden(), true)
+                ) {
+                    [$operator, $value] = is_array($param) ? array_values($param) : ['=', $param];
+
+                    if (is_array($value) && $operator !== 'in') {
+                        if ($operator === '=') {
+                            $query->whereIn("$table.$key", $value);
+                        } elseif ($operator === 'between' && count($value) >= 2) {
+                            $query->whereBetween("$table.$key", [$value[0], $value[1]]);
+                        }
+                    } elseif ($operator === 'in') {
+                        $inArgs = is_array($value) ? $value : [$value];
+                        $query->whereIn("$table.$key", $inArgs);
+                    } else {
+                        $query->where("$table.$key", $operator, $value);
+                    }
                 }
             }
         }
@@ -107,11 +109,11 @@ class QueryHelper
                 $relationQuery = $model->{$domain}();
                 if (!$first) {
                     $query->orWhereHas($domain, static function ($q) use ($filters, $relationQuery, $first) {
-                        self::apply($q, $relationQuery->getModel(), $filters, $first);
+                        QueryHelper::apply($q, $relationQuery->getModel(), $filters, $first);
                     });
                 } else {
                     $query->whereHas($domain, static function ($q) use ($filters, $relationQuery, $first) {
-                        self::apply($q, $relationQuery->getModel(), $filters, $first);
+                        QueryHelper::apply($q, $relationQuery->getModel(), $filters, $first);
                     });
                 }
                 $first = false;

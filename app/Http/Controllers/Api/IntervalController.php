@@ -633,7 +633,7 @@ class IntervalController extends ItemController
             $filters['task_id'] = ['in', $requestData['task_id']];
         }
 
-        $itemsQuery = $this->getQuery($filters ?: []);
+        $itemsQuery = $this->getQuery($filters ? ['where' => $filters]: []);
 
         $tasks = $itemsQuery
             ->with('task')

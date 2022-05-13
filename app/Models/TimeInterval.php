@@ -176,17 +176,6 @@ class TimeInterval extends Model
     protected array $spatialFields = [
         'location'
     ];
-    /**
-     * @var ScreenshotService
-     */
-    private ScreenshotService $screenshotService;
-
-    public function __construct(array $attributes = [])
-    {
-        $this->screenshotService = app()->make(ScreenshotService::class);
-
-        parent::__construct($attributes);
-    }
 
     /**
      * Override parent boot and Call deleting event
@@ -224,9 +213,7 @@ class TimeInterval extends Model
     public function hasScreenshot(): Attribute
     {
         return Attribute::make(
-            get: function ($value) {
-                !$value ?? Storage::exists($this->screenshotService->getScreenshotPath($value['id']));
-            }
+            get: static fn ($value) => !$value || Storage::exists(app(ScreenshotService::class)->getScreenshotPath($value['id']))
         )->shouldCache();
     }
 
@@ -234,7 +221,7 @@ class TimeInterval extends Model
     {
         return Attribute::make(
             get: static fn($value) => $value ? ['lat' => $value->getLat(), 'lng' => $value->getLng()] : null,
-            set: static fn($value) => !$value ?? new Point($value['lat'], $value['lng']),
+            set: static fn($value) => !$value || new Point($value['lat'], $value['lng']),
         )->shouldCache();
     }
 

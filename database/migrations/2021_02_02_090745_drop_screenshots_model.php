@@ -15,10 +15,12 @@ return new class extends Migration {
         DB::table('screenshots')
             ->lazyById()
             ->each(static function ($screenshot) {
-                app(ScreenshotService::class)->saveScreenshot(
-                    Storage::path($screenshot->path),
-                    $screenshot->time_interval_id
-                );
+                try{
+                    app(ScreenshotService::class)->saveScreenshot(
+                        Storage::path($screenshot->path),
+                        $screenshot->time_interval_id
+                    );
+                }catch (Exception){}
             });
 
         Storage::deleteDirectory('uploads/screenshots');

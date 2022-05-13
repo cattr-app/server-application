@@ -14,6 +14,10 @@ class TimeIntervalPolicy
         return $user->isAdmin() ?: null;
     }
 
+    public function viewAny(): bool{
+        return true;
+    }
+
     public function view(User $user, TimeInterval $timeInterval): bool
     {
         return cache()->remember(
