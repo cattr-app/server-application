@@ -2,25 +2,30 @@
 
 namespace App\Scopes;
 
+use App\Exceptions\Entities\AuthorizationException;
 use App\Models\Role;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
+use Throwable;
 
-class UserScope implements Scope
+class UserAccessScope implements Scope
 {
     /**
      * @param Builder $builder
      * @param Model $model
-     * @return Builder
+     * @return Builder|null
+     * @throws Throwable
      */
     public function apply(Builder $builder, Model $model): ?Builder
     {
-        if (!auth()->hasUser()) {
-            return null;
+        if (app()->runningInConsole()) {
+            return $builder;
         }
 
-        $user = request()->user();
+        $user = optional(request())->user();
+
+        throw_unless($user, new AuthorizationException);
 
         if ($user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
             return $builder;

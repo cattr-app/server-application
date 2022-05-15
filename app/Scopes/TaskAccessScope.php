@@ -9,7 +9,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Throwable;
 
-class TaskScope implements Scope
+class TaskAccessScope implements Scope
 {
     /**
      * @param Builder $builder
@@ -19,7 +19,11 @@ class TaskScope implements Scope
      */
     public function apply(Builder $builder, Model $model): Builder
     {
-        $user = request()->user();
+        if (app()->runningInConsole()) {
+            return $builder;
+        }
+
+        $user = optional(request())->user();
 
         throw_unless($user, new AuthorizationException);
 

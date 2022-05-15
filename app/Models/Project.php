@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Scopes\ProjectScope;
+use App\Scopes\ProjectAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\ProjectFactory;
 use Eloquent as EloquentIdeHelper;
@@ -125,7 +125,7 @@ class Project extends Model
     {
         parent::boot();
 
-        static::addGlobalScope(new ProjectScope);
+        static::addGlobalScope(new ProjectAccessScope);
 
         static::deleting(static function (Project $project) {
             $project->tasks()->delete();

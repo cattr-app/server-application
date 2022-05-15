@@ -120,7 +120,7 @@ class ListTest extends TestCase
     {
         $response = $this->actingAs($this->projectManager)->postJson(self::URI, ['global_scope' => true]);
 
-        $users = User::withoutGlobalScope(\App\Scopes\UserScope::class)
+        $users = User::withoutGlobalScope(\App\Scopes\UserAccessScope::class)
             ->setEagerLoads([])
             ->get()
             ->toArray();

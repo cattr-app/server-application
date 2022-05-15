@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App;
 use App\Http\Requests\User\ListUsersRequest;
+use App\Scopes\UserAccessScope;
 use Settings;
 use Carbon\Carbon;
 use Exception;
@@ -478,7 +479,7 @@ class UserController extends ItemController
             request()->request->remove('global_scope');
 
             if (request()->user()->hasProjectRole('manager')) {
-                $query->withoutGlobalScope(App\Scopes\UserScope::class);
+                $query->withoutGlobalScope(UserAccessScope::class);
             }
         }
 

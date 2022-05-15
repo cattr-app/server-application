@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Contracts\ScreenshotService;
-use App\Scopes\TimeIntervalScope;
+use App\Scopes\TimeIntervalAccessScope;
 use Database\Factories\TimeIntervalFactory;
 use Eloquent as EloquentIdeHelper;
 use Grimzy\LaravelMysqlSpatial\Eloquent\Builder;
@@ -186,7 +186,7 @@ class TimeInterval extends Model
     {
         parent::boot();
 
-        static::addGlobalScope(new TimeIntervalScope);
+        static::addGlobalScope(new TimeIntervalAccessScope);
 
         static::deleting(static function ($interval) {
             /** @var TimeInterval $interval */

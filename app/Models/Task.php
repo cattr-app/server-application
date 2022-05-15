@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Scopes\TaskScope;
+use App\Scopes\TaskAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\TaskFactory;
 use Eloquent as EloquentIdeHelper;
@@ -179,7 +179,7 @@ class Task extends Model
     {
         parent::boot();
 
-        static::addGlobalScope(new TaskScope);
+        static::addGlobalScope(new TaskAccessScope);
 
         static::deleting(static function (Task $task) {
             $task->timeIntervals()->delete();

@@ -8,7 +8,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
 use Throwable;
 
-class ProjectScope implements Scope
+class ProjectAccessScope implements Scope
 {
     /**
      * @param Builder $builder
@@ -18,7 +18,11 @@ class ProjectScope implements Scope
      */
     public function apply(Builder $builder, Model $model): Builder
     {
-        $user = request()->user();
+        if (app()->runningInConsole()) {
+            return $builder;
+        }
+
+        $user = optional(request())->user();
 
         throw_unless($user, new AuthorizationException);
 

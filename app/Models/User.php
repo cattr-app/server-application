@@ -3,7 +3,7 @@
 namespace App\Models;
 
 use App\Mail\ResetPassword;
-use App\Scopes\UserScope;
+use App\Scopes\UserAccessScope;
 use App\Traits\HasRole;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
@@ -297,7 +297,7 @@ class User extends Authenticatable
     {
         parent::boot();
 
-        static::addGlobalScope(new UserScope);
+        static::addGlobalScope(new UserAccessScope);
     }
 
     /**
