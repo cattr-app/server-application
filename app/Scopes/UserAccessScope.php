@@ -19,6 +19,10 @@ class UserAccessScope implements Scope
      */
     public function apply(Builder $builder, Model $model): ?Builder
     {
+        if (!auth()->hasUser()) {
+            return null;
+        }
+
         if (app()->runningInConsole()) {
             return $builder;
         }
