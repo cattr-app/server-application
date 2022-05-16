@@ -25,10 +25,10 @@ class Recaptcha
 
         $cacheKey = $this->getCaptchaCacheKey();
 
-        if (!Cache::has($cacheKey)) {
-            Cache::put($cacheKey, 1, config('recaptcha.ttl'));
+        if (!Cache::store('octane')->has($cacheKey)) {
+            Cache::store('octane')->put($cacheKey, 1, config('recaptcha.ttl'));
         } else {
-            Cache::increment($cacheKey);
+            Cache::store('octane')->increment($cacheKey);
         }
     }
 
@@ -62,7 +62,7 @@ class Recaptcha
             return;
         }
 
-        Cache::forget($this->getCaptchaCacheKey());
+        Cache::store('octane')->forget($this->getCaptchaCacheKey());
     }
 
     /**
@@ -101,7 +101,7 @@ class Recaptcha
 
         $cacheKey = $this->getBanCacheKey();
 
-        $banData = Cache::get($cacheKey, null);
+        $banData = Cache::store('octane')->get($cacheKey, null);
 
         if ($banData === null || !isset($banData['amounts'], $banData['time'])) {
             return false;
@@ -112,7 +112,7 @@ class Recaptcha
         }
 
         if ($banData['time'] + config('recaptcha.rate_limiter_ttl') < time()) {
-            Cache::forget($cacheKey);
+            Cache::store('octane')->forget($cacheKey);
             return false;
         }
 
@@ -151,7 +151,7 @@ class Recaptcha
 
         $cacheKey = $this->getBanCacheKey();
 
-        $banData = Cache::get($cacheKey);
+        $banData = Cache::store('octane')->get($cacheKey);
 
         if ($banData === null || !isset($banData['amounts'])) {
             $banData = ['amounts' => 1, 'time' => time()];
@@ -159,7 +159,7 @@ class Recaptcha
             $banData['amounts']++;
         }
 
-        Cache::put($cacheKey, $banData, config('recaptcha.rate_limiter_ttl'));
+        Cache::store('octane')->put($cacheKey, $banData, config('recaptcha.rate_limiter_ttl'));
     }
 
     /**
@@ -222,7 +222,7 @@ class Recaptcha
 
         $cacheKey = $this->getCaptchaCacheKey();
 
-        $attempts = Cache::get($cacheKey, null);
+        $attempts = Cache::store('octane')->get($cacheKey, null);
 
         if ($attempts === null) {
             return false;

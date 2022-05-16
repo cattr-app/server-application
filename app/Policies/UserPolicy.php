@@ -3,6 +3,7 @@
 namespace App\Policies;
 
 use App\Models\User;
+use Cache;
 use Illuminate\Auth\Access\HandlesAuthorization;
 use Illuminate\Validation\ValidationException;
 
@@ -29,7 +30,7 @@ class UserPolicy
 
     public function view(User $user, User $model): bool
     {
-        return cache()->remember(
+        return Cache::store('octane')->remember(
             "role_user_user_{$user->id}_$model->id",
             config('cache.role_caching_ttl'),
             static fn() => User::whereId($model->id)->exists(),

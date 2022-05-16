@@ -3,6 +3,7 @@
 namespace App\Models;
 
 use App\Exceptions\Entities\AuthorizationException;
+use Cache;
 use Eloquent as EloquentIdeHelper;
 use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -104,7 +105,7 @@ class Role extends Model
 
     public static function getIdByName(string $name): ?int
     {
-        return cache()->rememberForever(
+        return Cache::store('octane')->rememberForever(
             "role_id.$name",
             static fn() => optional(self::firstWhere('name', $name))->id,
         );

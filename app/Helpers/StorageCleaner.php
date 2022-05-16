@@ -4,6 +4,7 @@ namespace App\Helpers;
 
 use App\Contracts\ScreenshotService;
 use App\Models\TimeInterval;
+use Cache;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
 use Storage;
@@ -33,11 +34,11 @@ class StorageCleaner
      */
     public static function thin($force = false): void
     {
-        if ((!$force && !self::needThinning()) || cache('thinning_now')) {
+        if ((!$force && !self::needThinning()) || Cache::store('octane')->get('thinning_now')) {
             return;
         }
 
-        cache(['thinning_now' => true]);
+        Cache::store('octane')->set('thinning_now', true);
 
         $service = app()->make(ScreenshotService::class);
 
@@ -53,8 +54,8 @@ class StorageCleaner
             }
         }
 
-        cache(['thinning_now' => false]);
-        cache(['last_thin' => now()]);
+        Cache::store('octane')->set('thinning_now',false);
+        Cache::store('octane')->set('last_thin',now());
     }
 
     /**

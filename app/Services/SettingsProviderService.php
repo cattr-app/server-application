@@ -4,6 +4,7 @@ namespace App\Services;
 
 use App\Contracts\SettingsProvider;
 use App\Models\Setting;
+use Cache;
 use Exception;
 use PDOException;
 
@@ -47,7 +48,7 @@ class SettingsProviderService implements SettingsProvider
             ->toArray();
 
         try {
-            cache()->forever("settings:$scope", $result);
+            Cache::store('octane')->forever("settings:$scope", $result);
         } catch (Exception) {
             // DO NOTHING
         }
@@ -67,7 +68,7 @@ class SettingsProviderService implements SettingsProvider
         }
 
         try {
-            $cached = cache("settings:$scope");
+            $cached = Cache::store('octane')->get("settings:$scope");
 
             if (!isset($cached[$key])) {
                 $cached[$key] = optional(
@@ -77,7 +78,7 @@ class SettingsProviderService implements SettingsProvider
                         ])->first()
                 )->value ?? $default;
 
-                cache(["settings:$scope" => $cached]);
+                Cache::store('octane')->put("settings:$scope", $cached);
             }
 
             return $cached[$key];
@@ -123,7 +124,7 @@ class SettingsProviderService implements SettingsProvider
         }
 
         try {
-            cache()->forget("settings:$scope");
+            Cache::store('octane')->forget("settings:$scope");
         } catch (Exception) {
             // DO NOTHING
         }
@@ -141,7 +142,7 @@ class SettingsProviderService implements SettingsProvider
         }
 
         try {
-            cache()->forget("settings:$scope");
+            Cache::store('octane')->forget("settings:$scope");
         } catch (Exception) {
             // DO NOTHING
         }

@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Models\Project;
 use App\Models\User;
+use Cache;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProjectPolicy
@@ -17,7 +18,7 @@ class ProjectPolicy
 
     public function view(User $user, Project $project): bool
     {
-        return cache()->remember(
+        return Cache::store('octane')->remember(
             "role_user_project_{$user->id}_$project->id",
             config('cache.role_caching_ttl'),
             static fn() => Project::whereId($project->id)->exists()

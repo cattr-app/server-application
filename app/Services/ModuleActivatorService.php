@@ -3,6 +3,7 @@
 
 namespace App\Services;
 
+use Cache;
 use Exception;
 use JsonException;
 use Nwidart\Modules\Contracts\ActivatorInterface;
@@ -36,7 +37,7 @@ class ModuleActivatorService implements ActivatorInterface
      */
     public function hasStatus(Module $module, bool $status): bool
     {
-        return cache()->rememberForever(config('modules.activators.amazing.cache_key'), function () {
+        return Cache::store('octane')->rememberForever(config('modules.activators.amazing.cache_key'), function () {
             $configFile = config('modules.activators.amazing.file_name');
 
             $databaseModules = [];
@@ -114,6 +115,6 @@ class ModuleActivatorService implements ActivatorInterface
      */
     private function flushCache(): void
     {
-        cache()->forget(config('modules.activators.amazing.cache_key'));
+        Cache::store('octane')->forget(config('modules.activators.amazing.cache_key'));
     }
 }

@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Project;
 use App\Models\TimeInterval;
 use App\Models\User;
+use Cache;
 use Illuminate\Contracts\Database\Query\Builder;
 
 class TimeIntervalPolicy
@@ -20,7 +21,7 @@ class TimeIntervalPolicy
 
     public function view(User $user, TimeInterval $timeInterval): bool
     {
-        return cache()->remember(
+        return Cache::store('octane')->remember(
             "role_user_interval_{$user->id}_$timeInterval->id",
             config('cache.role_caching_ttl'),
             static fn() => TimeInterval::whereId($timeInterval->id)->exists(),
@@ -95,7 +96,7 @@ class TimeIntervalPolicy
 
     private static function getProjectIdByTaskId(int $taskId): int
     {
-        return cache()->remember(
+        return Cache::store('octane')->remember(
             "role_project_of_task_$taskId",
             config('cache.role_caching_ttl'),
             static fn() => Project::whereHas(

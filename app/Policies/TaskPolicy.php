@@ -5,6 +5,7 @@ namespace App\Policies;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
+use Cache;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class TaskPolicy
@@ -30,7 +31,7 @@ class TaskPolicy
      */
     public function view(User $user, Task $task): bool
     {
-        return cache()->remember(
+        return Cache::store('octane')->remember(
             "role_user_task_{$user->id}_$task->id",
             config('cache.role_caching_ttl'),
             static fn() => Task::whereId($task->id)->exists(),

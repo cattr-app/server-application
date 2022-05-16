@@ -2,6 +2,7 @@
 
 namespace App\Traits;
 
+use Cache;
 use Illuminate\Database\Eloquent\Builder;
 
 trait HasRole
@@ -56,7 +57,7 @@ trait HasRole
     public function hasProjectRole(string $role, int $projectId = null): bool
     {
         $userId = $this->id;
-        return cache()->remember(
+        return Cache::store('octane')->remember(
             "role_project_{$role}_$projectId",
             config('cache.role_caching_ttl'),
             static fn() => self::whereHas(

@@ -6,6 +6,7 @@ use App\Exceptions\Entities\AuthorizationException;
 use App\Helpers\Recaptcha;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Transformers\AuthTokenTransformer;
+use Cache;
 use Exception;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -212,9 +213,11 @@ class AuthController extends BaseController
 
         $lifetime = now()->addMinutes(config('auth.lifetime_minutes.desktop_token'));
 
-        cache([
-            sha1($request->ip()) . ":$token" => $request->user()->id,
-        ], $lifetime);
+        Cache::store('octane')->put(
+            sha1($request->ip()) . ":$token" ,
+            $request->user()->id,
+            $lifetime,
+        );
 
         return responder()->success([
             'token' => $token,
@@ -273,11 +276,11 @@ class AuthController extends BaseController
 
         $token = explode(' ', $token);
 
-        if (count($token) !== 2 || $token[0] !== 'desktop' || !cache()->has(sha1($request->ip()) . ":$token[1]")) {
+        if (count($token) !== 2 || $token[0] !== 'desktop' || !Cache::store('octane')->has(sha1($request->ip()) . ":$token[1]")) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
         }
 
-        $user = auth()->loginUsingId(cache(sha1($request->ip()) . ":$token[1]"));
+        $user = auth()->loginUsingId(Cache::store('octane')->get(sha1($request->ip()) . ":$token[1]"));
 
         if (!optional($user)->active) {
             throw new AuthorizationException(AuthorizationException::ERROR_TYPE_USER_DISABLED);
