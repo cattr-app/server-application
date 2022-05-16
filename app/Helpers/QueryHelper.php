@@ -195,6 +195,7 @@ class QueryHelper
             'withCount.*' => 'sometimes|string',
             'search.query' => 'sometimes|string|nullable',
             'search.fields.*' => 'sometimes|string',
+            'where' => 'array',
         ];
     }
 }
