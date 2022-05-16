@@ -26,12 +26,11 @@ RUN printf "\n\n\nyes\nyes\nyes\n" | pecl install swoole-4.8.9 && \
 
 COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
 
-RUN cp .env.docker .env && \
-    php -d memory_limit=8G /usr/local/bin/composer install -a && \
-    php -d memory_limit=8G /usr/local/bin/composer require -a $(cat .modules.production | tr '\012' ' ') && \
-    php /app/artisan storage:link
-
 COPY php.ini /usr/local/etc/php/php.ini
+
+RUN cp .env.docker .env && \
+    php -d memory_limit=8G /usr/local/bin/composer require -o $(cat .modules.production | tr '\012' ' ') && \
+    php /app/artisan storage:link
 
 RUN chown -R www-data:www-data /app
 
