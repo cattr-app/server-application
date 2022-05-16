@@ -479,7 +479,7 @@ class IntervalController extends ItemController
     {
         $intervalIds = Filter::process(Filter::getRequestFilterName(), $request->validated())['intervals'];
 
-        $itemsQuery = $this->getQuery(['id' => ['in', $intervalIds]]);
+        $itemsQuery = $this->getQuery(['where' => ['id' => ['in', $intervalIds]]]);
 
         Event::dispatch(Filter::getBeforeActionEventName(), $intervalIds);
 

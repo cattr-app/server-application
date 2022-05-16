@@ -72,6 +72,35 @@ abstract class ItemController extends Controller
     }
 
     /**
+     * @throws Exception
+     */
+    protected function getQuery(array $filter = []): Builder
+    {
+        $model = static::MODEL;
+        $model = new $model;
+
+        $query = new Builder($model::getQuery());
+        $query->setModel($model);
+
+        $modelScopes = $model->getGlobalScopes();
+
+        foreach ($modelScopes as $key => $value) {
+            $query->withGlobalScope($key, $value);
+        }
+
+        foreach (Filter::process(Filter::getQueryAdditionalRelationsFilterName(), []) as $with) {
+            $query->with($with);
+        }
+
+        QueryHelper::apply($query, $model, $filter);
+
+        return Filter::process(
+            Filter::getQueryFilterName(),
+            $query
+        );
+    }
+
+    /**
      * @throws Throwable
      */
     public function _create(CattrFormRequest $request): JsonResponse
@@ -134,7 +163,7 @@ abstract class ItemController extends Controller
 
         throw_unless(is_int($requestId), ValidationException::withMessages(['Invalid id']));
 
-        $itemsQuery = $this->getQuery(['id' => $requestId]);
+        $itemsQuery = $this->getQuery(['where' => ['id' => $requestId]]);
 
         /** @var Model $item */
         $item = $itemsQuery->first();
@@ -191,7 +220,7 @@ abstract class ItemController extends Controller
         throw_unless($itemId, ValidationException::withMessages(['Invalid id']));
 
         $filters = [
-            'id' => $itemId
+            'where' => ['id' => $itemId]
         ];
 
         if (!empty($requestData['with'])) {
@@ -209,35 +238,5 @@ abstract class ItemController extends Controller
         Event::dispatch(Filter::getAfterActionEventName(), [$item, $filters]);
 
         return responder()->success($item)->respond();
-    }
-
-
-    /**
-     * @throws Exception
-     */
-    protected function getQuery(array $filter = []): Builder
-    {
-        $model = static::MODEL;
-        $model = new $model;
-
-        $query = new Builder($model::getQuery());
-        $query->setModel($model);
-
-        $modelScopes = $model->getGlobalScopes();
-
-        foreach ($modelScopes as $key => $value) {
-            $query->withGlobalScope($key, $value);
-        }
-
-        foreach (Filter::process(Filter::getQueryAdditionalRelationsFilterName(), []) as $with) {
-            $query->with($with);
-        }
-
-        QueryHelper::apply($query, $model, $filter);
-
-        return Filter::process(
-            Filter::getQueryFilterName(),
-            $query
-        );
     }
 }
