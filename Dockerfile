@@ -14,7 +14,8 @@ RUN apt-get update && \
         libzip4  \
         libzip-dev  \
         procps  \
-        git && \
+        git \
+        zip && \
     apt-get clean && \
     rm -rf /etc/supervisor/
 
