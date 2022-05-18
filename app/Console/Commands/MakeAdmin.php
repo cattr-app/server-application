@@ -7,49 +7,31 @@ use Illuminate\Console\Command;
 
 class MakeAdmin extends Command
 {
-    /**
-     * The name and signature of the console command.
-     *
-     * @var string
-     */
-    protected $signature = 'cattr:make:admin {name : Administrator\'s name} {email : Administrator\'s email} '
-    . '{password : Administrator\'s password} {--o : Skip instance registration}';
-
-    /**
-     * The console command description.
-     *
-     * @var string
-     */
+    protected $signature = 'cattr:make:admin {--o : Skip instance registration}';
     protected $description = 'Creates admin user';
 
     public function handle(): void
     {
-        if (!$this->option('o') && !User::where(['is_admin' => true])->count()) {
-            $this->call('cattr:register', [
-                'adminEmail' => $this->argument('email')
-            ]);
+        $email = $this->ask('What is your email?', 'admin@example.com');
+
+        if (!$this->option('o') && !User::admin()->count()) {
+            rescue(
+                static fn() => $this->call(
+                    RegisterInstance::class,
+                    [
+                        'adminEmail' => $email
+                    ],
+                ),
+            );
         }
 
-        $admin = User::create([
-            'full_name' => $this->argument('name'),
-            'email' => $this->argument('email'),
-            'url' => '',
-            'company_id' => 1,
-            'avatar' => '',
-            'screenshots_active' => 1,
-            'manual_time' => 0,
-            'computer_time_popup' => 300,
-            'blur_screenshots' => 0,
-            'web_and_app_monitoring' => 1,
-            'screenshots_interval' => 9,
-            'active' => true,
-            'password' => $this->argument('password'),
-            'is_admin' => true,
-            'role_id' => 2,
-            'timezone' => 'Africa/Bamako',
-            'language' => 'en'
+        User::factory()->admin()->create([
+            'full_name' => $this->ask('What is your name?', 'Admin'),
+            'email' => $email,
+            'password' => $this->secret('What password should we set?'),
+            'last_activity' => now(),
         ]);
 
-        $this->info("Administrator with email {$admin->email} was created successfully");
+        $this->info("Administrator with email $email was created successfully");
     }
 }

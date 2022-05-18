@@ -1,0 +1,3 @@
+#!/bin/sh
+
+supercronic /app/crontab

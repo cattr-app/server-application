@@ -1,48 +1,69 @@
-FROM php:8.1-cli AS backend
+FROM composer:2.3.5 as composer
 
-COPY . /app
+FROM php:8.1-alpine AS runtime
 
-WORKDIR /app
+RUN set -x && \
+    apk add --no-cache icu-libs zlib libpng libzip libjpeg libcurl && \
+    apk add --no-cache --virtual .build-deps \
+            autoconf \
+            openssl \
+            make \
+            g++  \
+            zlib-dev \
+            libpng-dev \
+            libzip-dev \
+            libjpeg-turbo-dev  \
+            icu-dev \
+            curl-dev && \
+    docker-php-ext-configure gd --with-jpeg && \
+    CFLAGS="$CFLAGS -D_GNU_SOURCE" docker-php-ext-install -j$(nproc) \
+        gd \
+        zip \
+        intl \
+        pcntl \
+        pdo_mysql && \
+    printf "\n\n\nyes\nyes\nyes\n" | pecl install swoole-4.8.9 && \
+    docker-php-ext-enable swoole && \
+    wget -q "https://github.com/aptible/supercronic/releases/download/v0.1.12/supercronic-linux-amd64" \
+         -O /usr/bin/supercronic && \
+    chmod +x /usr/bin/supercronic && \
+    docker-php-source delete && \
+    apk del .build-deps && \
+    rm -R /tmp/pear && \
+    mkdir /app && \
+    echo '* * * * * php /app/artisan schedule:run' > /app/crontab && \
+    chown -R www-data:www-data /app
 
-RUN apt-get update && \
-    apt-get install -y --no-install-recommends  \
-        supervisor \
-        libcurl4-openssl-dev \
-        libfreetype6-dev \
-        libjpeg62-turbo-dev \
-        libpng-dev  \
-        libzip4  \
-        libzip-dev  \
-        procps  \
-        git \
-        zip && \
-    apt-get clean && \
-    rm -rf /etc/supervisor/
+USER www-data:www-data
 
-RUN printf "\n\n\nyes\nyes\nyes\n" | pecl install swoole-4.8.9 && \
-    docker-php-ext-configure gd --with-freetype --with-jpeg && \
-    docker-php-ext-install -j$(nproc) gd zip mysqli pcntl pdo pdo_mysql && \
-    docker-php-ext-enable swoole gd zip pdo pdo_mysql pcntl
-
-COPY --from=composer:latest /usr/bin/composer /usr/local/bin/composer
+COPY --from=composer /usr/bin/composer /usr/local/bin/composer
 
 COPY php.ini /usr/local/etc/php/php.ini
 
-RUN cp .env.docker .env && \
-    php -d memory_limit=8G /usr/local/bin/composer require -o $(cat .modules.production | tr '\012' ' ') && \
-    php /app/artisan storage:link
+WORKDIR /app
 
-RUN chown -R www-data:www-data /app
+COPY --chown=www-data:www-data ./composer.* /app/
+COPY --chown=www-data:www-data ./.modules.* /app/
+
+RUN composer require -n --no-install --no-ansi $(cat .modules.production | tr '\012' ' ') && \
+    composer install -n --no-dev --no-cache --no-ansi --no-autoloader
+
+COPY --chown=www-data:www-data . /app
+
+RUN set -x && \
+    cp .env.docker storage/.env && \
+    composer dump-autoload -n --optimize && \
+    php artisan storage:link
 
 VOLUME /app/storage
 VOLUME /app/Modules
 
 ARG APP_VERSION
 ARG APP_ENV=production
-ENV IMAGE_VERSION=4.0.0
+ENV IMAGE_VERSION=4.1.0
 ENV APP_VERSION $APP_VERSION
 ENV APP_ENV $APP_ENV
 
-ENTRYPOINT /app/entrypoint.sh
+ENTRYPOINT /app/start
 
 EXPOSE 8090

@@ -1,0 +1,11 @@
+#!/bin/sh
+
+php artisan key:generate -n
+php artisan optimize
+php artisan event:cache
+php artisan migrate --force
+php artisan db:seed --class InitialSeeder --force
+
+echo "Started!"
+
+php artisan octane:start --port=8090 --host=0.0.0.0

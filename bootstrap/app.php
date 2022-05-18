@@ -41,6 +41,10 @@ $app->singleton(
     App\Exceptions\Handler::class
 );
 
+if (env('IMAGE_VERSION', false)) {
+    $app->useEnvironmentPath(storage_path());
+}
+
 /*
 |--------------------------------------------------------------------------
 | Return The Application
