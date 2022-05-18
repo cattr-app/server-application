@@ -35,6 +35,7 @@ RUN cp .env.docker .env && \
 RUN chown -R www-data:www-data /app
 
 VOLUME /app/storage
+VOLUME /app/Modules
 
 ARG APP_VERSION
 ARG APP_ENV=production
