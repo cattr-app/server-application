@@ -26,6 +26,8 @@ class ProjectMemberController extends Controller
 
         $projectMembers = ProjectMemberService::getMembers($data['project_id']);
 
+        $projectMembers['users'] = $projectMembers['users'] ?? [];
+
         return responder()->success($projectMembers)->respond();
     }
 
