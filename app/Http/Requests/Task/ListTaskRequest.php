@@ -19,7 +19,6 @@ class ListTaskRequest extends CattrFormRequest
     {
         return array_merge(QueryHelper::getValidationRules(), [
             'project_id' => 'sometimes|array',
-            'status_id' => 'sometimes|array',
         ]);
     }
 }

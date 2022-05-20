@@ -44,7 +44,7 @@ class QueryHelper
 
         if (isset($filter['orderBy'])) {
             $order_by = $filter['orderBy'];
-            [$column, $dir] = is_array($order_by) ? array_values($order_by) : [$order_by, 'asc'];
+            [$column, $dir] = isset($order_by[1]) ? array_values($order_by) : [$order_by[0], 'asc'];
             if (Schema::hasColumn($table, $column)) {
                 $query->orderBy($column, $dir);
             }
@@ -107,16 +107,10 @@ class QueryHelper
 
                 /** @var Relation $relationQuery */
                 $relationQuery = $model->{$domain}();
-                if (!$first) {
-                    $query->orWhereHas($domain, static function ($q) use ($filters, $relationQuery, $first) {
-                        QueryHelper::apply($q, $relationQuery->getModel(), $filters, $first);
-                    });
-                } else {
-                    $query->whereHas($domain, static function ($q) use ($filters, $relationQuery, $first) {
-                        QueryHelper::apply($q, $relationQuery->getModel(), $filters, $first);
-                    });
-                }
-                $first = false;
+
+                $query->whereHas($domain, static function ($q) use ($filters, $relationQuery, $first) {
+                    QueryHelper::apply($q, $relationQuery->getModel(), ['where' => $filters], $first);
+                });
             }
         }
     }
@@ -190,12 +184,12 @@ class QueryHelper
         return [
             'limit' => 'sometimes|int',
             'offset' => 'sometimes|int',
-            'orderBy' => 'sometimes|string',
+            'orderBy' => 'sometimes|array',
             'with.*' => 'sometimes|string',
             'withCount.*' => 'sometimes|string',
             'search.query' => 'sometimes|string|nullable',
             'search.fields.*' => 'sometimes|string',
-            'where' => 'array',
+            'where' => 'sometimes|array',
         ];
     }
 }

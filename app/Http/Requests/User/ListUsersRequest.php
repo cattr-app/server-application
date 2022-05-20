@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\User;
 
-use App\Http\Requests\AuthorizesAfterValidation;
+use App\Helpers\QueryHelper;
 use App\Models\User;
 use App\Http\Requests\CattrFormRequest;
 
@@ -15,6 +15,6 @@ class ListUsersRequest extends CattrFormRequest
 
     protected function _rules(): array
     {
-        return [];
+        return QueryHelper::getValidationRules();
     }
 }

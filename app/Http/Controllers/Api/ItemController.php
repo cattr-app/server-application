@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Event;
 use Illuminate\Validation\ValidationException;
-use Log;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;

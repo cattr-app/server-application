@@ -465,24 +465,4 @@ class UserController extends ItemController
 
         return responder()->success()->respond(204);
     }
-
-    /**
-     * @param array $filter
-     * @return Builder
-     * @throws Exception
-     */
-    protected function getQuery(array $filter = []): Builder
-    {
-        $query = parent::getQuery($filter);
-
-        if (request('global_scope')) {
-            request()->request->remove('global_scope');
-
-            if (request()->user()->hasProjectRole('manager')) {
-                $query->withoutGlobalScope(UserAccessScope::class);
-            }
-        }
-
-        return $query;
-    }
 }
