@@ -586,9 +586,11 @@ class IntervalController extends ItemController
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
         $filters = [
-            'start_at' => ['>=', $requestData['start_at']],
-            'end_at' => ['<=', $requestData['end_at']],
-            'user_id' => ['=', $requestData['user_id']]
+            'where' => [
+                'start_at' => ['>=', $requestData['start_at']],
+                'end_at' => ['<=', $requestData['end_at']],
+                'user_id' => ['=', $requestData['user_id']],
+            ],
         ];
 
         $itemsQuery = $this->getQuery($filters);
