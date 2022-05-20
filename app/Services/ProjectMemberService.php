@@ -8,11 +8,10 @@ class ProjectMemberService
 {
     public static function getMembers(int $projectId): array
     {
-        return Project::select('id')
-            ->where('id', $projectId)
+        return Project::find($projectId)
             ->with('users')
             ->first()
-            ->toArray();
+            ->only(['id', 'users']);
     }
 
     public static function syncMembers(int $projectId, array $users): array

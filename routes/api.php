@@ -101,7 +101,7 @@ Route::group([
         $router->any('projects/show', [ProjectController::class, 'show'])->name('projects.show');
         $router->post('projects/remove', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
-        $router->any('project-members/show', [ProjectMemberController::class, 'show'])->name('projects_members.show');
+        $router->any('project-members/list', [ProjectMemberController::class, 'list'])->name('projects_members.list');
         $router->post('project-members/bulk-edit', [ProjectMemberController::class, 'bulkEdit'])->name('projects_members.edit');
 
         //Tasks routes
