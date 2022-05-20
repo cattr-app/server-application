@@ -8,6 +8,16 @@ sast:
       nodejs-scan, pmd-apex, security-code-scan, sobelow, spotbugs
   stage: test
 
+sentry:
+  image: getsentry/sentry-cli:latest
+  stage: deploy
+  only:
+    - tags
+  script:
+    - export APP_VERSION=$(echo "$CI_COMMIT_TAG" | sed 's/^v//g')
+    - sentry-cli releases new --finalize $APP_VERSION
+    - sentry-cli releases set-commits --auto $APP_VERSION
+
 publish:
   image: docker:19.03.12
   stage: deploy
@@ -18,7 +28,7 @@ publish:
   script:
     - export APP_VERSION=$(echo "$CI_COMMIT_TAG" | sed 's/^v//g')
     - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE:$APP_VERSION --build-arg APP_VERSION=$APP_VERSION .
+    - docker build -t $CI_REGISTRY_IMAGE:$APP_VERSION --build-arg APP_VERSION=$APP_VERSION --build-arg SENTRY_DSN=$SENTRY_DSN .
     - docker image tag $CI_REGISTRY_IMAGE:$APP_VERSION $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:$APP_VERSION
     - docker push $CI_REGISTRY_IMAGE:latest
