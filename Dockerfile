@@ -2,6 +2,12 @@ FROM composer:2.3.5 as composer
 
 FROM php:8.1-alpine AS runtime
 
+ARG APP_VERSION
+ARG APP_ENV=production
+ENV IMAGE_VERSION=4.1.0
+ENV APP_VERSION $APP_VERSION
+ENV APP_ENV $APP_ENV
+
 RUN set -x && \
     apk add --no-cache icu-libs zlib libpng libzip libjpeg libcurl && \
     apk add --no-cache --virtual .build-deps \
@@ -57,12 +63,6 @@ RUN set -x && \
 
 VOLUME /app/storage
 VOLUME /app/Modules
-
-ARG APP_VERSION
-ARG APP_ENV=production
-ENV IMAGE_VERSION=4.1.0
-ENV APP_VERSION $APP_VERSION
-ENV APP_ENV $APP_ENV
 
 ENTRYPOINT /app/start
 
