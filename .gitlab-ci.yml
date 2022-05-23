@@ -20,7 +20,7 @@ sentry:
     - sentry-cli releases new --finalize $APP_VERSION
     - sentry-cli releases set-commits --auto $APP_VERSION
 
-build_dev:
+build:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:20
   stage: build
   tags:
@@ -32,8 +32,9 @@ build_dev:
       alias: docker
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+    - export APP_VERSION=$(echo "$CI_COMMIT_TAG" | sed 's/^v//g')
   script:
-    - docker build -t $CONTAINER_IMAGE .
+    - docker build -t $CONTAINER_IMAGE --build-arg APP_VERSION=$APP_VERSION --build-arg SENTRY_DSN=$SENTRY_DSN .
     - docker push $CONTAINER_IMAGE
 
 mark_release:
@@ -62,4 +63,3 @@ include:
   - template: Security/Secret-Detection.gitlab-ci.yml
   - template: Security/License-Scanning.gitlab-ci.yml
   - template: Security/Container-Scanning.gitlab-ci.yml
-
