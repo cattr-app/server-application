@@ -15,7 +15,8 @@ class TimeIntervalPolicy
         return $user->isAdmin() ?: null;
     }
 
-    public function viewAny(): bool{
+    public function viewAny(): bool
+    {
         return true;
     }
 
@@ -28,12 +29,12 @@ class TimeIntervalPolicy
         );
     }
 
-    public function create(User $user, int $targetUserId, int $taskId, bool $manual): bool
+    public function create(User $user, array $param): bool
     {
-        $projectId = self::getProjectIdByTaskId($taskId);
+        $projectId = self::getProjectIdByTaskId($param['task_id']);
 
-        if ($manual) {
-            if ($user->id !== $targetUserId) {
+        if ($param['is_manual']) {
+            if ($user->id !== $param['user_id']) {
                 return $user->hasRole('manager') || $user->hasProjectRole('manager', $projectId);
             }
 
@@ -100,7 +101,7 @@ class TimeIntervalPolicy
             "role_project_of_task_$taskId",
             config('cache.role_caching_ttl'),
             static fn() => Project::whereHas(
-                'task',
+                'tasks',
                 static fn(Builder $query) => $query->where('id', '=', $taskId)
             )->firstOrFail()->id
         );
