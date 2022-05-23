@@ -7,6 +7,9 @@ stages:
   - test
   - deploy
 
+sast:
+  stage: test
+
 sentry:
   image: getsentry/sentry-cli:latest
   stage: deploy
