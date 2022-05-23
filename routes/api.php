@@ -45,7 +45,12 @@ Route::group([
         $router->get('desktop-key', [AuthController::class, 'issueDesktopKey'])->name('auth.desktop.request');
     });
 
-    $router->post('login', [AuthController::class, 'login'])->name('auth.login');
+        $router->withoutMiddleware('auth:sanctum')->group(static function (Router $router) {
+            $router->post('login', [AuthController::class, 'login'])->name('auth.login');
+            $router->post('password/reset/request', [PasswordResetController::class, 'request'])->name('auth.reset.request');
+            $router->post('password/reset/validate', [PasswordResetController::class, 'validate'])->name('auth.reset.validate');
+            $router->post('password/reset/process', [PasswordResetController::class, 'process'])->name('auth.reset.process');
+        });
 
     $router->put('desktop-key', [AuthController::class, 'authDesktopKey'])->name('auth.desktop.process');
 });
@@ -96,7 +101,7 @@ Route::group([
         $router->any('projects/show', [ProjectController::class, 'show'])->name('projects.show');
         $router->post('projects/remove', [ProjectController::class, 'destroy'])->name('projects.destroy');
 
-        $router->any('project-members/show', [ProjectMemberController::class, 'show'])->name('projects_members.show');
+        $router->any('project-members/list', [ProjectMemberController::class, 'list'])->name('projects_members.list');
         $router->post('project-members/bulk-edit', [ProjectMemberController::class, 'bulkEdit'])->name('projects_members.edit');
 
         //Tasks routes
