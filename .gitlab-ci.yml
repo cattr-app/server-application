@@ -1,6 +1,5 @@
 variables:
   DOCKER_TLS_CERTDIR: "/certs"
-  CONTAINER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
 
 stages:
   - build
@@ -17,7 +16,7 @@ sentry:
     - tags
   script:
     - export APP_VERSION=$(echo "$CI_COMMIT_TAG" | sed 's/^v//g')
-    - sentry-cli releases new --finalize $APP_VERSION
+    - sentry-cli releases new --finalize --org $SENTRY_ORG $APP_VERSION
     - sentry-cli releases set-commits --auto $APP_VERSION
 
 build:
@@ -25,17 +24,15 @@ build:
   stage: build
   tags:
     - privileged
-  except:
-    - tags
   services:
     - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:20-dind
       alias: docker
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - export APP_VERSION=$(echo "$CI_COMMIT_TAG" | sed 's/^v//g')
+    - export DOCKER_TAG=$(echo "$CI_COMMIT_REF_SLUG" | sed 's/^v//g')
   script:
-    - docker build -t $CONTAINER_IMAGE --build-arg APP_VERSION=$APP_VERSION --build-arg SENTRY_DSN=$SENTRY_DSN .
-    - docker push $CONTAINER_IMAGE
+    - docker build -t $CI_REGISTRY_IMAGE:$DOCKER_TAG --build-arg APP_VERSION=$APP_VERSION --build-arg SENTRY_DSN=$SENTRY_DSN .
+    - docker push $CI_REGISTRY_IMAGE:$DOCKER_TAG
 
 mark_release:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:20
@@ -49,12 +46,10 @@ mark_release:
       alias: docker
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - export APP_VERSION=$(echo "$CI_COMMIT_TAG" | sed 's/^v//g')
+    - export DOCKER_TAG=$(echo "$CI_COMMIT_REF_SLUG" | sed 's/^v//g')
   script:
-    - docker pull $CONTAINER_IMAGE
-    - docker image tag $CONTAINER_IMAGE $CI_REGISTRY_IMAGE:$APP_VERSION
+    - docker pull $CI_REGISTRY_IMAGE:$DOCKER_TAG
     - docker image tag $CONTAINER_IMAGE $CI_REGISTRY_IMAGE:latest
-    - docker push $CI_REGISTRY_IMAGE:$APP_VERSION
     - docker push $CI_REGISTRY_IMAGE:latest
 
 include:
