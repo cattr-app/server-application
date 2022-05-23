@@ -1,12 +1,11 @@
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+  CONTAINER_IMAGE: $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_SLUG
+
 stages:
+  - build
   - test
   - deploy
-
-sast:
-  variables:
-    SAST_EXCLUDED_ANALYZERS: bandit, brakeman, eslint, flawfinder, gosec, kubesec,
-      nodejs-scan, pmd-apex, security-code-scan, sobelow, spotbugs
-  stage: test
 
 sentry:
   image: getsentry/sentry-cli:latest
@@ -18,18 +17,39 @@ sentry:
     - sentry-cli releases new --finalize $APP_VERSION
     - sentry-cli releases set-commits --auto $APP_VERSION
 
-publish:
-  image: docker:19.03.12
+build_dev:
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:20
+  stage: build
+  tags:
+    - privileged
+  except:
+    - tags
+  services:
+    - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:20-dind
+      alias: docker
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
+  script:
+    - docker build -t $CONTAINER_IMAGE .
+    - docker push $CONTAINER_IMAGE
+
+mark_release:
+  image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:20
   stage: deploy
+  tags:
+    - privileged
   only:
     - tags
   services:
-    - docker:19.03.12-dind
-  script:
+    - name: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:20-dind
+      alias: docker
+  before_script:
+    - echo $CI_REGISTRY_PASSWORD | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
     - export APP_VERSION=$(echo "$CI_COMMIT_TAG" | sed 's/^v//g')
-    - docker login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
-    - docker build -t $CI_REGISTRY_IMAGE:$APP_VERSION --build-arg APP_VERSION=$APP_VERSION --build-arg SENTRY_DSN=$SENTRY_DSN .
-    - docker image tag $CI_REGISTRY_IMAGE:$APP_VERSION $CI_REGISTRY_IMAGE:latest
+  script:
+    - docker pull $CONTAINER_IMAGE
+    - docker image tag $CONTAINER_IMAGE $CI_REGISTRY_IMAGE:$APP_VERSION
+    - docker image tag $CONTAINER_IMAGE $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:$APP_VERSION
     - docker push $CI_REGISTRY_IMAGE:latest
 
@@ -38,3 +58,5 @@ include:
   - template: Security/Dependency-Scanning.gitlab-ci.yml
   - template: Security/Secret-Detection.gitlab-ci.yml
   - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
+
