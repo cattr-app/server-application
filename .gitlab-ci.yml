@@ -29,7 +29,7 @@ build:
       alias: docker
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - export DOCKER_TAG=$(echo "$CI_COMMIT_REF_SLUG" | sed 's/^v//g')
+    - export DOCKER_TAG=$(echo "$CI_COMMIT_REF_NAME" | sed 's/^v//g')
   script:
     - docker pull $CI_REGISTRY_IMAGE:latest || true
     - docker build --cache-from $CI_REGISTRY_IMAGE:latest -t $CI_REGISTRY_IMAGE:$DOCKER_TAG --build-arg APP_VERSION=$APP_VERSION --build-arg SENTRY_DSN=$SENTRY_DSN .
@@ -47,10 +47,10 @@ mark_release:
       alias: docker
   before_script:
     - echo $CI_REGISTRY_PASSWORD | docker login --username $CI_REGISTRY_USER --password-stdin $CI_REGISTRY
-    - export DOCKER_TAG=$(echo "$CI_COMMIT_REF_SLUG" | sed 's/^v//g')
+    - export DOCKER_TAG=$(echo "$CI_COMMIT_REF_NAME" | sed 's/^v//g')
   script:
     - docker pull $CI_REGISTRY_IMAGE:$DOCKER_TAG
-    - docker image tag $CONTAINER_IMAGE $CI_REGISTRY_IMAGE:latest
+    - docker image tag $CI_REGISTRY_IMAGE:$DOCKER_TAG $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
 
 include:
