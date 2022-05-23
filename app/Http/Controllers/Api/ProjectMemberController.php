@@ -18,7 +18,7 @@ class ProjectMemberController extends Controller
      * @return JsonResponse
      * @throws Throwable
      */
-    public function show(ShowProjectMemberRequest $request): JsonResponse
+    public function list(ShowProjectMemberRequest $request): JsonResponse
     {
         $data = $request->validated();
 
@@ -26,7 +26,7 @@ class ProjectMemberController extends Controller
 
         $projectMembers = ProjectMemberService::getMembers($data['project_id']);
 
-        throw_if(!isset($projectMembers['id']) || !$projectMembers, new NotFoundHttpException);
+        $projectMembers['users'] = $projectMembers['users'] ?? [];
 
         return responder()->success($projectMembers)->respond();
     }
