@@ -2,7 +2,7 @@ FROM composer:2.3.5 as composer
 
 FROM php:8.1-alpine AS runtime
 
-ARG SENTRY_DNS
+ARG SENTRY_DSN
 ARG APP_VERSION
 ARG APP_ENV=production
 ENV IMAGE_VERSION=4.1.0
