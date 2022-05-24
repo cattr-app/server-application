@@ -4,14 +4,14 @@ variables:
 stages:
   - build
   - test
-  - deploy
+  - release
 
 sast:
   stage: test
 
 sentry:
   image: getsentry/sentry-cli:latest
-  stage: deploy
+  stage: release
   rules:
     - if: $CI_COMMIT_TAG && $SENTRY_ORG
   before_script:
@@ -38,7 +38,7 @@ build:
 
 mark_release:
   image: ${CI_DEPENDENCY_PROXY_GROUP_IMAGE_PREFIX}/docker:20
-  stage: deploy
+  stage: release
   tags:
     - privileged
   only:
