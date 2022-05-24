@@ -55,6 +55,6 @@ class ProjectPolicy
             return false;
         }
 
-        return $user->hasRole('manager') || $user->hasProjectRole('manager', $project->id);
+        return $user->hasRole('manager');
     }
 }

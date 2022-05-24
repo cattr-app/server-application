@@ -51,19 +51,8 @@ class TaskPolicy
             return false;
         }
 
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-
-        if ($user->hasRole('manager')) {
-            return true;
-        }
-
-        if ($user->hasProjectRole('manager', $projectId)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasRole('manager')
+            || $user->hasProjectRole('manager', $projectId) || $user->hasProjectRole('user', $projectId);
     }
 
     /**
@@ -79,19 +68,9 @@ class TaskPolicy
             return false;
         }
 
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-
-        if ($user->hasRole('manager')) {
-            return true;
-        }
-
-        if ($user->hasProjectRole('manager', $task->project_id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasRole('manager')
+            || $user->hasProjectRole('manager', $task->project_id)
+            || ($user->hasProjectRole('user', $task->project_id) && $task->assigned_by === $user->id);
     }
 
     /**
@@ -107,18 +86,7 @@ class TaskPolicy
             return false;
         }
 
-        if ($user->hasRole('admin')) {
-            return true;
-        }
-
-        if ($user->hasRole('manager')) {
-            return true;
-        }
-
-        if ($user->hasProjectRole('manager', $task->project_id)) {
-            return true;
-        }
-
-        return false;
+        return $user->hasRole('manager')
+            || $user->hasProjectRole('manager', $task->project_id);
     }
 }

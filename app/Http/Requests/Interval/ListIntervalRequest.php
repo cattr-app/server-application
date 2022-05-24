@@ -13,7 +13,7 @@ class ListIntervalRequest extends CattrFormRequest
 
     public function authorizeValidated(): bool
     {
-        return $this->user()->can('view', TimeInterval::class);
+        return $this->user()->can('viewAny', TimeInterval::class);
     }
 
     public function _rules(): array

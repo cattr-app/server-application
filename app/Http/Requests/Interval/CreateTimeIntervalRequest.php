@@ -18,8 +18,12 @@ class CreateTimeIntervalRequest extends CattrFormRequest
     {
         return $this->user()->can(
             'create',
-            [TimeInterval::class,
-            request(['user_id', 'task_id', 'is_manual'])]
+            [
+                TimeInterval::class,
+                $this->get('user_id'),
+                $this->get('task_id'),
+                $this->get('is_manual', false),
+            ],
         );
     }
 

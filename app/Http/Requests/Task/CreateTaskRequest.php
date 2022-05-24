@@ -12,7 +12,7 @@ class CreateTaskRequest extends CattrFormRequest
 
     public function authorizeValidated(): bool
     {
-        return $this->user()->can('create', [Task::class, request('project_id')]);
+        return $this->user()->can('create', [Task::class, $this->get('project_id')]);
     }
 
     public function _rules(): array

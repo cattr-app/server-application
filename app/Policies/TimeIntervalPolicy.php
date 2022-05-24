@@ -29,18 +29,17 @@ class TimeIntervalPolicy
         );
     }
 
-    public function create(User $user, array $param): bool
+    public function create(User $user, int $userId, int $taskId, bool $isManual): bool
     {
-        $projectId = self::getProjectIdByTaskId($param['task_id']);
+        $projectId = self::getProjectIdByTaskId($taskId);
 
-        if ($param['is_manual']) {
-            if ($user->id !== $param['user_id']) {
+        if ($isManual) {
+            if ($user->id !== $userId) {
                 return $user->hasRole('manager') || $user->hasProjectRole('manager', $projectId);
             }
 
             return $user->hasProjectRole('user', $projectId) && $user->manual_time;
         }
-
 
         return $user->hasProjectRole('user', $projectId);
     }
