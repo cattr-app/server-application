@@ -39,6 +39,7 @@ cghooks.lock
 /storage/framework/tmp
 !/storage/framework/cache/.gitkeep
 /storage/framework/cache/*
+/storage/app/tmp
 
 /storage/app/reports
 

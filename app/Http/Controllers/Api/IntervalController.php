@@ -23,18 +23,14 @@ use Filter;
 use App\Models\TimeInterval;
 use Carbon\Carbon;
 use Exception;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use Illuminate\Support\Arr;
+use Log;
 use Settings;
 use Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
-use Validator;
 
 class IntervalController extends ItemController
 {
@@ -521,12 +517,21 @@ class IntervalController extends ItemController
 
         $screenshotService = $this->screenshotService;
 
+        if ($request->hasFile('screenshot') && optional($request->file('screenshot'))->isValid()) {
+            $path = $request->file('screenshot')->store('tmp');
+
+            Event::listen(
+                Filter::getAfterActionEventName(),
+                static function ($data) use ($path, $screenshotService, $data) {
+                    $screenshotService->saveScreenshot(Storage::path($path), $data);
+                    Storage::delete($path);
+                }
+            );
+        }
+
         Event::listen(
             Filter::getAfterActionEventName(),
-            static function ($data) use ($request, $screenshotService) {
-                if ($request->hasFile('screenshot') && optional($request->file('screenshot'))->isValid()) {
-                    $screenshotService->saveScreenshot($request->file('screenshot'), $data);
-                }
+            static function ($data) {
                 if (User::find($data['user_id'])->web_and_app_monitoring) {
                     AssignAppsToTimeInterval::dispatch($data);
                 }
@@ -635,7 +640,7 @@ class IntervalController extends ItemController
             $filters['task_id'] = ['in', $requestData['task_id']];
         }
 
-        $itemsQuery = $this->getQuery($filters ? ['where' => $filters]: []);
+        $itemsQuery = $this->getQuery($filters ? ['where' => $filters] : []);
 
         $tasks = $itemsQuery
             ->with('task')

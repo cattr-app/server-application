@@ -19,19 +19,22 @@ class SentryContext
      */
     public function handle(Request $request, Closure $next): mixed
     {
-        if (!config('sentry.send_default_pii') || !auth()->check() || !app()->bound('sentry')) {
-            return $next($request);
+        if (env('IMAGE_VERSION')) {
+            configureScope(static function (Scope $scope): void {
+                $scope->setTag('docker', env('IMAGE_VERSION'));
+            });
         }
 
-        $user = auth()->user();
-        configureScope(static function (Scope $scope) use ($user): void {
-            $scope->setUser([
-                'id' => optional($user)->id,
-                'email' => optional($user)->email,
-                'is_admin' => optional($user)->is_admin,
-                'role' => optional($user)->role->name
-            ]);
-        });
+        if ($user = $request->user()) {
+            configureScope(static function (Scope $scope) use ($user): void {
+                $scope->setUser([
+                    'id' => $user->id,
+                    'name' => config('sentry.send_default_pii') ? $user->full_name : '<masked>',
+                    'is_admin' => $user->is_admin,
+                    'role' => $user->role->name,
+                ]);
+            });
+        }
 
         return $next($request);
     }
