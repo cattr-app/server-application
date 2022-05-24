@@ -522,7 +522,7 @@ class IntervalController extends ItemController
 
             Event::listen(
                 Filter::getAfterActionEventName(),
-                static function ($data) use ($path, $screenshotService, $data) {
+                static function ($data) use ($path, $screenshotService) {
                     $screenshotService->saveScreenshot(Storage::path($path), $data);
                     Storage::delete($path);
                 }
