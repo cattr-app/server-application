@@ -28,9 +28,9 @@ class TaskCommentController extends ItemController
     public function create(CreateTaskCommentRequest $request): JsonResponse
     {
         Filter::listen(
-            Filter::getActionFilterName(),
-            static function (TaskComment $data) {
-                $data->user_id = auth()->id();
+            Filter::getRequestFilterName(),
+            static function (array $data) use ($request) {
+                $data['user_id'] = $request->user()->id();
 
                 return $data;
             }
