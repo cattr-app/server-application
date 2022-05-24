@@ -30,7 +30,7 @@ class TaskCommentController extends ItemController
         Filter::listen(
             Filter::getRequestFilterName(),
             static function (array $data) use ($request) {
-                $data['user_id'] = $request->user()->id();
+                $data['user_id'] = $request->user()->id;
 
                 return $data;
             }

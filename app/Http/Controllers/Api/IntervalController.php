@@ -524,7 +524,7 @@ class IntervalController extends ItemController
                 Filter::getAfterActionEventName(),
                 static function ($data) use ($path, $screenshotService) {
                     $screenshotService->saveScreenshot(Storage::path($path), $data);
-                    Storage::delete($path);
+                    dispatch(static fn() => Storage::delete($path))->delay(now()->addMinute());
                 }
             );
         }
