@@ -29,8 +29,7 @@ RUN set -x && \
         zip \
         intl \
         pcntl \
-        pdo_mysql \
-        opcache && \
+        pdo_mysql && \
     printf "\n\n\nyes\nyes\nyes\n" | pecl install swoole-4.8.9 && \
     docker-php-ext-enable swoole && \
     wget -q "https://github.com/aptible/supercronic/releases/download/v0.1.12/supercronic-linux-amd64" \
