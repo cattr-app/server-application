@@ -11,7 +11,7 @@ ENV SENTRY_DSN $SENTRY_DSN
 ENV APP_ENV $APP_ENV
 
 RUN set -x && \
-    apk add --no-cache icu-libs zlib libpng libzip libjpeg libcurl && \
+    apk add --no-cache icu-libs zlib libpng libzip libjpeg libcurl bash && \
     apk add --no-cache --virtual .build-deps \
             autoconf \
             openssl \
@@ -29,7 +29,8 @@ RUN set -x && \
         zip \
         intl \
         pcntl \
-        pdo_mysql && \
+        pdo_mysql \
+        opcache && \
     printf "\n\n\nyes\nyes\nyes\n" | pecl install swoole-4.8.9 && \
     docker-php-ext-enable swoole && \
     wget -q "https://github.com/aptible/supercronic/releases/download/v0.1.12/supercronic-linux-amd64" \
