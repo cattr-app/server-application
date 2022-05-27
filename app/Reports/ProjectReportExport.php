@@ -103,7 +103,7 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
                 ->all(),
             [
                 [
-                    "Subtotal for ${$row['name']}",
+                    "Subtotal for {$row['name']}",
                     '',
                     '',
                     CarbonInterval::seconds($row['time'])->cascade()->forHumans(),
