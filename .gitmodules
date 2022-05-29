@@ -1,8 +1,0 @@
-[submodule "Modules/RedmineIntegration"]
-	path = Modules/RedmineIntegration
-	url = https://git.amazingcat.net/cattr/core/modules/redmine/backend.git
-	branch = main
-[submodule "Modules/GitlabIntegration"]
-	path = Modules/GitlabIntegration
-	url = https://git.amazingcat.net/cattr/core/modules/gitlab/backend.git
-	branch = main
