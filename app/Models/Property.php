@@ -6,6 +6,8 @@ use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\MorphTo;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
@@ -41,22 +43,14 @@ class Property extends Model
 {
     use SoftDeletes;
 
-    public const APP_CODE = 'app';
-    public const COMPANY_CODE = 'company';
     public const PROJECT_CODE = 'project';
     public const TASK_CODE = 'task';
     public const TIME_INTERVAL_CODE = 'time_interval';
     public const USER_CODE = 'user';
     public const TASK_COMMENT_CODE = 'task_comment';
 
-    /**
-     * @var string
-     */
     protected $table = 'properties';
 
-    /**
-     * @var array
-     */
     protected $fillable = [
         'entity_id',
         'entity_type',
@@ -64,9 +58,6 @@ class Property extends Model
         'value',
     ];
 
-    /**
-     * @var array
-     */
     protected $casts = [
         'entity_id' => 'integer',
         'entity_type' => 'string',
@@ -74,39 +65,25 @@ class Property extends Model
         'value' => 'string',
     ];
 
-    /**
-     * @var array
-     */
     protected $dates = [
         'created_at',
         'updated_at',
         'deleted_at',
     ];
 
-    public static function getTableName(): string
+    public function entity(): MorphTo
     {
-        return with(new static())->getTable();
+        return $this->morphTo();
     }
 
-    /**
-     * Get property from database
-     * @param string $scope
-     * @param string $key
-     * @param array $parameters
-     * @return Collection
-     */
-    public static function getProperty(string $scope, string $key, array $parameters = []): Collection
+    public static function loadMorphMap(): void
     {
-        // Making data for where query
-        $queryData = [
-            'entity_type' => $scope,
-            'name' => $key
-        ];
-
-        if (!empty($parameters)) {
-            $queryData = array_merge($queryData, $parameters);
-        }
-
-        return self::where($queryData)->get();
+        Relation::enforceMorphMap([
+            self::PROJECT_CODE => Project::class,
+            self::TASK_CODE => Task::class,
+            self::TIME_INTERVAL_CODE => TimeInterval::class,
+            self::USER_CODE => User::class,
+            self::TASK_COMMENT_CODE => TaskComment::class,
+        ]);
     }
 }

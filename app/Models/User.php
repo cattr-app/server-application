@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Foundation\Auth\User as Authenticatable;
@@ -283,14 +284,8 @@ class User extends Authenticatable
         'last_activity',
     ];
 
-    /**
-     * The attributes that should be hidden for arrays.
-     *
-     * @var array
-     */
     protected $hidden = [
         'password',
-        'nonce',
     ];
 
     protected static function boot(): void
@@ -300,63 +295,39 @@ class User extends Authenticatable
         static::addGlobalScope(new UserAccessScope);
     }
 
-    /**
-     * The accessors to append to the model's array form.
-     *
-     * @var array
-     */
     protected $appends = [
         'online',
     ];
 
-    /**
-     * @return BelongsTo
-     */
     public function role(): BelongsTo
     {
         return $this->belongsTo(Role::class, 'role_id', 'id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function projects(): BelongsToMany
     {
         return $this->belongsToMany(Project::class, 'projects_users', 'user_id', 'project_id')
             ->withPivot('role_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function projectsRelation(): HasMany
     {
         return $this->hasMany(ProjectsUsers::class, 'user_id', 'id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function tasks(): BelongsToMany
     {
         return $this->belongsToMany(Task::class, 'tasks_users', 'user_id', 'task_id');
     }
 
-    /**
-     * @return HasMany
-     */
     public function timeIntervals(): HasMany
     {
         return $this->hasMany(TimeInterval::class, 'user_id');
     }
 
-    /**
-     * @return HasMany
-     */
-    public function properties(): HasMany
+    public function properties(): MorphMany
     {
-        return $this->hasMany(Property::class, 'entity_id')
-            ->where('entity_type', Property::USER_CODE);
+        return $this->morphMany(Property::class, 'entity');
     }
 
     /**

@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
@@ -205,9 +206,9 @@ class TimeInterval extends Model
         return $this->belongsTo(User::class, 'user_id');
     }
 
-    public function properties(): HasMany
+    public function properties(): MorphMany
     {
-        return $this->hasMany(Property::class, 'entity_id')->where('entity_type', '=', Property::TIME_INTERVAL_CODE);
+        return $this->morphMany(Property::class, 'entity');
     }
 
     public function hasScreenshot(): Attribute

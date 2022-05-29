@@ -2,7 +2,7 @@
 
 namespace App\Models;
 
-use App\Scopes\ScreenshotScope;
+use App\Scopes\TimeIntervalAccessScope;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -20,8 +20,8 @@ use Illuminate\Support\Carbon;
  * @property Carbon|null $updated_at
  * @property Carbon|null $deleted_at
  * @property int|null $user_id
- * @property-read \App\Models\TimeInterval|null $timeInterval
- * @property-read \App\Models\User|null $user
+ * @property-read TimeInterval|null $timeInterval
+ * @property-read User|null $user
  * @method static Builder|TrackedApplication newModelQuery()
  * @method static Builder|TrackedApplication newQuery()
  * @method static \Illuminate\Database\Query\Builder|TrackedApplication onlyTrashed()
@@ -60,7 +60,7 @@ class TrackedApplication extends Model
     {
         parent::boot();
 
-        static::addGlobalScope(new ScreenshotScope);
+        static::addGlobalScope(new TimeIntervalAccessScope);
     }
 
     public function timeInterval(): BelongsTo

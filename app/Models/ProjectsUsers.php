@@ -6,6 +6,7 @@ use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
+use Illuminate\Support\Carbon;
 
 /**
  * @apiDefine ProjectUserObject
@@ -44,12 +45,12 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  *
  * @property int $project_id
  * @property int $user_id
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
  * @property int $role_id
- * @property-read \App\Models\Project $project
- * @property-read \App\Models\Role $role
- * @property-read \App\Models\User $user
+ * @property-read Project $project
+ * @property-read Role $role
+ * @property-read User $user
  * @method static EloquentBuilder|ProjectsUsers newModelQuery()
  * @method static EloquentBuilder|ProjectsUsers newQuery()
  * @method static EloquentBuilder|ProjectsUsers query()

@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
@@ -189,7 +190,7 @@ class Task extends Model
             dispatch(static function () use ($task) {
                 foreach ($task->users as $user) {
                     $task->project->users()->firstOrCreate(
-                        ['user_id' => $user->id],
+                        ['id' => $user->id],
                         ['role_id' => Role::getIdByName('user')]
                     );
                 }
@@ -234,11 +235,16 @@ class Task extends Model
 
     public function getDescription(): string
     {
-        return (new Parsedown())->text($this->description);
+        return tap(new Parsedown())->text($this->description);
     }
 
     public function changes(): HasMany
     {
         return $this->hasMany(TaskHistory::class, 'task_id');
+    }
+
+    public function properties(): MorphMany
+    {
+        return $this->morphMany(Property::class, 'entity');
     }
 }

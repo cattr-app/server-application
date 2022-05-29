@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasOne;
+use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
@@ -117,10 +118,6 @@ class Project extends Model
 
     protected const PERMISSIONS = ['update', 'update_members', 'destroy'];
 
-
-    /**
-     * Override parent boot and Call deleting event
-     */
     protected static function boot(): void
     {
         parent::boot();
@@ -155,9 +152,6 @@ class Project extends Model
         return $this->hasOne(Priority::class, 'id', 'default_priority_id');
     }
 
-    /**
-     * @return BelongsToMany
-     */
     public function statuses(): BelongsToMany
     {
         return $this->belongsToMany(Status::class, 'projects_statuses', 'project_id', 'status_id')->withPivot('color');
@@ -168,5 +162,10 @@ class Project extends Model
         return empty($this->attributes['source']) || $this->attributes['source'] === 'internal'
             ? $this->attributes['name']
             : ucfirst($this->attributes['source']) . ": {$this->attributes['name']}";
+    }
+
+    public function properties(): MorphMany
+    {
+        return $this->morphMany(Property::class, 'entity');
     }
 }
