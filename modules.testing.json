@@ -1,6 +1,4 @@
 {
   "GitlabIntegration": false,
-  "Invoices": false,
-  "RedmineIntegration": false,
-  "Reports": false
+  "RedmineIntegration": false
 }
