@@ -88,7 +88,7 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
                 ->map(static fn($collection) => array_merge(
                     $collection['intervals']->map(
                         static fn($collection) => $collection['items']
-                    )->flatten(2)->map(
+                    )->flatten(2)->unique(static fn($item) => $item->task_id)->map(
                         static fn($collection) => array_values($collection->only([
                             'project_name',
                             'user_name',
