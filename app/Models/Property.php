@@ -76,6 +76,11 @@ class Property extends Model
         return $this->morphTo();
     }
 
+    public static function getTableName(): string
+    {
+        return with(new static())->getTable();
+    }
+
     public static function loadMorphMap(): void
     {
         Relation::enforceMorphMap([
