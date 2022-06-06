@@ -56,8 +56,10 @@ class GenerateAndSendReport implements ShouldQueue, ShouldBeUnique
 
         $this->user->notify((new ReportGenerated($fileName)));
 
+        $dir = $this->dir;
+
         dispatch(
-            static fn() => Storage::drive(self::STORAGE_DRIVE)->deleteDirectory("reports/$this->dir")
+            static fn() => Storage::drive(self::STORAGE_DRIVE)->deleteDirectory("reports/$dir")
         )->delay(now()->addHour());
     }
 
