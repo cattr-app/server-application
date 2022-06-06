@@ -15,8 +15,9 @@ class MakeAdmin extends Command
         $email = $this->ask('What is your email?', 'admin@example.com');
 
         if (!$this->option('o') && !User::admin()->count()) {
+            $self = $this;
             rescue(
-                static fn() => $this->call(
+                static fn() => $self->call(
                     RegisterInstance::class,
                     [
                         'adminEmail' => $email
