@@ -344,7 +344,7 @@ class User extends Authenticatable
     protected function online(): Attribute
     {
         return Attribute::make(
-            get: static fn($value, $attributes) => $attributes['last_activity'] &&
+            get: static fn($value, $attributes) => ($attributes['last_activity'] ?? false) &&
                 Carbon::parse($attributes['last_activity'])->diffInSeconds(Carbon::now())
                 < config('app.user_activity.online_status_time'),
         );
