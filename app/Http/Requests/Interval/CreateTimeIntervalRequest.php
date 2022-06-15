@@ -9,6 +9,7 @@ use App\Models\User;
 use App\Rules\TimeIntervalDoesNotExist;
 use Carbon\Carbon;
 use Exception;
+use Settings;
 
 class CreateTimeIntervalRequest extends CattrFormRequest
 {
@@ -29,6 +30,8 @@ class CreateTimeIntervalRequest extends CattrFormRequest
 
     public function _rules(): array
     {
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+
         return [
             'task_id' => 'required|exists:tasks,id',
             'user_id' => 'required|exists:users,id',
@@ -40,8 +43,8 @@ class CreateTimeIntervalRequest extends CattrFormRequest
                 'after:start_at',
                 new TimeIntervalDoesNotExist(
                     User::find($this->user_id),
-                    Carbon::parse($this->start_at),
-                    Carbon::parse($this->end_at)
+                    Carbon::parse($this->start_at)->setTimezone($timezone),
+                    Carbon::parse($this->end_at)->setTimezone($timezone),
                 ),
             ],
             'activity_fill' => 'int|between:0,100',
