@@ -169,9 +169,9 @@ class TaskController extends ItemController
             }
         );
 
-        Event::listen(Filter::getAfterActionEventName(), static function (array $data) use ($request) {
-            $oldUsers = (string) $data[0]->users()->select('id', 'full_name');
-            $changes = $data[0]->users()->sync($request->get('users'));
+        Event::listen(Filter::getAfterActionEventName(), static function (Task $data) use ($request) {
+            $oldUsers = $data->users()->select('id', 'full_name');
+            $changes = $data->users()->sync($request->get('users'));
             if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
                 SaveTaskEditHistory::dispatch(
                     $data[0],
@@ -182,7 +182,7 @@ class TaskController extends ItemController
                             ->select(['id', 'full_name'])
                     ],
                     [
-                        'users' => $oldUsers,
+                        'users' => json_encode($oldUsers),
                     ]
                 );
             }
