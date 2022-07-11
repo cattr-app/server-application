@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api\Reports;
 
+use App\Enums\DashboardSortBy;
+use App\Enums\SortDirection;
 use App\Helpers\ReportHelper;
 use App\Http\Requests\Reports\DashboardRequest;
 use App\Jobs\GenerateAndSendReport;
@@ -43,6 +45,8 @@ class DashboardController
                 $request->input('projects') ?? Project::all()->pluck('id')->toArray(),
                 Carbon::parse($request->input('start_at'))->setTimezone($timezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($timezone),
+                DashboardSortBy::tryFrom($request->input('sort_column')),
+                SortDirection::tryFrom($request->input('sort_direction')),
             ),
             $request->user(),
             ReportHelper::getReportFormat($request),

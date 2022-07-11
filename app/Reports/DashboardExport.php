@@ -3,6 +3,8 @@
 namespace App\Reports;
 
 use App\Contracts\AppReport;
+use App\Enums\DashboardSortBy;
+use App\Enums\SortDirection;
 use App\Helpers\ReportHelper;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
@@ -25,14 +27,15 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
         private readonly ?array $users,
         private readonly ?array $projects,
         private readonly Carbon $startAt,
-        private readonly Carbon $endAt
-    )
-    {
+        private readonly Carbon $endAt,
+        private readonly DashboardSortBy|null $sortBy = null,
+        private readonly SortDirection|null $sortDirection = null,
+    ) {
     }
 
     public function collection(): Collection
     {
-        return $this->queryReport()->map(static function ($el) {
+        $reportCollection = $this->queryReport()->map(static function ($el) {
             $start = Carbon::make($el->start_at);
 
             $el->duration = Carbon::make($el->end_at)?->diffInSeconds($start);
@@ -40,6 +43,33 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
 
             return $el;
         })->groupBy('user_id');
+
+        if ($this->sortBy && $this->sortDirection) {
+            $sortBy = match ($this->sortBy) {
+                DashboardSortBy::USER_NAME => 'user_name',
+                DashboardSortBy::WORKED => 'duration',
+            };
+            $sortDirection = match ($this->sortDirection) {
+                SortDirection::ASC => false,
+                SortDirection::DESC => true,
+            };
+
+            if ($this->sortBy === DashboardSortBy::USER_NAME) {
+                $reportCollection = $reportCollection->sortBy(
+                    fn ($interval) => $interval[0][$sortBy],
+                    SORT_NATURAL,
+                    $sortDirection
+                );
+            } else {
+                $reportCollection = $reportCollection->sortBy(
+                    fn ($interval) => $interval->sum($sortBy),
+                    SORT_NATURAL,
+                    $sortDirection
+                );
+            }
+        }
+
+        return $reportCollection;
     }
 
     /**
