@@ -428,9 +428,11 @@ class IntervalController extends ItemController
                     'task_id'
                 )
             )
-        )->save());
+        ));
 
         Event::dispatch(Filter::getAfterActionEventName(), [$intervals, $request]);
+
+        $intervals->each(static fn(Model $item) => $item->save());
 
         return responder()->success()->respond(204);
     }
