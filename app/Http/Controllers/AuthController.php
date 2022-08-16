@@ -214,7 +214,7 @@ class AuthController extends BaseController
         $lifetime = now()->addMinutes(config('auth.lifetime_minutes.desktop_token'));
 
         Cache::store('octane')->put(
-            sha1($request->ip()) . ":$token" ,
+            sha1($request->ip()) . ":$token",
             $request->user()->id,
             $lifetime,
         );
@@ -289,5 +289,54 @@ class AuthController extends BaseController
         return responder()->success([
             'token' => $user->createToken(Str::uuid())->plainTextToken,
         ], new AuthTokenTransformer)->respond();
+    }
+
+    /**
+     * @apiDeprecated Exists only for compatibility with old Cattr client
+     * @api            {post} /auth/refresh Refresh
+     * @apiDescription Refreshes JWT
+     *
+     * @apiVersion     1.0.0
+     * @apiName        Refresh
+     * @apiGroup       Auth
+     *
+     * @apiUse         AuthHeader
+     *
+     * @apiSuccess {String}   access_token  Token
+     * @apiSuccess {String}   token_type    Token Type
+     * @apiSuccess {String}   expires_in    Token TTL 8601String Date
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     */
+
+    /**
+     * @param Request $request
+     * @return JsonResponse
+     * @deprecated Exists only for compatibility with old Cattr client
+     */
+    public function refresh(Request $request): JsonResponse
+    {
+        \Log::channel('api-deprecation')
+            ->warning('Deprecated method AuthController@refresh called, update Cattr client', [
+                'user_id' => auth()->user()->id
+            ]);
+
+        $token = $request->header('Authorization');
+
+        if (!$token) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        }
+
+        $token = explode(' ', $token);
+
+        return new JsonResponse(array_merge([
+            'access_token' => $token[1],
+            'token_type' => $token[0],
+            'expires_in' => null,
+            'user' => auth()->user(),
+        ]), 200, [
+            'Warning' => '299 Deprecated method AuthController@refresh called, update Cattr client.'
+        ]);
     }
 }

@@ -56,6 +56,10 @@ return [
             'driver' => 'errorlog',
             'level' => env('APP_LOG_LEVEL', 'error'),
         ],
+        'api-deprecation' => [
+            'driver' => 'single',
+            'path' => storage_path('logs/api-deprecation.log'),
+        ],
         'sentry' => [
             'driver' => 'sentry',
             'level'  => env('SENTRY_LOG_LEVEL', 'warning'),
