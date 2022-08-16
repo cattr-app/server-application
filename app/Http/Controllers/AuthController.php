@@ -330,6 +330,10 @@ class AuthController extends BaseController
 
         $token = explode(' ', $token);
 
+        if (count($token) !== 2) {
+            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
+        }
+
         return new JsonResponse(array_merge([
             'access_token' => $token[1],
             'token_type' => $token[0],
