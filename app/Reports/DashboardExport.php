@@ -13,14 +13,16 @@ use Exception;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\Exportable;
+use Maatwebsite\Excel\Concerns\WithDefaultStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
+use PhpOffice\PhpSpreadsheet\Style\Style;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
 
-class DashboardExport extends AppReport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles
+class DashboardExport extends AppReport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles, WithDefaultStyles
 {
     use Exportable;
 
@@ -115,11 +117,7 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
 
         foreach ($this->periodDates as $date) {
             if (isset($mappedIntervals[$date])) {
-                // TODO: Decide on formatting
-                $intervalsByDay[] = CarbonInterval::seconds($mappedIntervals[$date])
-                    ->cascade()
-                    ->forHumans(['short' => true]);
-//                $intervalsByDay[] = round(CarbonInterval::seconds($mappedIntervals[$date])->totalHours, 3);
+                $intervalsByDay[] = round(CarbonInterval::seconds($mappedIntervals[$date])->totalHours, 3);
             } else {
                 $intervalsByDay[] = '';
             }
@@ -170,7 +168,8 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
     public function styles(Worksheet $sheet): array
     {
         return [
-            1 => ['font' => ['bold' => true], 'alignment' => ['horizontal' => Alignment::HORIZONTAL_CENTER]],
+            1 => ['font' => ['bold' => true]],
+            'A' => ['alignment' => ['horizontal' => Alignment::HORIZONTAL_LEFT]]
         ];
     }
 
@@ -182,5 +181,10 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
     public function getLocalizedReportName(): string
     {
         return __('Dashboard_Report');
+    }
+
+    public function defaultStyles(Style $defaultStyle)
+    {
+        return ['alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT]];
     }
 }
