@@ -321,7 +321,10 @@ class AuthController extends BaseController
         ]);
 
         return responder()
-            ->error('deprecated_api', "You're trying to reach deprecated api endpoint. Consider to update your Cattr client.")
+            ->error(
+                'deprecated_api',
+                "You're trying to reach deprecated api endpoint. Consider to update your Cattr client."
+            )
             ->respond(400, [
                 'Warning' => '299 Deprecated method AuthController@refresh called, update Cattr client.'
             ]);
