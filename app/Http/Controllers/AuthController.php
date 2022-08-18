@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\Entities\AuthorizationException;
+use App\Exceptions\Entities\DeprecatedApiException;
 use App\Helpers\Recaptcha;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Transformers\AuthTokenTransformer;
@@ -316,17 +317,6 @@ class AuthController extends BaseController
      */
     public function refresh(): JsonResponse
     {
-        \Log::warning('Deprecated method AuthController@refresh called, update Cattr client', [
-            'user_id' => auth()->user()->id
-        ]);
-
-        return responder()
-            ->error(
-                'deprecated_api',
-                "You're trying to reach deprecated api endpoint. Consider to update your Cattr client."
-            )
-            ->respond(400, [
-                'Warning' => '299 Deprecated method AuthController@refresh called, update Cattr client.'
-            ]);
+        throw new DeprecatedApiException();
     }
 }
