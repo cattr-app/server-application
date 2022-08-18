@@ -311,36 +311,19 @@ class AuthController extends BaseController
      */
 
     /**
-     * @param Request $request
      * @return JsonResponse
      * @deprecated Exists only for compatibility with old Cattr client
      */
-    public function refresh(Request $request): JsonResponse
+    public function refresh(): JsonResponse
     {
-        \Log::channel('api-deprecation')
-            ->warning('Deprecated method AuthController@refresh called, update Cattr client', [
-                'user_id' => auth()->user()->id
-            ]);
-
-        $token = $request->header('Authorization');
-
-        if (!$token) {
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
-        }
-
-        $token = explode(' ', $token);
-
-        if (count($token) !== 2) {
-            throw new AuthorizationException(AuthorizationException::ERROR_TYPE_UNAUTHORIZED);
-        }
-
-        return new JsonResponse(array_merge([
-            'access_token' => $token[1],
-            'token_type' => $token[0],
-            'expires_in' => null,
-            'user' => auth()->user(),
-        ]), 200, [
-            'Warning' => '299 Deprecated method AuthController@refresh called, update Cattr client.'
+        \Log::warning('Deprecated method AuthController@refresh called, update Cattr client', [
+            'user_id' => auth()->user()->id
         ]);
+
+        return responder()
+            ->error('deprecated_api', "You're trying to reach deprecated api endpoint. Consider to update your Cattr client.")
+            ->respond(400, [
+                'Warning' => '299 Deprecated method AuthController@refresh called, update Cattr client.'
+            ]);
     }
 }
