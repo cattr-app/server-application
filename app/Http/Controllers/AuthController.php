@@ -3,6 +3,7 @@
 namespace App\Http\Controllers;
 
 use App\Exceptions\Entities\AuthorizationException;
+use App\Exceptions\Entities\DeprecatedApiException;
 use App\Helpers\Recaptcha;
 use App\Http\Requests\Auth\LoginRequest;
 use App\Http\Transformers\AuthTokenTransformer;
@@ -214,7 +215,7 @@ class AuthController extends BaseController
         $lifetime = now()->addMinutes(config('auth.lifetime_minutes.desktop_token'));
 
         Cache::store('octane')->put(
-            sha1($request->ip()) . ":$token" ,
+            sha1($request->ip()) . ":$token",
             $request->user()->id,
             $lifetime,
         );
@@ -289,5 +290,33 @@ class AuthController extends BaseController
         return responder()->success([
             'token' => $user->createToken(Str::uuid())->plainTextToken,
         ], new AuthTokenTransformer)->respond();
+    }
+
+    /**
+     * @apiDeprecated Exists only for compatibility with old Cattr client
+     * @api            {post} /auth/refresh Refresh
+     * @apiDescription Refreshes JWT
+     *
+     * @apiVersion     1.0.0
+     * @apiName        Refresh
+     * @apiGroup       Auth
+     *
+     * @apiUse         AuthHeader
+     *
+     * @apiSuccess {String}   access_token  Token
+     * @apiSuccess {String}   token_type    Token Type
+     * @apiSuccess {String}   expires_in    Token TTL 8601String Date
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     */
+
+    /**
+     * @return JsonResponse
+     * @deprecated Exists only for compatibility with old Cattr client
+     */
+    public function refresh(): JsonResponse
+    {
+        throw new DeprecatedApiException();
     }
 }
