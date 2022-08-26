@@ -61,10 +61,7 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
                                     static fn(Collection $collection, string $key) => [
                                         'date' => $key,
                                         'time' => $collection->sum('duration'),
-                                        'items' => $collection->groupBy('hour')->map(
-                                            static fn(Collection $collection
-                                            ) => $collection->groupBy('minute')->values()->first(),
-                                        )->values(),
+                                        'items' => $collection->groupBy('hour')->values(),
                                     ],
                                 )->values(),
                             ],
