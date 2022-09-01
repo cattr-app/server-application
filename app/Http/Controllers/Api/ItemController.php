@@ -106,7 +106,7 @@ abstract class ItemController extends Controller
     {
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
+        Event::dispatch(Filter::getBeforeActionEventName(), [$requestData]);
 
         /** @var Model $cls */
         $cls = static::MODEL;
