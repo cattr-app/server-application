@@ -21,6 +21,8 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
 {
     use Exportable;
 
+    const PICS_AMOUNT = 6;
+
     public function __construct(
         private readonly ?array $users,
         private readonly ?array $projects,
@@ -63,7 +65,11 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
                                         'time' => $collection->sum('duration'),
                                         'items' => $collection->groupBy('hour')->map(
                                             static fn(Collection $collection
-                                            ) => $collection->slice(0, 6)->values(),
+                                            ) => $collection
+                                                ->split(self::PICS_AMOUNT)
+                                                ->map(fn(Collection $group, $i
+                                                ) => $i < (self::PICS_AMOUNT - 1) ? $group->first() : $group->last())
+                                                ->values(),
                                         )->values(),
                                     ],
                                 )->values(),
