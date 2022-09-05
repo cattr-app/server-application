@@ -57,7 +57,7 @@ class ReportHelper
                     'tasks.id as task_id',
                     'tasks.task_name as task_name',
                     'users.id as user_id',
-                    'users.full_name as user_name',
+                    'users.full_name as full_name',
                     'time_intervals.start_at',
                 ])
             ))
