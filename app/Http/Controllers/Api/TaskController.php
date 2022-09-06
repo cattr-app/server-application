@@ -174,7 +174,7 @@ class TaskController extends ItemController
             $changes = $data->users()->sync($request->get('users'));
             if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
                 SaveTaskEditHistory::dispatch(
-                    $data[0],
+                    $data,
                     $request->user(),
                     [
                         'users' => (string)User::withoutGlobalScopes()
@@ -186,7 +186,7 @@ class TaskController extends ItemController
                     ]
                 );
             }
-            SaveTaskEditHistory::dispatch($data[0], request()->user());
+            SaveTaskEditHistory::dispatch($data, request()->user());
         });
 
         return $this->_edit($request);
