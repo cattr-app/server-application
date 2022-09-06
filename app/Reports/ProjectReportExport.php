@@ -49,7 +49,7 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
                 'users' => $collection->groupBy('user_id')->map(
                     static fn(Collection $collection, int $key) => [
                         'id' => $key,
-                        'full_name' => $collection->first()->user_name,
+                        'full_name' => $collection->first()->full_name,
                         'email' => $collection->first()->user_email,
                         'time' => $collection->sum('duration'),
                         'tasks' => $collection->groupBy('task_id')->map(
@@ -91,7 +91,7 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
                     )->flatten(2)->unique(static fn($item) => $item->task_id)->map(
                         static fn($collection) => array_values($collection->only([
                             'project_name',
-                            'user_name',
+                            'full_name',
                             'task_name'
                         ]))
                     )->flatten(1)->all(),

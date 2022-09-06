@@ -55,7 +55,7 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
 
         if ($this->sortBy && $this->sortDirection) {
             $sortBy = match ($this->sortBy) {
-                DashboardSortBy::USER_NAME => 'user_name',
+                DashboardSortBy::USER_NAME => 'full_name',
                 DashboardSortBy::WORKED => 'duration',
             };
             $sortDirection = match ($this->sortDirection) {
@@ -94,7 +94,7 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
                 $interval = CarbonInterval::seconds($collection->sum('duration'));
 
                 return array_merge(
-                    array_values($collection->first()->only(['user_name'])),
+                    array_values($collection->first()->only(['full_name'])),
                     [
                         $interval->cascade()->forHumans(['short' => true]),
                         round($interval->totalHours, 3),
