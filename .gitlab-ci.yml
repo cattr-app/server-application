@@ -5,6 +5,7 @@ stages:
   - build
   - test
   - release
+  - deploy
 
 sast:
   stage: test
@@ -53,6 +54,26 @@ mark_release:
     - docker pull $CI_REGISTRY_IMAGE:$DOCKER_TAG
     - docker image tag $CI_REGISTRY_IMAGE:$DOCKER_TAG $CI_REGISTRY_IMAGE:latest
     - docker push $CI_REGISTRY_IMAGE:latest
+
+deploy_prod:
+  stage: deploy
+  image: alpine
+  environment:
+    name: production
+    url: https://time.amazingcat.net
+  only:
+    - tags
+  when: manual
+  before_script:
+    - 'which ssh-agent || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$CI_KEY" | base64 -d | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+  script:
+    - ssh $CI_USER@$CI_HOST 'cd /mnt/hdd/services/cattr && docker compose pull'
+    - ssh $CI_USER@$CI_HOST 'cd /mnt/hdd/services/cattr && docker compose up -d'
 
 include:
   - template: Security/SAST.gitlab-ci.yml
