@@ -41,11 +41,12 @@ class ReportHelper
      * @return Builder
      */
     public static function getBaseQuery(
-        array $users,
+        array  $users,
         Carbon $startAt,
         Carbon $endAt,
-        array $select = []
-    ): Builder {
+        array  $select = []
+    ): Builder
+    {
         return Project::join('tasks', 'tasks.project_id', '=', 'projects.id')
             ->join('time_intervals', 'time_intervals.task_id', '=', 'tasks.id')
             ->join('users', 'time_intervals.user_id', '=', 'users.id')
@@ -62,6 +63,7 @@ class ReportHelper
                 ])
             ))
             ->whereBetween('time_intervals.start_at', [$startAt, $endAt])
+            ->orWhereBetween('time_intervals.end_at', [$startAt, $endAt])
             ->whereNull('time_intervals.deleted_at')
             ->whereIn('users.id', $users)
             ->groupBy(['tasks.id', 'users.id', 'time_intervals.start_at'])
