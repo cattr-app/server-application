@@ -26,6 +26,7 @@ class ProjectReportController
                 $request->input('projects', Project::all()->pluck('id')->toArray()),
                 Carbon::parse($request->input('start_at'))->setTimezone($timezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($timezone),
+                $timezone
             )->collection()->all(),
         )->respond();
     }
@@ -43,6 +44,7 @@ class ProjectReportController
                 $request->input('projects', Project::all()->pluck('id')->toArray()),
                 Carbon::parse($request->input('start_at'))->setTimezone($timezone),
                 Carbon::parse($request->input('end_at'))->setTimezone($timezone),
+                $timezone
             ),
             $request->user(),
             ReportHelper::getReportFormat($request),
