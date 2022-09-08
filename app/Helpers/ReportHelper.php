@@ -62,8 +62,8 @@ class ReportHelper
                     'time_intervals.start_at',
                 ])
             ))
-            ->whereBetween('time_intervals.start_at', [$startAt, $endAt])
-            ->orWhereBetween('time_intervals.end_at', [$startAt, $endAt])
+            ->where(fn($query) => $query->whereBetween('time_intervals.start_at', [$startAt, $endAt])
+                ->orWhereBetween('time_intervals.end_at', [$startAt, $endAt]))
             ->whereNull('time_intervals.deleted_at')
             ->whereIn('users.id', $users)
             ->groupBy(['tasks.id', 'users.id', 'time_intervals.start_at'])
