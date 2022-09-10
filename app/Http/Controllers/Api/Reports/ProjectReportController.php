@@ -18,15 +18,15 @@ class ProjectReportController
 {
     public function __invoke(ProjectReportRequest $request): JsonResponse
     {
-        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+        $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
 
         return responder()->success(
             ProjectReportExport::init(
                 $request->input('users', User::all()->pluck('id')->toArray()),
                 $request->input('projects', Project::all()->pluck('id')->toArray()),
-                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
-                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
-                $timezone
+                Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
+                $companyTimezone
             )->collection()->all(),
         )->respond();
     }
@@ -36,15 +36,15 @@ class ProjectReportController
      */
     public function download(ProjectReportRequest $request): JsonResponse
     {
-        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+        $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
 
         $job = new GenerateAndSendReport(
             ProjectReportExport::init(
                 $request->input('users', User::all()->pluck('id')->toArray()),
                 $request->input('projects', Project::all()->pluck('id')->toArray()),
-                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
-                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
-                $timezone
+                Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
+                $companyTimezone
             ),
             $request->user(),
             ReportHelper::getReportFormat($request),

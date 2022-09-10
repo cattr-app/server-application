@@ -22,8 +22,9 @@ class DashboardRequest extends CattrFormRequest
             'projects' => 'nullable|exists:projects,id|array',
             'start_at' => 'required|date',
             'end_at' => 'required|date',
-            'sort_column'=> ['nullable', new Enum(DashboardSortBy::class)],
-            'sort_direction'=> ['nullable', new Enum(SortDirection::class)],
+            'user_timezone' => 'required|timezone',
+            'sort_column' => ['nullable', new Enum(DashboardSortBy::class)],
+            'sort_direction' => ['nullable', new Enum(SortDirection::class)],
         ];
     }
 }

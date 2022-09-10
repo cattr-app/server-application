@@ -7,6 +7,7 @@ use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\Request;
 use Illuminate\Support\Collection;
@@ -68,5 +69,56 @@ class ReportHelper
             ->whereIn('users.id', $users)
             ->groupBy(['tasks.id', 'users.id', 'time_intervals.start_at'])
             ->orderBy('time_intervals.start_at');
+    }
+
+    /**
+     * Calculate interval duration in period
+     * @param CarbonPeriod $period
+     * @param array $durationByDay
+     * @return int
+     */
+    public static function getIntervalDurationInPeriod(CarbonPeriod $period, array $durationByDay): int
+    {
+        $durationInPeriod = 0;
+        foreach ($durationByDay as $date => $duration) {
+            $period->contains($date) && $durationInPeriod += $duration;
+        }
+        return $durationInPeriod;
+    }
+
+    /**
+     * Splits interval by days on which it exists on. Considering timezone of a user if provided.
+     * @param $interval
+     * @param $companyTimezone
+     * @param $userTimezone
+     * @return array
+     */
+    public static function getIntervalDurationByDay($interval, $companyTimezone, $userTimezone = null): array
+    {
+        if ($userTimezone === null) {
+            $userTimezone = $companyTimezone;
+        }
+
+        $startAt = Carbon::parse($interval->start_at)->shiftTimezone($companyTimezone)->setTimezone($userTimezone);
+        $endAt = Carbon::parse($interval->end_at)->shiftTimezone($companyTimezone)->setTimezone($userTimezone);
+
+        $startDate = $startAt->format('Y-m-d');
+        $endDate = $endAt->format('Y-m-d');
+
+        $durationByDay = [];
+        if ($startDate === $endDate) {
+            $durationByDay[$startDate] = $interval->duration;
+        } else {
+//              If interval spans over midnight, divide it at midnight
+            $startOfDay = $endAt->copy()->startOfDay();
+            $startDateDuration = $startOfDay->diffInSeconds($startAt);
+
+            $durationByDay[$startDate] = $startDateDuration;
+
+            $endDateDuration = $endAt->diffInSeconds($startOfDay);
+
+            $durationByDay[$endDate] = $endDateDuration;
+        }
+        return $durationByDay;
     }
 }

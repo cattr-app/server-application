@@ -17,13 +17,14 @@ class TimeUseReportController
 {
     public function __invoke(TimeUseReportRequest $request): JsonResponse
     {
-        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+        $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
 
         return responder()->success(
             TimeUseReportExport::init(
                 $request->input('users') ?? User::all()->pluck('id')->toArray(),
-                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
-                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
+                Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
+                $companyTimezone
             )->collection()->all(),
         )->respond();
     }

@@ -28,35 +28,54 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
 
     private array $periodDates;
     private string $colsDateFormat;
+    private readonly CarbonPeriod $period;
 
     public function __construct(
         private readonly ?array               $users,
         private readonly ?array               $projects,
         private readonly Carbon               $startAt,
         private readonly Carbon               $endAt,
+        private readonly string               $companyTimezone,
+        private readonly string               $userTimezone,
         private readonly DashboardSortBy|null $sortBy = null,
         private readonly SortDirection|null   $sortDirection = null,
     )
     {
         $this->colsDateFormat = 'y-m-d';
+        $this->period = CarbonPeriod::create(
+            $this->startAt->clone()->setTimezone($this->userTimezone),
+            $this->endAt->clone()->setTimezone($this->userTimezone)
+        );
         $this->periodDates = $this->getPeriodDates();
     }
 
     public function collection(): Collection
     {
-        $reportCollection = $this->queryReport()->map(static function ($el) {
-            $start = Carbon::make($el->start_at);
+        $that = $this;
 
-            $el->duration = Carbon::make($el->end_at)?->diffInSeconds($start);
-            $el->from_midnight = $start?->diffInSeconds($start?->copy()->startOfDay());
+        $reportCollection = $this->queryReport()->map(static function ($interval) use ($that) {
+            $start = Carbon::make($interval->start_at);
 
-            return $el;
+            $interval->duration = Carbon::make($interval->end_at)?->diffInSeconds($start);
+            $interval->from_midnight = $start?->diffInSeconds($start?->copy()->startOfDay());
+
+            $interval->durationByDay = ReportHelper::getIntervalDurationByDay(
+                $interval,
+                $that->companyTimezone,
+                $that->userTimezone
+            );
+            $interval->durationAtSelectedPeriod = ReportHelper::getIntervalDurationInPeriod(
+                $that->period,
+                $interval->durationByDay
+            );
+
+            return $interval;
         })->groupBy('user_id');
 
         if ($this->sortBy && $this->sortDirection) {
             $sortBy = match ($this->sortBy) {
                 DashboardSortBy::USER_NAME => 'full_name',
-                DashboardSortBy::WORKED => 'duration',
+                DashboardSortBy::WORKED => 'durationAtSelectedPeriod',
             };
             $sortDirection = match ($this->sortDirection) {
                 SortDirection::ASC => false,

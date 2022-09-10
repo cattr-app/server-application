@@ -20,14 +20,16 @@ class DashboardController
 {
     public function __invoke(DashboardRequest $request): JsonResponse
     {
-        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+        $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
 
         return responder()->success(
             DashboardExport::init(
                 $request->input('users') ?? User::all()->pluck('id')->toArray(),
                 $request->input('projects') ?? Project::all()->pluck('id')->toArray(),
-                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
-                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
+                Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
+                $companyTimezone,
+                $request->input('user_timezone'),
             )->collection()->all(),
         )->respond();
     }
@@ -37,14 +39,16 @@ class DashboardController
      */
     public function download(DashboardRequest $request): JsonResponse
     {
-        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+        $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
 
         $job = new GenerateAndSendReport(
             DashboardExport::init(
                 $request->input('users') ?? User::all()->pluck('id')->toArray(),
                 $request->input('projects') ?? Project::all()->pluck('id')->toArray(),
-                Carbon::parse($request->input('start_at'))->setTimezone($timezone),
-                Carbon::parse($request->input('end_at'))->setTimezone($timezone),
+                Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
+                $companyTimezone,
+                $request->input('user_timezone'),
                 DashboardSortBy::tryFrom($request->input('sort_column')),
                 SortDirection::tryFrom($request->input('sort_direction')),
             ),

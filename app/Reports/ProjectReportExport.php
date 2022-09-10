@@ -31,7 +31,7 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
         private readonly ?array $projects,
         private readonly Carbon $startAt,
         private readonly Carbon $endAt,
-        private readonly string $timezone
+        private readonly string $companyTimezone,
     )
     {
         $this->period = CarbonPeriod::create($this->startAt, $this->endAt);
@@ -41,65 +41,42 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
     {
         $that = $this;
 
-        return $this->queryReport()->map(static function ($el) use ($that) {
-            $date = optional(Carbon::make($el->start_at));
+        return $this->queryReport()->map(static function ($interval) use ($that) {
+            $date = optional(Carbon::make($interval->start_at));
 
-            $el->hour = $date->hour;
-            $el->day = $date->format('Y-m-d');
-            $el->minute = round($date->minute, -1);
-            $el->duration = Carbon::make($el->end_at)?->diffInSeconds(Carbon::make($el->start_at));
+            $interval->hour = $date->hour;
+            $interval->day = $date->format('Y-m-d');
+            $interval->minute = round($date->minute, -1);
+            $interval->duration = Carbon::make($interval->end_at)?->diffInSeconds(Carbon::make($interval->start_at));
 
+            $interval->durationByDay = ReportHelper::getIntervalDurationByDay($interval, $that->companyTimezone);
 
-            $startAt = Carbon::parse($el->start_at)->shiftTimezone($that->timezone);
-            $endAt = Carbon::parse($el->end_at)->shiftTimezone($that->timezone);
+            $interval->durationAtSelectedPeriod = ReportHelper::getIntervalDurationInPeriod(
+                $that->period,
+                $interval->durationByDay
+            );
 
-            $startDate = $startAt->format('Y-m-d');
-            $endDate = $endAt->format('Y-m-d');
-
-            $durationByDay = [];
-            if ($startDate === $endDate) {
-                $durationByDay[$startDate] = $el->duration;
-            } else {
-//              If interval spans over midnight, divide it at midnight
-                $startOfDay = $endAt->copy()->startOfDay();
-                $startDateDuration = $startOfDay->diffInSeconds($startAt);
-
-                $durationByDay[$startDate] = $startDateDuration;
-
-                $endDateDuration = $endAt->diffInSeconds($startOfDay);
-
-                $durationByDay[$endDate] = $endDateDuration;
-            }
-
-            $el->durationByDay = $durationByDay;
-
-            return $el;
+            return $interval;
         })->groupBy('project_id')->map(
             static fn(Collection $collection, int $key) => [
                 'id' => $key,
                 'name' => $collection->first()->project_name,
-                'time' => $collection->sum(fn($interval) => $that->getTotalFromDurationByDay($interval->durationByDay)),
+                'time' => $collection->sum('durationAtSelectedPeriod'),
                 'users' => $collection->groupBy('user_id')->map(
                     static fn(Collection $collection, int $key) => [
                         'id' => $key,
                         'full_name' => $collection->first()->full_name,
                         'email' => $collection->first()->user_email,
-                        'time' => $collection->sum(fn($interval) => (
-                        $that->getTotalFromDurationByDay($interval->durationByDay)
-                        )),
+                        'time' => $collection->sum('durationAtSelectedPeriod'),
                         'tasks' => $collection->groupBy('task_id')->map(
                             static fn(Collection $collection, int $key) => [
                                 'id' => $key,
                                 'task_name' => $collection->first()->task_name,
-                                'time' => $collection->sum(fn($interval) => (
-                                $that->getTotalFromDurationByDay($interval->durationByDay)
-                                )),
+                                'time' => $collection->sum('durationAtSelectedPeriod'),
                                 'intervals' => $collection->groupBy('day')->map(
                                     static fn(Collection $collection, string $key) => [
                                         'date' => $key,
-                                        'time' => $collection->sum(fn($interval) => (
-                                        $that->getTotalFromDurationByDay($interval->durationByDay)
-                                        )),
+                                        'time' => $collection->sum('durationAtSelectedPeriod'),
                                         'items' => $collection->groupBy('hour')->map(
                                             static fn(Collection $collection
                                             ) => $collection
@@ -118,19 +95,6 @@ class ProjectReportExport extends AppReport implements FromCollection, WithMappi
         )->values();
     }
 
-    /**
-     *  Calculate interval duration for selected days
-     * @param array $durationByDay
-     * @return int
-     */
-    private function getTotalFromDurationByDay(array $durationByDay): int
-    {
-        $totalDuration = 0;
-        foreach ($durationByDay as $date => $duration) {
-            $this->period->contains($date) && $totalDuration += $duration;
-        }
-        return $totalDuration;
-    }
 
     /**
      * @param $row
