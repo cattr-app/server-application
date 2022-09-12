@@ -41,12 +41,11 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
         private readonly SortDirection|null   $sortDirection = null,
     )
     {
-        $this->colsDateFormat = 'y-m-d';
         $this->period = CarbonPeriod::create(
             $this->startAt->clone()->setTimezone($this->userTimezone),
             $this->endAt->clone()->setTimezone($this->userTimezone)
         );
-        $this->periodDates = $this->getPeriodDates();
+        $this->periodDates = $this->getPeriodDates($this->period);
     }
 
     public function collection(): Collection
@@ -110,7 +109,7 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
         $that = $this;
         return $row->groupBy('user_id')->map(
             static function ($collection) use ($that) {
-                $interval = CarbonInterval::seconds($collection->sum('duration'));
+                $interval = CarbonInterval::seconds($collection->sum('durationAtSelectedPeriod'));
 
                 return array_merge(
                     array_values($collection->first()->only(['full_name'])),
@@ -126,20 +125,13 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
 
     private function intervalsByDay(Collection $intervals): array
     {
-        $mappedIntervals = [];
-        $intervals->each(function ($interval) use (&$mappedIntervals) {
-            $key = Carbon::parse($interval['start_at'])->format($this->colsDateFormat);
-            $mappedIntervals[$key] = ($mappedIntervals[$key] ?? 0) + $interval['duration'];
-        });
-
         $intervalsByDay = [];
 
         foreach ($this->periodDates as $date) {
-            if (isset($mappedIntervals[$date])) {
-                $intervalsByDay[] = round(CarbonInterval::seconds($mappedIntervals[$date])->totalHours, 3);
-            } else {
-                $intervalsByDay[] = '';
-            }
+            $workedAtDate = $intervals->sum(fn($item) => (
+                $item->durationByDay[$date] ?? 0
+            ));
+            $intervalsByDay[] = round(CarbonInterval::seconds($workedAtDate)->totalHours, 3);
         }
 
 
@@ -170,16 +162,15 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
             'User Name',
             'Hours',
             'Hours (decimal)',
-            ...$this->periodDates
+            ...collect($this->periodDates)->map(fn($date) => Carbon::parse($date)->format('y-m-d'))
         ];
     }
 
-    private function getPeriodDates(): array
+    private function getPeriodDates($period): array
     {
         $dates = [];
-        $period = CarbonPeriod::create($this->startAt, $this->endAt);
         foreach ($period as $date) {
-            $dates[] = $date->format($this->colsDateFormat);
+            $dates[] = $date->format(ReportHelper::$dateFormat);
         }
         return $dates;
     }

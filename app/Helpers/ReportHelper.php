@@ -17,6 +17,8 @@ use RuntimeException;
 
 class ReportHelper
 {
+    public static string $dateFormat = 'Y-m-d';
+
     public static function getReportFormat(Request $request)
     {
         return array_flip(self::getAvailableReportFormats())[$request->header('accept')] ?? null;
@@ -102,8 +104,8 @@ class ReportHelper
         $startAt = Carbon::parse($interval->start_at)->shiftTimezone($companyTimezone)->setTimezone($userTimezone);
         $endAt = Carbon::parse($interval->end_at)->shiftTimezone($companyTimezone)->setTimezone($userTimezone);
 
-        $startDate = $startAt->format('Y-m-d');
-        $endDate = $endAt->format('Y-m-d');
+        $startDate = $startAt->format(self::$dateFormat);
+        $endDate = $endAt->format(self::$dateFormat);
 
         $durationByDay = [];
         if ($startDate === $endDate) {
