@@ -34,11 +34,19 @@ class TimeIntervalPolicy
         $projectId = self::getProjectIdByTaskId($taskId);
 
         if ($isManual) {
+            if ((bool)$user->manual_time === false) {
+                return false;
+            }
+
             if ($user->id !== $userId) {
                 return $user->hasRole('manager') || $user->hasProjectRole('manager', $projectId);
             }
 
-            return $user->hasProjectRole('user', $projectId) && $user->manual_time;
+            return (
+                $user->hasProjectRole('user', $projectId)
+                || $user->hasProjectRole('manager', $projectId)
+                || $user->hasRole('manager')
+            );
         }
 
         return $user->hasProjectRole('user', $projectId);
