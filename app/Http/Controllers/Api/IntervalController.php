@@ -602,10 +602,15 @@ class IntervalController extends ItemController
     {
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+
+        $start_at = Carbon::parse($requestData['start_at'])->setTimezone($timezone);
+        $end_at = Carbon::parse($requestData['end_at'])->setTimezone($timezone);
+
         $filters = [
             'where' => [
-                'start_at' => ['>=', $requestData['start_at']],
-                'end_at' => ['<=', $requestData['end_at']],
+                'start_at' => ['>=', $start_at],
+                'end_at' => ['<=', $end_at],
                 'user_id' => ['=', $requestData['user_id']],
             ],
         ];
@@ -634,14 +639,16 @@ class IntervalController extends ItemController
     {
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+
         $filters = [];
 
         if (isset($requestData['start_at'])) {
-            $filters['start_at'] = ['>=', $requestData['start_at']];
+            $filters['start_at'] = ['>=', Carbon::parse($requestData['start_at'])->setTimezone($timezone)];
         }
 
         if (isset($requestData['end_at'])) {
-            $filters['end_at'] = ['<=', $requestData['end_at']];
+            $filters['end_at'] = ['<=', Carbon::parse($requestData['end_at'])->setTimezone($timezone)];
         }
 
         if (isset($requestData['project_id'])) {
