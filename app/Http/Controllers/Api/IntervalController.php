@@ -411,16 +411,28 @@ class IntervalController extends ItemController
             Filter::process(Filter::getRequestFilterName(), $request->validated())['intervals']
         );
 
-        $this->getQuery(['id' => ['in', $intervalsData->pluck('id')->toArray()]])
-            ->each(static fn(Model $item) => Filter::process(
-                Filter::getActionFilterName(),
-                $item->fill(
-                    Arr::only(
-                        $intervalsData->where('id', $item->id)->first() ?: [],
-                        'task_id'
-                    )
+        $intervals = $this->getQuery([
+            'where' => [
+                'id' => ['in', $intervalsData->pluck('id')->toArray()]
+            ]
+        ])->get()->toBase();
+
+        Event::dispatch(Filter::getBeforeActionEventName(), [$intervals, $request]);
+
+
+        $intervals->each(static fn(Model $item) => Filter::process(
+            Filter::getActionFilterName(),
+            $item->fill(
+                Arr::only(
+                    $intervalsData->where('id', $item->id)->first() ?: [],
+                    'task_id'
                 )
-            )->save());
+            )
+        ));
+
+        Event::dispatch(Filter::getAfterActionEventName(), [$intervals, $request]);
+
+        $intervals->each(static fn(Model $item) => $item->save());
 
         return responder()->success()->respond(204);
     }
@@ -477,11 +489,11 @@ class IntervalController extends ItemController
 
         $itemsQuery = $this->getQuery(['where' => ['id' => ['in', $intervalIds]]]);
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $intervalIds);
+        Event::dispatch(Filter::getBeforeActionEventName(), [$intervalIds, $request]);
 
         $itemsQuery->eachById(static fn($item) => Filter::process(Filter::getActionFilterName(), $item)->delete());
 
-        Event::dispatch(Filter::getAfterActionEventName(), $intervalIds);
+        Event::dispatch(Filter::getAfterActionEventName(), [$intervalIds, $request]);
 
         return responder()->success()->respond(204);
     }
