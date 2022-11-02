@@ -47,7 +47,7 @@ class AppInstallCommand extends Command
             $this->filesystem->copy(base_path('.env.example'), $this->laravel->environmentFilePath());
         }
 
-        if (VIA_DOCKER) {
+        if (VIA_DOCKER == false) {
             try {
                 DB::connection()->getPdo();
 
