@@ -108,53 +108,48 @@ class AppInstallCommand extends Command
 
     protected function setUrls(): void
     {
-        $appUrlIsValid = false;
         do {
             $appUrl = $this->ask('Full URL to backend (API) application (example: http://cattr.acme.corp/)');
-            $appUrlIsValid = preg_match('/^https?:\/\//', $appUrl);
+
+            $validator = Validator::make([
+                'url' => $appUrl
+            ], [
+                'url' => 'url'
+            ]);
+
+            $appUrlIsValid = !$validator->fails();
+
             if (!$appUrlIsValid) {
-                $this->warn('URL should begin with http or https');
+                $this->warn('App url is incorrect');
             }
         } while (!$appUrlIsValid);
+
+
         EnvUpdater::set('APP_URL', $appUrl);
 
-        $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, '
-            . 'this domain will be the same as the backend (API) one.');
+        do {
+            $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, '
+                . 'this domain will be the same as the backend (API) one.', $appUrl);
+
+            $validator = Validator::make([
+                'url' => $frontendUrl
+            ], [
+                'url' => 'url'
+            ]);
+
+            $frontendUrlIsValid = !$validator->fails();
+
+            if (!$frontendUrlIsValid) {
+                $this->warn('Frontend url is incorrect');
+            }
+        } while (!$frontendUrlIsValid);
+
         $frontendUrl = preg_replace('/^https?:\/\//', '', $frontendUrl);
         $frontendUrl = preg_replace('/\/$/', '', $frontendUrl);
         EnvUpdater::set(
             'FRONTEND_APP_URL',
             '"' . $frontendUrl . '"'
         );
-    }
-
-    protected function askAdminCredentials(): array
-    {
-        do {
-            $email = $this->ask('Admin E-Mail');
-
-            $validator = Validator::make([
-                'email' => $email
-            ], [
-                'email' => 'email'
-            ]);
-
-            $emailIsValid = !$validator->fails();
-
-            if (!$emailIsValid) {
-                $this->warn('Email is incorrect');
-            }
-        } while (!$emailIsValid);
-
-        $password = $this->secret("Password");
-        $name = $this->ask('Admin Full Name');
-
-        return [
-            'email' => $email,
-            'password' => $password,
-            'name' => $name,
-            '--o' => true,
-        ];
     }
 
     protected function settingUpEnvMigrateAndSeed(): void
