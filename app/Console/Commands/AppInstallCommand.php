@@ -38,16 +38,17 @@ class AppInstallCommand extends Command
         protected Filesystem $filesystem
     ) {
         parent::__construct();
+        $this->VIA_DOCKER = !!env('IMAGE_VERSION', false);
     }
 
     public function handle(): int
     {
-        define('VIA_DOCKER', !!env('IMAGE_VERSION', false));
+        $this->error('$this->VIA_DOCKER: ' . $this->VIA_DOCKER);
         if (!$this->filesystem->exists($this->laravel->environmentFilePath())) {
             $this->filesystem->copy(base_path('.env.example'), $this->laravel->environmentFilePath());
         }
 
-        if (VIA_DOCKER == false) {
+        if ($this->VIA_DOCKER == false) {
             try {
                 DB::connection()->getPdo();
 
@@ -66,31 +67,20 @@ class AppInstallCommand extends Command
         $this->info("Welcome to Cattr installation wizard\n");
         $this->info("Let's connect to your database first");
 
-        if (VIA_DOCKER == false && $this->settingUpDatabase() !== 0) {
+        if ($this->VIA_DOCKER == false && $this->settingUpDatabase() !== 0) {
             return -1;
         }
 
         $this->setUrls();
 
         $this->info('Enter administrator credentials:');
-        $adminData = $this->askAdminCredentials();
 
         $this->settingUpEnvMigrateAndSeed();
-
-        if (!$this->registerInstance($adminData['email'])) {
-            // User did not confirm installation
-            $this->call(\Illuminate\Database\Console\Migrations\ResetCommand::class);
-            DB::statement('DROP TABLE migrations;');
-
-            $this->filesystem->delete(base_path('.env'));
-            $this->callSilent(ClearCommand::class);
-            return -1;
-        }
 
         $this->setLanguage();
 
         $this->info('Creating admin user');
-        $this->call(MakeAdmin::class, $adminData);
+        $this->call(MakeAdmin::class);
 
         $enableRecaptcha = $this->choice('Enable ReCaptcha 2', ['Yes', 'No'], 1) === 'Yes';
         EnvUpdater::set('RECAPTCHA_ENABLED', $enableRecaptcha ? 'true' : 'false');
@@ -115,14 +105,6 @@ class AppInstallCommand extends Command
         Settings::scope('core')->set('language', $language);
 
         $this->info(strtoupper($language) . ' language successfully set');
-    }
-
-    protected function registerInstance(string $adminEmail): bool
-    {
-        return $this->call(RegisterInstance::class, [
-            'adminEmail' => $adminEmail,
-            '--i' => true
-        ]);
     }
 
     protected function setUrls(): void
@@ -178,15 +160,19 @@ class AppInstallCommand extends Command
 
     protected function settingUpEnvMigrateAndSeed(): void
     {
-        $this->info('Running up migrations');
-        $this->call(MigrateCommand::class);
+        if ($this->VIA_DOCKER == false) {
+            $this->info('Running up migrations');
+            $this->call(MigrateCommand::class);
+        }
 
         $this->info('Running required seeders');
         $this->call(SeedCommand::class, ['--class' => 'InitialSeeder']);
 
         EnvUpdater::set('APP_DEBUG', 'false');
 
-        $this->call(KeyGenerateCommand::class, ['-n' => true]);
+        if ($this->VIA_DOCKER == false) {
+            $this->call(KeyGenerateCommand::class, ['-n' => true]);
+        }
     }
 
     protected function createDatabase(): void
