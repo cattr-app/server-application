@@ -16,7 +16,7 @@ elif [ "$1" == "install" ]; then
   shift
   php artisan cattr:install "$@"
 else
-  php artisan key:ganerate -n
+  php artisan key:generate -n
   php artisan optimize
   php artisan event:cache
   php artisan migrate --force
