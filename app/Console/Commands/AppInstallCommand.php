@@ -163,7 +163,10 @@ class AppInstallCommand extends Command
         }
 
         $this->info('Running required seeders');
-        $this->call(SeedCommand::class, ['--class' => 'InitialSeeder']);
+        $this->call(SeedCommand::class, [
+            '--class' => 'InitialSeeder',
+            '--force' => true
+        ]);
 
         EnvUpdater::set('APP_DEBUG', 'false');
 
