@@ -64,15 +64,15 @@ class AppInstallCommand extends Command
 
 
         $this->info("Welcome to Cattr installation wizard\n");
-        $this->info("Let's connect to your database first");
+        if ($this->VIA_DOCKER && $this->settingUpDatabase() === 0) {
+            $this->info("Let's connect to your database first");
+        }
 
         if ($this->VIA_DOCKER == false && $this->settingUpDatabase() !== 0) {
             return -1;
         }
 
         $this->setUrls();
-
-        $this->info('Enter administrator credentials:');
 
         $this->settingUpEnvMigrateAndSeed();
 
