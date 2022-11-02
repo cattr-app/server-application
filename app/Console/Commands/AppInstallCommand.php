@@ -5,9 +5,14 @@ namespace App\Console\Commands;
 use App\Helpers\EnvUpdater;
 use DB;
 use Exception;
+use Illuminate\Cache\Console\ClearCommand;
 use Illuminate\Console\Command;
+use Illuminate\Database\Console\Migrations\MigrateCommand;
+use Illuminate\Database\Console\Seeds\SeedCommand;
 use Illuminate\Filesystem\Filesystem;
-use Schema;
+use Illuminate\Foundation\Console\ConfigCacheCommand;
+use Illuminate\Foundation\Console\KeyGenerateCommand;
+use Illuminate\Support\Facades\Schema;
 use PDOException;
 use RuntimeException;
 use Settings;
@@ -71,18 +76,18 @@ class AppInstallCommand extends Command
 
         if (!$this->registerInstance($adminData['email'])) {
             // User did not confirm installation
-            $this->call('migrate:reset');
+            $this->call(\Illuminate\Database\Console\Migrations\ResetCommand::class);
             DB::statement('DROP TABLE migrations;');
 
             $this->filesystem->delete(base_path('.env'));
-            $this->callSilent('cache:clear');
+            $this->callSilent(ClearCommand::class);
             return -1;
         }
 
         $this->setLanguage();
 
         $this->info('Creating admin user');
-        $this->call('cattr:make:admin', $adminData);
+        $this->call(MakeAdmin::class, $adminData);
 
         $enableRecaptcha = $this->choice('Enable ReCaptcha 2', ['Yes', 'No'], 1) === 'Yes';
         EnvUpdater::set('RECAPTCHA_ENABLED', $enableRecaptcha ? 'true' : 'false');
@@ -93,7 +98,7 @@ class AppInstallCommand extends Command
             ]);
         }
 
-        $this->call('config:cache');
+        $this->call(ConfigCacheCommand::class);
         Settings::scope('core')->set('installed', true);
 
         $this->info('Application was installed successfully!');
@@ -111,7 +116,7 @@ class AppInstallCommand extends Command
 
     protected function registerInstance(string $adminEmail): bool
     {
-        return $this->call('cattr:register', [
+        return $this->call(RegisterInstance::class, [
             'adminEmail' => $adminEmail,
             '--i' => true
         ]);
@@ -171,25 +176,27 @@ class AppInstallCommand extends Command
     protected function settingUpEnvMigrateAndSeed(): void
     {
         $this->info('Running up migrations');
-        $this->call('migrate');
+        $this->call(MigrateCommand::class);
 
         $this->info('Running required seeders');
-        $this->call('db:seed', ['--class' => 'InitialSeeder']);
+        $this->call(SeedCommand::class, ['--class' => 'InitialSeeder']);
 
         EnvUpdater::set('APP_DEBUG', 'false');
+
+        $this->call(KeyGenerateCommand::class, ['-n' => true]);
     }
 
     protected function createDatabase(): void
     {
         $connectionName = config('database.default');
-        $databaseName = config("database.connections.{$connectionName}.database");
+        $databaseName = config("database.connections.$connectionName.database");
 
-        config(["database.connections.{$connectionName}.database" => null]);
+        config(["database.connections.$connectionName.database" => null]);
         DB::purge();
 
         DB::statement("CREATE DATABASE IF NOT EXISTS $databaseName");
 
-        config(["database.connections.{$connectionName}.database" => $databaseName]);
+        config(["database.connections.$connectionName.database" => $databaseName]);
         DB::purge();
 
         $this->info("Created database $databaseName.");

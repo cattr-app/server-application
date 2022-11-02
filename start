@@ -1,9 +1,24 @@
 #!/bin/bash
 
-php artisan key:generate -n
-php artisan optimize
-php artisan event:cache
-php artisan migrate --force
-php artisan db:seed --class InitialSeeder --force
+if [ "$1" == "artisan" ]; then
+  shift
+  php artisan "$@"
+elif [ "$1" == "cron" ]; then
+  shift
+  supercronic /app/crontab "$@"
+elif [ "$1" == "queue" ]; then
+  shift
+  php /app/artisan queue:work --sleep=3 "$@"
+elif [ "$1" == "admin" ]; then
+  shift
+  php artisan cattr:make:admin "$@"
+elif [ "$1" == "install" ]; then
+  shift
+  php artisan cattr:install "$@"
+else
+  php artisan optimize
+  php artisan event:cache
+  php artisan migrate --force
 
-php artisan octane:start --port=8090 --host=0.0.0.0 $@
+  php artisan octane:start --port=8090 --host=0.0.0.0 "$@"
+fi

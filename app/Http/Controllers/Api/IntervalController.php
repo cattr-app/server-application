@@ -488,14 +488,13 @@ class IntervalController extends ItemController
 
     public function trackApp(TrackAppRequest $request): JsonResponse
     {
-        $user = auth()->user();
-        if (!isset($user)) {
-            abort(401);
-        }
-
-        $item = TrackedApplication::create(array_merge($request->validated(), ['user_id' => $user->id]));
-
-        return responder()->success($item)->respond();
+        return responder()->success(
+            TrackedApplication::create(
+                array_merge(
+                    $request->validated(), ['user_id' => auth()->user()->id]
+                )
+            )
+        )->respond();
     }
 
     /**

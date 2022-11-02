@@ -12,7 +12,7 @@ class TrackAppRequest extends CattrFormRequest
 
     public function authorizeValidated(): bool
     {
-        return true;
+        return auth()->check();
     }
 
     public function _rules(): array

@@ -1,3 +1,0 @@
-#!/bin/bash
-
-php /app/artisan queue:work --sleep=3 $@
