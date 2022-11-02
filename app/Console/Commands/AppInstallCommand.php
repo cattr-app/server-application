@@ -43,7 +43,6 @@ class AppInstallCommand extends Command
 
     public function handle(): int
     {
-        $this->error('$this->VIA_DOCKER: ' . $this->VIA_DOCKER);
         if (!$this->filesystem->exists($this->laravel->environmentFilePath())) {
             $this->filesystem->copy(base_path('.env.example'), $this->laravel->environmentFilePath());
         }
