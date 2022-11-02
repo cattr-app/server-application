@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Helpers\EnvUpdater;
 use DB;
 use Exception;
-use Illuminate\Cache\Console\ClearCommand;
 use Illuminate\Console\Command;
 use Illuminate\Database\Console\Migrations\MigrateCommand;
 use Illuminate\Database\Console\Seeds\SeedCommand;
@@ -127,22 +126,26 @@ class AppInstallCommand extends Command
 
         EnvUpdater::set('APP_URL', $appUrl);
 
-        do {
-            $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, '
-                . 'this domain will be the same as the backend (API) one.', $appUrl);
+        if ($this->VIA_DOCKER == false) {
+            do {
+                $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, '
+                    . 'this domain will be the same as the backend (API) one.', $appUrl);
 
-            $validator = Validator::make([
-                'url' => $frontendUrl
-            ], [
-                'url' => 'url'
-            ]);
+                $validator = Validator::make([
+                    'url' => $frontendUrl
+                ], [
+                    'url' => 'url'
+                ]);
 
-            $frontendUrlIsValid = !$validator->fails();
+                $frontendUrlIsValid = !$validator->fails();
 
-            if (!$frontendUrlIsValid) {
-                $this->warn('Frontend url is incorrect');
-            }
-        } while (!$frontendUrlIsValid);
+                if (!$frontendUrlIsValid) {
+                    $this->warn('Frontend url is incorrect');
+                }
+            } while (!$frontendUrlIsValid);
+        } else {
+            $frontendUrl = $appUrl;
+        }
 
         $frontendUrl = preg_replace('/^https?:\/\//', '', $frontendUrl);
         $frontendUrl = preg_replace('/\/$/', '', $frontendUrl);
