@@ -42,28 +42,31 @@ class AppInstallCommand extends Command
 
     public function handle(): int
     {
+        define('VIA_DOCKER', !!env('IMAGE_VERSION', false));
         if (!$this->filesystem->exists($this->laravel->environmentFilePath())) {
             $this->filesystem->copy(base_path('.env.example'), $this->laravel->environmentFilePath());
         }
 
-        try {
-            DB::connection()->getPdo();
+        if (VIA_DOCKER) {
+            try {
+                DB::connection()->getPdo();
 
-            if (Schema::hasTable('migrations')) {
-                $this->error('Looks like the application was already installed. '
-                    . 'Please, make sure that database was flushed then try again');
+                if (Schema::hasTable('migrations')) {
+                    $this->error('Looks like the application was already installed. '
+                        . 'Please, make sure that database was flushed then try again');
 
-                return -1;
+                    return -1;
+                }
+            } catch (Exception) {
+                // If we can't connect to the database that means that we're probably installing the app for the first time
             }
-        } catch (Exception) {
-            // If we can't connect to the database that means that we're probably installing the app for the first time
         }
 
 
         $this->info("Welcome to Cattr installation wizard\n");
         $this->info("Let's connect to your database first");
 
-        if ($this->settingUpDatabase() !== 0) {
+        if (VIA_DOCKER == false && $this->settingUpDatabase() !== 0) {
             return -1;
         }
 
