@@ -5,7 +5,6 @@ namespace App\Console\Commands;
 use App\Helpers\EnvUpdater;
 use DB;
 use Exception;
-use Illuminate\Cache\Console\ClearCommand;
 use Illuminate\Console\Command;
 use Illuminate\Database\Console\Migrations\MigrateCommand;
 use Illuminate\Database\Console\Seeds\SeedCommand;
@@ -38,6 +37,7 @@ class AppInstallCommand extends Command
         protected Filesystem $filesystem
     ) {
         parent::__construct();
+        $this->VIA_DOCKER = !!env('IMAGE_VERSION', false);
     }
 
     public function handle(): int
@@ -46,48 +46,39 @@ class AppInstallCommand extends Command
             $this->filesystem->copy(base_path('.env.example'), $this->laravel->environmentFilePath());
         }
 
-        try {
-            DB::connection()->getPdo();
+        if ($this->VIA_DOCKER == false) {
+            try {
+                DB::connection()->getPdo();
 
-            if (Schema::hasTable('migrations')) {
-                $this->error('Looks like the application was already installed. '
-                    . 'Please, make sure that database was flushed then try again');
+                if (Schema::hasTable('migrations')) {
+                    $this->error('Looks like the application was already installed. '
+                        . 'Please, make sure that database was flushed then try again');
 
-                return -1;
+                    return -1;
+                }
+            } catch (Exception) {
+                // If we can't connect to the database that means that we're probably installing the app for the first time
             }
-        } catch (Exception) {
-            // If we can't connect to the database that means that we're probably installing the app for the first time
         }
 
 
         $this->info("Welcome to Cattr installation wizard\n");
-        $this->info("Let's connect to your database first");
+        if ($this->VIA_DOCKER == false && $this->settingUpDatabase() === 0) {
+            $this->info("Let's connect to your database first");
+        }
 
-        if ($this->settingUpDatabase() !== 0) {
+        if ($this->VIA_DOCKER == false && $this->settingUpDatabase() !== 0) {
             return -1;
         }
 
         $this->setUrls();
 
-        $this->info('Enter administrator credentials:');
-        $adminData = $this->askAdminCredentials();
-
         $this->settingUpEnvMigrateAndSeed();
-
-        if (!$this->registerInstance($adminData['email'])) {
-            // User did not confirm installation
-            $this->call(\Illuminate\Database\Console\Migrations\ResetCommand::class);
-            DB::statement('DROP TABLE migrations;');
-
-            $this->filesystem->delete(base_path('.env'));
-            $this->callSilent(ClearCommand::class);
-            return -1;
-        }
 
         $this->setLanguage();
 
         $this->info('Creating admin user');
-        $this->call(MakeAdmin::class, $adminData);
+        $this->call(MakeAdmin::class);
 
         $enableRecaptcha = $this->choice('Enable ReCaptcha 2', ['Yes', 'No'], 1) === 'Yes';
         EnvUpdater::set('RECAPTCHA_ENABLED', $enableRecaptcha ? 'true' : 'false');
@@ -114,28 +105,48 @@ class AppInstallCommand extends Command
         $this->info(strtoupper($language) . ' language successfully set');
     }
 
-    protected function registerInstance(string $adminEmail): bool
-    {
-        return $this->call(RegisterInstance::class, [
-            'adminEmail' => $adminEmail,
-            '--i' => true
-        ]);
-    }
-
     protected function setUrls(): void
     {
-        $appUrlIsValid = false;
         do {
             $appUrl = $this->ask('Full URL to backend (API) application (example: http://cattr.acme.corp/)');
-            $appUrlIsValid = preg_match('/^https?:\/\//', $appUrl);
+
+            $validator = Validator::make([
+                'url' => $appUrl
+            ], [
+                'url' => 'url'
+            ]);
+
+            $appUrlIsValid = !$validator->fails();
+
             if (!$appUrlIsValid) {
-                $this->warn('URL should begin with http or https');
+                $this->warn('App url is incorrect');
             }
         } while (!$appUrlIsValid);
+
+
         EnvUpdater::set('APP_URL', $appUrl);
 
-        $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, '
-            . 'this domain will be the same as the backend (API) one.');
+        if ($this->VIA_DOCKER == false) {
+            do {
+                $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, '
+                    . 'this domain will be the same as the backend (API) one.', $appUrl);
+
+                $validator = Validator::make([
+                    'url' => $frontendUrl
+                ], [
+                    'url' => 'url'
+                ]);
+
+                $frontendUrlIsValid = !$validator->fails();
+
+                if (!$frontendUrlIsValid) {
+                    $this->warn('Frontend url is incorrect');
+                }
+            } while (!$frontendUrlIsValid);
+        } else {
+            $frontendUrl = $appUrl;
+        }
+
         $frontendUrl = preg_replace('/^https?:\/\//', '', $frontendUrl);
         $frontendUrl = preg_replace('/\/$/', '', $frontendUrl);
         EnvUpdater::set(
@@ -144,46 +155,24 @@ class AppInstallCommand extends Command
         );
     }
 
-    protected function askAdminCredentials(): array
-    {
-        do {
-            $email = $this->ask('Admin E-Mail');
-
-            $validator = Validator::make([
-                'email' => $email
-            ], [
-                'email' => 'email'
-            ]);
-
-            $emailIsValid = !$validator->fails();
-
-            if (!$emailIsValid) {
-                $this->warn('Email is incorrect');
-            }
-        } while (!$emailIsValid);
-
-        $password = $this->secret("Password");
-        $name = $this->ask('Admin Full Name');
-
-        return [
-            'email' => $email,
-            'password' => $password,
-            'name' => $name,
-            '--o' => true,
-        ];
-    }
-
     protected function settingUpEnvMigrateAndSeed(): void
     {
-        $this->info('Running up migrations');
-        $this->call(MigrateCommand::class);
+        if ($this->VIA_DOCKER == false) {
+            $this->info('Running up migrations');
+            $this->call(MigrateCommand::class);
+        }
 
         $this->info('Running required seeders');
-        $this->call(SeedCommand::class, ['--class' => 'InitialSeeder']);
+        $this->call(SeedCommand::class, [
+            '--class' => 'InitialSeeder',
+            '--force' => true
+        ]);
 
         EnvUpdater::set('APP_DEBUG', 'false');
 
-        $this->call(KeyGenerateCommand::class, ['-n' => true]);
+        if ($this->VIA_DOCKER == false) {
+            $this->call(KeyGenerateCommand::class, ['-n' => true]);
+        }
     }
 
     protected function createDatabase(): void

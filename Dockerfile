@@ -66,7 +66,7 @@ RUN set -x && \
 VOLUME /app/storage
 VOLUME /app/Modules
 
-ENTRYPOINT /app/start
+ENTRYPOINT ["/app/start"]
 
 HEALTHCHECK --interval=5m --timeout=10s \
   CMD wget --spider -q "http://127.0.0.1:8090/status"
