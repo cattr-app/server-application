@@ -5,7 +5,7 @@ namespace App\Http\Requests\Interval;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\TimeInterval;
-use App\Exceptions\Entities\ActionException;
+use App\Exceptions\Entities\IntervalAlreadyDeletedException;
 
 class DestroyTimeIntervalRequest extends CattrFormRequest
 {
@@ -18,7 +18,7 @@ class DestroyTimeIntervalRequest extends CattrFormRequest
 
     protected function failedAuthorization(): void
     {
-        throw new ActionException(ActionException::ERROR_TYPE_INTERVAL_ALREADY_DELETED);
+        throw new IntervalAlreadyDeletedException;
     }
 
     public function _rules(): array
