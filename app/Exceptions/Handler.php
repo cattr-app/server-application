@@ -10,6 +10,7 @@ use Illuminate\Database\Eloquent\ModelNotFoundException;
 use Illuminate\Foundation\Exceptions\Handler as ExceptionHandler;
 use Illuminate\Session\TokenMismatchException;
 use Illuminate\Validation\ValidationException;
+use PDOException;
 use Symfony\Component\HttpFoundation\Response;
 use Flugg\Responder\Exceptions\Http\HttpException;
 use Symfony\Component\HttpKernel\Exception\MethodNotAllowedHttpException;
@@ -31,6 +32,7 @@ class Handler extends ExceptionHandler
             ModelNotFoundException::class,
             TokenMismatchException::class,
             ValidationException::class,
+            PDOException::class,
         ];
 
     public function register(): void
