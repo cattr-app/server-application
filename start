@@ -3,6 +3,9 @@
 if [ "$1" == "artisan" ]; then
   shift
   php artisan "$@"
+elif [ "$1" == "composer" ]; then
+  shift
+  composer "$@"
 elif [ "$1" == "cron" ]; then
   shift
   supercronic /app/crontab "$@"
