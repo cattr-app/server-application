@@ -2,28 +2,109 @@
 
 namespace App\Helpers;
 
+use Composer\InstalledVersions;
 use CzProject\GitPhp\Git;
+use CzProject\GitPhp\GitException;
 use Exception;
-use Module;
+use Illuminate\Support\Str;
+use Nwidart\Modules\Facades\Module;
+use RuntimeException;
 use Throwable;
+
+//use Module;
 
 class Version
 {
-    private string $version = 'dev';
+    private string $version;
 
+    /**
+     * @throws Throwable
+     */
     public function __construct(protected ?string $module = null)
     {
-        $repo = (new Git())->open($module ? Module::findOrFail($module)->getPath() : base_path());
+        throw_if($module && !isset(self::getModules()[$module]), new RuntimeException('No such module'));
 
-        try {
-            $tags = $repo->getTags();
-
-            $lastTag = array_pop($tags);
-
-            $this->version = app()->isLocal() && !str_contains($lastTag, '-') ? "$lastTag-dev" : $lastTag;
-        } catch (Throwable) {
-            $this->version = env('APP_VERSION', 'dev');
+        if ($module) {
+            $this->version = self::getModules()[$module];
+            return;
         }
+
+        $this->version = env('APP_VERSION', 'dev') ?: self::getComposerVersion(base_path());
+    }
+
+    public static function getModules(): array
+    {
+        return cache()->rememberForever('app.modules', static function() {
+            try {
+                return Module::toCollection()->map(static function (\Nwidart\Modules\Laravel\Module $module) {
+                    $modulePath = $module->getPath();
+
+                    try {
+                        return self::getComposerVersion($modulePath);
+                    } catch (Exception) {
+                        try {
+                            return self::getFileVersion($modulePath);
+                        } catch (Exception) {
+                            try {
+                                return self::getGitVersion($modulePath);
+                            } catch (Exception) {
+                                return 'dev';
+                            }
+                        }
+                    }
+                })->toArray();
+            } catch (Exception) {
+                return [];
+            }
+        });
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private static function getComposerVersion(string $path): string
+    {
+        throw_unless(file_exists("$path/composer.json"));
+
+        $composerConfig = file_get_contents("$path/composer.json");
+
+        throw_unless(Str::isJson($composerConfig));
+
+        $package = json_decode($composerConfig, true, 512, JSON_THROW_ON_ERROR);
+
+        throw_unless(InstalledVersions::isInstalled($package['name']) || isset($package['version']));
+
+        return $package['version'] ?? InstalledVersions::getVersion($package['name']);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    private static function getFileVersion(string $path): string
+    {
+        throw_unless(file_exists("$path/module.json"));
+
+        $moduleConfig = file_get_contents("$path/module.json");
+
+        throw_unless(Str::isJson($moduleConfig));
+
+        $module = json_decode($moduleConfig, true, 512, JSON_THROW_ON_ERROR);
+
+        throw_unless(isset($module['version']));
+
+        return $module['version'];
+    }
+
+    /**
+     * @throws GitException
+     */
+    private static function getGitVersion(string $path): string
+    {
+        $repo = (new Git())->open($path);
+
+        $tags = $repo->getTags();
+
+        return array_pop($tags);
     }
 
     public function __toString(): string
