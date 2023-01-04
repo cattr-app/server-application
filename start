@@ -23,6 +23,7 @@ else
   php artisan optimize
   php artisan event:cache
   php artisan migrate --force
+  php artisan module:migrate --force
 
   php artisan octane:start --port=8090 --host=0.0.0.0 "$@"
 fi
