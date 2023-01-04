@@ -31,6 +31,8 @@ use Illuminate\Support\Carbon;
  * @method static Builder|TaskHistory whereUpdatedAt($value)
  * @method static Builder|TaskHistory whereUserId($value)
  * @mixin Eloquent
+ * @property string|null $old_value
+ * @method static Builder|TaskHistory whereOldValue($value)
  */
 class TaskHistory extends Model
 {

@@ -57,3 +57,5 @@ bootstrap/cache/*
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+
+composer.phar

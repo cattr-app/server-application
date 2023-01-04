@@ -3,7 +3,9 @@
 namespace App\Http\Middleware;
 
 use Closure;
+use Exception;
 use Illuminate\Http\Request;
+use Route;
 use Sentry\State\Scope;
 use function Sentry\configureScope;
 
@@ -29,12 +31,21 @@ class SentryContext
             configureScope(static function (Scope $scope) use ($user): void {
                 $scope->setUser([
                     'id' => $user->id,
-                    'name' => config('sentry.send_default_pii') ? $user->full_name : '<masked>',
+                    'email' => config('sentry.send_default_pii') ? $user->email : sha1($user->email),
                     'is_admin' => $user->is_admin,
                     'role' => $user->role->name,
                 ]);
             });
         }
+
+        configureScope(static function (Scope $scope) use ($request): void {
+            $scope->setTag('request.host', $request->host());
+            $scope->setTag('request.method', $request->method());
+            try {
+                $scope->setTag('request.route', Route::getRoutes()->match($request)->getName());
+            } catch (Exception) {
+            }
+        });
 
         return $next($request);
     }

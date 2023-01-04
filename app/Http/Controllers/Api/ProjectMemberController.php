@@ -6,6 +6,8 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProjectMember\BulkEditProjectMemberRequest;
 use App\Http\Requests\ProjectMember\ShowProjectMemberRequest;
 use App\Services\ProjectMemberService;
+use Event;
+use Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -37,15 +39,19 @@ class ProjectMemberController extends Controller
      */
     public function bulkEdit(BulkEditProjectMemberRequest $request): JsonResponse
     {
-        $data = $request->validated();
+        $data = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
         $userRoles = [];
 
-        foreach ($data['user_roles'] as $key => $value) {
+        foreach ($data['user_roles'] as $value) {
             $userRoles[$value['user_id']] = ['role_id' => $value['role_id']];
         }
 
+        Event::dispatch(Filter::getBeforeActionEventName(), [$data['project_id'], $userRoles]);
+
         ProjectMemberService::syncMembers($data['project_id'], $userRoles);
+
+        Event::dispatch(Filter::getAfterActionEventName(), [$data['project_id'], $userRoles]);
 
         return responder()->success()->respond(204);
     }

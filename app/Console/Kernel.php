@@ -7,7 +7,9 @@ use App\Jobs\ClearExpiredApps;
 use Exception;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
+use Sentry\State\Scope;
 use Settings;
+use function Sentry\configureScope;
 
 class Kernel extends ConsoleKernel
 {
@@ -19,6 +21,28 @@ class Kernel extends ConsoleKernel
     protected $commands = [
         //
     ];
+
+    public function bootstrap(): void
+    {
+        parent::bootstrap();
+
+        if (env('IMAGE_VERSION')) {
+            configureScope(static function (Scope $scope): void {
+                $scope->setTag('docker', env('IMAGE_VERSION'));
+            });
+        }
+
+        if (auth()->check() && $user = auth()->user()) {
+            configureScope(static function (Scope $scope) use ($user): void {
+                $scope->setUser([
+                    'id' => $user->id,
+                    'email' => config('sentry.send_default_pii') ? $user->email : sha1($user->email),
+                    'is_admin' => $user->is_admin,
+                    'role' => $user->role->name,
+                ]);
+            });
+        }
+    }
 
     /**
      * Define the application's command schedule.

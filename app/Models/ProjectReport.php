@@ -10,7 +10,7 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
 /**
  * App\Models\ProjectReport
  *
- * @deprecated
+ * @deprecated 
  * @property int $user_id
  * @property string $user_name
  * @property int $task_id

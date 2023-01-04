@@ -120,6 +120,8 @@ use Parsedown;
  * @method static QueryBuilder|Task withTrashed()
  * @method static QueryBuilder|Task withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @property-read Collection|\App\Models\Property[] $properties
+ * @property-read int|null $properties_count
  */
 class Task extends Model
 {

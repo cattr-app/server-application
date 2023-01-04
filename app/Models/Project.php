@@ -75,6 +75,8 @@ use Illuminate\Support\Carbon;
  * @method static QueryBuilder|Project withTrashed()
  * @method static QueryBuilder|Project withoutTrashed()
  * @mixin EloquentIdeHelper
+ * @property-read Collection|\App\Models\Property[] $properties
+ * @property-read int|null $properties_count
  */
 
 class Project extends Model
