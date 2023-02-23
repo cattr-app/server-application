@@ -5,6 +5,7 @@ FROM php:8.1-alpine AS runtime
 ARG SENTRY_DSN
 ARG APP_VERSION
 ARG APP_ENV=production
+ARG MODULES="cattr/gitlab_integration-module cattr/redmine_integration-module"
 ENV IMAGE_VERSION=4.1.0
 ENV APP_VERSION $APP_VERSION
 ENV SENTRY_DSN $SENTRY_DSN
@@ -53,7 +54,7 @@ WORKDIR /app
 COPY --chown=www-data:www-data ./composer.* /app/
 COPY --chown=www-data:www-data ./.modules.* /app/
 
-RUN composer require -n --no-install --no-ansi $(cat .modules.production | tr '\012' ' ') && \
+RUN composer require -n --no-install --no-ansi $MODULES && \
     composer install -n --no-dev --no-cache --no-ansi --no-autoloader
 
 COPY --chown=www-data:www-data . /app
