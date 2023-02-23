@@ -37,27 +37,34 @@ class ModuleActivatorService implements ActivatorInterface
      */
     public function hasStatus(Module $module, bool $status): bool
     {
-        return Cache::store('octane')->rememberForever(config('modules.activators.amazing.cache_key'), function () {
-            $configFile = config('modules.activators.amazing.file_name');
+        $moduleStatuses = Cache::store('octane')
+            ->rememberForever(config('modules.activators.amazing.cache_key'), function () {
+                $configFile = config('modules.activators.amazing.file_name');
 
-            $databaseModules = [];
+                $databaseModules = [];
 
-            try {
-                foreach (ModuleModel::all()->toArray() as $module) {
-                    $databaseModules[$module['name']] = $module['enabled'];
+                try {
+                    foreach (ModuleModel::all()->toArray() as $module) {
+                        $databaseModules[$module['name']] = $module['enabled'];
+                    }
+                } catch (Exception) {
+                    // We can't communicate with db - then do nothing
+                    // This can happen on first install when we are trying to migrate over clear database
                 }
-            } catch (Exception) {
-                // We can't communicate with db - then do nothing
-                // This can happen on first install when we are trying to migrate over clear database
-            }
 
-            return array_merge(
-                $this->getFileConfig($configFile),
-                $this->getFileConfig("$configFile." . config('app.env')),
-                $this->getFileConfig("$configFile.local"),
-                $databaseModules,
-            );
-        })[$module->getName()] ?? false === $status;
+                return array_merge(
+                    $this->getFileConfig($configFile),
+                    $this->getFileConfig("$configFile." . config('app.env')),
+                    $this->getFileConfig("$configFile.local"),
+                    $databaseModules,
+                );
+            });
+
+        if (isset($moduleStatuses[$module->getName()])) {
+            return $moduleStatuses[$module->getName()] ?? false === $status;
+        }
+
+        return (bool)$module->json()?->active;
     }
 
     /**
