@@ -52,7 +52,6 @@ COPY php.ini /usr/local/etc/php/php.ini
 WORKDIR /app
 
 COPY --chown=www-data:www-data ./composer.* /app/
-COPY --chown=www-data:www-data ./.modules.* /app/
 
 RUN composer require -n --no-install --no-ansi $MODULES && \
     composer install -n --no-dev --no-cache --no-ansi --no-autoloader
