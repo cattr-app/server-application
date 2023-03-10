@@ -1,55 +1,15 @@
-FROM composer:2.3.5 as composer
+# syntax=docker/dockerfile:1-labs
+FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr-dev AS builder
 
-FROM php:8.1-alpine AS runtime
-
-ARG SENTRY_DSN
-ARG APP_VERSION
-ARG APP_ENV=production
 ARG MODULES="cattr/gitlab_integration-module cattr/redmine_integration-module"
-ENV IMAGE_VERSION=4.1.0
-ENV APP_VERSION $APP_VERSION
-ENV SENTRY_DSN $SENTRY_DSN
-ENV APP_ENV $APP_ENV
 
-RUN set -x && \
-    apk add --no-cache icu-libs zlib libpng libzip libjpeg libcurl bash && \
-    apk add --no-cache --virtual .build-deps \
-            autoconf \
-            openssl \
-            make \
-            g++  \
-            zlib-dev \
-            libpng-dev \
-            libzip-dev \
-            libjpeg-turbo-dev  \
-            icu-dev \
-            curl-dev && \
-    docker-php-ext-configure gd --with-jpeg && \
-    CFLAGS="$CFLAGS -D_GNU_SOURCE" docker-php-ext-install -j$(nproc) \
-        gd \
-        zip \
-        intl \
-        pcntl \
-        pdo_mysql && \
-    printf "\n\n\nyes\nyes\nyes\n" | pecl install swoole-4.8.9 && \
-    docker-php-ext-enable swoole && \
-    wget -q "https://github.com/aptible/supercronic/releases/download/v0.1.12/supercronic-linux-amd64" \
-         -O /usr/bin/supercronic && \
-    chmod +x /usr/bin/supercronic && \
-    docker-php-source delete && \
-    apk del .build-deps && \
-    rm -R /tmp/pear && \
-    mkdir /app && \
-    echo '* * * * * php /app/artisan schedule:run' > /app/crontab && \
-    chown -R www-data:www-data /app
-
-USER www-data:www-data
-
-COPY --from=composer /usr/bin/composer /usr/local/bin/composer
-
-COPY php.ini /usr/local/etc/php/php.ini
+COPY php.ini /php/php.ini
 
 WORKDIR /app
+
+RUN echo '* * * * * php /app/artisan schedule:run' > /crontab
+
+USER www-data:www-data
 
 COPY --chown=www-data:www-data ./composer.* /app/
 
@@ -59,16 +19,33 @@ RUN composer require -n --no-install --no-ansi $MODULES && \
 COPY --chown=www-data:www-data . /app
 
 RUN set -x && \
-    cp .env.docker storage/.env && \
     composer dump-autoload -n --optimize && \
     php artisan storage:link
 
+FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr AS runtime
+
+ARG SENTRY_DSN
+ARG APP_VERSION
+ARG APP_ENV=production
+ARG APP_KEY="base64:PU/8YRKoMdsPiuzqTpFDpFX1H8Af74nmCQNFwnHPFwY="
+ENV IMAGE_VERSION=5.0.0
+ENV DB_CONNECTION=mysql
+ENV DB_HOST=db
+ENV DB_USERNAME=root
+ENV DB_PASSWORD=password
+ENV APP_VERSION $APP_VERSION
+ENV SENTRY_DSN $SENTRY_DSN
+ENV APP_ENV $APP_ENV
+ENV APP_KEY $APP_KEY
+
+COPY --from=builder /app /app
+
+COPY php.ini /php/php.ini
+
 VOLUME /app/storage
-VOLUME /app/Modules
+VOLUME /app/bootstrap/cache
 
-ENTRYPOINT ["/app/start"]
-
-HEALTHCHECK --interval=5m --timeout=10s \
-  CMD wget --spider -q "http://127.0.0.1:8090/status"
+#HEALTHCHECK --interval=5m --timeout=10s \
+#  CMD wget --spider -q "http://127.0.0.1:8090/status"
 
 EXPOSE 8090

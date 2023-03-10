@@ -79,7 +79,7 @@ return [
         ],
 
         RequestTerminated::class => [
-            // FlushUploadedFiles::class,
+            FlushUploadedFiles::class,
         ],
 
         TaskReceived::class => [
@@ -103,7 +103,7 @@ return [
         OperationTerminated::class => [
             FlushTemporaryContainerInstances::class,
             // DisconnectFromDatabases::class,
-            // CollectGarbage::class,
+            CollectGarbage::class,
         ],
 
         WorkerErrorOccurred::class => [
@@ -188,6 +188,8 @@ return [
         'public/**/*.php',
         'resources/**/*.php',
         'routes',
+        'composer.lock',
+        '.env',
         'Modules/**/*.php',
     ],
 

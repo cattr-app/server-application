@@ -6,9 +6,6 @@ use App\Contracts\ScreenshotService;
 use App\Scopes\TimeIntervalAccessScope;
 use Database\Factories\TimeIntervalFactory;
 use Eloquent as EloquentIdeHelper;
-use Grimzy\LaravelMysqlSpatial\Eloquent\Builder;
-use Grimzy\LaravelMysqlSpatial\Eloquent\SpatialTrait;
-use Grimzy\LaravelMysqlSpatial\Types\Point;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -20,6 +17,9 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
 use Storage;
+use MatanYadaev\EloquentSpatial\SpatialBuilder as Builder;
+use MatanYadaev\EloquentSpatial\Objects\Point;
+use MatanYadaev\EloquentSpatial\Traits\HasSpatial;
 
 /**
  * @apiDefine TimeIntervalObject
@@ -127,7 +127,7 @@ class TimeInterval extends Model
 {
     use SoftDeletes;
     use HasFactory;
-    use SpatialTrait;
+    use HasSpatial;
 
     /**
      * table name from database
@@ -160,6 +160,7 @@ class TimeInterval extends Model
         'mouse_fill' => 'integer',
         'keyboard_fill' => 'integer',
         'is_manual' => 'boolean',
+        'location' => Point::class,
     ];
 
     /**
@@ -174,9 +175,6 @@ class TimeInterval extends Model
     ];
 
     protected $appends = ['has_screenshot'];
-    protected array $spatialFields = [
-        'location'
-    ];
 
     /**
      * Override parent boot and Call deleting event
@@ -221,7 +219,7 @@ class TimeInterval extends Model
     public function location(): Attribute
     {
         return Attribute::make(
-            get: static fn($value) => $value ? ['lat' => $value->getLat(), 'lng' => $value->getLng()] : null,
+            get: static fn($value) => $value ? ['lat' => $value->latitude, 'lng' => $value->longitude] : null,
             set: static fn($value) => $value ? new Point($value['lat'], $value['lng']) : null,
         )->shouldCache();
     }

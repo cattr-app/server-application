@@ -13,7 +13,6 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Illuminate\Routing\Controller as BaseController;
 use Illuminate\Support\Str;
-use Psr\SimpleCache\InvalidArgumentException;
 
 class AuthController extends BaseController
 {
@@ -265,7 +264,6 @@ class AuthController extends BaseController
      *
      * @return JsonResponse
      * @throws Exception
-     * @throws InvalidArgumentException
      */
     public function authDesktopKey(Request $request): JsonResponse
     {
