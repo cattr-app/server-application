@@ -1,6 +1,6 @@
 # Cattr Backend Application
 
-Here is an official development repository: https://git.amazingcat.net/AmazingTime/core/cattr-backend
+Here is an official development repository: https://git.amazingcat.net/Cattr/core/cattr-backend
 
 ## About Cattr
 Cattr is an open-source time tracking solution, designed to be flawlessly integrated with your infrastructure. 
@@ -8,9 +8,9 @@ Superpowered with features like built-in screenshot capture and activity detecti
 your team's performance straight to the top.
 
 ### Screenshots
-Dashboard             |  Project report
-:-------------------------:|:-------------------------:
-![](https://git.amazingcat.net/AmazingTime/core/cattr-frontend/uploads/69a5912d9db48237c29cd58aa54728b1/2.png)  |  ![](https://git.amazingcat.net/AmazingTime/core/cattr-frontend/uploads/bd595fdde959e6aff922ce2253a8acc8/1.png)
+|                                                Dashboard                                                 |                                              Project report                                              |
+|:--------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------:|
+| ![](https://git.amazingcat.net/Cattr/core/cattr-frontend/uploads/69a5912d9db48237c29cd58aa54728b1/2.png) | ![](https://git.amazingcat.net/Cattr/core/cattr-frontend/uploads/bd595fdde959e6aff922ce2253a8acc8/1.png) |
 
 ### Demo
 The demo app is available here: [demo.cattr.app](https://demo.cattr.app) 
@@ -20,7 +20,6 @@ The demo app is available here: [demo.cattr.app](https://demo.cattr.app)
 
 ```
 composer install
-composer run-script config:init
 ```
 
 Don't forget to init git submodules
@@ -60,15 +59,6 @@ App will not start without them
 ```
 composer dumphelpers
 ```
-
-### Generate documentation
-
-```
-npm install
-npm run custom-api
-```
-
-Then you can open [apidoc/index.html](apidoc/index.html)
 
 ## Links
 
