@@ -1,0 +1,10 @@
+{
+  "AmazingCat_GitlabIntegration": {
+    "type": "local",
+    "ref": "AmazingCat_GitlabIntegration"
+  },
+  "AmazingCat_RedmineIntegration": {
+    "type": "local",
+    "ref": "AmazingCat_RedmineIntegration"
+  }
+}

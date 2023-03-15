@@ -1,0 +1,9 @@
+{
+  "time_intervals": {
+    "crud_title": "Добавить время",
+    "task_select": {
+      "placeholder": "Введите не менее 3 символов для поиска",
+      "no_options": "Совпадений не найдено."
+    }
+  }
+}

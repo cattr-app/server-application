@@ -1,0 +1,35 @@
+.at-select {
+
+  & .at-select__input {
+    position: relative;
+    margin: 0;
+  }
+
+  &__dropdown {
+    box-shadow: 0px 0px 10px rgba(63, 51, 86, 0.1);
+  }
+
+  &__input {
+    position: relative;
+    margin: 0;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+
+  &__clear {
+    font-size: 14px;
+    margin-top: -7px;
+  }
+
+  &__arrow {
+    font-size: 14px;
+    margin-top: -7px;
+    color: $blue-1;
+  }
+
+  &--error .at-select__selection {
+    border: 1px solid $color-error;
+  }
+}

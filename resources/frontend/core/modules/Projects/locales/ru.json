@@ -1,0 +1,36 @@
+{
+  "navigation": {
+    "projects": "Проекты"
+  },
+  "projects": {
+    "grid-title": "Проекты",
+    "crud-title": "Проект",
+    "amount_of_tasks": "Нет задач | 1 задача | {count} задач(и)",
+    "project_members": "Участники",
+    "members": "Участники",
+    "enable_status": "Включить статус в проекте",
+    "override_color": "Переопределить цвет",
+    "tasks": "Задачи",
+    "project_tasks": "Задачи проекта",
+    "add_task": "Добавить задачу",
+    "task_change": "{user} изменил {field} {date}",
+    "task_change_to": "{user} изменил {field} на {value} {date}",
+    "task_change_users": "{user} назначил исполнителем {value} {date}",
+    "show_history": "Показать",
+    "hide_history": "Скрыть",
+    "add_comment": "Добавить"
+  },
+  "field": {
+    "default_priority": "Приоритет по-умолчанию",
+    "statuses": "Статусы",
+    "due_date": "Дата завершения",
+    "history": "История",
+    "project_id": "Проект",
+    "priority_id": "Приоритет",
+    "status_id": "Статус",
+    "comments": "Комментарии"
+  },
+  "control": {
+    "task-list": "Список задач"
+  }
+}

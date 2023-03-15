@@ -1,0 +1,43 @@
+@import '../variables.scss';
+
+.at-collapse {
+  border-radius: 0px;
+  border: none;
+
+  .at-collapse__content .at-collapse__content {
+    padding: 0;
+  }
+
+  &__header {
+    padding: 21px;
+    border-bottom: 0!important;
+  }
+
+  &__content {
+    padding: 0 21px;
+
+    .at-collapse__header {
+      padding: 21px 0;
+    }
+  }
+
+  &__item {
+    &--active {
+      background-color: $blue-3;
+
+      .at-collapse__content {
+        background-color: $blue-3;
+      }
+    }
+  }
+
+  &__icon.icon-chevron-right {
+    display: none;
+  }
+
+  &--simple {
+    .at-collapse__header {
+      border-bottom: none;
+    }
+  }
+}

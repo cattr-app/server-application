@@ -9,14 +9,14 @@ WORKDIR /app
 
 RUN echo '* * * * * php /app/artisan schedule:run' > /crontab
 
-USER www-data:www-data
+USER www:www
 
-COPY --chown=www-data:www-data ./composer.* /app/
+COPY --chown=www:www ./composer.* /app/
 
 RUN composer require -n --no-install --no-ansi $MODULES && \
     composer install -n --no-dev --no-cache --no-ansi --no-autoloader
 
-COPY --chown=www-data:www-data . /app
+COPY --chown=www:www . /app
 
 RUN set -x && \
     composer dump-autoload -n --optimize && \

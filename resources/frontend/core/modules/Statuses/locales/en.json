@@ -1,0 +1,12 @@
+{
+    "navigation": {
+        "statuses": "Statuses"
+    },
+    "statuses": {
+        "grid-title": "Statuses",
+        "crud-title": "Status"
+    },
+    "field": {
+        "close_task": "Close task"
+    }
+}

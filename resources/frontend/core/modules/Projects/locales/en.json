@@ -1,0 +1,36 @@
+{
+  "navigation": {
+    "projects": "Projects"
+  },
+  "projects": {
+    "grid-title": "Projects",
+    "crud-title": "Project",
+    "amount_of_tasks": "No tasks | 1 task | {count} tasks",
+    "project_members": "Project members",
+    "members": "Members",
+    "enable_status": "Enable status in project",
+    "override_color": "Override color",
+    "tasks": "Tasks",
+    "project_tasks": "Project tasks",
+    "add_task": "Add task",
+    "task_change": "{user} changed {field} {date}",
+    "task_change_to": "{user} changed {field} to {value} {date}",
+    "task_change_users": "{user} assigned to {value} {date}",
+    "show_history": "Show",
+    "hide_history": "Hide",
+    "add_comment": "Add"
+  },
+  "field": {
+    "default_priority": "Default priority",
+    "statuses": "Statuses",
+    "due_date": "Due date",
+    "history": "History",
+    "project_id": "Project",
+    "priority_id": "Priority",
+    "status_id": "Status",
+    "comments": "Comments"
+  },
+  "control": {
+    "task-list": "Task List"
+  }
+}

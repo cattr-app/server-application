@@ -1,0 +1,5 @@
+.at-textarea {
+    &--error .at-textarea__original {
+        border: 1px solid $color-error;
+    }
+}

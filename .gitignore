@@ -51,11 +51,23 @@ bootstrap/cache/*
 /public/vendor/
 
 .yarn/*
-!.yarn/cache
 !.yarn/patches
 !.yarn/plugins
 !.yarn/releases
 !.yarn/sdks
 !.yarn/versions
+.pnp.*
 
 composer.phar
+
+/public/dist
+/resources/frontend/app/etc/modules.local.json
+/resources/frontend/app/generated
+
+/public/mix-manifest.json
+/public/mix-sri.json
+/public/fonts
+/public/images
+
+/public/sw.*
+/public/workbox*

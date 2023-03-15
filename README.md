@@ -1,5 +1,3 @@
-# Cattr Backend Application
-
 Here is an official development repository: https://git.amazingcat.net/Cattr/core/cattr-backend
 
 ## About Cattr

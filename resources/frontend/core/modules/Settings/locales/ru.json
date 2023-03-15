@@ -1,0 +1,12 @@
+{
+  "settings": {
+    "company_language": "Язык компании",
+    "color_interval": {
+      "label": "Прогресс рабочего дня",
+      "notification" : {
+        "gt_100": "Значение не может быть больше 100",
+        "interval_already_in_use": "Этот интервал уже используется"
+      }
+    }
+  }
+}

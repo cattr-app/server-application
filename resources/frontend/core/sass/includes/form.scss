@@ -1,0 +1,17 @@
+.at-input {
+  font-size: initial;
+
+  &--small &__original {
+    font-size: 11px;
+  }
+}
+
+.at-select {
+  &__selection {
+    padding: 6px 12px;
+  }
+
+  &--small &__selection {
+    padding: 0 24px 0 8px;
+  }
+}

@@ -1,0 +1,53 @@
+.at-menu {
+  &__item {
+    color: $grey-400;
+
+    a {
+      color: $grey-400;
+    }
+
+    &#{&}--active &-link:not(.router-link-active)::after {
+      transform: scaleX(0);
+    }
+  }
+
+  &__submenu {
+    color: $grey-400;
+
+    &-title {
+      font-weight: bold;
+    }
+
+    a {
+      color: $grey-400;
+    }
+
+    &#{&}--active &-link:not(.router-link-active)::after {
+      transform: scaleX(0);
+    }
+
+    &:hover,
+    &.at-menu__submenu--active {
+      > .at-menu__submenu-title {
+        color: $blue-900!important;
+      }
+    }
+  }
+
+  &__item-link {
+    font-weight: bold;
+    color: $grey-400!important;
+
+    &.router-link-active {
+      color: $blue-900!important;
+    }
+
+    &:hover {
+      color: $blue-900!important;
+    }
+
+    &::after {
+      background-color: $blue-900!important;
+    }
+  }
+}

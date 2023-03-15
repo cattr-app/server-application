@@ -1,0 +1,21 @@
+@import url('https://fonts.googleapis.com/css?family=Nunito&display=swap&subset=cyrillic');
+
+/** first import the vendor css to be able to overwrite them **/
+@import '@cattr/ui-kit/src/stylesheet/src/index';
+
+@import '~vue2-datepicker/index.css';
+@import '~vue-multiselect/dist/vue-multiselect.min.css';
+@import "~vue-select/src/scss/vue-select.scss";
+@import '~quill/dist/quill.core.css';
+
+@import "includes/components";
+@import "includes/variables";
+@import "includes/typo";
+
+@import "includes/core";
+@import "includes/form";
+@import "includes/menu";
+@import "includes/crud";
+
+// Some beauty
+@import "includes/tasks";

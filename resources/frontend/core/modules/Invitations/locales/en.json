@@ -1,0 +1,9 @@
+{
+  "invitations": {
+    "grid-title": "Invitations",
+    "crud-title": "Invitation"
+  },
+  "navigation": {
+    "invitations": "Invitations"
+  }
+}

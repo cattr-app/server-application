@@ -26,6 +26,10 @@ class Controller extends BaseController
         return [];
     }
 
+    public function frontendRoute(Request $request) {
+        return view('app');
+    }
+
     /**
      * Laravel router pass to fallback not non-exist urls only but wrong-method requests too.
      * So required to check if route have alternative request methods

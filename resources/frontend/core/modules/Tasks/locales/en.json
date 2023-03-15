@@ -1,0 +1,33 @@
+{
+  "navigation": {
+    "tasks": "Tasks"
+  },
+  "tasks": {
+    "grid-title": "Tasks",
+    "crud-title": "Task",
+    "source": {
+      "internal": "Internal"
+    },
+    "priority": {
+      "low": "Low",
+      "normal": "Normal",
+      "high": "High"
+    },
+    "projects": "Projects",
+    "users": "Users",
+    "spent_by_user": "Spent time by user",
+    "status": "Status",
+    "statuses": {
+      "any": "Any",
+      "open": "Open",
+      "closed": "Closed"
+    },
+    "unassigned": "Unassigned"
+  },
+  "field": {
+    "source": "Source"
+  },
+  "control": {
+    "kanban-board": "Kanban"
+  }
+}

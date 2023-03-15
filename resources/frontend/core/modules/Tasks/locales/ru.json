@@ -1,0 +1,33 @@
+{
+  "navigation": {
+    "tasks": "Задачи"
+  },
+  "tasks": {
+    "grid-title": "Задачи",
+    "crud-title": "Задача",
+    "source": {
+      "internal": "Внутренняя"
+    },
+    "priority": {
+      "low": "Низкий",
+      "normal": "Нормальный",
+      "high": "Высокий"
+    },
+    "projects": "Проекты",
+    "users": "Пользователи",
+    "spent_by_user": "Время потраченное пользователями",
+    "status": "Статус",
+    "statuses": {
+      "any": "Все",
+      "open": "Открыта",
+      "closed": "Закрыта"
+    },
+    "unassigned": "Не назначен"
+  },
+  "field": {
+    "source": "Источник"
+  },
+  "control": {
+    "kanban-board": "Kanban"
+  }
+}

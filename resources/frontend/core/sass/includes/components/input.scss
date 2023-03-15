@@ -1,0 +1,9 @@
+.at-input {
+  &__original {
+    padding: 8.5px 12px;
+
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+  }
+}

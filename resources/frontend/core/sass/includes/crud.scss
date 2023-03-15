@@ -1,0 +1,22 @@
+.crud {
+  .page-controls {
+    display: flex;
+    flex-flow: row nowrap;
+    justify-content: space-between;
+    align-items: center;
+    margin-bottom: 1em;
+
+    .control-items {
+      display: flex;
+      flex-flow: row nowrap
+    }
+  }
+
+  &__title {
+    margin-bottom: 0;
+  }
+
+  &__content {
+    padding: 1.75em;
+  }
+}

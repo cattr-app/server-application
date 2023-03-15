@@ -1,0 +1,22 @@
+.tasks {
+  &-grid {
+    &__task,
+    &__project {
+      white-space: pre;
+      text-overflow: ellipsis;
+    }
+
+    &__task {
+      &--inactive {
+        color: #888;
+        text-decoration: line-through;
+      }
+    }
+  }
+}
+
+.crud__content.crud__item-view {
+  pre {
+    white-space: pre-wrap;
+  }
+}

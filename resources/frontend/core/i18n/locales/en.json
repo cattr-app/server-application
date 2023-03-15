@@ -1,0 +1,428 @@
+{
+  "navigation": {
+    "about":  "About",
+    "settings": "Settings",
+    "client-login": "Desktop app login",
+    "company_settings": "Company Settings",
+    "logout": "Logout",
+    "dropdown": {
+      "reports": "Reports"
+    }
+  },
+  "setup": {
+    "process": {
+      "info_without_docker": "Please, change your server's settings according to examples below. Note, that you should replace paths with the path to your Cattr installed.",
+      "important_information": "Important information",
+      "title_supervisor": "Supervisor configuration",
+      "title_cron": "Cron configuration",
+      "end_install": "Start use Cattr",
+      "button_process": "Installing",
+      "config_confirmation": "The required configuration files are changed accordingly",
+      "title": "Cattr install",
+      "subtitle": "Please, do not close or reload this tab until the installation is completed"
+    },
+    "step_description": {
+      "welcome": "Welcome",
+      "database_settings": "Database configuration",
+      "mail_settings": "Mail configuration",
+      "company_settings": "Company configuration",
+      "account": "Create account",
+      "permission": "Permissions",
+      "backend_ping": "Connection to backend server",
+      "recaptcha": "reCAPTCHA configuration"
+    },
+    "buttons": {
+      "next": "Next",
+      "back": "Back",
+      "complete": "Complete",
+      "update": "Update",
+      "connect": "Connect to database",
+      "checked": "Enabled",
+      "unchecked": "Disabled"
+    },
+    "header": {
+      "welcome": {
+        "title": "Welcome to Cattr",
+        "subtitle": "This is a quick setup",
+        "language": "Please, select your company language"
+      },
+      "backend_ping": {
+        "title": "Connection to backend server",
+        "subtitle": "Checking the connection with your Cattr backend server",
+        "success": "Success",
+        "error": "Connection refused",
+        "process": "Processing",
+        "status": "Backend status",
+        "server_url": "Trying to find the server at: {serverUrl}",
+        "wrong_url": "Wrong url?",
+        "building_when": "URL should be set up on frontend building",
+        "read_more": "You can read more in {0}",
+        "documentation": "documentation"
+      },
+      "database_settings": {
+        "title": "Database configuration",
+        "subtitle": "Set MySQL configuration",
+        "success": "Success",
+        "error": "Wrong params",
+        "process": "Wait process",
+        "host": "Host",
+        "database": "Database name",
+        "username":"User name",
+        "password":"Password",
+        "status": "Database status",
+        "docker_title": "Cattr is running inside the official Docker container",
+        "docker_subtitle": "You do not need to adjust database connection settings"
+      },
+      "mail_settings": {
+        "title": "Mail configuration",
+        "subtitle": "Set mail settings",
+        "email": "E-mail",
+        "password": "Password",
+        "host": "Server address",
+        "port": "Port",
+        "encryption": "Encryption"
+      },
+      "company_settings": {
+        "title": "Company settings",
+        "subtitle": "Set company settings",
+        "language": "Language",
+        "timezone": "Timezone"
+      },
+      "account": {
+        "title": "Admin account settings",
+        "subtitle": "Create admin account",
+        "email": "E-mail",
+        "password": "Password"
+      },
+      "permission": {
+        "title": "Permission",
+        "subtitle": "Give permission",
+        "registration_process": "Wait until the registration process is completed",
+        "registration": "Registration"
+      },
+      "recaptcha": {
+        "title": "reCAPTCHA settings",
+        "subtitle": "Connect reCAPTCHA to protect user accounts from password attacks",
+        "get_recaptcha": "Get reCAPTCHA keys"
+      }
+    }
+  },
+  "auth": {
+    "submit": "Login",
+    "forgot_password": "Forgot password?",
+    "message": {
+      "user_not_found": "We can't find the user with provided credentials",
+      "solve_captcha": "You must resolve a CAPTCHA",
+      "auth_error": "Authorization error",
+      "data_reset": "Data is flushing right now, please wait a minute and try again"
+    },
+    "desktop": {
+      "header": "Desktop application login",
+      "step": "Step {n}",
+      "step1": "Transferring data",
+      "step2": "Opening application",
+      "retry": "Retry",
+      "cancel": "Cancel",
+      "open": "Open application",
+      "finish": "Finish",
+      "error": "The desktop application is not installed on your PC",
+      "download": "You can download it {0}",
+      "download_button": "here"
+    },
+    "switch_to_common": "Log in with password",
+    "close": "Close page",
+    "desktop_error": "Error happened during authorization",
+    "desktop_working": "Authorizing"
+  },
+  "reset": {
+    "forgot_password": "Forgot password?",
+    "reset_password": "Reset password",
+    "confirm_password": "Confirm password",
+    "step": "Step {n}",
+    "step_description": {
+      "step_1": "Enter email",
+      "step_2": "Check your email",
+      "step_3": "Enter new password",
+      "step_4": "Enjoy"
+    },
+    "tabs": {
+      "enter_email": {
+        "title": "Forgot password?",
+        "subtitle": "Enter your email and we will send a link to reset your password"
+      },
+      "check_email": {
+        "title": "Check your email",
+        "subtitle": "Check your email, and follow the link in the password reset email to complete the process"
+      },
+      "new_password": {
+        "title": "Enter new password",
+        "subtitle": "Password must be at least 6 characters"
+      },
+      "success": {
+        "title": "Success",
+        "subtitle": "Your password has been successfully changed"
+      }
+    },
+    "page_is_not_available": "This page is no longer available",
+    "go_away": "Go to login page"
+  },
+  "register": {
+    "title": "Register",
+    "subtitle": "Please fill out the fields to confirm your registration",
+    "register_btn": "Create account",
+    "success_title": "Account was created successfully",
+    "success_subtitle": "Go to the login page to log in to your account"
+  },
+  "settings": {
+    "account": "Account",
+    "general": "General",
+    "language": "Language",
+    "company": "Company",
+    "company_timezone": "Company timezone"
+  },
+  "control": {
+    "save": "Save",
+    "create": "Create",
+    "view": "View",
+    "edit": "Edit",
+    "delete": "Delete",
+    "add": "Add",
+    "yes": "Yes",
+    "no": "No",
+    "back": "Back",
+    "submit": "Submit",
+    "select_all": "Select All",
+    "clear_all": "Clear All",
+    "select_all_open": "Select All Open",
+    "select_all_closed": "Select All Closed",
+    "user_selected": "No users selected | 1 user selected | {count} users selected",
+    "project_selected": "No projects selected | 1 project selected | {count} projects selected",
+    "project_selected_all": "All projects selected",
+    "status_selected": "No statuses selected | 1 status selected | {count} statuses selected",
+    "status_selected_all": "All statuses selected",
+    "day": "Day",
+    "week": "Week",
+    "month": "Month",
+    "range": "Range",
+    "today": "Today",
+    "ok": "Ok",
+    "active": "Active",
+    "inactive": "Inactive",
+    "search": "Search",
+    "add_time": "Add time",
+    "enable": "Enable",
+    "disable": "Disable",
+    "select": "Select",
+    "cancel": "Cancel",
+    "reset": "Reset",
+    "show_active": "Show active tasks"
+  },
+  "field": {
+    "password": "Password",
+    "name": "Name",
+    "full_name": "Name",
+    "status": "Status",
+    "email": "E-mail",
+    "user": "User",
+    "users": "Users",
+    "active":  "Active",
+    "change_password": "Change password",
+    "screenshot": "Screenshot",
+    "screenshots": "Screenshots",
+    "screenshots_active": "Screenshots Active",
+    "manual_time": "Manual Time",
+    "screenshots_interval": "Screenshots Interval",
+    "computer_time_popup": "Inactivity Time Popup",
+    "timezone": "Timezone",
+    "default_role": "Default Role",
+    "project_roles": "Project Roles",
+    "task": "Task",
+    "project": "Project",
+    "priority": "Priority",
+    "created_at": "Created",
+    "updated_at": "Last edit",
+    "team": "Team",
+    "amount_of_tasks": "Amount of tasks",
+    "description": "Description",
+    "important": "Important",
+    "actions": "Actions",
+    "start_at": "Start at",
+    "end_at": "End at",
+    "expires_at": "Expires at",
+    "role": "Role",
+    "user_language": "User Language",
+    "send_invite": "Send invite",
+    "selected": "Selected",
+    "total": "Total",
+    "total_time": "Total time",
+    "total_spent": "Total Spent Time",
+    "time": "Time",
+    "auto_thin": "Automatic storage cleanup",
+    "members": "Members",
+    "url": "URL",
+    "statuses": {
+      "any": "Any",
+      "active": "Active",
+      "disabled": "Disabled"
+    },
+    "roles": {
+      "any": "Any",
+      "manager": "Manager",
+      "user": "User",
+      "auditor": "Auditor"
+    },
+    "type": "Type",
+    "types": {
+      "all": "All",
+      "any": "Any",
+      "employee": "Employee",
+      "client": "Client"
+    },
+    "work_time": "Working Hours",
+    "notice": "Notice",
+    "report": "Report",
+    "minutes": "{value} minutes",
+    "duration": "Duration",
+    "duration_value": "{0} to {1}",
+    "web_and_app_monitoring": "Enable app monitoring"
+  },
+  "filter": {
+    "enter-single": "Enter {0}",
+    "enter-multiple": "Enter {0} or {1}",
+    "fields": {
+      "task_name": "task name",
+      "project_name": "project name",
+      "full_name": "full name",
+      "name": "name",
+      "email": "e-mail",
+      "url": "URL"
+    },
+    "full_name": "Filter by full name",
+    "email": "Filter by e-mail",
+    "task": "Filter by task name",
+    "project": "Filter by project name"
+  },
+  "message": {
+    "no_data": "No data to display",
+    "page_not_found": "The page you're looking for doesn't exist",
+    "api_error": "Looks like we have temporal problems, contact your administrator about that :(",
+    "page_forbidden": "Access denied",
+    "field_is_required": "This field is required",
+    "something_went_wrong": "Something went wrong",
+    "success": "Success",
+    "error": "Error",
+    "vulnerable_version": "You are using an outdated app version, please update to the latest one",
+    "update_version": "New version is available",
+    "report_has_been_queued": "Report has been queued and will be sent on your email"
+  },
+  "time": {
+    "h": "h",
+    "m": "m",
+    "s": "s"
+  },
+  "tooltip": {
+    "task_important": "Related screenshots should not be deleted automatically",
+    "user_change_password": "Makes the password change on the first login mandatory",
+    "user_manual_time": "Allow users to manually add time",
+    "user_send_invite": "Email user the account's credentials. If \"Password\" field is not filled in, an email with an auto-generated password will be sent in any case ",
+    "user_computer_time_popup": "User's inactivity time in minutes before 'inactivity detected' modal pops up",
+    "user_interval_screenshot": "Screenshot creation time interval in minutes",
+    "color_intervals": "Lets you select colors for clocked-in time intervals from 0 to 100%",
+    "work_time": "Minimum amount of working hours/day",
+    "auto_thin": "Old screenshots will be deleted automatically",
+    "activity_progress": {
+      "not_tracked": "No activity tracked",
+      "overall": "Overall activity: | Overall activity: 1% | Overall activity: {percent}%",
+      "mouse": "Mouse: 0% | Mouse: 1% | Mouse: {percent}%",
+      "keyboard": "Keyboard: 0% | Keyboard: 1% | Keyboard: {percent}%",
+      "just_mouse": "Mouse:",
+      "just_keyboard": "Keyboard:"
+    }
+  },
+  "invite": {
+    "resend": "Resend invite"
+  },
+  "about": {
+    "modules": {
+      "name": "Module",
+      "version": "Version",
+      "status": "Status",
+      "vulnerable": "Vulnerable",
+      "ok": "Up to date",
+      "outdated": "Out of date"
+    },
+    "module_versions": "Module versions",
+    "module_storage": "Storage",
+    "no_modules": "No modules installed",
+    "no_storage": "No info about storage",
+    "storage": {
+      "last_thinning": "Last cleanup was",
+      "space": {
+        "left": "Free space",
+        "total": "Total space",
+        "used": "Space used"
+      },
+      "screenshots_available": "Can be removed",
+      "screenshots": "0 screenshots | {n} screenshot | {n} screenshots",
+      "thin_unavailable": "Cleanup is unavailable at this moment",
+      "thin_available": "Cleanup is available",
+      "thin": "Cleanup space"
+    }
+  },
+  "notification": {
+    "save": {
+      "success": {
+        "title": "Success",
+        "message": "Saved successfully"
+      }
+    },
+    "record": {
+      "save": {
+        "success": {
+          "title": "Success",
+          "message": "Record was saved successfully"
+        }
+      },
+      "delete": {
+        "confirmation": {
+          "title": "Delete record?",
+          "message": "Are you sure you want delete this record?"
+        },
+        "success": {
+          "title": "Success",
+          "message": "Record was successfully deleted"
+        }
+      }
+    },
+    "settings": {
+      "save": {
+        "success": {
+          "title": "Success",
+          "message": "Settings were saved successfully"
+        }
+      }
+    },
+    "screenshot": {
+      "save": {
+        "success": {
+          "title": "Success",
+          "message": "Screenshots were saved successfully"
+        },
+        "error": {
+          "title": "Error",
+          "message": "Failed to save the screenshots"
+        }
+      },
+      "delete": {
+        "success": {
+          "title": "Success",
+          "message": "Screenshots were successfully deleted"
+        },
+        "error": {
+          "title": "Error",
+          "message": "Failed to remove the screenshots"
+        }
+      }
+    }
+  }
+}

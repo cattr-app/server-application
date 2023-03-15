@@ -10,7 +10,6 @@ use App\Http\Controllers\Api\Reports\DashboardController;
 use App\Http\Controllers\Api\Reports\ProjectReportController;
 use App\Http\Controllers\Api\Reports\TimeUseReportController;
 use App\Http\Controllers\Api\TaskController;
-use App\Http\Controllers\Api\TimeController;
 use App\Http\Controllers\Api\IntervalController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;

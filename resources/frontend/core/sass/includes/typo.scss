@@ -1,0 +1,65 @@
+h1, h2, h3, h4, h5, h6, h1, .h1, .h2, .h3, .h4, .h5, .h6 {
+  font-family: $heading-font-family;
+  color: $gray-1;
+}
+
+h1 {
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 50px;
+}
+
+h2 {
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 40px;
+}
+
+h3 {
+  font-weight: bold;
+  font-size: 25px;
+  line-height: 30px;
+}
+
+h4 {
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 25px;
+}
+
+h5 {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
+}
+
+
+.h1 {
+  font-size: 40px;
+  font-weight: bold;
+  line-height: 50px;
+}
+
+.h2 {
+  font-weight: 600;
+  font-size: 30px;
+  line-height: 40px;
+}
+
+.h3 {
+  font-weight: bold;
+  font-size: 25px;
+  line-height: 30px;
+}
+
+.h4 {
+  font-weight: bold;
+  font-size: 20px;
+  line-height: 25px;
+}
+
+.h5 {
+  font-weight: 600;
+  font-size: 15px;
+  line-height: 20px;
+}

@@ -1,0 +1,24 @@
+{
+  "navigation": {
+    "dashboard": "Dashboard"
+  },
+  "dashboard": {
+    "timeline": "Timeline",
+    "team": "Team",
+    "user": "User",
+    "worked": "Worked",
+    "total_time": "Total time"
+  },
+  "field": {
+    "task_name": "Name",
+    "task_description": "Description"
+  },
+  "control": {
+    "add_new_task": "Add new task",
+    "edit_intervals": "Change task"
+  },
+  "projects": {
+    "show-more": "Show more",
+    "show-less": "Show less"
+  }
+}

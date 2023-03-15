@@ -1,0 +1,13 @@
+.list {
+  &__item {
+    border-bottom: 3px solid $blue-3 !important;
+
+    &:last-child {
+      border-bottom: none !important;
+    }
+
+    &--active {
+      background-color: $blue-3;
+    }
+  }
+}

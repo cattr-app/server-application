@@ -1,0 +1,24 @@
+{
+  "navigation": {
+    "dashboard": "Обзор"
+  },
+  "dashboard": {
+    "timeline": "Личный",
+    "team": "Командный",
+    "user": "Пользователь",
+    "worked": "Отработано",
+    "total_time": "Общее время"
+  },
+  "field": {
+    "task_name": "Название",
+    "task_description": "Описание"
+  },
+  "control": {
+    "add_new_task": "Добавить новую задачу",
+    "edit_intervals": "Изменить задачу"
+  },
+  "projects": {
+    "show-more": "Показать ещё",
+    "show-less": "Показать меньше"
+  }
+}

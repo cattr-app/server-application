@@ -1,0 +1,8 @@
+{
+  "navigation": {
+    "project-report": "Отчет по проектам"
+  },
+  "project-report": {
+    "report_timezone": "Отчет составлен в часовом поясе: {0}"
+  }
+}
