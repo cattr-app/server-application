@@ -14,19 +14,17 @@ use App\Http\Controllers\Api\IntervalController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\AuthController;
-use App\Http\Controllers\InstallationController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegistrationController;
 use App\Http\Controllers\Api\StatusController as ApiStatusController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StatusController;
-use App\Http\Middleware\EnsureIsInstalled;
 use Illuminate\Routing\Router;
 
 // Routes for login/register processing
 Route::group([
-    'middleware' => [EnsureIsInstalled::class, 'throttle:120,1'],
+    'middleware' => ['throttle:120,1'],
     'prefix' => 'auth',
 ], static function (Router $router) {
     $router->middleware('auth:sanctum')->group(static function (Router $router) {
@@ -56,16 +54,9 @@ Route::group([
 
 Route::get('status', [StatusController::class, '__invoke'])->name('status');
 
-Route::group([
-    'prefix' => 'setup',
-], static function (Router $router) {
-    $router->post('database', [InstallationController::class, 'checkDatabaseInfo'])->name('setup.database');
-    $router->put('save', [InstallationController::class, 'save'])->name('setup.save');
-});
-
 // Main API routes
 Route::group([
-    'middleware' => ['auth:sanctum', EnsureIsInstalled::class],
+    'middleware' => ['auth:sanctum'],
 ], static function (Router $router) {
     $router->group(['middleware' => ['throttle:120,1']], static function (Router $router) {
         //Invitations routes

@@ -7,6 +7,8 @@ require('laravel-mix-sri');
 require('laravel-mix-serve');
 require('laravel-mix-workbox');
 
+const compiler = require('./resources/frontend/compiler/index');
+
 if (mix.isWatching()) {
   mix.bundleAnalyzer();
 }
@@ -16,7 +18,7 @@ process.env.VUE_APP_DOCKER_VERSION = process.env.IMAGE_VERSION;
 
 mix
   .before(() => {
-    console.log('I will be logged before the compilation begins.');
+    compiler();
   })
   .alias({
   '@': 'resources/frontend/core',

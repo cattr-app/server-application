@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Helpers\ModuleHelper;
 use GuzzleHttp\Client;
+use GuzzleHttp\Exception\GuzzleException;
 use Illuminate\Console\Command;
 use JsonException;
 use Exception;
@@ -31,7 +32,7 @@ class RegisterInstance extends Command
      * @param Client $client
      *
      * @return int
-     * @throws JsonException
+     * @throws JsonException|GuzzleException
      */
     public function handle(Client $client): int
     {

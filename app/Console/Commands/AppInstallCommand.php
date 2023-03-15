@@ -33,11 +33,13 @@ class AppInstallCommand extends Command
      */
     protected $description = 'Cattr Basic Installation';
 
+    private bool $VIA_DOCKER;
+
     public function __construct(
         protected Filesystem $filesystem
     ) {
         parent::__construct();
-        $this->VIA_DOCKER = !!env('IMAGE_VERSION', false);
+        $this->VIA_DOCKER = (bool)env('IMAGE_VERSION', false);
     }
 
     public function handle(): int
@@ -46,7 +48,7 @@ class AppInstallCommand extends Command
             $this->filesystem->copy(base_path('.env.example'), $this->laravel->environmentFilePath());
         }
 
-        if ($this->VIA_DOCKER == false) {
+        if (!$this->VIA_DOCKER) {
             try {
                 DB::connection()->getPdo();
 
@@ -57,17 +59,18 @@ class AppInstallCommand extends Command
                     return -1;
                 }
             } catch (Exception) {
-                // If we can't connect to the database that means that we're probably installing the app for the first time
+                // If we can't connect to the database that means that
+                // we're probably installing the app for the first time
             }
         }
 
 
         $this->info("Welcome to Cattr installation wizard\n");
-        if ($this->VIA_DOCKER == false && $this->settingUpDatabase() === 0) {
+        if (!$this->VIA_DOCKER && $this->settingUpDatabase() === 0) {
             $this->info("Let's connect to your database first");
         }
 
-        if ($this->VIA_DOCKER == false && $this->settingUpDatabase() !== 0) {
+        if (!$this->VIA_DOCKER && $this->settingUpDatabase() !== 0) {
             return -1;
         }
 
@@ -90,7 +93,6 @@ class AppInstallCommand extends Command
         }
 
         $this->call(ConfigCacheCommand::class);
-        Settings::scope('core')->set('installed', true);
 
         $this->info('Application was installed successfully!');
         return 0;
@@ -126,7 +128,7 @@ class AppInstallCommand extends Command
 
         EnvUpdater::set('APP_URL', $appUrl);
 
-        if ($this->VIA_DOCKER == false) {
+        if (!$this->VIA_DOCKER) {
             do {
                 $frontendUrl = $this->ask('Trusted frontend domain (e.g. cattr.acme.corp). In most cases, '
                     . 'this domain will be the same as the backend (API) one.', $appUrl);
@@ -157,7 +159,7 @@ class AppInstallCommand extends Command
 
     protected function settingUpEnvMigrateAndSeed(): void
     {
-        if ($this->VIA_DOCKER == false) {
+        if (!$this->VIA_DOCKER) {
             $this->info('Running up migrations');
             $this->call(MigrateCommand::class);
         }
@@ -170,7 +172,7 @@ class AppInstallCommand extends Command
 
         EnvUpdater::set('APP_DEBUG', 'false');
 
-        if ($this->VIA_DOCKER == false) {
+        if (!$this->VIA_DOCKER) {
             $this->call(KeyGenerateCommand::class, ['-n' => true]);
         }
     }

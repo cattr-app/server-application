@@ -1,28 +1,29 @@
 const fs = require('fs'),
+    path = require('path'),
     isObject = require('lodash/isObject'),
     merge = require('lodash/merge');
 
-module.exports = async (api, options) => {
-    api.registerCommand('modules:compile', () => {
+module.exports = () => {
         console.log('Reading modules config file...');
-        const p = api.resolve('app/etc/modules.config.json');
-        if (!fs.existsSync(api.resolve('app/generated'))) {
-            fs.mkdirSync(api.resolve('app/generated'));
+        const p = path.join(__dirname, '..', 'etc', 'modules.config.json');
+
+        if (!fs.existsSync(path.join(__dirname, '..', 'generated'))) {
+            fs.mkdirSync(path.join(__dirname, '..', 'generated'));
         }
-        if (!fs.existsSync(api.resolve(p))) {
-            console.error('modules.config.json was not found in [app/etc] folder');
+        if (!fs.existsSync(p)) {
+            console.error('modules.config.json was not found in [etc] folder');
             return undefined;
         }
         let moduleList = require(p);
 
         let fdArray = ['export default ['];
 
-        if (fs.existsSync(api.resolve(`app/etc/modules.${process.env.NODE_ENV}.json`))) {
-            moduleList = merge(moduleList, require(api.resolve(`app/etc/modules.${process.env.NODE_ENV}.json`)));
+        if (fs.existsSync(path.join(__dirname, '..', 'etc', `modules.${process.env.NODE_ENV}.json`))) {
+            moduleList = merge(moduleList, require(path.join(__dirname, '..', 'etc', `modules.${process.env.NODE_ENV}.json`)));
         }
 
-        if (fs.existsSync(api.resolve('app/etc/modules.local.json'))) {
-            moduleList = merge(moduleList, require(api.resolve('app/etc/modules.local.json')));
+        if (fs.existsSync(path.join(__dirname, '..', 'etc', 'modules.local.json'))) {
+            moduleList = merge(moduleList, require(path.join(__dirname, '..', 'etc', 'modules.local.json')));
         }
 
         Object.keys(moduleList).forEach(moduleName => {
@@ -41,7 +42,6 @@ module.exports = async (api, options) => {
 
         fdArray.push('];');
 
-        fs.writeFileSync(api.resolve('app/generated/module.require.js'), fdArray.join('\n'));
+        fs.writeFileSync(path.join(__dirname, '..', 'generated', 'module.require.js'), fdArray.join('\n'));
         console.log('Finished...');
-    });
 };

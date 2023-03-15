@@ -102,14 +102,6 @@ const routes = [
         name: 'desktop-login',
         component: () => import(/* webpackChunkName: "DesktopLogin" */ '@/views/DesktopLogin.vue'),
     },
-    {
-        path: '/setup',
-        name: 'setup',
-        meta: {
-            auth: false,
-        },
-        component: () => import(/* webpackChunkName: "Setup" */ '@/views/Setup.vue'),
-    },
 ];
 
 const router = new VueRouter({

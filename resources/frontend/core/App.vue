@@ -31,17 +31,6 @@
                 }
             }
 
-            const installed = await this.$store.dispatch('httpRequest/getInstallationStatus');
-            if (!installed) {
-                if (this.$route.name !== 'setup') {
-                    await this.$router.replace({ name: 'setup' });
-                    return;
-                }
-            } else if (this.$route.name === 'setup') {
-                await this.$router.replace('/');
-                return;
-            }
-
             const userApi = this.$store.getters['user/apiService'];
             if (userApi.token()) {
                 try {

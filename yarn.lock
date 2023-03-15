@@ -1319,14 +1319,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@cattr/vue-cli-plugin-compiler@workspace:*, @cattr/vue-cli-plugin-compiler@workspace:resources/frontend/compiler":
-  version: 0.0.0-use.local
-  resolution: "@cattr/vue-cli-plugin-compiler@workspace:resources/frontend/compiler"
-  dependencies:
-    lodash: ^4.17.21
-  languageName: unknown
-  linkType: soft
-
 "@colors/colors@npm:1.5.0":
   version: 1.5.0
   resolution: "@colors/colors@npm:1.5.0"
@@ -4067,7 +4059,6 @@ __metadata:
     "@cattr/gitlab-integration": "*"
     "@cattr/redmine-integration": "*"
     "@cattr/ui-kit": ^1.3.9
-    "@cattr/vue-cli-plugin-compiler": "workspace:*"
     "@commitlint/cli": ^17.4.4
     "@commitlint/config-conventional": ^17.4.4
     "@sentry/tracing": ^7.43.0
