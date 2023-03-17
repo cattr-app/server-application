@@ -9,7 +9,9 @@ use Illuminate\Console\Command;
 use JsonException;
 use Exception;
 use Settings;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'cattr:register')]
 class RegisterInstance extends Command
 {
     /**

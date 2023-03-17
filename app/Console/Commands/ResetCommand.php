@@ -9,10 +9,9 @@ use Illuminate\Database\Console\Seeds\SeedCommand;
 use Nwidart\Modules\Commands\SeedCommand as ModuleSeedCommand;
 use Settings;
 use Storage;
+use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * Class ResetCommand
- */
+#[AsCommand(name: 'cattr:reset')]
 class ResetCommand extends Command
 {
     /**
@@ -66,8 +65,6 @@ class ResetCommand extends Command
             $this->call(SeedCommand::class);
             $this->call(ModuleSeedCommand::class);
         }
-
-        Settings::scope('core')->set('installed', true);
 
         return 0;
     }

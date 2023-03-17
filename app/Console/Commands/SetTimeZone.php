@@ -5,10 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Property;
 use Illuminate\Console\Command;
 use Settings;
+use Symfony\Component\Console\Attribute\AsCommand;
 
-/**
- * Class SetTimeZone
- */
+#[AsCommand(name: 'cattr:set:timezone')]
 class SetTimeZone extends Command
 {
     /**

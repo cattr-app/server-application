@@ -5,7 +5,9 @@ namespace App\Console\Commands;
 use App\Models\Property;
 use Illuminate\Console\Command;
 use Settings;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'cattr:set:language')]
 class SetLanguage extends Command
 {
     /**

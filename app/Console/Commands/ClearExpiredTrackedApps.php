@@ -5,7 +5,9 @@ namespace App\Console\Commands;
 use App\Jobs\ClearExpiredApps;
 use App\Models\TrackedApplication;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'cattr:intervals:apps:clear-expired')]
 class ClearExpiredTrackedApps extends Command
 {
     /**
@@ -13,7 +15,7 @@ class ClearExpiredTrackedApps extends Command
      *
      * @var string
      */
-    protected $signature = 'intervals:apps:clear-expired';
+    protected $signature = 'cattr:intervals:apps:clear-expired';
 
     /**
      * The console command description.

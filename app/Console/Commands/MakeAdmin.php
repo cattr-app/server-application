@@ -4,10 +4,12 @@ namespace App\Console\Commands;
 
 use App\Models\User;
 use Illuminate\Console\Command;
+use Symfony\Component\Console\Attribute\AsCommand;
 use Validator;
 use Illuminate\Validation\Rule;
 use Illuminate\Contracts\Console\Isolatable;
 
+#[AsCommand(name: 'cattr:make:admin')]
 class MakeAdmin extends Command implements Isolatable
 {
     protected $signature = 'cattr:make:admin
