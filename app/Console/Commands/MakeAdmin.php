@@ -17,28 +17,41 @@ class MakeAdmin extends Command implements Isolatable
                             {--e|email : user email}
                             {--n|name : user name}
                             {--p|password : user password}';
-    protected $description = 'Creates admin user';
 
-    public function handle(): void
+    protected $description = 'Creates admin user with data from ENV or input';
+
+    public function handle(): int
     {
-        do {
-            $email = $this->option('email') ?: $this->ask('What is your email?', 'admin@example.com');
+        if ($this->option('email')) {
+            $email = $this->option('email');
 
-            $validator = Validator::make([
+            if (Validator::make([
                 'email' => $email
             ], [
                 'email' => ['email', Rule::unique(User::class)]
-            ]);
-
-            $emailIsValid = !$validator->fails();
-
-            if (!$emailIsValid) {
-                $this->warn('Email is incorrect or it was already registered.');
+            ])->fails()) {
+                $this->error('Email is incorrect or it was already registered');
+                return 1;
             }
-        } while (!$emailIsValid);
+        }
 
+        $email = env('APP_ADMIN_EMAIL', 'admin@cattr.app');
 
-        if (!$this->option('o') && !User::admin()->count()) {
+        if (Validator::make([
+                'email' => $email
+            ], [
+                'email' => ['email', Rule::unique(User::class)]
+            ])->fails()) {
+            if (env('IMAGE_VERSION', false)) {
+                $this->info('Admin already exists, skipping creation');
+                return 0;
+            }
+
+            $this->error('Email is incorrect or it was already registered');
+            return 1;
+        }
+
+        if ($email !== 'admin@cattr.app' && !$this->option('o') && !User::admin()->count()) {
             $self = $this;
             rescue(
                 static fn () => $self->call(
@@ -50,29 +63,39 @@ class MakeAdmin extends Command implements Isolatable
             );
         }
 
-        do {
-            $password = $this->option('password') ?: $this->secret('What password should we set?');
+        if ($this->option('password')) {
+            $password = $this->option('password');
 
-            $validator = Validator::make([
+            if (Validator::make([
                 'password' => $password
             ], [
                 'password' => 'min:6'
-            ]);
-
-            $passwordIsValid = !$validator->fails();
-
-            if (!$passwordIsValid) {
-                $this->warn('Minimum length is 6 characters.');
+            ])->fails()) {
+                $this->warn('Minimum length is 6 characters');
+                return 1;
             }
-        } while (!$passwordIsValid);
+        }
+
+        $password = env('APP_ADMIN_PASSWORD', 'password');
+
+        if (Validator::make([
+                'password' => $password
+            ], [
+                'password' => 'min:6'
+            ])->fails()) {
+            $this->warn('Minimum length is 6 characters');
+            return 1;
+        }
 
         User::factory()->admin()->create([
-            'full_name' => $this->option('name') ?: $this->ask('What is your name?', 'Admin'),
+            'full_name' => $this->option('name') ?: env('APP_ADMIN_NAME', 'Admin'),
             'email' => $email,
             'password' => $password,
             'last_activity' => now(),
         ]);
 
         $this->info("Administrator with email $email was created successfully");
+
+        return 0;
     }
 }
