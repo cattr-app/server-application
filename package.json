@@ -43,7 +43,7 @@
     "path-browserify": "^1.0.1",
     "postcss": "^8.4.21",
     "semver": "^7.3.8",
-    "validator": "^12.2.0",
+    "validator": "^13.7.0",
     "vee-validate": "^3.4.15",
     "vue": "^2.7.14",
     "vue-avatar": "^2.3.3",

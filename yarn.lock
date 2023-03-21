@@ -4103,7 +4103,7 @@ __metadata:
     sass-resources-loader: ^2.2.5
     semver: ^7.3.8
     swc-loader: ^0.2.3
-    validator: ^12.2.0
+    validator: ^13.7.0
     vee-validate: ^3.4.15
     vue: ^2.7.14
     vue-avatar: ^2.3.3
@@ -13445,10 +13445,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"validator@npm:^12.2.0":
-  version: 12.2.0
-  resolution: "validator@npm:12.2.0"
-  checksum: f635a8136a043a47ea7ade7aac8d6735609ebd40732517ed383d7c35155767d41742a858a9dd0b63833483014c508fef90457d7ea12e9166983a39eb798b38d6
+"validator@npm:^13.7.0":
+  version: 13.9.0
+  resolution: "validator@npm:13.9.0"
+  checksum: e2c936f041f61faa42bafd17c6faddf939498666cd82e88d733621c286893730b008959f4cb12ab3e236148a4f3805c30b85e3dcf5e0efd8b0cbcd36c02bfc0c
   languageName: node
   linkType: hard
 
