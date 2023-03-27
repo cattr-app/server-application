@@ -78,7 +78,6 @@
     "laravel-mix-bundle-analyzer": "^1.0.5",
     "laravel-mix-clean": "^0.1.0",
     "laravel-mix-compress": "^3.0.0",
-    "laravel-mix-make-file-hash": "^2.2.0",
     "laravel-mix-serve": "^2.2.2",
     "laravel-mix-sri": "^1.0.7",
     "laravel-mix-workbox": "^0.1.4",

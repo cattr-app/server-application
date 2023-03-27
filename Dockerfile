@@ -1,5 +1,5 @@
 # syntax=docker/dockerfile:1-labs
-FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr-dev AS builder
+FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr-dev:latest AS builder
 
 ARG MODULES="cattr/gitlab_integration-module cattr/redmine_integration-module"
 ARG APP_ENV=production
@@ -32,7 +32,7 @@ RUN set -x && \
     yarn prod && \
     rm -rf node_modules
 
-FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr AS runtime
+FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr:latest AS runtime
 
 ARG SENTRY_DSN
 ARG APP_VERSION

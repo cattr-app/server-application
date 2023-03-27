@@ -7,7 +7,6 @@ services:
       db:
         condition: service_healthy
     volumes:
-      - backend_public:/app/public
       - backend_storage:/app/storage
     labels:
       traefik.enable: true
@@ -30,7 +29,6 @@ services:
       retries: 10
 
 volumes:
-  backend_public: {}
   backend_storage: {}
   database: {}
 
