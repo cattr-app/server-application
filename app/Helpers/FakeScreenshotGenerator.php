@@ -22,7 +22,7 @@ class FakeScreenshotGenerator
 
         imagefill($image, 0, 0, $background);
 
-        imagejpeg($image, $tmpFile);
+        \imagejpeg($image, $tmpFile);
         imagedestroy($image);
 
         $service->saveScreenshot(

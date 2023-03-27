@@ -68,6 +68,7 @@ composer.phar
 /public/mix-sri.json
 /public/fonts
 /public/images
+/public/vendor
 
 /public/sw.*
 /public/workbox*

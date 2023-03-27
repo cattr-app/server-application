@@ -63,7 +63,6 @@ return [
          * Package Service Providers...
          */
 
-        Laravel\Tinker\TinkerServiceProvider::class,
         Intervention\Image\ImageServiceProvider::class,
         Sentry\Laravel\ServiceProvider::class,
 
@@ -77,7 +76,6 @@ return [
         App\Providers\EventServiceProvider::class,
         App\Providers\FilterServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
-        App\Providers\TelescopeServiceProvider::class,
 
         App\Providers\SettingsServiceProvider::class,
         App\Providers\ScreenshotsServiceProvider::class,

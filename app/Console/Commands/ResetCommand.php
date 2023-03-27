@@ -62,8 +62,12 @@ class ResetCommand extends Command
         ]);
 
         if ($this->option('seed')) {
-            $this->call(SeedCommand::class);
-            $this->call(ModuleSeedCommand::class);
+            $this->call(SeedCommand::class, [
+                '--force' => true
+            ]);
+            $this->call(ModuleSeedCommand::class, [
+                '--force' => true
+            ]);
         }
 
         return 0;

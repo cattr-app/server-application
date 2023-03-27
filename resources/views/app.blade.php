@@ -7,7 +7,7 @@
     <link rel="icon" href="/favicon.ico">
     <link rel="preconnect" href="/api">
     <link rel="preconnect" href="https://fonts.gstatic.com">
-    <x:sri.link mix href="dist/app.css" rel="stylesheet" />
+    <x:sri.link mix href="/dist/app.css" rel="stylesheet" />
     <title>Cattr</title>
 </head>
 <body>
@@ -15,6 +15,6 @@
     <strong>We're sorry but Cattr doesn't work properly without JavaScript enabled. Please enable it to continue.</strong>
 </noscript>
 <div id="app"></div>
-<x:sri.script mix src="dist/app.js"></x:sri-script>
+<x:sri.script mix src="/dist/app.js"></x:sri-script>
 </body>
 </html>

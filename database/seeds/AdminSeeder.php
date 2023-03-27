@@ -2,8 +2,9 @@
 
 namespace Database\Seeders;
 
-use App\Models\User;
+use App\Console\Commands\MakeAdmin;
 use Illuminate\Database\Seeder;
+use Illuminate\Support\Facades\Artisan;
 
 /**
  * Class AdminTableSeeder
@@ -15,11 +16,6 @@ class AdminSeeder extends Seeder
      */
     public function run(): void
     {
-        User::factory()->create([
-            'is_admin' => true,
-            'role_id' => 2,
-            'password' => 'admin',
-            'email' => 'admin@example.com',
-        ]);
+        Artisan::call(MakeAdmin::class);
     }
 }

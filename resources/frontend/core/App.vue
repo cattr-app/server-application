@@ -34,7 +34,7 @@
             const userApi = this.$store.getters['user/apiService'];
             if (userApi.token()) {
                 try {
-                    this.$loading.show();
+                    this.$Loading.start();
                     await userApi.checkApiAuth();
                     await userApi.getCompanyData();
 
@@ -49,7 +49,7 @@
                     console.log(e);
                     // Whoops
                 } finally {
-                    this.$loading.hide();
+                    this.$Loading.finish();
                 }
             }
         },

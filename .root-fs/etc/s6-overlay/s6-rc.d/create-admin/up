@@ -1,0 +1,1 @@
+with-contenv s6-setuidgid www php /app/artisan cattr:make:admin

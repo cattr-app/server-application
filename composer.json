@@ -1,40 +1,39 @@
 {
   "name": "cattr/backend-application",
   "description": "Backend Application for Cattr",
-  "license": "SEE LICENSE IN LICENSE",
+  "license": "SSPL-1.0",
   "type": "project",
   "homepage": "https://cattr.app",
   "support": {
     "email": "hi@cattr.app",
     "docs": "https://docs.cattr.app/backend#/",
     "forum": "https://community.cattr.app/public/",
-    "issues": "https://git.amazingcat.net/AmazingTime/core/cattr-backend/-/issues",
+    "issues": "https://git.amazingcat.net/cattr/core/app/-/issues",
     "chat": "https://cattr.app",
-    "source": "https://git.amazingcat.net/AmazingTime/core/cattr-backend"
+    "source": "https://git.amazingcat.net/cattr/core/app"
   },
   "require": {
     "php": "~8.2",
     "ext-gd": "*",
     "ext-json": "*",
     "ext-pdo": "*",
+    "beyondcode/laravel-websockets": "^1.14",
     "czproject/git-php": "^4.0",
+    "doctrine/dbal": "^3.0",
     "elhebert/laravel-sri": "^3.2",
     "erusev/parsedown": "^1.7",
+    "fakerphp/faker": "^1.21",
     "flugger/laravel-responder": "^3.3.0",
     "guzzlehttp/guzzle": "^7.2",
     "intervention/image": "^2.7",
-    "joshbrw/laravel-module-installer": "^2.0",
     "laravel/framework": "^10.0",
     "laravel/octane": "^1.5",
     "laravel/sanctum": "^3.2",
-    "laravel/telescope": "^4.14",
-    "laravel/tinker": "^2.8",
-    "league/fractal": "0.19.0",
     "maatwebsite/excel": "^3.1",
     "matanyadaev/laravel-eloquent-spatial": "^3.1",
     "mpdf/mpdf": "^8.0",
     "nwidart/laravel-modules": "^10",
-    "sentry/sentry-laravel": "^3.2",
+    "sentry/sentry-laravel": "^3.3",
     "webpatser/laravel-uuid": "^4.0",
     "wikimedia/composer-merge-plugin": "^2.0"
   },
@@ -45,7 +44,9 @@
     "roave/security-advisories": "dev-latest",
     "sempro/phpunit-pretty-print": "^1.0",
     "squizlabs/php_codesniffer": "^3",
-    "nunomaduro/collision": "^7.0"
+    "nunomaduro/collision": "^7.3",
+    "laravel/tinker": "^2.8",
+    "laravel/telescope": "^4.14"
   },
   "autoload": {
     "psr-4": {
@@ -55,6 +56,11 @@
       "Database\\Seeders\\": "database/seeds/"
     }
   },
+  "autoload-dev": {
+    "psr-4": {
+      "Tests\\": "tests/"
+    }
+  },
   "scripts": {
     "dumphelpers": [
       "@php artisan ide-helper:generate",
@@ -62,13 +68,13 @@
     ],
     "post-autoload-dump": [
       "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
-      "@php artisan package:discover --ansi"
-    ],
-    "post-update-cmd": [
+      "@php artisan package:discover --ansi",
       "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
     ],
     "post-root-package-install": [
-      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ],
+    "post-create-project-cmd": [
       "@php artisan key:generate --ansi"
     ]
   },
@@ -76,19 +82,9 @@
     "preferred-install": "dist",
     "sort-packages": true,
     "optimize-autoloader": true,
+    "gitlab-domains": ["git.amazingcat.net"],
     "allow-plugins": {
-      "joshbrw/laravel-module-installer": true,
-      "wikimedia/composer-merge-plugin": true,
-      "pestphp/pest-plugin": true,
-      "php-http/discovery": true
-    },
-    "gitlab-domains": [
-      "git.amazingcat.net"
-    ]
-  },
-  "autoload-dev": {
-    "psr-4": {
-      "Tests\\": "tests/"
+      "wikimedia/composer-merge-plugin": true
     }
   },
   "repositories": [

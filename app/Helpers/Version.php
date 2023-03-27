@@ -41,19 +41,19 @@ class Version
 
                     try {
                         return self::getComposerVersion($modulePath);
-                    } catch (Exception) {
+                    } catch (Throwable) {
                         try {
                             return self::getFileVersion($modulePath);
-                        } catch (Exception) {
+                        } catch (Throwable) {
                             try {
                                 return self::getGitVersion($modulePath);
-                            } catch (Exception) {
+                            } catch (Throwable) {
                                 return 'dev';
                             }
                         }
                     }
                 })->toArray();
-            } catch (Exception) {
+            } catch (Throwable) {
                 return [];
             }
         });

@@ -12,7 +12,7 @@ class SettingsProviderService implements SettingsProvider
 {
     protected string $scope = 'app';
 
-    public function __construct(private Setting $model, private bool $saveScope = true)
+    public function __construct(private readonly Setting $model, private readonly bool $saveScope = true)
     {
     }
 
@@ -41,7 +41,7 @@ class SettingsProviderService implements SettingsProvider
             $this->scope = '';
         }
 
-        $result = $this->model->whereModuleName($scope)
+        $result = $this->model::whereModuleName($scope)
             ->get()
             ->map(static fn(Setting $item) => [$item->key => $item->value])
             ->collapse()
@@ -97,7 +97,7 @@ class SettingsProviderService implements SettingsProvider
     /**
      * @inerhitDoc
      */
-    final public function set(mixed $key, mixed $value = null): void
+    final public function set(mixed $key, mixed $value = null, bool $onlyIfNotExists = false): void
     {
         $scope = $this->scope;
 
@@ -107,6 +107,15 @@ class SettingsProviderService implements SettingsProvider
 
         if (is_array($key)) {
             foreach ($key as $_key => $_value) {
+                if ($onlyIfNotExists &&
+                    $this->model::where([
+                        'module_name' => $scope,
+                        'key' => $_key,
+                    ])->exists()
+                ) {
+                        continue;
+                }
+
                 $this->model::updateOrCreate([
                     'module_name' => $scope,
                     'key' => $_key,
@@ -115,6 +124,15 @@ class SettingsProviderService implements SettingsProvider
                 ]);
             }
         } else {
+            if ($onlyIfNotExists &&
+                $this->model::where([
+                    'module_name' => $scope,
+                    'key' => $key,
+                ])->exists()
+            ) {
+                return;
+            }
+
             $this->model::updateOrCreate([
                 'module_name' => $scope,
                 'key' => $key,

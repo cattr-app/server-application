@@ -1,0 +1,3 @@
+if { mkdir -p /var/lib/nginx/tmp }
+if { mkdir -p /var/log/nginx }
+chown -R www:www /app/storage

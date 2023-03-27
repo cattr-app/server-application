@@ -39,6 +39,7 @@ cghooks.lock
 /storage/framework/tmp
 !/storage/framework/cache/.gitkeep
 /storage/framework/cache/*
+/storage/app/tmp
 
 /storage/app/reports
 
@@ -49,7 +50,28 @@ bootstrap/cache/*
 !bootstrap/cache/.gitkeep
 /public/vendor/
 
-.git
+.yarn/*
+!.yarn/patches
+!.yarn/plugins
+!.yarn/releases
+!.yarn/sdks
+!.yarn/versions
+.pnp.*
 
-public/storage
+composer.phar
+
+/public/dist
+/resources/frontend/app/etc/modules.local.json
+/resources/frontend/app/generated
+
+/public/mix-manifest.json
+/public/mix-sri.json
+/public/fonts
+/public/images
+/public/vendor
+
+/public/sw.*
+/public/workbox*
+
+.git
 Dockerfile

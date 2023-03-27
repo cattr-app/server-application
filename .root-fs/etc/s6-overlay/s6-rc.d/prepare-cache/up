@@ -1,0 +1,1 @@
+with-contenv s6-envuidgid www php /app/artisan config:cache

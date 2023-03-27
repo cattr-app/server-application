@@ -151,11 +151,11 @@
             },
             finish(error = true) {
                 this.error = error;
-                this.$loading.hide();
+                this.$Loading.error();
             },
         },
         mounted() {
-            this.$loading.show();
+            this.$Loading.start();
 
             if (location.search.length === 0) {
                 this.finish();

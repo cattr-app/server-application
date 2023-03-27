@@ -8,7 +8,6 @@ import App from '@/App.vue';
 import router from '@/router';
 import store from '@/store';
 import AtComponents from '@cattr/ui-kit';
-import Dialog from 'vue-dialog-loading';
 import DatePicker from 'vue2-datepicker';
 import moment from 'vue-moment';
 import i18n from '@/i18n';
@@ -28,7 +27,6 @@ Vue.config.productionTip = false;
 
 Vue.use(AtComponents);
 Vue.use(moment);
-Vue.use(Dialog);
 Vue.use(DatePicker);
 Vue.use(VueLazyload, {
     lazyComponent: true,

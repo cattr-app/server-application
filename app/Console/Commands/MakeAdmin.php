@@ -15,7 +15,7 @@ class MakeAdmin extends Command implements Isolatable
     protected $signature = 'cattr:make:admin
                             {--o : Skip instance registration}
                             {--e|email : user email}
-                            {--n|name : user name}
+                            {--u|name : user name}
                             {--p|password : user password}';
 
     protected $description = 'Creates admin user with data from ENV or input';
