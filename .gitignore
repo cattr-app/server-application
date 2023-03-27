@@ -61,8 +61,8 @@ bootstrap/cache/*
 composer.phar
 
 /public/dist
-/resources/frontend/app/etc/modules.local.json
-/resources/frontend/app/generated
+/resources/frontend/etc/modules.local.json
+/resources/frontend/generated
 
 /public/mix-manifest.json
 /public/mix-sri.json

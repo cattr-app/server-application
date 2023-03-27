@@ -13,6 +13,19 @@ if (mix.isWatching()) {
   mix.bundleAnalyzer();
 }
 
+if(mix.inProduction()){
+  mix.version()
+    .compress();
+
+  mix.then(() => {
+    const convertToFileHash = require("laravel-mix-make-file-hash");
+    convertToFileHash({
+      publicPath: "public",
+      manifestFilePath: "public/mix-manifest.json"
+    });
+  });
+}
+
 process.env.VUE_APP_VERSION = process.env.APP_VERSION;
 process.env.VUE_APP_DOCKER_VERSION = process.env.IMAGE_VERSION;
 
@@ -33,8 +46,6 @@ mix
     version: 2,
     globalStyles: 'resources/frontend/core/sass/includes/variables.scss'
   })
-  .version()
-  .compress()
   .serve({
     args: ['artisan', 'serve', '--host=0.0.0.0'],
     dev: false,

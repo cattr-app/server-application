@@ -1326,6 +1326,7 @@ __metadata:
     laravel-mix-bundle-analyzer: ^1.0.5
     laravel-mix-clean: ^0.1.0
     laravel-mix-compress: ^3.0.0
+    laravel-mix-make-file-hash: ^2.2.0
     laravel-mix-serve: ^2.2.2
     laravel-mix-sri: ^1.0.7
     laravel-mix-workbox: ^0.1.4
@@ -4717,6 +4718,22 @@ __metadata:
   languageName: node
   linkType: hard
 
+"del@npm:^5.1.0":
+  version: 5.1.0
+  resolution: "del@npm:5.1.0"
+  dependencies:
+    globby: ^10.0.1
+    graceful-fs: ^4.2.2
+    is-glob: ^4.0.1
+    is-path-cwd: ^2.2.0
+    is-path-inside: ^3.0.1
+    p-map: ^3.0.0
+    rimraf: ^3.0.0
+    slash: ^3.0.0
+  checksum: d9e4ef2c1227230ed61291fc99bdcb084167c0fe580df5fa8b2524b511c09f0c51887edf7dc5ffaa6ecfb25c92a2ca185ec49d5233baf6c5fe50248ab1f13e57
+  languageName: node
+  linkType: hard
+
 "delayed-stream@npm:~1.0.0":
   version: 1.0.0
   resolution: "delayed-stream@npm:1.0.0"
@@ -6135,7 +6152,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"globby@npm:^10.0.0":
+"globby@npm:^10.0.0, globby@npm:^10.0.1":
   version: 10.0.2
   resolution: "globby@npm:10.0.2"
   dependencies:
@@ -6963,7 +6980,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-path-cwd@npm:^2.0.0":
+"is-path-cwd@npm:^2.0.0, is-path-cwd@npm:^2.2.0":
   version: 2.2.0
   resolution: "is-path-cwd@npm:2.2.0"
   checksum: 46a840921bb8cc0dc7b5b423a14220e7db338072a4495743a8230533ce78812dc152548c86f4b828411fe98c5451959f07cf841c6a19f611e46600bd699e8048
@@ -6988,7 +7005,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"is-path-inside@npm:^3.0.3":
+"is-path-inside@npm:^3.0.1, is-path-inside@npm:^3.0.3":
   version: 3.0.3
   resolution: "is-path-inside@npm:3.0.3"
   checksum: abd50f06186a052b349c15e55b182326f1936c89a78bf6c8f2b707412517c097ce04bc49a0ca221787bc44e1049f51f09a2ffb63d22899051988d3a618ba13e9
@@ -7441,6 +7458,16 @@ __metadata:
   peerDependencies:
     laravel-mix: ^6.0.39
   checksum: 00449591f96c5733f592e3f7bb54dc246ffc4c329770aa4956e73c86b9f5ab0d8f46e3d0671c8642e04f59100e9dea9fae6a0a9e2694c271655abc6570e443aa
+  languageName: node
+  linkType: hard
+
+"laravel-mix-make-file-hash@npm:^2.2.0":
+  version: 2.2.0
+  resolution: "laravel-mix-make-file-hash@npm:2.2.0"
+  dependencies:
+    del: ^5.1.0
+    micromatch: ^4.0.2
+  checksum: ed1085232ae0b4f6dd0b6b8009efe57855a909587d755afc58950f72526b05f3f024a3c592d5753554a8d3ea0a56ac75e4d65826a9392404c1ebf6a8a6e93d58
   languageName: node
   linkType: hard
 
@@ -8691,6 +8718,15 @@ __metadata:
   version: 2.1.0
   resolution: "p-map@npm:2.1.0"
   checksum: 9e3ad3c9f6d75a5b5661bcad78c91f3a63849189737cd75e4f1225bf9ac205194e5c44aac2ef6f09562b1facdb9bd1425584d7ac375bfaa17b3f1a142dab936d
+  languageName: node
+  linkType: hard
+
+"p-map@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "p-map@npm:3.0.0"
+  dependencies:
+    aggregate-error: ^3.0.0
+  checksum: 49b0fcbc66b1ef9cd379de1b4da07fa7a9f84b41509ea3f461c31903623aaba8a529d22f835e0d77c7cb9fcc16e4fae71e308fd40179aea514ba68f27032b5d5
   languageName: node
   linkType: hard
 
@@ -10052,7 +10088,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"rimraf@npm:^3.0.2":
+"rimraf@npm:^3.0.0, rimraf@npm:^3.0.2":
   version: 3.0.2
   resolution: "rimraf@npm:3.0.2"
   dependencies:
