@@ -40,6 +40,7 @@ yarn dev
 
 ```
 composer dumphelpers
+composer dumperd
 ```
 
 ## Links

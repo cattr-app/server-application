@@ -72,3 +72,5 @@ composer.phar
 
 /public/sw.*
 /public/workbox*
+
+erd.svg
