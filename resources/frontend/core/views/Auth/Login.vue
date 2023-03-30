@@ -51,7 +51,7 @@
 
 <script>
     import { ValidationObserver } from 'vee-validate';
-    import VueRecaptcha from 'vue-recaptcha';
+    import { VueRecaptcha } from 'vue-recaptcha';
     import AuthInput from './AuthInput';
     import sloganGenerator from '@/helpers/sloganGenerator';
     import has from 'lodash/has';
