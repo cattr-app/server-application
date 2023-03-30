@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AboutController;
+use App\Http\Controllers\Api\AttachmentController;
 use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\PriorityController;
@@ -244,6 +245,10 @@ Route::group([
             ->name('settings.list');
         $router->patch('company-settings', [CompanySettingsController::class, 'update'])
             ->name('settings.save');
+
+        // Attachments routes
+        $router->post('attachment/create', [AttachmentController::class, 'create'])
+            ->name('attachment.create');
     });
 
     //Screenshots routes
