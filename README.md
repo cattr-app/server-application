@@ -4,9 +4,9 @@ Superpowered with features like built-in screenshot capture and activity detecti
 your team's performance straight to the top.
 
 ### Screenshots
-|                                                Dashboard                                                 |                                              Project report                                              |
-|:--------------------------------------------------------------------------------------------------------:|:--------------------------------------------------------------------------------------------------------:|
-| ![](https://git.amazingcat.net/Cattr/core/cattr-frontend/uploads/69a5912d9db48237c29cd58aa54728b1/2.png) | ![](https://git.amazingcat.net/Cattr/core/cattr-frontend/uploads/bd595fdde959e6aff922ce2253a8acc8/1.png) |
+|           Dashboard           |           Project report           |
+|:-----------------------------:|:----------------------------------:|
+| ![](./examples/dashboard.jpg) | ![](./examples/project_report.jpg) |
 
 ### Demo
 The demo app is available here: [demo.cattr.app](https://demo.cattr.app) 
