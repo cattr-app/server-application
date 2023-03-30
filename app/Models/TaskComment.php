@@ -2,6 +2,8 @@
 
 namespace App\Models;
 
+use App\Contracts\AttachmentAble;
+use App\Traits\HasAttachments;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -41,15 +43,17 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @method static QueryBuilder|TaskComment withoutTrashed()
  * @mixin EloquentIdeHelper
  */
-class TaskComment extends Model
+class TaskComment extends Model implements AttachmentAble
 {
     use SoftDeletes;
+    use HasAttachments;
 
+    public const TABLE = 'task_comment';
     /**
      * table name from database
      * @var string
      */
-    protected $table = 'task_comment';
+    protected $table = self::TABLE;
 
     /**
      * @var array

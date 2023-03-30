@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Contracts\AttachmentAble;
 use App\Scopes\TaskAccessScope;
 use App\Traits\ExposePermissions;
+use App\Traits\HasAttachments;
 use Database\Factories\TaskFactory;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -123,17 +125,19 @@ use Parsedown;
  * @property-read Collection|\App\Models\Property[] $properties
  * @property-read int|null $properties_count
  */
-class Task extends Model
+class Task extends Model implements AttachmentAble
 {
     use SoftDeletes;
     use ExposePermissions;
     use HasFactory;
+    use HasAttachments;
 
+    public const TABLE = 'tasks';
     /**
      * table name from database
      * @var string
      */
-    protected $table = 'tasks';
+    protected $table = self::TABLE;
 
     /**
      * @var array
