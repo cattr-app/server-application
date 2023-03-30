@@ -29,11 +29,6 @@ class Attachment extends Model
     use HasUuids;
 //    TODO: soft deletes?
 
-    public const SUPPORTED_BY = [
-        Task::TABLE,
-        TaskComment::TABLE
-    ];
-
     protected $fillable = [
         'attachmentable_id',
         'attachmentable_type',

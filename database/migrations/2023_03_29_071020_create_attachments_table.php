@@ -11,7 +11,7 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::create('attachment', static function (Blueprint $table) {
+        Schema::create('attachments', static function (Blueprint $table) {
             $table->uuid('id')->primary();
             $table->unsignedBigInteger('attachmentable_id')->index();
             $table->unsignedBigInteger('attachmentable_type')->index();
@@ -23,8 +23,8 @@ return new class extends Migration
 //          TODO: decide between char and binary for hash
 //            $table->char('hash', 32)->charset('binary')->index();
 
-            $table->unsignedBigInteger('project_id');
-            $table->unsignedBigInteger('user_id');
+            $table->unsignedInteger('project_id');
+            $table->unsignedInteger('user_id');
             $table->boolean('healthy');
 
             $table->timestamps();
@@ -39,6 +39,6 @@ return new class extends Migration
      */
     public function down(): void
     {
-        Schema::dropIfExists('attachment');
+        Schema::dropIfExists('attachments');
     }
 };

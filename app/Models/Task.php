@@ -253,4 +253,9 @@ class Task extends Model implements AttachmentAble
     {
         return $this->morphMany(Property::class, 'entity');
     }
+
+    public function getProjectId(): int
+    {
+        return $this->project_id;
+    }
 }

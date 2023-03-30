@@ -96,4 +96,9 @@ class TaskComment extends Model implements AttachmentAble
     {
         return $this->morphMany(Property::class, 'entity');
     }
+
+    public function getProjectId(): int
+    {
+        return $this->task->project_id;
+    }
 }

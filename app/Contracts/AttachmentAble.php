@@ -12,4 +12,6 @@ interface AttachmentAble
      */
     public function attachments();
     public function attachmentsRelation(): MorphMany;
+
+    public function getProjectId(): int;
 }
