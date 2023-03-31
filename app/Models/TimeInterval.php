@@ -15,6 +15,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Notifications\Notifiable;
 use Illuminate\Support\Carbon;
 use Storage;
 use MatanYadaev\EloquentSpatial\SpatialBuilder as Builder;
@@ -128,6 +129,7 @@ class TimeInterval extends Model
     use SoftDeletes;
     use HasFactory;
     use HasSpatial;
+    use Notifiable;
 
     /**
      * table name from database
@@ -186,12 +188,6 @@ class TimeInterval extends Model
         parent::boot();
 
         static::addGlobalScope(new TimeIntervalAccessScope);
-
-        static::deleting(static function ($interval) {
-            /** @var TimeInterval $interval */
-            $screenshotService = app()->make(ScreenshotService::class);
-            $screenshotService->destroyScreenshot($interval);
-        });
     }
 
     public function task(): BelongsTo
@@ -219,8 +215,8 @@ class TimeInterval extends Model
     public function location(): Attribute
     {
         return Attribute::make(
-            get: static fn($value) => $value ? ['lat' => $value->latitude, 'lng' => $value->longitude] : null,
-            set: static fn($value) => $value ? new Point($value['lat'], $value['lng']) : null,
+            get: static fn ($value) => $value ? ['lat' => $value->latitude, 'lng' => $value->longitude] : null,
+            set: static fn ($value) => $value ? new Point($value['lat'], $value['lng']) : null,
         )->shouldCache();
     }
 

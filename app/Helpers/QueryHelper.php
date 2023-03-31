@@ -60,6 +60,12 @@ class QueryHelper
             $query->withCount($filter['withCount']);
         }
 
+        if (isset($filter['withSum'])) {
+            foreach ($filter['withSum'] as $withSum) {
+                $query->withSum(...$withSum);
+            }
+        }
+
         if (isset($filter['search']['query'], $filter['search']['fields'])) {
             $query = self::buildSearchQuery($query, $filter['search']['query'], $filter['search']['fields']);
         }

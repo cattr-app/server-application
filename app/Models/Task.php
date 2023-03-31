@@ -85,6 +85,7 @@ use Parsedown;
  * @property int|null $status_id
  * @property float $relative_position
  * @property Carbon|null $due_date
+ * @property int|null $estimate
  * @property-read User $assigned
  * @property-read Collection|TaskHistory[] $changes
  * @property-read int|null $changes_count
@@ -97,6 +98,8 @@ use Parsedown;
  * @property-read Collection|TimeInterval[] $timeIntervals
  * @property-read int|null $time_intervals_count
  * @property-read Collection|User[] $users
+ * @property-read Collection|ViewTaskWorkers[] $workers
+ * @property-read int $total_spent_time
  * @property-read int|null $users_count
  * @method static TaskFactory factory(...$parameters)
  * @method static EloquentBuilder|Task newModelQuery()
@@ -149,6 +152,7 @@ class Task extends Model
         'important',
         'relative_position',
         'due_date',
+        'estimate',
     ];
 
     /**
@@ -164,6 +168,7 @@ class Task extends Model
         'status_id' => 'integer',
         'important' => 'integer',
         'relative_position' => 'float',
+        'estimate' => 'integer',
     ];
 
     /**
@@ -186,6 +191,8 @@ class Task extends Model
 
         static::deleting(static function (Task $task) {
             $task->timeIntervals()->delete();
+
+            ViewTaskWorkers::whereTaskId($task->id)->delete();
         });
 
         static::created(static function (Task $task) {
@@ -248,5 +255,10 @@ class Task extends Model
     public function properties(): MorphMany
     {
         return $this->morphMany(Property::class, 'entity');
+    }
+
+    public function workers(): HasMany
+    {
+        return $this->hasMany(ViewTaskWorkers::class, 'task_id', 'id');
     }
 }

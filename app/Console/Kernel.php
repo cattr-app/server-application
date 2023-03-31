@@ -56,6 +56,8 @@ class Kernel extends ConsoleKernel
         $schedule->command(RotateScreenshots::class)->weekly()->when(Settings::scope('core')->get('auto_thinning'));
 
         $schedule->job(new ClearExpiredApps)->daily();
+
+        $schedule->command(RecreateTaskWorkersView::class)->timezone(Settings::scope('core')->get('timezone', 'UTC'))->daily()->runInBackground()->withoutOverlapping();
     }
 
     /**

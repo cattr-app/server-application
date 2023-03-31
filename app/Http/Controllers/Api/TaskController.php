@@ -10,6 +10,7 @@ use App\Http\Requests\Task\ShowTaskRequest;
 use App\Jobs\SaveTaskEditHistory;
 use App\Models\Priority;
 use App\Models\Project;
+use Carbon\Carbon;
 use Exception;
 use Filter;
 use App\Models\Task;
@@ -149,6 +150,15 @@ class TaskController extends ItemController
         Filter::listen(
             Filter::getRequestFilterName(),
             static function (array $requestData) {
+                if ($requestData['due_date']) {
+                    $timezone = Settings::scope('core')->get('timezone', 'UTC');
+                    $requestData['due_date'] = Carbon::parse($requestData['due_date'])->setTimezone($timezone);
+                }
+
+                if (isset($requestData['estimate']) && $requestData['estimate'] <= 0) {
+                    $requestData['estimate'] = null;
+                }
+
                 if (!empty($requestData['priority_id'])) {
                     return $requestData;
                 }
@@ -264,12 +274,21 @@ class TaskController extends ItemController
     {
         Event::listen(
             Filter::getAfterActionEventName(),
-            static fn(Task $task) => $task->users()->sync($request->get('users'))
+            static fn (Task $task) => $task->users()->sync($request->get('users'))
         );
 
         Filter::listen(
             Filter::getRequestFilterName(),
             static function (array $requestData) {
+                if ($requestData['due_date']) {
+                    $timezone = Settings::scope('core')->get('timezone', 'UTC');
+                    $requestData['due_date'] = Carbon::parse($requestData['due_date'])->setTimezone($timezone);
+                }
+
+                if (isset($requestData['estimate']) && $requestData['estimate'] <= 0) {
+                    $requestData['estimate'] = null;
+                }
+
                 if (!empty($requestData['priority_id'])) {
                     return $requestData;
                 }
@@ -425,33 +444,6 @@ class TaskController extends ItemController
      */
     public function show(ShowTaskRequest $request): JsonResponse
     {
-        Filter::listen(Filter::getSuccessResponseFilterName(), static function ($task) {
-            $task['total_spent_time'] = 0;
-            $task['workers'] = [];
-
-            DB::table('time_intervals AS i')
-                ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-                ->join('users AS u', 'i.user_id', '=', 'u.id')
-                ->select(
-                    'i.user_id',
-                    'u.full_name',
-                    'i.task_id',
-                    'i.start_at',
-                    'i.end_at',
-                    DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
-                )
-                ->whereNull('i.deleted_at')
-                ->where('task_id', $task['id'])
-                ->groupBy('i.user_id')
-                ->get()
-                ->each(static function ($worker) use (&$task) {
-                    $task['total_spent_time'] += $worker->duration;
-                    $task['workers'][] = $worker;
-                });
-
-            return $task;
-        });
-
         return $this->_show($request);
     }
 }

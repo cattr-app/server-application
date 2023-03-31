@@ -1,22 +1,27 @@
 .tasks {
-  &-grid {
-    &__task,
-    &__project {
-      white-space: pre;
-      text-overflow: ellipsis;
-    }
+    &-grid {
+        &__task,
+        &__project {
+            white-space: pre;
+            text-overflow: ellipsis;
+        }
 
-    &__task {
-      &--inactive {
-        color: #888;
-        text-decoration: line-through;
-      }
+        &__task {
+            &--inactive {
+                color: #888;
+                text-decoration: line-through;
+            }
+        }
+
+        &__tags {
+            display: flex;
+            column-gap: 0.3rem;
+        }
     }
-  }
 }
 
 .crud__content.crud__item-view {
-  pre {
-    white-space: pre-wrap;
-  }
+    pre {
+        white-space: pre-wrap;
+    }
 }

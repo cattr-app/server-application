@@ -4,8 +4,6 @@ namespace App\Providers;
 
 use App;
 use App\Models\Property;
-use App\Models\User;
-use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Tinker\TinkerServiceProvider;
 
@@ -16,8 +14,6 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        User::observe(UserObserver::class);
-
         Property::loadMorphMap();
     }
 
