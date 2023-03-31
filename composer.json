@@ -73,11 +73,13 @@
       "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
     ],
     "post-install-cmd": [
-      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\"",
-      "@php artisan key:generate --ansi"
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
     ],
     "dumperd": [
       "@php artisan generate:erd erd.svg --format=svg"
+    ],
+    "kg": [
+      "@php artisan key:generate --ansi"
     ]
   },
   "config": {
