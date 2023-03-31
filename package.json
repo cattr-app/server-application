@@ -48,7 +48,7 @@
     "vue": "^2.7.14",
     "vue-avatar": "^2.3.3",
     "vue-color": "^2.8.1",
-    "vue-i18n": "^8.28.2",
+    "vue-i18n": "^9.2.2",
     "vue-kanban": "^1.8.0",
     "vue-lazyload": "^1.3.4",
     "vue-loading-skeleton": "^1.1.9",
