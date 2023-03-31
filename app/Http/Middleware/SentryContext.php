@@ -3,10 +3,10 @@
 namespace App\Http\Middleware;
 
 use Closure;
-use Exception;
 use Illuminate\Http\Request;
 use Route;
 use Sentry\State\Scope;
+use Throwable;
 use function Sentry\configureScope;
 
 class SentryContext
@@ -43,7 +43,7 @@ class SentryContext
             $scope->setTag('request.method', $request->method());
             try {
                 $scope->setTag('request.route', Route::getRoutes()->match($request)->getName());
-            } catch (Exception) {
+            } catch (Throwable) {
             }
         });
 
