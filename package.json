@@ -44,7 +44,7 @@
     "path-browserify": "^1.0.1",
     "semver": "^7.3.8",
     "validator": "^13.9.0",
-    "vee-validate": "^3.4.15",
+    "vee-validate": "^4.7.4",
     "vue": "^2.7.14",
     "vue-avatar": "^2.3.3",
     "vue-color": "^2.8.1",
