@@ -75,3 +75,4 @@ include:
   - template: Security/Secret-Detection.gitlab-ci.yml
   - template: Security/License-Scanning.gitlab-ci.yml
   - template: Security/Container-Scanning.gitlab-ci.yml
+  - template: Code-Quality.gitlab-ci.yml
