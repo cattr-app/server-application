@@ -193,6 +193,7 @@ class QueryHelper
             'orderBy' => 'sometimes|array',
             'with.*' => 'sometimes|string',
             'withCount.*' => 'sometimes|string',
+            'withSum.*.*' => 'sometimes|string',
             'search.query' => 'sometimes|string|nullable',
             'search.fields.*' => 'sometimes|string',
             'where' => 'sometimes|array',

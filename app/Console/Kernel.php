@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\RecreateTaskWorkersView;
 use App\Console\Commands\RotateScreenshots;
 use App\Jobs\ClearExpiredApps;
 use Exception;
