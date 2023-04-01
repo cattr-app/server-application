@@ -34,7 +34,7 @@
         },
         async created() {
             try {
-                this.options = await this.service.getAll({ headers: { 'X-Paginate': false } });
+                this.options = await this.service.getAll({ headers: { 'X-Paginate': 'false' } });
 
                 await this.$nextTick();
 

@@ -52,6 +52,7 @@ export default class StatusService extends ResourceService {
     }
 
     getOptionList() {
+        // TODO: this probably will throw :(
         return this.getAll().then(({ data }) =>
             data.data.map(option => ({
                 value: option.id,

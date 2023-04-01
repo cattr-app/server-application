@@ -115,7 +115,7 @@ export default class DashboardService extends ReportService {
 
     loadUsers() {
         return this.userService
-            .getAll({ headers: { 'X-Paginate': false } })
+            .getAll({ headers: { 'X-Paginate': 'false' } })
             .then(response => {
                 this.context.commit('setUsers', response);
                 return response;
