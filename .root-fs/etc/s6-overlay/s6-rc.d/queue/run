@@ -1,0 +1,6 @@
+#!/command/execlineb -P
+
+with-contenv
+s6-setuidgid www
+
+php /app/artisan queue:work --sleep=3
