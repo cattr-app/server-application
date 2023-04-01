@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Role;
 use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
@@ -17,7 +18,7 @@ class TaskPolicy
         return $user->isAdmin() ?: null;
     }
 
-    public function viewAny(User $user): bool
+    public function viewAny(): bool
     {
         return true;
     }
@@ -51,8 +52,8 @@ class TaskPolicy
             return false;
         }
 
-        return $user->hasRole('manager')
-            || $user->hasProjectRole('manager', $projectId) || $user->hasProjectRole('user', $projectId);
+        return $user->hasRole(Role::MANAGER)
+            || $user->hasProjectRole([Role::MANAGER, Role::USER], $projectId);
     }
 
     /**
@@ -68,9 +69,9 @@ class TaskPolicy
             return false;
         }
 
-        return $user->hasRole('manager')
-            || $user->hasProjectRole('manager', $task->project_id)
-            || ($user->hasProjectRole('user', $task->project_id) && $task->assigned_by === $user->id);
+        return $user->hasRole(Role::MANAGER)
+            || $user->hasProjectRole(Role::MANAGER, $task->project_id)
+            || ($user->hasProjectRole(Role::USER, $task->project_id) && $task->assigned_by === $user->id);
     }
 
     /**
@@ -86,7 +87,7 @@ class TaskPolicy
             return false;
         }
 
-        return $user->hasRole('manager')
-            || $user->hasProjectRole('manager', $task->project_id);
+        return $user->hasRole(Role::MANAGER)
+            || $user->hasProjectRole(Role::MANAGER, $task->project_id);
     }
 }

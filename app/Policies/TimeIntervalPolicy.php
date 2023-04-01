@@ -2,6 +2,7 @@
 
 namespace App\Policies;
 
+use App\Enums\Role;
 use App\Models\Project;
 use App\Models\TimeInterval;
 use App\Models\User;
@@ -22,11 +23,7 @@ class TimeIntervalPolicy
 
     public function view(User $user, TimeInterval $timeInterval): bool
     {
-        return Cache::store('octane')->remember(
-            "role_user_interval_{$user->id}_$timeInterval->id",
-            config('cache.role_caching_ttl'),
-            static fn() => TimeInterval::whereId($timeInterval->id)->exists(),
-        );
+        return $timeInterval->user_id === $user->id || $user->can('view', $timeInterval->task);
     }
 
     public function create(User $user, int $userId, int $taskId, bool $isManual): bool
@@ -39,17 +36,16 @@ class TimeIntervalPolicy
             }
 
             if ($user->id !== $userId) {
-                return $user->hasRole('manager') || $user->hasProjectRole('manager', $projectId);
+                return $user->hasRole(Role::MANAGER) || $user->hasProjectRole(Role::MANAGER, $projectId);
             }
 
             return (
-                $user->hasProjectRole('user', $projectId)
-                || $user->hasProjectRole('manager', $projectId)
-                || $user->hasRole('manager')
+                $user->hasProjectRole([Role::USER, Role::MANAGER], $projectId)
+                || $user->hasRole(Role::MANAGER)
             );
         }
 
-        return $user->hasProjectRole('user', $projectId);
+        return $user->hasProjectRole(Role::USER, $projectId);
     }
 
     public function update(User $user, TimeInterval $timeInterval): bool
@@ -60,9 +56,7 @@ class TimeIntervalPolicy
     public function bulkUpdate(User $user, array $timeIntervalIds): bool
     {
         foreach ($timeIntervalIds as $id) {
-            $can = $user->can('update', TimeInterval::find($id));
-
-            if (!$can) {
+            if (!$user->can('update', TimeInterval::find($id))) {
                 return false;
             }
         }
@@ -105,7 +99,7 @@ class TimeIntervalPolicy
     private static function getProjectIdByTaskId(int $taskId): int
     {
         return Cache::store('octane')->remember(
-            "role_project_of_task_$taskId",
+            "project_of_task_$taskId",
             config('cache.role_caching_ttl'),
             static fn() => Project::whereHas(
                 'tasks',

@@ -14,7 +14,6 @@ class InitialSeeder extends Seeder
      */
     public function run(): void
     {
-        $this->call(RoleSeeder::class);
         $this->call(PrioritiesSeeder::class);
         $this->call(StatusSeeder::class);
         $this->call(CompanyManagementSeeder::class);

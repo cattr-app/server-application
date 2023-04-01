@@ -18,14 +18,12 @@ class ProjectFactory extends Factory
     public function definition(): array
     {
         return [
-            'company_id' => $this->faker->numberBetween(1, 10),
-            'name' => $this->faker->sentence(3),
-            'description' => $this->faker->paragraph,
-            'important' => $this->faker->boolean,
+            'company_id' => fake()->numberBetween(1, 10),
+            'name' => fake()->sentence(3),
+            'description' => fake()->paragraph,
+            'important' => fake()->boolean,
             'source' => 'internal',
-            'default_priority_id' => function () {
-                return Priority::orderByRaw('RAND()')->first()->id;
-            },
+            'default_priority_id' => fn () => Priority::orderByRaw('RAND()')->first()->id,
             'created_at' => now()
         ];
     }

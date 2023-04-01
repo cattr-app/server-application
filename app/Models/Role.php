@@ -2,44 +2,32 @@
 
 namespace App\Models;
 
-use App\Exceptions\Entities\AuthorizationException;
 use Cache;
 use Eloquent as EloquentIdeHelper;
-use Exception;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
+use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
-use Auth;
 use Illuminate\Support\Carbon;
-use Throwable;
-
-/**
- * @apiDefine RoleObject
- *
- * @apiSuccess {Integer}  role.id          ID
- * @apiSuccess {Integer}  role.name        Name
- * @apiSuccess {ISO8601}  role.created_at  Creation DateTime
- * @apiSuccess {ISO8601}  role.updated_at  Update DateTime
- * @apiSuccess {ISO8601}  role.deleted_at  Delete DateTime or `NULL` if wasn't deleted
- *
- * @apiVersion 1.0.0
- */
 
 /**
  * App\Models\Role
  *
+ * @todo Find a way to delete this module. Currently used in many migrations =(
+ *
+ * @deprecated Since 4.0.0, but still can be used in some old migrations
  * @property int $id
  * @property string $name
  * @property Carbon|null $deleted_at
  * @property Carbon|null $created_at
  * @property Carbon|null $updated_at
- * @property-read Collection|\App\Models\Project[] $projects
+ * @property-read Collection|Project[] $projects
  * @property-read int|null $projects_count
- * @property-read Collection|\App\Models\User[] $users
+ * @property-read Collection|User[] $users
  * @property-read int|null $users_count
  * @method static EloquentBuilder|Role newModelQuery()
  * @method static EloquentBuilder|Role newQuery()
@@ -57,7 +45,7 @@ use Throwable;
 
 class Role extends Model
 {
-    use SoftDeletes;
+    use SoftDeletes, HasFactory;
 
     /**
      * table name from database
