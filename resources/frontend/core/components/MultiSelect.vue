@@ -71,7 +71,7 @@
         },
         async created() {
             try {
-                const all = await this.service.getAll({ headers: { 'X-Paginate': false } });
+                const all = await this.service.getAll({ headers: { 'X-Paginate': 'false' } });
                 this.options.push(...all);
                 this.$emit('onOptionsLoad', this.options);
             } catch ({ response }) {

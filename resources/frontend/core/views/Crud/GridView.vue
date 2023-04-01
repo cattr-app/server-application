@@ -376,7 +376,7 @@
                 }
 
                 try {
-                    const res = await this.service.getWithFilters(queryParams, { headers: { 'X-Paginate': true } });
+                    const res = await this.service.getWithFilters(queryParams, { headers: { 'X-Paginate': 'true' } });
                     const { data, pagination } = res.data;
 
                     this.totalItems = pagination.total;
