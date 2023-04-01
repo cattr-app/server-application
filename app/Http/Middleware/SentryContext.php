@@ -2,6 +2,7 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\Role;
 use Closure;
 use Illuminate\Http\Request;
 use Route;
@@ -33,7 +34,7 @@ class SentryContext
                     'id' => $user->id,
                     'email' => config('sentry.send_default_pii') ? $user->email : sha1($user->email),
                     'is_admin' => $user->is_admin,
-                    'role' => $user->role->name,
+                    'role' => is_int($user->role_id) ? Role::tryFrom($user->role_id)?->name :$user->role_id->name,
                 ]);
             });
         }

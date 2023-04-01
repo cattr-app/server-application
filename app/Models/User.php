@@ -179,7 +179,6 @@ class User extends Authenticatable
         'important' => 'integer',
         'change_password' => 'int',
         'is_admin' => 'integer',
-        'role_id' => 'integer',
         'user_language' => 'string',
         'type' => 'string',
         'invitation_sent' => 'boolean',
