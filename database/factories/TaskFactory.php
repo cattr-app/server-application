@@ -25,10 +25,10 @@ class TaskFactory extends Factory
     public function definition(): array
     {
         return [
-            'task_name' => $this->faker->sentence(3),
-            'description' => $this->faker->paragraph,
+            'task_name' => fake()->sentence(3),
+            'description' => fake()->paragraph,
             'assigned_by' => fn() => User::where(['is_admin' => 1])->first()->id,
-            'important' => $this->faker->boolean,
+            'important' => fake()->boolean,
             'priority_id' => Priority::inRandomOrder()->first()->id,
             'status_id' => Status::inRandomOrder()->first()->id,
         ];

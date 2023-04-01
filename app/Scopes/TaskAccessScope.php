@@ -3,7 +3,7 @@
 namespace App\Scopes;
 
 use App\Exceptions\Entities\AuthorizationException;
-use App\Models\Role;
+use App\Enums\Role;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -39,9 +39,9 @@ class TaskAccessScope implements Scope
                 ->whereIn(
                     'projects_users.role_id',
                     [
-                        Role::getIdByName('manager'),
-                        Role::getIdByName('user'),
-                        Role::getIdByName('auditor'),
+                        Role::MANAGER->value,
+                        Role::USER->value,
+                        Role::AUDITOR->value,
                     ],
                 ))
             ->orderBy('created_at', 'desc');

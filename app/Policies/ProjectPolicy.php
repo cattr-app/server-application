@@ -2,9 +2,9 @@
 
 namespace App\Policies;
 
+use App\Enums\Role;
 use App\Models\Project;
 use App\Models\User;
-use Cache;
 use Illuminate\Auth\Access\HandlesAuthorization;
 
 class ProjectPolicy
@@ -18,11 +18,7 @@ class ProjectPolicy
 
     public function view(User $user, Project $project): bool
     {
-        return Cache::store('octane')->remember(
-            "role_user_project_{$user->id}_$project->id",
-            config('cache.role_caching_ttl'),
-            static fn() => Project::whereId($project->id)->exists()
-        );
+        return $user->hasProjectRole(Role::ANY, $project->id);
     }
 
     public function viewAny(): bool
@@ -32,7 +28,7 @@ class ProjectPolicy
 
     public function create(User $user): bool
     {
-        return $user->hasRole('manager');
+        return $user->hasRole(Role::MANAGER);
     }
 
     public function update(User $user, Project $project): bool
@@ -41,12 +37,12 @@ class ProjectPolicy
             return false;
         }
 
-        return $user->hasRole('manager') || $user->hasProjectRole('manager', $project->id);
+        return $user->hasRole(Role::MANAGER) || $user->hasProjectRole(Role::MANAGER, $project->id);
     }
 
     public function updateMembers(User $user, Project $project): bool
     {
-        return $user->hasRole('manager') || $user->hasProjectRole('manager', $project->id);
+        return $user->hasRole(Role::MANAGER) || $user->hasProjectRole(Role::MANAGER, $project->id);
     }
 
     public function destroy(User $user, Project $project): bool
@@ -55,6 +51,6 @@ class ProjectPolicy
             return false;
         }
 
-        return $user->hasRole('manager');
+        return $user->hasRole(Role::MANAGER);
     }
 }

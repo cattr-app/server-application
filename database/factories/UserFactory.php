@@ -2,18 +2,17 @@
 
 namespace Database\Factories;
 
+use App\Enums\Role;
 use App\Models\User;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class UserFactory extends Factory
 {
-    protected $model = User::class;
-
     public function definition(): array
     {
         return [
-            'full_name' => $this->faker->name(),
-            'email' => $this->faker->unique()->safeEmail(),
+            'full_name' => fake()->name(),
+            'email' => fake()->unique()->safeEmail(),
             'url' => '',
             'company_id' => 1,
             'avatar' => '',
@@ -26,7 +25,7 @@ class UserFactory extends Factory
             'active' => 1,
             'password' => 'password',
             'user_language' => 'en',
-            'role_id' => 2,
+            'role_id' => Role::USER,
             'type' => 'employee',
             'last_activity' => now()->subMinutes(random_int(1, 55)),
         ];
@@ -34,6 +33,16 @@ class UserFactory extends Factory
 
     public function admin(): UserFactory
     {
-        return $this->state(fn () => ['is_admin' => true]);
+        return $this->state(fn () => ['role_id' => Role::ADMIN]);
+    }
+
+    public function manager(): UserFactory
+    {
+        return $this->state(fn () => ['role_id' => Role::MANAGER]);
+    }
+
+    public function auditor(): UserFactory
+    {
+        return $this->state(fn () => ['role_id' => Role::AUDITOR]);
     }
 }

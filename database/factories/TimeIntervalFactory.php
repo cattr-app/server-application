@@ -16,9 +16,10 @@ class TimeIntervalFactory extends Factory
             'is_manual' => false,
             'start_at' => now()->subMinutes(5)->toDateTimeString(),
             'end_at' => now()->toDateTimeString(),
-            'mouse_fill' => $this->faker->numberBetween(0, 100),
-            'keyboard_fill' => $this->faker->numberBetween(0, 100),
-            'activity_fill' => static fn(array $attributes) => +$attributes['keyboard_fill'] + $attributes['mouse_fill'],
+            'mouse_fill' => fake()->numberBetween(0, 100),
+            'keyboard_fill' => fake()->numberBetween(0, 100),
+            'activity_fill' => static fn(array $attributes) =>
+                +$attributes['keyboard_fill'] + $attributes['mouse_fill'],
         ];
     }
 

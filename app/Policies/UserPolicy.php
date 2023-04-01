@@ -23,7 +23,7 @@ class UserPolicy
         return $user->isAdmin() ?: null;
     }
 
-    public function viewAny(User $user): bool
+    public function viewAny(): bool
     {
         return true;
     }

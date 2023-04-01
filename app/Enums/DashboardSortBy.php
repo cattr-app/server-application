@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum DashboardSortBy:string
+enum DashboardSortBy: string
 {
     case USER_NAME = 'user';
     case WORKED = 'worked';

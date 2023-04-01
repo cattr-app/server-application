@@ -12,7 +12,6 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
-use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
@@ -24,82 +23,7 @@ use Illuminate\Notifications\DatabaseNotificationCollection;
 use Illuminate\Notifications\Notifiable;
 use Hash;
 use Laravel\Sanctum\HasApiTokens;
-
-/**
- * @apiDefine UserObject
- *
- * @apiSuccess {Integer}  user.id                       ID
- * @apiSuccess {String}   user.full_name                Name
- * @apiSuccess {String}   user.email                    Email
- * @apiSuccess {Integer}  user.company_id               Company ID
- * @apiSuccess {String}   user.avatar                   Avatar image url
- * @apiSuccess {Boolean}  user.screenshots_active       Should screenshots be captured
- * @apiSuccess {Boolean}  user.manual_time              Allow manual time edit
- * @apiSuccess {Integer}  user.screenshots_interval     Screenshots capture interval (seconds)
- * @apiSuccess {Boolean}  user.active                   Indicates active user when `TRUE`
- * @apiSuccess {String}   user.timezone                 User's timezone
- * @apiSuccess {ISO8601}  user.created_at               Creation DateTime
- * @apiSuccess {ISO8601}  user.updated_at               Update DateTime
- * @apiSuccess {ISO8601}  user.deleted_at               Delete DateTime or `NULL` if wasn't deleted
- * @apiSuccess {String}   user.url                     `Not used`
- * @apiSuccess {Boolean}  user.computer_time_popup     `Not used`
- * @apiSuccess {Boolean}  user.blur_screenshots        `Not used`
- * @apiSuccess {Boolean}  user.web_and_app_monitoring  `Not used`
- * @apiSuccess {String}   user.user_language            Language which is used for frontend translations and emails
- *
- * @apiVersion 1.0.0
- */
-
-/**
- * @apiDefine UserParams
- *
- * @apiParam {Integer}  [id]                       ID
- * @apiParam {String}   [full_name]                Name
- * @apiParam {String}   [email]                    Email
- * @apiParam {Integer}  [company_id]               Company ID
- * @apiParam {String}   [avatar]                   Avatar image url
- * @apiParam {Boolean}  [screenshots_active]       Should screenshots be captured
- * @apiParam {Boolean}  [manual_time]              Allow manual time edit
- * @apiParam {Integer}  [screenshots_interval]     Screenshots capture interval (seconds)
- * @apiParam {Boolean}  [active]                   Indicates active user when `TRUE`
- * @apiParam {String}   [timezone]                 User's timezone
- * @apiParam {ISO8601}  [created_at]               Creation DateTime
- * @apiParam {ISO8601}  [updated_at]               Update DateTime
- * @apiParam {ISO8601}  [deleted_at]               Delete DateTime
- * @apiParam {String}   [url]                     `Not used`
- * @apiParam {Boolean}  [computer_time_popup]     `Not used`
- * @apiParam {Boolean}  [blur_screenshots]        `Not used`
- * @apiParam {Boolean}  [web_and_app_monitoring]  `Not used`
- * @apiParam {String}   [user_language]            Language which is used for frontend translations and emails
- *
- * @apiVersion 1.0.0
- */
-
-/**
- * @apiDefine UserScopedParams
- *
- * @apiParam {Integer}  [users.id]                       ID
- * @apiParam {String}   [users.full_name]                Name
- * @apiParam {String}   [users.email]                    Email
- * @apiParam {Integer}  [users.company_id]               Company ID
- * @apiParam {String}   [users.avatar]                   Avatar image url
- * @apiParam {Boolean}  [users.screenshots_active]       Should screenshots be captured
- * @apiParam {Boolean}  [users.manual_time]              Allow manual time edit
- * @apiParam {Integer}  [users.screenshots_interval]     Screenshots capture interval (seconds)
- * @apiParam {Boolean}  [users.active]                   Indicates active user when `TRUE`
- * @apiParam {String}   [users.timezone]                 User's timezone
- * @apiParam {ISO8601}  [users.created_at]               Creation DateTime
- * @apiParam {ISO8601}  [users.updated_at]               Update DateTime
- * @apiParam {ISO8601}  [users.deleted_at]               Delete DateTime
- * @apiParam {String}   [users.url]                     `Not used`
- * @apiParam {Boolean}  [users.computer_time_popup]     `Not used`
- * @apiParam {Boolean}  [users.blur_screenshots]        `Not used`
- * @apiParam {Boolean}  [users.web_and_app_monitoring]  `Not used`
- * @apiParam {String}   [users.user_language]            Language which is used for frontend translations and emails
- *
- * @apiVersion 1.0.0
- */
-
+use Laravel\Sanctum\PersonalAccessToken;
 
 /**
  * App\Models\User
@@ -136,22 +60,21 @@ use Laravel\Sanctum\HasApiTokens;
  * @property-read bool $online
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
  * @property-read int|null $notifications_count
- * @property-read Collection|\App\Models\Project[] $projects
+ * @property-read Collection|Project[] $projects
  * @property-read int|null $projects_count
- * @property-read Collection|\App\Models\ProjectsUsers[] $projectsRelation
+ * @property-read Collection|ProjectsUsers[] $projectsRelation
  * @property-read int|null $projects_relation_count
- * @property-read Collection|\App\Models\Property[] $properties
+ * @property-read Collection|Property[] $properties
  * @property-read int|null $properties_count
- * @property-read \App\Models\Role $role
- * @property-read Collection|\App\Models\Task[] $tasks
+ * @property-read Collection|Task[] $tasks
  * @property-read int|null $tasks_count
- * @property-read Collection|\App\Models\TimeInterval[] $timeIntervals
+ * @property-read Collection|TimeInterval[] $timeIntervals
  * @property-read int|null $time_intervals_count
- * @property-read Collection|\Laravel\Sanctum\PersonalAccessToken[] $tokens
+ * @property-read Collection|PersonalAccessToken[] $tokens
  * @property-read int|null $tokens_count
  * @method static EloquentBuilder|User active()
  * @method static EloquentBuilder|User admin()
- * @method static \Database\Factories\UserFactory factory(...$parameters)
+ * @method static UserFactory factory(...$parameters)
  * @method static EloquentBuilder|User newModelQuery()
  * @method static EloquentBuilder|User newQuery()
  * @method static QueryBuilder|User onlyTrashed()
@@ -202,14 +125,6 @@ class User extends Authenticatable
      * @var string
      */
     protected $table = 'users';
-
-    /**
-     * @var array
-     */
-    protected $with = [
-        'role',
-        'projectsRelation.role',
-    ];
 
     /**
      * The attributes that are mass assignable.
@@ -298,11 +213,6 @@ class User extends Authenticatable
     protected $appends = [
         'online',
     ];
-
-    public function role(): BelongsTo
-    {
-        return $this->belongsTo(Role::class, 'role_id', 'id');
-    }
 
     public function projects(): BelongsToMany
     {
