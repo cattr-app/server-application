@@ -1,5 +1,5 @@
 <template>
-    <div ref="datetimeinput" class="datetimeinput" @click="togglePopup">
+    <div ref="dateinput" class="dateinput" @click="togglePopup">
         <div class="at-input">
             <at-input class="input" :readonly="true" :value="inputValue" />
 
@@ -22,30 +22,6 @@
                             :disabled-date="disabledDate"
                             @change="onDateChange"
                         />
-
-                        <ul class="hour-select">
-                            <li
-                                v-for="h in hours"
-                                :key="h"
-                                class="item"
-                                :class="{ selected: hour === h }"
-                                @click="setHour(h)"
-                            >
-                                {{ h.toString().padStart(2, '0') }}
-                            </li>
-                        </ul>
-
-                        <ul class="minute-select">
-                            <li
-                                v-for="m in minutes"
-                                :key="m"
-                                class="item"
-                                :class="{ selected: minute === m }"
-                                @click="setMinute(m)"
-                            >
-                                {{ m.toString().padStart(2, '0') }}
-                            </li>
-                        </ul>
                     </div>
 
                     <div class="datepicker__footer">
@@ -61,7 +37,7 @@
 <script>
     import moment from 'moment-timezone';
 
-    const DATETIME_FORMAT = 'YYYY-MM-DD HH:mm';
+    const DATETIME_FORMAT = 'YYYY-MM-DD';
 
     export default {
         name: 'DatetimeInput',
@@ -74,59 +50,26 @@
                 type: String,
                 required: false,
             },
-            timezone: {
-                type: String,
-                required: true,
-            },
         },
         data() {
             return {
                 showPopup: false,
                 datePickerLang: {},
-                userTimezone: moment.tz.guess(true),
             };
         },
         computed: {
             datePickerValue() {
-                return moment(this.value).add(this.tzDiff).toDate();
+                return this.value !== null ? moment(this.value).toDate() : null;
             },
             inputValue() {
                 return this.value ? moment(this.value).format(DATETIME_FORMAT) : this.$t('tasks.unset_due_date');
-            },
-            hours() {
-                const hours = [];
-                for (let i = 0; i < 24; i++) {
-                    hours.push(i);
-                }
-
-                return hours;
-            },
-            minutes() {
-                const minutes = [];
-                for (let i = 0; i < 60; i++) {
-                    minutes.push(i);
-                }
-
-                return minutes;
-            },
-            hour() {
-                return moment(this.value).hours();
-            },
-            minute() {
-                return moment(this.value).minutes();
-            },
-            tzDiff() {
-                return moment().tz(this.timezone, true).diff(moment().tz(this.userTimezone, true)) * -1;
             },
         },
         mounted() {
             window.addEventListener('click', this.hidePopup);
 
-            moment.tz.setDefault(this.timezone);
-
-            const dateTimeStr = this.value ? moment.utc(this.value).tz(this.userTimezone, true).toISOString() : null;
-            this.inputHandler(dateTimeStr);
-            this.$emit('change', dateTimeStr);
+            this.inputHandler(this.value);
+            this.$emit('change', this.value);
             this.$nextTick(async () => {
                 try {
                     const locale = await import(`vue2-datepicker/locale/${this.$i18n.locale}`);
@@ -147,84 +90,22 @@
                 }
             });
         },
-        beforeDestroy() {
-            window.removeEventListener('click', this.hidePopup);
-            moment.tz.setDefault();
-        },
         methods: {
             togglePopup() {
                 this.showPopup = !this.showPopup;
             },
             hidePopup(event) {
-                if (event.target.closest('.datetimeinput') !== this.$refs.datetimeinput) {
+                if (event.target.closest('.dateinput') !== this.$refs.dateinput) {
                     this.showPopup = false;
                 }
             },
             onDateChange(value) {
-                if (value == null) {
-                    this.inputHandler(null);
-                    this.$emit('change', null);
-                    return;
-                }
-                // value = js Date object in user timezone
-                const dateTime = moment
-                    .utc(value)
-                    .tz(this.userTimezone)
-                    .hour(this.hour)
-                    .minute(this.minute)
-                    .tz(this.timezone, true);
-                const dateTimeStr = dateTime.toISOString();
-
-                this.inputHandler(dateTimeStr);
-                this.$emit('change', dateTimeStr);
-            },
-            setHour(value) {
-                const dateTime = moment(this.value).hour(value);
-                const dateTimeStr = dateTime.toISOString();
-
-                this.inputHandler(dateTimeStr);
-                this.$emit('change', dateTimeStr);
-            },
-            setMinute(value) {
-                const dateTime = moment(this.value).minute(value);
-                const dateTimeStr = dateTime.toISOString();
-
-                this.inputHandler(dateTimeStr);
-                this.$emit('change', dateTimeStr);
+              const newValue = value !== null ? moment(value).format(DATETIME_FORMAT) : null
+              this.inputHandler(newValue);
+              this.$emit('change', newValue);
             },
             disabledDate(date) {
                 return false;
-                // date = js Date object in user timezone
-                // return moment.utc(date).tz(this.userTimezone).tz(this.timezone, true).isAfter(moment(), 'day');
-            },
-        },
-        watch: {
-            timezone(newTimezone) {
-                if (this.value == null) {
-                    moment.tz.setDefault(this.timezone);
-                    return;
-                }
-                let dateTimeStr = this.value
-                    ? moment.tz(this.value, newTimezone).toISOString()
-                    : moment().startOf('day').toISOString();
-
-                // Subtract one day if selected day is in the future in newTimezone,
-                // (relative to user timezone coz calendar show dates in user timezone)
-                if (
-                    moment
-                        .utc(moment.tz(this.value, newTimezone).toISOString())
-                        .tz(newTimezone)
-                        .tz(this.userTimezone, true)
-                        .isAfter(moment().tz(newTimezone), 'day')
-                ) {
-                    dateTimeStr = this.value
-                        ? moment.tz(this.value, newTimezone).subtract(1, 'day').toISOString()
-                        : moment().startOf('day').toISOString();
-                }
-
-                moment.tz.setDefault(this.timezone);
-                this.inputHandler(dateTimeStr);
-                this.$emit('change', dateTimeStr);
             },
         },
     };
@@ -257,7 +138,7 @@
         flex: 1;
     }
 
-    .datetimeinput::v-deep {
+    .dateinput::v-deep {
         .mx-datepicker {
             max-height: unset;
         }
@@ -359,25 +240,6 @@
 
         .mx-table .cell.today {
             color: #2a90e9;
-        }
-    }
-
-    .hour-select,
-    .minute-select {
-        padding: 5px;
-        width: 50px;
-        overflow-y: scroll;
-        text-align: center;
-
-        .item {
-            padding: 3px;
-            cursor: pointer;
-        }
-
-        .selected {
-            background: #2e2ef9;
-            color: #ffffff;
-            border-radius: 7px;
         }
     }
 </style>

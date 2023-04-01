@@ -3,7 +3,6 @@
 namespace App\Models;
 
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
@@ -21,8 +20,6 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  */
 class ViewTaskWorkers extends Model
 {
-    use HasFactory;
-
     public $table = "view_task_workers_materialized";
 
     public $timestamps = false;

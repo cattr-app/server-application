@@ -36,16 +36,19 @@ class RecreateTaskWorkersView extends Command
         $timezone = Settings::scope('core')->get('timezone');
         $reportCreatedAt = Carbon::now($timezone)->format('Y-m-d H:i:s e');
 
-        Task::lazyById()->each(static function (Task $task) {
-            ViewTaskWorkers::whereTaskId($task->id)->delete();
+        $this->withProgressBar(
+            Task::whereNull('deleted_at')->lazyById(),
+            static fn(Task $task) => rescue(static function () use ($task) {
+                ViewTaskWorkers::whereTaskId($task->id)->delete();
 
-            ViewTaskWorkers::insertUsing(
-                ['user_id', 'task_id', 'duration', 'created_by_cron'],
-                DB::table('view_task_workers')
-                    ->select(['user_id', 'task_id', 'duration', DB::raw("'1' as created_by_cron")])
-                    ->where('task_id', '=', $task->id)
-            );
-        });
+                ViewTaskWorkers::insertUsing(
+                    ['user_id', 'task_id', 'duration', 'created_by_cron'],
+                    DB::table('view_task_workers')
+                        ->select(['user_id', 'task_id', 'duration', DB::raw("'1' as created_by_cron")])
+                        ->where('task_id', '=', $task->id)
+                );
+            })
+        );
 
         Settings::scope('core.reports')->set('planned_time_report_date', $reportCreatedAt);
 

@@ -13,7 +13,7 @@ import { VueEditor } from 'vue2-editor';
 import TaskComments from './components/TaskComments';
 import TaskHistory from './components/TaskHistory';
 import TimeEstimate from './components/TimeEstimate.vue';
-import DatetimeInput from './components/DatetimeInput';
+import DateInput from './components/DateInput';
 import rootStore from '@/store';
 import moment from 'moment-timezone';
 
@@ -463,8 +463,9 @@ export function init(context, router) {
             key: 'estimate',
             label: 'field.estimate',
             render: (h, data) => {
-                return h(TimeEstimate, {
-                    props: { value: data.currentValue },
+              const value = typeof data.currentValue === 'number' ? data.currentValue : null;
+              return h(TimeEstimate, {
+                    props: { value },
                     on: {
                         input: function (seconds) {
                             data.inputHandler(seconds);
@@ -477,19 +478,12 @@ export function init(context, router) {
             label: 'field.due_date',
             key: 'due_date',
             render: (h, props) => {
-                const userTimezone = moment.tz.guess();
-                const companyTimezone = rootStore.getters['user/companyData'].timezone;
-                const timezone = companyTimezone || userTimezone;
-                let value =
-                    typeof props.currentValue === 'string'
-                        ? moment(props.currentValue).tz(timezone, true).toISOString()
-                        : null;
+                const value = typeof props.currentValue === 'string' ? props.currentValue : null;
 
-                return h(DatetimeInput, {
+                return h(DateInput, {
                     props: {
                         inputHandler: props.inputHandler,
                         value,
-                        timezone: timezone,
                     },
                 });
             },

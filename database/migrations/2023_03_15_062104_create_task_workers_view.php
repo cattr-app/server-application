@@ -50,8 +50,8 @@ return new class extends Migration
     {
         Schema::create('view_task_workers_materialized', static function (Blueprint $table) {
             $table->id();
-            $table->unsignedInteger('user_id');
-            $table->unsignedInteger('task_id');
+            $table->unsignedInteger('user_id')->index();
+            $table->unsignedInteger('task_id')->index();
             $table->unsignedInteger('duration');
             $table->integer('offset')->default(0);
             $table->boolean('created_by_cron')->default(false);
@@ -59,8 +59,6 @@ return new class extends Migration
             $table->foreign('task_id')->references('id')->on('tasks')->onDelete('cascade');
             $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
 
-            $table->index(['user_id']);
-            $table->index(['task_id']);
             $table->unique(['user_id', 'task_id']);
         });
     }

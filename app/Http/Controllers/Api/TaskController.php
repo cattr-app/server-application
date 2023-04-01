@@ -150,9 +150,8 @@ class TaskController extends ItemController
         Filter::listen(
             Filter::getRequestFilterName(),
             static function (array $requestData) {
-                if ($requestData['due_date']) {
-                    $timezone = Settings::scope('core')->get('timezone', 'UTC');
-                    $requestData['due_date'] = Carbon::parse($requestData['due_date'])->setTimezone($timezone);
+                if (empty($requestData['due_date'])) {
+                    $requestData['due_date'] = null;
                 }
 
                 if (isset($requestData['estimate']) && $requestData['estimate'] <= 0) {
@@ -274,15 +273,14 @@ class TaskController extends ItemController
     {
         Event::listen(
             Filter::getAfterActionEventName(),
-            static fn (Task $task) => $task->users()->sync($request->get('users'))
+            static fn(Task $task) => $task->users()->sync($request->get('users'))
         );
 
         Filter::listen(
             Filter::getRequestFilterName(),
             static function (array $requestData) {
-                if ($requestData['due_date']) {
-                    $timezone = Settings::scope('core')->get('timezone', 'UTC');
-                    $requestData['due_date'] = Carbon::parse($requestData['due_date'])->setTimezone($timezone);
+                if (empty($requestData['due_date'])) {
+                    $requestData['due_date'] = null;
                 }
 
                 if (isset($requestData['estimate']) && $requestData['estimate'] <= 0) {
