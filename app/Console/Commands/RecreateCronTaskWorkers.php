@@ -4,6 +4,7 @@ namespace App\Console\Commands;
 
 use App\Models\Task;
 use App\Models\CronTaskWorkers;
+use App\Models\TimeInterval;
 use Carbon\Carbon;
 use DB;
 use Illuminate\Console\Command;
@@ -45,12 +46,9 @@ class RecreateCronTaskWorkers extends Command
 
                 CronTaskWorkers::insertUsing(
                     ['user_id', 'task_id', 'duration', 'created_by_cron'],
-                    DB::table('time_intervals', 'i')
-                        ->join('users as u', 'i.user_id', '=', 'u.id')
-                        ->selectRaw('i.user_id, i.task_id, SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration, "1" as created_by_cron')
-                        ->whereNull('i.deleted_at')
+                    TimeInterval::selectRaw('user_id, task_id, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as duration, "1" as created_by_cron')
                         ->where('task_id', '=', $task->id)
-                        ->groupBy(['i.user_id', 'i.task_id'])
+                        ->groupBy(['user_id', 'task_id'])
                 );
             })
         );

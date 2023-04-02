@@ -13,7 +13,8 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('time_intervals', static function (Blueprint $table) {
-            $table->index(['user_id', 'task_id', 'deleted_at'], 'time_intervals_index_for_workers_view');
+            $table->index(['task_id', 'deleted_at'], 'time_intervals_index_for_cron_workers_where');
+            $table->index(['user_id', 'task_id'], 'time_intervals_index_for_cron_workers_group_by');
         });
     }
 
@@ -25,7 +26,8 @@ return new class extends Migration
     public function down(): void
     {
         Schema::table('time_intervals', static function (Blueprint $table) {
-            $table->dropIndex('time_intervals_index_for_workers_view');
+            $table->dropIndex('time_intervals_index_for_cron_workers_where');
+            $table->dropIndex('time_intervals_index_for_cron_workers_group_by');
         });
     }
 };
