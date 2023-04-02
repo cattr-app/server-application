@@ -98,7 +98,7 @@ use Parsedown;
  * @property-read Collection|TimeInterval[] $timeIntervals
  * @property-read int|null $time_intervals_count
  * @property-read Collection|User[] $users
- * @property-read Collection|ViewTaskWorkers[] $workers
+ * @property-read Collection|CronTaskWorkers[] $workers
  * @property-read int $total_spent_time
  * @property-read int|null $users_count
  * @method static TaskFactory factory(...$parameters)
@@ -192,7 +192,7 @@ class Task extends Model
         static::deleting(static function (Task $task) {
             $task->timeIntervals()->delete();
 
-            ViewTaskWorkers::whereTaskId($task->id)->delete();
+            CronTaskWorkers::whereTaskId($task->id)->delete();
         });
 
         static::created(static function (Task $task) {
@@ -259,6 +259,6 @@ class Task extends Model
 
     public function workers(): HasMany
     {
-        return $this->hasMany(ViewTaskWorkers::class, 'task_id', 'id');
+        return $this->hasMany(CronTaskWorkers::class, 'task_id', 'id');
     }
 }

@@ -8,7 +8,7 @@ use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 
 /**
- * Class ViewTaskWorkers
+ * Class CronTaskWorkers
  *
  * @property int $user_id
  * @property int $task_id
@@ -18,9 +18,9 @@ use Illuminate\Database\Eloquent\Relations\BelongsTo;
  * @method static EloquentBuilder|Task whereTaskId($value)
  * @mixin EloquentIdeHelper
  */
-class ViewTaskWorkers extends Model
+class CronTaskWorkers extends Model
 {
-    public $table = "view_task_workers_materialized";
+    public $table = "cron_task_workers";
 
     public $timestamps = false;
 

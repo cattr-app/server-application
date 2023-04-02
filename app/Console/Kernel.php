@@ -2,7 +2,7 @@
 
 namespace App\Console;
 
-use App\Console\Commands\RecreateTaskWorkersView;
+use App\Console\Commands\RecreateCronTaskWorkers;
 use App\Console\Commands\RotateScreenshots;
 use App\Jobs\ClearExpiredApps;
 use Exception;
@@ -58,7 +58,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->job(new ClearExpiredApps)->daily();
 
-        $schedule->command(RecreateTaskWorkersView::class)->daily()->runInBackground()->withoutOverlapping();
+        $schedule->command(RecreateCronTaskWorkers::class)->daily()->runInBackground()->withoutOverlapping();
     }
 
     /**

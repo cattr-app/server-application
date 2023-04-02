@@ -4,7 +4,7 @@ namespace App\Observers;
 
 use App\Contracts\ScreenshotService;
 use App\Models\TimeInterval;
-use App\Models\ViewTaskWorkers;
+use App\Models\CronTaskWorkers;
 use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Support\Carbon;
 
@@ -19,7 +19,7 @@ class TimeIntervalObserver
      */
     public function created(TimeInterval $timeInterval): void
     {
-        $viewRecord = ViewTaskWorkers::firstOrNew(
+        $viewRecord = CronTaskWorkers::firstOrNew(
             [
                 'user_id' => $timeInterval->user_id,
                 'task_id' => $timeInterval->task_id
@@ -69,7 +69,7 @@ class TimeIntervalObserver
      */
     public function deleted(TimeInterval $timeInterval): void
     {
-        $viewRecord = ViewTaskWorkers::firstWhere([
+        $viewRecord = CronTaskWorkers::firstWhere([
             ['user_id', '=', $timeInterval->user_id],
             ['task_id', '=', $timeInterval->task_id]
         ]);

@@ -128,7 +128,7 @@ class Project extends Model
         static::addGlobalScope(new ProjectAccessScope);
 
         static::deleting(static function (Project $project) {
-            ViewTaskWorkers::whereHas(
+            CronTaskWorkers::whereHas(
                 'task',
                 static fn(EloquentBuilder $query) => $query
                     ->where('project_id', '=', $project->id)
@@ -180,6 +180,6 @@ class Project extends Model
 
     public function workers(): HasManyThrough
     {
-        return $this->hasManyThrough(ViewTaskWorkers::class, Task::class);
+        return $this->hasManyThrough(CronTaskWorkers::class, Task::class);
     }
 }

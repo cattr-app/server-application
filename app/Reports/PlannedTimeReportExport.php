@@ -4,7 +4,7 @@ namespace App\Reports;
 
 use App\Contracts\AppReport;
 use App\Models\Project;
-use App\Models\ViewTaskWorkers;
+use App\Models\CronTaskWorkers;
 use Carbon\CarbonInterval;
 use Exception;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -93,7 +93,7 @@ class PlannedTimeReportExport extends AppReport implements FromCollection, WithM
 
     private function queryReport(): Collection
     {
-        $taskWorkersTable = (new ViewTaskWorkers())->table;
+        $taskWorkersTable = (new CronTaskWorkers())->table;
         return Project::with(
             [
                 'tasks' => static function (HasMany $query) use ($taskWorkersTable) {
