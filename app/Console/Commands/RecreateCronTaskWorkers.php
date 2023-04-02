@@ -9,7 +9,9 @@ use DB;
 use Illuminate\Console\Command;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Settings;
+use Symfony\Component\Console\Attribute\AsCommand;
 
+#[AsCommand(name: 'cattr:task:recreate-workers')]
 class RecreateCronTaskWorkers extends Command
 {
     /**
