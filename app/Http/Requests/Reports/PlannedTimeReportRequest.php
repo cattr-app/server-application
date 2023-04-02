@@ -8,7 +8,7 @@ class PlannedTimeReportRequest extends CattrFormRequest
 {
     public function _authorize(): bool
     {
-        return true;
+        return auth()->check();
     }
 
     public function _rules(): array
