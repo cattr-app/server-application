@@ -6,6 +6,7 @@ use App;
 use App\Models\Property;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Tinker\TinkerServiceProvider;
+use Settings;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -15,6 +16,7 @@ class AppServiceProvider extends ServiceProvider
     public function boot(): void
     {
         Property::loadMorphMap();
+        config(['app.timezone' => Settings::scope('core')->get('timezone', date_default_timezone_get())]);
     }
 
     /**

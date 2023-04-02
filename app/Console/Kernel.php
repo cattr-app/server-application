@@ -58,7 +58,7 @@ class Kernel extends ConsoleKernel
 
         $schedule->job(new ClearExpiredApps)->daily();
 
-        $schedule->command(RecreateTaskWorkersView::class)->timezone(Settings::scope('core')->get('timezone', 'UTC'))->daily()->runInBackground()->withoutOverlapping();
+        $schedule->command(RecreateTaskWorkersView::class)->daily()->runInBackground()->withoutOverlapping();
     }
 
     /**
