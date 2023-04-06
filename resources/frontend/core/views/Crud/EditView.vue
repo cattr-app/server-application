@@ -338,7 +338,7 @@
                     } else if (this.pageData.type === 'new') {
                         this.$router.push({
                             name: this.$route.meta.navigation.view,
-                            params: { id: data.res[this.service.getIdParam()] },
+                            params: { id: data.data[this.service.getIdParam()] },
                         });
                     }
                 } catch ({ response }) {

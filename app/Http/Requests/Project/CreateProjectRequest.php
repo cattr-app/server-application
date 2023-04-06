@@ -22,6 +22,7 @@ class CreateProjectRequest extends CattrFormRequest
             'statuses' => 'sometimes|array',
             'statuses.*.id' => 'required|exists:statuses,id',
             'statuses.*.color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
+            'group' => 'sometimes|nullable|integer|exists:project_groups,id',
         ];
     }
 }

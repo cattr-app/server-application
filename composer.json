@@ -26,6 +26,7 @@
     "flugger/laravel-responder": "^3.3.0",
     "guzzlehttp/guzzle": "^7.2",
     "intervention/image": "^2.7",
+    "kalnoy/nestedset": "^6.0",
     "laravel/framework": "^10.0",
     "laravel/octane": "^1.5",
     "laravel/sanctum": "^3.2",
