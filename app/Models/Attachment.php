@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\AttachmentStatus;
 use Illuminate\Database\Eloquent\Concerns\HasUuids;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -20,7 +21,7 @@ use Illuminate\Database\Eloquent\Relations\MorphTo;
  * @property string $hash
  * @property int $project_id
  * @property int $user_id
- * @property boolean $healthy
+ * @property AttachmentStatus $status
  */
 
 class Attachment extends Model
@@ -38,7 +39,7 @@ class Attachment extends Model
         'hash',
         'project_id',
         'user_id',
-        'healthy',
+        'status',
     ];
 
     protected $casts = [
@@ -50,7 +51,7 @@ class Attachment extends Model
         'hash' => 'string',
         'project_id' => 'integer',
         'user_id' => 'integer',
-        'healthy' => 'boolean',
+        'status' => AttachmentStatus::class,
     ];
 
     /**

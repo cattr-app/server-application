@@ -13,24 +13,24 @@ return new class extends Migration
     {
         Schema::create('attachments', static function (Blueprint $table) {
             $table->uuid('id')->primary();
-            $table->unsignedBigInteger('attachmentable_id')->index();
-            $table->unsignedBigInteger('attachmentable_type')->index();
+            $table->unsignedBigInteger('attachmentable_id')->nullable()->index();
+            $table->string('attachmentable_type')->nullable()->index();
 
             $table->string('original_name');
             $table->string('mime_type');
             $table->unsignedBigInteger('size');
-            $table->char('hash', 64);
+            $table->char('hash', 64)->nullable();
 //          TODO: decide between char and binary for hash
 //            $table->char('hash', 32)->charset('binary')->index();
 
-            $table->unsignedInteger('project_id');
+            $table->unsignedInteger('project_id')->nullable();
             $table->unsignedInteger('user_id');
-            $table->boolean('healthy');
+            $table->string('status')->index();
 
             $table->timestamps();
 
-            $table->foreign('project_id')->references('id')->on('projects')->onDelete('cascade');
-            $table->foreign('user_id')->references('id')->on('users')->onDelete('cascade');
+            $table->foreign('project_id')->references('id')->on('projects')->noActionOnDelete();
+            $table->foreign('user_id')->references('id')->on('users')->noActionOnDelete();
         });
     }
 

@@ -5,8 +5,10 @@ namespace App\Http\Requests\Attachment;
 use App\Helpers\AttachmentHelper;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Http\Requests\CattrFormRequest;
+use Illuminate\Validation\Rule;
 
-class CreateAttachmentRequest extends CattrFormRequest
+// TODO: probable useless
+class ConnectAttachmentRequest extends CattrFormRequest
 {
     use AuthorizesAfterValidation;
 
@@ -20,8 +22,14 @@ class CreateAttachmentRequest extends CattrFormRequest
 
     public function _rules(): array
     {
+        $able_type = $this->get('attachmentable_type');
+
+        $ruleForAbleId = AttachmentHelper::isAble($able_type) ? Rule::exists($able_type, 'id')
+            : Rule::in(['DUMMY_VALUE']); // TODO: write something better to make validation fail
+
         return [
-            'attachment' => 'file|required|max:2000', // TODO: take max file size from php config?
+            'attachmentable_id' => ['required', 'integer', $ruleForAbleId],
+            'attachmentable_type' => ['required', Rule::in(AttachmentHelper::getAbles())],
         ];
     }
 }

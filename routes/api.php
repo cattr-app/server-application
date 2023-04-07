@@ -247,7 +247,7 @@ Route::group([
             ->name('settings.save');
 
         // Attachments routes
-        $router->post('attachment/create', [AttachmentController::class, 'create'])
+        $router->post('attachment', [AttachmentController::class, 'create'])
             ->name('attachment.create');
     });
 

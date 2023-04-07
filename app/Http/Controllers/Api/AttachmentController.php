@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\AttachmentStatus;
 use App\Helpers\AttachmentHelper;
 use App\Http\Requests\Attachment\CreateAttachmentRequest;
 use App\Models\Attachment;
@@ -21,10 +22,10 @@ class AttachmentController extends ItemController
      */
     public function create(CreateAttachmentRequest $request): JsonResponse
     {
-        dump(['request' => $request]);
         Filter::listen(Filter::getRequestFilterName(), static function ($attachment) use ($request) {
             $attachment['user_id'] = auth()->user()->id;
-            $attachment['project_id'] = AttachmentHelper::getProjectId($request);
+            $attachment['status'] = AttachmentStatus::NOT_ATTACHED;
+//            $attachment['project_id'] = AttachmentHelper::getProjectId($request);
 
             dump($attachment);
             return $attachment;
