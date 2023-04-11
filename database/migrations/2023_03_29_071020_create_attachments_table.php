@@ -18,6 +18,7 @@ return new class extends Migration
 
             $table->string('original_name');
             $table->string('mime_type');
+            $table->string('extension');
             $table->unsignedBigInteger('size');
             $table->char('hash', 64)->nullable();
 //          TODO: decide between char and binary for hash

@@ -2,6 +2,7 @@
 
 namespace App\Providers;
 
+use App\Filters\AttachmentFilter;
 use App\Observers\AttachmentObserver;
 use Filter;
 use Illuminate\Foundation\Support\Providers\EventServiceProvider as ServiceProvider;
@@ -19,8 +20,7 @@ class EventServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-//      TODO: [ ] Create folder for Filters and extract them from AttachmentObserver
-        Filter::subscribe(AttachmentObserver::class);
+        Filter::subscribe(AttachmentFilter::class);
     }
 
 
