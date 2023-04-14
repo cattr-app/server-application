@@ -2,25 +2,25 @@
 
 namespace App\Enums;
 
-enum AttachmentStatus: string
+enum AttachmentStatus: int
 {
     /**
-     * file hash NOT matched (on cron check)
+     * file just uploaded, attachmentable not set yet, not calculating hash
      */
-    case BAD = 'bad';
-
-    /**
-     * file hash matched (on cron check and initial upload)
-     */
-    case GOOD = 'good';
+    case NOT_ATTACHED = 0;
 
     /**
      * moving file to correct project folder and then calculating hash
      */
-    case PROCESSING = 'processing';
+    case PROCESSING = 1;
 
     /**
-     * file just uploaded, attachmentable not set yet, not calculating hash
+     * file hash matched (on cron check and initial upload)
      */
-    case NOT_ATTACHED = 'not_attached';
+    case GOOD = 2;
+
+    /**
+     * file hash NOT matched (on cron check)
+     */
+    case BAD = 3;
 }

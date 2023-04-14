@@ -5,6 +5,7 @@ namespace App\Filters;
 use App\Enums\AttachmentStatus;
 use App\Helpers\AttachmentHelper;
 use App\Models\Attachment;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Validation\Rule;
 
 class AttachmentFilter
@@ -25,17 +26,35 @@ class AttachmentFilter
             'sometimes',
             'required',
             'uuid',
-            Rule::exists(Attachment::TABLE, 'id')->where('status', AttachmentStatus::NOT_ATTACHED->value)
+            Rule::exists(Attachment::class, 'id')->where('status', AttachmentStatus::NOT_ATTACHED->value)
         ];
 
         return $rules;
     }
 
+    public static function prepareAttachmentCreateRequest($request) {
+        /**
+         * @var $file UploadedFile
+         */
+        $file = $request['attachment'];
+
+        $request['user_id'] = auth()->user()->id;
+        $request['status'] = AttachmentStatus::NOT_ATTACHED;
+        $request['original_name'] = AttachmentHelper::getFileName($file);
+        $request['mime_type'] = $file->getMimeType();
+        $request['extension'] = $file->extension();
+        $request['size'] = $file->getSize();
+
+        return $request;
+    }
+
     public function subscribe(): array
     {
-        return AttachmentHelper::getFilters(
-            [[__CLASS__, 'addRequestRulesForParent']]
-        );
+        return array_merge([
+            'filter.request.attachment.create' => [[__CLASS__, 'prepareAttachmentCreateRequest']]
+        ], AttachmentHelper::getFilters(
+            addRequestRulesForParent: [[__CLASS__, 'addRequestRulesForParent']]
+        ));
     }
 
 }

@@ -48,12 +48,12 @@ class TaskComment extends Model implements AttachmentAble
     use SoftDeletes;
     use HasAttachments;
 
-    public const TABLE = 'task_comment';
+    public const TYPE = 'task_comment';
     /**
      * table name from database
      * @var string
      */
-    protected $table = self::TABLE;
+    protected $table = 'task_comment';
 
     /**
      * @var array

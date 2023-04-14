@@ -132,12 +132,12 @@ class Task extends Model implements AttachmentAble
     use HasFactory;
     use HasAttachments;
 
-    public const TABLE = 'tasks';
+    public const TYPE = 'tasks';
     /**
      * table name from database
      * @var string
      */
-    protected $table = self::TABLE;
+    protected $table = 'tasks';
 
     /**
      * @var array

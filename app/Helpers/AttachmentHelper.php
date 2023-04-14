@@ -4,41 +4,57 @@ namespace App\Helpers;
 
 use App\Models\Task;
 use App\Models\TaskComment;
+use Illuminate\Http\UploadedFile;
+use Str;
 
 class AttachmentHelper
 {
     protected const TYPE_PLACEHOLDER = '__ABLE_TYPE__';
 
-//  TODO: move it to AppServiceProvider and populate this array at HasAttachments trait initialization?
-    protected const ABLE_BY = [
-        Task::TABLE => Task::class,
-        TaskComment::TABLE => TaskComment::class
+    protected const MAX_FILE_NAME_LENGTH = 255; // name.extension
+
+//  TODO: move it to AttachmentServiceProvider
+    protected static array $ABLE_BY = [
+        Task::TYPE => Task::class,
+        TaskComment::TYPE => TaskComment::class
     ];
 
     public static function isAble(string $able_type): bool
     {
-        return array_key_exists($able_type, self::ABLE_BY);
+        return array_key_exists($able_type, self::$ABLE_BY);
     }
 
     public static function getAbles(): array
     {
-        return array_keys(self::ABLE_BY);
+        return array_keys(self::$ABLE_BY);
     }
 
-    public static function getEvents($created, $updated, $deleted): array
+    public static function getFileName(UploadedFile $file): string
+    {
+        $fileName = $file->getClientOriginalName();
+        $extension = ".{$file->extension()}";
+        $maxNameLength = (self::MAX_FILE_NAME_LENGTH - Str::length($extension));
+        if (Str::length($fileName) > $maxNameLength || Str::endsWith($fileName, $extension) === false){
+            $fileName = Str::substr($fileName, 0, $maxNameLength) . $extension;
+        }
+
+        return $fileName;
+    }
+
+    public static function getEvents($parentCreated, $parentUpdated, $parentDeleted): array
     {
         return self::getMappedEvents([
-            'event.after.action.' . self::TYPE_PLACEHOLDER . '.create'  => $created,
-            'event.after.action.' . self::TYPE_PLACEHOLDER . '.edit'    => $updated,
-            'event.after.action.' . self::TYPE_PLACEHOLDER . '.destroy' => $deleted,
+            'event.after.action.' . self::TYPE_PLACEHOLDER . '.create'  => $parentCreated,
+            'event.after.action.' . self::TYPE_PLACEHOLDER . '.edit'    => $parentUpdated,
+            'event.after.action.' . self::TYPE_PLACEHOLDER . '.destroy' => $parentDeleted,
         ]);
     }
 
-    public static function getFilters(array $requestRules): array
+    public static function getFilters(array $addRequestRulesForParent): array
     {
         return self::getMappedEvents([
-            'filter.validation.' . self::TYPE_PLACEHOLDER . '.edit'     => $requestRules,
-            'filter.validation.' . self::TYPE_PLACEHOLDER . '.create'   => $requestRules,
+            'filter.validation.' . self::TYPE_PLACEHOLDER . '.edit'     => $addRequestRulesForParent,
+            'filter.validation.' . self::TYPE_PLACEHOLDER . '.create'   => $addRequestRulesForParent,
         ]);
     }
 

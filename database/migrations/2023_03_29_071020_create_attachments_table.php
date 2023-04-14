@@ -26,7 +26,7 @@ return new class extends Migration
 
             $table->unsignedInteger('project_id')->nullable();
             $table->unsignedInteger('user_id');
-            $table->string('status')->index();
+            $table->unsignedTinyInteger('status')->index();
 
             $table->timestamps();
 

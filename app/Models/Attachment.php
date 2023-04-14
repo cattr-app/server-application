@@ -52,15 +52,6 @@ class Attachment extends Model
 {
     use HasFactory;
     use HasUuids;
-//    TODO: soft deletes?
-
-    public const TABLE = 'attachments';
-
-    /**
-     * table name from database
-     * @var string
-     */
-    protected $table = self::TABLE;
 
     protected $fillable = [
         'attachmentable_id',
