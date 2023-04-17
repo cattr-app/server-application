@@ -13,20 +13,19 @@ class AttachmentHelper
 
     protected const MAX_FILE_NAME_LENGTH = 255; // name.extension
 
-//  TODO: move it to AttachmentServiceProvider
-    protected static array $ABLE_BY = [
+    public const ABLE_BY = [
         Task::TYPE => Task::class,
         TaskComment::TYPE => TaskComment::class
     ];
 
     public static function isAble(string $able_type): bool
     {
-        return array_key_exists($able_type, self::$ABLE_BY);
+        return array_key_exists($able_type, self::ABLE_BY);
     }
 
     public static function getAbles(): array
     {
-        return array_keys(self::$ABLE_BY);
+        return array_keys(self::ABLE_BY);
     }
 
     public static function getFileName(UploadedFile $file): string

@@ -4,11 +4,8 @@ namespace App\Observers;
 
 use App\Contracts\AttachmentAble;
 use App\Contracts\AttachmentService;
-use App\Enums\AttachmentStatus;
 use App\Helpers\AttachmentHelper;
-use App\Jobs\VerifyAttachmentHash;
 use App\Models\Attachment;
-use Storage;
 
 class AttachmentObserver
 {

@@ -28,16 +28,13 @@ class AttachmentService implements \App\Contracts\AttachmentService
 
     public function attach(AttachmentAble $parent, array $idsToAttach): void
     {
-        $parentId = $parent->id;
-        $parentType = $parent::TYPE;
         $projectId = $parent->getProjectId();
         Attachment::whereIn('id', $idsToAttach)
-            ->each(function (Attachment $attachment) use ($parentType, $parentId, $projectId) {
+            ->each(function (Attachment $attachment) use ($parent, $projectId) {
                 $tmpPath = $this->getPath($attachment);
 
                 if ($this->storage->exists($tmpPath)){
-                    $attachment->attachmentable_id = $parentId;
-                    $attachment->attachmentable_type = $parentType;
+                    $attachment->attachmentAbleRelation()->associate($parent);
                     $attachment->status = AttachmentStatus::PROCESSING;
                     $attachment->project_id = $projectId;
                     $attachment->save();

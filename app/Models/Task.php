@@ -133,6 +133,7 @@ class Task extends Model implements AttachmentAble
     use HasAttachments;
 
     public const TYPE = 'tasks';
+
     /**
      * table name from database
      * @var string

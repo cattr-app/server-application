@@ -3,7 +3,9 @@
 namespace App\Providers;
 
 use App\Contracts\AttachmentService as AttachmentServiceContract;
+use App\Helpers\AttachmentHelper;
 use App\Services\AttachmentService;
+use Illuminate\Database\Eloquent\Relations\Relation;
 use Illuminate\Support\ServiceProvider;
 
 class AttachmentServiceProvider extends ServiceProvider
@@ -21,6 +23,7 @@ class AttachmentServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        //
+//      TODO: [ ] add ability to add more from Cattr modules
+        Relation::morphMap(AttachmentHelper::ABLE_BY);
     }
 }
