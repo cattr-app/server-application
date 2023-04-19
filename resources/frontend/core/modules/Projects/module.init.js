@@ -7,6 +7,8 @@ import PrioritySelect from '@/components/PrioritySelect';
 import TeamAvatars from '@/components/TeamAvatars';
 import Statuses from './components/Statuses';
 import Groups from './components/Groups';
+import GroupSelect from '@/components/GroupSelect'
+import { ref } from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -322,8 +324,37 @@ export function init(context) {
         {
             title: 'field.group',
             key: 'group',
-            render: (h, { item }) =>
-                h('span', item.group !== null ? item.group.name : i18n.t('field.no_group_selected')),
+            render: (h, data) => {
+                let currentGroup = ref(data.item.group?.name || i18n.t('field.no_group_selected'));
+
+                let value = ref(data.item.group?.name || i18n.t('field.no_group_selected'));
+                
+                return h(GroupSelect, {
+                    props: {
+                        value,
+                        currentGroup,
+                        clearable: true,
+                    },
+                    on: {
+                        input(val) {
+                            value.value = val;
+                        },
+                        setCurrent(group) {
+                            currentGroup.value = group;
+
+                            (new ProjectService).updateGroup({'group': group.id}, data.item.id);
+                        },
+                        createGroup(group) {
+                            value.value = group.name;
+                            currentGroup.value = {
+                                id: group.id,
+                                name: group.name,
+                            };
+                            (new ProjectService).updateGroup({'group': group.id}, data.item.id);
+                        }
+                    },
+                });
+            },
         },
         {
             title: 'field.members',
@@ -362,14 +393,6 @@ export function init(context) {
     const tasksRouteName = context.getModuleRouteName() + '.tasks';
     const assignRouteName = context.getModuleRouteName() + '.members';
     context.addRoute([
-        // {
-        //     path: `/${context.routerPrefix}/:id/tasks/kanban`,
-        //     name: tasksRouteName,
-        //     component: () => import('./views/Tasks.vue'),
-        //     meta: {
-        //         auth: true,
-        //     },
-        // },
         {
             path: `/${context.routerPrefix}/:id/members`,
             name: assignRouteName,

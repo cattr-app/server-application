@@ -22,9 +22,11 @@ class MakeAdmin extends Command implements Isolatable
 
     public function handle(): int
     {
+        $email = env('APP_ADMIN_EMAIL', 'admin@cattr.app');
+        $password = env('APP_ADMIN_PASSWORD', 'password');
+
         if ($this->option('email')) {
             $email = $this->option('email');
-
             if (Validator::make([
                 'email' => $email
             ], [
@@ -34,8 +36,6 @@ class MakeAdmin extends Command implements Isolatable
                 return 1;
             }
         }
-
-        $email = env('APP_ADMIN_EMAIL', 'admin@cattr.app');
 
         if (Validator::make([
                 'email' => $email
@@ -76,7 +76,6 @@ class MakeAdmin extends Command implements Isolatable
             }
         }
 
-        $password = env('APP_ADMIN_PASSWORD', 'password');
 
         if (Validator::make([
                 'password' => $password

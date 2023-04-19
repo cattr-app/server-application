@@ -131,6 +131,8 @@ Route::group([
             ->name('projects.show');
         $router->post('projects/remove', [ProjectController::class, 'destroy'])
             ->name('projects.destroy');
+        $router->patch('/projects/{project}/group/edit', [ProjectController::class, 'updateGroup'])
+            ->name('projects.group.edit');
 
         $router->any('project-groups/list', [ProjectGroupController::class, 'index'])
             ->name('project_groups.list');

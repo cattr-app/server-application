@@ -27,7 +27,7 @@ class TaskAccessScope implements Scope
 
         throw_unless($user, new AuthorizationException);
 
-        if (!$user || $user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
+        if (!$user || $user->hasRole(Role::ADMIN) || $user->hasRole(Role::MANAGER) || $user->hasRole(Role::AUDITOR)) {
             return $builder;
         }
 

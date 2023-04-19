@@ -1,0 +1,14 @@
+{
+  "navigation": {
+    "groups": "Группы"
+  },
+  "groups": {
+    "grid-title": "Группы",
+    "crud-title": "Группа"
+  },
+  "field": {
+    "no_group_selected": "Группа не выбрана",
+    "loading_groups": "Загружаем группы",
+    "no_groups_found": "Для {query} группы не найдены"
+  }
+}

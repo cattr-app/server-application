@@ -1,0 +1,14 @@
+{
+  "navigation": {
+    "groups": "Groups"
+  },
+  "groups": {
+    "grid-title": "Groups",
+    "crud-title": "Group"
+  },
+  "field": {
+    "no_group_selected": "Group not selected",
+    "loading_groups": "Loading groups",
+    "no_groups_found": "No groups found for {query}"
+  }
+}

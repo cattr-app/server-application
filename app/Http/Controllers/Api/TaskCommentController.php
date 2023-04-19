@@ -2,7 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Http\Requests\Status\DestroyStatusRequest;
+use App\Enums\Role;
 use App\Http\Requests\TaskComment\CreateTaskCommentRequest;
 use App\Http\Requests\TaskComment\DestroyTaskCommentRequest;
 use App\Http\Requests\TaskComment\ListTaskCommentRequest;
@@ -12,10 +12,7 @@ use Filter;
 use App\Models\TaskComment;
 use Exception;
 use Illuminate\Database\Eloquent\Builder;
-use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use Illuminate\Support\Facades\Auth;
 use Throwable;
 
 class TaskCommentController extends ItemController
@@ -137,7 +134,7 @@ class TaskCommentController extends ItemController
 
         Filter::listen(
             Filter::getQueryFilterName(),
-            static fn($query) => $user->hasRole('admin') || $user->hasRole('manager') ? $query :
+            static fn($query) => $user->hasRole(Role::ADMIN) || $user->hasRole(Role::MANAGER) ? $query :
                 $query->where(['user_id' => $user->id])
                     ->whereHas('task', static fn($taskQuery) => $taskQuery->where(['user_id' => $user->id]))
         );
