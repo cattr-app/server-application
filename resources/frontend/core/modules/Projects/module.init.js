@@ -6,6 +6,7 @@ import { ModuleLoaderInterceptor } from '@/moduleLoader';
 import PrioritySelect from '@/components/PrioritySelect';
 import TeamAvatars from '@/components/TeamAvatars';
 import Statuses from './components/Statuses';
+import Groups from './components/Groups';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -54,7 +55,7 @@ export function init(context) {
     crud.edit.addToMetaProperties('permissions', 'projects/edit', crud.edit.getRouterConfig());
 
     const grid = context.createGrid('projects.grid-title', 'projects', ProjectService, {
-        with: ['users', 'defaultPriority', 'statuses', 'can'],
+        with: ['users', 'defaultPriority', 'statuses', 'can', 'group:id,name'],
         withCount: ['tasks'],
     });
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
@@ -81,6 +82,12 @@ export function init(context) {
         {
             label: 'field.description',
             key: 'description',
+        },
+        {
+            label: 'field.group',
+            key: 'group',
+            render: (h, props) =>
+                h('span', props.currentValue !== null ? props.currentValue.name : i18n.t('field.no_group_selected')),
         },
         {
             key: 'total_spent_time',
@@ -215,6 +222,45 @@ export function init(context) {
             placeholder: 'field.description',
         },
         {
+            label: 'field.group',
+            key: 'group',
+            render: (h, data) => {
+                if (
+                    data.values._currentGroup == null &&
+                    (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string')
+                ) {
+                    data.setValue('_currentGroup', data.currentValue);
+                }
+                let currentGroup = data.values._currentGroup || '';
+
+                let value = '';
+                if (typeof data.currentValue === 'number' || typeof data.currentValue === 'string') {
+                    value = data.currentValue;
+                    data.inputHandler(value);
+                } else if (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string') {
+                    value = data.currentValue.id;
+                    data.inputHandler(value);
+                }
+
+                return h(Groups, {
+                    props: {
+                        value,
+                        currentGroup,
+                        clearable: true,
+                    },
+                    on: {
+                        input(value) {
+                            data.inputHandler(value);
+                        },
+                        setCurrent(group) {
+                            data.setValue('_currentGroup', group);
+                        },
+                    },
+                });
+            },
+            required: false,
+        },
+        {
             label: 'field.important',
             tooltipValue: 'tooltip.task_important',
             key: 'important',
@@ -272,6 +318,12 @@ export function init(context) {
         {
             title: 'field.project',
             key: 'name',
+        },
+        {
+            title: 'field.group',
+            key: 'group',
+            render: (h, { item }) =>
+                h('span', item.group !== null ? item.group.name : i18n.t('field.no_group_selected')),
         },
         {
             title: 'field.members',

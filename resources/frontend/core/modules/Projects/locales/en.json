@@ -28,7 +28,12 @@
     "project_id": "Project",
     "priority_id": "Priority",
     "status_id": "Status",
-    "comments": "Comments"
+    "comments": "Comments",
+    "group": "Group",
+    "no_group_selected": "No group selected",
+    "loading_groups": "Loading groups",
+    "no_groups_found": "No groups found for {query}",
+    "type_to_search_for_group": "Start typing to search for a group."
   },
   "control": {
     "task-list": "Task List"

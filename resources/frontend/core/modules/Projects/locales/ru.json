@@ -28,7 +28,12 @@
     "project_id": "Проект",
     "priority_id": "Приоритет",
     "status_id": "Статус",
-    "comments": "Комментарии"
+    "comments": "Комментарии",
+    "group": "Группа",
+    "no_group_selected": "Группа не выбрана",
+    "loading_groups": "Загружаем группы",
+    "no_groups_found": "Для {query} группы не найдены",
+    "type_to_search_for_group": "Начните печатать, чтобы найти группу."
   },
   "control": {
     "task-list": "Список задач"

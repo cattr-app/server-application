@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Invitation;
 use App\Models\Priority;
 use App\Models\Project;
+use App\Models\ProjectGroup;
 use App\Models\Status;
 use App\Models\Task;
 use App\Models\TaskComment;
@@ -28,6 +29,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
+        // ProjectGroup::class => ProjectPolicy::class, what is that???
         Project::class => ProjectPolicy::class,
         Task::class => TaskPolicy::class,
         User::class => UserPolicy::class,
