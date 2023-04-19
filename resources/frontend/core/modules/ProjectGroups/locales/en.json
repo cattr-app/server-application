@@ -1,0 +1,15 @@
+{
+  "navigation": {
+    "project-groups": "Groups"
+  },
+  "message": {
+    "no_child_groups": "No nested groups",
+    "no_group_projects": "No projects",
+    "loading_projects": "Loading projects"
+  },
+  "field": {
+    "project": "Project",
+    "members": "Members",
+    "amount_of_tasks": "Amount of tasks"
+  }
+}

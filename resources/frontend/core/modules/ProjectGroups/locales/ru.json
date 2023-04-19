@@ -1,0 +1,15 @@
+{
+  "navigation": {
+    "project-groups": "Группы"
+  },
+  "message": {
+    "no_child_groups": "Нет вложенных групп",
+    "no_group_projects": "Нет проектов",
+    "loading_projects": "Загрузка проектов"
+  },
+  "field": {
+    "project": "Проект",
+    "members": "Участники",
+    "amount_of_tasks": "Кол-во задач"
+  }
+}
