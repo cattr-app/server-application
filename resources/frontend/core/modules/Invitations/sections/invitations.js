@@ -6,6 +6,7 @@ import { formatDate } from '@/utils/time';
 import InvitationService from '../services/invitation.service';
 import InvitationForm from '../components/InvitationForm';
 import Invitations from '../views/Invitations';
+import { hasRole } from '@/utils/user';
 
 export function fieldsToFillProvider() {
     return [
@@ -46,7 +47,7 @@ export default (context, router) => {
 
     const grid = invitationsContext.createGrid('invitations.grid-title', 'invitations', InvitationService);
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
-    grid.addToMetaProperties('permissions', () => store.getters['user/user'].is_admin === 1, grid.getRouterConfig());
+    grid.addToMetaProperties('permissions', () => hasRole(store.getters['user/user'], 'admin'), grid.getRouterConfig());
 
     const fieldsToFill = config.fieldsToFillProvider();
 

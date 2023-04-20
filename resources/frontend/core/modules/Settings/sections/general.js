@@ -4,12 +4,13 @@ import CompanyService from '../services/company.service';
 import ColorSelect from '../components/ColorSelect';
 import PrioritySelect from '@/components/PrioritySelect';
 import { store } from '@/store';
+import { hasRole } from '@/utils/user';
 
 export default {
     // Check if this section can be rendered and accessed, this param IS OPTIONAL (true by default)
     // NOTICE: this route will not be added to VueRouter AT ALL if this check fails
     // MUST be a function that returns a boolean
-    accessCheck: async () => store.getters['user/user'].is_admin === 1,
+    accessCheck: async () => hasRole(store.getters['user/user'], 'admin'),
 
     scope: 'company',
 

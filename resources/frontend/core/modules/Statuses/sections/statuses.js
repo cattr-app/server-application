@@ -4,6 +4,7 @@ import { store } from '@/store';
 import StatusService from '../services/statuse.service';
 import Statuses from '../views/Statuses';
 import ColorInput from '@/components/ColorInput';
+import { hasRole } from '@/utils/user';
 
 export default (context, router) => {
     const statusesContext = cloneDeep(context);
@@ -23,7 +24,7 @@ export default (context, router) => {
 
     const grid = statusesContext.createGrid('statuses.grid-title', 'statuses', StatusService);
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
-    grid.addToMetaProperties('permissions', () => store.getters['user/user'].is_admin === 1, grid.getRouterConfig());
+    grid.addToMetaProperties('permissions', () => hasRole(store.getters['user/user'], 'admin'), grid.getRouterConfig());
 
     const fieldsToFill = [
         {
@@ -155,7 +156,7 @@ export default (context, router) => {
     ]);
 
     return {
-        accessCheck: async () => store.getters['user/user'].is_admin === 1,
+        accessCheck: async () => hasRole(store.getters['user/user'], 'admin'),
         scope: 'company',
         order: 20,
         component: Statuses,

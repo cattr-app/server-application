@@ -1,5 +1,6 @@
 import Store from '../store';
 import { getModuleList, ModuleLoaderInterceptor } from '@/moduleLoader';
+import { hasRole } from '@/utils/user';
 
 /**
  * Initialising setting parent route
@@ -26,11 +27,11 @@ ModuleLoaderInterceptor.on('loaded', router => {
             Store.watch(
                 () => Store.getters['user/user'],
                 user => {
-                    return user.is_admin === 1 ? next() : next({ name: 'forbidden' });
+                    return hasRole(user, 'admin') ? next() : next({ name: 'forbidden' });
                 },
             );
         } else {
-            return Store.getters['user/user'].is_admin === 1 ? next() : next({ name: 'forbidden' });
+            return hasRole(Store.getters['user/user'], 'admin') ? next() : next({ name: 'forbidden' });
         }
     }
 
