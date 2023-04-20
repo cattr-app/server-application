@@ -85,20 +85,20 @@ export function localModuleLoader(router) {
 
             if (!Object.prototype.hasOwnProperty.call(md, 'ModuleConfig')) {
                 throw new Error(
-                    `Vendor module can not be initialized. All vendor modules must export ModuleConfig object property.`,
+                    `Vendor module cannot be initialized. All vendor modules must export ModuleConfig object property.`,
                 );
             }
 
             if (!Object.prototype.hasOwnProperty.call(md, 'init')) {
                 throw new Error(
-                    `Vendor module can not be initialized. All vendor modules must export init function property`,
+                    `Vendor module cannot be initialized. All vendor modules must export init function property`,
                 );
             }
 
             const moduleConfig = md.ModuleConfig;
             if (!Object.prototype.hasOwnProperty.call(moduleConfig, 'moduleName')) {
                 throw new Error(
-                    `Vendor module can not be initialized. All vendor modules must have a name matching the pattern Vendor_ModuleName`,
+                    `Vendor module cannot be initialized. All vendor modules must have a name matching the pattern Vendor_ModuleName`,
                 );
             }
 
