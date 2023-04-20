@@ -271,7 +271,7 @@
                 const filters = {};
                 const fieldsToSave = this.getFilterFieldKeys();
                 Object.keys(this.filterFieldsModel).forEach(field => {
-                    if (fieldsToSave.indexOf(field) !== -1 && typeof this.filterFieldsModel[field] !== undefined) {
+                    if (fieldsToSave.indexOf(field) !== -1 && typeof this.filterFieldsModel[field] !== 'undefined') {
                         filters[field] = this.filterFieldsModel[field];
                     }
                 });
@@ -293,7 +293,7 @@
             updateQueryParams() {
                 Object.keys(this.filterFieldsModel).forEach(field => {
                     if (
-                        typeof this.filterFieldsModel[field] !== undefined &&
+                        typeof this.filterFieldsModel[field] !== 'undefined' &&
                         this.filterFieldsModel[field].toString().length
                     ) {
                         const filter = this.filterFields.find(filter => filter.key === field);
@@ -704,6 +704,7 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
+
             &__item {
                 position: relative;
                 margin-right: 1rem;

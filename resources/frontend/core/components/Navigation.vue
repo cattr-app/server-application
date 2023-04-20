@@ -36,10 +36,10 @@
 </template>
 
 <script>
-    import { mapGetters } from 'vuex';
+    import NavigationMenuItem from '@/components/NavigationMenuItem';
     import UserAvatar from '@/components/UserAvatar';
     import { getModuleList } from '@/moduleLoader';
-    import NavigationMenuItem from '@/components/NavigationMenuItem';
+    import { mapGetters } from 'vuex';
 
     export default {
         components: {
@@ -79,7 +79,10 @@
                     const entriesDropdown = m.getNavbarEntriesDropdown();
                     Object.keys(entriesDropdown).forEach(key => {
                         const isAllowItem = entriesDropdown[key][0].displayCondition(this.$store);
-                        if (!entriesDr.hasOwnProperty(entriesDropdown[key][0].section) && isAllowItem) {
+                        if (
+                            !Object.prototype.hasOwnProperty.call(entriesDr, entriesDropdown[key][0].section) &&
+                            isAllowItem
+                        ) {
                             entriesDr[entriesDropdown[key][0].section] = [];
                         }
                         if (isAllowItem) {

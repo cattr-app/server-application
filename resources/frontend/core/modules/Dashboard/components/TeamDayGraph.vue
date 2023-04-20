@@ -74,14 +74,14 @@
 </template>
 
 <script>
+    import Screenshot from '@/components/Screenshot';
+    import ScreenshotModal from '@/components/ScreenshotModal';
+    import IntervalService from '@/services/resource/time-interval.service';
+    import { formatDurationString } from '@/utils/time';
     import { fabric } from 'fabric';
     import throttle from 'lodash/throttle';
     import moment from 'moment-timezone';
     import { mapGetters } from 'vuex';
-    import Screenshot from '@/components/Screenshot';
-    import ScreenshotModal from '@/components/ScreenshotModal';
-    import { formatDurationString } from '@/utils/time';
-    import IntervalService from '@/services/resource/time-interval.service';
 
     let intervalService = new IntervalService();
 
@@ -331,7 +331,7 @@
                     }
 
                     // Intervals
-                    if (this.intervals.hasOwnProperty(user.id)) {
+                    if (Object.prototype.hasOwnProperty.call(this.intervals, user.id)) {
                         this.intervals[user.id].forEach(event => {
                             const leftOffset =
                                 moment

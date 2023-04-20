@@ -5,7 +5,8 @@ const state = {
 };
 
 const getters = {
-    roles: s => s.roles,
+    roles: s =>
+        s.roles.reduce((acc, el) => (el.id < 0 ? acc : Object.assign(acc, { [el.name.toLowerCase()]: el.id })), {}),
 };
 
 const mutations = {
@@ -29,6 +30,10 @@ const actions = {
 
     setRoles({ commit }, roles) {
         commit('setRoles', roles);
+    },
+
+    async init({ dispatch }) {
+        dispatch('loadRoles');
     },
 };
 

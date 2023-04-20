@@ -4,7 +4,7 @@ import CoreUsersService from '@/services/resource/user.service';
 import RoleSelect from '@/components/RoleSelect';
 import Users from '../views/Users';
 import UsersService from '../services/user.service';
-import Store from '@/store';
+import { store } from '@/store';
 import LanguageSelector from '@/components/LanguageSelector';
 import i18n from '@/i18n';
 import Vue from 'vue';
@@ -45,7 +45,7 @@ export function fieldsToFillProvider() {
                 props.inputHandler(props.currentValue);
 
                 let isDisable = false;
-                const selfId = Store.getters['user/user'].id;
+                const selfId = store.getters['user/user'].id;
                 const userId = props.values.id;
                 if (selfId === userId) {
                     isDisable = !isDisable;

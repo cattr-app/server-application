@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import cloneDeep from 'lodash/cloneDeep';
-import Store from '@/store';
+import { store } from '@/store';
 import i18n from '@/i18n';
 import { formatDate } from '@/utils/time';
 import InvitationService from '../services/invitation.service';
@@ -46,7 +46,7 @@ export default (context, router) => {
 
     const grid = invitationsContext.createGrid('invitations.grid-title', 'invitations', InvitationService);
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
-    grid.addToMetaProperties('permissions', () => Store.getters['user/user'].is_admin === 1, grid.getRouterConfig());
+    grid.addToMetaProperties('permissions', () => store.getters['user/user'].is_admin === 1, grid.getRouterConfig());
 
     const fieldsToFill = config.fieldsToFillProvider();
 

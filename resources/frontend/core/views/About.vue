@@ -68,9 +68,9 @@
 </template>
 
 <script>
-    import { Skeleton } from 'vue-loading-skeleton';
-    import semverGt from 'semver/functions/gt';
     import AboutService from '@/services/resource/about.service';
+    import semverGt from 'semver/functions/gt';
+    import { Skeleton } from 'vue-loading-skeleton';
 
     const aboutService = new AboutService();
 
@@ -125,7 +125,7 @@
                         render: (h, params) =>
                             h('AtAlert', {
                                 props: {
-                                    message: params.item.hasOwnProperty('lastVersion')
+                                    message: Object.prototype.hasOwnProperty.call(params.item, 'lastVersion')
                                         ? semverGt(params.item.version, params.item.lastVersion)
                                             ? params.item.flashMessage
                                             : params.item.version === params.item.lastVersion
@@ -134,7 +134,7 @@
                                             ? this.$i18n.t('about.modules.vulnerable')
                                             : this.$i18n.t('about.modules.outdated')
                                         : this.$i18n.t('about.modules.ok'),
-                                    type: params.item.hasOwnProperty('lastVersion')
+                                    type: Object.prototype.hasOwnProperty.call(params.item, 'lastVersion')
                                         ? semverGt(params.item.version, params.item.lastVersion)
                                             ? 'info'
                                             : params.item.version === params.item.lastVersion
