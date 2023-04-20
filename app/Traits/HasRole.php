@@ -13,8 +13,18 @@ trait HasRole
      * @param Role $role
      * @return bool
      */
-    public function hasRole(Role $role): bool
+    public function hasRole(Role|array $role): bool
     {
+        if (is_array($role)) {
+            foreach ($role as $e) {
+                if ($this->role_id === $e->value) {
+                    return true;
+                }
+            }
+
+            return false;
+        }
+
         return $this->role_id === $role->value;
     }
 

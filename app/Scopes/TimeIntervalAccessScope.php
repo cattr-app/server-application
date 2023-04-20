@@ -27,7 +27,7 @@ class TimeIntervalAccessScope implements Scope
 
         throw_unless($user, new AuthorizationException);
 
-        if ($user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
+        if ($user->hasRole([Role::ADMIN, Role::MANAGER, Role::AUDITOR])) {
             return $builder;
         }
 
