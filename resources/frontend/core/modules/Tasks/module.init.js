@@ -12,6 +12,7 @@ import { formatDate, formatDurationString } from '@/utils/time';
 import { VueEditor } from 'vue2-editor';
 import TaskComments from './components/TaskComments';
 import TaskHistory from './components/TaskHistory';
+import { hasRole } from '@/utils/user';
 
 export const ModuleConfig = {
     routerPrefix: 'tasks',
@@ -142,7 +143,7 @@ export function init(context, router) {
             key: 'users',
             label: 'field.users',
             render: (h, data) => {
-                if (!router.app.$store.getters['user/user'].is_admin) {
+                if (!hasRole(router.app.$store.getters['user/user'], 'admin')) {
                     return h(
                         'ul',
                         {},
@@ -237,7 +238,7 @@ export function init(context, router) {
                             {
                                 title: i18n.t('field.user'),
                                 render: (h, { item }) => {
-                                    if (!router.app.$store.getters['user/user'].is_admin) {
+                                    if (!hasRole(router.app.$store.getters['user/user'], 'admin')) {
                                         return h('span', item.full_name);
                                     }
 
@@ -579,7 +580,7 @@ export function init(context, router) {
             onClick: (router, { item }, context) => {
                 context.onView(item);
             },
-            renderCondition({ $store }) {
+            renderCondition() {
                 // User always can view assigned tasks
                 return true;
             },

@@ -41,7 +41,6 @@
                     Sentry.setUser({
                         full_name: this.$store.state.user.user.data.full_name,
                         id: this.$store.state.user.user.data.id,
-                        is_admin: this.$store.state.user.user.data.is_admin,
                         role: this.$store.state.user.user.data.role_id,
                         locale: this.$store.state.user.user.data.user_language,
                     });

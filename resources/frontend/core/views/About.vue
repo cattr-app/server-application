@@ -47,7 +47,7 @@
                             <p v-else v-t="'about.no_modules'" />
                         </at-tab-pane>
                         <at-tab-pane
-                            v-if="$store.getters['user/user'].is_admin"
+                            v-if="isAdmin"
                             :label="$t('about.module_storage')"
                             class="storage"
                             name="about_storage"
@@ -69,6 +69,7 @@
 
 <script>
     import AboutService from '@/services/resource/about.service';
+    import { hasRole } from '@/utils/user';
     import semverGt from 'semver/functions/gt';
     import { Skeleton } from 'vue-loading-skeleton';
 
@@ -80,6 +81,11 @@
             StorageManagementTab: () =>
                 import(/* webpackChunkName: "StorageManagementTab" */ '@/components/StorageManagementTab'),
             Skeleton,
+        },
+        computed: {
+            isAdmin() {
+                return hasRole(this.$store.getters['user/user'], 'admin');
+            },
         },
         async mounted() {
             this.isLoading = true;
