@@ -18,6 +18,7 @@
     "hot": "mix watch --hot",
     "prod": "mix --production",
     "postinstall": "husky install",
+    "prepare": "husky install",
     "lint": "eslint --ext .js,.vue -c .eslinrc.js resources/frontend/"
   },
   "workspaces": [
