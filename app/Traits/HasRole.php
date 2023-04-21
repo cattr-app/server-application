@@ -62,10 +62,11 @@ trait HasRole
      */
     public function hasProjectRole(Role|array $role, int $projectId): bool
     {
+        $self = $this;
         $roles = Cache::store('octane')->remember(
-            "role_project_$this->id",
+            "role_project_$self->id",
             config('cache.role_caching_ttl'),
-            static fn() => $this->projectsRelation()->get()->collect()->keyBy('project_id')->all(),
+            static fn() => $self->projectsRelation()->get()->collect()->keyBy('project_id')->all(),
         );
 
         if (!isset($roles[$projectId])) {
