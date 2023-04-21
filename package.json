@@ -19,7 +19,7 @@
     "prod": "mix --production",
     "postinstall": "husky install",
     "prepare": "husky install",
-    "lint": "eslint --ext .js,.vue -c .eslinrc.js resources/frontend/"
+    "lint": "eslint --ext .js,.vue -c .eslintrc.js resources/frontend/"
   },
   "workspaces": [
     "resources/frontend/vendor_modules/*/*"
