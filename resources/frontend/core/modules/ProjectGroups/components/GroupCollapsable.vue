@@ -2,13 +2,13 @@
     <div class="groups">
         <at-collapse simple accordion @on-change="changeHandler">
             <at-collapse-item
-                v-for="group in groups"
-                :key="group.id"
+                v-for="(group, index) in groups"
+                :key="index"
                 :disabled="group.projects_count === 0"
                 :class="{
                     groups__disabled: group.projects_count === 0,
                 }"
-                :name="String(group.id)"
+                :name="String(index)"
             >
                 <div slot="title">
                     <div class="groups__header">
@@ -18,8 +18,7 @@
                         </h5>
                     </div>
                 </div>
-
-                <div v-if="group.projects_count > 0 && isOpen(group.id)" class="groups__projects-wrapper">
+                <div v-if="group.projects_count > 0 && isOpen(index)" class="groups__projects-wrapper">
                     <GroupProjects :group-id="group.id" class="groups__projects" />
                 </div>
             </at-collapse-item>
@@ -41,7 +40,6 @@
         computed: {
             projectsCount() {
                 return `(${this.group.projects_count})`;
-                // return `(${this.group.projects_count} / ${this.calculateProjectsCount(this.group)})`;
             },
         },
         props: {

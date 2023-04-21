@@ -49,7 +49,6 @@
                 projects: [],
                 projectsTotal: 0,
                 limit: 10,
-                observer: null,
                 query: '',
                 totalPages: 0,
                 currentPage: 0,
@@ -66,23 +65,8 @@
         },
         mounted() {
             this.loadProjects();
-            this.observer = new IntersectionObserver(this.infiniteScroll);
         },
         methods: {
-            async infiniteScroll([{ isIntersecting, target }]) {
-                if (isIntersecting) {
-                    const requestTimestamp = +target.dataset.requestTimestamp;
-
-                    if (requestTimestamp === this.requestTimestamp) {
-                        await this.loadOptions(requestTimestamp);
-
-                        await this.$nextTick();
-
-                        this.observer.disconnect();
-                        this.observe(requestTimestamp);
-                    }
-                }
-            },
             async loadProjects() {
                 this.isDataLoading = true;
 
@@ -118,7 +102,6 @@
                 this.search(this.requestTimestamp);
             },
             async search(requestTimestamp) {
-                this.observer.disconnect();
                 this.totalPages = 0;
                 this.currentPage = 0;
                 this.resetOptions();
@@ -126,13 +109,6 @@
                 await this.$nextTick();
                 await this.loadOptions(requestTimestamp);
                 await this.$nextTick();
-                this.observe(requestTimestamp);
-            },
-            observe(requestTimestamp) {
-                if (this.$refs.load) {
-                    this.$refs.load.dataset.requestTimestamp = requestTimestamp;
-                    this.observer.observe(this.$refs.load);
-                }
             },
             async loadOptions(requestTimestamp) {
                 const filters = {
@@ -244,49 +220,46 @@
                     },
                 ]
 
-                // const columns = gridData.columns.map(col => ({ ...col, title: this.$t(col.title) }));
-
-                // if (gridData.actions.length > 0 && columns.filter(t => t.title === 'field.actions').length === 0) {
-                    columns.push({
-                        title: this.$t('field.actions'),
-                        render: (h, params) => {
-                            let cell = h(
-                                'div',
-                                {
-                                    class: 'actions-column',
-                                },
-                                actions.map(item => {
-                                    if (
-                                        typeof item.renderCondition !== 'undefined'
-                                            ? item.renderCondition(this, params.item)
-                                            : true
-                                    ) {
-                                        return h(
-                                            'AtButton',
-                                            {
-                                                props: {
-                                                    type: item.actionType || 'primary', // AT-ui button display type
-                                                    icon: item.icon || undefined, // Prepend icon to button
-                                                },
-                                                on: {
-                                                    click: () => {
-                                                        item.onClick(this.$router, params, this);
-                                                    },
-                                                },
-                                                class: 'action-button',
-                                                style: {
-                                                    margin: '0 10px 0 0'
-                                                }
+                columns.push({
+                    title: this.$t('field.actions'),
+                    render: (h, params) => {
+                        let cell = h(
+                            'div',
+                            {
+                                class: 'actions-column',
+                            },
+                            actions.map(item => {
+                                if (
+                                    typeof item.renderCondition !== 'undefined'
+                                        ? item.renderCondition(this, params.item)
+                                        : true
+                                ) {
+                                    return h(
+                                        'AtButton',
+                                        {
+                                            props: {
+                                                type: item.actionType || 'primary', // AT-ui button display type
+                                                icon: item.icon || undefined, // Prepend icon to button
                                             },
-                                            this.$t(item.title),
-                                        );
-                                    }
-                                }),
-                            );
+                                            on: {
+                                                click: () => {
+                                                    item.onClick(this.$router, params, this);
+                                                },
+                                            },
+                                            class: 'action-button',
+                                            style: {
+                                                margin: '0 10px 0 0'
+                                            }
+                                        },
+                                        this.$t(item.title),
+                                    );
+                                }
+                            }),
+                        );
 
-                            return cell;
-                        },
-                    });
+                        return cell;
+                    },
+                });
 
                 return columns;
             },

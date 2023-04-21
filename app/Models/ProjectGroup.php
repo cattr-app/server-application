@@ -8,6 +8,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
+use Kalnoy\Nestedset\AncestorsRelation;
 use Kalnoy\Nestedset\NodeTrait;
 use Kalnoy\Nestedset\QueryBuilder;
 
@@ -32,6 +33,11 @@ class ProjectGroup extends Model
     ];
 
     protected const PERMISSIONS = ['update', 'destroy'];
+
+    public function parents(): AncestorsRelation
+    {
+        return $this->ancestors()->withCount('projects');
+    }
 
     protected static function boot(): void
     {

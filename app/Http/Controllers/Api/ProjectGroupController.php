@@ -31,14 +31,14 @@ class ProjectGroupController extends ItemController
     {
         // TODO:
         //  [] remove/setAnother amount in ->paginate(2)
-
+        
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
         $itemsQuery = $this->getQuery($requestData);
 
         Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
 
-        $items = $itemsQuery->withDepth()->withCount('projects')->defaultOrder()->paginate(2);
+        $items = $itemsQuery->withDepth()->withCount('projects')->defaultOrder()->paginate($request->limit ? $request->limit : 2);
 
         Filter::process(
             Filter::getActionFilterName(),
@@ -66,7 +66,7 @@ class ProjectGroupController extends ItemController
         foreach ($modelScopes as $key => $value) {
             $query->withGlobalScope($key, $value);
         }
-
+        
         foreach (Filter::process(Filter::getQueryAdditionalRelationsFilterName(), []) as $with) {
             $query->with($with);
         }
