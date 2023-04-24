@@ -1301,7 +1301,7 @@ __metadata:
     "@cattr/ui-kit": ^1.3.9
     "@commitlint/cli": ^17.5.1
     "@commitlint/config-conventional": ^17.4.4
-    "@sentry/tracing": ^7.45.0
+    "@sentry/tracing": ^7.49.0
     "@sentry/vue": ^7.45.0
     autoprefixer: ^10.4.14
     axios: ^1.3.4
@@ -1981,6 +1981,18 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry-internal/tracing@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry-internal/tracing@npm:7.49.0"
+  dependencies:
+    "@sentry/core": 7.49.0
+    "@sentry/types": 7.49.0
+    "@sentry/utils": 7.49.0
+    tslib: ^1.9.3
+  checksum: 765e15b26e5074acb49f7b18f1eac9171cd00f19d9c7b311af1da05d5a8f8e114ee99512deeb9a85e2759ffea521a392da5edda529485abe5d519a3047ca02bf
+  languageName: node
+  linkType: hard
+
 "@sentry/browser@npm:7.45.0":
   version: 7.45.0
   resolution: "@sentry/browser@npm:7.45.0"
@@ -2006,6 +2018,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/core@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/core@npm:7.49.0"
+  dependencies:
+    "@sentry/types": 7.49.0
+    "@sentry/utils": 7.49.0
+    tslib: ^1.9.3
+  checksum: b1222afd09d219c990e2a8df136c6e540bd13f26616331f3d4e143182b6b4b550426b165dafc52e504a4bff111b634c756202656b383557e4cb3f2ff58022e1b
+  languageName: node
+  linkType: hard
+
 "@sentry/replay@npm:7.45.0":
   version: 7.45.0
   resolution: "@sentry/replay@npm:7.45.0"
@@ -2017,12 +2040,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/tracing@npm:^7.45.0":
-  version: 7.45.0
-  resolution: "@sentry/tracing@npm:7.45.0"
+"@sentry/tracing@npm:^7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/tracing@npm:7.49.0"
   dependencies:
-    "@sentry-internal/tracing": 7.45.0
-  checksum: 21cfa98152f66c588124b368cc2883688e4d12a6a1d3a48519522b4d165ba56f8b72d2154686e278ecedc7b6afe5c6f469d256a31745fa9b8140a1040064e9f5
+    "@sentry-internal/tracing": 7.49.0
+  checksum: 47c609e18ba8abb3876335b3368545a91fc4bc80d3882ab1c05fd7ba4c7ad88fdef177d3eb3e590372d6ad55a3f734298bd3e66f72c0f8572cf1ae49e0ac75fa
   languageName: node
   linkType: hard
 
@@ -2033,6 +2056,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/types@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/types@npm:7.49.0"
+  checksum: c6665e5ea14aa0288a44daf0ccbf8ab3134ec7ab61a6cda57e233c865a9c1ca3a9e45b5ab75705d2d3506c357e08cc500a550794fe6e888d363e0254b46c057b
+  languageName: node
+  linkType: hard
+
 "@sentry/utils@npm:7.45.0":
   version: 7.45.0
   resolution: "@sentry/utils@npm:7.45.0"
@@ -2040,6 +2070,16 @@ __metadata:
     "@sentry/types": 7.45.0
     tslib: ^1.9.3
   checksum: 5d4d2ab4fe85d7231a35859cbeecc3d0c95368c818f15d8d6332f8c57604a67c0e12d5a81c23e5dcb1c53b4e44faf753028592792eb98e4af1440ee375b2292e
+  languageName: node
+  linkType: hard
+
+"@sentry/utils@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/utils@npm:7.49.0"
+  dependencies:
+    "@sentry/types": 7.49.0
+    tslib: ^1.9.3
+  checksum: b3382418fbc98a685c3c01571ef24217d8cbcb283f8e12e2e44a518d9697e9fadcaa48c24e31063ecad6a13f3fc7b0caf0dcb8e7c0097bc2613e8f465de5d0be
   languageName: node
   linkType: hard
 
