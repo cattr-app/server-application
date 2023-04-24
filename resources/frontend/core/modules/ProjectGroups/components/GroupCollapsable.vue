@@ -5,17 +5,15 @@
                 v-for="(group, index) in groups"
                 :key="index"
                 :disabled="group.projects_count === 0"
-                :class="{
-                    groups__disabled: group.projects_count === 0,
-                }"
                 :name="String(index)"
             >
                 <div slot="title">
                     <div class="groups__header">
-                        <h5 class="groups__title">
-                            <span v-if="group.depth > 0" class="groups__depth">{{ getSpaceByDepth(group.depth) }}</span
+                        <h5 :class="{ groups__disabled: group.projects_count === 0 }" class="groups__title">
+                            <span :class="{ groups__disabled: group.projects_count === 0 }" v-if="group.depth > 0" class="groups__depth">{{ getSpaceByDepth(group.depth) }}</span
                             >{{ group.name }} ({{ group.projects_count }})
                         </h5>
+                        <a onclick="event.stopPropagation()" class="groups__title__link" :href="`/project-groups/edit/${group.id}`" target="_blank"><i class="icon icon-external-link"></i></a>
                     </div>
                 </div>
                 <div v-if="group.projects_count > 0 && isOpen(index)" class="groups__projects-wrapper">
@@ -71,19 +69,14 @@
 
 <style lang="scss" scoped>
     .groups {
-        &__header {
-            //display: flex;
-            //justify-content: space-between;
-            //align-items: center;
-            //border-bottom: none;
-            //padding: 14px 21px;
-            //border-bottom: 3px solid $blue-3;
-        }
 
         &__title {
-            //color: $black-900;
-            //font-size: 1rem;
-            //font-weight: bold;
+            display: inline-block;
+        }
+        
+        .icon-external-link {
+            font-size: 20px;
+            // position: absolute;
         }
 
         &__disabled {

@@ -6,6 +6,7 @@ use App\Helpers\QueryHelper;
 use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\ProjectGroup\CreateProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\DestroyProjectGroupRequest;
+use App\Http\Requests\ProjectGroup\EditProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\ListProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\ShowProjectGroupRequest;
 use App\Models\ProjectGroup;
@@ -13,7 +14,10 @@ use Event;
 use Exception;
 use Filter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 use Kalnoy\Nestedset\QueryBuilder;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class ProjectGroupController extends ItemController
@@ -88,7 +92,23 @@ class ProjectGroupController extends ItemController
      */
     public function create(CreateProjectGroupRequest $request): JsonResponse
     {
-        return $this->_create($request);
+        $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
+
+        Event::dispatch(Filter::getBeforeActionEventName(), [$requestData]);
+        
+        /** @var Model $cls */
+        $cls = static::MODEL;
+
+        $parent_id = isset($requestData['parent_id']) ? $requestData['parent_id'] : null;
+
+        $item = Filter::process(
+            Filter::getActionFilterName(),
+            $cls::create($requestData, ProjectGroup::find($parent_id)),
+        );
+
+        Event::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
+
+        return responder()->success($item)->respond();
     }
 
     /**
@@ -110,9 +130,36 @@ class ProjectGroupController extends ItemController
      * @return JsonResponse
      * @throws Throwable
      */
-    public function edit(EditProjectRequest $request): JsonResponse
+    public function edit(EditProjectGroupRequest $request): JsonResponse
     {
-        return $this->_edit($request);
+        $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
+
+        throw_unless(is_int($request->get('id')), ValidationException::withMessages(['Invalid id']));
+
+        $itemsQuery = $this->getQuery();
+
+        /** @var Model $item */
+        $item = $itemsQuery->get()->collect()->firstWhere('id', $request->get('id'));
+
+        if (!$item) {
+            /** @var Model $cls */
+            $cls = static::MODEL;
+            throw_if($cls::find($request->get('id'))?->count(), new AccessDeniedHttpException());
+
+            throw new NotFoundHttpException;
+        }
+
+        Event::dispatch(Filter::getBeforeActionEventName(), [$item, $requestData]);
+
+        $parent = isset($requestData['parent_id']) ? ProjectGroup::find($requestData['parent_id']) : null;
+
+        $item = Filter::process(Filter::getActionFilterName(), $item->fill($requestData)->parent()->associate($parent));
+
+        $item->save();
+
+        Event::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
+
+        return responder()->success($item)->respond();
     }
 
     /**

@@ -20,7 +20,7 @@ class EditProjectGroupRequest extends CattrFormRequest
         return [
             'id' => 'required|int|exists:project_groups,id',
             'name' => 'sometimes|required|string',
-            'parent' => 'sometimes|integer|exists:project_groups,id',
+            'parent_id' => 'sometimes|integer|exists:project_groups,id',
         ];
     }
 }
