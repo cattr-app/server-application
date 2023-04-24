@@ -32,7 +32,7 @@
     "axios-concurrency": "^1.0.4",
     "caret-pos": "^2.0.0",
     "color-convert": "^2.0.1",
-    "core-js": "^3.29.1",
+    "core-js": "^3.30.0",
     "cross-env": "^7.0.3",
     "dotenv": "^16.0.3",
     "fabric": "^5.3.0",
