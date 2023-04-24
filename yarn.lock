@@ -1302,7 +1302,7 @@ __metadata:
     "@commitlint/cli": ^17.5.1
     "@commitlint/config-conventional": ^17.4.4
     "@sentry/tracing": ^7.45.0
-    "@sentry/vue": ^7.45.0
+    "@sentry/vue": ^7.49.0
     autoprefixer: ^10.4.14
     axios: ^1.3.4
     axios-concurrency: ^1.0.4
@@ -1981,17 +1981,29 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/browser@npm:7.45.0":
-  version: 7.45.0
-  resolution: "@sentry/browser@npm:7.45.0"
+"@sentry-internal/tracing@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry-internal/tracing@npm:7.49.0"
   dependencies:
-    "@sentry-internal/tracing": 7.45.0
-    "@sentry/core": 7.45.0
-    "@sentry/replay": 7.45.0
-    "@sentry/types": 7.45.0
-    "@sentry/utils": 7.45.0
+    "@sentry/core": 7.49.0
+    "@sentry/types": 7.49.0
+    "@sentry/utils": 7.49.0
     tslib: ^1.9.3
-  checksum: 6f9328e32fbe92a31e891ec00f6fbd72397d6e6f9a53ec4025da8682bcb484fda49ad05ee73a95b1f0554f9a4543d9d5f40e26273eb9c70617a475939dfd29ad
+  checksum: 765e15b26e5074acb49f7b18f1eac9171cd00f19d9c7b311af1da05d5a8f8e114ee99512deeb9a85e2759ffea521a392da5edda529485abe5d519a3047ca02bf
+  languageName: node
+  linkType: hard
+
+"@sentry/browser@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/browser@npm:7.49.0"
+  dependencies:
+    "@sentry-internal/tracing": 7.49.0
+    "@sentry/core": 7.49.0
+    "@sentry/replay": 7.49.0
+    "@sentry/types": 7.49.0
+    "@sentry/utils": 7.49.0
+    tslib: ^1.9.3
+  checksum: 4a7ff0cf566937b59f892d52453895dea0e9b689f6fa0f725909171afc9d2e692ccb767cd277b325355fb4406dc17bbd1398ed9b3a291cd1d83a67e9377335b8
   languageName: node
   linkType: hard
 
@@ -2006,14 +2018,25 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/replay@npm:7.45.0":
-  version: 7.45.0
-  resolution: "@sentry/replay@npm:7.45.0"
+"@sentry/core@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/core@npm:7.49.0"
   dependencies:
-    "@sentry/core": 7.45.0
-    "@sentry/types": 7.45.0
-    "@sentry/utils": 7.45.0
-  checksum: 6e960f50cb1b3fae97482edfc2458542a254af0060481e369740c1e9f93093ca662f130c400fafff092e75079929c21f59ea78d85a095b59a07250976d478b84
+    "@sentry/types": 7.49.0
+    "@sentry/utils": 7.49.0
+    tslib: ^1.9.3
+  checksum: b1222afd09d219c990e2a8df136c6e540bd13f26616331f3d4e143182b6b4b550426b165dafc52e504a4bff111b634c756202656b383557e4cb3f2ff58022e1b
+  languageName: node
+  linkType: hard
+
+"@sentry/replay@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/replay@npm:7.49.0"
+  dependencies:
+    "@sentry/core": 7.49.0
+    "@sentry/types": 7.49.0
+    "@sentry/utils": 7.49.0
+  checksum: 0789ead51e2284fcf6871ba11c4b022de608b31354aa1c1fc30bb26811bad3e353a80dfb2a1517b1567c39be80e263e67f4d5d1efb0747048ee173d855daa308
   languageName: node
   linkType: hard
 
@@ -2033,6 +2056,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@sentry/types@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/types@npm:7.49.0"
+  checksum: c6665e5ea14aa0288a44daf0ccbf8ab3134ec7ab61a6cda57e233c865a9c1ca3a9e45b5ab75705d2d3506c357e08cc500a550794fe6e888d363e0254b46c057b
+  languageName: node
+  linkType: hard
+
 "@sentry/utils@npm:7.45.0":
   version: 7.45.0
   resolution: "@sentry/utils@npm:7.45.0"
@@ -2043,18 +2073,28 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/vue@npm:^7.45.0":
-  version: 7.45.0
-  resolution: "@sentry/vue@npm:7.45.0"
+"@sentry/utils@npm:7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/utils@npm:7.49.0"
   dependencies:
-    "@sentry/browser": 7.45.0
-    "@sentry/core": 7.45.0
-    "@sentry/types": 7.45.0
-    "@sentry/utils": 7.45.0
+    "@sentry/types": 7.49.0
+    tslib: ^1.9.3
+  checksum: b3382418fbc98a685c3c01571ef24217d8cbcb283f8e12e2e44a518d9697e9fadcaa48c24e31063ecad6a13f3fc7b0caf0dcb8e7c0097bc2613e8f465de5d0be
+  languageName: node
+  linkType: hard
+
+"@sentry/vue@npm:^7.49.0":
+  version: 7.49.0
+  resolution: "@sentry/vue@npm:7.49.0"
+  dependencies:
+    "@sentry/browser": 7.49.0
+    "@sentry/core": 7.49.0
+    "@sentry/types": 7.49.0
+    "@sentry/utils": 7.49.0
     tslib: ^1.9.3
   peerDependencies:
     vue: 2.x || 3.x
-  checksum: 5fc9c95da5228273f80e8ce215ad3625488141b2d169a33ee845d0a753fbe3ac3d96c89c3956ce8a2de61fe3271e0287003f9ce77b6f8fbdf2e1c6bb08f16e5e
+  checksum: f1bfea551ad13f650ca204f2aa93bdeb7190bae4c8738f545cd33863a175f4233ca22e947e78e156570b597fbdf086bafed8febb0db085e27128432db9625a55
   languageName: node
   linkType: hard
 
