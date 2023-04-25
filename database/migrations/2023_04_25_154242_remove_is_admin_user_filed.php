@@ -14,7 +14,7 @@ return new class extends Migration {
         Schema::table('users', function (Blueprint $table) {
             foreach (User::lazy() as $user) {
                 if ($user->is_admin) {
-                    $user->update(['role_id' => 1]);
+                    $user->update(['role_id' => 0]);
                 }
             }
             $table->dropColumn('is_admin');
@@ -30,7 +30,7 @@ return new class extends Migration {
             $table->boolean('is_admin')->default(false);
 
             foreach (User::lazy() as $user) {
-                if ($user->role_id === 1) {
+                if ($user->role_id === 0) {
                     $user->update(['is_admin' => true]);
                 }
             }
