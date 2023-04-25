@@ -1,6 +1,6 @@
 <template>
-    <div @click="onActive" class="group-select">
-        <div v-if="isActive != true">{{ model }}</div>
+    <div @click="onActive" class="group-select" ref="groupSelect">
+        <div v-if="isActive != true">{{ model == '' ? $t('field.no_group_selected') : model }}</div>
         <v-select
             v-else
             v-model="model"
@@ -28,23 +28,21 @@
                 <template v-if="searching">
                     <span v-html="$t('field.no_groups_found', { query: `<em>${search}</em>` })"></span>
                 </template>
-                <em v-else style="opacity: 0.5">{{ $t('field.no_groups_found', { query: `<em>${search}</em>` }) }}</em>
+                <em v-else v-html="$t('field.no_groups_found', { query: `<em>${search}</em>` })"></em>
                 <template>
-                    <div @click="createGroup" class="option icon icon-plus-circle" style="margin-top: 10px; cursor: pointer;">
-                        <span class="option__text">
-                            <span v-html="ucfirst($t('field.fast_create_group', { query: `<em>${search}</em>` }))"></span>
+                    <div @click="createGroup" class="no-option icon icon-plus-circle">
+                        <span class="no-option__text">
+                            <span v-html="$t('field.fast_create_group', { query: `<em>${search}</em>` })"></span>
                         </span>
                     </div>
                 </template>
                 <template>
-                    <div @click="toCreateGroup" class="option icon icon-plus-circle" style="margin-top: 10px; cursor: pointer;">
-                        <span class="option__text">
-                            <span v-html="ucfirst($t('field.to_create_group', { query: `<em>${search}</em>` }))"></span>
+                    <div @click="toCreateGroup" class="no-option icon icon-plus-circle">
+                        <span class="no-option__text">
+                            <span v-html="$t('field.to_create_group', { query: `<em>${search}</em>` })"></span>
                         </span>
                     </div>
                 </template>
-                <!-- <li @click="createGroup" class="vs__dropdown-option vs__dropdown-option--highlight icon icon-plus-circle" role="option"><span class="option" v-html="$t('field.fast_create_group', { query: `<em>${search}</em>` })"></span></li>
-                <li @click="toCreateGroup" class="vs__dropdown-option vs__dropdown-option--highlight icon icon-plus-circle" role="option"><span class="option" v-html="$t('field.to_create_group', { query: `<em>${search}</em>` })"></span></li> -->
             </template>
             
 
@@ -67,12 +65,12 @@
         name: 'GroupSelect',
         props: {
             value: {
-                type: [String, Number],
+                type: [String, Object],
                 default: '',
             },
             currentGroup: {
-                type: [Object, String],
-                default: '',
+                type: [Object],
+                required: true,
             },
             clearable: {
                 type: Boolean,
@@ -87,7 +85,6 @@
                 isActive: false,
                 options: [],
                 service: new ProjectGroupsService(),
-                observer: null,
                 isSelectOpen: false,
                 totalPages: 0,
                 currentPage: 0,
@@ -113,10 +110,12 @@
                         : (this.localCurrentGroup = null);
                     this.$emit('setCurrent', '');
                 } else {
-                    this.$emit('setCurrent', {
-                        id: this.localCurrentGroup.id,
-                        name: this.localCurrentGroup.label,
-                    });
+                    if (newValue.value !== this.currentGroup.name) {
+                        this.$emit('setCurrent', {
+                            id: this.localCurrentGroup.id,
+                            name: this.localCurrentGroup.label,
+                        });
+                    }
                 }
                 if (newValue.value === '' && newValue.query === '') {
                     this.requestTimestamp = Date.now();
@@ -144,6 +143,7 @@
             },
             onActive() {
                 this.isActive = true;
+                this.$refs.groupSelect.parentElement.style.zIndex = 1;
                 this.onOpen()
             },
             async onOpen() {
@@ -156,6 +156,7 @@
                     this.model = (typeof this.currentGroup) == 'object' ? this.currentGroup.name : this.currentGroup;
                 }
                 this.isActive = false;
+                this.$refs.groupSelect.parentElement.style.zIndex = 0;
                 this.isSelectOpen = false;
                 this.observer.disconnect();
             },
@@ -264,7 +265,6 @@
                     return this.value;
                 },
                 set(option) {
-                    console.log(option);
                     this.$emit('input', option);
                 },
             },
@@ -336,15 +336,15 @@
                 right: 0;
             }
 
-            .vs__dropdown-menu {
-                position: relative;
-                max-width: 250px;
-            }
-
             .vs__open-indicator {
                 transform: none;
                 position: absolute;
                 right: 0;
+            }
+
+            .vs__no-options {
+                padding: 0;
+                font-family: inherit;
             }
         }
     }
@@ -368,5 +368,26 @@
             column-gap: 0.3rem;
             z-index: 2;
         }
+    }
+    
+    .no-option {
+        margin-top: 10px; 
+        cursor: pointer;
+        padding: 10px 0 10px 5px;
+        border: 1px solid;
+        opacity: .5;
+        transition: all 1s;
+        text-align: start;
+        line-height: 20px;
+        border-radius: 4px;
+            &:hover {
+                background: #000;
+                color: white;
+                opacity: 1;
+                transition: all 1s;
+            }
+            &::before {
+                margin-right: 5px;
+            }
     }
 </style>

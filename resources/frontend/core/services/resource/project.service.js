@@ -59,10 +59,6 @@ export default class ProjectService extends ResourceService {
         return axios.post(`projects/${isNew ? 'create' : 'edit'}`, data);
     }
 
-    updateGroup(data, id) {
-        return axios.patch(`projects/${id}/group/edit`, data);
-    }
-
     getMembers(id) {
         return axios.post('project-members/list', { project_id: id });
     }

@@ -14,6 +14,36 @@ function formatDateTime(value, timezone) {
     return date.locale(i18n.locale).format('MMMM D, YYYY — HH:mm:ss ([GMT]Z)');
 }
 
+function setParentGroup(data) {
+    if (
+        data.values._currentGroup == null
+        && (typeof data.currentValue?.id === 'number' 
+        || typeof data.currentValue?.id === 'string')
+    ) {
+        data.setValue('_currentGroup', data.currentValue);
+    }
+
+    let currentGroup = data.values._currentGroup || '';
+
+    let value = '';
+
+    if (
+        typeof data.currentValue === 'number' 
+        || typeof data.currentValue === 'string'
+    ) {
+        value = data.currentValue;
+        data.inputHandler(value);
+    } else if (
+        typeof data.currentValue?.id === 'number' 
+        || typeof data.currentValue?.id === 'string'
+    ) {
+        value = data.currentValue.id;
+        data.inputHandler(value);
+    }
+
+    return [currentGroup, value];
+}
+
 export function init(context, r) {
     const crud = context.createCrud('groups.crud-title', 'groups', ProjectGroupsService);
 
@@ -74,22 +104,7 @@ export function init(context, r) {
             label: 'field.parent_group',
             key: 'parent_id',
             render: (h, data) => {
-                if (
-                    data.values._currentGroup == null &&
-                    (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string')
-                ) {
-                    data.setValue('_currentGroup', data.currentValue);
-                }
-                let currentGroup = data.values._currentGroup || '';
-
-                let value = '';
-                if (typeof data.currentValue === 'number' || typeof data.currentValue === 'string') {
-                    value = data.currentValue;
-                    data.inputHandler(value);
-                } else if (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string') {
-                    value = data.currentValue.id;
-                    data.inputHandler(value);
-                }
+                let [currentGroup, value] = setParentGroup(data)
 
                 return h(Groups, {
                     props: {

@@ -7,7 +7,6 @@ use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\Project\DestroyProjectRequest;
 use App\Http\Requests\Project\ListProjectRequest;
 use App\Http\Requests\Project\ShowProjectRequest;
-use App\Http\Requests\Project\UpdateProjectGroupRequest;
 use Event;
 use Filter;
 use App\Models\Project;
@@ -354,61 +353,6 @@ class ProjectController extends ItemController
         Filter::listen(Filter::getActionFilterName(), static fn($data) => $data->load('statuses'));
 
         return $this->_edit($request);
-    }
-
-        /**
-     * @throws Throwable
-     * @api             {patch} /projects/:id/group/edit Edit
-     * @apiDescription  Edit Project
-     *
-     * @apiVersion      1.0.0
-     * @apiName         EditProjectGroup
-     * @apiGroup        Project
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   projects_edit
-     * @apiPermission   projects_full_access
-     *
-     * @apiParamExample {json} Request Example
-     *  {
-     *      "id": 1,
-     *      "group": "test",
-     *  }
-     *
-     * @apiParam {String}  id           Project id
-     * @apiParam {String}  group         Project group
-     *
-     * @apiSuccess {Object}   res      Response object
-     *
-     * @apiUse          ProjectObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  {
-     *    "res": {
-     *      "id": 1,
-     *      "company_id": 0,
-     *      "name": "Eos est amet sunt ut autem harum.",
-     *      "description": "Dolores rem et sed beatae architecto...",
-     *      "deleted_at": null,
-     *      "created_at": "2018-09-25 06:15:08",
-     *      "updated_at": "2018-09-25 06:15:08"
-     *      "group": 1,
-     *    }
-     *  }
-     *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ItemNotFoundError
-     */
-    public function updateGroup(UpdateProjectGroupRequest $request, Project $project): JsonResponse
-    {
-        $project->update([
-            'group' => $request->input('group'),
-        ]);
-
-        return responder()->success($project)->respond();
     }
 
     /**

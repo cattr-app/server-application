@@ -325,10 +325,14 @@ export function init(context) {
             title: 'field.group',
             key: 'group',
             render: (h, data) => {
-                let currentGroup = ref(data.item.group?.name || i18n.t('field.no_group_selected'));
+                let currentGroup = ref(
+                    {
+                        id: data.item.group?.id || '',
+                        name: data.item.group?.name || ''
+                    }
+                )
+                let value = ref(data.item.group?.name || '');
 
-                let value = ref(data.item.group?.name || i18n.t('field.no_group_selected'));
-                
                 return h(GroupSelect, {
                     props: {
                         value,
@@ -342,7 +346,12 @@ export function init(context) {
                         setCurrent(group) {
                             currentGroup.value = group;
 
-                            (new ProjectService).updateGroup({'group': group.id}, data.item.id);
+                            if (group !== '') {
+                                (new ProjectService).save({
+                                    'id': data.item.id,
+                                    'group': group.id
+                                });
+                            }
                         },
                         createGroup(group) {
                             value.value = group.name;
@@ -350,7 +359,11 @@ export function init(context) {
                                 id: group.id,
                                 name: group.name,
                             };
-                            (new ProjectService).updateGroup({'group': group.id}, data.item.id);
+
+                            (new ProjectService).save({
+                                'id': data.item.id,
+                                'group': group.id
+                            });
                         }
                     },
                 });
