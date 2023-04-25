@@ -69,6 +69,10 @@ deploy_prod:
     - ssh $CI_USER@$CI_HOST 'cd /mnt/hdd/services/cattr && docker compose pull'
     - ssh $CI_USER@$CI_HOST 'cd /mnt/hdd/services/cattr && docker compose up -d'
 
+container_scanning:
+  variables:
+    CS_IMAGE: '$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME'
+
 include:
   - template: Security/SAST.gitlab-ci.yml
   - template: Security/Dependency-Scanning.gitlab-ci.yml
