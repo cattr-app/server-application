@@ -108,7 +108,7 @@
                 <template v-for="(control, key) of pageControls">
                     <template v-if="checkWithCtx(control.renderCondition)">
                         <at-checkbox
-                            v-if="control.frontedType == 'checkbox'"
+                            v-if="control.frontedType === 'checkbox'"
                             :key="control.key"
                             v-model="values[control.key]"
                             class="crud__control-items__item"
