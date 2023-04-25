@@ -266,6 +266,7 @@
       "disabled": "Disabled"
     },
     "roles": {
+      "admin": "Admin",
       "any": "Any",
       "manager": "Manager",
       "user": "User",

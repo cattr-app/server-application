@@ -1,5 +1,11 @@
 <template>
-    <at-select v-if="roles.length > 0" ref="select" class="role-select" :value="value" @on-change="inputHandler">
+    <at-select
+        v-if="Object.keys(roles).length > 0"
+        ref="select"
+        class="role-select"
+        :value="value"
+        @on-change="inputHandler"
+    >
         <at-option v-for="(role, name) in roles" :key="role" :value="role" :label="$t('users.role.' + name)">
             <div>{{ $t(`users.role.${name}`) }}</div>
             <div class="role-select__description">

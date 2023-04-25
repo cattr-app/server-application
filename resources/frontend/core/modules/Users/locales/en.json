@@ -20,6 +20,7 @@
       "user": "User"
     },
     "roles-description": {
+      "admin": "Full access to everything",
       "manager": "Full access to tasks, projects, screenshot and all users' activity",
       "auditor": "Read access to projects, create and read access to all the tasks, access to all users activity",
       "user": "Read access to assigned projects, create and view tasks, view personal activity"
