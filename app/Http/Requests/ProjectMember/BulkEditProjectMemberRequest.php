@@ -2,9 +2,11 @@
 
 namespace App\Http\Requests\ProjectMember;
 
+use App\Enums\Role;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\Project;
+use Illuminate\Validation\Rules\Enum;
 
 class BulkEditProjectMemberRequest extends CattrFormRequest
 {
@@ -21,7 +23,7 @@ class BulkEditProjectMemberRequest extends CattrFormRequest
             'project_id' => 'required|int|exists:projects,id',
             'user_roles' => 'present|array',
             'user_roles.*.user_id' => 'required|distinct|int|exists:users,id',
-            'user_roles.*.role_id' => 'required|int|exists:role,id',
+            'user_roles.*.role_id' => ['required', new Enum(Role::class)],
         ];
     }
 }
