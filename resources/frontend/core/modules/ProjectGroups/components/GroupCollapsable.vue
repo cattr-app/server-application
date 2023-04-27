@@ -102,7 +102,6 @@
         
         .icon-external-link {
             font-size: 20px;
-            // position: absolute;
         }
 
         &__disabled {

@@ -35,9 +35,9 @@ class ProjectGroup extends Model
 
     protected const PERMISSIONS = ['update', 'destroy'];
 
-    public function groupParentsWithCountProjects(): AncestorsRelation
+    public function groupParents(): AncestorsRelation
     {
-        return $this->ancestors()->withCount('projects');
+        return $this->ancestors();
     }
 
     public function descendantsWithDepthAndProjectsCount(): DescendantsRelation

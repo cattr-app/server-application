@@ -102,7 +102,7 @@
                 };
 
                 if (this.query !== '') {
-                    filters.with.push('groupParentsWithCountProjects')
+                    filters.with.push('groupParents')
                 }
 
                 return this.service.getWithFilters(filters).then(({ data, pagination }) => {
@@ -117,7 +117,7 @@
                         this.currentPage = pagination.currentPage;
                         data.forEach(option => {
                             let breadCrumps = [];
-                            option.group_parents_with_count_projects.forEach((el) => {
+                            option.group_parents.forEach((el) => {
                                 breadCrumps.push({
                                     name : el.name,
                                     id : el.id
