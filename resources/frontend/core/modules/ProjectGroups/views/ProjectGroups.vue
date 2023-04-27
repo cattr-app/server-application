@@ -20,18 +20,15 @@
                     :groups="groups"
                     @getTargetClickGroupAndChildren="getTargetClickGroupAndChildren"
                 />
+                <div v-show="hasNextPage" ref="load" class="option__infinite-loader">
+                    {{ $i18n.t('field.loading_groups') }} <i class="icon icon-loader"></i>
+                </div>
             </div>
             <div v-else class="at-container__inner no-data">
                 <preloader v-if="isDataLoading" />
                 <span>{{ $t('message.no_data') }}</span>
             </div>
         </div>
-        <at-pagination
-            :total="groupsTotal"
-            :current="currentPage"
-            :page-size="limit"
-            @page-change="loadPage"
-        />
     </div>
 </template>
 
@@ -55,7 +52,7 @@
                 limit: 10,
                 service: new ProjectGroupsService(),
                 totalPages: 0,
-                currentPage: 1,
+                currentPage: 0,
                 query: '',
                 requestTimestamp: null,
             };
@@ -66,7 +63,7 @@
             this.search(this.requestTimestamp);
         },
         mounted() {
-            this.loadPage();
+            this.observer = new IntersectionObserver(this.infiniteScroll);
         },
         computed: {
             hasNextPage() {
@@ -74,6 +71,21 @@
             },
         },
         methods: {
+            async infiniteScroll([{ isIntersecting, target }]) {
+                if (isIntersecting) {
+                    const requestTimestamp = +target.dataset.requestTimestamp;
+
+                    if (requestTimestamp === this.requestTimestamp) {
+                        await this.loadOptions(requestTimestamp);
+
+                        await this.$nextTick();
+
+                        this.observer.disconnect();
+                        this.observe(requestTimestamp);
+                    }
+                }
+            },
+
             getSpaceByDepth: function (depth) {
                 return ''.padStart(depth, '-');
             },
@@ -83,21 +95,28 @@
 
                 this.search(this.requestTimestamp);
             },
-            async search() {
+            async search(requestTimestamp) {
+                this.observer.disconnect();
                 this.totalPages = 0;
                 this.currentPage = 0;
                 this.resetOptions();
                 this.lastSearchQuery = this.query;
                 await this.$nextTick();
-                await this.loadOptions();
+                await this.loadOptions(requestTimestamp);
                 await this.$nextTick();
+                this.observe(requestTimestamp);
+            },
+            observe(requestTimestamp) {
+                if (this.$refs.load) {
+                    this.$refs.load.dataset.requestTimestamp = requestTimestamp;
+                    this.observer.observe(this.$refs.load);
+                }
             },
             async loadOptions() {
-                this.isDataLoading = true;
                 const filters = {
                     search: { query: this.lastSearchQuery, fields: ['name'] },
                     with: [],
-                    page: this.currentPage,
+                    page: this.currentPage + 1,
                     limit: this.limit,
                 };
 
@@ -106,7 +125,6 @@
                 }
 
                 return this.service.getWithFilters(filters).then(({ data, pagination }) => {
-                    this.resetOptions()
                     this.groupsTotal = pagination.total
                     if (this.query == '') {
                         this.totalPages = pagination.totalPages;
@@ -131,14 +149,7 @@
                             this.groups.push(option);
                         });
                     }
-
-                    this.isDataLoading = false;
                 });
-
-            },
-            async loadPage(page) {
-                this.currentPage = page
-                await this.loadOptions()
             },
             resetOptions() {
                 this.groups = [];
