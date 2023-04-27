@@ -6,6 +6,7 @@ use App\Contracts\AttachmentAble;
 use App\Enums\AttachmentStatus;
 use App\Jobs\VerifyAttachmentHash;
 use App\Models\Attachment;
+use App\Models\Project;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Storage;
@@ -24,6 +25,48 @@ class AttachmentService implements \App\Contracts\AttachmentService
         return $file->storeAs(
             $this->getPath($attachment), ['disk' => $this::DISK]
         );
+    }
+
+    public function handleParentDeletion(AttachmentAble $parent): void
+    {
+        $self = $this;
+        $parent->attachmentsRelation()->lazyById()->each(static function (Attachment $attachment) use ($self) {
+            if (($fileExists = $self->fileExists($attachment)) && $self->deleteFile($attachment)) {
+                $attachment->deleteQuietly();
+            } elseif (!$fileExists) {
+                $attachment->deleteQuietly();
+            } else {
+                \Log::warning("Unable to delete attachment`s file", [
+                    'attachment_id' => $attachment->id,
+                    'attachmentable_id' => $attachment->attachmentable_id,
+                    'attachmentable_type' => $attachment->attachmentable_type,
+                    'attachment_project_id' => $attachment->project_id,
+                    'path' => $self->getPath($attachment)
+                ]);
+            }
+        });
+    }
+
+    public function handleProjectDeletion(Project $project): void
+    {
+        Attachment::whereProjectId($project->id)->delete();
+
+        if ($this->storage->directoryExists($this->getProjectPath($project)) && !$this->storage->deleteDirectory($this->getProjectPath($project))) {
+            \Log::warning("Unable to delete project's attachments directory", [
+                'project_id' => $project->id,
+                'path' => $this->getProjectPath($project)
+            ]);
+        }
+    }
+
+    public function fileExists(Attachment $attachment): bool
+    {
+        return $this->storage->exists($this->getPath($attachment));
+    }
+
+    private function deleteFile(Attachment $attachment): bool
+    {
+        return $this->storage->delete($this->getPath($attachment));
     }
 
     public function attach(AttachmentAble $parent, array $idsToAttach): void
@@ -45,6 +88,11 @@ class AttachmentService implements \App\Contracts\AttachmentService
                     VerifyAttachmentHash::dispatch($attachment)->afterCommit();
                 }
             });
+    }
+
+    public function getProjectPath(Project $project): string
+    {
+        return "projects/{$project->id}";
     }
 
     public function getPath(Attachment $attachment): string

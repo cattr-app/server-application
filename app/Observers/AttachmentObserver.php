@@ -6,6 +6,7 @@ use App\Contracts\AttachmentAble;
 use App\Contracts\AttachmentService;
 use App\Helpers\AttachmentHelper;
 use App\Models\Attachment;
+use App\Models\Project;
 
 class AttachmentObserver
 {
@@ -30,10 +31,12 @@ class AttachmentObserver
 
     public function parentDeleted(AttachmentAble $parent): void
     {
-//      TODO: [ ] delete
-        dump([
-            'deleted' => $parent
-        ]);
+        $this->service->handleParentDeletion($parent);
+    }
+
+    public function projectDeleted(Project $project): void
+    {
+        $this->service->handleProjectDeletion($project);
     }
 
     public function attachmentCreated(Attachment $attachment, array $requestData): void
@@ -46,7 +49,8 @@ class AttachmentObserver
     public function subscribe(): array
     {
         return array_merge([
-            'event.after.action.attachment.create' => [[__CLASS__, 'attachmentCreated']]
+            'event.after.action.attachment.create' => [[__CLASS__, 'attachmentCreated']],
+            'event.after.action.projects.destroy' => [[__CLASS__, 'projectDeleted']]
         ], AttachmentHelper::getEvents(
             parentCreated: [[__CLASS__, 'parentCreated']],
             parentUpdated: [[__CLASS__, 'parentUpdated']],
