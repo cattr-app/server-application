@@ -38,7 +38,7 @@ use Illuminate\Support\Carbon;
  * @method static QueryBuilder|Property withTrashed()
  * @method static QueryBuilder|Property withoutTrashed()
  * @mixin EloquentIdeHelper
- * @property-read Model|\Eloquent $entity
+ * @property-read Model|EloquentIdeHelper $entity
  */
 class Property extends Model
 {

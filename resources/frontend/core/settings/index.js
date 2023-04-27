@@ -1,5 +1,6 @@
-import Store from '../store';
+import { store } from '@/store';
 import { getModuleList, ModuleLoaderInterceptor } from '@/moduleLoader';
+import { hasRole } from '@/utils/user';
 
 /**
  * Initialising setting parent route
@@ -12,25 +13,25 @@ ModuleLoaderInterceptor.on('loaded', router => {
     const settingsModules = modules.filter(m => m.moduleInstance.routerPrefix === 'settings');
 
     function initSettingsSections(to, from, next) {
-        Store.dispatch('settings/clearSections');
+        store.dispatch('settings/clearSections');
         settingsModules.forEach(m => m.moduleInstance.initSettingsSections());
 
         next();
     }
 
     function initCompanySections(to, from, next) {
-        Store.dispatch('settings/clearSections');
+        store.dispatch('settings/clearSections');
         settingsModules.forEach(m => m.moduleInstance.initCompanySections());
 
-        if (!Object.keys(Store.getters['user/user']).length) {
-            Store.watch(
-                () => Store.getters['user/user'],
+        if (!Object.keys(store.getters['user/user']).length) {
+            store.watch(
+                () => store.getters['user/user'],
                 user => {
-                    return user.is_admin === 1 ? next() : next({ name: 'forbidden' });
+                    return hasRole(user, 'admin') ? next() : next({ name: 'forbidden' });
                 },
             );
         } else {
-            return Store.getters['user/user'].is_admin === 1 ? next() : next({ name: 'forbidden' });
+            return hasRole(store.getters['user/user'], 'admin') ? next() : next({ name: 'forbidden' });
         }
     }
 

@@ -11,19 +11,6 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Carbon;
 
 /**
- * @apiDefine StatusObject
- *
- * @apiSuccess {Integer}  status.id              ID
- * @apiSuccess {String}   status.name            Status name
- * @apiSuccess {Boolean}  status.active          Active status
- * @apiSuccess {String}   status.color           Color
- * @apiSuccess {ISO8601}  status.created_at      Creation DateTime
- * @apiSuccess {ISO8601}  status.updated_at      Update DateTime
- *
- * @apiVersion 1.0.0
- */
-
-/**
  * App\Models\Status
  *
  * @property int $id

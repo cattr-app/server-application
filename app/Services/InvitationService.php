@@ -4,7 +4,7 @@ namespace App\Services;
 
 use App\Models\Invitation;
 use Exception;
-use Uuid;
+use Str;
 
 class InvitationService
 {
@@ -24,7 +24,7 @@ class InvitationService
     {
         return Invitation::create([
             'email' => $user['email'],
-            'key' => Uuid::generate(),
+            'key' => Str::uuid(),
             'expires_at' => now()->addDays(self::EXPIRATION_TIME_IN_DAYS),
             'role_id' => $user['role_id']
         ]);
@@ -40,7 +40,7 @@ class InvitationService
     public static function update(int $id): ?Invitation
     {
         return tap(Invitation::find($id))->update([
-            'key' => Uuid::generate(),
+            'key' => Str::uuid(),
             'expires_at' => now()->addDays(self::EXPIRATION_TIME_IN_DAYS)
         ]);
     }

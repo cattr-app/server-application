@@ -4,7 +4,7 @@ import CoreUsersService from '@/services/resource/user.service';
 import RoleSelect from '@/components/RoleSelect';
 import Users from '../views/Users';
 import UsersService from '../services/user.service';
-import Store from '@/store';
+import { store } from '@/store';
 import LanguageSelector from '@/components/LanguageSelector';
 import i18n from '@/i18n';
 import Vue from 'vue';
@@ -45,7 +45,7 @@ export function fieldsToFillProvider() {
                 props.inputHandler(props.currentValue);
 
                 let isDisable = false;
-                const selfId = Store.getters['user/user'].id;
+                const selfId = store.getters['user/user'].id;
                 const userId = props.values.id;
                 if (selfId === userId) {
                     isDisable = !isDisable;
@@ -224,7 +224,7 @@ export default (context, router) => {
 
     crud.edit.addToMetaProperties('permissions', 'users/edit', crud.edit.getRouterConfig());
 
-    const grid = usersContext.createGrid('users.grid-title', 'users', CoreUsersService, { with: ['role'] });
+    const grid = usersContext.createGrid('users.grid-title', 'users', CoreUsersService);
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
     grid.addToMetaProperties('style', 'compact', grid.getRouterConfig());
     grid.addToMetaProperties('sortable', true, grid.getRouterConfig());
@@ -292,9 +292,12 @@ export default (context, router) => {
         },
         {
             label: 'field.role',
-            key: 'role',
+            key: 'role_id',
             render: (h, { currentValue }) => {
-                return h('span', i18n.t(`field.roles.${currentValue.name}`));
+                const roleName = Object.keys(store.getters['roles/roles']).find(
+                    el => store.getters['roles/roles'][el] === currentValue,
+                );
+                return h('span', i18n.t(`field.roles.${roleName}.name`));
             },
         },
         {
@@ -361,15 +364,15 @@ export default (context, router) => {
                     },
                     {
                         value: '1',
-                        label: 'field.roles.manager',
+                        label: 'field.roles.manager.name',
                     },
                     {
                         value: '2',
-                        label: 'field.roles.user',
+                        label: 'field.roles.user.name',
                     },
                     {
                         value: '3',
-                        label: 'field.roles.auditor',
+                        label: 'field.roles.auditor.name',
                     },
                 ],
             },
@@ -417,8 +420,10 @@ export default (context, router) => {
             title: 'field.role',
             key: 'role_id',
             render(h, { item }) {
-                const role = i18n.t('users.role.' + item.role_id);
-                return h('span', [role]);
+                const roleName = Object.keys(store.getters['roles/roles']).find(
+                    el => store.getters['roles/roles'][el] === item.role_id,
+                );
+                return h('span', i18n.t(`field.roles.${roleName}.name`));
             },
         },
         {

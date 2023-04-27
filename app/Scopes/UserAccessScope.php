@@ -3,7 +3,7 @@
 namespace App\Scopes;
 
 use App\Exceptions\Entities\AuthorizationException;
-use App\Models\Role;
+use App\Enums\Role;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -31,7 +31,7 @@ class UserAccessScope implements Scope
 
         throw_unless($user, new AuthorizationException);
 
-        if ($user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
+        if ($user->hasRole([Role::ADMIN, Role::MANAGER, Role::AUDITOR])) {
             return $builder;
         }
 
@@ -43,9 +43,9 @@ class UserAccessScope implements Scope
                     ->select('project_id')
                     ->where(static fn(Builder $builder) => $builder
                         ->where('user_id', $user->id)
-                        ->where('role_id', Role::getIdByName('manager')))
+                        ->where('role_id', Role::MANAGER->value))
                     ->orWhere(static fn(Builder $builder) => $builder
                         ->where('user_id', $user->id)
-                        ->where('role_id', Role::getIdByName('auditor')))));
+                        ->where('role_id', Role::AUDITOR->value))));
     }
 }

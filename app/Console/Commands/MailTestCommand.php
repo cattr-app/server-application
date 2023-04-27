@@ -6,7 +6,7 @@ use Illuminate\Console\Command;
 use Mail;
 use Symfony\Component\Console\Attribute\AsCommand;
 
-#[AsCommand(name: 'mail:test')]
+#[AsCommand(name: 'cattr:mail:test')]
 class MailTestCommand extends Command
 {
     /**

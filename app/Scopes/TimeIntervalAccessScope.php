@@ -2,8 +2,8 @@
 
 namespace App\Scopes;
 
+use App\Enums\Role;
 use App\Exceptions\Entities\AuthorizationException;
-use App\Models\Role;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Scope;
@@ -27,7 +27,7 @@ class TimeIntervalAccessScope implements Scope
 
         throw_unless($user, new AuthorizationException);
 
-        if ($user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
+        if ($user->hasRole([Role::ADMIN, Role::MANAGER, Role::AUDITOR])) {
             return $builder;
         }
 
@@ -35,9 +35,9 @@ class TimeIntervalAccessScope implements Scope
             ->where('time_intervals.user_id', $user->id)
             ->orWhereHas('task.project.users', static fn(Builder $builder) => $builder
                 ->where('projects_users.user_id', $user->id)
-                ->where('projects_users.role_id', Role::getIdByName('manager')))
+                ->where('projects_users.role_id', Role::MANAGER->value))
             ->orWhereHas('task.project.users', static fn(Builder $builder) => $builder
                 ->where('projects_users.user_id', $user->id)
-                ->where('projects_users.role_id', Role::getIdByName('auditor')));
+                ->where('projects_users.role_id', Role::AUDITOR->value));
     }
 }

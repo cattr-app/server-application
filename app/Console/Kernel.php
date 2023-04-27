@@ -23,26 +23,9 @@ class Kernel extends ConsoleKernel
         //
     ];
 
-    public function bootstrap(): void
+    public final function bootstrap(): void
     {
         parent::bootstrap();
-
-        if (env('IMAGE_VERSION')) {
-            configureScope(static function (Scope $scope): void {
-                $scope->setTag('docker', env('IMAGE_VERSION'));
-            });
-        }
-
-        if (auth()->check() && $user = auth()->user()) {
-            configureScope(static function (Scope $scope) use ($user): void {
-                $scope->setUser([
-                    'id' => $user->id,
-                    'email' => config('sentry.send_default_pii') ? $user->email : sha1($user->email),
-                    'is_admin' => $user->is_admin,
-                    'role' => $user->role->name,
-                ]);
-            });
-        }
     }
 
     /**

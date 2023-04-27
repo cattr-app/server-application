@@ -331,8 +331,8 @@
                 } catch ({ response }) {
                     if (
                         typeof response !== 'undefined' &&
-                        response.hasOwnProperty('data') &&
-                        response.data.hasOwnProperty('info')
+                        Object.prototype.hasOwnProperty.call(response, 'data') &&
+                        Object.prototype.hasOwnProperty.call(response.data, 'info')
                     ) {
                         this.$refs.form.setErrors(response.data.info);
                     }

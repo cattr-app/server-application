@@ -1,6 +1,6 @@
 import axios from '@/config/app';
 import SettingsService from '@/services/settings.service';
-import Store from '@/store';
+import { store } from '@/store';
 import i18n from '@/i18n';
 import moment from 'moment';
 
@@ -23,7 +23,7 @@ export default class AccountService extends SettingsService {
      * @returns {data}
      */
     getAll() {
-        let user = Store.getters['user/user'];
+        let user = store.getters['user/user'];
         if (Object.keys(user).length) {
             Promise.resolve().then(() => {
                 return {

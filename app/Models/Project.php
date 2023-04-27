@@ -20,22 +20,6 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
 
 /**
- * @apiDefine ProjectObject
- *
- * @apiSuccess {Integer}  project.id            ID
- * @apiSuccess {Integer}  [project.company_id]  Company ID
- * @apiSuccess {String}   project.name          Name
- * @apiSuccess {String}   project.description   Description of project
- * @apiSuccess {ISO8601}  project.created_at    Creation DateTime
- * @apiSuccess {ISO8601}  project.updated_at    Update DateTime
- * @apiSuccess {ISO8601}  project.deleted_at    Delete DateTime or `NULL` if wasn't deleted
- * @apiSuccess {Array}    [project.users]       Users attached to project
- * @apiSuccess {Array}    [project.tasks]       Tasks of project
- *
- * @apiVersion 1.0.0
- */
-
-/**
  * App\Models\Project
  *
  * @property int $id
@@ -50,7 +34,6 @@ use Illuminate\Support\Carbon;
  * @property int|null $default_priority_id
  * @property-read Priority|null $defaultPriority
  * @property-read array $can
- * @property-read Collection|Role[] $roles
  * @property-read int|null $roles_count
  * @property-read Collection|Status[] $statuses
  * @property-read int|null $statuses_count
@@ -149,11 +132,6 @@ class Project extends Model
             ->withPivot('role_id')
             ->using(ProjectUserPivot::class)
             ->withoutGlobalScopes();
-    }
-
-    public function roles(): BelongsToMany
-    {
-        return $this->belongsToMany(Role::class, 'projects_roles', 'project_id', 'role_id');
     }
 
     public function defaultPriority(): HasOne

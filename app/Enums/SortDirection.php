@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum SortDirection:string
+enum SortDirection: string
 {
     case ASC = 'asc';
     case DESC = 'desc';

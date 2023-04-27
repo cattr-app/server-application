@@ -11,6 +11,7 @@ use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
+use Illuminate\Support\Carbon;
 
 /**
  * Class TaskComment
@@ -19,13 +20,13 @@ use Illuminate\Database\Query\Builder as QueryBuilder;
  * @property int $task_id
  * @property int $user_id
  * @property string $content
- * @property \Illuminate\Support\Carbon|null $created_at
- * @property \Illuminate\Support\Carbon|null $updated_at
- * @property \Illuminate\Support\Carbon|null $deleted_at
- * @property-read Collection|\App\Models\Property[] $properties
+ * @property Carbon|null $created_at
+ * @property Carbon|null $updated_at
+ * @property Carbon|null $deleted_at
+ * @property-read Collection|Property[] $properties
  * @property-read int|null $properties_count
- * @property-read \App\Models\Task $task
- * @property-read \App\Models\User $user
+ * @property-read Task $task
+ * @property-read User $user
  * @method static EloquentBuilder|TaskComment newModelQuery()
  * @method static EloquentBuilder|TaskComment newQuery()
  * @method static QueryBuilder|TaskComment onlyTrashed()

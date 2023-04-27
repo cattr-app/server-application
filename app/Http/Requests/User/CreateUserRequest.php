@@ -2,12 +2,10 @@
 
 namespace App\Http\Requests\User;
 
+use App\Enums\Role;
 use App\Models\User;
-//use App\Presenters\User\OrdinaryUserPresenter;
 use App\Http\Requests\CattrFormRequest;
-use Illuminate\Contracts\Container\BindingResolutionException;
-use Illuminate\Http\Request;
-use Illuminate\Validation\ValidationException;
+use Illuminate\Validation\Rules\Enum;
 
 class CreateUserRequest extends CattrFormRequest
 {
@@ -30,7 +28,7 @@ class CreateUserRequest extends CattrFormRequest
             'screenshots_interval' => 'required|int|min:1|max:15',
             'computer_time_popup' => 'required|int|min:1',
             'timezone' => 'required|string',
-            'role_id' => 'required|int|exists:role,id',
+            'role_id' => ['required', new Enum(Role::class)],
             'type' => 'required|string',
             'web_and_app_monitoring' => 'sometimes|required|bool',
         ];

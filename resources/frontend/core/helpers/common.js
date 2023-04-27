@@ -19,7 +19,7 @@ export function loadSections(context, router, requireSection) {
         });
 
     sections.forEach(section => {
-        if (section.hasOwnProperty('scope') && section.scope === 'company') {
+        if (Object.prototype.hasOwnProperty.call(section, 'scope') && section.scope === 'company') {
             context.addCompanySection(section);
         } else {
             context.addSettingsSection(section);

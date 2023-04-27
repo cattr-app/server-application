@@ -2,11 +2,12 @@
 
 namespace App\Http\Middleware;
 
+use App\Enums\Role;
 use Closure;
-use Exception;
 use Illuminate\Http\Request;
 use Route;
 use Sentry\State\Scope;
+use Throwable;
 use function Sentry\configureScope;
 
 class SentryContext
@@ -32,8 +33,7 @@ class SentryContext
                 $scope->setUser([
                     'id' => $user->id,
                     'email' => config('sentry.send_default_pii') ? $user->email : sha1($user->email),
-                    'is_admin' => $user->is_admin,
-                    'role' => $user->role->name,
+                    'role' => is_int($user->role_id) ? Role::tryFrom($user->role_id)?->name :$user->role_id->name,
                 ]);
             });
         }
@@ -43,7 +43,7 @@ class SentryContext
             $scope->setTag('request.method', $request->method());
             try {
                 $scope->setTag('request.route', Route::getRoutes()->match($request)->getName());
-            } catch (Exception) {
+            } catch (Throwable) {
             }
         });
 

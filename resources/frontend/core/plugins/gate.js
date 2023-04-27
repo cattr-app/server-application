@@ -1,4 +1,4 @@
-import Store from '@/store';
+import { store } from '@/store';
 
 /**
  * Gate Class
@@ -18,11 +18,11 @@ class Gate {
      * @returns {boolean|*}
      */
     allow(action, type, model = null) {
-        if (!Store.state['policies']['policies'][type]) {
+        if (!store.state['policies']['policies'][type]) {
             throw new Error(`Cannot find policy ${type}`);
         }
 
-        return Store.state['policies']['policies'][type][action](this.user, model);
+        return store.state['policies']['policies'][type][action](this.user, model);
     }
 
     /**

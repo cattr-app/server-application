@@ -213,9 +213,8 @@ Route::group([
 
         //Role routes
         $router->any('roles/list', [RoleController::class, 'index'])
+            ->withoutMiddleware('auth:sanctum')
             ->name('roles.list');
-        $router->any('roles/count', [RoleController::class, 'count'])
-            ->name('roles.count');
 
         // Statistic routes
         $router->post('report/project', [ProjectReportController::class, '__invoke'])

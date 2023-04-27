@@ -47,7 +47,7 @@
                             <p v-else v-t="'about.no_modules'" />
                         </at-tab-pane>
                         <at-tab-pane
-                            v-if="$store.getters['user/user'].is_admin"
+                            v-if="isAdmin"
                             :label="$t('about.module_storage')"
                             class="storage"
                             name="about_storage"
@@ -68,9 +68,10 @@
 </template>
 
 <script>
-    import { Skeleton } from 'vue-loading-skeleton';
-    import semverGt from 'semver/functions/gt';
     import AboutService from '@/services/resource/about.service';
+    import { hasRole } from '@/utils/user';
+    import semverGt from 'semver/functions/gt';
+    import { Skeleton } from 'vue-loading-skeleton';
 
     const aboutService = new AboutService();
 
@@ -80,6 +81,11 @@
             StorageManagementTab: () =>
                 import(/* webpackChunkName: "StorageManagementTab" */ '@/components/StorageManagementTab'),
             Skeleton,
+        },
+        computed: {
+            isAdmin() {
+                return hasRole(this.$store.getters['user/user'], 'admin');
+            },
         },
         async mounted() {
             this.isLoading = true;
@@ -125,7 +131,7 @@
                         render: (h, params) =>
                             h('AtAlert', {
                                 props: {
-                                    message: params.item.hasOwnProperty('lastVersion')
+                                    message: Object.prototype.hasOwnProperty.call(params.item, 'lastVersion')
                                         ? semverGt(params.item.version, params.item.lastVersion)
                                             ? params.item.flashMessage
                                             : params.item.version === params.item.lastVersion
@@ -134,7 +140,7 @@
                                             ? this.$i18n.t('about.modules.vulnerable')
                                             : this.$i18n.t('about.modules.outdated')
                                         : this.$i18n.t('about.modules.ok'),
-                                    type: params.item.hasOwnProperty('lastVersion')
+                                    type: Object.prototype.hasOwnProperty.call(params.item, 'lastVersion')
                                         ? semverGt(params.item.version, params.item.lastVersion)
                                             ? 'info'
                                             : params.item.version === params.item.lastVersion

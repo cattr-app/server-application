@@ -23,45 +23,6 @@ use MatanYadaev\EloquentSpatial\Objects\Point;
 use MatanYadaev\EloquentSpatial\Traits\HasSpatial;
 
 /**
- * @apiDefine TimeIntervalObject
- *
- * @apiSuccess {Integer}  timeInterval.id              ID
- * @apiSuccess {Integer}  timeInterval.task_id         The ID of the linked task
- * @apiSuccess {Integer}  timeInterval.user_id         The ID of the linked user
- * @apiSuccess {String}   timeInterval.start_at        DateTime of interval beginning
- * @apiSuccess {String}   timeInterval.end_at          DateTime of interval ending
- * @apiSuccess {Integer}  timeInterval.activity_fill   Activity rate as a percentage
- * @apiSuccess {Integer}  timeInterval.mouse_fill      Time spent using the mouse as a percentage
- * @apiSuccess {Integer}  timeInterval.keyboard_fill   Time spent using the keyboard as a percentage
- * @apiSuccess {ISO8601}  timeInterval.created_at      Creation DateTime
- * @apiSuccess {ISO8601}  timeInterval.updated_at      Update DateTime
- * @apiSuccess {ISO8601}  timeInterval.deleted_at      Delete DateTime or `NULL` if wasn't deleted
- * @apiSuccess {Array}    timeInterval.screenshots     Screenshots of this interval
- * @apiSuccess {Object}   timeInterval.user            The user that time interval belongs to
- * @apiSuccess {Object}   timeInterval.task            The task that time interval belongs to
- *
- * @apiVersion 1.0.0
- */
-/**
- * @apiDefine TimeIntervalParams
- *
- * @apiParam {Integer}  [id]             ID
- * @apiParam {Integer}  [task_id]        The ID of the linked task
- * @apiParam {Integer}  [user_id]        The ID of the linked user
- * @apiParam {String}   [start_at]       DateTime of interval beginning
- * @apiParam {String}   [end_at]         DateTime of interval ending
- * @apiParam {Integer}  [activity_fill]  Activity rate as a percentage
- * @apiParam {Integer}  [mouse_fill]     Time spent using the mouse as a percentage
- * @apiParam {Integer}  [keyboard_fill]  Time spent using the keyboard as a percentage
- * @apiParam {ISO8601}  [created_at]     Creation DateTime
- * @apiParam {ISO8601}  [updated_at]     Update DateTime
- * @apiParam {ISO8601}  [deleted_at]     Delete DateTime
- *
- * @apiVersion 1.0.0
- */
-
-
-/**
  * App\Models\TimeInterval
  *
  * @property int $id
@@ -208,7 +169,9 @@ class TimeInterval extends Model
     public function hasScreenshot(): Attribute
     {
         return Attribute::make(
-            get: static fn ($value) => !$value || Storage::exists(app(ScreenshotService::class)->getScreenshotPath($value['id']))
+            get: static fn ($value) => !$value || Storage::exists(
+                app(ScreenshotService::class)->getScreenshotPath($value['id'])
+            )
         )->shouldCache();
     }
 

@@ -2,6 +2,7 @@
 
 namespace App\Scopes;
 
+use App\Enums\Role;
 use App\Exceptions\Entities\AuthorizationException;
 use Illuminate\Contracts\Database\Query\Builder;
 use Illuminate\Database\Eloquent\Model;
@@ -26,7 +27,7 @@ class ProjectAccessScope implements Scope
 
         throw_unless($user, new AuthorizationException);
 
-        if ($user->hasRole('admin') || $user->hasRole('manager') || $user->hasRole('auditor')) {
+        if ($user->hasRole([Role::ADMIN, Role::MANAGER, Role::AUDITOR])) {
             return $builder;
         }
 
