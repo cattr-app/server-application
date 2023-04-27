@@ -108,7 +108,7 @@
                 <template v-for="(control, key) of pageControls">
                     <template v-if="checkWithCtx(control.renderCondition)">
                         <at-checkbox
-                            v-if="control.frontedType == 'checkbox'"
+                            v-if="control.frontedType === 'checkbox'"
                             :key="control.key"
                             v-model="values[control.key]"
                             class="crud__control-items__item"
@@ -271,7 +271,7 @@
                 const filters = {};
                 const fieldsToSave = this.getFilterFieldKeys();
                 Object.keys(this.filterFieldsModel).forEach(field => {
-                    if (fieldsToSave.indexOf(field) !== -1 && typeof this.filterFieldsModel[field] !== undefined) {
+                    if (fieldsToSave.indexOf(field) !== -1 && typeof this.filterFieldsModel[field] !== 'undefined') {
                         filters[field] = this.filterFieldsModel[field];
                     }
                 });
@@ -293,7 +293,7 @@
             updateQueryParams() {
                 Object.keys(this.filterFieldsModel).forEach(field => {
                     if (
-                        typeof this.filterFieldsModel[field] !== undefined &&
+                        typeof this.filterFieldsModel[field] !== 'undefined' &&
                         this.filterFieldsModel[field].toString().length
                     ) {
                         const filter = this.filterFields.find(filter => filter.key === field);
@@ -376,7 +376,7 @@
                 }
 
                 try {
-                    const res = await this.service.getWithFilters(queryParams, { headers: { 'X-Paginate': true } });
+                    const res = await this.service.getWithFilters(queryParams, { headers: { 'X-Paginate': 'true' } });
                     const { data, pagination } = res.data;
 
                     this.totalItems = pagination.total;
@@ -704,6 +704,7 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
+
             &__item {
                 position: relative;
                 margin-right: 1rem;

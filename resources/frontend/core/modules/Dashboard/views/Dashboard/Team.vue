@@ -79,23 +79,23 @@
 </template>
 
 <script>
-    import moment from 'moment';
-    import throttle from 'lodash/throttle';
-    import { mapMutations, mapGetters } from 'vuex';
     import Calendar from '@/components/Calendar';
-    import UserSelect from '@/components/UserSelect';
+    import ExportDropdown from '@/components/ExportDropdown';
+    import Preloader from '@/components/Preloader';
     import ProjectSelect from '@/components/ProjectSelect';
-    import TeamSidebar from '../../components/TeamSidebar';
-    import TeamDayGraph from '../../components/TeamDayGraph';
-    import TeamTableGraph from '../../components/TeamTableGraph';
     import TimezonePicker from '@/components/TimezonePicker';
-    import DashboardReportService from '_internal/Dashboard/services/dashboard.service';
+    import UserSelect from '@/components/UserSelect';
     import ProjectService from '@/services/resource/project.service';
     import { getDateToday, getEndOfDayInTimezone, getStartOfDayInTimezone } from '@/utils/time';
-    import ExportDropdown from '@/components/ExportDropdown';
-    import TimeIntervalEdit from '../../components/TimeIntervalEdit';
+    import DashboardReportService from '_internal/Dashboard/services/dashboard.service';
     import cloneDeep from 'lodash/cloneDeep';
-    import Preloader from '@/components/Preloader';
+    import throttle from 'lodash/throttle';
+    import moment from 'moment';
+    import { mapGetters, mapMutations } from 'vuex';
+    import TeamDayGraph from '../../components/TeamDayGraph';
+    import TeamSidebar from '../../components/TeamSidebar';
+    import TeamTableGraph from '../../components/TeamTableGraph';
+    import TimeIntervalEdit from '../../components/TimeIntervalEdit';
 
     const updateInterval = 60 * 1000;
 
@@ -300,7 +300,7 @@
                 }
             },
             getWorked(userId) {
-                return this.intervals.hasOwnProperty(userId)
+                return Object.prototype.hasOwnProperty.call(this.intervals, userId)
                     ? this.intervals[userId].reduce((acc, el) => acc + el.durationAtSelectedPeriod, 0)
                     : 0;
             },

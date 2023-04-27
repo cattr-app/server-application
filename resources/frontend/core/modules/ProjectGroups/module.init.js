@@ -3,7 +3,6 @@ import Groups from '../Projects/components/Groups';
 import i18n from '@/i18n';
 import Vue, { h } from 'vue';
 
-
 export const ModuleConfig = {
     routerPrefix: 'project-groups',
     loadOrder: 20,
@@ -19,9 +18,9 @@ export function init(context) {
     const navigation = { edit: crudEditRoute, new: crudNewRoute };
     crud.new.addToMetaProperties('permissions', 'groups/create', crud.new.getRouterConfig());
     crud.new.addToMetaProperties('navigation', navigation, crud.new.getRouterConfig());
-    
+
     crud.edit.addToMetaProperties('permissions', 'groups/edit', crud.edit.getRouterConfig());
-    
+
     const fieldsToFill = [
         {
             key: 'id',
@@ -75,7 +74,6 @@ export function init(context) {
         },
     ];
 
-
     crud.new.addField(fieldsToFill);
     crud.edit.addField(fieldsToFill);
 
@@ -122,13 +120,13 @@ export function init(context) {
                     title: i18n.t('notification.record.delete.success.title'),
                     message: i18n.t('notification.record.delete.success.message'),
                 });
-                context.$router.push('/groups')
+                context.$router.push('/groups');
             },
-            renderCondition: ({ $can }, item) => {
-                return $can('delete', 'project-groups', item);
-            },
+            // renderCondition: ({ $can }, item) => {
+            //     return $can('delete', 'project-groups', item);
+            // },
         },
-    ])
+    ]);
 
     context.addRoute({
         path: '/groups',

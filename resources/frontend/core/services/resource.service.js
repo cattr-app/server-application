@@ -36,7 +36,7 @@ export default class ResourceService {
     }
 
     getOptionList() {
-        return this.getAll({ headers: { 'X-Paginate': false } }).then(({ data }) =>
+        return this.getAll({ headers: { 'X-Paginate': 'false' } }).then(({ data }) =>
             data.data.map(option => ({
                 value: option.id,
                 label: option[this.getOptionLabelKey()],

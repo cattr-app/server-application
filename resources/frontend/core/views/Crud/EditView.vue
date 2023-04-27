@@ -217,7 +217,11 @@
                     :parent="this"
                 />
                 <div class="control-items">
-                    <template v-if="pageData.bottomComponents.pageControls && pageData.bottomComponents.pageControls.length > 0">
+                    <template
+                        v-if="
+                            pageData.bottomComponents.pageControls && pageData.bottomComponents.pageControls.length > 0
+                        "
+                    >
                         <template v-for="(button, key) of pageData.bottomComponents.pageControls">
                             <at-button
                                 v-if="checkRenderCondition(button)"

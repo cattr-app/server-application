@@ -84,7 +84,7 @@ export default class DashboardService extends ReportService {
                 this.context.commit(
                     'setUsers',
                     this.context.state.users.map(u => {
-                        if (this.context.state.intervals.hasOwnProperty(u.id)) {
+                        if (Object.prototype.hasOwnProperty.call(this.context.state.intervals, u.id)) {
                             const lastInterval = this.context.state.intervals[u.id].slice(-1)[0];
 
                             if (
@@ -115,7 +115,7 @@ export default class DashboardService extends ReportService {
 
     loadUsers() {
         return this.userService
-            .getAll({ headers: { 'X-Paginate': false } })
+            .getAll({ headers: { 'X-Paginate': 'false' } })
             .then(response => {
                 this.context.commit('setUsers', response);
                 return response;

@@ -2,6 +2,7 @@
 
 namespace Database\Factories;
 
+use App\Enums\Role;
 use App\Models\Priority;
 use App\Models\Status;
 use App\Models\Task;
@@ -27,7 +28,7 @@ class TaskFactory extends Factory
         return [
             'task_name' => fake()->sentence(3),
             'description' => fake()->paragraph,
-            'assigned_by' => fn() => User::where(['is_admin' => 1])->first()->id,
+            'assigned_by' => fn() => User::where(['role_id' => Role::ADMIN])->first()->id,
             'important' => fake()->boolean,
             'priority_id' => Priority::inRandomOrder()->first()->id,
             'status_id' => Status::inRandomOrder()->first()->id,
