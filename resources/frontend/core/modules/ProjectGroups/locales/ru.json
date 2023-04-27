@@ -1,4 +1,8 @@
 {
+  "groups": {
+    "grid-title": "Группы",
+    "crud-title": "Группа"
+  },
   "navigation": {
     "project-groups": "Группы"
   },
@@ -10,6 +14,7 @@
   "field": {
     "project": "Проект",
     "members": "Участники",
-    "amount_of_tasks": "Кол-во задач"
+    "amount_of_tasks": "Кол-во задач",
+    "parent_group": "Родительская группа"
   }
 }

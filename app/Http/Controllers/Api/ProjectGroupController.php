@@ -42,7 +42,9 @@ class ProjectGroupController extends ItemController
 
         Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
 
-        $items = $itemsQuery->withDepth()->withCount('projects')->defaultOrder()->paginate($request->limit ? $request->limit : 2);
+        $itemsQuery->withDepth()->withCount('projects')->defaultOrder();
+        
+        $items = $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate($request->limit ? $request->limit : 2) : $itemsQuery->get();
 
         Filter::process(
             Filter::getActionFilterName(),
@@ -92,23 +94,18 @@ class ProjectGroupController extends ItemController
      */
     public function create(CreateProjectGroupRequest $request): JsonResponse
     {
-        $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
+        if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
+            Event::listen(
+                Filter::getAfterActionEventName(),
+                static function(ProjectGroup $group) use($parent_id) {
+                    $group->parent_id = $parent_id;
 
-        Event::dispatch(Filter::getBeforeActionEventName(), [$requestData]);
-        
-        /** @var Model $cls */
-        $cls = static::MODEL;
+                    return $group->save();
+                }
+            );
+        }
 
-        $parent_id = isset($requestData['parent_id']) ? $requestData['parent_id'] : null;
-
-        $item = Filter::process(
-            Filter::getActionFilterName(),
-            $cls::create($requestData, ProjectGroup::find($parent_id)),
-        );
-
-        Event::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
-
-        return responder()->success($item)->respond();
+        return $this->_create($request);
     }
 
     /**
@@ -132,34 +129,18 @@ class ProjectGroupController extends ItemController
      */
     public function edit(EditProjectGroupRequest $request): JsonResponse
     {
-        $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
-
-        throw_unless(is_int($request->get('id')), ValidationException::withMessages(['Invalid id']));
-
-        $itemsQuery = $this->getQuery();
-
-        /** @var Model $item */
-        $item = $itemsQuery->get()->collect()->firstWhere('id', $request->get('id'));
-
-        if (!$item) {
-            /** @var Model $cls */
-            $cls = static::MODEL;
-            throw_if($cls::find($request->get('id'))?->count(), new AccessDeniedHttpException());
-
-            throw new NotFoundHttpException;
+        if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
+            Event::listen(
+                Filter::getAfterActionEventName(),
+                static function(ProjectGroup $group) use($parent_id) {
+                    $group->parent_id = $parent_id;
+                    
+                    return $group->save();
+                }
+            );
         }
 
-        Event::dispatch(Filter::getBeforeActionEventName(), [$item, $requestData]);
-
-        $parent = isset($requestData['parent_id']) ? ProjectGroup::find($requestData['parent_id']) : null;
-
-        $item = Filter::process(Filter::getActionFilterName(), $item->fill($requestData)->parent()->associate($parent));
-
-        $item->save();
-
-        Event::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
-
-        return responder()->success($item)->respond();
+        return $this->_edit($request);
     }
 
     /**

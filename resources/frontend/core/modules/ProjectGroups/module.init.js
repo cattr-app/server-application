@@ -1,8 +1,7 @@
 import ProjectGroupsService from '@/services/resource/project-groups.service';
 import Groups from '../Projects/components/Groups';
-import moment from 'moment-timezone';
 import i18n from '@/i18n';
-import Vue from 'vue';
+import Vue, { h } from 'vue';
 
 
 export const ModuleConfig = {
@@ -10,12 +9,6 @@ export const ModuleConfig = {
     loadOrder: 20,
     moduleName: 'ProjectGroups',
 };
-
-function formatDateTime(value, timezone) {
-    const date = moment.tz(value, timezone || moment.tz.guess());
-    return date.locale(i18n.locale).format('MMMM D, YYYY — HH:mm:ss ([GMT]Z)');
-}
-
 
 export function init(context) {
     const crud = context.createCrud('groups.crud-title', 'groups', ProjectGroupsService);
@@ -86,10 +79,9 @@ export function init(context) {
     crud.new.addField(fieldsToFill);
     crud.edit.addField(fieldsToFill);
 
-    console.log(context);
     context.addRoute(crud.getRouterConfig());
 
-    crud.edit.addPageControls([
+    crud.edit.addPageControlsToBottom([
         {
             title: 'control.delete',
             type: 'error',
@@ -130,11 +122,11 @@ export function init(context) {
                     title: i18n.t('notification.record.delete.success.title'),
                     message: i18n.t('notification.record.delete.success.message'),
                 });
-
+                context.$router.push('/groups')
             },
-            // renderCondition: ({ $can }, item) => {
-            //     return $can('delete', 'project-groups', item);
-            // },
+            renderCondition: ({ $can }, item) => {
+                return $can('delete', 'project-groups', item);
+            },
         },
     ])
 

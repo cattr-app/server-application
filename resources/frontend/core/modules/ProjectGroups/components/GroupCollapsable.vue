@@ -10,10 +10,32 @@
                 <div slot="title">
                     <div class="groups__header">
                         <h5 :class="{ groups__disabled: group.projects_count === 0 }" class="groups__title">
-                            <span :class="{ groups__disabled: group.projects_count === 0 }" v-if="group.depth > 0" class="groups__depth">{{ getSpaceByDepth(group.depth) }}</span
-                            >{{ group.name }} ({{ group.projects_count }})
+                            <span 
+                                :class="{ groups__disabled: group.projects_count === 0 }"
+                                v-if="group.depth > 0"
+                                class="groups__depth"
+                            >
+                                {{ getSpaceByDepth(group.depth) }}
+                            </span>
+                            <span v-if="group.breadCrumps">
+                                <span
+                                    v-for="(breadCrump, index) in group.breadCrumps"
+                                    @click.stop="getTargetClickGroupAndChildren(breadCrump.id)"
+                                >
+                                    {{ breadCrump.name }} {{(group.breadCrumps.length -1) > index ? '/': ''}}
+                                </span>
+                                <span v-html="`(${group.projects_count})`" />
+                            </span>
+                            <span v-else v-html="`${group.name} (${group.projects_count})`"></span>
                         </h5>
-                        <a onclick="event.stopPropagation()" class="groups__title__link" :href="`/project-groups/edit/${group.id}`" target="_blank"><i class="icon icon-external-link"></i></a>
+                        <a 
+                            @click.stop 
+                            class="groups__title__link" 
+                            :href="`/project-groups/edit/${group.id}`"
+                            target="_blank"
+                        >
+                            <i class="icon icon-external-link" />
+                        </a>
                     </div>
                 </div>
                 <div v-if="group.projects_count > 0 && isOpen(index)" class="groups__projects-wrapper">
@@ -47,14 +69,18 @@
             },
         },
         methods: {
+            getTargetClickGroupAndChildren(id) {
+                console.log(id);
+                this.$emit('getTargetClickGroupAndChildren', id)
+            },
             getSpaceByDepth: function (depth) {
                 return ''.padStart(depth, '-');
             },
             changeHandler(event) {
                 this.opened = event;
             },
-            isOpen(id) {
-                return this.opened[0] === String(id);
+            isOpen(index) {
+                return this.opened[0] === String(index);
             },
             calculateProjectsCount(group) {
                 let count = group.projects_count;

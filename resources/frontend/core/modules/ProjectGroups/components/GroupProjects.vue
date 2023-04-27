@@ -1,11 +1,11 @@
 <template>
-    <div style="border: 1px solid grey">
+    <div>
         <h6 v-if="isDataLoading">{{ $t('message.loading_projects') }} <i class="icon icon-loader"></i></h6>
 
         <at-input
             v-model="query"
             type="text"
-            :placeholder="'type to find group'"
+            :placeholder="'type to find project'"
             class="projects__search col-6"
             @input="onSearch"
         >
@@ -17,7 +17,6 @@
         <div class="at-container">
             <div ref="tableWrapper" class="crud__table">
                 <at-table ref="table" size="large" :columns="columns" :data="projects" />
-                <!-- <preloader v-if="isDataLoading" class="preloader" :is-transparent="true" /> -->
             </div>
         </div>
 
@@ -26,7 +25,7 @@
             :current="page"
             :page-size="limit"
             @page-change="loadPage"
-        ></at-pagination>
+        />
     </div>
 </template>
 
@@ -103,7 +102,6 @@
             },
             async search(requestTimestamp) {
                 this.totalPages = 0;
-                this.currentPage = 0;
                 this.resetOptions();
                 this.lastSearchQuery = this.query;
                 await this.$nextTick();
@@ -121,7 +119,7 @@
                         query: this.lastSearchQuery,
                         fields: ['name'],
                     },
-                    page: this.currentPage + 1,
+                    page: this.page,
                 };
 
                 return this.service.getWithFilters(filters).then(({data, pagination = data.pagination}) => {
@@ -267,4 +265,12 @@
     };
 </script>
 
-<style lang="scss" scoped></style>
+<style lang="scss" scoped>
+    .projects__search {
+        margin-bottom: $spacing-03;
+    }
+    
+    .at-container {
+        margin-bottom: 1rem;
+    }
+</style>

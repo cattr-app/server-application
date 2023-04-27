@@ -10,25 +10,28 @@
             @input="onSearch"
         >
             <template slot="prepend">
-                <i class="icon icon-search"></i>
+                <i class="icon icon-search" />
             </template>
         </at-input>
 
         <div class="at-container">
             <div v-if="Object.keys(groups).length && !isDataLoading">
-                <GroupCollapsable :groups="groups" />
-                <at-pagination
-                    :total="groupsTotal"
-                    :current="currentPage"
-                    :page-size="limit"
-                    @page-change="loadPage"
-                ></at-pagination>
+                <GroupCollapsable
+                    :groups="groups"
+                    @getTargetClickGroupAndChildren="getTargetClickGroupAndChildren"
+                />
             </div>
             <div v-else class="at-container__inner no-data">
                 <preloader v-if="isDataLoading" />
                 <span>{{ $t('message.no_data') }}</span>
             </div>
         </div>
+        <at-pagination
+            :total="groupsTotal"
+            :current="currentPage"
+            :page-size="limit"
+            @page-change="loadPage"
+        />
     </div>
 </template>
 
@@ -80,7 +83,7 @@
 
                 this.search(this.requestTimestamp);
             },
-            async search(requestTimestamp) {
+            async search() {
                 this.totalPages = 0;
                 this.currentPage = 0;
                 this.resetOptions();
@@ -93,10 +96,14 @@
                 this.isDataLoading = true;
                 const filters = {
                     search: { query: this.lastSearchQuery, fields: ['name'] },
-                    with: ['parents'],
+                    with: [],
                     page: this.currentPage,
                     limit: this.limit,
                 };
+
+                if (this.query !== '') {
+                    filters.with.push('groupParentsWithCountProjects')
+                }
 
                 return this.service.getWithFilters(filters).then(({ data, pagination }) => {
                     this.resetOptions()
@@ -109,13 +116,18 @@
                         this.totalPages = pagination.totalPages;
                         this.currentPage = pagination.currentPage;
                         data.forEach(option => {
-                            let breadCrumps = '';
-                            option.parents.forEach((el) => {
-                                breadCrumps += el.name + ' / ';
-                                el.name = breadCrumps;
-                                this.groups.push(el);
+                            let breadCrumps = [];
+                            option.group_parents_with_count_projects.forEach((el) => {
+                                breadCrumps.push({
+                                    name : el.name,
+                                    id : el.id
+                                });
                             });
-                            option.name = breadCrumps + option.name;
+                            breadCrumps.push({
+                                name: option.name,
+                                id: option.id,
+                            });
+                            option.breadCrumps = breadCrumps;
                             this.groups.push(option);
                         });
                     }
@@ -131,6 +143,18 @@
             resetOptions() {
                 this.groups = [];
             },
+            getTargetClickGroupAndChildren(id) {
+                this.service.getWithFilters({
+                    where: {id},
+                    with: ['descendantsWithDepthAndProjectsCount']
+                }).then(({ data }) => {
+                    this.resetOptions();
+                    this.groups.push(data[0]);
+                    data[0].descendants_with_depth_and_projects_count.forEach(element => {
+                        this.groups.push(element);
+                    });
+                })
+            }
         },
     };
 </script>
@@ -149,6 +173,7 @@
         &::v-deep {
             .at-container {
                 overflow: hidden;
+                margin-bottom: 1rem;
             }
         }
     }

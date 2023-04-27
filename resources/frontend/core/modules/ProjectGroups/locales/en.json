@@ -1,4 +1,8 @@
 {
+  "groups": {
+    "grid-title": "Groups",
+    "crud-title": "Group"
+  },
   "navigation": {
     "project-groups": "Groups"
   },
@@ -10,6 +14,7 @@
   "field": {
     "project": "Project",
     "members": "Members",
-    "amount_of_tasks": "Amount of tasks"
+    "amount_of_tasks": "Amount of tasks",
+    "parent_group": "Parent group"
   }
 }
