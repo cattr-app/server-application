@@ -20,12 +20,7 @@
             </div>
         </div>
 
-        <at-pagination
-            :total="projectsTotal"
-            :current="page"
-            :page-size="limit"
-            @page-change="loadPage"
-        />
+        <at-pagination :total="projectsTotal" :current="page" :page-size="limit" @page-change="loadPage" />
     </div>
 </template>
 
@@ -74,8 +69,8 @@
                         where: {
                             group: ['in', [this.groupId]],
                         },
-                        with: ["users", "tasks", "can"],
-                        withCount: ["tasks"],
+                        with: ['users', 'tasks', 'can'],
+                        withCount: ['tasks'],
                         page: this.page,
                     });
 
@@ -113,8 +108,8 @@
                     where: {
                         group: ['in', [this.groupId]],
                     },
-                    with: ["users", "tasks", "can"],
-                    withCount: ["tasks"],
+                    with: ['users', 'tasks', 'can'],
+                    withCount: ['tasks'],
                     search: {
                         query: this.lastSearchQuery,
                         fields: ['name'],
@@ -122,7 +117,7 @@
                     page: this.page,
                 };
 
-                return this.service.getWithFilters(filters).then(({data, pagination = data.pagination}) => {
+                return this.service.getWithFilters(filters).then(({ data, pagination = data.pagination }) => {
                     if (requestTimestamp === this.requestTimestamp) {
                         this.totalPages = pagination.totalPages;
                         this.currentPage = pagination.currentPage;
@@ -166,7 +161,7 @@
                             );
                         },
                     },
-                ]
+                ];
 
                 const actions = [
                     {
@@ -179,8 +174,8 @@
                             return true;
                         },
                         style: {
-                            margin: '0 10px 0 0'
-                        }
+                            margin: '0 10px 0 0',
+                        },
                     },
                     {
                         title: 'projects.members',
@@ -192,8 +187,8 @@
                             return $can('updateMembers', 'project', item);
                         },
                         style: {
-                            margin: '0 10px 0 0'
-                        }
+                            margin: '0 10px 0 0',
+                        },
                     },
                     {
                         title: 'control.edit',
@@ -216,7 +211,7 @@
                             return $can('delete', 'project', item);
                         },
                     },
-                ]
+                ];
 
                 columns.push({
                     title: this.$t('field.actions'),
@@ -246,8 +241,8 @@
                                             },
                                             class: 'action-button',
                                             style: {
-                                                margin: '0 10px 0 0'
-                                            }
+                                                margin: '0 10px 0 0',
+                                            },
                                         },
                                         this.$t(item.title),
                                     );
@@ -261,7 +256,7 @@
 
                 return columns;
             },
-        }
+        },
     };
 </script>
 
@@ -269,7 +264,7 @@
     .projects__search {
         margin-bottom: $spacing-03;
     }
-    
+
     .at-container {
         margin-bottom: 1rem;
     }

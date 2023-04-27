@@ -13,6 +13,7 @@
             @search="onSearch"
             @option:selecting="handleSelecting"
         >
+            <!-- eslint-disable-next-line vue/no-unused-vars -->
             <template #option="{ id, label, depth, current }">
                 <span class="option" :class="{ 'option--current': current }">
                     <span class="option__text">

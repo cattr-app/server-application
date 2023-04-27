@@ -10,9 +10,9 @@
                 <div slot="title">
                     <div class="groups__header">
                         <h5 :class="{ groups__disabled: group.projects_count === 0 }" class="groups__title">
-                            <span 
-                                :class="{ groups__disabled: group.projects_count === 0 }"
+                            <span
                                 v-if="group.depth > 0"
+                                :class="{ groups__disabled: group.projects_count === 0 }"
                                 class="groups__depth"
                             >
                                 {{ getSpaceByDepth(group.depth) }}
@@ -20,19 +20,20 @@
                             <span v-if="group.breadCrumps">
                                 <span
                                     v-for="(breadCrump, index) in group.breadCrumps"
+                                    :key="index"
                                     @click.stop="getTargetClickGroupAndChildren(breadCrump.id)"
                                 >
-                                    {{ breadCrump.name }} {{(group.breadCrumps.length -1) > index ? '/': ''}}
+                                    {{ breadCrump.name }} {{ group.breadCrumps.length - 1 > index ? '/' : '' }}
                                 </span>
                                 <span v-html="`(${group.projects_count})`" />
                             </span>
                             <span v-else v-html="`${group.name} (${group.projects_count})`"></span>
                         </h5>
-                        <a 
-                            @click.stop 
-                            class="groups__title__link" 
+                        <a
+                            class="groups__title__link"
                             :href="`/project-groups/edit/${group.id}`"
                             target="_blank"
+                            @click.stop
                         >
                             <i class="icon icon-external-link" />
                         </a>
@@ -71,7 +72,7 @@
         methods: {
             getTargetClickGroupAndChildren(id) {
                 console.log(id);
-                this.$emit('getTargetClickGroupAndChildren', id)
+                this.$emit('getTargetClickGroupAndChildren', id);
             },
             getSpaceByDepth: function (depth) {
                 return ''.padStart(depth, '-');
@@ -95,11 +96,10 @@
 
 <style lang="scss" scoped>
     .groups {
-
         &__title {
             display: inline-block;
         }
-        
+
         .icon-external-link {
             font-size: 20px;
         }

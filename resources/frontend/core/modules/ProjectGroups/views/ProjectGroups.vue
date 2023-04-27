@@ -16,10 +16,7 @@
 
         <div class="at-container">
             <div v-if="Object.keys(groups).length && !isDataLoading">
-                <GroupCollapsable
-                    :groups="groups"
-                    @getTargetClickGroupAndChildren="getTargetClickGroupAndChildren"
-                />
+                <GroupCollapsable :groups="groups" @getTargetClickGroupAndChildren="getTargetClickGroupAndChildren" />
                 <div v-show="hasNextPage" ref="load" class="option__infinite-loader">
                     {{ $i18n.t('field.loading_groups') }} <i class="icon icon-loader"></i>
                 </div>
@@ -121,11 +118,11 @@
                 };
 
                 if (this.query !== '') {
-                    filters.with.push('groupParents')
+                    filters.with.push('groupParents');
                 }
 
                 return this.service.getWithFilters(filters).then(({ data, pagination }) => {
-                    this.groupsTotal = pagination.total
+                    this.groupsTotal = pagination.total;
                     if (this.query == '') {
                         this.totalPages = pagination.totalPages;
                         this.currentPage = pagination.currentPage;
@@ -135,10 +132,10 @@
                         this.currentPage = pagination.currentPage;
                         data.forEach(option => {
                             let breadCrumps = [];
-                            option.group_parents.forEach((el) => {
+                            option.group_parents.forEach(el => {
                                 breadCrumps.push({
-                                    name : el.name,
-                                    id : el.id
+                                    name: el.name,
+                                    id: el.id,
                                 });
                             });
                             breadCrumps.push({
@@ -155,17 +152,19 @@
                 this.groups = [];
             },
             getTargetClickGroupAndChildren(id) {
-                this.service.getWithFilters({
-                    where: {id},
-                    with: ['descendantsWithDepthAndProjectsCount']
-                }).then(({ data }) => {
-                    this.resetOptions();
-                    this.groups.push(data[0]);
-                    data[0].descendants_with_depth_and_projects_count.forEach(element => {
-                        this.groups.push(element);
+                this.service
+                    .getWithFilters({
+                        where: { id },
+                        with: ['descendantsWithDepthAndProjectsCount'],
+                    })
+                    .then(({ data }) => {
+                        this.resetOptions();
+                        this.groups.push(data[0]);
+                        data[0].descendants_with_depth_and_projects_count.forEach(element => {
+                            this.groups.push(element);
+                        });
                     });
-                })
-            }
+            },
         },
     };
 </script>
