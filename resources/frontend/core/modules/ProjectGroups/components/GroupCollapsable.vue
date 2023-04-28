@@ -71,7 +71,6 @@
         },
         methods: {
             getTargetClickGroupAndChildren(id) {
-                console.log(id);
                 this.$emit('getTargetClickGroupAndChildren', id);
             },
             getSpaceByDepth: function (depth) {

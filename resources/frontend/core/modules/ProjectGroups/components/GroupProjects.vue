@@ -59,7 +59,6 @@
         },
         methods: {
             async loadPage(page) {
-                console.log(2);
                 this.page = page;
                 await this.loadOptions();
             },
