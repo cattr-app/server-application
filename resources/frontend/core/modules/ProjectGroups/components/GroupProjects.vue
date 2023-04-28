@@ -57,37 +57,11 @@
             this.requestTimestamp = Date.now();
             this.search(this.requestTimestamp);
         },
-        mounted() {
-            this.loadProjects();
-        },
         methods: {
-            async loadProjects() {
-                this.isDataLoading = true;
-
-                try {
-                    const response = await this.service.getWithFilters({
-                        where: {
-                            group: ['in', [this.groupId]],
-                        },
-                        with: ['users', 'tasks', 'can'],
-                        withCount: ['tasks'],
-                        page: this.page,
-                    });
-
-                    this.projectsTotal = response.data.pagination.total;
-
-                    this.projects = response.data.data;
-                } catch ({ response }) {
-                    if (process.env.NODE_ENV === 'development') {
-                        console.warn(response ? response : 'request to resource is canceled');
-                    }
-                }
-
-                this.isDataLoading = false;
-            },
             async loadPage(page) {
+                console.log(2);
                 this.page = page;
-                await this.loadProjects();
+                await this.loadOptions();
             },
             onSearch() {
                 this.search.cancel();
