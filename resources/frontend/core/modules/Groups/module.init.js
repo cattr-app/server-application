@@ -3,11 +3,10 @@ import Groups from '../Projects/components/Groups';
 import moment from 'moment-timezone';
 import i18n from '@/i18n';
 
-
 export const ModuleConfig = {
     routerPrefix: 'groups',
     moduleName: 'Groups',
-}
+};
 
 function formatDateTime(value, timezone) {
     const date = moment.tz(value, timezone || moment.tz.guess());
@@ -16,9 +15,8 @@ function formatDateTime(value, timezone) {
 
 function setParentGroup(data) {
     if (
-        data.values._currentGroup == null
-        && (typeof data.currentValue?.id === 'number' 
-        || typeof data.currentValue?.id === 'string')
+        data.values._currentGroup == null &&
+        (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string')
     ) {
         data.setValue('_currentGroup', data.currentValue);
     }
@@ -27,16 +25,10 @@ function setParentGroup(data) {
 
     let value = '';
 
-    if (
-        typeof data.currentValue === 'number' 
-        || typeof data.currentValue === 'string'
-    ) {
+    if (typeof data.currentValue === 'number' || typeof data.currentValue === 'string') {
         value = data.currentValue;
         data.inputHandler(value);
-    } else if (
-        typeof data.currentValue?.id === 'number' 
-        || typeof data.currentValue?.id === 'string'
-    ) {
+    } else if (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string') {
         value = data.currentValue.id;
         data.inputHandler(value);
     }
@@ -84,7 +76,6 @@ export function init(context, r) {
         {
             label: 'field.parent_group',
             key: 'parent_group_id',
-            
         },
     ];
 
@@ -104,7 +95,7 @@ export function init(context, r) {
             label: 'field.parent_group',
             key: 'parent_id',
             render: (h, data) => {
-                let [currentGroup, value] = setParentGroup(data)
+                let [currentGroup, value] = setParentGroup(data);
 
                 return h(Groups, {
                     props: {

@@ -7,7 +7,7 @@ import PrioritySelect from '@/components/PrioritySelect';
 import TeamAvatars from '@/components/TeamAvatars';
 import Statuses from './components/Statuses';
 import Groups from './components/Groups';
-import GroupSelect from '@/components/GroupSelect'
+import GroupSelect from '@/components/GroupSelect';
 import { ref } from 'vue';
 
 export const ModuleConfig = {
@@ -325,12 +325,11 @@ export function init(context) {
             title: 'field.group',
             key: 'group',
             render: (h, data) => {
-                let currentGroup = ref(
-                    {
-                        id: data.item.group?.id || '',
-                        name: data.item.group?.name || ''
-                    }
-                )
+                let currentGroup = ref({
+                    id: data.item.group?.id || '',
+                    name: data.item.group?.name || '',
+                });
+
                 let value = ref(data.item.group?.name || '');
 
                 return h(GroupSelect, {
@@ -347,9 +346,9 @@ export function init(context) {
                             currentGroup.value = group;
 
                             if (group !== '') {
-                                (new ProjectService).save({
-                                    'id': data.item.id,
-                                    'group': group.id
+                                new ProjectService().save({
+                                    id: data.item.id,
+                                    group: group.id,
                                 });
                             }
                         },
@@ -360,11 +359,11 @@ export function init(context) {
                                 name: group.name,
                             };
 
-                            (new ProjectService).save({
-                                'id': data.item.id,
-                                'group': group.id
+                            new ProjectService().save({
+                                id: data.item.id,
+                                group: group.id,
                             });
-                        }
+                        },
                     },
                 });
             },

@@ -1,5 +1,5 @@
 <template>
-    <div @click="onActive" class="group-select" ref="groupSelect">
+    <div ref="groupSelect" class="group-select" @click="onActive">
         <div v-if="isActive != true">{{ model == '' ? $t('field.no_group_selected') : model }}</div>
         <v-select
             v-else
@@ -15,6 +15,7 @@
             @search="onSearch"
             @option:selecting="handleSelecting"
         >
+            <!-- eslint-disable-next-line vue/no-unused-vars -->
             <template #option="{ id, label, depth, current }">
                 <span class="option" :class="{ 'option--current': current }">
                     <span class="option__text">
@@ -30,21 +31,20 @@
                 </template>
                 <em v-else v-html="$t('field.no_groups_found', { query: `<em>${search}</em>` })"></em>
                 <template>
-                    <div @click="createGroup" class="no-option icon icon-plus-circle">
+                    <div class="no-option icon icon-plus-circle" @click="createGroup">
                         <span class="no-option__text">
                             <span v-html="$t('field.fast_create_group', { query: `<em>${search}</em>` })"></span>
                         </span>
                     </div>
                 </template>
                 <template>
-                    <div @click="toCreateGroup" class="no-option icon icon-plus-circle">
+                    <div class="no-option icon icon-plus-circle" @click="toCreateGroup">
                         <span class="no-option__text">
                             <span v-html="$t('field.to_create_group', { query: `<em>${search}</em>` })"></span>
                         </span>
                     </div>
                 </template>
             </template>
-            
 
             <template #list-footer>
                 <li v-show="hasNextPage" ref="load" class="option__infinite-loader">
@@ -128,7 +128,7 @@
                 this.$router.push('/groups/new');
             },
             createGroup() {
-                this.service.save({'name': this.query}, true).then(({ data }) => {
+                this.service.save({ name: this.query }, true).then(({ data }) => {
                     this.$emit('createGroup', {
                         id: data.data.id,
                         name: data.data.name,
@@ -144,7 +144,7 @@
             onActive() {
                 this.isActive = true;
                 this.$refs.groupSelect.parentElement.style.zIndex = 1;
-                this.onOpen()
+                this.onOpen();
             },
             async onOpen() {
                 this.isSelectOpen = true;
@@ -153,8 +153,9 @@
             },
             onClose() {
                 if (this.model == null) {
-                    this.model = (typeof this.currentGroup) == 'object' ? this.currentGroup.name : this.currentGroup;
+                    this.model = typeof this.currentGroup == 'object' ? this.currentGroup.name : this.currentGroup;
                 }
+
                 this.isActive = false;
                 this.$refs.groupSelect.parentElement.style.zIndex = 0;
                 this.isSelectOpen = false;
@@ -369,25 +370,25 @@
             z-index: 2;
         }
     }
-    
+
     .no-option {
-        margin-top: 10px; 
+        margin-top: 10px;
         cursor: pointer;
         padding: 10px 0 10px 5px;
         border: 1px solid;
-        opacity: .5;
+        opacity: 0.5;
         transition: all 1s;
         text-align: start;
         line-height: 20px;
         border-radius: 4px;
-            &:hover {
-                background: #000;
-                color: white;
-                opacity: 1;
-                transition: all 1s;
-            }
-            &::before {
-                margin-right: 5px;
-            }
+        &:hover {
+            background: #000;
+            color: white;
+            opacity: 1;
+            transition: all 1s;
+        }
+        &::before {
+            margin-right: 5px;
+        }
     }
 </style>
