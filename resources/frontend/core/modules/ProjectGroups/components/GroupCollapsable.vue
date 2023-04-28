@@ -25,9 +25,9 @@
                                 >
                                     {{ breadCrump.name }} {{ group.breadCrumps.length - 1 > index ? '/' : '' }}
                                 </span>
-                                <span v-html="`(${group.projects_count})`" />
+                                <span>({{ group.projects_count }})</span>
                             </span>
-                            <span v-else v-html="`${group.name} (${group.projects_count})`"></span>
+                            <span v-else>{{ group.name + ' (' + group.projects_count + ')' }}</span>
                         </h5>
                         <a
                             class="groups__title__link"
