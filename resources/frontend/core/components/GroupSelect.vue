@@ -27,20 +27,20 @@
 
             <template #no-options="{ search, searching }">
                 <template v-if="searching">
-                    <span v-html="$t('field.no_groups_found', { query: `<em>${search}</em>` })"></span>
+                    <span>{{ $t('field.no_groups_found', { query: search }) }}</span>
                 </template>
-                <em v-else v-html="$t('field.no_groups_found', { query: `<em>${search}</em>` })"></em>
+                <em v-else>{{ $t('field.no_groups_found', { query: search }) }}</em>
                 <template>
                     <div class="no-option icon icon-plus-circle" @click="createGroup">
                         <span class="no-option__text">
-                            <span v-html="$t('field.fast_create_group', { query: `<em>${search}</em>` })"></span>
+                            <span>{{ $t('field.fast_create_group', { query: search }) }}</span>
                         </span>
                     </div>
                 </template>
                 <template>
                     <div class="no-option icon icon-plus-circle" @click="toCreateGroup">
                         <span class="no-option__text">
-                            <span v-html="$t('field.to_create_group', { query: `<em>${search}</em>` })"></span>
+                            <span>{{ $t('field.to_create_group', { query: search }) }}</span>
                         </span>
                     </div>
                 </template>
@@ -48,7 +48,7 @@
 
             <template #list-footer>
                 <li v-show="hasNextPage" ref="load" class="option__infinite-loader">
-                    {{ $i18n.t('field.loading_groups') }} <i class="icon icon-loader"></i>
+                    {{ $t('field.loading_groups') }} <i class="icon icon-loader"></i>
                 </li>
             </template>
         </v-select>

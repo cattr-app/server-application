@@ -25,14 +25,14 @@
 
             <template #no-options="{ search, searching }">
                 <template v-if="searching">
-                    <span v-html="$t('field.no_groups_found', { query: `<em>${search}</em>` })"></span>
+                    <span>{{ $t('field.no_groups_found', { query: search }) }}</span>
                 </template>
-                <em v-else style="opacity: 0.5">{{ $t('field.type_to_search_for_group') }}</em>
+                <em v-else>{{ $t('field.no_groups_found', { query: search }) }}</em>
             </template>
 
             <template #list-footer>
                 <li v-show="hasNextPage" ref="load" class="option__infinite-loader">
-                    {{ $i18n.t('field.loading_groups') }} <i class="icon icon-loader"></i>
+                    {{ $t('field.loading_groups') }} <i class="icon icon-loader"></i>
                 </li>
             </template>
         </v-select>
