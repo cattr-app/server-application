@@ -60,7 +60,7 @@ const showNextModal = () => {
 
         const options = currentModal.options;
         for (const prop in options) {
-            if (options.hasOwnProperty(prop)) {
+            if (Object.prototype.hasOwnProperty.call(options, prop)) {
                 instance[prop] = options[prop];
             }
         }

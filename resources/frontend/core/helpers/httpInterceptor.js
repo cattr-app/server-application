@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import axios from 'axios';
-import store from '@/store';
+import { store } from '@/store';
 import has from 'lodash/has';
 
 // Queue for pending queries

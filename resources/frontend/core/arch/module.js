@@ -3,7 +3,7 @@ import Crud from './builder/crud';
 import NavbarEntry from './builder/navbar';
 import SettingsSection from './builder/sections';
 import isObject from 'lodash/isObject';
-import Store from '@/store';
+import { store } from '@/store';
 
 /**
  * Module class. This class represents the context of a module in module.init.js -> init() function.
@@ -33,7 +33,7 @@ export default class Module {
      * @returns {Module}
      */
     addLocaleCode(code, label) {
-        Store.dispatch('lang/setLang', { code, label });
+        store.dispatch('lang/setLang', { code, label });
 
         return this;
     }
@@ -49,9 +49,9 @@ export default class Module {
             throw new Error('Vuex Module must be an object.');
         }
 
-        Store.registerModule(this.moduleName.toLowerCase(), { ...vuexModule, namespaced: true });
+        store.registerModule(this.moduleName.toLowerCase(), { ...vuexModule, namespaced: true });
 
-        Store.dispatch(`${this.moduleName.toLowerCase()}/init`);
+        store.dispatch(`${this.moduleName.toLowerCase()}/init`);
         return this;
     }
 
@@ -109,7 +109,9 @@ export default class Module {
                 new NavbarEntry({
                     label: p.label,
                     to: p.to,
-                    displayCondition: p.hasOwnProperty('displayCondition') ? p.displayCondition : () => true,
+                    displayCondition: Object.prototype.hasOwnProperty.call(p, 'displayCondition')
+                        ? p.displayCondition
+                        : () => true,
                 }),
             );
         });
@@ -120,14 +122,16 @@ export default class Module {
      */
     addNavbarEntryDropDown(...args) {
         Array.from(args).forEach(p => {
-            if (!this.navEntriesDropdown.hasOwnProperty(p.section)) {
+            if (!Object.prototype.hasOwnProperty.call(this.navEntriesDropdown, p.section)) {
                 this.navEntriesDropdown[p.section] = [];
             }
             this.navEntriesDropdown[p.section].push(
                 new NavbarEntry({
                     label: p.label,
                     to: p.to,
-                    displayCondition: p.hasOwnProperty('displayCondition') ? p.displayCondition : () => true,
+                    displayCondition: Object.prototype.hasOwnProperty.call(p, 'displayCondition')
+                        ? p.displayCondition
+                        : () => true,
                     section: p.section,
                 }),
             );
@@ -143,7 +147,9 @@ export default class Module {
                 new NavbarEntry({
                     label: a.label,
                     to: a.to,
-                    displayCondition: a.hasOwnProperty('displayCondition') ? a.displayCondition : () => true,
+                    displayCondition: Object.prototype.hasOwnProperty.call(a, 'displayCondition')
+                        ? a.displayCondition
+                        : () => true,
                     icon: a.icon,
                 }),
             );
@@ -198,7 +204,7 @@ export default class Module {
         this.additionalFields
             .filter(({ scope }) => scope === 'settings')
             .forEach(({ scope, path, field }) => {
-                Store.dispatch('settings/addField', { scope, path, field });
+                store.dispatch('settings/addField', { scope, path, field });
             });
 
         return this.settingsSections.map(s => s.initSection());
@@ -212,7 +218,7 @@ export default class Module {
         this.additionalFields
             .filter(({ scope }) => scope === 'company')
             .forEach(({ scope, path, field }) => {
-                Store.dispatch('settings/addField', { scope, path, field });
+                store.dispatch('settings/addField', { scope, path, field });
             });
 
         return this.companySections.map(s => s.initSection());

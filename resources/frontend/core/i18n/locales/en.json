@@ -266,10 +266,23 @@
       "disabled": "Disabled"
     },
     "roles": {
-      "any": "Any",
-      "manager": "Manager",
-      "user": "User",
-      "auditor": "Auditor"
+      "admin": {
+        "name": "Admin",
+        "description": "Full access to everything"
+      },
+      "manager": {
+        "name": "Manager",
+        "description": "Full access to tasks, projects, screenshot and all users' activity"
+      },
+      "auditor": {
+        "name": "Auditor",
+        "description": "Read access to projects, create and read access to all the tasks, access to all users activity"
+      },
+      "user": {
+        "name": "User",
+        "description": "Read access to assigned projects, create and view tasks, view personal activity"
+      },
+      "any": "Any"
     },
     "type": "Type",
     "types": {

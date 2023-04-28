@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Enums\Role;
+use App\Http\Requests\Status\DestroyStatusRequest;
 use App\Http\Requests\TaskComment\CreateTaskCommentRequest;
 use App\Http\Requests\TaskComment\DestroyTaskCommentRequest;
 use App\Http\Requests\TaskComment\ListTaskCommentRequest;
@@ -134,7 +135,7 @@ class TaskCommentController extends ItemController
 
         Filter::listen(
             Filter::getQueryFilterName(),
-            static fn($query) => $user->hasRole(Role::ADMIN) || $user->hasRole(Role::MANAGER) ? $query :
+            static fn($query) => $user->hasRole([Role::ADMIN, Role::MANAGER]) ? $query :
                 $query->where(['user_id' => $user->id])
                     ->whereHas('task', static fn($taskQuery) => $taskQuery->where(['user_id' => $user->id]))
         );

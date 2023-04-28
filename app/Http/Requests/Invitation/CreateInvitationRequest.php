@@ -2,8 +2,10 @@
 
 namespace App\Http\Requests\Invitation;
 
+use App\Enums\Role;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\Invitation;
+use Illuminate\Validation\Rules\Enum;
 
 class CreateInvitationRequest extends CattrFormRequest
 {
@@ -27,7 +29,7 @@ class CreateInvitationRequest extends CattrFormRequest
         return [
             'users' => 'required|array',
             'users.*.email' => 'required|email|unique:users,email|unique:invitations,email',
-            'users.*.role_id' => 'required|exists:role,id'
+            'users.*.role_id' => ['required', new Enum(Role::class)],
         ];
     }
 

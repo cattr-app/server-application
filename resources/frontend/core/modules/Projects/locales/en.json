@@ -39,5 +39,10 @@
   },
   "control": {
     "task-list": "Task List"
+  },
+  "project-roles-description": {
+    "auditor": "Read access to assigned projects, create and view all the assigned project's tasks, view all the project users' activity",
+    "manager": "Full access to assigned projects, full access to project's tasks, view all the project users' activity",
+    "user": "Read access to assigned projects, view all the assigned project's tasks, view personal activity"
   }
 }

@@ -1,10 +1,20 @@
 <template>
-    <at-select v-if="roles.length > 0" ref="select" class="role-select" :value="value" @on-change="inputHandler">
-        <at-option v-for="(role, index) in roles" :key="index" :value="role.id" :label="$t('users.role.' + role.name)">
-            <div>{{ $t('users.role.' + role.name) }}</div>
+    <at-select
+        v-if="Object.keys(roles).length > 0"
+        ref="select"
+        class="role-select"
+        :value="value"
+        @on-change="inputHandler"
+    >
+        <at-option v-for="(role, name) in roles" :key="role" :value="role" :label="$t(`field.roles.${name}.name`)">
+            <div>
+                <slot :name="`role_${name}_name`">
+                    {{ $t(`field.roles.${name}.name`) }}
+                </slot>
+            </div>
             <div class="role-select__description">
-                <slot :name="['role-description', role.name]">
-                    {{ $t('users.roles-description.' + role.name) }}
+                <slot :name="`role_${name}_description`">
+                    {{ $t(`field.roles.${name}.description`) }}
                 </slot>
             </div>
         </at-option>
@@ -18,9 +28,17 @@
     export default {
         props: {
             value: Number,
+            excludeRoles: {
+                type: Array,
+                default: () => [],
+            },
         },
         computed: {
-            ...mapGetters('roles', ['roles']),
+            roles() {
+                return Object.keys(this.$store.getters['roles/roles'])
+                    .filter(key => !this.excludeRoles.includes(key))
+                    .reduce((acc, el) => Object.assign(acc, { [el]: this.$store.getters['roles/roles'][el] }), {});
+            },
         },
         methods: {
             ucfirst,

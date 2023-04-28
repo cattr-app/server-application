@@ -45,7 +45,7 @@
         },
         methods: {
             onLoad(allSelectOptions) {
-                const allStatusIds = allSelectOptions.map(option => option.value);
+                const allStatusIds = allSelectOptions.map(option => option.id);
 
                 // Select all options if storage is empty
                 if (!localStorage.getItem(localStorageKey)) {

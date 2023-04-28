@@ -70,7 +70,6 @@ class UserController extends ItemController
      *      "timezone": null,
      *      "important": 0,
      *      "change_password": 0,
-     *      "is_admin": 0,
      *      "role_id": 1
      *    },
      *    {
@@ -93,7 +92,6 @@ class UserController extends ItemController
      *      "timezone": "Asia\/Omsk",
      *      "important": 0,
      *      "change_password": 0,
-     *      "is_admin": 0,
      *      "role_id": 2
      *    }
      *  ]
