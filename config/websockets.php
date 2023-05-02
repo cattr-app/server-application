@@ -23,7 +23,7 @@ return [
      */
     'apps' => [
         [
-            'id' => env('PUSHER_APP_ID'),
+            'id' => env('PUSHER_APP_ID', 'app'),
             'name' => env('APP_NAME'),
             'key' => env('PUSHER_APP_KEY'),
             'secret' => env('PUSHER_APP_SECRET'),

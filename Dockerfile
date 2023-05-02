@@ -1,8 +1,13 @@
 # syntax=docker/dockerfile:1-labs
 FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr-dev:latest AS builder
 
-ARG MODULES="cattr/gitlab_integration-module cattr/redmine_integration-module"
+ARG SENTRY_DSN
+ARG APP_VERSION
 ARG APP_ENV=production
+ENV IMAGE_VERSION=5.0.0
+ENV PUSHER_APP_KEY="cattr"
+ENV APP_VERSION $APP_VERSION
+ENV SENTRY_DSN $SENTRY_DSN
 ENV APP_ENV $APP_ENV
 ENV YARN_ENABLE_GLOBAL_CACHE=true
 
@@ -21,10 +26,6 @@ RUN set -x && \
     composer dump-autoload -n --optimize --apcu --classmap-authoritative
 
 RUN set -x && \
-    php artisan route:cache && \
-    php artisan view:cache && \
-    php artisan event:cache && \
-    php artisan config:cache && \
     php artisan storage:link
 
 RUN set -x && \
@@ -38,7 +39,9 @@ ARG SENTRY_DSN
 ARG APP_VERSION
 ARG APP_ENV=production
 ARG APP_KEY="base64:PU/8YRKoMdsPiuzqTpFDpFX1H8Af74nmCQNFwnHPFwY="
+ARG PUSHER_APP_SECRET="secret"
 ENV IMAGE_VERSION=5.0.0
+ENV PUSHER_APP_KEY="cattr"
 ENV DB_CONNECTION=mysql
 ENV DB_HOST=db
 ENV DB_USERNAME=root
@@ -48,6 +51,7 @@ ENV APP_VERSION $APP_VERSION
 ENV SENTRY_DSN $SENTRY_DSN
 ENV APP_ENV $APP_ENV
 ENV APP_KEY $APP_KEY
+ENV PUSHER_APP_SECRET $PUSHER_APP_SECRET
 
 COPY --from=builder /app /app
 
