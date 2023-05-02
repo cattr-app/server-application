@@ -50,15 +50,15 @@ export function localModuleLoader(router) {
 
         const moduleEnabled =
             (typeof moduleInitData.enabled !== 'undefined' ? moduleInitData.enabled : false) &&
-            (moduleCfg.hasOwnProperty(fullModuleName)
+            (Object.prototype.hasOwnProperty.call(moduleCfg, fullModuleName)
                 ? isObject(moduleCfg[fullModuleName])
-                    ? (moduleCfg[fullModuleName].hasOwnProperty('type')
+                    ? (Object.prototype.hasOwnProperty.call(moduleCfg[fullModuleName], 'type')
                           ? moduleCfg[fullModuleName].type === 'local'
                           : false) &&
-                      (moduleCfg[fullModuleName].hasOwnProperty('enabled')
+                      (Object.prototype.hasOwnProperty.call(moduleCfg[fullModuleName], 'enabled')
                           ? moduleCfg[fullModuleName].enabled
                           : false) &&
-                      (moduleCfg[fullModuleName].hasOwnProperty('ref')
+                      (Object.prototype.hasOwnProperty.call(moduleCfg[fullModuleName], 'ref')
                           ? moduleCfg[fullModuleName].ref === fullModuleName
                           : false)
                     : false
@@ -67,7 +67,9 @@ export function localModuleLoader(router) {
         if (moduleEnabled) {
             moduleInitQueue.push({
                 module: md,
-                order: moduleInitData.hasOwnProperty('loadOrder') ? moduleInitData.loadOrder : 999,
+                order: Object.prototype.hasOwnProperty.call(moduleInitData, 'loadOrder')
+                    ? moduleInitData.loadOrder
+                    : 999,
                 moduleInitData,
                 fullModuleName,
                 fn,
@@ -81,22 +83,22 @@ export function localModuleLoader(router) {
         moduleRequire.forEach(requireFn => {
             const md = requireFn();
 
-            if (!md.hasOwnProperty('ModuleConfig')) {
+            if (!Object.prototype.hasOwnProperty.call(md, 'ModuleConfig')) {
                 throw new Error(
-                    `Vendor module can not be initialized. All vendor modules must export ModuleConfig object property.`,
+                    `Vendor module cannot be initialized. All vendor modules must export ModuleConfig object property.`,
                 );
             }
 
-            if (!md.hasOwnProperty('init')) {
+            if (!Object.prototype.hasOwnProperty.call(md, 'init')) {
                 throw new Error(
-                    `Vendor module can not be initialized. All vendor modules must export init function property`,
+                    `Vendor module cannot be initialized. All vendor modules must export init function property`,
                 );
             }
 
             const moduleConfig = md.ModuleConfig;
-            if (!moduleConfig.hasOwnProperty('moduleName')) {
+            if (!Object.prototype.hasOwnProperty.call(moduleConfig, 'moduleName')) {
                 throw new Error(
-                    `Vendor module can not be initialized. All vendor modules must have a name matching the pattern Vendor_ModuleName`,
+                    `Vendor module cannot be initialized. All vendor modules must have a name matching the pattern Vendor_ModuleName`,
                 );
             }
 
@@ -107,7 +109,9 @@ export function localModuleLoader(router) {
             ) {
                 moduleInitQueue.push({
                     module: md,
-                    order: moduleConfig.hasOwnProperty('loadOrder') ? moduleConfig.loadOrder : 999,
+                    order: Object.prototype.hasOwnProperty.call(moduleConfig, 'loadOrder')
+                        ? moduleConfig.loadOrder
+                        : 999,
                     moduleInitData: moduleConfig,
                     fullModuleName: moduleConfig.moduleName,
                     type: 'package',
@@ -131,7 +135,7 @@ export function localModuleLoader(router) {
 
         moduleInitQueue.push({
             module: md,
-            order: moduleInitData.hasOwnProperty('loadOrder') ? moduleInitData.loadOrder : 999,
+            order: Object.prototype.hasOwnProperty.call(moduleInitData, 'loadOrder') ? moduleInitData.loadOrder : 999,
             moduleInitData,
             fullModuleName,
             fn,

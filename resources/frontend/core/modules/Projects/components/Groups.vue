@@ -13,7 +13,7 @@
             @search="onSearch"
             @option:selecting="handleSelecting"
         >
-            <template #option="{ id, label, depth, current }">
+            <template #option="{ label, depth, current }">
                 <span class="option" :class="{ 'option--current': current }">
                     <span class="option__text">
                         <span v-if="depth > 0" class="option__depth">{{ getSpaceByDepth(depth) }}</span>

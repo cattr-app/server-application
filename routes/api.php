@@ -226,6 +226,7 @@ Route::group([
 
         //Role routes
         $router->any('roles/list', [RoleController::class, 'index'])
+            ->withoutMiddleware('auth:sanctum')
             ->name('roles.list');
 
         // Statistic routes

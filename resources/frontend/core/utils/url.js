@@ -2,7 +2,7 @@ export function serialize(data, prefix) {
     let str = [],
         p;
     for (p in data) {
-        if (data.hasOwnProperty(p)) {
+        if (Object.prototype.hasOwnProperty.call(data, p)) {
             let k = prefix ? prefix + '[' + p + ']' : p,
                 v = data[p];
             str.push(

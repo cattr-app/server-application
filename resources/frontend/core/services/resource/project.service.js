@@ -29,8 +29,13 @@ export default class ProjectService extends ResourceService {
     /**
      * @returns {Promise<AxiosResponse<T>>}
      */
-    async getAll(options = {}) {
-        return (await axios.get('projects/list?' + serialize(this.params), options)).data.data;
+    async getAll(config = {}) {
+        return (
+            await axios.get('projects/list', {
+                ...config,
+                params: this.params,
+            })
+        ).data.data;
     }
 
     /**
@@ -44,6 +49,7 @@ export default class ProjectService extends ResourceService {
     /**
      *
      * @param filters
+     * @param config
      * @returns {Promise<AxiosResponse<T>>}
      */
     getWithFilters(filters, config = {}) {

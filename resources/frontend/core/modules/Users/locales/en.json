@@ -11,23 +11,7 @@
       "disabled": "Disabled"
     },
     "role": {
-      "name": "Role",
-      "1": "Manager",
-      "3": "Auditor",
-      "2": "User",
-      "manager": "Manager",
-      "auditor": "Auditor",
-      "user": "User"
-    },
-    "roles-description": {
-      "manager": "Full access to tasks, projects, screenshot and all users' activity",
-      "auditor": "Read access to projects, create and read access to all the tasks, access to all users activity",
-      "user": "Read access to assigned projects, create and view tasks, view personal activity"
-    },
-    "project-roles-description": {
-      "auditor": "Read access to assigned projects, create and view all the assigned project's tasks, view all the project users' activity",
-      "manager": "Full access to assigned projects, full access to project's tasks, view all the project users' activity",
-      "user": "Read access to assigned projects, view all the assigned project's tasks, view personal activity"
+      "name": "Role"
     }
   },
   "languages": {

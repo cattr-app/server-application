@@ -149,7 +149,6 @@ class User extends Authenticatable
         'important',
         'change_password',
         'role_id',
-        'is_admin',
         'user_language',
         'type',
         'invitation_sent',
@@ -178,7 +177,6 @@ class User extends Authenticatable
         'timezone' => 'string',
         'important' => 'integer',
         'change_password' => 'int',
-        'is_admin' => 'integer',
         'user_language' => 'string',
         'type' => 'string',
         'invitation_sent' => 'boolean',
@@ -268,7 +266,7 @@ class User extends Authenticatable
 
     public function scopeAdmin(EloquentBuilder $query): EloquentBuilder
     {
-        return $query->where('is_admin', true);
+        return $query->where('role_is', \App\Enums\Role::ADMIN);
     }
 
     public function scopeActive(EloquentBuilder $query): EloquentBuilder

@@ -4,7 +4,7 @@ import TasksService from '@/services/resource/task.service';
 import LazySelect from './components/LazySelect';
 import DatetimeInput from './components/DatetimeInput';
 import TimezonePicker from '@/components/TimezonePicker';
-import rootStore from '@/store';
+import { store as rootStore } from '@/store';
 import moment from 'moment-timezone';
 
 export const ModuleConfig = {
@@ -15,7 +15,6 @@ export const ModuleConfig = {
 
 export function init(context, router) {
     const crud = context.createCrud('time_intervals.crud_title', 'time-intervals', TimeIntervalService);
-    const crudNewRoute = crud.new.getNewRouteName();
 
     crud.new.addToMetaProperties('permissions', 'time-intervals/create', crud.new.getRouterConfig());
     crud.new.addToMetaProperties('afterSubmitCallback', () => router.go(-1), crud.new.getRouterConfig());

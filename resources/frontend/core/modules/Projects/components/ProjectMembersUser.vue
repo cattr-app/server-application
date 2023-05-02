@@ -2,15 +2,21 @@
     <li class="user-item flex flex-middle" :class="{ 'user-item--selected': selected }" @click="$emit('click', $event)">
         <user-avatar class="user-item__avatar" :user="user" />
         <div>{{ user.full_name }}</div>
-        <role-select v-if="!addable" v-model="roleId" class="user-item__role-select" @click.stop>
-            <template :slot="['role-description', 'manager']">
-                {{ $t('users.project-roles-description.manager') }}
+        <role-select
+            v-if="!addable"
+            v-model="roleId"
+            class="user-item__role-select"
+            :exclude-roles="['admin']"
+            @click.stop
+        >
+            <template v-slot:role_manager_description>
+                {{ $t('project-roles-description.manager') }}
             </template>
-            <template :slot="['role-description', 'auditor']">
-                {{ $t('users.project-roles-description.auditor') }}
+            <template v-slot:role_auditor_description>
+                {{ $t('project-roles-description.auditor') }}
             </template>
-            <template :slot="['role-description', 'user']">
-                {{ $t('users.project-roles-description.user') }}
+            <template v-slot:role_user_description>
+                {{ $t('project-roles-description.user') }}
             </template>
         </role-select>
     </li>

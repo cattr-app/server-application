@@ -4,15 +4,15 @@ import modules from './modules';
 
 Vue.use(Vuex);
 
-const store = new Vuex.Store({
+export const store = new Vuex.Store({
     modules,
     strict: process.env.NODE_ENV !== 'production',
 });
 
-for (const moduleName of Object.keys(modules)) {
-    if (modules[moduleName].actions.hasOwnProperty('init')) {
-        store.dispatch(`${moduleName}/init`);
+export const init = () => {
+    for (const moduleName of Object.keys(modules)) {
+        if (Object.prototype.hasOwnProperty.call(modules[moduleName].actions, 'init')) {
+            store.dispatch(`${moduleName}/init`);
+        }
     }
-}
-
-export default store;
+};
