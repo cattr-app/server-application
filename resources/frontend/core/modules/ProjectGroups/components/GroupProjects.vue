@@ -273,7 +273,7 @@
             .table {
                 &::v-deep .at-table {
                     &__cell {
-                        width: 100%;
+                        width: 25%;
                         overflow-x: hidden;
                         padding-top: $spacing-05;
                         padding-bottom: $spacing-05;

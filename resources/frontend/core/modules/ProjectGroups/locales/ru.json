@@ -17,6 +17,9 @@
     "project": "Проект",
     "members": "Участники",
     "amount_of_tasks": "Кол-во задач",
-    "parent_group": "Родительская группа"
+    "parent_group": "Родительская группа",
+    "no_group_selected": "Группа не выбрана",
+    "loading_groups": "Загружаем группы",
+    "no_groups_found": "Для {query} группы не найдены"
   }
 }

@@ -17,6 +17,9 @@
     "project": "Project",
     "members": "Members",
     "amount_of_tasks": "Amount of tasks",
-    "parent_group": "Parent group"
+    "parent_group": "Parent group",
+    "no_group_selected": "Group not selected",
+    "loading_groups": "Loading groups",
+    "no_groups_found": "No groups found for {query}"
   }
 }

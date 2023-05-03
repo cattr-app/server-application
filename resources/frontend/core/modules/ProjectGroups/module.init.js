@@ -1,7 +1,7 @@
 import ProjectGroupsService from '@/services/resource/project-groups.service';
 import Groups from '../Projects/components/Groups';
 import i18n from '@/i18n';
-import Vue, { h } from 'vue';
+import Vue from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'project-groups',

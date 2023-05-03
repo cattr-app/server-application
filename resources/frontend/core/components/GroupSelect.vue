@@ -20,7 +20,7 @@
                     <span class="option__text">
                         <span v-if="depth > 0" class="option__depth">{{ getSpaceByDepth(depth) }}</span>
                         <span>{{ ucfirst(label) }}</span>
-                        <a class="option__text__link" :href="`/groups/edit/${id}`" target="_blank" @click.stop>
+                        <a class="option__text__link" :href="`/project-groups/edit/${id}`" target="_blank" @click.stop>
                             <i class="icon icon-external-link" />
                         </a>
                     </span>
@@ -63,6 +63,8 @@
     import vSelect from 'vue-select';
     import debounce from 'lodash/debounce';
 
+    const service = new ProjectGroupsService();
+
     export default {
         name: 'GroupSelect',
         props: {
@@ -86,7 +88,6 @@
             return {
                 isActive: false,
                 options: [],
-                service: new ProjectGroupsService(),
                 isSelectOpen: false,
                 totalPages: 0,
                 currentPage: 0,
@@ -98,8 +99,6 @@
         },
         created() {
             this.search = debounce(this.search, 350);
-            this.requestTimestamp = Date.now();
-            this.search(this.requestTimestamp);
         },
         mounted() {
             this.observer = new IntersectionObserver(this.infiniteScroll);
@@ -127,10 +126,10 @@
         },
         methods: {
             toCreateGroup() {
-                this.$router.push('/groups/new');
+                this.$router.push({ name: 'ProjectGroups.crud.groups.new' });
             },
             createGroup() {
-                this.service.save({ name: this.query }, true).then(({ data }) => {
+                service.save({ name: this.query }, true).then(({ data }) => {
                     this.$emit('createGroup', {
                         id: data.data.id,
                         name: data.data.name,
@@ -146,6 +145,7 @@
             onActive() {
                 this.isActive = true;
                 this.$refs.groupSelect.parentElement.style.zIndex = 1;
+                this.onSearch(this.query);
                 this.onOpen();
             },
             async onOpen() {
@@ -168,9 +168,7 @@
                 this.search.cancel();
                 this.requestTimestamp = Date.now();
 
-                if (this.query.length) {
-                    this.search(this.requestTimestamp);
-                }
+                this.search(this.requestTimestamp);
             },
             async search(requestTimestamp) {
                 this.observer.disconnect();
@@ -220,7 +218,7 @@
                     page: this.currentPage + 1,
                 };
 
-                return this.service.getWithFilters(filters).then(({ data, pagination }) => {
+                return service.getWithFilters(filters).then(({ data, pagination }) => {
                     if (requestTimestamp === this.requestTimestamp) {
                         this.totalPages = pagination.totalPages;
                         this.currentPage = pagination.currentPage;
@@ -248,18 +246,14 @@
             },
             resetOptions() {
                 if (typeof this.currentGroup === 'object' && this.currentGroup !== null) {
-                    this.options = [
-                        {
-                            id: this.currentGroup.id,
-                            label: this.currentGroup.name,
-                            depth: 0,
-                            current: true,
-                        },
-                    ];
-                    this.localCurrentGroup = this.options[0];
-                } else {
-                    this.options = [];
+                    this.localCurrentGroup = {
+                        id: this.currentGroup.id,
+                        label: this.currentGroup.name,
+                        depth: 0,
+                        current: true,
+                    };
                 }
+                this.options = [];
             },
         },
         computed: {

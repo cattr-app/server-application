@@ -24,14 +24,14 @@
                             </span>
                             <span v-else>{{ group.name + ' (' + group.projects_count + ')' }}</span>
                         </h5>
-                        <router-link
+                        <a
                             class="groups__title__link"
-                            :to="`/project-groups/edit/${group.id}`"
+                            :href="`/project-groups/edit/${group.id}`"
                             target="_blank"
                             @click.stop
                         >
                             <i class="icon icon-external-link" />
-                        </router-link>
+                        </a>
                     </div>
                 </div>
                 <div v-if="group.projects_count > 0 && isOpen(index)" class="groups__projects-wrapper">
