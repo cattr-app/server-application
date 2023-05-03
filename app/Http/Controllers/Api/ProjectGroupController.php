@@ -41,8 +41,8 @@ class ProjectGroupController extends ItemController
         $itemsQuery = $this->getQuery($requestData);
 
         $itemsQuery->withDepth()->withCount('projects')->defaultOrder();
-        
-        $items = $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate($request->limit ? $request->limit : 2) : $itemsQuery->get();
+
+        $items = $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate($request->input('limit', null)) : $itemsQuery->get();
 
         return responder()->success($items)->respond();
     }
