@@ -33,6 +33,18 @@ export default class Edit extends AbstractCrud {
         return this;
     }
 
+    addPageControlsToBottom() {
+        const arg = arguments[0];
+        this.addToMetaProperties('pageData.bottomComponents.pageControls', arg, this.getRouterConfig());
+        return this;
+    }
+
+    addBottomComponents() {
+        const arg = arguments[0];
+        this.addToMetaProperties('pageData.bottomComponents.components', arg, this.getRouterConfig());
+        return this;
+    }
+
     /**
      * @param {Config} fieldConfig
      * @returns {Edit}

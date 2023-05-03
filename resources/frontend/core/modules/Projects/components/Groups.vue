@@ -31,7 +31,7 @@
 
             <template #list-footer>
                 <li v-show="hasNextPage" ref="load" class="option__infinite-loader">
-                    {{ $t('field.loading_groups') }} <i class="icon icon-loader"></i>
+                    {{ $t('field.loading_groups') }} <i class="icon icon-loader" />
                 </li>
             </template>
         </v-select>

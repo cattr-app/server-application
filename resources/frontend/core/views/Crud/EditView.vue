@@ -212,13 +212,34 @@
                 </div>
                 <component
                     :is="component"
-                    v-for="(component, index) of pageData.bottomComponents"
+                    v-for="(component, index) of pageData.bottomComponents.components"
                     :key="index"
                     :parent="this"
                 />
-                <at-button type="primary" :disabled="invalid || isLoading" :loading="isLoading" @click="submit">{{
-                    $t('control.save')
-                }}</at-button>
+                <div class="control-items">
+                    <template
+                        v-if="
+                            pageData.bottomComponents.pageControls && pageData.bottomComponents.pageControls.length > 0
+                        "
+                    >
+                        <template v-for="(button, key) of pageData.bottomComponents.pageControls">
+                            <at-button
+                                v-if="checkRenderCondition(button)"
+                                :key="key"
+                                class="control-item"
+                                size="large"
+                                :type="button.type || ''"
+                                :icon="button.icon || ''"
+                                @click="handleClick(button)"
+                            >
+                                {{ $t(button.label) }}
+                            </at-button>
+                        </template>
+                    </template>
+                    <at-button type="primary" :disabled="invalid || isLoading" :loading="isLoading" @click="submit">{{
+                        $t('control.save')
+                    }}</at-button>
+                </div>
             </validation-observer>
         </div>
     </div>

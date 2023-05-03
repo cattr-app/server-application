@@ -6,6 +6,7 @@ use App\Helpers\QueryHelper;
 use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\ProjectGroup\CreateProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\DestroyProjectGroupRequest;
+use App\Http\Requests\ProjectGroup\EditProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\ListProjectGroupRequest;
 use App\Http\Requests\ProjectGroup\ShowProjectGroupRequest;
 use App\Models\ProjectGroup;
@@ -13,7 +14,10 @@ use Event;
 use Exception;
 use Filter;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Validation\ValidationException;
 use Kalnoy\Nestedset\QueryBuilder;
+use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
+use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
 
 class ProjectGroupController extends ItemController
@@ -31,21 +35,14 @@ class ProjectGroupController extends ItemController
     {
         // TODO:
         //  [] remove/setAnother amount in ->paginate(2)
-
+        
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
         $itemsQuery = $this->getQuery($requestData);
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
+        $itemsQuery->withDepth()->withCount('projects')->defaultOrder();
 
-        $items = $itemsQuery->withDepth()->withCount('projects')->defaultOrder()->paginate(2);
-
-        Filter::process(
-            Filter::getActionFilterName(),
-            $items,
-        );
-
-        Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
+        $items = $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate($request->input('limit', null)) : $itemsQuery->get();
 
         return responder()->success($items)->respond();
     }
@@ -66,7 +63,7 @@ class ProjectGroupController extends ItemController
         foreach ($modelScopes as $key => $value) {
             $query->withGlobalScope($key, $value);
         }
-
+        
         foreach (Filter::process(Filter::getQueryAdditionalRelationsFilterName(), []) as $with) {
             $query->with($with);
         }
@@ -88,6 +85,13 @@ class ProjectGroupController extends ItemController
      */
     public function create(CreateProjectGroupRequest $request): JsonResponse
     {
+        if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
+            Event::listen(
+                Filter::getAfterActionEventName(),
+                static fn(ProjectGroup $group) => $group->parent()->associate(ProjectGroup::find($parent_id))->save(),
+            );
+        }
+
         return $this->_create($request);
     }
 
@@ -110,8 +114,15 @@ class ProjectGroupController extends ItemController
      * @return JsonResponse
      * @throws Throwable
      */
-    public function edit(EditProjectRequest $request): JsonResponse
+    public function edit(EditProjectGroupRequest $request): JsonResponse
     {
+        if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
+            Event::listen(
+                Filter::getAfterActionEventName(),
+                static fn(ProjectGroup $group) => $group->parent()->associate(ProjectGroup::find($parent_id))->save(),
+            );
+        }
+
         return $this->_edit($request);
     }
 
