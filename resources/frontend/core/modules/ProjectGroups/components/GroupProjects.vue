@@ -1,21 +1,21 @@
 <template>
-    <div>
-        <h6 v-if="isDataLoading">{{ $t('message.loading_projects') }} <i class="icon icon-loader"></i></h6>
+    <div class="projects">
+        <h6 v-if="isDataLoading">{{ $t('message.loading_projects') }} <i class="icon icon-loader" /></h6>
 
         <at-input
             v-model="query"
             type="text"
-            :placeholder="'type to find project'"
+            :placeholder="$t('message.project_search_input_placeholder')"
             class="projects__search col-6"
             @input="onSearch"
         >
-            <template slot="prepend">
-                <i class="icon icon-search"></i>
+            <template v-slot:prepend>
+                <i class="icon icon-search" />
             </template>
         </at-input>
 
         <div class="at-container">
-            <div ref="tableWrapper" class="crud__table">
+            <div ref="tableWrapper" class="table">
                 <at-table ref="table" size="large" :columns="columns" :data="projects" />
             </div>
         </div>
@@ -29,6 +29,8 @@
     import TeamAvatars from '@/components/TeamAvatars';
     import i18n from '@/i18n';
     import debounce from 'lodash.debounce';
+
+    const service = new ProjectService();
 
     export default {
         name: 'GroupProjects',
@@ -46,8 +48,6 @@
                 query: '',
                 totalPages: 0,
                 currentPage: 0,
-                requestTimestamp: null,
-                service: new ProjectService(),
                 page: 1,
                 isDataLoading: false,
             };
@@ -55,7 +55,7 @@
         async created() {
             this.search = debounce(this.search, 350);
             this.requestTimestamp = Date.now();
-            this.search(this.requestTimestamp);
+            await this.search(this.requestTimestamp);
         },
         methods: {
             async loadPage(page) {
@@ -63,7 +63,6 @@
                 await this.loadOptions();
             },
             onSearch() {
-                this.search.cancel();
                 this.requestTimestamp = Date.now();
 
                 this.search(this.requestTimestamp);
@@ -71,7 +70,6 @@
             async search(requestTimestamp) {
                 this.totalPages = 0;
                 this.resetOptions();
-                this.lastSearchQuery = this.query;
                 await this.$nextTick();
                 await this.loadOptions(requestTimestamp);
                 await this.$nextTick();
@@ -84,13 +82,13 @@
                     with: ['users', 'tasks', 'can'],
                     withCount: ['tasks'],
                     search: {
-                        query: this.lastSearchQuery,
+                        query: this.query,
                         fields: ['name'],
                     },
                     page: this.page,
                 };
 
-                return this.service.getWithFilters(filters).then(({ data, pagination = data.pagination }) => {
+                return service.getWithFilters(filters).then(({ data, pagination = data.pagination }) => {
                     if (requestTimestamp === this.requestTimestamp) {
                         this.totalPages = pagination.totalPages;
                         this.currentPage = pagination.currentPage;
@@ -146,9 +144,6 @@
                         renderCondition({ $store }) {
                             return true;
                         },
-                        style: {
-                            margin: '0 10px 0 0',
-                        },
                     },
                     {
                         title: 'projects.members',
@@ -158,9 +153,6 @@
                         },
                         renderCondition({ $can }, item) {
                             return $can('updateMembers', 'project', item);
-                        },
-                        style: {
-                            margin: '0 10px 0 0',
                         },
                     },
                     {
@@ -234,11 +226,38 @@
 </script>
 
 <style lang="scss" scoped>
-    .projects__search {
-        margin-bottom: $spacing-03;
-    }
+    .projects {
+        &__search {
+            margin-bottom: $spacing-03;
+        }
 
-    .at-container {
-        margin-bottom: 1rem;
+        .at-container {
+            margin-bottom: 1rem;
+            .table {
+                &::v-deep .at-table {
+                    &__cell {
+                        width: 100%;
+                        overflow-x: hidden;
+                        padding-top: $spacing-05;
+                        padding-bottom: $spacing-05;
+                        border-bottom: 2px solid $blue-3;
+                        position: relative;
+                        z-index: 0;
+                        &:last-child {
+                            max-width: unset;
+                        }
+                    }
+
+                    .actions-column {
+                        display: flex;
+                        flex-flow: row nowrap;
+                    }
+
+                    .action-button {
+                        margin-right: 1em;
+                    }
+                }
+            }
+        }
     }
 </style>

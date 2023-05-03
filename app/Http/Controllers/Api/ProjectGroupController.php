@@ -40,18 +40,9 @@ class ProjectGroupController extends ItemController
 
         $itemsQuery = $this->getQuery($requestData);
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
-
         $itemsQuery->withDepth()->withCount('projects')->defaultOrder();
         
         $items = $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate($request->limit ? $request->limit : 2) : $itemsQuery->get();
-
-        Filter::process(
-            Filter::getActionFilterName(),
-            $items,
-        );
-
-        Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
 
         return responder()->success($items)->respond();
     }
@@ -97,11 +88,7 @@ class ProjectGroupController extends ItemController
         if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
             Event::listen(
                 Filter::getAfterActionEventName(),
-                static function(ProjectGroup $group) use($parent_id) {
-                    $group->parent_id = $parent_id;
-
-                    return $group->save();
-                }
+                static fn(ProjectGroup $group) => $group->parent()->associate(ProjectGroup::find($parent_id))->save(),
             );
         }
 
@@ -132,11 +119,7 @@ class ProjectGroupController extends ItemController
         if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
             Event::listen(
                 Filter::getAfterActionEventName(),
-                static function(ProjectGroup $group) use($parent_id) {
-                    $group->parent_id = $parent_id;
-                    
-                    return $group->save();
-                }
+                static fn(ProjectGroup $group) => $group->parent()->associate(ProjectGroup::find($parent_id))->save(),
             );
         }
 

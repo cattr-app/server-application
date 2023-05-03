@@ -5,7 +5,7 @@
         <at-input
             v-model="query"
             type="text"
-            :placeholder="'type to find group'"
+            :placeholder="$t('message.group_search_input_placeholder')"
             class="project-groups__search col-6"
             @input="onSearch"
         >
@@ -35,6 +35,8 @@
     import Preloader from '@/components/Preloader';
     import debounce from 'lodash.debounce';
 
+    const service = new ProjectGroupsService();
+
     export default {
         name: 'ProjectGroups',
         components: {
@@ -47,11 +49,9 @@
                 isDataLoading: false,
                 groupsTotal: 0,
                 limit: 10,
-                service: new ProjectGroupsService(),
                 totalPages: 0,
                 currentPage: 0,
                 query: '',
-                requestTimestamp: null,
             };
         },
         async created() {
@@ -82,12 +82,7 @@
                     }
                 }
             },
-
-            getSpaceByDepth: function (depth) {
-                return ''.padStart(depth, '-');
-            },
             onSearch() {
-                this.search.cancel();
                 this.requestTimestamp = Date.now();
 
                 this.search(this.requestTimestamp);
@@ -97,7 +92,6 @@
                 this.totalPages = 0;
                 this.currentPage = 0;
                 this.resetOptions();
-                this.lastSearchQuery = this.query;
                 await this.$nextTick();
                 await this.loadOptions(requestTimestamp);
                 await this.$nextTick();
@@ -111,7 +105,7 @@
             },
             async loadOptions() {
                 const filters = {
-                    search: { query: this.lastSearchQuery, fields: ['name'] },
+                    search: { query: this.query, fields: ['name'] },
                     with: [],
                     page: this.currentPage + 1,
                     limit: this.limit,
@@ -121,9 +115,9 @@
                     filters.with.push('groupParents');
                 }
 
-                return this.service.getWithFilters(filters).then(({ data, pagination }) => {
+                return service.getWithFilters(filters).then(({ data, pagination }) => {
                     this.groupsTotal = pagination.total;
-                    if (this.query == '') {
+                    if (this.query === '') {
                         this.totalPages = pagination.totalPages;
                         this.currentPage = pagination.currentPage;
                         data.forEach(option => this.groups.push(option));
@@ -131,18 +125,18 @@
                         this.totalPages = pagination.totalPages;
                         this.currentPage = pagination.currentPage;
                         data.forEach(option => {
-                            let breadCrumps = [];
+                            let breadCrumbs = [];
                             option.group_parents.forEach(el => {
-                                breadCrumps.push({
+                                breadCrumbs.push({
                                     name: el.name,
                                     id: el.id,
                                 });
                             });
-                            breadCrumps.push({
+                            breadCrumbs.push({
                                 name: option.name,
                                 id: option.id,
                             });
-                            option.breadCrumps = breadCrumps;
+                            option.breadCrumbs = breadCrumbs;
                             this.groups.push(option);
                         });
                     }
@@ -152,7 +146,7 @@
                 this.groups = [];
             },
             getTargetClickGroupAndChildren(id) {
-                this.service
+                service
                     .getWithFilters({
                         where: { id },
                         with: ['descendantsWithDepthAndProjectsCount'],

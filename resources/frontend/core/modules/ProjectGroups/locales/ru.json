@@ -9,7 +9,9 @@
   "message": {
     "no_child_groups": "Нет вложенных групп",
     "no_group_projects": "Нет проектов",
-    "loading_projects": "Загрузка проектов"
+    "loading_projects": "Загрузка проектов",
+    "project_search_input_placeholder": "введите, чтобы найти проект",
+    "group_search_input_placeholder": "введите, чтобы найти группу"
   },
   "field": {
     "project": "Проект",

@@ -1,12 +1,7 @@
 <template>
     <div class="groups">
-        <at-collapse simple accordion @on-change="changeHandler">
-            <at-collapse-item
-                v-for="(group, index) in groups"
-                :key="index"
-                :disabled="group.projects_count === 0"
-                :name="String(index)"
-            >
+        <at-collapse simple accordion @on-change="event => (opened = event)">
+            <at-collapse-item v-for="(group, index) in groups" :key="index" :disabled="group.projects_count === 0">
                 <div slot="title">
                     <div class="groups__header">
                         <h5 :class="{ groups__disabled: group.projects_count === 0 }" class="groups__title">
@@ -15,28 +10,28 @@
                                 :class="{ groups__disabled: group.projects_count === 0 }"
                                 class="groups__depth"
                             >
-                                {{ getSpaceByDepth(group.depth) }}
+                                {{ group.depth | getSpaceByDepth }}
                             </span>
-                            <span v-if="group.breadCrumps">
+                            <span v-if="group.breadCrumbs">
                                 <span
-                                    v-for="(breadCrump, index) in group.breadCrumps"
+                                    v-for="(breadCrumb, index) in group.breadCrumbs"
                                     :key="index"
-                                    @click.stop="getTargetClickGroupAndChildren(breadCrump.id)"
+                                    @click.stop="$emit('getTargetClickGroupAndChildren', breadCrumb.id)"
                                 >
-                                    {{ breadCrump.name }} {{ group.breadCrumps.length - 1 > index ? '/' : '' }}
+                                    {{ breadCrumb.name }} {{ group.breadCrumbs.length - 1 > index ? '/' : '' }}
                                 </span>
                                 <span>({{ group.projects_count }})</span>
                             </span>
                             <span v-else>{{ group.name + ' (' + group.projects_count + ')' }}</span>
                         </h5>
-                        <a
+                        <router-link
                             class="groups__title__link"
-                            :href="`/project-groups/edit/${group.id}`"
+                            :to="`/project-groups/edit/${group.id}`"
                             target="_blank"
                             @click.stop
                         >
                             <i class="icon icon-external-link" />
-                        </a>
+                        </router-link>
                     </div>
                 </div>
                 <div v-if="group.projects_count > 0 && isOpen(index)" class="groups__projects-wrapper">
@@ -70,15 +65,6 @@
             },
         },
         methods: {
-            getTargetClickGroupAndChildren(id) {
-                this.$emit('getTargetClickGroupAndChildren', id);
-            },
-            getSpaceByDepth: function (depth) {
-                return ''.padStart(depth, '-');
-            },
-            changeHandler(event) {
-                this.opened = event;
-            },
             isOpen(index) {
                 return this.opened[0] === String(index);
             },
@@ -88,6 +74,11 @@
                     count += this.calculateProjectsCount(child);
                 });
                 return count;
+            },
+        },
+        filters: {
+            getSpaceByDepth(value) {
+                return ''.padStart(value, '-');
             },
         },
     };
@@ -113,7 +104,9 @@
             opacity: 0.3;
             font-weight: 300;
         }
-
+        &__header {
+            display: flex;
+        }
         &::v-deep {
             .at-collapse {
                 &__item--active {
