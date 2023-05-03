@@ -35,7 +35,7 @@
                     </div>
                 </div>
                 <div v-if="group.projects_count > 0 && isOpen(index)" class="groups__projects-wrapper">
-                    <GroupProjects :group-id="group.id" class="groups__projects" />
+                    <GroupProjects :group-id="group.id" class="groups__projects" @reloadData="$emit('reloadData')" />
                 </div>
             </at-collapse-item>
         </at-collapse>
@@ -74,6 +74,9 @@
                     count += this.calculateProjectsCount(child);
                 });
                 return count;
+            },
+            reloadData() {
+                this.$emit('reloadData');
             },
         },
         filters: {

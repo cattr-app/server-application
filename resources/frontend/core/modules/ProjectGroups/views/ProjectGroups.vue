@@ -16,9 +16,13 @@
 
         <div class="at-container">
             <div v-if="Object.keys(groups).length && !isDataLoading">
-                <GroupCollapsable :groups="groups" @getTargetClickGroupAndChildren="getTargetClickGroupAndChildren" />
+                <GroupCollapsable
+                    :groups="groups"
+                    @getTargetClickGroupAndChildren="getTargetClickGroupAndChildren"
+                    @reloadData="onSearch"
+                />
                 <div v-show="hasNextPage" ref="load" class="option__infinite-loader">
-                    {{ $i18n.t('field.loading_groups') }} <i class="icon icon-loader"></i>
+                    {{ $t('field.loading_groups') }} <i class="icon icon-loader" />
                 </div>
             </div>
             <div v-else class="at-container__inner no-data">

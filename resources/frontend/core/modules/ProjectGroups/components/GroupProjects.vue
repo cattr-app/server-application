@@ -139,7 +139,7 @@
                         title: 'control.view',
                         icon: 'icon-eye',
                         onClick: (router, { item }) => {
-                            this.$router.push(`/projects/view/${item.id}`);
+                            this.$router.push({ name: 'Projects.crud.projects.view', params: { id: item.id } });
                         },
                         renderCondition({ $store }) {
                             return true;
@@ -149,7 +149,7 @@
                         title: 'projects.members',
                         icon: 'icon-users',
                         onClick: (router, { item }) => {
-                            this.$router.push(`/projects/${item.id}/members`);
+                            this.$router.push({ name: 'Projects.members', params: { id: item.id } });
                         },
                         renderCondition({ $can }, item) {
                             return $can('updateMembers', 'project', item);
@@ -159,7 +159,7 @@
                         title: 'control.edit',
                         icon: 'icon-edit',
                         onClick: (router, { item }, context) => {
-                            this.$router.push(`/projects/edit/${item.id}`);
+                            this.$router.push({ name: 'Projects.crud.projects.edit', params: { id: item.id } });
                         },
                         renderCondition: ({ $can }, item) => {
                             return $can('update', 'project', item);
@@ -169,8 +169,45 @@
                         title: 'control.delete',
                         actionType: 'error', // AT-UI action type,
                         icon: 'icon-trash-2',
-                        onClick: (router, { item }, context) => {
-                            this.$router.push(`/projects/delete/${item.id}`);
+                        onClick: async (router, { item }, context) => {
+                            const isConfirm = await this.$CustomModal({
+                                title: this.$t('notification.record.delete.confirmation.title'),
+                                content: this.$t('notification.record.delete.confirmation.message'),
+                                okText: this.$t('control.delete'),
+                                cancelText: this.$t('control.cancel'),
+                                showClose: false,
+                                styles: {
+                                    'border-radius': '10px',
+                                    'text-align': 'center',
+                                    footer: {
+                                        'text-align': 'center',
+                                    },
+                                    header: {
+                                        padding: '16px 35px 4px 35px',
+                                        color: 'red',
+                                    },
+                                    body: {
+                                        padding: '16px 35px 4px 35px',
+                                    },
+                                },
+                                width: 320,
+                                type: 'trash',
+                                typeButton: 'error',
+                            });
+
+                            if (isConfirm !== 'confirm') {
+                                return;
+                            }
+
+                            await service.deleteItem(item.id);
+                            this.$Notify({
+                                type: 'success',
+                                title: this.$t('notification.record.delete.success.title'),
+                                message: this.$t('notification.record.delete.success.message'),
+                            });
+
+                            await this.search(this.requestTimestamp);
+                            this.$emit('reloadData');
                         },
                         renderCondition: ({ $can }, item) => {
                             return $can('delete', 'project', item);
