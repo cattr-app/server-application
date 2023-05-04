@@ -32,8 +32,8 @@ return [
 
         'pusher' => [
             'driver' => 'pusher',
-            'key' => env('PUSHER_APP_KEY'),
-            'secret' => env('PUSHER_APP_SECRET'),
+            'key' => env('PUSHER_APP_KEY', 'cattr'),
+            'secret' => env('PUSHER_APP_SECRET', 'secret'),
             'app_id' => env('PUSHER_APP_ID', 'app'),
             'options' => [
                 'host' => env('PUSHER_HOST') ?: 'api-' . env('PUSHER_APP_CLUSTER', 'mt1') . '.pusher.com',
