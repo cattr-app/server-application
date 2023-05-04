@@ -6,32 +6,33 @@
                     <div class="groups__header">
                         <h5 :class="{ groups__disabled: group.projects_count === 0 }" class="groups__title">
                             <span
-                                v-if="group.depth > 0"
+                                v-if="group.depth > 0 && group.breadCrumbs == null"
                                 :class="{ groups__disabled: group.projects_count === 0 }"
                                 class="groups__depth"
                             >
                                 {{ group.depth | getSpaceByDepth }}
                             </span>
-                            <span v-if="group.breadCrumbs">
+                            <span v-if="group.breadCrumbs" class="groups__bread-crumbs">
                                 <span
                                     v-for="(breadCrumb, index) in group.breadCrumbs"
                                     :key="index"
+                                    class="groups__bread-crumbs__item"
                                     @click.stop="$emit('getTargetClickGroupAndChildren', breadCrumb.id)"
                                 >
-                                    {{ breadCrumb.name }} {{ group.breadCrumbs.length - 1 > index ? '/' : '' }}
+                                    {{ breadCrumb.name }} /
                                 </span>
-                                <span>({{ group.projects_count }})</span>
                             </span>
-                            <span v-else>{{ group.name + ' (' + group.projects_count + ')' }}</span>
+                            <span>{{ group.name + ` (${group.projects_count})` }}</span>
                         </h5>
-                        <router-link
-                            class="groups__title__link"
-                            :to="`/project-groups/edit/${group.id}`"
-                            target="_blank"
-                            @click.stop
-                        >
-                            <i class="icon icon-external-link" />
-                        </router-link>
+                        <span @click.stop>
+                            <router-link
+                                class="groups__header__link"
+                                :to="`/project-groups/edit/${group.id}`"
+                                target="_blank"
+                            >
+                                <i class="icon icon-external-link" />
+                            </router-link>
+                        </span>
                     </div>
                 </div>
                 <div v-if="group.projects_count > 0 && isOpen(index)" class="groups__projects-wrapper">
@@ -53,11 +54,6 @@
                 opened: [],
             };
         },
-        computed: {
-            projectsCount() {
-                return `(${this.group.projects_count})`;
-            },
-        },
         props: {
             groups: {
                 type: Array,
@@ -67,13 +63,6 @@
         methods: {
             isOpen(index) {
                 return this.opened[0] === String(index);
-            },
-            calculateProjectsCount(group) {
-                let count = group.projects_count;
-                group.children.forEach(child => {
-                    count += this.calculateProjectsCount(child);
-                });
-                return count;
             },
             reloadData() {
                 this.$emit('reloadData');
@@ -109,6 +98,12 @@
         }
         &__header {
             display: flex;
+            &__link {
+                margin-left: 5px;
+            }
+        }
+        &__bread-crumbs {
+            color: #0075b2;
         }
         &::v-deep {
             .at-collapse {

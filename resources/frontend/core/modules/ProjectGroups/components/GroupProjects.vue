@@ -1,7 +1,5 @@
 <template>
     <div class="projects">
-        <h6 v-if="isDataLoading">{{ $t('message.loading_projects') }} <i class="icon icon-loader" /></h6>
-
         <at-input
             v-model="query"
             type="text"
@@ -44,37 +42,32 @@
             return {
                 projects: [],
                 projectsTotal: 0,
-                limit: 10,
+                limit: 15,
                 query: '',
-                totalPages: 0,
-                currentPage: 0,
                 page: 1,
-                isDataLoading: false,
             };
         },
         async created() {
             this.search = debounce(this.search, 350);
-            this.requestTimestamp = Date.now();
-            await this.search(this.requestTimestamp);
+            await this.search();
         },
         methods: {
             async loadPage(page) {
                 this.page = page;
+                this.resetOptions();
                 await this.loadOptions();
             },
             onSearch() {
-                this.requestTimestamp = Date.now();
-
-                this.search(this.requestTimestamp);
+                this.search();
             },
-            async search(requestTimestamp) {
+            async search() {
                 this.totalPages = 0;
                 this.resetOptions();
                 await this.$nextTick();
-                await this.loadOptions(requestTimestamp);
+                await this.loadOptions();
                 await this.$nextTick();
             },
-            async loadOptions(requestTimestamp) {
+            async loadOptions() {
                 const filters = {
                     where: {
                         group: ['in', [this.groupId]],
@@ -89,11 +82,9 @@
                 };
 
                 return service.getWithFilters(filters).then(({ data, pagination = data.pagination }) => {
-                    if (requestTimestamp === this.requestTimestamp) {
-                        this.totalPages = pagination.totalPages;
-                        this.currentPage = pagination.currentPage;
-                        data.data.forEach(option => this.projects.push(option));
-                    }
+                    this.projectsTotal = pagination.total;
+                    this.currentPage = pagination.currentPage;
+                    data.data.forEach(option => this.projects.push(option));
                 });
             },
             resetOptions() {
@@ -206,7 +197,7 @@
                                 message: this.$t('notification.record.delete.success.message'),
                             });
 
-                            await this.search(this.requestTimestamp);
+                            await this.search();
                             this.$emit('reloadData');
                         },
                         renderCondition: ({ $can }, item) => {

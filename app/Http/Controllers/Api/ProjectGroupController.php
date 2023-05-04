@@ -88,7 +88,7 @@ class ProjectGroupController extends ItemController
         if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
             Event::listen(
                 Filter::getAfterActionEventName(),
-                static fn(ProjectGroup $group) => $group->parent()->associate(ProjectGroup::find($parent_id))->save(),
+                static fn(ProjectGroup $group) => $group->parent()->associate($parent_id)->save(),
             );
         }
 
@@ -119,7 +119,7 @@ class ProjectGroupController extends ItemController
         if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
             Event::listen(
                 Filter::getAfterActionEventName(),
-                static fn(ProjectGroup $group) => $group->parent()->associate(ProjectGroup::find($parent_id))->save(),
+                static fn(ProjectGroup $group) => $group->parent()->associate($parent_id)->save(),
             );
         }
 

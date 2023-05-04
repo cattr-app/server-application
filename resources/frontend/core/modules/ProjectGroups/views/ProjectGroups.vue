@@ -136,10 +136,6 @@
                                     id: el.id,
                                 });
                             });
-                            breadCrumbs.push({
-                                name: option.name,
-                                id: option.id,
-                            });
                             option.breadCrumbs = breadCrumbs;
                             this.groups.push(option);
                         });
