@@ -27,7 +27,7 @@
                         <span @click.stop>
                             <router-link
                                 class="groups__header__link"
-                                :to="`/project-groups/edit/${group.id}`"
+                                :to="{ name: 'ProjectGroups.crud.groups.edit', params: { id: group.id } }"
                                 target="_blank"
                             >
                                 <i class="icon icon-external-link" />
