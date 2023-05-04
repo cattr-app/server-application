@@ -42,7 +42,7 @@ class ProjectGroup extends Model
 
     public function descendantsWithDepthAndProjectsCount(): DescendantsRelation
     {
-        return $this->descendants()->withCount('projects')->withDepth();
+        return $this->descendants()->withCount('projects')->withDepth()->defaultOrder();
     }
 
     protected static function boot(): void
