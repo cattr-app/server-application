@@ -1,6 +1,6 @@
 <template>
     <div class="project-groups">
-        <h1 class="page-title">{{ $t('navigation.project-groups') }}</h1>
+        <h1 class="page-title">{{ $t('groups.grid-title') }}</h1>
         <div class="project-groups__search-container">
             <at-input
                 v-model="query"

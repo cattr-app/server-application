@@ -4,7 +4,7 @@
     "crud-title": "Group"
   },
   "navigation": {
-    "project-groups": "Groups"
+    "project-groups": "By groups"
   },
   "message": {
     "project_search_input_placeholder": "type to find project",

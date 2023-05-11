@@ -446,8 +446,9 @@ export function init(context) {
     context.addRoute(crud.getRouterConfig());
     context.addRoute(grid.getRouterConfig());
 
-    context.addNavbarEntry({
+    context.addNavbarEntryDropDown({
         label: 'navigation.projects',
+        section: 'navigation.dropdown.projects',
         to: {
             name: 'Projects.crud.projects',
         },
