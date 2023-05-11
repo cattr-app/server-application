@@ -1,19 +1,22 @@
 <template>
     <div class="project-groups">
         <h1 class="page-title">{{ $t('navigation.project-groups') }}</h1>
-
-        <at-input
-            v-model="query"
-            type="text"
-            :placeholder="$t('message.group_search_input_placeholder')"
-            class="project-groups__search col-6"
-            @input="onSearch"
-        >
-            <template slot="prepend">
-                <i class="icon icon-search" />
-            </template>
-        </at-input>
-
+        <div class="project-groups__search-container">
+            <at-input
+                v-model="query"
+                type="text"
+                :placeholder="$t('message.group_search_input_placeholder')"
+                class="project-groups__search-container__search col-6"
+                @input="onSearch"
+            >
+                <template slot="prepend">
+                    <i class="icon icon-search" />
+                </template>
+            </at-input>
+            <div v-if="isSelectGroupBranch" class="project-groups__search-container__selected-group">
+                {{ groups[0].name }} <i class="icon icon-x" @click="resetSelectedGroup" />
+            </div>
+        </div>
         <div class="at-container">
             <div v-if="Object.keys(groups).length && !isDataLoading">
                 <GroupCollapsable
@@ -56,6 +59,7 @@
                 totalPages: 0,
                 currentPage: 0,
                 query: '',
+                isSelectGroupBranch: false,
             };
         },
         async created() {
@@ -87,6 +91,8 @@
                 }
             },
             onSearch() {
+                this.isSelectGroupBranch = false;
+
                 this.requestTimestamp = Date.now();
 
                 this.search(this.requestTimestamp);
@@ -116,7 +122,7 @@
                 };
 
                 if (this.query !== '') {
-                    filters.with.push('groupParents');
+                    filters.with.push('groupParentsWithProjectsCount');
                 }
 
                 return service.getWithFilters(filters).then(({ data, pagination }) => {
@@ -130,9 +136,9 @@
                         this.currentPage = pagination.currentPage;
                         data.forEach(option => {
                             let breadCrumbs = [];
-                            option.group_parents.forEach(el => {
+                            option.group_parents_with_projects_count.forEach(el => {
                                 breadCrumbs.push({
-                                    name: el.name,
+                                    name: `${el.name} (${el.projects_count})`,
                                     id: el.id,
                                 });
                             });
@@ -146,18 +152,26 @@
                 this.groups = [];
             },
             getTargetClickGroupAndChildren(id) {
+                this.query = '';
+                this.isSelectGroupBranch = true;
                 service
                     .getWithFilters({
                         where: { id },
                         with: ['descendantsWithDepthAndProjectsCount'],
                     })
-                    .then(({ data }) => {
+                    .then(({ data, pagination }) => {
+                        this.totalPages = pagination.totalPages;
+                        this.currentPage = pagination.currentPage;
                         this.resetOptions();
                         this.groups.push(data[0]);
                         data[0].descendants_with_depth_and_projects_count.forEach(element => {
                             this.groups.push(element);
                         });
                     });
+            },
+            resetSelectedGroup() {
+                this.isSelectGroupBranch = false;
+                this.onSearch();
             },
         },
     };
@@ -171,8 +185,22 @@
     }
 
     .project-groups {
-        &__search {
+        &__search-container {
+            display: flex;
+            align-items: center;
             margin-bottom: $spacing-03;
+
+            &__selected-group {
+                background: #ddd;
+                border-radius: 90px/100px;
+                padding: 5px;
+                margin-left: 15px;
+                align-items: center;
+                i {
+                    cursor: pointer;
+                }
+                // display: flex;
+            }
         }
         &::v-deep {
             .at-container {

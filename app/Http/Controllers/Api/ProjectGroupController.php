@@ -40,9 +40,18 @@ class ProjectGroupController extends ItemController
 
         $itemsQuery = $this->getQuery($requestData);
 
+        Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
+
         $itemsQuery->withDepth()->withCount('projects')->defaultOrder();
 
         $items = $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate($request->input('limit', null)) : $itemsQuery->get();
+
+        Filter::process(
+            Filter::getActionFilterName(),
+            $items,
+        );
+
+        Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
 
         return responder()->success($items)->respond();
     }
@@ -63,11 +72,11 @@ class ProjectGroupController extends ItemController
         foreach ($modelScopes as $key => $value) {
             $query->withGlobalScope($key, $value);
         }
-        
+
         foreach (Filter::process(Filter::getQueryAdditionalRelationsFilterName(), []) as $with) {
             $query->with($with);
         }
-
+        
         QueryHelper::apply($query, $model, $filter);
 
         return Filter::process(
@@ -120,6 +129,12 @@ class ProjectGroupController extends ItemController
             Event::listen(
                 Filter::getAfterActionEventName(),
                 static fn(ProjectGroup $group) => $group->parent()->associate($parent_id)->save(),
+            );
+        }
+        if ($parent_id == null) {
+            Event::listen(
+                Filter::getAfterActionEventName(),
+                static fn(ProjectGroup $group) => $group->saveAsRoot(),
             );
         }
 

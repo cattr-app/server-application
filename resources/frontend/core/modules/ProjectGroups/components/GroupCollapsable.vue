@@ -22,7 +22,7 @@
                                     {{ breadCrumb.name }} /
                                 </span>
                             </span>
-                            <span>{{ group.name + ` (${group.projects_count})` }}</span>
+                            <span>{{ `${group.name} (${group.projects_count})` }}</span>
                         </h5>
                         <span @click.stop>
                             <router-link

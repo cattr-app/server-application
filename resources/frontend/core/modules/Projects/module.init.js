@@ -7,6 +7,7 @@ import PrioritySelect from '@/components/PrioritySelect';
 import TeamAvatars from '@/components/TeamAvatars';
 import Statuses from './components/Statuses';
 import Groups from './components/Groups';
+import { ref } from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -225,35 +226,27 @@ export function init(context) {
             label: 'field.group',
             key: 'group',
             render: (h, data) => {
-                if (
-                    data.values._currentGroup == null &&
-                    (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string')
-                ) {
-                    data.setValue('_currentGroup', data.currentValue);
+                if (typeof data.values.group == 'object') {
+                    data.setValue('_currentGroup', data.values.group);
                 }
-                let currentGroup = data.values._currentGroup || '';
+                let currentGroup = ref(data.values?._currentGroup || '');
 
-                let value = '';
-                if (typeof data.currentValue === 'number' || typeof data.currentValue === 'string') {
-                    value = data.currentValue;
-                    data.inputHandler(value);
-                } else if (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string') {
-                    value = data.currentValue.id;
-                    data.inputHandler(value);
-                }
+                let value = ref(data.currentValue?.id || data.currentValue || '');
 
                 return h(Groups, {
                     props: {
-                        value,
                         currentGroup,
+                        value,
                         clearable: true,
                     },
                     on: {
-                        input(value) {
-                            data.inputHandler(value);
+                        input(val) {
+                            data.inputHandler(val);
+                            value.value = val;
                         },
                         setCurrent(group) {
                             data.setValue('_currentGroup', group);
+                            currentGroup.value = group;
                         },
                     },
                 });

@@ -44,16 +44,18 @@
     import vSelect from 'vue-select';
     import debounce from 'lodash/debounce';
 
+    const service = new ProjectGroupsService();
+
     export default {
         name: 'Groups',
         props: {
             value: {
-                type: [String, Number],
-                default: '',
+                type: [String, Number, Object],
+                default: () => {},
             },
             currentGroup: {
                 type: [Object, String],
-                default: '',
+                default: () => {},
             },
             clearable: {
                 type: Boolean,
@@ -66,7 +68,6 @@
         data() {
             return {
                 options: [],
-                service: new ProjectGroupsService(),
                 observer: null,
                 isSelectOpen: false,
                 totalPages: 0,
@@ -79,30 +80,20 @@
         },
         created() {
             this.search = debounce(this.search, 350);
-            this.requestTimestamp = Date.now();
-            this.search(this.requestTimestamp);
         },
         mounted() {
             this.observer = new IntersectionObserver(this.infiniteScroll);
-        },
-        watch: {
-            async valueAndQuery(newValue) {
-                if (newValue.value === '') {
-                    this.localCurrentGroup != null
-                        ? (this.localCurrentGroup.current = false)
-                        : (this.localCurrentGroup = null);
-                    this.$emit('setCurrent', '');
-                } else {
-                    this.$emit('setCurrent', {
-                        id: this.localCurrentGroup.id,
-                        name: this.localCurrentGroup.label,
-                    });
-                }
-                if (newValue.value === '' && newValue.query === '') {
-                    this.requestTimestamp = Date.now();
-                    this.search(this.requestTimestamp);
-                }
-            },
+            if (this.currentGroup != '' && typeof this.currentGroup === 'object') {
+                this.options = [
+                    {
+                        id: this.currentGroup.id,
+                        label: this.currentGroup.name,
+                        depth: 0,
+                        current: true,
+                    },
+                ];
+                this.localCurrentGroup = this.options[0];
+            }
         },
         methods: {
             ucfirst,
@@ -110,6 +101,8 @@
                 return ''.padStart(depth, '-');
             },
             async onOpen() {
+                this.requestTimestamp = Date.now();
+                this.search(this.requestTimestamp);
                 this.isSelectOpen = true;
                 await this.$nextTick();
                 this.observe(this.requestTimestamp);
@@ -175,7 +168,7 @@
                     page: this.currentPage + 1,
                 };
 
-                return this.service.getWithFilters(filters).then(({ data, pagination }) => {
+                return service.getWithFilters(filters).then(({ data, pagination }) => {
                     if (requestTimestamp === this.requestTimestamp) {
                         this.totalPages = pagination.totalPages;
                         this.currentPage = pagination.currentPage;

@@ -1,7 +1,7 @@
 import ProjectGroupsService from '@/services/resource/project-groups.service';
 import Groups from '../Projects/components/Groups';
 import i18n from '@/i18n';
-import Vue, { h } from 'vue';
+import Vue, { h, ref } from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'project-groups',
@@ -37,27 +37,18 @@ export function init(context) {
             label: 'field.parent_group',
             key: 'parent_id',
             render: (h, data) => {
-                if (
-                    data.values._currentGroup == null &&
-                    (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string')
-                ) {
-                    data.setValue('_currentGroup', data.currentValue);
+                if (data.values.group_parent) {
+                    data.setValue('_currentGroup', data.values.group_parent);
                 }
-                let currentGroup = data.values._currentGroup || '';
 
-                let value = '';
-                if (typeof data.currentValue === 'number' || typeof data.currentValue === 'string') {
-                    value = data.currentValue;
-                    data.inputHandler(value);
-                } else if (typeof data.currentValue?.id === 'number' || typeof data.currentValue?.id === 'string') {
-                    value = data.currentValue.id;
-                    data.inputHandler(value);
-                }
+                let currentGroup = ref(data.values._currentGroup || '');
+
+                let value = ref(data.currentValue?.id || data.currentValue || '');
 
                 return h(Groups, {
                     props: {
-                        value,
                         currentGroup,
+                        value,
                         clearable: true,
                     },
                     on: {
@@ -129,8 +120,8 @@ export function init(context) {
     ]);
 
     context.addRoute({
-        path: '/groups',
-        name: 'projects.groups',
+        path: `/${context.routerPrefix}`,
+        name: context.getModuleRouteName(),
         component: () => import(/* webpackChunkName: "project-groups" */ './views/ProjectGroups.vue'),
         meta: {
             auth: true,
@@ -140,7 +131,7 @@ export function init(context) {
     context.addNavbarEntry({
         label: 'navigation.project-groups',
         to: {
-            name: 'projects.groups',
+            name: context.getModuleRouteName(),
         },
     });
 

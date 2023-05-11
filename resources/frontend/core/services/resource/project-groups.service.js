@@ -24,7 +24,7 @@ export default class ProjectGroupsService extends ResourceService {
      * @returns {Promise<AxiosResponse<T>>}
      */
     getItem(id) {
-        return axios.get(this.getItemRequestUri(id));
+        return axios.get(this.getItemRequestUri(id) + '&' + serialize({ with: ['groupParent'] }));
     }
 
     /**

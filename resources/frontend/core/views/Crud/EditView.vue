@@ -216,29 +216,30 @@
                     :key="index"
                     :parent="this"
                 />
-                <div class="control-items">
+                <div class="bottom-control">
+                    <at-button type="primary" :disabled="invalid || isLoading" :loading="isLoading" @click="submit">{{
+                        $t('control.save')
+                    }}</at-button>
                     <template
                         v-if="
                             pageData.bottomComponents.pageControls && pageData.bottomComponents.pageControls.length > 0
                         "
                     >
-                        <template v-for="(button, key) of pageData.bottomComponents.pageControls">
-                            <at-button
-                                v-if="checkRenderCondition(button)"
-                                :key="key"
-                                class="control-item"
-                                size="large"
-                                :type="button.type || ''"
-                                :icon="button.icon || ''"
-                                @click="handleClick(button)"
-                            >
-                                {{ $t(button.label) }}
-                            </at-button>
-                        </template>
+                        <div class="bottom-control__added-items">
+                            <template v-for="(button, key) of pageData.bottomComponents.pageControls">
+                                <at-button
+                                    v-if="checkRenderCondition(button)"
+                                    :key="key"
+                                    class="bottom-control__added-items__item"
+                                    :type="button.type || ''"
+                                    :icon="button.icon || ''"
+                                    @click="handleClick(button)"
+                                >
+                                    {{ $t(button.label) }}
+                                </at-button>
+                            </template>
+                        </div>
                     </template>
-                    <at-button type="primary" :disabled="invalid || isLoading" :loading="isLoading" @click="submit">{{
-                        $t('control.save')
-                    }}</at-button>
                 </div>
             </validation-observer>
         </div>
@@ -294,7 +295,6 @@
 
         async beforeRouteEnter(to, from, next) {
             next(async vm => {
-                await vm.fetchData();
                 next();
             });
         },
@@ -424,6 +424,14 @@
                     .label {
                         font-weight: bold;
                     }
+                }
+            }
+
+            .bottom-control {
+                display: flex;
+
+                &__added-items {
+                    margin-left: auto;
                 }
             }
         }

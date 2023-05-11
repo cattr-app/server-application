@@ -7,6 +7,7 @@ use App\Traits\ExposePermissions;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\SoftDeletes;
 use Kalnoy\Nestedset\AncestorsRelation;
 use Kalnoy\Nestedset\DescendantsRelation;
@@ -35,9 +36,14 @@ class ProjectGroup extends Model
 
     protected const PERMISSIONS = ['update', 'destroy'];
 
-    public function groupParents(): AncestorsRelation
+    public function groupParentsWithProjectsCount(): AncestorsRelation
     {
-        return $this->ancestors();
+        return $this->ancestors()->withCount('projects');
+    }
+
+    public function groupParent(): HasOne
+    {
+        return $this->hasOne(ProjectGroup::class, 'id', 'parent_id');
     }
 
     public function descendantsWithDepthAndProjectsCount(): DescendantsRelation
