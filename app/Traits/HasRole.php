@@ -68,9 +68,9 @@ trait HasRole
             config('cache.role_caching_ttl'),
             static fn() => $self->projectsRelation()
                 ->get()
-                ->only(['project_id', 'role_id'])
                 ->collect()
                 ->keyBy('project_id')
+                ->map(static fn($el) => $el->role_id)
                 ->all(),
         );
 
