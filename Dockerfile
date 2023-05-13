@@ -4,6 +4,7 @@ FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr-dev:latest AS b
 ARG SENTRY_DSN
 ARG APP_VERSION
 ARG APP_ENV=production
+ARG BACKEND_MODULES="cattr/gitlab_integration-module cattr/redmine_integration-module"
 ENV IMAGE_VERSION=5.0.0
 ENV PUSHER_APP_KEY="cattr"
 ENV APP_VERSION $APP_VERSION
@@ -20,8 +21,8 @@ COPY --chown=www:www . /app
 USER www:www
 
 RUN set -x && \
-    composer require -n --no-ansi --no-install --no-update --no-audit $MODULES && \
-    composer update -n --no-autoloader --no-install --no-ansi $MODULES && \
+    composer require -n --no-ansi --no-install --no-update --no-audit $BACKEND_MODULES && \
+    composer update -n --no-autoloader --no-install --no-ansi $BACKEND_MODULES && \
     composer install -n --no-dev --no-cache --no-ansi --no-autoloader --no-dev && \
     composer dump-autoload -n --optimize --apcu --classmap-authoritative
 
