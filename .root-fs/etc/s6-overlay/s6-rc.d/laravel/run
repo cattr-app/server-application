@@ -1,6 +1,6 @@
 #!/command/execlineb -P
 
 with-contenv
-s6-setuidgid www:adm
+s6-setuidgid 10000:4
 
 php /app/artisan octane:start --host=127.0.0.1 --port=8090
