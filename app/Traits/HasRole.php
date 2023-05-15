@@ -79,7 +79,7 @@ trait HasRole
 
         if (is_array($role)) {
             foreach ($role as $e) {
-                if ($roles[$projectId]['role_id'] === $e->value) {
+                if ($roles[$projectId] === $e->value) {
                     return true;
                 }
             }
@@ -89,6 +89,6 @@ trait HasRole
             return true;
         }
 
-        return $roles[$projectId]['role_id'] === $role->value;
+        return $roles[$projectId] === $role->value;
     }
 }
