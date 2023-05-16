@@ -27,6 +27,12 @@ php artisan migrate --seed --seeder=InitialSeeder
 
 App will not start without seeding of InitialSeeder
 
+### Add admin 
+
+```
+php artisan cattr:make:admin
+```
+
 ### Run Local server
 
 local server by default will be run as <http://127.0.0.1:8000>
