@@ -32,6 +32,7 @@ App will not start without seeding of InitialSeeder
 ```
 php artisan cattr:make:admin
 ```
+It will create a default admin: `admin@cattr.app / password`
 
 ### Run Local server
 
