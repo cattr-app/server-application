@@ -1,5 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import TimezonePicker from '@/components/TimezonePicker';
+import EnabledScreenshotSelect from '@/components/EnabledScreenshotSelect';
 import CoreUsersService from '@/services/resource/user.service';
 import RoleSelect from '@/components/RoleSelect';
 import Users from '../views/Users';
@@ -8,6 +9,7 @@ import { store } from '@/store';
 import LanguageSelector from '@/components/LanguageSelector';
 import i18n from '@/i18n';
 import Vue from 'vue';
+import router from '@/router';
 
 export function fieldsToFillProvider() {
     return [
@@ -65,10 +67,33 @@ export function fieldsToFillProvider() {
             },
         },
         {
-            label: 'field.screenshots_active',
-            key: 'screenshots_active',
-            type: 'checkbox',
-            default: 1,
+            label: 'field.enable_screenshots',
+            key: 'enable_screenshots',
+            render: (h, props) => {
+                let value = props.values.enable_screenshots;
+                let propertyInheritance = false;
+
+                if (
+                    (router.history.current.name === 'Users.crud.users.edit' &&
+                        props.companyData.enable_screenshots == 'required') ||
+                    props.companyData.enable_screenshots == 'forbidden'
+                ) {
+                    value = props.companyData.enable_screenshots;
+                    propertyInheritance = value == 'required' || value == 'forbidden' ? true : false;
+                }
+
+                return h(EnabledScreenshotSelect, {
+                    props: {
+                        value,
+                        propertyInheritance,
+                    },
+                    on: {
+                        input(value) {
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
         },
         {
             label: 'field.password',
@@ -250,8 +275,8 @@ export default (context, router) => {
             },
         },
         {
-            label: 'field.screenshots_active',
-            key: 'screenshots_active',
+            label: 'field.enable_screenshots',
+            key: 'enable_screenshots',
             render: (h, { currentValue }) => {
                 return h('span', currentValue ? i18n.t('control.yes') : i18n.t('control.no'));
             },

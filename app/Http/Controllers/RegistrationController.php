@@ -134,7 +134,7 @@ class RegistrationController extends Controller
             'password' => $request->input('password'),
             'active' => true,
             'manual_time' => false,
-            'screenshots_active' => true,
+            'enable_screenshots' => 'required',
             'computer_time_popup' => 3,
             'screenshots_interval' => 10,
             'role_id' => $invitation->role_id,

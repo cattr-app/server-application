@@ -165,7 +165,7 @@ return [
         'url' => 'URL',
         'company_id' => 'Компания',
         'avatar' => 'Изображение пользователя',
-        'screenshots_active' => 'Снятие скриншотов',
+        'enable_screenshots' => 'Снятие скриншотов',
         'manual_time' => 'Ручная установка интервалов',
         'computer_time_popup' => 'Время неактивности пользователя',
         'screenshots_interval' => 'Интервал снятия скриншота',

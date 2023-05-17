@@ -34,7 +34,7 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property string|null $url
  * @property int|null $company_id
  * @property string|null $avatar
- * @property int|null $screenshots_active
+ * @property int|null $enable_screenshots
  * @property int|null $manual_time
  * @property int|null $computer_time_popup
  * @property bool|null $blur_screenshots
@@ -137,7 +137,7 @@ class User extends Authenticatable
         'url',
         'company_id',
         'avatar',
-        'screenshots_active',
+        'enable_screenshots',
         'manual_time',
         'computer_time_popup',
         'blur_screenshots',
@@ -166,7 +166,7 @@ class User extends Authenticatable
         'url' => 'string',
         'company_id' => 'integer',
         'avatar' => 'string',
-        'screenshots_active' => 'integer',
+        'enable_screenshots' => 'string',
         'manual_time' => 'integer',
         'computer_time_popup' => 'integer',
         'blur_screenshots' => 'boolean',

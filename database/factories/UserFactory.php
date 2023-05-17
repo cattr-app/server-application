@@ -3,7 +3,7 @@
 namespace Database\Factories;
 
 use App\Enums\Role;
-use App\Models\User;
+use App\Enums\ScreenshotEnabledOptions;
 use Illuminate\Database\Eloquent\Factories\Factory;
 
 class UserFactory extends Factory
@@ -16,7 +16,7 @@ class UserFactory extends Factory
             'url' => '',
             'company_id' => 1,
             'avatar' => '',
-            'screenshots_active' => 1,
+            'enable_screenshots' => ScreenshotEnabledOptions::REQUIRED->value,
             'manual_time' => 0,
             'computer_time_popup' => 300,
             'blur_screenshots' => 0,

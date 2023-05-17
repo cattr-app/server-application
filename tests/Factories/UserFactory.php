@@ -2,6 +2,7 @@
 
 namespace Tests\Factories;
 
+use App\Enums\ScreenshotEnabledOptions;
 use App\Models\User;
 use Carbon\Carbon;
 use Faker\Factory as FakerFactory;
@@ -65,7 +66,7 @@ class UserFactory extends Factory
             'url' => '',
             'company_id' => 1,
             'avatar' => '',
-            'screenshots_active' => 1,
+            'enable_screenshots' => ScreenshotEnabledOptions::REQUIRED->value,
             'manual_time' => 0,
             'computer_time_popup' => 300,
             'blur_screenshots' => 0,
@@ -92,7 +93,7 @@ class UserFactory extends Factory
             'password' => $faker->password,
             'screenshots_interval' => 5,
             'user_language' => 'en',
-            'screenshots_active' => true,
+            'enable_screenshots' => ScreenshotEnabledOptions::REQUIRED->value,
             'computer_time_popup' => 10,
             'timezone' => 'UTC',
             'role_id' => 2,

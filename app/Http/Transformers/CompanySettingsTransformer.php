@@ -2,6 +2,7 @@
 
 namespace App\Http\Transformers;
 
+use App\Enums\ScreenshotEnabledOptions;
 use Filter;
 use Flugg\Responder\Transformers\Transformer;
 
@@ -17,6 +18,7 @@ class CompanySettingsTransformer extends Transformer
             'internal_priorities' => $input['internal_priorities'] ?? [],
             'heartbeat_period' => config('app.user_activity.online_status_time'),
             'auto_thinning' => (bool)($input['auto_thinning'] ?? false),
+            'enable_screenshots' => (string) ScreenshotEnabledOptions::tryFrom($input['enable_screenshots'])?->value ?? ScreenshotEnabledOptions::FORBIDDEN->value,
             'default_priority_id' => (int)($input['default_priority_id'] ?? 2),
         ]);
     }

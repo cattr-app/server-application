@@ -12,5 +12,6 @@ class CompanyManagementSeeder extends Seeder
         Settings::scope('core')->set('timezone', 'UTC', true);
         Settings::scope('core')->set('language', 'en', true);
         Settings::scope('core')->set('auto_thinning', true, true);
+        Settings::scope('core')->set('enable_screenshots', 'required', true);
     }
 }

@@ -1,13 +1,14 @@
 <template>
     <div class="screenshot" @click="$emit('click', $event)">
         <AppImage
+            v-if="companyData.enable_screenshots != 'forbidden'"
             :is-blob="true"
             :src="getThumbnailPath(interval)"
             class="screenshot__image"
             :lazy="lazyImage"
             @click="onShow"
         />
-
+        <i v-else class="icon icon-camera-off screenshot_image" />
         <at-tooltip>
             <template slot="content">
                 <div v-if="interval.activity_fill === null" class="screenshot__activity">
@@ -185,6 +186,12 @@
                     height: 150px;
                 }
             }
+        }
+
+        .icon {
+            font-size: 70px;
+            display: flex;
+            justify-content: center;
         }
 
         &__text {
