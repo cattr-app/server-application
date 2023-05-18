@@ -123,7 +123,7 @@ class ProjectGroupController extends ItemController
         Event::listen(
             Filter::getAfterActionEventName(),
             static function (ProjectGroup $group) use ($request) {
-                    if ($parent_id = $request->input('parent_id', null)) {
+                if ($parent_id = $request->input('parent_id', null)) {
                     $group->parent()->associate($parent_id)->save();
                 } else {
                     $group->saveAsRoot();
