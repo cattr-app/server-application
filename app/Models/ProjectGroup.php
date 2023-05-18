@@ -38,7 +38,7 @@ class ProjectGroup extends Model
 
     public function groupParentsWithProjectsCount(): AncestorsRelation
     {
-        return $this->ancestors()->withCount('projects');
+        return $this->ancestors()->withCount('projects')->defaultOrder();
     }
 
     public function groupParent(): HasOne

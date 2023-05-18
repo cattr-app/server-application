@@ -1,7 +1,12 @@
 <template>
     <div class="groups">
         <at-collapse simple accordion @on-change="event => (opened = event)">
-            <at-collapse-item v-for="(group, index) in groups" :key="index" :disabled="group.projects_count === 0">
+            <at-collapse-item
+                v-for="(group, index) in groups"
+                :key="index"
+                :name="String(index)"
+                :disabled="group.projects_count === 0"
+            >
                 <div slot="title">
                     <div class="groups__header">
                         <h5 :class="{ groups__disabled: group.projects_count === 0 }" class="groups__title">

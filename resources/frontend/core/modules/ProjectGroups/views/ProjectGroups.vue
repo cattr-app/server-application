@@ -13,8 +13,15 @@
                     <i class="icon icon-search" />
                 </template>
             </at-input>
-            <div v-if="isSelectGroupBranch" class="project-groups__search-container__selected-group">
-                {{ groups[0].name }} <i class="icon icon-x" @click="resetSelectedGroup" />
+            <div v-if="isGroupSelected" class="project-groups__selected-group">
+                {{ groups[0].name }}
+                <at-button
+                    icon="icon-x"
+                    circle
+                    size="small"
+                    class="project-groups__selected-group__clear"
+                    @click="onSearch"
+                ></at-button>
             </div>
         </div>
         <div class="at-container">
@@ -59,7 +66,7 @@
                 totalPages: 0,
                 currentPage: 0,
                 query: '',
-                isSelectGroupBranch: false,
+                isGroupSelected: false,
             };
         },
         async created() {
@@ -91,7 +98,7 @@
                 }
             },
             onSearch() {
-                this.isSelectGroupBranch = false;
+                this.isGroupSelected = false;
 
                 this.requestTimestamp = Date.now();
 
@@ -153,7 +160,6 @@
             },
             getTargetClickGroupAndChildren(id) {
                 this.query = '';
-                this.isSelectGroupBranch = true;
                 service
                     .getWithFilters({
                         where: { id },
@@ -167,11 +173,8 @@
                         data[0].descendants_with_depth_and_projects_count.forEach(element => {
                             this.groups.push(element);
                         });
+                        this.isGroupSelected = true;
                     });
-            },
-            resetSelectedGroup() {
-                this.isSelectGroupBranch = false;
-                this.onSearch();
             },
         },
     };
@@ -189,17 +192,19 @@
             display: flex;
             align-items: center;
             margin-bottom: $spacing-03;
+        }
+        &__selected-group {
+            background: #ddd;
+            border-radius: 90px/100px;
+            padding: 5px 20px;
+            margin-left: 15px;
+            align-items: center;
 
-            &__selected-group {
-                background: #ddd;
-                border-radius: 90px/100px;
-                padding: 5px;
-                margin-left: 15px;
-                align-items: center;
-                i {
-                    cursor: pointer;
+            &__clear {
+                margin-left: 10px;
+                &:hover {
+                    background: rgba(97, 144, 232, 0.6);
                 }
-                // display: flex;
             }
         }
         &::v-deep {

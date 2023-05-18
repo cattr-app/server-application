@@ -14,10 +14,8 @@ use Event;
 use Exception;
 use Filter;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Validation\ValidationException;
 use Kalnoy\Nestedset\QueryBuilder;
-use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
-use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
+
 use Throwable;
 
 class ProjectGroupController extends ItemController
@@ -33,9 +31,6 @@ class ProjectGroupController extends ItemController
      */
     public function index(ListProjectGroupRequest $request): JsonResponse
     {
-        // TODO:
-        //  [] remove/setAnother amount in ->paginate(2)
-        
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
         $itemsQuery = $this->getQuery($requestData);
@@ -119,24 +114,22 @@ class ProjectGroupController extends ItemController
     /**
      * Show the form for editing the specified resource.
      *
-     * @param EditProjectRequest $request
+     * @param EditProjectGroupRequest $request
      * @return JsonResponse
      * @throws Throwable
      */
     public function edit(EditProjectGroupRequest $request): JsonResponse
     {
-        if ($parent_id = $request->safe(['parent_id'])['parent_id'] ?? null) {
-            Event::listen(
-                Filter::getAfterActionEventName(),
-                static fn(ProjectGroup $group) => $group->parent()->associate($parent_id)->save(),
-            );
-        }
-        if ($parent_id == null) {
-            Event::listen(
-                Filter::getAfterActionEventName(),
-                static fn(ProjectGroup $group) => $group->saveAsRoot(),
-            );
-        }
+        Event::listen(
+            Filter::getAfterActionEventName(),
+            static function (ProjectGroup $group) use ($request) {
+                    if ($parent_id = $request->input('parent_id', null)) {
+                    $group->parent()->associate($parent_id)->save();
+                } else {
+                    $group->saveAsRoot();
+                }
+            },
+        );
 
         return $this->_edit($request);
     }

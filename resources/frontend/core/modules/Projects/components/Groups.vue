@@ -83,7 +83,7 @@
         },
         mounted() {
             this.observer = new IntersectionObserver(this.infiniteScroll);
-            if (this.currentGroup != '' && typeof this.currentGroup === 'object') {
+            if (typeof this.currentGroup === 'object') {
                 this.options = [
                     {
                         id: this.currentGroup.id,
@@ -137,6 +137,10 @@
                 }
                 option.current = true;
                 this.localCurrentGroup = option;
+                this.$emit('setCurrent', {
+                    id: this.localCurrentGroup.id,
+                    name: this.localCurrentGroup.label,
+                });
             },
             async infiniteScroll([{ isIntersecting, target }]) {
                 if (isIntersecting) {

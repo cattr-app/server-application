@@ -19,8 +19,8 @@ class ShowProjectGroupRequest extends CattrFormRequest
     public function _rules(): array
     {
         return array_merge(
-            ['id' => 'required|int|exists:project_groups,id'],
             QueryHelper::getValidationRules(),
+            ['id' => 'required|int|exists:project_groups,id'],
         );
     }
 }
