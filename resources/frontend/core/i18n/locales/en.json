@@ -6,7 +6,8 @@
     "company_settings": "Company Settings",
     "logout": "Logout",
     "dropdown": {
-      "reports": "Reports"
+      "reports": "Reports",
+      "projects": "Projects"
     }
   },
   "setup": {

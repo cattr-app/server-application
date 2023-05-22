@@ -128,8 +128,9 @@ export function init(context) {
         },
     });
 
-    context.addNavbarEntry({
+    context.addNavbarEntryDropDown({
         label: 'navigation.project-groups',
+        section: 'navigation.dropdown.projects',
         to: {
             name: context.getModuleRouteName(),
         },
