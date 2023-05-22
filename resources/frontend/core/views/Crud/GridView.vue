@@ -799,6 +799,7 @@
             &::v-deep .at-table {
                 table {
                     border-radius: $border-radius-lger;
+                    overflow: visible;
                 }
 
                 tr {
