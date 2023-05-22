@@ -3,7 +3,7 @@
 namespace App\Http\Requests\User;
 
 use App\Enums\Role;
-use App\Enums\ScreenshotEnabledOptions;
+use App\Enums\ScreenshotsState;
 use App\Models\User;
 use App\Http\Requests\CattrFormRequest;
 use Illuminate\Validation\Rules\Enum;
@@ -24,7 +24,8 @@ class CreateUserRequest extends CattrFormRequest
             'password' => 'sometimes|required|min:6',
             'important' => 'bool',
             'active' => 'required|bool',
-            'enable_screenshots' => 'required|in:' . implode(',', array_map(fn($item) => $item->value, ScreenshotEnabledOptions::cases())),
+            'screenshots_state' => ['required', new Enum(ScreenshotsState::class)],
+            'screenshots_state_is_blocked_by_admin' => 'bool|required',
             'manual_time' => 'sometimes|required|bool',
             'screenshots_interval' => 'required|int|min:1|max:15',
             'computer_time_popup' => 'required|int|min:1',

@@ -262,7 +262,7 @@
     "total_spent": "Total Spent Time",
     "time": "Time",
     "auto_thin": "Automatic storage cleanup",
-    "enable_screenshots": "Enable screenshots",
+    "screenshots_state": "Enable screenshots",
     "members": "Members",
     "url": "URL",
     "statuses": {

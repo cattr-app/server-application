@@ -5,7 +5,12 @@
         </template>
 
         <AppImage
-            v-if="interval && interval.id && companyData.enable_screenshots != 'forbidden'"
+            v-if="
+                interval &&
+                interval.id &&
+                companyData.screenshots_state !== 0 &&
+                companyData.env_screenshots_state !== 0
+            "
             class="modal-screenshot"
             :src="getScreenshotPath(interval)"
             :openable="true"

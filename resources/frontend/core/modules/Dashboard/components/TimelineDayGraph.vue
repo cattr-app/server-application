@@ -34,7 +34,9 @@
             class="popup"
         >
             <Screenshot
-                v-if="clickPopup.event && companyData.enable_screenshots != 'forbidden'"
+                v-if="
+                    clickPopup.event && companyData.screenshots_state !== 0 && companyData.env_screenshots_state !== 0
+                "
                 :disableModal="true"
                 :lazyImage="false"
                 :project="{ id: clickPopup.event.project_id, name: clickPopup.event.project_name }"

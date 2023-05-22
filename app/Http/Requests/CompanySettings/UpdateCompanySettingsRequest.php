@@ -3,9 +3,9 @@
 namespace App\Http\Requests\CompanySettings;
 
 use App\Enums\Role;
-use App\Enums\ScreenshotEnabledOptions;
+use App\Enums\ScreenshotsState;
 use App\Http\Requests\CattrFormRequest;
-use Filter;
+use Illuminate\Validation\Rules\Enum;
 
 class UpdateCompanySettingsRequest extends CattrFormRequest
 {
@@ -20,7 +20,7 @@ class UpdateCompanySettingsRequest extends CattrFormRequest
             'timezone' => 'sometimes|required|timezone',
             'work_time' => 'sometimes|int',
             'auto_thinning' => 'sometimes|boolean',
-            'enable_screenshots' => 'sometimes|in:' . implode(',', array_map(fn($item) => $item->value, ScreenshotEnabledOptions::cases())),
+            'screenshots_state' => ['sometimes', 'required', new Enum(ScreenshotsState::class)],
             'language' => 'sometimes|string',
             'default_priority_id' => 'sometimes|int',
         ];

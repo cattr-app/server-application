@@ -13,6 +13,7 @@ use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\IntervalController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
+use App\Http\Controllers\ScreenshotController;
 use App\Http\Controllers\AuthController;
 use App\Http\Controllers\PasswordResetController;
 use App\Http\Controllers\RegistrationController;
@@ -247,9 +248,11 @@ Route::group([
 
     //Screenshots routes
     $router->get('time-intervals/{interval}/screenshot', [IntervalController::class, 'showScreenshot'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
     $router->get('time-intervals/{interval}/thumb', [IntervalController::class, 'showThumbnail'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
+    $router->get('screenshots/states', [ScreenshotController::class, 'getScreenshotStates'])
+        ->name('screenshots.states');
 });
 
 Route::any('(.*)', [Controller::class, 'universalRoute'])->name('universal_route');

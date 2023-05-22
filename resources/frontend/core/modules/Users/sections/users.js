@@ -1,6 +1,6 @@
 import cloneDeep from 'lodash/cloneDeep';
 import TimezonePicker from '@/components/TimezonePicker';
-import EnabledScreenshotSelect from '@/components/EnabledScreenshotSelect';
+import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
 import CoreUsersService from '@/services/resource/user.service';
 import RoleSelect from '@/components/RoleSelect';
 import Users from '../views/Users';
@@ -9,7 +9,6 @@ import { store } from '@/store';
 import LanguageSelector from '@/components/LanguageSelector';
 import i18n from '@/i18n';
 import Vue from 'vue';
-import router from '@/router';
 
 export function fieldsToFillProvider() {
     return [
@@ -67,33 +66,44 @@ export function fieldsToFillProvider() {
             },
         },
         {
-            label: 'field.enable_screenshots',
-            key: 'enable_screenshots',
+            label: 'field.screenshots_state',
+            key: 'screenshots_state',
+            default: 1,
             render: (h, props) => {
-                let value = props.values.enable_screenshots;
-                let propertyInheritance = false;
+                let value = props.values.screenshots_state;
+                let isDisabled = props.companyData.screenshots_state_inherit;
+                let envValue = props.companyData.env_screenshots_state;
 
-                if (
-                    (router.history.current.name === 'Users.crud.users.edit' &&
-                        props.companyData.enable_screenshots == 'required') ||
-                    props.companyData.enable_screenshots == 'forbidden'
-                ) {
-                    value = props.companyData.enable_screenshots;
-                    propertyInheritance = value == 'required' || value == 'forbidden' ? true : false;
+                if (envValue === 1 || envValue === 0) {
+                    value = envValue;
+                    isDisabled = true;
+                } else if (envValue === 2) {
+                    isDisabled = false;
+                } else if (isDisabled) {
+                    value = props.companyData.screenshots_state;
                 }
 
-                return h(EnabledScreenshotSelect, {
+                return h(ScreenshotsStateSelect, {
                     props: {
                         value,
-                        propertyInheritance,
+                        isDisabled,
                     },
                     on: {
                         input(value) {
                             props.inputHandler(value);
+
+                            value === 2
+                                ? props.setValue('screenshots_state_is_blocked_by_admin', false)
+                                : props.setValue('screenshots_state_is_blocked_by_admin', true);
                         },
                     },
                 });
             },
+        },
+        {
+            key: 'screenshots_state_is_blocked_by_admin',
+            default: true,
+            displayable: () => false,
         },
         {
             label: 'field.password',
@@ -275,8 +285,8 @@ export default (context, router) => {
             },
         },
         {
-            label: 'field.enable_screenshots',
-            key: 'enable_screenshots',
+            label: 'field.screenshots_state',
+            key: 'screenshots_state',
             render: (h, { currentValue }) => {
                 return h('span', currentValue ? i18n.t('control.yes') : i18n.t('control.no'));
             },

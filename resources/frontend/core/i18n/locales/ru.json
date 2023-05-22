@@ -261,7 +261,7 @@
     "total_spent": "Потраченное время",
     "time": "Время",
     "auto_thin": "Автоматическая очистка хранилища",
-    "enable_screenshots": "Включить скриншоты",
+    "screenshots_state": "Включить скриншоты",
     "members": "Участники",
     "url": "URL",
     "statuses": {

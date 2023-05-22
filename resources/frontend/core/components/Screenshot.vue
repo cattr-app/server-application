@@ -1,7 +1,7 @@
 <template>
     <div class="screenshot" @click="$emit('click', $event)">
         <AppImage
-            v-if="companyData.enable_screenshots != 'forbidden'"
+            v-if="companyData.screenshots_state !== 0 && companyData.env_screenshots_state !== 0"
             :is-blob="true"
             :src="getThumbnailPath(interval)"
             class="screenshot__image"

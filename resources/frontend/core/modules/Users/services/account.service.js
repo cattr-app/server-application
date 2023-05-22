@@ -40,12 +40,15 @@ export default class AccountService extends SettingsService {
 
         return axios.get(this.getItemRequestUri(), { ignoreCancel: true }).then(({ data }) => {
             const values = data.data;
+
             return {
                 id: values.id,
                 password: values.password,
                 email: values.email,
                 full_name: values.full_name,
                 user_language: values.user_language,
+                screenshots_state: values.screenshots_state,
+                screenshots_state_is_blocked_by_admin: values.screenshots_state_is_blocked_by_admin,
             };
         });
     }

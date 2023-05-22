@@ -121,7 +121,7 @@
  *      "url": "",
  *      "company_id": 1,
  *      "avatar": "",
- *      "enable_screenshots": "required",
+ *      "screenshots_state": 1,
  *      "manual_time": 0,
  *      "computer_time_popup": 300,
  *      "blur_screenshots": 0,

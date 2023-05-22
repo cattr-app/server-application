@@ -3,7 +3,7 @@ import TimezonePicker from '@/components/TimezonePicker';
 import CompanyService from '../services/company.service';
 import ColorSelect from '../components/ColorSelect';
 import PrioritySelect from '@/components/PrioritySelect';
-import EnabledScreenshotSelect from '@/components/EnabledScreenshotSelect';
+import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
 import { store } from '@/store';
 import { hasRole } from '@/utils/user';
 
@@ -139,13 +139,21 @@ export default {
                     tooltipValue: 'tooltip.auto_thin',
                 },
                 {
-                    label: 'field.enable_screenshots',
-                    key: 'enable_screenshots',
+                    label: 'field.screenshots_state',
+                    key: 'screenshots_state',
                     render: (h, props) => {
-                        let value = props.values.enable_screenshots;
-                        return h(EnabledScreenshotSelect, {
+                        let value = props.values.screenshots_state;
+                        let envValue = props.values.env_screenshots_state;
+                        let isDisabled = false;
+
+                        if (typeof envValue === 'number' && envValue <= 2 && envValue >= 0) {
+                            value = envValue;
+                            isDisabled = true;
+                        }
+                        return h(ScreenshotsStateSelect, {
                             props: {
                                 value,
+                                isDisabled,
                             },
                             on: {
                                 input(value) {

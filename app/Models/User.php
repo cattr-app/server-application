@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ScreenshotsState;
 use App\Mail\ResetPassword;
 use App\Scopes\UserAccessScope;
 use App\Traits\HasRole;
@@ -34,7 +35,7 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property string|null $url
  * @property int|null $company_id
  * @property string|null $avatar
- * @property int|null $enable_screenshots
+ * @property int|null $screenshots_state
  * @property int|null $manual_time
  * @property int|null $computer_time_popup
  * @property bool|null $blur_screenshots
@@ -137,7 +138,8 @@ class User extends Authenticatable
         'url',
         'company_id',
         'avatar',
-        'enable_screenshots',
+        'screenshots_state',
+        'screenshots_state_is_blocked_by_admin',
         'manual_time',
         'computer_time_popup',
         'blur_screenshots',
@@ -166,7 +168,8 @@ class User extends Authenticatable
         'url' => 'string',
         'company_id' => 'integer',
         'avatar' => 'string',
-        'enable_screenshots' => 'string',
+        'screenshots_state' => ScreenshotsState::class,
+        'screenshots_state_is_blocked_by_admin' => 'boolean',
         'manual_time' => 'integer',
         'computer_time_popup' => 'integer',
         'blur_screenshots' => 'boolean',
