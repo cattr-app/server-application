@@ -31,6 +31,7 @@
                         </h5>
                         <span @click.stop>
                             <router-link
+                                v-if="$can('update', 'projectGroup')"
                                 class="groups__header__link"
                                 :to="{ name: 'ProjectGroups.crud.groups.edit', params: { id: group.id } }"
                                 target="_blank"

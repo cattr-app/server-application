@@ -113,9 +113,9 @@ export function init(context) {
                 });
                 context.$router.push('/groups');
             },
-            // renderCondition: ({ $can }, item) => {
-            //     return $can('delete', 'project-groups', item);
-            // },
+            renderCondition: ({ $can }, item) => {
+                return $can('delete', 'projectGroup');
+            },
         },
     ]);
 
