@@ -199,7 +199,7 @@
     "project_selected_all": "Выбраны все проекты",
     "status_selected": "Нет выбранных статусов | Выбран 1 статус | Выбрано {count} статуса(ов)",
     "status_selected_all": "Выбраны все статусы",
-    "screenshot_select_options": {
+    "screenshot_state_options": {
       "required": "Обязательны",
       "optional": "Необязательны",
       "forbidden": "Запрещены"

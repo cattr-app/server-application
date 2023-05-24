@@ -136,7 +136,7 @@ class RegistrationController extends Controller
             'active' => true,
             'manual_time' => false,
             'screenshots_state' => ScreenshotsState::REQUIRED,
-            'screenshots_state_is_blocked_by_admin' => true,
+            'screenshots_state_locked' => true,
             'computer_time_popup' => 3,
             'screenshots_interval' => 10,
             'role_id' => $invitation->role_id,

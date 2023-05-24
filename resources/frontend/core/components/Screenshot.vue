@@ -8,7 +8,7 @@
             :lazy="lazyImage"
             @click="onShow"
         />
-        <i v-else class="icon icon-camera-off screenshot_image" />
+        <i v-else class="icon icon-camera-off screenshot__image" />
         <at-tooltip>
             <template slot="content">
                 <div v-if="interval.activity_fill === null" class="screenshot__activity">

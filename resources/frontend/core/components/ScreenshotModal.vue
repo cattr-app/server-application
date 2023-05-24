@@ -15,6 +15,7 @@
             :src="getScreenshotPath(interval)"
             :openable="true"
         />
+        <i v-else class="icon icon-camera-off modal-screenshot" />
         <at-progress
             class="screenshot__activity-bar"
             :stroke-width="7"
@@ -200,6 +201,13 @@
 
             .at-modal__body {
                 padding: 0;
+
+                .icon-camera-off {
+                    display: flex;
+                    justify-content: center;
+                    align-items: center;
+                    font-size: 200px;
+                }
             }
 
             .at-modal__footer {

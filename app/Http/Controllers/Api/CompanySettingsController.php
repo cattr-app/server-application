@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\ScreenshotsState;
 use App\Http\Controllers\Controller;
 use App\Http\Requests\CompanySettings\UpdateCompanySettingsRequest;
 use App\Http\Transformers\CompanySettingsTransformer;
@@ -148,5 +149,12 @@ class CompanySettingsController extends Controller
         Settings::scope('core')->set($request->validated());
 
         return responder()->success()->respond(204);
+    }
+
+    public function getScreenshotStates() 
+    {
+        $items = array_map(fn($case) => $case->toArray(), ScreenshotsState::cases());
+
+        return responder()->success($items)->respond();
     }
 }

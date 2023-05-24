@@ -87,21 +87,22 @@ export function fieldsToFillProvider() {
                     props: {
                         value,
                         isDisabled,
+                        hideIndexes: [0],
                     },
                     on: {
                         input(value) {
                             props.inputHandler(value);
 
                             value === 2
-                                ? props.setValue('screenshots_state_is_blocked_by_admin', false)
-                                : props.setValue('screenshots_state_is_blocked_by_admin', true);
+                                ? props.setValue('screenshots_state_locked', false)
+                                : props.setValue('screenshots_state_locked', true);
                         },
                     },
                 });
             },
         },
         {
-            key: 'screenshots_state_is_blocked_by_admin',
+            key: 'screenshots_state_locked',
             default: true,
             displayable: () => false,
         },

@@ -67,7 +67,7 @@ export function fieldsProvider() {
                 let userValue = props.values.screenshots_state;
                 let isDisabled = props.companyData.screenshots_state_inherit;
                 let envValue = props.companyData.env_screenshots_state;
-                let isBlockedByAdmin = props.values.screenshots_state_is_blocked_by_admin;
+                let isBlockedByAdmin = props.values.screenshots_state_locked;
 
                 if (envValue === 1 || envValue === 0) {
                     userValue = envValue;
@@ -88,7 +88,7 @@ export function fieldsProvider() {
                     props: {
                         value: userValue,
                         isDisabled,
-                        hideIndex: 1,
+                        hideIndexes: [0, 3],
                     },
                     on: {
                         input(value) {

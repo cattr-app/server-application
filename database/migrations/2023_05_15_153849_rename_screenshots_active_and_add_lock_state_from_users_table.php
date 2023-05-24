@@ -17,7 +17,7 @@ return new class extends Migration
         });
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('screenshots_active', 'screenshots_state');
-            $table->boolean('screenshots_state_is_blocked_by_admin')->default(true);
+            $table->boolean('screenshots_state_locked')->default(true);
         });
     }
 
@@ -33,7 +33,7 @@ return new class extends Migration
         });
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('screenshots_state', 'screenshots_active');
-            $table->dropColumn('screenshots_state_is_blocked_by_admin');
+            $table->dropColumn('screenshots_state_locked');
         });
     }
 };

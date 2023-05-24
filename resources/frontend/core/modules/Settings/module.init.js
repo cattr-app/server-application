@@ -11,7 +11,7 @@ export const ModuleConfig = {
 export function init(context) {
     ModuleLoaderInterceptor.on('Screenshots', context => {
         new CompanyService().getAll().then(({ screenshots_state, env_screenshots_state }) => {
-            if (env_screenshots_state === 0 || screenshots_state === 0) {
+            if (env_screenshots_state === 0 || (env_screenshots_state === -1 && screenshots_state === 0)) {
                 context.navEntries = context.navEntries.filter(el => el.label !== 'navigation.screenshots');
                 context.routes = context.routes.filter(el => el.name !== 'screenshots');
             }

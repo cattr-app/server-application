@@ -48,7 +48,7 @@ export default class AccountService extends SettingsService {
                 full_name: values.full_name,
                 user_language: values.user_language,
                 screenshots_state: values.screenshots_state,
-                screenshots_state_is_blocked_by_admin: values.screenshots_state_is_blocked_by_admin,
+                screenshots_state_locked: values.screenshots_state_locked,
             };
         });
     }

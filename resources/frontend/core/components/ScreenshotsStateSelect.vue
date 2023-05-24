@@ -1,8 +1,7 @@
 <template>
     <at-radio-group ref="select" v-model="model" class="screenshots-state-select">
         <at-radio-button
-            v-for="(state, i) in states"
-            v-show="i !== hideIndex"
+            v-for="state in states"
             :key="state.value"
             :label="state.value"
             :disabled="isDisabled"
@@ -10,7 +9,7 @@
         >
             <div>
                 <slot :name="`state__name`">
-                    {{ $t(`control.screenshot_select_options.${state.name}`) }}
+                    {{ $t(`control.screenshot_state_options.${state.name}`) }}
                 </slot>
             </div>
         </at-radio-button>
@@ -32,13 +31,11 @@
                 default: () => false,
                 required: false,
             },
-            hideIndex: {
-                type: Number,
+            hideIndexes: {
+                type: Array,
                 required: false,
+                default: () => [],
             },
-        },
-        mounted() {
-            service.getStates().then(({ data }) => (this.options = data));
         },
         methods: {
             inputHandler(value) {
@@ -62,7 +59,13 @@
                 },
             },
             states() {
-                return this.$store.getters['screenshots/states'];
+                let states = [];
+                this.$store.getters['screenshots/states'].forEach((item, i) => {
+                    if (!this.hideIndexes.includes(i)) {
+                        return states.push(item);
+                    }
+                });
+                return states;
             },
         },
     };

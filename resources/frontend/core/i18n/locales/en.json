@@ -200,7 +200,7 @@
     "project_selected_all": "All projects selected",
     "status_selected": "No statuses selected | 1 status selected | {count} statuses selected",
     "status_selected_all": "All statuses selected",
-    "screenshot_select_options": {
+    "screenshot_state_options": {
       "required": "Required",
       "optional": "Optional",
       "forbidden": "Forbidden"
