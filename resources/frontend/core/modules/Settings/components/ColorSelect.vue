@@ -218,6 +218,7 @@
                 if (newStart === 100) {
                     this.$emit('setEnd', index, 0);
                 } else if (this.colorsConfig[index].end === 0) {
+                    //eslint-disable-next-line vue/no-mutating-props
                     this.colorsConfig[index].end = 1;
                 }
             },

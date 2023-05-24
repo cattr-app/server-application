@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\CompanySettings;
 
+use App\Enums\Role;
 use App\Http\Requests\CattrFormRequest;
 use Filter;
 
@@ -9,7 +10,7 @@ class UpdateCompanySettingsRequest extends CattrFormRequest
 {
     public function _authorize(): bool
     {
-        return $this->user()->hasRole('admin');
+        return $this->user()->hasRole(Role::ADMIN);
     }
 
     public function _rules(): array

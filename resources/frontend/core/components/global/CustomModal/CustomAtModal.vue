@@ -37,15 +37,15 @@
                     </div>
                     <div v-if="showFooter" class="at-modal__footer" :style="footerStyle">
                         <slot name="footer">
-                            <at-button v-show="showCancelButton" @click.native="handleAction('cancel')">{{
-                                localeCancelText
-                            }}</at-button>
+                            <at-button v-show="showCancelButton" @click.native="handleAction('cancel')"
+                                >{{ localeCancelText }}
+                            </at-button>
                             <at-button
                                 v-show="showConfirmButton"
                                 :type="typeButton"
                                 @click.native="handleAction('confirm')"
-                                >{{ localeOKText }}</at-button
-                            >
+                                >{{ localeOKText }}
+                            </at-button>
                         </slot>
                     </div>
                     <span v-if="showClose" class="at-modal__close" @click="handleAction('cancel')"
@@ -129,13 +129,13 @@
         },
         computed: {
             headerStyle() {
-                return this.styles.hasOwnProperty('header') ? this.styles.header : {};
+                return Object.prototype.hasOwnProperty.call(this.styles, 'header') ? this.styles.header : {};
             },
             footerStyle() {
-                return this.styles.hasOwnProperty('footer') ? this.styles.footer : {};
+                return Object.prototype.hasOwnProperty.call(this.styles, 'footer') ? this.styles.footer : {};
             },
             bodyStyle() {
-                return this.styles.hasOwnProperty('body') ? this.styles.body : {};
+                return Object.prototype.hasOwnProperty.call(this.styles, 'body') ? this.styles.body : {};
             },
             iconClass() {
                 const classArr = {

@@ -12,7 +12,7 @@
                     </at-input>
                     <small>{{ errors[0] }}</small>
                 </validation-provider>
-                <validation-provider v-slot="{ errors }" :vid="`users.${index}.role_id`" class="col-6">
+                <validation-provider :vid="`users.${index}.role_id`" class="col-6">
                     <role-select v-model="users[index]['role_id']"></role-select>
                 </validation-provider>
                 <at-button v-if="index > 0" class="col-2 invite-form__remove" @click="removeUser(index)"

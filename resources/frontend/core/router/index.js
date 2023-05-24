@@ -1,6 +1,6 @@
 import Vue from 'vue';
 import VueRouter from 'vue-router';
-import Store from '@/store';
+import { store } from '@/store';
 
 // Fixing new issue with VueRouter caused by new Promise API
 const originalPush = VueRouter.prototype.push;
@@ -21,7 +21,7 @@ const routes = [
         },
         component: () => import(/* webpackChunkName: "login" */ '@/views/Auth/Login.vue'),
         beforeEnter: (to, from, next) => {
-            if (Store.getters['user/loggedIn']) {
+            if (store.getters['user/loggedIn']) {
                 next('/');
             } else {
                 next();
@@ -37,7 +37,7 @@ const routes = [
             layout: 'auth-layout',
         },
         beforeEnter: (to, from, next) => {
-            if (Store.getters['user/loggedIn']) {
+            if (store.getters['user/loggedIn']) {
                 next('/');
             } else {
                 next();
@@ -61,8 +61,8 @@ const routes = [
         },
         component: () => import(/* webpackChunkName: "Register" */ '@/views/Auth/Register.vue'),
         beforeEnter: (to, from, next) => {
-            if (Store.getters['user/loggedIn']) {
-                Store.dispatch('user/forceUserExit');
+            if (store.getters['user/loggedIn']) {
+                store.dispatch('user/forceUserExit');
             }
 
             next();
@@ -112,18 +112,18 @@ const router = new VueRouter({
 
 router.beforeEach(async (to, from, next) => {
     // Close pending requests when switching pages
-    await Store.dispatch('httpRequest/cancelPendingRequests');
+    await store.dispatch('httpRequest/cancelPendingRequests');
 
     if (to.matched.some(record => record.meta.auth || typeof record.meta.auth === 'undefined')) {
-        if (!Store.getters['user/loggedIn']) {
+        if (!store.getters['user/loggedIn']) {
             return next({ name: 'auth.login' });
         }
-    } else if (to.matched.some(record => !record.meta.auth) && !Store.getters['user/loggedIn']) {
+    } else if (to.matched.some(record => !record.meta.auth) && !store.getters['user/loggedIn']) {
         return next();
     }
 
     if (to.name === 'setup') {
-        if (Store.getters['httpRequest/getStatusOfInstalling']) {
+        if (store.getters['httpRequest/getStatusOfInstalling']) {
             next({ name: 'forbidden' });
         }
 
@@ -131,14 +131,14 @@ router.beforeEach(async (to, from, next) => {
     }
 
     if (to.matched.some(record => typeof record.meta.guest !== 'undefined' && record.meta.guest)) {
-        if (Store.getters['user/loggedIn']) {
+        if (store.getters['user/loggedIn']) {
             return next('/');
         }
     }
 
     const checkPermission = () => {
         if (!Vue.prototype.$gate.user) {
-            Vue.prototype.$gate.auth(Store.getters['user/user']);
+            Vue.prototype.$gate.auth(store.getters['user/user']);
         }
 
         if (to?.meta?.checkPermission) {
@@ -148,9 +148,9 @@ router.beforeEach(async (to, from, next) => {
         return next();
     };
 
-    if (!Store.getters['user/user'] || !Object.keys(Store.getters['user/user']).length) {
-        Store.watch(
-            () => Store.getters['user/user'],
+    if (!store.getters['user/user'] || !Object.keys(store.getters['user/user']).length) {
+        store.watch(
+            () => store.getters['user/user'],
             () => {
                 checkPermission();
             },

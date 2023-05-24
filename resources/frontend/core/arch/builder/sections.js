@@ -1,4 +1,4 @@
-import Store from '@/store';
+import { store } from '@/store';
 
 /**
  * Section class - create new section with provided params
@@ -55,7 +55,7 @@ export default class SettingsSection {
      * @returns {Promise<void>}
      */
     async initSection() {
-        await Store.dispatch('settings/setSettingSection', this.section);
+        await store.dispatch('settings/setSettingSection', this.section);
     }
 
     /**
