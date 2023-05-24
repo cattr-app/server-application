@@ -19,7 +19,7 @@ class TaskActivityController extends ItemController
     {
         $model = new $model;
 
-        $query = new Builder($model::getQuery(),$model);
+        $query = new Builder($model::getQuery(), $model);
         $query->setModel($model);
 
         $modelScopes = $model->getGlobalScopes();
@@ -59,12 +59,12 @@ class TaskActivityController extends ItemController
     {
         $result = false;
 
-        if($requestData['type'] === "all" ) {
+        if ($requestData['type'] === "all") {
             $result = array_merge(
                 $this->getCollectionFromModel($requestData, TaskComment::class)->toArray(),
                 $this->getCollectionFromModel($requestData, TaskHistory::class)->toArray()
             );
-        } else if ($requestData['type'] === "history" ) {
+        } else if ($requestData['type'] === "history") {
             $result = $this->getCollectionFromModel($requestData, TaskHistory::class)->toArray();
         } else if ($requestData['type'] === "comments") {
             $result = $this->getCollectionFromModel($requestData, TaskComment::class)->toArray();
@@ -103,17 +103,11 @@ class TaskActivityController extends ItemController
 
         Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
 
-        if($items = $this->getCollection($requestData)) {
-            $this->sortCollection($items, $requestData['orderBy']);
-            $items = $this->getPaginateCollection($items, $requestData['page']);
+        $items = $this->getCollection($requestData);
+        $this->sortCollection($items, $requestData['orderBy']);
+        $items = $this->getPaginateCollection($items, $requestData['page']);
 
-            Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
-            return responder()->success($items)->respond();
-        }
-        else
-        {
-            Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
-            responder()->error()->respond(400);
-        }
+        Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
+        return responder()->success($items)->respond();
     }
 }
