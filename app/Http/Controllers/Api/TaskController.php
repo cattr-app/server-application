@@ -170,16 +170,16 @@ class TaskController extends ItemController
         );
 
         Event::listen(Filter::getAfterActionEventName(), static function (Task $data) use ($request) {
-            $oldUsers = $data->users()->select('id', 'full_name');
+            $oldUsers = $data->users()->select('id', 'full_name')->get()->toArray();
             $changes = $data->users()->sync($request->get('users'));
             if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
                 SaveTaskEditHistory::dispatch(
                     $data,
                     $request->user(),
                     [
-                        'users' => (string)User::withoutGlobalScopes()
+                        'users' => json_encode(User::withoutGlobalScopes()
                             ->whereIn('id', $request->get('users'))
-                            ->select(['id', 'full_name'])
+                            ->select(['id', 'full_name'])->get()->toArray())
                     ],
                     [
                         'users' => json_encode($oldUsers),
@@ -264,7 +264,7 @@ class TaskController extends ItemController
     {
         Event::listen(
             Filter::getAfterActionEventName(),
-            static fn(Task $task) => $task->users()->sync($request->get('users'))
+            static fn (Task $task) => $task->users()->sync($request->get('users'))
         );
 
         Filter::listen(

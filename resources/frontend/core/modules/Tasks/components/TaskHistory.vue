@@ -108,7 +108,7 @@
                             {{ item.user.full_name }} ·
                             <span class="comment-date">{{ fromNow(item.created_at) }}</span>
                         </span>
-                        <div v-if="item.user.id === user.id" class="commment-functions">
+                        <div v-if="item.user.id === user.id" class="comment-functions">
                             <div class="comment-buttons">
                                 <i class="icon icon-edit-2" @click="changeComment(item)"></i>
                                 <i class="icon icon-x" @click="deleteComment(item)"></i>
@@ -193,12 +193,13 @@
         },
         async created() {
             this.users = await this.userService.getAll();
-            this.activity = (await this.getActivity()).data;
             this.user = this.$store.state.user.user.data;
         },
         async mounted() {
+            this.activity = (await this.getActivity()).data;
             window.addEventListener('scroll', this.onScroll);
             this.statuses = await this.statusService.getAll();
+            this.priorities = await this.priorityService.getAll();
         },
         beforeDestroy() {
             window.removeEventListener('scroll', this.onScroll);
@@ -299,21 +300,23 @@
                 }
             },
             async onScroll() {
-                this.scrollTop = document.scrollingElement.scrollTop;
-                let bottomOfWindow =
-                    document.documentElement.scrollHeight -
-                    document.documentElement.scrollTop -
-                    document.documentElement.clientHeight;
-                if (bottomOfWindow <= 0 && this.canLoad === true) {
-                    this.page++;
-                    let data = (await this.getActivity()).data;
+                this.$nextTick(async () => {
+                    this.scrollTop = document.scrollingElement.scrollTop;
+                    let bottomOfWindow =
+                        document.documentElement.scrollHeight -
+                        document.documentElement.scrollTop -
+                        document.documentElement.clientHeight;
+                    if (bottomOfWindow <= 0 && this.canLoad === true) {
+                        this.page++;
+                        let data = (await this.getActivity()).data;
 
-                    if (data.length > 0) {
-                        this.activity = [...this.activity, ...data];
-                    } else {
-                        this.canLoad = false;
+                        if (data.length > 0) {
+                            this.activity = [...this.activity, ...data];
+                        } else {
+                            this.canLoad = false;
+                        }
                     }
-                }
+                });
             },
             insertUserName(value) {
                 const messageBefore = this.commentMessage.substring(0, this.userNameStart);

@@ -18,7 +18,7 @@
     "task_change_users": "{user} assigned to {value} {date}",
     "show_history": "Show",
     "hide_history": "Hide",
-    "add_comment": "Add"
+    "add_comment": "Add comment"
   },
   "field": {
     "default_priority": "Default priority",

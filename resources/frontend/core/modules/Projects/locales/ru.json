@@ -18,7 +18,7 @@
     "task_change_users": "{user} назначил исполнителем {value} {date}",
     "show_history": "Показать",
     "hide_history": "Скрыть",
-    "add_comment": "Добавить"
+    "add_comment": "Добавить комментарий"
   },
   "field": {
     "default_priority": "Приоритет по-умолчанию",
