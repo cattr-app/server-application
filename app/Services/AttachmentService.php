@@ -80,7 +80,7 @@ class AttachmentService implements \App\Contracts\AttachmentService
                     $attachment->attachmentAbleRelation()->associate($parent);
                     $attachment->status = AttachmentStatus::PROCESSING;
                     $attachment->project_id = $projectId;
-                    $attachment->save();
+                    $attachment->saveQuietly();
 
                     $newPath = $this->getPath($attachment);
                     $this->storage->move($tmpPath, $newPath);
