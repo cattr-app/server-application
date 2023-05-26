@@ -23,7 +23,7 @@ class AttachmentServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-//      TODO: [ ] add ability to add more from Cattr modules
+//      TODO: [ ] check if we can add more from Cattr modules
         Relation::morphMap(AttachmentHelper::ABLE_BY);
     }
 }
