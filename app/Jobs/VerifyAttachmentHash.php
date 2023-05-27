@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
 use Illuminate\Queue\SerializesModels;
+use Log;
 
 class VerifyAttachmentHash implements ShouldQueue, ShouldBeUnique
 {
@@ -44,5 +45,13 @@ class VerifyAttachmentHash implements ShouldQueue, ShouldBeUnique
     public function uniqueId(): string
     {
         return $this->attachment->id;
+    }
+
+    public function failed(\Throwable $exception = null): void
+    {
+        Log::error('Job VerifyAttachmentHash Failed', [
+            'attachment_id' => $this->attachment->id,
+            'exception' => $exception
+        ]);
     }
 }

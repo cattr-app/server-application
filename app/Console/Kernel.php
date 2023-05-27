@@ -4,6 +4,8 @@ namespace App\Console;
 
 use App\Console\Commands\RotateScreenshots;
 use App\Jobs\ClearExpiredApps;
+use App\Jobs\VerifyAttachmentHash;
+use App\Models\Attachment;
 use Exception;
 use Illuminate\Console\Scheduling\Schedule;
 use Illuminate\Foundation\Console\Kernel as ConsoleKernel;
@@ -56,6 +58,10 @@ class Kernel extends ConsoleKernel
         $schedule->command(RotateScreenshots::class)->weekly()->when(Settings::scope('core')->get('auto_thinning'));
 
         $schedule->job(new ClearExpiredApps)->daily();
+
+        $schedule->call(function () {
+            Attachment::lazyById()->each(fn($attachment) => VerifyAttachmentHash::dispatch($attachment));
+        })->daily();
     }
 
     /**

@@ -73,4 +73,24 @@ class AttachmentHelper
             return $carry;
         }, []);
     }
+
+    public static function getMaxAllowedFileSize(): int|string
+    {
+        $size = trim(ini_get("upload_max_filesize") ?? '2M');
+        $last = strtolower($size[strlen($size)-1]);
+        $size = (float)$size;
+        switch($last) {
+            case 'g':
+                $size *= (1024 * 1024 * 1024); //1073741824
+                break;
+            case 'm':
+                $size *= (1024 * 1024); //1048576
+                break;
+            case 'k':
+                $size *= 1024;
+                break;
+        }
+
+        return $size;
+    }
 }
