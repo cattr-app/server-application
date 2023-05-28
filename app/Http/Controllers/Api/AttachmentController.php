@@ -50,7 +50,7 @@ class AttachmentController extends ItemController
     {
         return URL::temporarySignedRoute(
             'attachment.temporary-download',
-            now()->addMinutes(60),
+            now()->addSeconds($request->validated('seconds') ?? 60),
             $attachment
         );
     }

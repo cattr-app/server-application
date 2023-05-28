@@ -18,6 +18,8 @@ class DownloadAttachmentRequest extends CattrFormRequest
 
     public function _rules(): array
     {
-        return [];
+        return [
+            'seconds' => 'sometimes|int'
+        ];
     }
 }
