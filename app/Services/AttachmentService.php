@@ -18,7 +18,7 @@ class AttachmentService implements \App\Contracts\AttachmentService
 
     public function __construct()
     {
-        $this->storage = Storage::disk('attachments');
+        $this->storage = Storage::disk($this::DISK);
     }
     public function storeFile(UploadedFile $file, Attachment $attachment): string|false
     {
@@ -110,9 +110,18 @@ class AttachmentService implements \App\Contracts\AttachmentService
         return $this->storage->getConfig()['checksum_algo'] ?? 'sha512/256';
     }
 
-    public function getHashSum(Attachment $attachment): false|string
+    public function getHashSum(Attachment|string $attachment): false|string
     {
-        return $this->storage->checksum($this->getPath($attachment), ['checksum_algo' => $this->getHashAlgo()]);
+        return $this->storage->checksum($this->callIfInstance($attachment, 'getPath'), ['checksum_algo' => $this->getHashAlgo()]);
+    }
+
+    public function getMimeType(Attachment|string $attachment): false|string
+    {
+        return $this->storage->mimeType($this->callIfInstance($attachment, 'getPath'));
+    }
+
+    private function callIfInstance(Attachment|string $attachment, $action) {
+        return $attachment instanceof Attachment ? $this->{$action}($attachment) : $attachment;
     }
 
     public function verifyHash(Attachment $attachment): void

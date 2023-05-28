@@ -2,6 +2,7 @@
 
 namespace App\Console;
 
+use App\Console\Commands\FindSusFiles;
 use App\Console\Commands\RotateScreenshots;
 use App\Jobs\ClearExpiredApps;
 use App\Jobs\VerifyAttachmentHash;
@@ -62,6 +63,8 @@ class Kernel extends ConsoleKernel
         $schedule->call(function () {
             Attachment::lazyById()->each(fn($attachment) => VerifyAttachmentHash::dispatch($attachment));
         })->daily();
+
+        $schedule->command(FindSusFiles::class)->weekly()->runInBackground()->withoutOverlapping();
     }
 
     /**
