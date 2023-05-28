@@ -105,6 +105,16 @@ class AttachmentService implements \App\Contracts\AttachmentService
         };
     }
 
+    public function getFullPath(Attachment $attachment): string
+    {
+        return $this->storage->path($this->getPath($attachment));
+    }
+
+    public function readStream(Attachment $attachment)
+    {
+        return $this->storage->readStream($this->getPath($attachment));
+    }
+
     public function getHashAlgo(): string
     {
         return $this->storage->getConfig()['checksum_algo'] ?? 'sha512/256';

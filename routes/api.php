@@ -53,16 +53,16 @@ Route::group([
             ->name('auth.desktop.request');
     });
 
-        $router->withoutMiddleware('auth:sanctum')->group(static function (Router $router) {
-            $router->post('login', [AuthController::class, 'login'])
-                ->name('auth.login');
-            $router->post('password/reset/request', [PasswordResetController::class, 'request'])
-                ->name('auth.reset.request');
-            $router->post('password/reset/validate', [PasswordResetController::class, 'validate'])
-                ->name('auth.reset.validate');
-            $router->post('password/reset/process', [PasswordResetController::class, 'process'])
-                ->name('auth.reset.process');
-        });
+    $router->withoutMiddleware('auth:sanctum')->group(static function (Router $router) {
+        $router->post('login', [AuthController::class, 'login'])
+            ->name('auth.login');
+        $router->post('password/reset/request', [PasswordResetController::class, 'request'])
+            ->name('auth.reset.request');
+        $router->post('password/reset/validate', [PasswordResetController::class, 'validate'])
+            ->name('auth.reset.validate');
+        $router->post('password/reset/process', [PasswordResetController::class, 'process'])
+            ->name('auth.reset.process');
+    });
 
     $router->put('desktop-key', [AuthController::class, 'authDesktopKey'])
         ->name('auth.desktop.process');
@@ -249,13 +249,20 @@ Route::group([
         // Attachments routes
         $router->post('attachment', [AttachmentController::class, 'create'])
             ->name('attachment.create');
+        $router->get('attachment/{attachment}', [AttachmentController::class, 'download'])
+            ->whereUuid('attachment')->name('attachment.download');
+        $router->withoutMiddleware('auth:sanctum')->middleware('signed')
+            ->get('tmp-attachment-link/{attachment}', [AttachmentController::class, 'tmpDownload'])
+            ->whereUuid('attachment')->name('attachment.temporary-download');
+        $router->get('attachment/{attachment}/temporary-url', [AttachmentController::class, 'createTemporaryUrl'])
+            ->whereUuid('attachment')->name('attachment.temporary_url');
     });
 
     //Screenshots routes
     $router->get('time-intervals/{interval}/screenshot', [IntervalController::class, 'showScreenshot'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
     $router->get('time-intervals/{interval}/thumb', [IntervalController::class, 'showThumbnail'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
 });
 
 Route::any('(.*)', [Controller::class, 'universalRoute'])->name('universal_route');

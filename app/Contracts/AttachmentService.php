@@ -22,6 +22,8 @@ interface AttachmentService
 
     public function getPath(Attachment $attachment): string;
 
+    public function getFullPath(Attachment $attachment): string;
+
     public function getHashAlgo(): string;
 
     public function getHashSum(Attachment|string $attachment): false|string;
