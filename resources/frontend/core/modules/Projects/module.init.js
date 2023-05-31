@@ -6,6 +6,7 @@ import { ModuleLoaderInterceptor } from '@/moduleLoader';
 import PrioritySelect from '@/components/PrioritySelect';
 import TeamAvatars from '@/components/TeamAvatars';
 import Statuses from './components/Statuses';
+import Vue, { reactive } from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -299,6 +300,59 @@ export function init(context) {
             },
         },
     ]);
+
+    grid.addToMetaProperties(
+        'gridData.websocketDelete',
+        () => {
+            let result = reactive({ value: null });
+            Vue.prototype.$echo
+                .private(`${context.moduleName}Deleted`)
+                .listen(`${context.moduleName}Deleted`, e => Vue.set(result, 'value', e[0]));
+            return result;
+        },
+        grid.getRouterConfig(),
+    );
+
+    grid.addToMetaProperties(
+        'gridData.websocketUpdate',
+        id => {
+            let result = reactive({ value: null });
+            Vue.prototype.$echo
+                .private(`App.Models.Project.${id}`)
+                .listen('.ProjectUpdated', e => Vue.set(result, 'value', e.model));
+            return result;
+        },
+        grid.getRouterConfig(),
+    );
+
+    grid.addToMetaProperties(
+        'gridData.websocketLeaveChannel',
+        id => {
+            Vue.prototype.$echo.leaveChannel(`App.Models.Project.${id}`);
+        },
+        grid.getRouterConfig(),
+    );
+
+    crud.view.addToMetaProperties(
+        'pageData.websocketUpdate',
+        id => {
+            let result = reactive({ value: null });
+            Vue.prototype.$echo
+                .private(`App.Models.Project.${id}`)
+                .listen('.ProjectUpdated', e => Vue.set(result, 'value', e.modelShow));
+            console.log(result);
+            return result;
+        },
+        crud.view.getRouterConfig(),
+    );
+
+    crud.view.addToMetaProperties(
+        'pageData.websocketLeaveChannel',
+        id => {
+            Vue.prototype.$echo.leaveChannel(`App.Models.Project.${id}`);
+        },
+        crud.view.getRouterConfig(),
+    );
 
     grid.addFilter([
         {

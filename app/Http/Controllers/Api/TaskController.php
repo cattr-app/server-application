@@ -2,6 +2,8 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\Tasks;
+use App\Events\TasksDeleted;
 use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
 use App\Http\Requests\Task\EditTaskRequest;
@@ -13,14 +15,10 @@ use App\Models\Project;
 use Exception;
 use Filter;
 use App\Models\Task;
-use App\Models\TaskHistory;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
 use DB;
 use Event;
-use Illuminate\Support\Arr;
 use Settings;
 use Throwable;
 
@@ -188,7 +186,6 @@ class TaskController extends ItemController
             }
             SaveTaskEditHistory::dispatch($data, request()->user());
         });
-
         return $this->_edit($request);
     }
 
@@ -264,7 +261,12 @@ class TaskController extends ItemController
     {
         Event::listen(
             Filter::getAfterActionEventName(),
-            static fn(Task $task) => $task->users()->sync($request->get('users'))
+            static function (Task $task) use ($request){
+                $task->users()->sync($request->get('users'));
+
+                broadcast(new Tasks($task));
+
+            }
         );
 
         Filter::listen(
@@ -329,6 +331,13 @@ class TaskController extends ItemController
      */
     public function destroy(DestroyTaskRequest $request): JsonResponse
     {
+        Event::listen(
+            Filter::getAfterActionEventName(),
+            static function (Task $task) {
+                broadcast(new TasksDeleted($task));
+            }
+        );
+
         return $this->_destroy($request);
     }
 

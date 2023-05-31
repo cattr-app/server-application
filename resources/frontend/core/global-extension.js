@@ -28,10 +28,17 @@ function installGlobalComponents(Vue) {
         wsPath: process.env.MIX_PUSHER_PATH ?? '',
         wsPort: process.env.MIX_PUSHER_PORT ?? 80,
         wssPort: process.env.MIX_PUSHER_PORT ?? 443,
-        forceTLS: (process.env.MIX_PUSHER_SCHEME ?? 'https') === 'https',
+        // forceTLS: (process.env.MIX_PUSHER_SCHEME ?? 'https') === 'https',
+        forceTLS: false,
+        disableStats: true,
         enabledTransports: ['ws', 'wss'],
         Pusher,
         cluster: 'eu',
+        auth: {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            },
+        },
     });
 }
 

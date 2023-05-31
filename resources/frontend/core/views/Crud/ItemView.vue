@@ -107,6 +107,7 @@
                 service,
                 filters,
                 values: {},
+                websocketUpdateChannels: [],
                 fields: fields || [],
                 isDataLoading: false,
                 pageData: {
@@ -142,7 +143,28 @@
 
                 try {
                     const { data } = (await this.service.getItem(id, this.filters)).data;
+                    if (typeof this.$route.meta.pageData.websocketLeaveChannel !== 'undefined') {
+                        this.$route.meta.pageData.websocketLeaveChannel(id);
+                    }
+
                     this.values = data;
+
+                    if (typeof this.$route.meta.pageData.websocketUpdate !== 'undefined') {
+                        this.$set(this.websocketUpdateChannels, 0, this.$route.meta.pageData.websocketUpdate(id));
+
+                        this.$watch(
+                            `websocketUpdateChannels.0.value`,
+                            val => {
+                                console.log(val);
+                                if (val.modelShow !== undefined) {
+                                    this.values = val.modelShow;
+                                } else {
+                                    this.values = val;
+                                }
+                            },
+                            { deep: true },
+                        );
+                    }
                 } catch ({ response }) {
                     if (response.data.error_type === 'query.item_not_found') {
                         this.$router.replace({ name: 'forbidden' });

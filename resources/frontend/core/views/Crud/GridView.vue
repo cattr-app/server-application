@@ -217,7 +217,7 @@
                 filterTimeout: null,
                 filterFieldsTimeout: null,
                 orderBy,
-
+                websocketUpdateChannels: [],
                 filterPopupVisible: false,
                 filterFieldsModel: { ...filterFieldsModel },
 
@@ -383,7 +383,37 @@
                     this.itemsPerPage = pagination.perPage;
                     this.page = pagination.currentPage;
 
+                    if (typeof this.$route.meta.gridData.websocketLeaveChannel !== 'undefined') {
+                        this.tableData.forEach(({ id }) => this.$route.meta.gridData.websocketLeaveChannel(id));
+                    }
+
                     this.tableData = data;
+
+                    if (typeof this.$route.meta.gridData.websocketUpdate !== 'undefined') {
+                        this.tableData.forEach(({ id }, index) => {
+                            this.$set(
+                                this.websocketUpdateChannels,
+                                index,
+                                this.$route.meta.gridData.websocketUpdate(id),
+                            );
+
+                            this.$watch(
+                                `websocketUpdateChannels.${index}.value`,
+                                val => {
+                                    if (val !== undefined && val !== null) {
+                                        this.tableData.find((el, index) => {
+                                            if (el.id === val.id) {
+                                                this.$set(this.tableData, index, val);
+                                            }
+                                        });
+                                    }
+                                },
+                                {
+                                    deep: true,
+                                },
+                            );
+                        });
+                    }
                 } catch ({ response }) {
                     if (process.env.NODE_ENV === 'development') {
                         console.warn(response ? response : 'request is canceled');
@@ -661,6 +691,30 @@
 
             if (this.$refs.tableWrapper) {
                 this.$refs.tableWrapper.addEventListener('click', this.handleTableClick);
+            }
+
+            if (typeof this.$route.meta.gridData.websocketDelete !== 'undefined') {
+                this.lastDeletedItem = [];
+                this.$set(this.lastDeletedItem, 0, this.$route.meta.gridData.websocketDelete());
+
+                this.$watch(
+                    `lastDeletedItem.0.value`,
+                    val => {
+                        if (val !== undefined && val !== null) {
+                            this.tableData.find((el, index) => {
+                                console.log(el, 'el');
+                                console.log(val, 'val');
+                                console.log(el.id === val.id, '===');
+                                if (el.id === val.id) {
+                                    this.tableData.splice(index, 1);
+                                }
+                            });
+                        }
+                    },
+                    {
+                        deep: true,
+                    },
+                );
             }
         },
         watch: {

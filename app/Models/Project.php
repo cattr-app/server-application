@@ -5,7 +5,9 @@ namespace App\Models;
 use App\Scopes\ProjectAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\ProjectFactory;
+use DB;
 use Eloquent as EloquentIdeHelper;
+use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -67,6 +69,7 @@ class Project extends Model
     use SoftDeletes;
     use ExposePermissions;
     use HasFactory;
+    use BroadcastsEvents;
 
     /**
      * @var array
@@ -102,6 +105,26 @@ class Project extends Model
     ];
 
     protected const PERMISSIONS = ['update', 'update_members', 'destroy'];
+
+    public function broadcastWith($event)
+    {
+        return match ($event) {
+            'updated' => [
+                'model' => Project::query()->where('id', '=', $this->id)->with([
+                    "defaultPriority",
+                    "users",
+                    "statuses",
+                ])->withCount('tasks')->first()->append('can'),
+                'modelShow' => $this->project()
+            ],
+            default => ['model' => $this],
+        };
+    }
+
+    public function broadcastOn(string $event): array
+    {
+        return [$this, $event];
+    }
 
     protected static function boot(): void
     {
@@ -147,5 +170,44 @@ class Project extends Model
     public function properties(): MorphMany
     {
         return $this->morphMany(Property::class, 'entity');
+    }
+
+    public function project()
+    {
+        $project = Project::query()->where('id', '=', $this->id)->with([
+            "defaultPriority",
+            "users",
+            "statuses",
+        ])->first()->append('can');
+        $totalTracked = 0;
+
+        $taskIDs = array_map(static function ($task) {
+            return $task['id'];
+        }, $project->tasks->toArray());
+        $workers = DB::table('time_intervals AS i')
+            ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
+            ->leftJoin('users AS u', 'i.user_id', '=', 'u.id')
+            ->select(
+                'i.user_id',
+                'u.full_name',
+                'i.task_id',
+                'i.start_at',
+                'i.end_at',
+                't.task_name',
+                DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
+            )
+            ->whereNull('i.deleted_at')
+            ->whereIn('task_id', $taskIDs)
+            ->orderBy('duration', 'desc')
+            ->groupBy('t.id')
+            ->get();
+
+        foreach ($workers as $worker) {
+            $totalTracked += $worker->duration;
+        }
+
+        $project['workers'] = $workers;
+        $project['total_spent_time'] = $totalTracked;
+        return $project;
     }
 }

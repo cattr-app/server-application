@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Events\ProjectsDeleted;
 use App\Http\Requests\Project\CreateProjectRequest;
 use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\Project\DestroyProjectRequest;
@@ -93,7 +94,7 @@ class ProjectController extends ItemController
             $taskIDs = array_map(static function ($task) {
                 return $task['id'];
             }, $project['tasks']);
-
+            
             $workers = DB::table('time_intervals AS i')
                 ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
                 ->leftJoin('users AS u', 'i.user_id', '=', 'u.id')
@@ -392,6 +393,13 @@ class ProjectController extends ItemController
      */
     public function destroy(DestroyProjectRequest $request): JsonResponse
     {
+        Event::listen(
+            Filter::getAfterActionEventName(),
+            static function (Project $project) {
+                broadcast(new ProjectsDeleted($project));
+            }
+        );
+
         return $this->_destroy($request);
     }
 
