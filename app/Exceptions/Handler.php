@@ -27,24 +27,6 @@ class Handler extends ExceptionHandler
 {
     use ConvertsExceptions;
 
-    protected string $traceId;
-
-    public function __construct(Container $container)
-    {
-        $this->traceId = Str::uuid()->toString();
-
-        try {
-            // Only add trace_id to error response if Filter::getErrorResponseFilterName() method exists
-            $self = $this;
-            Filter::listen(Filter::getErrorResponseFilterName(), static function (array|null $data = []) use ($self) {
-                $data['trace_id'] = $self->traceId;
-                return $data;
-            });
-        } catch (Throwable $exception) {
-        }
-        parent::__construct($container);
-    }
-
     /**
      * A list of exception types with their corresponding custom log levels.
      *
@@ -98,16 +80,26 @@ class Handler extends ExceptionHandler
      */
     protected function context(): array
     {
-        $requestContent = collect(rescue(fn() => json_decode(request()->getContent(), true), [], false))
+        $traceId = Str::uuid()->toString();
+        try {
+            // Only add trace_id to error response if Filter::getErrorResponseFilterName() method exists
+            Filter::listen(Filter::getErrorResponseFilterName(), static function (array|null $data = []) use ($traceId) {
+                $data['trace_id'] = $traceId;
+                return $data;
+            });
+        } catch (Throwable $exception) {
+        }
+
+        $requestContent = collect(rescue(fn() => request()->all(), [], false))
             ->map(function ($item, string $key) {
-                if (Str::contains($key, ['password', 'secret', 'token', 'api_key'], true)) {
+                if (Str::contains($key, ['screenshot', 'password', 'secret', 'token', 'api_key'], true)) {
                     return '***';
                 }
                 return $item;
-            })->toJson();
+            })->toArray();
 
         return array_merge(parent::context(), [
-            'trace_id' => $this->traceId,
+            'trace_id' => $traceId,
             'request_uri' => request()->getRequestUri(),
             'request_content' => config('app.debug') ? $requestContent : Crypt::encryptString($requestContent)
         ]);
