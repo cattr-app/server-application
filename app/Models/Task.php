@@ -160,6 +160,7 @@ class Task extends Model
     {
         return [$this, $event];
     }
+    
     protected static function boot(): void
     {
         parent::boot();

@@ -87,6 +87,27 @@ const mutations = {
     setIntervals(state, intervals) {
         state.intervals = intervals;
     },
+    addInterval(state, data) {
+        state.intervals[data.userId].push(data.interval);
+    },
+    updateInterval(state, data) {
+        state.intervals[data.userId].find((el, index) => {
+            if (el.id === data.interval.id) {
+                return state.intervals[data.userId].splice(index, 1, data.interval);
+            }
+
+            return false;
+        });
+    },
+    removeInterval(state, data) {
+        state.intervals[data.userId].find((el, index) => {
+            if (el.id === data.interval.id) {
+                return state.intervals[data.userId].splice(index, 1);
+            }
+
+            return false;
+        });
+    },
     setTasks(state, tasks) {
         state.tasks = tasks;
     },

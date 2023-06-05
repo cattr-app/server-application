@@ -146,6 +146,10 @@
         beforeDestroy() {
             clearInterval(this.updateHandle);
             this.service.unloadIntervals();
+
+            this.$echo.leaveChannel(`TimeIntervalDeleted.${this.user.id}`);
+            this.$echo.leaveChannel(`TimeIntervalCreated.${this.user.id}`);
+            this.$echo.leaveChannel(`TimeIntervalUpdated.${this.user.id}`);
         },
         computed: {
             ...mapGetters('dashboard', ['service', 'intervals', 'timePerDay', 'timePerProject', 'timezone']),
@@ -154,6 +158,32 @@
                 if (!this.user || !this.user.id || !this.intervals[this.user.id]) {
                     return [];
                 }
+
+                this.$echo.private(`TimeIntervalsDeleted.${this.user.id}`).listen('TimeIntervalsDeleted', e => {
+                    this.removeInterval({ interval: e[0], userId: this.user.id });
+                });
+                this.$echo.private(`TimeIntervalsCreated.${this.user.id}`).listen('TimeIntervalsCreated', e => {
+                    const startAtUTC = moment.tz(e[0][0].start_at, 'UTC');
+                    const endAtUTC = moment.tz(e[0][0].end_at, 'UTC');
+
+                    if (
+                        startAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') <= this.start &&
+                        endAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') >= this.end
+                    ) {
+                        this.addInterval({ interval: e[0][0], userId: this.user.id });
+                    }
+                });
+                this.$echo.private(`TimeIntervalsUpdated.${this.user.id}`).listen('TimeIntervalsUpdated', e => {
+                    const startAtUTC = moment.tz(e[0][0].start_at, 'UTC');
+                    const endAtUTC = moment.tz(e[0][0].end_at, 'UTC');
+
+                    if (
+                        startAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') <= this.start &&
+                        endAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') >= this.end
+                    ) {
+                        this.updateInterval({ interval: e[0][0], userId: this.user.id });
+                    }
+                });
 
                 return this.intervals[this.user.id];
             },
@@ -171,6 +201,9 @@
             getEndOfDayInTimezone,
             ...mapMutations({
                 setTimezone: 'dashboard/setTimezone',
+                removeInterval: 'dashboard/removeInterval',
+                addInterval: 'dashboard/addInterval',
+                updateInterval: 'dashboard/updateInterval',
             }),
             loadData: debounce(async function (withLoadingIndicator = true) {
                 this.isDataLoading = withLoadingIndicator;

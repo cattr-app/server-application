@@ -11,6 +11,7 @@
 |
 */
 
+use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 Broadcast::channel('App.User.{id}', static function ($user, $id) {
@@ -36,3 +37,19 @@ Broadcast::channel('TasksDeleted', static function () {
 Broadcast::channel('ProjectsDeleted', static function () {
     return Auth::check();
 });
+
+$users = User::select('id')->get();
+
+foreach ($users as $user) {
+    Broadcast::channel("TimeIntervalsCreated.{$user->id}", static function () {
+        return Auth::check();
+    });
+
+    Broadcast::channel("TimeIntervalsUpdated.{$user->id}", static function () {
+        return Auth::check();
+    });
+
+    Broadcast::channel("TimeIntervalsDeleted.{$user->id}", static function () {
+        return Auth::check();
+    });
+}

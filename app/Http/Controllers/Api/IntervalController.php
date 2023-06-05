@@ -3,6 +3,9 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
+use App\Events\TimeIntervalsCreated;
+use App\Events\TimeIntervalsDeleted;
+use App\Events\TimeIntervalsUpdated;
 use App\Http\Requests\Interval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\Interval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\Interval\CreateTimeIntervalRequest;
@@ -193,6 +196,13 @@ class IntervalController extends ItemController
             $requestData['start_at'] = Carbon::parse($requestData['start_at'])->setTimezone('UTC')->toDateTimeString();
             $requestData['end_at'] = Carbon::parse($requestData['end_at'])->setTimezone('UTC')->toDateTimeString();
         });
+
+        Event::listen(
+            Filter::getAfterActionEventName(),
+            static function ($data) {
+                broadcast(new TimeIntervalsUpdated($data));
+            }
+        );
 
         return $this->_edit($request);
     }
@@ -396,6 +406,13 @@ class IntervalController extends ItemController
      */
     public function destroy(DestroyTimeIntervalRequest $request): JsonResponse
     {
+        Event::listen(
+            Filter::getAfterActionEventName(),
+            static function (TimeInterval $timeInterval) {
+                broadcast(new TimeIntervalsDeleted($timeInterval));
+            }
+        );
+
         return $this->_destroy($request);
     }
 
@@ -432,8 +449,12 @@ class IntervalController extends ItemController
 
         Event::dispatch(Filter::getAfterActionEventName(), [$intervals, $request]);
 
-        $intervals->each(static fn(Model $item) => $item->save());
+        $intervals->each(static function(Model $item) {
+            $item->save();
 
+            broadcast(new TimeIntervalsUpdated($item));
+        });
+        
         return responder()->success()->respond(204);
     }
 
@@ -491,7 +512,11 @@ class IntervalController extends ItemController
 
         Event::dispatch(Filter::getBeforeActionEventName(), [$intervalIds, $request]);
 
-        $itemsQuery->eachById(static fn($item) => Filter::process(Filter::getActionFilterName(), $item)->delete());
+        $itemsQuery->eachById(static function ($item)  {
+            Filter::process(Filter::getActionFilterName(), $item)->delete();
+            
+            broadcast(new TimeIntervalsDeleted($item));
+        });
 
         Event::dispatch(Filter::getAfterActionEventName(), [$intervalIds, $request]);
 
@@ -546,6 +571,8 @@ class IntervalController extends ItemController
                 if (User::find($data['user_id'])->web_and_app_monitoring) {
                     AssignAppsToTimeInterval::dispatch($data);
                 }
+
+                broadcast(new TimeIntervalsCreated(TimeInterval::find($data->id)));
             }
         );
 
