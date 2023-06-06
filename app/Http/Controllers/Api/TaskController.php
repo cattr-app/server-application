@@ -186,8 +186,6 @@ class TaskController extends ItemController
                 );
             }
             SaveTaskEditHistory::dispatch($data, request()->user());
-
-            broadcast(new TasksUpdated($data));
         });
         return $this->_edit($request);
     }
@@ -266,8 +264,6 @@ class TaskController extends ItemController
             Filter::getAfterActionEventName(),
             static function (Task $task) use ($request){
                 $task->users()->sync($request->get('users'));
-
-                broadcast(new TasksCreated($task));
             }
         );
 
@@ -333,13 +329,6 @@ class TaskController extends ItemController
      */
     public function destroy(DestroyTaskRequest $request): JsonResponse
     {
-        Event::listen(
-            Filter::getAfterActionEventName(),
-            static function (Task $task) {
-                broadcast(new TasksDeleted($task));
-            }
-        );
-
         return $this->_destroy($request);
     }
 

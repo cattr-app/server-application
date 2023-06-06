@@ -197,13 +197,6 @@ class IntervalController extends ItemController
             $requestData['end_at'] = Carbon::parse($requestData['end_at'])->setTimezone('UTC')->toDateTimeString();
         });
 
-        Event::listen(
-            Filter::getAfterActionEventName(),
-            static function ($data) {
-                broadcast(new TimeIntervalsUpdated($data));
-            }
-        );
-
         return $this->_edit($request);
     }
 
@@ -406,13 +399,6 @@ class IntervalController extends ItemController
      */
     public function destroy(DestroyTimeIntervalRequest $request): JsonResponse
     {
-        Event::listen(
-            Filter::getAfterActionEventName(),
-            static function (TimeInterval $timeInterval) {
-                broadcast(new TimeIntervalsDeleted($timeInterval));
-            }
-        );
-
         return $this->_destroy($request);
     }
 
@@ -451,8 +437,6 @@ class IntervalController extends ItemController
 
         $intervals->each(static function(Model $item) {
             $item->save();
-
-            broadcast(new TimeIntervalsUpdated($item));
         });
         
         return responder()->success()->respond(204);
@@ -514,8 +498,6 @@ class IntervalController extends ItemController
 
         $itemsQuery->eachById(static function ($item)  {
             Filter::process(Filter::getActionFilterName(), $item)->delete();
-            
-            broadcast(new TimeIntervalsDeleted($item));
         });
 
         Event::dispatch(Filter::getAfterActionEventName(), [$intervalIds, $request]);

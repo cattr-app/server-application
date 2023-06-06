@@ -350,8 +350,6 @@ class ProjectController extends ItemController
 
                 $project->statuses()->sync($statuses);
             }
-            
-            broadcast(new ProjectsUpdated($project));
         });
 
         Filter::listen(Filter::getActionFilterName(), static fn($data) => $data->load('statuses'));
@@ -396,13 +394,6 @@ class ProjectController extends ItemController
      */
     public function destroy(DestroyProjectRequest $request): JsonResponse
     {
-        Event::listen(
-            Filter::getAfterActionEventName(),
-            static function (Project $project) {
-                broadcast(new ProjectsDeleted($project));
-            }
-        );
-
         return $this->_destroy($request);
     }
 
