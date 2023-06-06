@@ -143,14 +143,19 @@
 
                 try {
                     const { data } = (await this.service.getItem(id, this.filters)).data;
+
                     if (typeof this.$route.meta.pageData.websocketLeaveChannel !== 'undefined') {
-                        this.$route.meta.pageData.websocketLeaveChannel(id);
+                        this.$route.meta.pageData.websocketLeaveChannel(this.$store.state.user.user.data.id, 'Updated');
                     }
 
                     this.values = data;
 
                     if (typeof this.$route.meta.pageData.websocketUpdate !== 'undefined') {
-                        this.$set(this.websocketUpdateChannels, 0, this.$route.meta.pageData.websocketUpdate(id));
+                        this.$set(
+                            this.websocketUpdateChannels,
+                            0,
+                            this.$route.meta.pageData.websocketUpdate(this.$store.state.user.user.data.id),
+                        );
 
                         this.$watch(
                             `websocketUpdateChannels.0.value`,

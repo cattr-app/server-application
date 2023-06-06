@@ -531,20 +531,12 @@ export function init(context, router) {
         },
     ]);
 
-    // grid.addToMetaProperties(
-    //     'gridData.websocket',
-    //     Vue.prototype.$echo.private(context.moduleName).listen(context.moduleName, e => {
-    //         console.log(e);
-    //     }),
-    //     grid.getRouterConfig(),
-    // );
-
     grid.addToMetaProperties(
         'gridData.websocketDelete',
-        () => {
+        id => {
             let result = reactive({ value: null });
             Vue.prototype.$echo
-                .private(`${context.moduleName}Deleted`)
+                .private(`${context.moduleName}Deleted.${id}`)
                 .listen(`${context.moduleName}Deleted`, e => Vue.set(result, 'value', e[0]));
             return result;
         },
@@ -556,8 +548,8 @@ export function init(context, router) {
         id => {
             let result = reactive({ value: null });
             Vue.prototype.$echo
-                .private(`App.Models.Task.${id}`)
-                .listen('.TaskUpdated', e => Vue.set(result, 'value', e.model));
+                .private(`${context.moduleName}Updated.${id}`)
+                .listen(`${context.moduleName}Updated`, e => Vue.set(result, 'value', e.model));
             return result;
         },
         grid.getRouterConfig(),
@@ -565,8 +557,8 @@ export function init(context, router) {
 
     grid.addToMetaProperties(
         'gridData.websocketLeaveChannel',
-        id => {
-            Vue.prototype.$echo.leaveChannel(`App.Models.Task.${id}`);
+        (id, action) => {
+            Vue.prototype.$echo.leaveChannel(`${context.moduleName}${action}.${id}`);
         },
         grid.getRouterConfig(),
     );
@@ -592,8 +584,8 @@ export function init(context, router) {
         id => {
             let result = reactive({ value: null });
             Vue.prototype.$echo
-                .private(`App.Models.Task.${id}`)
-                .listen('.TaskUpdated', e => Vue.set(result, 'value', e.modelShow));
+                .private(`${context.moduleName}Updated.${id}`)
+                .listen('TasksUpdated', e => Vue.set(result, 'value', e.modelShow));
             return result;
         },
         crud.view.getRouterConfig(),
@@ -601,8 +593,8 @@ export function init(context, router) {
 
     crud.view.addToMetaProperties(
         'pageData.websocketLeaveChannel',
-        id => {
-            Vue.prototype.$echo.leaveChannel(`App.Models.Task.${id}`);
+        (id, action) => {
+            Vue.prototype.$echo.leaveChannel(`${context.moduleName}${action}.${id}`);
         },
         crud.view.getRouterConfig(),
     );

@@ -53,8 +53,8 @@ class TimeIntervalsUpdated implements ShouldBroadcastNow
      */
     public function broadcastOn(): array
     {
-        return [
-            new PrivateChannel("TimeIntervalsUpdated.{$this->user->id}"),
-        ];
+        $companyAdminsAndManagersIds = User::select('id')->admin()->manager()->where('company_id', '=', $this->user->company_id)->get()->toArray();
+        
+        return array_map(fn($user) => new PrivateChannel("TimeIntervalsUpdated.{$user['id']}"), array_unique(array_merge([['id' => $this->user->id, 'online' => $this->user->online]], $companyAdminsAndManagersIds), SORT_REGULAR));
     }
 }

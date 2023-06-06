@@ -154,6 +154,7 @@
     import ProjectSelect from '@/components/ProjectSelect';
     import StatusSelect from '@/components/StatusSelect';
     import UserSelect from '@/components/UserSelect';
+    import { mapGetters } from 'vuex';
 
     export default {
         name: 'GridView',
@@ -383,37 +384,7 @@
                     this.itemsPerPage = pagination.perPage;
                     this.page = pagination.currentPage;
 
-                    if (typeof this.$route.meta.gridData.websocketLeaveChannel !== 'undefined') {
-                        this.tableData.forEach(({ id }) => this.$route.meta.gridData.websocketLeaveChannel(id));
-                    }
-
                     this.tableData = data;
-
-                    if (typeof this.$route.meta.gridData.websocketUpdate !== 'undefined') {
-                        this.tableData.forEach(({ id }, index) => {
-                            this.$set(
-                                this.websocketUpdateChannels,
-                                index,
-                                this.$route.meta.gridData.websocketUpdate(id),
-                            );
-
-                            this.$watch(
-                                `websocketUpdateChannels.${index}.value`,
-                                val => {
-                                    if (val !== undefined && val !== null) {
-                                        this.tableData.find((el, index) => {
-                                            if (el.id === val.id) {
-                                                this.$set(this.tableData, index, val);
-                                            }
-                                        });
-                                    }
-                                },
-                                {
-                                    deep: true,
-                                },
-                            );
-                        });
-                    }
                 } catch ({ response }) {
                     if (process.env.NODE_ENV === 'development') {
                         console.warn(response ? response : 'request is canceled');
@@ -576,6 +547,7 @@
             }
         },
         computed: {
+            ...mapGetters('user', ['user']),
             columnsKey() {
                 // Used to forced update table when columns changed
                 return this.columns.map(col => col.title).join(',');
@@ -695,16 +667,13 @@
 
             if (typeof this.$route.meta.gridData.websocketDelete !== 'undefined') {
                 this.lastDeletedItem = [];
-                this.$set(this.lastDeletedItem, 0, this.$route.meta.gridData.websocketDelete());
+                this.$set(this.lastDeletedItem, 0, this.$route.meta.gridData.websocketDelete(this.user.id));
 
                 this.$watch(
                     `lastDeletedItem.0.value`,
                     val => {
                         if (val !== undefined && val !== null) {
                             this.tableData.find((el, index) => {
-                                console.log(el, 'el');
-                                console.log(val, 'val');
-                                console.log(el.id === val.id, '===');
                                 if (el.id === val.id) {
                                     this.tableData.splice(index, 1);
                                 }
@@ -716,6 +685,22 @@
                     },
                 );
             }
+            this.$set(this.websocketUpdateChannels, 0, this.$route.meta.gridData.websocketUpdate(this.user.id));
+            this.$watch(
+                `websocketUpdateChannels.${0}.value`,
+                val => {
+                    if (val !== undefined && val !== null) {
+                        this.tableData.find((el, index) => {
+                            if (el.id === val.id) {
+                                this.$set(this.tableData, index, val);
+                            }
+                        });
+                    }
+                },
+                {
+                    deep: true,
+                },
+            );
         },
         watch: {
             async $route(to) {
@@ -732,6 +717,10 @@
             },
         },
         beforeDestory() {
+            if (typeof this.$route.meta.gridData.websocketLeaveChannel !== 'undefined') {
+                this.$route.meta.gridData.websocketLeaveChannel(this.user.id, 'Deleted');
+                this.$route.meta.gridData.websocketLeaveChannel(this.user.id, 'Updated');
+            }
             window.removeEventListener('click', this.handleClick);
             window.removeEventListener('resize', this.handleResize);
 

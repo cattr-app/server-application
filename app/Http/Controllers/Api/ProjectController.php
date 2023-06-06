@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Events\ProjectsDeleted;
+use App\Events\ProjectsUpdated;
 use App\Http\Requests\Project\CreateProjectRequest;
 use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\Project\DestroyProjectRequest;
@@ -349,6 +350,8 @@ class ProjectController extends ItemController
 
                 $project->statuses()->sync($statuses);
             }
+            
+            broadcast(new ProjectsUpdated($project));
         });
 
         Filter::listen(Filter::getActionFilterName(), static fn($data) => $data->load('statuses'));

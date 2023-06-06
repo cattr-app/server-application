@@ -2,8 +2,9 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\Tasks;
+use App\Events\TasksCreated;
 use App\Events\TasksDeleted;
+use App\Events\TasksUpdated;
 use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
 use App\Http\Requests\Task\EditTaskRequest;
@@ -185,6 +186,8 @@ class TaskController extends ItemController
                 );
             }
             SaveTaskEditHistory::dispatch($data, request()->user());
+
+            broadcast(new TasksUpdated($data));
         });
         return $this->_edit($request);
     }
@@ -264,8 +267,7 @@ class TaskController extends ItemController
             static function (Task $task) use ($request){
                 $task->users()->sync($request->get('users'));
 
-                broadcast(new Tasks($task));
-
+                broadcast(new TasksCreated($task));
             }
         );
 

@@ -11,7 +11,6 @@
 |
 */
 
-use App\Models\User;
 use Illuminate\Support\Facades\Auth;
 
 Broadcast::channel('App.User.{id}', static function ($user, $id) {
@@ -26,30 +25,39 @@ Broadcast::channel('App.Models.Project.{id}', static function ($user, $id) {
     return Auth::check();
 });
 
-Broadcast::channel('Tasks', static function () {
+Broadcast::channel('TasksCreated.{id}', static function () {
     return Auth::check();
 });
 
-Broadcast::channel('TasksDeleted', static function () {
+Broadcast::channel('TasksUpdated.{id}', static function () {
     return Auth::check();
 });
 
-Broadcast::channel('ProjectsDeleted', static function () {
+Broadcast::channel('TasksDeleted.{id}', static function () {
     return Auth::check();
 });
 
-$users = User::select('id')->get();
+Broadcast::channel('ProjectsCreated.{id}', static function () {
+    return Auth::check();
+});
 
-foreach ($users as $user) {
-    Broadcast::channel("TimeIntervalsCreated.{$user->id}", static function () {
-        return Auth::check();
-    });
+Broadcast::channel('ProjectsUpdated.{id}', static function () {
+    return Auth::check();
+});
 
-    Broadcast::channel("TimeIntervalsUpdated.{$user->id}", static function () {
-        return Auth::check();
-    });
+Broadcast::channel('ProjectsDeleted.{id}', static function () {
+    return Auth::check();
+});
 
-    Broadcast::channel("TimeIntervalsDeleted.{$user->id}", static function () {
-        return Auth::check();
-    });
-}
+
+Broadcast::channel('TimeIntervalsCreated.{id}', static function () {
+    return Auth::check();
+});
+
+Broadcast::channel('TimeIntervalsUpdated.{id}', static function () {
+    return Auth::check();
+});
+
+Broadcast::channel('TimeIntervalsDeleted.{id}', static function () {
+    return Auth::check();
+});
