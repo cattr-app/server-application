@@ -558,7 +558,7 @@ export function init(context, router) {
     grid.addToMetaProperties(
         'gridData.websocketLeaveChannel',
         (id, action) => {
-            Vue.prototype.$echo.leaveChannel(`${context.moduleName}${action}.${id}`);
+            Vue.prototype.$echo.leave(`${context.moduleName}${action}.${id}`);
         },
         grid.getRouterConfig(),
     );
@@ -594,7 +594,7 @@ export function init(context, router) {
     crud.view.addToMetaProperties(
         'pageData.websocketLeaveChannel',
         (id, action) => {
-            Vue.prototype.$echo.leaveChannel(`${context.moduleName}${action}.${id}`);
+            Vue.prototype.$echo.leave(`${context.moduleName}${action}.${id}`);
         },
         crud.view.getRouterConfig(),
     );

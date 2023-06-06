@@ -147,9 +147,9 @@
             clearInterval(this.updateHandle);
             this.service.unloadIntervals();
 
-            this.$echo.leaveChannel(`TimeIntervalDeleted.${this.user.id}`);
-            this.$echo.leaveChannel(`TimeIntervalCreated.${this.user.id}`);
-            this.$echo.leaveChannel(`TimeIntervalUpdated.${this.user.id}`);
+            this.$echo.leave(`TimeIntervalsDeleted.${this.user.id}`);
+            this.$echo.leave(`TimeIntervalsCreated.${this.user.id}`);
+            this.$echo.leave(`TimeIntervalsUpdated.${this.user.id}`);
         },
         computed: {
             ...mapGetters('dashboard', ['service', 'intervals', 'timePerDay', 'timePerProject', 'timezone']),
@@ -160,7 +160,9 @@
                 }
 
                 this.$echo.private(`TimeIntervalsDeleted.${this.user.id}`).listen('TimeIntervalsDeleted', e => {
-                    this.removeInterval({ interval: e[0], userId: this.user.id });
+                    if (Object.keys(this.intervals).includes(String(e[0].user_id))) {
+                        this.removeInterval({ interval: e[0], userId: this.user.id });
+                    }
                 });
                 this.$echo.private(`TimeIntervalsCreated.${this.user.id}`).listen('TimeIntervalsCreated', e => {
                     const startAtUTC = moment.tz(e[0][0].start_at, 'UTC');
@@ -168,7 +170,8 @@
 
                     if (
                         startAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') <= this.start &&
-                        endAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') >= this.end
+                        endAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') >= this.end &&
+                        Object.keys(this.intervals).includes(String(e[0][0].user_id))
                     ) {
                         this.addInterval({ interval: e[0][0], userId: this.user.id });
                     }
@@ -179,7 +182,8 @@
 
                     if (
                         startAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') <= this.start &&
-                        endAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') >= this.end
+                        endAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') >= this.end &&
+                        Object.keys(this.intervals).includes(String(e[0][0].user_id))
                     ) {
                         this.updateInterval({ interval: e[0][0], userId: this.user.id });
                     }

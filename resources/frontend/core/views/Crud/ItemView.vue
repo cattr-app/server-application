@@ -160,7 +160,6 @@
                         this.$watch(
                             `websocketUpdateChannels.0.value`,
                             val => {
-                                console.log(val);
                                 if (val.modelShow !== undefined) {
                                     this.values = val.modelShow;
                                 } else {

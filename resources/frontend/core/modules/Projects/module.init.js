@@ -328,7 +328,7 @@ export function init(context) {
     grid.addToMetaProperties(
         'gridData.websocketLeaveChannel',
         (id, action) => {
-            Vue.prototype.$echo.leaveChannel(`${context.moduleName}${action}.${id}`);
+            Vue.prototype.$echo.leave(`${context.moduleName}${action}.${id}`);
         },
         grid.getRouterConfig(),
     );
@@ -340,7 +340,7 @@ export function init(context) {
             Vue.prototype.$echo
                 .private(`${context.moduleName}Updated.${id}`)
                 .listen('ProjectsUpdated', e => Vue.set(result, 'value', e.modelShow));
-            console.log(result);
+
             return result;
         },
         crud.view.getRouterConfig(),
@@ -349,7 +349,7 @@ export function init(context) {
     crud.view.addToMetaProperties(
         'pageData.websocketLeaveChannel',
         (id, action) => {
-            Vue.prototype.$echo.leaveChannel(`${context.moduleName}${action}.${id}`);
+            Vue.prototype.$echo.leave(`${context.moduleName}${action}.${id}`);
         },
         crud.view.getRouterConfig(),
     );

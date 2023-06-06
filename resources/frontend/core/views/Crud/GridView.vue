@@ -716,7 +716,7 @@
                 this.skipRouteUpdate = false;
             },
         },
-        beforeDestory() {
+        beforeDestroy() {
             if (typeof this.$route.meta.gridData.websocketLeaveChannel !== 'undefined') {
                 this.$route.meta.gridData.websocketLeaveChannel(this.user.id, 'Deleted');
                 this.$route.meta.gridData.websocketLeaveChannel(this.user.id, 'Updated');
