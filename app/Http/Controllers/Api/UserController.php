@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App;
+use App\Enums\Role;
+use App\Enums\ScreenshotsState;
 use App\Http\Requests\User\ListUsersRequest;
 use App\Scopes\UserAccessScope;
 use Settings;
@@ -22,6 +24,7 @@ use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\SendInviteUserRequest;
 use App\Http\Requests\User\ShowUserRequest;
 use App\Http\Requests\User\DestroyUserRequest;
+use App\Models\Setting;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -235,6 +238,19 @@ class UserController extends ItemController
      */
     public function edit(EditUserRequest $request): JsonResponse
     {
+        if (ScreenshotsState::tryFromString(config('app.screenshots_state'))->inherited() ||
+            ScreenshotsState::tryFromString(Settings::scope('core')->get('screenshots_state'))->inherited() ||
+            $request->user()->role_id !== Role::ADMIN->value
+        ) {
+            $screenshots_state_locked = User::find($request->input('id'))->screenshots_state_locked;
+
+            Event::listen(Filter::getAfterActionEventName(), fn(User $user) => $user->save(['screenshots_state_locked' => $screenshots_state_locked]));
+        } else {
+            $screenshots_state_locked = $request->input('screenshots_state') === ScreenshotsState::OPTIONAL->value ? false : true;
+
+            Event::listen(Filter::getAfterActionEventName(), fn(User $user) => $user->save(['screenshots_state_locked' => $screenshots_state_locked]));
+        }
+        
         return $this->_edit($request);
     }
 

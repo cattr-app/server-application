@@ -24,6 +24,7 @@ enum ScreenshotsState: int
         return match ($this) {
             self::FORBIDDEN,
             self::REQUIRED => true,
+            self::ANY,
             self::OPTIONAL => false,
         };
     }
