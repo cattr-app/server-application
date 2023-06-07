@@ -25,39 +25,39 @@ Broadcast::channel('App.Models.Project.{id}', static function ($user, $id) {
     return Auth::check();
 });
 
-Broadcast::channel('TasksCreated.{id}', static function () {
+Broadcast::channel('TaskCreated.{id}', static function () {
     return Auth::check();
 });
 
-Broadcast::channel('TasksUpdated.{id}', static function () {
+Broadcast::channel('TaskUpdated.{id}', static function () {
     return Auth::check();
 });
 
-Broadcast::channel('TasksDeleted.{id}', static function () {
+Broadcast::channel('TaskDeleted.{id}', static function () {
     return Auth::check();
 });
 
-Broadcast::channel('ProjectsCreated.{id}', static function () {
+Broadcast::channel('ProjectCreated.{id}', static function () {
     return Auth::check();
 });
 
-Broadcast::channel('ProjectsUpdated.{id}', static function () {
+Broadcast::channel('ProjectUpdated.{id}', static function () {
     return Auth::check();
 });
 
-Broadcast::channel('ProjectsDeleted.{id}', static function () {
+Broadcast::channel('ProjectDeleted.{id}', static function () {
     return Auth::check();
 });
 
 
-Broadcast::channel('TimeIntervalsCreated.{id}', static function () {
+Broadcast::channel('TimeIntervalCreated.{id}', static function () {
     return Auth::check();
 });
 
-Broadcast::channel('TimeIntervalsUpdated.{id}', static function () {
+Broadcast::channel('TimeIntervalUpdated.{id}', static function () {
     return Auth::check();
 });
 
-Broadcast::channel('TimeIntervalsDeleted.{id}', static function () {
+Broadcast::channel('TimeIntervalDeleted.{id}', static function () {
     return Auth::check();
 });
