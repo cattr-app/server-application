@@ -10,7 +10,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 
-class TimeIntervalsDeleted implements ShouldBroadcastNow
+class TimeIntervalDeleted implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -39,6 +39,6 @@ class TimeIntervalsDeleted implements ShouldBroadcastNow
     {
         $companyAdminsAndManagersIds = User::select('id')->admin()->manager()->where('company_id', '=', $this->user->company_id)->get()->toArray();
         
-        return array_map(fn($user) => new PrivateChannel("TimeIntervalsDeleted.{$user['id']}"), array_unique(array_merge([['id' => $this->user->id, 'online' => $this->user->online]], $companyAdminsAndManagersIds), SORT_REGULAR));
+        return array_map(fn($user) => new PrivateChannel("TimeIntervalDeleted.{$user['id']}"), array_unique(array_merge([['id' => $this->user->id, 'online' => $this->user->online]], $companyAdminsAndManagersIds), SORT_REGULAR));
     }
 }

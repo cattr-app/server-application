@@ -11,7 +11,6 @@ use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
-use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
@@ -81,7 +80,6 @@ class Task extends Model
     use SoftDeletes;
     use ExposePermissions;
     use HasFactory;
-    use BroadcastsEvents;
 
     /**
      * table name from database
@@ -131,35 +129,6 @@ class Task extends Model
     ];
 
     protected const PERMISSIONS = ['update', 'destroy'];
-
-    public function broadcastAs($event)
-    {
-        return match ($event) {
-            'created' => 'App.Models.Task.Created',
-            default => null,
-        };
-    }
-
-    public function broadcastWith($event)
-    {
-        return match ($event) {
-            'updated' => [
-                'model' => Task::query()->where('id', '=', $this->id)->with([
-                    "priority",
-                    "project",
-                    "users",
-                    "status",
-                ])->first()->append('can'),
-                'modelShow' => $this->task()
-            ],
-            default => ['model' => $this],
-        };
-    }
-
-    public function broadcastOn(string $event): array
-    {
-        return [$this, $event];
-    }
     
     protected static function boot(): void
     {

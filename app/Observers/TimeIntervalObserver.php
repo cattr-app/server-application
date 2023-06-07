@@ -2,9 +2,9 @@
 
 namespace App\Observers;
 
-use App\Events\TimeIntervalsCreated;
-use App\Events\TimeIntervalsDeleted;
-use App\Events\TimeIntervalsUpdated;
+use App\Events\TimeIntervalCreated;
+use App\Events\TimeIntervalDeleted;
+use App\Events\TimeIntervalUpdated;
 use App\Models\TimeInterval;
 use Log;
 
@@ -17,8 +17,7 @@ class TimeIntervalObserver
     {
         Log::debug('TimeInterval created event');
 
-        broadcast(new TimeIntervalsCreated($timeInterval));
-        // broadcast(new TimeIntervalsCreated(TimeInterval::find($data->id)));
+        broadcast(new TimeIntervalCreated($timeInterval));
     }
 
     /**
@@ -28,7 +27,7 @@ class TimeIntervalObserver
     {
         Log::debug('TimeInterval updated event');
 
-        broadcast(new TimeIntervalsUpdated($timeInterval));
+        broadcast(new TimeIntervalUpdated($timeInterval));
     }
 
     /**
@@ -38,6 +37,6 @@ class TimeIntervalObserver
     {
         Log::debug('TimeInterval deleted event');
 
-        broadcast(new TimeIntervalsDeleted($timeInterval));
+        broadcast(new TimeIntervalDeleted($timeInterval));
     }
 }

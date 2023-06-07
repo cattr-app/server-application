@@ -2,38 +2,39 @@
 
 namespace App\Events;
 
-use App\Models\Project;
+use App\Models\Task;
 use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
-use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Illuminate\Support\Collection;
 
-class ProjectsCreated implements ShouldBroadcastNow
+class TaskCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
-    private Project $project;
+    private Task $task;
     private array $result;
     private Collection $users;
     /**
      * Create a new event instance.
      */
-    public function __construct(Project $project)
+    public function __construct(Task $task)
     {
         $this->result = [
-            'model' => Project::query()->where('id', '=', $project->id)->with([
-                "defaultPriority",
+            'model' => Task::query()->where('id', '=', $task->id)->with([
+                "priority",
+                "project",
                 "users",
-                "statuses",
-            ])->withCount('tasks')->first()->append('can'),
-            'modelShow' => $project->project()
+                "status",
+            ])->first()->append('can'),
+            'modelShow' => $task->task()
         ];
 
-        $this->project = $project;
-        $this->users = $project->users->map(fn($el) => $el->id);
+        $this->users = $task->users->map(fn($el) => $el->id);
+        $this->task = $task;
     }
 
     public function broadcastWith(): array
@@ -50,10 +51,10 @@ class ProjectsCreated implements ShouldBroadcastNow
         $companyAdminsAndManagersIds = User::select('id')
             ->admin()
             ->manager()
-            ->where('company_id', '=', $this->project->company_id)
+            ->where('company_id', '=', $this->task->project->company_id)
             ->get()
             ->map(fn($el) => $el->getAttributes()['id']);
-        
-        return array_map(fn($userId) => new PrivateChannel("ProjectsCreated.{$userId}"), array_unique(array_merge($this->users->toArray(), $companyAdminsAndManagersIds->toArray()), SORT_REGULAR));
+
+        return array_map(fn($userId) => new PrivateChannel("TaskCreated.{$userId}"), array_unique(array_merge($this->users->toArray(), $companyAdminsAndManagersIds->toArray()), SORT_REGULAR));
     }
 }

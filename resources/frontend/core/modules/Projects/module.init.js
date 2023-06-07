@@ -306,8 +306,8 @@ export function init(context) {
         id => {
             let result = reactive({ value: null });
             Vue.prototype.$echo
-                .private(`${context.moduleName}Deleted.${id}`)
-                .listen(`${context.moduleName}Deleted`, e => Vue.set(result, 'value', e[0]));
+                .private(`ProjectDeleted.${id}`)
+                .listen(`ProjectDeleted`, e => Vue.set(result, 'value', e[0]));
             return result;
         },
         grid.getRouterConfig(),
@@ -318,8 +318,8 @@ export function init(context) {
         id => {
             let result = reactive({ value: null });
             Vue.prototype.$echo
-                .private(`${context.moduleName}Updated.${id}`)
-                .listen('ProjectsUpdated', e => Vue.set(result, 'value', e.model));
+                .private(`ProjectUpdated.${id}`)
+                .listen('ProjectUpdated', e => Vue.set(result, 'value', e.model));
             return result;
         },
         grid.getRouterConfig(),
@@ -328,7 +328,7 @@ export function init(context) {
     grid.addToMetaProperties(
         'gridData.websocketLeaveChannel',
         (id, action) => {
-            Vue.prototype.$echo.leave(`${context.moduleName}${action}.${id}`);
+            Vue.prototype.$echo.leave(`Project${action}.${id}`);
         },
         grid.getRouterConfig(),
     );
@@ -338,8 +338,8 @@ export function init(context) {
         id => {
             let result = reactive({ value: null });
             Vue.prototype.$echo
-                .private(`${context.moduleName}Updated.${id}`)
-                .listen('ProjectsUpdated', e => Vue.set(result, 'value', e.modelShow));
+                .private(`ProjectUpdated.${id}`)
+                .listen('ProjectUpdated', e => Vue.set(result, 'value', e.modelShow));
 
             return result;
         },
@@ -349,7 +349,7 @@ export function init(context) {
     crud.view.addToMetaProperties(
         'pageData.websocketLeaveChannel',
         (id, action) => {
-            Vue.prototype.$echo.leave(`${context.moduleName}${action}.${id}`);
+            Vue.prototype.$echo.leave(`Project${action}.${id}`);
         },
         crud.view.getRouterConfig(),
     );

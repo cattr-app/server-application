@@ -3,9 +3,6 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
-use App\Events\TimeIntervalsCreated;
-use App\Events\TimeIntervalsDeleted;
-use App\Events\TimeIntervalsUpdated;
 use App\Http\Requests\Interval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\Interval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\Interval\CreateTimeIntervalRequest;
@@ -553,8 +550,6 @@ class IntervalController extends ItemController
                 if (User::find($data['user_id'])->web_and_app_monitoring) {
                     AssignAppsToTimeInterval::dispatch($data);
                 }
-
-                broadcast(new TimeIntervalsCreated(TimeInterval::find($data->id)));
             }
         );
 

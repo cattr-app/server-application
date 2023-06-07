@@ -7,7 +7,6 @@ use App\Traits\ExposePermissions;
 use Database\Factories\ProjectFactory;
 use DB;
 use Eloquent as EloquentIdeHelper;
-use Illuminate\Database\Eloquent\BroadcastsEvents;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
@@ -69,7 +68,6 @@ class Project extends Model
     use SoftDeletes;
     use ExposePermissions;
     use HasFactory;
-    use BroadcastsEvents;
 
     /**
      * @var array
@@ -105,26 +103,6 @@ class Project extends Model
     ];
 
     protected const PERMISSIONS = ['update', 'update_members', 'destroy'];
-
-    public function broadcastWith($event)
-    {
-        return match ($event) {
-            'updated' => [
-                'model' => Project::query()->where('id', '=', $this->id)->with([
-                    "defaultPriority",
-                    "users",
-                    "statuses",
-                ])->withCount('tasks')->first()->append('can'),
-                'modelShow' => $this->project()
-            ],
-            default => ['model' => $this],
-        };
-    }
-
-    public function broadcastOn(string $event): array
-    {
-        return [$this, $event];
-    }
 
     protected static function boot(): void
     {

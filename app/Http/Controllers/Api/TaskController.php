@@ -2,9 +2,6 @@
 
 namespace App\Http\Controllers\Api;
 
-use App\Events\TasksCreated;
-use App\Events\TasksDeleted;
-use App\Events\TasksUpdated;
 use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
 use App\Http\Requests\Task\EditTaskRequest;

@@ -143,9 +143,9 @@
             clearInterval(this.updateHandle);
             this.service.unloadIntervals();
 
-            this.$echo.leave(`TimeIntervalsDeleted.${this.user.id}`);
-            this.$echo.leave(`TimeIntervalsCreated.${this.user.id}`);
-            this.$echo.leave(`TimeIntervalsUpdated.${this.user.id}`);
+            this.$echo.leave(`TimeIntervalDeleted.${this.user.id}`);
+            this.$echo.leave(`TimeIntervalCreated.${this.user.id}`);
+            this.$echo.leave(`TimeIntervalUpdated.${this.user.id}`);
         },
         computed: {
             ...mapGetters('dashboard', ['intervals', 'timePerDay', 'users', 'timezone', 'service']),
@@ -314,13 +314,13 @@
             },
         },
         mounted() {
-            this.$echo.private(`TimeIntervalsDeleted.${this.user.id}`).listen('TimeIntervalsDeleted', e => {
+            this.$echo.private(`TimeIntervalDeleted.${this.user.id}`).listen('TimeIntervalDeleted', e => {
                 if (Object.keys(this.intervals).includes(String(e[0].user_id))) {
                     this.removeInterval({ interval: e[0], userId: e[0].user_id });
                 }
             });
 
-            this.$echo.private(`TimeIntervalsCreated.${this.user.id}`).listen('TimeIntervalsCreated', e => {
+            this.$echo.private(`TimeIntervalCreated.${this.user.id}`).listen('TimeIntervalCreated', e => {
                 const startAtUTC = moment.tz(e[0][0].start_at, 'UTC');
                 const endAtUTC = moment.tz(e[0][0].end_at, 'UTC');
                 if (
@@ -332,7 +332,7 @@
                 }
             });
 
-            this.$echo.private(`TimeIntervalsUpdated.${this.user.id}`).listen('TimeIntervalsUpdated', e => {
+            this.$echo.private(`TimeIntervalUpdated.${this.user.id}`).listen('TimeIntervalUpdated', e => {
                 const startAtUTC = moment.tz(e[0][0].start_at, 'UTC');
                 const endAtUTC = moment.tz(e[0][0].end_at, 'UTC');
                 if (

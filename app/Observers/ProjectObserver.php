@@ -2,8 +2,8 @@
 
 namespace App\Observers;
 
-use App\Events\ProjectsDeleted;
-use App\Events\ProjectsUpdated;
+use App\Events\ProjectDeleted;
+use App\Events\ProjectUpdated;
 use App\Models\Project;
 use Log;
 
@@ -26,7 +26,7 @@ class ProjectObserver
     {
         Log::debug('Project updated event');
 
-        broadcast(new ProjectsUpdated($project));
+        broadcast(new ProjectUpdated($project));
     }
 
     /**
@@ -36,6 +36,6 @@ class ProjectObserver
     {
         Log::debug('Project deleted event');
 
-        broadcast(new ProjectsDeleted($project));
+        broadcast(new ProjectDeleted($project));
     }
 }

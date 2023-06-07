@@ -11,24 +11,33 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
-class ProjectsDeleted implements ShouldBroadcastNow
+class ProjectUpdated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
     private Project $project;
+    private array $result;
     private Collection $users;
     /**
      * Create a new event instance.
      */
     public function __construct(Project $project)
     {
+        $this->result = [
+            'model' => Project::query()->where('id', '=', $project->id)->with([
+                "defaultPriority",
+                "users",
+                "statuses",
+            ])->withCount('tasks')->first()->append('can'),
+            'modelShow' => $project->project()
+        ];
         $this->project = $project;
         $this->users = $project->users->map(fn($el) => $el->id);
     }
 
     public function broadcastWith(): array
     {
-        return [$this->project];
+        return $this->result;
     }
     /**
      * Get the channels the event should broadcast on.
@@ -43,7 +52,7 @@ class ProjectsDeleted implements ShouldBroadcastNow
             ->where('company_id', '=', $this->project->company_id)
             ->get()
             ->map(fn($el) => $el->getAttributes()['id']);
-        
-        return array_map(fn($userId) => new PrivateChannel("ProjectsDeleted.{$userId}"), array_unique(array_merge($this->users->toArray(), $companyAdminsAndManagersIds->toArray()), SORT_REGULAR));
+
+        return array_map(fn($userId) => new PrivateChannel("ProjectUpdated.{$userId}"), array_unique(array_merge($this->users->toArray(), $companyAdminsAndManagersIds->toArray()), SORT_REGULAR));
     }
 }

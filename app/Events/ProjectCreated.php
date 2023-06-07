@@ -7,12 +7,11 @@ use App\Models\User;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcastNow;
+use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
-use Illuminate\Support\Collection;
-use Log;
 
-class ProjectsUpdated implements ShouldBroadcastNow
+class ProjectCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -32,6 +31,7 @@ class ProjectsUpdated implements ShouldBroadcastNow
             ])->withCount('tasks')->first()->append('can'),
             'modelShow' => $project->project()
         ];
+
         $this->project = $project;
         $this->users = $project->users->map(fn($el) => $el->id);
     }
@@ -53,7 +53,7 @@ class ProjectsUpdated implements ShouldBroadcastNow
             ->where('company_id', '=', $this->project->company_id)
             ->get()
             ->map(fn($el) => $el->getAttributes()['id']);
-
-        return array_map(fn($userId) => new PrivateChannel("ProjectsUpdated.{$userId}"), array_unique(array_merge($this->users->toArray(), $companyAdminsAndManagersIds->toArray()), SORT_REGULAR));
+        
+        return array_map(fn($userId) => new PrivateChannel("ProjectCreated.{$userId}"), array_unique(array_merge($this->users->toArray(), $companyAdminsAndManagersIds->toArray()), SORT_REGULAR));
     }
 }

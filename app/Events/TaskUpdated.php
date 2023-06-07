@@ -11,7 +11,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Illuminate\Support\Collection;
 
-class TasksUpdated implements ShouldBroadcastNow
+class TaskUpdated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -54,6 +54,7 @@ class TasksUpdated implements ShouldBroadcastNow
             ->where('company_id', '=', $this->task->project->company_id)
             ->get()
             ->map(fn($el) => $el->getAttributes()['id']);
-        return array_map(fn($userId) => new PrivateChannel("TasksUpdated.{$userId}"), array_unique(array_merge($this->users->toArray(), $companyAdminsAndManagersIds->toArray()), SORT_REGULAR));
+            
+        return array_map(fn($userId) => new PrivateChannel("TaskUpdated.{$userId}"), array_unique(array_merge($this->users->toArray(), $companyAdminsAndManagersIds->toArray()), SORT_REGULAR));
     }
 }

@@ -2,9 +2,9 @@
 
 namespace App\Observers;
 
-use App\Events\TasksCreated;
-use App\Events\TasksDeleted;
-use App\Events\TasksUpdated;
+use App\Events\TaskCreated;
+use App\Events\TaskDeleted;
+use App\Events\TaskUpdated;
 use App\Models\Task;
 use Log;
 
@@ -17,7 +17,7 @@ class TaskObserver
     {
         Log::debug('Task created event');
 
-        broadcast(new TasksCreated($task));
+        broadcast(new TaskCreated($task));
     }
 
     /**
@@ -27,7 +27,7 @@ class TaskObserver
     {
         Log::debug('Task updated event');
 
-        broadcast(new TasksUpdated($task));
+        broadcast(new TaskUpdated($task));
     }
 
     /**
@@ -37,6 +37,6 @@ class TaskObserver
     {
         Log::debug('Task deleted event');
         
-        broadcast(new TasksDeleted($task));
+        broadcast(new TaskDeleted($task));
     }
 }

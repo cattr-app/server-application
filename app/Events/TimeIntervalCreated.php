@@ -14,7 +14,7 @@ use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
 use Settings;
 
-class TimeIntervalsUpdated implements ShouldBroadcastNow
+class TimeIntervalCreated implements ShouldBroadcastNow
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
@@ -54,7 +54,7 @@ class TimeIntervalsUpdated implements ShouldBroadcastNow
     public function broadcastOn(): array
     {
         $companyAdminsAndManagersIds = User::select('id')->admin()->manager()->where('company_id', '=', $this->user->company_id)->get()->toArray();
-        
-        return array_map(fn($user) => new PrivateChannel("TimeIntervalsUpdated.{$user['id']}"), array_unique(array_merge([['id' => $this->user->id, 'online' => $this->user->online]], $companyAdminsAndManagersIds), SORT_REGULAR));
+
+        return array_map(fn($user) => new PrivateChannel("TimeIntervalCreated.{$user['id']}"), array_unique(array_merge([['id' => $this->user->id, 'online' => $this->user->online]], $companyAdminsAndManagersIds), SORT_REGULAR));
     }
 }
