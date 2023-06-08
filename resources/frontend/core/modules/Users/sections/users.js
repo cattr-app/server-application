@@ -9,6 +9,7 @@ import { store } from '@/store';
 import LanguageSelector from '@/components/LanguageSelector';
 import i18n from '@/i18n';
 import Vue from 'vue';
+import { checkLockedAndReturnValueForUsersScreenshotsSelector } from '@/utils/screenshots';
 
 export function fieldsToFillProvider() {
     return [
@@ -70,18 +71,12 @@ export function fieldsToFillProvider() {
             key: 'screenshots_state',
             default: 1,
             render: (h, props) => {
-                let value = props.values.screenshots_state;
-                let isDisabled = props.companyData.screenshots_state_inherit;
-                let envValue = props.companyData.env_screenshots_state;
-
-                if (envValue === 1 || envValue === 0) {
-                    value = envValue;
-                    isDisabled = true;
-                } else if (envValue === 2) {
-                    isDisabled = false;
-                } else if (isDisabled) {
-                    value = props.companyData.screenshots_state;
-                }
+                let [value, isDisabled] = checkLockedAndReturnValueForUsersScreenshotsSelector(
+                    props.values.screenshots_state,
+                    props.companyData.env_screenshots_state,
+                    props.companyData.screenshots_state,
+                    props.companyData.screenshots_state_inherit,
+                );
 
                 return h(ScreenshotsStateSelect, {
                     props: {

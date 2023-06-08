@@ -1,6 +1,7 @@
 import AccountService from '../services/account.service';
 import LanguageSelector from '@/components/LanguageSelector';
 import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
+import { checkLockedAndReturnValueForAccountScreenshotsSelector } from '@/utils/screenshots';
 
 export function fieldsProvider() {
     return [
@@ -64,29 +65,17 @@ export function fieldsProvider() {
             label: 'field.screenshots_state',
             key: 'screenshots_state',
             render: (h, props) => {
-                let userValue = props.values.screenshots_state;
-                let isDisabled = props.companyData.screenshots_state_inherit;
-                let envValue = props.companyData.env_screenshots_state;
-                let isBlockedByAdmin = props.values.screenshots_state_locked;
-
-                if (envValue === 1 || envValue === 0) {
-                    userValue = envValue;
-                    isDisabled = true;
-                } else if (envValue === 2) {
-                    isDisabled = false;
-
-                    if (isBlockedByAdmin) {
-                        isDisabled = true;
-                    }
-                } else if (isDisabled) {
-                    userValue = props.companyData.screenshots_state;
-                } else if (isBlockedByAdmin) {
-                    isDisabled = true;
-                }
+                let [value, isDisabled] = checkLockedAndReturnValueForAccountScreenshotsSelector(
+                    props.values.screenshots_state,
+                    props.companyData.env_screenshots_state,
+                    props.companyData.screenshots_state,
+                    props.companyData.screenshots_state_inherit,
+                    props.values.screenshots_state_locked,
+                );
 
                 return h(ScreenshotsStateSelect, {
                     props: {
-                        value: userValue,
+                        value,
                         isDisabled,
                         hideIndexes: [0, 3],
                     },

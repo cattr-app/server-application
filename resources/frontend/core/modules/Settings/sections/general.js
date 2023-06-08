@@ -6,6 +6,7 @@ import PrioritySelect from '@/components/PrioritySelect';
 import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
 import { store } from '@/store';
 import { hasRole } from '@/utils/user';
+import { checkLockedAndReturnValueForGlobalScreenshotsSelector } from '@/utils/screenshots';
 
 export default {
     // Check if this section can be rendered and accessed, this param IS OPTIONAL (true by default)
@@ -142,14 +143,17 @@ export default {
                     label: 'field.screenshots_state',
                     key: 'screenshots_state',
                     render: (h, props) => {
-                        let value = props.values.screenshots_state;
-                        let envValue = props.values.env_screenshots_state;
-                        let isDisabled = false;
-
-                        if (typeof envValue === 'number' && envValue <= 2 && envValue >= 0) {
-                            value = envValue;
-                            isDisabled = true;
-                        }
+                        // let value = props.values.screenshots_state;
+                        // let envValue = props.values.env_screenshots_state;
+                        // let isDisabled = false;
+                        let [value, isDisabled] = checkLockedAndReturnValueForGlobalScreenshotsSelector(
+                            props.values.screenshots_state,
+                            props.values.env_screenshots_state,
+                        );
+                        // if (typeof envValue === 'number' && envValue <= 2 && envValue >= 0) {
+                        //     value = envValue;
+                        //     isDisabled = true;
+                        // }
                         return h(ScreenshotsStateSelect, {
                             props: {
                                 value,

@@ -238,18 +238,11 @@ class UserController extends ItemController
      */
     public function edit(EditUserRequest $request): JsonResponse
     {
-        if (ScreenshotsState::tryFromString(config('app.screenshots_state'))->inherited() ||
-            ScreenshotsState::tryFromString(Settings::scope('core')->get('screenshots_state'))->inherited() ||
-            $request->user()->role_id !== Role::ADMIN->value
-        ) {
-            $screenshots_state_locked = User::find($request->input('id'))->screenshots_state_locked;
+        Filter::listen(Filter::getActionFilterName(), static function($user) use ($request){
+            $user->screenshots_state_locked = $request->user()->isAdmin() && $request->input('screenshots_state') === ScreenshotsState::OPTIONAL->value ? 0 : 1;
 
-            Event::listen(Filter::getAfterActionEventName(), fn(User $user) => $user->save(['screenshots_state_locked' => $screenshots_state_locked]));
-        } else {
-            $screenshots_state_locked = $request->input('screenshots_state') === ScreenshotsState::OPTIONAL->value ? false : true;
-
-            Event::listen(Filter::getAfterActionEventName(), fn(User $user) => $user->save(['screenshots_state_locked' => $screenshots_state_locked]));
-        }
+            return $user;
+        });
         
         return $this->_edit($request);
     }

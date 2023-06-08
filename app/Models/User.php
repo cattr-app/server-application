@@ -25,6 +25,7 @@ use Illuminate\Notifications\Notifiable;
 use Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\PersonalAccessToken;
+use Settings;
 
 /**
  * App\Models\User
@@ -201,6 +202,7 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
+        // 'screenshots_state'
     ];
 
     protected static function boot(): void
@@ -212,6 +214,7 @@ class User extends Authenticatable
 
     protected $appends = [
         'online',
+        'screenshots_state_with_inherited'
     ];
 
     public function projects(): BelongsToMany
@@ -265,6 +268,17 @@ class User extends Authenticatable
         return Attribute::make(
             set: static fn($value) => Hash::needsRehash($value) ? Hash::make($value) : $value,
         );
+    }
+
+    public function getScreenshotsStateWithInheritedAttribute(): ScreenshotsState
+    {
+        if (config('app.screenshots_state') === '0' || config('app.screenshots_state') === '1') {
+            return ScreenshotsState::tryFromString(config('app.screenshots_state'));
+        } else if (Settings::scope('core')->get('screenshots_state') === '0' || Settings::scope('core')->get('screenshots_state') === '1') {
+            return ScreenshotsState::tryFromString(Settings::scope('core')->get('screenshots_state'));
+        } else {
+            return $this->screenshots_state;
+        }
     }
 
     public function scopeAdmin(EloquentBuilder $query): EloquentBuilder
