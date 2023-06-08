@@ -73,9 +73,6 @@ export function fieldsToFillProvider() {
             render: (h, props) => {
                 let [value, isDisabled] = checkLockedAndReturnValueForUsersScreenshotsSelector(
                     props.values.screenshots_state,
-                    props.companyData.env_screenshots_state,
-                    props.companyData.screenshots_state,
-                    props.companyData.screenshots_state_inherit,
                 );
 
                 return h(ScreenshotsStateSelect, {

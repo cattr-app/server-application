@@ -143,17 +143,10 @@ export default {
                     label: 'field.screenshots_state',
                     key: 'screenshots_state',
                     render: (h, props) => {
-                        // let value = props.values.screenshots_state;
-                        // let envValue = props.values.env_screenshots_state;
-                        // let isDisabled = false;
                         let [value, isDisabled] = checkLockedAndReturnValueForGlobalScreenshotsSelector(
                             props.values.screenshots_state,
-                            props.values.env_screenshots_state,
                         );
-                        // if (typeof envValue === 'number' && envValue <= 2 && envValue >= 0) {
-                        //     value = envValue;
-                        //     isDisabled = true;
-                        // }
+
                         return h(ScreenshotsStateSelect, {
                             props: {
                                 value,
