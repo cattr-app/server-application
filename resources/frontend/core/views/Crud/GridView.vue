@@ -240,6 +240,7 @@
                         fields: gridData.filters.map(filter => filter.referenceKey),
                     },
                 },
+                lastDeletedItem: [],
 
                 isDataLoading: false,
                 skipRouteUpdate: false,
@@ -657,6 +658,10 @@
                 await this.fetchData();
             }
 
+            if (typeof this.$route.meta.gridData.websocketLeaveChannel !== 'undefined') {
+                this.websocketLeaveChannel = this.$route.meta.gridData.websocketLeaveChannel;
+            }
+
             window.addEventListener('click', this.handleClick);
             window.addEventListener('resize', this.handleResize);
             this.handleResize();
@@ -666,7 +671,6 @@
             }
 
             if (typeof this.$route.meta.gridData.websocketDelete !== 'undefined') {
-                this.lastDeletedItem = [];
                 this.$set(this.lastDeletedItem, 0, this.$route.meta.gridData.websocketDelete(this.user.id));
 
                 this.$watch(
@@ -676,6 +680,7 @@
                             this.tableData.find((el, index) => {
                                 if (el.id === val.id) {
                                     this.tableData.splice(index, 1);
+                                    return true;
                                 }
                             });
                         }
@@ -717,10 +722,11 @@
             },
         },
         beforeDestroy() {
-            if (typeof this.$route.meta.gridData.websocketLeaveChannel !== 'undefined') {
-                this.$route.meta.gridData.websocketLeaveChannel(this.user.id, 'Deleted');
-                this.$route.meta.gridData.websocketLeaveChannel(this.user.id, 'Updated');
+            if (typeof this.websocketLeaveChannel !== 'undefined') {
+                this.websocketLeaveChannel(this.user.id, 'Deleted');
+                this.websocketLeaveChannel(this.user.id, 'Updated');
             }
+
             window.removeEventListener('click', this.handleClick);
             window.removeEventListener('resize', this.handleResize);
 

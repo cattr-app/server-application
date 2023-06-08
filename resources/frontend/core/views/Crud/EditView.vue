@@ -324,7 +324,8 @@
 
                 this.isLoading = true;
                 try {
-                    const data = (await this.service.save(this.values, this.pageData.type === 'new')).data;
+                    const { data } = (await this.service.save(this.values, this.pageData.type === 'new')).data;
+
                     this.$Notify({
                         type: 'success',
                         title: this.$t('notification.record.save.success.title'),
@@ -338,12 +339,13 @@
                     } else if (this.pageData.type === 'new') {
                         this.$router.push({
                             name: this.$route.meta.navigation.view,
-                            params: { id: data.res[this.service.getIdParam()] },
+                            params: { id: data[this.service.getIdParam()] },
                         });
                     }
-                } catch ({ response }) {
+                } catch ({ message }) {
                     this.isLoading = false;
-                    this.$refs.form.setErrors(response.data.info);
+
+                    this.$refs.form.setErrors(message);
                 }
             },
 
