@@ -108,5 +108,5 @@ return [
     'prefix' => env('CACHE_PREFIX', Str::slug(env('APP_NAME', 'laravel'), '_').'_cache_'),
 
     // Amount of time to cache roles for
-    'role_caching_ttl' => 3600,
+    'role_caching_ttl' => 300,
 ];
