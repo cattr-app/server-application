@@ -27,12 +27,12 @@ RUN set -x && \
     composer dump-autoload -n --optimize --apcu --classmap-authoritative
 
 RUN set -x && \
-    php artisan storage:link
-
-RUN set -x && \
     yarn && \
     yarn prod && \
     rm -rf node_modules
+
+RUN set -x && \
+    php artisan storage:link
 
 FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr:latest AS runtime
 
