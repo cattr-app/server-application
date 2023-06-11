@@ -54,7 +54,7 @@ class GenerateAndSendReport implements ShouldQueue, ShouldBeUnique
 
         $this->report->store($fileName, self::STORAGE_DRIVE, $this->type === 'pdf' ? Excel::MPDF : Str::ucfirst($this->type));
 
-        $this->user->notify((new ReportGenerated($fileName)));
+        $this->user->notify((new ReportGenerated($fileName, self::STORAGE_DRIVE)));
 
         $dir = $this->dir;
 
