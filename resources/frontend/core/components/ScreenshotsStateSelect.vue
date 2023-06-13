@@ -1,15 +1,15 @@
 <template>
     <at-radio-group ref="select" v-model="model" class="screenshots-state-select">
         <at-radio-button
-            v-for="state in states"
-            :key="state.value"
-            :label="state.value"
+            v-for="(state, key) in states"
+            :key="key"
+            :label="key"
             :disabled="isDisabled"
             class="screenshots-state-select__btn"
         >
             <div>
                 <slot :name="`state__name`">
-                    {{ $t(`control.screenshot_state_options.${state.name}`) }}
+                    {{ $t(`control.screenshot_state_options.${state}`) }}
                 </slot>
             </div>
         </at-radio-button>
@@ -60,11 +60,13 @@
             },
             states() {
                 let states = [];
-                this.$store.getters['screenshots/states'].forEach((item, i) => {
+
+                Object.keys(this.$store.getters['screenshots/states']).forEach((item, i) => {
                     if (!this.hideIndexes.includes(i)) {
                         return states.push(item);
                     }
                 });
+
                 return states;
             },
         },

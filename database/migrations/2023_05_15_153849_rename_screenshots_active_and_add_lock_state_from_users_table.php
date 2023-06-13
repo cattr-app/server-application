@@ -12,9 +12,8 @@ return new class extends Migration
      */
     public function up(): void
     {
-        Schema::table('users', function (Blueprint $table) {
-            $table->integer('screenshots_active')->default(1)->change();
-        });
+        DB::statement("ALTER TABLE users MODIFY COLUMN screenshots_active ENUM('-1', '0', '1', '2') DEFAULT '1'");
+
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('screenshots_active', 'screenshots_state');
             $table->boolean('screenshots_state_locked')->default(true);

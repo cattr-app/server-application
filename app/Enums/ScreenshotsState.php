@@ -29,12 +29,16 @@ enum ScreenshotsState: int
         };
     }
     
-    public static function tryFromString($value): ScreenshotsState
+    public static function tryFromString(string $value): ScreenshotsState
     {
-        $stringValues = array_map(fn($i) => (string)$i->value, self::cases());
-
-        if (in_array($value, $stringValues, true)) {
-            return self::tryFrom($value);
+        if (is_null($value)) {
+            return self::ANY;
+        }
+        
+        foreach (self::cases() as $state) {
+            if ($state->title() === strtolower($value)) {
+                return $state;
+            }
         }
 
         return self::ANY;

@@ -5,7 +5,11 @@ const state = {
 };
 
 const getters = {
-    states: s => s.states,
+    states: s =>
+        s.states.reduce(
+            (acc, el) => (el.value < 0 ? acc : Object.assign(acc, { [el.name.toLowerCase()]: el.value })),
+            {},
+        ),
 };
 
 const mutations = {

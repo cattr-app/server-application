@@ -4,10 +4,14 @@ import { store } from '@/store';
  * Check if state from env is valid and set disabled state for global screenshot selector
  */
 export function checkLockedAndReturnValueForGlobalScreenshotsSelector(value, isDisabled = false) {
-    let envValue = store.getters['user/companyData'].env_screenshots_state;
+    let companyData = store.getters['user/companyData'];
 
-    if (typeof envValue === 'number' && envValue <= 2 && envValue >= 0) {
-        value = envValue;
+    if (
+        hasEnvState(companyData, 'forbidden') ||
+        hasEnvState(companyData, 'required') ||
+        hasEnvState(companyData, 'optional')
+    ) {
+        value = companyData.env_screenshots_state;
         isDisabled = true;
     }
 
@@ -24,10 +28,10 @@ export function checkLockedAndReturnValueForUsersScreenshotsSelector(value) {
         companyValue = companyData.screenshots_state,
         isDisabled = companyData.screenshots_state_inherit;
 
-    if (envValue === 1 || envValue === 0) {
+    if (hasEnvState(companyData, 'required') || hasEnvState(companyData, 'forbidden')) {
         value = envValue;
         isDisabled = true;
-    } else if (envValue === 2) {
+    } else if (hasEnvState(companyData, 'optional')) {
         isDisabled = false;
     } else if (isDisabled) {
         value = companyValue;
@@ -46,10 +50,10 @@ export function checkLockedAndReturnValueForAccountScreenshotsSelector(value, is
         companyValue = companyData.screenshots_state,
         isDisabled = companyData.screenshots_state_inherit;
 
-    if (envValue === 1 || envValue === 0) {
+    if (hasEnvState(companyData, 'required') || hasEnvState(companyData, 'forbidden')) {
         value = envValue;
         isDisabled = true;
-    } else if (envValue === 2) {
+    } else if (hasEnvState(companyData, 'optional')) {
         isDisabled = false;
 
         if (isBlockedByAdmin) {
@@ -73,12 +77,12 @@ export function checkLockedAndReturnValueForAccountScreenshotsSelector(value, is
 export function checkEnvAndCompanyVariablesScreenshotsSelector() {
     let companyData = store.getters['user/companyData'];
 
-    if (companyData.env_screenshots_state !== 0) {
-        if (companyData.env_screenshots_state === 1) {
+    if (!hasEnvState(companyData, 'forbidden')) {
+        if (hasEnvState(companyData, 'required')) {
             return true;
         }
 
-        if (companyData.screenshots_state !== 0) {
+        if (!hasCompanyState(companyData, 'forbidden')) {
             return true;
         }
 
@@ -90,4 +94,12 @@ export function checkEnvAndCompanyVariablesScreenshotsSelector() {
 
 export function isHiddenHeaderScreenshotsLink(env_screenshots_state, screenshots_state) {
     return env_screenshots_state === 0 || (env_screenshots_state === -1 && screenshots_state === 0);
+}
+
+export function hasCompanyState(company, stateName) {
+    return company.screenshots_state === store.getters['screenshots/states'][stateName];
+}
+
+export function hasEnvState(company, stateName) {
+    return company.env_screenshots_state === store.getters['screenshots/states'][stateName];
 }
