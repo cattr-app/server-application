@@ -1,6 +1,7 @@
 import { hasRole } from '@/utils/user';
 import CompanyService from './services/company.service';
 import { ModuleLoaderInterceptor } from '@/moduleLoader';
+import { isHiddenHeaderScreenshotsLink } from '@/utils/screenshots';
 
 export const ModuleConfig = {
     routerPrefix: 'settings',
@@ -11,7 +12,7 @@ export const ModuleConfig = {
 export function init(context) {
     ModuleLoaderInterceptor.on('Screenshots', context => {
         new CompanyService().getAll().then(({ screenshots_state, env_screenshots_state }) => {
-            if (env_screenshots_state === 0 || (env_screenshots_state === -1 && screenshots_state === 0)) {
+            if (isHiddenHeaderScreenshotsLink(env_screenshots_state, screenshots_state)) {
                 context.navEntries = context.navEntries.filter(el => el.label !== 'navigation.screenshots');
                 context.routes = context.routes.filter(el => el.name !== 'screenshots');
             }

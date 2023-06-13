@@ -87,3 +87,7 @@ export function checkEnvAndCompanyVariablesScreenshotsSelector() {
 
     return false;
 }
+
+export function isHiddenHeaderScreenshotsLink(env_screenshots_state, screenshots_state) {
+    return env_screenshots_state === 0 || (env_screenshots_state === -1 && screenshots_state === 0);
+}
