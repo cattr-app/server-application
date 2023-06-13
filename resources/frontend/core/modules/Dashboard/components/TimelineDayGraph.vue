@@ -34,9 +34,7 @@
             class="popup"
         >
             <Screenshot
-                v-if="
-                    clickPopup.event && companyData.screenshots_state !== 0 && companyData.env_screenshots_state !== 0
-                "
+                v-if="clickPopup.event && checkEnvAndCompanyVariablesScreenshotsSelector"
                 :disableModal="true"
                 :lazyImage="false"
                 :project="{ id: clickPopup.event.project_id, name: clickPopup.event.project_name }"
@@ -84,6 +82,7 @@
     import ScreenshotModal from '@/components/ScreenshotModal';
     import IntervalService from '@/services/resource/time-interval.service';
     import { mapGetters } from 'vuex';
+    import { checkEnvAndCompanyVariablesScreenshotsSelector } from '@/utils/screenshots';
 
     const fabricObjectOptions = {
         editable: false,
@@ -157,6 +156,7 @@
         },
         data() {
             return {
+                checkEnvAndCompanyVariablesScreenshotsSelector: checkEnvAndCompanyVariablesScreenshotsSelector(),
                 hoverPopup: {
                     show: false,
                     x: 0,

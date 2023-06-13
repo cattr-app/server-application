@@ -1,7 +1,7 @@
 <template>
     <div class="screenshot" @click="$emit('click', $event)">
         <AppImage
-            v-if="companyData.screenshots_state !== 0 && companyData.env_screenshots_state !== 0"
+            v-if="checkEnvAndCompanyVariablesScreenshotsSelector"
             :is-blob="true"
             :src="getThumbnailPath(interval)"
             class="screenshot__image"
@@ -73,6 +73,7 @@
     import AppImage from './AppImage';
     import ScreenshotModal from './ScreenshotModal';
     import { mapGetters } from 'vuex';
+    import { checkEnvAndCompanyVariablesScreenshotsSelector } from '@/utils/screenshots';
 
     export function thumbnailPathProvider(interval) {
         return `time-intervals/${interval.id}/thumb`;
@@ -125,6 +126,7 @@
         },
         data() {
             return {
+                checkEnvAndCompanyVariablesScreenshotsSelector: checkEnvAndCompanyVariablesScreenshotsSelector(),
                 showModal: false,
             };
         },

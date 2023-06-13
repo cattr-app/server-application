@@ -63,3 +63,27 @@ export function checkLockedAndReturnValueForAccountScreenshotsSelector(value, is
 
     return [value, isDisabled];
 }
+
+/**
+ * Check if state from .env not 0. Allow run next checks
+ * Check if state from .env === 1 then always allow show screenshot
+ * Check if state from company not 0. Allow show screenshot
+ * Else disallow show screenshot
+ */
+export function checkEnvAndCompanyVariablesScreenshotsSelector() {
+    let companyData = store.getters['user/companyData'];
+
+    if (companyData.env_screenshots_state !== 0) {
+        if (companyData.env_screenshots_state === 1) {
+            return true;
+        }
+
+        if (companyData.screenshots_state !== 0) {
+            return true;
+        }
+
+        return false;
+    }
+
+    return false;
+}

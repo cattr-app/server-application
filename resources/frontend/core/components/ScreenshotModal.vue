@@ -5,12 +5,7 @@
         </template>
 
         <AppImage
-            v-if="
-                interval &&
-                interval.id &&
-                companyData.screenshots_state !== 0 &&
-                companyData.env_screenshots_state !== 0
-            "
+            v-if="interval && interval.id && checkEnvAndCompanyVariablesScreenshotsSelector"
             class="modal-screenshot"
             :src="getScreenshotPath(interval)"
             :openable="true"
@@ -106,6 +101,7 @@
     import moment from 'moment-timezone';
     import AppImage from './AppImage';
     import { mapGetters } from 'vuex';
+    import { checkEnvAndCompanyVariablesScreenshotsSelector } from '@/utils/screenshots';
 
     export function screenshotPathProvider(interval) {
         return `time-intervals/${interval.id}/screenshot`;
@@ -115,6 +111,11 @@
 
     export default {
         name: 'ScreenshotModal',
+        data() {
+            return {
+                checkEnvAndCompanyVariablesScreenshotsSelector: checkEnvAndCompanyVariablesScreenshotsSelector(),
+            };
+        },
         components: {
             AppImage,
         },
