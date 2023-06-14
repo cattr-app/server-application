@@ -169,7 +169,6 @@ class User extends Authenticatable
         'url' => 'string',
         'company_id' => 'integer',
         'avatar' => 'string',
-        'screenshots_state' => ScreenshotsState::class,
         'screenshots_state_locked' => 'boolean',
         'manual_time' => 'integer',
         'computer_time_popup' => 'integer',
@@ -202,7 +201,6 @@ class User extends Authenticatable
 
     protected $hidden = [
         'password',
-        // 'screenshots_state'
     ];
 
     protected static function boot(): void
@@ -214,7 +212,6 @@ class User extends Authenticatable
 
     protected $appends = [
         'online',
-        'screenshots_state_with_inherited'
     ];
 
     public function projects(): BelongsToMany
@@ -271,25 +268,44 @@ class User extends Authenticatable
     }
 
     /**
+     * GET METHOD
      * Check if .env state equal forbidden or required in lowercase
      * Check if company screenshots_state equal forbidden or required
      * Else return standart screenshots_state
+     * 
+     * SET METHOD
+     * Accept number type int or string and ScreenshotsState enum
+     * Check if property type equal int or strin then find case in ScreenshotsState and return case value type int
+     * Else accept and return value type int
      */
-    public function getScreenshotsStateWithInheritedAttribute(): ScreenshotsState
+    protected function screenshotsState(): Attribute
     {
-        if (
-            strtolower(config('app.screenshots_state')) === strtolower(ScreenshotsState::FORBIDDEN->name) ||
-            strtolower(config('app.screenshots_state')) === strtolower(ScreenshotsState::REQUIRED->name)
-        ) {
-            return ScreenshotsState::tryFromString(config('app.screenshots_state'));
-        } else if (
-            Settings::scope('core')->get('screenshots_state') === (string)ScreenshotsState::FORBIDDEN->value ||
-            Settings::scope('core')->get('screenshots_state') === (string)ScreenshotsState::REQUIRED->value
-        ) {
-            return ScreenshotsState::tryFrom(Settings::scope('core')->get('screenshots_state'));
-        } else {
-            return $this->screenshots_state;
-        }
+        return Attribute::make(
+            get: function ($value): ScreenshotsState
+            {
+                if (
+                    strtolower(config('app.screenshots_state')) === strtolower(ScreenshotsState::FORBIDDEN->name) ||
+                    strtolower(config('app.screenshots_state')) === strtolower(ScreenshotsState::REQUIRED->name)
+                ) {
+                    return ScreenshotsState::tryFromString(config('app.screenshots_state'));
+                } else if (
+                    Settings::scope('core')->get('screenshots_state') === (string)ScreenshotsState::FORBIDDEN->value ||
+                    Settings::scope('core')->get('screenshots_state') === (string)ScreenshotsState::REQUIRED->value
+                ) {
+                    return ScreenshotsState::tryFrom(Settings::scope('core')->get('screenshots_state'));
+                } else {
+                    return ScreenshotsState::tryFrom($value);
+                }
+            },
+            set: function (string|int|ScreenshotsState $value): int
+            {
+                if (is_string($value) || is_int($value)) {
+                    return ScreenshotsState::tryFrom($value)->value;
+                } else {
+                    return $value->value;
+                }
+            }
+        );
     }
 
     public function scopeAdmin(EloquentBuilder $query): EloquentBuilder

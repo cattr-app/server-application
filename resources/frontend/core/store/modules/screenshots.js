@@ -2,6 +2,12 @@ import ScreenshotService from '@/services/resource/screenshot.service';
 
 const state = {
     states: [],
+    staticStates: [
+        { value: -1, name: 'any' },
+        { value: 0, name: 'forbidden' },
+        { value: 1, name: 'required' },
+        { value: 2, name: 'optional' },
+    ],
 };
 
 const getters = {
@@ -10,6 +16,8 @@ const getters = {
             (acc, el) => (el.value < 0 ? acc : Object.assign(acc, { [el.name.toLowerCase()]: el.value })),
             {},
         ),
+    staticStates: s =>
+        s.staticStates.reduce((acc, el) => Object.assign(acc, { [el.name.toLowerCase()]: el.value }), {}),
 };
 
 const mutations = {

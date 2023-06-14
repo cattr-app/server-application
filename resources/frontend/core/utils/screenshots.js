@@ -93,13 +93,17 @@ export function checkEnvAndCompanyVariablesScreenshotsSelector() {
 }
 
 export function isHiddenHeaderScreenshotsLink(env_screenshots_state, screenshots_state) {
-    return env_screenshots_state === 0 || (env_screenshots_state === -1 && screenshots_state === 0);
+    return (
+        hasEnvState({ env_screenshots_state }, 'forbidden', store.getters['screenshots/staticStates']) ||
+        (hasEnvState({ env_screenshots_state }, 'any', store.getters['screenshots/staticStates']) &&
+            hasCompanyState({ screenshots_state }, 'forbidden', store.getters['screenshots/staticStates']))
+    );
 }
 
-export function hasCompanyState(company, stateName) {
-    return company.screenshots_state === store.getters['screenshots/states'][stateName];
+export function hasCompanyState(company, stateName, states = store.getters['screenshots/states']) {
+    return company.screenshots_state === states[stateName];
 }
 
-export function hasEnvState(company, stateName) {
-    return company.env_screenshots_state === store.getters['screenshots/states'][stateName];
+export function hasEnvState(company, stateName, states = store.getters['screenshots/states']) {
+    return company.env_screenshots_state === states[stateName];
 }
