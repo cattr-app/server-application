@@ -83,10 +83,6 @@ export function fieldsToFillProvider() {
                     on: {
                         input(value) {
                             props.inputHandler(value);
-
-                            value === 2
-                                ? props.setValue('screenshots_state_locked', false)
-                                : props.setValue('screenshots_state_locked', true);
                         },
                     },
                 });
