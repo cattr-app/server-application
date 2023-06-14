@@ -270,12 +270,23 @@ class User extends Authenticatable
         );
     }
 
+    /**
+     * Check if .env state equal forbidden or required in lowercase
+     * Check if company screenshots_state equal forbidden or required
+     * Else return standart screenshots_state
+     */
     public function getScreenshotsStateWithInheritedAttribute(): ScreenshotsState
     {
-        if (config('app.screenshots_state') === '0' || config('app.screenshots_state') === '1') {
+        if (
+            strtolower(config('app.screenshots_state')) === strtolower(ScreenshotsState::FORBIDDEN->name) ||
+            strtolower(config('app.screenshots_state')) === strtolower(ScreenshotsState::REQUIRED->name)
+        ) {
             return ScreenshotsState::tryFromString(config('app.screenshots_state'));
-        } else if (Settings::scope('core')->get('screenshots_state') === '0' || Settings::scope('core')->get('screenshots_state') === '1') {
-            return ScreenshotsState::tryFromString(Settings::scope('core')->get('screenshots_state'));
+        } else if (
+            Settings::scope('core')->get('screenshots_state') === (string)ScreenshotsState::FORBIDDEN->value ||
+            Settings::scope('core')->get('screenshots_state') === (string)ScreenshotsState::REQUIRED->value
+        ) {
+            return ScreenshotsState::tryFrom(Settings::scope('core')->get('screenshots_state'));
         } else {
             return $this->screenshots_state;
         }

@@ -1,10 +1,11 @@
 <?php
 
+use App\Enums\ScreenshotsState;
 use App\Helpers\Version;
 use Illuminate\Support\Facades\Facade;
 
 return [
-    'screenshots_state' => env('SCREENSHOTS_STATE', -1),
+    'screenshots_state' => env('SCREENSHOTS_STATE', ScreenshotsState::ANY->name),
     'name' => env('APP_NAME', 'Cattr'),
     'version' => (string)new Version(),
     'env' => env('APP_ENV', 'local'),
