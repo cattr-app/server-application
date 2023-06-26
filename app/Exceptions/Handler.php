@@ -98,10 +98,18 @@ class Handler extends ExceptionHandler
                 return $item;
             })->toArray();
 
+        if (config('app.debug') === false){
+            try {
+                $requestContent = Crypt::encryptString(json_encode($requestContent, JSON_THROW_ON_ERROR));
+            } catch (Throwable $exception) {
+            }
+        }
+
+
         return array_merge(parent::context(), [
             'trace_id' => $traceId,
             'request_uri' => request()->getRequestUri(),
-            'request_content' => config('app.debug') ? $requestContent : Crypt::encryptString($requestContent)
+            'request_content' => $requestContent
         ]);
     }
 
