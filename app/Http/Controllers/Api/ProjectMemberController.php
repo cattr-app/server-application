@@ -6,7 +6,7 @@ use App\Http\Controllers\Controller;
 use App\Http\Requests\ProjectMember\BulkEditProjectMemberRequest;
 use App\Http\Requests\ProjectMember\ShowProjectMemberRequest;
 use App\Services\ProjectMemberService;
-use Event;
+use CatEvent;
 use Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Validation\ValidationException;
@@ -47,11 +47,11 @@ class ProjectMemberController extends Controller
             $userRoles[$value['user_id']] = ['role_id' => $value['role_id']];
         }
 
-        Event::dispatch(Filter::getBeforeActionEventName(), [$data['project_id'], $userRoles]);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), [$data['project_id'], $userRoles]);
 
         ProjectMemberService::syncMembers($data['project_id'], $userRoles);
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$data['project_id'], $userRoles]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$data['project_id'], $userRoles]);
 
         return responder()->success()->respond(204);
     }
