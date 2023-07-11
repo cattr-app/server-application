@@ -1368,7 +1368,7 @@ __metadata:
     vue-eslint-parser: ^9.1.1
     vue-i18n: ^8.28.2
     vue-kanban: ^1.8.0
-    vue-lazyload: ^1.3.4
+    vue-lazyload: ^1.3.5
     vue-loader: ^15.10.1
     vue-loading-skeleton: ^1.1.9
     vue-moment: ^4.1.0
@@ -5678,7 +5678,7 @@ __metadata:
 
 "fsevents@patch:fsevents@~2.3.2#~builtin<compat/fsevents>":
   version: 2.3.2
-  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=df0bf1"
+  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=18f3a7"
   dependencies:
     node-gyp: latest
   conditions: os=darwin
@@ -9633,7 +9633,7 @@ __metadata:
 
 "resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.14.2#~builtin<compat/resolve>, resolve@patch:resolve@^1.19.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.9.0#~builtin<compat/resolve>":
   version: 1.22.3
-  resolution: "resolve@patch:resolve@npm%3A1.22.3#~builtin<compat/resolve>::version=1.22.3&hash=c3c19d"
+  resolution: "resolve@patch:resolve@npm%3A1.22.3#~builtin<compat/resolve>::version=1.22.3&hash=07638b"
   dependencies:
     is-core-module: ^2.12.0
     path-parse: ^1.0.7
@@ -10938,11 +10938,11 @@ __metadata:
 
 "typescript@patch:typescript@^4.6.4 || ^5.0.0#~builtin<compat/typescript>":
   version: 5.0.2
-  resolution: "typescript@patch:typescript@npm%3A5.0.2#~builtin<compat/typescript>::version=5.0.2&hash=85af82"
+  resolution: "typescript@patch:typescript@npm%3A5.0.2#~builtin<compat/typescript>::version=5.0.2&hash=701156"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: b63cb742fbb9aeb3085e002ad8f10d5fd963606aa4d6b3b65b4e76c396ff09739f03b5dbae08e1698c3bce9d5619d3f67aeb7ee470ed4016bd345b3cfe37b54a
+  checksum: bdbf3d0aac0d6cf010fbe0536753dc19f278eb4aba88140dcd25487dfe1c56ca8b33abc0dcd42078790a939b08ebc4046f3e9bb961d77d3d2c3cfa9829da4d53
   languageName: node
   linkType: hard
 
@@ -11270,10 +11270,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-lazyload@npm:^1.3.4":
-  version: 1.3.4
-  resolution: "vue-lazyload@npm:1.3.4"
-  checksum: b597665022c8078f8235d6be21cac5554577e2d7c90983183fe61a9dba76be8cd5fedae89582a024ecba11b965775ad79e4cf79c3cb9fc7848cef2383505cb3a
+"vue-lazyload@npm:^1.3.5":
+  version: 1.3.5
+  resolution: "vue-lazyload@npm:1.3.5"
+  checksum: fca372cab2f42ad14bdf4330e6e51fa4eaf7155dc666bb75f153ad79252e748bcca5fda4af01d6037b37ab87be20645d9dc7644e3f079bb381a9ca70317e5449
   languageName: node
   linkType: hard
 
@@ -11643,7 +11643,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.60.0, webpack@npm:^5.76.2, webpack@npm:^5.80.0":
+"webpack@npm:^5.60.0, webpack@npm:^5.80.0":
   version: 5.80.0
   resolution: "webpack@npm:5.80.0"
   dependencies:

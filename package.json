@@ -53,7 +53,7 @@
     "vue-color": "^2.8.1",
     "vue-i18n": "^8.28.2",
     "vue-kanban": "^1.8.0",
-    "vue-lazyload": "^1.3.4",
+    "vue-lazyload": "^1.3.5",
     "vue-loading-skeleton": "^1.1.9",
     "vue-moment": "^4.1.0",
     "vue-multiselect": "^2.1.7",
