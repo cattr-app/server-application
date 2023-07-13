@@ -12,6 +12,7 @@ use App\Http\Controllers\Api\Reports\ProjectReportController;
 use App\Http\Controllers\Api\Reports\TimeUseReportController;
 use App\Http\Controllers\Api\TaskController;
 use App\Http\Controllers\Api\IntervalController;
+use App\Http\Controllers\Api\Reports\UniversalReportController;
 use App\Http\Controllers\Api\UserController;
 use App\Http\Controllers\Api\RoleController;
 use App\Http\Controllers\AuthController;
@@ -232,6 +233,13 @@ Route::group([
         $router->post('report/planned-time/download', [PlannedTimeReportController::class, 'download'])
             ->name('report.planned-time.download');
 
+        $router->get('report/universal-report/mains', [UniversalReportController::class, 'getMains']);
+        $router->get('report/universal-report/data-objects-and-fields', [UniversalReportController::class, 'getDataObjectsAndFields']);
+        $router->get('report/universal-report', [UniversalReportController::class, 'index']);
+        $router->get('report/universal-report/show', [UniversalReportController::class, 'show']);
+        $router->post('report/universal-report', [UniversalReportController::class, 'store']);
+        $router->post('report/universal-report/edit', [UniversalReportController::class, 'edit']);
+        $router->post('report/universal-report/generate', [UniversalReportController::class, '__invoke']);
         // About
         $router->get('about', [AboutController::class, '__invoke'])
             ->name('about.list');

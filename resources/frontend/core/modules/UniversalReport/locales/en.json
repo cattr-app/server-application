@@ -1,0 +1,22 @@
+{
+  "navigation": {
+    "planned-time-report": "Planned Time Report"
+  },
+  "universal-report": {
+    "personal-reports": "Personal reports",
+    "company-reports": "Company reports",
+    "tasks": "Tasks",
+    "estimate": "Estimate",
+    "spent": "Spent",
+    "productivity": "Productivity",
+    "report_date": "Report created at: {0}"
+  },
+  "field": {
+    "name": "Report name",
+    "options": {
+      "user": "User",
+      "project": "Project",
+      "task": "Task"
+    }
+  }
+}

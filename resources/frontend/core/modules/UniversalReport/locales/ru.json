@@ -1,0 +1,25 @@
+{
+  "navigation": {
+    "planned-time-report": "Отчет по запланированному времени"
+  },
+  "universal-report": {
+    "personal-reports": "Личные отчёты",
+    "company-reports": "Отчёты компании",
+    "tasks": "Задачи",
+    "estimate": "План",
+    "spent": "Факт",
+    "productivity": "Продуктивность",
+    "report_date": "Отчёт создан: {0}"
+  },
+  "field": {
+    "name": "Название отчёта",
+    "options": {
+      "user": "Пользователь",
+      "project": "Проект",
+      "task": "Задача"
+    },
+    "fields": {
+      "work_time": "Время"
+    }
+  }
+}
