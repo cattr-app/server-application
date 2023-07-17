@@ -11,15 +11,10 @@ enum ScreenshotsState: int
 
     public function title(): string
     {
-        return match ($this) {
-            self::ANY,
-            self::FORBIDDEN,
-            self::REQUIRED,
-            self::OPTIONAL => strtolower($this->name),
-        };
+        return strtolower($this->name);
     }
 
-    public function inherited(): bool
+    public function mustInherited(): bool
     {
         return match ($this) {
             self::FORBIDDEN,
@@ -50,5 +45,10 @@ enum ScreenshotsState: int
             'value' => $this->value,
             'name' => $this->title(),
         ];
+    }
+
+    public static function states(): array
+    {
+        return array_map(fn($case) => $case->toArray, self::cases());
     }
 }

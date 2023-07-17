@@ -61,7 +61,7 @@
             states() {
                 let states = [];
 
-                Object.keys(this.$store.getters['screenshots/states']).forEach((item, i) => {
+                Object.keys(this.$store.getters['screenshots/clipStates']).forEach((item, i) => {
                     if (!this.hideIndexes.includes(i)) {
                         return states.push(item);
                     }

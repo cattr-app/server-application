@@ -283,27 +283,20 @@ class User extends Authenticatable
         return Attribute::make(
             get: function ($value): ScreenshotsState
             {
-                if (
-                    strtolower(config('app.screenshots_state')) === strtolower(ScreenshotsState::FORBIDDEN->name) ||
-                    strtolower(config('app.screenshots_state')) === strtolower(ScreenshotsState::REQUIRED->name)
-                ) {
-                    return ScreenshotsState::tryFromString(config('app.screenshots_state'));
-                } else if (
-                    Settings::scope('core')->get('screenshots_state') === (string)ScreenshotsState::FORBIDDEN->value ||
-                    Settings::scope('core')->get('screenshots_state') === (string)ScreenshotsState::REQUIRED->value
-                ) {
-                    return ScreenshotsState::tryFrom(Settings::scope('core')->get('screenshots_state'));
-                } else {
-                    return ScreenshotsState::tryFrom($value);
+                $envState = ScreenshotsState::tryFromString(config('app.screenshots_state'));
+                if ($envState->mustInherited()){
+                    return $envState;
                 }
+
+                $settingsState = ScreenshotsState::tryFrom(Settings::scope('core')->get('screenshots_state'));
+                if ($settingsState && $settingsState->mustInherited()){
+                    return $settingsState;
+                }
+                return ScreenshotsState::tryFrom($value) ?? ScreenshotsState::REQUIRED;
             },
-            set: function (string|int|ScreenshotsState $value): int
+            set: function (ScreenshotsState $value): int
             {
-                if (is_string($value) || is_int($value)) {
-                    return ScreenshotsState::tryFrom($value)->value;
-                } else {
-                    return $value->value;
-                }
+                return $value->value;
             }
         );
     }

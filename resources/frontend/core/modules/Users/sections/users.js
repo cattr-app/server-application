@@ -89,11 +89,6 @@ export function fieldsToFillProvider() {
             },
         },
         {
-            key: 'screenshots_state_locked',
-            default: true,
-            displayable: () => false,
-        },
-        {
             label: 'field.password',
             key: 'password',
             type: 'input',

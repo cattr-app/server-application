@@ -6,11 +6,7 @@ import { store } from '@/store';
 export function checkLockedAndReturnValueForGlobalScreenshotsSelector(value, isDisabled = false) {
     let companyData = store.getters['user/companyData'];
 
-    if (
-        hasEnvState(companyData, 'forbidden') ||
-        hasEnvState(companyData, 'required') ||
-        hasEnvState(companyData, 'optional')
-    ) {
+    if (hasEnvState('forbidden') || hasEnvState('required') || hasEnvState('optional')) {
         value = companyData.env_screenshots_state;
         isDisabled = true;
     }
@@ -26,12 +22,11 @@ export function checkLockedAndReturnValueForUsersScreenshotsSelector(value) {
 
     let envValue = companyData.env_screenshots_state,
         companyValue = companyData.screenshots_state,
-        isDisabled = companyData.screenshots_state_inherit;
-
-    if (hasEnvState(companyData, 'required') || hasEnvState(companyData, 'forbidden')) {
+        isDisabled = mustInherited();
+    if (hasEnvState('required') || hasEnvState('forbidden')) {
         value = envValue;
         isDisabled = true;
-    } else if (hasEnvState(companyData, 'optional')) {
+    } else if (hasEnvState('optional')) {
         isDisabled = false;
     } else if (isDisabled) {
         value = companyValue;
@@ -48,12 +43,11 @@ export function checkLockedAndReturnValueForAccountScreenshotsSelector(value, is
 
     let envValue = companyData.env_screenshots_state,
         companyValue = companyData.screenshots_state,
-        isDisabled = companyData.screenshots_state_inherit;
-
-    if (hasEnvState(companyData, 'required') || hasEnvState(companyData, 'forbidden')) {
+        isDisabled = mustInherited();
+    if (hasEnvState('required') || hasEnvState('forbidden')) {
         value = envValue;
         isDisabled = true;
-    } else if (hasEnvState(companyData, 'optional')) {
+    } else if (hasEnvState('optional')) {
         isDisabled = false;
 
         if (isBlockedByAdmin) {
@@ -69,41 +63,66 @@ export function checkLockedAndReturnValueForAccountScreenshotsSelector(value, is
 }
 
 /**
- * Check if state from .env not 0. Allow run next checks
- * Check if state from .env === 1 then always allow show screenshot
- * Check if state from company not 0. Allow show screenshot
+ * Check if state from .env not forbidden. Allow run next checks
+ * Check if state from .env === required then always allow show screenshot
+ * Check if state from company not forbidden. Allow show screenshot
  * Else disallow show screenshot
  */
 export function checkEnvAndCompanyVariablesScreenshotsSelector() {
-    let companyData = store.getters['user/companyData'];
-
-    if (!hasEnvState(companyData, 'forbidden')) {
-        if (hasEnvState(companyData, 'required')) {
-            return true;
-        }
-
-        if (!hasCompanyState(companyData, 'forbidden')) {
-            return true;
-        }
-
+    if (hasEnvState('forbidden')) {
         return false;
+    }
+
+    if (hasEnvState('required')) {
+        return true;
+    }
+
+    if (hasCompanyState('forbidden')) {
+        return false;
+    }
+
+    if (hasCompanyState('required')) {
+        return true;
     }
 
     return false;
 }
 
-export function isHiddenHeaderScreenshotsLink(env_screenshots_state, screenshots_state) {
-    return (
-        hasEnvState({ env_screenshots_state }, 'forbidden', store.getters['screenshots/staticStates']) ||
-        (hasEnvState({ env_screenshots_state }, 'any', store.getters['screenshots/staticStates']) &&
-            hasCompanyState({ screenshots_state }, 'forbidden', store.getters['screenshots/staticStates']))
-    );
+export function hideScreenshotsInHeader() {
+    // console.log(hasEnvState('forbidden'), 'env');
+    return hasEnvState('forbidden') || (hasEnvState('any') && hasCompanyState('forbidden'));
 }
 
-export function hasCompanyState(company, stateName, states = store.getters['screenshots/states']) {
-    return company.screenshots_state === states[stateName];
+export function hasCompanyState(stateName, states = store.getters['screenshots/states']) {
+    if (typeof store.getters['user/companyData'].env_screenshots_state === 'undefined') {
+        return undefined;
+    }
+
+    return store.getters['user/companyData'].screenshots_state === states[stateName];
 }
 
-export function hasEnvState(company, stateName, states = store.getters['screenshots/states']) {
-    return company.env_screenshots_state === states[stateName];
+export function hasEnvState(stateName, states = store.getters['screenshots/states']) {
+    if (typeof store.getters['user/companyData'].env_screenshots_state === 'undefined') {
+        return undefined;
+    }
+
+    return store.getters['user/companyData'].env_screenshots_state === states[stateName];
+}
+
+function mustInherited(states = store.state.screenshots.states) {
+    let companyData = store.getters['user/companyData'],
+        companyStateValue = companyData.screenshots_state,
+        stateValues = store.getters['screenshots/states'];
+
+    if (typeof companyStateValue === 'undefined') {
+        let res;
+        setTimeout(() => (res = mustInherited()), 500);
+
+        return res;
+    } else {
+        return (
+            states.find(state => state.value === companyStateValue).value === stateValues['required'] ||
+            states.find(state => state.value === companyStateValue).value === stateValues['forbidden']
+        );
+    }
 }

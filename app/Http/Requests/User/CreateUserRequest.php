@@ -25,7 +25,6 @@ class CreateUserRequest extends CattrFormRequest
             'important' => 'bool',
             'active' => 'required|bool',
             'screenshots_state' => ['required', new Enum(ScreenshotsState::class)],
-            'screenshots_state_locked' => 'bool|required',
             'manual_time' => 'sometimes|required|bool',
             'screenshots_interval' => 'required|int|min:1|max:15',
             'computer_time_popup' => 'required|int|min:1',

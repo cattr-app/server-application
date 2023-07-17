@@ -1,8 +1,7 @@
 import ScreenshotService from '@/services/resource/screenshot.service';
 
 const state = {
-    states: [],
-    staticStates: [
+    states: [
         { value: -1, name: 'any' },
         { value: 0, name: 'forbidden' },
         { value: 1, name: 'required' },
@@ -11,13 +10,12 @@ const state = {
 };
 
 const getters = {
-    states: s =>
+    clipStates: s =>
         s.states.reduce(
             (acc, el) => (el.value < 0 ? acc : Object.assign(acc, { [el.name.toLowerCase()]: el.value })),
             {},
         ),
-    staticStates: s =>
-        s.staticStates.reduce((acc, el) => Object.assign(acc, { [el.name.toLowerCase()]: el.value }), {}),
+    states: s => s.states.reduce((acc, el) => Object.assign(acc, { [el.name.toLowerCase()]: el.value }), {}),
 };
 
 const mutations = {
