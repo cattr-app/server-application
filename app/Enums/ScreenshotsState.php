@@ -26,17 +26,11 @@ enum ScreenshotsState: int
     
     public static function tryFromString(string $value): ScreenshotsState
     {
-        if (is_null($value)) {
+        try {
+            return constant(__CLASS__."::".strtoupper($value));
+        } catch (\Throwable $e) {
             return self::ANY;
         }
-        
-        foreach (self::cases() as $state) {
-            if ($state->title() === strtolower($value)) {
-                return $state;
-            }
-        }
-
-        return self::ANY;
     }
 
     public function toArray(): array
