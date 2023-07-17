@@ -23,13 +23,13 @@ enum ScreenshotsState: int
             self::OPTIONAL => false,
         };
     }
-    
-    public static function tryFromString(string $value): ScreenshotsState
+
+    public static function tryFromString(string $value): ?ScreenshotsState
     {
         try {
             return constant(__CLASS__."::".strtoupper($value));
         } catch (\Throwable $e) {
-            return self::ANY;
+            return null;
         }
     }
 

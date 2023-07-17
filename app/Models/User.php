@@ -272,7 +272,7 @@ class User extends Authenticatable
      * Check if .env state equal forbidden or required in lowercase
      * Check if company screenshots_state equal forbidden or required
      * Else return standart screenshots_state
-     * 
+     *
      * SET METHOD
      * Accept number type int or string and ScreenshotsState enum
      * Check if property type equal int or strin then find case in ScreenshotsState and return case value type int
@@ -284,7 +284,7 @@ class User extends Authenticatable
             get: function ($value): ScreenshotsState
             {
                 $envState = ScreenshotsState::tryFromString(config('app.screenshots_state'));
-                if ($envState->mustInherited()){
+                if ($envState && $envState->mustInherited()){
                     return $envState;
                 }
 
