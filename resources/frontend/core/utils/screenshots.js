@@ -3,7 +3,7 @@ import { store } from '@/store';
 /**
  * Check if state from env is valid and set disabled state for global screenshot selector
  */
-export function checkLockedAndReturnValueForGlobalScreenshotsSelector(value, isDisabled = false) {
+export function checkStateGlobalScreenshotsSelector(value, isDisabled = false) {
     let companyData = store.getters['user/companyData'];
 
     if (hasEnvState('forbidden') || hasEnvState('required') || hasEnvState('optional')) {
@@ -17,12 +17,12 @@ export function checkLockedAndReturnValueForGlobalScreenshotsSelector(value, isD
 /**
  * Check if state from env & company is valid and set disabled state for admin screenshot selector
  */
-export function checkLockedAndReturnValueForUsersScreenshotsSelector(value) {
+export function checkStateUsersScreenshotsSelector(value) {
     let companyData = store.getters['user/companyData'];
 
     let envValue = companyData.env_screenshots_state,
         companyValue = companyData.screenshots_state,
-        isDisabled = mustInherited();
+        isDisabled = mustBeInherited();
     if (hasEnvState('required') || hasEnvState('forbidden')) {
         value = envValue;
         isDisabled = true;
@@ -38,12 +38,12 @@ export function checkLockedAndReturnValueForUsersScreenshotsSelector(value) {
 /**
  * Check if state from env & company is valid, check isBlockedByAdmin state and set disabled state for personal screenshot selector
  */
-export function checkLockedAndReturnValueForAccountScreenshotsSelector(value, isBlockedByAdmin) {
+export function checkStateAccountScreenshotsSelector(value, isBlockedByAdmin) {
     let companyData = store.getters['user/companyData'];
 
     let envValue = companyData.env_screenshots_state,
         companyValue = companyData.screenshots_state,
-        isDisabled = mustInherited();
+        isDisabled = mustBeInherited();
     if (hasEnvState('required') || hasEnvState('forbidden')) {
         value = envValue;
         isDisabled = true;
@@ -68,7 +68,7 @@ export function checkLockedAndReturnValueForAccountScreenshotsSelector(value, is
  * Check if state from company not forbidden. Allow show screenshot
  * Else disallow show screenshot
  */
-export function checkEnvAndCompanyVariablesScreenshotsSelector() {
+export function checkEnvAndCompanyStateScreenshotsSelector() {
     if (hasEnvState('forbidden')) {
         return false;
     }
@@ -109,14 +109,14 @@ export function hasEnvState(stateName, states = store.getters['screenshots/state
     return store.getters['user/companyData'].env_screenshots_state === states[stateName];
 }
 
-function mustInherited(states = store.state.screenshots.states) {
+function mustBeInherited(states = store.state.screenshots.states) {
     let companyData = store.getters['user/companyData'],
         companyStateValue = companyData.screenshots_state,
         stateValues = store.getters['screenshots/states'];
 
     if (typeof companyStateValue === 'undefined') {
         let res;
-        setTimeout(() => (res = mustInherited()), 500);
+        setTimeout(() => (res = mustBeInherited()), 500);
 
         return res;
     } else {

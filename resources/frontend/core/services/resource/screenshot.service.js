@@ -25,10 +25,6 @@ export default class ScreenshotService extends ResourceService {
         return axios.get('screenshots/list');
     }
 
-    getStates() {
-        return axios.get('screenshots/states');
-    }
-
     /**
      * @param filters
      * @param config

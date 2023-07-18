@@ -1,7 +1,7 @@
 import AccountService from '../services/account.service';
 import LanguageSelector from '@/components/LanguageSelector';
 import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
-import { checkLockedAndReturnValueForAccountScreenshotsSelector } from '@/utils/screenshots';
+import { checkStateAccountScreenshotsSelector } from '@/utils/screenshots';
 
 export function fieldsProvider() {
     return [
@@ -65,7 +65,7 @@ export function fieldsProvider() {
             label: 'field.screenshots_state',
             key: 'screenshots_state',
             render: (h, props) => {
-                let [value, isDisabled] = checkLockedAndReturnValueForAccountScreenshotsSelector(
+                let [value, isDisabled] = checkStateAccountScreenshotsSelector(
                     props.values.screenshots_state,
                     props.values.screenshots_state_locked,
                 );

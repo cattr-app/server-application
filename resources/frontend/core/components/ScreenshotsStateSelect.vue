@@ -17,9 +17,6 @@
 </template>
 
 <script>
-    import { mapActions } from 'vuex';
-    import ScreenshotService from '@/services/resource/screenshot.service';
-    const service = new ScreenshotService();
     export default {
         props: {
             value: {
@@ -42,12 +39,6 @@
                 this.$emit('input', value);
                 this.$emit('updateProps', value);
             },
-            ...mapActions({
-                getStates: 'screenshots/loadStates',
-            }),
-        },
-        created() {
-            this.getStates();
         },
         computed: {
             model: {

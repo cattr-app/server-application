@@ -5,7 +5,7 @@
         </template>
 
         <AppImage
-            v-if="interval && interval.id && checkEnvAndCompanyVariablesScreenshotsSelector"
+            v-if="interval && interval.id && checkEnvAndCompanyStateScreenshotsSelector"
             class="modal-screenshot"
             :src="getScreenshotPath(interval)"
             :openable="true"
@@ -101,7 +101,7 @@
     import moment from 'moment-timezone';
     import AppImage from './AppImage';
     import { mapGetters } from 'vuex';
-    import { checkEnvAndCompanyVariablesScreenshotsSelector } from '@/utils/screenshots';
+    import { checkEnvAndCompanyStateScreenshotsSelector } from '@/utils/screenshots';
 
     export function screenshotPathProvider(interval) {
         return `time-intervals/${interval.id}/screenshot`;
@@ -113,7 +113,7 @@
         name: 'ScreenshotModal',
         data() {
             return {
-                checkEnvAndCompanyVariablesScreenshotsSelector: checkEnvAndCompanyVariablesScreenshotsSelector(),
+                checkEnvAndCompanyStateScreenshotsSelector: checkEnvAndCompanyStateScreenshotsSelector(),
             };
         },
         components: {
