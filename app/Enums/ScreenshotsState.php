@@ -43,6 +43,6 @@ enum ScreenshotsState: int
 
     public static function states(): array
     {
-        return array_map(fn($case) => $case->toArray, self::cases());
+        return array_map(fn($case) => $case->toArray(), self::cases());
     }
 }

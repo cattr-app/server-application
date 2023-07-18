@@ -284,19 +284,19 @@ class User extends Authenticatable
             get: function ($value): ScreenshotsState
             {
                 $envState = ScreenshotsState::tryFromString(config('app.screenshots_state'));
-                if ($envState && $envState->mustInherited()){
+                if ($envState && $envState->mustBeInherited()){
                     return $envState;
                 }
 
                 $settingsState = ScreenshotsState::tryFrom(Settings::scope('core')->get('screenshots_state'));
-                if ($settingsState && $settingsState->mustInherited()){
+                if ($settingsState && $settingsState->mustBeInherited()){
                     return $settingsState;
                 }
                 return ScreenshotsState::tryFrom($value) ?? ScreenshotsState::REQUIRED;
             },
-            set: function (ScreenshotsState $value): int
+            set: function (ScreenshotsState|int $value): int
             {
-                return $value->value;
+                return $value?->value ?? ScreenshotsState::tryFrom($value)->value;
             }
         );
     }

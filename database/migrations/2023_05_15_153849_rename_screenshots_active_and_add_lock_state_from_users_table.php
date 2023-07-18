@@ -16,7 +16,7 @@ return new class extends Migration
 
         Schema::table('users', function (Blueprint $table) {
             $table->renameColumn('screenshots_active', 'screenshots_state');
-            $table->boolean('screenshots_state_locked')->default(true);
+            $table->boolean('screenshots_state_locked');
         });
     }
 

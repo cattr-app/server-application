@@ -166,6 +166,17 @@ class UserController extends ItemController
      */
     public function create(CreateUserRequest $request): JsonResponse
     {
+        Filter::listen(Filter::getRequestFilterName(), static function($r) use ($request) {
+            $r['screenshots_state'] = ScreenshotsState::tryFrom($request->screenshots_state);
+            return $r;
+        });
+
+        Filter::listen(Filter::getActionFilterName(), static function($user) use ($request) {
+            $user->screenshots_state_locked = $request->user()->isAdmin() && ScreenshotsState::tryFrom($request->input('screenshots_state')) !== ScreenshotsState::OPTIONAL;
+
+            return $user;
+        });
+
         return $this->_create($request);
     }
 
@@ -238,16 +249,24 @@ class UserController extends ItemController
      */
     public function edit(EditUserRequest $request): JsonResponse
     {
+        $screenshots_state = User::find($request->input('id'))->screenshots_state;
+
         Filter::listen(Filter::getRequestFilterName(), static function($r) use ($request) {
             $r['screenshots_state'] = ScreenshotsState::tryFrom($request->screenshots_state);
             return $r;
         });
-        Filter::listen(Filter::getActionFilterName(), static function($user) use ($request){
+
+        Filter::listen(Filter::getActionFilterName(), static function($user) use ($request, $screenshots_state) {
+            if ($user->screenshots_state_locked && !$request->user()->isAdmin()) {
+                $user->screenshots_state = $screenshots_state;
+                return $user;
+            }
+
             $user->screenshots_state_locked = $request->user()->isAdmin() && ScreenshotsState::tryFrom($request->input('screenshots_state')) !== ScreenshotsState::OPTIONAL;
 
             return $user;
         });
-        
+
         return $this->_edit($request);
     }
 

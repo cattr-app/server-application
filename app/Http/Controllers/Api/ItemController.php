@@ -129,12 +129,12 @@ abstract class ItemController extends Controller
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
         throw_unless(is_int($request->get('id')), ValidationException::withMessages(['Invalid id']));
-        
+
         $itemsQuery = $this->getQuery();
-        
+
         /** @var Model $item */
         $item = $itemsQuery->get()->collect()->firstWhere('id', $request->get('id'));
-        
+
         if (!$item) {
             /** @var Model $cls */
             $cls = static::MODEL;
@@ -142,9 +142,9 @@ abstract class ItemController extends Controller
 
             throw new NotFoundHttpException;
         }
-        
+
         Event::dispatch(Filter::getBeforeActionEventName(), [$item, $requestData]);
-        
+
         $item = Filter::process(Filter::getActionFilterName(), $item->fill($requestData));
         $item->save();
 
