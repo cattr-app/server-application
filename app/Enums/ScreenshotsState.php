@@ -14,7 +14,7 @@ enum ScreenshotsState: int
         return strtolower($this->name);
     }
 
-    public function mustInherited(): bool
+    public function mustBeInherited(): bool
     {
         return match ($this) {
             self::FORBIDDEN,
