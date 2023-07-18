@@ -1,8 +1,8 @@
 <template>
     <div ref="groupSelect" class="group-select" @click="onActive">
-        <div v-if="isActive != true">{{ model == '' ? $t('field.no_group_selected') : model }}</div>
+        <div v-show="isActive === false">{{ model == '' ? $t('field.no_group_selected') : model }}</div>
         <v-select
-            v-else
+            v-show="isActive === true"
             v-model="model"
             :options="options"
             :filterable="false"
@@ -10,6 +10,7 @@
             :clearable="true"
             :reduce="option => option.label"
             :components="{ Deselect, OpenIndicator }"
+            :dropdownShouldOpen="dropdownShouldOpen"
             @open="onOpen"
             @close="onClose"
             @search="onSearch"
@@ -39,18 +40,18 @@
                 </template>
                 <em v-else>{{ $t('field.no_groups_found', { query: search }) }}</em>
                 <template>
-                    <div class="no-option icon icon-plus-circle" @click="createGroup">
-                        <span class="no-option__text">
-                            <span>{{ $t('field.fast_create_group', { query: search }) }}</span>
-                        </span>
-                    </div>
+                    <at-button v-show="query !== ''" type="primary" class="no-option" size="large" @click="createGroup">
+                        <div class="icon icon-plus-circle">
+                            {{ $t('field.fast_create_group', { query: search }) }}
+                        </div>
+                    </at-button>
                 </template>
                 <template>
-                    <div class="no-option icon icon-plus-circle" @click="toCreateGroup">
-                        <span class="no-option__text">
-                            <span>{{ $t('field.to_create_group', { query: search }) }}</span>
-                        </span>
-                    </div>
+                    <at-button type="primary" class="no-option" size="large" @click="toCreateGroup">
+                        <div class="icon icon-plus-circle" @click="toCreateGroup">
+                            {{ $t('field.to_create_group', { query: search }) }}
+                        </div>
+                    </at-button>
                 </template>
             </template>
 
@@ -108,6 +109,16 @@
         },
         mounted() {
             this.observer = new IntersectionObserver(this.infiniteScroll);
+
+            const onClickOutside = e => {
+                this.opened = this.$el.contains(e.target);
+
+                if (!this.opened) {
+                    this.onClose();
+                }
+            };
+            document.addEventListener('click', onClickOutside);
+            this.$on('hook:beforeDestroy', () => document.removeEventListener('click', onClickOutside));
         },
         watch: {
             async valueAndQuery(newValue) {
@@ -134,13 +145,26 @@
             toCreateGroup() {
                 this.$router.push({ name: 'ProjectGroups.crud.groups.new' });
             },
+            dropdownShouldOpen() {
+                if (this.isSelectOpen) {
+                    this.onSearch(this.query);
+                }
+
+                return this.isSelectOpen;
+            },
             createGroup() {
-                service.save({ name: this.query }, true).then(({ data }) => {
-                    this.$emit('createGroup', {
-                        id: data.data.id,
-                        name: data.data.name,
+                service
+                    .save({ name: this.query }, true)
+                    .then(({ data }) => {
+                        this.$emit('createGroup', {
+                            id: data.data.id,
+                            name: data.data.name,
+                        });
+                    })
+                    .catch(() => {
+                        this.query = '';
+                        this.onClose();
                     });
-                });
                 this.query = '';
                 this.onClose();
             },
@@ -150,9 +174,8 @@
             },
             onActive() {
                 this.isActive = true;
-                this.$refs.groupSelect.parentElement.style.zIndex = 1;
-                this.onSearch(this.query);
                 this.onOpen();
+                this.$refs.groupSelect.parentElement.style.zIndex = 1;
             },
             async onOpen() {
                 this.isSelectOpen = true;
@@ -160,11 +183,11 @@
                 this.observe(this.requestTimestamp);
             },
             onClose() {
+                this.isActive = false;
                 if (this.model == null) {
                     this.model = typeof this.currentGroup == 'object' ? this.currentGroup.name : this.currentGroup;
                 }
 
-                this.isActive = false;
                 this.$refs.groupSelect.parentElement.style.zIndex = 0;
                 this.isSelectOpen = false;
                 this.observer.disconnect();
@@ -193,6 +216,7 @@
                 }
                 option.current = true;
                 this.localCurrentGroup = option;
+                this.onClose();
             },
             async infiniteScroll([{ isIntersecting, target }]) {
                 if (isIntersecting) {
@@ -349,6 +373,15 @@
                 padding: 0;
                 font-family: inherit;
             }
+
+            .vs__dropdown-menu {
+                width: 360px;
+                &::-webkit-scrollbar {
+                    display: none;
+                }
+
+                scrollbar-width: none;
+            }
         }
     }
 
@@ -380,21 +413,15 @@
     .no-option {
         margin-top: 10px;
         cursor: pointer;
-        padding: 10px 0 10px 5px;
-        border: 1px solid;
-        opacity: 0.5;
-        transition: all 1s;
-        text-align: start;
-        line-height: 20px;
-        border-radius: 4px;
-        &:hover {
-            background: #000;
-            color: white;
-            opacity: 1;
-            transition: all 1s;
-        }
-        &::before {
-            margin-right: 5px;
+        display: block;
+        width: 100%;
+        & div {
+            word-break: break-all;
+            white-space: initial;
+            line-height: 20px;
+            &::before {
+                margin-right: 5px;
+            }
         }
     }
 </style>
