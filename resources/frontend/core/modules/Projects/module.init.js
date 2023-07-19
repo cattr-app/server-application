@@ -329,6 +329,7 @@ export function init(context) {
                         value,
                         currentGroup,
                         clearable: true,
+                        project: data.item,
                     },
                     on: {
                         input(val) {

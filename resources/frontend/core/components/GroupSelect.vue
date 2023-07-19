@@ -87,6 +87,10 @@
                 type: Boolean,
                 default: () => false,
             },
+            project: {
+                type: Object,
+                required: true,
+            },
         },
         components: {
             vSelect,
@@ -173,6 +177,10 @@
                 return ''.padStart(depth, '-');
             },
             onActive() {
+                if (!this.project.can.update) {
+                    return;
+                }
+
                 this.isActive = true;
                 this.onOpen();
                 this.$refs.groupSelect.parentElement.style.zIndex = 1;
