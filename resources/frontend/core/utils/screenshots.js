@@ -1,4 +1,5 @@
 import { store } from '@/store';
+import axios from 'axios';
 
 /**
  * Check if state from env is valid and set disabled state for global screenshot selector
@@ -113,12 +114,11 @@ function mustBeInherited(states = store.state.screenshots.states) {
     let companyData = store.getters['user/companyData'],
         companyStateValue = companyData.screenshots_state,
         stateValues = store.getters['screenshots/states'];
-
     if (typeof companyStateValue === 'undefined') {
-        let res;
-        setTimeout(() => (res = mustBeInherited()), 500);
-
-        return res;
+        axios.get('/company-settings', { ignoreCancel: true }).then(({ data }) => {
+            store.state.user.companyData = data.data;
+        });
+        return;
     } else {
         return (
             states.find(state => state.value === companyStateValue).value === stateValues['required'] ||
