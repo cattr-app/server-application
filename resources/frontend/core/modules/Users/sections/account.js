@@ -74,7 +74,7 @@ export function fieldsProvider() {
                     props: {
                         value,
                         isDisabled,
-                        hideIndexes: [2],
+                        hideIndexes: [0, 3],
                     },
                     on: {
                         input(value) {

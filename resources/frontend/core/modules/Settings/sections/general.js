@@ -149,6 +149,7 @@ export default {
                             props: {
                                 value,
                                 isDisabled,
+                                hideIndexes: [0],
                             },
                             on: {
                                 input(value) {

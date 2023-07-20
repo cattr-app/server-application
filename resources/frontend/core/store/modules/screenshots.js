@@ -8,11 +8,6 @@ const state = {
 };
 
 const getters = {
-    clipStates: s =>
-        s.states.reduce(
-            (acc, el) => (el.value < 0 ? acc : Object.assign(acc, { [el.name.toLowerCase()]: el.value })),
-            {},
-        ),
     states: s => s.states.reduce((acc, el) => Object.assign(acc, { [el.name.toLowerCase()]: el.value }), {}),
 };
 
