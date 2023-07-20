@@ -36,7 +36,8 @@ use Settings;
  * @property string|null $url
  * @property int|null $company_id
  * @property string|null $avatar
- * @property int|null $screenshots_state
+ * @property ScreenshotsState $screenshots_state
+ * @property bool $screenshots_state_locked
  * @property int|null $manual_time
  * @property int|null $computer_time_popup
  * @property bool|null $blur_screenshots
@@ -268,35 +269,35 @@ class User extends Authenticatable
     }
 
     /**
-     * GET METHOD
-     * Check if .env state equal forbidden or required in lowercase
-     * Check if company screenshots_state equal forbidden or required
-     * Else return standart screenshots_state
-     *
-     * SET METHOD
-     * Accept number type int or string and ScreenshotsState enum
-     * Check if property type equal int or strin then find case in ScreenshotsState and return case value type int
-     * Else accept and return value type int
+     * Always returns correct state in case env or app settings should override it.
      */
     protected function screenshotsState(): Attribute
     {
         return Attribute::make(
-            get: function ($value): ScreenshotsState
-            {
+            get: static function ($value): ScreenshotsState {
                 $envState = ScreenshotsState::tryFromString(config('app.screenshots_state'));
-                if ($envState && $envState->mustBeInherited()){
+                if ($envState && $envState->mustBeInherited()) {
                     return $envState;
                 }
 
                 $settingsState = ScreenshotsState::tryFrom(Settings::scope('core')->get('screenshots_state'));
-                if ($settingsState && $settingsState->mustBeInherited()){
+                if ($settingsState && $settingsState->mustBeInherited()) {
                     return $settingsState;
                 }
-                return ScreenshotsState::tryFrom($value) ?? ScreenshotsState::REQUIRED;
+
+                $userState = ScreenshotsState::tryFrom($value) ?? ScreenshotsState::REQUIRED;
+                if ($userState === ScreenshotsState::ANY) {
+                    return ScreenshotsState::OPTIONAL;
+                }
+
+                return $userState;
             },
-            set: function (ScreenshotsState|int $value): int
-            {
-                return $value?->value ?? ScreenshotsState::tryFrom($value)->value;
+            set: static function (ScreenshotsState|int $value): int {
+                if ($value instanceof ScreenshotsState) {
+                    return $value->value;
+                }
+
+                return ScreenshotsState::tryFrom($value)->value;
             }
         );
     }

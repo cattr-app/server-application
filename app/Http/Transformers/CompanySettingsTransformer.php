@@ -10,7 +10,7 @@ class CompanySettingsTransformer extends Transformer
 {
     public function transform(array $input): array
     {
-        return (array) Filter::process('transformation.item.list.settings', [
+        return Filter::process('transformation.item.list.settings', [
             'timezone' => $input['timezone'] ?? null,
             'language' => $input['language'] ?? null,
             'work_time' => (int)($input['work_time'] ?? 0),
