@@ -18,6 +18,7 @@ process.env.MIX_APP_VERSION = process.env.APP_VERSION;
 process.env.MIX_DOCKER_VERSION = process.env.IMAGE_VERSION;
 process.env.MIX_PUSHER_APP_KEY = process.env.PUSHER_APP_KEY;
 process.env.MIX_PUSHER_SCHEME = process.env.PUSHER_SCHEME;
+process.env.MIX_PUSHER_PORT = process.env.PUSHER_PORT;
 process.env.MIX_SENTRY_DSN = process.env.SENTRY_DSN;
 
 mix.before(() => {
