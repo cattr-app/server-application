@@ -13,13 +13,103 @@
   },
   "field": {
     "name": "Название отчёта",
-    "options": {
+    "data-objects": {
       "user": "Пользователь",
       "project": "Проект",
       "task": "Задача"
     },
     "fields": {
-      "work_time": "Время"
+      "user": {
+        "main": {
+          "name": "Имя пользователя",
+          "email": "Эл. почта"
+        },
+        "tasks": {
+          "task_name": "Название задачи",
+          "priority": "Приоритет задачи",
+          "status": "Статус",
+          "due_date": "Какая-то дата",
+          "estimate": "Чёт ещё",
+          "description": "Описание"
+        },
+        "projects": {
+          "name": "Название проекта",
+          "created_at": "Дата создания",
+          "description": "Описание",
+          "important": "Важность"
+        },
+        "calculations": {
+          "total_spent_time": "Всего отработано пользователем",
+          "total_spent_time_by_day": ""
+        },
+        "charts": {
+          "total_hours": "Всего отработано пользоваетелем",
+          "hours_tasks": "Часов по задачам",
+          "hours_projects": "Часов по проектам"
+        }
+      },
+      "project": {
+        "main": {
+          "name": "Название проекта",
+          "created_at": "Дата создания",
+          "description": "Описание",
+          "important": "Важность"
+        },
+        "tasks": {
+          "task_name": "Название задачи",
+          "priority": "Приоритет задачи",
+          "status": "Статус",
+          "due_date": "Какая-то дата",
+          "estimate": "Чёт ещё",
+          "description": "Описание"
+        },
+        "users": {
+          "name": "Имя пользователя",
+          "email": "Эл. почта"
+        },
+        "calculations": {
+          "total_spent_time": "Total spent time",
+          "total_spent_time_by_day": "Total time spent per day",
+          "total_spent_time_by_user": "Total time spent per user",
+          "total_spent_time_by_day_and_user": "Total user time spent per day"
+        },
+        "charts": {
+          "worked_all_users": "Worked by all users",
+          "worked_all_users_separately": "Worked by all users individually"
+        }
+      },
+      "task": {
+        "main": {
+          "task_name": "Название задачи",
+          "priority": "Приоритет задачи",
+          "status": "Статус",
+          "due_date": "Какая-то дата",
+          "estimate": "Чёт ещё",
+          "description": "Описание"
+        },
+        "users": {
+          "name": "Имя пользователя",
+          "email": "Эл. почта"
+        },
+        "projects": {
+          "name": "Название проекта",
+          "created_at": "Дата создания",
+          "description": "Описание",
+          "important": "Важность"
+        },
+        "calculations": {
+          "total_spent_time": "Total spent time",
+          "total_spent_time_by_day": "Total time spent per day",
+          "total_spent_time_by_user": "Total time spent per user",
+          "total_spent_time_by_day_and_user": "Total user time spent per day"
+        },
+        "charts": {
+          "worked_all_users": "Worked by all users",
+          "worked_all_users_separately": "Worked by all users individually"
+        }
+
+      }
+
     }
   }
 }

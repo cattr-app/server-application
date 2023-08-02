@@ -24,13 +24,21 @@ use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithDefaultStyles;
 use Maatwebsite\Excel\Concerns\WithMapping;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
+use Maatwebsite\Excel\Concerns\WithCharts;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 use Maatwebsite\Excel\Concerns\WithStyles;
+use PhpOffice\PhpSpreadsheet\Chart\Chart;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
+use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
+use PhpOffice\PhpSpreadsheet\Chart\Legend;
+use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
+use PhpOffice\PhpSpreadsheet\Chart\Title;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Style;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
+use Settings;
 
-class UniversalReportExport extends AppReport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles, WithDefaultStyles
+class UniversalReportExport extends AppReport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles, WithDefaultStyles, WithCharts
 {
     use Exportable;
 
@@ -59,69 +67,39 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
     {
         $that = $this;
 
-        // $this->report->main->model()::whereIn('id', $this->report->data_objects)
         switch ($this->report->main) {
             case EnumsUniversalReport::PROJECT:
-                // $this->report->main->model()::whereIn('id', $this->report->data_objects);
-                return $this->collectionProject();
+                $result = $this->collectionProject();
+                return $result;
                 break;
             case EnumsUniversalReport::USER:
-                // $this->report->main->model()::whereIn('id', $this->report->data_objects)->with();
-                return $this->collectionUser();
+                $result = $this->collectionUser();
+                return $result;
                 break;
             case EnumsUniversalReport::TASK:
-                // $this->report->main->model()::whereIn('id', $this->report->data_objects);
-                return $this->collectionTask();
+                $result = $this->collectionTask();
+                return $result;
                 break;
             // default:
             //     return throw new Exception('Неправильно передана основа');
 
         }
-        // $reportCollection = $this->queryReport()->map(static function ($interval) use ($that) {
-        //     $start = Carbon::make($interval->start_at);
+    }
 
-        //     $interval->duration = Carbon::make($interval->end_at)?->diffInSeconds($start);
-        //     $interval->from_midnight = $start?->diffInSeconds($start?->copy()->startOfDay());
+    public function charts()
+    {
+        $label      = [new DataSeriesValues('String', 'Worksheet!$B$1', null, 1)];
+        $categories = [new DataSeriesValues('String', 'Worksheet!$B$2:$B$5', null, 4)];
+        $values     = [new DataSeriesValues('Number', 'Worksheet!$A$2:$A$5', null, 4)];
 
-        //     $interval->durationByDay = ReportHelper::getIntervalDurationByDay(
-        //         $interval,
-        //         $that->companyTimezone,
-        //         $that->userTimezone
-        //     );
-        //     $interval->durationAtSelectedPeriod = ReportHelper::getIntervalDurationInPeriod(
-        //         $that->period,
-        //         $interval->durationByDay
-        //     );
+        $series = new DataSeries(DataSeries::TYPE_PIECHART, DataSeries::GROUPING_STANDARD,
+            range(0, \count($values) - 1), $label, $categories, $values);
+        $plot   = new PlotArea(null, [$series]);
 
-        //     return $interval;
-        // })->groupBy('user_id');
+        $legend = new Legend();
+        $chart  = new Chart('chart name', new Title('chart title'), $legend, $plot);
 
-        // if ($this->sortBy && $this->sortDirection) {
-        //     $sortBy = match ($this->sortBy) {
-        //         DashboardSortBy::USER_NAME => 'full_name',
-        //         DashboardSortBy::WORKED => 'durationAtSelectedPeriod',
-        //     };
-        //     $sortDirection = match ($this->sortDirection) {
-        //         SortDirection::ASC => false,
-        //         SortDirection::DESC => true,
-        //     };
-
-        //     if ($this->sortBy === DashboardSortBy::USER_NAME) {
-        //         $reportCollection = $reportCollection->sortBy(
-        //             fn($interval) => $interval[0][$sortBy],
-        //             SORT_NATURAL,
-        //             $sortDirection
-        //         );
-        //     } else {
-        //         $reportCollection = $reportCollection->sortBy(
-        //             fn($interval) => $interval->sum($sortBy),
-        //             SORT_NATURAL,
-        //             $sortDirection
-        //         );
-        //     }
-        // }
-
-        // return $reportCollection;
+        return $chart;
     }
 
     /**
@@ -192,7 +170,7 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                     if (array_key_exists($key, $result[$u_id]) && in_array($key, $onlyOne, true)) {
                         continue;
                     }
-                    
+
                     // dd($key);
                     if (in_array($key, ['p_name', 'p_created_at', 'p_description', 'p_important'], true) && !is_null($p_id)) {
                         $result[$u_id]['projects'][$p_id][preg_replace('/p_/', '', $key, 1)] = $value;
@@ -210,7 +188,7 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                     }
 
                     if (!array_key_exists($key, $result[$u_id]) && in_array($key, $onlyOne, true)) {
-                        $result[$u_id][$key] = $value;
+                        $result[$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
                         continue;
                     }
                 }
@@ -225,7 +203,7 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                     }
 
                     if (in_array($key, ['p_name', 'p_created_at', 'p_description', 'p_important'], true) && !is_null($p_id)) {
-                        $result[$u_id]['projects'][$p_id][ltrim($key, 'p_')] = $value;
+                        $result[$u_id]['projects'][$p_id][preg_replace('/p_/', '', $key, 1)] = $value;
                         continue;
                     }
 
@@ -241,17 +219,26 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                 }
             }
         }
-        
-        dd($result);
-
+        // dd($result, $this->period, $this->periodDates);
+        foreach ($this->periodDates as $date) {
+            // dd($result[1]['worked_time_day']['']);
+            foreach ($result as $key => $report) {
+                unset($result[$key]['worked_time_day']['']);
+                if (!array_key_exists($date, $report['worked_time_day'])) {
+                    $result[$key]['worked_time_day'][$date] = 0;
+                }
+            }
+        }
         return collect([
-            'reportData' => $this->queryReportUser(),
-            // 'reportDate' => Settings::scope('core.reports')->get('planned_time_report_date', null)
+            'reportData' => $result,
+            'reportName' => $this->report->name
         ]);
     }
 
     public function collectionTask(): Collection
     {
+
+        // dd(in_array('total_spent_time_by_day', $this->report->fields['calculations']));
         $onlyOne = [
             't_priority',
             't_status',
@@ -269,6 +256,7 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             't_id',
             'u_id',
             'p_id',
+            'date_at',
         ];
         $data = $this->queryReportTask();
         // dd($data, 'ds');
@@ -289,15 +277,20 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                     if (array_key_exists($key, $result[$t_id]) && in_array($key, $onlyOne, true)) {
                         continue;
                     }
-                    
-                    if($key === 't_task_name') {
-                        $result[$t_id][$key] = $value;
+
+                    if(in_array($key, ['t_task_name', 't_description', 't_due_date', 't_estimate', 't_priority', 't_status'])) {
+                        $result[$t_id][preg_replace('/t_/', '', $key, 1)] = $value;
+                        continue;
+                    }
+
+                    if (in_array($key, ['p_created_at', 'p_description', 'p_important', 'p_name', ], true)) {
+                        $result[$t_id]['project'][preg_replace('/p_/', '', $key, 1)] = $value;
                         continue;
                     }
 
                     if (in_array($key, ['u_full_name', 'u_email', 'total_spent_time_by_user'], true) && !array_key_exists('users', $result[$t_id])
                     || in_array($key, ['u_full_name', 'u_email', 'total_spent_time_by_user'], true) && !in_array($key, array_keys($result[$t_id]['users'][$u_id]))) {
-                        $result[$t_id]['users'][$u_id][ltrim($key, 'u_')] = $value;
+                        $result[$t_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
                         continue;
                     }
 
@@ -326,7 +319,7 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                         $result[$t_id][$key] = $value;
                         continue;
                     }
-                    
+
                     if (array_key_exists($key, $result[$p_id]) && !in_array($key, $onlyOne, true)) {
                         array_push($result[$t_id][$key], $value);
                         continue;
@@ -346,7 +339,7 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                     }
 
                     if ($key === 'u_full_name' || $key === 'u_email' || $key === 'total_spent_time_by_user') {
-                        $result[$t_id]['users'][$u_id][ltrim($key, 'u_')] = $value;
+                        $result[$t_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
                         continue;
                     }
 
@@ -355,7 +348,7 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                         $result[$t_id]['worked_time_day'][$task->date_at] = $task->total_spent_time_by_day;
                         continue;
                     }
-                    
+
                     if ($key === 'total_spent_time_by_user_and_day') {
                         $result[$t_id]['users'][$u_id]['workers_day'][$task->date_at] = $task->total_spent_time_by_user_and_day;
                         continue;
@@ -363,12 +356,23 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                 }
             }
         }
-        
-        dd($result);
+        if (
+            in_array('total_spent_time_by_day', $this->report->fields['calculations'])
+        ) {
+            foreach ($this->periodDates as $date) {
+            // dd($result[1]['worked_time_day']['']);
+                foreach ($result as $key => $report) {
+                    unset($result[$key]['worked_time_day']['']);
+                    if (!array_key_exists($date, $report['worked_time_day'])) {
+                        $result[$key]['worked_time_day'][$date] = 0;
+                    }
+                }
+            }
+        }
 
         return collect([
-            'reportData' => $this->queryReportProject(),
-            // 'reportDate' => Settings::scope('core.reports')->get('planned_time_report_date', null)
+            'reportData' => $result,
+            'reportName' => $this->report->name
         ]);
     }
 
@@ -380,11 +384,6 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             'description',
             'important',
             'priority',
-            // 'status',
-            'due_date',
-            'estimate',
-            // 'full_name',
-            // 'email',
         ];
         $skipValues = [
             'default_priority_id',
@@ -402,30 +401,34 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
         $data = $this->queryReportProject();
         $result = [];
         foreach ($data as $project) {
-            // dd($project);
             $p_id = $project->p_id;
             $u_id = $project->u_id;
-            // array_push($result[$project['p_id']], );
 
             if (!array_key_exists($p_id, $result)) {
                 $result[$p_id] = [];
 
+
                 foreach ($project as $key => $value) {
+                    if($key === 'status') {
+                        // dd($key, $value, $project);
+                        // dd($value);
+                    }
                     if (in_array($key, $skipValues, true)) {
                         continue;
                     }
 
+
                     if (array_key_exists($key, $result[$p_id]) && in_array($key, $onlyOne, true)) {
                         continue;
                     }
-                    
-                    if($key === 'task_name') {
-                        $result[$p_id]['tasks'][$project->t_id]['name'] = $value;
+
+                    if(in_array($key, ['t_task_name', 't_priority', 'status', 't_description', 't_due_date', 't_estimate'])) {
+                        $result[$p_id]['tasks'][$project->t_id][preg_replace('/t_/', '', $key, 1)] = $value;
                         continue;
                     }
 
-                    if (in_array($key, ['full_name', 'email', 'total_spent_time_by_user'], true) && !array_key_exists('users', $result[$p_id]) || in_array($key, ['full_name', 'email', 'total_spent_time_by_user'], true) && !in_array($key, array_keys($result[$p_id]['users'][$u_id]))) {
-                        $result[$p_id]['users'][$u_id][$key] = $value;
+                    if (in_array($key, ['u_full_name', 'u_email', 'total_spent_time_by_user'], true)) {
+                        $result[$p_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
                         continue;
                     }
 
@@ -444,20 +447,20 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                         continue;
                     }
 
-                    if (!array_key_exists($key, $result[$p_id]) && in_array($key, $onlyOne, true)) {
-                        $result[$p_id][$key] = $value;
+                    if (!array_key_exists(preg_replace('/p_/', '', $key, 1), $result[$p_id]) && in_array(preg_replace('/p_/', '', $key, 1), $onlyOne, true)) {
+                        $result[$p_id][preg_replace('/p_/', '', $key, 1)] = $value;
                         continue;
                     }
-                    
-                    if (array_key_exists($key, $result[$p_id]) && !in_array($key, $onlyOne, true)) {
-                        array_push($result[$p_id][$key], $value);
+
+                    if (array_key_exists(preg_replace('/p_/', '', $key, 1), $result[$p_id]) && !in_array(preg_replace('/p_/', '', $key, 1), $onlyOne, true)) {
+                        array_push($result[$p_id][preg_replace('/p_/', '', $key, 1)], $value);
                         continue;
                     } else if (!array_key_exists($key, $result[$p_id]) && !in_array($key, $onlyOne, true)) {
                         array_push($result[$p_id], [$key => $value]);
                         continue;
                     }
                     // status, task_name, full_name, email, total_spent_time_by_user, total_spent_time_by_user_and_day, date_at, total_spent_time_by_day *Not Only One
-                    // name, created_at, description, important, priority, status, due_date, estimate, 
+                    // name, created_at, description, important, priority, status, due_date, estimate,
                 }
             } else {
                 foreach ($project as $key => $value) {
@@ -469,8 +472,8 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                         continue;
                     }
 
-                    if($key === 'task_name') {
-                        $result[$p_id]['tasks'][$project->t_id]['name'] = $value;
+                    if(in_array($key, ['t_task_name', 'priority', 'status', 't_description', 't_due_date', 't_estimate'])) {
+                        $result[$p_id]['tasks'][$project->t_id][preg_replace('/t_/', '', $key, 1)] = $value;
                         continue;
                     }
 
@@ -478,11 +481,11 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                         $value === 'Open' ? $result[$p_id]['statuses']['open'] = true : $result[$p_id]['statuses']['closed'] = true;
                         continue;
                     }
-                    if ($key === 'full_name' || $key === 'email' || $key === 'total_spent_time_by_user') {
-                        $result[$p_id]['users'][$u_id][$key] = $value;
+                    if (in_array(preg_replace('/u_/', '', $key, 1), ['full_name', 'email', 'total_spent_time_by_user'])) {
+                        $result[$p_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
                         continue;
                     }
-                    
+
                     if ($key === 'total_spent_time_by_day') {
                         $result[$p_id]['worked_time_day'][$project->date_at] = $project->total_spent_time_by_day;
                         continue;
@@ -494,12 +497,27 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                 }
             }
         }
-        
-        dd($result);
+
+        foreach ($this->periodDates as $date) {
+            foreach ($result as $key => $report) {
+                unset($result[$key]['worked_time_day']['']);
+                if (!array_key_exists($date, $report['worked_time_day'])) {
+                    $result[$key]['worked_time_day'][$date] = 0;
+                }
+
+                foreach ($report['users'] as $k => $user) {
+                    unset($result[$key]['users'][$k]['workers_day']['']);
+
+                    if (!array_key_exists($date, $user['workers_day'])) {
+                        $result[$key]['users'][$k]['workers_day'][$date] = 0;
+                    }
+                }
+            }
+        }
 
         return collect([
-            'reportData' => $this->queryReportProject(),
-            // 'reportDate' => Settings::scope('core.reports')->get('planned_time_report_date', null)
+            'reportData' => $result,
+            'reportName' => $this->report->name
         ]);
     }
 
@@ -512,31 +530,15 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
         $sqlGroupBy = '';
 
         $users = $this->generateSqlRaw('main', $this->report->fields['main'], 'u', 'users', 'u', '', false, true, false, false);
-        // dd($users);
         $sqlSelect .= $users['sqlSelect'];
         $sqlGroupBy .= 'u.id';
-        // return ReportHelper::getBaseQuery(
-        //     $this->report->data_objects,
-        //     $this->startAt,
-        //     $this->endAt,
-        //     [
-        //         'time_intervals.start_at',
-        //         'time_intervals.activity_fill',
-        //         'time_intervals.mouse_fill',
-        //         'time_intervals.keyboard_fill',
-        //         'time_intervals.end_at',
-        //         'users.email as user_email',
-        //     ]
-        // )->get();
-        // if (count($this->report->fields['projects']) > 0) {
-            $sqlGroupBy .= ', p.id';
-            $projectsUsers = $this->generateSqlRaw('projects', [], 'pu', 'projects_users', 'projects_users', 'u.id=pu.user_id', false, false, true, false);
-            $sqlJoin .= $projectsUsers['sqlJoin'];
-    
-            $projects = $this->generateSqlRaw('projects', $this->report->fields['projects'], 'p', 'projects', 'projects', 'pu.project_id=p.id', false, true, true, false);
-            $sqlSelect .= $projects['sqlSelect'];
-            $sqlJoin .= $projects['sqlJoin'];
-        // }
+        $sqlGroupBy .= ', p.id';
+        $projectsUsers = $this->generateSqlRaw('projects', [], 'pu', 'projects_users', 'projects_users', 'u.id=pu.user_id', false, false, true, false);
+        $sqlJoin .= $projectsUsers['sqlJoin'];
+
+        $projects = $this->generateSqlRaw('projects', $this->report->fields['projects'], 'p', 'projects', 'projects', 'pu.project_id=p.id', false, true, true, false);
+        $sqlSelect .= $projects['sqlSelect'];
+        $sqlJoin .= $projects['sqlJoin'];
 
         if (count($this->report->fields['tasks']) > 0) {
             $sqlGroupBy .= ', t.id';
@@ -557,7 +559,6 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                 unset($cloneTasksFields[array_search('status', $cloneTasksFields)]);
             }
 
-    
             $tasks = $this->generateSqlRaw('tasks', $cloneTasksFields, 't', 'tasks', 'tasks', 'tu.task_id=t.id AND p.id=t.project_id', false, true, true, false);
             $sqlSelect .= $tasks['sqlSelect'];
             $sqlJoin .= $tasks['sqlJoin'];
@@ -604,10 +605,10 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
         }
         $sqlSelect = rtrim($sqlSelect, ', ').' ';
 
-        // dd( 
+        // dd(
         return DB::select(
-            "$sqlWith SELECT {$sqlSelect} 
-            FROM users AS u 
+            "$sqlWith SELECT {$sqlSelect}
+            FROM users AS u
             $sqlJoin
             WHERE $sqlWhere
             GROUP BY $sqlGroupBy"
@@ -616,7 +617,7 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
     }
 
 
-    // Таск завершён. Осталось только нормально обработать поле date_at в collectionTask
+    // Таск завершён. Осталось только нормально обработать поле date_at в collectionTask UPD: время по юзерам и дням не приходит
     private function queryReportTask()
     {
         $sqlWith = '';
@@ -640,7 +641,7 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
         }
         $tasks = $this->generateSqlRaw('main', $cloneTasksFields, 't', 'tasks', 'tasks', '', false, true, false, false);
         $sqlSelect .= $tasks['sqlSelect'];
-        
+
         $tasksUsers = $this->generateSqlRaw('users', [], 'tu', 'tasks_users', 'tasks_users', 't.id=tu.task_id', false, true, true, false);
         $sqlJoin .= $tasksUsers['sqlJoin'];
 
@@ -729,8 +730,8 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
         $sqlSelect = rtrim($sqlSelect, ', ').' ';
         // dd(
         return DB::select(
-            "$sqlWith SELECT {$sqlSelect} 
-            FROM tasks AS t 
+            "$sqlWith SELECT {$sqlSelect}
+            FROM tasks AS t
             $sqlJoin
             WHERE $sqlWhere
             GROUP BY $sqlGroupBy"
@@ -762,14 +763,14 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                 if(in_array($value, $fields, true)) {
 
                     if ($select) {
-                        $result['select'] .= "$value";                  
+                        $result['select'] .= "$value";
                         if (++$key === count($arr)) {
                             $result['select'] .= ' ';
                         } else {
                             $result['select'] .= ', ';
                         }
                     }
-                    
+
                     if ($sqlSelect) {
                         $result['sqlSelect'] .= "$prefix.$value as {$prefix}_$value, ";
                     }
@@ -850,7 +851,6 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
         $sqlJoin .= $tasks['sqlJoin'];
 
         $tasksUsers = $this->generateSqlRaw('tasks', [], 'tu', 'tasks_users', 'tasks_users', 't.id=tu.task_id', false, true, true, false);
-        // dd($tasksUsers);
         // $sqlSelect .= preg_replace('/tu.id as tu_id, /', 'tu.user_id, tu.task_id, ', $tasksUsers['sqlSelect']);
         // $sqlSelect .= 'tu.user'
         $sqlJoin .= $tasksUsers['sqlJoin'];
@@ -899,7 +899,8 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                 ) ";
 
                 $sqlSelect .= "ts_time_day.total_spent_time_by_day, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time_by_day AS ts_time_day ON ts_time_user_day.date_at=ts_time_day.date_at ";
+                $sqlJoin .= "LEFT JOIN total_spent_time_by_day AS ts_time_day ON u.id=ts_time_day.user_id ";
+                // $sqlJoin .= "LEFT JOIN total_spent_time_by_day AS ts_time_day ON ts_time_user_day.date_at=ts_time_day.date_at ";
             }
 
 
@@ -916,17 +917,16 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
         }
         $sqlSelect = rtrim($sqlSelect, ', ').' ';
 
-        dd(
-             DB::select(
-                "$sqlWith SELECT {$sqlSelect} 
-                FROM projects AS p 
-                $sqlJoin
-                WHERE $sqlWhere
-                GROUP BY $sqlGroupBy"
-            )
+
+        return DB::select(
+            "$sqlWith SELECT {$sqlSelect}
+            FROM projects AS p
+            $sqlJoin
+            WHERE $sqlWhere
+            GROUP BY $sqlGroupBy"
         );
 
-        // dd(DB::select("WITH 
+        // dd(DB::select("WITH
         //     total_spent_time_by_user AS (
         //         SELECT id, user_id, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_user
         //         FROM time_intervals

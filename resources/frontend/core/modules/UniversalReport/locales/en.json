@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "planned-time-report": "Planned Time Report"
+    "universal-report": "Universal report"
   },
   "universal-report": {
     "personal-reports": "Personal reports",
@@ -12,11 +12,102 @@
     "report_date": "Report created at: {0}"
   },
   "field": {
-    "name": "Report name",
-    "options": {
+    "data-objects": {
       "user": "User",
       "project": "Project",
       "task": "Task"
+    },
+    "fields": {
+      "user": {
+        "main": {
+          "name": "User name",
+          "email": "User email"
+        },
+        "tasks": {
+          "task_name": "Task name",
+          "priority": "Priority",
+          "status": "Status",
+          "due_date": "Due date",
+          "estimate": "Estimate",
+          "description": "Description"
+        },
+        "projects": {
+          "name": "Project name",
+          "created_at": "Created at",
+          "description": "Description",
+          "important": "Important"
+        },
+        "calculations": {
+          "total_spent_time": "Total spent time",
+          "total_spent_time_by_day": "Total spent time per day"
+        },
+        "charts": {
+          "total_hours": "Total hours",
+          "hours_tasks": "Hours tasks",
+          "hours_projects": "Hours projects"
+        }
+      },
+      "project": {
+        "main": {
+          "name": "Project name",
+          "created_at": "Created at",
+          "description": "Description",
+          "important": "Important"
+        },
+        "tasks": {
+          "task_name": "Task name",
+          "priority": "Priority",
+          "status": "Status",
+          "due_date": "Due date",
+          "estimate": "Estimate",
+          "description": "Description"
+        },
+        "users": {
+          "full_name": "User name",
+          "email": "User email"
+        },
+        "calculations": {
+          "total_spent_time": "Total spent time",
+          "total_spent_time_by_day": "Total time spent per day",
+          "total_spent_time_by_user": "Total time spent per user",
+          "total_spent_time_by_day_and_user": "Total user time spent per day"
+        },
+        "charts": {
+          "worked_all_users": "Worked by all users",
+          "worked_all_users_separately": "Worked by all users individually"
+        }
+      },
+      "task": {
+        "main": {
+          "task_name": "Task name",
+          "priority": "Priority",
+          "status": "Status",
+          "due_date": "Due date",
+          "estimate": "Estimate",
+          "description": "Description"
+        },
+        "users": {
+          "name": "User name",
+          "email": "User email"
+        },
+        "projects": {
+          "name": "Project name",
+          "created_at": "Created at",
+          "description": "Description",
+          "important": "Important"
+        },
+        "calculations": {
+          "total_spent_time": "Total spent time",
+          "total_spent_time_by_day": "Total time spent per day",
+          "total_spent_time_by_user": "Total time spent per user",
+          "total_spent_time_by_day_and_user": "Total user time spent per day"
+        },
+        "charts": {
+          "worked_all_users": "Worked by all users",
+          "worked_all_users_separately": "Worked by all users individually"
+        }
+      }
+
     }
   }
 }

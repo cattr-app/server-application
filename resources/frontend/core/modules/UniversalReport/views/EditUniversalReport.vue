@@ -1,6 +1,10 @@
 <template>
     <div class="universal-report__form">
-        <Calendar class="data-entry" @change="onCalendarChange" />
+        <Calendar
+            class="data-entry"
+            sessionStorageKey="amazingcat.session.storage.universalreport"
+            @change="onCalendarChange"
+        />
         <validation-provider v-slot="{ errors }" :rules="'required'" :name="$t('field.name')">
             <at-input
                 v-model="reportName"
@@ -12,7 +16,12 @@
             <small>{{ errors[0] }}</small>
         </validation-provider>
         <at-select v-model="main" class="data-entry">
-            <at-option v-for="main in mains" :key="main" :value="main" :label="$t(`field.options.${main}`)"></at-option>
+            <at-option
+                v-for="main in mains"
+                :key="main"
+                :value="main"
+                :label="$t(`field.data-objects.${main}`)"
+            ></at-option>
         </at-select>
         <obj-data-select
             class="data-entry"
@@ -37,7 +46,7 @@
         />
         <v-select
             class="data-entry"
-            localePath="field.charts"
+            :localePath="`field.fields.${selectedMain}.charts`"
             :options="charts"
             :selectedOptions="selectedCharts"
             @on-change="onChartsChange"

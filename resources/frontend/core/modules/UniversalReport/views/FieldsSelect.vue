@@ -33,7 +33,7 @@
                             @click="toggle(option, key)"
                         >
                             <div class="name">
-                                {{ $t(`${localePath}.${option}`) }}
+                                {{ $t(`${localePath}.${selectedMain}.${key}.${option}`) }}
                             </div>
                         </li>
                     </div>
@@ -59,6 +59,7 @@
 <script>
     import Preloader from '@/components/Preloader';
     import cloneDeep from 'lodash/cloneDeep';
+    import { mapGetters } from 'vuex';
 
     export default {
         name: 'FieldsSelect',
@@ -157,6 +158,7 @@
             },
         },
         computed: {
+            ...mapGetters('universalreport', ['selectedMain']),
             inputValue() {
                 let count = 0;
                 let selectedFields = {};

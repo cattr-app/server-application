@@ -57,35 +57,9 @@
 
     export default {
         name: 'UniversalReport',
-        components: {
-            // Calendar,
-            // ValidationProvider,
-            // UserSelect,
-            // ProjectSelect,
-            // VSelect,
-            // FieldsSelect,
-            // Preloader,
-            // ExportDropdown,
-        },
         data() {
             return {
                 isDataLoading: false,
-                // reports: {
-                //     personal: [
-                //         {
-                //             id: 1,
-                //             name: 'aaaa',
-                //             access: true,
-                //         },
-                //     ],
-                //     company: [
-                //         {
-                //             id: 2,
-                //             name: 'bbb',
-                //             access: true,
-                //         },
-                //     ],
-                // },
             };
         },
         computed: {
@@ -96,12 +70,12 @@
                 setReports: 'universalreport/setReports',
             }),
             selectReport(id) {
-                console.log(id);
+                // console.log(id);
             },
         },
         mounted() {
             service.getReports().then(({ data }) => {
-                console.log(data.data);
+                // console.log(data.data);
                 this.setReports(data.data);
             });
         },

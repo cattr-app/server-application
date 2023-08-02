@@ -98,6 +98,7 @@
         methods: {
             formatDurationString,
             getUserPercentage(minutes, totalTime) {
+                console.log(minutes, totalTime);
                 return Math.floor((minutes * 100) / totalTime);
             },
         },
