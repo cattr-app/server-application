@@ -3,6 +3,7 @@
 namespace App\Http;
 
 use App\Http\Middleware\Authenticate;
+use App\Http\Middleware\RegisterModulesEvents;
 use App\Http\Middleware\SentryContext;
 use App\Http\Middleware\TrimStrings;
 use Illuminate\Http\Middleware\HandleCors;
@@ -41,6 +42,7 @@ class Kernel extends HttpKernel
         HandleCors::class,
         SentryContext::class,
         TrustProxies::class,
+        RegisterModulesEvents::class,
     ];
 
     /**

@@ -77,6 +77,7 @@ return [
         App\Providers\BroadcastServiceProvider::class,
         App\Providers\EventServiceProvider::class,
         App\Providers\FilterServiceProvider::class,
+        App\Providers\CatEventServiceProvider::class,
         App\Providers\RouteServiceProvider::class,
 
         App\Providers\SettingsServiceProvider::class,
@@ -88,6 +89,7 @@ return [
 
         'Settings' => App\Facades\SettingsFacade::class,
         'Filter' => App\Facades\FilterFacade::class,
+        'CatEvent' => App\Facades\EventFacade::class,
 
         'Responder' => Flugg\Responder\Facades\Responder::class,
         'Transformation' => Flugg\Responder\Facades\Transformation::class,

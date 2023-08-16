@@ -12,7 +12,7 @@ class ReportGenerated extends Notification implements ShouldQueue
 {
     use Queueable;
 
-    public function __construct(private $fileName)
+    public function __construct(private $fileName, private $drive)
     {
     }
 
@@ -25,7 +25,7 @@ class ReportGenerated extends Notification implements ShouldQueue
     {
         return (new MailMessage)
                     ->line('In attachment see report you have requested.')
-                    ->attach(Storage::path($this->fileName));
+                    ->attach(Storage::drive($this->drive)->path($this->fileName));
     }
 
     public function toArray($notifiable): array

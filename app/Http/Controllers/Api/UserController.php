@@ -17,7 +17,7 @@ use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
-use Event;
+use CatEvent;
 use Mail;
 use App\Http\Requests\User\CreateUserRequest;
 use App\Http\Requests\User\EditUserRequest;
@@ -431,7 +431,7 @@ class UserController extends ItemController
 
         $itemsQuery = $this->getQuery(['id' => $requestId]);
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $requestId);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), $requestId);
 
         $item = Filter::process(Filter::getActionFilterName(), $itemsQuery->first());
 
@@ -442,7 +442,7 @@ class UserController extends ItemController
 
         throw_unless($item, new NotFoundHttpException);
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$requestId, $item]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$requestId, $item]);
 
         $language = Settings::scope('core')->get('language', 'en');
 
@@ -475,11 +475,11 @@ class UserController extends ItemController
     {
         $user = request()->user();
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $user);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), $user);
 
         Filter::process(Filter::getActionFilterName(), $user)->update(['last_activity' => Carbon::now()]);
 
-        Event::dispatch(Filter::getAfterActionEventName(), $user);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), $user);
 
         return responder()->success()->respond(204);
     }
