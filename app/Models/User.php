@@ -2,10 +2,12 @@
 
 namespace App\Models;
 
+use App\Enums\Role;
 use App\Enums\ScreenshotsState;
 use App\Mail\ResetPassword;
 use App\Scopes\UserAccessScope;
 use App\Traits\HasRole;
+use Auth;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Eloquent as EloquentIdeHelper;
@@ -25,7 +27,6 @@ use Illuminate\Notifications\Notifiable;
 use Hash;
 use Laravel\Sanctum\HasApiTokens;
 use Laravel\Sanctum\PersonalAccessToken;
-use Settings;
 
 /**
  * App\Models\User
@@ -255,7 +256,7 @@ class User extends Authenticatable
     protected function online(): Attribute
     {
         return Attribute::make(
-            get: static fn($value, $attributes) => ($attributes['last_activity'] ?? false) &&
+            get: static fn ($value, $attributes) => ($attributes['last_activity'] ?? false) &&
                 Carbon::parse($attributes['last_activity'])->diffInSeconds(Carbon::now())
                 < config('app.user_activity.online_status_time'),
         );
@@ -264,7 +265,7 @@ class User extends Authenticatable
     protected function password(): Attribute
     {
         return Attribute::make(
-            set: static fn($value) => Hash::needsRehash($value) ? Hash::make($value) : $value,
+            set: static fn ($value) => Hash::needsRehash($value) ? Hash::make($value) : $value,
         );
     }
 
@@ -274,31 +275,23 @@ class User extends Authenticatable
     protected function screenshotsState(): Attribute
     {
         return Attribute::make(
-            get: static function ($value): ScreenshotsState {
-                $envState = ScreenshotsState::tryFromString(config('app.screenshots_state'));
-                if ($envState && $envState->mustBeInherited()) {
-                    return $envState;
+            get: static function (mixed $value, array $attributes): ScreenshotsState {
+                $userState = ScreenshotsState::withGlobalOverrides($value);
+                $showOriginalValues = Auth::user() !== null && Auth::user()->hasRole(Role::ADMIN) && (int)Auth::id() !== (int)$attributes['id'];
+                if ($showOriginalValues) {
+                    return match ($userState) {
+                        null => ScreenshotsState::REQUIRED,
+                        ScreenshotsState::ANY => ScreenshotsState::OPTIONAL,
+                        default => $userState,
+                    };
                 }
 
-                $settingsState = ScreenshotsState::tryFrom(Settings::scope('core')->get('screenshots_state'));
-                if ($settingsState && $settingsState->mustBeInherited()) {
-                    return $settingsState;
-                }
-
-                $userState = ScreenshotsState::tryFrom($value) ?? ScreenshotsState::REQUIRED;
-                if ($userState === ScreenshotsState::ANY) {
-                    return ScreenshotsState::OPTIONAL;
-                }
-
-                return $userState;
+                return match ($userState) {
+                    null, ScreenshotsState::ANY, ScreenshotsState::OPTIONAL => ScreenshotsState::REQUIRED,
+                    default => $userState,
+                };
             },
-            set: static function (ScreenshotsState|int $value): int {
-                if ($value instanceof ScreenshotsState) {
-                    return $value->value;
-                }
-
-                return ScreenshotsState::tryFrom($value)->value;
-            }
+            set: static fn ($value) => (string)ScreenshotsState::getNormalizedValue($value),
         );
     }
 
