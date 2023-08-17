@@ -5,11 +5,11 @@ import CoreUsersService from '@/services/resource/user.service';
 import RoleSelect from '@/components/RoleSelect';
 import Users from '../views/Users';
 import UsersService from '../services/user.service';
-import { store } from '@/store';
 import LanguageSelector from '@/components/LanguageSelector';
 import i18n from '@/i18n';
+import { hasRole } from '@/utils/user';
+import { store } from '@/store';
 import Vue from 'vue';
-import { checkStateUsersScreenshotsSelector } from '@/utils/screenshots';
 
 export function fieldsToFillProvider() {
     return [
@@ -71,13 +71,19 @@ export function fieldsToFillProvider() {
             key: 'screenshots_state',
             default: 1,
             render: (h, props) => {
-                let [value, isDisabled] = checkStateUsersScreenshotsSelector(props.values.screenshots_state);
+                const isAdmin = hasRole(store.getters['user/user'], 'admin');
+                const states = store.getters['screenshots/states'];
+                const hint =
+                    isAdmin && props.values.screenshots_state === states.optional
+                        ? 'users.screenshots_state.optional_will_be_overridden'
+                        : '';
 
                 return h(ScreenshotsStateSelect, {
                     props: {
-                        value,
-                        isDisabled,
+                        value: props.values.screenshots_state,
+                        isDisabled: store.getters['screenshots/isUserStateLocked'],
                         hideIndexes: [0],
+                        hint,
                     },
                     on: {
                         input(value) {

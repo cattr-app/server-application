@@ -1,19 +1,22 @@
 <template>
-    <at-radio-group ref="select" v-model="model" class="screenshots-state-select">
-        <at-radio-button
-            v-for="(state, key) in states"
-            :key="key"
-            :label="key"
-            :disabled="isDisabled"
-            class="screenshots-state-select__btn"
-        >
-            <div>
-                <slot :name="`state__name`">
-                    {{ $t(`control.screenshot_state_options.${state}`) }}
-                </slot>
-            </div>
-        </at-radio-button>
-    </at-radio-group>
+    <div>
+        <at-radio-group ref="select" v-model="model" class="screenshots-state-select">
+            <at-radio-button
+                v-for="(state, key) in states"
+                :key="key"
+                :label="key"
+                :disabled="isDisabled"
+                class="screenshots-state-select__btn"
+            >
+                <div>
+                    <slot :name="`state__name`">
+                        {{ $t(`control.screenshot_state_options.${state}`) }}
+                    </slot>
+                </div>
+            </at-radio-button>
+        </at-radio-group>
+        <div v-if="hint.length > 0" class="hint">{{ $t(hint) }}</div>
+    </div>
 </template>
 
 <script>
@@ -32,6 +35,11 @@
                 type: Array,
                 required: false,
                 default: () => [],
+            },
+            hint: {
+                type: String,
+                required: false,
+                default: () => '',
             },
         },
         methods: {
@@ -74,5 +82,9 @@
                 }
             }
         }
+    }
+
+    .hint {
+        font-size: 12px;
     }
 </style>

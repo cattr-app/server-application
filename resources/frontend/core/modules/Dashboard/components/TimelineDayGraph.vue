@@ -34,7 +34,7 @@
             class="popup"
         >
             <Screenshot
-                v-if="clickPopup.event && checkEnvAndCompanyStateScreenshotsSelector"
+                v-if="clickPopup.event && screenshotsEnabled"
                 :disableModal="true"
                 :lazyImage="false"
                 :project="{ id: clickPopup.event.project_id, name: clickPopup.event.project_name }"
@@ -82,7 +82,6 @@
     import ScreenshotModal from '@/components/ScreenshotModal';
     import IntervalService from '@/services/resource/time-interval.service';
     import { mapGetters } from 'vuex';
-    import { checkEnvAndCompanyStateScreenshotsSelector } from '@/utils/screenshots';
 
     const fabricObjectOptions = {
         editable: false,
@@ -131,6 +130,7 @@
         computed: {
             ...mapGetters('dashboard', ['tasks', 'intervals']),
             ...mapGetters('user', ['user', 'companyData']),
+            ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
             height() {
                 return timelineHeight + titleHeight + subtitleHeight;
             },
@@ -156,7 +156,6 @@
         },
         data() {
             return {
-                checkEnvAndCompanyStateScreenshotsSelector: checkEnvAndCompanyStateScreenshotsSelector(),
                 hoverPopup: {
                     show: false,
                     x: 0,

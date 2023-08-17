@@ -6,7 +6,6 @@ import PrioritySelect from '@/components/PrioritySelect';
 import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
 import { store } from '@/store';
 import { hasRole } from '@/utils/user';
-import { checkStateGlobalScreenshotsSelector } from '@/utils/screenshots';
 
 export default {
     // Check if this section can be rendered and accessed, this param IS OPTIONAL (true by default)
@@ -143,12 +142,12 @@ export default {
                     label: 'field.screenshots_state',
                     key: 'screenshots_state',
                     render: (h, props) => {
-                        let [value, isDisabled] = checkStateGlobalScreenshotsSelector(props.values.screenshots_state);
-
                         return h(ScreenshotsStateSelect, {
                             props: {
-                                value,
-                                isDisabled,
+                                value: store.getters['screenshots/getCompanyStateWithOverrides'](
+                                    props.values.screenshots_state,
+                                ),
+                                isDisabled: store.getters['screenshots/isCompanyStateLocked'],
                                 hideIndexes: [0],
                             },
                             on: {

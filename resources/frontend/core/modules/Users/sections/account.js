@@ -1,7 +1,8 @@
 import AccountService from '../services/account.service';
 import LanguageSelector from '@/components/LanguageSelector';
 import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
-import { checkStateAccountScreenshotsSelector } from '@/utils/screenshots';
+import { hasRole } from '@/utils/user';
+import { store } from '@/store';
 
 export function fieldsProvider() {
     return [
@@ -65,15 +66,14 @@ export function fieldsProvider() {
             label: 'field.screenshots_state',
             key: 'screenshots_state',
             render: (h, props) => {
-                let [value, isDisabled] = checkStateAccountScreenshotsSelector(
-                    props.values.screenshots_state,
-                    props.values.screenshots_state_locked,
-                );
+                const isAdmin = hasRole(store.getters['user/user'], 'admin');
 
                 return h(ScreenshotsStateSelect, {
                     props: {
-                        value,
-                        isDisabled,
+                        value: props.values.screenshots_state,
+                        isDisabled:
+                            store.getters['screenshots/isUserStateLocked'] ||
+                            (props.values.screenshots_state_locked && !isAdmin),
                         hideIndexes: [0, 3],
                     },
                     on: {

@@ -12,6 +12,9 @@
     },
     "role": {
       "name": "Role"
+    },
+    "screenshots_state": {
+      "optional_will_be_overridden": "Optional будет переопределён на required"
     }
   },
   "languages": {

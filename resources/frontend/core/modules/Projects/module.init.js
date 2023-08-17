@@ -4,7 +4,9 @@ import i18n from '@/i18n';
 import { formatDurationString } from '@/utils/time';
 import { ModuleLoaderInterceptor } from '@/moduleLoader';
 import PrioritySelect from '@/components/PrioritySelect';
+import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
 import TeamAvatars from '@/components/TeamAvatars';
+import { store } from '@/store';
 import Statuses from './components/Statuses';
 
 export const ModuleConfig = {
@@ -121,6 +123,13 @@ export function init(context) {
                         h('span', {}, [currentValue.name]),
                     ],
                 );
+            },
+        },
+        {
+            label: 'field.screenshots_state',
+            key: 'screenshots_state',
+            render: (h, { currentValue }) => {
+                return h('span', currentValue ? i18n.t('control.yes') : i18n.t('control.no'));
             },
         },
         {
@@ -243,6 +252,25 @@ export function init(context) {
                 });
             },
             required: false,
+        },
+        {
+            label: 'field.screenshots_state',
+            key: 'screenshots_state',
+            default: 1,
+            render: (h, props) => {
+                return h(ScreenshotsStateSelect, {
+                    props: {
+                        value: props.values.screenshots_state,
+                        isDisabled: store.getters['screenshots/isProjectStateLocked'],
+                        hideIndexes: [0],
+                    },
+                    on: {
+                        input(value) {
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
         },
         {
             label: 'field.statuses',
