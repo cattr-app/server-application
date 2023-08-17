@@ -16,7 +16,7 @@ use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
 use DB;
-use Event;
+use CatEvent;
 use Settings;
 use Throwable;
 
@@ -165,7 +165,7 @@ class TaskController extends ItemController
             }
         );
 
-        Event::listen(Filter::getAfterActionEventName(), static function (Task $data) use ($request) {
+        CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $data) use ($request) {
             $oldUsers = $data->users()->select('id', 'full_name');
             $changes = $data->users()->sync($request->get('users'));
             if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
@@ -257,7 +257,7 @@ class TaskController extends ItemController
      */
     public function create(CreateTaskRequest $request): JsonResponse
     {
-        Event::listen(
+        CatEvent::listen(
             Filter::getAfterActionEventName(),
             static function (Task $task) use ($request){
                 $task->users()->sync($request->get('users'));

@@ -7,7 +7,7 @@ use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\Project\DestroyProjectRequest;
 use App\Http\Requests\Project\ListProjectRequest;
 use App\Http\Requests\Project\ShowProjectRequest;
-use Event;
+use CatEvent;
 use Filter;
 use App\Models\Project;
 use Exception;
@@ -172,7 +172,7 @@ class ProjectController extends ItemController
      */
     public function create(CreateProjectRequest $request): JsonResponse
     {
-        Event::listen(Filter::getAfterActionEventName(), static function (Project $project) use ($request) {
+        CatEvent::listen(Filter::getAfterActionEventName(), static function (Project $project) use ($request) {
             if ($request->has('statuses')) {
                 $statuses = [];
                 foreach ($request->get('statuses') as $status) {
@@ -339,7 +339,7 @@ class ProjectController extends ItemController
      */
     public function edit(EditProjectRequest $request): JsonResponse
     {
-        Event::listen(Filter::getAfterActionEventName(), static function (Project $project) use ($request) {
+        CatEvent::listen(Filter::getAfterActionEventName(), static function (Project $project) use ($request) {
             if ($request->has('statuses')) {
                 $statuses = [];
                 foreach ($request->get('statuses') as $status) {

@@ -53,7 +53,7 @@ mix.before(() => {
         swDest: 'sw.js',
     })
     .clean({
-        cleanOnceBeforeBuildPatterns: ['**/*', '!index.php', '!robots.txt', '!vendor/**', '!favicon.ico'],
+        cleanOnceBeforeBuildPatterns: ['**/*', '!index.php', '!robots.txt', '!vendor/**', '!favicon.ico', '!storage/**'],
     })
     .webpackConfig({
         output: {
