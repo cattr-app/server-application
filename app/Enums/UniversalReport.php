@@ -109,13 +109,13 @@ enum UniversalReport: string
                     return request()->user()->projects()->select('id', 'name')->get();
                 }
 
-                return Project::select('id', 'name')->get(); 
+                return Project::select('id', 'name')->get();
             })(),
             self::USER => (function() {
                 if (!request()->user()->isAdmin()) {
                     return;
                 }
-                
+
                 return User::select('id', 'full_name as name', 'email', 'full_name')->get();
             })(),
             self::TASK => (function() {
@@ -123,7 +123,7 @@ enum UniversalReport: string
                     return request()->user()->tasks()->select('id', 'name')->get();
                 }
 
-                return Task::select('id', 'task_name as name')->get(); 
+                return Task::select('id', 'task_name as name')->get();
             })()
         };
     }
@@ -139,21 +139,21 @@ enum UniversalReport: string
         //     'total_hours',// "Всего часов за указанный период",
         //     'hours_tasks',// "Часов на каждой задаче",
         //     'hours_projects',// "Часов на каждом проекте",
-            
+
         // ];
         return match($this) {
             self::PROJECT => [
-                'worked_all_users', 
-                'worked_all_users_separately',
+                'total_spent_time_day',
+                'total_spent_time_day_and_users_separately',
             ],
             self::USER => [
-                'total_hours',
-                'hours_tasks', 
-                'hours_projects',
+                'total_spent_time_day',
+                'total_spent_time_day_and_tasks',
+                'total_spent_time_day_and_projects',
             ],
             self::TASK => [
-                'worked_all_users',
-                'worked_all_users_separately',
+                'total_spent_time_day',
+                'total_spent_time_day_users_separately',
             ],
         };
     }

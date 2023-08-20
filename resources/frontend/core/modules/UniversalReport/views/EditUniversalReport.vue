@@ -15,7 +15,7 @@
             ></at-input>
             <small>{{ errors[0] }}</small>
         </validation-provider>
-        <at-select v-model="main" class="data-entry">
+        <at-select class="data-entry" :value="main" @on-change="changeMain">
             <at-option
                 v-for="main in mains"
                 :key="main"
@@ -61,6 +61,7 @@
                     Сформировать
                 </router-link>
             </at-button>
+            <at-button class="controls-row__item" type="error" @click="remove">Удалить</at-button>
         </div>
     </div>
 </template>
@@ -92,6 +93,7 @@
                 reportDate: null,
                 projectsList: [],
                 projectReportsList: {},
+                main: '',
                 userIds: [],
                 reports: {
                     personal: [
@@ -125,20 +127,20 @@
                 'selectedCharts',
                 'type',
             ]),
-            main: {
-                get() {
-                    return this.selectedMain;
-                },
-                set(newMain) {
-                    this.setMain(newMain);
-
-                    service.getDataObjectsAndFields(newMain).then(({ data }) => {
-                        this.setFields(data.data.fields);
-                        this.setDataObjects(data.data.dataObjects);
-                        this.setCharts(data.data.charts);
-                    });
-                },
-            },
+            // main: {
+            //     get() {
+            //         return this.selectedMain;
+            //     },
+            //     set(newMain) {
+            //         this.setMain(newMain);
+            //         console.log('edit');
+            //         service.getDataObjectsAndFields(newMain).then(({ data }) => {
+            //             this.setFields(data.data.fields);
+            //             this.setDataObjects(data.data.dataObjects);
+            //             this.setCharts(data.data.charts);
+            //         });
+            //     },
+            // },
             reportName: {
                 get() {
                     return this.name;
@@ -158,6 +160,7 @@
 
                 this.setName(data.data.name);
                 this.setMain(data.data.main);
+                this.main = data.data.main;
                 this.setSelectedFields(data.data.fields);
                 this.setSelectedDataObjects(data.data.data_objects);
                 this.setSelectedCharts(data.data.charts);
@@ -182,10 +185,32 @@
             change(newOptions) {
                 this.setSelectedDataObjects(newOptions);
             },
+            changeMain(main) {
+                if (this.selectedMain === main) {
+                    return;
+                }
+
+                this.main = main;
+                this.setMain(main);
+
+                service.getDataObjectsAndFields(main).then(({ data }) => {
+                    this.setFields(data.data.fields);
+                    this.setDataObjects(data.data.dataObjects);
+                    this.setCharts(data.data.charts);
+
+                    let result = {};
+                    Object.keys(data.data.fields).forEach(item => (result[item] = []));
+
+                    this.setSelectedCharts([]);
+                    this.setSelectedDataObjects([]);
+                    this.setSelectedFields(result);
+                });
+            },
             onCalendarChange({ type, start, end }) {
                 this.setCalendarData({ type, start, end });
             },
             onFieldsChange(fields) {
+                console.log(fields);
                 this.setSelectedFields(fields);
             },
             selectReport(id) {
@@ -216,6 +241,25 @@
                             type: 'error',
                             title: this.$t('notification.save.error.title'),
                             message: this.$t('notification.save.error.message'),
+                        });
+                    });
+            },
+            remove() {
+                service
+                    .deleteItem(this.$route.params.id)
+                    .then(({ data }) => {
+                        this.$Notify({
+                            type: 'success',
+                            title: this.$t('notification.record.delete.success.title'),
+                            message: this.$t('notification.record.delete.success.message'),
+                        });
+                        this.$router.push({ name: 'report.universal' });
+                    })
+                    .catch(() => {
+                        this.$Notify({
+                            type: 'error',
+                            title: this.$t('notification.record.delete.error.title'),
+                            message: this.$t('notification.record.delete.error.message'),
                         });
                     });
             },

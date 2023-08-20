@@ -1,8 +1,23 @@
 <template>
-    <div v-if="Object.keys(reportsList).length">
-        <User v-if="hasMain('user')" :reports="reportsList" />
-        <Task v-else-if="hasMain('task')" :reports="reportsList" />
-        <Project v-else-if="hasMain('project')" :reports="reportsList" />
+    <div v-if="Object.keys(data.reportData).length">
+        <User
+            v-if="hasMain('user')"
+            :reports="data.reportData"
+            :charts="data.reportCharts"
+            :period="data.periodDates"
+        />
+        <Task
+            v-else-if="hasMain('task')"
+            :reports="data.reportData"
+            :charts="data.reportCharts"
+            :period="data.periodDates"
+        />
+        <Project
+            v-else-if="hasMain('project')"
+            :reports="data.reportData"
+            :charts="data.reportCharts"
+            :period="data.periodDates"
+        />
     </div>
 </template>
 
@@ -11,19 +26,35 @@
     import UniversalReportService from '../../service/universal-report.service';
     import moment from 'moment';
     import { hasSelectedMain } from '@/utils/universal-report';
-    import User from '../templates/User';
-    import Task from '../templates/Task';
-    import Project from '../templates/Project';
+    import User from './templates/User/User';
+    import Task from './templates/Task/Task';
+    import Project from './templates/Project/Project';
 
     const service = new UniversalReportService();
 
     export default {
         name: 'List',
         props: {
-            reportsList: {
+            // reportsList: {
+            //     type: Object,
+            //     required: true,
+            //     default: () => {},
+            // },
+            // reportsCharts: {
+            //     type: Object,
+            //     required: true,
+            //     default: () => {},
+            // },
+            data: {
                 type: Object,
                 required: true,
-                default: () => {},
+                default: function () {
+                    return {
+                        reportData: {},
+                        reportCharts: {},
+                        reportName: '',
+                    };
+                },
             },
         },
         components: {

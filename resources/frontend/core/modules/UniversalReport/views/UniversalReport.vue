@@ -15,10 +15,10 @@
                         </at-menu-item>
                     </at-menu>
                     <at-button class="button" type="primary"
-                        ><router-link class="button__link" :to="{ name: 'report.universal.create' }"
-                            >Создать новый отчёт</router-link
-                        ></at-button
-                    >
+                        ><router-link class="button__link" :to="{ name: 'report.universal.create' }">
+                            {{ $t('universal-report.create_new_report') }}
+                        </router-link>
+                    </at-button>
                 </div>
                 <div class="sidebar">
                     <p class="sidebar__header">{{ $t('universal-report.company-reports') }}</p>
@@ -31,10 +31,10 @@
                             {{ report.name }}
                         </at-menu-item>
                         <at-button class="button" type="primary"
-                            ><router-link class="button__link" :to="{ name: 'report.universal.create' }"
-                                >Создать новый отчёт</router-link
-                            ></at-button
-                        >
+                            ><router-link class="button__link" :to="{ name: 'report.universal.create' }">
+                                {{ $t('universal-report.create_new_report') }}
+                            </router-link>
+                        </at-button>
                     </at-menu>
                 </div>
             </div>
@@ -68,12 +68,14 @@
         methods: {
             ...mapMutations({
                 setReports: 'universalreport/setReports',
+                clearStore: 'universalreport/clearStore',
             }),
             selectReport(id) {
                 // console.log(id);
             },
         },
         mounted() {
+            this.clearStore();
             service.getReports().then(({ data }) => {
                 // console.log(data.data);
                 this.setReports(data.data);

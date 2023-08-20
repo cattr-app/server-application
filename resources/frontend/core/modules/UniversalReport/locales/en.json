@@ -9,7 +9,14 @@
     "estimate": "Estimate",
     "spent": "Spent",
     "productivity": "Productivity",
-    "report_date": "Report created at: {0}"
+    "report_date": "Report created at: {0}",
+    "data_for": "Data for: {0} - {1}",
+    "create_new_report": "Create a new report",
+    "user_information": "User information",
+    "project_information": "Project information",
+    "task_information": "Task information",
+    "worked_by_day": "Worked by day:"
+
   },
   "field": {
     "data-objects": {
@@ -42,9 +49,9 @@
           "total_spent_time_by_day": "Total spent time per day"
         },
         "charts": {
-          "total_hours": "Total hours",
-          "hours_tasks": "Hours tasks",
-          "hours_projects": "Hours projects"
+          "total_spent_time_by_day": "Total hours",
+          "total_spent_time_by_day_and_tasks": "Hours tasks",
+          "total_spent_time_by_day_and_projects": "Hours projects"
         }
       },
       "project": {
@@ -73,8 +80,8 @@
           "total_spent_time_by_day_and_user": "Total user time spent per day"
         },
         "charts": {
-          "worked_all_users": "Worked by all users",
-          "worked_all_users_separately": "Worked by all users individually"
+          "total_spent_time_day": "Worked by all users",
+          "total_spent_time_day_and_users_separately": "Worked by all users individually"
         }
       },
       "task": {
@@ -103,8 +110,8 @@
           "total_spent_time_by_day_and_user": "Total user time spent per day"
         },
         "charts": {
-          "worked_all_users": "Worked by all users",
-          "worked_all_users_separately": "Worked by all users individually"
+          "total_spent_time_day": "Worked by all users",
+          "total_spent_time_day_users_separately": "Worked by all users individually"
         }
       }
 

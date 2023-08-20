@@ -8,6 +8,8 @@ use App\Http\Requests\Reports\UniversalReport\UniversalReportEditRequest;
 use App\Http\Requests\Reports\UniversalReport\UniversalReportRequest;
 use App\Http\Requests\Reports\UniversalReport\UniversalReportShowRequest;
 use App\Http\Requests\Reports\UniversalReport\UniversalReportStoreRequest;
+use App\Http\Requests\Reports\UniversalReport\UniversalReportDestroyRequest;
+
 use App\Jobs\GenerateAndSendReport;
 use App\Models\Project;
 use App\Models\UniversalReport as ModelsUniversalReport;
@@ -50,16 +52,16 @@ class UniversalReportController
                 $item->type === 'company' ? array_push($items['company'], $item->toArray()) : array_push($items['personal'], $item->toArray());
             }
         });
-        
+
         return responder()->success($items)->respond();
 
     }
-    
+
     public function getMains()
     {
         return responder()->success(UniversalReport::mains())->respond();
     }
-    
+
     public function getDataObjectsAndFields(Request $request)
     {
         $main = UniversalReport::tryFrom($request->input('main', null));
@@ -90,7 +92,7 @@ class UniversalReportController
                 return responder()->error(500, 'Права пользователя не позволяют сохранить отчёт для компании')->respond(500);
             }
         }
-        
+
         $report = $user->universalReports()->create([
             'name' => $request->name,
             'type' => $request->type,
@@ -108,7 +110,7 @@ class UniversalReportController
         return responder()->success(ModelsUniversalReport::find($request->id))->respond();
     }
 
-    public function edit(UniversalReportEditRequest $request) 
+    public function edit(UniversalReportEditRequest $request)
     {
         if($request->type === 'company') {
             if($request->user()->isAdmin()) {
@@ -149,9 +151,14 @@ class UniversalReportController
         )->respond();
     }
 
+    public function destroy(UniversalReportDestroyRequest $request)
+    {
+        ModelsUniversalReport::find($request->input('id', null))->delete();
+
+        return responder()->success()->respond(204);
+    }
 
 
-    
         // /**
         //  * @throws Throwable
         //  */
@@ -164,9 +171,9 @@ class UniversalReportController
         //         $request->user(),
         //         ReportHelper::getReportFormat($request),
         //     );
-    
+
         //     app(Dispatcher::class)->dispatchSync($job);
-    
+
         //     return responder()->success(['url' => $job->getPublicPath()])->respond();
         // }
 }

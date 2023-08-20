@@ -7,7 +7,8 @@
                         <h1 class="control-item title">
                             <Skeleton :loading="isDataLoading" width="200px">{{ reportName }}</Skeleton>
                         </h1>
-                        <span>{{ `Данные за ${calendar.start} - ${calendar.end}` }}</span>
+                        <span>{{ $t('universal-report.data_for', [calendar.start, calendar.end]) }}</span>
+                        <!-- <span>{{ `Данные за ${calendar.start} - ${calendar.end}` }}</span> -->
                     </div>
                     <div class="control-items">
                         <at-button size="large" class="control-item" @click="$router.go($route.meta.navigation.from)"
@@ -15,7 +16,7 @@
                         </at-button>
                     </div>
                 </div>
-                <List :reportsList="reportData" />
+                <List :data="data" />
             </div>
         </div>
     </div>
@@ -43,7 +44,11 @@
             return {
                 isDataLoading: false,
                 reportName: '',
-                reportData: {},
+                data: {
+                    reportData: {},
+                    reportCharts: {},
+                    reportName: '',
+                },
             };
         },
         mounted() {
@@ -58,9 +63,13 @@
                         moment().format('YYYY-MM-DD'),
                 })
                 .then(({ data }) => {
+                    if (Array.isArray(data.data.reportCharts)) {
+                        data.data.reportCharts = {};
+                    }
+
                     this.reportName = data.data.reportName;
                     delete data.data.reportName;
-                    this.reportData = data.data.reportData;
+                    this.data = data.data;
                     this.isDataLoading = false;
                 });
         },

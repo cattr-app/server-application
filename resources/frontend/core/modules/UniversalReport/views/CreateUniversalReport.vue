@@ -15,7 +15,7 @@
             ></at-input>
             <small>{{ errors[0] }}</small>
         </validation-provider>
-        <at-select v-model="main" class="data-entry">
+        <at-select class="data-entry" @on-change="changeMain">
             <at-option
                 v-for="main in mains"
                 :key="main"
@@ -81,6 +81,7 @@
                 projectsList: [],
                 projectReportsList: {},
                 userIds: [],
+                main: '',
                 reports: {
                     personal: [
                         {
@@ -112,25 +113,6 @@
                 'charts',
                 'selectedCharts',
             ]),
-            main: {
-                get() {
-                    return this.selectedMain;
-                },
-                set(newMain) {
-                    this.setMain(newMain);
-
-                    service.getDataObjectsAndFields(newMain).then(({ data }) => {
-                        this.setFields(data.data.fields);
-                        this.setDataObjects(data.data.dataObjects);
-                        this.setCharts(data.data.charts);
-
-                        let result = {};
-                        Object.keys(data.data.fields).forEach(item => (result[item] = []));
-
-                        this.setSelectedFields(result);
-                    });
-                },
-            },
             reportName: {
                 get() {
                     return this.name;
@@ -154,6 +136,24 @@
                 setSelectedCharts: 'universalreport/setSelectedCharts',
                 clearStore: 'universalreport/clearStore',
             }),
+            changeMain(main) {
+                this.main = main;
+                this.setMain(main);
+                console.log('create');
+
+                service.getDataObjectsAndFields(main).then(({ data }) => {
+                    this.setFields(data.data.fields);
+                    this.setDataObjects(data.data.dataObjects);
+                    this.setCharts(data.data.charts);
+
+                    let result = {};
+                    Object.keys(data.data.fields).forEach(item => (result[item] = []));
+
+                    this.setSelectedCharts([]);
+                    this.setSelectedDataObjects([]);
+                    this.setSelectedFields(result);
+                });
+            },
             change(newOptions) {
                 this.setSelectedDataObjects(newOptions);
             },

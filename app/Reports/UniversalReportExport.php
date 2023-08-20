@@ -3,21 +3,16 @@
 namespace App\Reports;
 
 use App\Contracts\AppReport;
-use App\Enums\DashboardSortBy;
-use App\Enums\SortDirection;
 use App\Enums\UniversalReport as EnumsUniversalReport;
 use App\Helpers\ReportHelper;
-use App\Models\CronTaskWorkers;
-use App\Models\Project;
 use App\Models\UniversalReport;
+use App\Services\UniversalReportService;
 use ArrayObject;
 use Carbon\Carbon;
 use Carbon\CarbonInterval;
-use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Carbon\CarbonPeriod;
 use DB;
 use Exception;
-use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Support\Collection;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\Exportable;
@@ -36,7 +31,6 @@ use PhpOffice\PhpSpreadsheet\Chart\Title;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Style;
 use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use Settings;
 
 class UniversalReportExport extends AppReport implements FromCollection, WithMapping, ShouldAutoSize, WithHeadings, WithStyles, WithDefaultStyles, WithCharts
 {
@@ -69,16 +63,35 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
 
         switch ($this->report->main) {
             case EnumsUniversalReport::PROJECT:
-                $result = $this->collectionProject();
-                return $result;
+                $onlyOne = [
+                    'name',
+                    'created_at',
+                    'description',
+                    'important',
+                    'priority',
+                ];
+
+                $skipValues = [
+                    'default_priority_id',
+                    'priority_id',
+                    'st_id',
+                    'project_id',
+                    'id',
+                    't_id',
+                    'user_id',
+                    'task_id',
+                    'u_id',
+                    'p_id',
+                    'date_at',
+                ];
+
+                return $this->collectionProject($onlyOne, $skipValues);
                 break;
             case EnumsUniversalReport::USER:
-                $result = $this->collectionUser();
-                return $result;
+                return $this->collectionUser();
                 break;
             case EnumsUniversalReport::TASK:
-                $result = $this->collectionTask();
-                return $result;
+                return $this->collectionTask();
                 break;
             // default:
             //     return throw new Exception('Неправильно передана основа');
@@ -154,9 +167,9 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             'p_id',
         ];
         $data = $this->queryReportUser();
-        // dd($data, 'ds');
+
         $result = [];
-        foreach ($data as $user) {
+        foreach ($data['reportData'] as $user) {
             $p_id = $user?->p_id ?? null;
             $u_id = $user->u_id;
             $t_id = $user?->t_id ?? null;
@@ -171,7 +184,6 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                         continue;
                     }
 
-                    // dd($key);
                     if (in_array($key, ['p_name', 'p_created_at', 'p_description', 'p_important'], true) && !is_null($p_id)) {
                         $result[$u_id]['projects'][$p_id][preg_replace('/p_/', '', $key, 1)] = $value;
                         continue;
@@ -219,26 +231,24 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                 }
             }
         }
-        // dd($result, $this->period, $this->periodDates);
-        foreach ($this->periodDates as $date) {
-            // dd($result[1]['worked_time_day']['']);
+
+        if (in_array('total_spent_time_by_day', $this->report->fields['calculations'])) {
+            $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
             foreach ($result as $key => $report) {
-                unset($result[$key]['worked_time_day']['']);
-                if (!array_key_exists($date, $report['worked_time_day'])) {
-                    $result[$key]['worked_time_day'][$date] = 0;
-                }
+                $service->fillNullDatesAsZeroTime($result[$key]['worked_time_day']);
             }
         }
+
         return collect([
             'reportData' => $result,
-            'reportName' => $this->report->name
+            'reportName' => $this->report->name,
+            'reportCharts' => $data['reportCharts'],
+            'periodDates' => $this->periodDates,
         ]);
     }
 
     public function collectionTask(): Collection
     {
-
-        // dd(in_array('total_spent_time_by_day', $this->report->fields['calculations']));
         $onlyOne = [
             't_priority',
             't_status',
@@ -259,9 +269,8 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             'date_at',
         ];
         $data = $this->queryReportTask();
-        // dd($data, 'ds');
         $result = [];
-        foreach ($data as $task) {
+        foreach ($data['reportData'] as $task) {
             $p_id = $task->p_id;
             $u_id = $task->u_id;
             $t_id = $task->t_id;
@@ -295,7 +304,6 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                     }
 
                     if ($key === 'total_spent_time_by_day') {
-                        // dump($t_id, $task->date_at, $task->total_spent_time_by_day);
                         $result[$t_id]['worked_time_day'][$task->date_at] = $task->total_spent_time_by_day;
                         continue;
                     }
@@ -344,7 +352,6 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                     }
 
                     if ($key === 'total_spent_time_by_day') {
-                        // dump($t_id, $task->date_at, $task->total_spent_time_by_day);
                         $result[$t_id]['worked_time_day'][$task->date_at] = $task->total_spent_time_by_day;
                         continue;
                     }
@@ -356,51 +363,43 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                 }
             }
         }
+
         if (
             in_array('total_spent_time_by_day', $this->report->fields['calculations'])
+            || in_array('total_spent_time_by_day_and_user', $this->report->fields['calculations'])
         ) {
-            foreach ($this->periodDates as $date) {
-            // dd($result[1]['worked_time_day']['']);
-                foreach ($result as $key => $report) {
-                    unset($result[$key]['worked_time_day']['']);
-                    if (!array_key_exists($date, $report['worked_time_day'])) {
-                        $result[$key]['worked_time_day'][$date] = 0;
+            $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
+
+            foreach ($result as $key => $report) {
+                if (in_array('total_spent_time_by_day', $this->report->fields['calculations'])) {
+                    $service->fillNullDatesAsZeroTime($result[$key]['worked_time_day']);
+                }
+
+                if (in_array('total_spent_time_by_day_and_user', $this->report->fields['calculations'])) {
+                    foreach ($report['users'] as $k => $user) {
+                        $service->fillNullDatesAsZeroTime($result[$key]['users'][$k]['workers_day']);
                     }
                 }
+            }
+            $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
+            foreach ($result as $key => $report) {
+                $service->fillNullDatesAsZeroTime($result[$key]['worked_time_day']);
             }
         }
 
         return collect([
             'reportData' => $result,
-            'reportName' => $this->report->name
+            'reportName' => $this->report->name,
+            'reportCharts' => $data['reportCharts'],
+            'periodDates' => $this->periodDates,
         ]);
     }
 
-    public function collectionProject(): Collection
+    public function collectionProject(array $onlyOne, array $skipValues): Collection
     {
-        $onlyOne = [
-            'name',
-            'created_at',
-            'description',
-            'important',
-            'priority',
-        ];
-        $skipValues = [
-            'default_priority_id',
-            'priority_id',
-            'st_id',
-            'project_id',
-            'id',
-            't_id',
-            'user_id',
-            'task_id',
-            'u_id',
-            'p_id',
-            'date_at',
-        ];
         $data = $this->queryReportProject();
         $result = [];
-        foreach ($data as $project) {
+        foreach ($data['reportData'] as $project) {
             $p_id = $project->p_id;
             $u_id = $project->u_id;
 
@@ -498,26 +497,34 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             }
         }
 
-        foreach ($this->periodDates as $date) {
+        if (
+            in_array('total_spent_time_by_day', $this->report->fields['calculations'])
+            || in_array('total_spent_time_by_day_and_user', $this->report->fields['calculations'])
+        ) {
+            $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
+
             foreach ($result as $key => $report) {
-                unset($result[$key]['worked_time_day']['']);
-                if (!array_key_exists($date, $report['worked_time_day'])) {
-                    $result[$key]['worked_time_day'][$date] = 0;
+                if (in_array('total_spent_time_by_day', $this->report->fields['calculations'])) {
+                    $service->fillNullDatesAsZeroTime($result[$key]['worked_time_day']);
                 }
 
-                foreach ($report['users'] as $k => $user) {
-                    unset($result[$key]['users'][$k]['workers_day']['']);
-
-                    if (!array_key_exists($date, $user['workers_day'])) {
-                        $result[$key]['users'][$k]['workers_day'][$date] = 0;
+                if (in_array('total_spent_time_by_day_and_user', $this->report->fields['calculations'])) {
+                    foreach ($report['users'] as $k => $user) {
+                        $service->fillNullDatesAsZeroTime($result[$key]['users'][$k]['workers_day']);
                     }
                 }
+            }
+            $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
+            foreach ($result as $key => $report) {
+                $service->fillNullDatesAsZeroTime($result[$key]['worked_time_day']);
             }
         }
 
         return collect([
             'reportData' => $result,
-            'reportName' => $this->report->name
+            'reportName' => $this->report->name,
+            'reportCharts' => $data['reportCharts'],
+            'periodDates' => $this->periodDates,
         ]);
     }
 
@@ -529,29 +536,34 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
         $sqlWhere = '';
         $sqlGroupBy = '';
 
-        $users = $this->generateSqlRaw('main', $this->report->fields['main'], 'u', 'users', 'u', '', false, true, false, false);
+        $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
+
+        $users = $service->generateSqlRaw('main', $this->report->fields['main'], 'u', 'users', 'u', '', false, true, false, false);
         $sqlSelect .= $users['sqlSelect'];
         $sqlGroupBy .= 'u.id';
         $sqlGroupBy .= ', p.id';
-        $projectsUsers = $this->generateSqlRaw('projects', [], 'pu', 'projects_users', 'projects_users', 'u.id=pu.user_id', false, false, true, false);
+
+        $projectsUsers = $service->generateSqlRaw('projects', [], 'pu', 'projects_users', 'projects_users', 'u.id=pu.user_id', false, false, true, false);
         $sqlJoin .= $projectsUsers['sqlJoin'];
 
-        $projects = $this->generateSqlRaw('projects', $this->report->fields['projects'], 'p', 'projects', 'projects', 'pu.project_id=p.id', false, true, true, false);
+        $projects = $service->generateSqlRaw('projects', $this->report->fields['projects'], 'p', 'projects', 'projects', 'pu.project_id=p.id', false, true, true, false);
         $sqlSelect .= $projects['sqlSelect'];
         $sqlJoin .= $projects['sqlJoin'];
 
         if (count($this->report->fields['tasks']) > 0) {
             $sqlGroupBy .= ', t.id';
-            $tasksUsers = $this->generateSqlRaw('tasks', [], 'tu', 'tasks_users', 'tasks_users', 'u.id=tu.user_id', false, false, true, false);
+            $tasksUsers = $service->generateSqlRaw('tasks', [], 'tu', 'tasks_users', 'tasks_users', 'u.id=tu.user_id', false, false, true, false);
             $sqlJoin .= $tasksUsers['sqlJoin'];
             $cloneTasksFields = $this->report->fields['tasks'];
             $afterTasksTableJoins = '';
+
             if (in_array('priority', $this->report->fields['tasks'], true)) {
                 $afterTasksTableJoins .= "LEFT JOIN priorities AS pr ON t.priority_id=pr.id
                 ";
                 $sqlSelect .= "pr.name as t_priority, ";
                 unset($cloneTasksFields[array_search('priority', $cloneTasksFields)]);
             }
+
             if (in_array('status', $this->report->fields['tasks'], true)) {
                 $afterTasksTableJoins .= "LEFT JOIN statuses AS s ON t.status_id=s.id
                 ";
@@ -559,43 +571,18 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                 unset($cloneTasksFields[array_search('status', $cloneTasksFields)]);
             }
 
-            $tasks = $this->generateSqlRaw('tasks', $cloneTasksFields, 't', 'tasks', 'tasks', 'tu.task_id=t.id AND p.id=t.project_id', false, true, true, false);
+            $tasks = $service->generateSqlRaw('tasks', $cloneTasksFields, 't', 'tasks', 'tasks', 'tu.task_id=t.id AND p.id=t.project_id', false, true, true, false);
             $sqlSelect .= $tasks['sqlSelect'];
             $sqlJoin .= $tasks['sqlJoin'];
             $sqlJoin .= $afterTasksTableJoins;
         }
 
-        if (isset($this->report->fields['calculations']) && count($this->report->fields['calculations']) > 0) {
-            $sqlWith .= "WITH ";
-            if (in_array('total_spent_time', $this->report->fields['calculations'], true)) {
-                $sqlWith .= "total_spent_time AS (
-                    SELECT user_id, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time
-                    FROM time_intervals
-                    WHERE start_at>='{$this->startAt->format('Y-m-d')} 00:00:00'
-                    AND end_at<='{$this->endAt->format('Y-m-d')} 23:59:59'
-                    GROUP BY user_id
-                ), ";
+        $calculationsResult = $service->sqlWithForUser($this->report->fields['calculations']);
+        $sqlWith .= $calculationsResult['sqlWith'];
+        $sqlJoin .= $calculationsResult['sqlJoin'];
+        $sqlGroupBy .= $calculationsResult['sqlGroupBy'];
+        $sqlSelect .= $calculationsResult['sqlSelect'];
 
-                $sqlSelect .= "ts_time_user.total_spent_time, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time AS ts_time_user ON u.id=ts_time_user.user_id ";
-            }
-
-            if (in_array('total_spent_time_by_day', $this->report->fields['calculations'], true)) {
-                $sqlWith .= "total_spent_time_by_day AS (
-                    SELECT user_id, DATE(start_at) as date_at, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_day
-                    FROM time_intervals
-                    WHERE start_at>='{$this->startAt->format('Y-m-d')} 00:00:00'
-                    AND end_at<='{$this->endAt->format('Y-m-d')} 23:59:59'
-                    GROUP BY user_id, date_at
-                ) ";
-
-                $sqlSelect .= "ts_time_day.total_spent_time_by_day, ts_time_day.date_at, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time_by_day AS ts_time_day ON u.id=ts_time_day.user_id ";
-                $sqlGroupBy .= ', ts_time_day.date_at';
-            }
-
-            $sqlWith = rtrim($sqlWith, '), ').') ';
-        }
         foreach ($this->report->data_objects as $key => $dataObject) {
             $sqlWhere .= "u.id=$dataObject ";
             if (++$key === count($this->report->data_objects)) {
@@ -603,17 +590,20 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             }
             $sqlWhere .= "OR ";
         }
+
+        $sqlWith = preg_replace("/[) ,]+$/", ') ', $sqlWith);
         $sqlSelect = rtrim($sqlSelect, ', ').' ';
 
-        // dd(
-        return DB::select(
-            "$sqlWith SELECT {$sqlSelect}
-            FROM users AS u
-            $sqlJoin
-            WHERE $sqlWhere
-            GROUP BY $sqlGroupBy"
-        );
-        // );
+        return [
+            'reportData' => DB::select(
+                "$sqlWith SELECT {$sqlSelect}
+                FROM users AS u
+                $sqlJoin
+                WHERE $sqlWhere
+                GROUP BY $sqlGroupBy"
+            ),
+            'reportCharts' => $service->usersCharts(),
+        ];
     }
 
 
@@ -625,6 +615,8 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
         $sqlJoin = '';
         $sqlWhere = '';
         $sqlGroupBy = 't.id';
+
+        $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
 
         $cloneTasksFields = $this->report->fields['main'];
         if (in_array('priority', $this->report->fields['main'], true)) {
@@ -639,85 +631,29 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             $sqlSelect .= "s.name as t_status, ";
             unset($cloneTasksFields[array_search('status', $cloneTasksFields)]);
         }
-        $tasks = $this->generateSqlRaw('main', $cloneTasksFields, 't', 'tasks', 'tasks', '', false, true, false, false);
+        $tasks = $service->generateSqlRaw('main', $cloneTasksFields, 't', 'tasks', 'tasks', '', false, true, false, false);
         $sqlSelect .= $tasks['sqlSelect'];
 
-        $tasksUsers = $this->generateSqlRaw('users', [], 'tu', 'tasks_users', 'tasks_users', 't.id=tu.task_id', false, true, true, false);
+        $tasksUsers = $service->generateSqlRaw('users', [], 'tu', 'tasks_users', 'tasks_users', 't.id=tu.task_id', false, true, true, false);
         $sqlJoin .= $tasksUsers['sqlJoin'];
 
-        $users = $this->generateSqlRaw('users', $this->report->fields['users'], 'u', 'users', 'users', 'tu.user_id=u.id', false, true, true, false);
+        $users = $service->generateSqlRaw('users', $this->report->fields['users'], 'u', 'users', 'users', 'tu.user_id=u.id', false, true, true, false);
         $sqlSelect .= $users['sqlSelect'];
         $sqlJoin .= $users['sqlJoin'];
         $sqlGroupBy .= ', u.id';
 
-        $projects = $this->generateSqlRaw('projects', $this->report->fields['projects'], 'p', 'projects', 'projects', 't.project_id=p.id', false, true, true, false);
+        $projects = $service->generateSqlRaw('projects', $this->report->fields['projects'], 'p', 'projects', 'projects', 't.project_id=p.id', false, true, true, false);
         $sqlSelect .= $projects['sqlSelect'];
         $sqlJoin .= $projects['sqlJoin'];
         $sqlGroupBy .= ', p.id';
 
-        if (isset($this->report->fields['calculations']) && count($this->report->fields['calculations']) > 0) {
-            $sqlWith .= "WITH ";
+        $calculationsResult = $service->sqlWithForTask($this->report->fields['calculations']);
+        $sqlWith .= $calculationsResult['sqlWith'];
+        $sqlJoin .= $calculationsResult['sqlJoin'];
+        $sqlGroupBy .= $calculationsResult['sqlGroupBy'];
+        $sqlSelect .= $calculationsResult['sqlSelect'];
 
-            if (in_array('total_spent_time_by_user', $this->report->fields['calculations'], true)) {
-                $sqlWith .= "total_spent_time_by_user AS (
-                    SELECT user_id, task_id, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_user
-                    FROM time_intervals
-                    WHERE start_at>='{$this->startAt->format('Y-m-d')} 00:00:00'
-                    AND end_at<='{$this->endAt->format('Y-m-d')} 23:59:59'
-                    AND deleted_at IS NULL
-                    GROUP BY user_id, task_id
-                ), ";
 
-                $sqlSelect .= "ts_time_user.total_spent_time_by_user, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time_by_user AS ts_time_user ON t.id=ts_time_user.task_id AND u.id=ts_time_user.user_id ";
-            }
-
-            if (in_array('total_spent_time', $this->report->fields['calculations'], true)) {
-                $sqlWith .= "total_spent_time AS (
-                    SELECT task_id, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time
-                    FROM time_intervals
-                    WHERE start_at>='{$this->startAt->format('Y-m-d')} 00:00:00'
-                    AND end_at<='{$this->endAt->format('Y-m-d')} 23:59:59'
-                    AND deleted_at IS NULL
-                    GROUP BY task_id
-                ), ";
-
-                $sqlSelect .= "ts_time.total_spent_time, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time AS ts_time ON t.id=ts_time.task_id ";
-            }
-
-            if (in_array('total_spent_time_by_user_and_day', $this->report->fields['calculations'], true)) {
-                $sqlWith .= "total_spent_time_by_user_and_day AS (
-                    SELECT user_id, DATE(start_at) as date_at, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_user_and_day
-                    FROM time_intervals
-                    WHERE start_at>='{$this->startAt->format('Y-m-d')} 00:00:00'
-                    AND end_at<='{$this->endAt->format('Y-m-d')} 23:59:59'
-                    AND deleted_at IS NULL
-                    GROUP BY user_id, date_at, task_id
-                ) ";
-
-                $sqlSelect .= "ts_time_user_day.total_spent_time_by_user_and_day, ts_time_user_day.date_at, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time_by_user_and_day AS ts_time_user_day ON u.id=ts_time_user_day.user_id ";
-                $sqlGroupBy .= ', ts_time_user_day.date_at';
-            }
-
-            if (in_array('total_spent_time_by_day', $this->report->fields['calculations'], true)) {
-                $sqlWith .= "total_spent_time_by_day AS (
-                    SELECT task_id, DATE(start_at) as date_at, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_day
-                    FROM time_intervals
-                    WHERE start_at>='{$this->startAt->format('Y-m-d')} 00:00:00'
-                    AND end_at<='{$this->endAt->format('Y-m-d')} 23:59:59'
-                    AND deleted_at IS NULL
-                    GROUP BY task_id, date_at
-                ) ";
-
-                $sqlSelect .= "ts_time_day.total_spent_time_by_day, ts_time_day.date_at, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time_by_day AS ts_time_day ON t.id=ts_time_day.task_id ";
-                $sqlGroupBy .= ', ts_time_day.date_at';
-            }
-
-            $sqlWith = rtrim($sqlWith, '), ').') ';
-        }
 
         foreach ($this->report->data_objects as $key => $dataObject) {
             $sqlWhere .= "t.id=$dataObject ";
@@ -727,110 +663,46 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             $sqlWhere .= "OR ";
         }
 
+        // $sqlWith = rtrim($sqlWith, '), ').') ';
+        $sqlWith = preg_replace("/[) ,]+$/", ') ', $sqlWith);
+        // dd($sqlWith);
         $sqlSelect = rtrim($sqlSelect, ', ').' ';
-        // dd(
-        return DB::select(
-            "$sqlWith SELECT {$sqlSelect}
-            FROM tasks AS t
-            $sqlJoin
-            WHERE $sqlWhere
-            GROUP BY $sqlGroupBy"
-         );
-        // );
-    }
 
-    protected function valueExistsInArray($arr, $findingValue): bool
-    {
-        return array_search($findingValue, $arr) === false ? false : true;
-    }
-
-    private function generateSqlRaw(string $key, array $arr, string $prefix, string $table, string $alias, string $connector, bool $select = false, bool $sqlSelect = false, bool $sqlJoin = false, bool $sqlWith = false)
-    {
-        $fields = $this->report->main->fields()[$key];
-        $result = [
-            'select' => '',
-            'sqlSelect' => '',
-            'sqlJoin' => '',
-            'sqlWith' => '',
+        return [
+            'reportData' => DB::select(
+                "$sqlWith SELECT {$sqlSelect}
+                FROM tasks AS t
+                $sqlJoin
+                WHERE $sqlWhere
+                GROUP BY $sqlGroupBy"
+            ),
+            'reportCharts' => $service->tasksCharts(),
         ];
-
-        $id = $prefix.'_id';
-
-        if (count($arr) > 0) {
-            $result['sqlSelect'] .= "$prefix.id as $id, ";
-
-            foreach ($arr as $key => $value) {
-                if(in_array($value, $fields, true)) {
-
-                    if ($select) {
-                        $result['select'] .= "$value";
-                        if (++$key === count($arr)) {
-                            $result['select'] .= ' ';
-                        } else {
-                            $result['select'] .= ', ';
-                        }
-                    }
-
-                    if ($sqlSelect) {
-                        $result['sqlSelect'] .= "$prefix.$value as {$prefix}_$value, ";
-                    }
-
-                }
-            }
-
-            if ($sqlJoin) {
-                $result['sqlJoin'] .= "LEFT JOIN $alias AS $prefix ON $connector
-                ";
-            }
-
-            if ($sqlWith) {
-                if(strlen($result['select']) > 0) {
-                    $result['select'] = "id, {$result['select']}";
-                } else {
-                    $result['select'] = "id ";
-                }
-
-                $result['sqlWith'] .= "$alias AS (
-                    SELECT {$result['select']}
-                    FROM $table
-                ),
-                ";
-            }
-        } else {
-            // $result['sqlWith'] .= "$alias AS (
-            //     SELECT id
-            //     FROM $table
-            // ),
-            // ";
-            if ($sqlSelect) {
-                $result['sqlSelect'] .= "$prefix.id as $id, ";
-            }
-
-            $result['sqlJoin'] .= "LEFT JOIN $alias AS $prefix ON $connector
-            ";
-        }
-
-        return $result;
     }
+
     // Проект надо переписать группировку. Убрать зависимости join от других необязательных джойнов. Проверить правильно ли высчитывается всё время
     private function queryReportProject()
     {
         $copyTaskField = (new ArrayObject($this->report->fields['tasks']))->getArrayCopy();
 
-        if ($this->valueExistsInArray($copyTaskField, 'priority')) {
+        if (in_array('priority', $copyTaskField)) {
             unset($copyTaskField[array_search('priority', $copyTaskField)]);
         }
 
-        if ($this->valueExistsInArray($copyTaskField, 'status')) {
+        if (in_array('status', $copyTaskField)) {
             unset($copyTaskField[array_search('status', $copyTaskField)]);
         }
+
         $sqlWith = "";
         $sqlSelect = '';
         $sqlJoin = '';
         $sqlWhere = '';
         $sqlGroupBy = '';
-        $projects = $this->generateSqlRaw('main', $this->report->fields['main'], 'p', 'projects', 'p', '', false, true, false, false);
+        $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
+        $projects = $service->generateSqlRaw('main', $this->report->fields['main'], 'p', 'projects', 'p', '', false, true, false, false);
         $sqlSelect .= $projects['sqlSelect'];
+
+
 
         $cloneTasksFields = $this->report->fields['tasks'];
         if (in_array('priority', $this->report->fields['tasks'], true)) {
@@ -846,65 +718,26 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             unset($cloneTasksFields[array_search('status', $cloneTasksFields)]);
         }
 
-        $tasks = $this->generateSqlRaw('tasks', $cloneTasksFields, 't', 'tasks', 'tasks', 'p.id=t.project_id', false, true, true, false);
+        $tasks = $service->generateSqlRaw('tasks', $cloneTasksFields, 't', 'tasks', 'tasks', 'p.id=t.project_id', false, true, true, false);
         $sqlSelect .= $tasks['sqlSelect'];
         $sqlJoin .= $tasks['sqlJoin'];
 
-        $tasksUsers = $this->generateSqlRaw('tasks', [], 'tu', 'tasks_users', 'tasks_users', 't.id=tu.task_id', false, true, true, false);
+        $tasksUsers = $service->generateSqlRaw('tasks', [], 'tu', 'tasks_users', 'tasks_users', 't.id=tu.task_id', false, true, true, false);
         // $sqlSelect .= preg_replace('/tu.id as tu_id, /', 'tu.user_id, tu.task_id, ', $tasksUsers['sqlSelect']);
         // $sqlSelect .= 'tu.user'
+
         $sqlJoin .= $tasksUsers['sqlJoin'];
 
-        $users = $this->generateSqlRaw('users', $this->report->fields['users'], 'u', 'users', 'users', 'tu.user_id=u.id', false, true, true, false);
+        $users = $service->generateSqlRaw('users', $this->report->fields['users'], 'u', 'users', 'users', 'tu.user_id=u.id', false, true, true, false);
         $sqlSelect .= $users['sqlSelect'];
         $sqlJoin .= $users['sqlJoin'];
         $sqlWith .= $users['sqlWith'];
 
-        if (isset($this->report->fields['calculations']) && count($this->report->fields['calculations']) > 0) {
-            $sqlWith .= "WITH ";
-            if ($this->valueExistsInArray($this->report->fields['calculations'], 'total_spent_time_by_user')) {
-                $sqlWith .= "total_spent_time_by_user AS (
-                    SELECT user_id, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_user
-                    FROM time_intervals
-                    WHERE start_at>='{$this->startAt->format('Y-m-d')} 00:00:00'
-                    AND end_at<='{$this->endAt->format('Y-m-d')} 23:59:59'
-                    GROUP BY user_id
-                ), ";
-
-                $sqlSelect .= "ts_time_user.user_id, ts_time_user.total_spent_time_by_user, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time_by_user AS ts_time_user ON u.id=ts_time_user.user_id ";
-            }
-
-            if ($this->valueExistsInArray($this->report->fields['calculations'], 'total_spent_time_by_day_and_user')) {
-                $sqlWith .= "total_spent_time_by_user_and_day AS (
-                    SELECT user_id, DATE(start_at) as date_at, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_user_and_day
-                    FROM time_intervals
-                    WHERE start_at>='{$this->startAt->format('Y-m-d')} 00:00:00'
-                    AND end_at<='{$this->endAt->format('Y-m-d')} 23:59:59'
-                    GROUP BY user_id, date_at
-                ), ";
-
-                $sqlGroupBy .= 'ts_time_user_day.date_at, ';
-                $sqlSelect .= "ts_time_user_day.total_spent_time_by_user_and_day, ts_time_user_day.date_at, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time_by_user_and_day AS ts_time_user_day ON u.id=ts_time_user_day.user_id ";
-            }
-
-            if ($this->valueExistsInArray($this->report->fields['calculations'], 'total_spent_time_by_day')) {
-                $sqlWith .= "total_spent_time_by_day AS (
-                    SELECT user_id, DATE(start_at) as date_at, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_day
-                    FROM time_intervals
-                    WHERE start_at>='{$this->startAt->format('Y-m-d')} 00:00:00'
-                    AND end_at<='{$this->endAt->format('Y-m-d')} 23:59:59'
-                    GROUP BY date_at
-                ) ";
-
-                $sqlSelect .= "ts_time_day.total_spent_time_by_day, ";
-                $sqlJoin .= "LEFT JOIN total_spent_time_by_day AS ts_time_day ON u.id=ts_time_day.user_id ";
-                // $sqlJoin .= "LEFT JOIN total_spent_time_by_day AS ts_time_day ON ts_time_user_day.date_at=ts_time_day.date_at ";
-            }
-
-
-        }
+        $calculationsResult = $service->sqlWithForProject($this->report->fields['calculations']);
+        $sqlWith .= $calculationsResult['sqlWith'];
+        $sqlJoin .= $calculationsResult['sqlJoin'];
+        $sqlGroupBy .= $calculationsResult['sqlGroupBy'];
+        $sqlSelect .= $calculationsResult['sqlSelect'];
 
         $sqlGroupBy .= 'p.id, u.id, t.id';
 
@@ -915,53 +748,21 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             }
             $sqlWhere .= "OR ";
         }
+
+        $sqlWith = preg_replace("/[) ,]+$/", ') ', $sqlWith);
         $sqlSelect = rtrim($sqlSelect, ', ').' ';
 
+        return [
+            'reportData' => DB::select(
+                "$sqlWith SELECT {$sqlSelect}
+                FROM projects AS p
+                $sqlJoin
+                WHERE $sqlWhere
+                GROUP BY $sqlGroupBy"
+            ),
+            'reportCharts' => $service->projectsCharts(),
+        ];
 
-        return DB::select(
-            "$sqlWith SELECT {$sqlSelect}
-            FROM projects AS p
-            $sqlJoin
-            WHERE $sqlWhere
-            GROUP BY $sqlGroupBy"
-        );
-
-        // dd(DB::select("WITH
-        //     total_spent_time_by_user AS (
-        //         SELECT id, user_id, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_user
-        //         FROM time_intervals
-        //         WHERE start_at>='{$this->startAt->format('y-m-d')} 00:00:00'
-        //         AND end_at<='{$this->endAt->format('y-m-d')} 23:59:59'
-        //         GROUP BY user_id
-        //     ),
-        //     total_spent_time_by_day AS (
-        //         SELECT id, user_id, task_id, DATE(start_at) as date_at, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_day
-        //         FROM time_intervals
-        //         WHERE start_at>='{$this->startAt->format('y-m-d')} 00:00:00'
-        //         AND end_at<='{$this->endAt->format('y-m-d')} 23:59:59'
-        //         GROUP BY date_at
-        //     ),
-        //     total_spent_time_by_user_and_day AS (
-        //         SELECT id, user_id, DATE(start_at) as date_at, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_user_and_day
-        //         FROM time_intervals
-        //         WHERE start_at>='{$this->startAt->format('y-m-d')} 00:00:00'
-        //         AND end_at<='{$this->endAt->format('y-m-d')} 23:59:59'
-        //         GROUP BY user_id, date_at
-        //     ),
-        //     userInfo AS (
-        //         SELECT id, full_name
-        //         FROM users
-        //     )
-        //     SELECT p.id, p.name, t.id, t.task_name, u.id, t.project_id, ts_time_user.user_id, tu.user_id, tu.task_id, ts_time_user.total_spent_time_by_user, ts_time_user_day.total_spent_time_by_user_and_day, ts_time_user_day.date_at, ts_time_day.total_spent_time_by_day
-        //     FROM projects AS p
-        //     JOIN tasks AS t ON p.id=t.project_id
-        //     JOIN tasks_users AS tu ON t.id=tu.task_id
-        //     JOIN userInfo AS u ON tu.user_id=u.id
-        //     JOIN total_spent_time_by_user AS ts_time_user ON u.id=ts_time_user.user_id
-        //     JOIN total_spent_time_by_user_and_day AS ts_time_user_day ON u.id=ts_time_user_day.user_id
-        //     JOIN total_spent_time_by_day AS ts_time_day ON ts_time_user_day.date_at=ts_time_day.date_at
-        //     WHERE p.id=1
-        //     GROUP BY p.id, u.id, t.id, ts_time_user_day.date_at"));
     }
     public function headings(): array
     {

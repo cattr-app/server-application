@@ -36,4 +36,8 @@ export default class UniversalReportService extends ReportService {
     generate(id, data) {
         return axios.post(`report/universal-report/generate?id=${id}`, data);
     }
+
+    deleteItem(id) {
+        return axios.post('report/universal-report/remove', { id });
+    }
 }

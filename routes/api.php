@@ -240,6 +240,8 @@ Route::group([
         $router->post('report/universal-report', [UniversalReportController::class, 'store']);
         $router->post('report/universal-report/edit', [UniversalReportController::class, 'edit']);
         $router->post('report/universal-report/generate', [UniversalReportController::class, '__invoke']);
+        $router->post('report/universal-report/remove', [UniversalReportController::class, 'destroy']);
+
         // About
         $router->get('about', [AboutController::class, '__invoke'])
             ->name('about.list');

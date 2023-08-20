@@ -14,7 +14,7 @@
                 <at-input v-model="searchValue" class="search-input" :placeholder="$t('control.search')" />
             </div>
 
-            <div class="select-all">
+            <div class="select-all" @click="selectAll">
                 <span>{{ $t(selectedOptions.length ? 'control.clear_all' : 'control.select_all') }}</span>
             </div>
 
@@ -37,19 +37,6 @@
                             </div>
                         </li>
                     </div>
-                    <!-- <li
-                        v-for="option in filteredOptions"
-                        :key="option"
-                        :class="{
-                            'select-item': true,
-                            active: selectedOptions.includes(option),
-                        }"
-                        @click="toggle(option)"
-                    >
-                        <div class="name">
-                            {{ $t(`${localePath}.${option}`) }}
-                        </div>
-                    </li> -->
                 </ul>
             </div>
         </div>
@@ -95,44 +82,17 @@
             };
         },
         methods: {
-            // selectAll() {
-            //     // If some users already selected we are going to clear it
-            //     if (!this.selectedOptions.length) {
-            //         this.$emit(
-            //             'on-change',
-            //             this.selectedOptions.concat(
-            //                 Object.keys(this.options).map(key => {
-            //                     this.options[key]
-            //                         .filter(option => {
-            //                             let name = option;
-
-            //                             return name.toUpperCase().indexOf(this.searchValue.toUpperCase()) !== -1;
-            //                         })
-            //                         // .map(({ id }) => id)
-            //                         .filter(option => !this.selectedOptions[key].includes(option));
-            //                 }),
-            //             ),
-            //         );
-            //     } else {
-            //         this.$emit(
-            //             'on-change',
-            //             Object.keys(this.selectedOptions).map(key => {
-            //                 return this.selectedOptions[key].filter(
-            //                     option => !this.options.map(item => item).includes(option),
-            //                 );
-            //             }),
-            //         );
-            //     }
-            // },
+            selectAll() {
+                if (JSON.stringify(this.options) !== JSON.stringify(this.selectedOptions)) {
+                    this.$emit('on-change', this.options);
+                }
+            },
             toggle(option, key) {
                 let selectedOptions = cloneDeep(this.selectedOptions);
-                // console.log(key, option);
-                // console.log(selectedOptions[key]);
+
                 if (selectedOptions[key].includes(option)) {
-                    this.$emit(
-                        'on-change',
-                        selectedOptions[key].filter(item => item !== option),
-                    );
+                    selectedOptions[key] = selectedOptions[key].filter(item => item !== option);
+                    this.$emit('on-change', selectedOptions);
                 } else {
                     selectedOptions[key].push(option);
                     this.$emit('on-change', selectedOptions);
@@ -204,40 +164,6 @@
                 padding-right: $spacing-08;
                 cursor: text;
             }
-
-            // .at-tabs-nav {
-            //     width: 100%;
-            // }
-
-            // .at-tabs-nav__item {
-            //     color: #b1b1be;
-            //     font-size: 15px;
-            //     font-weight: 600;
-            //     text-align: center;
-            //     margin: 0;
-            //     line-height: 39px;
-            //     width: 50%;
-
-            //     &--active {
-            //         color: #2e2ef9;
-
-            //         &::after {
-            //             background-color: #2e2ef9;
-            //         }
-            //     }
-            // }
-
-            // .at-tabs__nav {
-            //     height: 39px;
-            // }
-
-            // .at-tabs__header {
-            //     margin-bottom: 0;
-            // }
-
-            // .at-tabs__body {
-            //     display: none;
-            // }
         }
 
         &__clear {
@@ -301,10 +227,6 @@
             }
         }
     }
-
-    // .user-type-filter {
-    //     padding: 0 12px;
-    // }
 
     .user-avatar {
         float: left;

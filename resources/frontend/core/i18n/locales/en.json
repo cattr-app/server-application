@@ -237,8 +237,9 @@
     "timezone": "Timezone",
     "default_role": "Default Role",
     "project_roles": "Project Roles",
-    "task": "Task",
+    "tasks": "Tasks",
     "project": "Project",
+    "projects": "Projects",
     "priority": "Priority",
     "created_at": "Created",
     "updated_at": "Last edit",
@@ -409,6 +410,10 @@
         "success": {
           "title": "Success",
           "message": "Record was successfully deleted"
+        },
+        "error": {
+          "title": "Error",
+          "message": "Failed to destroy the report"
         }
       }
     },
