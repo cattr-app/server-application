@@ -74,7 +74,6 @@
             this.$watch(
                 'reports',
                 val => {
-                    console.log(2222);
                     this.formatingProjectsReport();
                 },
                 {
@@ -85,6 +84,7 @@
         methods: {
             formatDurationString,
             getUserPercentage(minutes, totalTime) {
+                console.log(minutes, totalTime, 'dddddd');
                 return Math.floor((minutes * 100) / totalTime);
             },
             formatingProjectsReport() {

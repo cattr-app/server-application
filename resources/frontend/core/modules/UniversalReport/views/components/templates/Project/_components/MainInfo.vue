@@ -73,41 +73,14 @@
                 </div>
             </div>
         </div>
-        <div v-if="Object.keys(charts).length">
-            <div v-for="(chart, key) in charts" :key="key" class="data-entry">
-                <h4>{{ $t(`field.fields.${selectedMain}.charts.${key}`) }}</h4>
-                <ChartLine
-                    :id="key + report.id"
-                    :data="{
-                        datasets: formatDataset(chart['datasets'][report.id]),
-                        labels: period,
-                    }"
-                />
-            </div>
-        </div>
+        <Charts v-if="charts" :period="period" :charts="charts" :reportId="report.id" />
     </div>
 </template>
 
 <script>
     import { formatDurationString } from '@/utils/time';
     import { Skeleton } from 'vue-loading-skeleton';
-    import { Line as ChartLine } from 'vue-chartjs';
-    import { mapGetters } from 'vuex';
-    import cloneDeep from 'lodash/cloneDeep';
-
-    import {
-        Chart as ChartJS,
-        Title,
-        Tooltip,
-        Legend,
-        BarElement,
-        CategoryScale,
-        LinearScale,
-        PointElement,
-        LineElement,
-    } from 'chart.js';
-
-    ChartJS.register(Title, Tooltip, Legend, BarElement, CategoryScale, LinearScale, PointElement, LineElement);
+    import Charts from '../../../Charts';
 
     export default {
         props: {
@@ -128,32 +101,10 @@
         },
         components: {
             Skeleton,
-            ChartLine,
+            Charts,
         },
         methods: {
             formatDurationString,
-            formatDataset(dataset) {
-                if (typeof dataset === 'undefined') {
-                    return [];
-                }
-
-                let result = cloneDeep(dataset);
-
-                if (result?.data ?? false) {
-                    result.data = Object.values(dataset.data);
-                    return [result];
-                }
-
-                result = Object.values(result);
-                result.forEach((element, index) => {
-                    result[index].data = Object.values(element.data);
-                });
-
-                return result;
-            },
-        },
-        computed: {
-            ...mapGetters('universalreport', ['selectedMain']),
         },
     };
 </script>

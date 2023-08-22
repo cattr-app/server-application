@@ -49,9 +49,9 @@
           "total_spent_time_by_day": "Total spent time per day"
         },
         "charts": {
-          "total_spent_time_by_day": "Total hours",
-          "total_spent_time_by_day_and_tasks": "Hours tasks",
-          "total_spent_time_by_day_and_projects": "Hours projects"
+          "total_spent_time_day": "Total hours",
+          "total_spent_time_day_and_tasks": "Hours tasks",
+          "total_spent_time_day_and_projects": "Hours projects"
         }
       },
       "project": {

@@ -49,9 +49,9 @@
           "total_spent_time_by_day": ""
         },
         "charts": {
-          "total_spent_time_by_day": "Всего отработано пользоваетелем",
-          "total_spent_time_by_day_and_tasks": "Часов по задачам",
-          "total_spent_time_by_day_and_projects": "Часов по проектам"
+          "total_spent_time_day": "Всего отработано пользоваетелем",
+          "total_spent_time_day_and_tasks": "Часов по задачам",
+          "total_spent_time_day_and_projects": "Часов по проектам"
         }
       },
       "project": {
