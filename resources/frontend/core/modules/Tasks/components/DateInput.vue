@@ -100,9 +100,9 @@
                 }
             },
             onDateChange(value) {
-              const newValue = value !== null ? moment(value).format(DATETIME_FORMAT) : null
-              this.inputHandler(newValue);
-              this.$emit('change', newValue);
+                const newValue = value !== null ? moment(value).format(DATETIME_FORMAT) : null;
+                this.inputHandler(newValue);
+                this.$emit('change', newValue);
             },
             disabledDate(date) {
                 return false;
