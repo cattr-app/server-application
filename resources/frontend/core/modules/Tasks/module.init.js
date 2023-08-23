@@ -464,8 +464,8 @@ export function init(context, router) {
             key: 'estimate',
             label: 'field.estimate',
             render: (h, data) => {
-              const value = typeof data.currentValue === 'number' ? data.currentValue : null;
-              return h(TimeEstimate, {
+                const value = typeof data.currentValue === 'number' ? data.currentValue : null;
+                return h(TimeEstimate, {
                     props: { value },
                     on: {
                         input: function (seconds) {

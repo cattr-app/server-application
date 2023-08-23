@@ -14,6 +14,7 @@ abstract class ScreenshotService
     public const PARENT_FOLDER = 'screenshots/';
     public const THUMBS_FOLDER = 'thumbs/';
     private const THUMB_WIDTH = 280;
+    private const QUALITY = 50;
 
     /** Get screenshot path by interval */
     abstract public function getScreenshotPath(TimeInterval|int $interval): string;
@@ -30,7 +31,7 @@ abstract class ScreenshotService
 
         $image = Image::make($path);
 
-        Storage::put($this->getScreenshotPath($timeInterval), (string)$image->encode(self::FILE_FORMAT));
+        Storage::put($this->getScreenshotPath($timeInterval), (string)$image->encode(self::FILE_FORMAT, self::QUALITY));
 
         GenerateScreenshotThumbnail::dispatch($timeInterval);
     }
@@ -45,7 +46,7 @@ abstract class ScreenshotService
 
         $thumb = $image->resize(self::THUMB_WIDTH, null, fn(Constraint $constraint) => $constraint->aspectRatio());
 
-        Storage::put($this->getThumbPath($timeInterval), (string)$thumb->encode(self::FILE_FORMAT));
+        Storage::put($this->getThumbPath($timeInterval), (string)$thumb->encode(self::FILE_FORMAT, self::QUALITY));
     }
 
     public function destroyScreenshot(TimeInterval|int $interval): void

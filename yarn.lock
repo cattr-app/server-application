@@ -1312,8 +1312,8 @@ __metadata:
   dependencies:
     "@babel/core": ^7.21.4
     "@babel/eslint-parser": ^7.21.3
-    "@cattr/gitlab-integration": "*"
-    "@cattr/redmine-integration": "*"
+    "@cattr/gitlab-integration": ^2.0.4
+    "@cattr/redmine-integration": ^4.0.4
     "@cattr/ui-kit": ^1.3.9
     "@commitlint/cli": ^17.6.1
     "@commitlint/config-conventional": ^17.6.1
@@ -1337,6 +1337,7 @@ __metadata:
     fabric: ^5.3.0
     husky: ^8.0.3
     js-md5: ^0.7.3
+    laravel-echo: ^1.15.1
     laravel-mix: ^6.0.49
     laravel-mix-alias: ^1.0.3
     laravel-mix-bundle-analyzer: ^1.0.5
@@ -1353,6 +1354,7 @@ __metadata:
     path-browserify: ^1.0.1
     postcss: ^8.4.23
     prettier: 2.8.8
+    pusher-js: ^8.0.2
     resolve-url-loader: ^5.0.0
     sass: ^1.62.1
     sass-loader: ^13.2.2
@@ -1383,17 +1385,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@cattr/gitlab-integration@npm:*":
-  version: 2.0.3
-  resolution: "@cattr/gitlab-integration@npm:2.0.3::__archiveUrl=https%3A%2F%2Fgit.amazingcat.net%2Fapi%2Fv4%2Fprojects%2F274%2Fpackages%2Fnpm%2F%40cattr%2Fgitlab-integration%2F-%2F%40cattr%2Fgitlab-integration-2.0.3.tgz"
-  checksum: b0841e6ad3578fb2566eaee4959fb0542b66558de1a9e0b704bb0a0451db21d6421b9581330482af400f46483566264183adbeb2a8bcc623a66e25ece884d26d
+"@cattr/gitlab-integration@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "@cattr/gitlab-integration@npm:2.0.4::__archiveUrl=https%3A%2F%2Fgit.amazingcat.net%2Fapi%2Fv4%2Fprojects%2F274%2Fpackages%2Fnpm%2F%40cattr%2Fgitlab-integration%2F-%2F%40cattr%2Fgitlab-integration-2.0.4.tgz"
+  checksum: f1bd09a5936f4f1ea11d377ccdeb04df7196b408032f31197dd57352ab51aa5cb802928d17a7ac29b01a5b8c88790371032f13a65fe2efd97362be20c5624f4e
   languageName: node
   linkType: hard
 
-"@cattr/redmine-integration@npm:*":
-  version: 4.0.3
-  resolution: "@cattr/redmine-integration@npm:4.0.3::__archiveUrl=https%3A%2F%2Fgit.amazingcat.net%2Fapi%2Fv4%2Fprojects%2F272%2Fpackages%2Fnpm%2F%40cattr%2Fredmine-integration%2F-%2F%40cattr%2Fredmine-integration-4.0.3.tgz"
-  checksum: 68515f6c5861cb4fbd69eacf6f6bc2b56c3d3452dcd98b7a94275aed95d23aeeecd950ae94e68b50f57defa4390eeff2114a70cddd013d01063ed3289638706b
+"@cattr/redmine-integration@npm:^4.0.4":
+  version: 4.0.4
+  resolution: "@cattr/redmine-integration@npm:4.0.4::__archiveUrl=https%3A%2F%2Fgit.amazingcat.net%2Fapi%2Fv4%2Fprojects%2F272%2Fpackages%2Fnpm%2F%40cattr%2Fredmine-integration%2F-%2F%40cattr%2Fredmine-integration-4.0.4.tgz"
+  checksum: 85a781e3b206bc345d348836a9401fa06f55e20adb3daeecff8962775ea7abb3da39763fedd7e707b5a7c87bc058c8f11595603d0ead988ed010301804d5930e
   languageName: node
   linkType: hard
 
@@ -2272,6 +2274,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"@types/express-serve-static-core@npm:4.17.28":
+  version: 4.17.28
+  resolution: "@types/express-serve-static-core@npm:4.17.28"
+  dependencies:
+    "@types/node": "*"
+    "@types/qs": "*"
+    "@types/range-parser": "*"
+  checksum: 826489811a5b371c10f02443b4ca894ffc05813bfdf2b60c224f5c18ac9a30a2e518cb9ef9fdfcaa2a1bb17f8bfa4ed1859ccdb252e879c9276271b4ee2df5a9
+  languageName: node
+  linkType: hard
+
 "@types/express@npm:*, @types/express@npm:^4.17.13":
   version: 4.17.17
   resolution: "@types/express@npm:4.17.17"
@@ -2381,6 +2394,13 @@ __metadata:
   version: 18.15.3
   resolution: "@types/node@npm:18.15.3"
   checksum: 31b1d92475a82c30de29aa6c0771b18a276552d191283b4423ba2d61b3f01159bf0d02576c0b7cc834b043997893800db6bb47f246083ed85aa45e79c80875d7
+  languageName: node
+  linkType: hard
+
+"@types/node@npm:^14.14.31":
+  version: 14.18.43
+  resolution: "@types/node@npm:14.18.43"
+  checksum: 3ef43eda265c346597bc5c8329605255550f7a92300a76e9e3c48e07fd685b4a48d47465997bf6f1a68b235c7339e6e583d73515769efcad70e4f8f4c7f47fd4
   languageName: node
   linkType: hard
 
@@ -7092,6 +7112,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"laravel-echo@npm:^1.15.1":
+  version: 1.15.1
+  resolution: "laravel-echo@npm:1.15.1"
+  checksum: db66163610b2ea8cf5232dff759646e1f90cf4adca2d3b1f1bff021528f039965c9534d362c33bc3707cb71a006d98196ae57ef350ea6e4e609cadcf2f721d42
+  languageName: node
+  linkType: hard
+
 "laravel-mix-alias@npm:^1.0.3":
   version: 1.0.3
   resolution: "laravel-mix-alias@npm:1.0.3"
@@ -9218,6 +9245,17 @@ __metadata:
   languageName: node
   linkType: hard
 
+"pusher-js@npm:^8.0.2":
+  version: 8.0.2
+  resolution: "pusher-js@npm:8.0.2"
+  dependencies:
+    "@types/express-serve-static-core": 4.17.28
+    "@types/node": ^14.14.31
+    tweetnacl: ^1.0.3
+  checksum: 80b9c209a9db7b51f5edb9c03dc3075d759960644b12ac60e4e22b8e335bedfb69c16381ef7454b37dd3858c7c6e684b96fba368d3fc9f97ef63dfa6c37fb7ee
+  languageName: node
+  linkType: hard
+
 "q@npm:^1.5.1":
   version: 1.5.1
   resolution: "q@npm:1.5.1"
@@ -10804,6 +10842,13 @@ __metadata:
   version: 0.0.0
   resolution: "tty-browserify@npm:0.0.0"
   checksum: a06f746acc419cb2527ba19b6f3bd97b4a208c03823bfb37b2982629d2effe30ebd17eaed0d7e2fc741f3c4f2a0c43455bd5fb4194354b378e78cfb7ca687f59
+  languageName: node
+  linkType: hard
+
+"tweetnacl@npm:^1.0.3":
+  version: 1.0.3
+  resolution: "tweetnacl@npm:1.0.3"
+  checksum: e4a57cac188f0c53f24c7a33279e223618a2bfb5fea426231991652a13247bea06b081fd745d71291fcae0f4428d29beba1b984b1f1ce6f66b06a6d1ab90645c
   languageName: node
   linkType: hard
 

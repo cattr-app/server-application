@@ -2,17 +2,17 @@
 
 namespace App\Providers;
 
-use App\Helpers\FilterDispatcher;
 use Illuminate\Contracts\Queue\Factory as QueueFactoryContract;
 use Illuminate\Contracts\Support\DeferrableProvider;
+use Illuminate\Events\Dispatcher;
 use Illuminate\Support\ServiceProvider;
 
-class FilterServiceProvider extends ServiceProvider implements DeferrableProvider
+class CatEventServiceProvider extends ServiceProvider implements DeferrableProvider
 {
     public function register(): void
     {
-         $this->app->scoped('filter', static function ($app) {
-            return (new FilterDispatcher($app))->setQueueResolver(static function () use ($app) {
+         $this->app->scoped('catevent', static function ($app) {
+            return (new Dispatcher($app))->setQueueResolver(static function () use ($app) {
                 return $app->make(QueueFactoryContract::class);
             });
         });
@@ -20,6 +20,6 @@ class FilterServiceProvider extends ServiceProvider implements DeferrableProvide
 
     public function provides(): array
     {
-        return ['filter'];
+        return ['catevent'];
     }
 }
