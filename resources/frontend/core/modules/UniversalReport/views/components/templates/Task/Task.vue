@@ -35,6 +35,7 @@
 <script>
     import { formatDurationString } from '@/utils/time';
     import MainInfo from './_components/MainInfo';
+    import moment from 'moment';
 
     export default {
         name: 'Task',
