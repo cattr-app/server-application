@@ -18,8 +18,12 @@ export default class PlannedTimeReport extends ReportService {
      * @param format
      */
     downloadReport(projects, format) {
-        return axios.post(`report/planned-time/download`, { projects }, {
-            headers: { Accept: format },
-        });
+        return axios.post(
+            `report/planned-time/download`,
+            { projects },
+            {
+                headers: { Accept: format },
+            },
+        );
     }
 }

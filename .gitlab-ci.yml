@@ -66,8 +66,8 @@ deploy_prod:
     - chmod 700 ~/.ssh
     - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
   script:
-    - ssh $CI_USER@$CI_HOST 'cd /mnt/hdd/services/cattr && docker compose pull'
-    - ssh $CI_USER@$CI_HOST 'cd /mnt/hdd/services/cattr && docker compose up -d'
+    - ssh $CI_USER@$CI_HOST 'cd /opt/services/cattr/tracker && docker compose pull'
+    - ssh $CI_USER@$CI_HOST 'cd /opt/services/cattr/tracker && docker compose up -d'
 
 container_scanning:
   variables:

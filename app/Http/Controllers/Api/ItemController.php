@@ -10,7 +10,7 @@ use Exception;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
-use Event;
+use CatEvent;
 use Illuminate\Validation\ValidationException;
 use Symfony\Component\HttpKernel\Exception\AccessDeniedHttpException;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
@@ -56,7 +56,7 @@ abstract class ItemController extends Controller
 
         $itemsQuery = $this->getQuery($requestData);
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), $requestData);
 
         $items = $request->header('X-Paginate', true) !== 'false' ? $itemsQuery->paginate() : $itemsQuery->get();
 
@@ -65,7 +65,7 @@ abstract class ItemController extends Controller
             $items,
         );
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$items, $requestData]);
 
         return responder()->success($items)->respond();
     }
@@ -110,7 +110,7 @@ abstract class ItemController extends Controller
     {
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
-        Event::dispatch(Filter::getBeforeActionEventName(), [$requestData]);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), [$requestData]);
 
         /** @var Model $cls */
         $cls = static::MODEL;
@@ -120,7 +120,7 @@ abstract class ItemController extends Controller
             $cls::create($requestData),
         );
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
 
         return responder()->success($item)->respond();
     }
@@ -147,12 +147,12 @@ abstract class ItemController extends Controller
             throw new NotFoundHttpException;
         }
 
-        Event::dispatch(Filter::getBeforeActionEventName(), [$item, $requestData]);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), [$item, $requestData]);
 
         $item = Filter::process(Filter::getActionFilterName(), $item->fill($requestData));
         $item->save();
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$item, $requestData]);
 
         return responder()->success($item)->respond();
     }
@@ -178,9 +178,9 @@ abstract class ItemController extends Controller
             throw new NotFoundHttpException;
         }
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $requestId);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), $requestId);
 
-        Event::dispatch(
+        CatEvent::dispatch(
             Filter::getAfterActionEventName(),
             tap(
                 Filter::process(Filter::getActionFilterName(), $item),
@@ -198,13 +198,13 @@ abstract class ItemController extends Controller
     {
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $requestData);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), $requestData);
 
         $itemsQuery = $this->getQuery($requestData);
 
         $count = Filter::process(Filter::getActionFilterName(), $itemsQuery->count());
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$count, $requestData]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$count, $requestData]);
 
         clock()->event();
 
@@ -234,7 +234,7 @@ abstract class ItemController extends Controller
             $filters['withSum'] = $requestData['withSum'];
         }
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $filters);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), $filters);
 
         $itemsQuery = $this->getQuery($filters ?: []);
 
@@ -242,7 +242,7 @@ abstract class ItemController extends Controller
 
         throw_unless($item, new NotFoundHttpException);
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$item, $filters]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$item, $filters]);
 
         return responder()->success($item)->respond();
     }
