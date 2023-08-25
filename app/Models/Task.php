@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Scopes\TaskAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\TaskFactory;
+use DB;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -199,5 +201,49 @@ class Task extends Model
     public function properties(): MorphMany
     {
         return $this->morphMany(Property::class, 'entity');
+    }
+
+    protected function workers(): Attribute
+    {
+        return Attribute::make(
+            get: static function ($value, $attributes) {
+                $workers = [];
+                DB::table('time_intervals AS i')
+                    ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
+                    ->join('users AS u', 'i.user_id', '=', 'u.id')
+                    ->select(
+                        'i.user_id',
+                        'u.full_name',
+                        'i.task_id',
+                        'i.start_at',
+                        'i.end_at',
+                        DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
+                    )
+                    ->whereNull('i.deleted_at')
+                    ->where('task_id', $attributes['id'])
+                    ->groupBy('i.user_id')
+                    ->get()
+                    ->each(static function ($worker) use (&$workers) {
+                        $workers[] = $worker;
+                    });
+
+                return $workers;
+            },
+        )->shouldCache();
+    }
+
+    protected function totalSpentTime(): Attribute
+    {
+        $workers = $this->workers;
+        return Attribute::make(
+            get: static function () use ($workers) {
+                $totalSpentTime = 0;
+                foreach ($workers as $worker) {
+                    $totalSpentTime += $worker->duration;
+                }
+
+                return $totalSpentTime;
+            },
+        )->shouldCache();
     }
 }

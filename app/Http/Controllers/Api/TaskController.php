@@ -15,7 +15,6 @@ use Filter;
 use App\Models\Task;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
-use DB;
 use CatEvent;
 use Settings;
 use Throwable;
@@ -169,19 +168,19 @@ class TaskController extends ItemController
             $oldUsers = $data->users()->select('id', 'full_name');
             $changes = $data->users()->sync($request->get('users'));
             if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
-                // TODO: fix
-                // SaveTaskEditHistory::dispatch(
-                //     $data,
-                //     $request->user(),
-                //     [
-                //         'users' => (string)User::withoutGlobalScopes()
-                //             ->whereIn('id', $request->get('users'))
-                //             ->select(['id', 'full_name'])
-                //     ],
-                //     [
-                //         'users' => json_encode($oldUsers),
-                //     ]
-                // );
+                SaveTaskEditHistory::dispatch(
+                    $data,
+                    $request->user(),
+                    [
+                        'users' => User::withoutGlobalScopes()
+                            ->whereIn('id', $request->get('users'))
+                            ->select(['id', 'full_name'])
+                            ->get(),
+                    ],
+                    [
+                        'users' => json_encode($oldUsers),
+                    ]
+                );
             }
             SaveTaskEditHistory::dispatch($data, request()->user());
         });
@@ -423,32 +422,7 @@ class TaskController extends ItemController
      */
     public function show(ShowTaskRequest $request): JsonResponse
     {
-        Filter::listen(Filter::getSuccessResponseFilterName(), static function ($task) {
-            $task['total_spent_time'] = 0;
-            $task['workers'] = [];
-
-            DB::table('time_intervals AS i')
-                ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-                ->join('users AS u', 'i.user_id', '=', 'u.id')
-                ->select(
-                    'i.user_id',
-                    'u.full_name',
-                    'i.task_id',
-                    'i.start_at',
-                    'i.end_at',
-                    DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
-                )
-                ->whereNull('i.deleted_at')
-                ->where('task_id', $task['id'])
-                ->groupBy('i.user_id')
-                ->get()
-                ->each(static function ($worker) use (&$task) {
-                    $task['total_spent_time'] += $worker->duration;
-                    $task['workers'][] = $worker;
-                });
-
-            return $task;
-        });
+        Filter::listen(Filter::getActionFilterName(), static fn ($data) => $data->append('workers')->append('total_spent_time'));
 
         return $this->_show($request);
     }

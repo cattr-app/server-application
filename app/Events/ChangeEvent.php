@@ -26,13 +26,6 @@ class ChangeEvent implements ShouldBroadcast
         protected $model,
         protected int $userId
     ) {
-        if ($model instanceof Task) {
-            $model->load(['priority', 'project', 'users', 'status']);
-        } elseif ($model instanceof Project) {
-            // TODO
-        } elseif ($model instanceof TimeInterval) {
-            // TODO
-        }
     }
 
     public function broadcastAs(): string
@@ -42,9 +35,18 @@ class ChangeEvent implements ShouldBroadcast
 
     public function broadcastWith(): array
     {
-        return [
-            'model' => $this->model->setPermissionsUser(User::query()->find($this->userId))->append('can')->makeVisible('can'),
-        ];
+        $model = match (true) {
+            $this->model instanceof Task => $this->model->setPermissionsUser(User::query()->find($this->userId))
+                ->load(['priority', 'project', 'users', 'status', 'changes', 'changes.user', 'comments', 'comments.user'])
+                ->append(['can', 'workers', 'total_spent_time'])
+                ->makeVisible('can'),
+            $this->model instanceof Project => $this->model->setPermissionsUser(User::query()->find($this->userId))
+                ->append('can')
+                ->makeVisible('can'),
+            default => $this->model,
+        };
+
+        return ['model' =>  $model];
     }
 
     /** @return Channel[] */
