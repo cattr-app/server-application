@@ -5,7 +5,6 @@ namespace App\Models;
 use App\Scopes\TaskAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\TaskFactory;
-use DB;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Collection;
@@ -129,7 +128,7 @@ class Task extends Model
     ];
 
     protected const PERMISSIONS = ['update', 'destroy'];
-    
+
     protected static function boot(): void
     {
         parent::boot();
@@ -200,46 +199,5 @@ class Task extends Model
     public function properties(): MorphMany
     {
         return $this->morphMany(Property::class, 'entity');
-    }
-
-    public function &task()
-    {
-        $task = Task::query()->where('id', '=', $this->id)->with([
-            'priority',
-            'project',
-            "users",
-            'status',
-            'changes',
-            'changes.user',
-            'comments',
-            'comments.user',
-        ])->first()->append('can');
-
-        $task->total_spent_time = 0;
-        $task->workers = [];
-
-        $workers = DB::table('time_intervals AS i')
-            ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-            ->join('users AS u', 'i.user_id', '=', 'u.id')
-            ->select(
-                'i.user_id',
-                'u.full_name',
-                'i.task_id',
-                'i.start_at',
-                'i.end_at',
-                DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
-            )
-            ->whereNull('i.deleted_at')
-            ->where('task_id', $task['id'])
-            ->groupBy('i.user_id')
-            ->get();
-
-            foreach ($workers as $worker) {
-                $task['total_spent_time'] += $worker->duration;
-            }
-            
-            $task['workers'] = $workers;
-
-            return $task;
     }
 }

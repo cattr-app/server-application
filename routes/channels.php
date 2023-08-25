@@ -11,53 +11,16 @@
 |
 */
 
-use Illuminate\Support\Facades\Auth;
+use App\Models\User;
 
-Broadcast::channel('App.User.{id}', static function ($user, $id) {
-    return (int)$user->id === (int)$id;
+Broadcast::channel('tasks.{userId}', static function (User $user, $userId) {
+    return (int)$user->id === (int)$userId;
 });
 
-Broadcast::channel('App.Models.Task.{id}', static function ($user, $id) {
-    return Auth::check();
+Broadcast::channel('projects.{userId}', static function (User $user, $userId) {
+    return (int)$user->id === (int)$userId;
 });
 
-Broadcast::channel('App.Models.Project.{id}', static function ($user, $id) {
-    return Auth::check();
-});
-
-Broadcast::channel('TaskCreated.{id}', static function () {
-    return Auth::check();
-});
-
-Broadcast::channel('TaskUpdated.{id}', static function () {
-    return Auth::check();
-});
-
-Broadcast::channel('TaskDeleted.{id}', static function () {
-    return Auth::check();
-});
-
-Broadcast::channel('ProjectCreated.{id}', static function () {
-    return Auth::check();
-});
-
-Broadcast::channel('ProjectUpdated.{id}', static function () {
-    return Auth::check();
-});
-
-Broadcast::channel('ProjectDeleted.{id}', static function () {
-    return Auth::check();
-});
-
-
-Broadcast::channel('TimeIntervalCreated.{id}', static function () {
-    return Auth::check();
-});
-
-Broadcast::channel('TimeIntervalUpdated.{id}', static function () {
-    return Auth::check();
-});
-
-Broadcast::channel('TimeIntervalDeleted.{id}', static function () {
-    return Auth::check();
+Broadcast::channel('intervals.{userId}', static function (User $user, $userId) {
+    return (int)$user->id === (int)$userId;
 });
