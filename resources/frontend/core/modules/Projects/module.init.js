@@ -6,7 +6,7 @@ import { ModuleLoaderInterceptor } from '@/moduleLoader';
 import PrioritySelect from '@/components/PrioritySelect';
 import TeamAvatars from '@/components/TeamAvatars';
 import Statuses from './components/Statuses';
-import Vue, { reactive } from 'vue';
+import Vue from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -301,58 +301,19 @@ export function init(context) {
         },
     ]);
 
-    grid.addToMetaProperties(
-        'gridData.websocketDelete',
-        id => {
-            let result = reactive({ value: null });
-            Vue.prototype.$echo
-                .private(`ProjectDeleted.${id}`)
-                .listen(`ProjectDeleted`, e => Vue.set(result, 'value', e[0]));
-            return result;
-        },
-        grid.getRouterConfig(),
-    );
+    const websocketLeaveChannel = id => Vue.prototype.$echo.leave(`projects.${id}`);
+    const websocketEnterChannel = (id, handlers) => {
+        const channel = Vue.prototype.$echo.private(`projects.${id}`);
+        for (const action in handlers) {
+            channel.listen(`.projects.${action}`, handlers[action]);
+        }
+    };
 
-    grid.addToMetaProperties(
-        'gridData.websocketUpdate',
-        id => {
-            let result = reactive({ value: null });
-            Vue.prototype.$echo
-                .private(`ProjectUpdated.${id}`)
-                .listen('ProjectUpdated', e => Vue.set(result, 'value', e.model));
-            return result;
-        },
-        grid.getRouterConfig(),
-    );
+    grid.addToMetaProperties('gridData.websocketEnterChannel', websocketEnterChannel, grid.getRouterConfig());
+    grid.addToMetaProperties('gridData.websocketLeaveChannel', websocketLeaveChannel, grid.getRouterConfig());
 
-    grid.addToMetaProperties(
-        'gridData.websocketLeaveChannel',
-        (id, action) => {
-            Vue.prototype.$echo.leave(`Project${action}.${id}`);
-        },
-        grid.getRouterConfig(),
-    );
-
-    crud.view.addToMetaProperties(
-        'pageData.websocketUpdate',
-        id => {
-            let result = reactive({ value: null });
-            Vue.prototype.$echo
-                .private(`ProjectUpdated.${id}`)
-                .listen('ProjectUpdated', e => Vue.set(result, 'value', e.modelShow));
-
-            return result;
-        },
-        crud.view.getRouterConfig(),
-    );
-
-    crud.view.addToMetaProperties(
-        'pageData.websocketLeaveChannel',
-        (id, action) => {
-            Vue.prototype.$echo.leave(`Project${action}.${id}`);
-        },
-        crud.view.getRouterConfig(),
-    );
+    crud.view.addToMetaProperties('pageData.websocketEnterChannel', websocketEnterChannel, crud.view.getRouterConfig());
+    crud.view.addToMetaProperties('pageData.websocketLeaveChannel', websocketLeaveChannel, crud.view.getRouterConfig());
 
     grid.addFilter([
         {

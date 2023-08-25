@@ -131,7 +131,7 @@
                     edit: data => {
                         const id = this.$route.params[this.service.getIdParam()];
                         if (+id === +data.model.id) {
-                            this.values = { ...this.value, ...data.model };
+                            this.values = data.model;
                         }
                     },
                 });

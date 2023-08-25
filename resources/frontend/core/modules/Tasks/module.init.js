@@ -13,7 +13,7 @@ import { VueEditor } from 'vue2-editor';
 import TaskComments from './components/TaskComments';
 import TaskHistory from './components/TaskHistory';
 import { hasRole } from '@/utils/user';
-import Vue, { reactive } from 'vue';
+import Vue from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'tasks',
