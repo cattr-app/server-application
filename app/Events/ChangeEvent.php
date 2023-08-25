@@ -41,7 +41,9 @@ class ChangeEvent implements ShouldBroadcast
                 ->append(['can', 'workers', 'total_spent_time'])
                 ->makeVisible('can'),
             $this->model instanceof Project => $this->model->setPermissionsUser(User::query()->find($this->userId))
-                ->append('can')
+                ->load(['users', 'defaultPriority', 'statuses'])
+                ->loadCount('tasks')
+                ->append(['can', 'workers', 'total_spent_time'])
                 ->makeVisible('can'),
             default => $this->model,
         };

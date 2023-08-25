@@ -207,8 +207,7 @@ class Task extends Model
     {
         return Attribute::make(
             get: static function ($value, $attributes) {
-                $workers = [];
-                DB::table('time_intervals AS i')
+                $workers = DB::table('time_intervals AS i')
                     ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
                     ->join('users AS u', 'i.user_id', '=', 'u.id')
                     ->select(
@@ -222,10 +221,7 @@ class Task extends Model
                     ->whereNull('i.deleted_at')
                     ->where('task_id', $attributes['id'])
                     ->groupBy('i.user_id')
-                    ->get()
-                    ->each(static function ($worker) use (&$workers) {
-                        $workers[] = $worker;
-                    });
+                    ->get();
 
                 return $workers;
             },

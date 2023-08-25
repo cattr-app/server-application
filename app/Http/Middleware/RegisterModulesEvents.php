@@ -4,6 +4,7 @@ namespace App\Http\Middleware;
 
 use App;
 use App\Events\ChangeEvent;
+use App\Models\Project;
 use CatEvent;
 use Closure;
 use Illuminate\Http\Request;
@@ -22,11 +23,21 @@ class RegisterModulesEvents
         CatEvent::listen('event.after.action.*', static function (string $eventName, array $data) {
             $eventNameParts = explode('.', $eventName);
             [$entityType, $action] = array_slice($eventNameParts, 3, 2); // Strip "event.after.action" and get the next two parts
-            if (!in_array($entityType, ['tasks', 'projects', 'intervals']) || !in_array($action, ['create', 'edit', 'destroy'])) {
+            if (!in_array($entityType, ['tasks', 'projects', 'projects_members', 'intervals'])) {
                 return;
             }
 
-            [$model] = $data;
+            if (!in_array($action, ['create', 'edit', 'destroy'])) {
+                return;
+            }
+
+            if ($entityType === 'projects_members') {
+                $entityType = 'projects';
+                $model = Project::query()->find($data[0]);
+            } else {
+                $model = $data[0];
+            }
+
             App::terminating(static function () use ($entityType, $action, $model) {
                 foreach (ChangeEvent::getRelatedUserIds($model) as $userId) {
                     broadcast(new ChangeEvent($entityType, $action, $model, $userId));

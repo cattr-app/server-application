@@ -88,40 +88,8 @@ class ProjectController extends ItemController
      */
     public function show(ShowProjectRequest $request): JsonResponse
     {
-        Filter::listen(Filter::getSuccessResponseFilterName(), static function ($project) {
-            $totalTracked = 0;
-            $taskIDs = array_map(static function ($task) {
-                return $task['id'];
-            }, $project['tasks']);
-            
-            $workers = DB::table('time_intervals AS i')
-                ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-                ->leftJoin('users AS u', 'i.user_id', '=', 'u.id')
-                ->select(
-                    'i.user_id',
-                    'u.full_name',
-                    'i.task_id',
-                    'i.start_at',
-                    'i.end_at',
-                    't.task_name',
-                    DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
-                )
-                ->whereNull('i.deleted_at')
-                ->whereIn('task_id', $taskIDs)
-                ->orderBy('duration', 'desc')
-                ->groupBy('t.id')
-                ->get();
-
-            foreach ($workers as $worker) {
-                $totalTracked += $worker->duration;
-            }
-
-            $project['workers'] = $workers;
-            $project['total_spent_time'] = $totalTracked;
-            return $project;
-        });
-
-        Filter::listen(Filter::getQueryFilterName(), static fn($query) => $query->with('tasks'));
+        Filter::listen(Filter::getQueryFilterName(), static fn ($query) => $query->with('tasks'));
+        Filter::listen(Filter::getActionFilterName(), static fn ($data) => $data->append('workers')->append('total_spent_time'));
 
         return $this->_show($request);
     }
@@ -183,7 +151,7 @@ class ProjectController extends ItemController
             }
         });
 
-        Filter::listen(Filter::getActionFilterName(), static fn($data) => $data->load('statuses'));
+        Filter::listen(Filter::getActionFilterName(), static fn ($data) => $data->load('statuses'));
 
         return $this->_create($request);
     }
@@ -350,7 +318,7 @@ class ProjectController extends ItemController
             }
         });
 
-        Filter::listen(Filter::getActionFilterName(), static fn($data) => $data->load('statuses'));
+        Filter::listen(Filter::getActionFilterName(), static fn ($data) => $data->load('statuses'));
 
         return $this->_edit($request);
     }
