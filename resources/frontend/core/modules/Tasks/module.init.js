@@ -531,35 +531,19 @@ export function init(context, router) {
         },
     ]);
 
-    grid.addToMetaProperties(
-        'gridData.websocketDelete',
-        id => {
-            let result = reactive({ value: null });
-            Vue.prototype.$echo.private(`TaskDeleted.${id}`).listen(`TaskDeleted`, e => Vue.set(result, 'value', e[0]));
-            return result;
-        },
-        grid.getRouterConfig(),
-    );
+    const websocketLeaveChannel = id => Vue.prototype.$echo.leave(`tasks.${id}`);
+    const websocketEnterChannel = (id, handlers) => {
+        const channel = Vue.prototype.$echo.private(`tasks.${id}`);
+        for (const action in handlers) {
+            channel.listen(`.tasks.${action}`, handlers[action]);
+        }
+    };
 
-    grid.addToMetaProperties(
-        'gridData.websocketUpdate',
-        id => {
-            let result = reactive({ value: null });
-            Vue.prototype.$echo
-                .private(`TaskUpdated.${id}`)
-                .listen(`TaskUpdated`, e => Vue.set(result, 'value', e.model));
-            return result;
-        },
-        grid.getRouterConfig(),
-    );
+    grid.addToMetaProperties('gridData.websocketEnterChannel', websocketEnterChannel, grid.getRouterConfig());
+    grid.addToMetaProperties('gridData.websocketLeaveChannel', websocketLeaveChannel, grid.getRouterConfig());
 
-    grid.addToMetaProperties(
-        'gridData.websocketLeaveChannel',
-        (id, action) => {
-            Vue.prototype.$echo.leave(`Task${action}.${id}`);
-        },
-        grid.getRouterConfig(),
-    );
+    crud.view.addToMetaProperties('pageData.websocketEnterChannel', websocketEnterChannel, crud.view.getRouterConfig());
+    crud.view.addToMetaProperties('pageData.websocketLeaveChannel', websocketLeaveChannel, crud.view.getRouterConfig());
 
     grid.addToMetaProperties(
         'gridData.actionsFilter',
@@ -575,26 +559,6 @@ export function init(context, router) {
             return makeCellBg(h, cell, item);
         },
         grid.getRouterConfig(),
-    );
-
-    crud.view.addToMetaProperties(
-        'pageData.websocketUpdate',
-        id => {
-            let result = reactive({ value: null });
-            Vue.prototype.$echo
-                .private(`TaskUpdated.${id}`)
-                .listen('TaskUpdated', e => Vue.set(result, 'value', e.modelShow));
-            return result;
-        },
-        crud.view.getRouterConfig(),
-    );
-
-    crud.view.addToMetaProperties(
-        'pageData.websocketLeaveChannel',
-        (id, action) => {
-            Vue.prototype.$echo.leave(`Task${action}.${id}`);
-        },
-        crud.view.getRouterConfig(),
     );
 
     grid.addFilter([

@@ -71,6 +71,7 @@
 </template>
 
 <script>
+    import { mapGetters } from 'vuex';
     import RenderableField from '@/components/RenderableField';
     import { Skeleton } from 'vue-loading-skeleton';
 
@@ -89,6 +90,7 @@
         },
 
         computed: {
+            ...mapGetters('user', ['user']),
             title() {
                 const { fields, values, service, filters, pageData } = this;
                 const { titleCallback } = this.$route.meta;
@@ -107,7 +109,6 @@
                 service,
                 filters,
                 values: {},
-                websocketUpdateChannels: [],
                 fields: fields || [],
                 isDataLoading: false,
                 pageData: {
@@ -120,11 +121,21 @@
         },
 
         async mounted() {
-            this.isDataLoading = true;
-
             await this.load();
 
-            this.isDataLoading = false;
+            this.websocketEnterChannel = this.$route.meta.pageData.websocketEnterChannel;
+            this.websocketLeaveChannel = this.$route.meta.pageData.websocketLeaveChannel;
+
+            if (typeof this.websocketEnterChannel !== 'undefined') {
+                this.websocketEnterChannel(this.user.id, {
+                    edit: data => {
+                        const id = this.$route.params[this.service.getIdParam()];
+                        if (+id === +data.model.id) {
+                            this.values = { ...this.value, ...data.model };
+                        }
+                    },
+                });
+            }
         },
 
         beforeRouteEnter(to, from, next) {
@@ -137,43 +148,27 @@
             next();
         },
 
+        beforeDestroy() {
+            if (typeof this.websocketLeaveChannel !== 'undefined') {
+                this.websocketLeaveChannel(this.user.id);
+            }
+        },
+
         methods: {
             async load() {
+                this.isDataLoading = true;
                 const id = this.$route.params[this.service.getIdParam()];
 
                 try {
                     const { data } = (await this.service.getItem(id, this.filters)).data;
-
-                    if (typeof this.$route.meta.pageData.websocketLeaveChannel !== 'undefined') {
-                        this.$route.meta.pageData.websocketLeaveChannel(this.$store.state.user.user.data.id, 'Updated');
-                    }
-
                     this.values = data;
-
-                    if (typeof this.$route.meta.pageData.websocketUpdate !== 'undefined') {
-                        this.$set(
-                            this.websocketUpdateChannels,
-                            0,
-                            this.$route.meta.pageData.websocketUpdate(this.$store.state.user.user.data.id),
-                        );
-
-                        this.$watch(
-                            `websocketUpdateChannels.0.value`,
-                            val => {
-                                if (val.modelShow !== undefined) {
-                                    this.values = val.modelShow;
-                                } else {
-                                    this.values = val;
-                                }
-                            },
-                            { deep: true },
-                        );
-                    }
                 } catch ({ response }) {
                     if (response.data.error_type === 'query.item_not_found') {
                         this.$router.replace({ name: 'forbidden' });
                     }
                 }
+
+                this.isDataLoading = false;
             },
 
             handleClick(button) {
