@@ -7,6 +7,8 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
+use App\Reports\DashboardExport;
+use Carbon\Carbon;
 use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
@@ -14,6 +16,7 @@ use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Foundation\Events\Dispatchable;
 use Illuminate\Queue\SerializesModels;
+use Settings;
 
 class ChangeEvent implements ShouldBroadcast
 {
@@ -45,6 +48,15 @@ class ChangeEvent implements ShouldBroadcast
                 ->loadCount('tasks')
                 ->append(['can', 'workers', 'total_spent_time'])
                 ->makeVisible('can'),
+            // Format a time interval as in the dashboard report
+            $this->model instanceof TimeInterval => DashboardExport::init(
+                [$this->model->user_id],
+                [$this->model->task->project_id],
+                Carbon::parse($this->model->start_at)->startOfDay(),
+                Carbon::parse($this->model->end_at)->endOfDay(),
+                Settings::scope('core')->get('timezone', 'UTC'),
+                $this->model->user->timezone ?? Settings::scope('core')->get('timezone', 'UTC'),
+            )->collection(['time_intervals.id' => $this->model->id])->first()->first()->toArray(),
             default => $this->model,
         };
 

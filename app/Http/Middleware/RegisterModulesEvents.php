@@ -5,14 +5,27 @@ namespace App\Http\Middleware;
 use App;
 use App\Events\ChangeEvent;
 use App\Models\Project;
+use App\Models\Task;
+use App\Models\TimeInterval;
 use CatEvent;
 use Closure;
 use Illuminate\Http\Request;
+use Illuminate\Support\Collection;
 use Nwidart\Modules\Facades\Module;
 use Symfony\Component\HttpFoundation\Response;
 
 class RegisterModulesEvents
 {
+    /**
+     * @param Task|Project|TimeInterval $model
+     */
+    protected static function broadcastEvent(string $entityType, string $action, $model): void
+    {
+        foreach (ChangeEvent::getRelatedUserIds($model) as $userId) {
+            broadcast(new ChangeEvent($entityType, $action, $model, $userId));
+        }
+    }
+
     /**
      * Add subscribers from modules for Event and Filter
      *
@@ -33,14 +46,16 @@ class RegisterModulesEvents
 
             if ($entityType === 'projects_members') {
                 $entityType = 'projects';
-                $model = Project::query()->find($data[0]);
+                $projectId = $data[0];
+                $model = Project::query()->find($projectId);
             } else {
                 $model = $data[0];
             }
 
             App::terminating(static function () use ($entityType, $action, $model) {
-                foreach (ChangeEvent::getRelatedUserIds($model) as $userId) {
-                    broadcast(new ChangeEvent($entityType, $action, $model, $userId));
+                $items = is_array($model) || $model instanceof Collection ? $model : [$model];
+                foreach ($items as $item) {
+                    static::broadcastEvent($entityType, $action, $item);
                 }
             });
         });
