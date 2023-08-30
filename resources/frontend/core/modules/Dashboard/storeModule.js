@@ -3,6 +3,7 @@ import TasksService from '@/services/resource/task.service';
 import UserService from '@/services/resource/user.service';
 import DashboardService from '_internal/Dashboard/services/dashboard.service';
 import _ from 'lodash';
+import Vue from 'vue';
 
 const state = {
     service: null,
@@ -87,26 +88,45 @@ const mutations = {
     setIntervals(state, intervals) {
         state.intervals = intervals;
     },
-    addInterval(state, data) {
-        state.intervals[data.userId].push(data.interval);
-    },
-    updateInterval(state, data) {
-        state.intervals[data.userId].find((el, index) => {
-            if (el.id === data.interval.id) {
-                return state.intervals[data.userId].splice(index, 1, data.interval);
-            }
+    addInterval(state, interval) {
+        if (Array.isArray(state.intervals)) {
+            state.intervals = {};
+        }
 
-            return false;
-        });
-    },
-    removeInterval(state, data) {
-        state.intervals[data.userId].find((el, index) => {
-            if (el.id === data.interval.id) {
-                return state.intervals[data.userId].splice(index, 1);
-            }
+        if (!Object.prototype.hasOwnProperty.call(state.intervals, interval.user_id)) {
+            Vue.set(state.intervals, interval.user_id, []);
+        }
 
-            return false;
-        });
+        state.intervals[interval.user_id].push(interval);
+    },
+    updateInterval(state, interval) {
+        if (!Object.prototype.hasOwnProperty.call(state.intervals, interval.user_id)) {
+            return;
+        }
+
+        const index = state.intervals[interval.user_id].findIndex(item => +item.id === +interval.id);
+        if (index !== -1) {
+            state.intervals[interval.user_id].splice(index, 1, interval);
+        }
+    },
+    removeInterval(state, interval) {
+        if (!Object.prototype.hasOwnProperty.call(state.intervals, interval.user_id)) {
+            return;
+        }
+
+        const index = state.intervals[interval.user_id].findIndex(item => +item.id === +interval.id);
+        if (index !== -1) {
+            state.intervals[interval.user_id].splice(index, 1);
+        }
+    },
+    removeIntervalById(state, id) {
+        for (const userId in state.intervals) {
+            const index = state.intervals[userId].findIndex(item => +item.id === +id);
+            if (index !== -1) {
+                state.intervals[userId].splice(index, 1);
+                break;
+            }
+        }
     },
     setTasks(state, tasks) {
         state.tasks = tasks;
