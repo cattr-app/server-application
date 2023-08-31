@@ -137,15 +137,18 @@
             localStorage['dashboard.tab'] = 'team';
 
             await this.load();
-            this.updateHandle = setInterval(() => this.load(false), updateInterval);
+            this.updateHandle = setInterval(() => {
+                if (!this.updatedWithWebsockets) {
+                    this.load(false);
+                }
+
+                this.updatedWithWebsockets = false;
+            }, updateInterval);
+            this.updatedWithWebsockets = false;
         },
         beforeDestroy() {
             clearInterval(this.updateHandle);
             this.service.unloadIntervals();
-
-            this.$echo.leave(`TimeIntervalDeleted.${this.user.id}`);
-            this.$echo.leave(`TimeIntervalCreated.${this.user.id}`);
-            this.$echo.leave(`TimeIntervalUpdated.${this.user.id}`);
         },
         computed: {
             ...mapGetters('dashboard', ['intervals', 'timePerDay', 'users', 'timezone', 'service']),
@@ -179,6 +182,7 @@
                 removeInterval: 'dashboard/removeInterval',
                 addInterval: 'dashboard/addInterval',
                 updateInterval: 'dashboard/updateInterval',
+                removeIntervalById: 'dashboard/removeIntervalById',
             }),
             load: throttle(async function (withLoadingIndicator = true) {
                 this.isDataLoading = withLoadingIndicator;
@@ -314,34 +318,31 @@
             },
         },
         mounted() {
-            this.$echo.private(`TimeIntervalDeleted.${this.user.id}`).listen('TimeIntervalDeleted', e => {
-                if (Object.keys(this.intervals).includes(String(e[0].user_id))) {
-                    this.removeInterval({ interval: e[0], userId: e[0].user_id });
+            const channel = this.$echo.private(`intervals.${this.user.id}`);
+            channel.listen(`.intervals.create`, data => {
+                const startAt = moment.tz(data.model.start_at, 'UTC').tz(this.timezone).format('YYYY-MM-DD');
+                const endAt = moment.tz(data.model.end_at, 'UTC').tz(this.timezone).format('YYYY-MM-DD');
+                if (startAt > this.end || endAt < this.start) {
+                    return;
                 }
+
+                this.addInterval(data.model);
+                this.updatedWithWebsockets = true;
             });
 
-            this.$echo.private(`TimeIntervalCreated.${this.user.id}`).listen('TimeIntervalCreated', e => {
-                const startAtUTC = moment.tz(e[0][0].start_at, 'UTC');
-                const endAtUTC = moment.tz(e[0][0].end_at, 'UTC');
-                if (
-                    startAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') <= this.start &&
-                    endAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') >= this.end &&
-                    Object.keys(this.intervals).includes(String(e[0][0].user_id))
-                ) {
-                    this.addInterval({ interval: e[0][0], userId: e[0][0].user_id });
-                }
+            channel.listen(`.intervals.edit`, data => {
+                this.updateInterval(data.model);
+                this.updatedWithWebsockets = true;
             });
 
-            this.$echo.private(`TimeIntervalUpdated.${this.user.id}`).listen('TimeIntervalUpdated', e => {
-                const startAtUTC = moment.tz(e[0][0].start_at, 'UTC');
-                const endAtUTC = moment.tz(e[0][0].end_at, 'UTC');
-                if (
-                    startAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') <= this.start &&
-                    endAtUTC.clone().tz(this.timezone).format('YYYY-MM-DD') >= this.end &&
-                    Object.keys(this.intervals).includes(String(e[0][0].user_id))
-                ) {
-                    this.updateInterval({ interval: e[0][0], userId: e[0][0].user_id });
+            channel.listen(`.intervals.destroy`, data => {
+                if (typeof data.model === 'number') {
+                    this.removeIntervalById(data.model);
+                } else {
+                    this.removeInterval(data.model);
                 }
+
+                this.updatedWithWebsockets = true;
             });
         },
         watch: {
