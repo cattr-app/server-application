@@ -41,16 +41,14 @@
                 <em v-else>{{ $t('field.no_groups_found', { query: search }) }}</em>
                 <template>
                     <at-button v-show="query !== ''" type="primary" class="no-option" size="large" @click="createGroup">
-                        <div class="icon icon-plus-circle">
-                            {{ $t('field.fast_create_group', { query: search }) }}
-                        </div>
+                        <span class="icon icon-plus-circle"></span>
+                        {{ $t('field.fast_create_group', { query: search }) }}
                     </at-button>
                 </template>
                 <template>
                     <at-button type="primary" class="no-option" size="large" @click="toCreateGroup">
-                        <div class="icon icon-plus-circle" @click="toCreateGroup">
-                            {{ $t('field.to_create_group', { query: search }) }}
-                        </div>
+                        <span class="icon icon-plus-circle"></span>
+                        {{ $t('field.to_create_group', { query: search }) }}
                     </at-button>
                 </template>
             </template>
