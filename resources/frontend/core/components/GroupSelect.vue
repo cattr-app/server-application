@@ -46,7 +46,7 @@
                     </at-button>
                 </template>
                 <template>
-                    <at-button type="primary" class="no-option" size="large" @click="toCreateGroup">
+                    <at-button type="primary" class="no-option" size="large" @click="navigateToCreateGroup">
                         <span class="icon icon-plus-circle"></span>
                         {{ $t('field.to_create_group', { query: search }) }}
                     </at-button>
@@ -66,6 +66,7 @@
     import { ucfirst } from '@/utils/string';
     import ProjectGroupsService from '@/services/resource/project-groups.service';
     import vSelect from 'vue-select';
+    import { mapGetters } from 'vuex';
     import debounce from 'lodash/debounce';
 
     const service = new ProjectGroupsService();
@@ -96,13 +97,11 @@
         data() {
             return {
                 isActive: false,
-                options: [],
                 isSelectOpen: false,
                 totalPages: 0,
                 currentPage: 0,
                 query: '',
                 lastSearchQuery: '',
-                requestTimestamp: null,
                 localCurrentGroup: null,
             };
         },
@@ -113,12 +112,12 @@
             this.observer = new IntersectionObserver(this.infiniteScroll);
 
             const onClickOutside = e => {
-                this.opened = this.$el.contains(e.target);
-
-                if (!this.opened) {
+                const opened = this.$el.contains(e.target);
+                if (!opened) {
                     this.onClose();
                 }
             };
+
             document.addEventListener('click', onClickOutside);
             this.$on('hook:beforeDestroy', () => document.removeEventListener('click', onClickOutside));
         },
@@ -129,22 +128,21 @@
                         ? (this.localCurrentGroup.current = false)
                         : (this.localCurrentGroup = null);
                     this.$emit('setCurrent', '');
-                } else {
-                    if (newValue.value !== this.currentGroup.name) {
-                        this.$emit('setCurrent', {
-                            id: this.localCurrentGroup.id,
-                            name: this.localCurrentGroup.label,
-                        });
-                    }
+                } else if (newValue.value !== this.currentGroup.name) {
+                    this.$emit('setCurrent', {
+                        id: this.localCurrentGroup.id,
+                        name: this.localCurrentGroup.label,
+                    });
                 }
+
                 if (newValue.value === '' && newValue.query === '') {
-                    this.requestTimestamp = Date.now();
-                    this.search(this.requestTimestamp);
+                    this.search();
                 }
             },
         },
         methods: {
-            toCreateGroup() {
+            ucfirst,
+            navigateToCreateGroup() {
                 this.$router.push({ name: 'ProjectGroups.crud.groups.new' });
             },
             dropdownShouldOpen() {
@@ -154,23 +152,20 @@
 
                 return this.isSelectOpen;
             },
-            createGroup() {
-                service
-                    .save({ name: this.query }, true)
-                    .then(({ data }) => {
-                        this.$emit('createGroup', {
-                            id: data.data.id,
-                            name: data.data.name,
-                        });
-                    })
-                    .catch(() => {
-                        this.query = '';
-                        this.onClose();
-                    });
+            async createGroup() {
                 this.query = '';
                 this.onClose();
+
+                try {
+                    const { data } = await service.save({ name: this.query }, true);
+                    this.$emit('createGroup', {
+                        id: data.data.id,
+                        name: data.data.name,
+                    });
+                } catch (e) {
+                    // TODO
+                }
             },
-            ucfirst,
             getSpaceByDepth: function (depth) {
                 return ''.padStart(depth, '-');
             },
@@ -186,7 +181,7 @@
             async onOpen() {
                 this.isSelectOpen = true;
                 await this.$nextTick();
-                this.observe(this.requestTimestamp);
+                this.observe();
             },
             onClose() {
                 this.isActive = false;
@@ -201,25 +196,26 @@
             onSearch(query) {
                 this.query = query;
                 this.search.cancel();
-                this.requestTimestamp = Date.now();
-
-                this.search(this.requestTimestamp);
+                this.search();
             },
-            async search(requestTimestamp) {
+            async search() {
                 this.observer.disconnect();
+
                 this.totalPages = 0;
                 this.currentPage = 0;
-                this.resetOptions();
                 this.lastSearchQuery = this.query;
+
                 await this.$nextTick();
-                await this.loadOptions(requestTimestamp);
+                await this.loadOptions();
                 await this.$nextTick();
-                this.observe(requestTimestamp);
+
+                this.observe();
             },
             handleSelecting(option) {
                 if (this.localCurrentGroup != null) {
                     this.localCurrentGroup.current = false;
                 }
+
                 option.current = true;
                 this.localCurrentGroup = option;
                 this.onClose();
@@ -228,68 +224,28 @@
                 if (isIntersecting) {
                     const ul = target.offsetParent;
                     const scrollTop = target.offsetParent.scrollTop;
-                    const requestTimestamp = +target.dataset.requestTimestamp;
 
-                    if (requestTimestamp === this.requestTimestamp) {
-                        await this.loadOptions(requestTimestamp);
+                    await this.loadOptions();
+                    await this.$nextTick();
 
-                        await this.$nextTick();
+                    ul.scrollTop = scrollTop;
 
-                        ul.scrollTop = scrollTop;
-
-                        this.observer.disconnect();
-                        this.observe(requestTimestamp);
-                    }
+                    this.observer.disconnect();
+                    this.observe();
                 }
             },
-            observe(requestTimestamp) {
+            observe() {
                 if (this.isSelectOpen && this.$refs.load) {
-                    this.$refs.load.dataset.requestTimestamp = requestTimestamp;
                     this.observer.observe(this.$refs.load);
                 }
             },
-            async loadOptions(requestTimestamp) {
-                const filters = {
-                    search: { query: this.lastSearchQuery, fields: ['name'] },
-                    page: this.currentPage + 1,
-                };
-
-                return service.getWithFilters(filters).then(({ data, pagination }) => {
-                    if (requestTimestamp === this.requestTimestamp) {
-                        this.totalPages = pagination.totalPages;
-                        this.currentPage = pagination.currentPage;
-                        data.forEach(option => {
-                            option.current = false;
-                            if (this.options[0]?.id === option.id) {
-                                this.options.shift();
-                                if (option.id === this.currentGroup?.id) {
-                                    option.current = true;
-                                }
-                            }
-                            this.options.push({
-                                id: option.id,
-                                label: option.name,
-                                depth: option.depth,
-                                current: option.current,
-                            });
-
-                            if (option.current) {
-                                this.localCurrentGroup = this.options[this.options.length - 1];
-                            }
-                        });
-                    }
+            async loadOptions() {
+                this.$store.dispatch('projectGroups/loadGroups', {
+                    query: this.lastSearchQuery,
+                    page: this.currentPage,
                 });
-            },
-            resetOptions() {
-                if (typeof this.currentGroup === 'object' && this.currentGroup !== null) {
-                    this.localCurrentGroup = {
-                        id: this.currentGroup.id,
-                        label: this.currentGroup.name,
-                        depth: 0,
-                        current: true,
-                    };
-                }
-                this.options = [];
+
+                this.currentPage++;
             },
         },
         computed: {
@@ -300,6 +256,19 @@
                 set(option) {
                     this.$emit('input', option);
                 },
+            },
+            ...mapGetters('projectGroups', ['groups']),
+            options() {
+                if (!this.groups.has(this.lastSearchQuery)) {
+                    return [];
+                }
+
+                return this.groups.get(this.lastSearchQuery).map(({ id, name, depth }) => ({
+                    id,
+                    label: name,
+                    depth,
+                    current: id === this.currentGroup?.id,
+                }));
             },
             valueAndQuery() {
                 return {
