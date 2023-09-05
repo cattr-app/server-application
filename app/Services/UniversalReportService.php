@@ -7,6 +7,8 @@ use App\Models\Task;
 use App\Models\UniversalReport;
 use App\Models\User;
 use Carbon\Carbon;
+use DB;
+use Illuminate\Contracts\Database\Eloquent\Builder;
 use Illuminate\Database\Query\JoinClause;
 
 class UniversalReportService
@@ -294,6 +296,7 @@ class UniversalReportService
         ];
     }
 
+    // Базово закрыт, работает как на рэндж так и на дэй корректно
     public function usersCharts() {
         $result = [];
 
@@ -304,34 +307,7 @@ class UniversalReportService
             $total_spent_time_by_day = [
                 'datasets' => [],
             ];
-            // TimeInterval::selectRaw('user_id, full_name, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_day, DATE(start_at) as date_at')
-            //     ->whereIn('user_id', $this->report->data_objects)
-            //     ->where([
-            //         ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00"],
-            //         ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 00:00:00"],
-            //     ])
-            //     ->leftJoin('users', function($join) {
-            //         $join
-            //             ->on('time_intervals.user_id', '=', 'users.id')
-            //             ->select('full_name');
-            //     })
-            //     ->groupBy('user_id', 'date_at')
-            //     ->get()
-            //     ->each(function($i) use (&$total_spent_time_by_day) {
-            //         $time = sprintf("%02d.%02d", floor($i->total_spent_time_by_day / 3600), floor($i->total_spent_time_by_day / 60) % 60);
 
-            //         if(!array_key_exists($i->user_id, $total_spent_time_by_day['datasets'])) {
-            //             $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
-            //             return $total_spent_time_by_day['datasets'][$i->user_id] = [
-            //                 'label' => $i->full_name,
-            //                 'borderColor' => $color,
-            //                 'backgroundColor' => $color,
-            //                 'data' => [$i->date_at => $time],
-            //             ];
-            //         }
-
-            //         return $total_spent_time_by_day['datasets'][$i->user_id]['data'][$i->date_at] = $time;
-            //     });
             User::selectRaw('users.id, users.full_name, SUM(TIMESTAMPDIFF(SECOND, time_intervals.start_at, time_intervals.end_at)) as total_spent_time_by_day, DATE(time_intervals.start_at) as date_at')
                 ->whereIn('users.id', $this->report->data_objects)
                 ->leftJoin('time_intervals', function($join) {
@@ -370,37 +346,6 @@ class UniversalReportService
             $total_spent_time_by_day_and_tasks = [
                 'datasets' => [],
             ];
-
-            // TimeInterval::selectRaw('user_id, task_name, task_id, SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_by_day_and_tasks, DATE(start_at) as date_at')
-            //     ->whereIn('user_id', $this->report->data_objects)
-            //     ->where([
-            //         ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00"],
-            //         ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 00:00:00"],
-            //     ])
-            //     ->leftJoin('tasks', function($join) {
-            //         $join
-            //             ->on('time_intervals.task_id', '=', 'tasks.id')
-            //             ->select('task_name');
-            //     })
-            //     ->groupBy('user_id', 'date_at', 'task_id')
-            //     ->get()->each(function($i) use(&$total_spent_time_by_day_and_tasks) {
-            //         $time = sprintf("%02d.%02d", floor($i->total_spent_time_by_day_and_tasks / 3600), floor($i->total_spent_time_by_day_and_tasks / 60) % 60);
-
-            //         if(!array_key_exists($i->user_id, $total_spent_time_by_day_and_tasks['datasets'])) {
-            //             $total_spent_time_by_day_and_tasks['datasets'][$i->user_id] = [];
-            //         }
-            //         if(!array_key_exists($i->task_id, $total_spent_time_by_day_and_tasks['datasets'][$i->user_id])) {
-            //             $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
-            //             return $total_spent_time_by_day_and_tasks['datasets'][$i->user_id][$i->task_id] = [
-            //                 'label' => $i->task_name,
-            //                 'borderColor' => $color,
-            //                 'backgroundColor' => $color,
-            //                 'data' => [$i->date_at => $time],
-            //             ];
-            //         }
-
-            //         return $total_spent_time_by_day_and_tasks['datasets'][$i->user_id][$i->task_id]['data'][$i->date_at] = $time;
-            //     });
             User::selectRaw('users.id, tasks.task_name, tasks.id as task_id, SUM(TIMESTAMPDIFF(SECOND, time_intervals.start_at, time_intervals.end_at)) as total_spent_time_by_day_and_tasks, DATE(time_intervals.start_at) as date_at')
                 ->whereIn('users.id', $this->report->data_objects)
                 ->leftJoin('time_intervals', function($join) {
@@ -408,26 +353,25 @@ class UniversalReportService
                         ->on('users.id', '=', 'time_intervals.user_id')
                         ->select('start_at', 'end_at')
                         ->where([
-                            ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00"],
-                            ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 00:00:00"],
+                            ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00", 'and'],
+                            ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 23:59:59", 'and'],
                         ]);
                 })
                 ->leftJoin('tasks_users', function($join) {
                     $join
-                        ->on('users.id', '=', 'tasks_users.user_id');
+                        ->on('users.id', '=', 'tasks_users.user_id')
+                        ->orOn('time_intervals.task_id', '=', 'tasks_users.task_id');
                 })
                 ->leftJoin('tasks', function($join) {
                     $join
-                        ->on('tasks_users.task_id', '=', 'tasks.id')
-                        ->orOn('time_intervals.task_id', '=', 'tasks.id')
-                        ->select('task_name', 'id');
+                        ->on('tasks_users.task_id', '=', 'tasks.id');
                 })
                 ->groupBy('users.id', 'date_at', 'tasks.id')
-                ->get() // Если пользователь не прикреплён ни к одной задаче и при этом за выбранный период у него нет ни одного интервала, то его данные для диаграммы не на чём строить. Нужно добавить обработку на бэке, что если task_id null, то мы не даём юзеру dataset
+                ->get()
                 ->each(function($i) use (&$total_spent_time_by_day_and_tasks) {
                     $time = sprintf("%02d.%02d", floor($i->total_spent_time_by_day_and_tasks / 3600), floor($i->total_spent_time_by_day_and_tasks / 60) % 60);
 
-                    if(!array_key_exists($i->user_id, $total_spent_time_by_day_and_tasks['datasets'])) {
+                    if(!array_key_exists($i->id, $total_spent_time_by_day_and_tasks['datasets'])) {
                         $total_spent_time_by_day_and_tasks['datasets'][$i->id] = [];
                     }
 
@@ -439,6 +383,8 @@ class UniversalReportService
                             'backgroundColor' => $color,
                             'data' => [$i->date_at => $time],
                         ];
+                    } else {
+                        return $total_spent_time_by_day_and_tasks['datasets'][$i->id][$i->task_id]['data'][$i->date_at] = $time;
                     }
                 });
 
@@ -453,36 +399,35 @@ class UniversalReportService
             $total_spent_time_by_day_and_projects = [
                 'datasets' => [],
             ];
-            User::selectRaw('users.id, projects.name, projects.id as project_id, SUM(TIMESTAMPDIFF(SECOND, time_intervals.start_at, time_intervals.end_at)) as total_spent_time_by_day_and_projects, DATE(time_intervals.start_at) as date_at')
+            //Проверить
+            $r = User::selectRaw('users.id, projects.name, projects.id as project_id, SUM(TIMESTAMPDIFF(SECOND, time_intervals.start_at, time_intervals.end_at)) as total_spent_time_by_day_and_projects, DATE(time_intervals.start_at) as date_at')
                 ->whereIn('users.id', $this->report->data_objects)
                 ->leftJoin('time_intervals', function($join) {
                     $join
                         ->on('users.id', '=', 'time_intervals.user_id')
                         ->select('time_intervals.start_at', 'time_intervals.end_at')
                         ->where([
-                            ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00"],
-                            ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 00:00:00"],
+                            ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00", 'and'],
+                            ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 23:59:59", 'and'],
                         ]);
+                })
+                ->leftJoin('tasks_users', function(JoinClause $join) {
+                    $join
+                    ->on('time_intervals.task_id', '=', 'tasks_users.task_id')
+                    ->on('time_intervals.user_id', '=', 'users.id')
+                    ->orOn('users.id', '=', 'tasks_users.user_id');
+                })
+                ->leftJoin('tasks', function($join) {
+                    $join
+                        ->on('tasks_users.task_id', '=', 'tasks.id');
                 })
                 ->leftJoin('projects_users', function($join) {
                     $join
                         ->on('users.id', '=', 'projects_users.user_id');
                 })
-                ->leftJoin('tasks_users', function($join) {
-                    $join
-                        ->on('users.id', '=', 'tasks_users.user_id')
-                        ->orOn('time_intervals.task_id', '=', 'tasks_users.task_id');
-                })
                 ->leftJoin('projects', function($join) {
                     $join
-                        ->on('projects_users.project_id', '=', 'projects.id')
-                        ->on('tasks_users.user_id', '=', 'users.id')
-                        ->select('projects.id', 'projects.name');
-                })
-                ->leftJoin('tasks', function($join) {
-                    $join
-                        ->on('projects.id', '=', 'tasks.project_id')
-                        ->on('tasks_users.task_id', '=', 'tasks.id');
+                        ->on('projects_users.project_id', '=', 'projects.id');
                 })
                 ->groupBy('users.id', 'date_at', 'projects.id')
                 ->get()
@@ -535,8 +480,8 @@ class UniversalReportService
                     $join
                         ->on('tasks.id', '=', 'time_intervals.task_id')
                         ->where([
-                            ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00"],
-                            ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 00:00:00"],
+                            ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00", 'and'],
+                            ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 23:59:59", 'and'],
                         ]);
                 })
                 ->groupBy('projects.id', 'date_at')
@@ -569,34 +514,48 @@ class UniversalReportService
 
             Project::selectRaw('projects.id, users.full_name, users.id as user_id, SUM(TIMESTAMPDIFF(SECOND, time_intervals.start_at, time_intervals.end_at)) as total_spent_time_day_and_users_separately, DATE(time_intervals.start_at) as date_at')
                 ->whereIn('projects.id', $this->report->data_objects)
-                ->leftJoin('projects_users', function($join) {
-                    $join
-                        ->on('projects.id', '=', 'projects_users.project_id');
-                })
                 ->leftJoin('tasks', function($join) {
                     $join
                         ->on('projects.id', '=', 'tasks.project_id');
                 })
-                ->leftJoin('time_intervals', function($join) {
+                ->leftJoin('time_intervals as tm', function($join) {
                     $join
                         ->on('projects.id', '=', 'tasks.project_id')
-                        ->orOn('tasks.id', '=', 'time_intervals.task_id')
-                        ->select('user_id')
+                        ->on('tasks.id', '=', 'tm.task_id')
                         ->where([
-                            ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00"],
-                            ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 00:00:00"],
+                            ['tm.start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00", 'and'],
+                            ['tm.end_at', '<=', "{$this->endAt->format('Y-m-d')} 23:59:59", 'and'],
                         ]);
+                })
+                ->leftJoin('tasks_users', function($join) {
+                    $join
+                        ->on('tasks.id', '=', 'tasks_users.task_id');
+                })
+                ->leftJoin('projects_users', function($join) {
+                    $join
+                        ->on('projects.id', '=', 'projects_users.project_id');
                 })
                 ->leftJoin('users', function($join) {
                     $join
-                        ->on('projects_users.user_id', '=', 'users.id')
-                        ->orOn('time_intervals.user_id', '=', 'users.id')
-                        ->select('full_name');
+                        ->on('tm.user_id', '=', 'users.id')
+                        ->on('tm.task_id', '=', 'tasks.id')
+                        ->orOn('tasks_users.user_id', '=', 'users.id');
+                })
+                ->leftJoin('time_intervals', function(JoinClause $join) {
+                    $join
+                        ->on('time_intervals.user_id', '=', 'users.id')
+                        ->on('time_intervals.task_id', '=', 'tasks.id')
+                        ->on('tasks.project_id', '=', 'projects.id')
+                        ->where([
+                            ['time_intervals.start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00", 'and'],
+                            ['time_intervals.end_at', '<=', "{$this->endAt->format('Y-m-d')} 23:59:59", 'and'],
+                        ]);
                 })
                 ->groupBy('projects.id', 'user_id', 'date_at')
                 ->get()
                 ->each(function($i) use (&$total_spent_time_day_and_users_separately) {
-                    $time = sprintf("%02d.%02d", floor($i->total_spent_time_day_and_users_separately / 3600), floor($i->total_spent_time_day_and_users_separately / 60) % 60);
+                    // $time = sprintf("%02d.%02d", floor($i->total_spent_time_day_and_users_separately / 3600), floor($i->total_spent_time_day_and_users_separately / 60) % 60);
+                    $time = $i->total_spent_time_day_and_users_separately;
                     if(!array_key_exists($i->id, $total_spent_time_day_and_users_separately['datasets'])) {
                         $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
 
@@ -644,19 +603,15 @@ class UniversalReportService
                 'datasets' => []
             ];
             Task::selectRaw('tasks.id, tasks.task_name, SUM(TIMESTAMPDIFF(SECOND, time_intervals.start_at, time_intervals.end_at)) as total_spent_time_day, DATE(time_intervals.start_at) as date_at')
-                ->whereIn('tasks.id', $this->report->data_objects)
-                // ->leftJoin('projects', function($join) {
-                //     $join
-                //         ->on('tasks.project_id', '=', 'projects.id');
-                // })
-                ->leftJoin('time_intervals', function($join) {
+                ->leftJoin('time_intervals', function(JoinClause $join) {
                     $join
                         ->on('tasks.id', '=', 'time_intervals.task_id')
-                        ->where([
-                            ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00"],
-                            ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 00:00:00"],
-                        ]);
-                })
+                            ->where([
+                                ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00", 'and'],
+                                ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 23:59:59", 'and'],
+                            ]);
+                    })
+                ->whereIn('tasks.id', $this->report->data_objects)
                 ->groupBy('tasks.id', 'date_at')
                 ->get()
                 ->each(function($i) use (&$total_spent_time_day) {
@@ -684,37 +639,39 @@ class UniversalReportService
             $total_spent_time_day_users_separately = [
                 'datasets' => [],
             ];
+            $dataObjects = implode(', ', $this->report->data_objects);
 
             $r = Task::selectRaw('tasks.id, users.full_name, users.id as user_id, SUM(TIMESTAMPDIFF(SECOND, time_intervals.start_at, time_intervals.end_at)) as total_spent_time_day_users_separately, DATE(time_intervals.start_at) as date_at')
-                ->whereIn('tasks.id', $this->report->data_objects)
                 ->leftJoin('tasks_users', function($join) {
                     $join
                         ->on('tasks.id', '=', 'tasks_users.task_id');
                 })
-                ->leftJoin('time_intervals', function($join) {
+                ->leftJoin('time_intervals AS tm', function(JoinClause $join) {
                     $join
+                        ->on('tasks.id', '=', 'tm.task_id');
+                })
+                ->leftJoin('users', function(JoinClause $join) use($dataObjects) {
+                    $join
+                        ->on('tm.user_id', '=', 'users.id')
+                        ->on('tm.task_id', '=', 'tasks.id')
+                        ->orOn('tasks_users.user_id', '=', 'users.id');
+                })
+                ->leftJoin('time_intervals', function(JoinClause $join) {
+                    $join
+                        ->on('users.id', '=', 'time_intervals.user_id')
                         ->on('tasks.id', '=', 'time_intervals.task_id')
                         ->where([
-                            ['start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00"],
-                            ['end_at', '<=', "{$this->endAt->format('Y-m-d')} 23:59:59"],
+                            ['time_intervals.start_at', '>=', "{$this->startAt->format('Y-m-d')} 00:00:00", 'and'],
+                            ['time_intervals.end_at', '<=', "{$this->endAt->format('Y-m-d')} 23:59:59", 'and'],
                         ]);
                 })
-                ->leftJoin('users', function(JoinClause $join) {
-                    $join
-                        ->on('time_intervals.user_id', '=', 'users.id')
-                        ->orOn('tasks_users.user_id', '=', 'users.id')
-                        ->select('full_name')
-                        ->distinct();
-                })
-                ->distinct()
-                ->groupBy('tasks.id', 'date_at', 'time_intervals.user_id')
+                ->whereIn('tasks.id', $this->report->data_objects)
+                ->groupBy('tasks.id', 'date_at', 'users.id')
                 ->get()
                 ->each(function($i) use (&$total_spent_time_day_users_separately) {
-                    // $time = sprintf("%02d.%02d", floor($i->total_spent_time_day_users_separately / 3600), floor($i->total_spent_time_day_users_separately / 60) % 60);
                     $time = $i->total_spent_time_day_users_separately;
                     if(!array_key_exists($i->id, $total_spent_time_day_users_separately['datasets'])) {
                         $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
-                        // dd($i);
                         return $total_spent_time_day_users_separately['datasets'][$i->id][$i->user_id] = [
                             'label' => $i->full_name,
                             'borderColor' => $color,
@@ -764,3 +721,22 @@ class UniversalReportService
         }
     }
 }
+                // dd($r);
+            //     $startAt = $this->startAt->format('Y-m-d').' 00:00:00';
+            //     $endAt = $this->endAt->format('Y-m-d').' 23:59:59';
+            //     // dd([$startAt, $endAt]);
+            // $sql = "SELECT DISTINCT tasks.id, users.full_name, users.id AS user_id, time_intervals.user_id as t_uid, SUM(TIMESTAMPDIFF(SECOND, time_intervals.start_at, time_intervals.end_at)) AS total_spent_time, DATE(time_intervals.start_at) AS date_at FROM tasks
+            //     LEFT JOIN tasks_users ON tasks.id=tasks_users.task_id
+            //     LEFT JOIN users ON tasks_users.user_id=users.id OR (SELECT user_id FROM time_intervals WHERE task_id IN ($dataObjects) AND time_intervals.start_at>='2023-08-25 00:00:00' AND time_intervals.end_at<='2023-08-25 23:59:59')=users.id
+            //     LEFT JOIN (
+            //         SELECT * FROM time_intervals
+            //         WHERE time_intervals.start_at>='2023-08-25 00:00:00' AND time_intervals.end_at<='2023-08-25 23:59:59'
+            //     ) time_intervals ON users.id=time_intervals.user_id
+            //     -- LEFT JOIN users ON time_intervals.user_id=users.id OR tasks_users.user_id=users.id
+            //     WHERE tasks.id IN (4)
+            //     GROUP BY tasks.id, date_at, users.id";
+                // DB::select($sql)
+                // $sql = "SELECT * FROM time_intervals WHERE start_at>='2023-08-25 00:00:00' AND end_at<='2023-08-25 23:59:59'";
+                // dd($sql);
+                // dd($this->periodDates);
+                // dd(DB::select($sql));

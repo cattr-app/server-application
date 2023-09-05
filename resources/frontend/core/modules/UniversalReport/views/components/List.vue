@@ -70,19 +70,19 @@
         computed: {
             ...mapGetters('universalreport', ['selectedMain']),
         },
-        async mounted() {
-            await service.show(this.$route.params.id).then(({ data }) => {
-                this.setName(data.data.name);
-                this.setMain(data.data.main);
-                this.setCalendarData({
-                    type: sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.type') ?? 'day',
-                    end:
-                        sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.end') ??
-                        moment().format('YYYY-MM-DD'),
-                    start:
-                        sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.start') ??
-                        moment().format('YYYY-MM-DD'),
-                });
+        async created() {
+            const { data } = await service.show(this.$route.params.id);
+
+            this.setName(data.data.name);
+            this.setMain(data.data.main);
+            this.setCalendarData({
+                type: sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.type') ?? 'day',
+                end:
+                    sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.end') ??
+                    moment().format('YYYY-MM-DD'),
+                start:
+                    sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.start') ??
+                    moment().format('YYYY-MM-DD'),
             });
         },
         methods: {

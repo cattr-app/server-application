@@ -178,55 +178,31 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
 
                 foreach ($user as $key => $value) {
                     if (in_array($key, $skipValues, true)) {
-                        continue;
-                    }
-                    if (array_key_exists($key, $result[$u_id]) && in_array($key, $onlyOne, true)) {
-                        continue;
-                    }
 
-                    if (in_array($key, ['p_name', 'p_created_at', 'p_description', 'p_important'], true) && !is_null($p_id)) {
+                    } elseif (array_key_exists($key, $result[$u_id]) && in_array($key, $onlyOne, true)) {
+
+                    } elseif (in_array($key, ['p_name', 'p_created_at', 'p_description', 'p_important'], true) && !is_null($p_id)) {
                         $result[$u_id]['projects'][$p_id][preg_replace('/p_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if (in_array($key, ['t_task_name', 't_priority', 't_status', 't_due_date', 't_estimate', 't_description'], true) && !is_null($t_id)) {
+                    } elseif (in_array($key, ['t_task_name', 't_priority', 't_status', 't_due_date', 't_estimate', 't_description'], true) && !is_null($t_id)) {
                         $result[$u_id]['projects'][$p_id]['tasks'][$t_id][preg_replace('/t_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_day') {
+                    } elseif ($key === 'total_spent_time_by_day') {
                         $result[$u_id]['worked_time_day'][$user->date_at] = $user->total_spent_time_by_day;
-                        continue;
-                    }
-
-                    if (!array_key_exists($key, $result[$u_id]) && in_array($key, $onlyOne, true)) {
+                    } elseif (!array_key_exists($key, $result[$u_id]) && in_array($key, $onlyOne, true)) {
                         $result[$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
-                        continue;
                     }
                 }
             } else {
                 foreach ($user as $key => $value) {
                     if (in_array($key, $skipValues, true)) {
-                        continue;
-                    }
 
-                    if (in_array($key, $onlyOne, true)) {
-                        continue;
-                    }
+                    } elseif (in_array($key, $onlyOne, true)) {
 
-                    if (in_array($key, ['p_name', 'p_created_at', 'p_description', 'p_important'], true) && !is_null($p_id)) {
+                    } elseif (in_array($key, ['p_name', 'p_created_at', 'p_description', 'p_important'], true) && !is_null($p_id)) {
                         $result[$u_id]['projects'][$p_id][preg_replace('/p_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if (in_array($key, ['t_task_name', 't_priority', 't_status', 't_due_date', 't_estimate', 't_description'], true) && !is_null($t_id)) {
+                    } elseif (in_array($key, ['t_task_name', 't_priority', 't_status', 't_due_date', 't_estimate', 't_description'], true) && !is_null($t_id)) {
                         $result[$u_id]['projects'][$p_id]['tasks'][$t_id][preg_replace('/t_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_day') {
+                    } elseif ($key === 'total_spent_time_by_day') {
                         $result[$u_id]['worked_time_day'][$user->date_at] = $user->total_spent_time_by_day;
-                        continue;
                     }
                 }
             }
@@ -280,85 +256,44 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
 
                 foreach ($task as $key => $value) {
                     if (in_array($key, $skipValues, true)) {
-                        continue;
-                    }
 
-                    if (array_key_exists($key, $result[$t_id]) && in_array($key, $onlyOne, true)) {
-                        continue;
-                    }
+                    } elseif (array_key_exists($key, $result[$t_id]) && in_array($key, $onlyOne, true)) {
 
-                    if(in_array($key, ['t_task_name', 't_description', 't_due_date', 't_estimate', 't_priority', 't_status'])) {
+                    } elseif(in_array($key, ['t_task_name', 't_description', 't_due_date', 't_estimate', 't_priority', 't_status'])) {
                         $result[$t_id][preg_replace('/t_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if (in_array($key, ['p_created_at', 'p_description', 'p_important', 'p_name', ], true)) {
+                    } elseif (in_array($key, ['p_created_at', 'p_description', 'p_important', 'p_name', ], true)) {
                         $result[$t_id]['project'][preg_replace('/p_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if (in_array($key, ['u_full_name', 'u_email', 'total_spent_time_by_user'], true) && !array_key_exists('users', $result[$t_id])
+                    } elseif (in_array($key, ['u_full_name', 'u_email', 'total_spent_time_by_user'], true) && !array_key_exists('users', $result[$t_id])
                     || in_array($key, ['u_full_name', 'u_email', 'total_spent_time_by_user'], true) && !in_array($key, array_keys($result[$t_id]['users'][$u_id]))) {
                         $result[$t_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_day') {
+                    } elseif ($key === 'total_spent_time_by_day') {
                         $result[$t_id]['worked_time_day'][$task->date_at] = $task->total_spent_time_by_day;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_user_and_day') {
+                    } elseif ($key === 'total_spent_time_by_user_and_day') {
                         $result[$t_id]['users'][$u_id]['workers_day'][$task->date_at] = $task->total_spent_time_by_user_and_day;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time') {
+                    } elseif ($key === 'total_spent_time') {
                         $result[$t_id][$key] = $task->total_spent_time;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_user') {
+                    } elseif ($key === 'total_spent_time_by_user') {
                         $result[$t_id]['users'][$u_id][$key] = $task->total_spent_time_by_user;
-                        continue;
-                    }
-
-                    if (!array_key_exists($key, $result[$t_id]) && in_array($key, $onlyOne, true)) {
+                    } elseif (!array_key_exists($key, $result[$t_id]) && in_array($key, $onlyOne, true)) {
                         $result[$t_id][$key] = $value;
-                        continue;
-                    }
-
-                    if (array_key_exists($key, $result[$p_id]) && !in_array($key, $onlyOne, true)) {
+                    } elseif (array_key_exists($key, $result[$p_id]) && !in_array($key, $onlyOne, true)) {
                         array_push($result[$t_id][$key], $value);
-                        continue;
-                    } else if (!array_key_exists($key, $result[$t_id]) && !in_array($key, $onlyOne, true)) {
+                    } elseif (!array_key_exists($key, $result[$t_id]) && !in_array($key, $onlyOne, true)) {
                         array_push($result[$t_id], [$key => $value]);
-                        continue;
                     }
                 }
             } else {
                 foreach ($task as $key => $value) {
                     if (in_array($key, $skipValues, true)) {
-                        continue;
-                    }
 
-                    if (in_array($key, $onlyOne, true)) {
-                        continue;
-                    }
+                    } elseif (in_array($key, $onlyOne, true)) {
 
-                    if ($key === 'u_full_name' || $key === 'u_email' || $key === 'total_spent_time_by_user') {
+                    } elseif ($key === 'u_full_name' || $key === 'u_email' || $key === 'total_spent_time_by_user') {
                         $result[$t_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_day') {
+                    } elseif ($key === 'total_spent_time_by_day') {
                         $result[$t_id]['worked_time_day'][$task->date_at] = $task->total_spent_time_by_day;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_user_and_day') {
+                    } elseif ($key === 'total_spent_time_by_user_and_day') {
                         $result[$t_id]['users'][$u_id]['workers_day'][$task->date_at] = $task->total_spent_time_by_user_and_day;
-                        continue;
                     }
                 }
             }
@@ -408,55 +343,26 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
 
 
                 foreach ($project as $key => $value) {
-                    if($key === 'status') {
-                        // dd($key, $value, $project);
-                        // dd($value);
-                    }
                     if (in_array($key, $skipValues, true)) {
-                        continue;
-                    }
 
+                    } elseif (array_key_exists($key, $result[$p_id]) && in_array($key, $onlyOne, true)) {
 
-                    if (array_key_exists($key, $result[$p_id]) && in_array($key, $onlyOne, true)) {
-                        continue;
-                    }
-
-                    if(in_array($key, ['t_task_name', 't_priority', 'status', 't_description', 't_due_date', 't_estimate'])) {
+                    } elseif(in_array($key, ['t_task_name', 't_priority', 'status', 't_description', 't_due_date', 't_estimate'])) {
                         $result[$p_id]['tasks'][$project->t_id][preg_replace('/t_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if (in_array($key, ['u_full_name', 'u_email', 'total_spent_time_by_user'], true)) {
+                    } elseif (in_array($key, ['u_full_name', 'u_email', 'total_spent_time_by_user'], true)) {
                         $result[$p_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_day') {
+                    } elseif ($key === 'total_spent_time_by_day') {
                         $result[$p_id]['worked_time_day'][$project->date_at] = $project->total_spent_time_by_day;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_user_and_day') {
+                    } elseif ($key === 'total_spent_time_by_user_and_day') {
                         $result[$p_id]['users'][$u_id]['workers_day'][$project->date_at] = $project->total_spent_time_by_user_and_day;
-                        continue;
-                    }
-
-                    if ($key === 'status') {
+                    } elseif ($key === 'status') {
                         $value === 'Open' ? $result[$p_id]['statuses']['open'] = true : $result[$p_id]['statuses']['closed'] = true;
-                        continue;
-                    }
-
-                    if (!array_key_exists(preg_replace('/p_/', '', $key, 1), $result[$p_id]) && in_array(preg_replace('/p_/', '', $key, 1), $onlyOne, true)) {
+                    } elseif (!array_key_exists(preg_replace('/p_/', '', $key, 1), $result[$p_id]) && in_array(preg_replace('/p_/', '', $key, 1), $onlyOne, true)) {
                         $result[$p_id][preg_replace('/p_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if (array_key_exists(preg_replace('/p_/', '', $key, 1), $result[$p_id]) && !in_array(preg_replace('/p_/', '', $key, 1), $onlyOne, true)) {
+                    } elseif (array_key_exists(preg_replace('/p_/', '', $key, 1), $result[$p_id]) && !in_array(preg_replace('/p_/', '', $key, 1), $onlyOne, true)) {
                         array_push($result[$p_id][preg_replace('/p_/', '', $key, 1)], $value);
-                        continue;
                     } else if (!array_key_exists($key, $result[$p_id]) && !in_array($key, $onlyOne, true)) {
                         array_push($result[$p_id], [$key => $value]);
-                        continue;
                     }
                     // status, task_name, full_name, email, total_spent_time_by_user, total_spent_time_by_user_and_day, date_at, total_spent_time_by_day *Not Only One
                     // name, created_at, description, important, priority, status, due_date, estimate,
@@ -464,34 +370,19 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
             } else {
                 foreach ($project as $key => $value) {
                     if (in_array($key, $skipValues, true)) {
-                        continue;
-                    }
 
-                    if (in_array($key, $onlyOne, true)) {
-                        continue;
-                    }
+                    } elseif (in_array($key, $onlyOne, true)) {
 
-                    if(in_array($key, ['t_task_name', 'priority', 'status', 't_description', 't_due_date', 't_estimate'])) {
+                    } elseif(in_array($key, ['t_task_name', 'priority', 'status', 't_description', 't_due_date', 't_estimate'])) {
                         $result[$p_id]['tasks'][$project->t_id][preg_replace('/t_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if ($key === 'status') {
+                    } elseif ($key === 'status') {
                         $value === 'Open' ? $result[$p_id]['statuses']['open'] = true : $result[$p_id]['statuses']['closed'] = true;
-                        continue;
-                    }
-                    if (in_array(preg_replace('/u_/', '', $key, 1), ['full_name', 'email', 'total_spent_time_by_user'])) {
+                    } elseif (in_array(preg_replace('/u_/', '', $key, 1), ['full_name', 'email', 'total_spent_time_by_user'])) {
                         $result[$p_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
-                        continue;
-                    }
-
-                    if ($key === 'total_spent_time_by_day') {
+                    } elseif ($key === 'total_spent_time_by_day') {
                         $result[$p_id]['worked_time_day'][$project->date_at] = $project->total_spent_time_by_day;
-                        continue;
-                    }
-                    if ($key === 'total_spent_time_by_user_and_day') {
+                    } elseif ($key === 'total_spent_time_by_user_and_day') {
                         $result[$p_id]['users'][$u_id]['workers_day'][$project->date_at] = $project->total_spent_time_by_user_and_day;
-                        continue;
                     }
                 }
             }

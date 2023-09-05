@@ -2,7 +2,9 @@
 
 namespace App\Http\Requests\Reports\UniversalReport;
 
+use App\Enums\ReportType;
 use App\Enums\UniversalReport;
+use App\Exceptions\Entities\InvalidMainException;
 use App\Http\Requests\CattrFormRequest;
 use Exception;
 use Illuminate\Validation\Rules\Enum;
@@ -28,7 +30,7 @@ class UniversalReportStoreRequest extends CattrFormRequest
                 $table = 'tasks';
                 break;
             default:
-                return throw new Exception('Неправильно передана основа');
+                return throw new InvalidMainException();
 
         }
         return [
@@ -41,7 +43,7 @@ class UniversalReportStoreRequest extends CattrFormRequest
             'dataObjects.*' => "required|int|exists:$table,id",
             'charts' => 'nullable|array',
             'charts.*' => 'required|string|in:'.implode(',', array_map(fn($item) => $item, $enumCase->charts())),
-            'type' => 'required|string|in:company,personal',
+            'type' => ['required', 'string', new Enum(ReportType::class)]
         ];
     }
 }

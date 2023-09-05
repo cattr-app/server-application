@@ -136,23 +136,22 @@
                 setSelectedCharts: 'universalreport/setSelectedCharts',
                 clearStore: 'universalreport/clearStore',
             }),
-            changeMain(main) {
+            async changeMain(main) {
                 this.main = main;
                 this.setMain(main);
-                console.log('create');
+                // console.log('create');
 
-                service.getDataObjectsAndFields(main).then(({ data }) => {
-                    this.setFields(data.data.fields);
-                    this.setDataObjects(data.data.dataObjects);
-                    this.setCharts(data.data.charts);
+                let { data } = await service.getDataObjectsAndFields(main);
+                this.setFields(data.data.fields);
+                this.setDataObjects(data.data.dataObjects);
+                this.setCharts(data.data.charts);
 
-                    let result = {};
-                    Object.keys(data.data.fields).forEach(item => (result[item] = []));
+                let result = {};
+                Object.keys(data.data.fields).forEach(item => (result[item] = []));
 
-                    this.setSelectedCharts([]);
-                    this.setSelectedDataObjects([]);
-                    this.setSelectedFields(result);
-                });
+                this.setSelectedCharts([]);
+                this.setSelectedDataObjects([]);
+                this.setSelectedFields(result);
             },
             change(newOptions) {
                 this.setSelectedDataObjects(newOptions);
@@ -169,62 +168,56 @@
             onChartsChange(charts) {
                 this.setSelectedCharts(charts);
             },
-            create() {
-                service
-                    .create({
+            async create() {
+                try {
+                    const { data } = await service.create({
                         name: this.name,
                         main: this.selectedMain,
                         fields: this.selectedFields,
                         dataObjects: this.selectedDataObjects,
                         charts: this.selectedCharts,
                         type: 'personal',
-                    })
-                    .then(({ data }) => {
-                        this.$Notify({
-                            type: 'success',
-                            title: this.$t('notification.save.success.title'),
-                            message: this.$t('notification.save.success.message'),
-                        });
-                        this.$router.push({ name: 'report.universal.edit', params: { id: data.data.id } });
-                    })
-                    .catch(() => {
-                        this.$Notify({
-                            type: 'error',
-                            title: this.$t('notification.save.error.title'),
-                            message: this.$t('notification.save.error.message'),
-                        });
                     });
+                    this.$Notify({
+                        type: 'success',
+                        title: this.$t('notification.save.success.title'),
+                        message: this.$t('notification.save.success.message'),
+                    });
+                    this.$router.push({ name: 'report.universal.edit', params: { id: data.data.id } });
+                } catch (error) {
+                    this.$Notify({
+                        type: 'error',
+                        title: this.$t('notification.save.error.title'),
+                        message: this.$t('notification.save.error.message'),
+                    });
+                }
             },
-            createForCompany() {
-                service
-                    .create({
+            async createForCompany() {
+                try {
+                    const { data } = await service.create({
                         name: this.name,
                         main: this.selectedMain,
                         fields: this.selectedFields,
                         dataObjects: this.selectedDataObjects,
                         charts: this.selectedCharts,
                         type: 'company',
-                    })
-                    .then(({ data }) => {
-                        this.$Notify({
-                            type: 'success',
-                            title: this.$t('notification.save.success.title'),
-                            message: this.$t('notification.save.success.message'),
-                        });
-
-                        this.$router.push({ name: 'report.universal.edit', params: { id: data.data.id } });
-                    })
-                    .catch(() => {
-                        this.$Notify({
-                            type: 'error',
-                            title: this.$t('notification.save.error.title'),
-                            message: this.$t('notification.save.error.message'),
-                        });
                     });
+                    this.$Notify({
+                        type: 'success',
+                        title: this.$t('notification.save.success.title'),
+                        message: this.$t('notification.save.success.message'),
+                    });
+                    this.$router.push({ name: 'report.universal.edit', params: { id: data.data.id } });
+                } catch (error) {
+                    this.$Notify({
+                        type: 'error',
+                        title: this.$t('notification.save.error.title'),
+                        message: this.$t('notification.save.error.message'),
+                    });
+                }
             },
         },
         beforeDestroy() {
-            console.log(1111111);
             this.clearStore();
         },
     };

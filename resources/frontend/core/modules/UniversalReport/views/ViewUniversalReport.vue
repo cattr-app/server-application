@@ -51,27 +51,25 @@
                 },
             };
         },
-        mounted() {
+        async mounted() {
             this.isDataLoading = true;
-            service
-                .generate(this.$route.params.id, {
-                    start_at:
-                        sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.start') ??
-                        moment().format('YYYY-MM-DD'),
-                    end_at:
-                        sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.end') ??
-                        moment().format('YYYY-MM-DD'),
-                })
-                .then(({ data }) => {
-                    if (Array.isArray(data.data.reportCharts)) {
-                        data.data.reportCharts = {};
-                    }
+            const { data } = await service.generate(this.$route.params.id, {
+                start_at:
+                    sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.start') ??
+                    moment().format('YYYY-MM-DD'),
+                end_at:
+                    sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.end') ??
+                    moment().format('YYYY-MM-DD'),
+            });
 
-                    this.reportName = data.data.reportName;
-                    delete data.data.reportName;
-                    this.data = data.data;
-                    this.isDataLoading = false;
-                });
+            if (Array.isArray(data.data.reportCharts)) {
+                data.data.reportCharts = {};
+            }
+
+            this.reportName = data.data.reportName;
+            delete data.data.reportName;
+            this.data = data.data;
+            this.isDataLoading = false;
         },
     };
 </script>

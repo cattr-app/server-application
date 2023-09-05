@@ -47,12 +47,6 @@
     import { mapGetters, mapMutations } from 'vuex';
     import UniversalReportService from '../service/universal-report.service';
 
-    // import { formatDurationString } from '@/utils/time';
-    // import Preloader from '@/components/Preloader';
-    // import ExportDropdown from '@/components/ExportDropdown';
-    // import { mapGetters } from 'vuex';
-    // import debounce from 'lodash.debounce';
-
     const service = new UniversalReportService();
 
     export default {
@@ -70,16 +64,12 @@
                 setReports: 'universalreport/setReports',
                 clearStore: 'universalreport/clearStore',
             }),
-            selectReport(id) {
-                // console.log(id);
-            },
         },
-        mounted() {
+        async mounted() {
             this.clearStore();
-            service.getReports().then(({ data }) => {
-                // console.log(data.data);
-                this.setReports(data.data);
-            });
+            const { data } = await service.getReports();
+
+            this.setReports(data.data);
         },
     };
 </script>

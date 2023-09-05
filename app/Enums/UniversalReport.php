@@ -105,25 +105,25 @@ enum UniversalReport: string
     {
         return match($this) {
             self::PROJECT => (function() {
-                if(!request()->user()->isAdmin()) {
-                    return request()->user()->projects()->select('id', 'name')->get();
+                if(request()->user()->isAdmin()) {
+                    return Project::select('id', 'name')->get();
                 }
 
-                return Project::select('id', 'name')->get();
+                return request()->user()->projects()->select('id', 'name')->get();
             })(),
             self::USER => (function() {
-                if (!request()->user()->isAdmin()) {
-                    return;
+                if (request()->user()->isAdmin()) {
+                    return User::select('id', 'full_name as name', 'email', 'full_name')->get();
                 }
 
-                return User::select('id', 'full_name as name', 'email', 'full_name')->get();
+                return;
             })(),
             self::TASK => (function() {
-                if(!request()->user()->isAdmin()) {
-                    return request()->user()->tasks()->select('id', 'name')->get();
+                if(request()->user()->isAdmin()) {
+                    return Task::select('id', 'task_name as name')->get();
                 }
 
-                return Task::select('id', 'task_name as name')->get();
+                return request()->user()->tasks()->select('id', 'name')->get();
             })()
         };
     }
@@ -167,9 +167,9 @@ enum UniversalReport: string
     {
         $user = request()->user();
         return match($this) {
-            self::PROJECT => $user->projects()->select('id')->whereIn('id', $data_objects)->get()->count() === count($data_objects) ? true : false,
+            self::PROJECT => $user->projects()->select('id')->whereIn('id', $data_objects)->get()->count() === count($data_objects),
             self::USER => '',
-            self::TASK => $user->tasks()->select('id')->whereIn('id', $data_objects)->get()->count() === count($data_objects) ? true : false,
+            self::TASK => $user->tasks()->select('id')->whereIn('id', $data_objects)->get()->count() === count($data_objects),
         };
     }
 

@@ -127,20 +127,6 @@
                 'selectedCharts',
                 'type',
             ]),
-            // main: {
-            //     get() {
-            //         return this.selectedMain;
-            //     },
-            //     set(newMain) {
-            //         this.setMain(newMain);
-            //         console.log('edit');
-            //         service.getDataObjectsAndFields(newMain).then(({ data }) => {
-            //             this.setFields(data.data.fields);
-            //             this.setDataObjects(data.data.dataObjects);
-            //             this.setCharts(data.data.charts);
-            //         });
-            //     },
-            // },
             reportName: {
                 get() {
                     return this.name;
@@ -219,49 +205,45 @@
             onChartsChange(charts) {
                 this.setSelectedCharts(charts);
             },
-            edit() {
-                service
-                    .edit(this.$route.params.id, {
+            async edit() {
+                try {
+                    await service.edit(this.$route.params.id, {
                         name: this.name,
                         main: this.selectedMain,
                         fields: this.selectedFields,
                         dataObjects: this.selectedDataObjects,
                         charts: this.selectedCharts,
                         type: this.type,
-                    })
-                    .then(({ data }) => {
-                        this.$Notify({
-                            type: 'success',
-                            title: this.$t('notification.save.success.title'),
-                            message: this.$t('notification.save.success.message'),
-                        });
-                    })
-                    .catch(() => {
-                        this.$Notify({
-                            type: 'error',
-                            title: this.$t('notification.save.error.title'),
-                            message: this.$t('notification.save.error.message'),
-                        });
                     });
+                    this.$Notify({
+                        type: 'success',
+                        title: this.$t('notification.save.success.title'),
+                        message: this.$t('notification.save.success.message'),
+                    });
+                } catch (error) {
+                    this.$Notify({
+                        type: 'error',
+                        title: this.$t('notification.save.error.title'),
+                        message: this.$t('notification.save.error.message'),
+                    });
+                }
             },
-            remove() {
-                service
-                    .deleteItem(this.$route.params.id)
-                    .then(({ data }) => {
-                        this.$Notify({
-                            type: 'success',
-                            title: this.$t('notification.record.delete.success.title'),
-                            message: this.$t('notification.record.delete.success.message'),
-                        });
-                        this.$router.push({ name: 'report.universal' });
-                    })
-                    .catch(() => {
-                        this.$Notify({
-                            type: 'error',
-                            title: this.$t('notification.record.delete.error.title'),
-                            message: this.$t('notification.record.delete.error.message'),
-                        });
+            async remove() {
+                try {
+                    await service.deleteItem(this.$route.params.id);
+                    this.$Notify({
+                        type: 'success',
+                        title: this.$t('notification.record.delete.success.title'),
+                        message: this.$t('notification.record.delete.success.message'),
                     });
+                    this.$router.push({ name: 'report.universal' });
+                } catch (error) {
+                    this.$Notify({
+                        type: 'error',
+                        title: this.$t('notification.record.delete.error.title'),
+                        message: this.$t('notification.record.delete.error.message'),
+                    });
+                }
             },
         },
     };

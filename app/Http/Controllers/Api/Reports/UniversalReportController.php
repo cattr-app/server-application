@@ -2,7 +2,9 @@
 
 namespace App\Http\Controllers\Api\Reports;
 
+use App\Enums\ReportType;
 use App\Enums\UniversalReport;
+use App\Exceptions\Entities\NotEnoughRightsException;
 use App\Helpers\ReportHelper;
 use App\Http\Requests\Reports\UniversalReport\UniversalReportEditRequest;
 use App\Http\Requests\Reports\UniversalReport\UniversalReportRequest;
@@ -27,20 +29,20 @@ class UniversalReportController
     public function index()
     {
         $items = [
-            'personal' => [],
-            'company' => [],
+            ReportType::COMPANY->value => [],
+            ReportType::PERSONAL->value => [],
         ];
         $user = request()->user();
 
         if (request()->user()->isAdmin()) {
             ModelsUniversalReport::select('id', 'name', 'type')
                 ->where([
-                    ['type', '=', 'company', 'or'],
+                    ['type', '=', ReportType::COMPANY->value, 'or'],
                     ['user_id', '=', request()->user()->id, 'or']
                 ])
                 ->get()
                 ->each(function($item) use (&$items) {
-                    $item->type === 'company' ? array_push($items['company'], $item->toArray()) : array_push($items['personal'], $item->toArray());
+                    $items[$item->type][] = $item->toArray();
                 });
 
             return responder()->success($items)->respond();
@@ -49,7 +51,7 @@ class UniversalReportController
         ModelsUniversalReport::select('id', 'name', 'data_objects', 'main', 'type')->get()->each(function($item) use (&$items) {
             if ($item->main->checkAccess($item->data_objects)) {
                 unset($item->data_objects, $item->main);
-                $item->type === 'company' ? array_push($items['company'], $item->toArray()) : array_push($items['personal'], $item->toArray());
+                $items[$item->type][] = $item->toArray();
             }
         });
 
@@ -77,7 +79,7 @@ class UniversalReportController
     {
         $user = $request->user();
 
-        if ($request->type === 'company') {
+        if ($request->input('type') === ReportType::COMPANY->value) {
             if ($request->user()->isAdmin()) {
                 $report = $user->universalReports()->create([
                     'name' => $request->name,
@@ -87,9 +89,9 @@ class UniversalReportController
                     'fields' => $request->fields,
                     'charts' => $request->charts,
                 ]);
-                return responder()->success(['message' => "Отчёт успешно сохранён", 'id' => $report->id])->respond(200);
+                return responder()->success(['message' => "The report was saved successfully", 'id' => $report->id])->respond(200);
             } else {
-                return responder()->error(500, 'Права пользователя не позволяют сохранить отчёт для компании')->respond(500);
+                return throw new NotEnoughRightsException('User rights do not allow saving the report for the company');
             }
         }
 
@@ -102,7 +104,7 @@ class UniversalReportController
             'charts' => $request->charts,
         ]);
 
-        return responder()->success(['message' => "Отчёт успешно сохранён", 'id' => $report->id])->respond(200);
+        return responder()->success(['message' => "The report was saved successfully", 'id' => $report->id])->respond(200);
     }
 
     public function show(UniversalReportShowRequest $request)
@@ -112,7 +114,7 @@ class UniversalReportController
 
     public function edit(UniversalReportEditRequest $request)
     {
-        if($request->type === 'company') {
+        if($request->input('type') === ReportType::COMPANY->value) {
             if($request->user()->isAdmin()) {
                 ModelsUniversalReport::where('id', $request->id)->update([
                     'name' => $request->name,
@@ -122,6 +124,8 @@ class UniversalReportController
                     'fields' => $request->fields,
                     'charts' => $request->charts,
                 ]);
+            } else {
+                return throw new NotEnoughRightsException('User rights do not allow saving the report for the company');
             }
         }
 
