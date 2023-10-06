@@ -657,7 +657,7 @@ class IntervalController extends ItemController
             $filters['task_id'] = ['in', $requestData['task_id']];
         }
 
-        if(isset($requestData['user_id'])){
+        if (isset($requestData['user_id'])) {
             $filters['user_id'] = $requestData['user_id'];
         }
 
