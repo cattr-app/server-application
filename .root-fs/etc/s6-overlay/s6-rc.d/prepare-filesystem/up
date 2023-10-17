@@ -1,3 +1,9 @@
 if { mkdir -p /var/lib/nginx/tmp }
 if { mkdir -p /var/log/nginx }
+if { mkdir -p /app/storage/framework/logs }
+if { mkdir -p /app/storage/framework/views }
+if { mkdir -p /app/storage/framework/cache }
+if { mkdir -p /app/storage/framework/sessions }
+if { mkdir -p /app/storage/app/screenshots }
+if { mkdir -p /app/storage/app/modules }
 chown -R www:www /app/storage

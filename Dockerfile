@@ -60,6 +60,8 @@ COPY --from=builder /app /app
 
 COPY --chown=root:root .root-fs /
 
+RUN rm -rf /var/run && ln -s /run /var/run
+
 VOLUME /app/storage
 
 #HEALTHCHECK --interval=5m --timeout=10s \
