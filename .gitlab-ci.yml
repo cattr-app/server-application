@@ -21,7 +21,7 @@ sentry_upload:
 
 build:
   image:
-    name: gcr.io/kaniko-project/executor:latest
+    name: gcr.io/kaniko-project/executor:debug
     entrypoint: [""]
   stage: build
   before_script:
