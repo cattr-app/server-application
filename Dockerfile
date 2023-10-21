@@ -56,11 +56,12 @@ ENV APP_KEY $APP_KEY
 ENV PUSHER_APP_SECRET $PUSHER_APP_SECRET
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=20000
 
+RUN rm -rf /var/run
+
 COPY --from=builder /app /app
 
 COPY --chown=root:root .root-fs /
 
-RUN rm -rf /var/run
 RUN ln -s /run /var/run
 
 VOLUME /app/storage
