@@ -60,7 +60,8 @@ COPY --from=builder /app /app
 
 COPY --chown=root:root .root-fs /
 
-RUN rm -rf /var/run && ln -s /run /var/run
+RUN rm -rf /var/run
+RUN ln -s /run /var/run
 
 VOLUME /app/storage
 
