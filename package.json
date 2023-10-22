@@ -102,8 +102,8 @@
   },
   "packageManager": "yarn@3.5.0",
   "engines": {
-    "node": "^16.19.1",
-    "yarn": "^3.4.1"
+    "node": "^18",
+    "yarn": "^3.4"
   },
   "resolutions": {
     "webpack-bundle-analyzer": "4.8.0"
