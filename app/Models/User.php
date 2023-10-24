@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\Role;
 use App\Mail\ResetPassword;
 use App\Scopes\UserAccessScope;
 use App\Traits\HasRole;
@@ -58,6 +59,8 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property int $permanent_screenshots
  * @property \Illuminate\Support\Carbon $last_activity
  * @property-read bool $online
+ * @property-read bool $can_view_team_tab
+ * @property-read bool $can_create_task
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
  * @property-read int|null $notifications_count
  * @property-read Collection|Project[] $projects
@@ -209,6 +212,8 @@ class User extends Authenticatable
 
     protected $appends = [
         'online',
+        'can_view_team_tab',
+        'can_create_task',
     ];
 
     public function projects(): BelongsToMany
@@ -261,6 +266,24 @@ class User extends Authenticatable
     {
         return Attribute::make(
             set: static fn($value) => Hash::needsRehash($value) ? Hash::make($value) : $value,
+        );
+    }
+
+    protected function canViewTeamTab(): Attribute
+    {
+        $self = $this;
+        return Attribute::make(
+            get: static fn() => $self->hasRole([Role::ADMIN, Role::MANAGER, Role::AUDITOR])
+                || $self->hasRoleInAnyProject([Role::MANAGER, Role::AUDITOR]),
+        );
+    }
+
+    protected function canCreateTask(): Attribute
+    {
+        $self = $this;
+        return Attribute::make(
+            get: static fn() => $self->hasRole([Role::ADMIN, Role::MANAGER])
+                || $self->hasRoleInAnyProject(Role::MANAGER),
         );
     }
 
