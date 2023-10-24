@@ -1,6 +1,6 @@
 if { mkdir -p /var/lib/nginx/tmp }
 if { mkdir -p /var/log/nginx }
-if { mkdir -p /app/storage/framework/logs }
+if { mkdir -p /app/storage/logs }
 if { mkdir -p /app/storage/framework/views }
 if { mkdir -p /app/storage/framework/cache }
 if { mkdir -p /app/storage/framework/sessions }
