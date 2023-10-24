@@ -283,7 +283,7 @@ class User extends Authenticatable
         $self = $this;
         return Attribute::make(
             get: static fn() => $self->hasRole([Role::ADMIN, Role::MANAGER])
-                || $self->hasRoleInAnyProject(Role::MANAGER),
+                || $self->hasRoleInAnyProject(Role::MANAGER, Role::USER),
         );
     }
 
