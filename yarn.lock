@@ -1368,7 +1368,7 @@ __metadata:
     vue-eslint-parser: ^9.1.1
     vue-i18n: ^8.28.2
     vue-kanban: ^1.8.0
-    vue-lazyload: ^1.3.4
+    vue-lazyload: ^3.0.0
     vue-loader: ^15.10.1
     vue-loading-skeleton: ^1.1.9
     vue-moment: ^4.1.0
@@ -11292,10 +11292,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-lazyload@npm:^1.3.4":
-  version: 1.3.4
-  resolution: "vue-lazyload@npm:1.3.4"
-  checksum: b597665022c8078f8235d6be21cac5554577e2d7c90983183fe61a9dba76be8cd5fedae89582a024ecba11b965775ad79e4cf79c3cb9fc7848cef2383505cb3a
+"vue-lazyload@npm:^3.0.0":
+  version: 3.0.0
+  resolution: "vue-lazyload@npm:3.0.0"
+  checksum: 1f60fbeb1d7b3a2bac8a3f364242dca3a3f96d6cf0bcea44a00633a397bdcb4aca75b826b6b51fff43dc3f9d2a314f215e56e2bd55a82c500d206adbaf697ca2
   languageName: node
   linkType: hard
 
