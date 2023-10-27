@@ -42,7 +42,7 @@
     "lodash": "^4.17.21",
     "mapbox-gl": "^2.14.1",
     "moment": "^2.29.4",
-    "moment-timezone": "^0.5.42",
+    "moment-timezone": "^0.5.43",
     "path-browserify": "^1.0.1",
     "pusher-js": "^8.0.2",
     "semver": "^7.5.0",
