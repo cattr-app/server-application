@@ -1312,8 +1312,8 @@ __metadata:
   dependencies:
     "@babel/core": ^7.21.4
     "@babel/eslint-parser": ^7.21.3
-    "@cattr/gitlab-integration": "*"
-    "@cattr/redmine-integration": "*"
+    "@cattr/gitlab-integration": ^2.0.4
+    "@cattr/redmine-integration": ^4.0.4
     "@cattr/ui-kit": ^1.3.9
     "@commitlint/cli": ^17.6.1
     "@commitlint/config-conventional": ^17.6.1
@@ -1350,9 +1350,9 @@ __metadata:
     lodash: ^4.17.21
     mapbox-gl: ^2.14.1
     moment: ^2.29.4
-    moment-timezone: ^0.5.42
+    moment-timezone: ^0.5.43
     path-browserify: ^1.0.1
-    postcss: ^8.4.23
+    postcss: ^8.4.31
     prettier: 2.8.8
     pusher-js: ^8.0.2
     resolve-url-loader: ^5.0.0
@@ -1385,17 +1385,17 @@ __metadata:
   languageName: unknown
   linkType: soft
 
-"@cattr/gitlab-integration@npm:*":
-  version: 2.0.3
-  resolution: "@cattr/gitlab-integration@npm:2.0.3::__archiveUrl=https%3A%2F%2Fgit.amazingcat.net%2Fapi%2Fv4%2Fprojects%2F274%2Fpackages%2Fnpm%2F%40cattr%2Fgitlab-integration%2F-%2F%40cattr%2Fgitlab-integration-2.0.3.tgz"
-  checksum: b0841e6ad3578fb2566eaee4959fb0542b66558de1a9e0b704bb0a0451db21d6421b9581330482af400f46483566264183adbeb2a8bcc623a66e25ece884d26d
+"@cattr/gitlab-integration@npm:^2.0.4":
+  version: 2.0.4
+  resolution: "@cattr/gitlab-integration@npm:2.0.4::__archiveUrl=https%3A%2F%2Fgit.amazingcat.net%2Fapi%2Fv4%2Fprojects%2F274%2Fpackages%2Fnpm%2F%40cattr%2Fgitlab-integration%2F-%2F%40cattr%2Fgitlab-integration-2.0.4.tgz"
+  checksum: f1bd09a5936f4f1ea11d377ccdeb04df7196b408032f31197dd57352ab51aa5cb802928d17a7ac29b01a5b8c88790371032f13a65fe2efd97362be20c5624f4e
   languageName: node
   linkType: hard
 
-"@cattr/redmine-integration@npm:*":
-  version: 4.0.3
-  resolution: "@cattr/redmine-integration@npm:4.0.3::__archiveUrl=https%3A%2F%2Fgit.amazingcat.net%2Fapi%2Fv4%2Fprojects%2F272%2Fpackages%2Fnpm%2F%40cattr%2Fredmine-integration%2F-%2F%40cattr%2Fredmine-integration-4.0.3.tgz"
-  checksum: 68515f6c5861cb4fbd69eacf6f6bc2b56c3d3452dcd98b7a94275aed95d23aeeecd950ae94e68b50f57defa4390eeff2114a70cddd013d01063ed3289638706b
+"@cattr/redmine-integration@npm:^4.0.4":
+  version: 4.0.4
+  resolution: "@cattr/redmine-integration@npm:4.0.4::__archiveUrl=https%3A%2F%2Fgit.amazingcat.net%2Fapi%2Fv4%2Fprojects%2F272%2Fpackages%2Fnpm%2F%40cattr%2Fredmine-integration%2F-%2F%40cattr%2Fredmine-integration-4.0.4.tgz"
+  checksum: 85a781e3b206bc345d348836a9401fa06f55e20adb3daeecff8962775ea7abb3da39763fedd7e707b5a7c87bc058c8f11595603d0ead988ed010301804d5930e
   languageName: node
   linkType: hard
 
@@ -7914,12 +7914,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"moment-timezone@npm:^0.5.42":
-  version: 0.5.42
-  resolution: "moment-timezone@npm:0.5.42"
+"moment-timezone@npm:^0.5.43":
+  version: 0.5.43
+  resolution: "moment-timezone@npm:0.5.43"
   dependencies:
     moment: ^2.29.4
-  checksum: d4d5d68d4b98e4309e8692ddb6b790ab6b375414ea4e45ef3144bfbc689ab14e3089c4561aea43471fd58595328f43fc554231c9d8fc753b460ca0a29a105693
+  checksum: 8075c897ed8a044f992ef26fe8cdbcad80caf974251db424cae157473cca03be2830de8c74d99341b76edae59f148c9d9d19c1c1d9363259085688ec1cf508d0
   languageName: node
   linkType: hard
 
@@ -9077,7 +9077,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"postcss@npm:^8.2.14, postcss@npm:^8.2.15, postcss@npm:^8.4.14, postcss@npm:^8.4.19, postcss@npm:^8.4.23":
+"postcss@npm:^8.2.14, postcss@npm:^8.2.15, postcss@npm:^8.4.14, postcss@npm:^8.4.19":
   version: 8.4.23
   resolution: "postcss@npm:8.4.23"
   dependencies:
@@ -9085,6 +9085,17 @@ __metadata:
     picocolors: ^1.0.0
     source-map-js: ^1.0.2
   checksum: 8bb9d1b2ea6e694f8987d4f18c94617971b2b8d141602725fedcc2222fdc413b776a6e1b969a25d627d7b2681ca5aabb56f59e727ef94072e1b6ac8412105a2f
+  languageName: node
+  linkType: hard
+
+"postcss@npm:^8.4.31":
+  version: 8.4.31
+  resolution: "postcss@npm:8.4.31"
+  dependencies:
+    nanoid: ^3.3.6
+    picocolors: ^1.0.0
+    source-map-js: ^1.0.2
+  checksum: 1d8611341b073143ad90486fcdfeab49edd243377b1f51834dc4f6d028e82ce5190e4f11bb2633276864503654fb7cab28e67abdc0fbf9d1f88cad4a0ff0beea
   languageName: node
   linkType: hard
 

@@ -1,1 +1,1 @@
-* * * * * php /app/artisan schedule:run
+* * * * * php82 /app/artisan schedule:run

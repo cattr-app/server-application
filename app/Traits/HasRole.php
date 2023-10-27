@@ -8,12 +8,22 @@ use Cache;
 trait HasRole
 {
     /**
+     * Determine if the user has admin role.
+     *
+     * @return bool
+     */
+    final public function isAdmin(): bool
+    {
+        return $this->hasRole(Role::ADMIN);
+    }
+
+    /**
      * Determine if the user has role.
      *
      * @param Role $role
      * @return bool
      */
-    public function hasRole(Role|array $role): bool
+    final public function hasRole(Role|array $role): bool
     {
         if (is_array($role)) {
             foreach ($role as $e) {
@@ -29,22 +39,12 @@ trait HasRole
     }
 
     /**
-     * Determine if the user has admin role.
-     *
-     * @return bool
-     */
-    public function isAdmin(): bool
-    {
-        return $this->hasRole(Role::ADMIN);
-    }
-
-    /**
      * Returns the user role in the project.
      *
      * @param $projectId
      * @return int|null
      */
-    public function getProjectRole(int $projectId): ?int
+    final public function getProjectRole(int $projectId): ?int
     {
         $project = self::projects()
             ->where(['project_id' => $projectId])
@@ -60,13 +60,17 @@ trait HasRole
      * @param int $projectId
      * @return bool
      */
-    public function hasProjectRole(Role|array $role, int $projectId): bool
+    final public function hasProjectRole(Role|array $role, int $projectId): bool
     {
         $self = $this;
         $roles = Cache::store('octane')->remember(
             "role_project_$self->id",
             config('cache.role_caching_ttl'),
-            static fn() => $self->projectsRelation()->get()->collect()->keyBy('project_id')->all(),
+            static fn() => $self->projectsRelation()
+                ->get(['role_id', 'project_id'])
+                ->keyBy('project_id')
+                ->map(static fn($el) => $el->role_id)
+                ->all(),
         );
 
         if (!isset($roles[$projectId])) {
@@ -75,16 +79,50 @@ trait HasRole
 
         if (is_array($role)) {
             foreach ($role as $e) {
-                if ($roles[$projectId]['role_id'] === $e->value) {
+                if ($roles[$projectId] === $e->value) {
                     return true;
                 }
             }
+        } elseif ($roles[$projectId] === $role->value) {
+            return true;
         }
 
         if ($role === Role::ANY) {
             return true;
         }
 
-        return $roles[$projectId]['role_id'] === $role->value;
+        return false;
+    }
+
+    /**
+     * Determine if the user has a role in any project.
+     *
+     * @param Role|array $role
+     * @return bool
+     */
+    final public function hasRoleInAnyProject(Role|array $role): bool
+    {
+        $self = $this;
+        $roles = Cache::store('octane')->remember(
+            "role_any_project_$self->id",
+            config('cache.role_caching_ttl'),
+            static fn() => $self->projectsRelation()
+                ->get(['role_id'])
+                ->keyBy('role_id')
+                ->map(static fn($el) => $el->role_id)
+                ->all(),
+        );
+
+        if (is_array($role)) {
+            foreach ($role as $e) {
+                if (isset($roles[$e->value])) {
+                    return true;
+                }
+            }
+        } elseif (isset($roles[$role->value])) {
+            return true;
+        }
+
+        return false;
     }
 }
