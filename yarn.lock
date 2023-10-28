@@ -1482,7 +1482,7 @@ __metadata:
     vue-i18n: ^8.28.2
     vue-kanban: ^1.8.0
     vue-lazyload: ^1.3.4
-    vue-loader: ^15.10.1
+    vue-loader: ^15.11.1
     vue-loading-skeleton: ^1.1.9
     vue-moment: ^4.1.0
     vue-multiselect: ^2.1.7
@@ -11422,9 +11422,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-loader@npm:^15.10.1":
-  version: 15.10.1
-  resolution: "vue-loader@npm:15.10.1"
+"vue-loader@npm:^15.11.1":
+  version: 15.11.1
+  resolution: "vue-loader@npm:15.11.1"
   dependencies:
     "@vue/component-compiler-utils": ^3.1.0
     hash-sum: ^1.0.2
@@ -11437,9 +11437,11 @@ __metadata:
   peerDependenciesMeta:
     cache-loader:
       optional: true
+    prettier:
+      optional: true
     vue-template-compiler:
       optional: true
-  checksum: 753a6b6da29e8c0dc328365424cc43757573a2242b0dced5cf36aab775818b622a2bb831c053b43eabfc604755b6b957c196520a66da19bc634b245cb7b44a2b
+  checksum: 509a816d45d4f3de6fbe8aed2267e3113637950e61597bb7647cd43328d4eab9c70235f5161ab761f0a2162471f69271ae54b2a806663c2094a10266434fa6a3
   languageName: node
   linkType: hard
 
