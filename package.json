@@ -95,9 +95,9 @@
     "sass-loader": "^13.2.2",
     "sass-resources-loader": "^2.2.5",
     "vue-eslint-parser": "^9.1.1",
-    "vue-loader": "^15.10.1",
+    "vue-loader": "^15.11.1",
     "vue-template-compiler": "^2.7.14",
-    "webpack": "^5.80.0",
+    "webpack": "^5.89.0",
     "workbox-webpack-plugin": "^6.5.4"
   },
   "packageManager": "yarn@3.5.0",
