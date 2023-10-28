@@ -16,6 +16,7 @@ The demo app is available here: [demo.cattr.app](https://demo.cattr.app)
 
 ```
 composer install
+php artisan key:generate
 yarn
 ```
 
@@ -26,6 +27,12 @@ php artisan migrate --seed --seeder=InitialSeeder
 ```
 
 App will not start without seeding of InitialSeeder
+
+After seeding it, run `php artisan cattr:make:admin` and you will be able to login with following credentials
+```
+admin@cattr.app
+password
+```
 
 ### Run Local server
 
