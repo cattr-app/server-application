@@ -1449,7 +1449,7 @@ __metadata:
     eslint-plugin-vue: ^9.11.0
     fabric: ^5.3.0
     husky: ^8.0.3
-    js-md5: ^0.7.3
+    js-md5: ^0.8.0
     laravel-echo: ^1.15.1
     laravel-mix: ^6.0.49
     laravel-mix-alias: ^1.0.3
@@ -7025,10 +7025,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"js-md5@npm:^0.7.3":
-  version: 0.7.3
-  resolution: "js-md5@npm:0.7.3"
-  checksum: 1ed9f7f23a2ad224fc159ba7e074617d20e6b501ea96319091ae4c7cfe722cc472c4e05366fd25708311fb66dc2deb1b82e51c730f9ccd910e64b67ba36d3a75
+"js-md5@npm:^0.8.0":
+  version: 0.8.3
+  resolution: "js-md5@npm:0.8.3"
+  checksum: b8578232d8004978036f114aa4d46ad7c06ca36b2a6889f241762263424cfea6099701ec5394a1b463ad95f18f74a2acb8c6033b5ebd6a188d67a9e704b41e05
   languageName: node
   linkType: hard
 
