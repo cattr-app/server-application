@@ -1473,7 +1473,7 @@ __metadata:
     sass-loader: ^13.2.2
     sass-resources-loader: ^2.2.5
     semver: ^7.5.4
-    validator: ^13.9.0
+    validator: ^13.11.0
     vee-validate: ^3.4.15
     vue: ^2.7.14
     vue-avatar: ^2.3.3
@@ -5791,7 +5791,7 @@ __metadata:
 
 "fsevents@patch:fsevents@~2.3.2#~builtin<compat/fsevents>":
   version: 2.3.2
-  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=df0bf1"
+  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=18f3a7"
   dependencies:
     node-gyp: latest
   conditions: os=darwin
@@ -9757,7 +9757,7 @@ __metadata:
 
 "resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.14.2#~builtin<compat/resolve>, resolve@patch:resolve@^1.19.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.9.0#~builtin<compat/resolve>":
   version: 1.22.3
-  resolution: "resolve@patch:resolve@npm%3A1.22.3#~builtin<compat/resolve>::version=1.22.3&hash=c3c19d"
+  resolution: "resolve@patch:resolve@npm%3A1.22.3#~builtin<compat/resolve>::version=1.22.3&hash=07638b"
   dependencies:
     is-core-module: ^2.12.0
     path-parse: ^1.0.7
@@ -11073,11 +11073,11 @@ __metadata:
 
 "typescript@patch:typescript@^4.6.4 || ^5.0.0#~builtin<compat/typescript>":
   version: 5.0.2
-  resolution: "typescript@patch:typescript@npm%3A5.0.2#~builtin<compat/typescript>::version=5.0.2&hash=85af82"
+  resolution: "typescript@patch:typescript@npm%3A5.0.2#~builtin<compat/typescript>::version=5.0.2&hash=701156"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: b63cb742fbb9aeb3085e002ad8f10d5fd963606aa4d6b3b65b4e76c396ff09739f03b5dbae08e1698c3bce9d5619d3f67aeb7ee470ed4016bd345b3cfe37b54a
+  checksum: bdbf3d0aac0d6cf010fbe0536753dc19f278eb4aba88140dcd25487dfe1c56ca8b33abc0dcd42078790a939b08ebc4046f3e9bb961d77d3d2c3cfa9829da4d53
   languageName: node
   linkType: hard
 
@@ -11280,10 +11280,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"validator@npm:^13.9.0":
-  version: 13.9.0
-  resolution: "validator@npm:13.9.0"
-  checksum: e2c936f041f61faa42bafd17c6faddf939498666cd82e88d733621c286893730b008959f4cb12ab3e236148a4f3805c30b85e3dcf5e0efd8b0cbcd36c02bfc0c
+"validator@npm:^13.11.0":
+  version: 13.11.0
+  resolution: "validator@npm:13.11.0"
+  checksum: d1e0c27022681420756da25bc03eb08d5f0c66fb008f8ff02ebc95812b77c6be6e03d3bd05cf80ca702e23eeb73dadd66b4b3683173ea2a0bc7cc72820bee131
   languageName: node
   linkType: hard
 
@@ -11778,7 +11778,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.60.0, webpack@npm:^5.76.2, webpack@npm:^5.80.0":
+"webpack@npm:^5.60.0, webpack@npm:^5.80.0":
   version: 5.80.0
   resolution: "webpack@npm:5.80.0"
   dependencies:
