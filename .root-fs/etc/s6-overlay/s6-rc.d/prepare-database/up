@@ -1,1 +1,1 @@
-with-contenv s6-envuidgid www php /app/artisan migrate --force --seed --seeder=InitialSeeder
+with-contenv s6-envuidgid www php82 /app/artisan migrate --force --seed --seeder=InitialSeeder

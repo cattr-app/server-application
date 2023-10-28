@@ -1,8 +1,6 @@
-import { hasRole, hasProjectRole } from '@/utils/user';
-
 export default class TaskPolicy {
     static create(user) {
-        return hasRole(user, 'admin') || hasRole(user, 'manager') || hasProjectRole(user, 'manager');
+        return user.can_create_task;
     }
 
     static update(user, model) {
