@@ -46,7 +46,7 @@
     "path-browserify": "^1.0.1",
     "pusher-js": "^8.0.2",
     "semver": "^7.5.4",
-    "validator": "^13.9.0",
+    "validator": "^13.11.0",
     "vee-validate": "^3.4.15",
     "vue": "^2.7.14",
     "vue-avatar": "^2.3.3",
