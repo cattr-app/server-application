@@ -45,7 +45,7 @@ class TimeIntervalPolicy
             );
         }
 
-        return $user->hasProjectRole(Role::USER, $projectId);
+        return $user->hasProjectRole([Role::USER, Role::MANAGER], $projectId);
     }
 
     public function update(User $user, TimeInterval $timeInterval): bool
