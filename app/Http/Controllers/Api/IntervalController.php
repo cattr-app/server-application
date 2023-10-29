@@ -18,7 +18,7 @@ use App\Http\Requests\Interval\TrackAppRequest;
 use App\Jobs\AssignAppsToTimeInterval;
 use App\Models\TrackedApplication;
 use App\Models\User;
-use Event;
+use CatEvent;
 use Filter;
 use App\Models\TimeInterval;
 use Carbon\Carbon;
@@ -26,7 +26,6 @@ use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Support\Arr;
-use Log;
 use Settings;
 use Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
@@ -417,7 +416,7 @@ class IntervalController extends ItemController
             ]
         ])->get()->toBase();
 
-        Event::dispatch(Filter::getBeforeActionEventName(), [$intervals, $request]);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), [$intervals, $request]);
 
 
         $intervals->each(static fn(Model $item) => Filter::process(
@@ -430,7 +429,7 @@ class IntervalController extends ItemController
             )
         ));
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$intervals, $request]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$intervals, $request]);
 
         $intervals->each(static fn(Model $item) => $item->save());
 
@@ -489,11 +488,11 @@ class IntervalController extends ItemController
 
         $itemsQuery = $this->getQuery(['where' => ['id' => ['in', $intervalIds]]]);
 
-        Event::dispatch(Filter::getBeforeActionEventName(), [$intervalIds, $request]);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), [$intervalIds, $request]);
 
         $itemsQuery->eachById(static fn($item) => Filter::process(Filter::getActionFilterName(), $item)->delete());
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$intervalIds, $request]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$intervalIds, $request]);
 
         return responder()->success()->respond(204);
     }
@@ -531,7 +530,7 @@ class IntervalController extends ItemController
         if ($request->hasFile('screenshot') && optional($request->file('screenshot'))->isValid()) {
             $path = $request->file('screenshot')->store('tmp');
 
-            Event::listen(
+            CatEvent::listen(
                 Filter::getAfterActionEventName(),
                 static function ($data) use ($path, $screenshotService) {
                     $screenshotService->saveScreenshot(Storage::path($path), $data);
@@ -540,7 +539,7 @@ class IntervalController extends ItemController
             );
         }
 
-        Event::listen(
+        CatEvent::listen(
             Filter::getAfterActionEventName(),
             static function ($data) {
                 if (User::find($data['user_id'])->web_and_app_monitoring) {
@@ -616,11 +615,11 @@ class IntervalController extends ItemController
 
         $itemsQuery = $this->getQuery($filters);
 
-        Event::dispatch(Filter::getBeforeActionEventName(), $filters);
+        CatEvent::dispatch(Filter::getBeforeActionEventName(), $filters);
 
         $timeIntervals = Filter::process(Filter::getActionFilterName(), $itemsQuery->get());
 
-        Event::dispatch(Filter::getAfterActionEventName(), [$timeIntervals, $filters]);
+        CatEvent::dispatch(Filter::getAfterActionEventName(), [$timeIntervals, $filters]);
 
         $totalTime = $timeIntervals->sum(static fn($el) => Carbon::parse($el->end_at)->diffInSeconds($el->start_at));
 
@@ -658,6 +657,10 @@ class IntervalController extends ItemController
             $filters['task_id'] = ['in', $requestData['task_id']];
         }
 
+        if (isset($requestData['user_id'])) {
+            $filters['user_id'] = $requestData['user_id'];
+        }
+
         $itemsQuery = $this->getQuery($filters ? ['where' => $filters] : []);
 
         $tasks = $itemsQuery
@@ -669,7 +672,6 @@ class IntervalController extends ItemController
 
                 foreach ($taskIntervals as $userId => $userIntervals) {
                     $taskTime = 0;
-
                     foreach ($userIntervals as $interval) {
                         $taskTime += Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
                     }
@@ -687,8 +689,8 @@ class IntervalController extends ItemController
                     ];
 
                     $totalTime += $taskTime;
-                }
 
+                }
                 return $task;
             })
             ->values();

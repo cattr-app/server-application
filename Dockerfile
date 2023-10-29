@@ -13,7 +13,7 @@ ENV APP_ENV $APP_ENV
 ENV YARN_ENABLE_GLOBAL_CACHE=true
 ENV S6_CMD_WAIT_FOR_SERVICES_MAXTIME=20000
 
-COPY --chown=root:root .root-fs/php /php
+COPY --chown=root:root .root-fs/etc/php82 /etc/php82
 
 WORKDIR /app
 
@@ -22,10 +22,10 @@ COPY --chown=www:www . /app
 USER www:www
 
 RUN set -x && \
-    composer require -n --no-ansi --no-install --no-update --no-audit $BACKEND_MODULES && \
-    composer update -n --no-autoloader --no-install --no-ansi $BACKEND_MODULES && \
-    composer install -n --no-dev --no-cache --no-ansi --no-autoloader --no-dev && \
-    composer dump-autoload -n --optimize --apcu --classmap-authoritative
+    php /usr/bin/composer.phar require -n --no-ansi --no-install --no-update --no-audit $BACKEND_MODULES && \
+    php /usr/bin/composer.phar update -n --no-autoloader --no-install --no-ansi $BACKEND_MODULES && \
+    php /usr/bin/composer.phar install -n --no-dev --no-cache --no-ansi --no-autoloader --no-dev && \
+    php /usr/bin/composer.phar dump-autoload -n --optimize --apcu --classmap-authoritative
 
 RUN set -x && \
     yarn && \

@@ -83,12 +83,46 @@ trait HasRole
                     return true;
                 }
             }
+        } elseif ($roles[$projectId] === $role->value) {
+            return true;
         }
 
         if ($role === Role::ANY) {
             return true;
         }
 
-        return $roles[$projectId] === $role->value;
+        return false;
+    }
+
+    /**
+     * Determine if the user has a role in any project.
+     *
+     * @param Role|array $role
+     * @return bool
+     */
+    final public function hasRoleInAnyProject(Role|array $role): bool
+    {
+        $self = $this;
+        $roles = Cache::store('octane')->remember(
+            "role_any_project_$self->id",
+            config('cache.role_caching_ttl'),
+            static fn() => $self->projectsRelation()
+                ->get(['role_id'])
+                ->keyBy('role_id')
+                ->map(static fn($el) => $el->role_id)
+                ->all(),
+        );
+
+        if (is_array($role)) {
+            foreach ($role as $e) {
+                if (isset($roles[$e->value])) {
+                    return true;
+                }
+            }
+        } elseif (isset($roles[$role->value])) {
+            return true;
+        }
+
+        return false;
     }
 }
