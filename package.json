@@ -38,7 +38,7 @@
     "dotenv": "^16.0.3",
     "fabric": "^5.3.0",
     "js-md5": "^0.8.0",
-    "laravel-echo": "^1.15.1",
+    "laravel-echo": "^1.15.3",
     "lodash": "^4.17.21",
     "mapbox-gl": "^2.14.1",
     "moment": "^2.29.4",

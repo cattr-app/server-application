@@ -1450,7 +1450,7 @@ __metadata:
     fabric: ^5.3.0
     husky: ^8.0.3
     js-md5: ^0.8.0
-    laravel-echo: ^1.15.1
+    laravel-echo: ^1.15.3
     laravel-mix: ^6.0.49
     laravel-mix-alias: ^1.0.3
     laravel-mix-bundle-analyzer: ^1.0.5
@@ -7226,10 +7226,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"laravel-echo@npm:^1.15.1":
-  version: 1.15.1
-  resolution: "laravel-echo@npm:1.15.1"
-  checksum: db66163610b2ea8cf5232dff759646e1f90cf4adca2d3b1f1bff021528f039965c9534d362c33bc3707cb71a006d98196ae57ef350ea6e4e609cadcf2f721d42
+"laravel-echo@npm:^1.15.3":
+  version: 1.15.3
+  resolution: "laravel-echo@npm:1.15.3"
+  checksum: 28bd80365228c1402b3b13ff55d3c6bc2e91fe04c0d6412a3752c70b491eec66228e61c93d1e00aaf33cfd22a42a59506e9ff7b522d9a73b7d012112d35482af
   languageName: node
   linkType: hard
 
