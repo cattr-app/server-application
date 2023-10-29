@@ -1450,7 +1450,7 @@ __metadata:
     fabric: ^5.3.0
     husky: ^8.0.3
     js-md5: ^0.8.0
-    laravel-echo: ^1.15.1
+    laravel-echo: ^1.15.3
     laravel-mix: ^6.0.49
     laravel-mix-alias: ^1.0.3
     laravel-mix-bundle-analyzer: ^1.0.5
@@ -1482,7 +1482,7 @@ __metadata:
     vue-i18n: ^8.28.2
     vue-kanban: ^1.8.0
     vue-lazyload: ^1.3.4
-    vue-loader: ^15.10.1
+    vue-loader: ^15.11.1
     vue-loading-skeleton: ^1.1.9
     vue-moment: ^4.1.0
     vue-multiselect: ^2.1.7
@@ -7226,10 +7226,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"laravel-echo@npm:^1.15.1":
-  version: 1.15.1
-  resolution: "laravel-echo@npm:1.15.1"
-  checksum: db66163610b2ea8cf5232dff759646e1f90cf4adca2d3b1f1bff021528f039965c9534d362c33bc3707cb71a006d98196ae57ef350ea6e4e609cadcf2f721d42
+"laravel-echo@npm:^1.15.3":
+  version: 1.15.3
+  resolution: "laravel-echo@npm:1.15.3"
+  checksum: 28bd80365228c1402b3b13ff55d3c6bc2e91fe04c0d6412a3752c70b491eec66228e61c93d1e00aaf33cfd22a42a59506e9ff7b522d9a73b7d012112d35482af
   languageName: node
   linkType: hard
 
@@ -11422,9 +11422,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"vue-loader@npm:^15.10.1":
-  version: 15.10.1
-  resolution: "vue-loader@npm:15.10.1"
+"vue-loader@npm:^15.11.1":
+  version: 15.11.1
+  resolution: "vue-loader@npm:15.11.1"
   dependencies:
     "@vue/component-compiler-utils": ^3.1.0
     hash-sum: ^1.0.2
@@ -11437,9 +11437,11 @@ __metadata:
   peerDependenciesMeta:
     cache-loader:
       optional: true
+    prettier:
+      optional: true
     vue-template-compiler:
       optional: true
-  checksum: 753a6b6da29e8c0dc328365424cc43757573a2242b0dced5cf36aab775818b622a2bb831c053b43eabfc604755b6b957c196520a66da19bc634b245cb7b44a2b
+  checksum: 509a816d45d4f3de6fbe8aed2267e3113637950e61597bb7647cd43328d4eab9c70235f5161ab761f0a2162471f69271ae54b2a806663c2094a10266434fa6a3
   languageName: node
   linkType: hard
 
