@@ -1440,7 +1440,7 @@ __metadata:
     clean-webpack-plugin: ^4.0.0
     color-convert: ^2.0.1
     compression-webpack-plugin: ^10.0.0
-    core-js: ^3.30.1
+    core-js: ^3.33.1
     cross-env: ^7.0.3
     css-loader: ^6.7.3
     dotenv: ^16.1.3
@@ -4183,10 +4183,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^2.6.9 || ^3.1.4, core-js@npm:^3.30.1":
+"core-js@npm:^2.6.9 || ^3.1.4":
   version: 3.30.1
   resolution: "core-js@npm:3.30.1"
   checksum: 6d4a00b488694d4c715c424e15dfef31433ac7aa395c39c518a0cfacec918ada1c716fed74682033197e0164e23bbf38bfd598ee9a239c4aaa590ab1ba862ac8
+  languageName: node
+  linkType: hard
+
+"core-js@npm:^3.33.1":
+  version: 3.33.1
+  resolution: "core-js@npm:3.33.1"
+  checksum: 3a95003b0e77995203587117f3bde7f4e96adf434b6b78033dbe60347ffe38b2bac31eafab6a4cc641e5766062846b52f336ab4553fc0902c278959af4778e53
   languageName: node
   linkType: hard
 
