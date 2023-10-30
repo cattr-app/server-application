@@ -4414,16 +4414,16 @@
         },
         {
             "name": "nwidart/laravel-modules",
-            "version": "v10.0.0",
+            "version": "10.0.2",
             "source": {
                 "type": "git",
                 "url": "https://github.com/nWidart/laravel-modules.git",
-                "reference": "35e514f13cb8ae8dce093e9794785fea27319d81"
+                "reference": "ef67a7367223ab96539136116d69405d1c21c321"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/nWidart/laravel-modules/zipball/35e514f13cb8ae8dce093e9794785fea27319d81",
-                "reference": "35e514f13cb8ae8dce093e9794785fea27319d81",
+                "url": "https://api.github.com/repos/nWidart/laravel-modules/zipball/ef67a7367223ab96539136116d69405d1c21c321",
+                "reference": "ef67a7367223ab96539136116d69405d1c21c321",
                 "shasum": ""
             },
             "require": {
@@ -4483,7 +4483,7 @@
             ],
             "support": {
                 "issues": "https://github.com/nWidart/laravel-modules/issues",
-                "source": "https://github.com/nWidart/laravel-modules/tree/v10.0.0"
+                "source": "https://github.com/nWidart/laravel-modules/tree/10.0.2"
             },
             "funding": [
                 {
@@ -4491,7 +4491,7 @@
                     "type": "github"
                 }
             ],
-            "time": "2023-02-16T11:08:15+00:00"
+            "time": "2023-10-18T19:14:29+00:00"
         },
         {
             "name": "nyholm/psr7",
