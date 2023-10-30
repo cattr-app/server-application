@@ -1440,7 +1440,7 @@ __metadata:
     clean-webpack-plugin: ^4.0.0
     color-convert: ^2.0.1
     compression-webpack-plugin: ^10.0.0
-    core-js: ^3.30.1
+    core-js: ^3.33.1
     cross-env: ^7.0.3
     css-loader: ^6.7.3
     dotenv: ^16.1.3
@@ -4183,10 +4183,17 @@ __metadata:
   languageName: node
   linkType: hard
 
-"core-js@npm:^2.6.9 || ^3.1.4, core-js@npm:^3.30.1":
+"core-js@npm:^2.6.9 || ^3.1.4":
   version: 3.30.1
   resolution: "core-js@npm:3.30.1"
   checksum: 6d4a00b488694d4c715c424e15dfef31433ac7aa395c39c518a0cfacec918ada1c716fed74682033197e0164e23bbf38bfd598ee9a239c4aaa590ab1ba862ac8
+  languageName: node
+  linkType: hard
+
+"core-js@npm:^3.33.1":
+  version: 3.33.1
+  resolution: "core-js@npm:3.33.1"
+  checksum: 3a95003b0e77995203587117f3bde7f4e96adf434b6b78033dbe60347ffe38b2bac31eafab6a4cc641e5766062846b52f336ab4553fc0902c278959af4778e53
   languageName: node
   linkType: hard
 
@@ -5792,7 +5799,7 @@ __metadata:
 
 "fsevents@patch:fsevents@~2.3.2#~builtin<compat/fsevents>":
   version: 2.3.2
-  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=18f3a7"
+  resolution: "fsevents@patch:fsevents@npm%3A2.3.2#~builtin<compat/fsevents>::version=2.3.2&hash=df0bf1"
   dependencies:
     node-gyp: latest
   conditions: os=darwin
@@ -9757,7 +9764,7 @@ __metadata:
 
 "resolve@patch:resolve@^1.10.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.14.2#~builtin<compat/resolve>, resolve@patch:resolve@^1.19.0#~builtin<compat/resolve>, resolve@patch:resolve@^1.9.0#~builtin<compat/resolve>":
   version: 1.22.3
-  resolution: "resolve@patch:resolve@npm%3A1.22.3#~builtin<compat/resolve>::version=1.22.3&hash=07638b"
+  resolution: "resolve@patch:resolve@npm%3A1.22.3#~builtin<compat/resolve>::version=1.22.3&hash=c3c19d"
   dependencies:
     is-core-module: ^2.12.0
     path-parse: ^1.0.7
@@ -11084,11 +11091,11 @@ __metadata:
 
 "typescript@patch:typescript@^4.6.4 || ^5.0.0#~builtin<compat/typescript>":
   version: 5.0.2
-  resolution: "typescript@patch:typescript@npm%3A5.0.2#~builtin<compat/typescript>::version=5.0.2&hash=701156"
+  resolution: "typescript@patch:typescript@npm%3A5.0.2#~builtin<compat/typescript>::version=5.0.2&hash=85af82"
   bin:
     tsc: bin/tsc
     tsserver: bin/tsserver
-  checksum: bdbf3d0aac0d6cf010fbe0536753dc19f278eb4aba88140dcd25487dfe1c56ca8b33abc0dcd42078790a939b08ebc4046f3e9bb961d77d3d2c3cfa9829da4d53
+  checksum: b63cb742fbb9aeb3085e002ad8f10d5fd963606aa4d6b3b65b4e76c396ff09739f03b5dbae08e1698c3bce9d5619d3f67aeb7ee470ed4016bd345b3cfe37b54a
   languageName: node
   linkType: hard
 
@@ -11791,7 +11798,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"webpack@npm:^5.60.0, webpack@npm:^5.80.0":
+"webpack@npm:^5.60.0":
   version: 5.80.0
   resolution: "webpack@npm:5.80.0"
   dependencies:
