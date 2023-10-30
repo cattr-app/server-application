@@ -355,16 +355,16 @@
         },
         {
             "name": "czproject/git-php",
-            "version": "v4.1.0",
+            "version": "v4.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/czproject/git-php.git",
-                "reference": "bb195e30442bc5206b30fa9a304e20ea8e96458f"
+                "reference": "e257f2c3b43fe8fef19ddb5727b604416b423107"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/czproject/git-php/zipball/bb195e30442bc5206b30fa9a304e20ea8e96458f",
-                "reference": "bb195e30442bc5206b30fa9a304e20ea8e96458f",
+                "url": "https://api.github.com/repos/czproject/git-php/zipball/e257f2c3b43fe8fef19ddb5727b604416b423107",
+                "reference": "e257f2c3b43fe8fef19ddb5727b604416b423107",
                 "shasum": ""
             },
             "require": {
@@ -395,15 +395,15 @@
             ],
             "support": {
                 "issues": "https://github.com/czproject/git-php/issues",
-                "source": "https://github.com/czproject/git-php/tree/v4.1.0"
+                "source": "https://github.com/czproject/git-php/tree/v4.2.0"
             },
             "funding": [
                 {
-                    "url": "https://www.paypal.com/donate?hosted_button_id=EPSKR7MGVV7KC",
-                    "type": "custom"
+                    "url": "https://www.janpecha.cz/donate/git-php/",
+                    "type": "other"
                 }
             ],
-            "time": "2022-12-10T18:23:32+00:00"
+            "time": "2023-07-12T09:14:30+00:00"
         },
         {
             "name": "dflydev/dot-access-data",
