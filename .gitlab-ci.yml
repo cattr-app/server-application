@@ -36,6 +36,7 @@ build:
       --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
       --build-arg "SENTRY_DSN=$SENTRY_DSN"
       --build-arg "APP_VERSION=$APP_TAG"
+      --ignore-var-run
 
 tag_latest:
   image:
