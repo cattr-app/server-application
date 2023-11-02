@@ -22,7 +22,7 @@
                 <preloader v-if="isLoading"></preloader>
                 <ul>
                     <div v-for="(o, key) in filteredOptions" :key="key">
-                        <p>{{ key }}</p>
+                        <p>{{ $t(`universal-report.${key}`) }}</p> 
                         <li
                             v-for="option in o"
                             :key="option"
@@ -242,5 +242,8 @@
             overflow: hidden;
             max-height: 360px;
         }
+    }
+    p{
+       margin-left: 16px;
     }
 </style>

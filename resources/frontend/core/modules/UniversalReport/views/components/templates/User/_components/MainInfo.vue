@@ -67,3 +67,10 @@
         },
     };
 </script>
+
+<style lang="scss" scoped>
+.data-entry {
+    margin: 16px 0;
+}
+
+</style>

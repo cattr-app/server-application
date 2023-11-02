@@ -3,6 +3,11 @@
     "universal-report": "Universal report"
   },
   "universal-report": {
+    "main":"Main settings",
+    "users":"Users settings",
+    "projects":"Projectors settings",
+    "calculations":"Calculations settings",
+    "report_timezone": "Report timezone: {0}",
     "personal-reports": "Personal reports",
     "company-reports": "Company reports",
     "tasks": "Tasks",
@@ -16,7 +21,6 @@
     "project_information": "Project information",
     "task_information": "Task information",
     "worked_by_day": "Worked by day:"
-
   },
   "field": {
     "data-objects": {
@@ -28,8 +32,9 @@
       "user": {
         "main": {
           "name": "User name",
-          "email": "User email"
-        },
+          "email": "User email",
+          "full_name": "User name"
+        }, 
         "tasks": {
           "task_name": "Task name",
           "priority": "Priority",
@@ -95,7 +100,8 @@
         },
         "users": {
           "name": "User name",
-          "email": "User email"
+          "email": "User email",
+          "full_name": "User name"
         },
         "projects": {
           "name": "Project name",
@@ -114,7 +120,6 @@
           "total_spent_time_day_users_separately": "Worked by all users individually"
         }
       }
-
     }
   }
 }

@@ -51,9 +51,10 @@
                 </div>
             </div>
         </div>
-        <div v-if="report.users" class="data-entry">
+        <div v-if="report.users" class="data-entry members">
             <h3>{{ $t('field.members') }}</h3>
             <at-table
+                class="attable"
                 :columns="[
                     { title: $t('field.full_name'), key: 'full_name' },
                     { title: $t('field.email'), key: 'email' },
@@ -78,33 +79,40 @@
 </template>
 
 <script>
-    import { formatDurationString } from '@/utils/time';
-    import { Skeleton } from 'vue-loading-skeleton';
-    import Charts from '../../../Charts';
+import { formatDurationString } from '@/utils/time';
+import { Skeleton } from 'vue-loading-skeleton';
+import Charts from '../../../Charts';
 
-    export default {
-        props: {
-            report: {
-                type: Object,
-                required: true,
-            },
-            charts: {
-                type: Object,
-                required: true,
-                default: () => {},
-            },
-            period: {
-                type: Array,
-                required: true,
-                default: () => [],
-            },
+export default {
+    props: {
+        report: {
+            type: Object,
+            required: true,
         },
-        components: {
-            Skeleton,
-            Charts,
+        charts: {
+            type: Object,
+            required: true,
+            default: () => {},
         },
-        methods: {
-            formatDurationString,
+        period: {
+            type: Array,
+            required: true,
+            default: () => [],
         },
-    };
+    },
+    components: {
+        Skeleton,
+        Charts,
+    },
+    methods: {
+        formatDurationString,
+    },
+};
 </script>
+
+<style lang="scss" scoped>
+.data-entry {
+    margin: 16px 0;
+}
+
+</style>

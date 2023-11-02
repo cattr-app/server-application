@@ -1,97 +1,121 @@
 <template>
     <div>
-        <at-collapse simple class="list">
-            <at-collapse-item v-for="(report, id) in formatedReports" :key="id" class="list__item">
-                <div slot="title" class="item-header">
-                    <div>
-                        <div class="row flex-middle">
-                            <div class="col-xs-10 col-md-10 col-lg-13">
-                                <span class="h5">{{ report?.task_name ?? '' }}</span>
-                            </div>
-                            <div class="col-xs-offset-3 col-xs-7 col-md-3 col-lg-2">
-                                <span class="h4">{{ formatDurationString(report?.total_spent_time ?? 0) }}</span>
-                            </div>
-                            <div class="col-xs-5 col-md-9 col-lg-8 d-xs-none">
-                                <at-progress
-                                    :percent="
-                                        getUserPercentage(report?.total_spent_time ?? 0, report?.total_spent_time ?? 0)
-                                    "
-                                    class="time-percentage"
-                                    status="success"
-                                    :stroke-width="15"
-                                />
-                            </div>
+        <div v-for="(report, id) in formatedReports" :key="id" class="list__item">
+            <div slot="title" class="item-header">
+                <div>
+                    <div class="row flex-middle">
+                        <div class="left">
+                            <span class="h5">{{ report?.task_name ?? '' }}</span>
                         </div>
+                        <div class="center">
+                            <span class="h4">{{ formatDurationString(report?.total_spent_time ?? 0) }}</span>
+                        </div>
+                        <!-- <div class="right"> -->
+                        <at-progress
+                            :percent="getUserPercentage(report?.total_spent_time ?? 0, report?.total_spent_time ?? 0)"
+                            class="right time-percentage"
+                            status="success"
+                            :stroke-width="15"
+                        />
+                        <!-- </div> -->
                     </div>
                 </div>
-                <div>
-                    <MainInfo :report="report" :charts="charts" :period="period" />
-                </div>
-            </at-collapse-item>
-        </at-collapse>
+            </div>
+            <div>
+                <MainInfo :report="report" :charts="charts" :period="period" />
+            </div>
+        </div>
     </div>
 </template>
 
 <script>
-    import { formatDurationString } from '@/utils/time';
-    import MainInfo from './_components/MainInfo';
-    import moment from 'moment';
+import { formatDurationString } from '@/utils/time';
+import MainInfo from './_components/MainInfo';
+import moment from 'moment';
 
-    export default {
-        name: 'Task',
-        props: {
-            reports: {
-                type: Object,
-                required: true,
-                default: () => {},
-            },
-            charts: {
-                type: Object,
-                required: true,
-                default: () => {},
-            },
-            period: {
-                type: Array,
-                required: true,
-                default: () => [],
-            },
+export default {
+    name: 'Task',
+    props: {
+        reports: {
+            type: Object,
+            required: true,
+            default: () => {},
         },
-        components: {
-            MainInfo,
+        charts: {
+            type: Object,
+            required: true,
+            default: () => {},
         },
-        data() {
-            return {
-                formatedReports: [],
-            };
+        period: {
+            type: Array,
+            required: true,
+            default: () => [],
         },
-        mounted() {
-            this.formatingTasksReport();
-            this.$watch(
-                'reports',
-                val => {
-                    console.log(1);
-                    this.formatingTasksReport();
-                },
-                {
-                    deep: true,
-                },
-            );
-        },
-        methods: {
-            formatDurationString,
-            getUserPercentage(minutes, totalTime) {
-                return Math.floor((minutes * 100) / totalTime);
+    },
+    components: {
+        MainInfo,
+    },
+    data() {
+        return {
+            formatedReports: [],
+        };
+    },
+    mounted() {
+        this.formatingTasksReport();
+        this.$watch(
+            'reports',
+            val => {
+                console.log(1);
+                this.formatingTasksReport();
             },
-            formatingTasksReport() {
-                for (let key in this.reports) {
-                    let report = this.reports[key];
+            {
+                deep: true,
+            },
+        );
+    },
+    methods: {
+        formatDurationString,
+        getUserPercentage(minutes, totalTime) {
+            return Math.floor((minutes * 100) / totalTime);
+        },
+        formatingTasksReport() {
+            for (let key in this.reports) {
+                let report = this.reports[key];
 
-                    this.$set(this.formatedReports, this.formatedReports.length, {
-                        id: key,
-                        ...report,
-                    });
-                }
-            },
+                this.$set(this.formatedReports, this.formatedReports.length, {
+                    id: key,
+                    ...report,
+                });
+            }
         },
-    };
+    },
+};
 </script>
+
+<style scoped lang="scss">
+// .item-header {
+//     margin: 16px 0;
+// }
+.left {
+    flex: 2;
+}
+.center {
+    white-space: pre;
+}
+.right {
+    flex: 1;
+
+    &::v-deep .at-progress__text {
+        display: none;
+    }
+}
+.flex-middle {
+    gap: 16px;
+}
+.data-entry {
+    margin: 16px 0;
+}
+.item-header{
+    margin-bottom: 16px;
+}
+</style>
