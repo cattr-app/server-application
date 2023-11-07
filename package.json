@@ -68,7 +68,7 @@
     "@babel/core": "^7.21.4",
     "@babel/eslint-parser": "^7.22.15",
     "@commitlint/cli": "^17.6.1",
-    "@commitlint/config-conventional": "^17.6.1",
+    "@commitlint/config-conventional": "^18.1.0",
     "autoprefixer": "^10.4.16",
     "chokidar": "^3.5.3",
     "clean-webpack-plugin": "^4.0.0",
