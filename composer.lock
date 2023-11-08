@@ -3617,16 +3617,16 @@
         },
         {
             "name": "matanyadaev/laravel-eloquent-spatial",
-            "version": "3.1.2",
+            "version": "3.2.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/MatanYadaev/laravel-eloquent-spatial.git",
-                "reference": "cda683405d53d5a69938b844c52618d27f865b76"
+                "reference": "30e0a854f382a9d65497b7eed97c34846f0e04b3"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/MatanYadaev/laravel-eloquent-spatial/zipball/cda683405d53d5a69938b844c52618d27f865b76",
-                "reference": "cda683405d53d5a69938b844c52618d27f865b76",
+                "url": "https://api.github.com/repos/MatanYadaev/laravel-eloquent-spatial/zipball/30e0a854f382a9d65497b7eed97c34846f0e04b3",
+                "reference": "30e0a854f382a9d65497b7eed97c34846f0e04b3",
                 "shasum": ""
             },
             "require": {
@@ -3642,8 +3642,8 @@
                 "jubeki/laravel-code-style": "^1.2",
                 "nunomaduro/larastan": "^1.0|^2.4",
                 "orchestra/testbench": "^8.0",
-                "pestphp/pest": "^1.22.4",
-                "pestphp/pest-plugin-laravel": "^1.4"
+                "pestphp/pest": "^2.0",
+                "pestphp/pest-plugin-laravel": "^2.0"
             },
             "type": "library",
             "extra": {
@@ -3672,9 +3672,9 @@
             "homepage": "https://github.com/matanyadaev/laravel-eloquent-spatial",
             "support": {
                 "issues": "https://github.com/MatanYadaev/laravel-eloquent-spatial/issues",
-                "source": "https://github.com/MatanYadaev/laravel-eloquent-spatial/tree/3.1.2"
+                "source": "https://github.com/MatanYadaev/laravel-eloquent-spatial/tree/3.2.0"
             },
-            "time": "2023-02-28T21:34:41+00:00"
+            "time": "2023-06-25T20:45:11+00:00"
         },
         {
             "name": "monolog/monolog",
