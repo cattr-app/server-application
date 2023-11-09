@@ -204,6 +204,10 @@ Route::group([
         $router->put('time-intervals/app', [IntervalController::class, 'trackApp'])
             ->name('intervals.app');
 
+        // Offline Sync
+        $router->post('offline-sync/upload-intervals', [IntervalController::class, 'uploadOfflineIntervals'])
+            ->name('offline_sync.upload_intervals');
+
         //Time routes
         $router->any('time/total', [IntervalController::class, 'total'])
             ->name('time.total');

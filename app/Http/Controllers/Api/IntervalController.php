@@ -15,6 +15,7 @@ use App\Http\Requests\Interval\PutScreenshotRequest;
 use App\Http\Requests\Interval\ScreenshotRequest;
 use App\Http\Requests\Interval\ShowIntervalRequest;
 use App\Http\Requests\Interval\TrackAppRequest;
+use App\Http\Requests\Interval\UploadOfflineIntervalsRequest;
 use App\Jobs\AssignAppsToTimeInterval;
 use App\Models\TrackedApplication;
 use App\Models\User;
@@ -25,11 +26,14 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use MessagePack\MessagePack;
 use Settings;
 use Storage;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
+use Validator;
 
 class IntervalController extends ItemController
 {
@@ -502,7 +506,8 @@ class IntervalController extends ItemController
         return responder()->success(
             TrackedApplication::create(
                 array_merge(
-                    $request->validated(), ['user_id' => auth()->user()->id]
+                    $request->validated(),
+                    ['user_id' => auth()->user()->id]
                 )
             )
         )->respond();
@@ -588,6 +593,78 @@ class IntervalController extends ItemController
         $this->screenshotService->saveScreenshot($data['screenshot'], $interval);
 
         return responder()->success()->respond(204);
+    }
+
+    public function uploadOfflineIntervals(UploadOfflineIntervalsRequest $request): JsonResponse
+    {
+        /**
+         * @var UploadedFile $file
+         */
+        $file = $request->validated()['file'];
+        $intervals = MessagePack::unpack($file->getContent());
+
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+        $validatorClass = new CreateTimeIntervalRequest();
+        $creationResult = [];
+        $user = [
+            'full_name' => 'Unknown User',
+            'email' => 'unknown@cattr.app'
+        ];
+
+        if (count($intervals) > 0) {
+            $user = User::whereId($intervals[0]['user_id'])->first(['email', 'full_name']);
+        }
+
+        $canCreate = fn($interval) => $request->user()->can(
+            'create',
+            [
+                TimeInterval::class,
+                $interval['user_id'],
+                $interval['task_id'],
+                false,
+            ],
+        );
+
+        foreach ($intervals as $interval) {
+            $interval['user'] = $user;
+
+            if ($canCreate($interval) === false) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'message' => __('validation.offline-sync.cannot_create_interval'),
+                    'success' => false
+                ];
+                continue;
+            }
+
+            $intervalValidator = Validator::make(
+                $interval,
+                $validatorClass->getRules($interval['user_id'], $interval['start_at'], $interval['end_at'])
+            );
+
+            if ($intervalValidator->fails()) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'message' => __('validation.offline-sync.time_interval_already_exist'),
+                    'success' => false
+                ];
+                continue;
+            }
+
+            $requestData = $intervalValidator->validated();
+            $requestData['start_at'] = Carbon::parse($requestData['start_at'])->setTimezone($timezone);
+            $requestData['end_at'] = Carbon::parse($requestData['end_at'])->setTimezone($timezone);
+
+            TimeInterval::create($requestData);
+            $creationResult[] = [
+                'interval' => $interval,
+                'message' => __('validation.offline-sync.time_interval_added'),
+                'success' => true
+            ];
+        }
+
+
+        return responder()->success($creationResult)->respond();
     }
 
     /**
@@ -689,7 +766,6 @@ class IntervalController extends ItemController
                     ];
 
                     $totalTime += $taskTime;
-
                 }
                 return $task;
             })

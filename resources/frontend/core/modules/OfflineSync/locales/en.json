@@ -1,0 +1,17 @@
+{
+  "navigation": {
+    "offline_sync": "Offline Sync"
+  },
+  "offline_sync": {
+    "intervals": "Intervals",
+    "intervals_file": "Intervals file",
+    "upload": "Upload",
+    "added_intervals": "Added intervals",
+    "user": "User",
+    "task_id": "Task",
+    "start_at":  "Start",
+    "end_at": "End",
+    "result":  "Result",
+    "total_time": "Duration"
+  }
+}

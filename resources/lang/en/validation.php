@@ -105,7 +105,14 @@ return [
         ],
     ],
 
-    'time_interval_does_not_exist' => 'The time for this interval already exists.',
+    'time_interval_already_exist' => 'The time for this interval already exists.',
+
+    'offline-sync' => [
+        'cannot_create_interval' => 'Cannot create interval, make sure You are a member of the project or assigned to the task',
+        'time_interval_already_exist' => 'The time for this interval already exists.',
+        'time_interval_added' => 'Added',
+        'intervals_file_wrong_extension' => 'File extension should be .cattr'
+    ],
 
     /*
     |--------------------------------------------------------------------------
