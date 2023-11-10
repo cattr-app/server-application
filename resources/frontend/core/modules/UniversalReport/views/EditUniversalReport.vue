@@ -9,7 +9,7 @@
             <div class="controls-row__item controls-row__item--left-auto">
                 <small v-if="companyData.timezone">
                     {{ $t('universal-report.report_timezone', [companyData.timezone]) }}
-                </small>  
+                </small>
             </div>
             <ExportDropdown
                 class="export-btn dropdown controls-row__btn controls-row__item"
@@ -65,16 +65,20 @@
             @on-change="onChartsChange"
         />
         <div class="controls-row">
-            <at-button class="controls-row__item" type="primary" @click="edit">Сохранить</at-button>
+            <at-button class="controls-row__item" type="primary" @click="edit">{{
+                $t('universal-report.save')
+            }}</at-button>
             <at-button class="controls-row__item" type="success">
                 <router-link
                     class="link"
                     :to="{ name: 'report.universal.view', params: { id: this.$route.params.id } }"
                 >
-                    Сформировать
+                    {{ $t('universal-report.generate') }}
                 </router-link>
             </at-button>
-            <at-button class="controls-row__item" type="error" @click="remove">Удалить</at-button>
+            <at-button class="controls-row__item" type="error" @click="remove">{{
+                $t('universal-report.remove')
+            }}</at-button>
         </div>
     </div>
 </template>
@@ -84,10 +88,15 @@ import Calendar from '@/components/Calendar';
 import ExportDropdown from '@/components/ExportDropdown';
 import { ValidationProvider } from 'vee-validate';
 import ObjDataSelect from './ObjectsDataSelect';
+import UniversalReportService from '../service/universal-report.service';
 import VSelect from './Select';
 import FieldsSelect from './FieldsSelect';
 import { mapGetters, mapMutations } from 'vuex';
-import UniversalReportService from '../service/universal-report.service';
+import {
+    getStartDate,
+    getStartOfDayInTimezone,
+    getEndOfDayInTimezone,
+} from '@/utils/time';
 
 const service = new UniversalReportService();
 
@@ -207,10 +216,40 @@ export default {
                 this.setSelectedDataObjects([]);
                 this.setSelectedFields(result);
             });
-        },
+        }, 
         onCalendarChange({ type, start, end }) {
+            this.datepickerDateStart = getStartDate(start);
+            this.datepickerDateEnd = getStartDate(end);
             this.setCalendarData({ type, start, end });
+            this.fetchData();
         },
+        onUsersSelect(uids) {
+                this.userIds = uids;
+                this.fetchData();
+            },
+        onProjectsChange(projectIDs) {
+                this.projectsList = projectIDs;
+                this.fetchData();
+            },
+        async onExport(format) {
+            try {
+                const { data } = await service.downloadReport(
+                    getStartOfDayInTimezone(this.datepickerDateStart, this.companyData.timezone),
+                    getEndOfDayInTimezone(this.datepickerDateEnd, this.companyData.timezone),
+                    this.$route.params.id,
+                    format,
+                );
+
+                window.open(data.data.url, '_blank');
+            } catch ({ response }) {
+                if (process.env.NODE_ENV === 'development') {
+                    console.log(response ? response : 'request to reports is canceled');
+                }
+            }
+        },
+        // onCalendarChange({ type, start, end }) {
+        //     this.setCalendarData({ type, start, end });
+        // },
         onFieldsChange(fields) {
             console.log(fields);
             this.setSelectedFields(fields);

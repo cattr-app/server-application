@@ -10,6 +10,7 @@ use Illuminate\Contracts\Queue\ShouldBeUnique;
 use Illuminate\Contracts\Queue\ShouldQueue;
 use Illuminate\Foundation\Bus\Dispatchable;
 use Illuminate\Queue\InteractsWithQueue;
+use Illuminate\Support\Facades\Log;
 use Illuminate\Support\Str;
 use Illuminate\Validation\ValidationException;
 use Maatwebsite\Excel\Excel;
@@ -57,10 +58,9 @@ class GenerateAndSendReport implements ShouldQueue, ShouldBeUnique
         $this->user->notify((new ReportGenerated($fileName, self::STORAGE_DRIVE)));
 
         $dir = $this->dir;
-
-        dispatch(
-            static fn() => Storage::drive(self::STORAGE_DRIVE)->deleteDirectory("reports/$dir")
-        )->delay(now()->addHour());
+        // dispatch(
+        //     static fn() => Storage::drive(self::STORAGE_DRIVE)->deleteDirectory("reports/$dir")
+        // )->delay(now()->addHour());
     }
 
     public function uniqueId(): string

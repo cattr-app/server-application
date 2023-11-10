@@ -40,4 +40,16 @@ export default class UniversalReportService extends ReportService {
     deleteItem(id) {
         return axios.post('report/universal-report/remove', { id });
     }
+
+    downloadReport(startAt, endAt, id, format) {
+        const params = {
+            start_at: startAt,
+            end_at: endAt,
+            id
+        };
+        console.log(params);
+        return axios.post(`report/universal-report/download`, params, {
+            headers: { Accept: format },
+        });
+    }
 }

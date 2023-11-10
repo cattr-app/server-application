@@ -241,7 +241,8 @@ Route::group([
         $router->post('report/universal-report/edit', [UniversalReportController::class, 'edit']);
         $router->post('report/universal-report/generate', [UniversalReportController::class, '__invoke']);
         $router->post('report/universal-report/remove', [UniversalReportController::class, 'destroy']);
-
+        $router->post('report/universal-report/download', [UniversalReportController::class, 'download'])
+            ->name('report.universal-report.download');    
         // About
         $router->get('about', [AboutController::class, '__invoke'])
             ->name('about.list');

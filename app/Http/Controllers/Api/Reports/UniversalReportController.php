@@ -41,14 +41,14 @@ class UniversalReportController
                     ['user_id', '=', request()->user()->id, 'or']
                 ])
                 ->get()
-                ->each(function($item) use (&$items) {
+                ->each(function ($item) use (&$items) {
                     $items[$item->type][] = $item->toArray();
                 });
 
             return responder()->success($items)->respond();
         }
 
-        ModelsUniversalReport::select('id', 'name', 'data_objects', 'main', 'type')->get()->each(function($item) use (&$items) {
+        ModelsUniversalReport::select('id', 'name', 'data_objects', 'main', 'type')->get()->each(function ($item) use (&$items) {
             if ($item->main->checkAccess($item->data_objects)) {
                 unset($item->data_objects, $item->main);
                 $items[$item->type][] = $item->toArray();
@@ -56,7 +56,6 @@ class UniversalReportController
         });
 
         return responder()->success($items)->respond();
-
     }
 
     public function getMains()
@@ -72,7 +71,7 @@ class UniversalReportController
             'fields' => $main->fields(),
             'dataObjects' => $main->dataObjects(),
             'charts' => $main->charts(),
-            ])->respond();
+        ])->respond();
     }
 
     public function store(UniversalReportStoreRequest $request)
@@ -114,8 +113,8 @@ class UniversalReportController
 
     public function edit(UniversalReportEditRequest $request)
     {
-        if($request->input('type') === ReportType::COMPANY->value) {
-            if($request->user()->isAdmin()) {
+        if ($request->input('type') === ReportType::COMPANY->value) {
+            if ($request->user()->isAdmin()) {
                 ModelsUniversalReport::where('id', $request->id)->update([
                     'name' => $request->name,
                     'type' => $request->type,
@@ -142,7 +141,6 @@ class UniversalReportController
 
     public function __invoke(UniversalReportRequest $request): JsonResponse
     {
-        // dd(Carbon::parse());
         return responder()->success(
             UniversalReportExport::init(
                 $request->id,
@@ -162,22 +160,42 @@ class UniversalReportController
         return responder()->success()->respond(204);
     }
 
+    public function download(UniversalReportRequest $request): JsonResponse
+    {
+        $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
+        $job = new GenerateAndSendReport(
+            UniversalReportExport::init(
+                $request->id,
+                Carbon::parse($request->start_at) ?? Carbon::parse(),
+                Carbon::parse($request->end_at) ?? Carbon::parse(),
+                Settings::scope('core')->get('timezone', 'UTC'),
+                $request->user()?->timezone ?? 'UTC',
+            ),
 
-        // /**
-        //  * @throws Throwable
-        //  */
-        // public function download(UniversalReportRequest $request): JsonResponse
-        // {
-        //     $job = new GenerateAndSendReport(
-        //         PlannedTimeReportExport::init(
-        //             $request->input('projects', Project::all()->pluck('id')->toArray()),
-        //         ),
-        //         $request->user(),
-        //         ReportHelper::getReportFormat($request),
-        //     );
+            $request->user(),
+            ReportHelper::getReportFormat($request),
+        );
 
-        //     app(Dispatcher::class)->dispatchSync($job);
+        $job->handle();
+     //   app(Dispatcher::class)->dispatchSync($job);
 
-        //     return responder()->success(['url' => $job->getPublicPath()])->respond();
-        // }
+        return responder()->success(['url' => $job->getPublicPath()])->respond();
+    }
+    // /**
+    //  * @throws Throwable
+    //  */
+    // public function download(UniversalReportRequest $request): JsonResponse
+    // {
+    //     $job = new GenerateAndSendReport(
+    //         PlannedTimeReportExport::init(
+    //             $request->input('projects', Project::all()->pluck('id')->toArray()),
+    //         ),
+    //         $request->user(),
+    //         ReportHelper::getReportFormat($request),
+    //     );
+
+    //     app(Dispatcher::class)->dispatchSync($job);
+
+    //     return responder()->success(['url' => $job->getPublicPath()])->respond();
+    // }
 }

@@ -3,6 +3,9 @@
     "universal-report": "Universal report"
   },
   "universal-report": {
+    "generate":"Generate",
+    "remove" : "Remove",
+    "save": "Save",
     "main":"Main settings",
     "users":"Users settings",
     "projects":"Projectors settings",
