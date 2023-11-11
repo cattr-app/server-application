@@ -4,6 +4,39 @@
         <div class="at-container offline-sync">
             <div class="row">
                 <div class="col-8">
+                    <h2 class="page-title">{{ $t('offline_sync.projects_and_tasks') }}</h2>
+                    <validation-observer ref="form" v-slot="{}">
+                        <validation-provider
+                            ref="user_select"
+                            v-slot="{ errors }"
+                            rules="required"
+                            :name="$t('offline_sync.user')"
+                            mode="passive"
+                        >
+                            <small>{{ $t('offline_sync.user') }}</small>
+
+                            <resource-select
+                                v-model="userId"
+                                class="input"
+                                :service="usersService"
+                                :class="{ 'at-select--error': errors.length > 0 }"
+                            />
+
+                            <p>{{ errors[0] }}</p>
+                        </validation-provider>
+                    </validation-observer>
+                    <at-button
+                        class="offline-sync__upload-btn"
+                        size="large"
+                        icon="icon-download"
+                        type="primary"
+                        @click="exportTasks"
+                        >{{ $t('offline_sync.export') }}
+                    </at-button>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-8">
                     <h2 class="page-title">{{ $t('offline_sync.intervals') }}</h2>
                     <validation-observer ref="form" v-slot="{}">
                         <validation-provider
@@ -28,7 +61,7 @@
                         icon="icon-upload"
                         type="primary"
                         @click="uploadIntervals"
-                        >{{ $t('offline_sync.upload') }}
+                        >{{ $t('offline_sync.import') }}
                     </at-button>
                 </div>
             </div>
@@ -47,10 +80,13 @@
     import OfflineSyncService from '../services/offline-sync.service';
     import { formatDurationString } from '@/utils/time';
     import moment from 'moment';
+    import ResourceSelect from '@/components/ResourceSelect.vue';
+    import UsersService from '@/services/resource/user.service';
 
     export default {
         name: 'Page',
         components: {
+            ResourceSelect,
             ValidationObserver,
             ValidationProvider,
         },
@@ -119,9 +155,27 @@
                         },
                     },
                 ],
+                userId: null,
+                usersService: new UsersService(),
             };
         },
         methods: {
+            async exportTasks() {
+                const { valid } = await this.$refs.user_select.validate(this.userId);
+                if (valid) {
+                    const result = await this.service.download(this.userId);
+
+                    const blob = new Blob([result]);
+
+                    const aElement = document.createElement('a');
+                    aElement.setAttribute('download', 'ProjectsAndTasks.cattr');
+                    const href = URL.createObjectURL(blob);
+                    aElement.href = href;
+                    aElement.setAttribute('target', '_blank');
+                    aElement.click();
+                    URL.revokeObjectURL(href);
+                }
+            },
             async uploadIntervals() {
                 const file = this.$refs.intervals_file_input.$el.querySelector('input').files[0];
                 const { valid } = await this.$refs.intervals_file.validate(file);
@@ -153,6 +207,10 @@
     .offline-sync {
         padding: 1rem 1.5rem 2.5rem;
 
+        .row {
+            margin-bottom: $spacing-05;
+        }
+
         .intervals-input {
             width: 100%;
         }
@@ -165,6 +223,7 @@
             .page-title {
                 color: $gray-1;
                 font-size: 24px;
+                margin-bottom: 0;
             }
 
             .icon {

@@ -3,9 +3,11 @@
     "offline_sync": "Оффлайн Синхронизация"
   },
   "offline_sync": {
+    "projects_and_tasks": "Проекты и Задачи",
     "intervals": "Интервалы",
-    "intervals_file": "Intervals file",
-    "upload": "Загрузить",
+    "intervals_file": "файл интервалов",
+    "import": "Импортировать",
+    "export": "Экспортировать",
     "added_intervals": "Добавленные интервалы",
     "user": "Пользователь",
     "task_id": "Задача",

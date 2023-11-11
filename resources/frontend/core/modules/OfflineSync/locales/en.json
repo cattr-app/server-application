@@ -3,9 +3,11 @@
     "offline_sync": "Offline Sync"
   },
   "offline_sync": {
+    "projects_and_tasks": "Projects and Tasks",
     "intervals": "Intervals",
-    "intervals_file": "Intervals file",
-    "upload": "Upload",
+    "intervals_file": "intervals file",
+    "import": "Import",
+    "export": "Export",
     "added_intervals": "Added intervals",
     "user": "User",
     "task_id": "Task",

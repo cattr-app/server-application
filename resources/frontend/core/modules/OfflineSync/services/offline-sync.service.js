@@ -10,6 +10,17 @@ export default class OfflineSyncService {
     }
 
     /**
+     * @param user_id
+     * @returns {Promise<AxiosResponse<T>>}
+     */
+    async download(user_id) {
+        const { data } = await axios.get(this.getItemRequestUri() + `/download-projects-and-tasks/${user_id}`, {
+            responseType: 'blob',
+        });
+        return data;
+    }
+
+    /**
      * Upload file
      * @returns {Promise<void>}
      * @param payload

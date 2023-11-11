@@ -205,6 +205,9 @@ Route::group([
             ->name('intervals.app');
 
         // Offline Sync
+        $router->get('offline-sync/download-projects-and-tasks/{user}', [TaskController::class, 'downloadProjectsAndTasks'])
+            ->where('user', '[0-9]+')
+            ->name('offline_sync.download_projects_and_tasks');
         $router->post('offline-sync/upload-intervals', [IntervalController::class, 'uploadOfflineIntervals'])
             ->name('offline_sync.upload_intervals');
 
