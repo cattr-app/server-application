@@ -1524,7 +1524,7 @@ __metadata:
     "@cattr/ui-kit": ^1.3.9
     "@commitlint/cli": ^17.6.1
     "@commitlint/config-conventional": ^18.1.0
-    "@sentry/tracing": ^7.49.0
+    "@sentry/tracing": ^7.80.0
     "@sentry/vue": ^7.80.0
     autoprefixer: ^10.4.16
     axios: ^1.6.0
@@ -2204,18 +2204,6 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry-internal/tracing@npm:7.49.0":
-  version: 7.49.0
-  resolution: "@sentry-internal/tracing@npm:7.49.0"
-  dependencies:
-    "@sentry/core": 7.49.0
-    "@sentry/types": 7.49.0
-    "@sentry/utils": 7.49.0
-    tslib: ^1.9.3
-  checksum: 765e15b26e5074acb49f7b18f1eac9171cd00f19d9c7b311af1da05d5a8f8e114ee99512deeb9a85e2759ffea521a392da5edda529485abe5d519a3047ca02bf
-  languageName: node
-  linkType: hard
-
 "@sentry-internal/tracing@npm:7.80.0":
   version: 7.80.0
   resolution: "@sentry-internal/tracing@npm:7.80.0"
@@ -2237,17 +2225,6 @@ __metadata:
     "@sentry/types": 7.80.0
     "@sentry/utils": 7.80.0
   checksum: a64061e50be53ac25043ae3214d6fc3d31b37f5fc4809fe3d8f8bca05085d77fe34d297930a3a85de5d779df59dcc090be4193a3de2550e0e9b0eda3140f9a6b
-  languageName: node
-  linkType: hard
-
-"@sentry/core@npm:7.49.0":
-  version: 7.49.0
-  resolution: "@sentry/core@npm:7.49.0"
-  dependencies:
-    "@sentry/types": 7.49.0
-    "@sentry/utils": 7.49.0
-    tslib: ^1.9.3
-  checksum: b1222afd09d219c990e2a8df136c6e540bd13f26616331f3d4e143182b6b4b550426b165dafc52e504a4bff111b634c756202656b383557e4cb3f2ff58022e1b
   languageName: node
   linkType: hard
 
@@ -2273,19 +2250,12 @@ __metadata:
   languageName: node
   linkType: hard
 
-"@sentry/tracing@npm:^7.49.0":
-  version: 7.49.0
-  resolution: "@sentry/tracing@npm:7.49.0"
+"@sentry/tracing@npm:^7.80.0":
+  version: 7.80.0
+  resolution: "@sentry/tracing@npm:7.80.0"
   dependencies:
-    "@sentry-internal/tracing": 7.49.0
-  checksum: 47c609e18ba8abb3876335b3368545a91fc4bc80d3882ab1c05fd7ba4c7ad88fdef177d3eb3e590372d6ad55a3f734298bd3e66f72c0f8572cf1ae49e0ac75fa
-  languageName: node
-  linkType: hard
-
-"@sentry/types@npm:7.49.0":
-  version: 7.49.0
-  resolution: "@sentry/types@npm:7.49.0"
-  checksum: c6665e5ea14aa0288a44daf0ccbf8ab3134ec7ab61a6cda57e233c865a9c1ca3a9e45b5ab75705d2d3506c357e08cc500a550794fe6e888d363e0254b46c057b
+    "@sentry-internal/tracing": 7.80.0
+  checksum: 62c999608e2df0177cf235e19b7e4ec13044c94637391260bf81c12f8b68abb633d546c63b628aff4e81d98c4138efe443f3491ac34157b9c1cf75b061247418
   languageName: node
   linkType: hard
 
@@ -2293,16 +2263,6 @@ __metadata:
   version: 7.80.0
   resolution: "@sentry/types@npm:7.80.0"
   checksum: 95892d04ddda2136589f418b1673a7192ec03b9338c94de10fc0645b8b6e48de2c3363aec869137ba4dfa895273a749dc78fb7317c3dd410695a3c592abc4b03
-  languageName: node
-  linkType: hard
-
-"@sentry/utils@npm:7.49.0":
-  version: 7.49.0
-  resolution: "@sentry/utils@npm:7.49.0"
-  dependencies:
-    "@sentry/types": 7.49.0
-    tslib: ^1.9.3
-  checksum: b3382418fbc98a685c3c01571ef24217d8cbcb283f8e12e2e44a518d9697e9fadcaa48c24e31063ecad6a13f3fc7b0caf0dcb8e7c0097bc2613e8f465de5d0be
   languageName: node
   linkType: hard
 
@@ -11201,13 +11161,6 @@ __metadata:
     ts-node-transpile-only: dist/bin-transpile.js
     ts-script: dist/bin-script-deprecated.js
   checksum: 090adff1302ab20bd3486e6b4799e90f97726ed39e02b39e566f8ab674fd5bd5f727f43615debbfc580d33c6d9d1c6b1b3ce7d8e3cca3e20530a145ffa232c35
-  languageName: node
-  linkType: hard
-
-"tslib@npm:^1.9.3":
-  version: 1.14.1
-  resolution: "tslib@npm:1.14.1"
-  checksum: dbe628ef87f66691d5d2959b3e41b9ca0045c3ee3c7c7b906cc1e328b39f199bb1ad9e671c39025bd56122ac57dfbf7385a94843b1cc07c60a4db74795829acd
   languageName: node
   linkType: hard
 
