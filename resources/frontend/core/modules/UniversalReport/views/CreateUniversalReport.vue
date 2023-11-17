@@ -20,7 +20,7 @@
                 v-for="main in mains"
                 :key="main"
                 :value="main"
-                :label="$t(`field.data-objects.${main}`)"
+                :label="$t(`field.data-objects.${main}.1`)"
             ></at-option>
         </at-select>
         <obj-data-select

@@ -86,38 +86,18 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
                     'date_at',
                 ];
 
-
+                // Log::error(print_r($this->collectionProject($onlyOne, $skipValues), true));
                 return $this->collectionProject($onlyOne, $skipValues);
 
             case EnumsUniversalReport::USER:
                 return $this->collectionUser();
 
             case EnumsUniversalReport::TASK:
+                // Log::error(print_r($this->collectionTask(), true));
                 return $this->collectionTask();
         }
     }
 
-    // public function charts()
-    // {
-    //     $label      = [new DataSeriesValues('String', 'Worksheet!$B$1', null, 1)];
-    //     $categories = [new DataSeriesValues('String', 'Worksheet!$B$2:$B$5', null, 4)];
-    //     $values     = [new DataSeriesValues('Number', 'Worksheet!$A$2:$A$5', null, 4)];
-
-    //     $series = new DataSeries(
-    //         DataSeries::TYPE_PIECHART,
-    //         DataSeries::GROUPING_STANDARD,
-    //         range(0, \count($values) - 1),
-    //         $label,
-    //         $categories,
-    //         $values
-    //     );
-    //     $plot   = new PlotArea(null, [$series]);
-
-    //     $legend = new Legend();
-    //     $chart  = new Chart('chart name', new Title('chart title'), $legend, $plot);
-
-    //     return $chart;
-    // }
 
     /**
      * @param $row
@@ -132,22 +112,6 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
 
 
         // Log::error(print_r($row, true));
-
-        //  $that = $this;
-        // return collect($row)->groupBy('user_id')->map(
-        //     static function ($collection) use ($that) {
-        //         $interval = CarbonInterval::seconds($collection->sum('durationAtSelectedPeriod'));
-
-        //         return array_merge(
-        //             array_values(collect($collection->first())->only(['full_name'])->toArray()),
-        //             [
-        //                $interval->cascade()->forHumans(['short' => true]),
-        //                 round($interval->totalHours, 3),
-        //                 ...$that->intervalsByDay($collection)
-        //             ]
-        //         );
-        //     }
-        // )->all();
 
         $result = [];
         switch ($this->report->main) {
@@ -321,23 +285,59 @@ class UniversalReportExport extends AppReport implements FromCollection, WithMap
     public function sheets(): array
     {
         $sheets = [];
-        $collection = $this->collectionUser()->all();
-        $data = $collection['reportCharts'];
+        switch ($this->report->main) {
+            case EnumsUniversalReport::USER:
+                $collection = $this->collectionUser()->all();
+                $data = $collection['reportCharts'];
+                if (isset($data['total_spent_time_day']['datasets'])) {
+                    foreach ($data['total_spent_time_day']['datasets'] as $userId => $user) {
+                        $sheets[] = new UserMultiSheetExport($collection, $userId, ($user['label'] ?? ''), $this->periodDates);
+                    }
+                }
+                return $sheets;
+            case EnumsUniversalReport::TASK:
 
-        if (isset($data['total_spent_time_day']['datasets'])) {
-            foreach ($data['total_spent_time_day']['datasets'] as $userId => $user) {
-                $sheets[] = new UserMultiSheetExport($collection, $userId, ($user['label'] ?? ''), $this->periodDates);
-            }
+                $collection = $this->collectionTask()->all();
+                $data = $collection['reportCharts'];
+                if (isset($data['total_spent_time_day']['datasets'])) {
+                    foreach ($data['total_spent_time_day']['datasets'] as $taskId => $task) {
+                        $sheets[] = new TaskMultiSheetExport($collection, $taskId, ($task['label'] ?? ''), $this->periodDates);
+                    }
+                }
+                return $sheets;
+            case EnumsUniversalReport::PROJECT:
+                $onlyOne = [
+                    'name',
+                    'created_at',
+                    'description',
+                    'important',
+                    'priority',
+                ];
+
+                $skipValues = [
+                    'default_priority_id',
+                    'priority_id',
+                    'st_id',
+                    'project_id',
+                    'id',
+                    't_id',
+                    'user_id',
+                    'task_id',
+                    'u_id',
+                    'p_id',
+                    'date_at',
+                ];
+
+                $collection = $this->collectionProject($onlyOne, $skipValues)->all();
+                // Log::error(print_r($collection, true));
+                $data = $collection['reportCharts'];
+                if (isset($data['total_spent_time_day']['datasets'])) {
+                    foreach ($data['total_spent_time_day']['datasets'] as $taskId => $task) {
+                        $sheets[] = new ProjectMultiSheetExport($collection, $taskId, ($task['label'] ?? ''), $this->periodDates);
+                    }
+                }
+                return $sheets;
         }
-
-        // if (isset($data['total_spent_time_day_and_tasks']['datasets'])) {
-        //     foreach ($data['total_spent_time_day_and_tasks']['datasets'] as $userId => $user) {
-
-        //         $sheets[] = new ProjectMultiSheetExport($collection, $userId, ($user['label'] ?? ''), $this->periodDates);
-        //     }
-        // }
-
-
         return $sheets;
     }
 
