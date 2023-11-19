@@ -45,7 +45,7 @@ export default class UniversalReportService extends ReportService {
         const params = {
             start_at: startAt,
             end_at: endAt,
-            id
+            id,
         };
         console.log(params);
         return axios.post(`report/universal-report/download`, params, {

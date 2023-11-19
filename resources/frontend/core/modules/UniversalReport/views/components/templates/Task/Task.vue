@@ -29,93 +29,93 @@
 </template>
 
 <script>
-import { formatDurationString } from '@/utils/time';
-import MainInfo from './_components/MainInfo';
-import moment from 'moment';
+    import { formatDurationString } from '@/utils/time';
+    import MainInfo from './_components/MainInfo';
+    import moment from 'moment';
 
-export default {
-    name: 'Task',
-    props: {
-        reports: {
-            type: Object,
-            required: true,
-            default: () => {},
-        },
-        charts: {
-            type: Object,
-            required: true,
-            default: () => {},
-        },
-        period: {
-            type: Array,
-            required: true,
-            default: () => [],
-        },
-    },
-    components: {
-        MainInfo,
-    },
-    data() {
-        return {
-            formatedReports: [],
-        };
-    },
-    mounted() {
-        this.formatingTasksReport();
-        this.$watch(
-            'reports',
-            val => {
-                console.log(1);
-                this.formatingTasksReport();
+    export default {
+        name: 'Task',
+        props: {
+            reports: {
+                type: Object,
+                required: true,
+                default: () => {},
             },
-            {
-                deep: true,
+            charts: {
+                type: Object,
+                required: true,
+                default: () => {},
             },
-        );
-    },
-    methods: {
-        formatDurationString,
-        getUserPercentage(minutes, totalTime) {
-            return Math.floor((minutes * 100) / totalTime);
+            period: {
+                type: Array,
+                required: true,
+                default: () => [],
+            },
         },
-        formatingTasksReport() {
-            for (let key in this.reports) {
-                let report = this.reports[key];
+        components: {
+            MainInfo,
+        },
+        data() {
+            return {
+                formatedReports: [],
+            };
+        },
+        mounted() {
+            this.formatingTasksReport();
+            this.$watch(
+                'reports',
+                val => {
+                    console.log(1);
+                    this.formatingTasksReport();
+                },
+                {
+                    deep: true,
+                },
+            );
+        },
+        methods: {
+            formatDurationString,
+            getUserPercentage(minutes, totalTime) {
+                return Math.floor((minutes * 100) / totalTime);
+            },
+            formatingTasksReport() {
+                for (let key in this.reports) {
+                    let report = this.reports[key];
 
-                this.$set(this.formatedReports, this.formatedReports.length, {
-                    id: key,
-                    ...report,
-                });
-            }
+                    this.$set(this.formatedReports, this.formatedReports.length, {
+                        id: key,
+                        ...report,
+                    });
+                }
+            },
         },
-    },
-};
+    };
 </script>
 
 <style scoped lang="scss">
-// .item-header {
-//     margin: 16px 0;
-// }
-.left {
-    flex: 2;
-}
-.center {
-    white-space: pre;
-}
-.right {
-    flex: 1;
-
-    &::v-deep .at-progress__text {
-        display: none;
+    // .item-header {
+    //     margin: 16px 0;
+    // }
+    .left {
+        flex: 2;
     }
-}
-.flex-middle {
-    gap: 16px;
-}
-.data-entry {
-    margin: 16px 0;
-}
-.item-header{
-    margin-bottom: 16px;
-}
+    .center {
+        white-space: pre;
+    }
+    .right {
+        flex: 1;
+
+        &::v-deep .at-progress__text {
+            display: none;
+        }
+    }
+    .flex-middle {
+        gap: 16px;
+    }
+    .data-entry {
+        margin: 16px 0;
+    }
+    .item-header {
+        margin-bottom: 16px;
+    }
 </style>

@@ -14,14 +14,12 @@
                             <span class="h4">{{ formatDurationString(report?.total_spent_time ?? 0) }}</span>
                         </div>
                         <!-- <div class="col-xs-5 col-md-9 col-lg-8 d-xs-none"> -->
-                            <at-progress
-                                :percent="
-                                    getUserPercentage(report?.total_spent_time ?? 0, report?.total_spent_time ?? 0)
-                                "
-                                class="right time-percentage"
-                                status="success"
-                                :stroke-width="15"
-                            />
+                        <at-progress
+                            :percent="getUserPercentage(report?.total_spent_time ?? 0, report?.total_spent_time ?? 0)"
+                            class="right time-percentage"
+                            status="success"
+                            :stroke-width="15"
+                        />
                         <!-- </div> -->
                     </div>
                 </div>
@@ -38,96 +36,96 @@
 </template>
 
 <script>
-import { formatDurationString } from '@/utils/time';
-import UserAvatar from '@/components/UserAvatar';
-import MainInfo from './_components/MainInfo';
-import ProjectInfo from './_components/ProjectInfo';
+    import { formatDurationString } from '@/utils/time';
+    import UserAvatar from '@/components/UserAvatar';
+    import MainInfo from './_components/MainInfo';
+    import ProjectInfo from './_components/ProjectInfo';
 
-export default {
-    name: 'User',
-    props: {
-        reports: {
-            type: Object,
-            required: true,
-            default: () => {},
-        },
-        charts: {
-            type: Object,
-            required: true,
-            default: () => {},
-        },
-        period: {
-            type: Array,
-            required: true,
-            default: () => [],
-        },
-    },
-    components: {
-        UserAvatar,
-        MainInfo,
-        ProjectInfo,
-    },
-    data() {
-        return {
-            formatedReports: [],
-        };
-    },
-    async mounted() {
-        this.formatingUsersReport();
-        this.$watch(
-            'this.reports',
-            val => {
-                console.log(1);
-                this.formatingUsersReport();
+    export default {
+        name: 'User',
+        props: {
+            reports: {
+                type: Object,
+                required: true,
+                default: () => {},
             },
-            {
-                deep: true,
+            charts: {
+                type: Object,
+                required: true,
+                default: () => {},
             },
-        );
-    },
-    methods: {
-        formatDurationString,
-        getUserPercentage(minutes, totalTime) {
-            return Math.floor((minutes * 100) / totalTime);
+            period: {
+                type: Array,
+                required: true,
+                default: () => [],
+            },
         },
-        formatingUsersReport() {
-            for (let key in this.reports) {
-                let report = this.reports[key];
+        components: {
+            UserAvatar,
+            MainInfo,
+            ProjectInfo,
+        },
+        data() {
+            return {
+                formatedReports: [],
+            };
+        },
+        async mounted() {
+            this.formatingUsersReport();
+            this.$watch(
+                'this.reports',
+                val => {
+                    console.log(1);
+                    this.formatingUsersReport();
+                },
+                {
+                    deep: true,
+                },
+            );
+        },
+        methods: {
+            formatDurationString,
+            getUserPercentage(minutes, totalTime) {
+                return Math.floor((minutes * 100) / totalTime);
+            },
+            formatingUsersReport() {
+                for (let key in this.reports) {
+                    let report = this.reports[key];
 
-                this.$set(this.formatedReports, this.formatedReports.length, {
-                    id: key,
-                    ...report,
-                });
-            }
+                    this.$set(this.formatedReports, this.formatedReports.length, {
+                        id: key,
+                        ...report,
+                    });
+                }
+            },
         },
-    },
-};
+    };
 </script>
 
 <style scoped lang="scss">
-// .item-header {
-//     margin: 16px 0;
-// }
-.left {
-    flex: 2;
-}
-.center {
-    white-space: pre;
-}
-.right {
-    flex: 1;
-
-    &::v-deep .at-progress__text {
-        display: none;
+    // .item-header {
+    //     margin: 16px 0;
+    // }
+    .left {
+        flex: 2;
     }
-}
-.flex-middle {
-    gap: 16px;
-}
-.data-entry {
-    margin: 16px 0;
-}
-.item-header{
-    margin-bottom: 16px;
-}
+    .center {
+        white-space: pre;
+    }
+    .right {
+        flex: 1;
+
+        &::v-deep .at-progress__text {
+            display: none;
+        }
+    }
+    .flex-middle {
+        gap: 16px;
+    }
+    .data-entry {
+        margin: 16px 0;
+    }
+    .item-header {
+        margin-bottom: 16px;
+    }
 </style>

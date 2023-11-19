@@ -35,75 +35,75 @@
 </template>
 
 <script>
-import { formatDurationString } from '@/utils/time';
-import MainInfo from './_components/MainInfo';
-import TaskInfo from './_components/TaskInfo';
+    import { formatDurationString } from '@/utils/time';
+    import MainInfo from './_components/MainInfo';
+    import TaskInfo from './_components/TaskInfo';
 
-export default {
-    name: 'Project',
-    props: {
-        reports: {
-            type: Object,
-            required: true,
-            default: () => {},
-        },
-        charts: {
-            type: Object,
-            required: true,
-            default: () => {},
-        },
-        period: {
-            type: Array,
-            required: true,
-            default: () => [],
-        },
-    },
-    components: {
-        MainInfo,
-        TaskInfo,
-    },
-    data() {
-        return {
-            formatedReports: [],
-        };
-    },
-    mounted() {
-        this.formatingProjectsReport();
-        this.$watch(
-            'reports',
-            val => {
-                this.formatingProjectsReport();
+    export default {
+        name: 'Project',
+        props: {
+            reports: {
+                type: Object,
+                required: true,
+                default: () => {},
             },
-            {
-                deep: true,
+            charts: {
+                type: Object,
+                required: true,
+                default: () => {},
             },
-        );
-    },
-    methods: {
-        formatDurationString,
-        getUserPercentage(minutes, totalTime) {
-            console.log(minutes, totalTime, 'dddddd');
-            return Math.floor((minutes * 100) / totalTime);
+            period: {
+                type: Array,
+                required: true,
+                default: () => [],
+            },
         },
-        formatingProjectsReport() {
-            for (let key in this.reports) {
-                let report = this.reports[key];
+        components: {
+            MainInfo,
+            TaskInfo,
+        },
+        data() {
+            return {
+                formatedReports: [],
+            };
+        },
+        mounted() {
+            this.formatingProjectsReport();
+            this.$watch(
+                'reports',
+                val => {
+                    this.formatingProjectsReport();
+                },
+                {
+                    deep: true,
+                },
+            );
+        },
+        methods: {
+            formatDurationString,
+            getUserPercentage(minutes, totalTime) {
+                console.log(minutes, totalTime, 'dddddd');
+                return Math.floor((minutes * 100) / totalTime);
+            },
+            formatingProjectsReport() {
+                for (let key in this.reports) {
+                    let report = this.reports[key];
 
-                this.$set(this.formatedReports, this.formatedReports.length, {
-                    id: key,
-                    ...report,
-                });
-            }
+                    this.$set(this.formatedReports, this.formatedReports.length, {
+                        id: key,
+                        ...report,
+                    });
+                }
+            },
         },
-    },
-};
+    };
 </script>
 
 <style scoped lang="scss">
-.item-header {
-      margin: 16px 0;
-}
-.main-info{
-    margin-bottom: 16px;
-}
+    .item-header {
+        margin: 16px 0;
+    }
+    .main-info {
+        margin-bottom: 16px;
+    }
 </style>

@@ -243,7 +243,7 @@
             max-height: 360px;
         }
     }
-    p{
-       margin-left: 16px;
+    p {
+        margin-left: 16px;
     }
 </style>

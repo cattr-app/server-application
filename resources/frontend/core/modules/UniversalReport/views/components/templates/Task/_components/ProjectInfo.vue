@@ -31,19 +31,19 @@
 </script>
 
 <style scoped lang="scss">
-.data-task {
-    padding-top: 16px;
-}
-.data-entry {
-    margin: 16px 0;
-}
-.attable {
-    margin-top: 16px;
-}
-.members {
-    padding-bottom: 16px;
-}
-h3{
-    margin-top:16px;
-}
+    .data-task {
+        padding-top: 16px;
+    }
+    .data-entry {
+        margin: 16px 0;
+    }
+    .attable {
+        margin-top: 16px;
+    }
+    .members {
+        padding-bottom: 16px;
+    }
+    h3 {
+        margin-top: 16px;
+    }
 </style>

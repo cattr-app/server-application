@@ -79,40 +79,39 @@
 </template>
 
 <script>
-import { formatDurationString } from '@/utils/time';
-import { Skeleton } from 'vue-loading-skeleton';
-import Charts from '../../../Charts';
+    import { formatDurationString } from '@/utils/time';
+    import { Skeleton } from 'vue-loading-skeleton';
+    import Charts from '../../../Charts';
 
-export default {
-    props: {
-        report: {
-            type: Object,
-            required: true,
+    export default {
+        props: {
+            report: {
+                type: Object,
+                required: true,
+            },
+            charts: {
+                type: Object,
+                required: true,
+                default: () => {},
+            },
+            period: {
+                type: Array,
+                required: true,
+                default: () => [],
+            },
         },
-        charts: {
-            type: Object,
-            required: true,
-            default: () => {},
+        components: {
+            Skeleton,
+            Charts,
         },
-        period: {
-            type: Array,
-            required: true,
-            default: () => [],
+        methods: {
+            formatDurationString,
         },
-    },
-    components: {
-        Skeleton,
-        Charts,
-    },
-    methods: {
-        formatDurationString,
-    },
-};
+    };
 </script>
 
 <style lang="scss" scoped>
-.data-entry {
-    margin: 16px 0;
-}
-
+    .data-entry {
+        margin: 16px 0;
+    }
 </style>

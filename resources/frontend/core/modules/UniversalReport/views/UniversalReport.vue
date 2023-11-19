@@ -45,75 +45,75 @@
 </template>
 
 <script>
-import { mapGetters, mapMutations } from 'vuex';
-import UniversalReportService from '../service/universal-report.service';
+    import { mapGetters, mapMutations } from 'vuex';
+    import UniversalReportService from '../service/universal-report.service';
 
-const service = new UniversalReportService();
+    const service = new UniversalReportService();
 
-export default {
-    name: 'UniversalReport',
-    data() {
-        return {
-            isDataLoading: false,
-        };
-    },
-    computed: {
-        ...mapGetters('universalreport', ['reports']),
-    },
-    methods: {
-        ...mapMutations({
-            setReports: 'universalreport/setReports',
-            clearStore: 'universalreport/clearStore',
-        }),
-    },
-    async mounted() {
-        this.clearStore();
-        const { data } = await service.getReports();
+    export default {
+        name: 'UniversalReport',
+        data() {
+            return {
+                isDataLoading: false,
+            };
+        },
+        computed: {
+            ...mapGetters('universalreport', ['reports']),
+        },
+        methods: {
+            ...mapMutations({
+                setReports: 'universalreport/setReports',
+                clearStore: 'universalreport/clearStore',
+            }),
+        },
+        async mounted() {
+            this.clearStore();
+            const { data } = await service.getReports();
 
-        this.setReports(data.data);
-    },
-};
+            this.setReports(data.data);
+        },
+    };
 </script>
 
 <style lang="scss" scoped>
-.data-entry {
-    padding: 16px 0;
-    //margin-bottom: $layout-02;
-}
-.universal-report {
-    .at-container {
-        display: flex;
-    }
-    &__side-bars {
-        // min-width: 240px;
-        // padding: 16px;
-        border-right: 1px solid #e2ecf4;
-        display: flex;
-        flex-direction: column;
+    .data-entry {
         padding: 16px 0;
-        .sidebar {
-            padding-bottom: 16px;
-            // height: 100%;
-            &__header {
-                text-align: center;
+        //margin-bottom: $layout-02;
+    }
+    .universal-report {
+        .at-container {
+            display: flex;
+        }
+        &__side-bars {
+            // min-width: 240px;
+            // padding: 16px;
+            border-right: 1px solid #e2ecf4;
+            display: flex;
+            flex-direction: column;
+            padding: 16px 0;
+            .sidebar {
+                padding-bottom: 16px;
+                // height: 100%;
+                &__header {
+                    text-align: center;
+                }
             }
         }
-    }
-    .button {
-        margin: 0 auto;
-        display: block;
-        &__link {
-            color: #e2ecf4;
-            margin: 10px;
+        .button {
+            margin: 0 auto;
+            display: block;
+            &__link {
+                color: #e2ecf4;
+                margin: 10px;
+            }
         }
+        // &::v-deep {
+        //     .at-menu__item--active > .at-menu__item-link {
+        //         color: #6190e8 !important;
+        //     }
+        //     .at-menu__item-link::after {
+        //         transform: scaleX(1) !important;
+        //     }
+        // }
     }
-    // &::v-deep {
-    //     .at-menu__item--active > .at-menu__item-link {
-    //         color: #6190e8 !important;
-    //     }
-    //     .at-menu__item-link::after {
-    //         transform: scaleX(1) !important;
-    //     }
-    // }
-}
 </style>

@@ -57,7 +57,7 @@
                         </div>
                     </div>
                 </div>
-                <div  v-if="Object.keys(project?.tasks ?? []).length">
+                <div v-if="Object.keys(project?.tasks ?? []).length">
                     <h3>{{ $t('field.tasks') }}</h3>
                     <div v-for="(task, id) in project.tasks" :key="id">
                         <TaskInfo :id="id" :task="task" />
@@ -69,29 +69,28 @@
 </template>
 
 <script>
-import { Skeleton } from 'vue-loading-skeleton';
-import TaskInfo from './TaskInfo';
+    import { Skeleton } from 'vue-loading-skeleton';
+    import TaskInfo from './TaskInfo';
 
-export default {
-    props: {
-        id: {
-            type: [Number, String],
-            required: true,
+    export default {
+        props: {
+            id: {
+                type: [Number, String],
+                required: true,
+            },
+            project: {
+                type: Object,
+                required: true,
+            },
         },
-        project: {
-            type: Object,
-            required: true,
+        components: {
+            Skeleton,
+            TaskInfo,
         },
-    },
-    components: {
-        Skeleton,
-        TaskInfo,
-    },
-};
+    };
 </script>
 <style scoped lang="scss">
-.data-entries{
-    margin-bottom: 16px;
-}
+    .data-entries {
+        margin-bottom: 16px;
+    }
 </style>
-
