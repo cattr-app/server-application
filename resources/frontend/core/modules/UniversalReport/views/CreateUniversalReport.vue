@@ -1,10 +1,12 @@
 <template>
     <div class="universal-report__form">
+        <div class="data-entry controls-row">
         <Calendar
-            class="data-entry"
+            class="controls-row__item"
             sessionStorageKey="amazingcat.session.storage.universalreport"
             @change="onCalendarChange"
         />
+        </div>
         <validation-provider v-slot="{ errors }" :rules="'required'" :name="$t('field.name')">
             <at-input
                 v-model="reportName"
@@ -15,6 +17,7 @@
             ></at-input>
             <small>{{ errors[0] }}</small>
         </validation-provider>
+
         <at-select class="data-entry" @on-change="changeMain">
             <at-option
                 v-for="main in mains"
@@ -23,6 +26,9 @@
                 :label="$t(`field.data-objects.${main}.1`)"
             ></at-option>
         </at-select>
+        <div v-if="main">
+         <label>{{$t(`field.data-objects.${main}.1`)}}</label>
+         </div>
         <obj-data-select
             class="data-entry"
             :options="dataObjects"
@@ -30,6 +36,7 @@
             :selectedOptions="selectedDataObjects"
             @on-change="change"
         />
+        <label>{{ $t(`field.data-objects.user.2`) }}</label>
         <fields-select
             class="data-entry"
             localePath="field.fields"
@@ -37,6 +44,7 @@
             :selectedOptions="selectedFields"
             @on-change="onFieldsChange"
         />
+        <label>{{ $t(`field.data-objects.user.3`) }}</label>
         <v-select
             class="data-entry"
             :localePath="`field.fields.${selectedMain}.charts`"
@@ -45,9 +53,9 @@
             @on-change="onChartsChange"
         />
         <div class="controls-row">
-            <at-button class="controls-row__item" type="primary" @click="create">Создать</at-button>
+            <at-button class="controls-row__item" type="primary" @click="create">{{$t('universal-report.create-personal')}}</at-button>
             <at-button class="controls-row__item" type="primary" @click="createForCompany">
-                Создать для компании
+                {{$t('universal-report.create-company')}}
             </at-button>
         </div>
     </div>

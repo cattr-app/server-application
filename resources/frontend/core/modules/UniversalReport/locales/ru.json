@@ -26,7 +26,9 @@
         "worked_by_day": "Отработано по дням:",
         "user-label": "Пользователь",
         "settings-label": "Поля пользователя",
-        "time-label": "Часы пользователя"
+        "time-label": "Часы пользователя",
+        "create-company": "Создать для компании",
+        "create-personal": "Создать личный"
     },
     "field": {
         "name": "Название отчёта",

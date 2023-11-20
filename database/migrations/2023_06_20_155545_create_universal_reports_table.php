@@ -13,14 +13,15 @@ return new class extends Migration
     {
         Schema::create('universal_reports', function (Blueprint $table) {
             $table->increments('id');
-            $table->integer('user_id');
-            $table->text('name');
-            $table->text('type');
-            $table->text('main');
+            $table->unsignedInteger('user_id');
+            $table->string('name');
+            $table->string('type');
+            $table->string('main');
             $table->json('data_objects');
             $table->json('fields');
             $table->json('charts');
             $table->timestamps();
+            $table->foreign('user_id')->references('id')->on('users');
         });
     }
 

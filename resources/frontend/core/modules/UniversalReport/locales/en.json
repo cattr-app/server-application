@@ -23,7 +23,9 @@
         "user_information": "User information",
         "project_information": "Project information",
         "task_information": "Task information",
-        "worked_by_day": "Worked by day:"
+        "worked_by_day": "Worked by day:",
+        "create-company": "Create for the company",
+        "create-personal": "Create personal"
     },
     "field": {
         "name": "Report name",

@@ -4,8 +4,9 @@
         <div class="at-container">
             <div class="universal-report__side-bars">
                 <div class="sidebar">
-                    <p class="sidebar__header">{{ $t('universal-report.personal-reports') }}</p>
 
+                    <p class="sidebar__header">{{ $t('universal-report.personal-reports') }}</p>
+                    <div v-if="reports && reports.personal">
                     <at-menu v-if="reports.personal.length > 0" class="data-entry" mode="vertical" router>
                         <at-menu-item
                             v-for="report in reports.personal"
@@ -15,11 +16,12 @@
                             {{ report.name }}
                         </at-menu-item>
                     </at-menu>
-                    <at-button class="button" type="primary"
+                    </div>
+                    <!-- <at-button class="button" type="primary"
                         ><router-link class="button__link" :to="{ name: 'report.universal.create' }">
                             {{ $t('universal-report.create_new_report') }}
                         </router-link>
-                    </at-button>
+                    </at-button> -->
                 </div>
                 <div class="sidebar">
                     <p class="sidebar__header">{{ $t('universal-report.company-reports') }}</p>

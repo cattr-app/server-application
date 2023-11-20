@@ -47,7 +47,7 @@ export default class UniversalReportService extends ReportService {
             end_at: endAt,
             id,
         };
-        console.log(params);
+
         return axios.post(`report/universal-report/download`, params, {
             headers: { Accept: format },
         });
