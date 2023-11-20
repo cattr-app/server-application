@@ -13,7 +13,7 @@ return new class extends Migration
     {
         Schema::create('universal_reports', function (Blueprint $table) {
             $table->increments('id');
-            $table->unsignedInteger('user_id');
+            $table->unsignedInteger('user_id')->index();
             $table->string('name');
             $table->string('type');
             $table->string('main');

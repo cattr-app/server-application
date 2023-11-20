@@ -36,7 +36,9 @@
                 :label="$t(`field.data-objects.${main}.1`)"
             ></at-option>
         </at-select>
+         <div v-if="main">
         <label>{{ $t(`field.data-objects.${main}.1`) }}</label>
+         </div>
         <obj-data-select
             class="data-entry"
             :options="dataObjects"
@@ -51,7 +53,9 @@
             :selectedOptions="selectedFields"
             @on-change="onFieldsChange"
         /> -->
+         <div v-if="main">
         <label>{{ $t(`field.data-objects.${main}.2`) }}</label>
+         </div>
         <fields-select
             class="data-entry"
             localePath="field.fields"
@@ -59,7 +63,9 @@
             :selectedOptions="selectedFields"
             @on-change="onFieldsChange"
         />
+         <div v-if="main">
         <label>{{ $t(`field.data-objects.${main}.3`) }}</label>
+         </div>
         <v-select
             class="data-entry"
             :localePath="`field.fields.${selectedMain}.charts`"
