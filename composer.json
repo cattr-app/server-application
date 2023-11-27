@@ -27,7 +27,7 @@
     "guzzlehttp/guzzle": "^7.2",
     "intervention/image": "^2.7",
     "laravel/framework": "^10.0",
-    "laravel/octane": "^1.5",
+    "laravel/octane": "^2.1",
     "laravel/sanctum": "^3.2",
     "maatwebsite/excel": "^3.1",
     "matanyadaev/laravel-eloquent-spatial": "^3.1",
