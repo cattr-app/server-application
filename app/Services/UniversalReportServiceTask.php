@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Priority;
 use App\Models\Project;
+use App\Models\Status;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\UniversalReport;
@@ -26,31 +28,31 @@ class UniversalReportServiceTask
     }
     public function getTaskReportData()
     {
-        $projectfields = ['id'];
+        $projectFields = ['id'];
         foreach ($this->report->fields['projects'] as $field) {
-            $projectfields[] = 'projects.' . $field;
+            $projectFields[] = 'projects.' . $field;
         }
-        $taskrelations = [];
-        $taskfields = ['tasks.project_id'];
+        $taskRelations = [];
+        $taskFields = ['id','tasks.project_id'];
         foreach ($this->report->fields['main'] as $field) {
             if ($field !== 'priority' && $field !== 'status') {
-                $taskfields[] = 'tasks.' . $field;
+                $taskFields[] = 'tasks.' . $field;
             } else {
-                $taskrelations[] = $field;
-                $taskfields[] = 'tasks.' . $field . '_id';
+                $taskRelations[] = $field;
+                $taskFields[] = 'tasks.' . $field . '_id';
             }
         }
-        $userrelations = ['id'];
+        $userFields = ['id'];
         foreach ($this->report->fields['users'] as $field) {
-            $userrelations[] = 'users.' . $field;
+            $userFields[] = 'users.' . $field;
         }
         $tasks = Task::query()
-            ->with(['project' => function ($query) use ($projectfields) {
-                $query->select($projectfields);
-            }, 'users' => function ($query) use ($userrelations) {
-                $query->select($userrelations);
+            ->with(['project' => function ($query) use ($projectFields) {
+                $query->select($projectFields);
+            }, 'users' => function ($query) use ($userFields) {
+                $query->select($userFields);
             }])
-            ->select(array_merge($taskfields, ['id']))->whereIn('id', $this->report->data_objects)->get();
+            ->select(array_merge($taskFields))->whereIn('id', $this->report->data_objects)->get();
         $endAt = clone $this->endAt;
         $endAt = $endAt->endOfDay();
         $totalSpentTimeByUser = TimeInterval::whereIn('task_id', $tasks->pluck('id'))
@@ -72,7 +74,7 @@ class UniversalReportServiceTask
             ->where('end_at', '<=', $endAt->format('Y-m-d H:i:s'))
             ->select('task_id')
             ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at))  as total_spent_time')
-            ->groupBy('task_id')->get();
+            ->groupBy('task_id')->pluck('total_spent_time', 'task_id');
         $totalSpentTimeByDay  = TimeInterval::whereIn('task_id', $tasks->pluck('id'))
             ->where('start_at', '>=', $this->startAt->format('Y-m-d H:i:s'))
             ->where('end_at', '<=', $endAt->format('Y-m-d H:i:s'))
@@ -81,20 +83,17 @@ class UniversalReportServiceTask
             ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at))  as total_spent_time_by_day')
             ->groupBy('task_id', 'date_at')->get();
         foreach ($tasks as $task) {
-            $priority = [1 => 'Low', 2 => 'Normal', 3 => 'High',];
-            $task->priority = $priority[$task->priority_id] ?? 'Unknown';
-            $status = [1 => 'Open', 2 => 'Closed',];
-            $task->status = $status[$task->status_id] ?? 'Unknown';
+            $task->priority = Priority::find($task->priority_id)->name ?? 'Unknown';
+            $task->status = Status::find($task->status_id)->name ?? 'Unknown';
             $worked_time_day = [];
             $startDateTime = new DateTime($this->startAt);
             $endDateTime = new DateTime($this->endAt);
-            $task->total_spent_time =  $totalSpentTime->where('task_id', $task->id)->first()->total_spent_time ?? 0;
-            $task->project->where('id', $task->project_id)->get();
+            $task->total_spent_time =  $totalSpentTime[$task->id] ?? 0;
             while ($startDateTime <= $endDateTime) {
                 $currentDate = $startDateTime->format('Y-m-d');
-                foreach ($totalSpentTimeByDay as $tstd) {
-                    if (($tstd['date_at'] === $currentDate) && (int)$tstd['task_id'] === $task->id) {
-                        $worked_time_day[$currentDate] = $tstd['total_spent_time_by_day'];
+                foreach ($totalSpentTimeByDay as $item) {
+                    if (($item['date_at'] === $currentDate) && (int)$item['task_id'] === $task->id) {
+                        $worked_time_day[$currentDate] = $item['total_spent_time_by_day'];
                         break;
                     }
                 }
@@ -108,13 +107,12 @@ class UniversalReportServiceTask
                 $worked_time_day = [];
                 $startDateTime = new DateTime($this->startAt);
                 $endDateTime = new DateTime($this->endAt);
-                $tasks->users = $task->users->where('users_id', $user->id)->toArray();
                 $user->total_spent_time_by_user =  $totalSpentTimeByUser->where('user_id', $user->id)->where('task_id', $task->id)->first()->total_spent_time_by_user ?? 0;
                 while ($startDateTime <= $endDateTime) {
                     $currentDate = $startDateTime->format('Y-m-d');
-                    foreach ($totalSpentTimeByUserAndDay as $tstd) {
-                        if (($tstd['date_at'] === $currentDate) && ($user->id === (int)$tstd['user_id'] && (int)$tstd['task_id'] === $task->id)) {
-                            $worked_time_day[$currentDate] = $tstd['total_spent_time_by_user_and_day'];
+                    foreach ($totalSpentTimeByUserAndDay as $item) {
+                        if (($item['date_at'] === $currentDate) && ($user->id === (int)$item['user_id'] && (int)$item['task_id'] === $task->id)) {
+                            $worked_time_day[$currentDate] = $item['total_spent_time_by_user_and_day'];
                             break;
                         }
                     }
@@ -126,8 +124,15 @@ class UniversalReportServiceTask
                 $user->workers_day = $worked_time_day;
             }
         }
-        // dd($tasks->toArray());
-        return ($tasks->toArray());
+        $tasks = $tasks->toArray();
+        foreach ($tasks as &$task) {
+            if (isset($task['project'])) {
+                $createdAt = new DateTime(isset($task['project']['created_at']) ? $task['project']['created_at'] : 0);
+                $task['project']['created_at'] = $createdAt->format('Y-m-d H:i:s');
+            }
+        }
+        unset($task);
+        return ($tasks);
     }
 
     public function getTasksReportCharts()
@@ -190,7 +195,8 @@ class UniversalReportServiceTask
                 ->selectRaw('DATE(start_at) as date_at')
                 ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at)) as total_spent_time_day_users_separately')
                 ->groupBy('task_id', 'date_at', 'user_id')
-                ->get()->each(function ($timeInterval) use (&$total_spent_time_day_users_separately, $userNames) {
+                ->get()
+                ->each(function ($timeInterval) use (&$total_spent_time_day_users_separately, $userNames) {
                     $time = $timeInterval->total_spent_time_day_users_separately;
                     if (!array_key_exists($timeInterval->task_id, $total_spent_time_day_users_separately['datasets'])) {
                         $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));

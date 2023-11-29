@@ -8,6 +8,7 @@ use App\Helpers\ReportHelper;
 use App\Models\UniversalReport;
 use App\Models\User;
 use App\Services\UniversalReportService;
+use App\Services\UniversalReportServiceProject;
 use App\Services\UniversalReportServiceTask;
 use App\Services\UniversalReportServiceUser;
 use ArrayObject;
@@ -176,22 +177,22 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
 
     public function collectionUser(): Collection
     {
-        $service2 = new UniversalReportServiceUser($this->startAt, $this->endAt, $this->report, $this->periodDates);
+        $service = new UniversalReportServiceUser($this->startAt, $this->endAt, $this->report, $this->periodDates);
         return collect([
-            'reportData' => $service2->getUserReportData(),
+            'reportData' => $service->getUserReportData(),
             'reportName' => $this->report->name,
-            'reportCharts' =>  $service2->getUserReportCharts(),
+            'reportCharts' =>  $service->getUserReportCharts(),
             'periodDates' => $this->periodDates,
         ]);
     }
 
     public function collectionTask(): Collection
     {
-        $service2 = new UniversalReportServiceTask($this->startAt, $this->endAt, $this->report, $this->periodDates);
+        $service = new UniversalReportServiceTask($this->startAt, $this->endAt, $this->report, $this->periodDates);
         return collect([
-            'reportData' => $service2->getTaskReportData(),
+            'reportData' => $service->getTaskReportData(),
             'reportName' => $this->report->name,
-            'reportCharts' => $service2->getTasksReportCharts(),
+            'reportCharts' => $service->getTasksReportCharts(),
             'periodDates' => $this->periodDates,
         ]);
     }
@@ -228,8 +229,6 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
                     } else if (!array_key_exists($key, $result[$p_id]) && !in_array($key, $onlyOne, true)) {
                         array_push($result[$p_id], [$key => $value]);
                     }
-                    // status, task_name, full_name, email, total_spent_time_by_user, total_spent_time_by_user_and_day, date_at, total_spent_time_by_day *Not Only One
-                    // name, created_at, description, important, priority, status, due_date, estimate,
                 }
             } else {
                 foreach ($project as $key => $value) {
@@ -272,23 +271,14 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
                 $service->fillNullDatesAsZeroTime($result[$key]['worked_time_day']);
             }
         }
+        $service2 = new UniversalReportServiceProject($this->startAt, $this->endAt, $this->report, $this->periodDates);
+        $service2->getProjectReportData();
         return collect([
             'reportData' => $result,
             'reportName' => $this->report->name,
             'reportCharts' => $data['reportCharts'],
             'periodDates' => $this->periodDates,
         ]);
-    }
-
-
-    // Таск завершён. Осталось только нормально обработать поле date_at в collectionTask UPD: время по юзерам и дням не приходит
-    private function queryReportTask()
-    {
-        $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
-        return [
-
-            'reportCharts' => $service->tasksCharts(),
-        ];
     }
 
     // Проект надо переписать группировку. Убрать зависимости join от других необязательных джойнов. Проверить правильно ли высчитывается всё время
@@ -360,7 +350,6 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
 
         $sqlWith = preg_replace("/[) ,]+$/", ') ', $sqlWith);
         $sqlSelect = rtrim($sqlSelect, ', ') . ' ';
-
         return [
             'reportData' => DB::select(
                 "$sqlWith SELECT {$sqlSelect}

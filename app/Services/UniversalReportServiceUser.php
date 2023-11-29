@@ -27,24 +27,27 @@ class UniversalReportServiceUser
 
     public function getUserReportData()
     {
-        $projectfields = ['id'];
+        $projectFields = ['id'];
         foreach ($this->report->fields['projects'] as $field) {
-            $projectfields[] = 'projects.' . $field;
+            $projectFields[] = 'projects.' . $field;
         }
-        $taskrelations = [];
-        $taskfields = ['tasks.id', 'tasks.project_id'];
+        $taskRelations = [];
+        $taskFields = ['tasks.id', 'tasks.project_id'];
         foreach ($this->report->fields['tasks'] as $field) {
             if ($field !== 'priority' && $field !== 'status') {
-                $taskfields[] = 'tasks.' . $field;
+                $taskFields[] = 'tasks.' . $field;
             } else {
-                $taskrelations[] = $field;
-                $taskfields[] = 'tasks.' . $field . '_id';
+                $taskRelations[] = $field;
+                $taskFields[] = 'tasks.' . $field . '_id';
             }
         }
-        $users = User::query()->with(['projects' => function ($query) use ($projectfields) {
-            $query->select($projectfields);
-        }])->with(['tasks' => function ($query) use ($taskfields, $taskrelations) {
-            $query->with(...$taskrelations)->select($taskfields);
+        $users = User::query()->with(['projects' => function ($query) use ($projectFields) {
+            $query->select($projectFields);
+        }])->with(['tasks' => function ($query) use ($taskFields, $taskRelations) {
+            if (!empty($taskRelations)) {
+                $query->with(...$taskRelations);
+            }
+                $query->select($taskFields);
         }])->select(array_merge($this->report->fields['main'], ['id']))->whereIn('id', $this->report->data_objects)->get();
 
         foreach ($users as $user) {
@@ -76,9 +79,9 @@ class UniversalReportServiceUser
             $user->total_spent_time = $totalSpentTime[$user->id] ?? 0;
             while ($startDateTime <= $endDateTime) {
                 $currentDate = $startDateTime->format('Y-m-d');
-                foreach ($totalSpentTimeDay as $tstd) {
-                    if (($tstd['date_at'] === $currentDate) && ($user->id === (int)$tstd['user_id'])) {
-                        $worked_time_day[$currentDate] = $tstd['total_spent_time_by_day'];
+                foreach ($totalSpentTimeDay as $item) {
+                    if (($item['date_at'] === $currentDate) && ($user->id === (int)$item['user_id'])) {
+                        $worked_time_day[$currentDate] = $item['total_spent_time_by_day'];
                         break;
                     }
                 }
