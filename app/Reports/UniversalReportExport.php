@@ -64,38 +64,12 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
     {
         switch ($this->report->main) {
             case EnumsUniversalReport::PROJECT:
-                $onlyOne = [
-                    'name',
-                    'created_at',
-                    'description',
-                    'important',
-                    'priority',
-                ];
-
-                $skipValues = [
-                    'default_priority_id',
-                    'priority_id',
-                    'st_id',
-                    'project_id',
-                    'id',
-                    't_id',
-                    'user_id',
-                    'task_id',
-                    'u_id',
-                    'p_id',
-                    'date_at',
-                ];
-
-                // Log::error(print_r($this->collectionProject($onlyOne, $skipValues), true));
-                return $this->collectionProject($onlyOne, $skipValues);
+                return $this->collectionProject();
 
             case EnumsUniversalReport::USER:
-                // Log::error(print_r($this->collectionUser(), true));
                 return $this->collectionUser();
 
             case EnumsUniversalReport::TASK:
-                // dd( $this->collectionTask());
-                // Log::error(print_r($this->collectionTask(), true));
                 return $this->collectionTask();
         }
     }
@@ -126,30 +100,7 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
                 }
                 return $sheets;
             case EnumsUniversalReport::PROJECT:
-                $onlyOne = [
-                    'name',
-                    'created_at',
-                    'description',
-                    'important',
-                    'priority',
-                ];
-
-                $skipValues = [
-                    'default_priority_id',
-                    'priority_id',
-                    'st_id',
-                    'project_id',
-                    'id',
-                    't_id',
-                    'user_id',
-                    'task_id',
-                    'u_id',
-                    'p_id',
-                    'date_at',
-                ];
-
-                $collection = $this->collectionProject($onlyOne, $skipValues)->all();
-                // Log::error(print_r($collection, true));
+                $collection = $this->collectionProject()->all();
                 $data = $collection['reportCharts'];
                 if (isset($data['total_spent_time_day']['datasets'])) {
                     foreach ($data['total_spent_time_day']['datasets'] as $taskId => $task) {
@@ -159,20 +110,6 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
                 return $sheets;
         }
         return $sheets;
-    }
-
-    private function intervalsByDay(Collection $intervals): array
-    {
-        $intervalsByDay = [];
-
-        foreach ($this->periodDates as $date) {
-            $workedAtDate = $intervals->sum(fn ($item) => ($item->durationByDay[$date] ?? 0
-            ));
-            $intervalsByDay[] = round(CarbonInterval::seconds($workedAtDate)->totalHours, 3);
-        }
-
-
-        return $intervalsByDay;
     }
 
     public function collectionUser(): Collection
@@ -197,169 +134,15 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
         ]);
     }
 
-    public function collectionProject(array $onlyOne, array $skipValues): Collection
-    {
-        $data = $this->queryReportProject();
-        $result = [];
-        foreach ($data['reportData'] as $project) {
-            $p_id = $project->p_id;
-            $u_id = $project->u_id;
-
-            if (!array_key_exists($p_id, $result)) {
-                $result[$p_id] = [];
-
-
-                foreach ($project as $key => $value) {
-                    if (in_array($key, $skipValues, true)) {
-                    } elseif (array_key_exists($key, $result[$p_id]) && in_array($key, $onlyOne, true)) {
-                    } elseif (in_array($key, ['t_task_name', 't_priority', 'status', 't_description', 't_due_date', 't_estimate'])) {
-                        $result[$p_id]['tasks'][$project->t_id][preg_replace('/t_/', '', $key, 1)] = $value;
-                    } elseif (in_array($key, ['u_full_name', 'u_email', 'total_spent_time_by_user'], true)) {
-                        $result[$p_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
-                    } elseif ($key === 'total_spent_time_by_day') {
-                        $result[$p_id]['worked_time_day'][$project->date_at] = $project->total_spent_time_by_day;
-                    } elseif ($key === 'total_spent_time_by_user_and_day') {
-                        $result[$p_id]['users'][$u_id]['workers_day'][$project->date_at] = $project->total_spent_time_by_user_and_day;
-                    } elseif ($key === 'status') {
-                        $value === 'Open' ? $result[$p_id]['statuses']['open'] = true : $result[$p_id]['statuses']['closed'] = true;
-                    } elseif (!array_key_exists(preg_replace('/p_/', '', $key, 1), $result[$p_id]) && in_array(preg_replace('/p_/', '', $key, 1), $onlyOne, true)) {
-                        $result[$p_id][preg_replace('/p_/', '', $key, 1)] = $value;
-                    } elseif (array_key_exists(preg_replace('/p_/', '', $key, 1), $result[$p_id]) && !in_array(preg_replace('/p_/', '', $key, 1), $onlyOne, true)) {
-                        array_push($result[$p_id][preg_replace('/p_/', '', $key, 1)], $value);
-                    } else if (!array_key_exists($key, $result[$p_id]) && !in_array($key, $onlyOne, true)) {
-                        array_push($result[$p_id], [$key => $value]);
-                    }
-                }
-            } else {
-                foreach ($project as $key => $value) {
-                    if (in_array($key, $skipValues, true)) {
-                    } elseif (in_array($key, $onlyOne, true)) {
-                    } elseif (in_array($key, ['t_task_name', 'priority', 'status', 't_description', 't_due_date', 't_estimate'])) {
-                        $result[$p_id]['tasks'][$project->t_id][preg_replace('/t_/', '', $key, 1)] = $value;
-                    } elseif ($key === 'status') {
-                        $value === 'Open' ? $result[$p_id]['statuses']['open'] = true : $result[$p_id]['statuses']['closed'] = true;
-                    } elseif (in_array(preg_replace('/u_/', '', $key, 1), ['full_name', 'email', 'total_spent_time_by_user'])) {
-                        $result[$p_id]['users'][$u_id][preg_replace('/u_/', '', $key, 1)] = $value;
-                    } elseif ($key === 'total_spent_time_by_day') {
-                        $result[$p_id]['worked_time_day'][$project->date_at] = $project->total_spent_time_by_day;
-                    } elseif ($key === 'total_spent_time_by_user_and_day') {
-                        $result[$p_id]['users'][$u_id]['workers_day'][$project->date_at] = $project->total_spent_time_by_user_and_day;
-                    }
-                }
-            }
-        }
-
-        if (
-            in_array('total_spent_time_by_day', $this->report->fields['calculations'])
-            || in_array('total_spent_time_by_day_and_user', $this->report->fields['calculations'])
-        ) {
-            $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
-
-            foreach ($result as $key => $report) {
-                if (in_array('total_spent_time_by_day', $this->report->fields['calculations'])) {
-                    $service->fillNullDatesAsZeroTime($result[$key]['worked_time_day']);
-                }
-
-                if (in_array('total_spent_time_by_day_and_user', $this->report->fields['calculations'])) {
-                    foreach ($report['users'] as $k => $user) {
-                        $service->fillNullDatesAsZeroTime($result[$key]['users'][$k]['workers_day']);
-                    }
-                }
-            }
-            $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
-            foreach ($result as $key => $report) {
-                $service->fillNullDatesAsZeroTime($result[$key]['worked_time_day']);
-            }
-        }
-        $service2 = new UniversalReportServiceProject($this->startAt, $this->endAt, $this->report, $this->periodDates);
-        $service2->getProjectReportData();
+    public function collectionProject(): Collection
+    {   
+        $service = new UniversalReportServiceProject($this->startAt, $this->endAt, $this->report, $this->periodDates);
         return collect([
-            'reportData' => $result,
+            'reportData' => $service->getProjectReportData(),
             'reportName' => $this->report->name,
-            'reportCharts' => $data['reportCharts'],
+            'reportCharts' =>$service->getProjectReportCharts(),
             'periodDates' => $this->periodDates,
         ]);
-    }
-
-    // Проект надо переписать группировку. Убрать зависимости join от других необязательных джойнов. Проверить правильно ли высчитывается всё время
-    private function queryReportProject()
-    {
-        $copyTaskField = (new ArrayObject($this->report->fields['tasks']))->getArrayCopy();
-
-        if (in_array('priority', $copyTaskField)) {
-            unset($copyTaskField[array_search('priority', $copyTaskField)]);
-        }
-
-        if (in_array('status', $copyTaskField)) {
-            unset($copyTaskField[array_search('status', $copyTaskField)]);
-        }
-
-        $sqlWith = "";
-        $sqlSelect = '';
-        $sqlJoin = '';
-        $sqlWhere = '';
-        $sqlGroupBy = '';
-        $service = new UniversalReportService($this->startAt, $this->endAt, $this->report, $this->periodDates);
-        $projects = $service->generateSqlRaw('main', $this->report->fields['main'], 'p', 'projects', 'p', '', false, true, false, false);
-        $sqlSelect .= $projects['sqlSelect'];
-
-
-
-        $cloneTasksFields = $this->report->fields['tasks'];
-        if (in_array('priority', $this->report->fields['tasks'], true)) {
-            $sqlJoin .= "LEFT JOIN priorities AS pr ON p.default_priority_id=pr.id
-            ";
-            $sqlSelect .= "pr.name as priority, ";
-            unset($cloneTasksFields[array_search('priority', $cloneTasksFields)]);
-        }
-        if (in_array('status', $this->report->fields['tasks'], true)) {
-            $sqlJoin .= "LEFT JOIN projects_statuses AS ps ON p.id=ps.project_id LEFT JOIN statuses AS s ON ps.status_id=s.id
-            ";
-            $sqlSelect .= "s.name as status, ";
-            unset($cloneTasksFields[array_search('status', $cloneTasksFields)]);
-        }
-
-        $tasks = $service->generateSqlRaw('tasks', $cloneTasksFields, 't', 'tasks', 'tasks', 'p.id=t.project_id', false, true, true, false);
-        $sqlSelect .= $tasks['sqlSelect'];
-        $sqlJoin .= $tasks['sqlJoin'];
-
-        $tasksUsers = $service->generateSqlRaw('tasks', [], 'tu', 'tasks_users', 'tasks_users', 't.id=tu.task_id', false, true, true, false);
-
-        $sqlJoin .= $tasksUsers['sqlJoin'];
-
-        $users = $service->generateSqlRaw('users', $this->report->fields['users'], 'u', 'users', 'users', 'tu.user_id=u.id', false, true, true, false);
-        $sqlSelect .= $users['sqlSelect'];
-        $sqlJoin .= $users['sqlJoin'];
-        $sqlWith .= $users['sqlWith'];
-
-        $calculationsResult = $service->sqlWithForProject($this->report->fields['calculations']);
-        $sqlWith .= $calculationsResult['sqlWith'];
-        $sqlJoin .= $calculationsResult['sqlJoin'];
-        $sqlGroupBy .= $calculationsResult['sqlGroupBy'];
-        $sqlSelect .= $calculationsResult['sqlSelect'];
-
-        $sqlGroupBy .= 'p.id, u.id, t.id';
-
-        foreach ($this->report->data_objects as $key => $dataObject) {
-            $sqlWhere .= "p.id=$dataObject ";
-            if (++$key === count($this->report->data_objects)) {
-                continue;
-            }
-            $sqlWhere .= "OR ";
-        }
-
-        $sqlWith = preg_replace("/[) ,]+$/", ') ', $sqlWith);
-        $sqlSelect = rtrim($sqlSelect, ', ') . ' ';
-        return [
-            'reportData' => DB::select(
-                "$sqlWith SELECT {$sqlSelect}
-                FROM projects AS p
-                $sqlJoin
-                WHERE $sqlWhere
-                GROUP BY $sqlGroupBy"
-            ),
-            'reportCharts' => $service->projectsCharts(),
-        ];
     }
 
     private function getPeriodDates($period): array
