@@ -3,7 +3,6 @@
 namespace App\Services;
 
 use App\Models\Priority;
-use App\Models\Project;
 use App\Models\Status;
 use App\Models\Task;
 use App\Models\TimeInterval;
@@ -33,7 +32,7 @@ class UniversalReportServiceTask
             $projectFields[] = 'projects.' . $field;
         }
         $taskRelations = [];
-        $taskFields = ['id','tasks.project_id'];
+        $taskFields = ['id', 'tasks.project_id'];
         foreach ($this->report->fields['main'] as $field) {
             if ($field !== 'priority' && $field !== 'status') {
                 $taskFields[] = 'tasks.' . $field;
@@ -132,13 +131,12 @@ class UniversalReportServiceTask
             }
         }
         unset($task);
-        return ($tasks);
+        return $tasks;
     }
 
     public function getTasksReportCharts()
     {
         $result = [];
-
         if (count($this->report->charts) === 0) {
             return $result;
         }
@@ -149,7 +147,6 @@ class UniversalReportServiceTask
             $total_spent_time_day = [
                 'datasets' => []
             ];
-
             $taskNames = $tasks->pluck('task_name', 'id');
             TimeInterval::whereIn('task_id', $this->report->data_objects)
                 ->where('start_at', '>=', $this->startAt)
@@ -163,20 +160,16 @@ class UniversalReportServiceTask
                     $time = sprintf("%02d.%02d", floor($timeInterval->total_spent_time_day / 3600), floor($timeInterval->total_spent_time_day / 60) % 60);
                     if (!array_key_exists($timeInterval->task_id, $total_spent_time_day['datasets'])) {
                         $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
-
-                        return $total_spent_time_day['datasets'][$timeInterval->task_id] = [
+                        $total_spent_time_day['datasets'][$timeInterval->task_id] = [
                             'label' => $taskNames[$timeInterval->task_id] ?? '',
                             'borderColor' => $color,
                             'backgroundColor' => $color,
                             'data' => [$timeInterval->date_at => $time],
                         ];
                     }
-
-                    return $total_spent_time_day['datasets'][$timeInterval->task_id]['data'][$timeInterval->date_at] = $time;
+                    $total_spent_time_day['datasets'][$timeInterval->task_id]['data'][$timeInterval->date_at] = $time;
                 });
-
             $this->fillNullDatesAsZeroTime($total_spent_time_day['datasets'], 'data');
-
             $result['total_spent_time_day'] = $total_spent_time_day;
         }
 
@@ -198,35 +191,28 @@ class UniversalReportServiceTask
                 ->get()
                 ->each(function ($timeInterval) use (&$total_spent_time_day_users_separately, $userNames) {
                     $time = $timeInterval->total_spent_time_day_users_separately;
-                    if (!array_key_exists($timeInterval->task_id, $total_spent_time_day_users_separately['datasets'])) {
+                    $taskId = $timeInterval->task_id;
+                    $userId = $timeInterval->user_id;
+                    if (!isset($total_spent_time_day_users_separately['datasets'][$taskId])) {
+                        $total_spent_time_day_users_separately['datasets'][$taskId] = [];
+                    }
+                    if (!isset($total_spent_time_day_users_separately['datasets'][$taskId][$userId])) {
                         $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
-                        return $total_spent_time_day_users_separately['datasets'][$timeInterval->task_id][$timeInterval->user_id] = [
-                            'label' =>  $userNames[$timeInterval->user_id] ?? '',
-                            'borderColor' => $color,
-                            'backgroundColor' => $color,
-                            'data' => [$timeInterval->date_at => $time],
-                        ];
-                    } elseif (!array_key_exists($timeInterval->user_id, $total_spent_time_day_users_separately['datasets'][$timeInterval->task_id])) {
-                        $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
-
-                        return $total_spent_time_day_users_separately['datasets'][$timeInterval->task_id][$timeInterval->user_id] = [
-                            'label' => $timeInterval->full_name,
+                        $total_spent_time_day_users_separately['datasets'][$taskId][$userId] = [
+                            'label' =>  $userNames[$userId] ?? '',
                             'borderColor' => $color,
                             'backgroundColor' => $color,
                             'data' => [$timeInterval->date_at => $time],
                         ];
                     }
-
-                    return $total_spent_time_day_users_separately['datasets'][$timeInterval->task_id][$timeInterval->user_id]['data'][$timeInterval->date_at] = $time;
+                    $total_spent_time_day_users_separately['datasets'][$timeInterval->task_id][$timeInterval->user_id]['data'][$timeInterval->date_at] = $time;
                 });
-
             foreach ($total_spent_time_day_users_separately['datasets'] as $key => $item) {
                 $this->fillNullDatesAsZeroTime($total_spent_time_day_users_separately['datasets'][$key], 'data');
             }
 
             $result['total_spent_time_day_users_separately'] = $total_spent_time_day_users_separately;
         }
-        // dd($result);
         return $result;
     }
     public function fillNullDatesAsZeroTime(array &$datesToFill, $key = null)
@@ -238,7 +224,6 @@ class UniversalReportServiceTask
             } else {
                 foreach ($datesToFill as $k => $item) {
                     unset($datesToFill[$k][$key]['']);
-
                     if (!array_key_exists($date, $item[$key])) {
                         $datesToFill[$k][$key][$date] = 0.0;
                     }

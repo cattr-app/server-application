@@ -4,7 +4,6 @@ namespace App\Reports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithCharts;
-use App\Enums\UniversalReport as EnumsUniversalReport;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
 use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
@@ -12,9 +11,7 @@ use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
 use PhpOffice\PhpSpreadsheet\Chart\Legend;
 use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
 use PhpOffice\PhpSpreadsheet\Chart\Title;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
@@ -98,9 +95,7 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
             }
         }
         if (isset($this->reportData)) {
-
-            foreach ($this->reportData as $projectId => $projectTasks) {
-
+            foreach ($this->reportData as $projectId => $project) {
                 if ($projectId !== $this->project)
                     continue;
                 $resultrow = [];
@@ -108,14 +103,12 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                 $resultrow[] = 'Create at';
                 $resultrow[] = 'Description';
                 $resultrow[] = 'Important';
-                $resultrow[] = 'Priority';
                 $result[] = $resultrow;
                 $resultrow = [];
-                $resultrow[] = $projectTasks['name'];
-                $resultrow[] = $projectTasks['created_at'];
-                $resultrow[] = $projectTasks['description'];
-                $resultrow[] = $projectTasks['important'];
-                $resultrow[] = $projectTasks['priority'];
+                $resultrow[] = $project['name'];
+                $resultrow[] = $project['created_at'];
+                $resultrow[] = $project['description'];
+                $resultrow[] = $project['important'];
                 $result[] = $resultrow;
 
                 $resultrow = [];
@@ -126,12 +119,9 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                 $resultrow[] = 'Time estimat';
                 $resultrow[] = 'Descriptione';
                 $result[] = $resultrow;
-                if (isset($projectTasks['tasks'])) {
-                    foreach ($projectTasks['tasks'] as $taskId => $task) {
-
-
+                if (isset($project['tasks'])) {
+                    foreach ($project['tasks'] as $taskId => $task) {
                         $resultrow = [];
-
                         $resultrow[] =  '';
                         $resultrow[] = $task['task_name'] ?? '';
                         $resultrow[] = $task['status'] ?? '';
@@ -149,8 +139,6 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
                     $resultrow[] = 'Total time';
                     $result[] = $resultrow;
                     foreach ($projectTasks['users'] as $taskId => $user) {
-
-
                         $resultrow = [];
                         $resultrow[] = $user['full_name'] ?? '';
                         $resultrow[] = $user['email'] ?? '';

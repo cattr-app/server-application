@@ -6,35 +6,19 @@ use App\Contracts\AppReport;
 use App\Enums\UniversalReport as EnumsUniversalReport;
 use App\Helpers\ReportHelper;
 use App\Models\UniversalReport;
-use App\Models\User;
-use App\Services\UniversalReportService;
 use App\Services\UniversalReportServiceProject;
 use App\Services\UniversalReportServiceTask;
 use App\Services\UniversalReportServiceUser;
-use ArrayObject;
 use Carbon\Carbon;
-use Carbon\CarbonInterval;
 use Carbon\CarbonPeriod;
-use DB;
-use Exception;
 use Illuminate\Support\Collection;
-use Log;
 use Maatwebsite\Excel\Concerns\FromCollection;
 use Maatwebsite\Excel\Concerns\Exportable;
 use Maatwebsite\Excel\Concerns\WithDefaultStyles;
 use Maatwebsite\Excel\Concerns\ShouldAutoSize;
 use Maatwebsite\Excel\Concerns\WithMultipleSheets;
-use PhpOffice\PhpSpreadsheet\Chart\Chart;
-use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
-use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
-use PhpOffice\PhpSpreadsheet\Chart\Legend;
-use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
-use PhpOffice\PhpSpreadsheet\Chart\Title;
 use PhpOffice\PhpSpreadsheet\Style\Alignment;
 use PhpOffice\PhpSpreadsheet\Style\Style;
-use PhpOffice\PhpSpreadsheet\Worksheet\Worksheet;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
-
 
 class UniversalReportExport extends AppReport implements FromCollection, ShouldAutoSize, WithDefaultStyles, WithMultipleSheets
 {
@@ -79,9 +63,7 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
         $sheets = [];
         switch ($this->report->main) {
             case EnumsUniversalReport::USER:
-
                 $collection = $this->collectionUser()->all();
-                // Log::error(print_r($collection, true));
                 $data = $collection['reportCharts'];
                 if (isset($data['total_spent_time_day']['datasets'])) {
                     foreach ($data['total_spent_time_day']['datasets'] as $userId => $user) {
@@ -135,7 +117,7 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
     }
 
     public function collectionProject(): Collection
-    {   
+    {
         $service = new UniversalReportServiceProject($this->startAt, $this->endAt, $this->report, $this->periodDates);
         return collect([
             'reportData' => $service->getProjectReportData(),
@@ -161,13 +143,11 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
 
     public function getLocalizedReportName(): string
     {
-
         return __('Universal_Report');
     }
 
     public function defaultStyles(Style $defaultStyle)
     {
-
         return ['alignment' => ['horizontal' => Alignment::HORIZONTAL_RIGHT]];
     }
 }

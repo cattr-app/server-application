@@ -4,7 +4,6 @@ namespace App\Reports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithCharts;
-use App\Enums\UniversalReport as EnumsUniversalReport;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
 use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
@@ -12,26 +11,23 @@ use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
 use PhpOffice\PhpSpreadsheet\Chart\Legend;
 use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
 use PhpOffice\PhpSpreadsheet\Chart\Title;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
-use Illuminate\Support\Facades\Log;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
 
-class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHeadings,WithColumnWidths
+class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHeadings, WithColumnWidths
 {
     private $data;
     private $task;
     private $taskname;
     private $periodDates;
     private $countdate;
-    private $project;
+    private $reportData;
 
     public function __construct(array $collection, $taskId, $taskname, array $periodDates)
     {
         $this->data = $collection['reportCharts'];
-        $this->project = $collection['reportData'];
+        $this->reportData = $collection['reportData'];
         $this->task = $taskId;
         $this->taskname = $taskname;
         $this->periodDates = $periodDates;
@@ -97,27 +93,52 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
                 }
             }
         }
-        if (isset($this->project)) {
-            $resultrow = [];
-            $resultrow[] = 'task project';
-            $resultrow[] = 'created at';
-            $resultrow[] = ' ';
-            $resultrow[] = 'description';
-            $resultrow[] = ' ';
-            $resultrow[] = 'important';
-            $resultrow[] = ' ';
-            $result[] = $resultrow;
-            foreach ($this->project as $taskId => $userTasks) {
+        if (isset($this->reportData)) {
+
+            foreach ($this->reportData as $taskId => $userTasks) {
 
                 if ($taskId !== $this->task)
                     continue;
                 $resultrow = [];
-
+                if (isset($userTasks['users'])) {
+                    foreach ($userTasks['users'] as $taskId => $taskData) {
+                        $resultrow = [];
+                        $resultrow[] = 'User name';
+                        $resultrow[] = 'Email user';
+                        $resultrow[] = 'Total time';
+                        $resultrow[] = 'Task name';
+                        $resultrow[] = 'Priority';
+                        $resultrow[] = 'Status';
+                        $resultrow[] = 'Estimate';
+                        $resultrow[] = 'Description';
+                        $result[] = $resultrow;
+                        $resultrow = [];
+                        $resultrow[] = $taskData['full_name'] ?? '';
+                        $resultrow[] = $taskData['email'] ?? '';
+                        $resultrow[] = $taskData['total_spent_time_by_user'] ?? '';
+                        $resultrow[] = $userTasks['task_name'] ?? '';
+                        $resultrow[] = $userTasks['priority'] ?? '';
+                        $resultrow[] = $userTasks['status'] ?? '';
+                        $resultrow[] = $userTasks['estimate'] ?? '';
+                        $resultrow[] = $userTasks['description'] ?? '';
+                        if (isset($taskData['workers_day'])) {
+                            foreach ($taskData['workers_day'] as $date => $time) {
+                                $resultrow[] = 'Data ' . $date . ' time: ' . $time;
+                            }
+                        }
+                        $result[] = $resultrow;
+                    }
+                }
+                $resultrow = [];
+                $resultrow[] = 'Project name';
+                $resultrow[] = 'created at';
+                $resultrow[] = 'description';
+                $resultrow[] = 'important';
+                $result[] = $resultrow;
+                $resultrow = [];
                 $resultrow[] = $userTasks['project']['name'] ?? '';
                 $resultrow[] = $userTasks['project']['created_at'] ?? '';
-                $resultrow[] =  '';
                 $resultrow[] = $userTasks['project']['description'] ?? '';
-                $resultrow[] =  '';
                 $resultrow[] = $userTasks['project']['important'] ?? '';
                 $result[] = $resultrow;
             }

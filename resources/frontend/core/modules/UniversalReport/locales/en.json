@@ -28,6 +28,7 @@
         "create-personal": "Create personal"
     },
     "field": {
+        "id": "ID",
         "name": "Report name",
         "data-objects": {
             "user": { "1": "Users", "2": "Report columns configuration", "3": "Time columns configuration" },

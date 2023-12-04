@@ -2,7 +2,9 @@
 
 namespace App\Services;
 
+use App\Models\Priority;
 use App\Models\Project;
+use App\Models\Status;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\UniversalReport;
@@ -43,11 +45,8 @@ class UniversalReportServiceUser
         }
         $users = User::query()->with(['projects' => function ($query) use ($projectFields) {
             $query->select($projectFields);
-        }])->with(['tasks' => function ($query) use ($taskFields, $taskRelations) {
-            if (!empty($taskRelations)) {
-                $query->with(...$taskRelations);
-            }
-                $query->select($taskFields);
+        }])->with(['tasks' => function ($query) use ($taskFields) {
+            $query->select($taskFields);
         }])->select(array_merge($this->report->fields['main'], ['id']))->whereIn('id', $this->report->data_objects)->get();
 
         foreach ($users as $user) {
@@ -91,7 +90,18 @@ class UniversalReportServiceUser
 
                 $startDateTime->modify('+1 day');
             }
+
             $user->worked_time_day = $worked_time_day;
+            foreach ($user->projects as $project) {
+                if (!empty($project['tasks'])) {
+                    $tasks = $project['tasks'];
+                    foreach ($tasks as $key => $task) {
+                        $tasks[$key]['priority'] =  Priority::find($task['priority_id'])->name ?? 'Unknown';
+                        $tasks[$key]['status'] =  Status::find($task['status_id'])->name ?? 'Unknown';
+                    }
+                    $project['tasks'] = $tasks;
+                }
+            }
         }
         return $users->toArray();
     }
@@ -121,7 +131,7 @@ class UniversalReportServiceUser
                     $time = sprintf("%02d.%02d", floor($timeInterval->total_spent_time_by_day / 3600), floor($timeInterval->total_spent_time_by_day / 60) % 60);
                     if (!array_key_exists($timeInterval->user_id, $total_spent_time_by_day['datasets'])) {
                         $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
-                        return $total_spent_time_by_day['datasets'][$timeInterval->user_id] = [
+                        $total_spent_time_by_day['datasets'][$timeInterval->user_id] = [
                             'label' => $userNames[$timeInterval->user_id] ?? ' ',
                             'borderColor' => $color,
                             'backgroundColor' => $color,
@@ -213,7 +223,7 @@ class UniversalReportServiceUser
                 $projectId = $userTasks[$timeInterval->task_id];
                 if (!array_key_exists($projectId, $total_spent_time_by_day_and_projects['datasets'][$timeInterval->user_id])) {
                     $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
-                    return $total_spent_time_by_day_and_projects['datasets'][$timeInterval->user_id][$projectId] = [
+                    $total_spent_time_by_day_and_projects['datasets'][$timeInterval->user_id][$projectId] = [
                         'label' =>  $projectNames[$projectId],
                         'borderColor' => $color,
                         'backgroundColor' => $color,
