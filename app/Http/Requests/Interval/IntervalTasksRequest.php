@@ -22,6 +22,7 @@ class IntervalTasksRequest extends CattrFormRequest
             'end_at' => 'date',
             'project_id' => 'exists:projects,id',
             'task_id' => 'exists:tasks,id',
+            'user_id' => 'required|integer|exists:users,id',
         ];
     }
 }
