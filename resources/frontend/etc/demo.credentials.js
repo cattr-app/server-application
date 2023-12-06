@@ -3,8 +3,8 @@ module.exports = {
     DEMO_CREDENTIALS: [
         {
             user: 'Administrator',
-            email: 'admin@example.com',
-            password: 'admin',
+            email: 'admin@cattr.app',
+            password: 'password',
         },
         {
             user: 'Manager',
@@ -18,12 +18,12 @@ module.exports = {
         },
         {
             user: 'Project manager',
-            email: 'user2@example.com',
+            email: 'projectManager@example.com',
             password: 'password',
         },
         {
             user: 'Project auditor',
-            email: 'user3@example.com',
+            email: 'projectAuditor@example.com',
             password: 'password',
         },
         {
