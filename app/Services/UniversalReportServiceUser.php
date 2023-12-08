@@ -103,7 +103,7 @@ class UniversalReportServiceUser
                 }
             }
         }
-        return $users->toArray();
+        return $users->keyBy('id');
     }
     public function getUserReportCharts()
     {

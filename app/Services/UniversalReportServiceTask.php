@@ -123,7 +123,7 @@ class UniversalReportServiceTask
                 $user->workers_day = $worked_time_day;
             }
         }
-        $tasks = $tasks->toArray();
+        $tasks = $tasks->keyBy('id');
         foreach ($tasks as &$task) {
             if (isset($task['project'])) {
                 $createdAt = new DateTime(isset($task['project']['created_at']) ? $task['project']['created_at'] : 0);

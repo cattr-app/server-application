@@ -3,16 +3,14 @@
         <at-collapse simple class="list">
             <at-collapse-item class="list__item">
                 <div slot="title" class="item-header">
-                    <router-link
-                        class="h5 link"
-                        :title="task.task_name"
-                        :to="{
-                            name: 'Tasks.crud.tasks.view',
-                            params: { id },
-                        }"
-                    >
+                    <router-link class="h5 link" :title="task.task_name" :to="{
+                        name: 'Tasks.crud.tasks.view',
+                        params: { id },
+                    }">
                         {{ task.task_name }}
                     </router-link>
+                    <at-button class="icon" icon="icon-external-link" @click="redirectToTask">
+                    </at-button>
                 </div>
                 <div>
                     <div class="data-entries">
@@ -85,21 +83,29 @@
 </template>
 
 <script>
-    import { Skeleton } from 'vue-loading-skeleton';
+import { Skeleton } from 'vue-loading-skeleton';
 
-    export default {
-        props: {
-            id: {
-                type: [Number, String],
-                required: true,
-            },
-            task: {
-                type: Object,
-                required: true,
-            },
+export default {
+    methods: {
+        redirectToTask() {
+
+            this.$router.push({
+                name: 'Tasks.crud.tasks.view', params: { id: this.id },
+            });
         },
-        components: {
-            Skeleton,
+    },
+    props: {
+        id: {
+            type: [Number, String],
+            required: true,
         },
-    };
+        task: {
+            type: Object,
+            required: true,
+        },
+    },
+    components: {
+        Skeleton,
+    },
+};
 </script>

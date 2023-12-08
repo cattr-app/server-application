@@ -137,7 +137,7 @@ class UniversalReportServiceProject
             }
             $project->worked_time_day =  $worked_time_day;
         }
-        $projects = $projects->toArray();
+        $projects = $projects->keyBy('id');
         foreach ($projects as &$project) {
             $createdAt = new DateTime(isset($project['created_at']) ? $project['created_at'] : 0);
             $project['created_at'] = $createdAt->format('Y-m-d H:i:s');

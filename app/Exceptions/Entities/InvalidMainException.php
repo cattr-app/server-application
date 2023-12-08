@@ -8,5 +8,5 @@ class InvalidMainException extends HttpException
 {
     protected $status = 422;
 
-    protected $message = 'You mistranslated the base';
+    protected $message = 'Base mistranslation detected';
 }

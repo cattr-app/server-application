@@ -23,7 +23,10 @@ const state = {
         start: '',
         end: '',
     },
-    reports: [],
+    reports: {
+        company: [],
+        personal: [],
+    },
 };
 
 const getters = {

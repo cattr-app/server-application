@@ -2,16 +2,15 @@
     <at-collapse simple class="list">
         <at-collapse-item class="list__item">
             <div slot="title" class="item-header">
-                <router-link
-                    class="h5 link"
-                    :title="project.name"
-                    :to="{
-                        name: 'Projects.crud.projects.view',
-                        params: { id },
-                    }"
-                >
+                <router-link class="h5 link" :title="project.name" :to="{
+                    name: 'Projects.crud.projects.view',
+                    params: { id },
+                }">
                     {{ project?.name ?? 'No selected name' }}
                 </router-link>
+                <at-button class="icon" icon="icon-external-link" @click="redirectToProject">
+                </at-button>
+
             </div>
             <div v-if="project">
                 <div class="data-entries">
@@ -69,28 +68,36 @@
 </template>
 
 <script>
-    import { Skeleton } from 'vue-loading-skeleton';
-    import TaskInfo from './TaskInfo';
+import { Skeleton } from 'vue-loading-skeleton';
+import TaskInfo from './TaskInfo';
 
-    export default {
-        props: {
-            id: {
-                type: [Number, String],
-                required: true,
-            },
-            project: {
-                type: Object,
-                required: true,
-            },
+export default {
+    methods: {
+        redirectToProject() {
+
+            this.$router.push({
+                name: 'Projects.crud.projects.view', params: { id: this.id },
+            });
         },
-        components: {
-            Skeleton,
-            TaskInfo,
+    },
+    props: {
+        id: {
+            type: [Number, String],
+            required: true,
         },
-    };
+        project: {
+            type: Object,
+            required: true,
+        },
+    },
+    components: {
+        Skeleton,
+        TaskInfo,
+    },
+};
 </script>
 <style scoped lang="scss">
-    .data-entries {
-        margin-bottom: 16px;
-    }
+.data-entries {
+    margin-bottom: 16px;
+}
 </style>
