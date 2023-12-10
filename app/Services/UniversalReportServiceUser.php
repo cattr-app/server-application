@@ -171,7 +171,7 @@ class UniversalReportServiceUser
                     if (!array_key_exists($timeInterval->task_id, $total_spent_time_by_day_and_tasks['datasets'][$timeInterval->user_id])) {
                         $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
                         $total_spent_time_by_day_and_tasks['datasets'][$timeInterval->user_id][$timeInterval->task_id] = [
-                            'label' =>  $taskNames[$timeInterval->task_id] ?? '',
+                            'label' =>  $taskNames[$timeInterval->task_id] ?? ' ',
                             'borderColor' => $color,
                             'backgroundColor' => $color,
                             'data' => [$timeInterval->date_at => $time],
@@ -224,7 +224,7 @@ class UniversalReportServiceUser
                 if (!array_key_exists($projectId, $total_spent_time_by_day_and_projects['datasets'][$timeInterval->user_id])) {
                     $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
                     $total_spent_time_by_day_and_projects['datasets'][$timeInterval->user_id][$projectId] = [
-                        'label' =>  $projectNames[$projectId],
+                        'label' =>  $projectNames[$projectId] ?? '',
                         'borderColor' => $color,
                         'backgroundColor' => $color,
                         'data' => [$timeInterval->date_at => $time[$timeInterval->date_at . '_' . $projectId . '_' . $timeInterval->user_id] / 3600],

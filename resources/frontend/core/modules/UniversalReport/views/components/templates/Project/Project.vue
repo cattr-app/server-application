@@ -27,7 +27,7 @@
                 <MainInfo class="main-info" :report="report" :charts="charts" :period="period" />
                 <template v-if="report.tasks">
                     <h3>{{ `${$t('field.tasks')}:` }}</h3>
-                    <TaskInfo v-for="(task, id) in report.tasks" :id="id" :key="id" :task="task" />
+                    <TaskInfo v-for="(task, id) in report.tasks" :id="task.id" :key="id" :task="task" />
                 </template>
             </div>
         </div>

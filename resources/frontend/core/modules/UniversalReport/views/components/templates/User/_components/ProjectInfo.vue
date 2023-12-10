@@ -59,7 +59,7 @@
                 <div v-if="Object.keys(project?.tasks ?? []).length">
                     <h3>{{ $t('field.tasks') }}</h3>
                     <div v-for="(task, id) in project.tasks" :key="id">
-                        <TaskInfo :id="id" :task="task" />
+                        <TaskInfo :id="task.id" :task="task" />
                     </div>
                 </div>
             </div>
@@ -74,7 +74,6 @@ import TaskInfo from './TaskInfo';
 export default {
     methods: {
         redirectToProject() {
-
             this.$router.push({
                 name: 'Projects.crud.projects.view', params: { id: this.id },
             });

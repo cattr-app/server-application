@@ -28,7 +28,7 @@
                 <MainInfo :report="report" :period="period" :charts="charts" />
                 <h3 v-if="report.projects">{{ $t('field.projects') }}</h3>
                 <div v-for="(project, id) in report.projects" :key="id">
-                    <ProjectInfo :id="id" :project="project" />
+                    <ProjectInfo :id="project.id" :project="project" />
                 </div>
             </div>
         </div>

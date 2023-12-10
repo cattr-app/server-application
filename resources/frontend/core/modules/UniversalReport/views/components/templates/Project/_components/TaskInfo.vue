@@ -88,7 +88,6 @@ import { Skeleton } from 'vue-loading-skeleton';
 export default {
     methods: {
         redirectToTask() {
-
             this.$router.push({
                 name: 'Tasks.crud.tasks.view', params: { id: this.id },
             });

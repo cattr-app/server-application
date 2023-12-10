@@ -195,7 +195,7 @@ class UniversalReportServiceProject
                     if (!isset($total_spent_time_day['datasets'][$projectId])) {
                         $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
                         $total_spent_time_day['datasets'][$projectId] = [
-                            'label' => $projectsName[$projectId],
+                            'label' => $projectsName[$projectId] ?? ' ',
                             'borderColor' => $color,
                             'backgroundColor' => $color,
                             'data' => [$timeInterval->date_at => $time],
