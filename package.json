@@ -40,7 +40,7 @@
     "js-md5": "^0.8.0",
     "laravel-echo": "^1.15.3",
     "lodash": "^4.17.21",
-    "mapbox-gl": "^2.15.0",
+    "mapbox-gl": "^3.0.1",
     "moment": "^2.29.4",
     "moment-timezone": "^0.5.43",
     "path-browserify": "^1.0.1",
