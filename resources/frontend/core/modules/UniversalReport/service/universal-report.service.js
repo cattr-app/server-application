@@ -9,12 +9,12 @@ export default class UniversalReportService extends ReportService {
         this.userService = userService;
     }
 
-    getMains() {
-        return axios.get('report/universal-report/mains');
+    getBases() {
+        return axios.get('report/universal-report/bases');
     }
 
-    getDataObjectsAndFields(main) {
-        return axios.get(`report/universal-report/data-objects-and-fields?main=${main}`);
+    getDataObjectsAndFields(base) {
+        return axios.get(`report/universal-report/data-objects-and-fields?base=${base}`);
     }
 
     getReports() {

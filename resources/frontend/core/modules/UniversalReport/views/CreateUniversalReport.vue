@@ -1,11 +1,11 @@
 <template>
     <div class="universal-report__form">
         <div class="data-entry controls-row">
-        <Calendar
-            class="controls-row__item"
-            sessionStorageKey="amazingcat.session.storage.universalreport"
-            @change="onCalendarChange"
-        />
+            <Calendar
+                class="controls-row__item"
+                sessionStorageKey="amazingcat.session.storage.universalreport"
+                @change="onCalendarChange"
+            />
         </div>
         <validation-provider v-slot="{ errors }" :rules="'required'" :name="$t('field.name')">
             <at-input
@@ -18,21 +18,21 @@
             <small>{{ errors[0] }}</small>
         </validation-provider>
 
-        <at-select class="data-entry" @on-change="changeMain">
+        <at-select class="data-entry" @on-change="changeBase">
             <at-option
-                v-for="main in mains"
-                :key="main"
-                :value="main"
-                :label="$t(`field.data-objects.${main}.1`)"
+                v-for="base in bases"
+                :key="base"
+                :value="base"
+                :label="$t(`field.data-objects.${base}.1`)"
             ></at-option>
         </at-select>
-        <div v-if="main">
-         <label>{{$t(`field.data-objects.${main}.1`)}}</label>
-         </div>
+        <div v-if="base">
+            <label>{{ $t(`field.data-objects.${base}.1`) }}</label>
+        </div>
         <obj-data-select
             class="data-entry"
             :options="dataObjects"
-            :main="selectedMain"
+            :base="selectedBase"
             :selectedOptions="selectedDataObjects"
             @on-change="change"
         />
@@ -47,15 +47,17 @@
         <label>{{ $t(`field.data-objects.user.3`) }}</label>
         <v-select
             class="data-entry"
-            :localePath="`field.fields.${selectedMain}.charts`"
+            :localePath="`field.fields.${selectedBase}.charts`"
             :options="charts"
             :selectedOptions="selectedCharts"
             @on-change="onChartsChange"
         />
         <div class="controls-row">
-            <at-button class="controls-row__item" type="primary" @click="create">{{$t('universal-report.create-personal')}}</at-button>
+            <at-button class="controls-row__item" type="primary" @click="create">{{
+                $t('universal-report.create-personal')
+            }}</at-button>
             <at-button class="controls-row__item" type="primary" @click="createForCompany">
-                {{$t('universal-report.create-company')}}
+                {{ $t('universal-report.create-company') }}
             </at-button>
         </div>
     </div>
@@ -89,7 +91,7 @@
                 projectsList: [],
                 projectReportsList: {},
                 userIds: [],
-                main: '',
+                base: '',
                 reports: {
                     personal: [
                         {
@@ -112,9 +114,9 @@
             ...mapGetters('universalreport', [
                 'name',
                 'service',
-                'mains',
+                'bases',
                 'fields',
-                'selectedMain',
+                'selectedBase',
                 'selectedFields',
                 'dataObjects',
                 'selectedDataObjects',
@@ -133,8 +135,8 @@
         methods: {
             ...mapMutations({
                 setName: 'universalreport/setName',
-                setMains: 'universalreport/setMains',
-                setMain: 'universalreport/setMain',
+                setBases: 'universalreport/setBases',
+                setBase: 'universalreport/setBase',
                 setFields: 'universalreport/setFields',
                 setSelectedFields: 'universalreport/setSelectedFields',
                 setDataObjects: 'universalreport/setDataObjects',
@@ -144,12 +146,12 @@
                 setSelectedCharts: 'universalreport/setSelectedCharts',
                 clearStore: 'universalreport/clearStore',
             }),
-            async changeMain(main) {
-                this.main = main;
-                this.setMain(main);
+            async changeBase(base) {
+                this.base = base;
+                this.setBase(base);
                 // console.log('create');
 
-                let { data } = await service.getDataObjectsAndFields(main);
+                let { data } = await service.getDataObjectsAndFields(base);
                 this.setFields(data.data.fields);
                 this.setDataObjects(data.data.dataObjects);
                 this.setCharts(data.data.charts);
@@ -180,7 +182,7 @@
                 try {
                     const { data } = await service.create({
                         name: this.name,
-                        main: this.selectedMain,
+                        base: this.selectedBase,
                         fields: this.selectedFields,
                         dataObjects: this.selectedDataObjects,
                         charts: this.selectedCharts,
@@ -204,7 +206,7 @@
                 try {
                     const { data } = await service.create({
                         name: this.name,
-                        main: this.selectedMain,
+                        base: this.selectedBase,
                         fields: this.selectedFields,
                         dataObjects: this.selectedDataObjects,
                         charts: this.selectedCharts,

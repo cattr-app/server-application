@@ -24,7 +24,7 @@
                 </div>
             </div>
             <div>
-                <MainInfo class="main-info" :report="report" :charts="charts" :period="period" />
+                <BaseInfo class="base-info" :report="report" :charts="charts" :period="period" />
                 <template v-if="report.tasks">
                     <h3>{{ `${$t('field.tasks')}:` }}</h3>
                     <TaskInfo v-for="(task, id) in report.tasks" :id="task.id" :key="id" :task="task" />
@@ -36,7 +36,7 @@
 
 <script>
     import { formatDurationString } from '@/utils/time';
-    import MainInfo from './_components/MainInfo';
+    import BaseInfo from './_components/BaseInfo';
     import TaskInfo from './_components/TaskInfo';
 
     export default {
@@ -59,7 +59,7 @@
             },
         },
         components: {
-            MainInfo,
+            BaseInfo,
             TaskInfo,
         },
         data() {
@@ -103,7 +103,7 @@
     .item-header {
         margin: 16px 0;
     }
-    .main-info {
+    .base-info {
         margin-bottom: 16px;
     }
 </style>

@@ -31,7 +31,7 @@
                         @click="toggle(option.id)"
                     >
                         <UserAvatar
-                            v-if="main === 'user'"
+                            v-if="base === 'user'"
                             class="user-avatar"
                             :size="25"
                             :borderRadius="5"
@@ -60,7 +60,7 @@
             Preloader,
         },
         props: {
-            main: {
+            base: {
                 type: String,
                 default: () => '',
                 required: false,

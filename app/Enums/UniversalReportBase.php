@@ -6,7 +6,7 @@ use App\Models\Project;
 use App\Models\Task;
 use App\Models\User;
 
-enum UniversalReport: string
+enum UniversalReportBase: string
 {
     case PROJECT = 'project';
     case USER = 'user';
@@ -16,7 +16,7 @@ enum UniversalReport: string
     public function fields() {
         return match($this) {
             self::PROJECT => [
-                'main' => [
+                'base' => [
                     'name',
                     'created_at',
                     'description',
@@ -45,7 +45,7 @@ enum UniversalReport: string
 
             ],
             self::USER => [
-                'main' => [
+                'base' => [
                     'full_name',
                     'email',
                 ],
@@ -69,7 +69,7 @@ enum UniversalReport: string
                 ]
             ],
             self::TASK => [
-                'main' => [
+                'base' => [
                     'task_name',
                     'priority',
                     'status',
@@ -158,7 +158,7 @@ enum UniversalReport: string
         };
     }
 
-    public static function mains()
+    public static function bases()
     {
         return array_map(fn($case) => $case->value, self::cases());
     }

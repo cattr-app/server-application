@@ -2,7 +2,7 @@
 
 namespace App\Http\Requests\Reports\UniversalReport;
 
-use App\Enums\UniversalReport;
+use App\Enums\UniversalReportBase;
 use App\Http\Requests\CattrFormRequest;
 use Exception;
 use Illuminate\Validation\Rules\Enum;

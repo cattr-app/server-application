@@ -22,7 +22,7 @@
                 </div>
             </div>
             <div>
-                <MainInfo :report="report" :charts="charts" :period="period" />
+                <BaseInfo :report="report" :charts="charts" :period="period" />
             </div>
         </div>
     </div>
@@ -30,7 +30,7 @@
 
 <script>
     import { formatDurationString } from '@/utils/time';
-    import MainInfo from './_components/MainInfo';
+    import BaseInfo from './_components/BaseInfo';
     import moment from 'moment';
 
     export default {
@@ -53,7 +53,7 @@
             },
         },
         components: {
-            MainInfo,
+            BaseInfo,
         },
         data() {
             return {

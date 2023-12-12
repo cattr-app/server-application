@@ -10,8 +10,8 @@ const state = {
     name: '',
     type: '',
     service: null,
-    mains: [],
-    selectedMain: '',
+    bases: [],
+    selectedBase: '',
     fields: {},
     selectedFields: {},
     dataObjects: [],
@@ -32,9 +32,9 @@ const state = {
 const getters = {
     name: state => state.name,
     service: state => state.service,
-    mains: state => state.mains,
+    bases: state => state.bases,
     fields: state => state.fields,
-    selectedMain: state => state.selectedMain,
+    selectedBase: state => state.selectedBase,
     selectedFields: state => state.selectedFields,
     dataObjects: state => state.dataObjects,
     selectedDataObjects: state => state.selectedDataObjects,
@@ -52,11 +52,11 @@ const mutations = {
     setService(state, service) {
         state.service = service;
     },
-    setMains(state, mains) {
-        state.mains = mains;
+    setBases(state, bases) {
+        state.bases = bases;
     },
-    setMain(state, main) {
-        state.selectedMain = main;
+    setBase(state, base) {
+        state.selectedBase = base;
     },
     setFields(state, fields) {
         state.fields = fields;
@@ -90,8 +90,8 @@ const mutations = {
         state.name = '';
         state.type = '';
         // service: state.service,
-        // mains: [],
-        state.selectedMain = '';
+        // bases: [],
+        state.selectedBase = '';
         state.fields = {};
         state.selectedFields = {};
         state.dataObjects = [];
@@ -115,8 +115,8 @@ const actions = {
             'setService',
             new UniversalReportService(context, new TasksService(), new UserService(), new ProjectsService()),
         );
-        service.getMains().then(({ data }) => {
-            context.commit('setMains', data.data);
+        service.getBases().then(({ data }) => {
+            context.commit('setBases', data.data);
         });
 
         context.commit('clearStore');

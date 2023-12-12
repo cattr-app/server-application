@@ -2,8 +2,8 @@
 
 namespace App\Http\Requests\Reports\UniversalReport;
 
-use App\Enums\ReportType;
-use App\Enums\UniversalReport;
+use App\Enums\UniversalReportType;
+use App\Enums\UniversalReportBase;
 use App\Exceptions\Entities\InvalidMainException;
 use App\Http\Requests\CattrFormRequest;
 use Exception;
@@ -18,15 +18,15 @@ class UniversalReportEditRequest extends CattrFormRequest
 
     public function _rules(): array
     {
-        $enumCase = UniversalReport::tryFrom(request('main'));
+        $enumCase = UniversalReportBase::tryFrom(request('base'));
         switch ($enumCase) {
-            case UniversalReport::PROJECT:
+            case UniversalReportBase::PROJECT:
                 $table = 'projects';
                 break;
-            case UniversalReport::USER:
+            case UniversalReportBase::USER:
                 $table = 'users';
                 break;
-            case UniversalReport::TASK:
+            case UniversalReportBase::TASK:
                 $table = 'tasks';
                 break;
             default:
@@ -36,7 +36,7 @@ class UniversalReportEditRequest extends CattrFormRequest
         return [
             'id' => 'required|int|exists:universal_reports,id',
             'name' => 'required|string',
-            'main' => ['required', new Enum(UniversalReport::class)],
+            'base' => ['required', new Enum(UniversalReportBase::class)],
             'fields' => 'required|array',
             'fields.*' => 'array',
             'fields.*.*' => 'required|string|in:'.implode(',', array_map(fn($item) => implode(',', $item), $enumCase->fields())),
@@ -44,7 +44,7 @@ class UniversalReportEditRequest extends CattrFormRequest
             'dataObjects.*' => "required|int|exists:$table,id",
             'charts' => 'nullable|array',
             'charts.*' => 'required|string|in:'.implode(',', array_map(fn($item) => $item, $enumCase->charts())),
-            'type' => ['required', 'string', new Enum(ReportType::class)],
+            'type' => ['required', 'string', new Enum(UniversalReportType::class)],
         ];
     }
 }

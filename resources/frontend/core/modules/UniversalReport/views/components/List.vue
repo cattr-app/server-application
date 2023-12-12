@@ -1,19 +1,19 @@
 <template>
     <div v-if="Object.keys(data.reportData).length">
         <User
-            v-if="hasMain('user')"
+            v-if="hasBase('user')"
             :reports="data.reportData"
             :charts="data.reportCharts"
             :period="data.periodDates"
         />
         <Task
-            v-else-if="hasMain('task')"
+            v-else-if="hasBase('task')"
             :reports="data.reportData"
             :charts="data.reportCharts"
             :period="data.periodDates"
         />
         <Project
-            v-else-if="hasMain('project')"
+            v-else-if="hasBase('project')"
             :reports="data.reportData"
             :charts="data.reportCharts"
             :period="data.periodDates"
@@ -25,7 +25,7 @@
     import { mapGetters, mapMutations } from 'vuex';
     import UniversalReportService from '../../service/universal-report.service';
     import moment from 'moment';
-    import { hasSelectedMain } from '@/utils/universal-report';
+    import { hasSelectedBase } from '@/utils/universal-report';
     import User from './templates/User/User';
     import Task from './templates/Task/Task';
     import Project from './templates/Project/Project';
@@ -68,13 +68,13 @@
             };
         },
         computed: {
-            ...mapGetters('universalreport', ['selectedMain']),
+            ...mapGetters('universalreport', ['selectedBase']),
         },
         async created() {
             const { data } = await service.show(this.$route.params.id);
 
             this.setName(data.data.name);
-            this.setMain(data.data.main);
+            this.setBase(data.data.base);
             this.setCalendarData({
                 type: sessionStorage?.getItem('amazingcat.session.storage.universalreport' + '.type') ?? 'day',
                 end:
@@ -88,7 +88,7 @@
         methods: {
             ...mapMutations({
                 setName: 'universalreport/setName',
-                setMain: 'universalreport/setMain',
+                setBase: 'universalreport/setBase',
                 setCalendarData: 'universalreport/setCalendarData',
                 // clearStore: 'universalreport/clearStore',
             }),
@@ -96,8 +96,8 @@
             getUserPercentage(minutes, totalTime) {
                 return Math.floor((minutes * 100) / totalTime);
             },
-            hasMain(value) {
-                return hasSelectedMain(value);
+            hasBase(value) {
+                return hasSelectedBase(value);
             },
         },
     };

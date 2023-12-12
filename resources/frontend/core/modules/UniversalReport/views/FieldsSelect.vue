@@ -33,7 +33,7 @@
                             @click="toggle(option, key)"
                         >
                             <div class="name">
-                                {{ $t(`${localePath}.${selectedMain}.${key}.${option}`) }}
+                                {{ $t(`${localePath}.${selectedBase}.${key}.${option}`) }}
                             </div>
                         </li>
                     </div>
@@ -118,7 +118,7 @@
             },
         },
         computed: {
-            ...mapGetters('universalreport', ['selectedMain']),
+            ...mapGetters('universalreport', ['selectedBase']),
             inputValue() {
                 let count = 0;
                 let selectedFields = {};

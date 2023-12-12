@@ -25,7 +25,7 @@
                 </div>
             </div>
             <div>
-                <MainInfo :report="report" :period="period" :charts="charts" />
+                <BaseInfo :report="report" :period="period" :charts="charts" />
                 <h3 v-if="report.projects">{{ $t('field.projects') }}</h3>
                 <div v-for="(project, id) in report.projects" :key="id">
                     <ProjectInfo :id="project.id" :project="project" />
@@ -38,7 +38,7 @@
 <script>
     import { formatDurationString } from '@/utils/time';
     import UserAvatar from '@/components/UserAvatar';
-    import MainInfo from './_components/MainInfo';
+    import BaseInfo from './_components/BaseInfo';
     import ProjectInfo from './_components/ProjectInfo';
 
     export default {
@@ -62,7 +62,7 @@
         },
         components: {
             UserAvatar,
-            MainInfo,
+            BaseInfo,
             ProjectInfo,
         },
         data() {

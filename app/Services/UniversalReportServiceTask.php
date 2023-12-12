@@ -33,7 +33,7 @@ class UniversalReportServiceTask
         }
         $taskRelations = [];
         $taskFields = ['id', 'tasks.project_id'];
-        foreach ($this->report->fields['main'] as $field) {
+        foreach ($this->report->fields['base'] as $field) {
             if ($field !== 'priority' && $field !== 'status') {
                 $taskFields[] = 'tasks.' . $field;
             } else {

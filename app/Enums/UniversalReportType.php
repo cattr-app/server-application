@@ -2,7 +2,7 @@
 
 namespace App\Enums;
 
-enum ReportType: string
+enum UniversalReportType: string
 {
     case COMPANY = 'company';
     case PERSONAL = 'personal';

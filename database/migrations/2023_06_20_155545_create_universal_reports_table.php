@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedInteger('user_id')->index();
             $table->string('name');
             $table->string('type');
-            $table->string('main');
+            $table->string('base');
             $table->json('data_objects');
             $table->json('fields');
             $table->json('charts');

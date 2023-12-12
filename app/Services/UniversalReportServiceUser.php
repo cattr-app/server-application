@@ -47,7 +47,7 @@ class UniversalReportServiceUser
             $query->select($projectFields);
         }])->with(['tasks' => function ($query) use ($taskFields) {
             $query->select($taskFields);
-        }])->select(array_merge($this->report->fields['main'], ['id']))->whereIn('id', $this->report->data_objects)->get();
+        }])->select(array_merge($this->report->fields['base'], ['id']))->whereIn('id', $this->report->data_objects)->get();
 
         foreach ($users as $user) {
             foreach ($user->projects as $project) {

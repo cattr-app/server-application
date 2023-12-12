@@ -2,8 +2,8 @@
 
 namespace App\Http\Controllers\Api\Reports;
 
-use App\Enums\ReportType;
-use App\Enums\UniversalReport;
+use App\Enums\UniversalReportType;
+use App\Enums\UniversalReportBase;
 use App\Exceptions\Entities\NotEnoughRightsException;
 use App\Helpers\ReportHelper;
 use App\Http\Requests\Reports\UniversalReport\UniversalReportEditRequest;
@@ -14,7 +14,7 @@ use App\Http\Requests\Reports\UniversalReport\UniversalReportDestroyRequest;
 
 use App\Jobs\GenerateAndSendReport;
 use App\Models\Project;
-use App\Models\UniversalReport as ModelsUniversalReport;
+use App\Models\UniversalReport;
 use App\Reports\PlannedTimeReportExport;
 use App\Reports\UniversalReportExport;
 use Carbon\Carbon;
@@ -29,48 +29,48 @@ class UniversalReportController
     public function index()
     {
         $items = [
-            ReportType::COMPANY->value => [],
-            ReportType::PERSONAL->value => [],
+            UniversalReportType::COMPANY->value => [],
+            UniversalReportType::PERSONAL->value => [],
         ];
         $user = request()->user();
 
         if (request()->user()->isAdmin()) {
-            ModelsUniversalReport::select('id', 'name', 'type')
+            UniversalReport::select('id', 'name', 'type')
                 ->where([
-                    ['type', '=', ReportType::COMPANY->value, 'or'],
+                    ['type', '=', UniversalReportType::COMPANY->value, 'or'],
                     ['user_id', '=', request()->user()->id, 'or']
                 ])
                 ->get()
                 ->each(function ($item) use (&$items) {
-                    $items[$item->type][] = $item->toArray();
+                    $items[$item->type->value][] = $item->toArray();
                 });
 
             return responder()->success($items)->respond();
         }
 
-        ModelsUniversalReport::select('id', 'name', 'data_objects', 'main', 'type')->get()->each(function ($item) use (&$items) {
-            if ($item->main->checkAccess($item->data_objects)) {
-                unset($item->data_objects, $item->main);
-                $items[$item->type][] = $item->toArray();
+        UniversalReport::select('id', 'name', 'data_objects', 'base', 'type')->get()->each(function ($item) use (&$items) {
+            if ($item->base->checkAccess($item->data_objects)) {
+                unset($item->data_objects, $item->base);
+                $items[$item->type->value][] = $item->toArray();
             }
         });
 
         return responder()->success($items)->respond();
     }
 
-    public function getMains()
+    public function getBases()
     {
-        return responder()->success(UniversalReport::mains())->respond();
+        return responder()->success(UniversalReportBase::bases())->respond();
     }
 
     public function getDataObjectsAndFields(Request $request)
     {
-        $main = UniversalReport::tryFrom($request->input('main', null));
-        // dd($main->dataObjects());
+        $base = UniversalReportBase::tryFrom($request->input('base', null));
+        // dd($base->dataObjects());
         return responder()->success([
-            'fields' => $main->fields(),
-            'dataObjects' => $main->dataObjects(),
-            'charts' => $main->charts(),
+            'fields' => $base->fields(),
+            'dataObjects' => $base->dataObjects(),
+            'charts' => $base->charts(),
         ])->respond();
     }
 
@@ -78,12 +78,12 @@ class UniversalReportController
     {
         $user = $request->user();
 
-        if ($request->input('type') === ReportType::COMPANY->value) {
+        if ($request->input('type') === UniversalReportType::COMPANY->value) {
             if ($request->user()->isAdmin()) {
                 $report = $user->universalReports()->create([
                     'name' => $request->name,
                     'type' => $request->type,
-                    'main' => $request->main,
+                    'base' => $request->base,
                     'data_objects' => $request->dataObjects,
                     'fields' => $request->fields,
                     'charts' => $request->charts,
@@ -97,7 +97,7 @@ class UniversalReportController
         $report = $user->universalReports()->create([
             'name' => $request->name,
             'type' => $request->type,
-            'main' => $request->main,
+            'base' => $request->base,
             'data_objects' => $request->dataObjects,
             'fields' => $request->fields,
             'charts' => $request->charts,
@@ -108,17 +108,17 @@ class UniversalReportController
 
     public function show(UniversalReportShowRequest $request)
     {
-        return responder()->success(ModelsUniversalReport::find($request->id))->respond();
+        return responder()->success(UniversalReport::find($request->id))->respond();
     }
 
     public function edit(UniversalReportEditRequest $request)
     {
-        if ($request->input('type') === ReportType::COMPANY->value) {
+        if ($request->input('type') === UniversalReportType::COMPANY->value) {
             if ($request->user()->isAdmin()) {
-                ModelsUniversalReport::where('id', $request->id)->update([
+                UniversalReport::where('id', $request->id)->update([
                     'name' => $request->name,
                     'type' => $request->type,
-                    'main' => $request->main,
+                    'base' => $request->base,
                     'data_objects' => $request->dataObjects,
                     'fields' => $request->fields,
                     'charts' => $request->charts,
@@ -128,10 +128,10 @@ class UniversalReportController
             }
         }
 
-        ModelsUniversalReport::where('id', $request->id)->update([
+        UniversalReport::where('id', $request->id)->update([
             'name' => $request->name,
             'type' => $request->type,
-            'main' => $request->main,
+            'base' => $request->base,
             'data_objects' => $request->dataObjects,
             'fields' => $request->fields,
             'charts' => $request->charts,
@@ -141,21 +141,21 @@ class UniversalReportController
 
     public function __invoke(UniversalReportRequest $request): JsonResponse
     {
+        $companyTimezone = Settings::scope('core')->get('timezone', 'UTC');
+
         return responder()->success(
             UniversalReportExport::init(
-                $request->id,
-                Carbon::parse($request->start_at) ?? Carbon::parse(),
-                Carbon::parse($request->end_at) ?? Carbon::parse(),
+                $request->input('id'),
+                Carbon::parse($request->input('start_at'))->setTimezone($companyTimezone),
+                Carbon::parse($request->input('end_at'))->setTimezone($companyTimezone),
                 Settings::scope('core')->get('timezone', 'UTC'),
-                $request->user()?->timezone ?? 'UTC',
-
             )->collection()->all(),
         )->respond();
     }
 
     public function destroy(UniversalReportDestroyRequest $request)
     {
-        ModelsUniversalReport::find($request->input('id', null))->delete();
+        UniversalReport::find($request->input('id', null))->delete();
 
         return responder()->success()->respond(204);
     }

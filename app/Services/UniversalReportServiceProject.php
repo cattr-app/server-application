@@ -25,10 +25,11 @@ class UniversalReportServiceProject
         $this->report = $report;
         $this->periodDates = $periodDates;
     }
+
     public function getProjectReportData()
     {
         $projectFields = ['id'];
-        foreach ($this->report->fields['main'] as $field) {
+        foreach ($this->report->fields['base'] as $field) {
             $projectFields[] = 'projects.' . $field;
         }
         $taskRelations = [];
@@ -45,10 +46,11 @@ class UniversalReportServiceProject
         foreach ($this->report->fields['users'] as $field) {
             $userFields[] = 'users.' . $field;
         }
-        $projects = Project::query()
-            ->with(['tasks' => function ($query) use ($taskFields) {
+        $projects = Project::with([
+            'tasks' => function ($query) use ($taskFields) {
                 $query->select($taskFields);
-            }, 'users' => function ($query) use ($userFields) {
+            },
+            'users' => function ($query) use ($userFields) {
                 $query->select($userFields);
             }])
             ->select(array_merge($projectFields))->whereIn('id', $this->report->data_objects)->get();
@@ -78,6 +80,7 @@ class UniversalReportServiceProject
             ->selectRaw('DATE(start_at) as date_at')
             ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at))  as total_spent_time_by_day')
             ->groupBy('date_at', 'task_id')->get();
+        $loopCounter = 0;
         foreach ($projects as $project) {
             foreach ($project->users as $user) {
                 $worked_time_day = [];
@@ -90,6 +93,7 @@ class UniversalReportServiceProject
                         $worked_time_day[$currentDate] = 0;
                         $projectId = (int)$timeInterval->task->project_id;
                         foreach ($projectIdsIndexedByTaskIds as $taskId => $id) {
+                                $loopCounter++;
                             if (($timeInterval['date_at'] === $currentDate) && ($user->id === (int)$timeInterval->user_id && $projectId === $project->id)) {
                                 $worked_time_day[$currentDate] += $timeInterval['total_spent_time_by_user_and_day'];
                                 $totalSpentTimeUser += $timeInterval['total_spent_time_by_user_and_day'];
@@ -105,7 +109,6 @@ class UniversalReportServiceProject
                 }
 
                 foreach ($project->tasks as $task) {
-
                     $task->priority = Priority::find($task->priority_id)->name ?? 'Unknown';
                     $task->status = Status::find($task->status_id)->name ?? 'Unknown';
                 }
@@ -121,12 +124,13 @@ class UniversalReportServiceProject
                     $time = 0;
                     $projectId = (int)$timeInterval->task->project_id;
                     foreach ($projectIdsIndexedByTaskIds as $taskId => $id) {
+                        $loopCounter++;
                         if ($projectId === $id) {
                             $time += $timeInterval->total_spent_time_by_day;
                         }
                     }
-                    if ($timeInterval['date_at'] === $currentDate && $projectId  === $project->id) {
-                        $worked_time_day[$currentDate] =  $time;
+                    if ($timeInterval['date_at'] === $currentDate && $projectId === $project->id) {
+                        $worked_time_day[$currentDate] = $time;
                         break;
                     }
                 }
@@ -135,8 +139,9 @@ class UniversalReportServiceProject
                 }
                 $startDateTime->modify('+1 day');
             }
-            $project->worked_time_day =  $worked_time_day;
+            $project->worked_time_day = $worked_time_day;
         }
+        dump(['LOOP HELL' => $loopCounter]);
         $projects = $projects->keyBy('id');
         foreach ($projects as &$project) {
             $createdAt = new DateTime(isset($project['created_at']) ? $project['created_at'] : 0);
@@ -145,6 +150,7 @@ class UniversalReportServiceProject
         unset($project);
         return $projects;
     }
+
     public function getProjectReportCharts()
     {
         $result = [];

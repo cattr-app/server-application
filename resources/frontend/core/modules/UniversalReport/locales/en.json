@@ -6,10 +6,10 @@
         "generate": "Generate",
         "remove": "Remove",
         "save": "Save",
-        "main": "Main settings",
-        "users": "Users settings",
-        "projects": "Project settings",
-        "calculations": "Calculations settings",
+        "base": "Base fields",
+        "users": "User fields",
+        "projects": "Project fields",
+        "calculations": "Time fields",
         "report_timezone": "Report timezone: {0}",
         "no-personal-reports": "No personal reports.",
         "no-company-reports": "No company reports.",
@@ -40,7 +40,7 @@
         },
         "fields": {
             "user": {
-                "main": {
+                "base": {
                     "name": "User name",
                     "email": "User email",
                     "full_name": "User name"
@@ -70,7 +70,7 @@
                 }
             },
             "project": {
-                "main": {
+                "base": {
                     "name": "Project name",
                     "created_at": "Created at",
                     "description": "Description",
@@ -100,7 +100,7 @@
                 }
             },
             "task": {
-                "main": {
+                "base": {
                     "task_name": "Task name",
                     "priority": "Priority",
                     "status": "Status",

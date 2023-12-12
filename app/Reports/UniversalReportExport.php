@@ -3,7 +3,7 @@
 namespace App\Reports;
 
 use App\Contracts\AppReport;
-use App\Enums\UniversalReport as EnumsUniversalReport;
+use App\Enums\UniversalReportBase;
 use App\Helpers\ReportHelper;
 use App\Models\UniversalReport;
 use App\Services\UniversalReportServiceProject;
@@ -34,35 +34,29 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
         private readonly Carbon               $startAt,
         private readonly Carbon               $endAt,
         private readonly string               $companyTimezone,
-        private readonly string               $userTimezone,
     ) {
         $this->report = UniversalReport::find($id);
         $this->period = CarbonPeriod::create(
-            $this->startAt->clone()->setTimezone($this->userTimezone),
-            $this->endAt->clone()->setTimezone($this->userTimezone)
+            $this->startAt->clone()->setTimezone($this->companyTimezone),
+            $this->endAt->clone()->setTimezone($this->companyTimezone)
         );
         $this->periodDates = $this->getPeriodDates($this->period);
     }
 
     public function collection(): Collection
     {
-        switch ($this->report->main) {
-            case EnumsUniversalReport::PROJECT:
-                return $this->collectionProject();
-
-            case EnumsUniversalReport::USER:
-                return $this->collectionUser();
-
-            case EnumsUniversalReport::TASK:
-                return $this->collectionTask();
-        }
+        return match ($this->report->base) {
+            UniversalReportBase::PROJECT => $this->collectionProject(),
+            UniversalReportBase::USER => $this->collectionUser(),
+            UniversalReportBase::TASK => $this->collectionTask()
+        };
     }
 
     public function sheets(): array
     {
         $sheets = [];
-        switch ($this->report->main) {
-            case EnumsUniversalReport::USER:
+        switch ($this->report->base) {
+            case UniversalReportBase::USER:
                 $collection = $this->collectionUser()->all();
                 $data = $collection['reportCharts'];
                 if (isset($data['total_spent_time_day']['datasets'])) {
@@ -71,7 +65,7 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
                     }
                 }
                 return $sheets;
-            case EnumsUniversalReport::TASK:
+            case UniversalReportBase::TASK:
 
                 $collection = $this->collectionTask()->all();
                 $data = $collection['reportCharts'];
@@ -81,11 +75,11 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
                     }
                 }
                 return $sheets;
-            case EnumsUniversalReport::PROJECT:
+            case UniversalReportBase::PROJECT:
                 $collection = $this->collectionProject()->all();
-                $data = $collection['reportCharts'];
-                if (isset($data['total_spent_time_day']['datasets'])) {
-                    foreach ($data['total_spent_time_day']['datasets'] as $taskId => $task) {
+                $charts = $collection['reportCharts'];
+                if (isset($charts['total_spent_time_day']['datasets'])) {
+                    foreach ($charts['total_spent_time_day']['datasets'] as $taskId => $task) {
                         $sheets[] = new ProjectMultiSheetExport($collection, $taskId, ($task['label'] ?? ''), $this->periodDates);
                     }
                 }

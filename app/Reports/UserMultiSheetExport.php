@@ -4,7 +4,7 @@ namespace App\Reports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithCharts;
-use App\Enums\UniversalReport as EnumsUniversalReport;
+use App\Enums\UniversalReportBase;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
 use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
