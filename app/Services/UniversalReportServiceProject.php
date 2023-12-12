@@ -46,27 +46,22 @@ class UniversalReportServiceProject
         foreach ($this->report->fields['users'] as $field) {
             $userFields[] = 'users.' . $field;
         }
-        $projects = Project::with([
-            'tasks' => function ($query) use ($taskFields) {
-                $query->select($taskFields);
-            },
-            'users' => function ($query) use ($userFields) {
-                $query->select($userFields);
-            }])
+        $projects = Project::with(['tasks' => function ($query) use ($taskFields) {
+            $query->select($taskFields);
+        }, 'users' => function ($query) use ($userFields) {
+            $query->select($userFields);
+        }])
             ->select(array_merge($projectFields))->whereIn('id', $this->report->data_objects)->get();
-        $usersId = [];
         $tasksId = [];
         foreach ($projects as $project) {
-            $usersId[] = $project->users->pluck('id');
             $tasksId[] = $project->tasks->pluck('id');
         }
         $taskQuery = Task::whereIn('project_id', $projects->pluck('id'));
         $projectIdsIndexedByTaskIds = $taskQuery->pluck('project_id', 'id');
-        $usersId = collect($usersId)->flatten()->toArray();
         $tasksId = collect($tasksId)->flatten()->toArray();
         $endAt = clone $this->endAt;
         $endAt = $endAt->endOfDay();
-        $totalSpentTimeByUserAndDay = TimeInterval::whereIn('user_id', $usersId)
+        $totalSpentTimeByUserAndDay = TimeInterval::whereIn('task_id', $tasksId)
             ->where('start_at', '>=', $this->startAt->format('Y-m-d H:i:s'))
             ->where('end_at', '<=', $endAt->format('Y-m-d H:i:s'))
             ->select('user_id', 'task_id')
@@ -80,73 +75,74 @@ class UniversalReportServiceProject
             ->selectRaw('DATE(start_at) as date_at')
             ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at))  as total_spent_time_by_day')
             ->groupBy('date_at', 'task_id')->get();
-
-            foreach ($projects as $project) {
-            foreach ($project->users as $user) {
-                $worked_time_day = [];
-                $totalSpentTimeUser = 0;
-                $startDateTime = new DateTime($this->startAt);
-                $endDateTime = new DateTime($this->endAt);
-                while ($startDateTime <= $endDateTime) {
-                    $currentDate = $startDateTime->format('Y-m-d');
-                    foreach ($totalSpentTimeByUserAndDay as $timeInterval) {
-                        $worked_time_day[$currentDate] = 0;
-                        $projectId = (int)$timeInterval->task->project_id;
-                        foreach ($projectIdsIndexedByTaskIds as $taskId => $id) {
-                            if (($timeInterval['date_at'] === $currentDate) && ($user->id === (int)$timeInterval->user_id && $projectId === $project->id)) {
-                                $worked_time_day[$currentDate] += $timeInterval['total_spent_time_by_user_and_day'];
-                                $totalSpentTimeUser += $timeInterval['total_spent_time_by_user_and_day'];
-                                break;
-                            }
-                        }
-                    }
-
-                    if (!isset($worked_time_day[$currentDate])) {
-                        $worked_time_day[$currentDate] = 0.0;
-                    }
-                    $startDateTime->modify('+1 day');
-                }
-
-                foreach ($project->tasks as $task) {
-                    $task->priority = Priority::find($task->priority_id)->name ?? 'Unknown';
-                    $task->status = Status::find($task->status_id)->name ?? 'Unknown';
-                }
-                $user->workers_day = $worked_time_day;
-                $user->total_spent_time_by_user = $totalSpentTimeUser;
+        $intervalProjectId = null;
+        $workedTimeByDayUser = [];
+        $totalSpentTimeUser = [];
+        foreach ($totalSpentTimeByUserAndDay as $timeInterval) {
+            $intervalDate = $timeInterval['date_at'];
+            if (isset($projectIdsIndexedByTaskIds[$timeInterval->task_id])) {
+                $intervalProjectId = $projectIdsIndexedByTaskIds[$timeInterval->task_id];
             }
-            $worked_time_day = [];
+            $intervalUserId = $timeInterval->user_id;
+            $startDateTime = new DateTime($this->startAt);
+            $endDateTime = new DateTime($this->endAt);
+
+            if (!isset($workedTimeByDayUser[$intervalProjectId][$intervalUserId])) {
+                $workedTimeByDayUser[$intervalProjectId][$intervalUserId] = [];
+            }
+            if (!isset($workedTimeByDayUser[$intervalProjectId][$intervalUserId][$intervalDate])) {
+                $workedTimeByDayUser[$intervalProjectId][$intervalUserId][$intervalDate] = 0;
+            }
+            if (!isset($totalSpentTimeUser[$intervalProjectId][$intervalUserId])) {
+                $totalSpentTimeUser[$intervalProjectId][$intervalUserId] = 0;
+            }
+            $workedTimeByDayUser[$intervalProjectId][$intervalUserId][$intervalDate] += $timeInterval->total_spent_time_by_user_and_day;
+            $totalSpentTimeUser[$intervalProjectId][$intervalUserId] += $timeInterval->total_spent_time_by_user_and_day;
+            while ($startDateTime <= $endDateTime) {
+                $currentDate = $startDateTime->format('Y-m-d');
+
+                if ($currentDate !== $intervalDate) {
+                    $workedTimeByDayUser[$intervalProjectId][$intervalUserId][$currentDate] = 0;
+                }
+                $startDateTime->modify('+1 day');
+            }
+        }
+        $workedTimeByDay = [];
+        foreach ($totalSpentTimeByDay as $timeInterval) {
+            $intervalDate = $timeInterval['date_at'];
+            $intervalProjectId = $projectIdsIndexedByTaskIds[$timeInterval->task_id];
             $startDateTime = new DateTime($this->startAt);
             $endDateTime = new DateTime($this->endAt);
             while ($startDateTime <= $endDateTime) {
                 $currentDate = $startDateTime->format('Y-m-d');
-                foreach ($totalSpentTimeByDay as $timeInterval) {
-                    $time = 0;
-                    $projectId = (int)$timeInterval->task->project_id;
-                    foreach ($projectIdsIndexedByTaskIds as $taskId => $id) {
-                        if ($projectId === $id) {
-                            $time += $timeInterval->total_spent_time_by_day;
-                        }
-                    }
-                    if ($timeInterval['date_at'] === $currentDate && $projectId === $project->id) {
-                        $worked_time_day[$currentDate] = $time;
-                        break;
-                    }
-                }
-                if (!isset($worked_time_day[$currentDate])) {
-                    $worked_time_day[$currentDate] = 0.0;
+
+                if ($currentDate !== $intervalDate) {
+                    $workedTimeByDay[$intervalProjectId][$currentDate] = 0;
                 }
                 $startDateTime->modify('+1 day');
             }
-            $project->worked_time_day = $worked_time_day;
+            if (!isset($workedTimeByDay[$intervalProjectId])) {
+                $workedTimeByDay[$intervalProjectId] = [];
+            }
+            if (!isset($workedTimeByDay[$intervalProjectId][$intervalDate])) {
+                $workedTimeByDay[$intervalProjectId][$intervalDate] = 0;
+            }
+            $workedTimeByDay[$intervalProjectId][$intervalDate] += $timeInterval->total_spent_time_by_day;
         }
-
-        $projects = $projects->keyBy('id');
-        foreach ($projects as &$project) {
-            $createdAt = new DateTime(isset($project['created_at']) ? $project['created_at'] : 0);
-            $project['created_at'] = $createdAt->format('Y-m-d H:i:s');
+        foreach ($projects as $project) {
+            $project->worked_time_day = $workedTimeByDay[$project->id];
+            foreach ($project->users as $user) {
+                if (isset($workedTimeByDayUser[$project->id][$user->id]))
+                    $user->workers_day =  $workedTimeByDayUser[$project->id][$user->id];
+                if (isset($totalSpentTimeUser[$project->id][$user->id]))
+                    $user->total_spent_time_by_user = $totalSpentTimeUser[$project->id][$user->id];
+            }
+            foreach ($project->tasks as $task) {
+                $task->priority = Priority::find($task->priority_id)->name ?? '';
+                $task->status = Status::find($task->status_id)->name ?? '';
+            }
         }
-        unset($project);
-        return $projects;
+        return  $projects->keyBy('id');
     }
 
     public function getProjectReportCharts()

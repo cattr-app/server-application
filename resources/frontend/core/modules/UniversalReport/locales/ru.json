@@ -3,6 +3,10 @@
         "universal-report": "Универсальный отчет"
     },
     "universal-report": {
+        "warning": {
+            "title": "Ошибка",
+            "empty": "Заполните все обязательные поля"
+        },
         "generate": "Сформировать",
         "remove": "Удалить",
         "save": "Сохранить",

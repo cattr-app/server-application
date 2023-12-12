@@ -123,15 +123,7 @@ class UniversalReportServiceTask
                 $user->workers_day = $worked_time_day;
             }
         }
-        $tasks = $tasks->keyBy('id');
-        foreach ($tasks as &$task) {
-            if (isset($task['project'])) {
-                $createdAt = new DateTime(isset($task['project']['created_at']) ? $task['project']['created_at'] : 0);
-                $task['project']['created_at'] = $createdAt->format('Y-m-d H:i:s');
-            }
-        }
-        unset($task);
-        return $tasks;
+        return  $tasks->keyBy('id');
     }
 
     public function getTasksReportCharts()

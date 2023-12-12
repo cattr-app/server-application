@@ -3,7 +3,8 @@
         <at-collapse simple class="list">
             <at-collapse-item class="list__item">
                 <div slot="title" class="item-header">
-                    <router-link
+                    {{ task.task_name }}
+                    <!-- <router-link
                         class="h5 link"
                         :title="task.task_name"
                         :to="{
@@ -12,8 +13,8 @@
                         }"
                     >
                         {{ task.task_name }}
-                    </router-link>
-                    <at-button class="icon" icon="icon-external-link" @click="redirectToTask"> </at-button>
+                    </router-link> -->
+                    <at-button v-if="task.task_name" class="icon" icon="icon-external-link" @click="redirectToTask"></at-button>
                 </div>
                 <div>
                     <div class="data-entries">
@@ -86,29 +87,29 @@
 </template>
 
 <script>
-    import { Skeleton } from 'vue-loading-skeleton';
+import { Skeleton } from 'vue-loading-skeleton';
 
-    export default {
-        methods: {
-            redirectToTask() {
-                this.$router.push({
-                    name: 'Tasks.crud.tasks.view',
-                    params: { id: this.id },
-                });
-            },
+export default {
+    methods: {
+        redirectToTask() {
+            this.$router.push({
+                name: 'Tasks.crud.tasks.view',
+                params: { id: this.id },
+            });
         },
-        props: {
-            id: {
-                type: [Number, String],
-                required: true,
-            },
-            task: {
-                type: Object,
-                required: true,
-            },
+    },
+    props: {
+        id: {
+            type: [Number, String],
+            required: true,
         },
-        components: {
-            Skeleton,
+        task: {
+            type: Object,
+            required: true,
         },
-    };
+    },
+    components: {
+        Skeleton,
+    },
+};
 </script>

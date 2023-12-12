@@ -2,7 +2,7 @@
     <at-collapse simple class="list">
         <at-collapse-item class="list__item">
             <div slot="title" class="item-header">
-                <router-link
+                <!-- <router-link
                     class="h5 link"
                     :title="project.name"
                     :to="{
@@ -11,8 +11,9 @@
                     }"
                 >
                     {{ project?.name ?? 'No selected name' }}
-                </router-link>
-                <at-button class="icon" icon="icon-external-link" @click="redirectToProject"> </at-button>
+                </router-link> -->
+                {{ project?.name}}
+                <at-button  v-if="project.name" class="icon" icon="icon-external-link" @click="redirectToProject"> </at-button>
             </div>
             <div v-if="project">
                 <div class="data-entries">

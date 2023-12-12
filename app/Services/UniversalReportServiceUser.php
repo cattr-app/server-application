@@ -96,8 +96,12 @@ class UniversalReportServiceUser
                 if (!empty($project['tasks'])) {
                     $tasks = $project['tasks'];
                     foreach ($tasks as $key => $task) {
-                        $tasks[$key]['priority'] =  Priority::find($task['priority_id'])->name ?? 'Unknown';
-                        $tasks[$key]['status'] =  Status::find($task['status_id'])->name ?? 'Unknown';
+                        if (isset($tasks[$key]['priority'])) {
+                            $tasks[$key]['priority'] =  Priority::find($task['priority_id'])->name ?? 'Unknown';
+                        }
+                        if (isset($tasks[$key]['status'])) {
+                            $tasks[$key]['status'] =  Status::find($task['status_id'])->name ?? 'Unknown';
+                        }
                     }
                     $project['tasks'] = $tasks;
                 }

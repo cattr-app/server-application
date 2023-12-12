@@ -3,6 +3,10 @@
         "universal-report": "Universal report"
     },
     "universal-report": {
+        "warning": {
+            "title": "Error",
+            "empty": "Fill in all required fields"
+        },
         "generate": "Generate",
         "remove": "Remove",
         "save": "Save",
