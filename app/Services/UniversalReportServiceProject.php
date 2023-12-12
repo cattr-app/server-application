@@ -80,8 +80,8 @@ class UniversalReportServiceProject
             ->selectRaw('DATE(start_at) as date_at')
             ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at))  as total_spent_time_by_day')
             ->groupBy('date_at', 'task_id')->get();
-        $loopCounter = 0;
-        foreach ($projects as $project) {
+
+            foreach ($projects as $project) {
             foreach ($project->users as $user) {
                 $worked_time_day = [];
                 $totalSpentTimeUser = 0;
@@ -93,7 +93,6 @@ class UniversalReportServiceProject
                         $worked_time_day[$currentDate] = 0;
                         $projectId = (int)$timeInterval->task->project_id;
                         foreach ($projectIdsIndexedByTaskIds as $taskId => $id) {
-                                $loopCounter++;
                             if (($timeInterval['date_at'] === $currentDate) && ($user->id === (int)$timeInterval->user_id && $projectId === $project->id)) {
                                 $worked_time_day[$currentDate] += $timeInterval['total_spent_time_by_user_and_day'];
                                 $totalSpentTimeUser += $timeInterval['total_spent_time_by_user_and_day'];
@@ -124,7 +123,6 @@ class UniversalReportServiceProject
                     $time = 0;
                     $projectId = (int)$timeInterval->task->project_id;
                     foreach ($projectIdsIndexedByTaskIds as $taskId => $id) {
-                        $loopCounter++;
                         if ($projectId === $id) {
                             $time += $timeInterval->total_spent_time_by_day;
                         }
@@ -141,7 +139,7 @@ class UniversalReportServiceProject
             }
             $project->worked_time_day = $worked_time_day;
         }
-        dump(['LOOP HELL' => $loopCounter]);
+
         $projects = $projects->keyBy('id');
         foreach ($projects as &$project) {
             $createdAt = new DateTime(isset($project['created_at']) ? $project['created_at'] : 0);
