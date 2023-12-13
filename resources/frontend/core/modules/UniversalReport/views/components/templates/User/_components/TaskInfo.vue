@@ -1,7 +1,7 @@
 <template>
     <at-collapse simple class="list">
         <at-collapse-item class="list__item">
-            <div slot="title" class="item-header">
+            <div slot="title" class="task-title">
                 <!-- <router-link
                     class="h5 link"
                     :title="task.task_name"
@@ -111,3 +111,9 @@
         },
     };
 </script>
+<style lang="scss" scoped>
+    .task-title {
+        color: black;
+        font-weight: bold;
+    }
+</style>

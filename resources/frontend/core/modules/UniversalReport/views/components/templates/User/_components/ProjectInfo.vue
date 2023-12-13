@@ -1,7 +1,7 @@
 <template>
     <at-collapse simple class="list">
         <at-collapse-item class="list__item">
-            <div slot="title" class="item-header">
+            <div slot="title" class="project-title">
                 <!-- <router-link
                     class="h5 link"
                     :title="project.name"
@@ -102,5 +102,9 @@
 <style scoped lang="scss">
     .data-entries {
         margin-bottom: 16px;
+    }
+    .project-title {
+        color: black;
+        font-weight: bold;
     }
 </style>

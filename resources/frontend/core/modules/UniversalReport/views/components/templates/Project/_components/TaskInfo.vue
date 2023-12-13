@@ -2,7 +2,7 @@
     <div>
         <at-collapse simple class="list">
             <at-collapse-item class="list__item">
-                <div slot="title" class="item-header">
+                <div class="task-title" slot="title">
                     {{ task.task_name }}
                     <!-- <router-link
                         class="h5 link"
@@ -118,3 +118,9 @@
         },
     };
 </script>
+<style lang="scss" scoped>
+    .task-title {
+        color: black;
+        font-weight: bold;
+    }
+</style>
