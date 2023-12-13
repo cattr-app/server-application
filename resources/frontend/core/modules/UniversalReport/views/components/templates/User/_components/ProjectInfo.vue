@@ -12,8 +12,8 @@
                 >
                     {{ project?.name ?? 'No selected name' }}
                 </router-link> -->
-                {{ project?.name}}
-                <at-button  v-if="project.name" class="icon" icon="icon-external-link" @click="redirectToProject"> </at-button>
+                {{ project?.name }}
+                <at-button v-if="project.name" class="icon" icon="icon-external-link" @click="redirectToProject" />
             </div>
             <div v-if="project">
                 <div class="data-entries">
