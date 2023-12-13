@@ -132,7 +132,7 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
 
     public function getReportId(): string
     {
-        return 'dashboard_report';
+        return 'universal_report';
     }
 
     public function getLocalizedReportName(): string

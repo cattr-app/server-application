@@ -322,6 +322,6 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
      */
     public function title(): string
     {
-        return  $this->projectname;
+        return \Str::limit("{$this->project}) $this->projectname", 25);
     }
 }
