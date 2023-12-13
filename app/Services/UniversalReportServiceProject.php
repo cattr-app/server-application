@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Priority;
 use App\Models\Project;
-use App\Models\Status;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\UniversalReport;
@@ -38,7 +36,7 @@ class UniversalReportServiceProject
             if ($field !== 'priority' && $field !== 'status') {
                 $taskFields[] = 'tasks.' . $field;
             } else {
-                $taskRelations[] = $field;
+                $taskRelations[] = 'tasks.' . $field;
                 $taskFields[] = 'tasks.' . $field . '_id';
             }
         }
@@ -46,12 +44,14 @@ class UniversalReportServiceProject
         foreach ($this->report->fields['users'] as $field) {
             $userFields[] = 'users.' . $field;
         }
-        $projects = Project::with(['tasks' => function ($query) use ($taskFields) {
+        $projectsQuery = Project::with(['tasks' => function ($query) use ($taskFields) {
             $query->select($taskFields);
         }, 'users' => function ($query) use ($userFields) {
             $query->select($userFields);
         }])
-            ->select(array_merge($projectFields))->whereIn('id', $this->report->data_objects)->get();
+            ->select(array_merge($projectFields))->whereIn('id', $this->report->data_objects);
+        if (!empty($taskRelations)) $projectsQuery = $projectsQuery->with($taskRelations);
+        $projects = $projectsQuery->get();
         $tasksId = [];
         foreach ($projects as $project) {
             $tasksId[] = $project->tasks->pluck('id');
@@ -130,19 +130,27 @@ class UniversalReportServiceProject
             $workedTimeByDay[$intervalProjectId][$intervalDate] += $timeInterval->total_spent_time_by_day;
         }
         foreach ($projects as $project) {
-            $project->worked_time_day = $workedTimeByDay[$project->id];
+            if (isset($workedTimeByDay[$project->id]))
+                $project->worked_time_day = $workedTimeByDay[$project->id];
             foreach ($project->users as $user) {
                 if (isset($workedTimeByDayUser[$project->id][$user->id]))
                     $user->workers_day =  $workedTimeByDayUser[$project->id][$user->id];
                 if (isset($totalSpentTimeUser[$project->id][$user->id]))
                     $user->total_spent_time_by_user = $totalSpentTimeUser[$project->id][$user->id];
             }
-            foreach ($project->tasks as $task) {
-                $task->priority = Priority::find($task->priority_id)->name ?? '';
-                $task->status = Status::find($task->status_id)->name ?? '';
+        }
+        $projects = $projects->keyBy('id')->toArray();
+        foreach ($projects as &$project) {
+            if (isset($project['created_at'])) {
+                $date = new DateTime($project['created_at']);
+                $project['created_at'] = $date->format('Y-m-d H:i:s');
+            }
+            foreach ($project['tasks'] as &$task) {
+                if (isset($task['priority'])) $task['priority'] = $task['priority']['name'];
+                if (isset($task['status'])) $task['status'] = $task['status']['name'];
             }
         }
-        return  $projects->keyBy('id');
+        return $projects;
     }
 
     public function getProjectReportCharts()
