@@ -2,8 +2,6 @@
 
 namespace App\Services;
 
-use App\Models\Priority;
-use App\Models\Status;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\UniversalReport;
@@ -45,13 +43,15 @@ class UniversalReportServiceTask
         foreach ($this->report->fields['users'] as $field) {
             $userFields[] = 'users.' . $field;
         }
-        $tasks = Task::query()
+        $tasksQuery = Task::query()
             ->with(['project' => function ($query) use ($projectFields) {
                 $query->select($projectFields);
             }, 'users' => function ($query) use ($userFields) {
                 $query->select($userFields);
             }])
-            ->select(array_merge($taskFields))->whereIn('id', $this->report->data_objects)->get();
+            ->select(array_merge($taskFields))->whereIn('id', $this->report->data_objects);
+        if (!empty($taskRelations)) $tasksQuery = $tasksQuery->with($taskRelations);
+        $tasks = $tasksQuery->get();
         $endAt = clone $this->endAt;
         $endAt = $endAt->endOfDay();
         $totalSpentTimeByUser = TimeInterval::whereIn('task_id', $tasks->pluck('id'))
@@ -82,8 +82,6 @@ class UniversalReportServiceTask
             ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at))  as total_spent_time_by_day')
             ->groupBy('task_id', 'date_at')->get();
         foreach ($tasks as $task) {
-            $task->priority = Priority::find($task->priority_id)->name ?? 'Unknown';
-            $task->status = Status::find($task->status_id)->name ?? 'Unknown';
             $worked_time_day = [];
             $startDateTime = new DateTime($this->startAt);
             $endDateTime = new DateTime($this->endAt);
@@ -123,7 +121,12 @@ class UniversalReportServiceTask
                 $user->workers_day = $worked_time_day;
             }
         }
-        return  $tasks->keyBy('id');
+        $tasks = $tasks->keyBy('id')->toArray();
+        foreach ($tasks as &$task) {
+            if (isset($task['priority'])) $task['priority'] = $task['priority']['name'];
+            if (isset($task['status'])) $task['status'] = $task['status']['name'];
+        }
+        return  $tasks;
     }
 
     public function getTasksReportCharts()
