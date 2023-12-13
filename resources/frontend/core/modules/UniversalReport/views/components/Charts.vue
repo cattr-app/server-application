@@ -5,9 +5,9 @@
             <!-- <div v-if="(typeof chart['datasets'][reportId].label) !== 'string'" class="diagram__missing"> -->
             <!-- eslint-disable-next-line prettier/prettier -->
             <div v-if="checkDataset(chart)" class="diagram__missing">
-                <h5 class="diagram__missing__title">Нет данных за указанный период для этого объекта данных</h5>
+                <h5 class="diagram__missing__title">{{ $t(`universal-report.no-data-available`) }}</h5>
                 <h6 class="diagram__missing__subtitle">
-                    Возможно этот объект не участвовал в событиях за указанный период
+                    {{ $t(`universal-report.object-not-participate`) }}
                 </h6>
             </div>
             <ChartLine

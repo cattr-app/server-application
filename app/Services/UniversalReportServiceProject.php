@@ -137,6 +137,8 @@ class UniversalReportServiceProject
                     $user->workers_day =  $workedTimeByDayUser[$project->id][$user->id];
                 if (isset($totalSpentTimeUser[$project->id][$user->id]))
                     $user->total_spent_time_by_user = $totalSpentTimeUser[$project->id][$user->id];
+                else
+                    $user->total_spent_time_by_user = 0;
             }
         }
         $projects = $projects->keyBy('id')->toArray();

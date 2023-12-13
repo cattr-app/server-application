@@ -7,6 +7,8 @@
             "title": "Error",
             "empty": "Fill in all required fields"
         },
+        "no-data-available":"No data available for the specified period for this data object.",
+        "object-not-participate":"Perhaps this object did not participate in events during the specified period.",
         "generate": "Generate",
         "remove": "Remove",
         "save": "Save",
