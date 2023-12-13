@@ -151,14 +151,13 @@ class UniversalReportServiceUser
             $total_spent_time_by_day_and_tasks = [
                 'datasets' => [],
             ];
-
             $userTasks = Task::whereHas('users', function ($query) {
                 $query->whereIn('id', $this->report->data_objects);
             })->get();
             $taskNames = $userTasks->pluck('task_name', 'id');
             TimeInterval::whereIn('user_id', $this->report->data_objects)
-                ->where('start_at', '>=', $this->startAt)
-                ->where('end_at', '<=', $this->endAt)
+                ->where('start_at', '>=',  $this->startAt->format('Y-m-d H:i:s'))
+                ->where('end_at', '<=',  $endAt->format('Y-m-d H:i:s'))
                 ->whereIn('task_id', $userTasks->pluck('id'))
                 ->select('task_id', 'user_id')
                 ->selectRaw('DATE(start_at) as date_at')
@@ -203,8 +202,8 @@ class UniversalReportServiceUser
             })->pluck('project_id', 'id');
 
             $timeIntervals = TimeInterval::whereIn('user_id', $this->report->data_objects)
-                ->where('start_at', '>=', $this->startAt)
-                ->where('end_at', '<=', $this->endAt)
+                ->where('start_at', '>=',  $this->startAt->format('Y-m-d H:i:s'))
+                ->where('end_at', '<=', $endAt->format('Y-m-d H:i:s'))
                 ->whereIn('task_id', $userTasks->keys())
                 ->select('task_id', 'user_id')
                 ->selectRaw('DATE(start_at) as date_at')
