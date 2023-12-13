@@ -13,8 +13,7 @@
                     {{ task?.task_name ?? 'No selected name' }}
                 </router-link> -->
                 {{ task?.task_name }}
-                <at-button v-if="task.task_name" class="icon" icon="icon-external-link" @click="redirectToTask">
-                </at-button>
+                <at-button v-if="task.task_name" class="icon" icon="icon-external-link" @click="redirectToTask" />
             </div>
             <div>
                 <div class="data-entries">

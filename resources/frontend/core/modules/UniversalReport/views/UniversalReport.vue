@@ -84,7 +84,6 @@
             const { data } = await service.getReports();
 
             this.setReports(data.data);
-            const urlParams = new URLSearchParams(window.location.search);
         },
     };
 </script>
