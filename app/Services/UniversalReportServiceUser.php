@@ -2,9 +2,7 @@
 
 namespace App\Services;
 
-use App\Models\Priority;
 use App\Models\Project;
-use App\Models\Status;
 use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\UniversalReport;
@@ -39,16 +37,17 @@ class UniversalReportServiceUser
             if ($field !== 'priority' && $field !== 'status') {
                 $taskFields[] = 'tasks.' . $field;
             } else {
-                $taskRelations[] = $field;
+                $taskRelations[] = 'tasks.' . $field;
                 $taskFields[] = 'tasks.' . $field . '_id';
             }
         }
-        $users = User::query()->with(['projects' => function ($query) use ($projectFields) {
+        $usersQuery = User::query()->with(['projects' => function ($query) use ($projectFields) {
             $query->select($projectFields);
         }])->with(['tasks' => function ($query) use ($taskFields) {
             $query->select($taskFields);
-        }])->select(array_merge($this->report->fields['base'], ['id']))->whereIn('id', $this->report->data_objects)->get();
-
+        }])->select(array_merge($this->report->fields['base'], ['id']))->whereIn('id', $this->report->data_objects);
+        if (!empty($taskRelations)) $usersQuery = $usersQuery->with($taskRelations);
+        $users = $usersQuery->get();
         foreach ($users as $user) {
             foreach ($user->projects as $project) {
                 $project->tasks = $user->tasks->where('project_id', $project->id)->toArray();
@@ -97,10 +96,10 @@ class UniversalReportServiceUser
                     $tasks = $project['tasks'];
                     foreach ($tasks as $key => $task) {
                         if (isset($tasks[$key]['priority'])) {
-                            $tasks[$key]['priority'] =  Priority::find($task['priority_id'])->name ?? 'Unknown';
+                            $tasks[$key]['priority'] = $tasks[$key]['priority']['name'];
                         }
                         if (isset($tasks[$key]['status'])) {
-                            $tasks[$key]['status'] =  Status::find($task['status_id'])->name ?? 'Unknown';
+                            $tasks[$key]['status'] = $tasks[$key]['status']['name'];
                         }
                     }
                     $project['tasks'] = $tasks;
