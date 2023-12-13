@@ -43,10 +43,7 @@
                     </at-button>
                 </div>
             </div>
-            <div
-                v-if="reports.company.length === 0 && reports.personal.length === 0 && showCreateMessage"
-                class="universal-report__ text-no-report"
-            >
+            <div v-if="showCreateMessage" class="universal-report__ text-no-report">
                 {{ $t('universal-report.сreate-select-existing-report') }}
             </div>
             <router-view />
@@ -64,17 +61,18 @@
         name: 'UniversalReport',
         data() {
             return {
-                showCreateMessage: true,
                 isDataLoading: false,
             };
         },
         computed: {
             ...mapGetters('universalreport', ['reports']),
+            showCreateMessage() {
+                return this.$route.name === 'report.universal';
+            },
         },
         methods: {
             redirectToCreate() {
                 this.$router.push({ name: 'report.universal.create' });
-                this.showCreateMessage = false;
             },
             ...mapMutations({
                 setReports: 'universalreport/setReports',
@@ -86,10 +84,6 @@
             const { data } = await service.getReports();
 
             this.setReports(data.data);
-            const urlParams = new URLSearchParams(window.location.search);
-            if (urlParams.has('type')) {
-                this.showCreateMessage = false;
-            }
         },
     };
 </script>
