@@ -14,7 +14,12 @@
                     >
                         {{ task.task_name }}
                     </router-link> -->
-                    <at-button v-if="task.task_name" class="icon" icon="icon-external-link" @click="redirectToTask"></at-button>
+                    <at-button
+                        v-if="task.task_name"
+                        class="icon"
+                        icon="icon-external-link"
+                        @click="redirectToTask"
+                    ></at-button>
                 </div>
                 <div>
                     <div class="data-entries">
@@ -87,29 +92,29 @@
 </template>
 
 <script>
-import { Skeleton } from 'vue-loading-skeleton';
+    import { Skeleton } from 'vue-loading-skeleton';
 
-export default {
-    methods: {
-        redirectToTask() {
-            this.$router.push({
-                name: 'Tasks.crud.tasks.view',
-                params: { id: this.id },
-            });
+    export default {
+        methods: {
+            redirectToTask() {
+                this.$router.push({
+                    name: 'Tasks.crud.tasks.view',
+                    params: { id: this.id },
+                });
+            },
         },
-    },
-    props: {
-        id: {
-            type: [Number, String],
-            required: true,
+        props: {
+            id: {
+                type: [Number, String],
+                required: true,
+            },
+            task: {
+                type: Object,
+                required: true,
+            },
         },
-        task: {
-            type: Object,
-            required: true,
+        components: {
+            Skeleton,
         },
-    },
-    components: {
-        Skeleton,
-    },
-};
+    };
 </script>
