@@ -232,7 +232,7 @@ class UniversalReportServiceProject
                 ->selectRaw('SUM(TIMESTAMPDIFF(SECOND, start_at, end_at))  as total_spent_time_day_and_users_separately')
                 ->groupBy('user_id', 'date_at', 'task_id')
                 ->get()
-                ->each(function ($timeInterval) use (&$total_spent_time_day_and_users_separately, $userNames) {
+                ->each(function ($timeInterval) use (&$total_spent_time_day_and_users_separately, $userNames, $projectsName) {
                     $time = $timeInterval->total_spent_time_day_and_users_separately;
                     $projectId = (int)$timeInterval->task->project_id;
                     if (!isset($total_spent_time_day_and_users_separately['datasets'][$projectId])) {
@@ -243,6 +243,7 @@ class UniversalReportServiceProject
                         $color = sprintf('#%02X%02X%02X', rand(0, 255), rand(0, 255), rand(0, 255));
                         $total_spent_time_day_and_users_separately['datasets'][$projectId][$userId] = [
                             'label' => $userNames[$timeInterval->user_id] ?? ' ',
+                            'projectLabel' => $projectsName[$projectId] ?? ' ',
                             'borderColor' => $color,
                             'backgroundColor' => $color,
                             'data' => [$timeInterval->date_at => $time],
