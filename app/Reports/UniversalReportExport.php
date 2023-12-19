@@ -64,9 +64,8 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
                         $sheets[] = new UserMultiSheetExport($collection, $userId, ($user['label'] ?? ''), $this->periodDates);
                     }
                 }
-                return $sheets;
+                break;
             case UniversalReportBase::TASK:
-
                 $collection = $this->collectionTask()->all();
                 $data = $collection['reportCharts'];
                 if (isset($data['total_spent_time_day']['datasets'])) {
@@ -74,16 +73,29 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
                         $sheets[] = new TaskMultiSheetExport($collection, $taskId, ($task['label'] ?? ''), $this->periodDates);
                     }
                 }
-                return $sheets;
+                break;
             case UniversalReportBase::PROJECT:
                 $collection = $this->collectionProject()->all();
                 $charts = $collection['reportCharts'];
+                $allTaskIds = [];
+                $allUserIds = [];
                 if (isset($charts['total_spent_time_day']['datasets'])) {
-                    foreach ($charts['total_spent_time_day']['datasets'] as $taskId => $task) {
-                        $sheets[] = new ProjectMultiSheetExport($collection, $taskId, ($task['label'] ?? ''), $this->periodDates);
+                    $allTaskIds = array_keys($charts['total_spent_time_day']['datasets'] ?? []);
+                }
+                if (isset($charts['total_spent_time_day_and_users_separately']['datasets'])) {
+                    $allUserIds = array_keys($charts['total_spent_time_day_and_users_separately']['datasets'] ?? []);
+                }
+                if (isset($charts['total_spent_time_day']['datasets']) || isset($charts['total_spent_time_day_and_users_separately']['datasets'])) {
+                    $allIds = array_merge($allTaskIds, $allUserIds);
+                    $allIds = array_unique($allIds);
+                    foreach ($allIds as $id) {
+                        $sheets[] = new ProjectMultiSheetExport($collection, $id, $this->periodDates);
                     }
                 }
-                return $sheets;
+                break;
+        }
+        if (empty($sheets)) {
+            $sheets[] = new DummySheetExport();
         }
         return $sheets;
     }
@@ -116,7 +128,7 @@ class UniversalReportExport extends AppReport implements FromCollection, ShouldA
         return collect([
             'reportData' => $service->getProjectReportData(),
             'reportName' => $this->report->name,
-            'reportCharts' =>$service->getProjectReportCharts(),
+            'reportCharts' => $service->getProjectReportCharts(),
             'periodDates' => $this->periodDates,
         ]);
     }

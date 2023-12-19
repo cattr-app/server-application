@@ -161,12 +161,8 @@ class UserMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
     }
     public function charts()
     {
-        if ($this->countdate > 27) {
-            $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A2', null, 1)];
-            $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!B1:AF1', null, $this->countdate)];
-            $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . '!B2:AF2', null,  $this->countdate)];
-
-            $series = new DataSeries(
+        $createDataSeries = function ($label, $categories, $values) {
+            return new DataSeries(
                 DataSeries::TYPE_LINECHART,
                 DataSeries::GROUPING_STANDARD,
                 [0],
@@ -174,204 +170,58 @@ class UserMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
                 $categories,
                 $values
             );
-            $plot   = new PlotArea(null, [$series]);
+        };
 
-            $legend = new Legend();
-            $chart  = new Chart('Всего отработано пользоваетелем', new Title('Всего отработано пользоваетелем'), $legend, $plot);
-            $chart->setTopLeftPosition('A8');
-            $chart->setTopLeftOffset(10, 10);
-            $chart->setBottomRightPosition('I38');
-            $chart->setBottomRightOffset(30, 30);
+        $createChart = function ($name, $title, $position, $offset, $startColumn, $endColumn, $rowCount, $columnLast) use ($createDataSeries) {
             $series = [];
-            for ($i = 4; $i < $this->rowcount() + 4; $i++) {
-                $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A' . $i, null, $i)];
-                $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!B1:AF1', null,  $this->countdate)];
-                $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . '!B' . $i . ':AF' . $i, null,  $this->countdate)];
+            if (empty($rowCount)) {
+                $label = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A2', null, 1)];
+                $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . "!{$startColumn}1:{$endColumn}1", null, $columnLast)];
+                $values = [new DataSeriesValues('Number', "'" . $this->title() . "'" . "!{$startColumn}2:{$endColumn}2", null, $columnLast)];
+                $series[] = $createDataSeries($label, $categories, $values);
+            } else {
 
-
-                $dataSeries = new DataSeries(
-                    DataSeries::TYPE_LINECHART,
-                    DataSeries::GROUPING_STANDARD,
-                    [0],
-                    $label,
-                    $categories,
-                    $values
-                );
-                $series[] = $dataSeries;
+                for ($i = $rowCount[0]; $i < $rowCount[1]; $i++) {
+                    $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A' . $i, null, $i)];
+                    $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . "!{$startColumn}1:{$endColumn}1", null,  $columnLast)];
+                    $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . "!{$startColumn}" . $i . ":!{$endColumn}" . $i, null,  $columnLast)];
+                    $series[] = $createDataSeries($label, $categories, $values);
+                }
             }
-            $plot   = new PlotArea(null, $series);
+            $plot = new PlotArea(null, $series);
             $legend = new Legend();
-            $chart2 = new Chart('Часов по задачам', new Title('Часов по задачам'), $legend, $plot);
-            $chart2->setTopLeftPosition('J8');
-            $chart2->setTopLeftOffset(10, 10);
-            $chart2->setBottomRightPosition('R38');
-            $chart2->setBottomRightOffset(30, 30);
-            $series = [];
-            for ($i = $this->rowcount() + 5; $i < ($this->rowcountproject() + $this->rowcount() + 5); $i++) {
-                $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A' . $i, null, $i)];
-                $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!B1:AF1', null,  $this->countdate)];
-                $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . '!B' . $i . ':AF' . $i, null,  $this->countdate)];
+            $chart = new Chart($name, new Title($title), $legend, $plot);
+            $chart->setTopLeftPosition($position[0]);
+            $chart->setTopLeftOffset($offset[0], $offset[0]);
+            $chart->setBottomRightPosition($position[1]);
+            $chart->setBottomRightOffset($offset[1], $offset[1]);
+            return $chart;
+        };
 
-
-                $dataSeries = new DataSeries(
-                    DataSeries::TYPE_LINECHART,
-                    DataSeries::GROUPING_STANDARD,
-                    [0],
-                    $label,
-                    $categories,
-                    $values
-                );
-                $series[] = $dataSeries;
-            }
-            $plot   = new PlotArea(null, $series);
-            $legend = new Legend();
-            $chart3 = new Chart('Часов', new Title('Часов по проектам'), $legend, $plot);
-            $chart3->setTopLeftPosition('S8');
-            $chart3->setTopLeftOffset(10, 10);
-            $chart3->setBottomRightPosition('Z30');
-            $chart3->setBottomRightOffset(30, 30);
-        } elseif ($this->countdate === 7) {
-            $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A2', null, 1)];
-            $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!B1:H1', null, $this->countdate)];
-            $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . '!B2:H2', null,  $this->countdate)];
-
-            $series = new DataSeries(
-                DataSeries::TYPE_LINECHART,
-                DataSeries::GROUPING_STANDARD,
-                [0],
-                $label,
-                $categories,
-                $values
-            );
-            $plot   = new PlotArea(null, [$series]);
-
-            $legend = new Legend();
-            $chart  = new Chart('Всего отработано пользоваетелем', new Title('Всего отработано пользоваетелем'), $legend, $plot);
-            $chart->setTopLeftPosition('A8');
-            $chart->setTopLeftOffset(10, 10);
-            $chart->setBottomRightPosition('E38');
-            $chart->setBottomRightOffset(30, 30);
-            $series = [];
-            for ($i = 4; $i < $this->rowcount() + 4; $i++) {
-                $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A' . $i, null, $i)];
-                $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!B1:H1', null,  $this->countdate)];
-                $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . '!B' . $i . ':H' . $i, null,  $this->countdate)];
-
-
-                $dataSeries = new DataSeries(
-                    DataSeries::TYPE_LINECHART,
-                    DataSeries::GROUPING_STANDARD,
-                    [0],
-                    $label,
-                    $categories,
-                    $values
-                );
-                $series[] = $dataSeries;
-            }
-            $plot   = new PlotArea(null, $series);
-            $legend = new Legend();
-            $chart2 = new Chart('Часов по задачам', new Title('Часов по задачам'), $legend, $plot);
-            $chart2->setTopLeftPosition('F8');
-            $chart2->setTopLeftOffset(10, 10);
-            $chart2->setBottomRightPosition('R38');
-            $chart2->setBottomRightOffset(30, 30);
-            $series = [];
-            for ($i = $this->rowcount() + 5; $i < ($this->rowcountproject() + $this->rowcount() + 5); $i++) {
-                $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A' . $i, null, $i)];
-                $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!B1:H1', null,  $this->countdate)];
-                $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . '!B' . $i . ':H' . $i, null,  $this->countdate)];
-
-
-                $dataSeries = new DataSeries(
-                    DataSeries::TYPE_LINECHART,
-                    DataSeries::GROUPING_STANDARD,
-                    [0],
-                    $label,
-                    $categories,
-                    $values
-                );
-                $series[] = $dataSeries;
-            }
-            $plot   = new PlotArea(null, $series);
-            $legend = new Legend();
-            $chart3 = new Chart('Часов', new Title('Часов по проектам'), $legend, $plot);
-            $chart3->setTopLeftPosition('S8');
-            $chart3->setTopLeftOffset(10, 10);
-            $chart3->setBottomRightPosition('Z30');
-            $chart3->setBottomRightOffset(30, 30);
-        } else {
-            $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A2', null, 1)];
-            $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!B1', null, $this->countdate)];
-            $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . '!B2', null,  $this->countdate)];
-
-            $series = new DataSeries(
-                DataSeries::TYPE_LINECHART,
-                DataSeries::GROUPING_STANDARD,
-                [0],
-                $label,
-                $categories,
-                $values
-            );
-            $plot   = new PlotArea(null, [$series]);
-
-            $legend = new Legend();
-            $chart  = new Chart('Всего отработано пользоваетелем', new Title('Всего отработано пользоваетелем'), $legend, $plot);
-            $chart->setTopLeftPosition('A8');
-            $chart->setTopLeftOffset(10, 10);
-            $chart->setBottomRightPosition('I38');
-            $chart->setBottomRightOffset(30, 30);
-            $series = [];
-            for ($i = 4; $i < $this->rowcount() + 4; $i++) {
-                $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A' . $i, null, $i)];
-                $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!B1', null,  $this->countdate)];
-                $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . '!B' . $i, null,  $this->countdate)];
-
-
-                $dataSeries = new DataSeries(
-                    DataSeries::TYPE_LINECHART,
-                    DataSeries::GROUPING_STANDARD,
-                    [0],
-                    $label,
-                    $categories,
-                    $values
-                );
-                $series[] = $dataSeries;
-            }
-            $plot   = new PlotArea(null, $series);
-            $legend = new Legend();
-            $chart2 = new Chart('Часов по задачам', new Title('Часов по задачам'), $legend, $plot);
-            $chart2->setTopLeftPosition('J8');
-            $chart2->setTopLeftOffset(10, 10);
-            $chart2->setBottomRightPosition('R38');
-            $chart2->setBottomRightOffset(30, 30);
-            $series = [];
-            for ($i = $this->rowcount() + 5; $i < ($this->rowcountproject() + $this->rowcount() + 5); $i++) {
-                $label      = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!A' . $i, null, $i)];
-                $categories = [new DataSeriesValues('String', "'" . $this->title() . "'" . '!B1', null,  $this->countdate)];
-                $values     = [new DataSeriesValues('Number', "'" . $this->title() . "'" . '!B' . $i, null,  $this->countdate)];
-
-
-                $dataSeries = new DataSeries(
-                    DataSeries::TYPE_LINECHART,
-                    DataSeries::GROUPING_STANDARD,
-                    [0],
-                    $label,
-                    $categories,
-                    $values
-                );
-                $series[] = $dataSeries;
-            }
-            $plot   = new PlotArea(null, $series);
-            $legend = new Legend();
-            $chart3 = new Chart('Часов', new Title('Часов по проектам'), $legend, $plot);
-            $chart3->setTopLeftPosition('S8');
-            $chart3->setTopLeftOffset(10, 10);
-            $chart3->setBottomRightPosition('Z30');
-            $chart3->setBottomRightOffset(30, 30);
-        }
-        return [$chart, $chart2, $chart3];
+        $columnNumber = $this->countdate;
+        $charts = [];
+        $columnLast =  $this->getColumnLast($columnNumber + 1);
+        $columnFirst = 'B';
+        $offsetChart = [10, 30];
+        $positionsChart = [['A8', 'E38'], ['F8', 'R38'], ['S8', 'Z30']];
+        $textUser = 'Total time worked by the user';
+        $textTask = 'Hours by tasks';
+        $textProject = 'Hours by projects';
+        $charts[] = $createChart($textUser, $textUser, $positionsChart[0],  $offsetChart, $columnFirst, $columnLast, [], $columnNumber);
+        $charts[] = $createChart($textTask, $textTask, $positionsChart[1],  $offsetChart, $columnFirst, $columnLast, [4, $this->rowcount() + 4], $columnNumber);
+        $charts[] = $createChart($textProject, $textProject, $positionsChart[2],  $offsetChart, $columnFirst, $columnLast, [$this->rowcount() + 5, $this->rowcountproject() + $this->rowcount() + 5], $columnNumber);
+        return $charts;
     }
-
+    function getColumnLast($columnNumber)
+    {
+        $columnName = '';
+        while ($columnNumber > 0) {
+            $remainder = ($columnNumber - 1) % 26;
+            $columnName = chr(65 + $remainder) . $columnName;
+            $columnNumber = intdiv(($columnNumber - $remainder - 1), 26);
+        }
+        return $columnName;
+    }
     public function headings(): array
     {
 
