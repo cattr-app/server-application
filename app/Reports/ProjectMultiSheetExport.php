@@ -2,6 +2,7 @@
 
 namespace App\Reports;
 
+use App\Models\Project;
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithCharts;
 use Maatwebsite\Excel\Concerns\WithTitle;
@@ -14,6 +15,7 @@ use PhpOffice\PhpSpreadsheet\Chart\Title;
 use Carbon\Carbon;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHeadings, WithColumnWidths
 {
@@ -25,31 +27,31 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
     private $reportData;
     private $taskIdisset;
     private $userIdisset;
+    const COLUMN_FIRST = 'B';
+    const OFFSET_CHART = [10, 30];
+    const POSITIONS_CHART = [['A8', 'D38'], ['E8', 'H38']];
+    const TEXT_USER = 'Worked by all users';
+    const TEXT_USER_INDIVIDUALLY = 'Worked by all users individually';
 
     public function __construct(array $collection, $id, array $periodDates)
     {
         $this->data = $collection['reportCharts'];
         $this->project = $id;
         $this->periodDates = $periodDates;
+        $this->projectname = Project::find($id)->name;
         $this->reportData = $collection['reportData'];
         $this->countdate  = count($this->periodDates);
     }
 
     public function columnWidths(): array
     {
-        return [
-            'A' => 35,
-            'B' => 35,
-            'C' => 35,
-            'D' => 25,
-            'E' => 25,
-            'F' => 25,
-            'G' => 25,
-            'H' => 25,
-            'I' => 25,
-            'J' => 25,
-
-        ];
+        $columnWidths = ['A' => 45];
+        $currentColumn = 2;
+        while ($currentColumn <= $this->countdate+1) {
+            $columnWidths[Coordinate::stringFromColumnIndex($currentColumn)] = 25;
+            $currentColumn++;
+        }
+        return $columnWidths;
     }
     public function array(): array
     {
@@ -78,7 +80,6 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
             $resultrow[] = ' ';
             $resultrow[] = ' ';
             $result[] = $resultrow;
-
             foreach ($this->data['total_spent_time_day_and_users_separately']['datasets'] as $projectId => $userTask) {
                 if ($projectId !== $this->project)
                     continue;
@@ -194,29 +195,14 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
 
         $columnNumber = $this->countdate;
         $charts = [];
-        $columnLast =  $this->getColumnLast($columnNumber + 1);
-        $columnFirst = 'B';
-        $offsetChart = [10, 30];
-        $positionsChart = [['A8', 'D38'], ['F8', 'J38']];
-        $textUser = 'Worked by all users';
-        $textUserIndividually = 'Worked by all users individually';
+        $columnLast =  Coordinate::stringFromColumnIndex($columnNumber + 1);
         $rowCounts = $this->rowCount();
         if ($this->taskIdisset)
-            $charts[] = $createChart($textUser, $textUser, $positionsChart[0],  $offsetChart, $columnFirst, $columnLast, [], $columnNumber);
+            $charts[] = $createChart(static::TEXT_USER, static::TEXT_USER, static::POSITIONS_CHART[0],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [], $columnNumber);
         if ($this->userIdisset)
-            $charts[] = $createChart($textUserIndividually, $textUserIndividually, $positionsChart[1],  $offsetChart, $columnFirst, $columnLast, [4, $rowCounts + 4], $columnNumber);
+            $charts[] = $createChart(static::TEXT_USER_INDIVIDUALLY , static::TEXT_USER_INDIVIDUALLY , static::POSITIONS_CHART[1],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $rowCounts + 4], $columnNumber);
 
         return $charts;
-    }
-    function getColumnLast($columnNumber)
-    {
-        $columnName = '';
-        while ($columnNumber > 0) {
-            $remainder = ($columnNumber - 1) % 26;
-            $columnName = chr(65 + $remainder) . $columnName;
-            $columnNumber = intdiv(($columnNumber - $remainder - 1), 26);
-        }
-        return $columnName;
     }
     public function headings(): array
     {
@@ -229,21 +215,14 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
     {
         $count = 0;
         if (isset($this->data['total_spent_time_day']['datasets'])) {
-            $this->taskIdisset = false;
-            foreach ($this->data['total_spent_time_day']['datasets'] as $projectId => $userTasks) {
-                if ($projectId !== $this->project) {
-                    continue;
-                }
-                $this->taskIdisset = true;
-            }
+            $this->taskIdisset = isset($this->data['total_spent_time_day']['datasets'][$this->project]);
         }
         if (isset($this->data['total_spent_time_day_and_users_separately']['datasets'])) {
-            $this->userIdisset = false;
+            $this->userIdisset = isset($this->data['total_spent_time_day_and_users_separately']['datasets'][$this->project]);
             foreach ($this->data['total_spent_time_day_and_users_separately']['datasets'] as $projectId => $userTasks) {
                 if ($projectId !== $this->project) {
                     continue;
                 }
-                $this->userIdisset = true;
                 $count += count($userTasks);
             }
         }
@@ -254,6 +233,6 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
      */
     public function title(): string
     {
-        return \Str::limit("{$this->project}) $this->projectname", 25);
+        return \Str::limit("{$this->project}) $this->projectname", 8);
     }
 }

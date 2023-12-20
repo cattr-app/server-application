@@ -4,7 +4,6 @@ namespace App\Reports;
 
 use Maatwebsite\Excel\Concerns\FromArray;
 use Maatwebsite\Excel\Concerns\WithCharts;
-use App\Enums\UniversalReportBase;
 use Maatwebsite\Excel\Concerns\WithTitle;
 use PhpOffice\PhpSpreadsheet\Chart\Chart;
 use PhpOffice\PhpSpreadsheet\Chart\DataSeries;
@@ -12,11 +11,10 @@ use PhpOffice\PhpSpreadsheet\Chart\DataSeriesValues;
 use PhpOffice\PhpSpreadsheet\Chart\Legend;
 use PhpOffice\PhpSpreadsheet\Chart\PlotArea;
 use PhpOffice\PhpSpreadsheet\Chart\Title;
-use PhpOffice\PhpSpreadsheet\Spreadsheet;
 use Carbon\Carbon;
-use Carbon\CarbonPeriod;
 use Maatwebsite\Excel\Concerns\WithColumnWidths;
 use Maatwebsite\Excel\Concerns\WithHeadings;
+use PhpOffice\PhpSpreadsheet\Cell\Coordinate;
 
 class UserMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHeadings, WithColumnWidths
 {
@@ -26,6 +24,12 @@ class UserMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
     private $username;
     private $periodDates;
     private $countdate;
+    const COLUMN_FIRST = 'B';
+    const OFFSET_CHART = [10, 30];
+    const POSITIONS_CHART = [['A8', 'E38'], ['F8', 'R38'], ['S8', 'Z30']];
+    const TEXT_USER = 'Worked by all users';
+    const TEXT_TASK = 'Hours by tasks';
+    const TEXT_PROJECT = 'Hours by projects';
     public function __construct(array $collection, $userId, $username, array $periodDates)
     {
         $this->data = $collection['reportCharts'];
@@ -38,18 +42,13 @@ class UserMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
 
     public function columnWidths(): array
     {
-        return [
-            'A' => 55,
-            'B' => 25,
-            'C' => 25,
-            'D' => 25,
-            'E' => 25,
-            'F' => 25,
-            'G' => 25,
-            'H' => 25,
-            'I' => 25,
-            'J' => 25,
-        ];
+        $columnWidths = ['A' => 45];
+        $currentColumn = 2;
+        while ($currentColumn <= $this->countdate+1) {
+            $columnWidths[Coordinate::stringFromColumnIndex($currentColumn)] = 25;
+            $currentColumn++;
+        }
+        return $columnWidths;
     }
     public function array(): array
     {
@@ -200,31 +199,14 @@ class UserMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
 
         $columnNumber = $this->countdate;
         $charts = [];
-        $columnLast =  $this->getColumnLast($columnNumber + 1);
-        $columnFirst = 'B';
-        $offsetChart = [10, 30];
-        $positionsChart = [['A8', 'E38'], ['F8', 'R38'], ['S8', 'Z30']];
-        $textUser = 'Total time worked by the user';
-        $textTask = 'Hours by tasks';
-        $textProject = 'Hours by projects';
-        $charts[] = $createChart($textUser, $textUser, $positionsChart[0],  $offsetChart, $columnFirst, $columnLast, [], $columnNumber);
-        $charts[] = $createChart($textTask, $textTask, $positionsChart[1],  $offsetChart, $columnFirst, $columnLast, [4, $this->rowcount() + 4], $columnNumber);
-        $charts[] = $createChart($textProject, $textProject, $positionsChart[2],  $offsetChart, $columnFirst, $columnLast, [$this->rowcount() + 5, $this->rowcountproject() + $this->rowcount() + 5], $columnNumber);
+        $columnLast =  Coordinate::stringFromColumnIndex($columnNumber + 1);
+        $charts[] = $createChart(static::TEXT_USER, static::TEXT_USER, static::POSITIONS_CHART[0],   static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [], $columnNumber);
+        $charts[] = $createChart(static::TEXT_TASK, static::TEXT_TASK, static::POSITIONS_CHART[1],   static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $this->rowcount() + 4], $columnNumber);
+        $charts[] = $createChart(static::TEXT_PROJECT, static::TEXT_PROJECT, static::POSITIONS_CHART[2],    static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [$this->rowcount() + 5, $this->rowcountproject() + $this->rowcount() + 5], $columnNumber);
         return $charts;
-    }
-    function getColumnLast($columnNumber)
-    {
-        $columnName = '';
-        while ($columnNumber > 0) {
-            $remainder = ($columnNumber - 1) % 26;
-            $columnName = chr(65 + $remainder) . $columnName;
-            $columnNumber = intdiv(($columnNumber - $remainder - 1), 26);
-        }
-        return $columnName;
     }
     public function headings(): array
     {
-
         return [
             'User Name',
             ...collect($this->periodDates)->map(fn ($date) => Carbon::parse($date)->format('y-m-d'))
@@ -236,7 +218,7 @@ class UserMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
      */
     public function title(): string
     {
-        return  $this->username;
+        return \Str::limit("$this->username", 10);
     }
     protected function rowcount()
     {
