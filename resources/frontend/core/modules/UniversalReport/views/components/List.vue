@@ -35,16 +35,6 @@
     export default {
         name: 'List',
         props: {
-            // reportsList: {
-            //     type: Object,
-            //     required: true,
-            //     default: () => {},
-            // },
-            // reportsCharts: {
-            //     type: Object,
-            //     required: true,
-            //     default: () => {},
-            // },
             data: {
                 type: Object,
                 required: true,
@@ -90,7 +80,6 @@
                 setName: 'universalreport/setName',
                 setBase: 'universalreport/setBase',
                 setCalendarData: 'universalreport/setCalendarData',
-                // clearStore: 'universalreport/clearStore',
             }),
 
             getUserPercentage(minutes, totalTime) {

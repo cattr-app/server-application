@@ -86,11 +86,8 @@ const mutations = {
         state.type = type;
     },
     clearStore(state) {
-        // const data = {
         state.name = '';
         state.type = '';
-        // service: state.service,
-        // bases: [],
         state.selectedBase = '';
         state.fields = {};
         state.selectedFields = {};
@@ -103,9 +100,6 @@ const mutations = {
             start: '',
             end: '',
         };
-        // };
-
-        // state = data;
     },
 };
 

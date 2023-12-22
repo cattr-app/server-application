@@ -7,7 +7,6 @@ use App\Models\TimeInterval;
 use App\Models\UniversalReport;
 use App\Models\User;
 use Carbon\Carbon;
-use DateTime;
 
 class UniversalReportServiceTask
 {
@@ -83,8 +82,8 @@ class UniversalReportServiceTask
             ->groupBy('task_id', 'date_at')->get();
         foreach ($tasks as $task) {
             $worked_time_day = [];
-            $startDateTime = new DateTime($this->startAt);
-            $endDateTime = new DateTime($this->endAt);
+            $startDateTime = Carbon::parse($this->startAt);
+            $endDateTime = Carbon::parse($this->endAt);
             $task->total_spent_time =  $totalSpentTime[$task->id] ?? 0;
             while ($startDateTime <= $endDateTime) {
                 $currentDate = $startDateTime->format('Y-m-d');
@@ -102,8 +101,8 @@ class UniversalReportServiceTask
             $task->worked_time_day =  $worked_time_day;
             foreach ($task->users as $user) {
                 $worked_time_day = [];
-                $startDateTime = new DateTime($this->startAt);
-                $endDateTime = new DateTime($this->endAt);
+                $startDateTime = Carbon::parse($this->startAt);
+                $endDateTime = Carbon::parse($this->endAt);
                 $user->total_spent_time_by_user =  $totalSpentTimeByUser->where('user_id', $user->id)->where('task_id', $task->id)->first()->total_spent_time_by_user ?? 0;
                 while ($startDateTime <= $endDateTime) {
                     $currentDate = $startDateTime->format('Y-m-d');

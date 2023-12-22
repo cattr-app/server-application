@@ -149,7 +149,6 @@
             async changeBase(base) {
                 this.base = base;
                 this.setBase(base);
-                // console.log('create');
 
                 let { data } = await service.getDataObjectsAndFields(base);
                 this.setFields(data.data.fields);
@@ -258,7 +257,6 @@
         &__side-bars {
             min-width: 240px;
             padding: 16px;
-            // margin-right: $layout-03;
             border-right: 1px solid #e2ecf4;
             display: flex;
             flex-direction: column;

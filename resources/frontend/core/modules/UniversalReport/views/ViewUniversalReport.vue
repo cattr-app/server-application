@@ -8,7 +8,6 @@
                             <Skeleton :loading="isDataLoading" width="200px">{{ reportName }}</Skeleton>
                         </h1>
                         <span>{{ $t('universal-report.data_for', [calendar.start, calendar.end]) }}</span>
-                        <!-- <span>{{ `Данные за ${calendar.start} - ${calendar.end}` }}</span> -->
                     </div>
                     <div class="control-items">
                         <at-button size="large" class="control-item" @click="$router.go(-1)"

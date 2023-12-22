@@ -2,16 +2,6 @@
     <at-collapse simple class="list">
         <at-collapse-item class="list__item">
             <div slot="title" class="project-title">
-                <!-- <router-link
-                    class="h5 link"
-                    :title="project.name"
-                    :to="{
-                        name: 'Projects.crud.projects.view',
-                        params: { id },
-                    }"
-                >
-                    {{ project?.name ?? 'No selected name' }}
-                </router-link> -->
                 {{ project?.name }}
                 <at-button v-if="project.name" class="icon" icon="icon-external-link" @click="redirectToProject" />
             </div>

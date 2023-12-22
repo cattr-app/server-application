@@ -10,14 +10,12 @@
                         <div class="center">
                             <span class="h4">{{ formatDurationString(report?.total_spent_time ?? 0) }}</span>
                         </div>
-                        <!-- <div class="right"> -->
                         <at-progress
                             :percent="getUserPercentage(report?.total_spent_time ?? 0, report?.total_spent_time ?? 0)"
                             class="right time-percentage"
                             status="success"
                             :stroke-width="15"
                         />
-                        <!-- </div> -->
                     </div>
                 </div>
             </div>
@@ -93,9 +91,6 @@
 </script>
 
 <style scoped lang="scss">
-    // .item-header {
-    //     margin: 16px 0;
-    // }
     .left {
         flex: 2;
     }

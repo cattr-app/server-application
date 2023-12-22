@@ -7,7 +7,6 @@ use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\UniversalReport;
 use Carbon\Carbon;
-use DateTime;
 
 class UniversalReportServiceProject
 {
@@ -84,8 +83,8 @@ class UniversalReportServiceProject
                 $intervalProjectId = $projectIdsIndexedByTaskIds[$timeInterval->task_id];
             }
             $intervalUserId = $timeInterval->user_id;
-            $startDateTime = new DateTime($this->startAt);
-            $endDateTime = new DateTime($this->endAt);
+            $startDateTime = Carbon::parse($this->startAt);
+            $endDateTime = Carbon::parse($this->endAt);
 
             if (!isset($workedTimeByDayUser[$intervalProjectId][$intervalUserId])) {
                 $workedTimeByDayUser[$intervalProjectId][$intervalUserId] = [];
@@ -111,8 +110,8 @@ class UniversalReportServiceProject
         foreach ($totalSpentTimeByDay as $timeInterval) {
             $intervalDate = $timeInterval['date_at'];
             $intervalProjectId = $projectIdsIndexedByTaskIds[$timeInterval->task_id];
-            $startDateTime = new DateTime($this->startAt);
-            $endDateTime = new DateTime($this->endAt);
+            $startDateTime = \Carbon\Carbon::parse($this->startAt);
+            $endDateTime = \Carbon\Carbon::parse($this->endAt);
             while ($startDateTime <= $endDateTime) {
                 $currentDate = $startDateTime->format('Y-m-d');
 
@@ -144,7 +143,7 @@ class UniversalReportServiceProject
         $projects = $projects->keyBy('id')->toArray();
         foreach ($projects as &$project) {
             if (isset($project['created_at'])) {
-                $date = new DateTime($project['created_at']);
+                $date = Carbon::parse($project['created_at']);
                 $project['created_at'] = $date->format('Y-m-d H:i:s');
             }
             foreach ($project['tasks'] as &$task) {

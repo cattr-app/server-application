@@ -4,16 +4,6 @@
             <at-collapse-item class="list__item">
                 <div class="task-title" slot="title">
                     {{ task.task_name }}
-                    <!-- <router-link
-                        class="h5 link"
-                        :title="task.task_name"
-                        :to="{
-                            name: 'Tasks.crud.tasks.view',
-                            params: { id },
-                        }"
-                    >
-                        {{ task.task_name }}
-                    </router-link> -->
                     <at-button
                         v-if="task.task_name"
                         class="icon"

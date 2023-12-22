@@ -2,7 +2,6 @@ import storeModule from './storeModule';
 
 export const ModuleConfig = {
     routerPrefix: 'universal-report',
-    // loadOrder: 21,
     moduleName: 'UniversalReport',
 };
 

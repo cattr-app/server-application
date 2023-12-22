@@ -180,40 +180,6 @@
                 padding-right: $spacing-08;
                 cursor: text;
             }
-
-            // .at-tabs-nav {
-            //     width: 100%;
-            // }
-
-            // .at-tabs-nav__item {
-            //     color: #b1b1be;
-            //     font-size: 15px;
-            //     font-weight: 600;
-            //     text-align: center;
-            //     margin: 0;
-            //     line-height: 39px;
-            //     width: 50%;
-
-            //     &--active {
-            //         color: #2e2ef9;
-
-            //         &::after {
-            //             background-color: #2e2ef9;
-            //         }
-            //     }
-            // }
-
-            // .at-tabs__nav {
-            //     height: 39px;
-            // }
-
-            // .at-tabs__header {
-            //     margin-bottom: 0;
-            // }
-
-            // .at-tabs__body {
-            //     display: none;
-            // }
         }
 
         &__clear {
@@ -277,10 +243,6 @@
             }
         }
     }
-
-    // .user-type-filter {
-    //     padding: 0 12px;
-    // }
 
     .user-avatar {
         float: left;

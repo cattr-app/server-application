@@ -244,9 +244,6 @@
                     }
                 }
             },
-            // onCalendarChange({ type, start, end }) {
-            //     this.setCalendarData({ type, start, end });
-            // },
             onFieldsChange(fields) {
                 console.log(fields);
                 this.setSelectedFields(fields);
@@ -318,7 +315,6 @@
         &__side-bars {
             min-width: 240px;
             padding: 16px;
-            // margin-right: $layout-03;
             border-right: 1px solid #e2ecf4;
             display: flex;
             flex-direction: column;

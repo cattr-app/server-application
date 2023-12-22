@@ -2,8 +2,6 @@
     <div class="diagrams">
         <div v-for="(chart, key) in charts" :key="key" class="data-entry">
             <h4>{{ $t(`field.fields.${selectedBase}.charts.${key}`) }}</h4>
-            <!-- <div v-if="(typeof chart['datasets'][reportId].label) !== 'string'" class="diagram__missing"> -->
-            <!-- eslint-disable-next-line prettier/prettier -->
             <div v-if="checkDataset(chart)" class="diagram__missing">
                 <h5 class="diagram__missing__title">{{ $t(`universal-report.no-data-available`) }}</h5>
                 <h6 class="diagram__missing__subtitle">
@@ -72,9 +70,6 @@
                 }
                 chart = this.formatDataset(chart['datasets'][this.reportId]);
                 console.log(chart, 'work');
-                // if (typeof chart['datasets'][this.reportId][0] !== 'undefined') {
-                //     console.log(222222);
-                // }
 
                 return typeof chart[0].label !== 'string';
             },

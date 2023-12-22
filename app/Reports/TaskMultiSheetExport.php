@@ -20,9 +20,9 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
 {
     private $data;
     private $task;
-    private $taskname;
+    private $taskName;
     private $periodDates;
-    private $countdate;
+    private $countDate;
     private $reportData;
     const COLUMN_FIRST = 'B';
     const OFFSET_CHART = [10, 30];
@@ -30,21 +30,21 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
     const TEXT_USER = 'Worked by all users';
     const TEXT_USER_INDIVIDUALLY = 'Worked by all users individually';
 
-    public function __construct(array $collection, $taskId, $taskname, array $periodDates)
+    public function __construct(array $collection, $taskId, $taskName, array $periodDates)
     {
         $this->data = $collection['reportCharts'];
         $this->reportData = $collection['reportData'];
         $this->task = $taskId;
-        $this->taskname = $taskname;
+        $this->taskName = $taskName;
         $this->periodDates = $periodDates;
-        $this->countdate  = count($this->periodDates);
+        $this->countDate  = count($this->periodDates);
     }
 
     public function columnWidths(): array
     {
         $columnWidths = ['A' => 45];
         $currentColumn = 2;
-        while ($currentColumn <= $this->countdate+1) {
+        while ($currentColumn <= $this->countDate+1) {
             $columnWidths[Coordinate::stringFromColumnIndex($currentColumn)] = 25;
             $currentColumn++;
         }
@@ -56,39 +56,39 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
             foreach ($this->data['total_spent_time_day']['datasets'] as $taskId => $task) {
                 if ($taskId !== $this->task)
                     continue;
-                $resultrow = [];
-                $resultrow[] = $task['label'] ?? '';
-                $this->taskname = $task['label'] ?? '';
+                $resultRow = [];
+                $resultRow[] = $task['label'] ?? '';
+                $this->taskName = $task['label'] ?? '';
                 if (isset($task['data'])) {
                     foreach ($task['data'] as $date => $time) {
-                        $resultrow[] = number_format($time, 2, '.', '');
+                        $resultRow[] = number_format($time, 2, '.', '');
                     }
                 }
-                $result[] = $resultrow;
+                $result[] = $resultRow;
             }
         }
         if (isset($this->data['total_spent_time_day_users_separately']['datasets'])) {
-            $resultrow = [];
-            $resultrow[] = 'User name';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $result[] = $resultrow;
+            $resultRow = [];
+            $resultRow[] = 'User name';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $result[] = $resultRow;
             foreach ($this->data['total_spent_time_day_users_separately']['datasets'] as $taskId => $userTask) {
                 if ($taskId !== $this->task)
                     continue;
                 foreach ($userTask as $userId => $user) {
-                    $resultrow = [];
-                    $resultrow[] = $user['label'] ?? '';
+                    $resultRow = [];
+                    $resultRow[] = $user['label'] ?? '';
                     if (isset($user['data'])) {
                         foreach ($user['data'] as $date => $time) {
-                            $resultrow[] = number_format($time, 2, '.', '');
+                            $resultRow[] = number_format($time, 2, '.', '');
                         }
                     }
-                    $result[] = $resultrow;
+                    $result[] = $resultRow;
                 }
             }
         }
@@ -97,48 +97,48 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
             foreach ($this->reportData as $taskId => $userTasks) {
                 if ($taskId !== $this->task)
                     continue;
-                $resultrow = [];
+                $resultRow = [];
                 if (isset($userTasks['users'])) {
                     foreach ($userTasks['users'] as $taskId => $taskData) {
-                        $resultrow = [];
-                        $resultrow[] = 'User name';
-                        $resultrow[] = 'Email user';
-                        $resultrow[] = 'Total time';
-                        $resultrow[] = 'Task name';
-                        $resultrow[] = 'Priority';
-                        $resultrow[] = 'Status';
-                        $resultrow[] = 'Estimate';
-                        $resultrow[] = 'Description';
-                        $result[] = $resultrow;
-                        $resultrow = [];
-                        $resultrow[] = $taskData['full_name'] ?? '';
-                        $resultrow[] = $taskData['email'] ?? '';
-                        $resultrow[] = $taskData['total_spent_time_by_user'] ?? '';
-                        $resultrow[] = $userTasks['task_name'] ?? '';
-                        $resultrow[] = $userTasks['priority'] ?? '';
-                        $resultrow[] = $userTasks['status'] ?? '';
-                        $resultrow[] = $userTasks['estimate'] ?? '';
-                        $resultrow[] = $userTasks['description'] ?? '';
+                        $resultRow = [];
+                        $resultRow[] = 'User name';
+                        $resultRow[] = 'Email user';
+                        $resultRow[] = 'Total time';
+                        $resultRow[] = 'Task name';
+                        $resultRow[] = 'Priority';
+                        $resultRow[] = 'Status';
+                        $resultRow[] = 'Estimate';
+                        $resultRow[] = 'Description';
+                        $result[] = $resultRow;
+                        $resultRow = [];
+                        $resultRow[] = $taskData['full_name'] ?? '';
+                        $resultRow[] = $taskData['email'] ?? '';
+                        $resultRow[] = $taskData['total_spent_time_by_user'] ?? '';
+                        $resultRow[] = $userTasks['task_name'] ?? '';
+                        $resultRow[] = $userTasks['priority'] ?? '';
+                        $resultRow[] = $userTasks['status'] ?? '';
+                        $resultRow[] = $userTasks['estimate'] ?? '';
+                        $resultRow[] = $userTasks['description'] ?? '';
                         if (isset($taskData['workers_day'])) {
                             foreach ($taskData['workers_day'] as $date => $time) {
-                                $resultrow[] = 'Data ' . $date . ' time: ' . $time;
+                                $resultRow[] = 'Data ' . $date . ' time: ' . $time;
                             }
                         }
-                        $result[] = $resultrow;
+                        $result[] = $resultRow;
                     }
                 }
-                $resultrow = [];
-                $resultrow[] = 'Project name';
-                $resultrow[] = 'created at';
-                $resultrow[] = 'description';
-                $resultrow[] = 'important';
-                $result[] = $resultrow;
-                $resultrow = [];
-                $resultrow[] = $userTasks['project']['name'] ?? '';
-                $resultrow[] = $userTasks['project']['created_at'] ?? '';
-                $resultrow[] = $userTasks['project']['description'] ?? '';
-                $resultrow[] = $userTasks['project']['important'] ?? '';
-                $result[] = $resultrow;
+                $resultRow = [];
+                $resultRow[] = 'Project name';
+                $resultRow[] = 'created at';
+                $resultRow[] = 'description';
+                $resultRow[] = 'important';
+                $result[] = $resultRow;
+                $resultRow = [];
+                $resultRow[] = $userTasks['project']['name'] ?? '';
+                $resultRow[] = $userTasks['project']['created_at'] ?? '';
+                $resultRow[] = $userTasks['project']['description'] ?? '';
+                $resultRow[] = $userTasks['project']['important'] ?? '';
+                $result[] = $resultRow;
             }
         }
         return $result;
@@ -180,11 +180,11 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
             $chart->setBottomRightOffset($offset[1], $offset[1]);
             return $chart;
         };
-        $columnNumber = $this->countdate;
+        $columnNumber = $this->countDate;
         $charts = [];
         $columnLast =  Coordinate::stringFromColumnIndex($columnNumber + 1);
         $charts[] = $createChart(static::TEXT_USER, static::TEXT_USER, static::POSITIONS_CHART[0],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [], $columnNumber);
-        $charts[] = $createChart(static::TEXT_USER_INDIVIDUALLY, static::TEXT_USER_INDIVIDUALLY, static::POSITIONS_CHART[1],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $this->rowcount() + 4], $columnNumber);
+        $charts[] = $createChart(static::TEXT_USER_INDIVIDUALLY, static::TEXT_USER_INDIVIDUALLY, static::POSITIONS_CHART[1],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $this->rowCount() + 4], $columnNumber);
         return $charts;
     }
     public function headings(): array
@@ -200,9 +200,9 @@ class TaskMultiSheetExport implements FromArray, WithTitle, WithCharts, WithHead
      */
     public function title(): string
     {
-        return \Str::limit("{$this->task}) $this->taskname", 8);
+        return \Str::limit("{$this->task}) $this->taskName", 8);
     }
-    protected function rowcount()
+    protected function rowCount()
     {
         $count = 0;
         if (isset($this->data['total_spent_time_day_users_separately']['datasets'])) {

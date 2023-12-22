@@ -21,12 +21,12 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
 {
     private $data;
     private $project;
-    private $projectname;
-    private $countdate;
+    private $projectName;
+    private $countDate;
     private $periodDates;
     private $reportData;
-    private $taskIdisset;
-    private $userIdisset;
+    private $showTasksChart;
+    private $showUsersChart;
     const COLUMN_FIRST = 'B';
     const OFFSET_CHART = [10, 30];
     const POSITIONS_CHART = [['A8', 'D38'], ['E8', 'H38']];
@@ -38,16 +38,16 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
         $this->data = $collection['reportCharts'];
         $this->project = $id;
         $this->periodDates = $periodDates;
-        $this->projectname = Project::find($id)->name;
+        $this->projectName = Project::find($id)->name;
         $this->reportData = $collection['reportData'];
-        $this->countdate  = count($this->periodDates);
+        $this->countDate  = count($this->periodDates);
     }
 
     public function columnWidths(): array
     {
         $columnWidths = ['A' => 45];
         $currentColumn = 2;
-        while ($currentColumn <= $this->countdate+1) {
+        while ($currentColumn <= $this->countDate + 1) {
             $columnWidths[Coordinate::stringFromColumnIndex($currentColumn)] = 25;
             $currentColumn++;
         }
@@ -59,39 +59,39 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
             foreach ($this->data['total_spent_time_day']['datasets'] as $projectId => $project) {
                 if ($projectId !== $this->project)
                     continue;
-                $resultrow = [];
-                $resultrow[] = $project['label'] ?? '';
-                $this->projectname = $project['label'] ?? '';
+                $resultRow = [];
+                $resultRow[] = $project['label'] ?? '';
+                $this->projectName = $project['label'] ?? '';
                 if (isset($project['data'])) {
                     foreach ($project['data'] as $date => $time) {
-                        $resultrow[] = number_format($time, 2, '.', '');
+                        $resultRow[] = number_format($time, 2, '.', '');
                     }
                 }
-                $result[] = $resultrow;
+                $result[] = $resultRow;
             }
         }
         if (isset($this->data['total_spent_time_day_and_users_separately']['datasets'])) {
-            $resultrow = [];
-            $resultrow[] = 'user name';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $resultrow[] = ' ';
-            $result[] = $resultrow;
+            $resultRow = [];
+            $resultRow[] = 'user name';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $resultRow[] = ' ';
+            $result[] = $resultRow;
             foreach ($this->data['total_spent_time_day_and_users_separately']['datasets'] as $projectId => $userTask) {
                 if ($projectId !== $this->project)
                     continue;
                 foreach ($userTask as $userId => $user) {
-                    $resultrow = [];
-                    $resultrow[] = $user['label'] ?? '';
+                    $resultRow = [];
+                    $resultRow[] = $user['label'] ?? '';
                     if (isset($user['data'])) {
                         foreach ($user['data'] as $date => $time) {
-                            $resultrow[] = number_format($time, 2, '.', '');
+                            $resultRow[] = number_format($time, 2, '.', '');
                         }
                     }
-                    $result[] = $resultrow;
+                    $result[] = $resultRow;
                 }
             }
         }
@@ -99,56 +99,56 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
             foreach ($this->reportData as $projectId => $project) {
                 if ($projectId !== $this->project)
                     continue;
-                $resultrow = [];
-                $resultrow[] = 'Project name';
-                $resultrow[] = 'Create at';
-                $resultrow[] = 'Description';
-                $resultrow[] = 'Important';
-                $result[] = $resultrow;
-                $resultrow = [];
-                $resultrow[] = $project['name'];
-                $resultrow[] = $project['created_at'];
-                $resultrow[] = $project['description'];
-                $resultrow[] = $project['important'];
-                $result[] = $resultrow;
+                $resultRow = [];
+                $resultRow[] = 'Project name';
+                $resultRow[] = 'Create at';
+                $resultRow[] = 'Description';
+                $resultRow[] = 'Important';
+                $result[] = $resultRow;
+                $resultRow = [];
+                $resultRow[] = $project['name'];
+                $resultRow[] = $project['created_at'];
+                $resultRow[] = $project['description'];
+                $resultRow[] = $project['important'];
+                $result[] = $resultRow;
 
-                $resultrow = [];
-                $resultrow[] = 'Task information';
-                $resultrow[] = 'Task name';
-                $resultrow[] = 'Status';
-                $resultrow[] = 'Due date';
-                $resultrow[] = 'Time estimat';
-                $resultrow[] = 'Descriptione';
-                $result[] = $resultrow;
+                $resultRow = [];
+                $resultRow[] = 'Task information';
+                $resultRow[] = 'Task name';
+                $resultRow[] = 'Status';
+                $resultRow[] = 'Due date';
+                $resultRow[] = 'Time estimat';
+                $resultRow[] = 'Descriptione';
+                $result[] = $resultRow;
                 if (isset($project['tasks'])) {
                     foreach ($project['tasks'] as $taskId => $task) {
-                        $resultrow = [];
-                        $resultrow[] =  '';
-                        $resultrow[] = $task['task_name'] ?? '';
-                        $resultrow[] = $task['status'] ?? '';
-                        $resultrow[] = $task['due_date'] ?? 'Отсутствует';
-                        $resultrow[] = $task['estimate'] ?? 'Отсутствует';
-                        $resultrow[] = $task['description'] ?? '';
-                        $result[] = $resultrow;
+                        $resultRow = [];
+                        $resultRow[] =  '';
+                        $resultRow[] = $task['task_name'] ?? '';
+                        $resultRow[] = $task['status'] ?? '';
+                        $resultRow[] = $task['due_date'] ?? 'Отсутствует';
+                        $resultRow[] = $task['estimate'] ?? 'Отсутствует';
+                        $resultRow[] = $task['description'] ?? '';
+                        $result[] = $resultRow;
                     }
                 }
 
                 if (isset($projectTasks['users'])) {
-                    $resultrow = [];
-                    $resultrow[] = 'User Name';
-                    $resultrow[] = 'User Email';
-                    $resultrow[] = 'Total time';
-                    $result[] = $resultrow;
+                    $resultRow = [];
+                    $resultRow[] = 'User Name';
+                    $resultRow[] = 'User Email';
+                    $resultRow[] = 'Total time';
+                    $result[] = $resultRow;
                     foreach ($projectTasks['users'] as $taskId => $user) {
-                        $resultrow = [];
-                        $resultrow[] = $user['full_name'] ?? '';
-                        $resultrow[] = $user['email'] ?? '';
-                        $resultrow[] = $user['total_spent_time_by_user'] ?? 'Отсутствует';
+                        $resultRow = [];
+                        $resultRow[] = $user['full_name'] ?? '';
+                        $resultRow[] = $user['email'] ?? '';
+                        $resultRow[] = $user['total_spent_time_by_user'] ?? 'Отсутствует';
                         if (isset($user['workers_day'])) {
                             foreach ($user['workers_day'] as $date => $time)
-                                $resultrow[] = 'Data ' . $date . ' time: ' . $time;
+                                $resultRow[] = 'Data ' . $date . ' time: ' . $time;
                         }
-                        $result[] = $resultrow;
+                        $result[] = $resultRow;
                     }
                 }
             }
@@ -193,14 +193,14 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
             return $chart;
         };
 
-        $columnNumber = $this->countdate;
+        $columnNumber = $this->countDate;
         $charts = [];
         $columnLast =  Coordinate::stringFromColumnIndex($columnNumber + 1);
         $rowCounts = $this->rowCount();
-        if ($this->taskIdisset)
+        if ($this->showTasksChart)
             $charts[] = $createChart(static::TEXT_USER, static::TEXT_USER, static::POSITIONS_CHART[0],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [], $columnNumber);
-        if ($this->userIdisset)
-            $charts[] = $createChart(static::TEXT_USER_INDIVIDUALLY , static::TEXT_USER_INDIVIDUALLY , static::POSITIONS_CHART[1],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $rowCounts + 4], $columnNumber);
+        if ($this->showUsersChart)
+            $charts[] = $createChart(static::TEXT_USER_INDIVIDUALLY, static::TEXT_USER_INDIVIDUALLY, static::POSITIONS_CHART[1],  static::OFFSET_CHART, static::COLUMN_FIRST, $columnLast, [4, $rowCounts + 4], $columnNumber);
 
         return $charts;
     }
@@ -215,10 +215,10 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
     {
         $count = 0;
         if (isset($this->data['total_spent_time_day']['datasets'])) {
-            $this->taskIdisset = isset($this->data['total_spent_time_day']['datasets'][$this->project]);
+            $this->showTasksChart = isset($this->data['total_spent_time_day']['datasets'][$this->project]);
         }
         if (isset($this->data['total_spent_time_day_and_users_separately']['datasets'])) {
-            $this->userIdisset = isset($this->data['total_spent_time_day_and_users_separately']['datasets'][$this->project]);
+            $this->showUsersChart = isset($this->data['total_spent_time_day_and_users_separately']['datasets'][$this->project]);
             foreach ($this->data['total_spent_time_day_and_users_separately']['datasets'] as $projectId => $userTasks) {
                 if ($projectId !== $this->project) {
                     continue;
@@ -233,6 +233,6 @@ class ProjectMultiSheetExport implements FromArray, WithTitle, WithCharts, WithH
      */
     public function title(): string
     {
-        return \Str::limit("{$this->project}) $this->projectname", 8);
+        return \Str::limit("{$this->project}) $this->projectName", 8);
     }
 }
