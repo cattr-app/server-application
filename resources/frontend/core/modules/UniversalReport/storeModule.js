@@ -109,10 +109,6 @@ const actions = {
             'setService',
             new UniversalReportService(context, new TasksService(), new UserService(), new ProjectsService()),
         );
-        service.getBases().then(({ data }) => {
-            context.commit('setBases', data.data);
-        });
-
         context.commit('clearStore');
     },
 };

@@ -160,6 +160,10 @@
             },
         },
         async mounted() {
+            await service.getBases().then(({ data }) => {
+                this.setBases(data.data);
+            });
+
             await service.show(this.$route.params.id).then(({ data }) => {
                 service.getDataObjectsAndFields(data.data.base).then(({ data }) => {
                     this.setFields(data.data.fields);
