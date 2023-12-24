@@ -4,10 +4,9 @@ namespace App\Providers;
 
 use App;
 use App\Models\Property;
-use App\Models\User;
-use App\Observers\UserObserver;
 use Illuminate\Support\ServiceProvider;
 use Laravel\Tinker\TinkerServiceProvider;
+use Settings;
 
 class AppServiceProvider extends ServiceProvider
 {
@@ -16,9 +15,8 @@ class AppServiceProvider extends ServiceProvider
      */
     public function boot(): void
     {
-        User::observe(UserObserver::class);
-
         Property::loadMorphMap();
+        config(['app.timezone' => Settings::scope('core')->get('timezone', date_default_timezone_get())]);
     }
 
     /**

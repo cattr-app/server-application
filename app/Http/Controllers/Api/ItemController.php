@@ -91,6 +91,10 @@ abstract class ItemController extends Controller
             $query->with($with);
         }
 
+        foreach (Filter::process(Filter::getQueryAdditionalRelationsSumFilterName(), []) as $withSum) {
+            $query->withSum(...$withSum);
+        }
+
         QueryHelper::apply($query, $model, $filter);
 
         return Filter::process(
@@ -224,6 +228,10 @@ abstract class ItemController extends Controller
 
         if (!empty($requestData['with'])) {
             $filters['with'] = $requestData['with'];
+        }
+
+        if (!empty($requestData['withSum'])) {
+            $filters['withSum'] = $requestData['withSum'];
         }
 
         CatEvent::dispatch(Filter::getBeforeActionEventName(), $filters);
