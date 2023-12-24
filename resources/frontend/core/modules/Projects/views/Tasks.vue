@@ -259,7 +259,7 @@
                     await this.taskService.getItem(id, {
                         with: 'users, priority, project',
                     })
-                ).data;
+                ).data.data;
             },
             viewTask(task) {
                 this.$router.push({
@@ -314,8 +314,8 @@
 
                 this.tasks = (
                     await this.taskService.getWithFilters({
-                        project_id: projectId,
-                        orderBy: 'relative_position',
+                        where: { project_id: projectId },
+                        orderBy: ['relative_position'],
                         with: 'users,priority',
                     })
                 ).data;
@@ -329,11 +329,11 @@
 
             this.tasks = (
                 await this.taskService.getWithFilters({
-                    project_id: projectId,
-                    orderBy: 'relative_position',
+                    where: { project_id: projectId },
+                    orderBy: ['relative_position'],
                     with: 'users,priority',
                 })
-            ).data;
+            ).data.data;
         },
         mounted() {
             if (this.$route.query.task) {
@@ -434,7 +434,7 @@
         padding: 16px;
     }
 
-    .project-tasks /deep/ {
+    .project-tasks ::v-deep {
         ul.drag-list,
         ul.drag-inner-list {
             list-style-type: none;
