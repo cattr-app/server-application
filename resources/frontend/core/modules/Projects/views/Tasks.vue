@@ -29,7 +29,6 @@
                 </div>
             </div>
             <div ref="kanban" class="project-tasks at-container">
-                
                 <kanban-board :stages="stages" :blocks="blocks" @update-block="updateBlock">
                     <div
                         v-for="stage in stages"
@@ -40,7 +39,7 @@
                     >
                         <h3>{{ stage }}</h3>
                     </div>
-                     
+
                     <div class="icon total-time-row" data-feather="icon-clock">sdfdsf</div>
                     <div
                         v-for="block in blocks"
@@ -49,13 +48,11 @@
                         class="task"
                         @click="loadTask(block.id)"
                     >
-
                         <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
 
                         <p class="task-description">{{ getTask(block.id).description }}</p>
-                     
 
-                        <div class="task-users">                       
+                        <div class="task-users">
                             <at-tag v-if="isOverDue(companyData.timezone, block)" color="error"
                                 >{{ $t('tasks.due_date--overdue') }}
                             </at-tag>
@@ -64,8 +61,8 @@
                             </at-tag>
 
                             <span class="total-time-row">
-                                <i class="icon icon-clock"></i>&nbsp;
-                                {{ block.total_spent_time }} {{ $t(`control.of`) }} {{ block.estimate }}
+                                <i class="icon icon-clock"></i>&nbsp; {{ block.total_spent_time }}
+                                {{ $t(`control.of`) }} {{ block.estimate }}
                             </span>
                             <team-avatars :users="getTask(block.id).users"></team-avatars>
                         </div>
@@ -287,9 +284,11 @@
                 // Load task details
                 this.task = (
                     await this.taskService.getItem(id, {
-                        with: ["users", "priority", "project","can"],
-                        withSum:[["workers as total_spent_time", "duration"],
-                                ["workers as total_offset", "offset"]],
+                        with: ['users', 'priority', 'project', 'can'],
+                        withSum: [
+                            ['workers as total_spent_time', 'duration'],
+                            ['workers as total_offset', 'offset'],
+                        ],
                     })
                 ).data.data;
             },
@@ -345,29 +344,39 @@
                 const projectId = this.$route.params['id'];
 
                 this.tasks = (
-                    await this.taskService.getWithFilters({
-                        where: { project_id: projectId },
-                        orderBy: ['relative_position'],
-                        with: ["users","priority","project","can"],
-                        withSum:[["workers as total_spent_time", "duration"],
-                                ["workers as total_offset", "offset"]],
-                    },{headers: { 'X-Paginate': 'false' }})
+                    await this.taskService.getWithFilters(
+                        {
+                            where: { project_id: projectId },
+                            orderBy: ['relative_position'],
+                            with: ['users', 'priority', 'project', 'can'],
+                            withSum: [
+                                ['workers as total_spent_time', 'duration'],
+                                ['workers as total_offset', 'offset'],
+                            ],
+                        },
+                        { headers: { 'X-Paginate': 'false' } },
+                    )
                 ).data;
             },
         },
         async created() {
             const projectId = this.$route.params['id'];
             this.project = (await this.projectService.getItem(projectId)).data;
-            this.statuses = (await this.statusService.getWithFilters({orderBy:['order']})).data.data;
+            this.statuses = (await this.statusService.getWithFilters({ orderBy: ['order'] })).data.data;
 
             this.tasks = (
-                await this.taskService.getWithFilters({
-                    where: { project_id: projectId },
-                    orderBy: ['relative_position'],
-                    with: ["users","priority","project","can"],
-                    withSum:[["workers as total_spent_time", "duration"],
-                             ["workers as total_offset", "offset"]],
-                },{headers: { 'X-Paginate': 'false' }})
+                await this.taskService.getWithFilters(
+                    {
+                        where: { project_id: projectId },
+                        orderBy: ['relative_position'],
+                        with: ['users', 'priority', 'project', 'can'],
+                        withSum: [
+                            ['workers as total_spent_time', 'duration'],
+                            ['workers as total_offset', 'offset'],
+                        ],
+                    },
+                    { headers: { 'X-Paginate': 'false' } },
+                )
             ).data.data;
         },
         mounted() {
@@ -572,7 +581,7 @@
     .slide-leave-to {
         transform: translate(100%, 0);
     }
-    .at-tag{
+    .at-tag {
         vertical-align: middle;
         display: inline-flex;
         align-items: center;
