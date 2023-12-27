@@ -5,6 +5,7 @@ namespace App\Http\Requests\Status;
 use App\Http\Requests\CattrFormRequest;
 use App\Models\Status;
 use App\Models\User;
+use Illuminate\Validation\Rule;
 
 class UpdateStatusRequest extends CattrFormRequest
 {
@@ -18,6 +19,7 @@ class UpdateStatusRequest extends CattrFormRequest
         return [
             'id' => 'required|integer|exists:statuses,id',
             'name' => 'required|string',
+            'order' => ['sometimes', 'integer', Rule::unique('statuses', 'order')->ignore($this->id)],
             'active' => 'sometimes|boolean',
             'color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
         ];

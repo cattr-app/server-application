@@ -28,8 +28,8 @@
                     </div>
                 </div>
             </div>
-
             <div ref="kanban" class="project-tasks at-container">
+                
                 <kanban-board :stages="stages" :blocks="blocks" @update-block="updateBlock">
                     <div
                         v-for="stage in stages"
@@ -40,7 +40,8 @@
                     >
                         <h3>{{ stage }}</h3>
                     </div>
-
+                     
+                    <div class="icon total-time-row" data-feather="icon-clock">sdfdsf</div>
                     <div
                         v-for="block in blocks"
                         :slot="block.id"
@@ -48,11 +49,24 @@
                         class="task"
                         @click="loadTask(block.id)"
                     >
+
                         <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
 
                         <p class="task-description">{{ getTask(block.id).description }}</p>
+                     
 
-                        <div class="task-users">
+                        <div class="task-users">                       
+                            <at-tag v-if="isOverDue(companyData.timezone, block)" color="error"
+                                >{{ $t('tasks.due_date--overdue') }}
+                            </at-tag>
+                            <at-tag v-if="isOverTime(block)" color="warning"
+                                >{{ $t('tasks.estimate--overtime') }}
+                            </at-tag>
+
+                            <span class="total-time-row">
+                                <i class="icon icon-clock"></i>&nbsp;
+                                {{ block.total_spent_time }} {{ $t(`control.of`) }} {{ block.estimate }}
+                            </span>
                             <team-avatars :users="getTask(block.id).users"></team-avatars>
                         </div>
                     </div>
@@ -143,10 +157,12 @@
 </template>
 
 <script>
+    import moment from 'moment-timezone';
     import TeamAvatars from '@/components/TeamAvatars';
     import ProjectService from '@/services/resource/project.service';
     import StatusService from '@/services/resource/status.service';
     import TasksService from '@/services/resource/task.service';
+    import { mapGetters } from 'vuex';
     import { getTextColor } from '@/utils/color';
     import { formatDate, formatDurationString } from '@/utils/time';
 
@@ -167,13 +183,17 @@
             };
         },
         computed: {
+            ...mapGetters('user', ['companyData']),
             stages() {
                 return this.statuses.map(status => status.name);
             },
             blocks() {
                 return this.tasks.map(task => ({
                     id: +task.id,
+                    estimate: formatDurationString(task.estimate),
                     status: this.getStatusName(task.status_id),
+                    total_spent_time: formatDurationString(task.total_spent_time),
+                    due_date: task.due_date,
                 }));
             },
         },
@@ -181,6 +201,16 @@
             getTextColor,
             formatDate,
             formatDurationString,
+            isOverDue(companyTimezone, item) {
+                return (
+                    typeof companyTimezone === 'string' &&
+                    item.due_date != null &&
+                    moment.utc(item.due_date).tz(companyTimezone, true).isBefore(moment())
+                );
+            },
+            isOverTime(item) {
+                return item.estimate != null && item.total_spent_time > item.estimate;
+            },
             getBlock(id) {
                 return this.blocks.find(block => +block.id === +id);
             },
@@ -257,7 +287,9 @@
                 // Load task details
                 this.task = (
                     await this.taskService.getItem(id, {
-                        with: 'users, priority, project',
+                        with: ["users", "priority", "project","can"],
+                        withSum:[["workers as total_spent_time", "duration"],
+                                ["workers as total_offset", "offset"]],
                     })
                 ).data.data;
             },
@@ -316,23 +348,26 @@
                     await this.taskService.getWithFilters({
                         where: { project_id: projectId },
                         orderBy: ['relative_position'],
-                        with: 'users,priority',
-                    })
+                        with: ["users","priority","project","can"],
+                        withSum:[["workers as total_spent_time", "duration"],
+                                ["workers as total_offset", "offset"]],
+                    },{headers: { 'X-Paginate': 'false' }})
                 ).data;
             },
         },
         async created() {
             const projectId = this.$route.params['id'];
-
             this.project = (await this.projectService.getItem(projectId)).data;
-            this.statuses = await this.statusService.getAll();
+            this.statuses = (await this.statusService.getWithFilters({orderBy:['order']})).data.data;
 
             this.tasks = (
                 await this.taskService.getWithFilters({
                     where: { project_id: projectId },
                     orderBy: ['relative_position'],
-                    with: 'users,priority',
-                })
+                    with: ["users","priority","project","can"],
+                    withSum:[["workers as total_spent_time", "duration"],
+                             ["workers as total_offset", "offset"]],
+                },{headers: { 'X-Paginate': 'false' }})
             ).data.data;
         },
         mounted() {
@@ -520,6 +555,15 @@
         }
     }
 
+    .total-time-row {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        padding: 14px 21px;
+        color: $black-900;
+        font-size: 1rem;
+        font-weight: bold;
+    }
     .slide-enter-active,
     .slide-leave-active {
         transition: transform 250ms ease;
@@ -527,5 +571,10 @@
     .slide-enter,
     .slide-leave-to {
         transform: translate(100%, 0);
+    }
+    .at-tag{
+        vertical-align: middle;
+        display: inline-flex;
+        align-items: center;
     }
 </style>

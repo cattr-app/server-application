@@ -39,6 +39,12 @@ export default (context, router) => {
             placeholder: 'field.name',
         },
         {
+            label: 'field.order',
+            key: 'order',
+            type: 'input',
+            placeholder: 'field.order',
+        },
+        {
             label: 'field.close_task',
             key: 'active',
             required: false,
@@ -82,6 +88,10 @@ export default (context, router) => {
         {
             title: 'field.name',
             key: 'name',
+        },
+        {
+            title: 'field.order',
+            key: 'order',
         },
         {
             title: 'field.close_task',

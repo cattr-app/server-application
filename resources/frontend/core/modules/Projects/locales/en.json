@@ -31,7 +31,8 @@
     "comments": "Comments"
   },
   "control": {
-    "task-list": "Task List"
+    "task-list": "Task List",
+    "of": "of"
   },
   "project-roles-description": {
     "auditor": "Read access to assigned projects, create and view all the assigned project's tasks, view all the project users' activity",
