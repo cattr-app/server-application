@@ -645,7 +645,7 @@ class IntervalController extends ItemController
             if ($intervalValidator->fails()) {
                 $creationResult[] = [
                     'interval' => $interval,
-                    'message' => __('validation.offline-sync.time_interval_already_exist'),
+                    'message' => $intervalValidator->errors(),
                     'success' => false
                 ];
                 continue;

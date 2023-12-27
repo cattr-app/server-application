@@ -83,6 +83,23 @@
     import ResourceSelect from '@/components/ResourceSelect.vue';
     import UsersService from '@/services/resource/user.service';
 
+    const formatImportResultMessage = (h, params) => {
+        const getResultIcon = () => {
+            return h('i', {
+                class: {
+                    icon: true,
+                    'icon-x-circle': !params.item.success,
+                    'icon-check-circle': params.item.success,
+                },
+            });
+        };
+        return typeof params.item.message === 'string'
+            ? h('span', [getResultIcon(h, params), params.item.message])
+            : Object.entries(params.item.message).map(([key, msg]) =>
+                  h('span', [getResultIcon(h, params), `${key}: ${msg}`]),
+              );
+    };
+
     export default {
         name: 'Page',
         components: {
@@ -142,16 +159,11 @@
                     {
                         title: this.$t('offline_sync.result'),
                         render: (h, params) => {
-                            return h('div', [
-                                h('i', {
-                                    class: {
-                                        icon: true,
-                                        'icon-x-circle': !params.item.success,
-                                        'icon-check-circle': params.item.success,
-                                    },
-                                }),
-                                h('span', params.item.message),
-                            ]);
+                            return h(
+                                'div',
+                                { class: 'offline-sync__import-result' },
+                                formatImportResultMessage(h, params),
+                            );
                         },
                     },
                 ],
@@ -234,6 +246,10 @@
             }
             .icon-check-circle {
                 color: $green-1;
+            }
+            .offline-sync__import-result {
+                display: flex;
+                flex-direction: column;
             }
         }
 
