@@ -18,8 +18,8 @@
                     </div>
 
                     <div class="control-item">
-                        <at-button size="large" @click="$router.push(`/projects/${$route.params['id']}/tasks/list`)">
-                            {{ $t('control.task-list') }}
+                        <at-button size="large" @click="$router.push(`/projects`)">
+                            {{ $t('control.project-list') }}
                         </at-button>
                     </div>
 
@@ -40,7 +40,6 @@
                         <h3>{{ stage }}</h3>
                     </div>
 
-                    <div class="icon total-time-row" data-feather="icon-clock">sdfdsf</div>
                     <div
                         v-for="block in blocks"
                         :slot="block.id"
@@ -294,12 +293,12 @@
             },
             viewTask(task) {
                 this.$router.push({
-                    path: `/projects/${task.project_id}/tasks/list/view/${task.id}`,
+                    path: `/tasks/view/${task.id}`,
                 });
             },
             editTask(task) {
                 this.$router.push({
-                    path: `/projects/${task.project_id}/tasks/list/edit/${task.id}`,
+                    path: `/tasks/edit/${task.id}`,
                 });
             },
             async deleteTask(task) {

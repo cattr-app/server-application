@@ -362,6 +362,17 @@ export function init(context) {
             },
         },
         {
+            title: 'projects.kanban',
+            icon: 'icon-list',
+            onClick: (router, { item }) => {
+                router.push({ name: tasksRouteName, params: { id: item.id } });
+            },
+            renderCondition({ $can }, item) {
+                // User always can view project's tasks
+                return true;
+            },
+        },
+        {
             title: 'control.edit',
             icon: 'icon-edit',
             onClick: (router, { item }, context) => {

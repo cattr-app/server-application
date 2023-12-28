@@ -798,7 +798,7 @@ export function init(context, router) {
             onClick: ({ $router, $route }) => {
                 $router.push(`/projects/${$route.params.project_id}/tasks/kanban`);
             },
-            renderCondition: () => true,
+            renderCondition: () => false,
         },
         {
             label: 'control.back',

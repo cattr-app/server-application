@@ -11,6 +11,7 @@
     "enable_status": "Enable status in project",
     "override_color": "Override color",
     "tasks": "Tasks",
+    "kanban": "Kanban",
     "project_tasks": "Project tasks",
     "add_task": "Add task",
     "task_change": "{user} changed {field} {date}",
@@ -32,6 +33,7 @@
   },
   "control": {
     "task-list": "Task List",
+    "project-list": "Project List",
     "of": "of"
   },
   "project-roles-description": {
