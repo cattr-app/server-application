@@ -1560,7 +1560,7 @@ __metadata:
     moment-timezone: ^0.5.43
     path-browserify: ^1.0.1
     postcss: ^8.4.31
-    prettier: 2.8.8
+    prettier: 3.1.1
     pusher-js: ^8.3.0
     resolve-url-loader: ^5.0.0
     sass: ^1.69.6
@@ -9467,7 +9467,16 @@ __metadata:
   languageName: node
   linkType: hard
 
-"prettier@npm:2.8.8, prettier@npm:^1.18.2 || ^2.0.0":
+"prettier@npm:3.1.1":
+  version: 3.1.1
+  resolution: "prettier@npm:3.1.1"
+  bin:
+    prettier: bin/prettier.cjs
+  checksum: e386855e3a1af86a748e16953f168be555ce66d6233f4ba54eb6449b88eb0c6b2ca79441b11eae6d28a7f9a5c96440ce50864b9d5f6356d331d39d6bb66c648e
+  languageName: node
+  linkType: hard
+
+"prettier@npm:^1.18.2 || ^2.0.0":
   version: 2.8.8
   resolution: "prettier@npm:2.8.8"
   bin:
