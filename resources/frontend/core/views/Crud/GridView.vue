@@ -232,6 +232,7 @@
                 values: [],
                 queryParams: {
                     with: withParam,
+                    orderBy: gridData.orderBy,
                     where: whereParam,
                     withCount,
                     withSum,
@@ -555,7 +556,15 @@
             columns() {
                 const { gridData, sortable } = this.$route.meta;
 
-                const columns = gridData.columns.map(col => ({ ...col, title: this.$t(col.title) }));
+                const columns = gridData.columns.map(col => {
+                    col = { ...col, title: this.$t(col.title) };
+                    if ('render' in col) {
+                        col._render = col.render;
+                        col.render = (h, params) => col._render(h, { ...params, gridView: this });
+                    }
+
+                    return col;
+                });
 
                 if (gridData.actions.length > 0 && columns.filter(t => t.title === 'field.actions').length === 0) {
                     columns.push({

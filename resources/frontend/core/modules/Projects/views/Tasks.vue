@@ -29,15 +29,31 @@
                 </div>
             </div>
             <div ref="kanban" class="project-tasks at-container">
-                <kanban-board :stages="stages" :blocks="blocks" @update-block="updateBlock">
+                <kanban-board :stages="stages.map(s => s.name)" :blocks="blocks" @update-block="updateBlock">
                     <div
                         v-for="stage in stages"
-                        :slot="stage"
-                        :key="`stage_${stage}`"
+                        :slot="stage.name"
+                        :key="`stage_${stage.name}`"
                         class="status"
-                        :style="getHeaderStyle(stage)"
+                        :style="getHeaderStyle(stage.name)"
                     >
-                        <h3>{{ stage }}</h3>
+                        <at-button
+                            v-if="stage.order !== 0"
+                            type="primary"
+                            size="large"
+                            icon="icon-chevron-left"
+                            @click="changeOrderLeft(stage.order)"
+                        >
+                        </at-button>
+                        <h3>{{ stage.name }}</h3>
+                        <at-button
+                            v-if="stage.order !== stages.length - 1"
+                            type="primary"
+                            size="large"
+                            icon="icon-chevron-right"
+                            @click="changeOrderRight(stage.order)"
+                        >
+                        </at-button>
                     </div>
 
                     <div
@@ -161,6 +177,7 @@
     import { mapGetters } from 'vuex';
     import { getTextColor } from '@/utils/color';
     import { formatDate, formatDurationString } from '@/utils/time';
+    import Vue from 'vue';
 
     export default {
         components: {
@@ -181,14 +198,16 @@
         computed: {
             ...mapGetters('user', ['companyData']),
             stages() {
-                return this.statuses.map(status => status.name);
+                return this.statuses.map(status => ({ name: status.name, order: this.getStatusByOrder(status.id) }));
             },
             blocks() {
                 return this.tasks.map(task => ({
                     id: +task.id,
                     estimate: formatDurationString(task.estimate),
                     status: this.getStatusName(task.status_id),
-                    total_spent_time: formatDurationString(task.total_spent_time),
+                    total_spent_time: formatDurationString(+task.total_spent_time + +task.total_offset),
+                    total_spent_time_over: +task.total_spent_time + +task.total_offset,
+                    estimate_over: +task.estimate,
                     due_date: task.due_date,
                 }));
             },
@@ -205,7 +224,7 @@
                 );
             },
             isOverTime(item) {
-                return item.estimate != null && item.total_spent_time > item.estimate;
+                return item.estimate != null && item.total_spent_time_over > item.estimate_over;
             },
             getBlock(id) {
                 return this.blocks.find(block => +block.id === +id);
@@ -216,6 +235,10 @@
             getStatusByName(name) {
                 return this.statuses.find(status => status.name === name);
             },
+            getStatusByOrder(id) {
+                const index = this.statuses.findIndex(item => item.id === id);
+                return index;
+            },
             getStatusName(id) {
                 const status = this.statuses.find(status => +status.id === +id);
                 if (status !== undefined) {
@@ -223,6 +246,28 @@
                 }
 
                 return '';
+            },
+            async changeOrderLeft(index) {
+                const service = this.statusService;
+                const item = this.statuses[index];
+                const prevItem = this.statuses[index - 1];
+                await service.save({ ...item, order: -1 });
+                await service.save({ ...prevItem, order: item.order });
+                await service.save({ ...item, order: prevItem.order });
+
+                Vue.set(this.statuses, index, { ...prevItem, order: item.order });
+                Vue.set(this.statuses, index - 1, { ...item, order: prevItem.order });
+            },
+            async changeOrderRight(index) {
+                const service = this.statusService;
+                const item = this.statuses[index];
+                const prevItem = this.statuses[index + 1];
+                await service.save({ ...item, order: -1 });
+                await service.save({ ...prevItem, order: item.order });
+                await service.save({ ...item, order: prevItem.order });
+
+                Vue.set(this.statuses, index, { ...prevItem, order: item.order });
+                Vue.set(this.statuses, index + 1, { ...item, order: prevItem.order });
             },
             getHeaderStyle(name) {
                 const status = this.getStatusByName(name);
@@ -258,16 +303,12 @@
                 }
 
                 const task = this.getTask(blockId);
-
-                const updatedTask = (
-                    await this.taskService.save({
-                        ...task,
-                        users: task.users.map(user => +user.id),
-                        status_id: newStatus.id,
-                        relative_position: newRelativePosition,
-                    })
-                ).data.res;
-
+                const updatedTask = await this.taskService.save({
+                    ...task,
+                    users: task.users.map(user => +user.id),
+                    status_id: newStatus.id,
+                    relative_position: newRelativePosition,
+                });
                 const taskIndex = this.tasks.findIndex(t => +t.id === +updatedTask.id);
                 if (taskIndex !== -1) {
                     const tasks = [...this.tasks];
@@ -362,7 +403,6 @@
             const projectId = this.$route.params['id'];
             this.project = (await this.projectService.getItem(projectId)).data;
             this.statuses = (await this.statusService.getWithFilters({ orderBy: ['order'] })).data.data;
-
             this.tasks = (
                 await this.taskService.getWithFilters(
                     {
@@ -398,10 +438,13 @@
     .status {
         width: 100%;
         padding: 16px;
-        text-align: center;
+        display: flex;
+        justify-content: space-between;
 
         h3 {
+            flex: 1;
             color: inherit;
+            text-align: center;
         }
     }
 

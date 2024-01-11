@@ -5,6 +5,7 @@ import StatusService from '../services/statuse.service';
 import Statuses from '../views/Statuses';
 import ColorInput from '@/components/ColorInput';
 import { hasRole } from '@/utils/user';
+import Vue from 'vue';
 
 export default (context, router) => {
     const statusesContext = cloneDeep(context);
@@ -22,7 +23,10 @@ export default (context, router) => {
 
     crud.edit.addToMetaProperties('permissions', 'statuses/edit', crud.edit.getRouterConfig());
 
-    const grid = statusesContext.createGrid('statuses.grid-title', 'statuses', StatusService);
+    const grid = statusesContext.createGrid('statuses.grid-title', 'statuses', StatusService, {
+        orderBy: ['order', 'asc'],
+    });
+
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
     grid.addToMetaProperties('permissions', () => hasRole(store.getters['user/user'], 'admin'), grid.getRouterConfig());
 
@@ -83,7 +87,6 @@ export default (context, router) => {
 
     crud.edit.addField(fieldsToFill);
     crud.new.addField(fieldsToFill);
-
     grid.addColumn([
         {
             title: 'field.name',
@@ -92,7 +95,71 @@ export default (context, router) => {
         {
             title: 'field.order',
             key: 'order',
+            render(h, data) {
+                const index = data.gridView.tableData.findIndex(item => item.id === data.item.id);
+                const result = [];
+                if (index > 0) {
+                    result.push(
+                        h(
+                            'button',
+                            {
+                                on: {
+                                    click: async () => {
+                                        const { gridView } = data;
+                                        const { tableData } = gridView;
+
+                                        const service = new StatusService();
+                                        const index = tableData.findIndex(item => item.id === data.item.id);
+
+                                        const item = tableData[index];
+                                        const prevItem = tableData[index - 1];
+
+                                        await service.save({ ...item, order: -1 });
+                                        await service.save({ ...prevItem, order: item.order });
+                                        await service.save({ ...item, order: prevItem.order });
+
+                                        Vue.set(tableData, index, { ...prevItem, order: item.order });
+                                        Vue.set(tableData, index - 1, { ...item, order: prevItem.order });
+                                    },
+                                },
+                            },
+                            [h('i', { class: 'icon icon-chevrons-up' })],
+                        ),
+                    );
+                }
+                if (index < data.gridView.tableData.length - 1) {
+                    result.push(
+                        h(
+                            'button',
+                            {
+                                on: {
+                                    click: async () => {
+                                        const { gridView } = data;
+                                        const { tableData } = gridView;
+
+                                        const service = new StatusService();
+                                        const index = tableData.findIndex(item => item.id === data.item.id);
+
+                                        const item = tableData[index];
+                                        const prevItem = tableData[index + 1];
+
+                                        await service.save({ ...item, order: -1 });
+                                        await service.save({ ...prevItem, order: item.order });
+                                        await service.save({ ...item, order: prevItem.order });
+
+                                        Vue.set(tableData, index, { ...prevItem, order: item.order });
+                                        Vue.set(tableData, index + 1, { ...item, order: prevItem.order });
+                                    },
+                                },
+                            },
+                            [h('i', { class: 'icon icon-chevrons-down' })],
+                        ),
+                    );
+                }
+                return result;
+            },
         },
+
         {
             title: 'field.close_task',
             key: 'active',
