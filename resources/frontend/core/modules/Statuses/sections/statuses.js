@@ -6,6 +6,7 @@ import Statuses from '../views/Statuses';
 import ColorInput from '@/components/ColorInput';
 import { hasRole } from '@/utils/user';
 import Vue from 'vue';
+import { throttle } from 'lodash';
 
 export default (context, router) => {
     const statusesContext = cloneDeep(context);
@@ -16,7 +17,35 @@ export default (context, router) => {
     const crudNewRoute = crud.new.getNewRouteName();
 
     const navigation = { edit: crudEditRoute, new: crudNewRoute };
+    const oneClickUp = throttle(async data => {
+        const { gridView } = data;
+        const { tableData } = gridView;
 
+        const service = new StatusService();
+        const index = tableData.findIndex(item => item.id === data.item.id);
+
+        const item = tableData[index];
+        const prevItem = tableData[index - 1];
+        await service.save({ ...prevItem, order: item.order });
+
+        Vue.set(tableData, index, { ...prevItem, order: item.order });
+        Vue.set(tableData, index - 1, { ...item, order: prevItem.order });
+    }, 1000);
+    const oneClickDown = throttle(async data => {
+        const { gridView } = data;
+        const { tableData } = gridView;
+
+        const service = new StatusService();
+        const index = tableData.findIndex(item => item.id === data.item.id);
+
+        const item = tableData[index];
+        const prevItem = tableData[index + 1];
+
+        await service.save({ ...prevItem, order: item.order });
+
+        Vue.set(tableData, index, { ...prevItem, order: item.order });
+        Vue.set(tableData, index + 1, { ...item, order: prevItem.order });
+    }, 1000);
     crud.new.addToMetaProperties('permissions', 'statuses/create', crud.new.getRouterConfig());
     crud.new.addToMetaProperties('navigation', navigation, crud.new.getRouterConfig());
     crud.new.addToMetaProperties('afterSubmitCallback', () => router.go(-1), crud.new.getRouterConfig());
@@ -42,12 +71,12 @@ export default (context, router) => {
             required: true,
             placeholder: 'field.name',
         },
-        {
-            label: 'field.order',
-            key: 'order',
-            type: 'input',
-            placeholder: 'field.order',
-        },
+        // {
+        //     label: 'field.order',
+        //     key: 'order',
+        //     type: 'input',
+        //     placeholder: 'field.order',
+        // },
         {
             label: 'field.close_task',
             key: 'active',
@@ -104,22 +133,8 @@ export default (context, router) => {
                             'button',
                             {
                                 on: {
-                                    click: async () => {
-                                        const { gridView } = data;
-                                        const { tableData } = gridView;
-
-                                        const service = new StatusService();
-                                        const index = tableData.findIndex(item => item.id === data.item.id);
-
-                                        const item = tableData[index];
-                                        const prevItem = tableData[index - 1];
-
-                                        await service.save({ ...item, order: -1 });
-                                        await service.save({ ...prevItem, order: item.order });
-                                        await service.save({ ...item, order: prevItem.order });
-
-                                        Vue.set(tableData, index, { ...prevItem, order: item.order });
-                                        Vue.set(tableData, index - 1, { ...item, order: prevItem.order });
+                                    click: function () {
+                                        oneClickUp(data);
                                     },
                                 },
                             },
@@ -133,22 +148,8 @@ export default (context, router) => {
                             'button',
                             {
                                 on: {
-                                    click: async () => {
-                                        const { gridView } = data;
-                                        const { tableData } = gridView;
-
-                                        const service = new StatusService();
-                                        const index = tableData.findIndex(item => item.id === data.item.id);
-
-                                        const item = tableData[index];
-                                        const prevItem = tableData[index + 1];
-
-                                        await service.save({ ...item, order: -1 });
-                                        await service.save({ ...prevItem, order: item.order });
-                                        await service.save({ ...item, order: prevItem.order });
-
-                                        Vue.set(tableData, index, { ...prevItem, order: item.order });
-                                        Vue.set(tableData, index + 1, { ...item, order: prevItem.order });
+                                    click: function () {
+                                        oneClickDown(data);
                                     },
                                 },
                             },

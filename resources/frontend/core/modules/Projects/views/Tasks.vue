@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div>
-            <div ref="kanban" class="project-tasks at-container">
+            <div ref="kanban" class="project-tasks at-container" style="overflow-x: auto; max-height: 100vh">
                 <kanban-board :stages="stages.map(s => s.name)" :blocks="blocks" @update-block="updateBlock">
                     <div
                         v-for="stage in stages"
@@ -115,7 +115,11 @@
                     <div class="row">
                         <div class="col-10 label">{{ $t('field.total_spent') }}:</div>
                         <div class="col">
-                            {{ task.total_spent_time ? formatDurationString(task.total_spent_time) : '' }}
+                            {{
+                                task.total_spent_time
+                                    ? formatDurationString(+task.total_spent_time + +task.total_offset)
+                                    : ''
+                            }}
                         </div>
                     </div>
 
@@ -178,6 +182,7 @@
     import { getTextColor } from '@/utils/color';
     import { formatDate, formatDurationString } from '@/utils/time';
     import Vue from 'vue';
+    import { throttle } from 'lodash';
 
     export default {
         components: {
@@ -247,28 +252,24 @@
 
                 return '';
             },
-            async changeOrderLeft(index) {
+            changeOrderLeft: throttle(async function (index) {
                 const service = this.statusService;
                 const item = this.statuses[index];
                 const prevItem = this.statuses[index - 1];
-                await service.save({ ...item, order: -1 });
                 await service.save({ ...prevItem, order: item.order });
-                await service.save({ ...item, order: prevItem.order });
 
                 Vue.set(this.statuses, index, { ...prevItem, order: item.order });
                 Vue.set(this.statuses, index - 1, { ...item, order: prevItem.order });
-            },
-            async changeOrderRight(index) {
+            }, 1000),
+            changeOrderRight: throttle(async function (index) {
                 const service = this.statusService;
                 const item = this.statuses[index];
                 const prevItem = this.statuses[index + 1];
-                await service.save({ ...item, order: -1 });
                 await service.save({ ...prevItem, order: item.order });
-                await service.save({ ...item, order: prevItem.order });
 
                 Vue.set(this.statuses, index, { ...prevItem, order: item.order });
                 Vue.set(this.statuses, index + 1, { ...item, order: prevItem.order });
-            },
+            }, 1000),
             getHeaderStyle(name) {
                 const status = this.getStatusByName(name);
 
@@ -440,11 +441,18 @@
         padding: 16px;
         display: flex;
         justify-content: space-between;
-
+        min-width: 300px;
+        align-items: center;
         h3 {
+            padding: 10px;
             flex: 1;
             color: inherit;
             text-align: center;
+        }
+        .at-button {
+            width: 100px;
+            height: 40px;
+            font-size: 14px;
         }
     }
 
@@ -461,7 +469,9 @@
         &-users {
             display: flex;
             justify-content: flex-end;
-            height: 34px;
+            flex-wrap: wrap;
+            align-items: center;
+            margin-left: auto;
         }
     }
 
@@ -536,6 +546,8 @@
 
         .drag-column {
             flex: 1;
+            flex-shrink: 0;
+            flex-basis: 400px;
             position: relative;
             border: 1px solid #c5d9e8;
             border-radius: 4px;
@@ -614,6 +626,7 @@
         color: $black-900;
         font-size: 1rem;
         font-weight: bold;
+        flex-wrap: nowrap;
     }
     .slide-enter-active,
     .slide-leave-active {
@@ -627,5 +640,44 @@
         vertical-align: middle;
         display: inline-flex;
         align-items: center;
+    }
+
+    @media (max-width: 1400px) {
+        .task-name {
+            font-size: 16px;
+        }
+        .task-description {
+            font-size: 14px;
+        }
+        .task-users {
+            font-size: 12px;
+        }
+        .total-time-row {
+            font-size: 10px;
+        }
+        .drag-column {
+            width: 300px;
+            flex-basis: 300px;
+            flex-shrink: 0;
+        }
+    }
+    @media only screen and (max-width: 600px) {
+        .task-name {
+            font-size: 16px;
+        }
+        .task-description {
+            font-size: 14px;
+        }
+        .task-users {
+            font-size: 12px;
+        }
+        .total-time-row {
+            font-size: 7px;
+        }
+        .drag-column {
+            width: 300px;
+            flex-basis: 300px;
+            flex-shrink: 0;
+        }
     }
 </style>

@@ -905,3 +905,10 @@
         }
     }
 </style>
+
+<style lang="scss">
+    .icon-bar-chart-2 {
+        display: inline-block;
+        transform: rotate(180deg);
+    }
+</style>

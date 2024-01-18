@@ -19,7 +19,7 @@ class UpdateStatusRequest extends CattrFormRequest
         return [
             'id' => 'required|integer|exists:statuses,id',
             'name' => 'required|string',
-            'order' => ['sometimes', 'integer', Rule::unique('statuses', 'order')->ignore($this->id)],
+            'order' => ['sometimes', 'integer', Rule::exists('statuses', 'order')],
             'active' => 'sometimes|boolean',
             'color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
         ];

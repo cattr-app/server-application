@@ -3,6 +3,8 @@
 namespace App\Http\Middleware;
 
 use App;
+use App\Observers\StatusObserver;
+use CatEvent;
 use Closure;
 use Illuminate\Http\Request;
 use Nwidart\Modules\Facades\Module;
@@ -17,6 +19,8 @@ class RegisterModulesEvents
      */
     public function handle(Request $request, Closure $next): Response
     {
+        CatEvent::subscribe(StatusObserver::class);
+
         collect(Module::allEnabled())->each(function (\Nwidart\Modules\Module $module) {
             App::call([preg_grep("/ModuleServiceProvider$/i", $module->get('providers'))[0], 'registerEvents']);
         });

@@ -363,7 +363,7 @@ export function init(context) {
         },
         {
             title: 'projects.kanban',
-            icon: 'icon-list',
+            icon: 'icon-bar-chart-2',
             onClick: (router, { item }) => {
                 router.push({ name: tasksRouteName, params: { id: item.id } });
             },
