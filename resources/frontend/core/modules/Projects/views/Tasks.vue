@@ -442,6 +442,7 @@
         display: flex;
         justify-content: space-between;
         min-width: 300px;
+        align-items: flex-start;
         h3 {
             padding: 10px;
             flex: 1;
