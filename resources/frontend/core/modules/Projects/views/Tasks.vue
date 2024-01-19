@@ -442,17 +442,11 @@
         display: flex;
         justify-content: space-between;
         min-width: 300px;
-        align-items: center;
         h3 {
             padding: 10px;
             flex: 1;
             color: inherit;
             text-align: center;
-        }
-        .at-button {
-            width: 100px;
-            height: 40px;
-            font-size: 14px;
         }
     }
 
