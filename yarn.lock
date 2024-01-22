@@ -1370,7 +1370,7 @@ __metadata:
     vue: ^2.7.16
     vue-avatar: ^2.3.3
     vue-color: ^2.8.1
-    vue-eslint-parser: ^9.4.0
+    vue-eslint-parser: ^9.4.1
     vue-i18n: ^8.28.2
     vue-kanban: ^1.8.0
     vue-lazyload: ^1.3.5
@@ -11089,6 +11089,23 @@ __metadata:
   peerDependencies:
     eslint: ">=6.0.0"
   checksum: b53d05d3ba5828aafc14486d862350ccc9784642f6274495ddac89eaa7508f7ffeb85a707bf7faf0ed72d6a361f82b374ce0b3462a01c91cf4577ec3cf4ea9c6
+  languageName: node
+  linkType: hard
+
+"vue-eslint-parser@npm:^9.4.1":
+  version: 9.4.1
+  resolution: "vue-eslint-parser@npm:9.4.1"
+  dependencies:
+    debug: ^4.3.4
+    eslint-scope: ^7.1.1
+    eslint-visitor-keys: ^3.3.0
+    espree: ^9.3.1
+    esquery: ^1.4.0
+    lodash: ^4.17.21
+    semver: ^7.3.6
+  peerDependencies:
+    eslint: ">=6.0.0"
+  checksum: 1703db91df157fca4921d517a425040569d4731cb538c8fb9f124586b2eebf960389809ae04ddb685e2f3df7142ec1121597749f62c2a9720a0b9af1231ec62a
   languageName: node
   linkType: hard
 
