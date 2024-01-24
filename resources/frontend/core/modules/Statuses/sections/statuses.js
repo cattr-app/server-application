@@ -17,7 +17,7 @@ export default (context, router) => {
     const crudNewRoute = crud.new.getNewRouteName();
 
     const navigation = { edit: crudEditRoute, new: crudNewRoute };
-    const oneClickUp = throttle(async data => {
+    const oneClick = throttle(async (data, direction) => {
         const { gridView } = data;
         const { tableData } = gridView;
 
@@ -25,26 +25,13 @@ export default (context, router) => {
         const index = tableData.findIndex(item => item.id === data.item.id);
 
         const item = tableData[index];
-        const prevItem = tableData[index - 1];
-        await service.save({ ...prevItem, order: item.order });
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        const targetItem = tableData[targetIndex];
 
-        Vue.set(tableData, index, { ...prevItem, order: item.order });
-        Vue.set(tableData, index - 1, { ...item, order: prevItem.order });
-    }, 1000);
-    const oneClickDown = throttle(async data => {
-        const { gridView } = data;
-        const { tableData } = gridView;
+        await service.save({ ...targetItem, order: item.order });
 
-        const service = new StatusService();
-        const index = tableData.findIndex(item => item.id === data.item.id);
-
-        const item = tableData[index];
-        const prevItem = tableData[index + 1];
-
-        await service.save({ ...prevItem, order: item.order });
-
-        Vue.set(tableData, index, { ...prevItem, order: item.order });
-        Vue.set(tableData, index + 1, { ...item, order: prevItem.order });
+        Vue.set(tableData, index, { ...targetItem, order: item.order });
+        Vue.set(tableData, targetIndex, { ...item, order: targetItem.order });
     }, 1000);
     crud.new.addToMetaProperties('permissions', 'statuses/create', crud.new.getRouterConfig());
     crud.new.addToMetaProperties('navigation', navigation, crud.new.getRouterConfig());
@@ -134,7 +121,7 @@ export default (context, router) => {
                             {
                                 on: {
                                     click: function () {
-                                        oneClickUp(data);
+                                        oneClick(data, 'up');
                                     },
                                 },
                             },
@@ -149,7 +136,7 @@ export default (context, router) => {
                             {
                                 on: {
                                     click: function () {
-                                        oneClickDown(data);
+                                        oneClick(data, 'down');
                                     },
                                 },
                             },

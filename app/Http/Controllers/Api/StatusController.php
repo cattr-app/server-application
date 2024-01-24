@@ -10,7 +10,10 @@ use App\Http\Requests\Status\DestroyStatusRequest;
 use App\Http\Requests\Status\ListStatusRequest;
 use App\Http\Requests\Status\ShowStatusRequestStatus;
 use App\Http\Requests\Status\UpdateStatusRequest;
+use App\Observers\StatusObserver;
+use CatEvent;
 use Exception;
+use Filter;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
@@ -134,6 +137,8 @@ class StatusController extends ItemController
      */
     public function create(CreateStatusRequest $request): JsonResponse
     {
+        CatEvent::subscribe(StatusObserver::class);
+        Filter::listen('filter.request.statuses.create', [StatusObserver::class, 'statusCreation']);
         return $this->_create($request);
     }
 
@@ -180,6 +185,7 @@ class StatusController extends ItemController
      */
     public function edit(UpdateStatusRequest $request): JsonResponse
     {
+        CatEvent::subscribe(StatusObserver::class);
         return $this->_edit($request);
     }
 

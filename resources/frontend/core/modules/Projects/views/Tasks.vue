@@ -18,7 +18,7 @@
                     </div>
 
                     <div class="control-item">
-                        <at-button size="large" @click="$router.push(`/projects`)">
+                        <at-button size="large" @click="$router.push({ name: 'Projects.crud.projects' })">
                             {{ $t('control.project-list') }}
                         </at-button>
                     </div>
@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div>
-            <div ref="kanban" class="project-tasks at-container" style="overflow-x: auto; max-height: 100vh">
+            <div ref="kanban" class="project-tasks at-container kanban-style">
                 <kanban-board :stages="stages.map(s => s.name)" :blocks="blocks" @update-block="updateBlock">
                     <div
                         v-for="stage in stages"
@@ -42,7 +42,7 @@
                             type="primary"
                             size="large"
                             icon="icon-chevron-left"
-                            @click="changeOrderLeft(stage.order)"
+                            @click="changeOrder(stage.order, 'left')"
                         >
                         </at-button>
                         <h3>{{ stage.name }}</h3>
@@ -51,7 +51,7 @@
                             type="primary"
                             size="large"
                             icon="icon-chevron-right"
-                            @click="changeOrderRight(stage.order)"
+                            @click="changeOrder(stage.order, 'right')"
                         >
                         </at-button>
                     </div>
@@ -252,23 +252,16 @@
 
                 return '';
             },
-            changeOrderLeft: throttle(async function (index) {
+            changeOrder: throttle(async function (index, direction) {
                 const service = this.statusService;
                 const item = this.statuses[index];
-                const prevItem = this.statuses[index - 1];
-                await service.save({ ...prevItem, order: item.order });
+                const targetIndex = direction === 'left' ? index - 1 : index + 1;
+                const targetItem = this.statuses[targetIndex];
 
-                Vue.set(this.statuses, index, { ...prevItem, order: item.order });
-                Vue.set(this.statuses, index - 1, { ...item, order: prevItem.order });
-            }, 1000),
-            changeOrderRight: throttle(async function (index) {
-                const service = this.statusService;
-                const item = this.statuses[index];
-                const prevItem = this.statuses[index + 1];
-                await service.save({ ...prevItem, order: item.order });
+                await service.save({ ...targetItem, order: item.order });
 
-                Vue.set(this.statuses, index, { ...prevItem, order: item.order });
-                Vue.set(this.statuses, index + 1, { ...item, order: prevItem.order });
+                this.$set(this.statuses, index, { ...targetItem, order: item.order });
+                this.$set(this.statuses, targetIndex, { ...item, order: targetItem.order });
             }, 1000),
             getHeaderStyle(name) {
                 const status = this.getStatusByName(name);
@@ -335,12 +328,14 @@
             },
             viewTask(task) {
                 this.$router.push({
-                    path: `/tasks/view/${task.id}`,
+                    name: 'Tasks.crud.tasks.view',
+                    params: { id: task.id },
                 });
             },
             editTask(task) {
                 this.$router.push({
-                    path: `/tasks/edit/${task.id}`,
+                    name: 'Tasks.crud.tasks.edit',
+                    params: { id: task.id },
                 });
             },
             async deleteTask(task) {
@@ -636,7 +631,10 @@
         display: inline-flex;
         align-items: center;
     }
-
+    .kanban-style {
+        overflow-x: auto;
+        max-height: 100vh;
+    }
     @media (max-width: 1400px) {
         .task-name {
             font-size: 16px;

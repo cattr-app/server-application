@@ -12,7 +12,16 @@ class StatusSeeder extends Seeder
      */
     public function run(): void
     {
-        Status::updateOrCreate(['id' => 1], ['name' => 'Open', 'active' => true]);
-        Status::updateOrCreate(['id' => 2], ['name' => 'Closed', 'active' => false]);
+        $statuses = [
+            ['name' => 'Open', 'active' => true, 'order' => 1],
+            ['name' => 'Closed', 'active' => false, 'order' => 2],
+        ];
+
+        foreach ($statuses as $status) {
+            Status::updateOrCreate(
+                ['name' => $status['name']],
+                ['active' => $status['active'], 'order' => $status['order']]
+            );
+        }
     }
 }

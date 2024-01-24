@@ -9,6 +9,9 @@ use Illuminate\Validation\Rule;
 
 class CreateStatusRequest extends CattrFormRequest
 {
+    const MIN_UNSIGNED_INT = 0;
+    const MAX_UNSIGNED_INT = 4294967295;
+
     public function _authorize(): bool
     {
         return $this->user()->can('create', Status::class);
@@ -18,7 +21,13 @@ class CreateStatusRequest extends CattrFormRequest
     {
         return [
             'name' => 'required|string',
-            'order' => ['sometimes', 'integer', Rule::unique('statuses', 'order')->ignore($this->id)],
+            'order' => [
+                'sometimes',
+                'integer',
+                Rule::unique('statuses', 'order')->ignore($this->id),
+                'min:' . self::MIN_UNSIGNED_INT,
+                'max:' . self::MAX_UNSIGNED_INT,
+            ],
             'active' => 'sometimes|boolean',
             'color' => 'sometimes|nullable|string|regex:/^#[a-f0-9]{6}$/i',
         ];

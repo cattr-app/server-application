@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 return new class extends Migration
@@ -12,7 +13,17 @@ return new class extends Migration
     public function up(): void
     {
         Schema::table('statuses', function (Blueprint $table) {
-                $table->integer('order')->default(0);
+            $table->unsignedInteger('order')->default(0);
+        });
+
+        DB::table('statuses')->lazyById()->each(function ($status) {
+            DB::table('statuses')
+                ->where('id', $status->id)
+                ->update(['order' => $status->id]);
+        });
+
+        Schema::table('statuses', function (Blueprint $table) {
+            $table->unique('order');
         });
     }
 
