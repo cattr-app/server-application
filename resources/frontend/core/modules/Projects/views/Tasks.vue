@@ -39,18 +39,22 @@
                     >
                         <at-button
                             v-if="stage.order !== 0"
-                            type="primary"
+                            type="text"
                             size="large"
+                            class="button-kanban"
                             icon="icon-chevron-left"
+                            :style="getHeaderStyle(stage.name)"
                             @click="changeOrder(stage.order, 'left')"
                         >
                         </at-button>
                         <h3>{{ stage.name }}</h3>
                         <at-button
                             v-if="stage.order !== stages.length - 1"
-                            type="primary"
+                            type="text"
                             size="large"
+                            class="button-kanban"
                             icon="icon-chevron-right"
+                            :style="getHeaderStyle(stage.name)"
                             @click="changeOrder(stage.order, 'right')"
                         >
                         </at-button>
@@ -540,8 +544,8 @@
             flex-basis: 400px;
             position: relative;
             border: 1px solid #c5d9e8;
-            border-radius: 4px;
-
+            border-radius: 6px;
+            background-color: rgb(246, 248, 250);
             h2 {
                 font-size: 0.8rem;
                 margin: 0;
@@ -569,7 +573,7 @@
         .drag-item {
             margin: 16px;
             border: 1px solid #c5d9e8;
-            border-radius: 4px;
+            border-radius: 6px;
             transition: border 0.2s;
             overflow: hidden;
 
@@ -672,5 +676,12 @@
             flex-basis: 300px;
             flex-shrink: 0;
         }
+    }
+    .button-kanban {
+        aspect-ratio: 1;
+        color: inherit;
+    }
+    .button-kanban:hover {
+        color: #999 !important;
     }
 </style>
