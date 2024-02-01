@@ -1353,7 +1353,7 @@ __metadata:
     laravel-mix-sri: ^1.0.7
     laravel-mix-workbox: ^0.1.4
     lodash: ^4.17.21
-    mapbox-gl: ^3.0.1
+    mapbox-gl: ^3.1.2
     moment: ^2.29.4
     moment-timezone: ^0.5.44
     path-browserify: ^1.0.1
@@ -7498,9 +7498,9 @@ __metadata:
   languageName: node
   linkType: hard
 
-"mapbox-gl@npm:^3.0.1":
-  version: 3.0.1
-  resolution: "mapbox-gl@npm:3.0.1"
+"mapbox-gl@npm:^3.1.2":
+  version: 3.1.2
+  resolution: "mapbox-gl@npm:3.1.2"
   dependencies:
     "@mapbox/geojson-rewind": ^0.5.2
     "@mapbox/jsonlint-lines-primitives": ^2.0.2
@@ -7525,7 +7525,7 @@ __metadata:
     supercluster: ^8.0.0
     tinyqueue: ^2.0.3
     vt-pbf: ^3.1.3
-  checksum: cbb1c93aaeb24fed11a2c69d7aeada2e0271c90fc52c54a9d64cd8a20149cd4a6529c3551cc38342573cb39fba8a74389078e41c6a98fbf7847cb649f1601a2f
+  checksum: a7e061144871ece2bf977e833788b92e23376aa26762dafa6f7958c822bdfdb67cb8b2922102a5207cf1af2b7c3693af088eaa634872dd0c85bae33ef60e009c
   languageName: node
   linkType: hard
 
