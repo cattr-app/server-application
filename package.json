@@ -91,7 +91,7 @@
     "postcss": "^8.4.31",
     "prettier": "2.8.8",
     "resolve-url-loader": "^5.0.0",
-    "sass": "^1.69.7",
+    "sass": "^1.70.0",
     "sass-loader": "^13.3.3",
     "sass-resources-loader": "^2.2.5",
     "vue-eslint-parser": "^9.4.2",
