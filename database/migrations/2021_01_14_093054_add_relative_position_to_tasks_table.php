@@ -2,6 +2,7 @@
 
 use Illuminate\Database\Migrations\Migration;
 use Illuminate\Database\Schema\Blueprint;
+use Illuminate\Support\Facades\DB;
 use Illuminate\Support\Facades\Schema;
 
 class AddRelativePositionToTasksTable extends Migration
@@ -15,6 +16,11 @@ class AddRelativePositionToTasksTable extends Migration
     {
         Schema::table('tasks', function (Blueprint $table) {
             $table->decimal('relative_position', 64, 30)->default(0);
+        });
+        DB::table('tasks')->lazyById()->each(function ($task) {
+            DB::table('tasks')
+                ->where('id', $task->id)
+                ->update(['relative_position' => $task->id]);
         });
     }
 

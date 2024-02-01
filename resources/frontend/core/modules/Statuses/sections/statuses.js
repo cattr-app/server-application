@@ -117,7 +117,7 @@ export default (context, router) => {
                 if (index > 0) {
                     result.push(
                         h(
-                            'button',
+                            'at-button',
                             {
                                 on: {
                                     click: function () {
@@ -132,7 +132,7 @@ export default (context, router) => {
                 if (index < data.gridView.tableData.length - 1) {
                     result.push(
                         h(
-                            'button',
+                            'at-button',
                             {
                                 on: {
                                     click: function () {

@@ -16,6 +16,7 @@ use Filter;
 use App\Models\Task;
 use App\Models\TaskHistory;
 use App\Models\User;
+use App\Observers\TaskObserver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
@@ -306,7 +307,8 @@ class TaskController extends ItemController
                 return $requestData;
             }
         );
-
+        CatEvent::subscribe(TaskObserver::class);
+        Filter::listen('filter.request.tasks.create', [TaskObserver::class, 'taskCreation']);
         return $this->_create($request);
     }
 

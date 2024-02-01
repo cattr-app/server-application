@@ -69,7 +69,7 @@
                     >
                         <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
 
-                        <p class="task-description">{{ getTask(block.id).description }}</p>
+                        <p class="task-description" v-html="getTask(block.id).description"></p>
 
                         <div class="task-users">
                             <at-tag v-if="isOverDue(companyData.timezone, block)" color="error"
@@ -96,7 +96,7 @@
                     <div class="task-view-header">
                         <h4 class="task-view-title">{{ task.task_name }}</h4>
 
-                        <p class="task-view-description">{{ task.description }}</p>
+                        <p class="task-view-description" v-html="task.description"></p>
 
                         <div class="task-view-close" @click="task = null">
                             <span class="icon icon-x"></span>
