@@ -119,10 +119,28 @@ export default (context, router) => {
                         h(
                             'at-button',
                             {
+                                style: {
+                                    marginRight: '8px',
+                                },
                                 on: {
                                     click: function () {
                                         oneClick(data, 'up');
                                     },
+                                },
+                            },
+                            [h('i', { class: 'icon icon-chevrons-up' })],
+                        ),
+                    );
+                } else {
+                    result.push(
+                        h(
+                            'at-button',
+                            {
+                                style: {
+                                    marginRight: '8px',
+                                },
+                                props: {
+                                    disabled: true,
                                 },
                             },
                             [h('i', { class: 'icon icon-chevrons-up' })],
@@ -134,10 +152,25 @@ export default (context, router) => {
                         h(
                             'at-button',
                             {
+                                style: {
+                                    marginRight: '8px',
+                                },
                                 on: {
                                     click: function () {
                                         oneClick(data, 'down');
                                     },
+                                },
+                            },
+                            [h('i', { class: 'icon icon-chevrons-down' })],
+                        ),
+                    );
+                } else {
+                    result.push(
+                        h(
+                            'at-button',
+                            {
+                                props: {
+                                    disabled: true,
                                 },
                             },
                             [h('i', { class: 'icon icon-chevrons-down' })],
