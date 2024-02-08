@@ -27,13 +27,13 @@
     "guzzlehttp/guzzle": "^7.2",
     "intervention/image": "^2.7",
     "laravel/framework": "^10.0",
-    "laravel/octane": "^1.5",
+    "laravel/octane": "^2.2",
     "laravel/sanctum": "^3.2",
     "maatwebsite/excel": "^3.1",
     "matanyadaev/laravel-eloquent-spatial": "^3.1",
     "mpdf/mpdf": "^8.0",
     "nwidart/laravel-modules": "^10",
-    "sentry/sentry-laravel": "^3.3",
+    "sentry/sentry-laravel": "^4.1",
     "wikimedia/composer-merge-plugin": "^2.0"
   },
   "require-dev": {
