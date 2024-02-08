@@ -1324,6 +1324,7 @@ __metadata:
     "@commitlint/config-conventional": ^18.4.4
     "@sentry/tracing": ^7.93.0
     "@sentry/vue": ^7.93.0
+    "@vue/composition-api": ^1.7.2
     autoprefixer: ^10.4.16
     axios: ^1.6.5
     axios-concurrency: ^1.0.4
@@ -1336,6 +1337,7 @@ __metadata:
     cross-env: ^7.0.3
     css-loader: ^6.9.0
     dotenv: ^16.3.1
+    echarts: ^5.4.3
     eslint: ^8.56.0
     eslint-plugin-prettier: ^4.2.1
     eslint-plugin-vue: ^9.20.1
@@ -1370,6 +1372,7 @@ __metadata:
     vue: ^2.7.16
     vue-avatar: ^2.3.3
     vue-color: ^2.8.1
+    vue-echarts: ^6.6.8
     vue-eslint-parser: ^9.4.2
     vue-i18n: ^8.28.2
     vue-kanban: ^1.8.0
@@ -2482,6 +2485,15 @@ __metadata:
     prettier:
       optional: true
   checksum: 70fee2289a4f54ec1be4d46136ee9b9893e31bf5622cead5be06c3dfb83449c3dbe6f8c03404625ccf302d0628ff9e2ea1debfae609d1bfe1d065d8f57c5dba8
+  languageName: node
+  linkType: hard
+
+"@vue/composition-api@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "@vue/composition-api@npm:1.7.2"
+  peerDependencies:
+    vue: ">= 2.5 < 2.7"
+  checksum: 6ce5ce4c0301fe45873c12bb46f449e1b0e978fa7df60de2a54aa314c5dc6e299640d0e9433e6edcd764f86ed9b737123f9346680733d228d5111d4b02736ff4
   languageName: node
   linkType: hard
 
@@ -4785,6 +4797,16 @@ __metadata:
   version: 2.2.4
   resolution: "earcut@npm:2.2.4"
   checksum: aea0466cb2f24e0c3c57148d8d28ac9846f53c4f43ee66780826474303ac851b305ef988152d0bdeb31e8f7ca939dc0df737e7505cfb1c1bdf2ff9d7f9ea2faa
+  languageName: node
+  linkType: hard
+
+"echarts@npm:^5.4.3":
+  version: 5.4.3
+  resolution: "echarts@npm:5.4.3"
+  dependencies:
+    tslib: 2.3.0
+    zrender: 5.4.4
+  checksum: f4f69becf1cf8f546f9488ffa3bffaa971dcfbd49f5d635f288cbc8c5177839154bd6c325d6ed72c2b822c89c9bba4947ac73400614fd23c6f2f7ace3c939132
   languageName: node
   linkType: hard
 
@@ -9495,6 +9517,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"resize-detector@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "resize-detector@npm:0.3.0"
+  checksum: 06c5f321b9349e34b71020b945cbd90c5300ca49d3e204fbc236c0827ad133a2d0cd48b9943a8b50723e4e16b67c106d9b8e1eba6240a6e136d1926373bacb2e
+  languageName: node
+  linkType: hard
+
 "resolve-cwd@npm:^3.0.0":
   version: 3.0.0
   resolution: "resolve-cwd@npm:3.0.0"
@@ -10712,6 +10741,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:2.3.0":
+  version: 2.3.0
+  resolution: "tslib@npm:2.3.0"
+  checksum: 8869694c26e4a7b56d449662fd54a4f9ba872c889d991202c74462bd99f10e61d5bd63199566c4284c0f742277736292a969642cc7b590f98727a7cae9529122
+  languageName: node
+  linkType: hard
+
 "tslib@npm:^2.0.3":
   version: 2.5.0
   resolution: "tslib@npm:2.5.0"
@@ -11072,6 +11108,26 @@ __metadata:
     vue-demi-fix: bin/vue-demi-fix.js
     vue-demi-switch: bin/vue-demi-switch.js
   checksum: 0fbe9bf8ab7fe498ffa2bbd0cfc8f6f43a6bbaa5eda3e20ef1b70dca7c8b0ddb216a7ff2f632b694fe0735805638975abb441c621ec0bd2e6d4656353f316c15
+  languageName: node
+  linkType: hard
+
+"vue-echarts@npm:^6.6.8":
+  version: 6.6.8
+  resolution: "vue-echarts@npm:6.6.8"
+  dependencies:
+    resize-detector: ^0.3.0
+    vue-demi: ^0.13.11
+  peerDependencies:
+    "@vue/composition-api": ^1.0.5
+    "@vue/runtime-core": ^3.0.0
+    echarts: ^5.4.1
+    vue: ^2.6.12 || ^3.1.1
+  peerDependenciesMeta:
+    "@vue/composition-api":
+      optional: true
+    "@vue/runtime-core":
+      optional: true
+  checksum: 9aed10b99e080402e89410a4fbce34a11b361490c81c0cb47018613d8c413ed4cc2eaff66534d770106a5bc15a084872cc18702e8134661866130e6b0f5f03da
   languageName: node
   linkType: hard
 
@@ -12052,5 +12108,14 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zrender@npm:5.4.4":
+  version: 5.4.4
+  resolution: "zrender@npm:5.4.4"
+  dependencies:
+    tslib: 2.3.0
+  checksum: 4b317346af8eca38e62ba029239c3a13e97eac4fa15b3ddadbae23442d8b373f0e937c255dee8080d6bb2fc79c9da54f1106415586ed8942bd8bc684b3890ea9
   languageName: node
   linkType: hard
