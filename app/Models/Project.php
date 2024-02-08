@@ -12,6 +12,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -110,6 +111,12 @@ class Project extends Model
         static::addGlobalScope(new ProjectAccessScope);
 
         static::deleting(static function (Project $project) {
+            CronTaskWorkers::whereHas(
+                'task',
+                static fn(EloquentBuilder $query) => $query
+                    ->where('project_id', '=', $project->id)
+            )->delete();
+
             $project->tasks()->delete();
         });
     }
@@ -147,5 +154,10 @@ class Project extends Model
     public function properties(): MorphMany
     {
         return $this->morphMany(Property::class, 'entity');
+    }
+
+    public function workers(): HasManyThrough
+    {
+        return $this->hasManyThrough(CronTaskWorkers::class, Task::class);
     }
 }

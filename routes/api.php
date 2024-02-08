@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PriorityController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectMemberController;
 use App\Http\Controllers\Api\Reports\DashboardController;
+use App\Http\Controllers\Api\Reports\PlannedTimeReportController;
 use App\Http\Controllers\Api\Reports\ProjectReportController;
 use App\Http\Controllers\Api\Reports\TimeUseReportController;
 use App\Http\Controllers\Api\TaskController;
@@ -226,6 +227,10 @@ Route::group([
             ->name('report.dashboard');
         $router->post('report/dashboard/download', [DashboardController::class, 'download'])
             ->name('report.dashboard.download');
+        $router->post('report/planned-time', [PlannedTimeReportController::class, '__invoke'])
+            ->name('report.planned-time');
+        $router->post('report/planned-time/download', [PlannedTimeReportController::class, 'download'])
+            ->name('report.planned-time.download');
 
         // About
         $router->get('about', [AboutController::class, '__invoke'])
