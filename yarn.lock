@@ -1335,7 +1335,7 @@ __metadata:
     core-js: ^3.35.0
     cross-env: ^7.0.3
     css-loader: ^6.9.0
-    dotenv: ^16.3.1
+    dotenv: ^16.4.2
     eslint: ^8.56.0
     eslint-plugin-prettier: ^4.2.1
     eslint-plugin-vue: ^9.20.1
@@ -4757,10 +4757,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"dotenv@npm:^16.3.1":
-  version: 16.3.1
-  resolution: "dotenv@npm:16.3.1"
-  checksum: 15d75e7279018f4bafd0ee9706593dd14455ddb71b3bcba9c52574460b7ccaf67d5cf8b2c08a5af1a9da6db36c956a04a1192b101ee102a3e0cf8817bbcf3dfd
+"dotenv@npm:^16.4.2":
+  version: 16.4.2
+  resolution: "dotenv@npm:16.4.2"
+  checksum: c53d064435d835b07b2cd90a692f6859b8ba016b7ca57eeb487e430da74fb2335ac2bdb53f16774011d7b9b6b44c093637b39cbe76d9e01f9b8856a6dfd32f4a
   languageName: node
   linkType: hard
 
