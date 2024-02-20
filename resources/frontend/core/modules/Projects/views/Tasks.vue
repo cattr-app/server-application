@@ -185,7 +185,6 @@
     import { mapGetters } from 'vuex';
     import { getTextColor } from '@/utils/color';
     import { formatDate, formatDurationString } from '@/utils/time';
-    import Vue from 'vue';
     import { throttle } from 'lodash';
 
     export default {
@@ -316,10 +315,7 @@
                 }
             },
             async loadTask(id) {
-                // Get basic task info from the task list
                 this.task = this.getTask(id);
-
-                // Load task details
                 this.task = (
                     await this.taskService.getItem(id, {
                         with: ['users', 'priority', 'project', 'can'],

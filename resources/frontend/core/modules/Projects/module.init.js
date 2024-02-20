@@ -368,7 +368,6 @@ export function init(context) {
                 router.push({ name: tasksRouteName, params: { id: item.id } });
             },
             renderCondition({ $can }, item) {
-                // User always can view project's tasks
                 return true;
             },
         },

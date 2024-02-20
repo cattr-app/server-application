@@ -14,14 +14,14 @@ class AddRelativePositionToTasksTable extends Migration
      */
     public function up()
     {
-        // Schema::table('tasks', function (Blueprint $table) {
-        //     $table->decimal('relative_position', 64, 30)->default(0);
-        // });
-        // DB::table('tasks')->lazyById()->each(function ($task) {
-        //     DB::table('tasks')
-        //         ->where('id', $task->id)
-        //         ->update(['relative_position' => $task->id]);
-        // });
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->decimal('relative_position', 64, 30)->default(0);
+        });
+        DB::table('tasks')->lazyById()->each(function ($task) {
+            DB::table('tasks')
+                ->where('id', $task->id)
+                ->update(['relative_position' => $task->id]);
+        });
     }
 
     /**
@@ -31,8 +31,8 @@ class AddRelativePositionToTasksTable extends Migration
      */
     public function down()
     {
-        // Schema::table('tasks', function (Blueprint $table) {
-        //     $table->dropColumn('relative_position');
-        // });
+        Schema::table('tasks', function (Blueprint $table) {
+            $table->dropColumn('relative_position');
+        });
     }
 }

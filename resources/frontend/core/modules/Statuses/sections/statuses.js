@@ -58,12 +58,6 @@ export default (context, router) => {
             required: true,
             placeholder: 'field.name',
         },
-        // {
-        //     label: 'field.order',
-        //     key: 'order',
-        //     type: 'input',
-        //     placeholder: 'field.order',
-        // },
         {
             label: 'field.close_task',
             key: 'active',
