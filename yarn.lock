@@ -1324,6 +1324,8 @@ __metadata:
     "@commitlint/config-conventional": ^18.4.4
     "@sentry/tracing": ^7.93.0
     "@sentry/vue": ^7.93.0
+    "@svgdotjs/svg.draggable.js": ^3.0.3
+    "@svgdotjs/svg.js": ^3.2.0
     autoprefixer: ^10.4.16
     axios: ^1.6.5
     axios-concurrency: ^1.0.4
@@ -2085,6 +2087,22 @@ __metadata:
     magic-string: ^0.25.0
     string.prototype.matchall: ^4.0.6
   checksum: 2c021349442e2e2cec96bb50fd82ec8bf8514d909bc73594f6cfc89b3b68f2feed909a8161d7d307d9455585c97e6b66853ce334db432626c7596836d4549c0c
+  languageName: node
+  linkType: hard
+
+"@svgdotjs/svg.draggable.js@npm:^3.0.3":
+  version: 3.0.3
+  resolution: "@svgdotjs/svg.draggable.js@npm:3.0.3"
+  dependencies:
+    "@svgdotjs/svg.js": ^3.0.16
+  checksum: a595a4b84b254262d61240fb498c8e13bb96394a5664f3790406fda4d10aac5400d551a96e629dfaed311811f768950be7d253ebe1985dfab52521f6e7d2a293
+  languageName: node
+  linkType: hard
+
+"@svgdotjs/svg.js@npm:^3.0.16, @svgdotjs/svg.js@npm:^3.2.0":
+  version: 3.2.0
+  resolution: "@svgdotjs/svg.js@npm:3.2.0"
+  checksum: 73e34a50ca5b413a6522e37d5bdfaccffa9a29aa76fa2d6c2b81afffc0604683635e45c85db2eeffaf7e78744d9736c7b2bf627b428c905d862a3527734eccaf
   languageName: node
   linkType: hard
 
