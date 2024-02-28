@@ -13,13 +13,11 @@ return new class extends Migration
     public function up()
     {
         Schema::table('tasks', function (Blueprint $table) {
-            $table->decimal('relative_position', 64, 30)->default(0);
+            if (!Schema::hasColumn('tasks', 'relative_position')) {
+                $table->decimal('relative_position', 64, 30)->default(0);
+            }
         });
-        DB::table('tasks')->lazyById()->each(function ($task) {
-            DB::table('tasks')
-                ->where('id', $task->id)
-                ->update(['relative_position' => $task->id]);
-        });
+        DB::table('tasks')->update(['relative_position' => DB::raw('id')]);
     }
 
     /**
@@ -29,8 +27,5 @@ return new class extends Migration
      */
     public function down()
     {
-        Schema::table('tasks', function (Blueprint $table) {
-            $table->dropColumn('relative_position');
-        });
     }
 };

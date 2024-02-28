@@ -274,7 +274,7 @@ class TaskController extends ItemController
     {
         CatEvent::listen(
             Filter::getAfterActionEventName(),
-            static fn(Task $task) => $task->users()->sync($request->get('users'))
+            static fn (Task $task) => $task->users()->sync($request->get('users'))
         );
 
         Filter::listen(
@@ -307,8 +307,11 @@ class TaskController extends ItemController
                 return $requestData;
             }
         );
-        CatEvent::subscribe(TaskObserver::class);
-        Filter::listen('filter.request.tasks.create', [TaskObserver::class, 'taskCreation']);
+        CatEvent::listen('filter.request.tasks.create', static function ($item) {
+            $maxPosition = Task::max('relative_position');
+            $item['relative_position'] = $maxPosition + 1;
+            return $item;
+        });
         return $this->_create($request);
     }
 

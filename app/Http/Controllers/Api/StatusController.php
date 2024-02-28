@@ -137,8 +137,12 @@ class StatusController extends ItemController
      */
     public function create(CreateStatusRequest $request): JsonResponse
     {
-        CatEvent::subscribe(StatusObserver::class);
-        Filter::listen('filter.request.statuses.create', [StatusObserver::class, 'statusCreation']);
+        Filter::listen('filter.request.statuses.create', static function ($item) {
+            $maxOrder = Status::max('order');
+            $item['order'] = $maxOrder + 1;
+            return $item;
+        });
+
         return $this->_create($request);
     }
 
@@ -185,9 +189,32 @@ class StatusController extends ItemController
      */
     public function edit(UpdateStatusRequest $request): JsonResponse
     {
-        CatEvent::subscribe(StatusObserver::class);
+        CatEvent::listen('event.before.action.statuses.edit', static function ($item, $requestData) {
+            if (isset($requestData['order'])) {
+                $order = $requestData['order'];
+                if ($order < 1) {
+                    $order = 1;
+                }
+                $maxOrder = Status::max('order');
+                if ($order > $maxOrder) {
+                    $order = $maxOrder + 1;
+                }
+                $nextItem = Status::where('order', '=', $requestData['order'])->first();
+                if (isset($nextItem)) {
+                    $itemOrder = $nextItem->order;
+                    Status::where('order', '=',  $item->order)->update(['order' => 0]);
+                    $nextItem->order = $item->order;
+                    $item->order = $itemOrder;
+                    $nextItem->save();
+                    Status::where('order', '=', 0)->update(['order' => $requestData['order']]);
+                } else {
+                    $item->order = $maxOrder + 1;
+                }
+            }
+        });
         return $this->_edit($request);
     }
+
 
     /**
      * @throws Throwable

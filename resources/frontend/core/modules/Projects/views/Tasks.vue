@@ -28,7 +28,7 @@
                     </div>
                 </div>
             </div>
-            <div ref="kanban" class="project-tasks at-container kanban-style">
+            <div ref="kanban" class="project-tasks_kanban at-container">
                 <kanban-board :stages="stages.map(s => s.name)" :blocks="blocks" @update-block="updateBlock">
                     <div
                         v-for="stage in stages"
@@ -516,11 +516,11 @@
         }
     }
 
-    .project-tasks {
+    .project-tasks_kanban {
         padding: 16px;
     }
 
-    .project-tasks ::v-deep {
+    .project-tasks_kanban ::v-deep {
         ul.drag-list,
         ul.drag-inner-list {
             list-style-type: none;
@@ -631,7 +631,7 @@
         display: inline-flex;
         align-items: center;
     }
-    .kanban-style {
+    .project-tasks_kanban {
         overflow-x: auto;
         max-height: 100vh;
     }
