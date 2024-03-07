@@ -34,6 +34,7 @@
     "mpdf/mpdf": "^8.0",
     "nwidart/laravel-modules": "^10",
     "sentry/sentry-laravel": "^4.1",
+    "staudenmeir/laravel-adjacency-list": "^1.19",
     "wikimedia/composer-merge-plugin": "^2.0"
   },
   "require-dev": {
