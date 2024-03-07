@@ -11,6 +11,7 @@
 </template>
 
 <script>
+    import i18n from '@/i18n';
 
     const HEIGHT_RATIO = 0.6;
     const ROW_HEIGHT = 20;
@@ -25,11 +26,20 @@
         'due_date',
         'project_phase_id',
         'project_id',
+        'total_spent_time',
+        'total_offset',
+        'status',
+        'priority',
     ];
+    const i18nDimensions = rawDimensions.map(t => i18n.t(`gantt.dimensions.${t}`));
 
     const dimensionIndex = Object.fromEntries(rawDimensions.map((el, i) => [el, i]));
 
     const dimensionsMap = new Map(rawDimensions.map((el, i) => [i, el]));
+
+    const rawPhaseDimensions = ['id', 'name', 'start_date', 'due_date', 'first_task_id', 'last_task_id'];
+    const i18nPhaseDimensions = rawPhaseDimensions.map(t => i18n.t(`gantt.dimensions.${t}`));
+    const phaseDimensionIndex = Object.fromEntries(rawPhaseDimensions.map((el, i) => [el, i]));
 
     import { use, format as echartsFormat, graphic as echartsGraphic } from 'echarts/core';
     import { CanvasRenderer } from 'echarts/renderers';
@@ -52,7 +62,9 @@
     import debounce from 'lodash/debounce';
     import Preloader from '@/components/Preloader.vue';
     import GanttService from '../services/gantt.service';
-    import { getStartDate } from '@/utils/time';
+    import { formatDurationString, getStartDate } from '@/utils/time';
+    import { store as rootStore } from '@/store';
+    import moment from 'moment-timezone';
 
     use([
         CanvasRenderer,
@@ -68,6 +80,16 @@
         CustomChart,
         CanvasRenderer,
     ]);
+
+    const grid = {
+        show: true,
+        top: 70,
+        bottom: 20,
+        left: 100,
+        right: 20,
+        backgroundColor: '#fff',
+        borderWidth: 0,
+    };
 
     export default {
         name: 'Index',
@@ -85,6 +107,7 @@
                 projectIDs: [],
                 service: new GanttService(),
                 option: {},
+                tasksRelationsMap: [],
                 totalRows: 0,
             };
         },
@@ -126,17 +149,50 @@
                 }
                 const ganttData = (await this.service.getGanttData(1)).data.data;
                 this.totalRows = ganttData.tasks.length;
-                const preparedRows = ganttData.tasks.map((item, index) => [index + 1].concat(...Object.values(item)));
 
-                window.gantt = this.$refs.gantt.chart;
+                const phasesMap = ganttData.phases
+                    .filter(p => p.start_date && p.due_date)
+                    .reduce((acc, phase) => {
+                        phase.tasks = {
+                            byStartDate: {},
+                            byDueDate: {},
+                        };
+                        acc[phase.id] = phase;
+                        return acc;
+                    }, {});
 
-                // console.log('ChartHeight', totalRows);
-                // console.log('ChartHeight', chartHeight);
-                // console.log('canDraw', canDraw);
-                // console.log('end', canDraw * 100);
+                const preparedRowsMap = {};
+                const preparedRows = ganttData.tasks.map((item, index) => {
+                    const row = [index + 1].concat(...Object.values(item));
+                    preparedRowsMap[item.id] = row;
+                    if (phasesMap[item.project_phase_id]) {
+                        const phaseTasks = phasesMap[item.project_phase_id].tasks;
+                        if (phaseTasks.byStartDate[item.start_date]) {
+                            phaseTasks.byStartDate[item.start_date].push(row);
+                        } else {
+                            phaseTasks.byStartDate[item.start_date] = [row];
+                        }
+                        if (phaseTasks.byDueDate[item.due_date]) {
+                            phaseTasks.byDueDate[item.due_date].push(row);
+                        } else {
+                            phaseTasks.byDueDate[item.due_date] = [row];
+                        }
+                    }
+                    return preparedRowsMap[item.id];
+                });
 
-                const option = {
-                    tooltip: {},
+                this.tasksRelationsMap = ganttData.tasks_relations.reduce((obj, relation) => {
+                    const child = preparedRowsMap[relation.child_id];
+                    if (Array.isArray(obj[relation.parent_id]) && child) {
+                        obj[relation.parent_id].push(child);
+                    } else {
+                        obj[relation.parent_id] = [child];
+                    }
+
+                    return obj;
+                }, {});
+
+                this.option = {
                     animation: false,
                     toolbox: {
                         left: 20,
@@ -151,11 +207,11 @@
                         {
                             type: 'slider',
                             xAxisIndex: 0,
-                            filterMode: 'weakFilter',
+                            filterMode: 'none',
                             height: 20,
                             bottom: 0,
                             start: 0,
-                            end: 50,
+                            end: 100,
                             handleIcon:
                                 'path://M10.7,11.9H9.3c-4.9,0.3-8.8,4.4-8.8,9.4c0,5,3.9,9.1,8.8,9.4h1.3c4.9-0.3,8.8-4.4,8.8-9.4C19.5,16.3,15.6,12.2,10.7,11.9z M13.3,24.4H6.7V23h6.6V24.4z M13.3,19.6H6.7v-1.4h6.6V19.6z',
                             handleSize: '80%',
@@ -166,7 +222,7 @@
                             type: 'inside',
                             id: 'insideX',
                             xAxisIndex: 0,
-                            filterMode: 'weakFilter',
+                            filterMode: 'none',
                             start: 0,
                             end: 50,
                             zoomOnMouseWheel: false,
@@ -174,8 +230,8 @@
                         },
                         {
                             type: 'slider',
+                            filterMode: 'none',
                             yAxisIndex: 0,
-                            zoomLock: true,
                             width: 10,
                             right: 10,
                             top: 70,
@@ -189,6 +245,7 @@
                             type: 'inside',
                             id: 'insideY',
                             yAxisIndex: 0,
+                            filterMode: 'none',
                             // startValue: 0,
                             // endValue: 10,
                             zoomOnMouseWheel: 'shift',
@@ -196,15 +253,7 @@
                             moveOnMouseWheel: true,
                         },
                     ],
-                    grid: {
-                        show: true,
-                        top: 70,
-                        bottom: 20,
-                        left: 100,
-                        right: 20,
-                        backgroundColor: '#fff',
-                        borderWidth: 0,
-                    },
+                    grid,
                     xAxis: {
                         type: 'time',
                         position: 'top',
@@ -252,37 +301,109 @@
                         //         [-22.1, 50],
                         //     ]
                         // },
-                        // min: -1,
                         max: this.totalRows + 1, // _rawData.parkingApron.data.length https://echarts.apache.org/en/option.html#yAxis.max
+                    },
+                    tooltip: {
+                        textStyle: {},
+                        formatter: function (params) {
+                            // console.log(params);
+                            const getRow = (key, value) => `
+                            <div style="display: inline-flex; width: 100%; justify-content: space-between; column-gap: 1rem; text-overflow: ellipsis;">
+                            ${key} <span style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" ><b>${value}</b></span>
+                            </div>`;
+                            const getWrapper = dimensionsToShow => `
+                                <div style="display:flex; flex-direction: column; max-width: 280px;">
+                                    ${dimensionsToShow.map(([title, value]) => getRow(title, value)).join('')}
+                                </div>
+                                `;
+                            const prepareValues = accessor => {
+                                const key = params.dimensionNames[Array.isArray(accessor) ? accessor[0] : accessor];
+                                let value = Array.isArray(accessor)
+                                    ? accessor[1](params.value[accessor[0]])
+                                    : params.value[accessor];
+                                return [key, value];
+                            };
+                            if (params.seriesId === 'tasksData' || params.seriesId === 'tasksLabels') {
+                                return getWrapper([
+                                    prepareValues(dimensionIndex.task_name),
+                                    prepareValues([dimensionIndex.status, v => v.name]),
+                                    prepareValues([dimensionIndex.priority, v => v.name]),
+                                    prepareValues([
+                                        dimensionIndex.estimate,
+                                        v => (v == null ? '—' : formatDurationString(v)),
+                                    ]),
+                                    prepareValues([
+                                        dimensionIndex.total_spent_time,
+                                        v => (v == null ? '—' : formatDurationString(v)),
+                                    ]),
+                                    prepareValues(dimensionIndex.start_date),
+                                    prepareValues(dimensionIndex.due_date),
+                                ]);
+                            }
+                            if (params.seriesId === 'phasesData') {
+                                return getWrapper([
+                                    prepareValues(phaseDimensionIndex.name),
+                                    prepareValues(phaseDimensionIndex.start_date),
+                                    prepareValues(phaseDimensionIndex.due_date),
+                                ]);
+                            }
+                            return `${params.dataIndex}`;
+                        },
+                        // borderColor: 'red'
                     },
                     series: [
                         {
                             id: 'tasksData',
                             type: 'custom',
                             renderItem: this.renderGanttItem,
-                            dimensions: rawDimensions,
+                            dimensions: i18nDimensions,
                             encode: {
                                 x: [dimensionIndex.start_date, dimensionIndex.due_date],
                                 y: dimensionIndex.index,
-                                tooltip: [dimensionIndex.index, dimensionIndex.start_date, dimensionIndex.due_date],
                             },
                             data: preparedRows,
                         },
                         {
+                            id: 'tasksLabels',
                             type: 'custom',
                             renderItem: this.renderAxisLabelItem,
-                            dimensions: rawDimensions,
+                            dimensions: i18nDimensions,
                             encode: {
                                 x: -1,
                                 y: 0,
-                                tooltip: [dimensionIndex.task_name, dimensionIndex.start_date, dimensionIndex.due_date],
                             },
                             data: preparedRows,
                         },
+                        {
+                            id: 'phasesData',
+                            type: 'custom',
+                            dimensions: i18nPhaseDimensions,
+                            renderItem: this.renderPhaseItem,
+                            encode: {
+                                x: [2, 3],
+                                y: 4,
+                            },
+                            data: Object.values(phasesMap).map(phase => {
+                                const startTaskIdx = phase.tasks.byStartDate[phase.start_date].reduce(
+                                    (minIndex, row) => Math.min(minIndex, row[dimensionIndex.index]),
+                                    Infinity,
+                                );
+                                const dueTaskId = phase.tasks.byDueDate[phase.due_date].reduce(
+                                    (maxIndex, row) => Math.max(maxIndex, row[dimensionIndex.index]),
+                                    null,
+                                );
+                                return [
+                                    phase.id,
+                                    phase.name,
+                                    phase.start_date,
+                                    phase.due_date,
+                                    startTaskIdx,
+                                    dueTaskId,
+                                ];
+                            }),
+                        },
                     ],
                 };
-
-                this.option = option;
 
                 this.isDataLoading = false;
             }, 100),
@@ -292,70 +413,156 @@
                 this.load();
             },
             renderGanttItem(params, api) {
-                // TODO: remove
-                // window.$params = params;
-                // window.$api = api;
+                let categoryIndex = api.value(dimensionIndex.index);
+                let startDate = api.coord([api.value(dimensionIndex.start_date), categoryIndex]);
+                let endDate = api.coord([api.value(dimensionIndex.due_date), categoryIndex]);
 
-                var categoryIndex = api.value(dimensionIndex.index);
-                var startDate = api.coord([api.value(dimensionIndex.start_date), categoryIndex]);
-                var endDate = api.coord([api.value(dimensionIndex.due_date), categoryIndex]);
-
-                var barLength = endDate[0] - startDate[0];
+                let barLength = endDate[0] - startDate[0];
                 // Get the heigth corresponds to length 1 on y axis.
-                var barHeight = api.size([0, 1])[1] * HEIGHT_RATIO;
+                let barHeight = api.size([0, 1])[1] * HEIGHT_RATIO;
                 barHeight = ROW_HEIGHT;
-                // console.log({
-                //     barSize: api.size([0, 1]),
-                //     barLength: barLength,
-                //     startDate: startDate,
-                //     endDate: endDate,
-                //     params
-                // });
-                var x = startDate[0];
-                var y = startDate[1] - barHeight;
-                var barText = api.value(dimensionIndex.task_name) + '';
-                var barTextWidth = echartsFormat.getTextRect(barText).width;
-                var text = barLength > barTextWidth + 40 && x + barLength >= 180 ? barText : '';
-                var rectNormal = this.clipRectByRect(params, {
+
+                let x = startDate[0];
+                let y = startDate[1] - barHeight;
+                let barText = api.value(dimensionIndex.task_name);
+                let barTextWidth = echartsFormat.getTextRect(barText).width;
+
+                let rectNormal = this.clipRectByRect(params, {
                     x: x,
                     y: y,
                     width: barLength,
                     height: barHeight,
                 });
-                var rectVIP = this.clipRectByRect(params, {
+
+                const estimate = api.value(dimensionIndex.estimate);
+                const timeWithOffset =
+                    +api.value(dimensionIndex.total_spent_time) + +api.value(dimensionIndex.total_offset);
+                let taskProgressLine = 0;
+                const multiplier = estimate > 0 ? timeWithOffset / estimate : 0;
+                if (estimate != null && estimate >= 0) {
+                    taskProgressLine = barLength * multiplier;
+                }
+                let rectProgress = this.clipRectByRect(params, {
                     x: x,
                     y: y + barHeight * 0.15,
-                    width: barLength * 0.8, // fill bar length
+                    width: taskProgressLine > barLength ? barLength : taskProgressLine, // fill bar length
                     height: barHeight * 0.7,
                 });
-                var rectText = this.clipRectByRect(params, {
-                    x: x,
-                    y: y,
-                    width: barLength,
-                    height: barHeight,
+
+                let taskId = api.value(dimensionIndex.id);
+                const canvasWidth = api.getWidth() - grid.right;
+                const canvasHeight = api.getHeight() - grid.bottom;
+
+                let childrenLines = [];
+                this.tasksRelationsMap[taskId]?.forEach((childRowData, index) => {
+                    let childStartDate = api.coord([
+                        childRowData[dimensionIndex.start_date],
+                        childRowData[dimensionIndex.index],
+                    ]);
+                    let childY = childStartDate[1] - barHeight / 2;
+
+                    // Start point at the end of the parent task
+                    let startPoint = [endDate[0], endDate[1] - barHeight / 2];
+                    if (startPoint[0] <= grid.left) {
+                        startPoint[0] = grid.left;
+                        startPoint[1] = childY; // if parent outside grid, don't draw line to the top
+                    } else if (startPoint[0] >= canvasWidth) {
+                        startPoint[0] = canvasWidth;
+                    }
+                    if (startPoint[1] <= grid.top) {
+                        startPoint[1] = grid.top;
+                    } else if (startPoint[1] >= canvasHeight) {
+                        startPoint[1] = canvasHeight;
+                    }
+
+                    // Intermediate point, vertically aligned with the parent task end, but at the child task's y-level
+                    let intermediatePoint = [endDate[0], childY];
+                    if (intermediatePoint[0] <= grid.left) {
+                        intermediatePoint[0] = grid.left;
+                    } else if (intermediatePoint[0] >= canvasWidth) {
+                        intermediatePoint[0] = canvasWidth;
+                    }
+                    if (intermediatePoint[1] <= grid.top) {
+                        intermediatePoint[1] = grid.top;
+                    } else if (intermediatePoint[1] >= canvasHeight) {
+                        intermediatePoint[1] = canvasHeight;
+                    }
+
+                    // End point at the start of the child task
+                    let endPoint = [childStartDate[0], childY];
+                    if (endPoint[0] <= grid.left) {
+                        endPoint[0] = grid.left;
+                    } else if (endPoint[0] >= canvasWidth) {
+                        endPoint[0] = canvasWidth;
+                    }
+                    if (endPoint[1] <= grid.top) {
+                        endPoint[1] = grid.top;
+                    } else if (endPoint[1] >= canvasHeight) {
+                        endPoint[1] = canvasHeight;
+                        endPoint[0] = endDate[0]; // if child outside grid, don't draw line to the right
+                    }
+
+                    const ignore =
+                        endPoint[0] === grid.left ||
+                        startPoint[0] === canvasWidth ||
+                        endPoint[1] === grid.top ||
+                        startPoint[1] === canvasHeight;
+
+                    const childOrParentAreOutside =
+                        startPoint[0] === grid.left ||
+                        startPoint[1] === grid.top ||
+                        endPoint[0] === canvasWidth ||
+                        endPoint[1] === canvasHeight;
+
+                    childrenLines.push({
+                        type: 'polyline',
+                        ignore: ignore,
+                        silent: true,
+                        shape: {
+                            points: [startPoint, intermediatePoint, endPoint],
+                        },
+                        style: {
+                            fill: 'transparent',
+                            stroke: childOrParentAreOutside ? '#aaa' : '#333', // Line color
+                            lineWidth: 1, // Line width
+                            lineDash: childOrParentAreOutside ? [20, 3, 3, 3, 3, 3, 3, 3] : 'solid',
+                        },
+                    });
                 });
 
-                const linePoints = echartsGraphic.clipPointsByRect(
-                    [
-                        [40, -10],
-                        [-30, -5],
-                        [-76.5, 20],
-                        [-63.5, 40],
-                        [-22.1, 50],
-                    ],
-                    // {
-                    //     x: x,
-                    //     y: y,
-                    //     width: barLength,
-                    //     height: barHeight,
-                    // }
-                    rectNormal
-                );
-                linePoints.forEach((point, index) => {
-                    point[0] = point[0] + 10 * index;
-                    point[1] = point[1] + 10 * index;
+                const rectTextShape = {
+                    x: x + barLength + 5,
+                    y: y + barHeight / 2,
+                    width: barLength,
+                    height: barHeight,
+                };
+
+                const textStyle = {
+                    textFill: '#333',
+                    width: 150,
+                    height: barHeight,
+                    text: barText,
+                    textAlign: 'left',
+                    textVerticalAlign: 'top',
+                    lineHeight: 1,
+                    fontSize: 12,
+                    overflow: 'truncate',
+                    elipsis: '...',
+                };
+
+                const progressPercentage = Number(multiplier).toLocaleString(this.$i18n.locale, {
+                    style: 'percent',
+                    minimumFractionDigits: 2,
                 });
-                // console.log('linePoints', linePoints);
+
+                const progressText =
+                    multiplier === 0
+                        ? ''
+                        : echartsFormat.truncateText(
+                              `${progressPercentage}`,
+                              rectNormal?.width ?? 0,
+                              api.font({ fontSize: 12 }),
+                          );
                 return {
                     type: 'group',
                     children: [
@@ -363,64 +570,163 @@
                             type: 'rect',
                             ignore: !rectNormal,
                             shape: rectNormal,
-                            style: {
+                            style: api.style({
                                 fill: 'rgba(56,134,208,1)',
                                 rectBorderWidth: 10,
-                            },
+                                text: progressText,
+                                fontSize: 12,
+                            }),
                         },
                         {
                             type: 'rect',
-                            ignore: !rectVIP && !api.value(4),
-                            shape: rectVIP,
-                            style: { fill: 'rgba(0,55,111,.6)' },
-                        },
-                        {
-                            type: 'rect',
-                            ignore: !rectText,
-                            shape: rectText,
+                            ignore: !rectProgress,
+                            shape: rectProgress,
                             style: {
-                                fill: 'transparent',
-                                stroke: 'transparent',
-                                text: text,
-                                textFill: '#fff',
+                                fill: 'rgba(0,55,111,.6)',
                             },
                         },
                         {
-                            type: 'line',
-                            data: [[2, 2], [10, 10]],
-                            symbolSize: 10,
-                            x: rectNormal.x + rectNormal.width,
-                            y: rectNormal.y + rectNormal.height / 2,
-                            // shape: echartsGraphic.clipPointsByRect([10,20,30,40], rectNormal),
-                            style: {
-                                fill: 'red',
-                                stroke: 'red',
-                                text: '13213',
-                                textFill: 'red',
+                            type: 'text',
+                            ignore:
+                                rectTextShape.x <= grid.left ||
+                                rectTextShape.x > canvasWidth ||
+                                rectTextShape.y <= grid.top + ROW_HEIGHT / 4 ||
+                                rectTextShape.y >= canvasHeight - ROW_HEIGHT / 4,
+                            clipPath: {
+                                type: 'rect',
+                                shape: {
+                                    x: 0,
+                                    y: 0 - ROW_HEIGHT / 2,
+                                    width: textStyle.width,
+                                    height: ROW_HEIGHT,
+                                },
                             },
+                            style: textStyle,
+                            position: [rectTextShape.x, rectTextShape.y],
                         },
+                        ...childrenLines,
                     ],
                 };
             },
-            renderAxisLabelItem(params, api) {
-                // console.log(params);
-                // console.log(api);
-                window.$api = api;
+            renderPhaseItem(params, api) {
+                let start = api.coord([
+                    api.value(phaseDimensionIndex.start_date),
+                    api.value(phaseDimensionIndex.first_task_id),
+                ]);
+                let end = api.coord([
+                    api.value(phaseDimensionIndex.due_date),
+                    api.value(phaseDimensionIndex.last_task_id),
+                ]);
 
-                var y = api.coord([0, api.value(0)])[1];
-                // var y = api.coord([0, params.dataIndex])[1];
-                // if (y < params.coordSys.y + 5) {
-                //     return;
-                // }
-                // [0, 'AB94', 'W', true],
+                const phaseHeight = ROW_HEIGHT / 3;
+
+                // Calculate the Y position for the phase, maybe above all tasks
+                let topY = start[1] - ROW_HEIGHT - phaseHeight - 5; // Determine how far above tasks you want to draw phases
+                if (topY <= grid.top) {
+                    topY = grid.top;
+                }
+                // when phase approach its last task set y to task y
+                if (end[1] - ROW_HEIGHT - phaseHeight - 5 <= topY) {
+                    topY = end[1] - ROW_HEIGHT - phaseHeight - 5;
+                }
+                let bottomY = topY + ROW_HEIGHT + phaseHeight + 5; // Determine the bottom Y based on the tasks' Y positions
+                if (bottomY >= api.getHeight() - grid.bottom) {
+                    bottomY = api.getHeight() - grid.bottom;
+                }
+
+                // Phase rectangle
+                let rectShape = this.clipRectByRect(params, {
+                    x: start[0],
+                    y: topY,
+                    width: end[0] - start[0],
+                    height: phaseHeight, // Define the height of the phase rectangle
+                });
+                if (rectShape) {
+                    rectShape.r = [5, 5, 0, 0];
+                }
+
+                const phaseName = echartsFormat.truncateText(
+                    api.value(phaseDimensionIndex.name),
+                    rectShape?.width ?? 0,
+                    api.font({ fontSize: 14 }),
+                );
+
+                let rect = {
+                    type: 'rect',
+                    shape: rectShape,
+                    ignore: !rectShape,
+                    style: api.style({
+                        fill: 'rgba(255,149,0,0.5)',
+                        text: phaseName,
+                        textStroke: 'rgb(181,106,0)',
+                    }),
+                };
+
+                const lineWidth = 1;
+                let y1 = topY + phaseHeight;
+                if (y1 <= grid.top) {
+                    y1 = grid.top;
+                }
+                // start vertical line
+                let startLine = {
+                    type: 'line',
+                    ignore:
+                        bottomY <= grid.top ||
+                        y1 >= api.getHeight() - grid.bottom ||
+                        start[0] + lineWidth / 2 <= grid.left ||
+                        start[0] >= api.getWidth() - grid.right,
+                    shape: {
+                        x1: start[0] + lineWidth / 2,
+                        y1,
+                        x2: start[0] + lineWidth / 2,
+                        y2: bottomY,
+                    },
+                    style: api.style({
+                        stroke: 'rgba(255,149,0,0.5)', // Example style
+                        lineWidth,
+                        lineDash: [3, 3, 4],
+                    }),
+                };
+
+                // End vertical line
+                let endLine = {
+                    type: 'line',
+                    ignore:
+                        bottomY <= grid.top ||
+                        y1 >= api.getHeight() - grid.bottom ||
+                        end[0] - lineWidth / 2 >= api.getWidth() - grid.right ||
+                        end[0] <= grid.left,
+                    shape: {
+                        x1: end[0] - lineWidth / 2,
+                        y1,
+                        x2: end[0] - lineWidth / 2,
+                        y2: bottomY,
+                    },
+                    style: api.style({
+                        stroke: 'rgba(255,149,0,0.5)', // Example style
+                        lineWidth,
+                        lineDash: [3, 3, 4],
+                    }),
+                };
+
+                return {
+                    type: 'group',
+                    children: [rect, startLine, endLine],
+                };
+            },
+
+            renderAxisLabelItem(params, api) {
+                const y = api.coord([0, api.value(0)])[1];
+                const isOutside = y <= 70 || y > api.getHeight();
                 return {
                     type: 'group',
                     position: [10, y],
+                    ignore: isOutside,
                     children: [
                         {
                             type: 'path',
                             shape: {
-                                d: 'M0,0 L0,-20 L30,-20 C42,-20 38,-1 50,-1 L70,-1 L70,0 Z',
+                                d: 'M 0 0 L 0 -20 C 20.3333 -20 40.6667 -20 52 -20 C 64 -20 65 -2 70 -2 L 70 0 Z',
                                 x: 0,
                                 y: -ROW_HEIGHT,
                                 width: 90,
@@ -434,23 +740,14 @@
                         {
                             type: 'text',
                             style: {
-                                x: 24,
+                                x: 3,
                                 y: -3,
+                                width: 90,
                                 text: api.value(dimensionIndex.task_name),
                                 textVerticalAlign: 'bottom',
-                                textAlign: 'center',
+                                textAlign: 'left',
                                 textFill: '#fff',
-                            },
-                        },
-                        {
-                            type: 'text',
-                            style: {
-                                x: 75,
-                                y: -2,
-                                textVerticalAlign: 'bottom',
-                                textAlign: 'center',
-                                text: api.value(dimensionIndex.task_name),
-                                textFill: '#000',
+                                overflow: 'truncate',
                             },
                         },
                     ],
