@@ -9,7 +9,7 @@ module.exports = {
         parser: '@babel/eslint-parser',
         requireConfigFile: false,
     },
-    extends: ['plugin:vue/essential', 'eslint:recommended'],
+    extends: ['plugin:vue/essential', 'eslint:recommended', 'plugin:prettier/recommended'],
     plugins: ['prettier'],
     rules: {
         'linebreak-style': ['error', 'unix'],
