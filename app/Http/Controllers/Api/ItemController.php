@@ -206,8 +206,6 @@ abstract class ItemController extends Controller
 
         CatEvent::dispatch(Filter::getAfterActionEventName(), [$count, $requestData]);
 
-        clock()->event();
-
         return responder()->success(['total' => $count])->respond();
     }
 
