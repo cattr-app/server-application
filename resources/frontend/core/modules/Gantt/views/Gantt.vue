@@ -129,14 +129,14 @@
             onResize: debounce(
                 function () {
                     this.$refs.gantt.chart.resize();
-                    // TODO: maybe improve ux of sliders on resize?
+                    // TODO: maybe improve ux by adjusting sliders (zoom) on resize?
                     // this.option.dataZoom = this.$refs.gantt.getOption().dataZoom;
                     // this.option.dataZoom[2].start = this.getYAxisZoomPercentage();
                     // this.option.dataZoom[2].end = 100;
                 },
-                100,
+                50,
                 {
-                    maxWait: 200,
+                    maxWait: 100,
                 },
             ),
             load: debounce(async function () {
@@ -192,7 +192,7 @@
                     return obj;
                 }, {});
 
-                this.option = {
+                const option = {
                     animation: false,
                     toolbox: {
                         left: 20,
@@ -306,7 +306,6 @@
                     tooltip: {
                         textStyle: {},
                         formatter: function (params) {
-                            // console.log(params);
                             const getRow = (key, value) => `
                             <div style="display: inline-flex; width: 100%; justify-content: space-between; column-gap: 1rem; text-overflow: ellipsis;">
                             ${key} <span style="text-overflow: ellipsis; white-space: nowrap; overflow: hidden;" ><b>${value}</b></span>
@@ -349,7 +348,6 @@
                             }
                             return `${params.dataIndex}`;
                         },
-                        // borderColor: 'red'
                     },
                     series: [
                         {
@@ -363,6 +361,7 @@
                             },
                             data: preparedRows,
                         },
+
                         {
                             id: 'tasksLabels',
                             type: 'custom',
@@ -404,6 +403,50 @@
                         },
                     ],
                 };
+                const firstTaskDate = preparedRows[0] ? preparedRows[0][dimensionIndex.start_date] : null;
+                const lastTaskDate = preparedRows[preparedRows.length - 1]
+                    ? preparedRows[preparedRows.length - 1][dimensionIndex.start_date]
+                    : null;
+                const today = moment();
+                if (
+                    firstTaskDate &&
+                    lastTaskDate &&
+                    !today.isBefore(moment(firstTaskDate)) &&
+                    !today.isAfter(moment(lastTaskDate))
+                ) {
+                    option.series.push({
+                        id: 'currentDayLine',
+                        type: 'custom',
+                        encode: {
+                            x: 0,
+                            y: -1,
+                        },
+                        data: [getStartDate(today)],
+                        renderItem: (params, api) => {
+                            const todayCoord = api.coord([api.value(0), 0])[0];
+                            const chartHeight = api.getHeight() - grid.bottom - grid.top;
+                            const gridTop = params.coordSys.y;
+                            const gridBottom = gridTop + chartHeight;
+
+                            return {
+                                type: 'line',
+                                ignore: todayCoord < grid.left || todayCoord > api.getWidth() - grid.right,
+                                shape: {
+                                    x1: todayCoord,
+                                    y1: gridTop,
+                                    x2: todayCoord,
+                                    y2: gridBottom,
+                                },
+                                style: {
+                                    stroke: 'rgba(255,0,0,0.3)',
+                                    lineWidth: 2,
+                                },
+                                silent: true,
+                            };
+                        },
+                    });
+                }
+                this.option = option;
 
                 this.isDataLoading = false;
             }, 100),
