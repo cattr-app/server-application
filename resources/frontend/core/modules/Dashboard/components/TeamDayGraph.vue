@@ -1,7 +1,5 @@
 <template>
-    <div ref="canvasWrapper" class="canvas">
-        <canvas ref="canvas" />
-
+    <div ref="canvas" class="canvas">
         <div
             v-show="hoverPopup.show && !clickPopup.show"
             :style="{
@@ -78,10 +76,10 @@
     import ScreenshotModal from '@/components/ScreenshotModal';
     import IntervalService from '@/services/resource/time-interval.service';
     import { formatDurationString } from '@/utils/time';
-    import { fabric } from 'fabric';
     import throttle from 'lodash/throttle';
     import moment from 'moment-timezone';
     import { mapGetters } from 'vuex';
+    import { SVG } from '@svgdotjs/svg.js';
 
     let intervalService = new IntervalService();
 
@@ -155,12 +153,7 @@
             },
         },
         mounted() {
-            this.canvas = new fabric.Canvas(this.$refs.canvas, {
-                backgroundColor: '#fff',
-                renderOnAddRemove: false,
-                selection: false,
-                skipOffscreen: true,
-            });
+            this.draw = SVG();
 
             this.onResize();
             window.addEventListener('resize', this.onResize);
@@ -234,84 +227,57 @@
                     }
                 }
             },
-            draw: throttle(function () {
-                this.canvas.clear();
-
-                const width = this.canvas.getWidth();
+            drawGrid: throttle(function () {
+                if (typeof this.draw === 'undefined') return;
+                this.draw.clear();
+                const canvasContainer = this.$refs.canvas;
+                const width = canvasContainer.clientWidth;
                 const height = this.users.length * rowHeight;
                 const columnWidth = width / columns;
-
+                const draw = this.draw;
+                draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
                 // Background
-                this.canvas.add(
-                    new fabric.Rect({
-                        left: 0,
-                        top: titleHeight + subtitleHeight,
-                        width: width - 1,
-                        height: height - 1,
-                        rx: 20,
-                        ry: 20,
-                        fill: '#FAFAFA',
-                        stroke: '#DFE5ED',
-                        strokeWidth: 1,
-                        ...fabricObjectOptions,
-                    }).on('mousedown', () => this.$emit('outsideClick')),
-                );
-
+                draw.rect(width - 1, height - 1)
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .fill('#FAFAFA')
+                    .stroke({ color: '#DFE5ED', width: 1 })
+                    .on('mousedown', () => this.$emit('outsideClick'));
                 for (let column = 0; column < columns; ++column) {
                     const date = moment().startOf('day').add(column, 'hours');
                     const left = columnWidth * column;
 
                     // Column headers - hours
-                    this.canvas.add(
-                        new fabric.Textbox(date.format('h'), {
-                            left,
-                            top: 0,
-                            width: columnWidth,
-                            height: titleHeight,
-                            textAlign: 'center',
-                            fontFamily: 'Nunito, sans-serif',
-                            fontSize: 15,
+                    draw.text(date.format('h'))
+                        .move(left + columnWidth / 2, 0)
+                        .size(columnWidth, titleHeight)
+                        .attr({
+                            'text-anchor': 'middle',
+                            'font-family': 'Nunito, sans-serif',
+                            'font-size': 15,
                             fill: '#151941',
-                            ...fabricObjectOptions,
-                        }),
-                    );
-
+                        });
                     // Column headers - am/pm
-                    this.canvas.add(
-                        new fabric.Textbox(date.format('A'), {
-                            left,
-                            top: titleHeight,
-                            width: columnWidth,
-                            height: subtitleHeight,
-                            textAlign: 'center',
-                            fontFamily: 'Nunito, sans-serif',
-                            fontSize: 10,
-                            fontWeight: '600',
+                    draw.text(date.format('A'))
+                        .move(left + columnWidth / 2, titleHeight - 5)
+                        .size(columnWidth, subtitleHeight)
+                        .attr({
+                            'text-anchor': 'middle',
+                            'font-family': 'Nunito, sans-serif',
+                            'font-size': 10,
+                            'font-weight': '600',
                             fill: '#B1B1BE',
-                            ...fabricObjectOptions,
-                        }),
-                    );
+                        });
 
-                    // Vertical grid lines
+                    // // Vertical grid lines
                     if (column > 0) {
-                        this.canvas.add(
-                            new fabric.Line([0, 0, 0, height], {
-                                left,
-                                top: titleHeight + subtitleHeight,
-                                stroke: '#DFE5ED',
-                                strokeWidth: 1,
-                                ...fabricObjectOptions,
-                            }),
-                        );
+                        draw.line(0, titleHeight + subtitleHeight, 0, height + titleHeight + subtitleHeight)
+                            .move(left, titleHeight + subtitleHeight)
+                            .stroke({ color: '#DFE5ED', width: 1 });
                     }
                 }
 
-                if (!this.$refs.canvasWrapper) {
-                    return;
-                }
-
-                const { width: canvasWidth } = this.$refs.canvasWrapper.getBoundingClientRect();
-                const maxLeftOffset = canvasWidth - popupWidth + 2 * canvasPadding;
+                const maxLeftOffset = width - popupWidth + 2 * canvasPadding;
                 const minLeftOffset = canvasPadding / 2;
 
                 this.users.forEach((user, row) => {
@@ -319,15 +285,7 @@
 
                     // Horizontal grid lines
                     if (row > 0) {
-                        this.canvas.add(
-                            new fabric.Line([0, 0, width, 0], {
-                                left: 0,
-                                top,
-                                stroke: '#DFE5ED',
-                                strokeWidth: 1,
-                                ...fabricObjectOptions,
-                            }),
-                        );
+                        draw.line(0, 0, width, 0).move(0, top).stroke({ color: '#DFE5ED', width: 1 });
                     }
 
                     // Intervals
@@ -341,35 +299,34 @@
 
                             const width = ((Math.max(event.duration, 60) + 120) * columnWidth) / 60 / 60;
 
-                            const rect = new fabric.Rect({
-                                left: Math.floor(leftOffset * columnWidth),
-                                top: top + rowHeight / 4,
-                                width,
-                                height: rowHeight / 2,
-                                rx: 2,
-                                ry: 2,
-                                fill: event.is_manual == '1' ? '#c4b52d' : '#2DC48D',
-                                stroke: 'transparent',
-                                strokeWidth: 0,
-                                ...fabricObjectOptions,
-                                cursor: 'pointer',
-                                hoverCursor: 'pointer',
-                            });
+                            const rect = draw
+                                .rect(width, rowHeight / 2)
+                                .move(Math.floor(leftOffset * columnWidth), top + rowHeight / 4)
+                                .radius(2)
+                                .fill(event.is_manual === '1' ? '#c4b52d' : '#2DC48D')
+                                .stroke({ color: 'transparent', width: 0 })
+                                .attr({
+                                    cursor: 'pointer',
+                                    hoverCursor: 'pointer',
+                                });
 
                             rect.on('mouseover', e => {
-                                if (e.target.left > maxLeftOffset) {
+                                if (e.target.attributes.x.value > maxLeftOffset) {
                                     this.hoverPopup = {
                                         show: true,
                                         x: maxLeftOffset,
-                                        y: e.target.top,
+                                        y: e.target.attributes.y.value,
                                         event,
-                                        borderX: defaultCornerOffset + e.target.left - maxLeftOffset,
+                                        borderX: defaultCornerOffset + e.target.attributes.x.value - maxLeftOffset,
                                     };
                                 } else {
                                     this.hoverPopup = {
                                         show: true,
-                                        x: e.target.left < minLeftOffset ? minLeftOffset : e.target.left,
-                                        y: e.target.top,
+                                        x:
+                                            e.target.attributes.x.value < minLeftOffset
+                                                ? minLeftOffset
+                                                : e.target.attributes.x.value,
+                                        y: e.target.attributes.y.value - 10,
                                         borderX: defaultCornerOffset,
                                         event,
                                     };
@@ -386,42 +343,34 @@
                             rect.on('mousedown', e => {
                                 this.$emit('selectedIntervals', event);
 
-                                if (e.target.left > maxLeftOffset) {
+                                if (e.target.attributes.x.value > maxLeftOffset) {
                                     this.clickPopup = {
                                         show: true,
                                         x: maxLeftOffset,
-                                        y: e.target.top,
+                                        y: e.target.attributes.y.value,
                                         event,
-                                        borderX: defaultCornerOffset + e.target.left - maxLeftOffset,
+                                        borderX: defaultCornerOffset + e.target.attributes.x.value - maxLeftOffset,
                                     };
                                 } else {
                                     this.clickPopup = {
                                         show: true,
-                                        x: e.target.left,
-                                        y: e.target.top,
+                                        x: e.target.attributes.x.value,
+                                        y: e.target.attributes.y.value - 10,
                                         event,
                                         borderX: defaultCornerOffset,
                                     };
                                 }
 
-                                e.e.stopPropagation();
+                                e.stopPropagation();
                             });
 
-                            this.canvas.add(rect);
+                            draw.add(rect);
                         });
                     }
                 });
-
-                this.canvas.requestRenderAll();
             }, 100),
             onResize: throttle(function () {
-                if (!this.$refs.canvasWrapper) {
-                    return;
-                }
-                const { width } = this.$refs.canvasWrapper.getBoundingClientRect();
-                this.canvas.setWidth(width);
-                this.canvas.setHeight(this.height);
-                this.draw();
+                this.drawGrid();
             }, 200),
             onClick(e) {
                 if (e.button !== 0 || (e.target && e.target.closest('.popup'))) {
@@ -457,10 +406,10 @@
                 this.onResize();
             },
             intervals() {
-                this.draw();
+                this.drawGrid();
             },
             timezone() {
-                this.draw();
+                this.drawGrid();
             },
         },
     };
