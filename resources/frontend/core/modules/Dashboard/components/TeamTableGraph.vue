@@ -60,7 +60,6 @@
     const subtitleHeight = 20;
     const rowHeight = 65;
     const minColumnWidth = 85;
-    const columns = 7;
     export default {
         name: 'TeamTableGraph',
         props: {
@@ -108,7 +107,7 @@
                 return this.columns * this.columnWidth;
             },
             maxScrollX() {
-                return this.contentWidth - this.canvasWidth();
+                return this.contentWidth - this.canvasWidth() + 30;
             },
         },
         mounted() {
@@ -125,7 +124,6 @@
                 if (!this.$refs.scrollArea) {
                     return 500;
                 }
-
                 return this.$refs.scrollArea.clientWidth;
             },
             getColor(progress) {
@@ -355,7 +353,6 @@
                                         });
                                     break;
                             }
-
                             // Time label
                             draw.text(this.formatDuration(duration))
                                 .move(columnWidth / 2 + left, top + 22)
@@ -373,7 +370,6 @@
                                 });
                         });
                     }
-
                     // Horizontal grid lines
                     if (row > 0) {
                         draw.line(0, 0, width, 0).move(0, top).stroke({ color: '#dfe5ed', width: 1 }).attr({
@@ -384,7 +380,6 @@
                 });
             }, 100),
             onResize: throttle(function () {
-                this.drawGrid();
                 this.drawGrid();
             }, 100),
         },
