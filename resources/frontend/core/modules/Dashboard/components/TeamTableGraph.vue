@@ -1,5 +1,5 @@
 <template>
-    <div ref="canvas" class="canvas">
+    <div class="canvas">
         <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
             <div :style="{ width: `${contentWidth}px` }" />
         </div>
@@ -13,7 +13,7 @@
                 @pointermove="onMove"
                 @pointerup="onUp"
             >
-                <div class="scroll-area-inner" :style="{ width: `${contentWidth}px` }" />
+                <div class="scroll-area-inner" :style="{ width: `${contentWidth}px` }"><div ref="canvas"></div></div>
             </div>
         </div>
     </div>
@@ -83,7 +83,6 @@
         },
         data() {
             return {
-                canvas: null,
                 isDragging: false,
                 lastPosX: 0,
             };
@@ -96,13 +95,6 @@
             colorRules() {
                 return this.companyData.color ? this.companyData.color : defaultColorConfig;
             },
-            canvasWidth() {
-                if (!this.canvas) {
-                    return 500;
-                }
-
-                return this.canvas.getWidth();
-            },
             columns() {
                 const start = moment(this.start, 'YYYY-MM-DD');
                 const end = moment(this.end, 'YYYY-MM-DD');
@@ -110,16 +102,17 @@
                 return end.diff(start, 'days') + 1;
             },
             columnWidth() {
-                return Math.max(minColumnWidth, this.canvasWidth / this.columns);
+                return Math.max(minColumnWidth, this.canvasWidth() / this.columns);
             },
             contentWidth() {
                 return this.columns * this.columnWidth;
             },
             maxScrollX() {
-                return this.contentWidth - this.canvasWidth;
+                return this.contentWidth - this.canvasWidth();
             },
         },
         mounted() {
+            this.offsetX = 0;
             this.draw = SVG();
             this.onResize();
             window.addEventListener('resize', this.onResize);
@@ -128,6 +121,13 @@
             window.removeEventListener('resize', this.onResize);
         },
         methods: {
+            canvasWidth() {
+                if (!this.$refs.scrollArea) {
+                    return 500;
+                }
+
+                return this.$refs.scrollArea.clientWidth;
+            },
             getColor(progress) {
                 let color = '#3cd7b6';
 
@@ -154,8 +154,6 @@
 
                     this.setScroll(newScrollX);
                     this.lastPosX = e.clientX;
-                    this.$refs.scrollbarTop.scrollLeft = -newScrollX;
-                    this.$refs.scrollArea.scrollLeft = -newScrollX;
                 }
             },
             onUp(e) {
@@ -165,6 +163,7 @@
                 this.setScroll(-e.target.scrollLeft);
             },
             setScroll(x) {
+                this.offsetX = x;
                 this.draw.transform({ translateX: x });
             },
             resetScroll() {
@@ -178,10 +177,10 @@
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
                 const height = this.users.length * rowHeight;
-                const columnWidth = width / columns;
+                const columnWidth = width / this.columns;
                 const start = moment(this.start, 'YYYY-MM-DD');
 
-                const cursor = this.contentWidth > this.canvasWidth ? 'move' : 'default';
+                const cursor = this.contentWidth > this.canvasWidth() ? 'move' : 'default';
                 draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
                 // Background
                 draw.rect(width - 1, height - 1)
@@ -196,11 +195,15 @@
 
                 for (let column = 0; column < this.columns; ++column) {
                     const date = start.clone().locale(this.$i18n.locale).add(column, 'days');
-                    const left = columnWidth * column;
-
+                    let left = this.columnWidth * column;
+                    let halfColumnWidth = this.columnWidth / 2;
+                    if (this.columns === 7) {
+                        left = columnWidth * column;
+                        halfColumnWidth = columnWidth / 2;
+                    }
                     // Column headers - day
                     draw.text(date.locale(this.$i18n.locale).format('D'))
-                        .move(left + columnWidth / 2, 0)
+                        .move(left + halfColumnWidth, 0)
                         .size(columnWidth, titleHeight)
                         .font({
                             family: 'Nunito, sans-serif',
@@ -215,7 +218,7 @@
 
                     // Column headers - am/pm
                     draw.text(date.format('dddd').toUpperCase())
-                        .move(left + columnWidth / 2, titleHeight - 5)
+                        .move(left + halfColumnWidth, titleHeight - 5)
                         .size(columnWidth, subtitleHeight)
                         .font({
                             family: 'Nunito, sans-serif',
@@ -252,7 +255,7 @@
                         Object.keys(userTime).forEach((day, i) => {
                             const column = -start.diff(day, 'days');
                             const duration = userTime[day];
-                            const left = (column * width) / 7;
+                            const left = (column * width) / this.columns;
                             const total = 60 * 60 * this.workingHours;
                             const progress = duration / total;
                             const height = Math.ceil(Math.min(progress, 1) * (rowHeight - 1));
@@ -333,7 +336,7 @@
                                     squaresGroup.add(rect4);
                                     clipPath = draw
                                         .rect(width, this.users.length * rowHeight)
-                                        .move(0, titleHeight + subtitleHeight)
+                                        .move(this.offsetX, titleHeight + subtitleHeight)
                                         .radius(20)
                                         .attr({
                                             absolutePositioned: true,
@@ -382,6 +385,7 @@
             }, 100),
             onResize: throttle(function () {
                 this.drawGrid();
+                this.drawGrid();
             }, 100),
         },
         watch: {
@@ -407,6 +411,7 @@
     }
 
     .canvas {
+        height: 100%;
         position: relative;
     }
 
@@ -471,7 +476,7 @@
         right: -6px;
         bottom: -6px;
         display: block;
-        overflow: auto;
+        overflow: scroll;
         scrollbar-width: thin;
 
         &::-webkit-scrollbar {
