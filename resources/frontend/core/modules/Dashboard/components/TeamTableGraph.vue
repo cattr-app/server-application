@@ -45,17 +45,6 @@
         },
     ];
 
-    const fabricObjectOptions = {
-        editable: false,
-        selectable: false,
-        objectCaching: false,
-        hasBorders: false,
-        hasControls: false,
-        hasRotatingPoint: false,
-        cursor: 'default',
-        hoverCursor: 'default',
-    };
-
     const titleHeight = 20;
     const subtitleHeight = 20;
     const rowHeight = 65;
