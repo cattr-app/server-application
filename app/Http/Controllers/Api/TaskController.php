@@ -303,14 +303,14 @@ class TaskController extends ItemController
                 }
 
                 $requestData['priority_id'] = Priority::firstOrFail()->id;
-
+                dd($requestData);
                 return $requestData;
             }
         );
-        CatEvent::listen('filter.request.tasks.create', static function ($item) {
-            $maxPosition = Task::max('relative_position');
-            $item['relative_position'] = $maxPosition + 1;
-            return $item;
+        Filter::listen('filter.request.tasks.create',static function ($item) {
+                $maxPosition = Task::max('relative_position');
+                $item['relative_position'] = $maxPosition + 1;
+                return $item;
         });
         return $this->_create($request);
     }
