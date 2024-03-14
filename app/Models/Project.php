@@ -126,6 +126,11 @@ class Project extends Model
         return $this->hasMany(Task::class, 'project_id');
     }
 
+    public function phases(): HasMany
+    {
+        return $this->hasMany(ProjectPhase::class);
+    }
+
     public function users(): BelongsToMany
     {
         return $this->belongsToMany(User::class, 'projects_users')
