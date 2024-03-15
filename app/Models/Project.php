@@ -38,6 +38,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection|Status[] $statuses
  * @property-read int|null $statuses_count
  * @property-read Collection|Task[] $tasks
+ * @property-read ProjectPhase[] $phases
  * @property-read int|null $tasks_count
  * @property-read Collection|User[] $users
  * @property-read int|null $users_count

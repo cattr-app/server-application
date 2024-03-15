@@ -26,6 +26,8 @@
     "due_date": "Due date",
     "history": "History",
     "project_id": "Project",
+    "phases": "Phases",
+    "add_phase": "Add",
     "priority_id": "Priority",
     "status_id": "Status",
     "comments": "Comments"

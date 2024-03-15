@@ -6,6 +6,7 @@ import { ModuleLoaderInterceptor } from '@/moduleLoader';
 import PrioritySelect from '@/components/PrioritySelect';
 import TeamAvatars from '@/components/TeamAvatars';
 import Statuses from './components/Statuses';
+import Phases from './components/Phases.vue';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -86,6 +87,24 @@ export function init(context) {
             key: 'total_spent_time',
             label: 'field.total_spent',
             render: (h, props) => h('span', formatDurationString(props.currentValue)),
+        },
+        {
+            label: 'field.phases',
+            key: 'phases',
+            render: (h, data) => {
+                return h(Phases, {
+                    props: {
+                        phases: Array.isArray(data.currentValue) ? data.currentValue : [],
+                        showControls: false,
+                    },
+                    on: {
+                        change(value) {
+                            data.inputHandler(value);
+                        },
+                    },
+                });
+            },
+            required: false,
         },
         {
             key: 'default_priority',
@@ -220,6 +239,23 @@ export function init(context) {
             key: 'important',
             type: 'checkbox',
             default: 0,
+        },
+        {
+            label: 'field.phases',
+            key: 'phases',
+            render: (h, data) => {
+                return h(Phases, {
+                    props: {
+                        phases: Array.isArray(data.currentValue) ? data.currentValue : [],
+                    },
+                    on: {
+                        change(value) {
+                            data.inputHandler(value);
+                        },
+                    },
+                });
+            },
+            required: false,
         },
         {
             label: 'field.default_priority',

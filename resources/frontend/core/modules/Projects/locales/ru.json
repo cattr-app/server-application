@@ -26,6 +26,8 @@
     "due_date": "Дата завершения",
     "history": "История",
     "project_id": "Проект",
+    "phases": "Стадии",
+    "add_phase": "Добавить",
     "priority_id": "Приоритет",
     "status_id": "Статус",
     "comments": "Комментарии"
