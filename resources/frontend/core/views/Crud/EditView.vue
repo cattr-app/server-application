@@ -343,7 +343,8 @@
                     }
                 } catch ({ response }) {
                     this.isLoading = false;
-                    this.$refs.form.setErrors(response.data.info);
+                    // TODO: fix error printing
+                    this.$refs.form.setErrors(response.data.error);
                 }
             },
 

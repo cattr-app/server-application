@@ -137,6 +137,12 @@ Route::group([
         $router->post('project-members/bulk-edit', [ProjectMemberController::class, 'bulkEdit'])
             ->name('projects_members.edit');
 
+        // Gantt routes
+        $router->get('projects/gantt-data', [ProjectController::class, 'ganttData'])
+            ->name('projects.gantt-data');
+        $router->get('projects/phases', [ProjectController::class, 'phases'])
+            ->name('projects.phases');
+
         //Tasks routes
         $router->any('tasks/list', [TaskController::class, 'index'])
             ->name('tasks.list');

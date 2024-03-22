@@ -26,14 +26,16 @@
     "unset_due_date": "Not set",
     "due_date--overdue": "Overdue",
     "unset_estimate": "Not set",
-    "estimate--overtime": "Overtime"
+    "estimate--overtime": "Overtime",
+    "unset_phase": "Not set"
   },
   "field": {
     "source": "Source",
     "estimate": "Time estimate",
     "due_date": "Due date",
     "hour_short": "h",
-    "minute_short": "m"
+    "minute_short": "m",
+    "phase": "Phase"
   },
   "control": {
     "kanban-board": "Kanban"

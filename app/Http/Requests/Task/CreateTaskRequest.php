@@ -5,6 +5,7 @@ namespace App\Http\Requests\Task;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Models\Task;
 use App\Http\Requests\CattrFormRequest;
+use Illuminate\Validation\Rule;
 
 class CreateTaskRequest extends CattrFormRequest
 {
@@ -19,6 +20,12 @@ class CreateTaskRequest extends CattrFormRequest
     {
         return [
             'project_id' => 'required|exists:projects,id',
+            'project_phase_id' => [
+                'sometimes',
+                'nullable',
+                Rule::exists('project_phases', 'id')
+                    ->where('project_id', $this->input('project_id')),
+            ],
             'task_name' => 'required|string',
             'description' => 'string',
             'users' => 'sometimes|array',

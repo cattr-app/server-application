@@ -26,14 +26,16 @@
     "unset_due_date": "Не установлена",
     "due_date--overdue": "Просрочено",
     "unset_estimate": "Не установлена",
-    "estimate--overtime": "Сверхурочно"
+    "estimate--overtime": "Сверхурочно",
+    "unset_phase": "Не установлена"
   },
   "field": {
     "source": "Источник",
     "estimate": "Оценка времени",
     "due_date": "Дата завершения",
     "hour_short": "ч",
-    "minute_short": "м"
+    "minute_short": "м",
+    "phase": "Стадия"
   },
   "control": {
     "kanban-board": "Kanban"

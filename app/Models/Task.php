@@ -24,6 +24,7 @@ use Parsedown;
  *
  * @property int $id
  * @property int $project_id
+ * @property int $project_phase_id
  * @property string $task_name
  * @property string|null $description
  * @property int $assigned_by
@@ -94,6 +95,7 @@ class Task extends Model
      */
     protected $fillable = [
         'project_id',
+        'project_phase_id',
         'task_name',
         'description',
         'assigned_by',
@@ -111,6 +113,7 @@ class Task extends Model
      */
     protected $casts = [
         'project_id' => 'integer',
+        'project_phase_id' => 'integer',
         'task_name' => 'string',
         'description' => 'string',
         'assigned_by' => 'integer',
@@ -212,4 +215,10 @@ class Task extends Model
     {
         return $this->hasMany(CronTaskWorkers::class, 'task_id', 'id');
     }
+
+    public function phase(): BelongsTo
+    {
+        return $this->belongsTo(ProjectPhase::class, 'project_phase_id');
+    }
+
 }

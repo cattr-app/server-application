@@ -7,6 +7,7 @@ use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\Project\DestroyProjectRequest;
 use App\Http\Requests\Project\GanttDataRequest;
 use App\Http\Requests\Project\ListProjectRequest;
+use App\Http\Requests\Project\PhasesRequest;
 use App\Http\Requests\Project\ShowProjectRequest;
 use CatEvent;
 use Filter;
@@ -144,11 +145,31 @@ class ProjectController extends ItemController
     }
 
     /**
+     * @param PhasesRequest $request
+     * @return JsonResponse
+     * @throws Exception
+     * @throws Throwable
+     */
+    public function phases(PhasesRequest $request): JsonResponse
+    {
+        Filter::listen(
+            Filter::getQueryFilterName(),
+            static fn(Builder $query) => $query
+                ->with([
+                    'phases'=> fn(HasMany $q) => $q->withCount('tasks')
+            ])
+        );
+
+        return $this->_show($request);
+    }
+
+    /**
      * @throws Throwable
      */
     public function show(ShowProjectRequest $request): JsonResponse
     {
         Filter::listen(Filter::getSuccessResponseFilterName(), static function ($project) {
+            // TODO: refactor and send "with" from frontend
             $totalTracked = 0;
             $taskIDs = array_map(static function ($task) {
                 return $task['id'];
