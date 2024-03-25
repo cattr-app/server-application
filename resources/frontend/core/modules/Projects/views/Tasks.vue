@@ -215,7 +215,7 @@
                     status: this.getStatusName(task.status_id),
                     total_spent_time: formatDurationString(+task.total_spent_time + +task.total_offset),
                     total_spent_time_over: +task.total_spent_time + +task.total_offset,
-                    estimate_over: +task.estimate,
+                    estimate_over: task.estimate,
                     due_date: task.due_date,
                 }));
             },
