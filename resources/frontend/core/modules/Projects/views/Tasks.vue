@@ -80,8 +80,8 @@
                             </at-tag>
 
                             <span class="total-time-row">
-                                <i class="icon icon-clock"></i>&nbsp; {{ block.total_spent_time }}
-                                {{ $t(`control.of`) }} {{ block.estimate }}
+                                <i class="icon icon-clock"></i>&nbsp; {{ block.estimate }} {{ $t(`control.of`) }}
+                                {{ block.total_spent_time }}
                             </span>
                             <team-avatars :users="getTask(block.id).users"></team-avatars>
                         </div>
@@ -232,7 +232,7 @@
                 );
             },
             isOverTime(item) {
-                return item.estimate != null && item.total_spent_time_over > item.estimate_over;
+                return item.estimate_over != null && item.total_spent_time_over > item.estimate_over;
             },
             getBlock(id) {
                 return this.blocks.find(block => +block.id === +id);
@@ -398,7 +398,9 @@
         async created() {
             const projectId = this.$route.params['id'];
             this.project = (await this.projectService.getItem(projectId)).data;
-            this.statuses = (await this.statusService.getWithFilters({ orderBy: ['order'] })).data.data;
+            this.statuses = (
+                await this.statusService.getWithFilters({ orderBy: ['order'] }, { headers: { 'X-Paginate': 'false' } })
+            ).data.data;
             this.tasks = (
                 await this.taskService.getWithFilters(
                     {
