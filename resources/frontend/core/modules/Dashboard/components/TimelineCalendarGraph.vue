@@ -55,7 +55,8 @@
                 draw.rect(width - 1, (lastDay.diff(firstDay, 'weeks') + 1) * rowHeight - 1)
                     .move(0, headerHeight)
                     .radius(20)
-                    .fill('#FAFAFA');
+                    .fill('#FAFAFA')
+                    .stroke({ color: '#dfe5ed', width: 1 });
                 for (let column = 0; column < columns; column++) {
                     const date = firstDay.clone().locale(this.$i18n.locale).add(column, 'days');
                     draw.text(date.format('dddd').toUpperCase())
@@ -138,7 +139,7 @@
                                     'font-family': 'Nunito, sans-serif',
                                     'font-size': 12,
                                     'font-weight': isInSelection ? 600 : 400,
-                                    fill: isInSelection ? '#2E2EF9' : '#333333',
+                                    fill: isInSelection ? '#2E2EF9' : '#868495',
                                 });
 
                             const dateKey = date.format('YYYY-MM-DD');

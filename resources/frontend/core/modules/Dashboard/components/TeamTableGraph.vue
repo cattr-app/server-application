@@ -1,20 +1,7 @@
 <template>
-    <div class="canvas">
-        <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
-            <div :style="{ width: `${contentWidth}px` }" />
-        </div>
-
+    <div ref="canvas" class="canvas">
         <div class="scroll-area-wrapper">
-            <div
-                ref="scrollArea"
-                class="scroll-area"
-                @scroll="onScroll"
-                @pointerdown="onDown"
-                @pointermove="onMove"
-                @pointerup="onUp"
-            >
-                <div class="scroll-area-inner" :style="{ width: `${contentWidth}px` }"><div ref="canvas"></div></div>
-            </div>
+            <div ref="scrollArea" class="scroll-area" @pointerdown="onDown"></div>
         </div>
     </div>
 </template>
@@ -71,8 +58,9 @@
         },
         data() {
             return {
-                isDragging: false,
+                viewBox: '',
                 lastPosX: 0,
+                offsetX: 0,
             };
         },
         computed: {
@@ -96,17 +84,23 @@
                 return this.columns * this.columnWidth;
             },
             maxScrollX() {
-                return this.contentWidth - this.canvasWidth() + 30;
+                return this.contentWidth - this.canvasWidth();
             },
         },
         mounted() {
-            this.offsetX = 0;
             this.draw = SVG();
             this.onResize();
+            const canvasContainer = this.$refs.scrollArea;
+            const width = canvasContainer.clientWidth;
+            const height = this.users.length * rowHeight;
+            this.draw.viewbox(0, 0, width, height);
             window.addEventListener('resize', this.onResize);
         },
         beforeDestroy() {
             window.removeEventListener('resize', this.onResize);
+            document.removeEventListener('pointermove', this.onMove);
+            document.removeEventListener('pointerup', this.onUp);
+            document.removeEventListener('pointercancel', this.onUp);
         },
         methods: {
             canvasWidth() {
@@ -114,6 +108,10 @@
                     return 500;
                 }
                 return this.$refs.scrollArea.clientWidth;
+            },
+            isDateWithinRange(dateString, startDate, endDate) {
+                const date = new Date(dateString);
+                return date >= new Date(startDate) && date <= new Date(endDate);
             },
             getColor(progress) {
                 let color = '#3cd7b6';
@@ -129,29 +127,35 @@
                 return color;
             },
             onDown(e) {
-                this.draw.selection = false;
-                this.isDragging = true;
-                this.lastPosX = e.clientX;
+                if (e.buttons & 1) {
+                    this.draw.selection = false;
+                    this.lastPosX = e.clientX;
+                    document.addEventListener('pointermove', this.onMove);
+                    document.addEventListener('pointerup', this.onUp);
+                    document.addEventListener('pointercancel', this.onUp);
+                }
             },
             onMove(e) {
-                if (this.isDragging) {
+                if (e.buttons & 1) {
                     const deltaX = e.clientX - this.lastPosX;
-                    let newScrollX = this.draw.transform().translateX + deltaX;
-                    newScrollX = Math.min(0, Math.max(newScrollX, -this.maxScrollX));
-
-                    this.setScroll(newScrollX);
+                    this.offsetX -= deltaX;
+                    this.offsetX = Math.min(this.maxScrollX, Math.max(this.offsetX, 0));
                     this.lastPosX = e.clientX;
+                    this.setScroll(this.offsetX);
                 }
             },
             onUp(e) {
-                this.isDragging = false;
-            },
-            onScroll(e) {
-                this.setScroll(-e.target.scrollLeft);
+                if (e.buttons & 1) {
+                    document.removeEventListener('pointermove', this.onMove);
+                    document.removeEventListener('pointerup', this.onUp);
+                    document.removeEventListener('pointercancel', this.onUp);
+                }
             },
             setScroll(x) {
-                this.offsetX = x;
-                this.draw.transform({ translateX: x });
+                const canvasContainer = this.$refs.scrollArea;
+                const width = canvasContainer.clientWidth;
+                const height = canvasContainer.clientHeight;
+                this.draw.viewbox(x, 0, width, height);
             },
             resetScroll() {
                 this.setScroll(0);
@@ -161,16 +165,17 @@
                 if (typeof this.draw === 'undefined') return;
                 this.draw.clear();
                 const draw = this.draw;
-                const canvasContainer = this.$refs.canvas;
+                const canvasContainer = this.$refs.scrollArea;
                 const width = canvasContainer.clientWidth;
-                const height = this.users.length * rowHeight;
-                const columnWidth = width / this.columns;
-                const start = moment(this.start, 'YYYY-MM-DD');
 
+                const columnWidth = width / this.columns;
+                const height = this.users.length * rowHeight;
+                const start = moment(this.start, 'YYYY-MM-DD');
+                draw.viewbox(0, 0, width, canvasContainer.clientHeight);
                 const cursor = this.contentWidth > this.canvasWidth() ? 'move' : 'default';
                 draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
                 // Background
-                draw.rect(width - 1, height - 1)
+                draw.rect(this.contentWidth - 1, canvasContainer.clientHeight - (titleHeight + subtitleHeight))
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .fill('#fafafa')
@@ -184,10 +189,6 @@
                     const date = start.clone().locale(this.$i18n.locale).add(column, 'days');
                     let left = this.columnWidth * column;
                     let halfColumnWidth = this.columnWidth / 2;
-                    if (this.columns === 7) {
-                        left = columnWidth * column;
-                        halfColumnWidth = columnWidth / 2;
-                    }
                     // Column headers - day
                     draw.text(date.locale(this.$i18n.locale).format('D'))
                         .move(left + halfColumnWidth, 0)
@@ -221,7 +222,7 @@
 
                     // Vertical grid lines
                     if (column > 0) {
-                        draw.line(0, titleHeight + subtitleHeight, 0, height + titleHeight + subtitleHeight)
+                        draw.line(0, titleHeight + subtitleHeight, 0, height + titleHeight + subtitleHeight + 10)
                             .move(left, titleHeight + subtitleHeight)
                             .stroke({ color: '#DFE5ED', width: 1 })
                             .attr({
@@ -231,120 +232,53 @@
                     }
                 }
 
-                const countAllRows = this.users.length - 1;
-                const countAllColumns = this.columns - 1;
-
+                const filteredData = {};
+                for (let key in this.timePerDay) {
+                    const innerObject = this.timePerDay[key];
+                    const filteredInnerObject = {};
+                    for (let dateKey in innerObject) {
+                        if (this.isDateWithinRange(dateKey, this.start, this.end)) {
+                            filteredInnerObject[dateKey] = innerObject[dateKey];
+                        }
+                    }
+                    filteredData[key] = filteredInnerObject;
+                }
+                const clipPath = draw
+                    .rect(this.contentWidth - 1, canvasContainer.clientHeight - (titleHeight + subtitleHeight))
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .attr({
+                        absolutePositioned: true,
+                    });
+                const squaresGroup = draw.group().clipWith(clipPath);
                 this.users.forEach((user, row) => {
                     const top = row * rowHeight + titleHeight + subtitleHeight;
-                    const userTime = this.timePerDay[user.id];
+                    const userTime = filteredData[user.id];
 
                     if (userTime) {
                         Object.keys(userTime).forEach((day, i) => {
                             const column = -start.diff(day, 'days');
                             const duration = userTime[day];
-                            const left = (column * width) / this.columns;
+                            const left = (column * this.contentWidth) / this.columns;
                             const total = 60 * 60 * this.workingHours;
                             const progress = duration / total;
                             const height = Math.ceil(Math.min(progress, 1) * (rowHeight - 1));
                             const color = this.getColor(progress);
-                            let squaresGroup, clipPath;
 
-                            switch (true) {
-                                case column === 0 && row === 0: {
-                                    squaresGroup = draw.group();
-                                    const rect1 = draw
-                                        .rect(columnWidth, height)
-                                        .move(left + 1, Math.floor(top + (rowHeight - height)))
-                                        .fill(color)
-                                        .stroke({ width: 0 })
-                                        .attr({
-                                            cursor: cursor,
-                                            hoverCursor: cursor,
-                                        });
-                                    squaresGroup.add(rect1);
-                                    clipPath = draw
-                                        .rect(columnWidth, this.users.length * rowHeight)
-                                        .move(0, titleHeight + subtitleHeight)
-                                        .radius(20)
-                                        .attr({
-                                            absolutePositioned: true,
-                                        });
-                                    squaresGroup.clipWith(clipPath);
-                                    break;
-                                }
-                                case column === 0 && row === countAllRows: {
-                                    squaresGroup = draw.group();
-                                    const rect2 = draw
-                                        .rect(columnWidth, height)
-                                        .move(left + 1, Math.floor(top + (rowHeight - height)))
-                                        .fill(color)
-                                        .stroke({ width: 0 });
-                                    squaresGroup.add(rect2);
-                                    clipPath = draw
-                                        .rect(width, this.users.length * rowHeight)
-                                        .move(0, titleHeight + subtitleHeight)
-                                        .radius(20);
-                                    squaresGroup.clipWith(clipPath);
-                                    break;
-                                }
-                                case countAllColumns === column && row === 0: {
-                                    squaresGroup = draw.group();
-                                    const rect3 = draw
-                                        .rect(columnWidth, height)
-                                        .move(left + 1, Math.floor(top + (rowHeight - height)))
-                                        .fill(color)
-                                        .stroke({ width: 0 })
-                                        .attr({
-                                            cursor: cursor,
-                                            hoverCursor: cursor,
-                                        });
-                                    squaresGroup.add(rect3);
-                                    clipPath = draw
-                                        .rect(width, this.users.length * rowHeight)
-                                        .move(0, titleHeight + subtitleHeight)
-                                        .radius(20)
-                                        .attr({
-                                            absolutePositioned: true,
-                                        });
-                                    squaresGroup.clipWith(clipPath);
-                                    break;
-                                }
-                                case countAllColumns === column && row === countAllRows: {
-                                    squaresGroup = draw.group();
-                                    const rect4 = draw
-                                        .rect(columnWidth, height)
-                                        .move(left + 1, Math.floor(top + (rowHeight - height)))
-                                        .fill(color)
-                                        .stroke({ width: 0 })
-                                        .attr({
-                                            cursor: cursor,
-                                            hoverCursor: cursor,
-                                        });
-                                    squaresGroup.add(rect4);
-                                    clipPath = draw
-                                        .rect(width, this.users.length * rowHeight)
-                                        .move(this.offsetX, titleHeight + subtitleHeight)
-                                        .radius(20)
-                                        .attr({
-                                            absolutePositioned: true,
-                                        });
-                                    squaresGroup.clipWith(clipPath);
-                                    break;
-                                }
-                                default:
-                                    draw.rect(columnWidth, height)
-                                        .move(left, Math.floor(top + (rowHeight - height)))
-                                        .fill(color)
-                                        .stroke({ width: 0 })
-                                        .attr({
-                                            cursor: cursor,
-                                            hoverCursor: cursor,
-                                        });
-                                    break;
-                            }
+                            const rect = draw
+                                .rect(this.columnWidth, height + 1)
+                                .move(left, Math.floor(top + (rowHeight - height)) - 1)
+                                .fill(color)
+                                .stroke({ width: 0 })
+                                .attr({
+                                    cursor: cursor,
+                                    hoverCursor: cursor,
+                                });
+                            squaresGroup.add(rect);
+
                             // Time label
                             draw.text(this.formatDuration(duration))
-                                .move(columnWidth / 2 + left, top + 22)
+                                .move(this.columnWidth / 2 + left, top + 22)
                                 .size(this.columnWidth, rowHeight)
                                 .font({
                                     family: 'Nunito, sans-serif',
@@ -361,7 +295,7 @@
                     }
                     // Horizontal grid lines
                     if (row > 0) {
-                        draw.line(0, 0, width, 0).move(0, top).stroke({ color: '#dfe5ed', width: 1 }).attr({
+                        draw.line(0, 0, this.contentWidth, 0).move(0, top).stroke({ color: '#dfe5ed', width: 1 }).attr({
                             cursor: cursor,
                             hoverCursor: cursor,
                         });
@@ -388,17 +322,17 @@
         },
     };
 </script>
-
 <style lang="scss" scoped>
     .canvas::v-deep canvas {
         box-sizing: content-box;
     }
 
     .canvas {
+        user-select: none;
         height: 100%;
         position: relative;
+        width: 100%;
     }
-
     .scrollbar-top {
         position: absolute;
         left: 0;
@@ -460,7 +394,7 @@
         right: -6px;
         bottom: -6px;
         display: block;
-        overflow: scroll;
+        overflow: auto;
         scrollbar-width: thin;
 
         &::-webkit-scrollbar {
