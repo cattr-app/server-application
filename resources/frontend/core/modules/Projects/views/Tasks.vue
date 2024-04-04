@@ -72,13 +72,14 @@
                         <p class="task-description" v-html="getTask(block.id).description"></p>
 
                         <div class="task-users">
-                            <at-tag v-if="isOverDue(companyData.timezone, block)" color="error"
-                                >{{ $t('tasks.due_date--overdue') }}
-                            </at-tag>
-                            <at-tag v-if="isOverTime(block)" color="warning"
-                                >{{ $t('tasks.estimate--overtime') }}
-                            </at-tag>
-
+                            <div class="task__tags">
+                                <at-tag v-if="isOverDue(companyData.timezone, block)" color="error"
+                                    >{{ $t('tasks.due_date--overdue') }}
+                                </at-tag>
+                                <at-tag v-if="isOverTime(block)" color="warning"
+                                    >{{ $t('tasks.estimate--overtime') }}
+                                </at-tag>
+                            </div>
                             <span class="total-time-row">
                                 <i class="icon icon-clock"></i>&nbsp; {{ block.estimate }} {{ $t(`control.of`) }}
                                 {{ block.total_spent_time }}
@@ -441,6 +442,7 @@
         min-width: 300px;
         align-items: flex-start;
         h3 {
+            font-size: $font-size-lger;
             padding: 10px;
             flex: 1;
             color: inherit;
@@ -520,6 +522,7 @@
 
     .project-tasks_kanban {
         padding: 16px;
+        overflow-y: hidden;
     }
 
     .project-tasks_kanban ::v-deep {
@@ -635,7 +638,6 @@
     }
     .project-tasks_kanban {
         overflow-x: auto;
-        max-height: 100vh;
     }
     @media (max-width: 1400px) {
         .task-name {
