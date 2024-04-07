@@ -61,7 +61,7 @@
     import Calendar from '@/components/Calendar.vue';
     import debounce from 'lodash/debounce';
     import Preloader from '@/components/Preloader.vue';
-    import GanttService from '../services/gantt.service';
+    import GanttService from '@/services/resource/gantt.service';
     import { formatDurationString, getStartDate } from '@/utils/time';
     import { store as rootStore } from '@/store';
     import moment from 'moment-timezone';
