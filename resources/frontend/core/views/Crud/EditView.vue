@@ -68,8 +68,8 @@
                                                 typeof field.rules === 'string'
                                                     ? field.rules
                                                     : field.required
-                                                    ? 'required'
-                                                    : ''
+                                                      ? 'required'
+                                                      : ''
                                             "
                                             :name="$t(field.label)"
                                             :vid="field.key"

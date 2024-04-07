@@ -661,6 +661,10 @@ class IntervalController extends ItemController
             $filters['task_id'] = ['in', $requestData['task_id']];
         }
 
+        if (isset($requestData['user_id'])) {
+            $filters['user_id'] = $requestData['user_id'];
+        }
+
         $itemsQuery = $this->getQuery($filters ? ['where' => $filters] : []);
 
         $tasks = $itemsQuery
@@ -672,7 +676,6 @@ class IntervalController extends ItemController
 
                 foreach ($taskIntervals as $userId => $userIntervals) {
                     $taskTime = 0;
-
                     foreach ($userIntervals as $interval) {
                         $taskTime += Carbon::parse($interval->end_at)->diffInSeconds($interval->start_at);
                     }
@@ -690,8 +693,8 @@ class IntervalController extends ItemController
                     ];
 
                     $totalTime += $taskTime;
-                }
 
+                }
                 return $task;
             })
             ->values();
