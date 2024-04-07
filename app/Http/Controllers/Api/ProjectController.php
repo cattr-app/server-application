@@ -113,6 +113,7 @@ class ProjectController extends ItemController
                 ])->with(['status', 'priority'])
                 ->withSum(['workers as total_spent_time'], 'duration')
                 ->withSum(['workers as total_offset'], 'offset')
+                ->withCasts(['start_date' => 'string', 'due_date' => 'string'])
                 ->whereNotNull('start_date')->whereNotNull('due_date'),
             'phases' => fn(HasMany $queue) => $queue
                 ->select(['id', 'name', 'project_id'])

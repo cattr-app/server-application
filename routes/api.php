@@ -157,6 +157,12 @@ Route::group([
         $router->post('tasks/remove', [TaskController::class, 'destroy'])
             ->name('tasks.destroy');
 
+        // Gantt routes
+        $router->post('tasks/create-relation', [TaskController::class, 'createRelation'])
+            ->name('tasks.create-relation');
+        $router->post('tasks/remove-relation', [TaskController::class, 'destroyRelation'])
+            ->name('tasks.remove-relation');
+
         // Task comments
         $router->any('task-comment/list', [TaskCommentController::class, 'index'])
             ->name('task_comments.list');

@@ -36,7 +36,18 @@ class EditTaskRequest extends CattrFormRequest
             'priority_id' => 'sometimes|nullable|exists:priorities,id',
             'status_id' => 'sometimes|required|exists:statuses,id',
             'relative_position' => 'sometimes|required|numeric',
-            'due_date' => 'sometimes|nullable|date',
+            'start_date' => [
+                'sometimes',
+                'nullable',
+                'date',
+                Rule::when($this->input('due_date'), 'before_or_equal:due_date')
+            ],
+            'due_date' => [
+                'sometimes',
+                'nullable',
+                'date',
+                Rule::when($this->input('start_date'), 'after_or_equal:start_date')
+            ],
             'estimate' => 'sometimes|nullable|integer|gte:0',
         ];
     }

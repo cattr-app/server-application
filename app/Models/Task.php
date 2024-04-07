@@ -18,6 +18,7 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
 use Parsedown;
+use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 
 /**
  * Class Task
@@ -37,6 +38,7 @@ use Parsedown;
  * @property int|null $status_id
  * @property float $relative_position
  * @property Carbon|null $due_date
+ * @property Carbon|null $start_date
  * @property int|null $estimate
  * @property-read User $assigned
  * @property-read Collection|TaskHistory[] $changes
@@ -83,6 +85,7 @@ class Task extends Model
     use SoftDeletes;
     use ExposePermissions;
     use HasFactory;
+    use HasGraphRelationships;
 
     /**
      * table name from database
@@ -104,6 +107,7 @@ class Task extends Model
         'status_id',
         'important',
         'relative_position',
+        'start_date',
         'due_date',
         'estimate',
     ];
@@ -123,6 +127,8 @@ class Task extends Model
         'important' => 'integer',
         'relative_position' => 'float',
         'estimate' => 'integer',
+        'start_date' => 'date',
+        'due_date' => 'date',
     ];
 
     /**
@@ -132,7 +138,6 @@ class Task extends Model
         'created_at',
         'updated_at',
         'deleted_at',
-        'due_date',
     ];
 
     protected const PERMISSIONS = ['update', 'destroy'];
@@ -145,7 +150,8 @@ class Task extends Model
 
         static::deleting(static function (Task $task) {
             $task->timeIntervals()->delete();
-
+            $task->parents()->detach();
+            $task->children()->detach();
             CronTaskWorkers::whereTaskId($task->id)->delete();
         });
 
@@ -221,4 +227,18 @@ class Task extends Model
         return $this->belongsTo(ProjectPhase::class, 'project_phase_id');
     }
 
+    // Below methods are related to Cattr gantt functionality and LaravelAdjacencyList package
+    public function getPivotTableName(): string
+    {
+        return 'tasks_relations';
+    }
+    public function enableCycleDetection(): bool
+    {
+        return true;
+    }
+
+    public function includeCycleStart(): bool
+    {
+        return true;
+    }
 }
