@@ -23,15 +23,28 @@
       "closed": "Closed"
     },
     "unassigned": "Unassigned",
+    "unset_start_date": "Not set",
     "unset_due_date": "Not set",
     "due_date--overdue": "Overdue",
     "unset_estimate": "Not set",
     "estimate--overtime": "Overtime",
-    "unset_phase": "Not set"
+    "unset_phase": "Not set",
+    "relations": {
+      "title": "Relations",
+      "for": "Relations for",
+      "follows": "Follows",
+      "precedes": "Precedes",
+      "loading": "Loading tasks",
+      "no_task_found": "No tasks found for {query}",
+      "type_to_search": "Start typing to search for a task",
+      "select_task": "Select task",
+      "type": "Relation type"
+    }
   },
   "field": {
     "source": "Source",
     "estimate": "Time estimate",
+    "start_date": "Start date",
     "due_date": "Due date",
     "hour_short": "h",
     "minute_short": "m",

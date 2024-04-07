@@ -1,9 +1,7 @@
 <template>
     <div class="gantt">
-        <div class="controls-row flex-between">
-            <div class="flex">
-                <ProjectSelect class="controls-row__item" @change="onProjectsChange" />
-            </div>
+        <div class="row flex-end">
+            <at-button size="large" @click="$router.go(-1)">{{ $t('control.back') }}</at-button>
         </div>
         <v-chart ref="gantt" class="gantt__chart" :option="option" />
         <preloader v-if="isDataLoading" :is-transparent="true" class="gantt__loader" />
@@ -55,15 +53,10 @@
         GridComponent,
     } from 'echarts/components';
     import VChart, { THEME_KEY } from 'vue-echarts';
-    import UserSelect from '@/components/UserSelect.vue';
-    import TimezonePicker from '@/components/TimezonePicker.vue';
-    import ProjectSelect from '@/components/ProjectSelect.vue';
-    import Calendar from '@/components/Calendar.vue';
     import debounce from 'lodash/debounce';
     import Preloader from '@/components/Preloader.vue';
     import GanttService from '@/services/resource/gantt.service';
     import { formatDurationString, getStartDate } from '@/utils/time';
-    import { store as rootStore } from '@/store';
     import moment from 'moment-timezone';
 
     use([
@@ -95,7 +88,6 @@
         name: 'Index',
         components: {
             Preloader,
-            ProjectSelect,
             VChart,
         },
         provide: {
@@ -104,7 +96,6 @@
         data() {
             return {
                 isDataLoading: false,
-                projectIDs: [],
                 service: new GanttService(),
                 option: {},
                 tasksRelationsMap: [],
@@ -129,10 +120,9 @@
             onResize: debounce(
                 function () {
                     this.$refs.gantt.chart.resize();
-                    // TODO: maybe improve ux by adjusting sliders (zoom) on resize?
-                    // this.option.dataZoom = this.$refs.gantt.getOption().dataZoom;
-                    // this.option.dataZoom[2].start = this.getYAxisZoomPercentage();
-                    // this.option.dataZoom[2].end = 100;
+                    this.$refs.gantt.chart.setOption({
+                        dataZoom: { id: 'sliderY', start: 0, end: this.getYAxisZoomPercentage() },
+                    });
                 },
                 50,
                 {
@@ -140,14 +130,9 @@
                 },
             ),
             load: debounce(async function () {
-                console.log('loadFired', this.projectIDs);
                 this.isDataLoading = true;
-                if (!this.projectIDs.length) {
-                    this.isDataLoading = false;
 
-                    return;
-                }
-                const ganttData = (await this.service.getGanttData(1)).data.data;
+                const ganttData = (await this.service.getGanttData(this.$route.params.id)).data.data;
                 this.totalRows = ganttData.tasks.length;
 
                 const phasesMap = ganttData.phases
@@ -200,7 +185,7 @@
                         itemSize: 20,
                     },
                     title: {
-                        text: `Gantt for ${ganttData.name}`,
+                        text: `${ganttData.name}`,
                         left: 'center',
                     },
                     dataZoom: [
@@ -230,14 +215,15 @@
                         },
                         {
                             type: 'slider',
+                            id: 'sliderY',
                             filterMode: 'none',
                             yAxisIndex: 0,
                             width: 10,
                             right: 10,
                             top: 70,
                             bottom: 20,
-                            start: 0, // TODO: calculate zoom to set proper size?
-                            end: this.getYAxisZoomPercentage(this.totalRows), // TODO: calculate zoom to set proper size?
+                            start: 0,
+                            end: this.getYAxisZoomPercentage(this.totalRows),
                             handleSize: 0,
                             showDetail: false,
                         },
@@ -301,7 +287,7 @@
                         //         [-22.1, 50],
                         //     ]
                         // },
-                        max: this.totalRows + 1, // _rawData.parkingApron.data.length https://echarts.apache.org/en/option.html#yAxis.max
+                        max: this.totalRows + 1,
                     },
                     tooltip: {
                         textStyle: {},
@@ -450,11 +436,6 @@
 
                 this.isDataLoading = false;
             }, 100),
-            onProjectsChange(projectIDs) {
-                this.projectIDs = [...projectIDs];
-
-                this.load();
-            },
             renderGanttItem(params, api) {
                 let categoryIndex = api.value(dimensionIndex.index);
                 let startDate = api.coord([api.value(dimensionIndex.start_date), categoryIndex]);
@@ -812,34 +793,5 @@
     .gantt {
         height: calc(100vh - 75px * 2);
         width: 100%;
-        //position: absolute;
-        //top: 0;
-        //bottom: 0;
-        //right: 0;
-        //left: 0;
-    }
-
-    .dashboard {
-        &__routes {
-            margin-bottom: 1em;
-            display: flex;
-        }
-
-        &__link {
-            margin-right: $layout-03;
-            font-size: 1.8rem;
-
-            &:last-child {
-                margin-right: initial;
-            }
-
-            a {
-                color: #b1b1be;
-            }
-
-            .router-link-active {
-                color: #2e2ef9;
-            }
-        }
     }
 </style>

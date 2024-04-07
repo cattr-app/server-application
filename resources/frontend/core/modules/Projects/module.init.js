@@ -97,14 +97,8 @@ export function init(context) {
                         phases: Array.isArray(data.currentValue) ? data.currentValue : [],
                         showControls: false,
                     },
-                    on: {
-                        change(value) {
-                            data.inputHandler(value);
-                        },
-                    },
                 });
             },
-            required: false,
         },
         {
             key: 'default_priority',
@@ -179,7 +173,7 @@ export function init(context) {
                                         {
                                             props: {
                                                 to: {
-                                                    name: routes.tasksView,
+                                                    name: 'Tasks.crud.tasks.view',
                                                     params: { id: item.task_id },
                                                 },
                                             },
@@ -370,6 +364,17 @@ export function init(context) {
             icon: 'icon-eye',
             onClick: (router, { item }, context) => {
                 context.onView(item);
+            },
+            renderCondition({ $store }) {
+                // User always can view assigned projects
+                return true;
+            },
+        },
+        {
+            title: 'projects.gantt',
+            icon: 'icon-crop',
+            onClick: (router, { item }, context) => {
+                router.push({ name: 'Gantt.index', params: { id: item.id } });
             },
             renderCondition({ $store }) {
                 // User always can view assigned projects
