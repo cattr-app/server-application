@@ -29,7 +29,12 @@
                 </div>
             </div>
             <div ref="kanban" class="project-tasks_kanban at-container">
-                <kanban-board :stages="stages.map(s => s.name)" :blocks="blocks" @update-block="updateBlock">
+                <kanban-board
+                    :config="config"
+                    :stages="stages.map(s => s.name)"
+                    :blocks="blocks"
+                    @update-block="updateBlock"
+                >
                     <div
                         v-for="stage in stages"
                         :slot="stage.name"
@@ -64,8 +69,9 @@
                         v-for="block in blocks"
                         :slot="block.id"
                         :key="`block_${block.id}`"
-                        class="task"
-                        @click="loadTask(block.id)"
+                        :class="{ task: true, handle: isDesktop }"
+                        @click.stop.prevent="loadTask(block.id)"
+                        @pointerdown="task = null"
                     >
                         <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
 
@@ -86,6 +92,9 @@
                             </span>
                             <team-avatars :users="getTask(block.id).users"></team-avatars>
                         </div>
+                        <span :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop }"
+                            ><i class="icon icon-move" :class="{ handle: !isDesktop }"></i
+                        ></span>
                     </div>
                 </kanban-board>
             </div>
@@ -202,6 +211,12 @@
                 statuses: [],
                 tasks: [],
                 task: null,
+                config: {
+                    moves: function (el, container, handle) {
+                        return handle.classList.contains('handle');
+                    },
+                },
+                isDesktop: false,
             };
         },
         computed: {
@@ -231,6 +246,9 @@
                     item.due_date != null &&
                     moment.utc(item.due_date).tz(companyTimezone, true).isBefore(moment())
                 );
+            },
+            checkScreenSize() {
+                this.isDesktop = window.screen.width > 992;
             },
             isOverTime(item) {
                 return item.estimate_over != null && item.total_spent_time_over > item.estimate_over;
@@ -421,6 +439,11 @@
             if (this.$route.query.task) {
                 this.loadTask(+this.$route.query.task);
             }
+            this.checkScreenSize();
+            window.addEventListener('resize', this.checkScreenSize);
+        },
+        beforeDestroy() {
+            window.removeEventListener('resize', this.checkScreenSize);
         },
     };
 </script>
@@ -459,7 +482,13 @@
             height: 24px;
             overflow: hidden;
         }
-
+        .move-task {
+            display: flex;
+            align-self: flex-start;
+            color: $black-900;
+            font-size: 1rem;
+            font-weight: bold;
+        }
         &-users {
             display: flex;
             justify-content: flex-end;
