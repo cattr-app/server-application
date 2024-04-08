@@ -30,7 +30,7 @@
     "laravel/octane": "^2.2",
     "laravel/sanctum": "^3.2",
     "maatwebsite/excel": "^3.1",
-    "matanyadaev/laravel-eloquent-spatial": "^3.1",
+    "matanyadaev/laravel-eloquent-spatial": "^4.2",
     "mpdf/mpdf": "^8.0",
     "nwidart/laravel-modules": "^10",
     "sentry/sentry-laravel": "^4.1",
