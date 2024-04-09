@@ -22,10 +22,18 @@
       "open": "Открыта",
       "closed": "Закрыта"
     },
-    "unassigned": "Не назначен"
+    "unassigned": "Не назначен",
+    "unset_due_date": "Не установлена",
+    "due_date--overdue": "Просрочено",
+    "unset_estimate": "Не установлена",
+    "estimate--overtime": "Сверхурочно"
   },
   "field": {
-    "source": "Источник"
+    "source": "Источник",
+    "estimate": "Оценка времени",
+    "due_date": "Дата завершения",
+    "hour_short": "ч",
+    "minute_short": "м"
   },
   "control": {
     "kanban-board": "Kanban"

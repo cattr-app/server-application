@@ -12,6 +12,10 @@ import { formatDate, formatDurationString } from '@/utils/time';
 import { VueEditor } from 'vue2-editor';
 import TaskComments from './components/TaskComments';
 import TaskHistory from './components/TaskHistory';
+import TimeEstimate from './components/TimeEstimate.vue';
+import DateInput from './components/DateInput';
+import { store as rootStore } from '@/store';
+import moment from 'moment-timezone';
 import { hasRole } from '@/utils/user';
 import Vue from 'vue';
 
@@ -44,7 +48,22 @@ export function init(context, router) {
     //tasksContext.routerPrefix = 'projects/:project_id/tasks/list';
 
     const crud = tasksContext.createCrud('tasks.crud-title', 'tasks', TasksService, {
-        with: ['priority', 'project', 'users', 'status', 'changes', 'changes.user', 'comments', 'comments.user'],
+        with: [
+            'priority',
+            'project',
+            'users',
+            'status',
+            'changes',
+            'changes.user',
+            'comments',
+            'comments.user',
+            'workers',
+            'workers.user:id,full_name',
+        ],
+        withSum: [
+            ['workers as total_spent_time', 'duration'],
+            ['workers as total_offset', 'offset'],
+        ],
     });
 
     const crudViewRoute = crud.view.getViewRouteName();
@@ -63,6 +82,10 @@ export function init(context, router) {
 
     const grid = tasksContext.createGrid('tasks.grid-title', 'tasks', TasksService, {
         with: ['priority', 'project', 'users', 'status', 'can'],
+        withSum: [
+            ['workers as total_spent_time', 'duration'],
+            ['workers as total_offset', 'offset'],
+        ],
     });
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
 
@@ -222,16 +245,87 @@ export function init(context, router) {
         {
             key: 'total_spent_time',
             label: 'field.total_spent',
-            render: (h, props) => h('span', formatDurationString(props.currentValue)),
+            render: (h, props) => {
+                const tags = [];
+                const timeWithOffset = +props.values.total_spent_time + +props.values.total_offset;
+                if (props.values.estimate != null && timeWithOffset > props.values.estimate) {
+                    tags.push(
+                        h(
+                            'at-tag',
+                            {
+                                attrs: { color: 'warning' },
+                            },
+                            i18n.t('tasks.estimate--overtime'),
+                        ),
+                    );
+                }
+                const tagsWrapper = tags.length > 0 ? h('div', tags) : '';
+
+                return h('span', [formatDurationString(timeWithOffset > 0 ? timeWithOffset : 0), tagsWrapper]);
+            },
+        },
+        {
+            key: 'estimate',
+            label: 'field.estimate',
+            render: (h, props) => {
+                let estimate = i18n.t('tasks.unset_estimate');
+                if (props.currentValue != null) {
+                    estimate = formatDurationString(props.currentValue);
+                }
+                return h('span', estimate);
+            },
+        },
+        {
+            key: 'due_date',
+            label: 'field.due_date',
+            render: (h, props) => {
+                let date = i18n.t('tasks.unset_due_date');
+                const userTimezone = moment.tz.guess();
+                const companyTimezone = rootStore.getters['user/companyData'].timezone;
+                if (
+                    props.currentValue != null &&
+                    typeof props.currentValue === 'string' &&
+                    typeof companyTimezone === 'string'
+                ) {
+                    date =
+                        formatDate(moment.utc(props.currentValue).tz(companyTimezone, true).tz(userTimezone)) +
+                        ` (GMT${moment.tz(userTimezone).format('Z')})`;
+                }
+
+                const tags = [];
+                if (
+                    typeof companyTimezone === 'string' &&
+                    props.currentValue != null &&
+                    moment.utc(props.currentValue).tz(companyTimezone, true).isBefore(moment())
+                ) {
+                    tags.push(
+                        h(
+                            'at-tag',
+                            {
+                                attrs: { color: 'error' },
+                            },
+                            i18n.t('tasks.due_date--overdue'),
+                        ),
+                    );
+                }
+                const tagsWrapper = tags.length > 0 ? h('div', tags) : '';
+
+                return h('span', [date, tagsWrapper]);
+            },
         },
         {
             key: 'workers',
             label: 'tasks.spent_by_user',
             render: (h, props) => {
-                const data = [];
+                const tableData = [];
+                const globalTimeWithOffset = +props.values.total_spent_time + +props.values.total_offset;
                 Object.keys(props.currentValue).forEach(k => {
-                    props.currentValue[k].time = formatDurationString(+props.currentValue[k].duration);
-                    data.push(props.currentValue[k]);
+                    const timeWithOffset = +props.currentValue[k].duration + +props.currentValue[k].offset;
+                    props.currentValue[k].time = formatDurationString(timeWithOffset);
+                    props.currentValue[k].full_name = props.currentValue[k].user.full_name;
+                    if (timeWithOffset > 0 && globalTimeWithOffset > 0) {
+                        tableData.push(props.currentValue[k]);
+                    }
                 });
                 return h('AtTable', {
                     props: {
@@ -262,7 +356,7 @@ export function init(context, router) {
                                 title: i18n.t('field.time'),
                             },
                         ],
-                        data,
+                        data: tableData,
                     },
                 });
             },
@@ -368,6 +462,35 @@ export function init(context, router) {
             initialValue: false,
         },
         {
+            key: 'estimate',
+            label: 'field.estimate',
+            render: (h, data) => {
+                const value = typeof data.currentValue === 'number' ? data.currentValue : null;
+                return h(TimeEstimate, {
+                    props: { value },
+                    on: {
+                        input: function (seconds) {
+                            data.inputHandler(seconds);
+                        },
+                    },
+                });
+            },
+        },
+        {
+            label: 'field.due_date',
+            key: 'due_date',
+            render: (h, props) => {
+                const value = typeof props.currentValue === 'string' ? props.currentValue : null;
+
+                return h(DateInput, {
+                    props: {
+                        inputHandler: props.inputHandler,
+                        value,
+                    },
+                });
+            },
+        },
+        {
             label: 'field.users',
             key: 'users',
             render: (h, props) => {
@@ -459,15 +582,64 @@ export function init(context, router) {
                     classes.push('tasks-grid__task--inactive');
                 }
 
-                const cell = h(
-                    'span',
-                    {
-                        class: classes,
-                        style: getCellStyle(item),
-                        attrs: { title: item.task_name },
-                    },
-                    item.task_name,
-                );
+                const companyTimezone = rootStore.getters['user/companyData'].timezone;
+
+                let tags = [];
+                if (
+                    typeof companyTimezone === 'string' &&
+                    item.due_date != null &&
+                    moment.utc(item.due_date).tz(companyTimezone, true).isBefore(moment())
+                ) {
+                    tags.push(
+                        h(
+                            'at-tag',
+                            {
+                                class: ['tasks-grid__tag', 'tasks-grid__tag--overdue'],
+                                attrs: { color: 'error' },
+                            },
+                            i18n.t('tasks.due_date--overdue'),
+                        ),
+                    );
+                }
+
+                const timeWithOffset = +item.total_spent_time + +item.total_offset;
+
+                if (item.estimate != null && timeWithOffset > item.estimate) {
+                    tags.push(
+                        h(
+                            'at-tag',
+                            {
+                                class: ['tasks-grid__tag', 'tasks-grid__tag--overtime'],
+                                attrs: { color: 'warning' },
+                            },
+                            i18n.t('tasks.estimate--overtime'),
+                        ),
+                    );
+                }
+
+                const tagsWrapper =
+                    tags.length > 0
+                        ? h(
+                              'div',
+                              {
+                                  class: ['tasks-grid__tags'],
+                              },
+                              tags,
+                          )
+                        : '';
+
+                const cell = [
+                    h(
+                        'span',
+                        {
+                            class: classes,
+                            style: getCellStyle(item),
+                            attrs: { title: item.task_name },
+                        },
+                        item.task_name,
+                    ),
+                    tagsWrapper,
+                ];
 
                 return makeCellBg(h, cell, item);
             },

@@ -5,15 +5,14 @@ namespace App\Models;
 use App\Scopes\ProjectAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\ProjectFactory;
-use DB;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -112,6 +111,12 @@ class Project extends Model
         static::addGlobalScope(new ProjectAccessScope);
 
         static::deleting(static function (Project $project) {
+            CronTaskWorkers::whereHas(
+                'task',
+                static fn(EloquentBuilder $query) => $query
+                    ->where('project_id', '=', $project->id)
+            )->delete();
+
             $project->tasks()->delete();
         });
     }
@@ -151,46 +156,8 @@ class Project extends Model
         return $this->morphMany(Property::class, 'entity');
     }
 
-    protected function workers(): Attribute
+    public function workers(): HasManyThrough
     {
-        $tasks = $this->tasks;
-        return Attribute::make(
-            get: static function ($value, $attributes) use ($tasks) {
-                $workers = DB::table('time_intervals AS i')
-                    ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-                    ->leftJoin('users AS u', 'i.user_id', '=', 'u.id')
-                    ->select(
-                        'i.user_id',
-                        'u.full_name',
-                        'i.task_id',
-                        'i.start_at',
-                        'i.end_at',
-                        't.task_name',
-                        DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
-                    )
-                    ->whereNull('i.deleted_at')
-                    ->whereIn('task_id', $tasks->pluck('id'))
-                    ->orderBy('duration', 'desc')
-                    ->groupBy('t.id')
-                    ->get();
-
-                return $workers;
-            },
-        )->shouldCache();
-    }
-
-    protected function totalSpentTime(): Attribute
-    {
-        $workers = $this->workers;
-        return Attribute::make(
-            get: static function () use ($workers) {
-                $totalSpentTime = 0;
-                foreach ($workers as $worker) {
-                    $totalSpentTime += $worker->duration;
-                }
-
-                return $totalSpentTime;
-            },
-        )->shouldCache();
+        return $this->hasManyThrough(CronTaskWorkers::class, Task::class);
     }
 }

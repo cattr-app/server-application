@@ -5,10 +5,8 @@ namespace App\Models;
 use App\Scopes\TaskAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\TaskFactory;
-use DB;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
-use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -38,6 +36,7 @@ use Parsedown;
  * @property int|null $status_id
  * @property float $relative_position
  * @property Carbon|null $due_date
+ * @property int|null $estimate
  * @property-read User $assigned
  * @property-read Collection|TaskHistory[] $changes
  * @property-read int|null $changes_count
@@ -50,6 +49,7 @@ use Parsedown;
  * @property-read Collection|TimeInterval[] $timeIntervals
  * @property-read int|null $time_intervals_count
  * @property-read Collection|User[] $users
+ * @property-read Collection|CronTaskWorkers[] $workers
  * @property-read int|null $users_count
  * @method static TaskFactory factory(...$parameters)
  * @method static EloquentBuilder|Task newModelQuery()
@@ -102,6 +102,7 @@ class Task extends Model
         'important',
         'relative_position',
         'due_date',
+        'estimate',
     ];
 
     /**
@@ -117,6 +118,7 @@ class Task extends Model
         'status_id' => 'integer',
         'important' => 'integer',
         'relative_position' => 'float',
+        'estimate' => 'integer',
     ];
 
     /**
@@ -139,6 +141,8 @@ class Task extends Model
 
         static::deleting(static function (Task $task) {
             $task->timeIntervals()->delete();
+
+            CronTaskWorkers::whereTaskId($task->id)->delete();
         });
 
         static::created(static function (Task $task) {
@@ -203,43 +207,8 @@ class Task extends Model
         return $this->morphMany(Property::class, 'entity');
     }
 
-    protected function workers(): Attribute
+    public function workers(): HasMany
     {
-        return Attribute::make(
-            get: static function ($value, $attributes) {
-                $workers = DB::table('time_intervals AS i')
-                    ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-                    ->join('users AS u', 'i.user_id', '=', 'u.id')
-                    ->select(
-                        'i.user_id',
-                        'u.full_name',
-                        'i.task_id',
-                        'i.start_at',
-                        'i.end_at',
-                        DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
-                    )
-                    ->whereNull('i.deleted_at')
-                    ->where('task_id', $attributes['id'])
-                    ->groupBy('i.user_id')
-                    ->get();
-
-                return $workers;
-            },
-        )->shouldCache();
-    }
-
-    protected function totalSpentTime(): Attribute
-    {
-        $workers = $this->workers;
-        return Attribute::make(
-            get: static function () use ($workers) {
-                $totalSpentTime = 0;
-                foreach ($workers as $worker) {
-                    $totalSpentTime += $worker->duration;
-                }
-
-                return $totalSpentTime;
-            },
-        )->shouldCache();
+        return $this->hasMany(CronTaskWorkers::class, 'task_id', 'id');
     }
 }

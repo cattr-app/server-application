@@ -182,6 +182,7 @@
             const withParam = gridData.with;
             const whereParam = gridData.where || {};
             const withCount = gridData.withCount;
+            const withSum = gridData.withSum;
 
             const filterFieldsModel = {};
             const fieldsToLoad = (gridData.filterFields || []).filter(f => f.saveToQuery).map(f => f.key);
@@ -233,6 +234,7 @@
                     with: withParam,
                     where: whereParam,
                     withCount,
+                    withSum,
                     page: this.$route.query.page,
                     search: {
                         query: this.$route.query.search,

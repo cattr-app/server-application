@@ -292,7 +292,7 @@ class User extends Authenticatable
         return $query->where('role_id', '=', Role::ADMIN->value, 'or');
     }
 
-    public function scopeManager(EloquentBuilder $query)
+    public function scopeManager(EloquentBuilder $query): EloquentBuilder
     {
         return $query->where('role_id', '=', Role::MANAGER->value, 'or');
     }

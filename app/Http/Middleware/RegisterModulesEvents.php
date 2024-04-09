@@ -33,6 +33,9 @@ class RegisterModulesEvents
      */
     public function handle(Request $request, Closure $next): Response
     {
+        // TODO:
+        //      [ ] move to Observers folder
+        //      [ ] rewrite with laravel Event so updates that come from modules will trigger update
         CatEvent::listen('event.after.action.*', static function (string $eventName, array $data) {
             $eventNameParts = explode('.', $eventName);
             [$entityType, $action] = array_slice($eventNameParts, 3, 2); // Strip "event.after.action" and get the next two parts

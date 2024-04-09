@@ -30,6 +30,7 @@ class EditTaskRequest extends CattrFormRequest
             'status_id' => 'sometimes|required|exists:statuses,id',
             'relative_position' => 'sometimes|required|numeric',
             'due_date' => 'sometimes|nullable|date',
+            'estimate' => 'sometimes|nullable|integer|gte:0',
         ];
     }
 }

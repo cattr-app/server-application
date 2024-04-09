@@ -22,7 +22,7 @@ trait ExposePermissions
         $model = $this;
         return Attribute::make(
             get: static function () use ($model) {
-                $user = $model->permissionsUser ?? request()->user();
+                $user = $model->permissionsUser ?? request()->user(); // if called from queue - use existing user
                 return collect($model::PERMISSIONS)->mapWithKeys(static fn ($item) => [
                     $item => $user?->can(Str::camel($item), $model)
                 ]);

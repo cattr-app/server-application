@@ -144,6 +144,14 @@ class TaskController extends ItemController
         Filter::listen(
             Filter::getRequestFilterName(),
             static function (array $requestData) {
+                if (empty($requestData['due_date'])) {
+                    $requestData['due_date'] = null;
+                }
+
+                if (isset($requestData['estimate']) && $requestData['estimate'] <= 0) {
+                    $requestData['estimate'] = null;
+                }
+
                 if (!empty($requestData['priority_id'])) {
                     return $requestData;
                 }
@@ -184,6 +192,7 @@ class TaskController extends ItemController
             }
             SaveTaskEditHistory::dispatch($data, request()->user());
         });
+
         return $this->_edit($request);
     }
 
@@ -259,14 +268,20 @@ class TaskController extends ItemController
     {
         CatEvent::listen(
             Filter::getAfterActionEventName(),
-            static function (Task $task) use ($request) {
-                $task->users()->sync($request->get('users'));
-            }
+            static fn(Task $task) => $task->users()->sync($request->get('users'))
         );
 
         Filter::listen(
             Filter::getRequestFilterName(),
             static function (array $requestData) {
+                if (empty($requestData['due_date'])) {
+                    $requestData['due_date'] = null;
+                }
+
+                if (isset($requestData['estimate']) && $requestData['estimate'] <= 0) {
+                    $requestData['estimate'] = null;
+                }
+
                 if (!empty($requestData['priority_id'])) {
                     return $requestData;
                 }
@@ -422,8 +437,6 @@ class TaskController extends ItemController
      */
     public function show(ShowTaskRequest $request): JsonResponse
     {
-        Filter::listen(Filter::getActionFilterName(), static fn ($data) => $data->append('workers')->append('total_spent_time'));
-
         return $this->_show($request);
     }
 }
