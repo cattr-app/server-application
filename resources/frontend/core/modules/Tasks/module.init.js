@@ -17,6 +17,7 @@ import DateInput from './components/DateInput';
 import { store as rootStore } from '@/store';
 import moment from 'moment-timezone';
 import { hasRole } from '@/utils/user';
+import Vue from 'vue';
 import ResourceSelect from '@/components/ResourceSelect.vue';
 import PhaseSelect from './components/PhaseSelect';
 import RelationsSelector from './components/RelationsSelector';
@@ -386,7 +387,7 @@ export function init(context, router) {
                                         {
                                             props: {
                                                 to: {
-                                                    name: routes.usersView,
+                                                    name: 'Users.crud.users.view',
                                                     params: { id: item.user_id },
                                                 },
                                             },
@@ -793,6 +794,20 @@ export function init(context, router) {
             },
         },
     ]);
+
+    const websocketLeaveChannel = id => Vue.prototype.$echo.leave(`tasks.${id}`);
+    const websocketEnterChannel = (id, handlers) => {
+        const channel = Vue.prototype.$echo.private(`tasks.${id}`);
+        for (const action in handlers) {
+            channel.listen(`.tasks.${action}`, handlers[action]);
+        }
+    };
+
+    grid.addToMetaProperties('gridData.websocketEnterChannel', websocketEnterChannel, grid.getRouterConfig());
+    grid.addToMetaProperties('gridData.websocketLeaveChannel', websocketLeaveChannel, grid.getRouterConfig());
+
+    crud.view.addToMetaProperties('pageData.websocketEnterChannel', websocketEnterChannel, crud.view.getRouterConfig());
+    crud.view.addToMetaProperties('pageData.websocketLeaveChannel', websocketLeaveChannel, crud.view.getRouterConfig());
 
     grid.addToMetaProperties(
         'gridData.actionsFilter',

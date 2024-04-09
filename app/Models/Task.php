@@ -53,7 +53,6 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
  * @property-read int|null $time_intervals_count
  * @property-read Collection|User[] $users
  * @property-read Collection|CronTaskWorkers[] $workers
- * @property-read int $total_spent_time
  * @property-read int|null $users_count
  * @method static TaskFactory factory(...$parameters)
  * @method static EloquentBuilder|Task newModelQuery()

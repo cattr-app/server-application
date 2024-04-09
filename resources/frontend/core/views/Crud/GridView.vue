@@ -154,6 +154,7 @@
     import ProjectSelect from '@/components/ProjectSelect';
     import StatusSelect from '@/components/StatusSelect';
     import UserSelect from '@/components/UserSelect';
+    import { mapGetters } from 'vuex';
 
     export default {
         name: 'GridView',
@@ -218,7 +219,6 @@
                 filterTimeout: null,
                 filterFieldsTimeout: null,
                 orderBy,
-
                 filterPopupVisible: false,
                 filterFieldsModel: { ...filterFieldsModel },
 
@@ -241,6 +241,7 @@
                         fields: gridData.filters.map(filter => filter.referenceKey),
                     },
                 },
+                lastDeletedItem: [],
 
                 isDataLoading: false,
                 skipRouteUpdate: false,
@@ -548,6 +549,7 @@
             }
         },
         computed: {
+            ...mapGetters('user', ['user']),
             columnsKey() {
                 // Used to forced update table when columns changed
                 return this.columns.map(col => col.title).join(',');
@@ -664,6 +666,29 @@
             if (this.$refs.tableWrapper) {
                 this.$refs.tableWrapper.addEventListener('click', this.handleTableClick);
             }
+
+            this.websocketEnterChannel = this.$route.meta.gridData.websocketEnterChannel;
+            this.websocketLeaveChannel = this.$route.meta.gridData.websocketLeaveChannel;
+
+            if (typeof this.websocketEnterChannel !== 'undefined') {
+                this.websocketEnterChannel(this.user.id, {
+                    create: data => {
+                        this.tableData.unshift(data.model);
+                    },
+                    edit: data => {
+                        const rowIndex = this.tableData.findIndex(row => +row.id === +data.model.id);
+                        if (rowIndex !== -1) {
+                            this.$set(this.tableData, rowIndex, data.model);
+                        }
+                    },
+                    destroy: data => {
+                        const rowIndex = this.tableData.findIndex(row => +row.id === +data.model.id);
+                        if (rowIndex !== -1) {
+                            this.tableData.splice(rowIndex, 1);
+                        }
+                    },
+                });
+            }
         },
         watch: {
             async $route(to) {
@@ -679,7 +704,11 @@
                 this.skipRouteUpdate = false;
             },
         },
-        beforeDestory() {
+        beforeDestroy() {
+            if (typeof this.websocketLeaveChannel !== 'undefined') {
+                this.websocketLeaveChannel(this.user.id);
+            }
+
             window.removeEventListener('click', this.handleClick);
             window.removeEventListener('resize', this.handleResize);
 

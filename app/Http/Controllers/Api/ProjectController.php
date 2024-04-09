@@ -169,49 +169,6 @@ class ProjectController extends ItemController
      */
     public function show(ShowProjectRequest $request): JsonResponse
     {
-        Filter::listen(Filter::getSuccessResponseFilterName(), static function ($project) {
-            // TODO: refactor and send "with" from frontend
-            $totalTracked = 0;
-            $taskIDs = array_map(static function ($task) {
-                return $task['id'];
-            }, $project['tasks']);
-
-            $workers = DB::table('time_intervals AS i')
-                ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-                ->leftJoin('users AS u', 'i.user_id', '=', 'u.id')
-                ->select(
-                    'i.user_id',
-                    'u.full_name',
-                    'i.task_id',
-                    'i.start_at',
-                    'i.end_at',
-                    't.task_name',
-                    DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
-                )
-                ->whereNull('i.deleted_at')
-                ->whereIn('task_id', $taskIDs)
-                ->orderBy('duration', 'desc')
-                ->groupBy('t.id')
-                ->get();
-
-            foreach ($workers as $worker) {
-                $totalTracked += $worker->duration;
-            }
-
-            $project['workers'] = $workers;
-            $project['total_spent_time'] = $totalTracked;
-            return $project;
-        });
-
-        Filter::listen(
-            Filter::getQueryFilterName(),
-            static fn(Builder $query) => $query
-                ->with([
-                    'tasks',
-                    'phases'=> fn(HasMany $q) => $q->withCount('tasks')
-                ])
-        );
-
         return $this->_show($request);
     }
 

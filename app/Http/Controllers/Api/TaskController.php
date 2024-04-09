@@ -18,7 +18,6 @@ use Exception;
 use Filter;
 use App\Models\Task;
 use App\Models\User;
-use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use CatEvent;
 use Settings;
@@ -245,9 +244,10 @@ class TaskController extends ItemController
                     $data,
                     $request->user(),
                     [
-                        'users' => (string)User::withoutGlobalScopes()
+                        'users' => User::withoutGlobalScopes()
                             ->whereIn('id', $request->get('users'))
                             ->select(['id', 'full_name'])
+                            ->get(),
                     ],
                     [
                         'users' => json_encode($oldUsers),

@@ -289,7 +289,12 @@ class User extends Authenticatable
 
     public function scopeAdmin(EloquentBuilder $query): EloquentBuilder
     {
-        return $query->where('role_is', \App\Enums\Role::ADMIN);
+        return $query->where('role_id', '=', Role::ADMIN->value, 'or');
+    }
+
+    public function scopeManager(EloquentBuilder $query): EloquentBuilder
+    {
+        return $query->where('role_id', '=', Role::MANAGER->value, 'or');
     }
 
     public function scopeActive(EloquentBuilder $query): EloquentBuilder
