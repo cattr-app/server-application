@@ -38,7 +38,13 @@ export function init(context) {
         });
     });
 
-    const crud = context.createCrud('projects.crud-title', 'projects', ProjectService);
+    const crud = context.createCrud('projects.crud-title', 'projects', ProjectService, {
+        with: ['defaultPriority', 'tasks', 'workers', 'workers.task:id,task_name', 'workers.user:id,full_name'],
+        withSum: [
+            ['workers as total_spent_time', 'duration'],
+            ['workers as total_offset', 'offset'],
+        ],
+    });
 
     const crudViewRoute = crud.view.getViewRouteName();
     const crudEditRoute = crud.edit.getEditRouteName();
@@ -86,7 +92,10 @@ export function init(context) {
         {
             key: 'total_spent_time',
             label: 'field.total_spent',
-            render: (h, props) => h('span', formatDurationString(props.currentValue)),
+            render: (h, props) => {
+                const timeWithOffset = +props.values.total_spent_time + +props.values.total_offset;
+                return h('span', formatDurationString(timeWithOffset > 0 ? timeWithOffset : 0));
+            },
         },
         {
             key: 'default_priority',
@@ -128,10 +137,14 @@ export function init(context) {
             key: 'workers',
             label: 'field.users',
             render: (h, props) => {
-                const data = [];
+                const tableData = [];
+                const globalTimeWithOffset = +props.values.total_spent_time + +props.values.total_offset;
                 Object.keys(props.currentValue).forEach(k => {
-                    props.currentValue[k].time = formatDurationString(+props.currentValue[k].duration);
-                    data.push(props.currentValue[k]);
+                    const timeWithOffset = +props.currentValue[k].duration + +props.currentValue[k].offset;
+                    props.currentValue[k].time = formatDurationString(timeWithOffset);
+                    if (timeWithOffset > 0 && globalTimeWithOffset > 0) {
+                        tableData.push(props.currentValue[k]);
+                    }
                 });
                 return h('AtTable', {
                     props: {
@@ -144,12 +157,12 @@ export function init(context) {
                                         {
                                             props: {
                                                 to: {
-                                                    name: routes.usersView,
+                                                    name: 'Users.crud.users.view',
                                                     params: { id: item.user_id },
                                                 },
                                             },
                                         },
-                                        item.full_name,
+                                        item.user.full_name,
                                     );
                                 },
                             },
@@ -161,12 +174,12 @@ export function init(context) {
                                         {
                                             props: {
                                                 to: {
-                                                    name: routes.tasksView,
+                                                    name: 'Tasks.crud.tasks.view',
                                                     params: { id: item.task_id },
                                                 },
                                             },
                                         },
-                                        item.task_name,
+                                        item.task.task_name,
                                     );
                                 },
                             },
@@ -187,7 +200,7 @@ export function init(context) {
                                 },
                             },
                         ],
-                        data,
+                        data: tableData,
                         pagination: true,
                         'page-size': 100,
                     },

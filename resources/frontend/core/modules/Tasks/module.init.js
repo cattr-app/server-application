@@ -342,7 +342,7 @@ export function init(context, router) {
                                         {
                                             props: {
                                                 to: {
-                                                    name: routes.usersView,
+                                                    name: 'Users.crud.users.view',
                                                     params: { id: item.user_id },
                                                 },
                                             },

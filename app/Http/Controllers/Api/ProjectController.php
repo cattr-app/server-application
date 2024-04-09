@@ -11,6 +11,7 @@ use CatEvent;
 use Filter;
 use App\Models\Project;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use DB;
 use Throwable;
@@ -88,9 +89,6 @@ class ProjectController extends ItemController
      */
     public function show(ShowProjectRequest $request): JsonResponse
     {
-        Filter::listen(Filter::getQueryFilterName(), static fn ($query) => $query->with('tasks'));
-        Filter::listen(Filter::getActionFilterName(), static fn ($data) => $data->append('workers')->append('total_spent_time'));
-
         return $this->_show($request);
     }
 
@@ -151,7 +149,7 @@ class ProjectController extends ItemController
             }
         });
 
-        Filter::listen(Filter::getActionFilterName(), static fn ($data) => $data->load('statuses'));
+        Filter::listen(Filter::getActionFilterName(), static fn($data) => $data->load('statuses'));
 
         return $this->_create($request);
     }
@@ -318,7 +316,7 @@ class ProjectController extends ItemController
             }
         });
 
-        Filter::listen(Filter::getActionFilterName(), static fn ($data) => $data->load('statuses'));
+        Filter::listen(Filter::getActionFilterName(), static fn($data) => $data->load('statuses'));
 
         return $this->_edit($request);
     }

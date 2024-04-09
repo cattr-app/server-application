@@ -41,12 +41,16 @@ class ChangeEvent implements ShouldBroadcast
         $model = match (true) {
             $this->model instanceof Task => $this->model->setPermissionsUser(User::query()->find($this->userId))
                 ->load(['priority', 'project', 'users', 'status', 'changes', 'changes.user', 'comments', 'comments.user'])
-                ->append(['can', 'workers', 'total_spent_time'])
+                ->append(['can'])
+                ->loadSum('workers as total_spent_time', 'duration')
+                ->loadSum('workers as total_offset', 'offset')
                 ->makeVisible('can'),
             $this->model instanceof Project => $this->model->setPermissionsUser(User::query()->find($this->userId))
-                ->load(['users', 'defaultPriority', 'statuses'])
+                ->load(['users', 'defaultPriority', 'statuses', 'workers', 'workers.user:id,full_name', 'workers.task:id,task_name'])
                 ->loadCount('tasks')
-                ->append(['can', 'workers', 'total_spent_time'])
+                ->append(['can'])
+                ->loadSum('workers as total_spent_time', 'duration')
+                ->loadSum('workers as total_offset', 'offset')
                 ->makeVisible('can'),
             // Format a time interval as in the dashboard report
             $this->model instanceof TimeInterval => DashboardExport::init(
