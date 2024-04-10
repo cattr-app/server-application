@@ -5,8 +5,10 @@ namespace App\Models;
 use App\Scopes\ProjectAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\ProjectFactory;
+use DB;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
+use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
@@ -165,5 +167,14 @@ class Project extends Model
     public function workers(): HasManyThrough
     {
         return $this->hasManyThrough(CronTaskWorkers::class, Task::class);
+    }
+
+    public function tasksRelations(): Attribute
+    {
+        $tasksIdsQuery = $this->tasks()->select('id');
+        return Attribute::make(get: fn() => DB::table('tasks_relations')
+                ->whereIn('parent_id', $tasksIdsQuery)
+                ->orWhereIn('child_id', $tasksIdsQuery)
+                ->get(['parent_id', 'child_id']))->shouldCache();
     }
 }

@@ -3,7 +3,7 @@
         <div class="row flex-end">
             <at-button size="large" @click="$router.go(-1)">{{ $t('control.back') }}</at-button>
         </div>
-        <v-chart ref="gantt" class="gantt__chart" :option="option" />
+        <v-chart ref="gantt" class="gantt__chart" />
         <preloader v-if="isDataLoading" :is-transparent="true" class="gantt__loader" />
     </div>
 </template>
@@ -58,6 +58,7 @@
     import GanttService from '@/services/resource/gantt.service';
     import { formatDurationString, getStartDate } from '@/utils/time';
     import moment from 'moment-timezone';
+    import { mapGetters } from 'vuex';
 
     use([
         CanvasRenderer,
@@ -107,9 +108,21 @@
         },
         mounted() {
             window.addEventListener('resize', this.onResize);
+            this.websocketEnterChannel(this.user.id, {
+                updateAll: data => {
+                    const id = this.$route.params[this.service.getIdParam()];
+                    if (+id === +data.model.id) {
+                        this.prepareAndSetData(data.model);
+                    }
+                },
+            });
         },
         beforeDestroy() {
             window.removeEventListener('resize', this.onResize);
+            this.websocketLeaveChannel(this.user.id);
+        },
+        computed: {
+            ...mapGetters('user', ['user']),
         },
         methods: {
             getYAxisZoomPercentage() {
@@ -133,6 +146,12 @@
                 this.isDataLoading = true;
 
                 const ganttData = (await this.service.getGanttData(this.$route.params.id)).data.data;
+
+                this.prepareAndSetData(ganttData);
+
+                this.isDataLoading = false;
+            }, 100),
+            prepareAndSetData(ganttData) {
                 this.totalRows = ganttData.tasks.length;
 
                 const phasesMap = ganttData.phases
@@ -432,10 +451,14 @@
                         },
                     });
                 }
-                this.option = option;
-
-                this.isDataLoading = false;
-            }, 100),
+                const oldZoom = this.$refs.gantt.chart.getOption()?.dataZoom;
+                this.$refs.gantt.chart.setOption(option);
+                if (oldZoom) {
+                    this.$refs.gantt.chart.setOption({
+                        dataZoom: oldZoom,
+                    });
+                }
+            },
             renderGanttItem(params, api) {
                 let categoryIndex = api.value(dimensionIndex.index);
                 let startDate = api.coord([api.value(dimensionIndex.start_date), categoryIndex]);
@@ -784,6 +807,15 @@
                     width: params.coordSys.width,
                     height: params.coordSys.height,
                 });
+            },
+            websocketLeaveChannel(userId) {
+                this.$echo.leave(`gantt.${userId}`);
+            },
+            websocketEnterChannel(userId, handlers) {
+                const channel = this.$echo.private(`gantt.${userId}`);
+                for (const action in handlers) {
+                    channel.listen(`.gantt.${action}`, handlers[action]);
+                }
             },
         },
     };

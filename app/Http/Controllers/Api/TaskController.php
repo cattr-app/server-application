@@ -4,6 +4,7 @@ namespace App\Http\Controllers\Api;
 
 use App\Enums\TaskRelationType;
 use App\Exceptions\Entities\TaskRelationException;
+use App\Http\Middleware\RegisterModulesEvents;
 use App\Http\Requests\Task\CreateRelationRequest;
 use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
@@ -18,6 +19,7 @@ use Exception;
 use Filter;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use CatEvent;
 use Settings;
@@ -223,7 +225,7 @@ class TaskController extends ItemController
 
             $delta = $nearestChildDate->diffInDays($newDate, false);
 
-            Task::withInitialQueryConstraint(function (Builder $query) use ($newDate) {
+            dispatch(fn() => Task::withInitialQueryConstraint(function (Builder $query) use ($newDate) {
                 $query->where(fn(Builder $q) => $q
                     ->where('start_date', '<', $newDate)
                     ->orWhere('due_date', '<', $newDate));
@@ -233,7 +235,7 @@ class TaskController extends ItemController
                     $child->due_date = $child->due_date?->addDays($delta);
                     $child->save();
                 }
-            ));
+            )));
         });
 
         CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $data) use ($request) {
@@ -534,7 +536,8 @@ class TaskController extends ItemController
             TaskRelationType::FOLLOWS => $task->parents()->attach($relatedTask),
             TaskRelationType::PRECEDES => $task->children()->attach($relatedTask),
         };
-
+        RegisterModulesEvents::broadcastEvent('tasks', 'edit', $task);
+        RegisterModulesEvents::broadcastEvent('tasks', 'edit', $relatedTask);
         $relatedTask->pivot = match ($relationType) { // only for frontend update
             TaskRelationType::FOLLOWS => [
                 'child_id' => $task->id,
@@ -557,15 +560,21 @@ class TaskController extends ItemController
             $child->start_date = $parent->$parentDateKey;
             $child->due_date = $parent->$parentDateKey;
             $child->save();
+            RegisterModulesEvents::broadcastEvent('gantt', 'updateAll', $child->project);
         } elseif ($parentDateKey && $childDateKey && $child->$childDateKey->lt($parent->$parentDateKey)) {
             // child date is before parent date - move child and its descendants dates
             $delta = $child->$childDateKey->diffInDays($parent->$parentDateKey, false);
-            $child->descendantsAndSelf()->groupBy('id')->lazyById()
-                ->each(static function (Task $child) use ($delta) {
-                    $child->start_date = $child->start_date?->addDays($delta);
-                    $child->due_date = $child->due_date?->addDays($delta);
-                    $child->save();
-                });
+            dispatch(function () use ($delta, $child) {
+                $child->descendantsAndSelf()->groupBy('id')->lazyById()
+                    ->each(static function (Task $child) use ($delta) {
+                        $child->start_date = $child->start_date?->addDays($delta);
+                        $child->due_date = $child->due_date?->addDays($delta);
+                        $child->save();
+                    });
+                RegisterModulesEvents::broadcastEvent('gantt', 'updateAll', $child->project);
+            });
+        } else {
+            RegisterModulesEvents::broadcastEvent('gantt', 'updateAll', $child->project);
         }
 
         return responder()->success($relatedTask)->respond();
@@ -577,7 +586,12 @@ class TaskController extends ItemController
     public function destroyRelation(DestroyRelationRequest $request): JsonResponse
     {
         $requestData = $request->validated();
-        Task::find($requestData['parent_id'])->children()->detach($requestData['child_id']);
+        $parentTask = Task::find($requestData['parent_id']);
+        $parentTask->children()->detach($requestData['child_id']);
+
+        RegisterModulesEvents::broadcastEvent('gantt', 'updateAll', $parentTask->project);
+        RegisterModulesEvents::broadcastEvent('tasks', 'edit', $parentTask);
+        RegisterModulesEvents::broadcastEvent('tasks', 'edit', Task::find($requestData['child_id']));
 
         return responder()->success()->respond(204);
     }

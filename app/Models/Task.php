@@ -154,6 +154,13 @@ class Task extends Model
             CronTaskWorkers::whereTaskId($task->id)->delete();
         });
 
+        static::updated(static function (Task $task) {
+            if ($task->getOriginal('project_id') !== $task->project_id) {
+                $task->parents()->detach();
+                $task->children()->detach();
+            }
+        });
+
         static::created(static function (Task $task) {
             dispatch(static function () use ($task) {
                 foreach ($task->users as $user) {
@@ -231,6 +238,7 @@ class Task extends Model
     {
         return 'tasks_relations';
     }
+
     public function enableCycleDetection(): bool
     {
         return true;

@@ -1,6 +1,6 @@
 <template>
     <div class="phases">
-        <at-table :columns="columns" :data="phases"></at-table>
+        <at-table :columns="columns" :data="rows"></at-table>
         <at-button v-if="this.showControls" class="phases__add-btn" type="primary" @click="addPhase">{{
             $t('field.add_phase')
         }}</at-button>
@@ -109,6 +109,7 @@
             return {
                 modalIsOpen: false,
                 columns,
+                rows: this.phases,
             };
         },
         methods: {
@@ -117,6 +118,11 @@
                     name: '',
                 });
                 this.$emit('change', this.rows);
+            },
+        },
+        watch: {
+            phases: function (val) {
+                this.rows = val;
             },
         },
     };

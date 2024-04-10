@@ -130,14 +130,7 @@ class ProjectController extends ItemController
         ]));
 
         Filter::listen(Filter::getActionFilterName(), static function (Project $item) {
-            $tasksIds = $item->tasks()->select('id');
-
-            $tasksLinks = DB::table('tasks_relations')
-                ->whereIn('parent_id', $tasksIds)
-                ->orWhereIn('child_id', $tasksIds)
-                ->get(['parent_id', 'child_id']);
-            $item['tasks_relations'] = $tasksLinks;
-
+            $item->append('tasks_relations');
             return $item;
         });
 

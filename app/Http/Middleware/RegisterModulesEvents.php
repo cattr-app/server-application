@@ -19,7 +19,7 @@ class RegisterModulesEvents
     /**
      * @param Task|Project|TimeInterval $model
      */
-    protected static function broadcastEvent(string $entityType, string $action, $model): void
+    public static function broadcastEvent(string $entityType, string $action, $model): void
     {
         foreach (ChangeEvent::getRelatedUserIds($model) as $userId) {
             broadcast(new ChangeEvent($entityType, $action, $model, $userId));
@@ -59,6 +59,13 @@ class RegisterModulesEvents
                 $items = is_array($model) || $model instanceof Collection ? $model : [$model];
                 foreach ($items as $item) {
                     static::broadcastEvent($entityType, $action, $item);
+                }
+                if (in_array($entityType, ['tasks', 'projects'])) {
+                    $project = match (true) {
+                        $model instanceof Task => $model->project,
+                        $model instanceof Project => $model
+                    };
+                    static::broadcastEvent('gantt', 'updateAll', $project);
                 }
             });
         });

@@ -21,6 +21,10 @@ Broadcast::channel('projects.{userId}', static function (User $user, $userId) {
     return (int)$user->id === (int)$userId;
 });
 
+Broadcast::channel('gantt.{userId}', static function (User $user, $userId) {
+    return (int)$user->id === (int)$userId;
+});
+
 Broadcast::channel('intervals.{userId}', static function (User $user, $userId) {
     return (int)$user->id === (int)$userId;
 });
