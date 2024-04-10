@@ -169,6 +169,13 @@ class ProjectController extends ItemController
      */
     public function show(ShowProjectRequest $request): JsonResponse
     {
+        Filter::listen(
+            Filter::getQueryFilterName(),
+            static fn(Builder $query) => $query
+                ->with([
+                    'phases'=> fn(HasMany $q) => $q->withCount('tasks')
+                ])
+        );
         return $this->_show($request);
     }
 

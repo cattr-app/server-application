@@ -442,7 +442,7 @@
                 let endDate = api.coord([api.value(dimensionIndex.due_date), categoryIndex]);
 
                 let barLength = endDate[0] - startDate[0];
-                // Get the heigth corresponds to length 1 on y axis.
+                // Get the height corresponds to length 1 on y axis.
                 let barHeight = api.size([0, 1])[1] * HEIGHT_RATIO;
                 barHeight = ROW_HEIGHT;
 

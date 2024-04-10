@@ -1,6 +1,6 @@
 <template>
     <div class="phases">
-        <at-table :columns="columns" :data="rows"></at-table>
+        <at-table :columns="columns" :data="phases"></at-table>
         <at-button v-if="this.showControls" class="phases__add-btn" type="primary" @click="addPhase">{{
             $t('field.add_phase')
         }}</at-button>
@@ -96,19 +96,19 @@
             } else {
                 columns.push({
                     title: this.$tc('field.amount_of_tasks'),
-                    render: (h, params) =>
-                        h(
+                    render: (h, params) => {
+                        return h(
                             'span',
-                            this.$tc('projects.amount_of_tasks', params.item.tasks_count, {
-                                count: params.item.tasks_count,
+                            this.$tc('projects.amount_of_tasks', params.item?.tasks_count ?? 0, {
+                                count: params.item?.tasks_count,
                             }),
-                        ),
+                        );
+                    },
                 });
             }
             return {
                 modalIsOpen: false,
                 columns,
-                rows: this.phases,
             };
         },
         methods: {
