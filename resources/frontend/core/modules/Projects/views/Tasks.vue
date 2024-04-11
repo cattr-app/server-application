@@ -28,8 +28,9 @@
                     </div>
                 </div>
             </div>
-            <div ref="kanban" class="project-tasks_kanban at-container">
+            <div ref="kanban" class="project-tasks_kanban at-container" :class="{ 'scroll-disabled': scrollDisabled }">
                 <kanban-board
+                    ref="board"
                     :config="config"
                     :stages="stages.map(s => s.name)"
                     :blocks="blocks"
@@ -92,7 +93,10 @@
                             </span>
                             <team-avatars :users="getTask(block.id).users"></team-avatars>
                         </div>
-                        <span :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop }"
+                        <span
+                            :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop }"
+                            @click.stop.prevent
+                            @pointerdown="disableScroll"
                             ><i class="icon icon-move" :class="{ handle: !isDesktop }"></i
                         ></span>
                     </div>
@@ -217,6 +221,7 @@
                     },
                 },
                 isDesktop: false,
+                scrollDisabled: false,
             };
         },
         computed: {
@@ -240,6 +245,14 @@
             getTextColor,
             formatDate,
             formatDurationString,
+            disableScroll() {
+                this.scrollDisabled = true;
+                document.body.classList.add('scroll-disabled');
+            },
+            enableScroll() {
+                this.scrollDisabled = false;
+                document.body.classList.remove('scroll-disabled');
+            },
             isOverDue(companyTimezone, item) {
                 return (
                     typeof companyTimezone === 'string' &&
@@ -440,6 +453,18 @@
                 this.loadTask(+this.$route.query.task);
             }
             this.checkScreenSize();
+            this.$refs.board.drake.on('drag', () => {
+                this.disableScroll();
+                console.log('hidden добавлен');
+            });
+            this.$refs.board.drake.on('drop', () => {
+                this.enableScroll();
+                console.log('hidden убран');
+            });
+            this.$refs.board.drake.on('cancel', () => {
+                this.enableScroll();
+                console.log('hidden убран');
+            });
             window.addEventListener('resize', this.checkScreenSize);
         },
         beforeDestroy() {
@@ -497,19 +522,23 @@
             margin-left: auto;
         }
     }
+    .hide-on-mobile {
+        display: none;
+    }
 
     .task-view {
         position: fixed;
         top: 0;
         right: 0;
         display: flex;
+        z-index: 1;
         flex-flow: column nowrap;
         justify-content: space-between;
         background: #ffffff;
         border: 1px solid #c5d9e8;
         border-radius: 4px;
-        width: 500px;
-        height: 100vh;
+        max-width: 500px;
+        // height: 100vh;
         overflow: hidden auto;
         padding: 16px;
 
@@ -668,15 +697,28 @@
     .project-tasks_kanban {
         overflow-x: auto;
     }
-    @media (max-width: 1400px) {
+    @media (max-width: $screen-md) {
+        .project-tasks_kanban ::v-deep .drag-item {
+            margin: 6px;
+        }
+        .scroll-disabled.scroll-disabled {
+            overflow: hidden;
+        }
+        .task ::v-deep {
+            padding: 8px;
+        }
+        .task-view {
+            width: auto;
+            left: 0;
+        }
         .task-name {
-            font-size: 16px;
+            font-size: $font-size-normal;
         }
         .task-description {
-            font-size: 14px;
+            font-size: $font-size-base;
         }
         .task-users {
-            font-size: 12px;
+            font-size: $font-size-smer;
         }
         .total-time-row {
             font-size: 10px;
@@ -687,15 +729,60 @@
             flex-shrink: 0;
         }
     }
-    @media only screen and (max-width: 600px) {
+    @media (max-width: $screen-sm) {
+        .project-tasks_kanban ::v-deep .drag-item {
+            margin: 4px;
+        }
+        .scroll-disabled.scroll-disabled {
+            overflow: hidden;
+        }
+        .task ::v-deep {
+            padding: 8px;
+        }
+        .task-view {
+            width: auto;
+            left: 0;
+        }
         .task-name {
-            font-size: 16px;
+            font-size: $font-size-normal;
         }
         .task-description {
-            font-size: 14px;
+            font-size: $font-size-base;
         }
         .task-users {
-            font-size: 12px;
+            font-size: $font-size-smer;
+        }
+        .total-time-row {
+            font-size: 10px;
+        }
+        .drag-column {
+            width: 300px;
+            flex-basis: 300px;
+            flex-shrink: 0;
+        }
+    }
+    @media only screen and (max-width: $screen-xs) {
+        .project-tasks_kanban ::v-deep .drag-item {
+            margin: 2px;
+        }
+        .scroll-disabled.scroll-disabled {
+            overflow: hidden;
+        }
+        .task-view {
+            width: auto;
+            left: 0;
+        }
+        .task ::v-deep {
+            padding: 8px;
+        }
+        .task-name {
+            font-size: $font-size-normal;
+        }
+        .task-description {
+            font-size: $font-size-base;
+        }
+        .task-users {
+            font-size: $font-size-smer;
         }
         .total-time-row {
             font-size: 7px;
