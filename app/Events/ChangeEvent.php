@@ -124,7 +124,7 @@ class ChangeEvent implements ShouldBroadcast
             )->collection(['time_intervals.id' => $this->model->id])->first()->first()->toArray(),
             default => $this->model,
         };
-            
+
         return ['model' => $model];
     }
 
