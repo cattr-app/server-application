@@ -762,6 +762,7 @@ export function init(context, router) {
         {
             title: 'field.users',
             key: 'users',
+            hideForMobile: true,
             render: (h, { item }) => {
                 const users = item.users;
                 if (!users) {

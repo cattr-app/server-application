@@ -316,10 +316,21 @@ export function init(context) {
         {
             title: 'field.project',
             key: 'name',
+            render: (h, { item }) => {
+                return h(
+                    'span',
+                    {
+                        class: ['projects-grid__project'],
+                        attrs: { title: item.name },
+                    },
+                    item.name,
+                );
+            },
         },
         {
             title: 'field.members',
             key: 'users',
+            hideForMobile: true,
             render: (h, { item }) => {
                 return h(TeamAvatars, {
                     props: {
