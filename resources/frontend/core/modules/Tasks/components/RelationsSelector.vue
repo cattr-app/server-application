@@ -157,6 +157,9 @@
             &:last-of-type {
                 margin-top: $spacing-03;
             }
+            @media (min-width: 768px) {
+                font-size: 0.8rem;
+            }
         }
         &::v-deep {
             .at-input__original {

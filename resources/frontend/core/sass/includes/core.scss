@@ -67,3 +67,10 @@ body {
   border-bottom: 1px dashed #3f536e;
   cursor: help;
 }
+
+@media (max-width: 1200px) {
+  .container-fluid {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
+}

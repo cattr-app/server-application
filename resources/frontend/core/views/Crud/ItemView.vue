@@ -1,7 +1,7 @@
 <template>
-    <div class="container crud">
+    <div class="container-fluid crud">
         <div class="row flex-around">
-            <div class="col-24 col-lg-20">
+            <div class="col-24 col-sm-22 col-lg-20">
                 <div class="at-container crud__content crud__item-view">
                     <div class="page-controls">
                         <h1 class="control-item title">
@@ -40,7 +40,7 @@
                     <div class="data-entries">
                         <div v-for="(field, key) of fields" v-bind:key="key" class="data-entry">
                             <div class="row">
-                                <div class="col-6 label">{{ $t(field.label) }}:</div>
+                                <div class="col-6 col-xs-24 label">{{ $t(field.label) }}:</div>
                                 <div class="col">
                                     <Skeleton :loading="isDataLoading">
                                         <renderable-field
@@ -189,18 +189,19 @@
                 margin-bottom: 1.5em;
                 display: flex;
                 justify-content: space-between;
+                align-items: flex-start;
 
                 .control-item {
-                    margin-right: 0.5em;
-
                     &:last-child {
                         margin-right: 0;
                     }
                 }
 
                 .title {
-                    margin-right: 1.5em;
                     font-size: 1.6rem;
+                    @media (max-width: 768px) {
+                        font-size: 1rem;
+                    }
                 }
             }
 
@@ -217,6 +218,10 @@
                     .label {
                         margin-right: 1em;
                         font-weight: bold;
+                        @media (max-width: 768px) {
+                            font-size: 0.8rem;
+                            width: 100%;
+                        }
                     }
                 }
             }

@@ -18,5 +18,8 @@
 
   &__content {
     padding: 1.75em;
+    @media (max-width: 768px) {
+      padding: 1em;
+    }
   }
 }

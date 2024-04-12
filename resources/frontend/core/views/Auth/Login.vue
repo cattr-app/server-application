@@ -45,7 +45,7 @@
             </div>
             <a class="login__slogan" href="https://cattr.app" v-html="slogan" />
         </div>
-        <div class="hero col-16"></div>
+        <div class="hero col-lg-16 col-md-14 col-sm-12"></div>
     </div>
 </template>
 

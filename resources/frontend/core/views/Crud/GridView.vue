@@ -11,7 +11,7 @@
                 v-model="filterModel"
                 type="text"
                 :placeholder="filterPlaceholder"
-                class="col-6 crud__filter"
+                class="col-6 col-xs-24 crud__filter"
                 @input="handleSearchInput"
             >
                 <template slot="prepend">
@@ -794,10 +794,10 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
+            gap: 1rem;
 
             &__item {
                 position: relative;
-                margin-right: 1rem;
             }
         }
 
@@ -845,6 +845,10 @@
 
         &__filters {
             margin-bottom: $spacing-03;
+            @media (max-width: 991px) {
+                gap: 1rem;
+                flex-direction: row-reverse;
+            }
         }
 
         &__filter {

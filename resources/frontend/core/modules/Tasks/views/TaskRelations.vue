@@ -1,25 +1,29 @@
 <template>
-    <div class="container">
-        <div class="at-container">
-            <div class="crud crud__content">
-                <preloader v-if="fetching" is-transparent></preloader>
-                <div class="page-controls">
-                    <h1 class="page-title crud__title">{{ $t('tasks.relations.for') }}: {{ this.task.task_name }}</h1>
-                    <div class="control-items">
-                        <div class="control-item">
-                            <at-button size="large" @click="$router.go(-1)">{{ $t('control.back') }}</at-button>
+    <div class="container-fluid">
+        <div class="row flex-around">
+            <div class="col-24 col-sm-22 col-lg-20 at-container">
+                <div class="crud crud__content">
+                    <preloader v-if="fetching" is-transparent></preloader>
+                    <div class="page-controls">
+                        <h1 class="page-title crud__title">
+                            {{ $t('tasks.relations.for') }}: {{ this.task.task_name }}
+                        </h1>
+                        <div class="control-items">
+                            <div class="control-item">
+                                <at-button size="large" @click="$router.go(-1)">{{ $t('control.back') }}</at-button>
+                            </div>
                         </div>
                     </div>
+                    <relations-selector
+                        v-if="task.project_id"
+                        :parents="parents"
+                        :children="children"
+                        :project-id="task.project_id"
+                        :show-controls="true"
+                        @unlink="handleUnlink"
+                        @createRelation="handleCreate"
+                    />
                 </div>
-                <relations-selector
-                    v-if="task.project_id"
-                    :parents="parents"
-                    :children="children"
-                    :project-id="task.project_id"
-                    :show-controls="true"
-                    @unlink="handleUnlink"
-                    @createRelation="handleCreate"
-                />
             </div>
         </div>
     </div>
@@ -126,5 +130,11 @@
         &__action-btn {
             margin-bottom: $layout-01;
         }
+    }
+    .page-controls {
+        margin-bottom: 1.5em;
+        display: flex;
+        justify-content: space-between;
+        align-items: flex-start;
     }
 </style>
