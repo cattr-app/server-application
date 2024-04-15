@@ -489,9 +489,14 @@
                     height: barHeight,
                 });
 
-                const estimate = api.value(dimensionIndex.estimate);
-                const timeWithOffset =
-                    +api.value(dimensionIndex.total_spent_time) + +api.value(dimensionIndex.total_offset);
+                let estimate = +api.value(dimensionIndex.estimate);
+                estimate = isNaN(estimate) ? 0 : estimate;
+                let totalSpentTime = +api.value(dimensionIndex.total_spent_time);
+                totalSpentTime = isNaN(totalSpentTime) ? 0 : totalSpentTime;
+                let totalOffset = +api.value(dimensionIndex.total_offset);
+                totalOffset = isNaN(totalOffset) ? 0 : totalOffset;
+                const timeWithOffset = totalSpentTime + totalOffset;
+
                 let taskProgressLine = 0;
                 const multiplier = estimate > 0 ? timeWithOffset / estimate : 0;
                 if (estimate != null && estimate >= 0) {

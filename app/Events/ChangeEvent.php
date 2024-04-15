@@ -13,6 +13,7 @@ use Illuminate\Broadcasting\Channel;
 use Illuminate\Broadcasting\InteractsWithSockets;
 use Illuminate\Broadcasting\PrivateChannel;
 use Illuminate\Contracts\Broadcasting\ShouldBroadcast;
+use Illuminate\Contracts\Events\ShouldDispatchAfterCommit;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Foundation\Events\Dispatchable;
@@ -20,7 +21,7 @@ use Illuminate\Queue\SerializesModels;
 use Settings;
 use Staudenmeir\LaravelAdjacencyList\Eloquent\Builder as AdjacencyListBuilder;
 
-class ChangeEvent implements ShouldBroadcast
+class ChangeEvent implements ShouldBroadcast, ShouldDispatchAfterCommit
 {
     use Dispatchable, InteractsWithSockets, SerializesModels;
 
