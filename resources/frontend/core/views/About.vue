@@ -135,19 +135,19 @@
                                         ? semverGt(params.item.version, params.item.lastVersion)
                                             ? params.item.flashMessage
                                             : params.item.version === params.item.lastVersion
-                                            ? this.$i18n.t('about.modules.ok')
-                                            : params.item.vulnerable
-                                            ? this.$i18n.t('about.modules.vulnerable')
-                                            : this.$i18n.t('about.modules.outdated')
+                                              ? this.$i18n.t('about.modules.ok')
+                                              : params.item.vulnerable
+                                                ? this.$i18n.t('about.modules.vulnerable')
+                                                : this.$i18n.t('about.modules.outdated')
                                         : this.$i18n.t('about.modules.ok'),
                                     type: Object.prototype.hasOwnProperty.call(params.item, 'lastVersion')
                                         ? semverGt(params.item.version, params.item.lastVersion)
                                             ? 'info'
                                             : params.item.version === params.item.lastVersion
-                                            ? 'success'
-                                            : params.item.vulnerable
-                                            ? 'error'
-                                            : 'warning'
+                                              ? 'success'
+                                              : params.item.vulnerable
+                                                ? 'error'
+                                                : 'warning'
                                         : 'info',
                                 },
                                 style: {

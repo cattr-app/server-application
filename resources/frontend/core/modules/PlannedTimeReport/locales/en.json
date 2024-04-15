@@ -1,0 +1,12 @@
+{
+  "navigation": {
+    "planned-time-report": "Planned Time Report"
+  },
+  "planned-time-report": {
+    "tasks": "Tasks",
+    "estimate": "Estimate",
+    "spent": "Spent",
+    "productivity": "Productivity",
+    "report_date": "Report created at: {0}"
+  }
+}

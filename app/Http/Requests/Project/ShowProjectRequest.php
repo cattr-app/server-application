@@ -2,6 +2,7 @@
 
 namespace App\Http\Requests\Project;
 
+use App\Helpers\QueryHelper;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Models\Project;
 use App\Http\Requests\CattrFormRequest;
@@ -17,6 +18,8 @@ class ShowProjectRequest extends CattrFormRequest
 
     public function _rules(): array
     {
-        return ['id' => 'required|int|exists:projects,id'];
+        return array_merge(QueryHelper::getValidationRules(), [
+            'id' => 'required|int|exists:projects,id'
+        ]);
     }
 }
