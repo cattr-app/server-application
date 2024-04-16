@@ -3,7 +3,6 @@
         <div class="crud crud__content">
             <div class="page-controls">
                 <h1 class="page-title crud__title">{{ project.name }}</h1>
-
                 <div class="control-items">
                     <div class="control-item">
                         <at-button
@@ -71,7 +70,7 @@
                         :slot="block.id"
                         :key="`block_${block.id}`"
                         :class="{ task: true, handle: isDesktop }"
-                        @click.stop.prevent="loadTask(block.id)"
+                        @click="loadTask(block.id)"
                         @pointerdown="task = null"
                     >
                         <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
@@ -95,8 +94,8 @@
                         </div>
                         <span
                             :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop }"
-                            @click.stop.prevent
-                            @pointerdown="disableScroll"
+                            @mousedown="onDown"
+                            @touchstart="onDown"
                             ><i class="icon icon-move" :class="{ handle: !isDesktop }"></i
                         ></span>
                     </div>
@@ -287,6 +286,36 @@
 
                 return '';
             },
+            onDown(e) {
+                document.addEventListener('mousemove', this.onMove);
+                document.addEventListener('mouseup', this.onUp);
+
+                document.addEventListener('touchmove', this.onMove);
+                document.addEventListener('touchup', this.onUp);
+
+                this.scrollTimer = setInterval(this.onScrollTimer, 1000);
+            },
+            onScrollTimer() {
+                if (this.mouseX < 50) {
+                    this.$refs.kanban.scrollLeft -= window.screen.width / 2;
+                }
+
+                if (this.mouseX > window.screen.width - 50) {
+                    this.$refs.kanban.scrollLeft += window.screen.width / 2;
+                }
+            },
+            onMove(e) {
+                this.mouseX = e.clientX || e.touches[0].clientX;
+            },
+            onUp(e) {
+                document.removeEventListener('mousemove', this.onMove);
+                document.removeEventListener('mouseup', this.onUp);
+
+                document.removeEventListener('touchmove', this.onMove);
+                document.removeEventListener('touchup', this.onUp);
+
+                clearInterval(this.scrollTimer);
+            },
             changeOrder: throttle(async function (index, direction) {
                 const service = this.statusService;
                 const item = this.statuses[index];
@@ -453,18 +482,6 @@
                 this.loadTask(+this.$route.query.task);
             }
             this.checkScreenSize();
-            this.$refs.board.drake.on('drag', () => {
-                this.disableScroll();
-                console.log('hidden добавлен');
-            });
-            this.$refs.board.drake.on('drop', () => {
-                this.enableScroll();
-                console.log('hidden убран');
-            });
-            this.$refs.board.drake.on('cancel', () => {
-                this.enableScroll();
-                console.log('hidden убран');
-            });
             window.addEventListener('resize', this.checkScreenSize);
         },
         beforeDestroy() {
@@ -513,6 +530,7 @@
             color: $black-900;
             font-size: 1rem;
             font-weight: bold;
+            padding: 10px;
         }
         &-users {
             display: flex;
@@ -538,7 +556,6 @@
         border: 1px solid #c5d9e8;
         border-radius: 4px;
         max-width: 500px;
-        // height: 100vh;
         overflow: hidden auto;
         padding: 16px;
 
@@ -698,8 +715,14 @@
         overflow-x: auto;
     }
     @media (max-width: $screen-md) {
+        .status {
+            min-width: 100%;
+        }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 6px;
+        }
+        .project-tasks_kanban ::v-deep {
+            scroll-snap-type: x mandatory;
         }
         .scroll-disabled.scroll-disabled {
             overflow: hidden;
@@ -723,15 +746,23 @@
         .total-time-row {
             font-size: 10px;
         }
-        .drag-column {
-            width: 300px;
-            flex-basis: 300px;
+
+        .project-tasks_kanban ::v-deep .drag-column {
+            scroll-snap-align: center;
+            max-width: 100%;
+            flex-basis: 100%;
             flex-shrink: 0;
         }
     }
     @media (max-width: $screen-sm) {
+        .status {
+            min-width: 100%;
+        }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 4px;
+        }
+        .project-tasks_kanban ::v-deep {
+            scroll-snap-type: x mandatory;
         }
         .scroll-disabled.scroll-disabled {
             overflow: hidden;
@@ -755,15 +786,22 @@
         .total-time-row {
             font-size: 10px;
         }
-        .drag-column {
-            width: 300px;
-            flex-basis: 300px;
+        .project-tasks_kanban ::v-deep .drag-column {
+            scroll-snap-align: center;
+            max-width: 100%;
+            flex-basis: 100%;
             flex-shrink: 0;
         }
     }
     @media only screen and (max-width: $screen-xs) {
+        .status {
+            min-width: 100%;
+        }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 2px;
+        }
+        .project-tasks_kanban ::v-deep {
+            scroll-snap-type: x mandatory;
         }
         .scroll-disabled.scroll-disabled {
             overflow: hidden;
@@ -787,9 +825,10 @@
         .total-time-row {
             font-size: 7px;
         }
-        .drag-column {
-            width: 300px;
-            flex-basis: 300px;
+        .project-tasks_kanban ::v-deep .drag-column {
+            scroll-snap-align: center;
+            max-width: 100%;
+            flex-basis: 100%;
             flex-shrink: 0;
         }
     }
