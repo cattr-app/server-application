@@ -76,12 +76,12 @@
                     }
 
                     this.drawCells(draw, firstDay, columnWidth, rows, width, lastDay);
-                    this.drawBackgroundGrid(draw, rows, width, columnWidth);
+                    this.drawGridLines(draw, rows, width, columnWidth);
                 },
                 30,
                 { maxWait: 50 },
             ),
-            drawBackgroundGrid(draw, rows, width, columnWidth) {
+            drawGridLines(draw, rows, width, columnWidth) {
                 for (let row = 1; row < rows; row++) {
                     draw.line(1, row * rowHeight + headerHeight, width - 1, row * rowHeight + headerHeight).stroke({
                         color: '#DFE5ED',
