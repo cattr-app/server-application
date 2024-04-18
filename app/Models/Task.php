@@ -18,12 +18,14 @@ use Illuminate\Database\Eloquent\SoftDeletes;
 use Illuminate\Database\Query\Builder as QueryBuilder;
 use Illuminate\Support\Carbon;
 use Parsedown;
+use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
 
 /**
  * Class Task
  *
  * @property int $id
  * @property int $project_id
+ * @property int $project_phase_id
  * @property string $task_name
  * @property string|null $description
  * @property int $assigned_by
@@ -36,6 +38,8 @@ use Parsedown;
  * @property int|null $status_id
  * @property float $relative_position
  * @property Carbon|null $due_date
+ * @property Carbon|null $start_date
+ * @property int|null $estimate
  * @property-read User $assigned
  * @property-read Collection|TaskHistory[] $changes
  * @property-read int|null $changes_count
@@ -48,6 +52,7 @@ use Parsedown;
  * @property-read Collection|TimeInterval[] $timeIntervals
  * @property-read int|null $time_intervals_count
  * @property-read Collection|User[] $users
+ * @property-read Collection|CronTaskWorkers[] $workers
  * @property-read int|null $users_count
  * @method static TaskFactory factory(...$parameters)
  * @method static EloquentBuilder|Task newModelQuery()
@@ -79,6 +84,7 @@ class Task extends Model
     use SoftDeletes;
     use ExposePermissions;
     use HasFactory;
+    use HasGraphRelationships;
 
     /**
      * table name from database
@@ -91,6 +97,7 @@ class Task extends Model
      */
     protected $fillable = [
         'project_id',
+        'project_phase_id',
         'task_name',
         'description',
         'assigned_by',
@@ -99,7 +106,9 @@ class Task extends Model
         'status_id',
         'important',
         'relative_position',
+        'start_date',
         'due_date',
+        'estimate',
     ];
 
     /**
@@ -107,6 +116,7 @@ class Task extends Model
      */
     protected $casts = [
         'project_id' => 'integer',
+        'project_phase_id' => 'integer',
         'task_name' => 'string',
         'description' => 'string',
         'assigned_by' => 'integer',
@@ -115,6 +125,9 @@ class Task extends Model
         'status_id' => 'integer',
         'important' => 'integer',
         'relative_position' => 'float',
+        'estimate' => 'integer',
+        'start_date' => 'date',
+        'due_date' => 'date',
     ];
 
     /**
@@ -124,7 +137,6 @@ class Task extends Model
         'created_at',
         'updated_at',
         'deleted_at',
-        'due_date',
     ];
 
     protected const PERMISSIONS = ['update', 'destroy'];
@@ -137,6 +149,16 @@ class Task extends Model
 
         static::deleting(static function (Task $task) {
             $task->timeIntervals()->delete();
+            $task->parents()->detach();
+            $task->children()->detach();
+            CronTaskWorkers::whereTaskId($task->id)->delete();
+        });
+
+        static::updated(static function (Task $task) {
+            if ($task->getOriginal('project_id') !== $task->project_id) {
+                $task->parents()->detach();
+                $task->children()->detach();
+            }
         });
 
         static::created(static function (Task $task) {
@@ -199,5 +221,31 @@ class Task extends Model
     public function properties(): MorphMany
     {
         return $this->morphMany(Property::class, 'entity');
+    }
+
+    public function workers(): HasMany
+    {
+        return $this->hasMany(CronTaskWorkers::class, 'task_id', 'id');
+    }
+
+    public function phase(): BelongsTo
+    {
+        return $this->belongsTo(ProjectPhase::class, 'project_phase_id');
+    }
+
+    // Below methods are related to Cattr gantt functionality and LaravelAdjacencyList package
+    public function getPivotTableName(): string
+    {
+        return 'tasks_relations';
+    }
+
+    public function enableCycleDetection(): bool
+    {
+        return true;
+    }
+
+    public function includeCycleStart(): bool
+    {
+        return true;
     }
 }

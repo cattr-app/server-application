@@ -387,6 +387,10 @@
       "success": {
         "title": "Success",
         "message": "Saved successfully"
+      },
+      "error": {
+        "title": "Error",
+        "message": "Failed to save"
       }
     },
     "record": {

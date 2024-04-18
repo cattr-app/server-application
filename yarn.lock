@@ -1324,6 +1324,7 @@ __metadata:
     "@commitlint/config-conventional": ^18.4.4
     "@sentry/tracing": ^7.93.0
     "@sentry/vue": ^7.93.0
+    "@vue/composition-api": ^1.7.2
     autoprefixer: ^10.4.16
     axios: ^1.6.5
     axios-concurrency: ^1.0.4
@@ -1336,6 +1337,7 @@ __metadata:
     cross-env: ^7.0.3
     css-loader: ^6.9.0
     dotenv: ^16.4.2
+    echarts: ^5.4.3
     eslint: ^8.56.0
     eslint-config-prettier: ^9.1.0
     eslint-plugin-prettier: ^5.1.3
@@ -1343,7 +1345,7 @@ __metadata:
     fabric: ^5.3.0
     husky: ^8.0.3
     js-md5: ^0.8.3
-    laravel-echo: ^1.15.3
+    laravel-echo: ^1.16.1
     laravel-mix: ^6.0.49
     laravel-mix-alias: ^1.0.3
     laravel-mix-bundle-analyzer: ^1.0.5
@@ -1371,6 +1373,7 @@ __metadata:
     vue: ^2.7.16
     vue-avatar: ^2.3.3
     vue-color: ^2.8.1
+    vue-echarts: ^6.6.8
     vue-eslint-parser: ^9.4.2
     vue-i18n: ^8.28.2
     vue-kanban: ^1.8.0
@@ -2549,6 +2552,15 @@ __metadata:
     prettier:
       optional: true
   checksum: 70fee2289a4f54ec1be4d46136ee9b9893e31bf5622cead5be06c3dfb83449c3dbe6f8c03404625ccf302d0628ff9e2ea1debfae609d1bfe1d065d8f57c5dba8
+  languageName: node
+  linkType: hard
+
+"@vue/composition-api@npm:^1.7.2":
+  version: 1.7.2
+  resolution: "@vue/composition-api@npm:1.7.2"
+  peerDependencies:
+    vue: ">= 2.5 < 2.7"
+  checksum: 6ce5ce4c0301fe45873c12bb46f449e1b0e978fa7df60de2a54aa314c5dc6e299640d0e9433e6edcd764f86ed9b737123f9346680733d228d5111d4b02736ff4
   languageName: node
   linkType: hard
 
@@ -5006,6 +5018,16 @@ __metadata:
   languageName: node
   linkType: hard
 
+"echarts@npm:^5.4.3":
+  version: 5.5.0
+  resolution: "echarts@npm:5.5.0"
+  dependencies:
+    tslib: 2.3.0
+    zrender: 5.5.0
+  checksum: 181600d21bc4ad6a877bac419800501345c4103ae49ef05a4db495c8dde91f0a5f7ff02eb94581190c59518526f7931e8410ce3fe5da1e0f1e60cd1aeec04a52
+  languageName: node
+  linkType: hard
+
 "ee-first@npm:1.1.1":
   version: 1.1.1
   resolution: "ee-first@npm:1.1.1"
@@ -7301,10 +7323,10 @@ __metadata:
   languageName: node
   linkType: hard
 
-"laravel-echo@npm:^1.15.3":
-  version: 1.15.3
-  resolution: "laravel-echo@npm:1.15.3"
-  checksum: 28bd80365228c1402b3b13ff55d3c6bc2e91fe04c0d6412a3752c70b491eec66228e61c93d1e00aaf33cfd22a42a59506e9ff7b522d9a73b7d012112d35482af
+"laravel-echo@npm:^1.16.1":
+  version: 1.16.1
+  resolution: "laravel-echo@npm:1.16.1"
+  checksum: 5171d2d45e9b28e50cc6f09bf44ab87c7bb40d07337b14a6d636803a4dd8cdbb642f9429af7fe00fa6ab3f5b1c6bf0cc070adb588635f0f5e56ea0b8b27ed7f9
   languageName: node
   linkType: hard
 
@@ -9755,6 +9777,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"resize-detector@npm:^0.3.0":
+  version: 0.3.0
+  resolution: "resize-detector@npm:0.3.0"
+  checksum: 06c5f321b9349e34b71020b945cbd90c5300ca49d3e204fbc236c0827ad133a2d0cd48b9943a8b50723e4e16b67c106d9b8e1eba6240a6e136d1926373bacb2e
+  languageName: node
+  linkType: hard
+
 "resolve-cwd@npm:^3.0.0":
   version: 3.0.0
   resolution: "resolve-cwd@npm:3.0.0"
@@ -11029,6 +11058,13 @@ __metadata:
   languageName: node
   linkType: hard
 
+"tslib@npm:2.3.0":
+  version: 2.3.0
+  resolution: "tslib@npm:2.3.0"
+  checksum: 8869694c26e4a7b56d449662fd54a4f9ba872c889d991202c74462bd99f10e61d5bd63199566c4284c0f742277736292a969642cc7b590f98727a7cae9529122
+  languageName: node
+  linkType: hard
+
 "tslib@npm:^2.0.3":
   version: 2.5.0
   resolution: "tslib@npm:2.5.0"
@@ -11396,6 +11432,26 @@ __metadata:
     vue-demi-fix: bin/vue-demi-fix.js
     vue-demi-switch: bin/vue-demi-switch.js
   checksum: 0fbe9bf8ab7fe498ffa2bbd0cfc8f6f43a6bbaa5eda3e20ef1b70dca7c8b0ddb216a7ff2f632b694fe0735805638975abb441c621ec0bd2e6d4656353f316c15
+  languageName: node
+  linkType: hard
+
+"vue-echarts@npm:^6.6.8":
+  version: 6.6.9
+  resolution: "vue-echarts@npm:6.6.9"
+  dependencies:
+    resize-detector: ^0.3.0
+    vue-demi: ^0.13.11
+  peerDependencies:
+    "@vue/composition-api": ^1.0.5
+    "@vue/runtime-core": ^3.0.0
+    echarts: ^5.4.1
+    vue: ^2.6.12 || ^3.1.1
+  peerDependenciesMeta:
+    "@vue/composition-api":
+      optional: true
+    "@vue/runtime-core":
+      optional: true
+  checksum: 14698a19fef7998f4dbf5fb20450fb554ee292ae3f6bf0676dafb0e3f70bb06137fcbf9de13d5a0556deba035145d7b9df9ac0a35a14c11644305c77dd794b7d
   languageName: node
   linkType: hard
 
@@ -12423,5 +12479,14 @@ __metadata:
   version: 0.1.0
   resolution: "yocto-queue@npm:0.1.0"
   checksum: f77b3d8d00310def622123df93d4ee654fc6a0096182af8bd60679ddcdfb3474c56c6c7190817c84a2785648cdee9d721c0154eb45698c62176c322fb46fc700
+  languageName: node
+  linkType: hard
+
+"zrender@npm:5.5.0":
+  version: 5.5.0
+  resolution: "zrender@npm:5.5.0"
+  dependencies:
+    tslib: 2.3.0
+  checksum: 89e4f9e95b586af66ebf5c0504d5f8da73678e18c5b888124943ca81ecea7cff12f23009d64048df91e4dc670e9c51fa66c357834d9347e367f3b5cc02a24d35
   languageName: node
   linkType: hard

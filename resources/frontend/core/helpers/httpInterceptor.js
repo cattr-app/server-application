@@ -2,6 +2,7 @@ import Vue from 'vue';
 import axios from 'axios';
 import { store } from '@/store';
 import has from 'lodash/has';
+import isObject from 'lodash/isObject';
 
 // Queue for pending queries
 let pendingRequests = 0;
@@ -29,7 +30,7 @@ const responseInterceptor = response => {
 };
 
 // Adds error response interceptor
-const responseErrorInterceptor = error => {
+const responseErrorInterceptor = async error => {
     setLoading(false);
 
     if (!has(error, 'response.status') || (error.request.responseType === 'blob' && error.request.status === 404)) {
@@ -53,6 +54,18 @@ const responseErrorInterceptor = error => {
                     : 'Internal server error',
                 duration: 5000,
             });
+            if (isObject(error.response.data.error.fields)) {
+                for (const [fieldName, msgArr] of Object.entries(error.response.data.error.fields)) {
+                    for (const msg of msgArr) {
+                        await Vue.prototype.$nextTick();
+                        Vue.prototype.$Notify.warning({
+                            title: 'Warning',
+                            message: msg,
+                            duration: 5000,
+                        });
+                    }
+                }
+            }
     }
 
     return Promise.reject(error);

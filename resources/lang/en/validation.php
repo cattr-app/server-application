@@ -106,6 +106,12 @@ return [
     ],
 
     'time_interval_does_not_exist' => 'The time for this interval already exists.',
+    'tasks-relations' => [
+        'already_exists' => 'Relation already exists!',
+        'must_have_same_project' => 'Tasks mush have same project.',
+        'cyclic_relation_detected' => 'Cyclic relation detected!',
+        'cannot_start_before_parent_ends' => "Task can't start before parent task!",
+    ],
 
     /*
     |--------------------------------------------------------------------------

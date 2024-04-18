@@ -31,10 +31,33 @@
       "open": "Открыта",
       "closed": "Закрыта"
     },
-    "unassigned": "Не назначен"
+    "unassigned": "Не назначен",
+    "unset_start_date": "Не установлена",
+    "unset_due_date": "Не установлена",
+    "due_date--overdue": "Просрочено",
+    "unset_estimate": "Не установлена",
+    "estimate--overtime": "Сверхурочно",
+    "unset_phase": "Не установлена",
+    "relations": {
+      "title": "Связи",
+      "for": "Связи для",
+      "follows": "Следует",
+      "precedes": "Предшествует",
+      "loading": "Загружаем задачи",
+      "no_task_found": "Для {query} задачи не найдены",
+      "type_to_search": "Начните печатать, чтобы найти задачу",
+      "select_task": "Выберите задачу",
+      "type": "Тип связи"
+    }
   },
   "field": {
-    "source": "Источник"
+    "source": "Источник",
+    "estimate": "Оценка времени",
+    "start_date": "Дата начала",
+    "due_date": "Дата завершения",
+    "hour_short": "ч",
+    "minute_short": "м",
+    "phase": "Стадия"
   },
   "control": {
     "kanban-board": "Kanban"

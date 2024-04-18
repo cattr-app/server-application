@@ -11,6 +11,20 @@
 |
 */
 
-Broadcast::channel('App.User.{id}', static function ($user, $id) {
-    return (int)$user->id === (int)$id;
+use App\Models\User;
+
+Broadcast::channel('tasks.{userId}', static function (User $user, $userId) {
+    return (int)$user->id === (int)$userId;
+});
+
+Broadcast::channel('projects.{userId}', static function (User $user, $userId) {
+    return (int)$user->id === (int)$userId;
+});
+
+Broadcast::channel('gantt.{userId}', static function (User $user, $userId) {
+    return (int)$user->id === (int)$userId;
+});
+
+Broadcast::channel('intervals.{userId}', static function (User $user, $userId) {
+    return (int)$user->id === (int)$userId;
 });
