@@ -16,7 +16,7 @@ return new class extends Migration
             $table->unsignedInteger('order')->default(0);
         });
 
-        DB::table('statuses')->update(['order' => DB::raw('id')])
+        DB::table('statuses')->update(['order' => DB::raw('id')]);
 
         Schema::table('statuses', function (Blueprint $table) {
             $table->unique('order');
