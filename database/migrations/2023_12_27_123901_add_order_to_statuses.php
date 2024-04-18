@@ -16,11 +16,7 @@ return new class extends Migration
             $table->unsignedInteger('order')->default(0);
         });
 
-        DB::table('statuses')->lazyById()->each(function ($status) {
-            DB::table('statuses')
-                ->where('id', $status->id)
-                ->update(['order' => $status->id]);
-        });
+        DB::table('statuses')->update(['order' => DB::raw('id')])
 
         Schema::table('statuses', function (Blueprint $table) {
             $table->unique('order');
