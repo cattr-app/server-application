@@ -73,35 +73,22 @@
                         @click="loadTask(block.id)"
                         @pointerdown="task = null"
                     >
-                        <h4 class="task-name" :class="{ handle: isDesktop }">{{ getTask(block.id).task_name }}</h4>
-
-                        <p
-                            class="task-description"
-                            :class="{ handle: isDesktop }"
-                            v-html="getTask(block.id).description"
-                        ></p>
-
-                        <div class="task-users" :class="{ handle: isDesktop }">
-                            <div class="task__tags" :class="{ handle: isDesktop }">
-                                <at-tag
-                                    v-if="isOverDue(companyData.timezone, block)"
-                                    :class="{ handle: isDesktop }"
-                                    color="error"
+                        <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
+                        <p class="task-description" v-html="getTask(block.id).description"></p>
+                        <div class="task-users">
+                            <div class="task__tags">
+                                <at-tag v-if="isOverDue(companyData.timezone, block)" color="error"
                                     >{{ $t('tasks.due_date--overdue') }}
                                 </at-tag>
-                                <at-tag v-if="isOverTime(block)" :class="{ handle: isDesktop }" color="warning"
+                                <at-tag v-if="isOverTime(block)" color="warning"
                                     >{{ $t('tasks.estimate--overtime') }}
                                 </at-tag>
                             </div>
-                            <span class="total-time-row" :class="{ handle: isDesktop }">
-                                <i class="icon icon-clock" :class="{ handle: isDesktop }"></i>&nbsp;
-                                {{ block.estimate }} {{ $t(`control.of`) }}
+                            <span class="total-time-row">
+                                <i class="icon icon-clock"></i>&nbsp; {{ block.estimate }} {{ $t(`control.of`) }}
                                 {{ block.total_spent_time }}
                             </span>
-                            <team-avatars
-                                :class="{ handle: isDesktop }"
-                                :users="getTask(block.id).users"
-                            ></team-avatars>
+                            <team-avatars :users="getTask(block.id).users"></team-avatars>
                         </div>
                         <span :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop }" @touchstart="onDown"
                             ><i class="icon icon-move" :class="{ handle: !isDesktop }"></i
@@ -297,15 +284,14 @@
                 return '';
             },
             onDown(e) {
-                // document.addEventListener('mousemove', this.onMove);
-                // document.addEventListener('mouseup', this.onUp);
-
+                e.preventDefault();
                 document.addEventListener('touchmove', this.onMove);
-                document.addEventListener('touchup', this.onUp);
+                document.addEventListener('touchend', this.onUp);
 
                 this.scrollTimer = setInterval(this.onScrollTimer, 1000);
             },
             onScrollTimer() {
+                console.log('onScrollTimer', this.scrollTimer);
                 if (this.mouseX < 50) {
                     this.$refs.kanban.scrollLeft -= window.screen.width / 2;
                 }
@@ -318,12 +304,8 @@
                 this.mouseX = e.clientX || e.touches[0].clientX;
             },
             onUp(e) {
-                // document.removeEventListener('mousemove', this.onMove);
-                // document.removeEventListener('mouseup', this.onUp);
-
                 document.removeEventListener('touchmove', this.onMove);
-                document.removeEventListener('touchup', this.onUp);
-
+                document.removeEventListener('touchend', this.onUp);
                 clearInterval(this.scrollTimer);
             },
             changeOrder: throttle(async function (index, direction) {
@@ -501,6 +483,9 @@
 </script>
 
 <style lang="scss" scoped>
+    .task.handle > * {
+        pointer-events: none;
+    }
     .at-container {
         position: relative;
     }
