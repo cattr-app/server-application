@@ -68,7 +68,50 @@
             <div class="row">
                 <div class="offline-sync__added col-24">
                     <h5>{{ $t('offline_sync.added_intervals') }}</h5>
-                    <at-table :columns="columns" :data="addedIntervals"></at-table>
+                    <at-table :columns="intervalsColumns" :data="addedIntervals"></at-table>
+                </div>
+            </div>
+            <div class="row">
+                <div class="col-8">
+                    <h2 class="page-title">{{ $t('offline_sync.screenshots') }}</h2>
+                    <validation-observer ref="form" v-slot="{}">
+                        <validation-provider
+                            ref="screenshots_file"
+                            v-slot="{ errors }"
+                            :rules="`required|ext:cattr`"
+                            :name="$t('offline_sync.screenshots_file')"
+                            mode="passive"
+                        >
+                            <at-input
+                                ref="screenshots_file_input"
+                                class="screenshots-input"
+                                name="screenshots-file"
+                                type="file"
+                            />
+                            <p>{{ errors[0] }}</p>
+                        </validation-provider>
+                    </validation-observer>
+                    <at-button
+                        class="offline-sync__upload-btn"
+                        size="large"
+                        icon="icon-upload"
+                        type="primary"
+                        @click="uploadScreenshots"
+                        >{{ $t('offline_sync.import') }}
+                    </at-button>
+                    <div v-if="screenshotsUploadProgress != null" class="screenshots-upload-progress">
+                        <at-progress :percent="screenshotsUploadProgress.progress" :stroke-width="15" />
+                        <span class="screenshots-upload-progress__total">{{
+                            screenshotsUploadProgress.humanReadable
+                        }}</span>
+                        <span class="screenshots-upload-progress__speed">{{ screenshotsUploadProgress.speed }}</span>
+                    </div>
+                </div>
+            </div>
+            <div class="row">
+                <div class="offline-sync__added col-24">
+                    <h5>{{ $t('offline_sync.added_screenshots') }}</h5>
+                    <at-table :columns="screenshotsColumns" :data="addedScreenshots"></at-table>
                 </div>
             </div>
         </div>
@@ -82,6 +125,7 @@
     import moment from 'moment';
     import ResourceSelect from '@/components/ResourceSelect.vue';
     import UsersService from '@/services/resource/user.service';
+    import { humanFileSize } from '@/utils/file';
 
     const formatImportResultMessage = (h, params) => {
         const getResultIcon = () => {
@@ -94,7 +138,7 @@
             });
         };
         return typeof params.item.message === 'string'
-            ? h('span', [getResultIcon(h, params), params.item.message])
+            ? [h('span', [getResultIcon(h, params), params.item.message])]
             : Object.entries(params.item.message).map(([key, msg]) =>
                   h('span', [getResultIcon(h, params), `${key}: ${msg}`]),
               );
@@ -110,8 +154,9 @@
         data() {
             return {
                 addedIntervals: [],
+                addedScreenshots: [],
                 service: new OfflineSyncService(),
-                columns: [
+                intervalsColumns: [
                     {
                         title: this.$t('offline_sync.user'),
                         render: (h, params) => {
@@ -167,8 +212,56 @@
                         },
                     },
                 ],
+                screenshotsColumns: [
+                    {
+                        title: this.$t('offline_sync.user'),
+                        render: (h, params) => {
+                            return h('span', params.item?.user_id ?? '-');
+                        },
+                    },
+                    {
+                        title: this.$t('offline_sync.task_id'),
+                        render: (h, params) => {
+                            return h(
+                                params.item?.task_id ? 'router-link' : 'span',
+                                {
+                                    props: {
+                                        to: {
+                                            name: `Tasks.crud.tasks.view`,
+                                            params: { id: params.item?.task_id },
+                                        },
+                                    },
+                                },
+                                params.item?.task_id ?? '-',
+                            );
+                        },
+                    },
+                    {
+                        title: this.$t('offline_sync.start_at'),
+                        key: 'start_at',
+                    },
+                    {
+                        title: this.$t('offline_sync.end_at'),
+                        key: 'end_at',
+                    },
+                    {
+                        title: this.$t('offline_sync.total_time'),
+                        key: 'total_time',
+                    },
+                    {
+                        title: this.$t('offline_sync.result'),
+                        render: (h, params) => {
+                            return h(
+                                'div',
+                                { class: 'offline-sync__import-result' },
+                                formatImportResultMessage(h, params),
+                            );
+                        },
+                    },
+                ],
                 userId: null,
                 usersService: new UsersService(),
+                screenshotsUploadProgress: null,
             };
         },
         methods: {
@@ -193,7 +286,7 @@
                 const { valid } = await this.$refs.intervals_file.validate(file);
 
                 if (valid) {
-                    const result = await this.service.upload(file);
+                    const result = await this.service.uploadIntervals(file);
                     if (result.success) {
                         this.addedIntervals = result.data.map(el => {
                             const timeDiff = moment(el.interval['end_at']).diff(moment(el.interval['start_at'])) / 1000;
@@ -210,6 +303,43 @@
                         this.addedIntervals = [];
                     }
                 }
+            },
+            async uploadScreenshots() {
+                const file = this.$refs.screenshots_file_input.$el.querySelector('input').files[0];
+                const { valid } = await this.$refs.screenshots_file.validate(file);
+
+                if (valid) {
+                    const result = await this.service.uploadScreenshots(file, this.onUploadProgress.bind(this));
+                    if (result.success) {
+                        this.addedScreenshots = result.data.map(el => {
+                            const timeDiff = el.interval
+                                ? moment(el.interval['end_at']).diff(moment(el.interval['start_at'])) / 1000
+                                : '-';
+                            const totalTime = el.interval ? Math.round((timeDiff + Number.EPSILON) * 100) / 100 : '-';
+
+                            return {
+                                ...el.interval,
+                                message: el.message,
+                                success: el.success,
+                                total_time: el.interval ? formatDurationString(totalTime) : '-',
+                            };
+                        });
+                    } else {
+                        this.addedScreenshots = [];
+                    }
+                }
+            },
+            onUploadProgress(progressEvent) {
+                this.screenshotsUploadProgress = {
+                    progress: +(progressEvent.progress * 100).toFixed(2),
+                    loaded: progressEvent.loaded,
+                    total: progressEvent.total,
+                    humanReadable: `${humanFileSize(progressEvent.loaded, true)} / ${humanFileSize(
+                        progressEvent.total,
+                        true,
+                    )}`,
+                    speed: `${progressEvent.rate ? humanFileSize(progressEvent.rate, true) : '0 kB'}/s`,
+                };
             },
         },
     };
@@ -255,6 +385,18 @@
 
         &__added {
             margin-top: $spacing-03;
+        }
+
+        .screenshots-upload-progress {
+            margin-top: 0.5rem;
+            font-size: 0.8rem;
+            &::v-deep .at-progress {
+                display: flex;
+                align-items: end;
+                &-bar {
+                    flex-basis: 70%;
+                }
+            }
         }
     }
 </style>

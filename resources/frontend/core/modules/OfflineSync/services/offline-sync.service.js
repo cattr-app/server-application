@@ -21,15 +21,31 @@ export default class OfflineSyncService {
     }
 
     /**
-     * Upload file
+     * Upload Intervals.cattr file
      * @returns {Promise<void>}
      * @param payload
      */
-    async upload(payload) {
+    async uploadIntervals(payload) {
         const formData = new FormData();
         formData.append('file', payload);
 
         const { data } = await axios.post(this.getItemRequestUri() + '/upload-intervals', formData);
+        return data;
+    }
+
+    /**
+     * Upload Screenshots.cattr file
+     * @returns {Promise<void>}
+     * @param payload
+     * @param progressCallback
+     */
+    async uploadScreenshots(payload, progressCallback) {
+        const formData = new FormData();
+        formData.append('file', payload);
+
+        const { data } = await axios.post(this.getItemRequestUri() + '/upload-screenshots', formData, {
+            onUploadProgress: progressCallback,
+        });
         return data;
     }
 }

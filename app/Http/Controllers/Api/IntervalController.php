@@ -16,6 +16,7 @@ use App\Http\Requests\Interval\ScreenshotRequest;
 use App\Http\Requests\Interval\ShowIntervalRequest;
 use App\Http\Requests\Interval\TrackAppRequest;
 use App\Http\Requests\Interval\UploadOfflineIntervalsRequest;
+use App\Http\Requests\Interval\UploadOfflineScreenshotsRequest;
 use App\Jobs\AssignAppsToTimeInterval;
 use App\Models\TrackedApplication;
 use App\Models\User;
@@ -29,11 +30,15 @@ use Illuminate\Http\JsonResponse;
 use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
 use MessagePack\MessagePack;
+use phpseclib3\Crypt\RSA;
 use Settings;
+use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Storage;
+use Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
 use Validator;
+use ZipArchive;
 
 class IntervalController extends ItemController
 {
@@ -601,7 +606,40 @@ class IntervalController extends ItemController
          * @var UploadedFile $file
          */
         $file = $request->validated()['file'];
-        $intervals = MessagePack::unpack($file->getContent());
+
+        $zip = new ZipArchive;
+        $zipOpenResult = $zip->open($file->path());
+        abort_if(
+            $zipOpenResult === false || (is_int($zipOpenResult) && $zipOpenResult > 0),
+            400,
+            __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
+        );
+
+        $temporaryDirectory = (new TemporaryDirectory())->deleteWhenDestroyed()->force()->create();
+        $zip->extractTo($temporaryDirectory->path());
+        $zip->close();
+
+        $privateKey = RSA::load(Settings::scope('core.offline-sync')->get('private_key'));
+
+        $intervalsContent = file_get_contents($temporaryDirectory->path('Intervals'));
+        $digestContent = file_get_contents($temporaryDirectory->path('EncryptedDigest'));
+
+        abort_if(
+            $intervalsContent === false || $digestContent === false,
+            400,
+            __('Unable to read content of Intervals or its EncryptedDigest')
+        );
+
+        $digest = $privateKey->withPadding(RSA::ENCRYPTION_OAEP)->withHash('sha256')->decrypt($digestContent);
+        $actualDigest = openssl_digest($intervalsContent, 'sha256');
+
+        abort_if(
+            $digest === false || $actualDigest === false || $digest !== $actualDigest,
+            400,
+            __('Unable to verify Intervals digest')
+        );
+
+        $intervals = MessagePack::unpack($intervalsContent);
 
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
         $validatorClass = new CreateTimeIntervalRequest();
@@ -639,7 +677,10 @@ class IntervalController extends ItemController
 
             $intervalValidator = Validator::make(
                 $interval,
-                $validatorClass->getRules($interval['user_id'], $interval['start_at'], $interval['end_at'])
+                array_merge(
+                    $validatorClass->getRules($interval['user_id'], $interval['start_at'], $interval['end_at']),
+                    ['screenshot_id' => 'required|uuid']
+                )
             );
 
             if ($intervalValidator->fails()) {
@@ -663,6 +704,84 @@ class IntervalController extends ItemController
             ];
         }
 
+
+        return responder()->success($creationResult)->respond();
+    }
+
+    public function uploadOfflineScreenshots(UploadOfflineScreenshotsRequest $request): JsonResponse
+    {
+        /**
+         * @var UploadedFile $file
+         */
+        $file = $request->validated()['file'];
+
+        $zip = new ZipArchive;
+        $zipOpenResult = $zip->open($file->path());
+        abort_if(
+            $zipOpenResult === false || (is_int($zipOpenResult) && $zipOpenResult > 0),
+            400,
+            __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
+        );
+
+        $temporaryDirectory = (new TemporaryDirectory())
+            ->location(Storage::disk('local')->path('tmp'))->force()->create();
+        $zip->extractTo($temporaryDirectory->path());
+        $zip->close();
+
+        $dirPath = Str::of($temporaryDirectory->path())->match('/tmp.+/');
+        dispatch(static fn() => $temporaryDirectory->delete())->delay(now()->addHour());
+
+
+        $allScreenshots = Storage::disk('local')->files($dirPath);
+
+        $creationResult = [];
+
+        $screenshotService = $this->screenshotService;
+        foreach ($allScreenshots as $screenshotPath) {
+            $pathArr = Str::of($screenshotPath)->match('/\d_.+/')->split('/_/');
+            abort_if(
+                count($pathArr) !== 2 || (count($pathArr) === 2 && !Str::isUuid($pathArr[1])),
+                400,
+                __('Wrong screenshot file name')
+            );
+
+            [$userId, $screenshotId] = $pathArr;
+
+            $interval = TimeInterval::where('user_id', $userId)->where('screenshot_id', $screenshotId)->first();
+            if ($interval === null) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'user_id' => $userId,
+                    'screenshot_id' => $screenshotId,
+                    'message' => __('validation.offline-sync.cannot_find_interval'),
+                    'success' => false
+                ];
+                continue;
+            }
+            try {
+                dispatch(static function () use ($screenshotService, $interval, $screenshotPath) {
+                    $screenshotService->saveScreenshot(Storage::path($screenshotPath), $interval);
+                    $interval->screenshot_id = null;
+                    $interval->save();
+                });
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'user_id' => $userId,
+                    'screenshot_id' => $screenshotId,
+                    'message' => __('validation.offline-sync.screenshot_attached'),
+                    'success' => true
+                ];
+            } catch (\Exception $e) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'user_id' => $userId,
+                    'screenshot_id' => $screenshotId,
+                    'message' => __('validation.offline-sync.screenshot_not_attached'),
+                    'success' => false
+                ];
+                \Log::error($e);
+            }
+        }
 
         return responder()->success($creationResult)->respond();
     }

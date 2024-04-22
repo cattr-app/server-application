@@ -109,9 +109,12 @@ return [
 
     'offline-sync' => [
         'cannot_create_interval' => 'Cannot create interval, make sure You are a member of the project or assigned to the task',
+        'cannot_find_interval' => 'Cannot find interval, to attach screenshot to',
+        'screenshot_attached' => 'Screenshot added to the queue (see logs)',
+        'screenshot_not_attached' => 'Screenshot not attached (see logs)',
         'time_interval_already_exist' => 'The time for this interval already exists.',
         'time_interval_added' => 'Added',
-        'intervals_file_wrong_extension' => 'File extension should be .cattr'
+        'wrong_extension' => 'File extension should be .cattr'
     ],
 
     /*
