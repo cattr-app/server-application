@@ -1,0 +1,10 @@
+.projects {
+    &-grid {
+        &__project {
+            white-space: pre;
+            text-overflow: ellipsis;
+            overflow: hidden;
+        }
+
+    }
+}

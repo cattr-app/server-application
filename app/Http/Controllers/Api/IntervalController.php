@@ -440,7 +440,9 @@ class IntervalController extends ItemController
 
         CatEvent::dispatch(Filter::getAfterActionEventName(), [$intervals, $request]);
 
-        $intervals->each(static fn(Model $item) => $item->save());
+        $intervals->each(static function (Model $item) {
+            $item->save();
+        });
 
         return responder()->success()->respond(204);
     }
@@ -499,7 +501,9 @@ class IntervalController extends ItemController
 
         CatEvent::dispatch(Filter::getBeforeActionEventName(), [$intervalIds, $request]);
 
-        $itemsQuery->eachById(static fn($item) => Filter::process(Filter::getActionFilterName(), $item)->delete());
+        $itemsQuery->eachById(static function ($item) {
+            Filter::process(Filter::getActionFilterName(), $item)->delete();
+        });
 
         CatEvent::dispatch(Filter::getAfterActionEventName(), [$intervalIds, $request]);
 

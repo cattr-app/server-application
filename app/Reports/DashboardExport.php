@@ -48,11 +48,11 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
         $this->periodDates = $this->getPeriodDates($this->period);
     }
 
-    public function collection(): Collection
+    public function collection(array|null $where = null): Collection
     {
         $that = $this;
 
-        $reportCollection = $this->queryReport()->map(static function ($interval) use ($that) {
+        $reportCollection = $this->queryReport($where)->map(static function ($interval) use ($that) {
             $start = Carbon::make($interval->start_at);
 
             $interval->duration = Carbon::make($interval->end_at)?->diffInSeconds($start);
@@ -138,9 +138,9 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
         return $intervalsByDay;
     }
 
-    private function queryReport(): Collection
+    private function queryReport(array|null $where = null): Collection
     {
-        return ReportHelper::getBaseQuery(
+        $query = ReportHelper::getBaseQuery(
             $this->users,
             $this->startAt,
             $this->endAt,
@@ -153,7 +153,13 @@ class DashboardExport extends AppReport implements FromCollection, WithMapping, 
                 'time_intervals.is_manual',
                 'users.email as user_email',
             ]
-        )->whereIn('project_id', $this->projects)->get();
+        )->whereIn('project_id', $this->projects);
+
+        if (!is_null($where)) {
+            $query = $query->where($where);
+        }
+
+        return $query->get();
     }
 
     public function headings(): array

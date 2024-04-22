@@ -1,7 +1,7 @@
 import moment from 'moment-timezone';
 import i18n from '@/i18n';
 
-export function formatDate(date, format = 'YYYY-MM-DD h:mm:ss') {
+export function formatDate(date, format = 'YYYY-MM-DD HH:mm:ss') {
     return moment(date).format(format);
 }
 
