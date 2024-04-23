@@ -418,7 +418,7 @@
 <style lang="scss" scoped>
     .canvas {
         position: relative;
-
+        user-select: none;
         &::v-deep canvas {
             box-sizing: content-box;
         }

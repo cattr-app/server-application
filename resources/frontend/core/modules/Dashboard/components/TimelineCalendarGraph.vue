@@ -191,6 +191,7 @@
 
 <style lang="scss" scoped>
     .canvas ::v-deep svg {
+        user-select: none;
         width: 100%;
     }
 </style>

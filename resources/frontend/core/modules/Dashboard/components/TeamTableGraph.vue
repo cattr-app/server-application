@@ -340,10 +340,10 @@
     };
 </script>
 <style lang="scss" scoped>
-    .canvas::v-deep canvas {
+    .canvas::v-deep .canvas {
+        user-select: none;
         box-sizing: content-box;
     }
-
     .canvas {
         user-select: none;
         height: 100%;
