@@ -1,7 +1,10 @@
 <template>
     <div ref="canvas" class="canvas">
+        <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
+            <div :style="{ width: `${contentWidth()}px` }" />
+        </div>
         <div class="scroll-area-wrapper">
-            <div ref="scrollArea" class="scroll-area" @pointerdown="onDown"></div>
+            <div ref="scrollArea" class="scroll-area" @pointerdown="onDown" @scroll="onScroll"></div>
         </div>
     </div>
 </template>
@@ -12,6 +15,7 @@
     import { formatDurationString } from '@/utils/time';
     import { mapGetters } from 'vuex';
     import { SVG } from '@svgdotjs/svg.js';
+    import { debounce } from 'lodash';
 
     const defaultColorConfig = [
         {
@@ -77,23 +81,20 @@
 
                 return end.diff(start, 'days') + 1;
             },
-            columnWidth() {
-                return Math.max(minColumnWidth, this.canvasWidth() / this.columns);
-            },
-            contentWidth() {
-                return this.columns * this.columnWidth;
-            },
+
             maxScrollX() {
-                return this.contentWidth - this.canvasWidth();
+                return this.contentWidth() - this.canvasWidth();
             },
         },
         mounted() {
             this.draw = SVG();
-            this.onResize();
+
             const canvasContainer = this.$refs.scrollArea;
             const width = canvasContainer.clientWidth;
             const height = this.users.length * rowHeight;
             this.draw.viewbox(0, 0, width, height);
+
+            this.onResize();
             window.addEventListener('resize', this.onResize);
         },
         beforeDestroy() {
@@ -104,10 +105,16 @@
         },
         methods: {
             canvasWidth() {
-                if (!this.$refs.scrollArea) {
+                if (!this.$refs.canvas) {
                     return 500;
                 }
-                return this.$refs.scrollArea.clientWidth;
+                return this.$refs.canvas.clientWidth;
+            },
+            columnWidth() {
+                return Math.max(minColumnWidth, this.canvasWidth() / this.columns);
+            },
+            contentWidth() {
+                return this.columns * this.columnWidth();
             },
             isDateWithinRange(dateString, startDate, endDate) {
                 const date = new Date(dateString);
@@ -151,6 +158,9 @@
                     document.removeEventListener('pointercancel', this.onUp);
                 }
             },
+            onScroll(e) {
+                this.setScroll(e.target.scrollLeft);
+            },
             setScroll(x) {
                 const canvasContainer = this.$refs.scrollArea;
                 const width = canvasContainer.clientWidth;
@@ -161,21 +171,20 @@
                 this.setScroll(0);
             },
             formatDuration: formatDurationString,
-            drawGrid: throttle(function () {
+            drawGrid: debounce(function () {
                 if (typeof this.draw === 'undefined') return;
                 this.draw.clear();
                 const draw = this.draw;
                 const canvasContainer = this.$refs.scrollArea;
                 const width = canvasContainer.clientWidth;
-
                 const columnWidth = width / this.columns;
                 const height = this.users.length * rowHeight;
                 const start = moment(this.start, 'YYYY-MM-DD');
                 draw.viewbox(0, 0, width, canvasContainer.clientHeight);
-                const cursor = this.contentWidth > this.canvasWidth() ? 'move' : 'default';
+                const cursor = this.contentWidth() > this.canvasWidth() ? 'move' : 'default';
                 draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
                 // Background
-                draw.rect(this.contentWidth - 1, canvasContainer.clientHeight - (titleHeight + subtitleHeight))
+                draw.rect(this.contentWidth() - 1, canvasContainer.clientHeight - (titleHeight + subtitleHeight))
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .fill('#fafafa')
@@ -187,8 +196,8 @@
 
                 for (let column = 0; column < this.columns; ++column) {
                     const date = start.clone().locale(this.$i18n.locale).add(column, 'days');
-                    let left = this.columnWidth * column;
-                    let halfColumnWidth = this.columnWidth / 2;
+                    let left = this.columnWidth() * column;
+                    let halfColumnWidth = this.columnWidth() / 2;
                     // Column headers - day
                     draw.text(date.locale(this.$i18n.locale).format('D'))
                         .move(left + halfColumnWidth, 0)
@@ -244,7 +253,7 @@
                     filteredData[key] = filteredInnerObject;
                 }
                 const clipPath = draw
-                    .rect(this.contentWidth - 1, canvasContainer.clientHeight - (titleHeight + subtitleHeight))
+                    .rect(this.contentWidth() - 1, canvasContainer.clientHeight - (titleHeight + subtitleHeight))
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .attr({
@@ -259,14 +268,14 @@
                         Object.keys(userTime).forEach((day, i) => {
                             const column = -start.diff(day, 'days');
                             const duration = userTime[day];
-                            const left = (column * this.contentWidth) / this.columns;
+                            const left = (column * this.contentWidth()) / this.columns;
                             const total = 60 * 60 * this.workingHours;
                             const progress = duration / total;
                             const height = Math.ceil(Math.min(progress, 1) * (rowHeight - 1));
                             const color = this.getColor(progress);
 
                             const rect = draw
-                                .rect(this.columnWidth, height + 1)
+                                .rect(this.columnWidth(), height + 1)
                                 .move(left, Math.floor(top + (rowHeight - height)) - 1)
                                 .fill(color)
                                 .stroke({ width: 0 })
@@ -278,8 +287,8 @@
 
                             // Time label
                             draw.text(this.formatDuration(duration))
-                                .move(this.columnWidth / 2 + left, top + 22)
-                                .size(this.columnWidth, rowHeight)
+                                .move(this.columnWidth() / 2 + left, top + 22)
+                                .size(this.columnWidth(), rowHeight)
                                 .font({
                                     family: 'Nunito, sans-serif',
                                     size: 15,
@@ -295,14 +304,22 @@
                     }
                     // Horizontal grid lines
                     if (row > 0) {
-                        draw.line(0, 0, this.contentWidth, 0).move(0, top).stroke({ color: '#dfe5ed', width: 1 }).attr({
-                            cursor: cursor,
-                            hoverCursor: cursor,
-                        });
+                        draw.line(0, 0, this.contentWidth(), 0)
+                            .move(0, top)
+                            .stroke({ color: '#dfe5ed', width: 1 })
+                            .attr({
+                                cursor: cursor,
+                                hoverCursor: cursor,
+                            });
                     }
                 });
             }, 100),
-            onResize: throttle(function () {
+            onResize: debounce(function () {
+                const canvasContainer = this.$refs.scrollArea;
+                const width = canvasContainer.clientWidth;
+                const height = this.users.length * rowHeight;
+                this.draw.size(width, height);
+                this.draw.viewbox(0, 0, width, height);
                 this.drawGrid();
             }, 100),
         },
@@ -338,6 +355,7 @@
         left: 0;
         top: -25px;
         width: 100%;
+        height: 10px;
         overflow-x: auto;
     }
 
