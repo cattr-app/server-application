@@ -7,6 +7,7 @@
     "crud-title": "Project",
     "amount_of_tasks": "No tasks | 1 task | {count} tasks",
     "project_members": "Project members",
+    "gantt": "Gantt",
     "members": "Members",
     "enable_status": "Enable status in project",
     "override_color": "Override color",
@@ -27,6 +28,8 @@
     "due_date": "Due date",
     "history": "History",
     "project_id": "Project",
+    "phases": "Phases",
+    "add_phase": "Add",
     "priority_id": "Priority",
     "status_id": "Status",
     "comments": "Comments"

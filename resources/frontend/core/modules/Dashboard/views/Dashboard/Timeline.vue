@@ -141,11 +141,48 @@
         created() {
             localStorage['dashboard.tab'] = 'timeline';
             this.loadData();
-            this.updateHandle = setInterval(() => this.loadData(false), updateInterval);
+            this.updateHandle = setInterval(() => {
+                if (!this.updatedWithWebsockets) {
+                    this.loadData(false);
+                }
+
+                this.updatedWithWebsockets = false;
+            }, updateInterval);
+            this.updatedWithWebsockets = false;
+        },
+        mounted() {
+            const channel = this.$echo.private(`intervals.${this.user.id}`);
+            channel.listen(`.intervals.create`, data => {
+                const startAt = moment.tz(data.model.start_at, 'UTC').tz(this.timezone).format('YYYY-MM-DD');
+                const endAt = moment.tz(data.model.end_at, 'UTC').tz(this.timezone).format('YYYY-MM-DD');
+                if (startAt > this.end || endAt < this.start) {
+                    return;
+                }
+
+                this.addInterval(data.model);
+                this.updatedWithWebsockets = true;
+            });
+
+            channel.listen(`.intervals.edit`, data => {
+                this.updateInterval(data.model);
+                this.updatedWithWebsockets = true;
+            });
+
+            channel.listen(`.intervals.destroy`, data => {
+                if (typeof data.model === 'number') {
+                    this.removeIntervalById(data.model);
+                } else {
+                    this.removeInterval(data.model);
+                }
+
+                this.updatedWithWebsockets = true;
+            });
         },
         beforeDestroy() {
             clearInterval(this.updateHandle);
             this.service.unloadIntervals();
+
+            this.$echo.leave(`intervals.${this.user.id}`);
         },
         computed: {
             ...mapGetters('dashboard', ['service', 'intervals', 'timePerDay', 'timePerProject', 'timezone']),
@@ -171,6 +208,10 @@
             getEndOfDayInTimezone,
             ...mapMutations({
                 setTimezone: 'dashboard/setTimezone',
+                removeInterval: 'dashboard/removeInterval',
+                addInterval: 'dashboard/addInterval',
+                updateInterval: 'dashboard/updateInterval',
+                removeIntervalById: 'dashboard/removeIntervalById',
             }),
             loadData: debounce(async function (withLoadingIndicator = true) {
                 this.isDataLoading = withLoadingIndicator;

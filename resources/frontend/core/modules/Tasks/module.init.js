@@ -17,6 +17,10 @@ import DateInput from './components/DateInput';
 import { store as rootStore } from '@/store';
 import moment from 'moment-timezone';
 import { hasRole } from '@/utils/user';
+import Vue from 'vue';
+import ResourceSelect from '@/components/ResourceSelect.vue';
+import PhaseSelect from './components/PhaseSelect';
+import RelationsSelector from './components/RelationsSelector';
 
 export const ModuleConfig = {
     routerPrefix: 'tasks',
@@ -50,6 +54,9 @@ export function init(context, router) {
         with: [
             'priority',
             'project',
+            'phase:id,name',
+            'parents',
+            'children',
             'users',
             'status',
             'changes',
@@ -124,6 +131,26 @@ export function init(context, router) {
                     },
                     currentValue.name,
                 );
+            },
+        },
+        {
+            key: 'phase',
+            label: 'field.phase',
+            render: (h, { currentValue }) => {
+                return h('span', {}, [currentValue?.name ?? i18n.t('tasks.unset_phase')]);
+            },
+        },
+        {
+            label: 'tasks.relations.title',
+            key: 'relations',
+            render: (h, data) => {
+                return h(RelationsSelector, {
+                    props: {
+                        parents: Array.isArray(data.values.parents) ? data.values.parents : [],
+                        children: Array.isArray(data.values.children) ? data.values.children : [],
+                        showControls: false,
+                    },
+                });
             },
         },
         {
@@ -275,6 +302,25 @@ export function init(context, router) {
             },
         },
         {
+            key: 'start_date',
+            label: 'field.start_date',
+            render: (h, props) => {
+                let date = i18n.t('tasks.unset_start_date');
+                const userTimezone = moment.tz.guess();
+                const companyTimezone = rootStore.getters['user/companyData'].timezone;
+                if (
+                    props.currentValue != null &&
+                    typeof props.currentValue === 'string' &&
+                    typeof companyTimezone === 'string'
+                ) {
+                    date =
+                        formatDate(moment.utc(props.currentValue).tz(companyTimezone, true).tz(userTimezone)) +
+                        ` (GMT${moment.tz(userTimezone).format('Z')})`;
+                }
+                return h('span', date);
+            },
+        },
+        {
             key: 'due_date',
             label: 'field.due_date',
             render: (h, props) => {
@@ -341,7 +387,7 @@ export function init(context, router) {
                                         {
                                             props: {
                                                 to: {
-                                                    name: routes.usersView,
+                                                    name: 'Users.crud.users.view',
                                                     params: { id: item.user_id },
                                                 },
                                             },
@@ -386,9 +432,42 @@ export function init(context, router) {
         {
             label: 'field.project',
             key: 'project_id',
-            type: 'resource-select',
-            service: new ProjectsService(),
+            render: (h, props) => {
+                const value = typeof props.currentValue === 'number' ? props.currentValue : null;
+                return h(ResourceSelect, {
+                    props: {
+                        value,
+                        service: new ProjectsService(),
+                    },
+                    on: {
+                        input: function (value) {
+                            props.setValue('project_phase_id', null);
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
             required: true,
+        },
+
+        {
+            key: 'project_phase_id',
+            label: 'field.phase',
+            render: (h, props) => {
+                const value = typeof props.currentValue === 'number' ? props.currentValue : '';
+                const projectId = typeof props.values.project_id === 'number' ? props.values.project_id : 0;
+                return h(PhaseSelect, {
+                    props: {
+                        value,
+                        projectId,
+                    },
+                    on: {
+                        input: function (value) {
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
         },
         {
             label: 'field.task_name',
@@ -471,6 +550,20 @@ export function init(context, router) {
                         input: function (seconds) {
                             data.inputHandler(seconds);
                         },
+                    },
+                });
+            },
+        },
+        {
+            label: 'field.start_date',
+            key: 'start_date',
+            render: (h, props) => {
+                const value = typeof props.currentValue === 'string' ? props.currentValue : null;
+
+                return h(DateInput, {
+                    props: {
+                        inputHandler: props.inputHandler,
+                        value,
                     },
                 });
             },
@@ -669,6 +762,7 @@ export function init(context, router) {
         {
             title: 'field.users',
             key: 'users',
+            hideForMobile: true,
             render: (h, { item }) => {
                 const users = item.users;
                 if (!users) {
@@ -701,6 +795,20 @@ export function init(context, router) {
             },
         },
     ]);
+
+    const websocketLeaveChannel = id => Vue.prototype.$echo.leave(`tasks.${id}`);
+    const websocketEnterChannel = (id, handlers) => {
+        const channel = Vue.prototype.$echo.private(`tasks.${id}`);
+        for (const action in handlers) {
+            channel.listen(`.tasks.${action}`, handlers[action]);
+        }
+    };
+
+    grid.addToMetaProperties('gridData.websocketEnterChannel', websocketEnterChannel, grid.getRouterConfig());
+    grid.addToMetaProperties('gridData.websocketLeaveChannel', websocketLeaveChannel, grid.getRouterConfig());
+
+    crud.view.addToMetaProperties('pageData.websocketEnterChannel', websocketEnterChannel, crud.view.getRouterConfig());
+    crud.view.addToMetaProperties('pageData.websocketLeaveChannel', websocketLeaveChannel, crud.view.getRouterConfig());
 
     grid.addToMetaProperties(
         'gridData.actionsFilter',
@@ -745,6 +853,18 @@ export function init(context, router) {
         },
     ]);
 
+    const relationsRouteName = context.getModuleRouteName() + '.relations';
+    context.addRoute([
+        {
+            path: `/${context.routerPrefix}/:id/relations`,
+            name: relationsRouteName,
+            component: () => import('./views/TaskRelations.vue'),
+            meta: {
+                auth: true,
+            },
+        },
+    ]);
+
     grid.addAction([
         {
             title: 'control.view',
@@ -755,6 +875,16 @@ export function init(context, router) {
             renderCondition() {
                 // User always can view assigned tasks
                 return true;
+            },
+        },
+        {
+            title: 'tasks.relations.title',
+            icon: 'icon-corner-down-right',
+            onClick: (router, { item }) => {
+                router.push({ name: relationsRouteName, params: { id: item.id } });
+            },
+            renderCondition({ $can }, item) {
+                return $can('update', 'task', item);
             },
         },
         {

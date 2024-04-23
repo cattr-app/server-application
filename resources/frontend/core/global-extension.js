@@ -23,15 +23,21 @@ function installGlobalComponents(Vue) {
     Vue.prototype.$http = axios;
     Vue.prototype.$echo = new Echo({
         broadcaster: 'pusher',
-        key: process.env.MIX_PUSHER_APP_KEY,
-        wsHost: process.env.MIX_PUSHER_HOST ?? window.location.hostname,
-        wsPath: process.env.MIX_PUSHER_PATH ?? '',
-        wsPort: process.env.MIX_PUSHER_PORT ?? 80,
-        wssPort: process.env.MIX_PUSHER_PORT ?? 443,
-        forceTLS: (process.env.MIX_PUSHER_SCHEME ?? 'https') === 'https',
+        key: process.env.MIX_REVERB_APP_KEY,
+        wsHost: process.env.MIX_REVERB_HOST ?? window.location.hostname,
+        wsPath: process.env.MIX_REVERB_PATH ?? '',
+        wsPort: process.env.MIX_REVERB_FRONTEND_PORT ?? 80,
+        wssPort: process.env.MIX_REVERB_FRONTEND_PORT ?? 443,
+        forceTLS: (process.env.MIX_REVERB_SCHEME ?? 'https') === 'https',
+        disableStats: true,
         enabledTransports: ['ws', 'wss'],
         Pusher,
         cluster: 'eu',
+        auth: {
+            headers: {
+                Authorization: `Bearer ${localStorage.getItem('access_token')}`,
+            },
+        },
     });
 }
 

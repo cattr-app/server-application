@@ -4,6 +4,7 @@
         &__project {
             white-space: pre;
             text-overflow: ellipsis;
+            overflow: hidden;
         }
 
         &__task {

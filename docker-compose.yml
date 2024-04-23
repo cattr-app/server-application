@@ -15,7 +15,7 @@ services:
       - web
 
   db:
-    image: percona:latest
+    image: percona:8.0
     environment:
       - MYSQL_DATABASE=cattr
       - MYSQL_ROOT_PASSWORD=password

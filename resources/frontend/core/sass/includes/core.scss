@@ -1,5 +1,5 @@
 body {
-  // min-width: $container-lg;
+  //min-width: $container-lg;
 }
 
 .content-wrapper {
@@ -66,4 +66,11 @@ body {
   text-decoration: none;
   border-bottom: 1px dashed #3f536e;
   cursor: help;
+}
+
+@media (max-width: 1200px) {
+  .container-fluid {
+    padding-left: 8px;
+    padding-right: 8px;
+  }
 }

@@ -57,7 +57,10 @@
             width: 30px;
             height: 30px;
             border-radius: 5px;
-            font: 12px / 30px Helvetica, Arial, sans-serif;
+            font:
+                12px / 30px Helvetica,
+                Arial,
+                sans-serif;
             align-items: center;
             justify-content: center;
             text-align: center;

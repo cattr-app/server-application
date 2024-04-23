@@ -137,6 +137,12 @@ Route::group([
         $router->post('project-members/bulk-edit', [ProjectMemberController::class, 'bulkEdit'])
             ->name('projects_members.edit');
 
+        // Gantt routes
+        $router->get('projects/gantt-data', [ProjectController::class, 'ganttData'])
+            ->name('projects.gantt-data');
+        $router->get('projects/phases', [ProjectController::class, 'phases'])
+            ->name('projects.phases');
+
         //Tasks routes
         $router->any('tasks/list', [TaskController::class, 'index'])
             ->name('tasks.list');
@@ -150,6 +156,12 @@ Route::group([
             ->name('tasks.show');
         $router->post('tasks/remove', [TaskController::class, 'destroy'])
             ->name('tasks.destroy');
+
+        // Gantt routes
+        $router->post('tasks/create-relation', [TaskController::class, 'createRelation'])
+            ->name('tasks.create-relation');
+        $router->post('tasks/remove-relation', [TaskController::class, 'destroyRelation'])
+            ->name('tasks.remove-relation');
 
         // Task comments
         $router->any('task-comment/list', [TaskCommentController::class, 'index'])

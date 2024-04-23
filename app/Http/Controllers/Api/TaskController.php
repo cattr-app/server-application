@@ -2,27 +2,27 @@
 
 namespace App\Http\Controllers\Api;
 
+use App\Enums\TaskRelationType;
+use App\Exceptions\Entities\TaskRelationException;
+use App\Http\Middleware\RegisterModulesEvents;
+use App\Http\Requests\Task\CreateRelationRequest;
 use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
 use App\Http\Requests\Task\EditTaskRequest;
 use App\Http\Requests\Task\ListTaskRequest;
 use App\Http\Requests\Task\ShowTaskRequest;
+use App\Http\Requests\Task\DestroyRelationRequest;
 use App\Jobs\SaveTaskEditHistory;
 use App\Models\Priority;
 use App\Models\Project;
-use Carbon\Carbon;
 use Exception;
 use Filter;
 use App\Models\Task;
-use App\Models\TaskHistory;
 use App\Models\User;
 use App\Observers\TaskObserver;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
-use Illuminate\Http\Request;
-use DB;
 use CatEvent;
-use Illuminate\Support\Arr;
 use Settings;
 use Throwable;
 
@@ -179,6 +179,66 @@ class TaskController extends ItemController
             }
         );
 
+        CatEvent::listen(Filter::getBeforeActionEventName(), static function (Task $task, array $requestData) {
+            if (isset($requestData['start_date'])) {
+                throw_if(
+                    $task->ancestors()
+                        ->where(fn(Builder $q) => $q
+                            ->where('due_date', '>', $requestData['start_date'])
+                            ->orWhere('start_date', '>', $requestData['start_date']))
+                        ->exists(),
+                    new TaskRelationException(TaskRelationException::CANNOT_START_BEFORE_PARENT_ENDS)
+                );
+            } elseif (isset($requestData['due_date'])) {
+                throw_if(
+                    $task->ancestors()
+                        ->where(fn(Builder $q) => $q
+                            ->where('due_date', '>', $requestData['due_date'])
+                            ->orWhere('start_date', '>', $requestData['due_date']))
+                        ->exists(),
+                    new TaskRelationException(TaskRelationException::CANNOT_START_BEFORE_PARENT_ENDS)
+                );
+            } else {
+                return;
+            }
+            $newDate = $requestData['due_date'] ?? $requestData['start_date'];
+
+            $nearestChildStartDate = $task->descendants()
+                ->where('start_date', '<', $newDate)
+                ->orderBy('start_date')
+                ->first()?->start_date;
+
+            $nearestChildDueDate = $task->descendants()
+                ->where('due_date', '<', $newDate)
+                ->orderBy('due_date')
+                ->first()?->due_date;
+
+            if (is_null($nearestChildStartDate) && is_null($nearestChildDueDate)) { // no date overlap
+                return;
+            }
+            if (is_null($nearestChildStartDate)) {
+                $nearestChildDate = $nearestChildDueDate;
+            } elseif (is_null($nearestChildDueDate)) {
+                $nearestChildDate = $nearestChildStartDate;
+            } else {
+                $nearestChildDate = min($nearestChildStartDate, $nearestChildDueDate);
+            }
+
+            $delta = $nearestChildDate->diffInDays($newDate, false);
+
+            dispatch(fn() => Task::withInitialQueryConstraint(function (Builder $query) use ($newDate) {
+                $query->where(fn(Builder $q) => $q
+                    ->where('start_date', '<', $newDate)
+                    ->orWhere('due_date', '<', $newDate));
+            }, fn() => $task->descendants()->groupBy('id')->lazyById()->each(
+                static function (Task $child) use ($delta) {
+                    $child->start_date = $child->start_date?->addDays($delta);
+                    $child->due_date = $child->due_date?->addDays($delta);
+                    $child->save();
+                }
+            )));
+        });
+
         CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $data) use ($request) {
             $oldUsers = $data->users()->select('id', 'full_name');
             $changes = $data->users()->sync($request->get('users'));
@@ -187,9 +247,10 @@ class TaskController extends ItemController
                     $data,
                     $request->user(),
                     [
-                        'users' => (string)User::withoutGlobalScopes()
+                        'users' => User::withoutGlobalScopes()
                             ->whereIn('id', $request->get('users'))
                             ->select(['id', 'full_name'])
+                            ->get(),
                     ],
                     [
                         'users' => json_encode($oldUsers),
@@ -448,5 +509,95 @@ class TaskController extends ItemController
     public function show(ShowTaskRequest $request): JsonResponse
     {
         return $this->_show($request);
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function createRelation(CreateRelationRequest $request): JsonResponse
+    {
+        $requestData = $request->validated();
+
+        $task = Task::find($requestData['task_id']);
+        $relatedTask = Task::find($requestData['related_task_id']);
+        $relationType = TaskRelationType::tryFrom($requestData['relation_type']);
+        throw_if(
+            $task->project_id !== $relatedTask->project_id,
+            new TaskRelationException(TaskRelationException::NOT_SAME_PROJECT)
+        );
+        throw_if(
+            $task->children()->where('id', $relatedTask->id)->exists()
+            || $task->parents()->where('id', $relatedTask->id)->exists(),
+            new TaskRelationException(TaskRelationException::ALREADY_EXISTS)
+        );
+        throw_if(
+            match ($relationType) {
+                TaskRelationType::FOLLOWS => $task->descendants()->where('id', $relatedTask->id)->exists(),
+                TaskRelationType::PRECEDES => $task->ancestors()->where('id', $relatedTask->id)->exists()
+            },
+            new TaskRelationException(TaskRelationException::CYCLIC)
+        );
+        match ($relationType) {
+            TaskRelationType::FOLLOWS => $task->parents()->attach($relatedTask),
+            TaskRelationType::PRECEDES => $task->children()->attach($relatedTask),
+        };
+        RegisterModulesEvents::broadcastEvent('tasks', 'edit', $task);
+        RegisterModulesEvents::broadcastEvent('tasks', 'edit', $relatedTask);
+        $relatedTask->pivot = match ($relationType) { // only for frontend update
+            TaskRelationType::FOLLOWS => [
+                'child_id' => $task->id,
+                'parent_id' => $relatedTask->id,
+            ],
+            TaskRelationType::PRECEDES => [
+                'child_id' => $relatedTask->id,
+                'parent_id' => $task->id,
+            ]
+        };
+
+        // move dates after relation attached
+        $parent = $relationType === TaskRelationType::FOLLOWS ? $relatedTask : $task;
+        $child = $relationType === TaskRelationType::FOLLOWS ? $task : $relatedTask;
+        $parentDateKey = $parent->due_date ? 'due_date' : ($parent->start_date ? 'start_date' : null);
+        $childDateKey = $child->start_date ? 'start_date' : ($child->due_date ? 'due_date' : null);
+
+        if (is_null($childDateKey) && $parentDateKey) {
+            // no date on child - add any available date from parent
+            $child->start_date = $parent->$parentDateKey;
+            $child->due_date = $parent->$parentDateKey;
+            $child->save();
+            RegisterModulesEvents::broadcastEvent('gantt', 'updateAll', $child->project);
+        } elseif ($parentDateKey && $childDateKey && $child->$childDateKey->lt($parent->$parentDateKey)) {
+            // child date is before parent date - move child and its descendants dates
+            $delta = $child->$childDateKey->diffInDays($parent->$parentDateKey, false);
+            dispatch(function () use ($delta, $child) {
+                $child->descendantsAndSelf()->groupBy('id')->lazyById()
+                    ->each(static function (Task $child) use ($delta) {
+                        $child->start_date = $child->start_date?->addDays($delta);
+                        $child->due_date = $child->due_date?->addDays($delta);
+                        $child->save();
+                    });
+                RegisterModulesEvents::broadcastEvent('gantt', 'updateAll', $child->project);
+            });
+        } else {
+            RegisterModulesEvents::broadcastEvent('gantt', 'updateAll', $child->project);
+        }
+
+        return responder()->success($relatedTask)->respond();
+    }
+
+    /**
+     * @throws Throwable
+     */
+    public function destroyRelation(DestroyRelationRequest $request): JsonResponse
+    {
+        $requestData = $request->validated();
+        $parentTask = Task::find($requestData['parent_id']);
+        $parentTask->children()->detach($requestData['child_id']);
+
+        RegisterModulesEvents::broadcastEvent('gantt', 'updateAll', $parentTask->project);
+        RegisterModulesEvents::broadcastEvent('tasks', 'edit', $parentTask);
+        RegisterModulesEvents::broadcastEvent('tasks', 'edit', Task::find($requestData['child_id']));
+
+        return responder()->success()->respond(204);
     }
 }

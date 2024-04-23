@@ -41,10 +41,10 @@
                                 transferStatus === 'error' || openStatus === 'error'
                                     ? $t('auth.desktop.retry')
                                     : transferStatus === 'finish' && openStatus !== 'finish'
-                                    ? $t('auth.desktop.open')
-                                    : transferStatus === 'finish' && openStatus === 'finish'
-                                    ? $t('auth.desktop.finish')
-                                    : $t('auth.desktop.cancel')
+                                      ? $t('auth.desktop.open')
+                                      : transferStatus === 'finish' && openStatus === 'finish'
+                                        ? $t('auth.desktop.finish')
+                                        : $t('auth.desktop.cancel')
                             }}
                         </at-button>
                     </div>

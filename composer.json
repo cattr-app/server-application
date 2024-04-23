@@ -17,7 +17,6 @@
     "ext-gd": "*",
     "ext-json": "*",
     "ext-pdo": "*",
-    "beyondcode/laravel-websockets": "^1.14",
     "czproject/git-php": "^4.0",
     "doctrine/dbal": "^3.0",
     "elhebert/laravel-sri": "^3.2",
@@ -27,13 +26,15 @@
     "guzzlehttp/guzzle": "^7.2",
     "intervention/image": "^2.7",
     "laravel/framework": "^10.0",
-    "laravel/octane": "^1.5",
+    "laravel/octane": "^2.2",
+    "laravel/reverb": "@beta",
     "laravel/sanctum": "^3.2",
     "maatwebsite/excel": "^3.1",
     "matanyadaev/laravel-eloquent-spatial": "^3.1",
     "mpdf/mpdf": "^8.0",
     "nwidart/laravel-modules": "^10",
-    "sentry/sentry-laravel": "^3.3",
+    "sentry/sentry-laravel": "^4.1",
+    "staudenmeir/laravel-adjacency-list": "^1.19",
     "wikimedia/composer-merge-plugin": "^2.0"
   },
   "require-dev": {
@@ -66,13 +67,13 @@
       "@php artisan ide-helper:generate",
       "@php artisan ide-helper:meta"
     ],
+    "pre-install-cmd": [
+      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
+    ],
     "post-autoload-dump": [
       "Illuminate\\Foundation\\ComposerScripts::postAutoloadDump",
       "@php artisan package:discover --ansi",
       "@php artisan vendor:publish --tag=laravel-assets --ansi --force"
-    ],
-    "post-install-cmd": [
-      "@php -r \"file_exists('.env') || copy('.env.example', '.env');\""
     ],
     "dumperd": [
       "@php artisan generate:erd erd.svg --format=svg"

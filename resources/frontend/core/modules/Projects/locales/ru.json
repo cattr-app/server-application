@@ -7,6 +7,7 @@
     "crud-title": "Проект",
     "amount_of_tasks": "Нет задач | 1 задача | {count} задач(и)",
     "project_members": "Участники",
+    "gantt": "Гант",
     "members": "Участники",
     "kanban": "Канбан",
     "enable_status": "Включить статус в проекте",
@@ -27,6 +28,8 @@
     "due_date": "Дата завершения",
     "history": "История",
     "project_id": "Проект",
+    "phases": "Стадии",
+    "add_phase": "Добавить",
     "priority_id": "Приоритет",
     "status_id": "Статус",
     "comments": "Комментарии"

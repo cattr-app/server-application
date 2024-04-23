@@ -5,14 +5,19 @@ namespace App\Http\Controllers\Api;
 use App\Http\Requests\Project\CreateProjectRequest;
 use App\Http\Requests\Project\EditProjectRequest;
 use App\Http\Requests\Project\DestroyProjectRequest;
+use App\Http\Requests\Project\GanttDataRequest;
 use App\Http\Requests\Project\ListProjectRequest;
+use App\Http\Requests\Project\PhasesRequest;
 use App\Http\Requests\Project\ShowProjectRequest;
 use CatEvent;
 use Filter;
 use App\Models\Project;
 use Exception;
+use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Http\JsonResponse;
 use DB;
+use Staudenmeir\LaravelAdjacencyList\Eloquent\Builder as AdjacencyListBuilder;
 use Throwable;
 
 class ProjectController extends ItemController
@@ -84,45 +89,86 @@ class ProjectController extends ItemController
     }
 
     /**
+     * @param GanttDataRequest $request
+     * @return JsonResponse
+     * @throws Exception
+     * @throws Throwable
+     */
+    public function ganttData(GanttDataRequest $request): JsonResponse
+    {
+
+        Filter::listen(Filter::getQueryFilterName(), static fn(Builder $query) => $query->with([
+            'tasks' => fn(HasMany $queue) => $queue
+                ->orderBy('start_date')
+                ->select([
+                    'id',
+                    'task_name',
+                    'priority_id',
+                    'status_id',
+                    'estimate',
+                    'start_date',
+                    'due_date',
+                    'project_phase_id',
+                    'project_id'
+                ])->with(['status', 'priority'])
+                ->withSum(['workers as total_spent_time'], 'duration')
+                ->withSum(['workers as total_offset'], 'offset')
+                ->withCasts(['start_date' => 'string', 'due_date' => 'string'])
+                ->whereNotNull('start_date')->whereNotNull('due_date'),
+            'phases' => fn(HasMany $queue) => $queue
+                ->select(['id', 'name', 'project_id'])
+                ->withMin([
+                    'tasks as start_date' => fn(AdjacencyListBuilder $q) => $q
+                        ->whereNotNull('start_date')
+                        ->whereNotNull('due_date')
+                ], 'start_date')
+                ->withMax([
+                    'tasks as due_date' => fn(AdjacencyListBuilder $q) => $q
+                        ->whereNotNull('start_date')
+                        ->whereNotNull('due_date')
+                ], 'due_date'),
+        ]));
+
+        Filter::listen(Filter::getActionFilterName(), static function (Project $item) {
+            $item->append('tasks_relations');
+            return $item;
+        });
+
+
+        return $this->_show($request);
+    }
+
+    /**
+     * @param PhasesRequest $request
+     * @return JsonResponse
+     * @throws Exception
+     * @throws Throwable
+     */
+    public function phases(PhasesRequest $request): JsonResponse
+    {
+        Filter::listen(
+            Filter::getQueryFilterName(),
+            static fn(Builder $query) => $query
+                ->with([
+                    'phases'=> fn(HasMany $q) => $q->withCount('tasks')
+            ])
+        );
+
+        return $this->_show($request);
+    }
+
+    /**
      * @throws Throwable
      */
     public function show(ShowProjectRequest $request): JsonResponse
     {
-        Filter::listen(Filter::getSuccessResponseFilterName(), static function ($project) {
-            $totalTracked = 0;
-            $taskIDs = array_map(static function ($task) {
-                return $task['id'];
-            }, $project['tasks']);
-
-            $workers = DB::table('time_intervals AS i')
-                ->leftJoin('tasks AS t', 'i.task_id', '=', 't.id')
-                ->leftJoin('users AS u', 'i.user_id', '=', 'u.id')
-                ->select(
-                    'i.user_id',
-                    'u.full_name',
-                    'i.task_id',
-                    'i.start_at',
-                    'i.end_at',
-                    't.task_name',
-                    DB::raw('SUM(TIMESTAMPDIFF(SECOND, i.start_at, i.end_at)) as duration')
-                )
-                ->whereNull('i.deleted_at')
-                ->whereIn('task_id', $taskIDs)
-                ->orderBy('duration', 'desc')
-                ->groupBy('t.id')
-                ->get();
-
-            foreach ($workers as $worker) {
-                $totalTracked += $worker->duration;
-            }
-
-            $project['workers'] = $workers;
-            $project['total_spent_time'] = $totalTracked;
-            return $project;
-        });
-
-        Filter::listen(Filter::getQueryFilterName(), static fn($query) => $query->with('tasks'));
-
+        Filter::listen(
+            Filter::getQueryFilterName(),
+            static fn(Builder $query) => $query
+                ->with([
+                    'phases'=> fn(HasMany $q) => $q->withCount('tasks')
+                ])
+        );
         return $this->_show($request);
     }
 
@@ -172,7 +218,7 @@ class ProjectController extends ItemController
      */
     public function create(CreateProjectRequest $request): JsonResponse
     {
-        CatEvent::listen(Filter::getAfterActionEventName(), static function (Project $project) use ($request) {
+        CatEvent::listen(Filter::getAfterActionEventName(), static function (Project $project, $requestData) use ($request) {
             if ($request->has('statuses')) {
                 $statuses = [];
                 foreach ($request->get('statuses') as $status) {
@@ -180,6 +226,10 @@ class ProjectController extends ItemController
                 }
 
                 $project->statuses()->sync($statuses);
+            }
+
+            if (isset($requestData['phases'])) {
+                $project->phases()->createMany($requestData['phases']);
             }
         });
 
@@ -339,7 +389,7 @@ class ProjectController extends ItemController
      */
     public function edit(EditProjectRequest $request): JsonResponse
     {
-        CatEvent::listen(Filter::getAfterActionEventName(), static function (Project $project) use ($request) {
+        CatEvent::listen(Filter::getAfterActionEventName(), static function (Project $project, $requestData) use ($request) {
             if ($request->has('statuses')) {
                 $statuses = [];
                 foreach ($request->get('statuses') as $status) {
@@ -347,6 +397,19 @@ class ProjectController extends ItemController
                 }
 
                 $project->statuses()->sync($statuses);
+            }
+
+            if (isset($requestData['phases'])) {
+                $phases = collect($requestData['phases']);
+                $project->phases()
+                    ->whereNotIn('id', $phases->pluck('id')->filter())
+                    ->delete();
+                $project->phases()->upsert(
+                    $phases->filter(fn (array $val) => isset($val['id']))->toArray(),
+                    ['id'],
+                    ['name']
+                );
+                $project->phases()->createMany($phases->filter(fn (array $val) => !isset($val['id'])));
             }
         });
 

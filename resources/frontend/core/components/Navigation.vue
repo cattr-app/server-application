@@ -154,6 +154,7 @@
             background-size: cover;
             height: 45px;
             width: 45px;
+            flex-shrink: 0;
         }
 
         &::v-deep {

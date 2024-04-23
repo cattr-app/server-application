@@ -11,7 +11,7 @@
                 v-model="filterModel"
                 type="text"
                 :placeholder="filterPlaceholder"
-                class="col-6 crud__filter"
+                class="col-6 col-xs-24 crud__filter"
                 @input="handleSearchInput"
             >
                 <template slot="prepend">
@@ -133,7 +133,7 @@
         </div>
 
         <div class="at-container">
-            <div ref="tableWrapper" class="crud__table">
+            <div ref="tableWrapper" class="crud__table" :style="cssVarsForGridCols">
                 <at-table ref="table" :key="columnsKey" size="large" :columns="columns" :data="displayableData" />
                 <preloader v-if="isDataLoading" class="preloader" :is-transparent="true" />
             </div>
@@ -154,6 +154,9 @@
     import ProjectSelect from '@/components/ProjectSelect';
     import StatusSelect from '@/components/StatusSelect';
     import UserSelect from '@/components/UserSelect';
+    import { mapGetters } from 'vuex';
+
+    const widthLessThan500MediaQuery = matchMedia('(max-width: 500px)');
 
     export default {
         name: 'GridView',
@@ -218,7 +221,6 @@
                 filterTimeout: null,
                 filterFieldsTimeout: null,
                 orderBy,
-
                 filterPopupVisible: false,
                 filterFieldsModel: { ...filterFieldsModel },
 
@@ -242,12 +244,19 @@
                         fields: gridData.filters.map(filter => filter.referenceKey),
                     },
                 },
+                lastDeletedItem: [],
 
                 isDataLoading: false,
                 skipRouteUpdate: false,
+
+                openActionsFor: null,
+                hideColumns: widthLessThan500MediaQuery.matches,
             };
         },
         methods: {
+            setHideColumns(e) {
+                this.hideColumns = e.matches;
+            },
             handleSearchInput() {
                 clearTimeout(this.filterTimeout);
 
@@ -396,6 +405,9 @@
                 this.isDataLoading = false;
             },
             handleClick(e) {
+                if (!e.target.closest('.actions__toggle')) {
+                    this.openActionsFor = null;
+                }
                 if (e.target.closest('.crud__popup-filters')) {
                     return;
                 }
@@ -549,6 +561,7 @@
             }
         },
         computed: {
+            ...mapGetters('user', ['user']),
             columnsKey() {
                 // Used to forced update table when columns changed
                 return this.columns.map(col => col.title).join(',');
@@ -575,30 +588,57 @@
                                 {
                                     class: 'actions-column',
                                 },
-                                gridData.actions.map(item => {
-                                    if (
-                                        typeof item.renderCondition !== 'undefined'
-                                            ? item.renderCondition(this, params.item)
-                                            : true
-                                    ) {
-                                        return h(
-                                            'AtButton',
-                                            {
-                                                props: {
-                                                    type: item.actionType || 'primary', // AT-ui button display type
-                                                    icon: item.icon || undefined, // Prepend icon to button
-                                                },
-                                                on: {
-                                                    click: () => {
-                                                        item.onClick(this.$router, params, this);
-                                                    },
-                                                },
-                                                class: 'action-button',
+                                [
+                                    h('AtButton', {
+                                        props: {
+                                            type: 'primary',
+                                            icon: params.item.id === this.openActionsFor ? 'icon-x' : 'icon-grid',
+                                        },
+                                        class: 'actions__toggle',
+                                        on: {
+                                            click: () => {
+                                                if (this.openActionsFor === params.item.id) {
+                                                    this.openActionsFor = null;
+                                                } else {
+                                                    this.openActionsFor = params.item.id;
+                                                }
                                             },
-                                            this.$t(item.title),
-                                        );
-                                    }
-                                }),
+                                        },
+                                    }),
+                                    h(
+                                        'div',
+                                        {
+                                            class: {
+                                                actions__wrapper: true,
+                                                'actions__wrapper--active': this.openActionsFor === params.item.id,
+                                            },
+                                        },
+                                        gridData.actions.map(item => {
+                                            if (
+                                                typeof item.renderCondition !== 'undefined'
+                                                    ? item.renderCondition(this, params.item)
+                                                    : true
+                                            ) {
+                                                return h(
+                                                    'AtButton',
+                                                    {
+                                                        props: {
+                                                            type: item.actionType || 'primary', // AT-ui button display type
+                                                            icon: item.icon || undefined, // Prepend icon to button
+                                                        },
+                                                        on: {
+                                                            click: () => {
+                                                                item.onClick(this.$router, params, this);
+                                                            },
+                                                        },
+                                                        class: 'action-button',
+                                                    },
+                                                    this.$t(item.title),
+                                                );
+                                            }
+                                        }),
+                                    ),
+                                ],
                             );
 
                             if (typeof gridData.actionsFilter !== 'undefined') {
@@ -610,7 +650,12 @@
                     });
                 }
 
-                return columns.filter(column => this.checkWithCtx(column.renderCondition));
+                return columns.filter(column => {
+                    if (this.hideColumns && column.hideForMobile) {
+                        return false;
+                    }
+                    return this.checkWithCtx(column.renderCondition);
+                });
             },
             visibleFilterFields() {
                 return this.filterFields.filter(filter => {
@@ -658,6 +703,18 @@
 
                 return keys.every(key => this.loadedFilters[key]);
             },
+            cssVarsForGridCols() {
+                const { gridData } = this.$route.meta;
+                const numOfActions = gridData.actions.length;
+                const actionsCol = num => (numOfActions > 0 ? `${numOfActions / num}fr` : '');
+                const hiddenColumnsAmount = gridData.columns.filter(column => column.hideForMobile).length;
+                return {
+                    '--grid-columns-gt-1620': `repeat(${gridData.columns.length}, minmax(75px, 1fr)) ${actionsCol(1)}`,
+                    '--grid-columns-lt-1620': `repeat(${gridData.columns.length}, minmax(75px, 1fr)) ${actionsCol(3)}`,
+                    '--grid-columns-lt-1200': `repeat(${gridData.columns.length}, minmax(75px, 1fr)) 0.5fr`,
+                    '--grid-columns-lt-500': `repeat(${gridData.columns.length - hiddenColumnsAmount}, minmax(75px, 1fr)) 0.5fr`,
+                };
+            },
         },
         async mounted() {
             this.loadFilterFields();
@@ -672,6 +729,32 @@
 
             if (this.$refs.tableWrapper) {
                 this.$refs.tableWrapper.addEventListener('click', this.handleTableClick);
+            }
+
+            widthLessThan500MediaQuery.addEventListener('change', this.setHideColumns);
+
+            // websocket
+            this.websocketEnterChannel = this.$route.meta.gridData.websocketEnterChannel;
+            this.websocketLeaveChannel = this.$route.meta.gridData.websocketLeaveChannel;
+
+            if (typeof this.websocketEnterChannel !== 'undefined') {
+                this.websocketEnterChannel(this.user.id, {
+                    create: data => {
+                        this.tableData.unshift(data.model);
+                    },
+                    edit: data => {
+                        const rowIndex = this.tableData.findIndex(row => +row.id === +data.model.id);
+                        if (rowIndex !== -1) {
+                            this.$set(this.tableData, rowIndex, data.model);
+                        }
+                    },
+                    destroy: data => {
+                        const rowIndex = this.tableData.findIndex(row => +row.id === +data.model.id);
+                        if (rowIndex !== -1) {
+                            this.tableData.splice(rowIndex, 1);
+                        }
+                    },
+                });
             }
         },
         watch: {
@@ -688,7 +771,12 @@
                 this.skipRouteUpdate = false;
             },
         },
-        beforeDestory() {
+        beforeDestroy() {
+            widthLessThan500MediaQuery.removeEventListener('change', this.setHideColumns);
+            if (typeof this.websocketLeaveChannel !== 'undefined') {
+                this.websocketLeaveChannel(this.user.id);
+            }
+
             window.removeEventListener('click', this.handleClick);
             window.removeEventListener('resize', this.handleResize);
 
@@ -715,10 +803,10 @@
             display: flex;
             justify-content: flex-end;
             align-items: center;
+            gap: 1rem;
 
             &__item {
                 position: relative;
-                margin-right: 1rem;
             }
         }
 
@@ -766,6 +854,10 @@
 
         &__filters {
             margin-bottom: $spacing-03;
+            @media (max-width: 991px) {
+                gap: 1rem;
+                flex-direction: row-reverse;
+            }
         }
 
         &__filter {
@@ -810,13 +902,31 @@
             &::v-deep .at-table {
                 table {
                     border-radius: $border-radius-lger;
+                    display: grid;
+                    overflow: unset;
                 }
 
                 tr {
+                    display: grid;
+                    grid-template-columns: var(--grid-columns-gt-1620);
+                    @media (max-width: 1620px) {
+                        grid-template-columns: var(--grid-columns-lt-1620);
+                    }
+                    @media (max-width: 1200px) {
+                        grid-template-columns: var(--grid-columns-lt-1200);
+                    }
+                    @media (max-width: 500px) {
+                        grid-template-columns: var(--grid-columns-lt-500);
+                    }
+
                     th {
                         background: #fff;
                         color: #c4c4cf;
                     }
+                }
+                &__thead {
+                    overflow: hidden;
+                    border-radius: 20px 20px 0 0;
                 }
 
                 &__content {
@@ -826,23 +936,16 @@
                 &__tbody {
                     tr:last-child .at-table__cell {
                         border-bottom: 0;
+                        border-radius: 0 0 20px 20px;
                     }
                 }
 
                 &__cell {
-                    max-width: 250px;
-                    overflow-x: hidden;
-
-                    padding-top: $spacing-05;
-                    padding-bottom: $spacing-05;
+                    display: flex;
+                    align-items: center;
                     border-bottom: 2px solid $blue-3;
 
                     position: relative;
-                    z-index: 0;
-
-                    &:last-child {
-                        max-width: unset;
-                    }
                 }
 
                 &__cell-bg {
@@ -856,12 +959,43 @@
                 }
 
                 .actions-column {
-                    display: flex;
-                    flex-flow: row nowrap;
+                    position: relative;
+                    .actions__toggle {
+                        display: none;
+                        @media (max-width: 1200px) {
+                            display: inline-block;
+                        }
+                    }
+                    .actions__wrapper {
+                        display: flex;
+                        flex-direction: row;
+                        flex-wrap: wrap;
+                        gap: 1em;
+                        @media (max-width: 1200px) {
+                            display: none;
+                            position: absolute;
+                            //margin-top: 1em;
+                            &--active {
+                                display: flex;
+                                right: 100%;
+                                background: $bg-color;
+                                border: 1px solid $black-900;
+                                border-radius: 20px;
+                                padding: 1em;
+                                z-index: 1;
+                                margin-right: 1em;
+                                top: -1em;
+                            }
+                        }
+                    }
                 }
 
                 .action-button {
-                    margin-right: 1em;
+                    @media (min-width: 1201px) and (max-width: 1620px) {
+                        .at-btn__text {
+                            display: none;
+                        }
+                    }
                 }
             }
         }
@@ -896,13 +1030,6 @@
 
     .at-container ::v-deep {
         margin-bottom: $layout-01;
-
-        tr {
-            .at-table__cell:nth-child(2),
-            .at-table__cell:nth-child(3) {
-                overflow: visible;
-            }
-        }
     }
 </style>
 
