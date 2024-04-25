@@ -6,6 +6,7 @@ use App\Enums\ScreenshotsState;
 use App\Scopes\ProjectAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\ProjectFactory;
+use DB;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
 use Illuminate\Database\Eloquent\Casts\Attribute;
@@ -14,6 +15,7 @@ use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
+use Illuminate\Database\Eloquent\Relations\HasManyThrough;
 use Illuminate\Database\Eloquent\Relations\HasOne;
 use Illuminate\Database\Eloquent\Relations\MorphMany;
 use Illuminate\Database\Eloquent\SoftDeletes;
@@ -40,6 +42,7 @@ use Illuminate\Support\Carbon;
  * @property-read Collection|Status[] $statuses
  * @property-read int|null $statuses_count
  * @property-read Collection|Task[] $tasks
+ * @property-read ProjectPhase[] $phases
  * @property-read int|null $tasks_count
  * @property-read Collection|User[] $users
  * @property-read int|null $users_count
@@ -114,6 +117,12 @@ class Project extends Model
         static::addGlobalScope(new ProjectAccessScope);
 
         static::deleting(static function (Project $project) {
+            CronTaskWorkers::whereHas(
+                'task',
+                static fn(EloquentBuilder $query) => $query
+                    ->where('project_id', '=', $project->id)
+            )->delete();
+
             $project->tasks()->delete();
         });
     }
@@ -121,6 +130,11 @@ class Project extends Model
     public function tasks(): HasMany
     {
         return $this->hasMany(Task::class, 'project_id');
+    }
+
+    public function phases(): HasMany
+    {
+        return $this->hasMany(ProjectPhase::class);
     }
 
     public function users(): BelongsToMany
@@ -151,6 +165,20 @@ class Project extends Model
     public function properties(): MorphMany
     {
         return $this->morphMany(Property::class, 'entity');
+    }
+
+    public function workers(): HasManyThrough
+    {
+        return $this->hasManyThrough(CronTaskWorkers::class, Task::class);
+    }
+
+    public function tasksRelations(): Attribute
+    {
+        $tasksIdsQuery = $this->tasks()->select('id');
+        return Attribute::make(get: fn() => DB::table('tasks_relations')
+                ->whereIn('parent_id', $tasksIdsQuery)
+                ->orWhereIn('child_id', $tasksIdsQuery)
+                ->get(['parent_id', 'child_id']))->shouldCache();
     }
 
     protected function screenshotsState(): Attribute

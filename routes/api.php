@@ -7,6 +7,7 @@ use App\Http\Controllers\Api\PriorityController;
 use App\Http\Controllers\Api\ProjectController;
 use App\Http\Controllers\Api\ProjectMemberController;
 use App\Http\Controllers\Api\Reports\DashboardController;
+use App\Http\Controllers\Api\Reports\PlannedTimeReportController;
 use App\Http\Controllers\Api\Reports\ProjectReportController;
 use App\Http\Controllers\Api\Reports\TimeUseReportController;
 use App\Http\Controllers\Api\TaskController;
@@ -136,6 +137,12 @@ Route::group([
         $router->post('project-members/bulk-edit', [ProjectMemberController::class, 'bulkEdit'])
             ->name('projects_members.edit');
 
+        // Gantt routes
+        $router->get('projects/gantt-data', [ProjectController::class, 'ganttData'])
+            ->name('projects.gantt-data');
+        $router->get('projects/phases', [ProjectController::class, 'phases'])
+            ->name('projects.phases');
+
         //Tasks routes
         $router->any('tasks/list', [TaskController::class, 'index'])
             ->name('tasks.list');
@@ -149,6 +156,12 @@ Route::group([
             ->name('tasks.show');
         $router->post('tasks/remove', [TaskController::class, 'destroy'])
             ->name('tasks.destroy');
+
+        // Gantt routes
+        $router->post('tasks/create-relation', [TaskController::class, 'createRelation'])
+            ->name('tasks.create-relation');
+        $router->post('tasks/remove-relation', [TaskController::class, 'destroyRelation'])
+            ->name('tasks.remove-relation');
 
         // Task comments
         $router->any('task-comment/list', [TaskCommentController::class, 'index'])
@@ -204,6 +217,17 @@ Route::group([
         $router->put('time-intervals/app', [IntervalController::class, 'trackApp'])
             ->name('intervals.app');
 
+        // Offline Sync
+        $router->get('offline-sync/download-projects-and-tasks/{user}', [TaskController::class, 'downloadProjectsAndTasks'])
+            ->where('user', '[0-9]+')
+            ->name('offline_sync.download_projects_and_tasks');
+        $router->post('offline-sync/upload-intervals', [IntervalController::class, 'uploadOfflineIntervals'])
+            ->name('offline_sync.upload_intervals');
+        $router->post('offline-sync/upload-screenshots', [IntervalController::class, 'uploadOfflineScreenshots'])
+            ->name('offline_sync.upload_screenshots');
+        $router->get('offline-sync/public-key', [CompanySettingsController::class, 'getOfflineSyncPublicKey'])
+            ->name('offline_sync.public_key');
+
         //Time routes
         $router->any('time/total', [IntervalController::class, 'total'])
             ->name('time.total');
@@ -226,6 +250,10 @@ Route::group([
             ->name('report.dashboard');
         $router->post('report/dashboard/download', [DashboardController::class, 'download'])
             ->name('report.dashboard.download');
+        $router->post('report/planned-time', [PlannedTimeReportController::class, '__invoke'])
+            ->name('report.planned-time');
+        $router->post('report/planned-time/download', [PlannedTimeReportController::class, 'download'])
+            ->name('report.planned-time.download');
 
         // About
         $router->get('about', [AboutController::class, '__invoke'])

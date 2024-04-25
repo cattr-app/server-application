@@ -1,0 +1,28 @@
+{
+  "navigation": {
+    "gantt": "Гант"
+  },
+  "gantt": {
+    "dimensions" : {
+      "index" : "Index",
+      "id" : "Id",
+      "task_name" : "Название",
+      "estimate" : "Оценка времени",
+      "total_spent_time": "Всего потрачено времени",
+      "start_date" : "Дата начала",
+      "due_date" : "Дата завершения",
+      "name" : "Название",
+      "first_task_id" : "Первая задача",
+      "last_task_id" : "Последняя задача",
+      "status": "Статус",
+      "priority": "Приоритет"
+    }
+  },
+  "field": {
+
+  },
+  "control": {
+  },
+  "projects": {
+  }
+}

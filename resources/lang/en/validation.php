@@ -105,7 +105,24 @@ return [
         ],
     ],
 
-    'time_interval_does_not_exist' => 'The time for this interval already exists.',
+    'time_interval_already_exist' => 'The time for this interval already exists.',
+
+    'offline-sync' => [
+        'cannot_create_interval' => 'Cannot create interval, make sure You are a member of the project or assigned to the task',
+        'cannot_find_interval' => 'Cannot find interval, to attach screenshot to',
+        'screenshot_attached' => 'Screenshot added to the queue (see logs)',
+        'screenshot_not_attached' => 'Screenshot not attached (see logs)',
+        'time_interval_already_exist' => 'The time for this interval already exists.',
+        'time_interval_added' => 'Added',
+        'wrong_extension' => 'File extension should be .cattr'
+    ],
+
+    'tasks-relations' => [
+        'already_exists' => 'Relation already exists!',
+        'must_have_same_project' => 'Tasks mush have same project.',
+        'cyclic_relation_detected' => 'Cyclic relation detected!',
+        'cannot_start_before_parent_ends' => "Task can't start before parent task!",
+    ],
 
     /*
     |--------------------------------------------------------------------------

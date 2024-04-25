@@ -8,6 +8,8 @@ import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
 import TeamAvatars from '@/components/TeamAvatars';
 import { store } from '@/store';
 import Statuses from './components/Statuses';
+import Phases from './components/Phases.vue';
+import Vue from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -39,7 +41,13 @@ export function init(context) {
         });
     });
 
-    const crud = context.createCrud('projects.crud-title', 'projects', ProjectService);
+    const crud = context.createCrud('projects.crud-title', 'projects', ProjectService, {
+        with: ['defaultPriority', 'tasks', 'workers', 'workers.task:id,task_name', 'workers.user:id,full_name'],
+        withSum: [
+            ['workers as total_spent_time', 'duration'],
+            ['workers as total_offset', 'offset'],
+        ],
+    });
 
     const crudViewRoute = crud.view.getViewRouteName();
     const crudEditRoute = crud.edit.getEditRouteName();
@@ -87,7 +95,22 @@ export function init(context) {
         {
             key: 'total_spent_time',
             label: 'field.total_spent',
-            render: (h, props) => h('span', formatDurationString(props.currentValue)),
+            render: (h, props) => {
+                const timeWithOffset = +props.values.total_spent_time + +props.values.total_offset;
+                return h('span', formatDurationString(timeWithOffset > 0 ? timeWithOffset : 0));
+            },
+        },
+        {
+            label: 'field.phases',
+            key: 'phases',
+            render: (h, data) => {
+                return h(Phases, {
+                    props: {
+                        phases: Array.isArray(data.currentValue) ? data.currentValue : [],
+                        showControls: false,
+                    },
+                });
+            },
         },
         {
             key: 'default_priority',
@@ -136,10 +159,14 @@ export function init(context) {
             key: 'workers',
             label: 'field.users',
             render: (h, props) => {
-                const data = [];
+                const tableData = [];
+                const globalTimeWithOffset = +props.values.total_spent_time + +props.values.total_offset;
                 Object.keys(props.currentValue).forEach(k => {
-                    props.currentValue[k].time = formatDurationString(+props.currentValue[k].duration);
-                    data.push(props.currentValue[k]);
+                    const timeWithOffset = +props.currentValue[k].duration + +props.currentValue[k].offset;
+                    props.currentValue[k].time = formatDurationString(timeWithOffset);
+                    if (timeWithOffset > 0 && globalTimeWithOffset > 0) {
+                        tableData.push(props.currentValue[k]);
+                    }
                 });
                 return h('AtTable', {
                     props: {
@@ -152,12 +179,12 @@ export function init(context) {
                                         {
                                             props: {
                                                 to: {
-                                                    name: routes.usersView,
+                                                    name: 'Users.crud.users.view',
                                                     params: { id: item.user_id },
                                                 },
                                             },
                                         },
-                                        item.full_name,
+                                        item.user.full_name,
                                     );
                                 },
                             },
@@ -169,12 +196,12 @@ export function init(context) {
                                         {
                                             props: {
                                                 to: {
-                                                    name: routes.tasksView,
+                                                    name: 'Tasks.crud.tasks.view',
                                                     params: { id: item.task_id },
                                                 },
                                             },
                                         },
-                                        item.task_name,
+                                        item.task.task_name,
                                     );
                                 },
                             },
@@ -195,7 +222,7 @@ export function init(context) {
                                 },
                             },
                         ],
-                        data,
+                        data: tableData,
                         pagination: true,
                         'page-size': 100,
                     },
@@ -229,6 +256,23 @@ export function init(context) {
             key: 'important',
             type: 'checkbox',
             default: 0,
+        },
+        {
+            label: 'field.phases',
+            key: 'phases',
+            render: (h, data) => {
+                return h(Phases, {
+                    props: {
+                        phases: Array.isArray(data.currentValue) ? data.currentValue : [],
+                    },
+                    on: {
+                        change(value) {
+                            data.inputHandler(value);
+                        },
+                    },
+                });
+            },
+            required: false,
         },
         {
             label: 'field.default_priority',
@@ -300,10 +344,21 @@ export function init(context) {
         {
             title: 'field.project',
             key: 'name',
+            render: (h, { item }) => {
+                return h(
+                    'span',
+                    {
+                        class: ['projects-grid__project'],
+                        attrs: { title: item.name },
+                    },
+                    item.name,
+                );
+            },
         },
         {
             title: 'field.members',
             key: 'users',
+            hideForMobile: true,
             render: (h, { item }) => {
                 return h(TeamAvatars, {
                     props: {
@@ -327,6 +382,20 @@ export function init(context) {
             },
         },
     ]);
+
+    const websocketLeaveChannel = id => Vue.prototype.$echo.leave(`projects.${id}`);
+    const websocketEnterChannel = (id, handlers) => {
+        const channel = Vue.prototype.$echo.private(`projects.${id}`);
+        for (const action in handlers) {
+            channel.listen(`.projects.${action}`, handlers[action]);
+        }
+    };
+
+    grid.addToMetaProperties('gridData.websocketEnterChannel', websocketEnterChannel, grid.getRouterConfig());
+    grid.addToMetaProperties('gridData.websocketLeaveChannel', websocketLeaveChannel, grid.getRouterConfig());
+
+    crud.view.addToMetaProperties('pageData.websocketEnterChannel', websocketEnterChannel, crud.view.getRouterConfig());
+    crud.view.addToMetaProperties('pageData.websocketLeaveChannel', websocketLeaveChannel, crud.view.getRouterConfig());
 
     grid.addFilter([
         {
@@ -362,6 +431,17 @@ export function init(context) {
             icon: 'icon-eye',
             onClick: (router, { item }, context) => {
                 context.onView(item);
+            },
+            renderCondition({ $store }) {
+                // User always can view assigned projects
+                return true;
+            },
+        },
+        {
+            title: 'projects.gantt',
+            icon: 'icon-crop',
+            onClick: (router, { item }, context) => {
+                router.push({ name: 'Gantt.index', params: { id: item.id } });
             },
             renderCondition({ $store }) {
                 // User always can view assigned projects

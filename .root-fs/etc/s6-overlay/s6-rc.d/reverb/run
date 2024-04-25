@@ -1,0 +1,6 @@
+#!/usr/bin/execlineb -P
+
+with-contenv
+s6-setuidgid www
+
+php82 /app/artisan reverb:start --host=127.0.0.1 --port=8080

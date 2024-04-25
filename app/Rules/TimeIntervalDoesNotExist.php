@@ -5,14 +5,15 @@ namespace App\Rules;
 use App\Models\User;
 use App\Models\TimeInterval;
 use Carbon\Carbon;
-use Illuminate\Contracts\Validation\Rule;
+use Closure;
+use Illuminate\Contracts\Validation\ValidationRule;
 
-class TimeIntervalDoesNotExist implements Rule
+class TimeIntervalDoesNotExist implements ValidationRule
 {
     /**
      * @var User
      */
-    private ?User $user;
+    private User $user;
 
     /**
      * @var Carbon
@@ -44,11 +45,12 @@ class TimeIntervalDoesNotExist implements Rule
      *
      * @param string $attribute
      * @param mixed $value
-     * @return bool
+     * @param Closure $fail
+     * @return void
      */
-    public function passes($attribute, $value): bool
+    public function validate(string $attribute, mixed $value, Closure $fail): void
     {
-        return !TimeInterval::where('user_id', optional($this->user)->id)
+        $alreadyExists = TimeInterval::where('user_id', optional($this->user)->id)
             ->where(function ($query) {
                 $query
                     ->whereBetween('start_at', [$this->startAt, $this->endAt])
@@ -60,13 +62,9 @@ class TimeIntervalDoesNotExist implements Rule
                     });
             })
             ->exists();
-    }
 
-    /**
-     * Get the validation error message.
-     */
-    public function message(): string
-    {
-        return trans('validation.time_interval_does_not_exist');
+        if ($alreadyExists) {
+            $fail('validation.time_interval_already_exist')->translate();
+        }
     }
 }

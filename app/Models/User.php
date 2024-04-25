@@ -62,6 +62,8 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property int $permanent_screenshots
  * @property \Illuminate\Support\Carbon $last_activity
  * @property-read bool $online
+ * @property-read bool $can_view_team_tab
+ * @property-read bool $can_create_task
  * @property-read DatabaseNotificationCollection|DatabaseNotification[] $notifications
  * @property-read int|null $notifications_count
  * @property-read Collection|Project[] $projects
@@ -214,6 +216,8 @@ class User extends Authenticatable
 
     protected $appends = [
         'online',
+        'can_view_team_tab',
+        'can_create_task',
     ];
 
     public function projects(): BelongsToMany
@@ -256,7 +260,7 @@ class User extends Authenticatable
     protected function online(): Attribute
     {
         return Attribute::make(
-            get: static fn ($value, $attributes) => ($attributes['last_activity'] ?? false) &&
+            get: static fn($value, $attributes) => ($attributes['last_activity'] ?? false) &&
                 Carbon::parse($attributes['last_activity'])->diffInSeconds(Carbon::now())
                 < config('app.user_activity.online_status_time'),
         );
@@ -265,7 +269,25 @@ class User extends Authenticatable
     protected function password(): Attribute
     {
         return Attribute::make(
-            set: static fn ($value) => Hash::needsRehash($value) ? Hash::make($value) : $value,
+            set: static fn($value) => Hash::needsRehash($value) ? Hash::make($value) : $value,
+        );
+    }
+
+    protected function canViewTeamTab(): Attribute
+    {
+        $self = $this;
+        return Attribute::make(
+            get: static fn() => $self->hasRole([Role::ADMIN, Role::MANAGER, Role::AUDITOR])
+                || $self->hasRoleInAnyProject([Role::MANAGER, Role::AUDITOR]),
+        );
+    }
+
+    protected function canCreateTask(): Attribute
+    {
+        $self = $this;
+        return Attribute::make(
+            get: static fn() => $self->hasRole([Role::ADMIN, Role::MANAGER])
+                || $self->hasRoleInAnyProject(Role::MANAGER, Role::USER),
         );
     }
 
@@ -297,7 +319,12 @@ class User extends Authenticatable
 
     public function scopeAdmin(EloquentBuilder $query): EloquentBuilder
     {
-        return $query->where('role_is', \App\Enums\Role::ADMIN);
+        return $query->where('role_id', '=', Role::ADMIN->value, 'or');
+    }
+
+    public function scopeManager(EloquentBuilder $query): EloquentBuilder
+    {
+        return $query->where('role_id', '=', Role::MANAGER->value, 'or');
     }
 
     public function scopeActive(EloquentBuilder $query): EloquentBuilder

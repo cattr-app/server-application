@@ -1,0 +1,12 @@
+{
+  "navigation": {
+    "planned-time-report": "Отчет по запланированному времени"
+  },
+  "planned-time-report": {
+    "tasks": "Задачи",
+    "estimate": "План",
+    "spent": "Факт",
+    "productivity": "Продуктивность",
+    "report_date": "Отчёт создан: {0}"
+  }
+}

@@ -4,6 +4,7 @@ namespace App\Policies;
 
 use App\Enums\Role;
 use App\Models\Project;
+use App\Models\Task;
 use App\Models\TimeInterval;
 use App\Models\User;
 use Cache;
@@ -45,7 +46,15 @@ class TimeIntervalPolicy
             );
         }
 
-        return $user->hasProjectRole(Role::USER, $projectId);
+        if ($user->id !== $userId) {
+            return $user->hasRole(Role::MANAGER) || $user->hasProjectRole(Role::MANAGER, $projectId);
+        }
+
+        return $user->hasProjectRole([Role::USER, Role::MANAGER], $projectId)
+            || Task::whereId($taskId)->whereHas(
+                'users',
+                fn($query) => $query->where('user_id', '=', $userId)->withoutGlobalScopes()
+            )->withoutGlobalScopes()->exists();
     }
 
     public function update(User $user, TimeInterval $timeInterval): bool
@@ -103,8 +112,8 @@ class TimeIntervalPolicy
             config('cache.role_caching_ttl'),
             static fn() => Project::whereHas(
                 'tasks',
-                static fn(Builder $query) => $query->where('id', '=', $taskId)
-            )->firstOrFail()->id
+                static fn(Builder $query) => $query->where('id', '=', $taskId)->withoutGlobalScopes()
+            )->withoutGlobalScopes()->firstOrFail()->id
         );
     }
 }

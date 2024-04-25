@@ -22,6 +22,11 @@ class FilterDispatcher extends LaravelDispatcher
         return 'filter.query.with.' . request()?->route()?->getName();
     }
 
+    public static function getQueryAdditionalRelationsSumFilterName(): string
+    {
+        return 'filter.query.withSum.' . request()?->route()?->getName();
+    }
+
     public static function getSuccessResponseFilterName(): string
     {
         return 'filter.response.success.' . request()?->route()?->getName();
