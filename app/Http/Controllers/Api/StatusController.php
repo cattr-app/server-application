@@ -10,7 +10,6 @@ use App\Http\Requests\Status\DestroyStatusRequest;
 use App\Http\Requests\Status\ListStatusRequest;
 use App\Http\Requests\Status\ShowStatusRequestStatus;
 use App\Http\Requests\Status\UpdateStatusRequest;
-use App\Observers\StatusObserver;
 use CatEvent;
 use Exception;
 use Filter;
@@ -137,7 +136,7 @@ class StatusController extends ItemController
      */
     public function create(CreateStatusRequest $request): JsonResponse
     {
-        Filter::listen('filter.request.statuses.create', static function ($item) {
+        Filter::listen(Filter::getRequestFilterName(), static function ($item) {
             $maxOrder = Status::max('order');
             $item['order'] = $maxOrder + 1;
             return $item;
@@ -189,7 +188,7 @@ class StatusController extends ItemController
      */
     public function edit(UpdateStatusRequest $request): JsonResponse
     {
-        CatEvent::listen('event.before.action.statuses.edit', static function ($item, $requestData) {
+        CatEvent::listen(Filter::getBeforeActionEventName(), static function ($item, $requestData) {
             if (isset($requestData['order'])) {
                 $order = $requestData['order'];
                 if ($order < 1) {

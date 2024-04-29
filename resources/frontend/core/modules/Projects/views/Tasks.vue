@@ -27,7 +27,7 @@
                     </div>
                 </div>
             </div>
-            <div ref="kanban" class="project-tasks_kanban at-container" :class="{ 'scroll-disabled': scrollDisabled }">
+            <div ref="kanban" class="project-tasks_kanban at-container">
                 <kanban-board
                     ref="board"
                     :config="config"
@@ -215,7 +215,6 @@
                     },
                 },
                 isDesktop: false,
-                scrollDisabled: false,
                 scrollInterval: null,
                 mouseX: 0,
             };
@@ -241,14 +240,6 @@
             getTextColor,
             formatDate,
             formatDurationString,
-            disableScroll() {
-                this.scrollDisabled = true;
-                document.body.classList.add('scroll-disabled');
-            },
-            enableScroll() {
-                this.scrollDisabled = false;
-                document.body.classList.remove('scroll-disabled');
-            },
             isOverDue(companyTimezone, item) {
                 return (
                     typeof companyTimezone === 'string' &&
@@ -719,9 +710,6 @@
         .project-tasks_kanban ::v-deep {
             scroll-snap-type: x mandatory;
         }
-        .scroll-disabled.scroll-disabled {
-            overflow: hidden;
-        }
         .task ::v-deep {
             padding: 8px;
         }
@@ -759,9 +747,6 @@
         .project-tasks_kanban ::v-deep {
             scroll-snap-type: x mandatory;
         }
-        .scroll-disabled.scroll-disabled {
-            overflow: hidden;
-        }
         .task ::v-deep {
             padding: 8px;
         }
@@ -797,9 +782,6 @@
         }
         .project-tasks_kanban ::v-deep {
             scroll-snap-type: x mandatory;
-        }
-        .scroll-disabled.scroll-disabled {
-            overflow: hidden;
         }
         .task-view {
             width: auto;

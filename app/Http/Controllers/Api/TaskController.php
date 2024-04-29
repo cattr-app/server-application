@@ -368,11 +368,11 @@ class TaskController extends ItemController
                 return $requestData;
             }
         );
-        Filter::listen('filter.request.tasks.create',static function ($item) {
-                $maxPosition = Task::max('relative_position');
-                $item['relative_position'] = $maxPosition + 1;
-                return $item;
-        });
+        Filter::listen(Filter::getRequestFilterName(),static function ($item) {
+            $maxPosition = Task::max('relative_position');
+            $item['relative_position'] = $maxPosition + 1;
+            return $item;
+    });
         return $this->_create($request);
     }
 
