@@ -39,7 +39,7 @@ class RegisterModulesEvents
         CatEvent::listen('event.after.action.*', static function (string $eventName, array $data) {
             $eventNameParts = explode('.', $eventName);
             [$entityType, $action] = array_slice($eventNameParts, 3, 2); // Strip "event.after.action" and get the next two parts
-            if (!in_array($entityType, ['tasks', 'projects', 'projects_members', 'intervals'])) {
+            if (!in_array($entityType, ['tasks', 'projects', 'projects_members', 'intervals','task_comments'])) {
                 return;
             }
 
@@ -54,7 +54,10 @@ class RegisterModulesEvents
             } else {
                 $model = $data[0];
             }
-
+            if ($entityType === 'task_comments') {
+                $entityType = 'tasks_activities';
+                $model = $data[0];
+            }
             App::terminating(static function () use ($entityType, $action, $model) {
                 $items = is_array($model) || $model instanceof Collection ? $model : [$model];
                 foreach ($items as $item) {

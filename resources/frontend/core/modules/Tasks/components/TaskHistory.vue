@@ -200,9 +200,18 @@
             window.addEventListener('scroll', this.onScroll);
             this.statuses = await this.statusService.getAll();
             this.priorities = await this.priorityService.getAll();
+            this.websocketEnterChannel(this.user.id, {
+                create: async data => {
+                    this.activity = (await this.getActivity()).data;
+                },
+                edit: async data => {
+                    this.activity = (await this.getActivity()).data;
+                },
+            });
         },
         beforeDestroy() {
             window.removeEventListener('scroll', this.onScroll);
+            this.websocketLeaveChannel(this.user.id);
         },
         computed: {
             visibleUsers() {
@@ -361,6 +370,15 @@
             async deleteComment(item) {
                 const result = await this.taskActivityService.deleteComment(item.id);
                 this.activity.splice(this.activity.indexOf(item), 1);
+            },
+            websocketLeaveChannel(userId) {
+                this.$echo.leave(`tasks_activities.${userId}`);
+            },
+            websocketEnterChannel(userId, handlers) {
+                const channel = this.$echo.private(`tasks_activities.${userId}`);
+                for (const action in handlers) {
+                    channel.listen(`.tasks_activities.${action}`, handlers[action]);
+                }
             },
         },
     };
