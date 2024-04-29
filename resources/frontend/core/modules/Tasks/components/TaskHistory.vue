@@ -373,11 +373,14 @@
             },
             websocketLeaveChannel(userId) {
                 this.$echo.leave(`tasks_activities.${userId}`);
+                this.$echo.leave(`tasks.${userId}`);
             },
             websocketEnterChannel(userId, handlers) {
-                const channel = this.$echo.private(`tasks_activities.${userId}`);
+                const channelActivity = this.$echo.private(`tasks_activities.${userId}`);
+                const channelTask = this.$echo.private(`tasks.${userId}`);
                 for (const action in handlers) {
-                    channel.listen(`.tasks_activities.${action}`, handlers[action]);
+                    channelActivity.listen(`.tasks_activities.${action}`, handlers[action]);
+                    channelTask.listen(`.tasks.${action}`, handlers[action]);
                 }
             },
         },
