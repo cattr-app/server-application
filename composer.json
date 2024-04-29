@@ -25,7 +25,7 @@
     "fakerphp/faker": "^1.21",
     "flugger/laravel-responder": "^3.3.0",
     "guzzlehttp/guzzle": "^7.2",
-    "intervention/image": "^2.7",
+    "intervention/image": "^3.6",
     "laravel/framework": "^10.0",
     "laravel/octane": "^2.2",
     "laravel/sanctum": "^3.2",
