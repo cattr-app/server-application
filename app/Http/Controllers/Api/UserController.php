@@ -250,7 +250,7 @@ class UserController extends ItemController
                 return $user;
             }
 
-            $user->screenshots_state_locked = $request->user()->isAdmin() && $user->screenshots_state->mustBeInherited();
+            $user->screenshots_state_locked = $request->user()->isAdmin() && ScreenshotsState::tryFrom($user->screenshots_state)->mustBeInherited();
 
             return $user;
         });
