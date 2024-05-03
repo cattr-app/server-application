@@ -14,7 +14,7 @@
       "name": "Роль"
     },
     "screenshots_state": {
-      "optional_will_be_overridden": "Optional will be overridden with required"
+      "optional_will_be_overridden": "Даёт возможность выбора пользователю. По умолчанию устанавливается \"Обязательно\""
     }
   },
   "languages": {
