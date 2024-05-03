@@ -314,7 +314,7 @@ class User extends Authenticatable
                 };
             },
             set: static fn ($value) => (string)ScreenshotsState::getNormalizedValue($value),
-        );
+        )->shouldCache();
     }
 
     public function scopeAdmin(EloquentBuilder $query): EloquentBuilder

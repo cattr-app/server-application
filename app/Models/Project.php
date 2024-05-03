@@ -193,6 +193,6 @@ class Project extends Model
                 };
             },
             set: static fn ($value) => (string)ScreenshotsState::getNormalizedValue($value),
-        );
+        )->shouldCache();
     }
 }
