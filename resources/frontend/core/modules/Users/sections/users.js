@@ -1,12 +1,14 @@
 import cloneDeep from 'lodash/cloneDeep';
 import TimezonePicker from '@/components/TimezonePicker';
+import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
 import CoreUsersService from '@/services/resource/user.service';
 import RoleSelect from '@/components/RoleSelect';
 import Users from '../views/Users';
 import UsersService from '../services/user.service';
-import { store } from '@/store';
 import LanguageSelector from '@/components/LanguageSelector';
 import i18n from '@/i18n';
+import { hasRole } from '@/utils/user';
+import { store } from '@/store';
 import Vue from 'vue';
 
 export function fieldsToFillProvider() {
@@ -65,10 +67,31 @@ export function fieldsToFillProvider() {
             },
         },
         {
-            label: 'field.screenshots_active',
-            key: 'screenshots_active',
-            type: 'checkbox',
+            label: 'field.screenshots_state',
+            key: 'screenshots_state',
             default: 1,
+            render: (h, props) => {
+                const isAdmin = hasRole(store.getters['user/user'], 'admin');
+                const states = store.getters['screenshots/states'];
+                const hint =
+                    isAdmin && props.values.screenshots_state === states.optional
+                        ? 'users.screenshots_state.optional_will_be_overridden'
+                        : '';
+
+                return h(ScreenshotsStateSelect, {
+                    props: {
+                        value: props.values.screenshots_state,
+                        isDisabled: store.getters['screenshots/isUserStateLocked'],
+                        hideIndexes: [0],
+                        hint,
+                    },
+                    on: {
+                        input(value) {
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
         },
         {
             label: 'field.password',
@@ -250,8 +273,8 @@ export default (context, router) => {
             },
         },
         {
-            label: 'field.screenshots_active',
-            key: 'screenshots_active',
+            label: 'field.screenshots_state',
+            key: 'screenshots_state',
             render: (h, { currentValue }) => {
                 return h('span', currentValue ? i18n.t('control.yes') : i18n.t('control.no'));
             },

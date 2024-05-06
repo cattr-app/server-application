@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
+use App\Enums\ScreenshotsState;
 use App\Http\Requests\Interval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\Interval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\Interval\CreateTimeIntervalRequest;
@@ -18,6 +19,7 @@ use App\Http\Requests\Interval\TrackAppRequest;
 use App\Http\Requests\Interval\UploadOfflineIntervalsRequest;
 use App\Http\Requests\Interval\UploadOfflineScreenshotsRequest;
 use App\Jobs\AssignAppsToTimeInterval;
+use App\Models\Task;
 use App\Models\TrackedApplication;
 use App\Models\User;
 use CatEvent;
@@ -546,9 +548,16 @@ class IntervalController extends ItemController
 
             CatEvent::listen(
                 Filter::getAfterActionEventName(),
-                static function ($data) use ($path, $screenshotService) {
-                    $screenshotService->saveScreenshot(Storage::path($path), $data);
-                    dispatch(static fn() => Storage::delete($path))->delay(now()->addMinute());
+                static function (TimeInterval $interval) use ($path, $screenshotService) {
+                    $projScreenshotsState = $interval->task->project->screenshots_state;
+                    $mustCapture = $projScreenshotsState === ScreenshotsState::REQUIRED;
+                    $optionalCapture = $projScreenshotsState === ScreenshotsState::OPTIONAL;
+                    if ($mustCapture
+                        || ($optionalCapture && $interval->user->screenshots_state === ScreenshotsState::REQUIRED)
+                    ) {
+                        $screenshotService->saveScreenshot(Storage::path($path), $interval);
+                        dispatch(static fn() => Storage::delete($path))->delay(now()->addMinute());
+                    }
                 }
             );
         }
@@ -599,7 +608,19 @@ class IntervalController extends ItemController
             __('Screenshot for requested interval already exists')
         );
 
-        $this->screenshotService->saveScreenshot($data['screenshot'], $interval);
+        $projScreenshotsState = $interval->task->project->screenshots_state;
+        $mustCapture = $projScreenshotsState === ScreenshotsState::REQUIRED;
+        $optionalCapture = $projScreenshotsState === ScreenshotsState::OPTIONAL;
+        if ($mustCapture
+            || ($optionalCapture && $interval->user->screenshots_state === ScreenshotsState::REQUIRED)
+        ) {
+            $this->screenshotService->saveScreenshot($data['screenshot'], $interval);
+        } else {
+            abort(
+                409,
+                __('Screenshots disabled for interval\'s project')
+            );
+        }
 
         return responder()->success()->respond(204);
     }
@@ -648,14 +669,20 @@ class IntervalController extends ItemController
         $timezone = Settings::scope('core')->get('timezone', 'UTC');
         $validatorClass = new CreateTimeIntervalRequest();
         $creationResult = [];
-        $user = [
-            'full_name' => 'Unknown User',
-            'email' => 'unknown@cattr.app'
-        ];
 
-        if (count($intervals) > 0) {
-            $user = User::whereId($intervals[0]['user_id'])->first(['email', 'full_name']);
-        }
+        abort_if(
+            count($intervals) === 0,
+            400,
+            __('File contains 0 intervals')
+        );
+
+        $user = User::whereId($intervals[0]['user_id'])->first(['id', 'email', 'full_name', 'screenshots_state']);
+
+        abort_if(
+            $user === null,
+            400,
+            __('User not found')
+        );
 
         $canCreate = fn($interval) => $request->user()->can(
             'create',
@@ -666,6 +693,14 @@ class IntervalController extends ItemController
                 false,
             ],
         );
+
+        $tasksScreenshotsState = Task::with('project:id,screenshots_state')
+            ->whereIn('id', collect($intervals)->pluck('task_id'))
+            ->select(['id', 'project_id'])
+            ->get()
+            ->mapWithKeys(fn($item)=>[$item->id => $item->project->screenshots_state])
+            ->toArray();
+        $globalScreenshotsState = ScreenshotsState::withGlobalOverrides(null) ?? ScreenshotsState::OPTIONAL;
 
         foreach ($intervals as $interval) {
             $interval['user'] = $user;
@@ -679,11 +714,29 @@ class IntervalController extends ItemController
                 continue;
             }
 
+            $screenshotIdValidationRule = $interval['has_screenshot'] ? ['screenshot_id' => 'required|uuid'] : [];
+
+            if ($interval['has_screenshot']) {
+                $mustNotCapture = $globalScreenshotsState === ScreenshotsState::FORBIDDEN;
+                $optionalCapture = $globalScreenshotsState === ScreenshotsState::OPTIONAL
+                    && isset($tasksScreenshotsState[$interval['task_id']]);
+
+                if ($optionalCapture && $tasksScreenshotsState[$interval['task_id']] === ScreenshotsState::FORBIDDEN) {
+                    $mustNotCapture = true;
+                } elseif ($optionalCapture
+                    && $tasksScreenshotsState[$interval['task_id']] === ScreenshotsState::OPTIONAL) {
+                    $mustNotCapture = $user->screenshots_state === ScreenshotsState::FORBIDDEN;
+                }
+                if ($mustNotCapture) {
+                    $screenshotIdValidationRule = [];
+                }
+            }
+
             $intervalValidator = Validator::make(
                 $interval,
                 array_merge(
                     $validatorClass->getRules($interval['user_id'], $interval['start_at'], $interval['end_at']),
-                    ['screenshot_id' => 'required|uuid']
+                    $screenshotIdValidationRule
                 )
             );
 

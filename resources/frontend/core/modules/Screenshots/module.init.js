@@ -19,6 +19,7 @@ export function init(context) {
         to: {
             name: 'screenshots',
         },
+        displayCondition: store => store.getters['screenshots/enabled'],
     });
 
     context.addLocalizationData({

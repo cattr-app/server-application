@@ -275,9 +275,9 @@ Route::group([
 
     //Screenshots routes
     $router->get('time-intervals/{interval}/screenshot', [IntervalController::class, 'showScreenshot'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
     $router->get('time-intervals/{interval}/thumb', [IntervalController::class, 'showThumbnail'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
 });
 
 Route::any('(.*)', [Controller::class, 'universalRoute'])->name('universal_route');
