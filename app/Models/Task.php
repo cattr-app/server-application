@@ -171,6 +171,17 @@ class Task extends Model
                 }
             });
         });
+
+        static::updated(static function (Task $task) {
+            dispatch(static function () use ($task) {
+                foreach ($task->users as $user) {
+                    $task->project->users()->firstOrCreate(
+                        ['id' => $user->id],
+                        ['role_id' => \App\Enums\Role::USER]
+                    );
+                }
+            });
+        });
     }
 
     public function timeIntervals(): HasMany

@@ -328,6 +328,8 @@
                         title: this.$t('notification.settings.save.success.title'),
                         message: this.$t('notification.settings.save.success.message'),
                     });
+
+                    this.$router.go(0);
                 } catch ({ response }) {
                     if (
                         typeof response !== 'undefined' &&

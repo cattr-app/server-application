@@ -220,6 +220,17 @@ Route::group([
         $router->put('time-intervals/app', [IntervalController::class, 'trackApp'])
             ->name('intervals.app');
 
+        // Offline Sync
+        $router->get('offline-sync/download-projects-and-tasks/{user}', [TaskController::class, 'downloadProjectsAndTasks'])
+            ->where('user', '[0-9]+')
+            ->name('offline_sync.download_projects_and_tasks');
+        $router->post('offline-sync/upload-intervals', [IntervalController::class, 'uploadOfflineIntervals'])
+            ->name('offline_sync.upload_intervals');
+        $router->post('offline-sync/upload-screenshots', [IntervalController::class, 'uploadOfflineScreenshots'])
+            ->name('offline_sync.upload_screenshots');
+        $router->get('offline-sync/public-key', [CompanySettingsController::class, 'getOfflineSyncPublicKey'])
+            ->name('offline_sync.public_key');
+
         //Time routes
         $router->any('time/total', [IntervalController::class, 'total'])
             ->name('time.total');
@@ -267,9 +278,9 @@ Route::group([
 
     //Screenshots routes
     $router->get('time-intervals/{interval}/screenshot', [IntervalController::class, 'showScreenshot'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
     $router->get('time-intervals/{interval}/thumb', [IntervalController::class, 'showThumbnail'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
 });
 
 Route::any('(.*)', [Controller::class, 'universalRoute'])->name('universal_route');

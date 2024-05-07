@@ -19,9 +19,13 @@ use Exception;
 use Filter;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\JsonResponse;
 use CatEvent;
+use Illuminate\Http\Response;
+use MessagePack\MessagePack;
 use Settings;
 use Throwable;
 
@@ -593,5 +597,45 @@ class TaskController extends ItemController
         RegisterModulesEvents::broadcastEvent('tasks', 'edit', Task::find($requestData['child_id']));
 
         return responder()->success()->respond(204);
+    }
+
+    /**
+     * @throws BindingResolutionException
+     */
+    public function downloadProjectsAndTasks(User $user): Response
+    {
+        $projectsAndTasks = collect($user->load([
+            'projects' => fn(BelongsToMany $q) => $q->select([
+                'projects.id',
+                'projects.name',
+                'projects.description',
+                'projects.source',
+                'projects.updated_at'
+            ])->withoutGlobalScopes(),
+            'tasks' => fn(BelongsToMany $q) => $q->select([
+                'tasks.id',
+                'tasks.project_id',
+                'tasks.task_name',
+                'tasks.description',
+                'tasks.url',
+                'tasks.priority_id',
+                'tasks.status_id',
+                'tasks.updated_at'
+            ])->withoutGlobalScopes(),
+        ]))->only(['id', 'projects', 'tasks'])->all();
+
+        foreach ($projectsAndTasks['projects'] as $project) {
+            unset($project['pivot']);
+        }
+        foreach ($projectsAndTasks['tasks'] as $task) {
+            unset($task['pivot']);
+        }
+
+        $packed = MessagePack::pack($projectsAndTasks);
+
+        return response()->make($packed, 200, [
+            'Content-type: application/octet-stream',
+            'Content-Disposition: attachment; filename=ProjectsAndTasks.cattr'
+        ]);
     }
 }
