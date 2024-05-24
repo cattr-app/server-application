@@ -10,7 +10,6 @@
 </template>
 
 <script>
-    import throttle from 'lodash/throttle';
     import moment from 'moment';
     import { formatDurationString } from '@/utils/time';
     import { mapGetters } from 'vuex';
@@ -38,7 +37,7 @@
 
     const titleHeight = 20;
     const subtitleHeight = 20;
-    const rowHeight = 65;
+    const rowHeight = 64;
     const minColumnWidth = 85;
     export default {
         name: 'TeamTableGraph',
@@ -81,15 +80,11 @@
 
                 return end.diff(start, 'days') + 1;
             },
-
-            maxScrollX() {
-                return this.contentWidth() - this.canvasWidth();
-            },
         },
         mounted() {
             this.draw = SVG();
 
-            const canvasContainer = this.$refs.scrollArea;
+            const canvasContainer = this.$refs.canvas;
             const width = canvasContainer.clientWidth;
             const height = this.users.length * rowHeight;
             this.draw.viewbox(0, 0, width, height);
@@ -142,11 +137,14 @@
                     document.addEventListener('pointercancel', this.onUp);
                 }
             },
+            maxScrollX() {
+                return this.contentWidth() - this.canvasWidth();
+            },
             onMove(e) {
                 if (e.buttons & 1) {
                     const deltaX = e.clientX - this.lastPosX;
                     this.offsetX -= deltaX;
-                    this.offsetX = Math.min(this.maxScrollX, Math.max(this.offsetX, 0));
+                    this.offsetX = Math.min(this.maxScrollX(), Math.max(this.offsetX, 0));
                     this.lastPosX = e.clientX;
                     this.setScroll(this.offsetX);
                 }
@@ -175,7 +173,7 @@
                 if (typeof this.draw === 'undefined') return;
                 this.draw.clear();
                 const draw = this.draw;
-                const canvasContainer = this.$refs.scrollArea;
+                const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
                 const columnWidth = width / this.columns;
                 const height = this.users.length * rowHeight;
@@ -273,7 +271,6 @@
                             const progress = duration / total;
                             const height = Math.ceil(Math.min(progress, 1) * (rowHeight - 1));
                             const color = this.getColor(progress);
-
                             const rect = draw
                                 .rect(this.columnWidth(), height + 1)
                                 .move(left, Math.floor(top + (rowHeight - height)) - 1)
@@ -315,7 +312,7 @@
                 });
             }, 100),
             onResize: debounce(function () {
-                const canvasContainer = this.$refs.scrollArea;
+                const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
                 const height = this.users.length * rowHeight;
                 this.draw.size(width, height);

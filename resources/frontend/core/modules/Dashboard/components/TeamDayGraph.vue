@@ -4,7 +4,7 @@
             v-show="hoverPopup.show && !clickPopup.show"
             :style="{
                 left: `${hoverPopup.x - 30}px`,
-                bottom: `${height - hoverPopup.y + 10}px`,
+                bottom: `${height() - hoverPopup.y + 50}px`,
             }"
             class="popup"
         >
@@ -24,7 +24,7 @@
             v-show="clickPopup.show"
             :style="{
                 left: `${clickPopup.x - 30}px`,
-                bottom: `${height - clickPopup.y + 10}px`,
+                bottom: `${height() - clickPopup.y + 10}px`,
             }"
             class="popup"
         >
@@ -68,6 +68,12 @@
             @showNext="showNext"
             @showPrevious="showPrevious"
         />
+        <div class="scroll-area-wrapper">
+            <div ref="scrollArea" class="scroll-area"></div>
+        </div>
+        <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
+            <div :style="{ width: `${contentWidth()}px` }" />
+        </div>
     </div>
 </template>
 
@@ -83,22 +89,11 @@
 
     let intervalService = new IntervalService();
 
-    const fabricObjectOptions = {
-        editable: false,
-        selectable: false,
-        objectCaching: false,
-        hasBorders: false,
-        hasControls: false,
-        hasRotatingPoint: false,
-        cursor: 'default',
-        hoverCursor: 'default',
-    };
-
     const titleHeight = 20;
     const subtitleHeight = 20;
-    const rowHeight = 65;
+    const rowHeight = 64;
     const columns = 24;
-
+    const minColumnWidth = 85;
     const popupWidth = 270;
     const canvasPadding = 24;
     const defaultCornerOffset = 15;
@@ -143,14 +138,13 @@
                     user: null,
                     interval: null,
                 },
+                lastPosX: 0,
+                offsetX: 0,
             };
         },
         computed: {
             ...mapGetters('dashboard', ['intervals', 'timezone']),
             ...mapGetters('user', ['companyData']),
-            height() {
-                return this.users.length * rowHeight + titleHeight + subtitleHeight;
-            },
         },
         mounted() {
             this.draw = SVG();
@@ -164,6 +158,9 @@
             window.removeEventListener('resize', this.onResize);
             window.removeEventListener('mousedown', this.onClick);
             window.removeEventListener('keydown', this.onKeyDown);
+            document.removeEventListener('pointermove', this.onMove);
+            document.removeEventListener('pointerup', this.onUp);
+            document.removeEventListener('pointercancel', this.onUp);
         },
         methods: {
             formatDuration: formatDurationString,
@@ -227,29 +224,94 @@
                     }
                 }
             },
+            height() {
+                return this.users.length * rowHeight; //this.users.length * rowHeight + titleHeight + subtitleHeight;
+            },
+            canvasWidth() {
+                if (!this.$refs.canvas) {
+                    return 500;
+                }
+                return this.$refs.canvas.clientWidth;
+            },
+            columnWidth() {
+                return Math.max(minColumnWidth, this.canvasWidth() / columns);
+            },
+            contentWidth() {
+                return columns * this.columnWidth();
+            },
+            onDown(e) {
+                if (e.buttons & 1) {
+                    this.draw.selection = false;
+                    this.lastPosX = e.clientX;
+                    document.addEventListener('pointermove', this.onMove);
+                    document.addEventListener('pointerup', this.onUp);
+                    document.addEventListener('pointercancel', this.onUp);
+                }
+            },
+
+            maxScrollX() {
+                return this.contentWidth() - this.canvasWidth();
+            },
+            onMove(e) {
+                if (e.buttons & 1) {
+                    const deltaX = e.clientX - this.lastPosX;
+                    this.offsetX -= deltaX;
+                    this.offsetX = Math.min(this.maxScrollX(), Math.max(this.offsetX, 0));
+                    this.lastPosX = e.clientX;
+                    this.setScroll(this.offsetX);
+                }
+            },
+            onUp(e) {
+                if (e.buttons & 1) {
+                    document.removeEventListener('pointermove', this.onMove);
+                    document.removeEventListener('pointerup', this.onUp);
+                    document.removeEventListener('pointercancel', this.onUp);
+                }
+            },
+            onScroll(e) {
+                this.setScroll(e.target.scrollLeft);
+            },
+            setScroll(x) {
+                const canvasContainer = this.$refs.canvas;
+                const width = canvasContainer.clientWidth;
+                const height = canvasContainer.clientHeight;
+                this.draw.viewbox(x, -3, width, height);
+            },
             drawGrid: throttle(function () {
                 if (typeof this.draw === 'undefined') return;
                 this.draw.clear();
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
-                const height = this.users.length * rowHeight;
+                const height = canvasContainer.clientHeight;
                 const columnWidth = width / columns;
                 const draw = this.draw;
                 draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
+                if (height <= 0) {
+                    return;
+                }
                 // Background
-                draw.rect(width - 1, height - 1)
+                const rectBackground = draw
+                    .rect(this.contentWidth(), height - 1)
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .fill('#FAFAFA')
                     .stroke({ color: '#DFE5ED', width: 1 })
                     .on('mousedown', () => this.$emit('outsideClick'));
+                rectBackground.on('mousedown', e => {
+                    this.onDown(e);
+                    e.stopPropagation();
+                });
+                rectBackground.on('scroll', e => {
+                    this.onScroll(e);
+                    e.stopPropagation();
+                });
+                draw.add(rectBackground);
                 for (let column = 0; column < columns; ++column) {
                     const date = moment().startOf('day').add(column, 'hours');
-                    const left = columnWidth * column;
-
+                    let left = this.columnWidth() * column;
                     // Column headers - hours
                     draw.text(date.format('h'))
-                        .move(left + columnWidth / 2, 0)
+                        .move(left + columnWidth / 2 + 15, 0)
                         .size(columnWidth, titleHeight)
                         .attr({
                             'text-anchor': 'middle',
@@ -259,7 +321,7 @@
                         });
                     // Column headers - am/pm
                     draw.text(date.format('A'))
-                        .move(left + columnWidth / 2, titleHeight - 5)
+                        .move(left + columnWidth / 2 + 15, titleHeight - 5)
                         .size(columnWidth, subtitleHeight)
                         .attr({
                             'text-anchor': 'middle',
@@ -278,14 +340,20 @@
                 }
 
                 const maxLeftOffset = width - popupWidth + 2 * canvasPadding;
-                const minLeftOffset = canvasPadding / 2;
-
+                const clipPath = draw
+                    .rect(this.contentWidth(), height - 1)
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .attr({
+                        absolutePositioned: true,
+                    });
+                const squaresGroup = draw.group().clipWith(clipPath);
                 this.users.forEach((user, row) => {
                     const top = row * rowHeight + titleHeight + subtitleHeight;
 
                     // Horizontal grid lines
                     if (row > 0) {
-                        draw.line(0, 0, width, 0).move(0, top).stroke({ color: '#DFE5ED', width: 1 });
+                        draw.line(0, 0, this.contentWidth(), 0).move(0, top).stroke({ color: '#DFE5ED', width: 1 });
                     }
 
                     // Intervals
@@ -296,12 +364,11 @@
                                     .tz(event.start_at, this.companyData.timezone)
                                     .tz(this.timezone)
                                     .diff(moment.tz(this.start, this.timezone).startOf('day'), 'hours', true) % 24;
-
-                            const width = ((Math.max(event.duration, 60) + 120) * columnWidth) / 60 / 60;
-
-                            const rect = draw
-                                .rect(width, rowHeight / 2)
-                                .move(Math.floor(leftOffset * columnWidth), top + rowHeight / 4)
+                            const widthIntrevals =
+                                ((Math.max(event.duration, 60) + 120) * this.columnWidth()) / 60 / 60;
+                            const rectInterval = draw
+                                .rect(widthIntrevals, rowHeight / 2)
+                                .move(Math.floor(leftOffset * this.columnWidth()), top + rowHeight / 4)
                                 .radius(2)
                                 .fill(event.is_manual === '1' ? '#c4b52d' : '#2DC48D')
                                 .stroke({ color: 'transparent', width: 0 })
@@ -310,68 +377,51 @@
                                     hoverCursor: 'pointer',
                                 });
 
-                            rect.on('mouseover', e => {
-                                if (e.target.attributes.x.value > maxLeftOffset) {
-                                    this.hoverPopup = {
-                                        show: true,
-                                        x: maxLeftOffset,
-                                        y: e.target.attributes.y.value,
-                                        event,
-                                        borderX: defaultCornerOffset + e.target.attributes.x.value - maxLeftOffset,
-                                    };
-                                } else {
-                                    this.hoverPopup = {
-                                        show: true,
-                                        x:
-                                            e.target.attributes.x.value < minLeftOffset
-                                                ? minLeftOffset
-                                                : e.target.attributes.x.value,
-                                        y: e.target.attributes.y.value - 10,
-                                        borderX: defaultCornerOffset,
-                                        event,
-                                    };
-                                }
+                            rectInterval.on('mouseover', e => {
+                                const rectBBox = rectInterval.bbox();
+                                const popupX = Math.max(rectBBox.x, canvasPadding / 2) - this.offsetX;
+                                const popupY = rectBBox.y - 10;
+                                this.hoverPopup = {
+                                    show: true,
+                                    x: popupX,
+                                    y: popupY,
+                                    event,
+                                    borderX: defaultCornerOffset,
+                                };
                             });
-
-                            rect.on('mouseout', e => {
+                            rectInterval.on('mouseout', e => {
                                 this.hoverPopup = {
                                     ...this.hoverPopup,
                                     show: false,
                                 };
                             });
-
-                            rect.on('mousedown', e => {
+                            rectInterval.on('mousedown', e => {
                                 this.$emit('selectedIntervals', event);
-
-                                if (e.target.attributes.x.value > maxLeftOffset) {
-                                    this.clickPopup = {
-                                        show: true,
-                                        x: maxLeftOffset,
-                                        y: e.target.attributes.y.value,
-                                        event,
-                                        borderX: defaultCornerOffset + e.target.attributes.x.value - maxLeftOffset,
-                                    };
-                                } else {
-                                    this.clickPopup = {
-                                        show: true,
-                                        x: e.target.attributes.x.value,
-                                        y: e.target.attributes.y.value - 10,
-                                        event,
-                                        borderX: defaultCornerOffset,
-                                    };
-                                }
-
+                                const rectBBox = rectInterval.bbox();
+                                const popupX = Math.max(rectBBox.x, canvasPadding / 2) - this.offsetX;
+                                const popupY = rectBBox.y - 50;
+                                this.clickPopup = {
+                                    show: true,
+                                    x: popupX,
+                                    y: popupY,
+                                    event,
+                                    borderX: defaultCornerOffset + e.target.attributes.x.value - maxLeftOffset,
+                                };
                                 e.stopPropagation();
                             });
-
-                            draw.add(rect);
+                            squaresGroup.add(rectInterval);
                         });
                     }
                 });
             }, 100),
             onResize: throttle(function () {
+                const canvasContainer = this.$refs.canvas;
+                const width = canvasContainer.clientWidth;
+                const height = this.users.length * rowHeight;
+                this.draw.size(width, height);
+                this.draw.viewbox(0, 20, width, height);
                 this.drawGrid();
-            }, 200),
+            }, 100),
             onClick(e) {
                 if (e.button !== 0 || (e.target && e.target.closest('.popup'))) {
                     return;
@@ -459,6 +509,65 @@
                 width: 0;
 
                 z-index: 1;
+            }
+        }
+        .scroll-area-wrapper {
+            position: absolute;
+            top: 0;
+            left: 0;
+            display: block;
+            width: 100%;
+            height: 100%;
+            overflow: hidden;
+            pointer-events: none;
+            // cursor: move;
+        }
+
+        .scroll-area {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: -6px;
+            bottom: -6px;
+            display: block;
+            overflow: auto;
+            scrollbar-width: thin;
+
+            &::-webkit-scrollbar {
+                display: none;
+            }
+        }
+        .scrollbar-top {
+            position: absolute;
+            left: 0;
+            top: -25px;
+            width: 100%;
+            height: 10px;
+            overflow-x: auto;
+        }
+        .scrollbar-top {
+            scrollbar-color: #2e2ef9 transparent;
+            scrollbar-width: thin;
+
+            & > div {
+                height: 1px;
+            }
+
+            &::-webkit-scrollbar {
+                height: 7px;
+            }
+
+            &::-webkit-scrollbar-track {
+                background: transparent;
+            }
+
+            &::-webkit-scrollbar-button {
+                display: none;
+            }
+
+            &::-webkit-scrollbar-thumb {
+                background: #2e2ef9;
+                border-radius: 3px;
             }
         }
     }

@@ -31,7 +31,7 @@
                 <div class="col-4">
                     <UserAvatar :user="user" />
                 </div>
-                <div class="team_sidebar__user_info col-offset-1">
+                <div class="team_sidebar__user_info col-offset-1 hidden">
                     <div class="team_sidebar__user_name">{{ user.full_name }}</div>
                     <div class="team_sidebar__user_task">
                         <router-link
@@ -46,7 +46,7 @@
                     </div>
                 </div>
             </div>
-            <div class="col-8 flex-end team_sidebar__user_worked">
+            <div class="col-8 flex-end team_sidebar__user_worked time-user">
                 {{ formatDurationString(user.worked) }}
             </div>
         </div>
@@ -141,6 +141,11 @@
 
             &_info {
                 margin-top: -5px;
+            }
+        }
+        @media (max-width: 750px) {
+            .hidden {
+                display: none;
             }
         }
     }
