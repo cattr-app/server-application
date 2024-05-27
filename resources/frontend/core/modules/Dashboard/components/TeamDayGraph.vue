@@ -225,7 +225,7 @@
                 }
             },
             height() {
-                return this.users.length * rowHeight; //this.users.length * rowHeight + titleHeight + subtitleHeight;
+                return this.users.length * rowHeight;
             },
             canvasWidth() {
                 if (!this.$refs.canvas) {
@@ -370,11 +370,11 @@
                                 .rect(widthIntrevals, rowHeight / 2)
                                 .move(Math.floor(leftOffset * this.columnWidth()), top + rowHeight / 4)
                                 .radius(2)
-                                .fill(event.is_manual === '1' ? '#c4b52d' : '#2DC48D')
                                 .stroke({ color: 'transparent', width: 0 })
                                 .attr({
                                     cursor: 'pointer',
                                     hoverCursor: 'pointer',
+                                    fill: event.is_manual == '1' ? '#c4b52d' : '#2DC48D',
                                 });
 
                             rectInterval.on('mouseover', e => {
@@ -520,7 +520,6 @@
             height: 100%;
             overflow: hidden;
             pointer-events: none;
-            // cursor: move;
         }
 
         .scroll-area {
