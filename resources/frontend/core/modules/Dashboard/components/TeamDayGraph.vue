@@ -262,11 +262,9 @@
                 }
             },
             onUp(e) {
-                if (e.buttons & 1) {
-                    document.removeEventListener('pointermove', this.onMove);
-                    document.removeEventListener('pointerup', this.onUp);
-                    document.removeEventListener('pointercancel', this.onUp);
-                }
+                document.removeEventListener('pointermove', this.onMove);
+                document.removeEventListener('pointerup', this.onUp);
+                document.removeEventListener('pointercancel', this.onUp);
             },
             onScroll(e) {
                 this.setScroll(e.target.scrollLeft);
@@ -275,6 +273,7 @@
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
                 const height = canvasContainer.clientHeight;
+                this.$refs.scrollbarTop.scrollLeft = x;
                 this.draw.viewbox(x, -3, width, height);
             },
             drawGrid: throttle(function () {
@@ -282,13 +281,14 @@
                 this.draw.clear();
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
-                const height = canvasContainer.clientHeight;
+                const height = this.users.length * rowHeight;
                 const columnWidth = width / columns;
                 const draw = this.draw;
                 draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
                 if (height <= 0) {
                     return;
                 }
+                this.draw.viewbox(0, 20, width, height);
                 // Background
                 const rectBackground = draw
                     .rect(this.contentWidth(), height - 1)

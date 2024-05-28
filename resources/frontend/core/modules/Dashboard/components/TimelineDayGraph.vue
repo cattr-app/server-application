@@ -81,17 +81,6 @@
     import { mapGetters } from 'vuex';
     import { SVG } from '@svgdotjs/svg.js';
 
-    const fabricObjectOptions = {
-        editable: false,
-        selectable: false,
-        objectCaching: false,
-        hasBorders: false,
-        hasControls: false,
-        hasRotatingPoint: false,
-        cursor: 'default',
-        hoverCursor: 'default',
-    };
-
     const titleHeight = 20;
     const subtitleHeight = 20;
     const timelineHeight = 80;
@@ -260,7 +249,14 @@
                     .on('mousedown', () => this.$emit('outsideClick'));
                 const maxLeftOffset = width - popupWidth + 2 * canvasPadding;
                 const minLeftOffset = canvasPadding / 2;
-
+                const clipPath = draw
+                    .rect(width - 1, timelineHeight - 1)
+                    .move(0, titleHeight + subtitleHeight)
+                    .radius(20)
+                    .attr({
+                        absolutePositioned: true,
+                    });
+                const squaresGroup = draw.group().clipWith(clipPath);
                 for (let i = 0; i < columns; ++i) {
                     const date = moment().startOf('day').add(i, 'hours');
                     const left = columnWidth * i;
@@ -293,12 +289,14 @@
 
                     // Vertical grid line
                     if (i > 0) {
-                        draw.line(0, 0, 0, timelineHeight)
+                        const line = draw
+                            .line(0, 0, 0, timelineHeight)
                             .move(left, titleHeight + subtitleHeight)
                             .stroke({
                                 color: '#dfe5ed',
                                 width: 1,
                             });
+                        squaresGroup.add(line);
                     }
                 }
 
