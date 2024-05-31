@@ -61,7 +61,6 @@
         },
         data() {
             return {
-                viewBox: '',
                 lastPosX: 0,
                 offsetX: 0,
             };
@@ -83,12 +82,6 @@
         },
         mounted() {
             this.draw = SVG();
-
-            const canvasContainer = this.$refs.canvas;
-            const width = canvasContainer.clientWidth;
-            const height = this.users.length * rowHeight;
-            this.draw.viewbox(0, 0, width, height);
-
             this.onResize();
             window.addEventListener('resize', this.onResize);
         },
@@ -150,23 +143,19 @@
                 }
             },
             onUp(e) {
-                if (e.buttons & 1) {
-                    document.removeEventListener('pointermove', this.onMove);
-                    document.removeEventListener('pointerup', this.onUp);
-                    document.removeEventListener('pointercancel', this.onUp);
-                }
+                document.removeEventListener('pointermove', this.onMove);
+                document.removeEventListener('pointerup', this.onUp);
+                document.removeEventListener('pointercancel', this.onUp);
             },
             onScroll(e) {
                 this.setScroll(e.target.scrollLeft);
             },
             setScroll(x) {
-                const canvasContainer = this.$refs.scrollArea;
+                const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
                 const height = canvasContainer.clientHeight;
-                this.draw.viewbox(x, 0, width, height);
-            },
-            resetScroll() {
-                this.setScroll(0);
+                this.$refs.scrollbarTop.scrollLeft = x;
+                this.draw.viewbox(x, 0, width, height - 10);
             },
             formatDuration: formatDurationString,
             drawGrid: debounce(function () {
@@ -177,12 +166,16 @@
                 const width = canvasContainer.clientWidth;
                 const columnWidth = width / this.columns;
                 const height = this.users.length * rowHeight;
+                if (height <= 0) {
+                    return;
+                }
                 const start = moment(this.start, 'YYYY-MM-DD');
-                draw.viewbox(0, 0, width, canvasContainer.clientHeight);
+
                 const cursor = this.contentWidth() > this.canvasWidth() ? 'move' : 'default';
                 draw.addTo(canvasContainer).size(width, height + titleHeight + subtitleHeight);
+                draw.viewbox(0, 20, width, height);
                 // Background
-                draw.rect(this.contentWidth() - 1, canvasContainer.clientHeight - (titleHeight + subtitleHeight))
+                draw.rect(this.contentWidth() - 1, height - 1)
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .fill('#fafafa')
@@ -190,8 +183,8 @@
                     .attr({
                         cursor: cursor,
                         hoverCursor: cursor,
-                    });
-
+                    })
+                    .on('mousedown', () => this.$emit('outsideClick'));
                 for (let column = 0; column < this.columns; ++column) {
                     const date = start.clone().locale(this.$i18n.locale).add(column, 'days');
                     let left = this.columnWidth() * column;
@@ -229,7 +222,7 @@
 
                     // Vertical grid lines
                     if (column > 0) {
-                        draw.line(0, titleHeight + subtitleHeight, 0, height + titleHeight + subtitleHeight + 10)
+                        draw.line(0, titleHeight + subtitleHeight, 0, height + titleHeight + subtitleHeight)
                             .move(left, titleHeight + subtitleHeight)
                             .stroke({ color: '#DFE5ED', width: 1 })
                             .attr({
@@ -251,7 +244,7 @@
                     filteredData[key] = filteredInnerObject;
                 }
                 const clipPath = draw
-                    .rect(this.contentWidth() - 1, canvasContainer.clientHeight - (titleHeight + subtitleHeight))
+                    .rect(this.contentWidth() - 1, height - 1)
                     .move(0, titleHeight + subtitleHeight)
                     .radius(20)
                     .attr({
@@ -315,17 +308,16 @@
                 const canvasContainer = this.$refs.canvas;
                 const width = canvasContainer.clientWidth;
                 const height = this.users.length * rowHeight;
-                this.draw.size(width, height);
-                this.draw.viewbox(0, 0, width, height);
+                this.draw.viewbox(0, 20, width, height);
                 this.drawGrid();
             }, 100),
         },
         watch: {
             start() {
-                this.resetScroll();
+                this.onResize();
             },
             end() {
-                this.resetScroll();
+                this.onResize();
             },
             users() {
                 this.onResize();
