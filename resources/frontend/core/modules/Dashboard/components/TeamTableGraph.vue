@@ -157,6 +157,9 @@
                 this.$refs.scrollbarTop.scrollLeft = x;
                 this.draw.viewbox(x, 0, width, height - 10);
             },
+            resetScroll() {
+                this.setScroll(0);
+            },
             formatDuration: formatDurationString,
             drawGrid: debounce(function () {
                 if (typeof this.draw === 'undefined') return;
@@ -314,10 +317,10 @@
         },
         watch: {
             start() {
-                this.onResize();
+                this.resetScroll();
             },
             end() {
-                this.onResize();
+                this.resetScroll();
             },
             users() {
                 this.onResize();
