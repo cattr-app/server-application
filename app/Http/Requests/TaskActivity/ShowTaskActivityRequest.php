@@ -2,10 +2,12 @@
 
 namespace App\Http\Requests\TaskActivity;
 
+use App\Enums\ActivityType;
 use App\Helpers\QueryHelper;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Models\Task;
 use App\Http\Requests\CattrFormRequest;
+use Illuminate\Validation\Rule;
 
 class ShowTaskActivityRequest extends CattrFormRequest
 {
@@ -20,8 +22,8 @@ class ShowTaskActivityRequest extends CattrFormRequest
     {
         return array_merge(QueryHelper::getValidationRules(), [
             'page' => 'required|int',
-            'task_id' => 'required|int',
-            'type' => 'required|string',
+            'task_id' => 'required|int|exists:tasks,id',
+            'type' => ['required', Rule::enum(ActivityType::class)],
         ]);
     }
 }

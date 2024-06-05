@@ -50,7 +50,7 @@
             </div>
         </div>
         <div class="history">
-            <div v-for="item in activity" :key="item.id + (item.content ? 'c' : 'h')" class="comment">
+            <div v-for="item in activities" :key="item.id + (item.content ? 'c' : 'h')" class="comment">
                 <div v-if="!item.content" class="content">
                     <TeamAvatars class="history-change-avatar" :users="[item.user]" />
 
@@ -186,7 +186,7 @@
                 changeMessageText: null,
                 sort: 'desc',
                 typeActivity: 'all',
-                activity: [],
+                activities: [],
                 page: 1,
                 canLoad: true,
             };
@@ -196,16 +196,16 @@
             this.user = this.$store.state.user.user.data;
         },
         async mounted() {
-            this.activity = (await this.getActivity()).data;
+            this.activities = (await this.getActivity()).data;
             window.addEventListener('scroll', this.onScroll);
             this.statuses = await this.statusService.getAll();
             this.priorities = await this.priorityService.getAll();
             this.websocketEnterChannel(this.user.id, {
                 create: async data => {
-                    this.activity = (await this.getActivity()).data;
+                    this.activities = (await this.getActivity()).data;
                 },
                 edit: async data => {
-                    this.activity = (await this.getActivity()).data;
+                    this.activities = (await this.getActivity()).data;
                 },
             });
         },
@@ -233,7 +233,7 @@
             async resetHistory() {
                 this.page = 1;
                 this.canLoad = true;
-                this.activity = (await this.getActivity()).data;
+                this.activities = (await this.getActivity()).data;
             },
             async getActivity(dataOptions = {}) {
                 return (
@@ -316,11 +316,17 @@
                         document.documentElement.scrollTop -
                         document.documentElement.clientHeight;
                     if (bottomOfWindow <= 0 && this.canLoad === true) {
+                        console.log(this.page);
                         this.page++;
                         let data = (await this.getActivity()).data;
-
+                        console.log(
+                            data.reduce((acc, obj) => {
+                                acc.push(obj.id);
+                                return acc;
+                            }, []),
+                        );
                         if (data.length > 0) {
-                            this.activity = [...this.activity, ...data];
+                            this.activities = [...this.activities, ...data];
                         } else {
                             this.canLoad = false;
                         }
