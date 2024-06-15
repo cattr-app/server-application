@@ -49,7 +49,7 @@
                 </at-dropdown>
             </div>
         </div>
-        <div class="history">
+        <div ref="activities" class="history">
             <div v-for="item in activities" :key="item.id + (item.content ? 'c' : 'h')" class="comment">
                 <div v-if="!item.content" class="content">
                     <TeamAvatars class="history-change-avatar" :users="[item.user]" />
@@ -189,6 +189,7 @@
                 activities: [],
                 page: 1,
                 canLoad: true,
+                observer: null,
             };
         },
         async created() {
@@ -196,8 +197,12 @@
             this.user = this.$store.state.user.user.data;
         },
         async mounted() {
-            this.activities = (await this.getActivity()).data;
-            window.addEventListener('scroll', this.onScroll);
+            this.observer = new IntersectionObserver(this.infiniteScroll, {
+                rootMargin: '100px',
+                threshold: 0.8,
+            });
+            this.observer.observe(this.$refs.activities);
+
             this.statuses = await this.statusService.getAll();
             this.priorities = await this.priorityService.getAll();
             this.websocketEnterChannel(this.user.id, {
@@ -210,7 +215,7 @@
             });
         },
         beforeDestroy() {
-            window.removeEventListener('scroll', this.onScroll);
+            this.observer.disconnect();
             this.websocketLeaveChannel(this.user.id);
         },
         computed: {
@@ -221,10 +226,10 @@
             },
         },
         watch: {
-            sort(newQuestion, oldQuestion) {
+            sort() {
                 this.resetHistory();
             },
-            typeActivity(newQuestion, oldQuestion) {
+            typeActivity() {
                 this.resetHistory();
             },
         },
@@ -233,7 +238,9 @@
             async resetHistory() {
                 this.page = 1;
                 this.canLoad = true;
-                this.activities = (await this.getActivity()).data;
+                this.activities = [];
+                this.observer.disconnect();
+                this.observer.observe(this.$refs.activities);
             },
             async getActivity(dataOptions = {}) {
                 return (
@@ -308,30 +315,21 @@
                     this.userFilter = '';
                 }
             },
-            async onScroll() {
-                this.$nextTick(async () => {
-                    this.scrollTop = document.scrollingElement.scrollTop;
-                    let bottomOfWindow =
-                        document.documentElement.scrollHeight -
-                        document.documentElement.scrollTop -
-                        document.documentElement.clientHeight;
-                    if (bottomOfWindow <= 0 && this.canLoad === true) {
-                        console.log(this.page);
-                        this.page++;
-                        let data = (await this.getActivity()).data;
-                        console.log(
-                            data.reduce((acc, obj) => {
-                                acc.push(obj.id);
-                                return acc;
-                            }, []),
-                        );
-                        if (data.length > 0) {
-                            this.activities = [...this.activities, ...data];
-                        } else {
-                            this.canLoad = false;
-                        }
+            async infiniteScroll([entry]) {
+                await this.$nextTick();
+                if (entry.isIntersecting && this.canLoad === true) {
+                    this.observer.disconnect();
+                    this.canLoad = false;
+
+                    let data = (await this.getActivity()).data;
+                    this.page++;
+
+                    if (data.length > 0) {
+                        this.activities.push(...data);
+                        this.canLoad = true;
+                        this.observer.observe(this.$refs.activities);
                     }
-                });
+                }
             },
             insertUserName(value) {
                 const messageBefore = this.commentMessage.substring(0, this.userNameStart);
