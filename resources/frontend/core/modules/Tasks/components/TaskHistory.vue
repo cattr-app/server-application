@@ -442,6 +442,13 @@
     }
     .at-dropdown {
         margin-top: 8px;
+        &-menu__item {
+            padding: 0;
+            .at-radio {
+                padding: 8px 16px;
+                width: 100%;
+            }
+        }
     }
     .comment {
         display: block;
