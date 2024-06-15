@@ -18,7 +18,7 @@
                 </div>
             </div>
             <div class="buttons">
-                <at-button class="comment-button" @click.prevent="createComment(task.id)">
+                <at-button class="comment-button" type="primary" @click.prevent="createComment(task.id)">
                     {{ $t('projects.add_comment') }}
                 </at-button>
                 <at-dropdown>
@@ -110,15 +110,28 @@
                         </span>
                         <div v-if="item.user.id === user.id" class="comment-functions">
                             <div class="comment-buttons">
-                                <i class="icon icon-edit-2" @click="changeComment(item)"></i>
-                                <i class="icon icon-x" @click="deleteComment(item)"></i>
+                                <at-button
+                                    icon="icon icon-edit-2"
+                                    size="small"
+                                    circle
+                                    hollow
+                                    @click="changeComment(item)"
+                                ></at-button>
+                                <at-button
+                                    icon="icon icon-trash-2"
+                                    size="small"
+                                    type="error"
+                                    hollow
+                                    circle
+                                    @click="deleteComment(item)"
+                                ></at-button>
                             </div>
                         </div>
                     </div>
                     <div v-if="item.id === idComment" ref="commentChangeForm" class="comment-content">
                         <at-textarea v-model="changeMessageText" class="comment-message" />
                         <div class="comment-buttons">
-                            <at-button class="comment-button" @click.prevent="editComment(item)">
+                            <at-button class="comment-button" type="primary" @click.prevent="editComment(item)">
                                 {{ $t('tasks.save_comment') }}
                             </at-button>
                             <at-button class="comment-button" @click.prevent="cancelChangeComment">
