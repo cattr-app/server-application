@@ -203,6 +203,7 @@
                 page: 1,
                 canLoad: true,
                 observer: null,
+                isModalOpen: false,
             };
         },
         async created() {
@@ -385,8 +386,41 @@
                 this.idComment = null;
             },
             async deleteComment(item) {
-                const result = await this.taskActivityService.deleteComment(item.id);
-                this.activity.splice(this.activity.indexOf(item), 1);
+                if (this.modalIsOpen) {
+                    return;
+                }
+                this.modalIsOpen = true;
+                const isConfirm = await this.$CustomModal({
+                    title: this.$t('notification.record.delete.confirmation.title'),
+                    content: this.$t('notification.record.delete.confirmation.message'),
+                    okText: this.$t('control.delete'),
+                    cancelText: this.$t('control.cancel'),
+                    showClose: false,
+                    styles: {
+                        'border-radius': '10px',
+                        'text-align': 'center',
+                        footer: {
+                            'text-align': 'center',
+                        },
+                        header: {
+                            padding: '16px 35px 4px 35px',
+                            color: 'red',
+                        },
+                        body: {
+                            padding: '16px 35px 4px 35px',
+                        },
+                    },
+                    width: 320,
+                    type: 'trash',
+                    typeButton: 'error',
+                });
+                this.modalIsOpen = false;
+                if (isConfirm === 'confirm') {
+                    const result = await this.taskActivityService.deleteComment(item.id);
+                    if (result.status === 204) {
+                        this.activities.splice(this.activities.indexOf(item), 1);
+                    }
+                }
             },
             websocketLeaveChannel(userId) {
                 this.$echo.leave(`tasks_activities.${userId}`);
