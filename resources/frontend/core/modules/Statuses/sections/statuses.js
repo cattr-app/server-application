@@ -17,7 +17,7 @@ export default (context, router) => {
     const crudNewRoute = crud.new.getNewRouteName();
 
     const navigation = { edit: crudEditRoute, new: crudNewRoute };
-    const oneClick = throttle(async (data, direction) => {
+    const statusOrder = throttle(async (data, direction) => {
         const { gridView } = data;
         const { tableData } = gridView;
 
@@ -108,69 +108,56 @@ export default (context, router) => {
             render(h, data) {
                 const index = data.gridView.tableData.findIndex(item => item.id === data.item.id);
                 const result = [];
-                if (index > 0) {
-                    result.push(
-                        h(
-                            'at-button',
-                            {
-                                style: {
-                                    marginRight: '8px',
-                                },
-                                on: {
-                                    click: function () {
-                                        oneClick(data, 'up');
-                                    },
-                                },
+                result.push(
+                    h(
+                        'at-button',
+                        {
+                            style: {
+                                marginRight: '8px',
                             },
-                            [h('i', { class: 'icon icon-chevrons-up' })],
-                        ),
-                    );
-                } else {
-                    result.push(
-                        h(
-                            'at-button',
-                            {
-                                style: {
-                                    marginRight: '8px',
-                                },
-                                props: {
-                                    disabled: true,
-                                },
+                            on:
+                                index > 0
+                                    ? {
+                                          click: function () {
+                                              statusOrder(data, 'up');
+                                          },
+                                      }
+                                    : {},
+                            props:
+                                index > 0
+                                    ? {}
+                                    : {
+                                          disabled: true,
+                                      },
+                        },
+                        [h('i', { class: 'icon icon-chevrons-up' })],
+                    ),
+                );
+                result.push(
+                    h(
+                        'at-button',
+                        {
+                            style: {
+                                marginRight: '8px',
                             },
-                            [h('i', { class: 'icon icon-chevrons-up' })],
-                        ),
-                    );
-                }
-                if (index < data.gridView.tableData.length - 1) {
-                    result.push(
-                        h(
-                            'at-button',
-                            {
-                                style: {
-                                    marginRight: '8px',
-                                },
-                                on: {
-                                    click: function () {
-                                        oneClick(data, 'down');
-                                    },
-                                },
-                            },
-                            [h('i', { class: 'icon icon-chevrons-down' })],
-                        ),
-                    );
-                } else {
-                    result.push(
-                        h(
-                            'at-button',
-                            {
-                                props: {
-                                    disabled: true,
-                                },
-                            },
-                            [h('i', { class: 'icon icon-chevrons-down' })],
-                        ),
-                    );
-                }
+                            on:
+                                index < data.gridView.tableData.length - 1
+                                    ? {
+                                          click: function () {
+                                              statusOrder(data, 'down');
+                                          },
+                                      }
+                                    : {},
+                            props:
+                                index < data.gridView.tableData.length - 1
+                                    ? {}
+                                    : {
+                                          disabled: true,
+                                      },
+                        },
+                        [h('i', { class: 'icon icon-chevrons-down' })],
+                    ),
+                );
                 return result;
             },
         },

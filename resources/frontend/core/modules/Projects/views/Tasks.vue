@@ -15,13 +15,11 @@
                             {{ $t('projects.add_task') }}
                         </at-button>
                     </div>
-
                     <div class="control-item">
                         <at-button size="large" @click="$router.push({ name: 'Projects.crud.projects' })">
                             {{ $t('control.project-list') }}
                         </at-button>
                     </div>
-
                     <div class="control-item">
                         <at-button size="large" @click="$router.go(-1)">{{ $t('control.back') }}</at-button>
                     </div>
@@ -71,6 +69,7 @@
                         :key="`block_${block.id}`"
                         :class="{ task: true, handle: isDesktop }"
                         @click="loadTask(block.id)"
+                        @mousedown="onDownMouse()"
                         @pointerdown="task = null"
                     >
                         <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
@@ -90,9 +89,12 @@
                             </span>
                             <team-avatars :users="getTask(block.id).users"></team-avatars>
                         </div>
-                        <span :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop }" @touchstart="onDown"
-                            ><i class="icon icon-move" :class="{ handle: !isDesktop }"></i
-                        ></span>
+                        <at-button
+                            type="primary"
+                            hollow
+                            circle
+                            :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop, handle: !isDesktop }"
+                        ></at-button>
                     </div>
                 </kanban-board>
             </div>
@@ -100,7 +102,7 @@
 
         <transition name="slide">
             <div v-if="task" class="task-view">
-                <div>
+                <div class="actions__toggle">
                     <div class="task-view-header">
                         <h4 class="task-view-title">{{ task.task_name }}</h4>
 
@@ -215,8 +217,12 @@
                     },
                 },
                 isDesktop: false,
+                isMobile: false,
                 scrollInterval: null,
                 mouseX: 0,
+                isDragging: false,
+                edgeThreshold: Math.min(window.innerWidth * 0.1, 100),
+                maxScrollSpeed: window.innerWidth * 0.02,
             };
         },
         computed: {
@@ -240,6 +246,14 @@
             getTextColor,
             formatDate,
             formatDurationString,
+            handleClick(e) {
+                if (!e.target.closest('.actions__toggle')) {
+                    if (e.target.closest('.task')) {
+                        return;
+                    }
+                    this.task = null;
+                }
+            },
             isOverDue(companyTimezone, item) {
                 return (
                     typeof companyTimezone === 'string' &&
@@ -249,6 +263,10 @@
             },
             checkScreenSize() {
                 this.isDesktop = window.screen.width > 992;
+                this.checkScreenSizeMobile();
+            },
+            checkScreenSizeMobile() {
+                this.isMobile = window.screen.width < 600;
             },
             isOverTime(item) {
                 return item.estimate_over != null && item.total_spent_time_over > item.estimate_over;
@@ -274,29 +292,60 @@
 
                 return '';
             },
+            onDownMouse(e) {
+                document.addEventListener('mousemove', this.onMoveMouse);
+                document.addEventListener('mouseup', this.onUpMouse);
+
+                this.scrollTimer = setInterval(this.onScrollMouse, 100);
+            },
+            onMove(e) {
+                this.mouseX = e.touches[0].clientX;
+                // this.mouseX = e.clientX || e.touches[0].clientX;
+            },
+            onMoveMouse(e) {
+                this.mouseX = e.clientX;
+            },
+            onUpMouse(e) {
+                document.removeEventListener('mousemove', this.onMoveMouse);
+                document.removeEventListener('mouseup', this.onUpMouse);
+                clearInterval(this.scrollTimer);
+            },
             onDown(e) {
-                e.preventDefault();
                 document.addEventListener('touchmove', this.onMove);
                 document.addEventListener('touchend', this.onUp);
-
-                this.scrollTimer = setInterval(this.onScrollTimer, 1000);
+                if (!this.isMobile) {
+                    this.scrollTimer = setInterval(this.onScrollMouse, 1000);
+                } else {
+                    this.scrollTimer = setInterval(this.onScrollTimerTouch, 1000);
+                }
             },
-            onScrollTimer() {
-                console.log('onScrollTimer', this.scrollTimer);
+            onScrollTimerTouch() {
                 if (this.mouseX < 50) {
                     this.$refs.kanban.scrollLeft -= window.screen.width / 2;
                 }
-
                 if (this.mouseX > window.screen.width - 50) {
                     this.$refs.kanban.scrollLeft += window.screen.width / 2;
                 }
             },
-            onMove(e) {
-                this.mouseX = e.clientX || e.touches[0].clientX;
+            onScrollMouse() {
+                let scrollSpeed = 0;
+                if (this.mouseX < this.edgeThreshold) {
+                    scrollSpeed = this.maxScrollSpeed * (1 - this.mouseX / this.edgeThreshold);
+                    this.$refs.kanban.scrollBy(-scrollSpeed, 0);
+                } else if (this.mouseX > window.innerWidth - this.edgeThreshold) {
+                    const distanceToRightEdge = window.innerWidth - this.mouseX;
+                    scrollSpeed = this.maxScrollSpeed * (1 - distanceToRightEdge / this.edgeThreshold);
+                    this.$refs.kanban.scrollBy(scrollSpeed, 0);
+                }
             },
             onUp(e) {
                 document.removeEventListener('touchmove', this.onMove);
                 document.removeEventListener('touchend', this.onUp);
+                clearInterval(this.scrollTimer);
+            },
+            onUpMove(e) {
+                document.removeEventListener('mousemove', this.onMove);
+                document.removeEventListener('mouseend', this.onUpMove);
                 clearInterval(this.scrollTimer);
             },
             changeOrder: throttle(async function (index, direction) {
@@ -466,14 +515,25 @@
             }
             this.checkScreenSize();
             window.addEventListener('resize', this.checkScreenSize);
+            window.addEventListener('click', this.handleClick);
+            window.addEventListener('touchstart', this.onDown);
         },
         beforeDestroy() {
+            window.removeEventListener('click', this.handleClick);
             window.removeEventListener('resize', this.checkScreenSize);
+            window.removeEventListener('touchstart', this.onDown);
+            window.removeEventListener('mousedown', this.onDownMouse);
         },
     };
 </script>
 
 <style lang="scss" scoped>
+    .crud__content {
+        padding: 0 !important;
+    }
+    .crud {
+        overflow: hidden;
+    }
     .task.handle > * {
         pointer-events: none;
     }
@@ -505,7 +565,7 @@
         background: #ffffff;
         padding: 16px;
         cursor: default;
-
+        overflow: hidden;
         &-description {
             height: 24px;
             overflow: hidden;
@@ -532,7 +592,8 @@
 
     .task-view {
         position: fixed;
-        top: 0;
+        bottom: 0;
+        // left: 0;
         right: 0;
         display: flex;
         z-index: 1;
@@ -541,8 +602,8 @@
         background: #ffffff;
         border: 1px solid #c5d9e8;
         border-radius: 4px;
-        max-width: 500px;
-        overflow: hidden auto;
+        height: 100vh;
+        overflow: hidden;
         padding: 16px;
 
         &-header {
@@ -701,9 +762,9 @@
         overflow-x: auto;
     }
     @media (max-width: $screen-md) {
-        .status {
-            min-width: 100%;
-        }
+        // .status {
+        //     min-width: 100%;
+        // }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 6px;
         }
@@ -714,7 +775,7 @@
             padding: 8px;
         }
         .task-view {
-            width: auto;
+            // width: auto;
             left: 0;
         }
         .task-name {
@@ -732,15 +793,15 @@
 
         .project-tasks_kanban ::v-deep .drag-column {
             scroll-snap-align: center;
-            max-width: 100%;
-            flex-basis: 100%;
+            // max-width: 100%;
+            // flex-basis: 100%;
             flex-shrink: 0;
         }
     }
     @media (max-width: $screen-sm) {
-        .status {
-            min-width: 100%;
-        }
+        // .status {
+        //     min-width: 100%;
+        // }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 4px;
         }
@@ -768,8 +829,8 @@
         }
         .project-tasks_kanban ::v-deep .drag-column {
             scroll-snap-align: center;
-            max-width: 100%;
-            flex-basis: 100%;
+            // max-width: 100%;
+            // flex-basis: 100%;
             flex-shrink: 0;
         }
     }
@@ -784,8 +845,12 @@
             scroll-snap-type: x mandatory;
         }
         .task-view {
-            width: auto;
+            // width: auto;
             left: 0;
+            max-width: 100%;
+            width: 100%;
+            margin: 0;
+            border-radius: 0;
         }
         .task ::v-deep {
             padding: 8px;
