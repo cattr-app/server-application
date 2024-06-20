@@ -69,7 +69,8 @@
                         :key="`block_${block.id}`"
                         :class="{ task: true, handle: isDesktop }"
                         @click="loadTask(block.id)"
-                        @mousedown="onDownMouse()"
+                        @mousedown="onDownMouse"
+                        @touchstart="onDown"
                         @pointerdown="task = null"
                     >
                         <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
@@ -293,10 +294,12 @@
                 return '';
             },
             onDownMouse(e) {
-                document.addEventListener('mousemove', this.onMoveMouse);
-                document.addEventListener('mouseup', this.onUpMouse);
+                if (e.buttons & 1) {
+                    document.addEventListener('mousemove', this.onMoveMouse);
+                    document.addEventListener('mouseup', this.onUpMouse);
 
-                this.scrollTimer = setInterval(this.onScrollMouse, 100);
+                    this.scrollTimer = setInterval(this.onScrollMouse, 100);
+                }
             },
             onMove(e) {
                 this.mouseX = e.touches[0].clientX;
@@ -516,7 +519,6 @@
             this.checkScreenSize();
             window.addEventListener('resize', this.checkScreenSize);
             window.addEventListener('click', this.handleClick);
-            window.addEventListener('touchstart', this.onDown);
         },
         beforeDestroy() {
             window.removeEventListener('click', this.handleClick);
@@ -762,9 +764,6 @@
         overflow-x: auto;
     }
     @media (max-width: $screen-md) {
-        // .status {
-        //     min-width: 100%;
-        // }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 6px;
         }
@@ -775,7 +774,6 @@
             padding: 8px;
         }
         .task-view {
-            // width: auto;
             left: 0;
         }
         .task-name {
@@ -793,15 +791,10 @@
 
         .project-tasks_kanban ::v-deep .drag-column {
             scroll-snap-align: center;
-            // max-width: 100%;
-            // flex-basis: 100%;
             flex-shrink: 0;
         }
     }
     @media (max-width: $screen-sm) {
-        // .status {
-        //     min-width: 100%;
-        // }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 4px;
         }
@@ -829,8 +822,6 @@
         }
         .project-tasks_kanban ::v-deep .drag-column {
             scroll-snap-align: center;
-            // max-width: 100%;
-            // flex-basis: 100%;
             flex-shrink: 0;
         }
     }
@@ -845,7 +836,6 @@
             scroll-snap-type: x mandatory;
         }
         .task-view {
-            // width: auto;
             left: 0;
             max-width: 100%;
             width: 100%;
