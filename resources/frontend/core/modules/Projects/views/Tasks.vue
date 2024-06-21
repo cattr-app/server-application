@@ -74,6 +74,9 @@
                         @pointerdown="task = null"
                     >
                         <h4 class="task-name">{{ getTask(block.id).task_name }}</h4>
+                        <at-tag class="tag-priority" :color="getTask(block.id).priority.color">{{
+                            getTask(block.id).priority.name
+                        }}</at-tag>
                         <p class="task-description" v-html="getTask(block.id).description"></p>
                         <div class="task-users">
                             <div class="task__tags">
@@ -530,6 +533,11 @@
 </script>
 
 <style lang="scss" scoped>
+    .tag-priority {
+        // padding: 5px;
+        margin-top: 5px;
+        margin-bottom: 5px;
+    }
     .crud__content {
         padding: 0 !important;
     }
