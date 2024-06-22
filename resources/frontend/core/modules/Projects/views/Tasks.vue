@@ -306,7 +306,6 @@
             },
             onMove(e) {
                 this.mouseX = e.touches[0].clientX;
-                // this.mouseX = e.clientX || e.touches[0].clientX;
             },
             onMoveMouse(e) {
                 this.mouseX = e.clientX;
@@ -534,9 +533,7 @@
 
 <style lang="scss" scoped>
     .tag-priority {
-        // padding: 5px;
-        margin-top: 5px;
-        margin-bottom: 5px;
+        margin: 5px 0;
     }
     .crud__content {
         padding: 0 !important;
@@ -603,7 +600,6 @@
     .task-view {
         position: fixed;
         bottom: 0;
-        // left: 0;
         right: 0;
         display: flex;
         z-index: 1;
