@@ -512,6 +512,91 @@ class TaskController extends ItemController
 
     /**
      * @throws Throwable
+     * @api             {post} /tasks/create-relation Create Relation
+     * @apiDescription  Creates a relation between two tasks, ensuring they belong to the same project and no cyclic dependencies exist.
+     *
+     * @apiVersion      4.0.0
+     * @apiName         CreateRelation
+     * @apiGroup        Task
+     *
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   tasks_create_relation
+     * @apiPermission   tasks_full_access
+     *
+     * @apiParam {Integer}  task_id            The ID of the task.
+     * @apiParam {Integer}  related_task_id    The ID of the related task.
+     * @apiParam {String="FOLLOWS","PRECEDES"} relation_type The type of the relation between the tasks.
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "task_id": 1,
+     *    "related_task_id": 2,
+     *    "relation_type": "follows"
+     *  }
+     *
+     * @apiUse          TaskObject
+     *
+     * @apiSuccess {Object} data The related task object.
+     * @apiSuccess {Number} data.id The ID of the related task.
+     * @apiSuccess {Number} data.project_id The project ID of the related task.
+     * @apiSuccess {Number} data.project_phase_id The project phase ID of the related task, if any.
+     * @apiSuccess {String} data.task_name The name of the related task.
+     * @apiSuccess {String} data.description The description of the related task.
+     * @apiSuccess {Number} data.assigned_by The ID of the user who assigned the task.
+     * @apiSuccess {String} data.url The URL of the related task, if any.
+     * @apiSuccess {String} data.created_at The creation timestamp of the related task.
+     * @apiSuccess {String} data.updated_at The last update timestamp of the related task.
+     * @apiSuccess {String} data.deleted_at The deletion timestamp of the related task, if any.
+     * @apiSuccess {Number} data.priority_id The priority ID of the related task.
+     * @apiSuccess {Boolean} data.important Indicates if the task is marked as important.
+     * @apiSuccess {String} data.start_date The start date of the related task, if any.
+     * @apiSuccess {Number} data.project_milestone_id The project milestone ID of the related task, if any.
+     * @apiSuccess {Number} data.status_id The status ID of the related task.
+     * @apiSuccess {Number} data.relative_position The relative position of the related task.
+     * @apiSuccess {String} data.estimate The estimate for the task, if any.
+     * @apiSuccess {String} data.due_date The due date of the related task, if any.
+     * @apiSuccess {Object} data.pivot The pivot data for the relation.
+     * @apiSuccess {Number} data.pivot.child_id The child task ID.
+     * @apiSuccess {Number} data.pivot.parent_id The parent task ID.
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *      "id": 5,
+     *      "project_id": 1,
+     *      "project_phase_id": null,
+     *      "task_name": "Laudantium sapiente voluptas.",
+     *      "description": "Quam incidunt nemo",
+     *      "assigned_by": 2,
+     *      "url": null,
+     *      "created_at": "2023-10-26T10:26:27.000000Z",
+     *      "updated_at": "2024-06-16T05:13:13.000000Z",
+     *      "deleted_at": null,
+     *      "priority_id": 1,
+     *      "important": 1,
+     *      "start_date": null,
+     *      "project_milestone_id": null,
+     *      "status_id": 4,
+     *      "relative_position": 68.8125,
+     *      "estimate": null,
+     *      "due_date": null,
+     *      "pivot": {
+     *        "child_id": 1,
+     *        "parent_id": 5
+     *      }
+     *  }
+     *
+     * @apiError TaskRelationException NOT_SAME_PROJECT The tasks do not belong to the same project.
+     * @apiError TaskRelationException ALREADY_EXISTS The relation already exists.
+     * @apiError TaskRelationException CYCLIC The relation would create a cyclic dependency.
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     * @apiUse         ForbiddenError
+     * @apiUse         ValidationError
      */
     public function createRelation(CreateRelationRequest $request): JsonResponse
     {
@@ -584,8 +669,40 @@ class TaskController extends ItemController
         return responder()->success($relatedTask)->respond();
     }
 
-    /**
+     /**
      * @throws Throwable
+     * @api             {post} /tasks/remove-relation Destroy Relation
+     * @apiDescription  Removes a relation between two tasks.
+     *
+     * @apiVersion      4.0.0
+     * @apiName         DestroyRelation
+     * @apiGroup        Task
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   tasks_destroy_relation
+     * @apiPermission   tasks_full_access
+     *
+     * @apiParam {Integer}  parent_id   The ID of the parent task.
+     * @apiParam {Integer}  child_id    The ID of the child task.
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "parent_id": 1,
+     *    "child_id": 2
+     *  }
+     *
+     * @apiSuccess {Boolean} success Indicates if the operation was successful.
+     * @apiSuccess {Number} status The HTTP status code.
+     * @apiSuccess {Null} data No content is returned.
+     *
+     * @apiError TaskRelationException The specified relation does not exist or another error occurred.
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     * @apiUse         ForbiddenError
+     * @apiUse         ValidationError
      */
     public function destroyRelation(DestroyRelationRequest $request): JsonResponse
     {
@@ -602,6 +719,33 @@ class TaskController extends ItemController
 
     /**
      * @throws BindingResolutionException
+     * @api             {get} /offline-sync/download-projects-and-tasks/{user} Download Projects and Tasks
+     * @apiDescription  Downloads all projects and tasks associated with a specific user.
+     *
+     * @apiVersion      4.0.0
+     * @apiName         DownloadProjectsAndTasks
+     * @apiGroup        User
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   users_download_projects_tasks
+     * @apiPermission   users_full_access
+     *
+     * @apiParam {Integer}  user   The ID of the user.
+     *
+     * @apiSuccess {Boolean} success Indicates if the operation was successful.
+     * @apiSuccess {Number} status The HTTP status code.
+     * @apiSuccess {File} data A binary file containing the packed projects and tasks data.
+     * @apiSuccess {String} Content-type The content type of the file, which is `application/octet-stream`.
+     * @apiSuccess {String} Content-Disposition The content disposition of the file, indicating an attachment with the filename `ProjectsAndTasks.cattr`.
+     *
+     *
+     * @apiError UserNotFound The user with the specified ID was not found.
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     * @apiUse         ForbiddenError
      */
     public function downloadProjectsAndTasks(User $user): Response
     {

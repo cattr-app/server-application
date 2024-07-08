@@ -149,7 +149,32 @@ class CompanySettingsController extends Controller
 
         return responder()->success()->respond(204);
     }
-
+    /**
+     * @api             {get} /offline-sync/public-key Get Offline Sync Public Key
+     * @apiDescription  Retrieves the public key for offline synchronization.
+     *
+     * @apiVersion      1.0.0
+     * @apiName         GetOfflineSyncPublicKey
+     * @apiGroup        OfflineSync
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   offline_sync_view
+     * @apiPermission   offline_sync_full_access
+     *
+     * @apiSuccess {Boolean} success Indicates if the operation was successful.
+     * @apiSuccess {Object} data The response data.
+     * @apiSuccess {String} data.key The public key for offline synchronization.
+     *
+     * @apiError (Error 401) Unauthorized The user is not authorized to access this resource.
+     * @apiError (Error 403) Forbidden The user does not have the necessary permissions.
+     * @apiError (Error 404) NotFound The requested resource was not found.
+     *
+     * @apiUse         400Error
+     * @apiUse         UnauthorizedError
+     * @apiUse         ItemNotFoundError
+     * @apiUse         ForbiddenError
+     */
     public function getOfflineSyncPublicKey(): JsonResponse
     {
         return responder()->success(

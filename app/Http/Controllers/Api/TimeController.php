@@ -33,7 +33,7 @@ class TimeController extends Controller
      * @api             {get,post} /time/total Total
      * @apiDescription  Get total of Time
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Total
      * @apiGroup        Time
      *
@@ -53,9 +53,9 @@ class TimeController extends Controller
      *    "end_at": "2019-01-01 00:00:00"
      *  }
      *
-     * @apiSuccess {Boolean}  time     Total time in seconds
-     * @apiSuccess {String}   start    Datetime of first Time Interval start_at
-     * @apiSuccess {String}   end      DateTime of last Time Interval end_at
+     * @apiSuccess {Integer} time  Total time in seconds
+     * @apiSuccess {String}  start Datetime of first Time Interval start_at
+     * @apiSuccess {String}  end   Datetime of last Time Interval end_at
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
@@ -138,7 +138,7 @@ class TimeController extends Controller
      * @api             {get,post} /time/tasks Tasks
      * @apiDescription  Get tasks and its total time
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Tasks
      * @apiGroup        Time
      *
