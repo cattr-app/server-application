@@ -154,22 +154,6 @@ class IntervalController extends ItemController
      * }
      *
      * @apiUse          TimeIntervalObject
-     *
-     * @apiSuccessExample {json} Response Example
-     * {
-     *   "id": 1,
-     *   "task_id": 1,
-     *   "start_at": "2006-05-31 16:15:09",
-     *   "end_at": "2006-05-31 16:20:07",
-     *   "created_at": "2018-09-25 06:15:08",
-     *   "updated_at": "2018-09-25 06:15:08",
-     *   "deleted_at": null,
-     *   "activity_fill": 42,
-     *   "mouse_fill": 43,
-     *   "keyboard_fill": 43,
-     *   "user_id": 1
-     * }
-     *
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      * @apiUse          ItemNotFoundError

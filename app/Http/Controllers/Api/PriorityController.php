@@ -98,7 +98,7 @@ class PriorityController extends ItemController
      * @api             {post} /priorities/create Create
      * @apiDescription  Creates priority
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Create Priority
      * @apiGroup        Priority
      *
@@ -116,18 +116,6 @@ class PriorityController extends ItemController
      * @apiSuccess {Object}   res      Priority
      *
      * @apiUse          PriorityObject
-     *
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": {
-     *      "id": 1
-     *      "name": "Normal",
-     *      "color": null
-     *    }
-     *  }
-     *
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
      */
@@ -141,7 +129,7 @@ class PriorityController extends ItemController
      * @api             {post} /priorities/edit Edit
      * @apiDescription  Edit Priority
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Edit
      * @apiGroup        Priority
      *
@@ -160,18 +148,7 @@ class PriorityController extends ItemController
      *
      * @apiSuccess {Object}   res      Priority
      *
-     * @apiUse          PriorityObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": {
-     *      "id": 1
-     *      "name": "Normal",
-     *      "color": null
-     *    }
-     *  }
-     *
+     * @apiUse         PriorityObject
      * @apiUse         400Error
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
@@ -218,6 +195,19 @@ class PriorityController extends ItemController
         return $this->_destroy($request);
     }
 
+    /**
+     * @api             {get} /api/priorities/count Count Priorities
+     * @apiDescription  Returns the total count of priorities
+     *
+     * @apiVersion      1.0.0
+     * @apiName         CountPriorities
+     * @apiGroup        Priorities
+     *
+     * @apiUse          TotalSuccess
+     *
+     * @apiUse 400Error
+     * @apiUse UnauthorizedError
+     */
     /**
      * @param ListPriorityRequest $request
      * @return JsonResponse

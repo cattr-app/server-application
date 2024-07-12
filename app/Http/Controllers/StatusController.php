@@ -13,18 +13,20 @@ class StatusController extends Controller
      * @api             {get} /status Status
      * @apiDescription  Check API status
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Status
      * @apiGroup        Status
      *
      * @apiSuccess {String}   cat       A cat for you
      * @apiSuccess {Array}    modules   Information about installed modules
+     * @apiSuccess {Array}    version   Information about version modules
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "cattr": true,
      *    "cat": "(=ㅇ༝ㅇ=)"
+     *    "version": "dev"
      *  }
      */
     /**

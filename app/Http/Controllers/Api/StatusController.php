@@ -224,6 +224,20 @@ class StatusController extends ItemController
      * @return JsonResponse
      * @throws Exception
      */
+    /**
+     * @api            {get} /invitations/count Count Invitations
+     * @apiDescription Get the count of invitations
+     *
+     * @apiVersion     4.0.0
+     * @apiName        CountInvitations
+     * @apiGroup       Invitations
+     *
+     * @apiParam {String}  [filter]  Optional filter parameter
+     *
+     * @apiUse TotalSuccess
+     * @apiUse 400Error
+     * @apiUse UnauthorizedError
+     */
     public function count(ListStatusRequest $request): JsonResponse
     {
         return $this->_count($request);

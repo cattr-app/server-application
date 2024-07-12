@@ -120,8 +120,8 @@ class InvitationController extends ItemController
      *  {
      *    "users": [
      *      {
-     *        email: "test@example.com",
-     *        role_id: 1
+     *        "email": "test@example.com",
+     *        "role_id": 1
      *      }
      *    ]
      *  }
@@ -286,6 +286,18 @@ class InvitationController extends ItemController
      * @param ListInvitationRequest $request
      * @return JsonResponse
      * @throws Exception
+     */
+    /**
+     * @api             {get} /api/invitations/count Count Invitations
+     * @apiDescription  Returns the total count of invitations
+     *
+     * @apiVersion      4.0.0
+     * @apiName         CountInvitations
+     * @apiGroup        Invitations
+     *
+     * @apiUse TotalSuccess
+     * @apiUse 400Error
+     * @apiUse UnauthorizedError
      */
     public function count(ListInvitationRequest $request): JsonResponse
     {
