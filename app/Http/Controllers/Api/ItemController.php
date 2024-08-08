@@ -227,10 +227,27 @@ abstract class ItemController extends Controller
 
     /**
      * @apiDefine ProjectParams
+     * @apiParam {Object}   [filters]                 Filters to apply to the project list.
+     * @apiParam {Object}   [filters.id]              Filter by project ID.
+     * @apiParam {String}   [filters.name]            Filter by project name.
+     * @apiParam {String}   [filters.description]     Filter by project description.
+     * @apiParam {String}   [filters.created_at]      Filter by project creation date.
+     * @apiParam {String}   [filters.updated_at]      Filter by project update date.
+     * @apiParam {Integer}  [page=1]                  Page number for pagination.
+     * @apiParam {Integer}  [perPage=15]              Number of items per page.
      */
 
     /**
      * @apiDefine ProjectObject
+     * @apiSuccess {Integer}  id Project ID.
+     * @apiSuccess {Integer}  company_id Company ID.
+     * @apiSuccess {String}   name Project name.
+     * @apiSuccess {String}   description Project description.
+     * @apiSuccess {String}   created_at Creation date.
+     * @apiSuccess {String}   updated_at Update date.
+     * @apiSuccess {Boolean}  important Indicates if the project is marked as important.
+     * @apiSuccess {String}   source Project source (e.g., "internal", "gitlab").
+     * @apiSuccess {Integer}  [default_priority_id] Default priority ID.
      */
     /**
      * @apiDefine StatusObject
