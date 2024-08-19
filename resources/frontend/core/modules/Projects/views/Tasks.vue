@@ -541,6 +541,9 @@
     .crud {
         overflow: hidden;
     }
+    .handle {
+        touch-action: none;
+    }
     .task.handle > * {
         pointer-events: none;
     }
