@@ -46,7 +46,52 @@ abstract class ItemController extends Controller
      *
      * @apiVersion 1.0.0
      */
-
+    /**
+     * @apiDefine ProjectIDParam
+     * @apiParam {Integer} id  Project ID
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "id": 1
+     *  }
+     */
+    /**
+     * @apiDefine ProjectObject
+     *
+     * @apiSuccess {Integer}  id                    Project ID
+     * @apiSuccess {Integer}  company_id            Company ID
+     * @apiSuccess {String}   name                  Project name
+     * @apiSuccess {String}   description           Project description
+     * @apiSuccess {String}   deleted_at            Project deletion date or null
+     * @apiSuccess {String}   created_at            Project creation date
+     * @apiSuccess {String}   updated_at            Project update date
+     * @apiSuccess {Boolean}  important             Project importance
+     * @apiSuccess {String}   source                Project source
+     * @apiSuccess {Integer}  default_priority_id   Default priority ID or null
+     * @apiSuccess {Object[]} phases                List of project phases
+     * @apiSuccess {Integer}  phases.id             Phase ID
+     * @apiSuccess {String}   phases.name           Phase name
+     * @apiSuccess {String}   phases.description    Phase description
+     * @apiSuccess {Integer}  phases.tasks_count    Number of tasks in the phase
+     * @apiSuccess {String}   phases.created_at     Phase creation date
+     * @apiSuccess {String}   phases.updated_at     Phase update date
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *      "id": 1,
+     *      "company_id": 1,
+     *      "name": "Dolores voluptates.",
+     *      "description": "Deleniti maxime fugit nesciunt. Ut maiores deleniti tempora vel. Nisi aut doloremque accusantium tempore aut.",
+     *      "deleted_at": null,
+     *      "created_at": "2023-10-26T10:26:17.000000Z",
+     *      "updated_at": "2023-10-26T10:26:17.000000Z",
+     *      "important": 1,
+     *      "source": "internal",
+     *      "default_priority_id": null,
+     *      "phases": []
+     *  }
+     */
     /**
      * @apiDefine UserObject
      */
@@ -144,7 +189,7 @@ abstract class ItemController extends Controller
      *  @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "res": {
+     *    "data": {
      *      "id": 1,
      *      "time_interval_id": 1,
      *      "path": "uploads\/screenshots\/1_1_1.png",
@@ -171,24 +216,35 @@ abstract class ItemController extends Controller
      * @apiSuccess {String}   created_at     Creation timestamp
      * @apiSuccess {String}   updated_at     Last update timestamp
      * @apiSuccess {String}   [deleted_at]   Deletion timestamp (if applicable)
+     * @apiSuccess {String}   user_id        The ID of the user
+     * @apiSuccess {Boolean}  is_manual      Indicates whether the time was logged manually (true) or automatically
      * @apiSuccess {Integer}  activity_fill  Activity fill percentage
      * @apiSuccess {Integer}  mouse_fill     Mouse activity fill percentage
      * @apiSuccess {Integer}  keyboard_fill  Keyboard activity fill percentage
-     * @apiSuccess {Integer}  user_id        ID of the user
+     * @apiSuccess {Integer}  location       Additional location information, if available
+     * @apiSuccess {Integer}  screenshot_id  The ID of the screenshot associated with this interval
+     * @apiSuccess {Integer}  has_screenshot Indicates if there is a screenshot for this interval
      * @apiSuccessExample {json} Response Example
-     * {
-     *   "id": 1,
-     *   "task_id": 1,
-     *   "start_at": "2006-05-31 16:15:09",
-     *   "end_at": "2006-05-31 16:20:07",
-     *   "created_at": "2018-09-25 06:15:08",
-     *   "updated_at": "2018-09-25 06:15:08",
-     *   "deleted_at": null,
-     *   "activity_fill": 42,
-     *   "mouse_fill": 43,
-     *   "keyboard_fill": 43,
-     *   "user_id": 1
-     * }
+     *  HTTP/1.1 200 OK
+     *  {
+     *    {
+     *       "id": 1,
+     *       "task_id": 1,
+     *       "start_at": "2023-10-26 10:21:17",
+     *       "end_at": "2023-10-26 10:26:17",
+     *       "created_at": "2023-10-26T10:26:17.000000Z",
+     *       "updated_at": "2023-10-26T10:26:17.000000Z",
+     *       "deleted_at": null,
+     *       "user_id": 2,
+     *       "is_manual": false,
+     *       "activity_fill": 60,
+     *       "mouse_fill": 47,
+     *       "keyboard_fill": 13,
+     *       "location": null,
+     *       "screenshot_id": null,
+     *       "has_screenshot": true
+     *   },...
+     *  }
      */
 
     /**
@@ -236,27 +292,40 @@ abstract class ItemController extends Controller
      * @apiParam {Integer}  [page=1]                  Page number for pagination.
      * @apiParam {Integer}  [perPage=15]              Number of items per page.
      */
-
-    /**
-     * @apiDefine ProjectObject
-     * @apiSuccess {Integer}  id Project ID.
-     * @apiSuccess {Integer}  company_id Company ID.
-     * @apiSuccess {String}   name Project name.
-     * @apiSuccess {String}   description Project description.
-     * @apiSuccess {String}   created_at Creation date.
-     * @apiSuccess {String}   updated_at Update date.
-     * @apiSuccess {Boolean}  important Indicates if the project is marked as important.
-     * @apiSuccess {String}   source Project source (e.g., "internal", "gitlab").
-     * @apiSuccess {Integer}  [default_priority_id] Default priority ID.
-     */
     /**
      * @apiDefine StatusObject
+     * @apiSuccess {Number}   id             The ID of the status.
+     * @apiSuccess {String}   name           The name of the status.
+     * @apiSuccess {Boolean}  active         Indicates if the status is active.
+     * @apiSuccess {String}   color          The color of the status (in HEX).
+     * @apiSuccess {Number}   order          The sort order of the status.
+     * @apiSuccess {String}   created_at     The creation timestamp.
+     * @apiSuccess {String}   updated_at     The last update timestamp.
+     *
+     * @apiSuccessExample {json} Success Response Example:
+     *  HTTP/1.1 200 OK
+     *  {
+     *      "id": 1,
+     *      "name": "Normal",
+     *      "active": true,
+     *      "color": "#363334",
+     *      "order": 1,
+     *      "created_at": "2024-08-26T10:47:30.000000Z",
+     *      "updated_at": "2024-08-26T10:48:35.000000Z"
+     *  }
      */
     /**
-     * @apiDefine TaskParams
-     */
-    /**
-     * @apiDefine TaskObject
+     * @apiDefine ParamTimeInterval
+     *
+     * @apiParam {String}   start_at  The start datetime for the interval
+     * @apiParam {String}   end_at    The end datetime for the interval
+     * @apiParam {Integer}  user_id   The ID of the user
+     * @apiParamExample {json} Request Example
+     * {
+     *   "start_at":  "2024-08-16T12:32:11.000000Z",
+     *   "end_at":  "2024-08-17T12:32:11.000000Z",
+     *   "user_id": 1
+     * }
      */
     /**
      * @apiDefine AuthHeader

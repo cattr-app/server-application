@@ -129,6 +129,8 @@ class DashboardController
      *
      * @apiUse          AuthHeader
      *
+     * @apiHeader {String} Accept Specifies the content type of the response. (Example: `text/csv`)
+     * @apiHeader {String} Authorization Bearer token for API access. (Example: `82|LosbyrFljFDJqUcqMNG6UveCgrclt6OzTrCWdnJBEZ1fee08e6`)
      * @apiPermission   report_generate
      * @apiPermission   report_full_access
      *

@@ -103,29 +103,23 @@ class ProjectController extends ItemController
      * @apiGroup        Project
      *
      * @apiUse          AuthHeader
+     * @apiUse          ProjectIDParam
      *
-     * @apiParam {Integer} id  ID проекта
-     *
-     * @apiParamExample {json} Request Example
-     *  {
-     *    "id": 1
-     *  }
-     *
-     * @apiSuccess {Integer}  id                   ID проекта
-     * @apiSuccess {Integer}  company_id           ID компании
-     * @apiSuccess {String}   name                 Название проекта
-     * @apiSuccess {String}   description          Описание проекта
-     * @apiSuccess {String}   deleted_at           Дата удаления (null, если не удален)
-     * @apiSuccess {String}   created_at           Дата создания
-     * @apiSuccess {String}   updated_at           Дата обновления
-     * @apiSuccess {Integer}  important            Важность проекта (1 - важный, 0 - не важный)
-     * @apiSuccess {String}   source               Источник проекта (internal/external)
-     * @apiSuccess {Integer}  default_priority_id  ID приоритета по умолчанию (null, если нет)
-     * @apiSuccess {Object[]} tasks_relations      Связи задач
-     * @apiSuccess {Integer}  tasks_relations.parent_id  ID родительской задачи
-     * @apiSuccess {Integer}  tasks_relations.child_id   ID дочерней задачи
-     * @apiSuccess {Object[]} tasks                Список задач
-     * @apiSuccess {Object[]} phases               Список фаз проекта
+     * @apiSuccess {Integer}  id                   Project ID
+     * @apiSuccess {Integer}  company_id           Company ID
+     * @apiSuccess {String}   name                 Project name
+     * @apiSuccess {String}   description          Project description
+     * @apiSuccess {String}   deleted_at           Deletion date (null if not deleted)
+     * @apiSuccess {String}   created_at           Creation date
+     * @apiSuccess {String}   updated_at           Update date
+     * @apiSuccess {Integer}  important            Project importance (1 - important, 0 - not important)
+     * @apiSuccess {String}   source               Project source (internal/external)
+     * @apiSuccess {Integer}  default_priority_id  Default priority ID (null if not set)
+     * @apiSuccess {Object[]} tasks_relations      Task relations
+     * @apiSuccess {Integer}  tasks_relations.parent_id  Parent task ID
+     * @apiSuccess {Integer}  tasks_relations.child_id   Child task ID
+     * @apiSuccess {Object[]} tasks                List of tasks
+     * @apiSuccess {Object[]} phases               List of project phases
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
@@ -206,58 +200,19 @@ class ProjectController extends ItemController
 
     /**
      * @api             {get} /projects/phases Project Phases
-     * @apiDescription  Получение фаз проекта с количеством задач в каждой фазе
+     * @apiDescription  Retrieve project phases along with the number of tasks in each phase.
      *
      * @apiVersion      4.0.0
      * @apiName         GetProjectPhases
      * @apiGroup        Project
      *
      * @apiUse          AuthHeader
-     *
-     * @apiParam {Integer} id  ID проекта
-     *
-     * @apiParamExample {json} Request Example
-     *  {
-     *    "id": 1
-     *  }
-     *
-     * @apiSuccess {Integer}  id                    ID проекта
-     * @apiSuccess {Integer}  company_id            ID компании
-     * @apiSuccess {String}   name                  Название проекта
-     * @apiSuccess {String}   description           Описание проекта
-     * @apiSuccess {String}   deleted_at            Дата удаления проекта или null
-     * @apiSuccess {String}   created_at            Дата создания проекта
-     * @apiSuccess {String}   updated_at            Дата обновления проекта
-     * @apiSuccess {Boolean}  important             Важность проекта
-     * @apiSuccess {String}   source                Источник проекта
-     * @apiSuccess {Integer}  default_priority_id   ID приоритета по умолчанию или null
-     * @apiSuccess {Object[]} phases                Список фаз проекта
-     * @apiSuccess {Integer}  phases.id             ID фазы
-     * @apiSuccess {String}   phases.name           Название фазы
-     * @apiSuccess {String}   phases.description    Описание фазы
-     * @apiSuccess {Integer}  phases.tasks_count    Количество задач в фазе
-     * @apiSuccess {String}   phases.created_at     Дата создания фазы
-     * @apiSuccess {String}   phases.updated_at     Дата обновления фазы
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *      "id": 1,
-     *      "company_id": 1,
-     *      "name": "Dolores voluptates.",
-     *      "description": "Deleniti maxime fugit nesciunt. Ut maiores deleniti tempora vel. Nisi aut doloremque accusantium tempore aut.",
-     *      "deleted_at": null,
-     *      "created_at": "2023-10-26T10:26:17.000000Z",
-     *      "updated_at": "2023-10-26T10:26:17.000000Z",
-     *      "important": 1,
-     *      "source": "internal",
-     *      "default_priority_id": null,
-     *      "phases": []
-     *  }
-     *
-     * @apiUse         400Error
-     * @apiUse         UnauthorizedError
+     * @apiUse          ProjectIDParam
+     * @apiUse          ProjectObject
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
      */
+
     /**
      * @param PhasesRequest $request
      * @return JsonResponse
@@ -276,9 +231,20 @@ class ProjectController extends ItemController
 
         return $this->_show($request);
     }
-
     /**
      * @throws Throwable
+     * @api             {get} /projects/show Project Show
+     * @apiDescription  Retrieve project show along with the number of tasks in each phase.
+     *
+     * @apiVersion      4.0.0
+     * @apiName         GetProjectShow
+     * @apiGroup        Project
+     *
+     * @apiUse          AuthHeader
+     * @apiUse          ProjectIDParam
+     * @apiUse          ProjectObject
+     * @apiUse          400Error
+     * @apiUse          UnauthorizedError
      */
     public function show(ShowProjectRequest $request): JsonResponse
     {
@@ -376,108 +342,6 @@ class ProjectController extends ItemController
 
         return $this->_create($request);
     }
-
-    /**
-     * @api             {get, post} /projects/show Show
-     * @apiDescription  Show Project
-     *
-     * @apiVersion      1.0.0
-     * @apiName         ShowProject
-     * @apiGroup        Project
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   projects_show
-     * @apiPermission   projects_full_access
-     *
-     * @apiParam {Integer}  id  Project ID
-     *
-     * @apiUse          ProjectParams
-     *
-     * @apiParamExample {json} Request Example
-     *  {
-     *      "id":          1,
-     *      "user_id":     ["=", [1,2,3]],
-     *      "name":        ["like", "%lorem%"],
-     *      "description": ["like", "%lorem%"],
-     *      "created_at":  [">", "2019-01-01 00:00:00"],
-     *      "updated_at":  ["<", "2019-01-01 00:00:00"]
-     *  }
-     *
-     * @apiUse         ProjectObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "id": 1,
-     *    "company_id": 0,
-     *    "name": "Eos est amet sunt ut autem harum.",
-     *    "description": "Dolores rem et sed beatae architecto...",
-     *    "deleted_at": null,
-     *    "created_at": "2018-09-25 06:15:08",
-     *    "updated_at": "2018-09-25 06:15:08"
-     *  }
-     *
-     * @apiSuccessExample {json} Response Relation Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "id": 1,
-     *    "company_id": 0,
-     *    "name": "Eos est amet sunt ut autem harum.",
-     *    "description": "Dolores rem et sed beatae architecto assumenda illum reprehenderit...",
-     *    "deleted_at": null,
-     *    "created_at": "2018-09-25 06:15:08",
-     *    "updated_at": "2018-09-25 06:15:08",
-     *    "tasks": [
-     *      {
-     *        "id": 1,
-     *        "project_id": 1,
-     *        "task_name": "Enim et sit similique.",
-     *        "description": "Adipisci eius qui quia et rerum rem perspiciatis...",
-     *        "active": 1,
-     *        "user_id": 1,
-     *        "assigned_by": 1,
-     *        "url": null,
-     *        "created_at": "2018-09-25 06:15:08",
-     *        "updated_at": "2018-09-25 06:15:08",
-     *        "deleted_at": null,
-     *        "time_intervals": [
-     *          {
-     *            "id": 1,
-     *            "task_id": 1,
-     *            "start_at": "2006-05-31 16:15:09",
-     *            "end_at": "2006-05-31 16:20:07",
-     *            "created_at": "2018-09-25 06:15:08",
-     *            "updated_at": "2018-09-25 06:15:08",
-     *            "deleted_at": null,
-     *            "activity_fill": 88,
-     *            "mouse_fill": 40,
-     *            "keyboard_fill": 48,
-     *            "user_id": 1
-     *          },
-     *          {
-     *            "id": 2,
-     *            "task_id": 1,
-     *            "start_at": "2006-05-31 16:20:08",
-     *            "end_at": "2006-05-31 16:25:06",
-     *            "created_at": "2018-09-25 06:15:08",
-     *            "updated_at": "2018-09-25 06:15:08",
-     *            "deleted_at": null,
-     *            "activity_fill": 88,
-     *            "mouse_fill": 40,
-     *            "keyboard_fill": 48,
-     *            "user_id": 1
-     *          }
-     *      }
-     *    ]
-     *  }
-     *
-     * @apiUse         400Error
-     * @apiUse         ValidationError
-     * @apiUse         UnauthorizedError
-     * @apiUse         ForbiddenError
-     * @apiUse         ItemNotFoundError
-     */
 
     /**
      * @throws Throwable

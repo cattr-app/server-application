@@ -56,6 +56,27 @@ class IntervalController extends ItemController
      * @return JsonResponse
      * @throws Exception
      */
+
+    /**
+     * @api             {post} /time-intervals/list List
+     * @apiDescription   Get list of Time Intervals
+     *
+     * @apiVersion      4.0.0
+     * @apiName         List
+     * @apiGroup        Time Interval
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   time_intervals_list
+     * @apiPermission   time_intervals_full_access
+     * @apiUse          TimeIntervalObject
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
+     */
+
     public function index(ListIntervalRequest $request): JsonResponse
     {
         Filter::listen(Filter::getRequestFilterName(), static function ($filters) use ($request) {
@@ -70,64 +91,6 @@ class IntervalController extends ItemController
     }
 
     /**
-     * @api             {post} /time-intervals/create Create
-     * @apiDescription  Create Time Interval
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Create
-     * @apiGroup        Time Interval
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   time_intervals_create
-     * @apiPermission   time_intervals_full_access
-     *
-     * @apiParam {Integer}  task_id           Task id
-     * @apiParam {Integer}  user_id           User id
-     * @apiParam {String}   start_at          Interval time start
-     * @apiParam {String}   end_at            Interval time end
-     *
-     * @apiParam {Integer}  [activity_fill]   Activity rate as a percentage
-     * @apiParam {Integer}  [mouse_fill]      Time spent using the mouse as a percentage
-     * @apiParam {Integer}  [keyboard_fill]   Time spent using the keyboard as a percentage
-     *
-     * @apiParamExample {json} Request Example
-     * {
-     *   "task_id": 1,
-     *   "user_id": 1,
-     *   "start_at": "2013-04-12T16:40:00-04:00",
-     *   "end_at": "2013-04-12T16:40:00-04:00"
-     * }
-     *
-     * @apiSuccess {Object}   interval  Interval
-     *
-     * @apiUse          TimeIntervalObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "interval": {
-     *      "id": 2251,
-     *      "task_id": 1,
-     *      "start_at": "2013-04-12 20:40:00",
-     *      "end_at": "2013-04-12 20:40:00",
-     *      "is_manual": true,
-     *      "created_at": "2018-10-01 03:20:59",
-     *      "updated_at": "2018-10-01 03:20:59",
-     *      "activity_fill": 0,
-     *      "mouse_fill": 0,
-     *      "keyboard_fill": 0,
-     *      "user_id": 1
-     *    }
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          ValidationError
-     * @apiUse          UnauthorizedError
-     * @apiUse          ForbiddenError
-     */
-
-    /**
      * @param ShowIntervalRequest $request
      *
      * @return JsonResponse
@@ -135,7 +98,7 @@ class IntervalController extends ItemController
      * @api             {post} /time-intervals/show Show
      * @apiDescription  Show Time Interval
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Show
      * @apiGroup        Time Interval
      *
@@ -146,7 +109,6 @@ class IntervalController extends ItemController
      *
      * @apiParam {Integer}  id     Time Interval id
      *
-     * @apiUse          TimeIntervalParams
      *
      * @apiParamExample {json} Request Example
      * {
@@ -191,44 +153,7 @@ class IntervalController extends ItemController
         return $this->_edit($request);
     }
 
-    /**
-     * @api             {post} /time-intervals/list List
-     * @apiDescription  Get list of Time Intervals
-     *
-     * @apiVersion      1.0.0
-     * @apiName         List
-     * @apiGroup        Time Interval
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   time_intervals_list
-     * @apiPermission   time_intervals_full_access
-     *
-     * @apiUse          TimeIntervalParams
-     * @apiUse          TimeIntervalObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  [
-     *    {
-     *      "id": 1,
-     *      "task_id": 1,
-     *      "start_at": "2006-06-20 15:54:40",
-     *      "end_at": "2006-06-20 15:59:38",
-     *      "created_at": "2018-10-15 05:54:39",
-     *      "updated_at": "2018-10-15 05:54:39",
-     *      "deleted_at": null,
-     *      "activity_fill": 42,
-     *      "mouse_fill": 43,
-     *      "keyboard_fill": 43,
-     *      "user_id":1
-     *    }
-     *  ]
-     *
-     * @apiUse          400Error
-     * @apiUse          UnauthorizedError
-     * @apiUse          ForbiddenError
-     */
+
 
     /**
      * @throws Exception
@@ -301,11 +226,57 @@ class IntervalController extends ItemController
      * @apiUse          ItemNotFoundError
      */
 
+
+
+    /**
+     * @throws Throwable
+     * @api             {post} /time-intervals/remove Destroy
+     * @apiDescription  Destroy Time Interval
+     *
+     * @apiVersion      4.0.0
+     * @apiName         Destroy
+     * @apiGroup        Time Interval
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   time_intervals_remove
+     * @apiPermission   time_intervals_full_access
+     *
+     * @apiParam {Integer}  id  ID of the target interval
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "id": 1
+     * }
+     *
+     * @apiSuccess {String}   message  Destroy status
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 204 No Content
+     *  {
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     */
+    public function destroy(DestroyTimeIntervalRequest $request): JsonResponse
+    {
+        return $this->_destroy($request);
+    }
+
+    /**
+     * @param BulkEditTimeIntervalRequest $request
+     *
+     * @return JsonResponse
+     * @throws Exception
+     */
     /**
      * @api             {post} /time-intervals/bulk-edit Bulk Edit
      * @apiDescription  Multiple Edit TimeInterval to assign tasks to them
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Bulk Edit
      * @apiGroup        Time Interval
      *
@@ -329,16 +300,15 @@ class IntervalController extends ItemController
      *   ]
      * }
      *
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 204 No Content
+     *  {
+     *  }
+     *
      * @apiSuccess {String}     message    Message from server
      * @apiSuccess {Integer[]}  updated    Updated intervals
      * @apiSuccess {Integer[]}  not_found  Not found intervals
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "message": "Intervals successfully updated",
-     *    "updated": [12, 123, 45],
-     *  }
      *
      * @apiSuccessExample {json} Not all intervals updated Response Example
      *  HTTP/1.1 207 Multi-Status
@@ -352,52 +322,6 @@ class IntervalController extends ItemController
      * @apiUse          ValidationError
      * @apiUse          UnauthorizedError
      * @apiUse          ForbiddenError
-     */
-
-    /**
-     * @throws Throwable
-     * @api             {post} /time-intervals/remove Destroy
-     * @apiDescription  Destroy Time Interval
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Destroy
-     * @apiGroup        Time Interval
-     *
-     * @apiUse          AuthHeader
-     *
-     * @apiPermission   time_intervals_remove
-     * @apiPermission   time_intervals_full_access
-     *
-     * @apiParam {Integer}  id  ID of the target interval
-     *
-     * @apiParamExample {json} Request Example
-     * {
-     *   "id": 1
-     * }
-     *
-     * @apiSuccess {String}   message  Destroy status
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "message": "Item has been removed"
-     *  }
-     *
-     * @apiUse          400Error
-     * @apiUse          ValidationError
-     * @apiUse          ForbiddenError
-     * @apiUse          UnauthorizedError
-     */
-    public function destroy(DestroyTimeIntervalRequest $request): JsonResponse
-    {
-        return $this->_destroy($request);
-    }
-
-    /**
-     * @param BulkEditTimeIntervalRequest $request
-     *
-     * @return JsonResponse
-     * @throws Exception
      */
     public function bulkEdit(BulkEditTimeIntervalRequest $request): JsonResponse
     {
@@ -438,7 +362,7 @@ class IntervalController extends ItemController
      * @api             {post} /time-intervals/bulk-remove Bulk Destroy
      * @apiDescription  Multiple Destroy TimeInterval
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Bulk Destroy
      * @apiGroup        Time Interval
      *
@@ -451,7 +375,7 @@ class IntervalController extends ItemController
      *
      * @apiParamExample {json} Request Example
      * {
-     *   "intervals": [ 1, 2, 3 ]
+     *   "intervals": [1]
      * }
      *
      * @apiSuccess {String}     message    Message from server
@@ -459,10 +383,8 @@ class IntervalController extends ItemController
      * @apiSuccess {Integer[]}  not_found  Not found intervals
      *
      * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
+     *  HTTP/1.1 204 No Content
      *  {
-     *    "message": "Intervals successfully removed",
-     *    "removed": [12, 123, 45],
      *  }
      *
      * @apiSuccessExample {json} Not all intervals removed Response Example
@@ -495,7 +417,45 @@ class IntervalController extends ItemController
 
         return responder()->success()->respond(204);
     }
-
+    /**
+     * @api             {put} /time-intervals/app Adds the current user’s ID.
+     * @apiDescription  Adds the current user’s ID.
+     *
+     * @apiVersion      4.0.0
+     * @apiName         Adds the current user’s ID.
+     * @apiGroup        Time Interval
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiParam {Integer[]}  intervals  Intervals ID to delete
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "executable":  "1"
+     * }
+     *
+     * @apiSuccess {String}     executable  Indicates if the interval is executable.
+     * @apiSuccess {Integer[]}  user_id     ID of the user
+     * @apiSuccess {Integer[]}  updated_at  Last update timestamp
+     * @apiSuccess {Integer[]}  created_at  Creation timestamp
+     * @apiSuccess {Integer[]}  id          ID of the time interval
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200
+     *  {
+     *  "executable": "1",
+     *   "user_id": 1,
+     *   "updated_at": "2024-08-17T12:32:11.000000Z",
+     *   "created_at": "2024-08-17T12:32:11.000000Z",
+     *   "id": 1
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     *
+     */
     public function trackApp(TrackAppRequest $request): JsonResponse
     {
         return responder()->success(
@@ -510,6 +470,67 @@ class IntervalController extends ItemController
 
     /**
      * @throws Throwable
+     * @api             {post} /time-intervals/create Create
+     * @apiDescription  Create Time Interval
+     *
+     * @apiVersion      4.0.0
+     * @apiName         Create
+     * @apiGroup        Time Interval
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiPermission   time_intervals_create
+     * @apiPermission   time_intervals_full_access
+     *
+     * @apiParam {Integer}  task_id           Task id
+     * @apiParam {Integer}  user_id           User id
+     * @apiParam {String}   start_at          Interval time start
+     * @apiParam {String}   end_at            Interval time end
+     * @apiParam {String}   timezone          Interval time end
+     * @apiParam {Boolean}  is_manual         Indicates whether the time was logged manually (true) or automatically
+     *
+     * @apiParamExample {json} Request Example
+     * {
+     *   "task_id": 59,
+     *   "user_id": 7,
+     *   "start_at": "2024-08-16T18:00:00.000Z",
+     *   "end_at": "2024-08-16T18:10:00.000Z",
+     *   "timezone": "Asia/Omsk",
+     *   "is_manual": true
+     * }
+     *
+     * @apiSuccess {Object}   interval  Interval
+     *
+     * @apiUse          TimeIntervalObject
+     *
+     * @apiSuccess {Integer}  id             ID of the time interval
+     * @apiSuccess {Integer}  task_id        ID of the task
+     * @apiSuccess {Integer}  user_id        ID of the user
+     * @apiSuccess {String}   start_at       Start timestamp of the time interval
+     * @apiSuccess {String}   end_at         End timestamp of the time interval
+     * @apiSuccess {String}   created_at     Creation timestamp
+     * @apiSuccess {String}   updated_at     Last update timestamp
+     * @apiSuccess {Boolean}  is_manual      Indicates whether the time was logged manually (true) or automatically
+     * @apiSuccess {Integer}  has_screenshot Indicates if there is a screenshot for this interval
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *   "id": 22578,
+     *   "task_id": 59,
+     *   "user_id": 7,
+     *   "start_at": "2024-08-16T18:00:00.000000Z",
+     *   "end_at": "2024-08-16T18:10:00.000000Z",
+     *   "created_at": "2024-08-16T20:07:14.000000Z",
+     *   "updated_at": "2024-08-16T20:07:14.000000Z",
+     *   "is_manual": true,
+     *   "has_screenshot": true
+     * }
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          UnauthorizedError
+     * @apiUse          ForbiddenError
      */
     public function create(CreateTimeIntervalRequest $request): JsonResponse
     {
@@ -833,6 +854,36 @@ class IntervalController extends ItemController
      * @return JsonResponse
      * @throws Exception
      */
+    /**
+     * @api             {any} /time/total Calculate total time interval
+     * @apiDescription  Calculate the total time spent within the specified start and end intervals for a given user.
+     *
+     * @apiVersion      4.0.0
+     * @apiName         CalculateTotalTime
+     * @apiGroup        Time Interval
+     *
+     * @apiUse          AuthHeader
+     * @apiUse ParamTimeInterval
+     *
+     * @apiSuccess {Integer}  time  Total time in seconds calculated between the intervals.
+     * @apiSuccess {String}   start The earliest start datetime.
+     * @apiSuccess {String}   end   The latest end datetime.
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *      "time": 1200,
+     *      "start": "2024-08-16 18:00:00",
+     *      "end": "2024-08-17 11:10:00"
+     *  }
+     *
+     * @apiUse          400Error
+     * @apiUse          ValidationError
+     * @apiUse          ForbiddenError
+     * @apiUse          UnauthorizedError
+     *
+     */
+
     public function total(IntervalTotalRequest $request): JsonResponse
     {
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
@@ -870,6 +921,54 @@ class IntervalController extends ItemController
     /**
      * @throws Exception
      */
+    /**
+    * @api             {any} /time/tasks Calculate total time interval
+    * @apiDescription  Calculate the total time spent within the specified start and end intervals for a given user.
+    *
+    * @apiVersion      4.0.0
+    * @apiName         CalculateTotalTime
+    * @apiGroup        Time Interval
+    *
+    * @apiUse          AuthHeader
+    *
+    * @apiUse ParamTimeInterval
+    *
+    * @apiSuccess {Integer}   tasks.id           The ID of the task.
+    * @apiSuccess {Integer}   tasks.user_id      The ID of the user.
+    * @apiSuccess {Integer}   tasks.project_id   The latest end datetime.
+    * @apiSuccess {Integer}   tasks.time         Total time in seconds calculated between the intervals.
+    * @apiSuccess {String}    tasks.start        The earliest start datetime.
+    * @apiSuccess {String}    tasks.end          The latest end datetime.
+    * @apiSuccess {Integer}   total.time         Total time in seconds calculated between the intervals.
+    * @apiSuccess {String}    total.start        The earliest start datetime.
+    * @apiSuccess {String}    total.end          The latest end datetime.
+    *
+    * @apiSuccessExample {json} Response Example
+    *  HTTP/1.1 200 OK
+    *  {
+    *   "tasks": [
+    *        {
+    *            "id": 59,
+    *            "user_id": 7,
+    *            "project_id": 2,
+    *            "time": 1200,
+    *            "start": "2024-08-16T18:00:00.000000Z",
+    *            "end": "2024-08-17T11:10:00.000000Z"
+    *        }
+    *    ],
+    *    "total": {
+    *        "time": 1200,
+    *        "start": "2024-08-16T18:00:00.000000Z",
+    *        "end": "2024-08-17T11:10:00.000000Z"
+    *    }
+    * }
+    * @apiUse          400Error
+    * @apiUse          ValidationError
+    * @apiUse          ForbiddenError
+    * @apiUse          UnauthorizedError
+    *
+    */
+
     public function tasks(IntervalTasksRequest $request): JsonResponse
     {
         $requestData = Filter::process(Filter::getRequestFilterName(), $request->validated());
