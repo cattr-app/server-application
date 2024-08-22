@@ -539,7 +539,7 @@
         padding: 0 !important;
     }
     .crud {
-        overflow: hidden;
+        // overflow: hidden;
     }
     .handle {
         touch-action: none;
@@ -653,7 +653,7 @@
 
     .project-tasks_kanban {
         padding: 16px;
-        overflow-y: hidden;
+        // overflow-y: hidden;
     }
 
     .project-tasks_kanban ::v-deep {
@@ -768,7 +768,7 @@
         align-items: center;
     }
     .project-tasks_kanban {
-        overflow-x: auto;
+        // overflow-x: auto;
     }
     @media (max-width: $screen-md) {
         .project-tasks_kanban ::v-deep .drag-item {
