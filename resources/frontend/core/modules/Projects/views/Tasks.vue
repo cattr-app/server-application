@@ -25,6 +25,9 @@
                     </div>
                 </div>
             </div>
+            <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
+                <div ref="scrollbar" class="scrollbar"></div>
+            </div>
             <div ref="kanban" class="project-tasks_kanban at-container">
                 <kanban-board
                     ref="board"
@@ -412,6 +415,9 @@
                     this.tasks = tasks;
                 }
             },
+            onScroll(e) {
+                 document.querySelector(".drag-container").scrollLeft = e.target.scrollLeft;
+            },
             async loadTask(id) {
                 this.task = this.getTask(id);
                 this.task = (
@@ -513,6 +519,9 @@
                     { headers: { 'X-Paginate': 'false' } },
                 )
             ).data.data;
+            const width = document.querySelector(".drag-container").scrollWidth + 100;
+            this.$refs.scrollbar.style.width = `${width}px`;
+
         },
         mounted() {
             if (this.$route.query.task) {
@@ -539,7 +548,20 @@
         padding: 0 !important;
     }
     .crud {
-        // overflow: hidden;
+        overflow: hidden;
+    }
+    .scrollbar-top{
+        overflow: scroll;
+        width: 100%;
+        height: 20px;
+        position: fixed;
+        bottom: 4px;
+        left: 0;
+        height: 10px;
+        z-index: 1;
+    }
+    .scrollbar{
+        height: 10px;
     }
     .handle {
         touch-action: none;
@@ -653,10 +675,13 @@
 
     .project-tasks_kanban {
         padding: 16px;
-        // overflow-y: hidden;
+        overflow-y: hidden;
     }
 
     .project-tasks_kanban ::v-deep {
+        .drag-container {
+            overflow: hidden;
+        }
         ul.drag-list,
         ul.drag-inner-list {
             list-style-type: none;
@@ -768,7 +793,7 @@
         align-items: center;
     }
     .project-tasks_kanban {
-        // overflow-x: auto;
+        overflow-x: auto;
     }
     @media (max-width: $screen-md) {
         .project-tasks_kanban ::v-deep .drag-item {
