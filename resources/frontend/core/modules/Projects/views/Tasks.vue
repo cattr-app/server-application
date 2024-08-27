@@ -25,7 +25,7 @@
                     </div>
                 </div>
             </div>
-            <div ref="scrollbarTop" class="scrollbar-top" @scroll="onScroll">
+            <div ref="scrollbarTop" :class="{ 'scrollbar-top': true, 'hide-on-mobile': !isDesktop }" @scroll="onScroll">
                 <div ref="scrollbar" class="scrollbar"></div>
             </div>
             <div ref="kanban" class="project-tasks_kanban at-container">
@@ -229,7 +229,7 @@
                 mouseX: 0,
                 isDragging: false,
                 edgeThreshold: Math.min(window.innerWidth * 0.1, 100),
-                maxScrollSpeed: window.innerWidth * 0.02,
+                maxScrollSpeed: window.innerWidth * 0.002,
             };
         },
         computed: {
@@ -269,7 +269,7 @@
                 );
             },
             checkScreenSize() {
-                this.isDesktop = window.screen.width > 992;
+                this.isDesktop = window.screen.width > 900;
                 this.checkScreenSizeMobile();
             },
             checkScreenSizeMobile() {
@@ -303,8 +303,7 @@
                 if (e.buttons & 1) {
                     document.addEventListener('mousemove', this.onMoveMouse);
                     document.addEventListener('mouseup', this.onUpMouse);
-
-                    this.scrollTimer = setInterval(this.onScrollMouse, 100);
+                    this.scrollTimer = setInterval(this.onScrollMouse, 1);
                 }
             },
             onMove(e) {
@@ -322,29 +321,32 @@
                 document.addEventListener('touchmove', this.onMove);
                 document.addEventListener('touchend', this.onUp);
                 if (!this.isMobile) {
-                    this.scrollTimer = setInterval(this.onScrollMouse, 1000);
+                    this.scrollTimer = setInterval(this.onScrollMouse, 1);
                 } else {
-                    this.scrollTimer = setInterval(this.onScrollTimerTouch, 1000);
+                    this.scrollTimer = setInterval(this.onScrollTimerTouch, 1);
                 }
             },
             onScrollTimerTouch() {
                 if (this.mouseX < 50) {
-                    this.$refs.kanban.scrollLeft -= window.screen.width / 2;
+                    document.querySelector('.drag-container').scrollLeft -= 1;
                 }
                 if (this.mouseX > window.screen.width - 50) {
-                    this.$refs.kanban.scrollLeft += window.screen.width / 2;
+                    document.querySelector('.drag-container').scrollLeft += 1;
                 }
             },
             onScrollMouse() {
                 let scrollSpeed = 0;
                 if (this.mouseX < this.edgeThreshold) {
                     scrollSpeed = this.maxScrollSpeed * (1 - this.mouseX / this.edgeThreshold);
-                    this.$refs.kanban.scrollBy(-scrollSpeed, 0);
+                    document.querySelector('.drag-container').scrollBy(-scrollSpeed, 0);
                 } else if (this.mouseX > window.innerWidth - this.edgeThreshold) {
                     const distanceToRightEdge = window.innerWidth - this.mouseX;
                     scrollSpeed = this.maxScrollSpeed * (1 - distanceToRightEdge / this.edgeThreshold);
-                    this.$refs.kanban.scrollBy(scrollSpeed, 0);
+                    document.querySelector('.drag-container').scrollBy(scrollSpeed, 0);
                 }
+            },
+            onDragContainerScroll(e) {
+                this.$refs.scrollbarTop.scrollLeft = e.target.scrollLeft;
             },
             onUp(e) {
                 document.removeEventListener('touchmove', this.onMove);
@@ -416,7 +418,7 @@
                 }
             },
             onScroll(e) {
-                 document.querySelector(".drag-container").scrollLeft = e.target.scrollLeft;
+                document.querySelector('.drag-container').scrollLeft = e.target.scrollLeft;
             },
             async loadTask(id) {
                 this.task = this.getTask(id);
@@ -519,9 +521,8 @@
                     { headers: { 'X-Paginate': 'false' } },
                 )
             ).data.data;
-            const width = document.querySelector(".drag-container").scrollWidth + 100;
+            const width = document.querySelector('.drag-container').scrollWidth + 100;
             this.$refs.scrollbar.style.width = `${width}px`;
-
         },
         mounted() {
             if (this.$route.query.task) {
@@ -530,12 +531,16 @@
             this.checkScreenSize();
             window.addEventListener('resize', this.checkScreenSize);
             window.addEventListener('click', this.handleClick);
+            this.$refs.kanban.querySelector('.drag-container').addEventListener('scroll', this.onDragContainerScroll);
         },
         beforeDestroy() {
             window.removeEventListener('click', this.handleClick);
             window.removeEventListener('resize', this.checkScreenSize);
             window.removeEventListener('touchstart', this.onDown);
             window.removeEventListener('mousedown', this.onDownMouse);
+            this.$refs.kanban
+                .querySelector('.drag-container')
+                .removeEventListener('scroll', this.onDragContainerScroll);
         },
     };
 </script>
@@ -550,7 +555,7 @@
     .crud {
         overflow: hidden;
     }
-    .scrollbar-top{
+    .scrollbar-top {
         overflow: scroll;
         width: 100%;
         height: 20px;
@@ -560,7 +565,7 @@
         height: 10px;
         z-index: 1;
     }
-    .scrollbar{
+    .scrollbar {
         height: 10px;
     }
     .handle {
@@ -795,17 +800,24 @@
     .project-tasks_kanban {
         overflow-x: auto;
     }
-    @media (max-width: $screen-md) {
+    @media (max-width: 900px) {
+        .crud {
+            overflow: auto;
+        }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 6px;
         }
         .project-tasks_kanban ::v-deep {
+            .drag-container {
+                overflow: auto;
+            }
             scroll-snap-type: x mandatory;
         }
         .task ::v-deep {
             padding: 8px;
         }
         .task-view {
+            padding-top: 60px;
             left: 0;
         }
         .task-name {
@@ -827,16 +839,23 @@
         }
     }
     @media (max-width: $screen-sm) {
+        .crud {
+            overflow: auto;
+        }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 4px;
         }
         .project-tasks_kanban ::v-deep {
+            .drag-container {
+                overflow: auto;
+            }
             scroll-snap-type: x mandatory;
         }
         .task ::v-deep {
             padding: 8px;
         }
         .task-view {
+            padding-top: 60px;
             width: auto;
             left: 0;
         }
@@ -858,6 +877,9 @@
         }
     }
     @media only screen and (max-width: $screen-xs) {
+        .crud {
+            overflow: auto;
+        }
         .status {
             min-width: 100%;
         }
@@ -865,9 +887,13 @@
             margin: 2px;
         }
         .project-tasks_kanban ::v-deep {
+            .drag-container {
+                overflow: auto;
+            }
             scroll-snap-type: x mandatory;
         }
         .task-view {
+            padding-top: 60px;
             left: 0;
             max-width: 100%;
             width: 100%;
