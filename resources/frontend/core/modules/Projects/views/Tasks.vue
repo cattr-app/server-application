@@ -100,6 +100,7 @@
                             type="primary"
                             hollow
                             circle
+                            @click.stop
                             :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop, handle: !isDesktop }"
                         ></at-button>
                     </div>
@@ -226,7 +227,7 @@
                 isDesktop: false,
                 isMobile: false,
                 scrollInterval: null,
-                mouseX: 0,
+                mouseX: null,
                 isDragging: false,
                 edgeThreshold: Math.min(window.innerWidth * 0.1, 100),
                 maxScrollSpeed: window.innerWidth * 0.002,
@@ -336,7 +337,7 @@
             },
             onScrollMouse() {
                 let scrollSpeed = 0;
-                if (this.mouseX < this.edgeThreshold) {
+                if (this.mouseX !== null && this.mouseX < this.edgeThreshold) {
                     scrollSpeed = this.maxScrollSpeed * (1 - this.mouseX / this.edgeThreshold);
                     document.querySelector('.drag-container').scrollBy(-scrollSpeed, 0);
                 } else if (this.mouseX > window.innerWidth - this.edgeThreshold) {
@@ -356,6 +357,10 @@
             onUpMove(e) {
                 document.removeEventListener('mousemove', this.onMove);
                 document.removeEventListener('mouseend', this.onUpMove);
+                document
+                .querySelector('.drag-container')
+                .removeEventListener('scroll', this.onDragContainerScroll);
+                this.mouseX = null;
                 clearInterval(this.scrollTimer);
             },
             changeOrder: throttle(async function (index, direction) {
@@ -531,14 +536,14 @@
             this.checkScreenSize();
             window.addEventListener('resize', this.checkScreenSize);
             window.addEventListener('click', this.handleClick);
-            this.$refs.kanban.querySelector('.drag-container').addEventListener('scroll', this.onDragContainerScroll);
+            document.querySelector('.drag-container').addEventListener('scroll', this.onDragContainerScroll);
         },
         beforeDestroy() {
             window.removeEventListener('click', this.handleClick);
             window.removeEventListener('resize', this.checkScreenSize);
             window.removeEventListener('touchstart', this.onDown);
             window.removeEventListener('mousedown', this.onDownMouse);
-            this.$refs.kanban
+            document
                 .querySelector('.drag-container')
                 .removeEventListener('scroll', this.onDragContainerScroll);
         },
@@ -546,14 +551,17 @@
 </script>
 
 <style lang="scss" scoped>
+    .task-view-description{
+        overflow: hidden;
+        white-space: nowrap;
+        text-overflow: ellipsis;
+        max-height: 290px;
+    }
     .tag-priority {
         margin: 5px 0;
     }
     .crud__content {
         padding: 0 !important;
-    }
-    .crud {
-        overflow: hidden;
     }
     .scrollbar-top {
         overflow: scroll;
@@ -641,7 +649,7 @@
         height: 100vh;
         overflow: hidden;
         padding: 16px;
-
+        max-width: 500px;
         &-header {
             position: relative;
             padding: 32px;
@@ -704,6 +712,7 @@
             flex: 1;
             flex-shrink: 0;
             flex-basis: 400px;
+            max-width: 400px;
             position: relative;
             border: 1px solid #c5d9e8;
             border-radius: 6px;
