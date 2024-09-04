@@ -1,7 +1,63 @@
 <template>
-    <div>
-        <div ref="commentForm" class="comment-form">
-            <at-textarea v-model="commentMessage" class="comment-message" @change="commentMessageChange" />
+    <div class="activity-wrapper">
+        <div class="sort-wrapper">
+            <at-dropdown>
+                <at-button size="middle">
+                    {{ $t('tasks.sort_or_filter') }} <i class="icon icon-chevron-down"></i>
+                </at-button>
+                <at-dropdown-menu slot="menu">
+                    <at-radio-group v-model="sort">
+                        <at-dropdown-item>
+                            <at-radio label="desc">{{ $t('tasks.newest_first') }}</at-radio>
+                        </at-dropdown-item>
+                        <at-dropdown-item>
+                            <at-radio label="asc">{{ $t('tasks.oldest_first') }}</at-radio>
+                        </at-dropdown-item>
+                    </at-radio-group>
+                    <at-radio-group v-model="typeActivity">
+                        <at-dropdown-item divided>
+                            <at-radio label="all">{{ $t('tasks.show_all_activity') }}</at-radio>
+                        </at-dropdown-item>
+                        <at-dropdown-item>
+                            <at-radio label="comments">{{ $t('tasks.show_comments_only') }}</at-radio>
+                        </at-dropdown-item>
+                        <at-dropdown-item>
+                            <at-radio label="history">{{ $t('tasks.show_history_only') }}</at-radio>
+                        </at-dropdown-item>
+                    </at-radio-group>
+                </at-dropdown-menu>
+            </at-dropdown>
+        </div>
+        <div ref="commentForm" class="comment-form" :class="{ 'comment-form--at-bottom': sort === 'asc' }">
+            <div class="comment-content" :class="{ 'comment-content--preview': mainPreview }">
+                <div class="preview-btn-wrapper">
+                    <at-button
+                        v-show="commentMessage.length > 0"
+                        class="preview-btn"
+                        :icon="mainPreview ? 'icon-eye-off' : 'icon-eye'"
+                        size="small"
+                        circle
+                        type="info"
+                        hollow
+                        @click="togglePreview(true)"
+                    ></at-button>
+                </div>
+                <at-textarea
+                    v-if="!mainPreview"
+                    v-model="commentMessage"
+                    class="comment-message mainTextArea"
+                    autosize
+                    resize="none"
+                    @change="commentMessageChange"
+                />
+                <vue-markdown
+                    v-else
+                    ref="markdown"
+                    :source="commentMessage"
+                    :plugins="markdownPlugins"
+                    :options="{ linkify: true }"
+                />
+            </div>
             <div
                 v-if="showUsers"
                 class="comment-form-users"
@@ -17,37 +73,9 @@
                     {{ user.full_name }}
                 </div>
             </div>
-            <div class="buttons">
-                <at-button class="comment-button" type="primary" @click.prevent="createComment(task.id)">
-                    {{ $t('projects.add_comment') }}
-                </at-button>
-                <at-dropdown>
-                    <at-button size="middle">
-                        {{ $t('tasks.sort_or_filter') }} <i class="icon icon-chevron-down"></i>
-                    </at-button>
-                    <at-dropdown-menu slot="menu">
-                        <at-radio-group v-model="sort">
-                            <at-dropdown-item>
-                                <at-radio label="desc">{{ $t('tasks.newest_first') }}</at-radio>
-                            </at-dropdown-item>
-                            <at-dropdown-item>
-                                <at-radio label="asc">{{ $t('tasks.oldest_first') }}</at-radio>
-                            </at-dropdown-item>
-                        </at-radio-group>
-                        <at-radio-group v-model="typeActivity">
-                            <at-dropdown-item divided>
-                                <at-radio label="all">{{ $t('tasks.show_all_activity') }}</at-radio>
-                            </at-dropdown-item>
-                            <at-dropdown-item>
-                                <at-radio label="comments">{{ $t('tasks.show_comments_only') }}</at-radio>
-                            </at-dropdown-item>
-                            <at-dropdown-item>
-                                <at-radio label="history">{{ $t('tasks.show_history_only') }}</at-radio>
-                            </at-dropdown-item>
-                        </at-radio-group>
-                    </at-dropdown-menu>
-                </at-dropdown>
-            </div>
+            <at-button class="comment-button" type="primary" @click.prevent="createComment(task.id)">
+                {{ $t('projects.add_comment') }}
+            </at-button>
         </div>
         <div ref="activities" class="history">
             <div v-for="item in activities" :key="item.id + (item.content ? 'c' : 'h')" class="comment">
@@ -111,11 +139,21 @@
                         <div v-if="item.user.id === user.id" class="comment-functions">
                             <div class="comment-buttons">
                                 <at-button
-                                    icon="icon icon-edit-2"
+                                    v-show="item.id === idComment"
+                                    :icon="editPreview ? 'icon-eye-off' : 'icon-eye'"
                                     size="small"
                                     circle
+                                    type="info"
                                     hollow
-                                    @click="changeComment(item)"
+                                    @click="togglePreview(false)"
+                                ></at-button>
+                                <at-button
+                                    :icon="item.id === idComment ? 'icon-x' : 'icon-edit-2'"
+                                    size="small"
+                                    circle
+                                    type="warning"
+                                    hollow
+                                    @click="item.id === idComment ? cancelChangeComment() : changeComment(item)"
                                 ></at-button>
                                 <at-button
                                     icon="icon icon-trash-2"
@@ -128,8 +166,14 @@
                             </div>
                         </div>
                     </div>
-                    <div v-if="item.id === idComment" ref="commentChangeForm" class="comment-content">
-                        <at-textarea v-model="changeMessageText" class="comment-message" />
+                    <div v-if="item.id === idComment && !editPreview" ref="commentChangeForm" class="comment-content">
+                        <at-textarea
+                            v-model="changeMessageText"
+                            :class="`commentTextArea${item.id}`"
+                            class="comment-message"
+                            autosize
+                            resize="none"
+                        />
                         <div class="comment-buttons">
                             <at-button class="comment-button" type="primary" @click.prevent="editComment(item)">
                                 {{ $t('tasks.save_comment') }}
@@ -139,12 +183,23 @@
                             </at-button>
                         </div>
                     </div>
-                    <div v-else class="comment-content">
+                    <div
+                        v-else
+                        class="comment-content"
+                        :class="{ 'comment-content--preview': editPreview && item.id === idComment }"
+                    >
                         <template v-for="(content, index) in getCommentContent(item)">
-                            <span v-if="content.type === 'text'" :key="index">{{ content.text }}</span>
-                            <span v-else-if="content.type === 'username'" :key="index" class="username">{{
-                                content.text
-                            }}</span>
+                            <div :key="index">
+                                <div v-if="content.type === 'text'">
+                                    <vue-markdown
+                                        ref="markdown"
+                                        :source="content.text"
+                                        :plugins="markdownPlugins"
+                                        :options="{ linkify: true }"
+                                    />
+                                </div>
+                                <span v-else-if="content.type === 'username'" class="username">{{ content.text }}</span>
+                            </div>
                         </template>
                     </div>
                     <span v-if="item.updated_at !== item.created_at" class="comment-date">
@@ -164,10 +219,14 @@
     import TaskActivityService from '@/services/resource/task-activity.service';
     import UsersService from '@/services/resource/user.service';
     import { fromNow } from '@/utils/time';
+    import VueMarkdown from '@/components/VueMarkdown';
+    import 'markdown-it';
+    import 'highlight.js/styles/github.min.css'; // Import a highlight.js theme (choose your favorite!)
 
     export default {
         components: {
             TeamAvatars,
+            VueMarkdown,
         },
         props: {
             task: {
@@ -178,6 +237,19 @@
         inject: ['reload'],
         data() {
             return {
+                markdownPlugins: [
+                    md => {
+                        // Use a function to add the plugin
+                        // Add the highlight.js plugin
+                        md.use(require('markdown-it-highlightjs'), {
+                            auto: true,
+                            code: true,
+                            // inline: true
+                        });
+                        md.use(require('markdown-it-sup'));
+                        md.use(require('markdown-it-sub'));
+                    },
+                ],
                 statusService: new StatusService(),
                 priorityService: new PriorityService(),
                 taskActivityService: new TaskActivityService(),
@@ -204,6 +276,8 @@
                 canLoad: true,
                 observer: null,
                 isModalOpen: false,
+                mainPreview: false,
+                editPreview: false,
             };
         },
         async created() {
@@ -363,7 +437,11 @@
                 });
             },
             getCommentContent(item) {
-                return item.content.split(/(@[0-9a-zа-я._-]+)/gi).map(str => {
+                let content = item.content;
+                if (item.id === this.idComment && this.editPreview) {
+                    content = this.changeMessageText;
+                }
+                return content.split(/(@[0-9a-zа-я._-]+)/gi).map(str => {
                     return {
                         type: /^@[0-9a-zа-я._-]+/i.test(str) ? 'username' : 'text',
                         text: str,
@@ -373,13 +451,34 @@
             changeComment(item) {
                 this.idComment = item.id;
                 this.changeMessageText = item.content;
+                this.editPreview = false;
+                this.scrollToTextArea(`commentTextArea${this.idComment}`);
+            },
+            togglePreview(main = false) {
+                if (main) {
+                    this.mainPreview = !this.mainPreview;
+                } else {
+                    this.editPreview = !this.editPreview;
+                }
+
+                if (main && !this.mainPreview) {
+                    this.scrollToTextArea('mainTextArea');
+                } else if (!main && this.idComment && !this.editPreview) {
+                    this.scrollToTextArea(`commentTextArea${this.idComment}`);
+                }
+            },
+            scrollToTextArea(ref) {
+                this.$nextTick(() => {
+                    document.querySelector(`.${ref}`)?.scrollIntoView({ behavior: 'smooth', block: 'center' });
+                });
             },
             cancelChangeComment() {
                 this.idComment = null;
+                this.editPreview = false;
             },
             async editComment(item) {
-                const newCommnet = { ...item, content: this.changeMessageText };
-                const result = await this.taskActivityService.editComment(newCommnet);
+                const newComment = { ...item, content: this.changeMessageText };
+                const result = await this.taskActivityService.editComment(newComment);
                 item.content = this.changeMessageText;
                 item.updated_at = result.data.data.updated_at;
                 this.changeMessageText = '';
@@ -439,6 +538,148 @@
 </script>
 
 <style lang="scss" scoped>
+    .activity-wrapper {
+        display: flex;
+        flex-direction: column;
+    }
+    .sort-wrapper {
+        display: flex;
+        justify-content: end;
+    }
+    .content {
+        position: relative;
+        .comment-functions {
+            position: absolute;
+            right: 0;
+            top: 0;
+            bottom: 0;
+            pointer-events: none;
+            z-index: 5;
+            .comment-buttons {
+                position: sticky;
+                top: 10px;
+                pointer-events: all;
+                button {
+                    background: #fff;
+                }
+            }
+        }
+    }
+    .comment-content {
+        position: relative;
+        border: 1px solid transparent;
+        border-radius: 4px;
+        &--preview {
+            border: 1px solid $color-info;
+            border-radius: 4px;
+        }
+        &::v-deep {
+            .preview-btn-wrapper {
+                position: absolute;
+                top: 5px;
+                right: 5px;
+                bottom: 5px;
+                pointer-events: none;
+            }
+            .preview-btn {
+                pointer-events: all;
+                position: sticky;
+                top: 10px;
+                background: #fff;
+            }
+            img {
+                max-width: 35%;
+            }
+            h6 {
+                font-size: 14px;
+            }
+            hr {
+                border: 0;
+                border-top: 2px solid $gray-3;
+                border-radius: 5px;
+            }
+            p {
+                margin: 0 0 10px;
+            }
+            ul,
+            ol {
+                all: revert;
+            }
+            table {
+                width: 100%;
+                max-width: 100%;
+                margin-bottom: 20px;
+                border-collapse: collapse;
+            }
+
+            table > caption + thead > tr:first-child > th,
+            table > colgroup + thead > tr:first-child > th,
+            table > thead:first-child > tr:first-child > th,
+            table > caption + thead > tr:first-child > td,
+            table > colgroup + thead > tr:first-child > td,
+            table > thead:first-child > tr:first-child > td {
+                border-top: 0;
+            }
+            table > thead > tr > th {
+                vertical-align: bottom;
+                border-bottom: 2px solid #ddd;
+            }
+            table > tbody > tr:nth-child(odd) > td,
+            table > tbody > tr:nth-child(odd) > th {
+                background-color: #f9f9f9;
+            }
+            table > thead > tr > th,
+            table > tbody > tr > th,
+            table > tfoot > tr > th,
+            table > thead > tr > td,
+            table > tbody > tr > td,
+            table > tfoot > tr > td {
+                padding: 8px;
+                line-height: 1.42857143;
+                vertical-align: top;
+                border-top: 1px solid #ddd;
+            }
+            code.hljs {
+                white-space: pre;
+                padding: 9.5px;
+            }
+            pre {
+                white-space: pre !important;
+                display: block;
+                margin: 0 0 10px;
+                font-size: 13px;
+                line-height: 1.42857143;
+                color: #333;
+                word-break: break-all;
+                word-wrap: break-word;
+                background-color: #f5f5f5;
+                border: 1px solid #ccc;
+                border-radius: 4px;
+                code {
+                    padding: 0;
+                    font-size: inherit;
+                    color: inherit;
+                    white-space: pre-wrap;
+                    background-color: transparent;
+                    border-radius: 0;
+                }
+            }
+            code {
+                padding: 2px 4px;
+                font-size: 90%;
+                color: #c7254e;
+                background-color: #f9f2f4;
+                border-radius: 4px;
+            }
+            blockquote {
+                padding: 10px 20px;
+                margin: 0 0 20px;
+                font-size: 17.5px;
+                border-left: 5px solid #eee;
+            }
+        }
+    }
+
     .history {
         &-change {
             margin-top: 16px;
@@ -448,9 +689,23 @@
             display: inline-block;
         }
     }
+    .comment-form,
+    .comment-content {
+        &::v-deep .comment-message textarea {
+            min-height: 140px !important;
+            max-height: 500px;
+            resize: none !important;
+        }
+    }
     .comment-form {
         width: 100%;
         margin-top: 16px;
+        display: flex;
+        flex-direction: column;
+
+        &--at-bottom {
+            order: 999;
+        }
 
         &-users {
             position: fixed;
@@ -478,6 +733,7 @@
     .comment-button {
         margin-top: 8px;
         margin-right: 8px;
+        margin-left: auto;
     }
     .buttons {
         display: flex;
