@@ -25,9 +25,6 @@
                     </div>
                 </div>
             </div>
-            <div ref="scrollbarTop" :class="{ 'scrollbar-top': true, 'hide-on-mobile': !isDesktop }" @scroll="onScroll">
-                <div ref="scrollbar" class="scrollbar"></div>
-            </div>
             <div ref="kanban" class="project-tasks_kanban at-container">
                 <kanban-board
                     ref="board"
@@ -100,14 +97,17 @@
                             type="primary"
                             hollow
                             circle
-                            @click.stop
                             :class="{ 'hide-on-mobile': isDesktop, 'move-task': !isDesktop, handle: !isDesktop }"
+                            @click.stop
                         ></at-button>
                     </div>
                 </kanban-board>
             </div>
         </div>
-
+        <div
+            v-custom-scroll="{ targetSelector: '.drag-container' }"
+            :class="{ 'scrollbar-top': true, 'hide-on-mobile': !isDesktop }"
+        ></div>
         <transition name="slide">
             <div v-if="task" class="task-view">
                 <div class="actions__toggle">
@@ -204,7 +204,6 @@
     import { getTextColor } from '@/utils/color';
     import { formatDate, formatDurationString } from '@/utils/time';
     import { throttle } from 'lodash';
-
     export default {
         components: {
             TeamAvatars,
@@ -304,6 +303,7 @@
                 if (e.buttons & 1) {
                     document.addEventListener('mousemove', this.onMoveMouse);
                     document.addEventListener('mouseup', this.onUpMouse);
+                    this.onScrollMouse();
                     this.scrollTimer = setInterval(this.onScrollMouse, 1);
                 }
             },
@@ -322,6 +322,7 @@
                 document.addEventListener('touchmove', this.onMove);
                 document.addEventListener('touchend', this.onUp);
                 if (!this.isMobile) {
+                    this.onScrollMouse();
                     this.scrollTimer = setInterval(this.onScrollMouse, 1);
                 } else {
                     this.scrollTimer = setInterval(this.onScrollTimerTouch, 1);
@@ -346,9 +347,6 @@
                     document.querySelector('.drag-container').scrollBy(scrollSpeed, 0);
                 }
             },
-            onDragContainerScroll(e) {
-                this.$refs.scrollbarTop.scrollLeft = e.target.scrollLeft;
-            },
             onUp(e) {
                 document.removeEventListener('touchmove', this.onMove);
                 document.removeEventListener('touchend', this.onUp);
@@ -357,9 +355,7 @@
             onUpMove(e) {
                 document.removeEventListener('mousemove', this.onMove);
                 document.removeEventListener('mouseend', this.onUpMove);
-                document
-                .querySelector('.drag-container')
-                .removeEventListener('scroll', this.onDragContainerScroll);
+                document.querySelector('.drag-container').removeEventListener('scroll', this.onDragContainerScroll);
                 this.mouseX = null;
                 clearInterval(this.scrollTimer);
             },
@@ -421,9 +417,6 @@
                     tasks.sort((a, b) => a.relative_position - b.relative_position);
                     this.tasks = tasks;
                 }
-            },
-            onScroll(e) {
-                document.querySelector('.drag-container').scrollLeft = e.target.scrollLeft;
             },
             async loadTask(id) {
                 this.task = this.getTask(id);
@@ -526,14 +519,13 @@
                     { headers: { 'X-Paginate': 'false' } },
                 )
             ).data.data;
-            const width = document.querySelector('.drag-container').scrollWidth + 100;
-            this.$refs.scrollbar.style.width = `${width}px`;
         },
         mounted() {
             if (this.$route.query.task) {
                 this.loadTask(+this.$route.query.task);
             }
             this.checkScreenSize();
+
             window.addEventListener('resize', this.checkScreenSize);
             window.addEventListener('click', this.handleClick);
             document.querySelector('.drag-container').addEventListener('scroll', this.onDragContainerScroll);
@@ -543,15 +535,36 @@
             window.removeEventListener('resize', this.checkScreenSize);
             window.removeEventListener('touchstart', this.onDown);
             window.removeEventListener('mousedown', this.onDownMouse);
-            document
-                .querySelector('.drag-container')
-                .removeEventListener('scroll', this.onDragContainerScroll);
+            document.querySelector('.drag-container').removeEventListener('scroll', this.onDragContainerScroll);
+        },
+        directives: {
+            customScroll: {
+                bind: (el, binding) => {
+                    const extraWidth = 100;
+                    const scrollbar = document.createElement('div');
+                    el.appendChild(scrollbar);
+                    scrollbar.style.height = '20px';
+                    const targetSelector = binding.value.targetSelector;
+                    setTimeout(() => {
+                        const width = document.querySelector(targetSelector).scrollWidth + 100;
+                        if (scrollbar && width !== null) {
+                            scrollbar.style.width = `${width}px`;
+                        }
+                    }, 1000);
+                    el.addEventListener('scroll', e => {
+                        const targetElement = document.querySelector(targetSelector);
+                        if (targetElement) {
+                            targetElement.scrollLeft = e.target.scrollLeft;
+                        }
+                    });
+                },
+            },
         },
     };
 </script>
 
 <style lang="scss" scoped>
-    .task-view-description{
+    .task-view-description {
         overflow: hidden;
         white-space: nowrap;
         text-overflow: ellipsis;
@@ -566,15 +579,11 @@
     .scrollbar-top {
         overflow: scroll;
         width: 100%;
-        height: 20px;
+        height: 16px;
         position: fixed;
         bottom: 4px;
         left: 0;
-        height: 10px;
         z-index: 1;
-    }
-    .scrollbar {
-        height: 10px;
     }
     .handle {
         touch-action: none;
@@ -766,7 +775,9 @@
             opacity: 0.8;
             list-style-type: none;
         }
-
+        .gu-mirror.withoutoffset {
+            transform: translate(-50%, -50%);
+        }
         .gu-hide {
             display: none !important;
         }
@@ -816,6 +827,9 @@
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 6px;
         }
+        .scrollbar-top {
+            display: none;
+        }
         .project-tasks_kanban ::v-deep {
             .drag-container {
                 overflow: auto;
@@ -854,6 +868,9 @@
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 4px;
         }
+        .scrollbar-top {
+            display: none;
+        }
         .project-tasks_kanban ::v-deep {
             .drag-container {
                 overflow: auto;
@@ -891,6 +908,9 @@
         }
         .status {
             min-width: 100%;
+        }
+        .scrollbar-top {
+            display: none;
         }
         .project-tasks_kanban ::v-deep .drag-item {
             margin: 2px;
