@@ -21,7 +21,7 @@ class PriorityController extends ItemController
      * @api             {post} /priorities/show Show
      * @apiDescription  Show priority.
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Show Priority
      * @apiGroup        Priority
      *
@@ -62,7 +62,7 @@ class PriorityController extends ItemController
      * @api             {get} /priorities/list List
      * @apiDescription  Get list of priorities.
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Priority List
      * @apiGroup        Priority
      *
@@ -164,7 +164,7 @@ class PriorityController extends ItemController
      * @api             {post} /priorities/remove Destroy
      * @apiDescription  Destroy User
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Destroy Priority
      * @apiGroup        Priority
      *
@@ -199,7 +199,7 @@ class PriorityController extends ItemController
      * @api             {get} /api/priorities/count Count Priorities
      * @apiDescription  Returns the total count of priorities
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         CountPriorities
      * @apiGroup        Priorities
      *

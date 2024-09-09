@@ -94,6 +94,72 @@ abstract class ItemController extends Controller
      */
     /**
      * @apiDefine UserObject
+     * @apiSuccess {Integer}   id                         User ID.
+     * @apiSuccess {String}    full_name                  Full name of the user.
+     * @apiSuccess {String}    email                      Email address of the user.
+     * @apiSuccess {String}    url                        URL associated with the user (if any).
+     * @apiSuccess {Integer}   company_id                 ID of the company the user belongs to.
+     * @apiSuccess {String}    avatar                     URL of the user's avatar (if any).
+     * @apiSuccess {Boolean}   screenshots_state          State of screenshot capturing.
+     * @apiSuccess {Boolean}   manual_time                Indicates whether manual time tracking is enabled.
+     * @apiSuccess {Integer}   computer_time_popup        Time in seconds for the computer time popup.
+     * @apiSuccess {Boolean}   blur_screenshots           Indicates if screenshots are blurred.
+     * @apiSuccess {Boolean}   web_and_app_monitoring     Indicates if web and app monitoring is enabled.
+     * @apiSuccess {Integer}   screenshots_interval       Interval for capturing screenshots in minutes.
+     * @apiSuccess {Boolean}   active                     Indicates if the user account is active.
+     * @apiSuccess {String}    created_at                 Timestamp of when the user was created.
+     * @apiSuccess {String}    updated_at                 Timestamp of when the user was last updated.
+     * @apiSuccess {String}    deleted_at                 Timestamp of when the user was deleted (if applicable).
+     * @apiSuccess {String}    timezone                   User's timezone.
+     * @apiSuccess {Boolean}   important                  Indicates if the user is marked as important.
+     * @apiSuccess {Boolean}   change_password            Indicates if the user is required to change their password.
+     * @apiSuccess {Integer}   role_id                    Role ID associated with the user.
+     * @apiSuccess {String}    user_language              Language preference of the user.
+     * @apiSuccess {String}    type                       User type (e.g., employee, admin).
+     * @apiSuccess {Boolean}   invitation_sent            Indicates if an invitation has been sent to the user.
+     * @apiSuccess {Boolean}   client_installed           Indicates if the tracking client is installed.
+     * @apiSuccess {Boolean}   permanent_screenshots      Indicates if permanent screenshots are enabled.
+     * @apiSuccess {String}    last_activity              Timestamp of the user's last activity.
+     * @apiSuccess {Boolean}   screenshots_state_locked   Indicates if the screenshot state is locked.
+     * @apiSuccess {Boolean}   online                     Indicates if the user is currently online.
+     * @apiSuccess {Boolean}   can_view_team_tab          Indicates if the user can view the team tab.
+     * @apiSuccess {Boolean}   can_create_task            Indicates if the user can create tasks.
+     *
+     * @apiSuccessExample {json} Response Example:
+     *  HTTP/1.1 200 OK
+     *  {
+     *      "id": 1,
+     *      "full_name": "Admin",
+     *      "email": "admin@cattr.app",
+     *      "url": "",
+     *      "company_id": 1,
+     *      "avatar": "",
+     *      "screenshots_state": 1,
+     *      "manual_time": 0,
+     *      "computer_time_popup": 300,
+     *      "blur_screenshots": false,
+     *      "web_and_app_monitoring": true,
+     *      "screenshots_interval": 5,
+     *      "active": 1,
+     *      "deleted_at": null,
+     *      "created_at": "2023-10-26T10:26:17.000000Z",
+     *      "updated_at": "2024-08-20T09:22:02.000000Z",
+     *      "timezone": null,
+     *      "important": 0,
+     *      "change_password": 0,
+     *      "role_id": 0,
+     *      "user_language": "en",
+     *      "type": "employee",
+     *      "invitation_sent": false,
+     *      "nonce": 0,
+     *      "client_installed": 0,
+     *      "permanent_screenshots": 0,
+     *      "last_activity": "2024-08-20 09:22:02",
+     *      "screenshots_state_locked": false,
+     *      "online": false,
+     *      "can_view_team_tab": true,
+     *      "can_create_task": true
+     *  }
      */
 
     /**

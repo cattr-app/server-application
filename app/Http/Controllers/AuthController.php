@@ -309,7 +309,7 @@ class AuthController extends BaseController
      * @api            {post} /auth/refresh Refresh
      * @apiDescription Refreshes JWT
      *
-     * @apiVersion     1.0.0
+     * @apiVersion     4.0.0
      * @apiName        Refresh
      * @apiGroup       Auth
      *

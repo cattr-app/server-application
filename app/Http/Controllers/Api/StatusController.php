@@ -23,7 +23,7 @@ class StatusController extends ItemController
      * @api             {post} /statuses/show Show
      * @apiDescription  Show status.
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Show Status
      * @apiGroup        Status
      *
@@ -36,19 +36,7 @@ class StatusController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {Object}   res      Status
-     *
      * @apiUse StatusObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": {
-     *      "id": 1
-     *      "name": "Normal",
-     *      "active": false
-     *    }
-     *  }
      *
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
@@ -64,7 +52,7 @@ class StatusController extends ItemController
      * @api             {get} /statuses/list List
      * @apiDescription  Get list of statuses.
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Status List
      * @apiGroup        Status
      *
@@ -73,16 +61,6 @@ class StatusController extends ItemController
      * @apiSuccess {Object}   res      Status
      *
      * @apiUse StatusObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": [{
-     *      "id": 1
-     *      "name": "Normal",
-     *      "active": false
-     *    }]
-     *  }
      *
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
@@ -100,7 +78,7 @@ class StatusController extends ItemController
      * @api             {post} /statuses/create Create
      * @apiDescription  Creates status
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Create Status
      * @apiGroup        Status
      *
@@ -117,17 +95,20 @@ class StatusController extends ItemController
      *
      * @apiSuccess {Object}   res      Status
      *
-     * @apiUse StatusObject
-     *
+     * @apiSuccess {Number}   id             The ID of the status.
+     * @apiSuccess {String}   name           The name of the status.
+     * @apiSuccess {Boolean}  active         Indicates if the status is active.\
+     * @apiSuccess {String}   created_at     The creation timestamp.
+     * @apiSuccess {String}   updated_at     The last update timestamp.
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
-     *    "res": {
-     *      "id": 1
-     *      "name": "Normal",
-     *      "active": false
-     *    }
-     *  }
+     *   "id": 10,
+     *   "name": "Normal",
+     *   "active": false,
+     *   "created_at": "2024-08-15T14:04:03.000000Z",
+     *   "updated_at": "2024-08-15T14:04:03.000000Z"
+     * }
      *
      * @apiUse          400Error
      * @apiUse          UnauthorizedError
@@ -142,7 +123,7 @@ class StatusController extends ItemController
      * @api             {post} /statuses/edit Edit
      * @apiDescription  Edit Status
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Edit
      * @apiGroup        Status
      *
@@ -163,16 +144,6 @@ class StatusController extends ItemController
      *
      * @apiUse         StatusObject
      *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": {
-     *      "id": 1
-     *      "name": "Normal",
-     *      "active": false
-     *    }
-     *  }
-     *
      * @apiUse         400Error
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
@@ -188,7 +159,7 @@ class StatusController extends ItemController
      * @api             {post} /statuses/remove Destroy
      * @apiDescription  Destroy User
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Destroy Status
      * @apiGroup        Status
      *
@@ -201,13 +172,7 @@ class StatusController extends ItemController
      *   "id": 1
      * }
      *
-     * @apiSuccess {String}   message  Destroy status
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "message": "Item has been removed"
-     *  }
+     * @apiSuccess (204) No Content  Indicates that the status was successfully removed or deactivated.
      *
      * @apiUse          400Error
      * @apiUse          ValidationError
@@ -232,7 +197,12 @@ class StatusController extends ItemController
      * @apiName        CountInvitations
      * @apiGroup       Invitations
      *
-     * @apiParam {String}  [filter]  Optional filter parameter
+     * @apiSuccess {Integer} total The total count of pending invitations.
+     *
+     * @apiSuccessExample {json} Success Response:
+     * {
+     *     "total": 0
+     * }
      *
      * @apiUse TotalSuccess
      * @apiUse 400Error

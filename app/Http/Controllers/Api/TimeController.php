@@ -122,19 +122,6 @@ class TimeController extends Controller
     }
 
     /**
-     * @apiDeprecated   since 1.0.0
-     * @api             {get, post} /time/project Project
-     * @apiDescription  Get time of project
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Project
-     * @apiGroup        Time
-     *
-     * @apiPermission   time_project
-     * @apiPermission   time_full_access
-     */
-
-    /**
      * @api             {get,post} /time/tasks Tasks
      * @apiDescription  Get tasks and its total time
      *
@@ -289,30 +276,4 @@ class TimeController extends Controller
             ]
         ])->respond();
     }
-
-    /**
-     * @apiDeprecated   since 1.0.0
-     * @api             {get, post} /time/task Task
-     * @apiDescription  Get task and its total time
-     *
-     * @apiVersion      1.0.0
-     * @apiName         Task
-     * @apiGroup        Time
-     *
-     * @apiPermission   time_task
-     * @apiPermission   time_full_access
-     */
-
-    /**
-     * @apiDeprecated   since 1.0.0
-     * @api             {get,post} /time/task-user TaskUser
-     * @apiDescription  Get time of user's single task
-     *
-     * @apiVersion      1.0.0
-     * @apiName         TaskAndUser
-     * @apiGroup        Time
-     *
-     * @apiPermission   time_task_user
-     * @apiPermission   time_full_access
-     */
 }

@@ -37,7 +37,7 @@ class TaskController extends ItemController
      * @api             {post} /tasks/list List
      * @apiDescription  Get list of Tasks
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         List
      * @apiGroup        Task
      *
@@ -46,28 +46,48 @@ class TaskController extends ItemController
      * @apiPermission   tasks_list
      * @apiPermission   tasks_full_access
      *
-     * @apiUse          TaskParams
-     * @apiUse          TaskObject
+     *
+     * @apiSuccess {Integer} id Task ID.
+     * @apiSuccess {Integer} project_id Project ID associated with the task.
+     * @apiSuccess {Integer} [project_phase_id] ID of the project phase (if any).
+     * @apiSuccess {String} task_name Name of the task.
+     * @apiSuccess {String} description Description of the task.
+     * @apiSuccess {Integer} assigned_by ID of the user who assigned the task.
+     * @apiSuccess {String} url URL of the task.
+     * @apiSuccess {String} created_at Task creation date in ISO format.
+     * @apiSuccess {String} updated_at Task update date in ISO format.
+     * @apiSuccess {String} [deleted_at] Deletion date if the task is soft-deleted.
+     * @apiSuccess {Integer} priority_id Priority level of the task.
+     * @apiSuccess {Boolean} important Indicates whether the task is marked as important.
+     * @apiSuccess {String} [start_date] Start date of the task (if set).
+     * @apiSuccess {String} [due_date] Due date of the task (if set).
+     * @apiSuccess {Integer} status_id Status ID of the task.
+     * @apiSuccess {Integer} relative_position Relative position of the task in the list.
+     * @apiSuccess {Integer} [project_milestone_id] Project milestone ID if linked.
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  [
-     *    {
-     *      "id": 2,
-     *      "project_id": 1,
-     *      "task_name": "Delectus.",
-     *      "description": "Et qui sed qui vero quis.
-     *                      Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
-     *      "active": 1,
-     *      "user_id": 1,
-     *      "assigned_by": 1,
-     *      "url": null,
-     *      "created_at": "2020-01-23T09:42:26+00:00",
-     *      "updated_at": "2020-01-23T09:42:26+00:00",
-     *      "deleted_at": null,
-     *      "priority_id": 2,
-     *      "important": 0
-     *    }
+     *     {
+     *       "id": 11,
+     *       "project_id": 2,
+     *       "project_phase_id": null,
+     *       "task_name": "Qui velit fugiat magni accusantium.",
+     *       "description": "Dignissimos praesentium voluptatibus velit et velit tenetur...",
+     *       "assigned_by": 3,
+     *       "url": null,
+     *       "created_at": "2023-10-26T10:26:42.000000Z",
+     *       "updated_at": "2023-10-26T10:26:42.000000Z",
+     *       "deleted_at": null,
+     *       "priority_id": 3,
+     *       "important": 1,
+     *       "start_date": null,
+     *       "due_date": null,
+     *       "status_id": 2,
+     *       "relative_position": 11,
+     *       "project_milestone_id": null
+     *     },
+     *     ...
      *  ]
      *
      * @apiUse         400Error
@@ -89,7 +109,7 @@ class TaskController extends ItemController
      * @api             {post} /tasks/edit Edit
      * @apiDescription  Edit Task
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Edit
      * @apiGroup        Task
      *
@@ -104,46 +124,122 @@ class TaskController extends ItemController
      * @apiParam {Array}    users        Task Users
      * @apiParam {Integer}  priority_id  Priority ID
      *
-     * @apiUse         TaskParams
      *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *    "id": 1,
-     *    "project_id": 2,
-     *    "active": 1,
-     *    "users": [3],
-     *    "assigned_by": 2,
-     *    "task_name": "lorem",
-     *    "description": "test",
-     *    "url": "url",
-     *    "priority_id": 1
-     *  }
+     * @apiParamExample {json} Request Example:
+     * {
+     *   "start_date": null,
+     *   "due_date": null,
+     *   "id": 54,
+     *   "project_id": 159,
+     *   "project_phase_id": null,
+     *   "task_name": "Quo consequatur mollitia nam.",
+     *   "description": "<p>Aut iure minima vero voluptates nisi placeat. Distinctio fuga aut sit quia sequi. Cupiditate tenetur sit ut voluptatem ratione culpa. Voluptatibus id perspiciatis ipsa quas cumque laudantium repudiandae.</p>",
+     *   "assigned_by": 7,
+     *   "url": null,
+     *   "created_at": "2023-11-07T13:23:46.000000Z",
+     *   "updated_at": "2023-11-07T13:23:46.000000Z",
+     *   "deleted_at": null,
+     *   "priority_id": 2,
+     *   "important": 0,
+     *   "project_milestone_id": null,
+     *   "status_id": 2,
+     *   "relative_position": 54,
+     *   "estimate": null,
+     *   "total_spent_time": null,
+     *   "total_offset": null,
+     *   "priority": {
+     *     "id": 2,
+     *     "name": "Normal",
+     *     "created_at": "2023-10-26T10:26:17.000000Z",
+     *     "updated_at": "2024-06-21T10:06:50.000000Z",
+     *     "color": "#49E637"
+     *   },
+     *   "project": {
+     *     "id": 159,
+     *     "company_id": 1,
+     *     "name": "Voluptas ab et ea.",
+     *     "description": "Cum aut sunt in fuga quia. Similique autem et quod qui eveniet omnis consequatur. Molestias tenetur est tempora tenetur.",
+     *     "deleted_at": null,
+     *     "created_at": "2023-11-07T13:23:45.000000Z",
+     *     "updated_at": "2023-11-07T13:23:45.000000Z",
+     *     "important": 0,
+     *     "source": "internal",
+     *     "default_priority_id": null,
+     *     "screenshots_state": 1
+     *   },
+     *   "phase": null,
+     *   "parents": [],
+     *   "children": [],
+     *   "users": [7],
+     *   "status": {
+     *     "id": 2,
+     *     "name": "Closed",
+     *     "active": false,
+     *     "created_at": "2024-02-28T16:47:00.000000Z",
+     *     "updated_at": "2024-06-08T16:17:04.000000Z",
+     *     "color": null,
+     *     "order": 4
+     *   },
+     *   "changes": [],
+     *   "comments": [
+     *     {
+     *       "id": 22,
+     *       "task_id": 54,
+     *       "user_id": 1,
+     *       "content": "lll",
+     *       "created_at": "2024-08-15T14:49:16.000000Z",
+     *       "updated_at": "2024-08-15T14:49:16.000000Z",
+     *       "deleted_at": null,
+     *       "user": {
+     *         "id": 1,
+     *         "full_name": "Admin",
+     *         "email": "admin@cattr.app",
+     *         ...
+     *       }
+     *     },
+     *     ...
+     *   ],
+     *   "workers": []
+     * }
      *
-     * @apiSuccess {Object}   res      Task
+     * @apiSuccess {Integer} id Task ID.
+     * @apiSuccess {Integer} project_id Project ID associated with the task.
+     * @apiSuccess {Integer} [project_phase_id] ID of the project phase (if any).
+     * @apiSuccess {String} task_name Name of the task.
+     * @apiSuccess {String} description Description of the task.
+     * @apiSuccess {Integer} assigned_by ID of the user who assigned the task.
+     * @apiSuccess {String} url URL of the task.
+     * @apiSuccess {String} created_at Task creation date in ISO format.
+     * @apiSuccess {String} updated_at Task update date in ISO format.
+     * @apiSuccess {String} [deleted_at] Deletion date if the task is soft-deleted.
+     * @apiSuccess {Integer} priority_id Priority level of the task.
+     * @apiSuccess {Boolean} important Indicates whether the task is marked as important.
+     * @apiSuccess {String} [start_date] Start date of the task (if set).
+     * @apiSuccess {String} [due_date] Due date of the task (if set).
+     * @apiSuccess {Integer} status_id Status ID of the task.
+     * @apiSuccess {Integer} relative_position Relative position of the task in the list.
      *
-     * @apiUse         TaskObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": {
-     *      "id": 2,
-     *      "project_id": 1,
-     *      "task_name": "Delectus.",
-     *      "description": "Et qui sed qui vero quis.
-     *                      Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
-     *      "active": 1,
-     *      "users": [],
-     *      "assigned_by": 1,
-     *      "url": null,
-     *      "created_at": "2020-01-23T09:42:26+00:00",
-     *      "updated_at": "2020-01-23T09:42:26+00:00",
-     *      "deleted_at": null,
-     *      "priority_id": 2,
-     *      "important": 0
-     *    }
-     *  }
-     *
+     * @apiSuccessExample {json} Success Response:
+     * {
+     *     "id": 54,
+     *     "project_id": 159,
+     *     "project_phase_id": null,
+     *     "task_name": "Quo consequatur mollitia nam.",
+     *     "description": "<p>Aut iure minima vero voluptates nisi placeat. Distinctio fuga aut sit quia sequi...</p>",
+     *     "assigned_by": 7,
+     *     "url": null,
+     *     "created_at": "2023-11-07T13:23:46.000000Z",
+     *     "updated_at": "2024-08-15T15:39:53.000000Z",
+     *     "deleted_at": null,
+     *     "priority_id": 2,
+     *     "important": 0,
+     *     "start_date": null,
+     *     "project_milestone_id": null,
+     *     "status_id": 2,
+     *     "relative_position": 54,
+     *     "estimate": null,
+     *     "due_date": null
+     * }
      * @apiUse         400Error
      * @apiUse         ValidationError
      * @apiUse         UnauthorizedError
@@ -274,7 +370,7 @@ class TaskController extends ItemController
      * @api             {post} /tasks/create Create
      * @apiDescription  Create Task
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Create
      * @apiGroup        Task
      *
@@ -283,51 +379,61 @@ class TaskController extends ItemController
      * @apiPermission   tasks_create
      * @apiPermission   tasks_full_access
      *
-     * @apiParam {Integer}  project_id   Project
-     * @apiParam {String}   task_name    Name
-     * @apiParam {String}   description  Description
-     * @apiParam {String}   url          Url
-     * @apiParam {Integer}  active       Active/Inactive Task. Available value: {0,1}
-     * @apiParam {Array}    users        Users
-     * @apiParam {Integer}  assigned_by  User who assigned task
-     * @apiParam {Integer}  priority_id  Priority ID
-     *
+     * @apiParam {String}  start_date          Start date of the task (in YYYY-MM-DD format).
+     * @apiParam {String}  due_date           Due date of the task (in YYYY-MM-DD format).
+     * @apiParam {Array}   users              List of user IDs assigned to the task.
+     * @apiParam {Integer} [project_phase_id] ID of the project phase (if any).
+     * @apiParam {Integer} project_id         Project ID to which the task belongs.
+     * @apiParam {String}  task_name          Name of the task.
+     * @apiParam {String}  description        Description of the task in HTML format.
+     * @apiParam {Boolean} important          Indicates if the task is marked as important.
+     * @apiParam {Integer} priority_id        Priority level ID of the task.
+     * @apiParam {Integer} status_id          Status ID of the task.
      * @apiParamExample {json} Simple Request Example
-     *  {
-     *    "project_id":"163",
-     *    "task_name":"retr",
-     *    "description":"fdgfd",
-     *    "active":1,
-     *    "users":[3],
-     *    "assigned_by":"1",
-     *    "url":"URL",
-     *    "priority_id": 1
-     *  }
+     * {
+     *   "start_date": "2024-08-14",
+     *   "due_date": "2024-08-16",
+     *   "users": [
+     *     1,
+     *     6,
+     *     7
+     *   ],
+     *   "project_phase_id": null,
+     *   "project_id": 2,
+     *   "task_name": "test",
+     *   "description": "<p>test</p>",
+     *   "important": true,
+     *   "priority_id": 2,
+     *   "status_id": 5
+     * }
+     * @apiSuccess {Integer} id Task ID.
+     * @apiSuccess {Integer} project_id Project ID associated with the task.
+     * @apiSuccess {Integer} [project_phase_id] ID of the project phase (if any).
+     * @apiSuccess {String}  task_name Name of the task.
+     * @apiSuccess {String}  description Description of the task.
+     * @apiSuccess {Boolean} important Indicates whether the task is marked as important.
+     * @apiSuccess {Integer} priority_id Priority level ID of the task.
+     * @apiSuccess {Integer} status_id Status ID of the task.
+     * @apiSuccess {String}  start_date Start date of the task in ISO format.
+     * @apiSuccess {String}  due_date Due date of the task in ISO format.
+     * @apiSuccess {String}  created_at Task creation date in ISO format.
+     * @apiSuccess {String}  updated_at Task update date in ISO format.
      *
-     * @apiSuccess {Object}   res      Task
-     *
-     * @apiUse TaskObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "res": {
-     *      "id": 2,
-     *      "project_id": 1,
-     *      "task_name": "Delectus.",
-     *      "description": "Et qui sed qui vero quis.
-     *                      Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
-     *      "active": 1,
-     *      "users": [],
-     *      "assigned_by": 1,
-     *      "url": null,
-     *      "created_at": "2020-01-23T09:42:26+00:00",
-     *      "updated_at": "2020-01-23T09:42:26+00:00",
-     *      "deleted_at": null,
-     *      "priority_id": 2,
-     *      "important": 0
-     *    }
-     *  }
+     * @apiSuccessExample {json} Success Response:
+     * {
+     *     "project_id": 2,
+     *     "project_phase_id": null,
+     *     "task_name": "test",
+     *     "description": "<p>test</p>",
+     *     "important": 1,
+     *     "priority_id": 2,
+     *     "status_id": 5,
+     *     "start_date": "2024-08-14T00:00:00.000000Z",
+     *     "due_date": "2024-08-16T00:00:00.000000Z",
+     *     "updated_at": "2024-08-16T09:07:47.000000Z",
+     *     "created_at": "2024-08-16T09:07:47.000000Z",
+     *     "id": 116
+     * }
      *
      * @apiUse         400Error
      * @apiUse         ValidationError
@@ -380,7 +486,7 @@ class TaskController extends ItemController
      * @api             {post} /tasks/remove Destroy
      * @apiDescription  Destroy Task
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Destroy
      * @apiGroup        Task
      *
@@ -393,16 +499,13 @@ class TaskController extends ItemController
      *
      * @apiParamExample {json} Request Example
      * {
-     *   "id": 1
+     *   "id": 54
      * }
      *
      * @apiSuccess {String}   message  Destroy status
      *
      * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "message": "Item has been removed"
-     *  }
+     * HTTP/1.1 204 No Content
      *
      * @apiUse          400Error
      * @apiUse          ValidationError
@@ -419,7 +522,7 @@ class TaskController extends ItemController
      * @api             {get,post} /tasks/count Count
      * @apiDescription  Count Tasks
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Count
      * @apiGroup        Task
      *
@@ -428,13 +531,12 @@ class TaskController extends ItemController
      * @apiPermission   tasks_count
      * @apiPermission   tasks_full_access
      *
-     * @apiSuccess {String}   total    Amount of tasks that we have
+     * @apiSuccess {Integer}   total    Amount of tasks that we have
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
      *  {
      *    "total": 2
-     *
      *  }
      *
      * @apiUse          400Error
@@ -451,7 +553,7 @@ class TaskController extends ItemController
      * @api             {post} /tasks/show Show
      * @apiDescription  Show Task
      *
-     * @apiVersion      1.0.0
+     * @apiVersion      4.0.0
      * @apiName         Show
      * @apiGroup        Task
      *
@@ -460,44 +562,79 @@ class TaskController extends ItemController
      * @apiPermission   tasks_show
      * @apiPermission   tasks_full_access
      *
-     * @apiParam {Integer}  id  ID
+     * @apiParamExample {json} Request Example:
+     * {
+     *   "id": "55",
+     *   "with": [
+     *     "priority",
+     *     "project",
+     *     "phase:id,name",
+     *     "parents",
+     *     "children",
+     *     "users",
+     *     "status",
+     *     "changes",
+     *     "changes.user",
+     *     "comments",
+     *     "comments.user",
+     *     "workers",
+     *     "workers.user:id,full_name"
+     *   ],
+     *   "withSum": [
+     *     ["workers as total_spent_time", "duration"],
+     *     ["workers as total_offset", "offset"]
+     *   ]
+     * }
+     * @apiSuccess {Integer} id The ID of the task.
+     * @apiSuccess {Integer} project_id The ID of the project the task belongs to.
+     * @apiSuccess {String} task_name The name of the task.
+     * @apiSuccess {String} description The description of the task.
+     * @apiSuccess {Boolean} important Indicates if the task is marked as important.
+     * @apiSuccess {Object} priority Priority details including ID, name, and color.
+     * @apiSuccess {Object} project Project details including ID, name, description, and more.
+     * @apiSuccess {Array} users List of users assigned to the task.
+     * @apiSuccess {Object} status Status details of the task.
+     * @apiSuccess {Array} changes List of changes made to the task.
+     * @apiSuccess {Array} comments List of comments related to the task.
+     * @apiSuccess {Array} workers List of workers associated with the task.
+     * @apiSuccess {String} total_spent_time Sum of the time spent by workers on the task.
+     * @apiSuccess {String} total_offset Sum of the offset time for the task.
      *
-     * @apiUse          TaskParams
-     *
-     * @apiParamExample {json} Simple Request Example
-     *  {
-     *    "id": 1,
-     *    "project_id": ["=", [1,2,3]],
-     *    "active": 1,
-     *    "user_id": ["=", [1,2,3]],
-     *    "assigned_by": ["=", [1,2,3]],
-     *    "task_name": ["like", "%lorem%"],
-     *    "description": ["like", "%lorem%"],
-     *    "url": ["like", "%lorem%"],
-     *    "created_at": [">", "2019-01-01 00:00:00"],
-     *    "updated_at": ["<", "2019-01-01 00:00:00"]
-     *  }
-     *
-     * @apiUse          TaskObject
-     *
-     * @apiSuccessExample {json} Response Example
-     *  HTTP/1.1 200 OK
-     *  {
-     *    "id": 2,
-     *    "project_id": 1,
-     *    "task_name": "Delectus.",
-     *    "description": "Et qui sed qui vero quis.
-     *                    Vitae corporis sapiente saepe dolor rerum. Eligendi commodi quia rerum ut.",
-     *    "active": 1,
-     *    "user_id": 1,
-     *    "assigned_by": 1,
-     *    "url": null,
-     *    "created_at": "2020-01-23T09:42:26+00:00",
-     *    "updated_at": "2020-01-23T09:42:26+00:00",
-     *    "deleted_at": null,
-     *    "priority_id": 2,
-     *    "important": 0
-     *  }
+     * @apiSuccessExample {json} Success Response:
+     * {
+     *     "id": 55,
+     *     "project_id": 159,
+     *     "task_name": "Nisi qui ut et.",
+     *     "description": "Molestias libero deleniti laboriosam sit libero voluptas aut quibusdam...",
+     *     "important": 1,
+     *     "priority": {
+     *       "id": 3,
+     *       "name": "High",
+     *       "color": "#D40C0C"
+     *     },
+     *     "project": {
+     *       "id": 159,
+     *       "name": "Voluptas ab et ea.",
+     *       "description": "Cum aut sunt in fuga quia..."
+     *     },
+     *     "users": [
+     *       {
+     *         "id": 7,
+     *         "full_name": "Dr. Adaline Toy",
+     *         "email": "projectManager1231@example.com"
+     *       }
+     *     ],
+     *     "status": {
+     *       "id": 2,
+     *       "name": "Closed",
+     *       "active": false
+     *     },
+     *     "changes": [],
+     *     "comments": [],
+     *     "workers": [],
+     *     "total_spent_time": null,
+     *     "total_offset": null
+     * }
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
@@ -536,30 +673,28 @@ class TaskController extends ItemController
      *    "relation_type": "follows"
      *  }
      *
-     * @apiUse          TaskObject
      *
-     * @apiSuccess {Object} data The related task object.
-     * @apiSuccess {Number} data.id The ID of the related task.
-     * @apiSuccess {Number} data.project_id The project ID of the related task.
-     * @apiSuccess {Number} data.project_phase_id The project phase ID of the related task, if any.
-     * @apiSuccess {String} data.task_name The name of the related task.
-     * @apiSuccess {String} data.description The description of the related task.
-     * @apiSuccess {Number} data.assigned_by The ID of the user who assigned the task.
-     * @apiSuccess {String} data.url The URL of the related task, if any.
-     * @apiSuccess {String} data.created_at The creation timestamp of the related task.
-     * @apiSuccess {String} data.updated_at The last update timestamp of the related task.
-     * @apiSuccess {String} data.deleted_at The deletion timestamp of the related task, if any.
-     * @apiSuccess {Number} data.priority_id The priority ID of the related task.
-     * @apiSuccess {Boolean} data.important Indicates if the task is marked as important.
-     * @apiSuccess {String} data.start_date The start date of the related task, if any.
-     * @apiSuccess {Number} data.project_milestone_id The project milestone ID of the related task, if any.
-     * @apiSuccess {Number} data.status_id The status ID of the related task.
-     * @apiSuccess {Number} data.relative_position The relative position of the related task.
-     * @apiSuccess {String} data.estimate The estimate for the task, if any.
-     * @apiSuccess {String} data.due_date The due date of the related task, if any.
-     * @apiSuccess {Object} data.pivot The pivot data for the relation.
-     * @apiSuccess {Number} data.pivot.child_id The child task ID.
-     * @apiSuccess {Number} data.pivot.parent_id The parent task ID.
+     * @apiSuccess {Number} id The ID of the related task.
+     * @apiSuccess {Number} project_id The project ID of the related task.
+     * @apiSuccess {Number} project_phase_id The project phase ID of the related task, if any.
+     * @apiSuccess {String} task_name The name of the related task.
+     * @apiSuccess {String} description The description of the related task.
+     * @apiSuccess {Number} assigned_by The ID of the user who assigned the task.
+     * @apiSuccess {String} url The URL of the related task, if any.
+     * @apiSuccess {String} created_at The creation timestamp of the related task.
+     * @apiSuccess {String} updated_at The last update timestamp of the related task.
+     * @apiSuccess {String} deleted_at The deletion timestamp of the related task, if any.
+     * @apiSuccess {Number} priority_id The priority ID of the related task.
+     * @apiSuccess {Boolean} important Indicates if the task is marked as important.
+     * @apiSuccess {String} start_date The start date of the related task, if any.
+     * @apiSuccess {Number} project_milestone_id The project milestone ID of the related task, if any.
+     * @apiSuccess {Number} status_id The status ID of the related task.
+     * @apiSuccess {Number} relative_position The relative position of the related task.
+     * @apiSuccess {String} estimate The estimate for the task, if any.
+     * @apiSuccess {String} due_date The due date of the related task, if any.
+     * @apiSuccess {Object} pivot The pivot data for the relation.
+     * @apiSuccess {Number} pivot.child_id The child task ID.
+     * @apiSuccess {Number} pivot.parent_id The parent task ID.
      *
      * @apiSuccessExample {json} Response Example
      *  HTTP/1.1 200 OK
@@ -587,10 +722,6 @@ class TaskController extends ItemController
      *        "parent_id": 5
      *      }
      *  }
-     *
-     * @apiError TaskRelationException NOT_SAME_PROJECT The tasks do not belong to the same project.
-     * @apiError TaskRelationException ALREADY_EXISTS The relation already exists.
-     * @apiError TaskRelationException CYCLIC The relation would create a cyclic dependency.
      *
      * @apiUse         400Error
      * @apiUse         UnauthorizedError
