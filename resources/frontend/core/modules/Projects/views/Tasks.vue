@@ -945,9 +945,11 @@
             font-size: 7px;
         }
         .project-tasks_kanban ::v-deep .drag-column {
+            flex: 0 0 90%;
+            margin-right: 10px;
             scroll-snap-align: center;
             max-width: 100%;
-            flex-basis: 100%;
+            // flex-basis: 100%;
             flex-shrink: 0;
         }
     }
