@@ -1372,6 +1372,7 @@ __metadata:
     sass-loader: ^13.3.3
     sass-resources-loader: ^2.2.5
     semver: ^7.6.0
+    v-code-diff: ^1.13.1
     validator: ^13.11.0
     vee-validate: ^3.4.15
     vue: ^2.7.16
@@ -4850,6 +4851,20 @@ __metadata:
   languageName: node
   linkType: hard
 
+"diff-match-patch@npm:^1.0.5":
+  version: 1.0.5
+  resolution: "diff-match-patch@npm:1.0.5"
+  checksum: 841522d01b09cccbc4e4402cf61514a81b906349a7d97b67222390f2d35cf5df277cb23959eeed212d5e46afb5629cebab41b87918672c5a05c11c73688630e3
+  languageName: node
+  linkType: hard
+
+"diff@npm:^5.2.0":
+  version: 5.2.0
+  resolution: "diff@npm:5.2.0"
+  checksum: 12b63ca9c36c72bafa3effa77121f0581b4015df18bc16bac1f8e263597735649f1a173c26f7eba17fb4162b073fee61788abe49610e6c70a2641fe1895443fd
+  languageName: node
+  linkType: hard
+
 "diffie-hellman@npm:^5.0.0":
   version: 5.0.3
   resolution: "diffie-hellman@npm:5.0.3"
@@ -6324,7 +6339,7 @@ __metadata:
   languageName: node
   linkType: hard
 
-"highlight.js@npm:^11.9.0":
+"highlight.js@npm:^11.10.0, highlight.js@npm:^11.9.0":
   version: 11.10.0
   resolution: "highlight.js@npm:11.10.0"
   checksum: 65f89966a164f283a3083ce90f65d6f78c5d91c2ab753c70dc2f1d117ee8fe982ed428e51e663c37c562c88b7dad18cdd84769e522f0f8764462c448017c6dfa
@@ -11436,6 +11451,24 @@ __metadata:
   languageName: node
   linkType: hard
 
+"v-code-diff@npm:^1.13.1":
+  version: 1.13.1
+  resolution: "v-code-diff@npm:1.13.1"
+  dependencies:
+    diff: ^5.2.0
+    diff-match-patch: ^1.0.5
+    highlight.js: ^11.10.0
+    vue-demi: ^0.14.6
+  peerDependencies:
+    "@vue/composition-api": ^1.4.9
+    vue: ^2.6.0 || >=3.0.0
+  peerDependenciesMeta:
+    "@vue/composition-api":
+      optional: true
+  checksum: db0aa797e55ed67c6769c62f627420be1e312a92cc252ffac2fe95a26eb10c77c8b737937f2f7501285ca7f56b39e7d82af83d0ea63fcd7cb563ed5fe2cf3b16
+  languageName: node
+  linkType: hard
+
 "validate-npm-package-license@npm:^3.0.1":
   version: 3.0.4
   resolution: "validate-npm-package-license@npm:3.0.4"
@@ -11519,6 +11552,22 @@ __metadata:
     vue-demi-fix: bin/vue-demi-fix.js
     vue-demi-switch: bin/vue-demi-switch.js
   checksum: 0fbe9bf8ab7fe498ffa2bbd0cfc8f6f43a6bbaa5eda3e20ef1b70dca7c8b0ddb216a7ff2f632b694fe0735805638975abb441c621ec0bd2e6d4656353f316c15
+  languageName: node
+  linkType: hard
+
+"vue-demi@npm:^0.14.6":
+  version: 0.14.10
+  resolution: "vue-demi@npm:0.14.10"
+  peerDependencies:
+    "@vue/composition-api": ^1.0.0-rc.1
+    vue: ^3.0.0-0 || ^2.6.0
+  peerDependenciesMeta:
+    "@vue/composition-api":
+      optional: true
+  bin:
+    vue-demi-fix: bin/vue-demi-fix.js
+    vue-demi-switch: bin/vue-demi-switch.js
+  checksum: 9b4106f99be3b0c1dd4a6dc5725f5e8f79c6b98d1eeb849bf2c54416cd77f4aa344960b202768865245cfa82d57f49a9d96f67f5d8e256604b9dac1c5df9a8d6
   languageName: node
   linkType: hard
 

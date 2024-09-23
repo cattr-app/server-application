@@ -26,6 +26,7 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
  * @property int $id
  * @property int $project_id
  * @property int $project_phase_id
+ * @property string $phase
  * @property string $task_name
  * @property string|null $description
  * @property int $assigned_by

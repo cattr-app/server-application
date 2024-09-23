@@ -74,60 +74,25 @@
                 </div>
             </div>
             <at-button class="comment-button" type="primary" @click.prevent="createComment(task.id)">
-                {{ $t('projects.add_comment') }}
+                {{ $t('tasks.activity.add_comment') }}
             </at-button>
         </div>
         <div ref="activities" class="history">
             <div v-for="item in activities" :key="item.id + (item.content ? 'c' : 'h')" class="comment">
                 <div v-if="!item.content" class="content">
                     <TeamAvatars class="history-change-avatar" :users="[item.user]" />
-
-                    <template v-if="item.field === 'users'">
-                        {{
-                            $t('projects.task_change_users', {
-                                user: item.user.full_name,
-                                date: fromNow(item.created_at),
-                                value:
-                                    item.new_value && item.new_value.length
-                                        ? JSON.parse(item.new_value)
-                                              .map(user => user.full_name)
-                                              .join(', ')
-                                        : '',
-                            })
-                        }}
-                    </template>
-
-                    <template v-else-if="item.field === 'status_id'">
-                        {{
-                            $t('projects.task_change_to', {
-                                user: item.user.full_name,
-                                field: $t(`field.${item.field}`).toLocaleLowerCase(),
-                                value: getStatusName(item.new_value),
-                                date: fromNow(item.created_at),
-                            })
-                        }}
-                    </template>
-
-                    <template v-else-if="item.field === 'priority_id'">
-                        {{
-                            $t('projects.task_change_to', {
-                                user: item.user.full_name,
-                                field: $t(`field.${item.field}`).toLocaleLowerCase(),
-                                value: getPriorityName(item.new_value),
-                                date: fromNow(item.created_at),
-                            })
-                        }}
-                    </template>
-
-                    <template v-else-if="item.field !== 'relative_position'">
-                        {{
-                            $t('projects.task_change', {
-                                user: item.user.full_name,
-                                field: $t(`field.${item.field}`).toLocaleLowerCase(),
-                                date: fromNow(item.created_at),
-                            })
-                        }}
-                    </template>
+                    {{ getActivityMessage(item) }}
+                    <at-collapse v-if="item.field !== 'important'" simple accordion :value="-1">
+                        <at-collapse-item :title="$t('tasks.activity.show_changes')">
+                            <CodeDiff
+                                :old-string="formatActivityValue(item, false)"
+                                :new-string="formatActivityValue(item, true)"
+                                max-height="500px"
+                                :hide-header="true"
+                                output-format="line-by-line"
+                            />
+                        </at-collapse-item>
+                    </at-collapse>
                 </div>
                 <div v-if="item.content" class="content">
                     <div class="comment-header">
@@ -215,18 +180,24 @@
     import TeamAvatars from '@/components/TeamAvatars';
     import StatusService from '@/services/resource/status.service';
     import PriorityService from '@/services/resource/priority.service';
+    import ProjectService from '@/services/resource/project.service';
     import { offset } from 'caret-pos';
     import TaskActivityService from '@/services/resource/task-activity.service';
     import UsersService from '@/services/resource/user.service';
-    import { fromNow } from '@/utils/time';
+    import { formatDate, formatDurationString, fromNow } from '@/utils/time';
     import VueMarkdown from '@/components/VueMarkdown';
     import 'markdown-it';
     import 'highlight.js/styles/github.min.css'; // Import a highlight.js theme (choose your favorite!)
+    import { CodeDiff } from 'v-code-diff';
+    import i18n from '@/i18n';
+    import moment from 'moment-timezone';
+    import { store as rootStore } from '@/store';
 
     export default {
         components: {
             TeamAvatars,
             VueMarkdown,
+            CodeDiff,
         },
         props: {
             task: {
@@ -253,8 +224,10 @@
                 statusService: new StatusService(),
                 priorityService: new PriorityService(),
                 taskActivityService: new TaskActivityService(),
+                projectService: new ProjectService(),
                 statuses: [],
                 priorities: [],
+                projects: [],
                 userService: new UsersService(),
                 commentMessage: '',
                 users: [],
@@ -291,14 +264,29 @@
             });
             this.observer.observe(this.$refs.activities);
 
-            this.statuses = await this.statusService.getAll();
-            this.priorities = await this.priorityService.getAll();
+            this.statuses = await this.statusService.getAll({
+                headers: {
+                    'X-Paginate': 'false',
+                },
+            });
+            this.priorities = await this.priorityService.getAll({
+                headers: {
+                    'X-Paginate': 'false',
+                },
+            });
+            this.projects = await this.projectService.getAll({
+                headers: {
+                    'X-Paginate': 'false',
+                },
+            });
             this.websocketEnterChannel(this.user.id, {
                 create: async data => {
-                    this.activities = (await this.getActivity()).data;
+                    console.log('create', data);
+                    // this.activities = (await this.getActivity()).data;
                 },
                 edit: async data => {
-                    this.activities = (await this.getActivity()).data;
+                    console.log('edit', data);
+                    // this.activities = (await this.getActivity()).data;
                 },
             });
         },
@@ -342,6 +330,154 @@
                         ...dataOptions,
                     })
                 ).data;
+            },
+            formatActivityValue(item, isNew) {
+                let newValue = item.new_value;
+                let oldValue = item.old_value;
+                if (item.field === 'estimate') {
+                    newValue = newValue == null ? newValue : formatDurationString(newValue);
+                    oldValue = oldValue == null ? oldValue : formatDurationString(oldValue);
+                } else if (item.field === 'project_id') {
+                    newValue = newValue == null ? newValue : this.getProjectName(newValue);
+                    oldValue = oldValue == null ? oldValue : this.getProjectName(oldValue);
+                } else if (item.field === 'status_id') {
+                    newValue = newValue == null ? newValue : this.getStatusName(newValue);
+                    oldValue = oldValue == null ? oldValue : this.getStatusName(oldValue);
+                } else if (item.field === 'priority_id') {
+                    newValue = newValue == null ? newValue : this.getPriorityName(newValue);
+                    oldValue = oldValue == null ? oldValue : this.getPriorityName(oldValue);
+                } else if (item.field === 'start_date' || item.field === 'due_date') {
+                    const isStart = item.field === 'start_date';
+                    let oldDate = isStart ? i18n.t('tasks.unset_start_date') : i18n.t('tasks.unset_due_date');
+                    let newDate = isStart ? i18n.t('tasks.unset_start_date') : i18n.t('tasks.unset_due_date');
+                    const userTimezone = moment.tz.guess();
+                    const companyTimezone = rootStore.getters['user/companyData'].timezone;
+                    if (newValue != null && typeof newValue === 'string' && typeof companyTimezone === 'string') {
+                        newDate =
+                            formatDate(moment.utc(newValue).tz(companyTimezone, true).tz(userTimezone)) +
+                            ` (GMT${moment.tz(userTimezone).format('Z')})`;
+                    }
+                    if (oldValue != null && typeof oldValue === 'string' && typeof companyTimezone === 'string') {
+                        oldDate =
+                            formatDate(moment.utc(oldValue).tz(companyTimezone, true).tz(userTimezone)) +
+                            ` (GMT${moment.tz(userTimezone).format('Z')})`;
+                    }
+                    newValue = newDate;
+                    oldValue = oldDate;
+                }
+                return isNew ? newValue : oldValue;
+            },
+            getActivityMessage(item) {
+                if (item.field === 'users') {
+                    return this.$i18n.t(
+                        item.new_value === ''
+                            ? 'tasks.activity.task_unassigned_users'
+                            : 'tasks.activity.task_change_users',
+                        {
+                            user: item.user.full_name,
+                            date: fromNow(item.created_at),
+                            value: item.new_value,
+                        },
+                    );
+                }
+                if (item.field === 'task_name') {
+                    return this.$i18n.t('tasks.activity.task_change_to', {
+                        user: item.user.full_name,
+                        field: this.$i18n.t(`field.${item.field}`).toLocaleLowerCase(),
+                        value: item.new_value,
+                        date: fromNow(item.created_at),
+                    });
+                }
+                if (item.field === 'project_id') {
+                    return this.$i18n.t('tasks.activity.task_change_to', {
+                        user: item.user.full_name,
+                        field: this.$i18n.t(`field.${item.field}`).toLocaleLowerCase(),
+                        value: this.getProjectName(item.new_value),
+                        date: fromNow(item.created_at),
+                    });
+                }
+                if (item.field === 'status_id') {
+                    return this.$i18n.t('tasks.activity.task_change_to', {
+                        user: item.user.full_name,
+                        field: this.$i18n.t(`field.${item.field}`).toLocaleLowerCase(),
+                        value: this.getStatusName(item.new_value),
+                        date: fromNow(item.created_at),
+                    });
+                }
+                if (item.field === 'priority_id') {
+                    return this.$i18n.t('tasks.activity.task_change_to', {
+                        user: item.user.full_name,
+                        field: this.$i18n.t(`field.${item.field}`).toLocaleLowerCase(),
+                        value: this.getPriorityName(item.new_value),
+                        date: fromNow(item.created_at),
+                    });
+                }
+                if (item.field === 'project_phase_id') {
+                    return this.$i18n.t('tasks.activity.task_change_to', {
+                        user: item.user.full_name,
+                        field: this.$i18n.t(`field.${item.field}`).toLocaleLowerCase(),
+                        value: item.new_value == null ? this.$i18n.t('tasks.unset_phase') : item.new_value,
+                        date: fromNow(item.created_at),
+                    });
+                }
+
+                if (item.field === 'estimate') {
+                    return this.$i18n.t('tasks.activity.task_change_to', {
+                        user: item.user.full_name,
+                        field: this.$i18n.t(`field.${item.field}`).toLocaleLowerCase(),
+                        value:
+                            item.new_value == null
+                                ? this.$i18n.t('tasks.unset_estimate')
+                                : formatDurationString(item.new_value),
+                        date: fromNow(item.created_at),
+                    });
+                }
+
+                if (item.field === 'start_date' || item.field === 'due_date') {
+                    const isStart = item.field === 'start_date';
+                    let date = isStart ? i18n.t('tasks.unset_start_date') : i18n.t('tasks.unset_due_date');
+                    const userTimezone = moment.tz.guess();
+                    const companyTimezone = rootStore.getters['user/companyData'].timezone;
+                    let newValue = item.new_value;
+                    if (newValue != null && typeof newValue === 'string' && typeof companyTimezone === 'string') {
+                        date =
+                            formatDate(moment.utc(newValue).tz(companyTimezone, true).tz(userTimezone)) +
+                            ` (GMT${moment.tz(userTimezone).format('Z')})`;
+                    }
+                    return this.$i18n.t('tasks.activity.task_change_to', {
+                        user: item.user.full_name,
+                        field: this.$i18n.t(`field.${item.field}`).toLocaleLowerCase(),
+                        value: date,
+                        date: fromNow(item.created_at),
+                    });
+                }
+
+                if (item.field === 'important') {
+                    return this.$i18n.t(
+                        +item.new_value === 1
+                            ? 'tasks.activity.marked_as_important'
+                            : 'tasks.activity.marked_as_non_important',
+                        {
+                            user: item.user.full_name,
+                            date: fromNow(item.created_at),
+                        },
+                    );
+                }
+
+                return this.$i18n.t('tasks.activity.task_change', {
+                    user: item.user.full_name,
+                    field: this.$i18n.t(`field.${item.field}`).toLocaleLowerCase(),
+                    value: item.new_value,
+                    date: fromNow(item.created_at),
+                });
+            },
+            getProjectName(id) {
+                const project = this.projects.find(project => +project.id === +id);
+                if (project) {
+                    return project.name;
+                }
+
+                return '';
             },
             getStatusName(id) {
                 const status = this.statuses.find(status => +status.id === +id);

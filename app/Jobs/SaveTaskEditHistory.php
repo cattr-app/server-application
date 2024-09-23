@@ -34,12 +34,20 @@ class SaveTaskEditHistory implements ShouldQueue
                 continue;
             }
 
+            $new_value = $value;
+            $old_value = $this->original[$key];
+            // bacause we need to save a string, not id
+            if ($key === 'project_phase_id') {
+                $new_value = $this->task->phase?->name;
+                $old_value = $this->original['_old_phase_name'];
+            }
+
             TaskHistory::create([
                 'task_id' => $this->task->id,
                 'user_id' => $this->author->id,
                 'field' => $key,
-                'new_value' => $value,
-                'old_value' => $this->original[$key],
+                'new_value' => $new_value,
+                'old_value' => $old_value,
             ])->updateQuietly(['created_at' => $this->timestamp]);
         }
     }

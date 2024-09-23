@@ -13,6 +13,18 @@
       "normal": "Normal",
       "high": "High"
     },
+    "activity": {
+      "task_change": "{user} changed {field} {date}",
+      "task_change_to": "{user} changed {field} to {value} {date}",
+      "task_change_users": "{user} assigned the task to {value} {date}",
+      "task_unassigned_users": "{user} removed all assignees {date}",
+      "show_history": "Show",
+      "hide_history": "Hide",
+      "add_comment": "Add comment",
+      "show_changes": "Show changes",
+      "marked_as_important": "{user} Marked the task as important {date}",
+      "marked_as_non_important": "{user} Unchecked the importance of the task {date}"
+    },
     "projects": "Projects",
     "users": "Users",
     "spent_by_user": "Spent time by user",
@@ -38,6 +50,8 @@
     "unset_estimate": "Not set",
     "estimate--overtime": "Overtime",
     "unset_phase": "Not set",
+    "important": "Important",
+    "not_important": "Not important",
     "relations": {
       "title": "Relations",
       "for": "Relations for",
