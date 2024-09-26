@@ -6,6 +6,7 @@ use App;
 use App\Events\ChangeEvent;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskHistory;
 use App\Models\TimeInterval;
 use CatEvent;
 use Closure;
@@ -17,7 +18,7 @@ use Symfony\Component\HttpFoundation\Response;
 class RegisterModulesEvents
 {
     /**
-     * @param Task|Project|TimeInterval $model
+     * @param Task|Project|TimeInterval|TaskHistory $model
      */
     public static function broadcastEvent(string $entityType, string $action, $model): void
     {

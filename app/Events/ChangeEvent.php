@@ -5,6 +5,7 @@ namespace App\Events;
 use App\Enums\Role;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskComment;
 use App\Models\TimeInterval;
 use App\Models\User;
 use App\Reports\DashboardExport;
@@ -95,6 +96,7 @@ class ChangeEvent implements ShouldBroadcast, ShouldDispatchAfterCommit
                 ->loadSum('workers as total_spent_time', 'duration')
                 ->loadSum('workers as total_offset', 'offset')
                 ->makeVisible('can'),
+            $this->model instanceof TaskComment => $this->model->load('user'),
             $this->model instanceof Project => $this->model->setPermissionsUser(User::query()->find($this->userId))
                 ->load([
                     'users',

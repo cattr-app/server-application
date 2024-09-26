@@ -77,7 +77,7 @@
                 {{ $t('tasks.activity.add_comment') }}
             </at-button>
         </div>
-        <div ref="activities" class="history">
+        <div class="history">
             <div v-for="item in activities" :key="item.id + (item.content ? 'c' : 'h')" class="comment">
                 <div v-if="!item.content" class="content">
                     <TeamAvatars class="history-change-avatar" :users="[item.user]" />
@@ -172,6 +172,7 @@
                     </span>
                 </div>
             </div>
+            <div ref="activitiesObservable"></div>
         </div>
     </div>
 </template>
@@ -247,6 +248,7 @@
                 activities: [],
                 page: 1,
                 canLoad: true,
+                isLoading: false,
                 observer: null,
                 isModalOpen: false,
                 mainPreview: false,
@@ -259,10 +261,10 @@
         },
         async mounted() {
             this.observer = new IntersectionObserver(this.infiniteScroll, {
-                rootMargin: '100px',
-                threshold: 0.8,
+                rootMargin: '300px',
+                threshold: 0,
             });
-            this.observer.observe(this.$refs.activities);
+            this.observer.observe(this.$refs.activitiesObservable);
 
             this.statuses = await this.statusService.getAll({
                 headers: {
@@ -281,12 +283,22 @@
             });
             this.websocketEnterChannel(this.user.id, {
                 create: async data => {
-                    console.log('create', data);
-                    // this.activities = (await this.getActivity()).data;
+                    if (data.model.task_id !== this.task.id) {
+                        return;
+                    }
+
+                    if (this.sort === 'desc') {
+                        this.activities.unshift(data.model);
+                    } else if (this.sort === 'asc' && !this.canLoad && !this.isLoading) {
+                        this.activities.push(data.model);
+                    }
                 },
                 edit: async data => {
-                    console.log('edit', data);
-                    // this.activities = (await this.getActivity()).data;
+                    if (data.model.task_id !== this.task.id) {
+                        return;
+                    }
+                    const comment = this.activities.find(el => el.id === data.model.id);
+                    comment ? (comment.content = data.model.content) : null;
                 },
             });
         },
@@ -316,7 +328,7 @@
                 this.canLoad = true;
                 this.activities = [];
                 this.observer.disconnect();
-                this.observer.observe(this.$refs.activities);
+                this.observer.observe(this.$refs.activitiesObservable);
             },
             async getActivity(dataOptions = {}) {
                 return (
@@ -500,12 +512,6 @@
                     task_id: id,
                     content: this.commentMessage,
                 });
-
-                if (this.sort === 'desc') {
-                    this.resetHistory();
-                } else {
-                    this.canLoad = true;
-                }
                 this.commentMessage = '';
             },
             commentMessageChange(value) {
@@ -544,14 +550,19 @@
                 if (entry.isIntersecting && this.canLoad === true) {
                     this.observer.disconnect();
                     this.canLoad = false;
+                    this.isLoading = true;
 
                     let data = (await this.getActivity()).data;
+                    if (this.page === 1) {
+                        this.activities = [];
+                    }
                     this.page++;
 
                     if (data.length > 0) {
                         this.activities.push(...data);
                         this.canLoad = true;
-                        this.observer.observe(this.$refs.activities);
+                        this.isLoading = false;
+                        this.observer.observe(this.$refs.activitiesObservable);
                     }
                 }
             },
