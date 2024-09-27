@@ -13,13 +13,7 @@
     "override_color": "Override color",
     "tasks": "Tasks",
     "project_tasks": "Project tasks",
-    "add_task": "Add task",
-    "task_change": "{user} changed {field} {date}",
-    "task_change_to": "{user} changed {field} to {value} {date}",
-    "task_change_users": "{user} assigned to {value} {date}",
-    "show_history": "Show",
-    "hide_history": "Hide",
-    "add_comment": "Add"
+    "add_task": "Add task"
   },
   "field": {
     "default_priority": "Default priority",
@@ -31,7 +25,8 @@
     "add_phase": "Add",
     "priority_id": "Priority",
     "status_id": "Status",
-    "comments": "Comments"
+    "comments": "Comments",
+    "project_phase_id": "Phase"
   },
   "control": {
     "task-list": "Task List"

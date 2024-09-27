@@ -21,6 +21,7 @@ use App\Http\Controllers\Api\StatusController as ApiStatusController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StatusController;
+use App\Http\Controllers\Api\TaskActivityController;
 use Illuminate\Routing\Router;
 
 // Routes for login/register processing
@@ -156,6 +157,8 @@ Route::group([
             ->name('tasks.show');
         $router->post('tasks/remove', [TaskController::class, 'destroy'])
             ->name('tasks.destroy');
+        $router->post('tasks/activity', [TaskActivityController::class, 'index'])
+            ->name('task.activity');
 
         // Gantt routes
         $router->post('tasks/create-relation', [TaskController::class, 'createRelation'])

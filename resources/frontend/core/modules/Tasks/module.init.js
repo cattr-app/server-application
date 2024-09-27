@@ -59,10 +59,6 @@ export function init(context, router) {
             'children',
             'users',
             'status',
-            'changes',
-            'changes.user',
-            'comments',
-            'comments.user',
             'workers',
             'workers.user:id,full_name',
         ],
@@ -413,16 +409,16 @@ export function init(context, router) {
                 return h(TaskHistory, { props: { task: props.values } });
             },
         },
-        {
-            key: 'comments',
-            label: 'field.comments',
-            render: (h, props) => {
-                return h(TaskComments, {
-                    props: { task: props.values },
-                });
-            },
-        },
     ];
+    // {
+    //     key: 'comments',
+    //     label: 'field.comments',
+    //     render: (h, props) => {
+    //         return h(TaskComments, {
+    //             props: { task: props.values },
+    //         });
+    //     },
+    // },
 
     const fieldsToFill = [
         {
