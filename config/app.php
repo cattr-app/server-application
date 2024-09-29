@@ -82,6 +82,7 @@ return [
 
         App\Providers\SettingsServiceProvider::class,
         App\Providers\ScreenshotsServiceProvider::class,
+        App\Providers\AttachmentServiceProvider::class,
     ],
 
     'aliases' => Facade::defaultAliases()->merge([
