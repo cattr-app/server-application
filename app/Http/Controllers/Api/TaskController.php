@@ -5,6 +5,7 @@ namespace App\Http\Controllers\Api;
 use App\Enums\TaskRelationType;
 use App\Exceptions\Entities\TaskRelationException;
 use App\Http\Middleware\RegisterModulesEvents;
+use App\Http\Requests\Task\CalendarRequest;
 use App\Http\Requests\Task\CreateRelationRequest;
 use App\Http\Requests\Task\CreateTaskRequest;
 use App\Http\Requests\Task\DestroyTaskRequest;
@@ -19,9 +20,12 @@ use Exception;
 use Filter;
 use App\Models\Task;
 use App\Models\User;
+use Carbon\Carbon;
+use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
 use Illuminate\Http\JsonResponse;
 use CatEvent;
+use DB;
 use Settings;
 use Throwable;
 
@@ -594,5 +598,70 @@ class TaskController extends ItemController
         RegisterModulesEvents::broadcastEvent('tasks', 'edit', Task::find($requestData['child_id']));
 
         return responder()->success()->respond(204);
+    }
+
+    public function calendar(CalendarRequest $request): JsonResponse
+    {
+        $requestData = $request->validated();
+
+        $startAt = Carbon::parse($requestData['start_at'])->startOfWeek();
+        $endAt = Carbon::parse($requestData['end_at'])->endOfWeek();
+
+        /** @var \Illuminate\Support\Collection<int, Task> $tasks */
+        $tasks = Task::query()
+            ->select(
+                'id',
+                'task_name',
+                'start_date',
+                DB::raw('(start_date + INTERVAL COALESCE(TIMESTAMPDIFF(DAY, start_date, due_date), 0) DAY) AS end_date'),
+            )
+            ->whereNotNull('start_date')
+            ->where(static fn(Builder $query) => $query
+                ->whereBetween('start_date', [$startAt, $endAt])
+                ->orWhereBetween('due_date', [$startAt, $endAt])
+                ->orWhereBetween(DB::raw($startAt->format('"Y-m-d"')), [DB::raw('start_date'), DB::raw('due_date')])
+                ->orWhereBetween(DB::raw($endAt->format('"Y-m-d"')), [DB::raw('start_date'), DB::raw('due_date')]))
+            ->orderBy('start_date')
+            ->get()
+            ->keyBy('id');
+
+        $tasksByDay = [];
+        $tasksByWeek = [];
+
+        $period = CarbonPeriod::create($startAt, '1 day', $endAt);
+        foreach ($period as $date) {
+            $day = $date->format('Y-m-d');
+            $tasksByDay[$day] = [];
+
+            $week = $date->startOfWeek()->format('Y-m-d');
+            $tasksByWeek[$week] = [];
+        }
+
+        foreach ($tasks as $task) {
+            $task->mergeCasts([
+                'start_date' => 'date:Y-m-d',
+                'end_date' => 'date:Y-m-d',
+            ]);
+
+            $startDate = $task->start_date->greaterThan($startAt) ? $task->start_date : $startAt;
+            $endDate = $task->end_date->lessThan($endAt) ? $task->end_date : $endAt;
+
+            $period = new CarbonPeriod($startDate, '1 day', $endDate);
+            foreach ($period as $date)
+                $tasksByDay[$date->format('Y-m-d')][] = $task->id;
+
+            $period = new CarbonPeriod($startDate->startOfWeek(), '7 days', $endDate);
+            foreach ($period as $date) {
+                $key = $date->format('Y-m-d');
+                if (!in_array($task->id, $tasksByWeek[$key]))
+                    $tasksByWeek[$key][] = $task->id;
+            }
+        }
+
+        return responder()->success([
+            'tasks' => $tasks,
+            'tasks_by_day' => $tasksByDay,
+            'tasks_by_week' => $tasksByWeek,
+        ])->respond();
     }
 }
