@@ -609,11 +609,12 @@ class TaskController extends ItemController
         $startAt = Carbon::parse($requestData['start_at'])->startOfWeek();
         $endAt = Carbon::parse($requestData['end_at'])->endOfWeek();
 
-        /** @var \Illuminate\Support\Collection<int, Task> $tasks */
-        $tasks = Task::query()
+        /** @var Builder $query */
+        $query = Task::query()
             ->select(
                 'id',
                 'task_name',
+                'project_id',
                 DB::raw('COALESCE(start_date, due_date) AS start_date'),
                 DB::raw('COALESCE(due_date, start_date) AS due_date'),
             )
@@ -623,11 +624,19 @@ class TaskController extends ItemController
             ->where(static fn(Builder $query) => $query
                 ->whereBetween('start_date', [$startAt, $endAt])
                 ->orWhereBetween('due_date', [$startAt, $endAt])
-                ->orWhereBetween(DB::raw($startAt->format('"' . static::ISO8601_DATE_FORMAT . '"')), [DB::raw('start_date'), DB::raw('due_date')])
-                ->orWhereBetween(DB::raw($endAt->format('"' . static::ISO8601_DATE_FORMAT . '"')), [DB::raw('start_date'), DB::raw('due_date')]))
-            ->orderBy('start_date')
-            ->get()
-            ->keyBy('id');
+                ->orWhereBetween(DB::raw(DB::escape($startAt->format(static::ISO8601_DATE_FORMAT))), [DB::raw('start_date'), DB::raw('due_date')])
+                ->orWhereBetween(DB::raw(DB::escape($endAt->format(static::ISO8601_DATE_FORMAT))), [DB::raw('start_date'), DB::raw('due_date')]))
+            ->orderBy('start_date');
+
+        if (isset($requestData['project_id'])) {
+            if (is_array($requestData['project_id']))
+                $query->whereIn('project_id', array_values($requestData['project_id']));
+            else
+                $query->where('project_id', (int)$requestData['project_id']);
+        }
+
+        /** @var \Illuminate\Support\Collection<int, Task> $tasks */
+        $tasks = $query->get()->keyBy('id');
 
         $tasksByDay = [];
         $tasksByWeek = [];

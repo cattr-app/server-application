@@ -2,7 +2,6 @@
 
 namespace App\Http\Requests\Task;
 
-use App\Helpers\QueryHelper;
 use App\Http\Requests\AuthorizesAfterValidation;
 use App\Http\Requests\CattrFormRequest;
 use Illuminate\Validation\Rule;
@@ -18,9 +17,11 @@ class CalendarRequest extends CattrFormRequest
 
     public function _rules(): array
     {
-        return array_merge(QueryHelper::getValidationRules(), [
-            'start_at' => ['required', 'date', Rule::when($this->input('due_date'), 'before_or_equal:end_at')],
-            'end_at' => ['required', 'date', Rule::when($this->input('start_date'), 'after_or_equal:start_at')],
-        ]);
+        return [
+            'project_id' => ['sometimes', Rule::when(!is_array($this->input('project_id')), 'nullable|integer|exists:projects,id')],
+            'project_id.*' => [Rule::when(is_array($this->input('project_id')), 'integer|exists:projects,id')],
+            'start_at' => 'required|date|before_or_equal:end_at',
+            'end_at' => 'required|date|after_or_equal:start_at',
+        ];
     }
 }
