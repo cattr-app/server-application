@@ -658,16 +658,12 @@ class TaskController extends ItemController
                 $tasksByDay[$date->format(static::ISO8601_DATE_FORMAT)]['task_ids'][] = $task->id;
 
             $period = new CarbonPeriod($startDate->startOfWeek(), '7 days', $endDate);
-            foreach ($period as $date) {
-                $key = $date->format(static::ISO8601_DATE_FORMAT);
-                if (!in_array($task->id, $tasksByWeek[$key])) {
-                    $tasksByWeek[$key]['tasks'][] = [
-                        'task_id' => $task->id,
-                        'start_week_day' => $task->start_date->greaterThan($date) ? $task->start_date->diffInDays($date) : 0,
-                        'end_week_day' => $task->due_date->lessThan($date) ? $task->due_date->diffInDays($date) : 6,
-                    ];
-                }
-            }
+            foreach ($period as $date)
+                $tasksByWeek[$date->format(static::ISO8601_DATE_FORMAT)]['tasks'][] = [
+                    'task_id' => $task->id,
+                    'start_week_day' => $task->start_date->greaterThan($date) ? $task->start_date->diffInDays($date) : 0,
+                    'end_week_day' => $task->due_date->lessThan($date) ? $task->due_date->diffInDays($date) : 6,
+                ];
         }
 
         return responder()->success([
