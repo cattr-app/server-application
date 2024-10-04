@@ -600,6 +600,8 @@ class TaskController extends ItemController
         return responder()->success()->respond(204);
     }
 
+    protected const ISO8601_DATE_FORMAT = 'Y-m-d';
+
     public function calendar(CalendarRequest $request): JsonResponse
     {
         $requestData = $request->validated();
@@ -612,15 +614,17 @@ class TaskController extends ItemController
             ->select(
                 'id',
                 'task_name',
-                'start_date',
-                DB::raw('(start_date + INTERVAL COALESCE(TIMESTAMPDIFF(DAY, start_date, due_date), 0) DAY) AS end_date'),
+                DB::raw('COALESCE(start_date, due_date) AS start_date'),
+                DB::raw('COALESCE(due_date, start_date) AS due_date'),
             )
-            ->whereNotNull('start_date')
+            ->where(static fn(Builder $query) => $query
+                ->whereNotNull('start_date')
+                ->orWhereNotNull('due_date'))
             ->where(static fn(Builder $query) => $query
                 ->whereBetween('start_date', [$startAt, $endAt])
                 ->orWhereBetween('due_date', [$startAt, $endAt])
-                ->orWhereBetween(DB::raw($startAt->format('"Y-m-d"')), [DB::raw('start_date'), DB::raw('due_date')])
-                ->orWhereBetween(DB::raw($endAt->format('"Y-m-d"')), [DB::raw('start_date'), DB::raw('due_date')]))
+                ->orWhereBetween(DB::raw($startAt->format('"' . static::ISO8601_DATE_FORMAT . '"')), [DB::raw('start_date'), DB::raw('due_date')])
+                ->orWhereBetween(DB::raw($endAt->format('"' . static::ISO8601_DATE_FORMAT . '"')), [DB::raw('start_date'), DB::raw('due_date')]))
             ->orderBy('start_date')
             ->get()
             ->keyBy('id');
@@ -629,32 +633,40 @@ class TaskController extends ItemController
         $tasksByWeek = [];
 
         $period = CarbonPeriod::create($startAt, '1 day', $endAt);
-        foreach ($period as $date) {
-            $day = $date->format('Y-m-d');
-            $tasksByDay[$day] = [];
+        foreach ($period as $date)
+            $tasksByDay[$date->format(static::ISO8601_DATE_FORMAT)] = [
+                'month' => (int)$date->format('m'),
+                'day' => (int)$date->format('d'),
+                'task_ids' => [],
+            ];
 
-            $week = $date->startOfWeek()->format('Y-m-d');
-            $tasksByWeek[$week] = [];
-        }
+        $period = CarbonPeriod::create($startAt, '7 days', $endAt);
+        foreach ($period as $date)
+            $tasksByWeek[$date->format(static::ISO8601_DATE_FORMAT)] = ['tasks' => []];
 
         foreach ($tasks as $task) {
             $task->mergeCasts([
-                'start_date' => 'date:Y-m-d',
-                'end_date' => 'date:Y-m-d',
+                'start_date' => 'date:' . static::ISO8601_DATE_FORMAT,
+                'due_date' => 'date:' . static::ISO8601_DATE_FORMAT,
             ]);
 
             $startDate = $task->start_date->greaterThan($startAt) ? $task->start_date : $startAt;
-            $endDate = $task->end_date->lessThan($endAt) ? $task->end_date : $endAt;
+            $endDate = $task->due_date->lessThan($endAt) ? $task->due_date : $endAt;
 
             $period = new CarbonPeriod($startDate, '1 day', $endDate);
             foreach ($period as $date)
-                $tasksByDay[$date->format('Y-m-d')][] = $task->id;
+                $tasksByDay[$date->format(static::ISO8601_DATE_FORMAT)]['task_ids'][] = $task->id;
 
             $period = new CarbonPeriod($startDate->startOfWeek(), '7 days', $endDate);
             foreach ($period as $date) {
-                $key = $date->format('Y-m-d');
-                if (!in_array($task->id, $tasksByWeek[$key]))
-                    $tasksByWeek[$key][] = $task->id;
+                $key = $date->format(static::ISO8601_DATE_FORMAT);
+                if (!in_array($task->id, $tasksByWeek[$key])) {
+                    $tasksByWeek[$key]['tasks'][] = [
+                        'task_id' => $task->id,
+                        'start_week_day' => $task->start_date->greaterThan($date) ? $task->start_date->diffInDays($date) : 0,
+                        'end_week_day' => $task->due_date->lessThan($date) ? $task->due_date->diffInDays($date) : 6,
+                    ];
+                }
             }
         }
 
