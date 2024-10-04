@@ -602,6 +602,72 @@ class TaskController extends ItemController
 
     protected const ISO8601_DATE_FORMAT = 'Y-m-d';
 
+    /**
+     * @param CalendarRequest $request
+     * @return JsonResponse
+     *
+     * @throws Throwable
+     * @api             {get} /tasks/calendar Calendar
+     * @apiDescription  Get calendar report data
+     *
+     * @apiVersion      4.0.0
+     * @apiName         Calendar
+     * @apiGroup        Task
+     *
+     * @apiUse          AuthHeader
+     *
+     * @apiParam {Integer|Integer[]} project_id Filter by project ids
+     * @apiParam {ISO8601}           start_at   Start date
+     * @apiParam {ISO8601}           end_at     End date
+     *
+     * @apiParamExample {json} Request Example
+     *  {
+     *    "project_id": 1,
+     *    "start_at": "2024-10-01",
+     *    "end_at": "2024-10-31"
+     *  }
+     *
+     * @apiSuccessExample {json} Response Example
+     *  HTTP/1.1 200 OK
+     *  {
+     *    "status": 200,
+     *    "success": true,
+     *    "data": {
+     *      "tasks": {
+     *        "1": {
+     *          "id": 1,
+     *          "task_name": "Eveniet non laudantium pariatur quia.",
+     *          "project_id": 1,
+     *          "start_date": "2024-10-03",
+     *          "due_date": "2024-10-03"
+     *        }
+     *      },
+     *      "tasks_by_day": {
+     *        "2024-10-03": {
+     *          "month": 10,
+     *          "day": 3,
+     *          "task_ids": [1]
+     *        }
+     *      },
+     *      "tasks_by_week": {
+     *        "2024-09-30": {
+     *          "tasks": [
+     *            {
+     *              "task_id": 1,
+     *              "start_week_day": 3,
+     *              "end_week_day": 3
+     *            }
+     *          ]
+     *        }
+     *      }
+     *    }
+     *  }
+     *
+     * @apiUse         400Error
+     * @apiUse         ValidationError
+     * @apiUse         UnauthorizedError
+     * @apiUse         ForbiddenError
+     */
     public function calendar(CalendarRequest $request): JsonResponse
     {
         $requestData = $request->validated();
