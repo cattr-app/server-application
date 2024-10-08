@@ -651,6 +651,7 @@ class TaskController extends ItemController
      *      },
      *      "tasks_by_week": {
      *        "2024-09-30": {
+     *          "days": [30, 1, 2, 3, 4, 5, 6],
      *          "tasks": [
      *            {
      *              "task_id": 1,
@@ -716,8 +717,17 @@ class TaskController extends ItemController
             ];
 
         $period = CarbonPeriod::create($startAt, '7 days', $endAt);
-        foreach ($period as $date)
-            $tasksByWeek[$date->format(static::ISO8601_DATE_FORMAT)] = ['tasks' => []];
+        foreach ($period as $date) {
+            $week = $date->format(static::ISO8601_DATE_FORMAT);
+            $tasksByWeek[$week] = [
+                'days' => [],
+                'tasks' => [],
+            ];
+
+            $weekPeriod = CarbonPeriod::create($date, '1 day', $date->clone()->addDays(7))->excludeEndDate();
+            foreach ($weekPeriod as $date)
+                $tasksByWeek[$week]['days'][] = (int)$date->format('d');
+        }
 
         foreach ($tasks as $task) {
             $task->mergeCasts([
@@ -733,12 +743,13 @@ class TaskController extends ItemController
                 $tasksByDay[$date->format(static::ISO8601_DATE_FORMAT)]['task_ids'][] = $task->id;
 
             $period = new CarbonPeriod($startDate->startOfWeek(), '7 days', $endDate);
-            foreach ($period as $date)
+            foreach ($period as $date) {
                 $tasksByWeek[$date->format(static::ISO8601_DATE_FORMAT)]['tasks'][] = [
                     'task_id' => $task->id,
                     'start_week_day' => $task->start_date->greaterThan($date) ? $task->start_date->diffInDays($date) : 0,
-                    'end_week_day' => $task->due_date->lessThan($date) ? $task->due_date->diffInDays($date) : 6,
+                    'end_week_day' => $task->due_date->lessThan($date->clone()->addDays(7)) ? $task->due_date->diffInDays($date) : 6,
                 ];
+            }
         }
 
         return responder()->success([
