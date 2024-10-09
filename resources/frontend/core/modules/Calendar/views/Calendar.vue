@@ -110,14 +110,16 @@
 
                         group.rect(`100%`, cellHeight).move(0, verticalOffset).fill('#fafafa').stroke('#F4F4FF');
 
-                        const rect = group
+                        const link = group.link(`/tasks/view/${task_id}`);
+                        link.target('_blank');
+
+                        const rect = link
                             .rect(`${width}%`, cellHeight)
                             .move(`${horizontalOffset}%`, verticalOffset)
                             .fill('#fff')
                             .stroke('#F4F4FF');
 
-                        group
-                            .text(add => add.tspan(this.tasks[task_id].task_name).dmove(8, 0))
+                        link.text(add => add.tspan(this.tasks[task_id].task_name).dmove(8, 0))
                             .font({ anchor: 'start', size: 16 })
                             .amove(`${horizontalOffset}%`, verticalOffset + cellHeight / 2)
                             .fill('rgb(63, 83, 110)')
