@@ -53,7 +53,10 @@
                     Object.keys(this.tasksByWeek).length +
                     Object.values(this.tasksByWeek).reduce((acc, item) => acc + item.tasks.length, 0);
 
-                this.svg.viewbox(0, 0, container.clientWidth, rows * cellHeight);
+                const width = Math.min(1200, container.clientWidth);
+                const height = rows * cellHeight;
+
+                this.svg.viewbox(0, 0, width, height);
             },
             draw() {
                 this.svg.clear();
@@ -113,15 +116,18 @@
                         const link = group.link(`/tasks/view/${task_id}`);
                         link.target('_blank');
 
+                        const taskHorizontalPadding = 0.25;
+                        const taskVerticaladding = 2;
+
                         const rect = link
-                            .rect(`${width}%`, cellHeight)
-                            .move(`${horizontalOffset}%`, verticalOffset)
+                            .rect(`${width - 2 * taskHorizontalPadding}%`, cellHeight - 2 * taskVerticaladding)
+                            .move(`${horizontalOffset + taskHorizontalPadding}%`, verticalOffset + taskVerticaladding)
                             .fill('#fff')
                             .stroke('#F4F4FF');
 
                         link.text(add => add.tspan(this.tasks[task_id].task_name).dmove(8, 0))
                             .font({ anchor: 'start', size: 16 })
-                            .amove(`${horizontalOffset}%`, verticalOffset + cellHeight / 2)
+                            .amove(`${horizontalOffset + taskHorizontalPadding}%`, verticalOffset + cellHeight / 2)
                             .fill('rgb(63, 83, 110)')
                             .clipWith(rect.clone());
 
@@ -148,6 +154,8 @@
 
             width: 100%;
             height: 100%;
+
+            max-width: 1200px;
         }
 
         &::v-deep text {
