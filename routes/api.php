@@ -279,8 +279,6 @@ Route::group([
         // Attachments routes
         $router->post('attachment', [AttachmentController::class, 'create'])
             ->name('attachment.create');
-        $router->get('attachment/{attachment}', [AttachmentController::class, 'download'])
-            ->whereUuid('attachment')->name('attachment.download');
         $router->withoutMiddleware('auth:sanctum')->middleware('signed')
             ->get('tmp-attachment-link/{attachment}', [AttachmentController::class, 'tmpDownload'])
             ->whereUuid('attachment')->name('attachment.temporary-download');

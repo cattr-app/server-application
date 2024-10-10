@@ -7,6 +7,7 @@ use App\Enums\AttachmentStatus;
 use App\Http\Requests\Attachment\CreateAttachmentRequest;
 use App\Http\Requests\Attachment\DownloadAttachmentRequest;
 use App\Models\Attachment;
+use Filter;
 use Illuminate\Http\JsonResponse;
 use Illuminate\Http\Request;
 use Symfony\Component\HttpFoundation\StreamedResponse;
@@ -29,12 +30,11 @@ class AttachmentController extends ItemController
      */
     public function create(CreateAttachmentRequest $request): JsonResponse
     {
+        Filter::listen(Filter::getActionFilterName(), static function (Attachment $attachment) {
+            $attachment->load('user');
+            return $attachment;
+        });
         return $this->_create($request);
-    }
-
-    public function download(DownloadAttachmentRequest $request, Attachment $attachment): StreamedResponse
-    {
-        return $this->streamDownloadLogic($attachment);
     }
 
     public function tmpDownload(Request $request, Attachment $attachment): ?StreamedResponse
@@ -50,7 +50,7 @@ class AttachmentController extends ItemController
     {
         return URL::temporarySignedRoute(
             'attachment.temporary-download',
-            now()->addSeconds($request->validated('seconds') ?? 60),
+            now()->addSeconds($request->validated('seconds') ?? 3600),
             $attachment
         );
     }

@@ -71,7 +71,22 @@
     "due_date": "Due date",
     "hour_short": "h",
     "minute_short": "m",
-    "phase": "Phase"
+    "phase": "Phase",
+    "attachments": "Attachments"
+  },
+  "attachments": {
+    "status": "Status",
+    "name": "Name",
+    "size": "Size",
+    "upload": "Upload",
+    "is_good": "Hash match",
+    "is_bad": "Hash do not match",
+    "is_not_attached": "Not attached",
+    "is_processing": "Calculating hash",
+    "upload_queue": "Upload queue",
+    "create_tmp_url_for": "Create temporary url for:",
+    "tmp_url_created":  "Temporary url created",
+    "copied_to_clipboard": "Copied to clipboard"
   },
   "control": {
     "kanban-board": "Kanban"

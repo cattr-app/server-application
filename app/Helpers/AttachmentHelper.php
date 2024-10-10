@@ -31,7 +31,7 @@ class AttachmentHelper
     public static function getFileName(UploadedFile $file): string
     {
         $fileName = $file->getClientOriginalName();
-        $extension = ".{$file->extension()}";
+        $extension = ".{$file->clientExtension()}";
         $maxNameLength = (self::MAX_FILE_NAME_LENGTH - Str::length($extension));
         if (Str::length($fileName) > $maxNameLength || Str::endsWith($fileName, $extension) === false){
             $fileName = Str::substr($fileName, 0, $maxNameLength) . $extension;

@@ -26,7 +26,14 @@ class AttachmentFilter
             'sometimes',
             'required',
             'uuid',
-            Rule::exists(Attachment::class, 'id')->where('status', AttachmentStatus::NOT_ATTACHED->value)
+            Rule::exists(Attachment::class, 'id')
+        ];
+        $rules['attachmentsToRemove'] = 'sometimes|required|array';
+        $rules['attachmentsToRemove.*'] = [
+            'sometimes',
+            'required',
+            'uuid',
+            Rule::exists(Attachment::class, 'id')
         ];
 
         return $rules;
@@ -42,7 +49,7 @@ class AttachmentFilter
         $request['status'] = AttachmentStatus::NOT_ATTACHED;
         $request['original_name'] = AttachmentHelper::getFileName($file);
         $request['mime_type'] = $file->getMimeType();
-        $request['extension'] = $file->extension();
+        $request['extension'] = $file->clientExtension();
         $request['size'] = $file->getSize();
 
         return $request;

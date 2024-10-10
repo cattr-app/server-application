@@ -11,9 +11,7 @@ class DownloadAttachmentRequest extends CattrFormRequest
 
     public function authorizeValidated(): bool
     {
-//      TODO: write following rules
-//        [ ] when user can view Attachment`s parent
-        return true;
+        return $this->user()->can('view', request('attachment')->project);
     }
 
     public function _rules(): array

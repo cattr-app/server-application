@@ -71,7 +71,22 @@
     "due_date": "Дата завершения",
     "hour_short": "ч",
     "minute_short": "м",
-    "phase": "Стадия"
+    "phase": "Стадия",
+    "attachments": "Вложения"
+  },
+  "attachments": {
+    "status": "Статус",
+    "name": "Имя",
+    "size": "Размер",
+    "upload": "Загрузить",
+    "is_good": "Хэш совпадает",
+    "is_bad": "Хэш не совпадает",
+    "is_not_attached": "Не прикреплен",
+    "is_processing": "Вычисляется хэш",
+    "upload_queue": "Очередь загрузки",
+    "create_tmp_url_for": "Создать временную ссылку на:",
+    "tmp_url_created":  "Временная ссылка создана",
+    "copied_to_clipboard": "Скопирована в буфер обмена"
   },
   "control": {
     "kanban-board": "Kanban"

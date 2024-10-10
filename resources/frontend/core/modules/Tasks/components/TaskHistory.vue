@@ -73,6 +73,9 @@
                     {{ user.full_name }}
                 </div>
             </div>
+            <div class="attachments-wrapper">
+                <Attachments :attachments="attachments" @change="handleAttachmentsChangeOnCreate" />
+            </div>
             <at-button class="comment-button" type="primary" @click.prevent="createComment(task.id)">
                 {{ $t('tasks.activity.add_comment') }}
             </at-button>
@@ -118,7 +121,7 @@
                                     circle
                                     type="warning"
                                     hollow
-                                    @click="item.id === idComment ? cancelChangeComment() : changeComment(item)"
+                                    @click="item.id === idComment ? cancelChangeComment : changeComment(item)"
                                 ></at-button>
                                 <at-button
                                     icon="icon icon-trash-2"
@@ -139,6 +142,9 @@
                             autosize
                             resize="none"
                         />
+                        <div class="attachments-wrapper">
+                            <Attachments :attachments="changeAttachments" @change="handleAttachmentsChangeOnEdit" />
+                        </div>
                         <div class="comment-buttons">
                             <at-button class="comment-button" type="primary" @click.prevent="editComment(item)">
                                 {{ $t('tasks.save_comment') }}
@@ -166,6 +172,12 @@
                                 <span v-else-if="content.type === 'username'" class="username">{{ content.text }}</span>
                             </div>
                         </template>
+                        <div class="attachments-wrapper">
+                            <Attachments
+                                :attachments="item.id === idComment ? changeAttachments : item.attachments_relation"
+                                :show-controls="false"
+                            />
+                        </div>
                     </div>
                     <span v-if="item.updated_at !== item.created_at" class="comment-date">
                         {{ $t('tasks.edited') }} {{ fromNow(item.updated_at) }}
@@ -193,9 +205,11 @@
     import i18n from '@/i18n';
     import moment from 'moment-timezone';
     import { store as rootStore } from '@/store';
+    import Attachments from './Attachments.vue';
 
     export default {
         components: {
+            Attachments,
             TeamAvatars,
             VueMarkdown,
             CodeDiff,
@@ -230,7 +244,6 @@
                 priorities: [],
                 projects: [],
                 userService: new UsersService(),
-                commentMessage: '',
                 users: [],
                 userFilter: '',
                 userNameStart: 0,
@@ -241,8 +254,6 @@
                 scrollTop: 0,
                 commentMessageScrollTop: 0,
                 user: null,
-                idComment: null,
-                changeMessageText: null,
                 sort: 'desc',
                 typeActivity: 'all',
                 activities: [],
@@ -250,6 +261,11 @@
                 canLoad: true,
                 isLoading: false,
                 observer: null,
+                commentMessage: '',
+                attachments: [],
+                idComment: null,
+                changeMessageText: null,
+                changeAttachments: [],
                 isModalOpen: false,
                 mainPreview: false,
                 editPreview: false,
@@ -297,8 +313,11 @@
                     if (data.model.task_id !== this.task.id) {
                         return;
                     }
-                    const comment = this.activities.find(el => el.id === data.model.id);
-                    comment ? (comment.content = data.model.content) : null;
+                    const comment = this.activities.find(el => el.id === data.model.id && el.content);
+                    if (comment) {
+                        comment.content = data.model.content;
+                        comment.attachments_relation = data.model.attachments_relation;
+                    }
                 },
             });
         },
@@ -507,11 +526,28 @@
 
                 return '';
             },
+            handleAttachmentsChangeOnCreate(attachments) {
+                this.attachments = attachments;
+            },
+            handleAttachmentsChangeOnEdit(attachments) {
+                this.changeAttachments = attachments;
+            },
             async createComment(id) {
-                const comment = await this.taskActivityService.saveComment({
+                // mitigate validation issues for empty array
+                const payload = {
                     task_id: id,
                     content: this.commentMessage,
-                });
+                    attachmentsRelation: this.attachments.filter(el => !el.toDelete).map(el => el.id),
+                    attachmentsToRemove: this.attachments.filter(el => el.toDelete).map(el => el.id),
+                };
+                if (payload.attachmentsRelation.length === 0) {
+                    delete payload.attachmentsRelation;
+                }
+                if (payload.attachmentsToRemove.length === 0) {
+                    delete payload.attachmentsToRemove;
+                }
+                const comment = await this.taskActivityService.saveComment(payload);
+                this.attachments = [];
                 this.commentMessage = '';
             },
             commentMessageChange(value) {
@@ -596,6 +632,7 @@
                 });
             },
             changeComment(item) {
+                this.changeAttachments = JSON.parse(JSON.stringify(item.attachments_relation));
                 this.idComment = item.id;
                 this.changeMessageText = item.content;
                 this.editPreview = false;
@@ -620,16 +657,30 @@
                 });
             },
             cancelChangeComment() {
+                this.changeAttachments = [];
                 this.idComment = null;
                 this.editPreview = false;
             },
             async editComment(item) {
-                const newComment = { ...item, content: this.changeMessageText };
+                // mitigate validation issues for empty array
+                const newComment = {
+                    ...item,
+                    content: this.changeMessageText,
+                    attachmentsRelation: this.changeAttachments.filter(el => !el.toDelete).map(el => el.id),
+                    attachmentsToRemove: this.changeAttachments.filter(el => el.toDelete).map(el => el.id),
+                };
+                if (newComment.attachmentsRelation.length === 0) {
+                    delete newComment.attachmentsRelation;
+                }
+                if (newComment.attachmentsToRemove.length === 0) {
+                    delete newComment.attachmentsToRemove;
+                }
                 const result = await this.taskActivityService.editComment(newComment);
-                item.content = this.changeMessageText;
+                item.content = result.data.data.content;
                 item.updated_at = result.data.data.updated_at;
                 this.changeMessageText = '';
                 this.idComment = null;
+                this.changeAttachments = [];
             },
             async deleteComment(item) {
                 if (this.modalIsOpen) {
@@ -692,6 +743,9 @@
     .sort-wrapper {
         display: flex;
         justify-content: end;
+    }
+    .attachments-wrapper {
+        margin-top: 0.5rem;
     }
     .content {
         position: relative;

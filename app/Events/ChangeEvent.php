@@ -30,10 +30,9 @@ class ChangeEvent implements ShouldBroadcast, ShouldDispatchAfterCommit
     public function __construct(
         protected string $entityType,
         protected string $action,
-        protected        $model,
+        protected $model,
         protected int    $userId
-    )
-    {
+    ) {
     }
 
     public function broadcastAs(): string
@@ -90,13 +89,20 @@ class ChangeEvent implements ShouldBroadcast, ShouldDispatchAfterCommit
                     'children',
                     'phase:id,name',
                     'workers',
-                    'workers.user:id,full_name'
+                    'workers.user:id,full_name',
+                    'attachmentsRelation',
+                    'attachmentsRelation.user:id,full_name',
                 ])
                 ->append(['can'])
                 ->loadSum('workers as total_spent_time', 'duration')
                 ->loadSum('workers as total_offset', 'offset')
                 ->makeVisible('can'),
-            $this->model instanceof TaskComment => $this->model->load('user'),
+            $this->model instanceof TaskComment => $this->model
+                ->load(
+                    'user',
+                    'attachmentsRelation',
+                    'attachmentsRelation.user:id,full_name'
+                ),
             $this->model instanceof Project => $this->model->setPermissionsUser(User::query()->find($this->userId))
                 ->load([
                     'users',

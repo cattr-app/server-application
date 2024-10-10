@@ -37,7 +37,7 @@ class FindSusFiles extends Command
 
         $this->withProgressBar(
             Storage::disk('attachments')->allFiles('projects'),
-            function ($filePath) use($service) {
+            function ($filePath) use ($service) {
                 $fileName = Str::of($filePath)->basename()->toString();
 
                 if (Attachment::whereId($fileName)->exists() === false) {
@@ -47,6 +47,7 @@ class FindSusFiles extends Command
                         'hash' => $service->getHashSum($filePath),
                     ]);
                 }
-            });
+            }
+        );
     }
 }

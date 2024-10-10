@@ -48,7 +48,7 @@ class TaskComment extends Model implements AttachmentAble
     use SoftDeletes;
     use HasAttachments;
 
-    public const TYPE = 'task_comment';
+    public const TYPE = 'task_comments';
     /**
      * table name from database
      * @var string

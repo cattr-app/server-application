@@ -7,6 +7,7 @@ use App\Contracts\AttachmentService;
 use App\Helpers\AttachmentHelper;
 use App\Models\Attachment;
 use App\Models\Project;
+use App\Models\Task;
 
 class AttachmentObserver
 {
@@ -19,13 +20,21 @@ class AttachmentObserver
         if (isset($requestData['attachmentsRelation']) && count($requestData['attachmentsRelation']) > 0) {
             $this->service->attach($parent, $requestData['attachmentsRelation']);
         }
+        if (isset($requestData['attachmentsToRemove']) && count($requestData['attachmentsToRemove']) > 0) {
+            $this->service->deleteAttachments($requestData['attachmentsToRemove']);
+        }
     }
 
     public function parentUpdated(AttachmentAble $parent, $requestData): void
     {
-//      TODO: [ ] if task moves to another project we should create new task and copy main files
+        if ($parent instanceof Task && isset($parent->getChanges()['project_id'])) {
+            $this->service->handleProjectChange($parent);
+        }
         if (isset($requestData['attachmentsRelation']) && count($requestData['attachmentsRelation']) > 0) {
             $this->service->attach($parent, $requestData['attachmentsRelation']);
+        }
+        if (isset($requestData['attachmentsToRemove']) && count($requestData['attachmentsToRemove']) > 0) {
+            $this->service->deleteAttachments($requestData['attachmentsToRemove']);
         }
     }
 

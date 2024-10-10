@@ -46,6 +46,10 @@ class TaskActivityController extends ItemController
 
     private function getCollectionFromModel(array $requestData, string $model): LengthAwarePaginator
     {
+        if ($model === TaskComment::class) {
+            $requestData['with'][] = 'attachmentsRelation';
+            $requestData['with'][] = 'attachmentsRelation.user:id,full_name';
+        }
 
         $itemsQuery = $this->getQueryBuilder($requestData, $model);
 
@@ -90,7 +94,7 @@ class TaskActivityController extends ItemController
             $total = $taskHistory->total();
             $perPage = $taskHistory->perPage();
             $items = $taskHistory->items();
-        } elseif ($requestedActivity === ACTIVITYType::COMMENTS) {
+        } elseif ($requestedActivity === ActivityType::COMMENTS) {
             $taskComments = $this->getCollectionFromModel($requestData, TaskComment::class);
             $total = $taskComments->total();
             $perPage = $taskComments->perPage();

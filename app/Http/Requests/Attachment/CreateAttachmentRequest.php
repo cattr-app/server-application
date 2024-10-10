@@ -12,10 +12,7 @@ class CreateAttachmentRequest extends CattrFormRequest
 
     public function authorizeValidated(): bool
     {
-//      TODO: write following rules
-//        [ ] when user can create Attachments
         return true;
-//        return $this->user()->can('create', [Attachment::class, $this->get('project_id')]);
     }
 
     public function _rules(): array

@@ -4,11 +4,20 @@ namespace App\Contracts;
 
 use App\Models\Attachment;
 use App\Models\Project;
+use App\Models\Task;
 use Illuminate\Http\UploadedFile;
 
 interface AttachmentService
 {
     public function storeFile(UploadedFile $file, Attachment $attachment): string|false;
+
+    public function handleProjectChange(Task $parent): void;
+
+    public function moveAttachment(Attachment $attachment, $newProjectId): void;
+
+    public function deleteAttachment(Attachment $attachment): void;
+
+    public function deleteAttachments(array $attachmentsIds): void;
 
     public function handleParentDeletion(AttachmentAble $parent): void;
 

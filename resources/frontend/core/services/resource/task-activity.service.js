@@ -13,7 +13,6 @@ export default class TaskActivityService extends ResourceService {
     /**
      * @returns {Promise<AxiosResponse<T>>}
      * @param data
-     * @param isNew
      */
     saveComment(data) {
         return axios.post('task-comment/create', data);
@@ -22,7 +21,6 @@ export default class TaskActivityService extends ResourceService {
     /**
      * @returns {Promise<AxiosResponse<T>>}
      * @param data
-     * @param isNew
      */
     editComment(data) {
         return axios.post('task-comment/edit', data);
@@ -31,7 +29,6 @@ export default class TaskActivityService extends ResourceService {
     /**
      * @returns {Promise<AxiosResponse<T>>}
      * @param data
-     * @param isNew
      */
     getActivity(data) {
         return axios.post('tasks/activity', data);

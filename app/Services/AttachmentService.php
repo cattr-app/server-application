@@ -7,6 +7,8 @@ use App\Enums\AttachmentStatus;
 use App\Jobs\VerifyAttachmentHash;
 use App\Models\Attachment;
 use App\Models\Project;
+use App\Models\Task;
+use App\Models\TaskComment;
 use Illuminate\Filesystem\FilesystemAdapter;
 use Illuminate\Http\UploadedFile;
 use Storage;
@@ -23,28 +25,76 @@ class AttachmentService implements \App\Contracts\AttachmentService
     public function storeFile(UploadedFile $file, Attachment $attachment): string|false
     {
         return $file->storeAs(
-            $this->getPath($attachment), ['disk' => $this::DISK]
+            $this->getPath($attachment),
+            ['disk' => $this::DISK]
         );
+    }
+
+    public function handleProjectChange(Task $parent): void
+    {
+        $newProjectId = $parent->getProjectId();
+        $parent->attachmentsRelation()->lazyById()
+            ->each(fn(Attachment $attachment) => $this->moveAttachment($attachment, $newProjectId));
+
+        $parent->comments()->lazyById()
+            ->each(fn(TaskComment $comment) => $comment->attachmentsRelation()->lazyById()
+                ->each(fn(Attachment $attachment) => $this->moveAttachment($attachment, $newProjectId)));
+    }
+
+    public function moveAttachment(Attachment $attachment, $newProjectId): void
+    {
+        if ($attachment->status === AttachmentStatus::NOT_ATTACHED) {
+            return;
+        }
+        $oldPath = $this->getPath($attachment);
+        $oldProjectId = $attachment->project_id;
+        $attachment->project_id = $newProjectId;
+        $attachment->saveQuietly();
+        $newPath = $this->getPath($attachment);
+
+        $fileExists = $this->storage->exists($oldPath);
+        if (!$fileExists || !$this->storage->move($oldPath, $newPath)) {
+            $attachment->project_id = $oldProjectId;
+            $attachment->saveQuietly();
+            \Log::error("Unable to move attachment`s file", [
+                'attachment_id' => $attachment->id,
+                'attachmentable_id' => $attachment->attachmentable_id,
+                'attachmentable_type' => $attachment->attachmentable_type,
+                'attachment_project_id' => $attachment->project_id,
+                'old_attachment_project_id' => $oldProjectId,
+                'old_path' => $oldPath,
+                'new_path' => $newPath
+            ]);
+        }
+    }
+
+    public function deleteAttachment(Attachment $attachment): void
+    {
+        if (($fileExists = $this->fileExists($attachment)) && $this->deleteFile($attachment)) {
+            $attachment->deleteQuietly();
+        } elseif (!$fileExists) {
+            $attachment->deleteQuietly();
+        } else {
+            \Log::error("Unable to delete attachment`s file", [
+                'attachment_id' => $attachment->id,
+                'attachmentable_id' => $attachment->attachmentable_id,
+                'attachmentable_type' => $attachment->attachmentable_type,
+                'attachment_project_id' => $attachment->project_id,
+                'path' => $this->getPath($attachment)
+            ]);
+        }
+    }
+
+    public function deleteAttachments(array $attachmentsIds): void
+    {
+        Attachment::whereIn('id', $attachmentsIds)
+            ->each(fn (Attachment $attachment) => $this->deleteAttachment($attachment));
     }
 
     public function handleParentDeletion(AttachmentAble $parent): void
     {
-        $self = $this;
-        $parent->attachmentsRelation()->lazyById()->each(static function (Attachment $attachment) use ($self) {
-            if (($fileExists = $self->fileExists($attachment)) && $self->deleteFile($attachment)) {
-                $attachment->deleteQuietly();
-            } elseif (!$fileExists) {
-                $attachment->deleteQuietly();
-            } else {
-                \Log::warning("Unable to delete attachment`s file", [
-                    'attachment_id' => $attachment->id,
-                    'attachmentable_id' => $attachment->attachmentable_id,
-                    'attachmentable_type' => $attachment->attachmentable_type,
-                    'attachment_project_id' => $attachment->project_id,
-                    'path' => $self->getPath($attachment)
-                ]);
-            }
-        });
+        $parent->attachmentsRelation()->lazyById()
+            ->each(fn (Attachment $attachment) => $this->deleteAttachment($attachment));
     }
 
     public function handleProjectDeletion(Project $project): void
@@ -52,7 +102,7 @@ class AttachmentService implements \App\Contracts\AttachmentService
         Attachment::whereProjectId($project->id)->delete();
 
         if ($this->storage->directoryExists($this->getProjectPath($project)) && !$this->storage->deleteDirectory($this->getProjectPath($project))) {
-            \Log::warning("Unable to delete project's attachments directory", [
+            \Log::error("Unable to delete project's attachments directory", [
                 'project_id' => $project->id,
                 'path' => $this->getProjectPath($project)
             ]);
@@ -74,9 +124,12 @@ class AttachmentService implements \App\Contracts\AttachmentService
         $projectId = $parent->getProjectId();
         Attachment::whereIn('id', $idsToAttach)
             ->each(function (Attachment $attachment) use ($parent, $projectId) {
+                if ($attachment->status !== AttachmentStatus::NOT_ATTACHED) {
+                    return;
+                }
                 $tmpPath = $this->getPath($attachment);
 
-                if ($this->storage->exists($tmpPath)){
+                if ($this->storage->exists($tmpPath)) {
                     $attachment->attachmentAbleRelation()->associate($parent);
                     $attachment->status = AttachmentStatus::PROCESSING;
                     $attachment->project_id = $projectId;
@@ -97,7 +150,7 @@ class AttachmentService implements \App\Contracts\AttachmentService
 
     public function getPath(Attachment $attachment): string
     {
-        return match($attachment->status) {
+        return match ($attachment->status) {
             AttachmentStatus::NOT_ATTACHED => "users/{$attachment->user_id}/{$attachment->id}",
             AttachmentStatus::PROCESSING,
             AttachmentStatus::GOOD,
@@ -130,7 +183,8 @@ class AttachmentService implements \App\Contracts\AttachmentService
         return $this->storage->mimeType($this->callIfInstance($attachment, 'getPath'));
     }
 
-    private function callIfInstance(Attachment|string $attachment, $action) {
+    private function callIfInstance(Attachment|string $attachment, $action)
+    {
         return $attachment instanceof Attachment ? $this->{$action}($attachment) : $attachment;
     }
 
@@ -139,8 +193,7 @@ class AttachmentService implements \App\Contracts\AttachmentService
         if ($attachment->status === AttachmentStatus::PROCESSING && $hash = $this->getHashSum($attachment)) {
             $attachment->hash = $hash;
             $attachment->status = AttachmentStatus::GOOD;
-        } elseif (
-            $attachment->status === AttachmentStatus::GOOD && $attachment->hash !== $this->getHashSum($attachment)
+        } elseif ($attachment->status === AttachmentStatus::GOOD && $attachment->hash !== $this->getHashSum($attachment)
         ) {
             $attachment->status = AttachmentStatus::BAD;
         }
