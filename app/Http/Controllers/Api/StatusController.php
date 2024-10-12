@@ -190,24 +190,30 @@ class StatusController extends ItemController
     {
         CatEvent::listen(Filter::getBeforeActionEventName(), static function ($item, $requestData) {
             if (isset($requestData['order'])) {
-                $order = $requestData['order'];
-                if ($order < 1) {
-                    $order = 1;
+                $newOrder = $requestData['order'];
+                $oldOrder = $item->order;
+                if ($newOrder < 1) {
+                    $newOrder = 1;
                 }
                 $maxOrder = Status::max('order');
-                if ($order > $maxOrder) {
-                    $order = $maxOrder + 1;
+                if ($newOrder > $maxOrder) {
+                    $newOrder = $maxOrder + 1;
                 }
-                $nextItem = Status::where('order', '=', $requestData['order'])->first();
-                if (isset($nextItem)) {
-                    $itemOrder = $nextItem->order;
-                    Status::where('order', '=',  $item->order)->update(['order' => 0]);
-                    $nextItem->order = $item->order;
-                    $item->order = $itemOrder;
-                    $nextItem->save();
-                    Status::where('order', '=', 0)->update(['order' => $requestData['order']]);
+                $swapItem = Status::where('order', '=', $newOrder)->first();
+                if (isset($swapItem)) {
+                    $swapItemOrder = $swapItem->order;
+
+                    $item->order = 0;
+                    $item->save();
+
+                    $swapItem->order = $oldOrder;
+                    $swapItem->save();
+
+                    $item->order = $swapItemOrder;
+                    $item->save();
+
                 } else {
-                    $item->order = $maxOrder + 1;
+                    $item->order = $newOrder;
                 }
             }
         });
