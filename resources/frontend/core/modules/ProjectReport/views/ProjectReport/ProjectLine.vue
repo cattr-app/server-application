@@ -42,7 +42,12 @@
                                 />
                             </div>
                         </div>
-                        <at-collapse class="project__screenshots screenshots" accordion @on-change="handleCollapseDate">
+                        <at-collapse
+                            v-if="screenshotsEnabled"
+                            class="project__screenshots screenshots"
+                            accordion
+                            @on-change="handleCollapseDate"
+                        >
                             <span class="screenshots__title">{{ $t('field.screenshots') }}</span>
                             <at-collapse-item
                                 v-for="(interval, key) of task.intervals"
@@ -92,6 +97,20 @@
                                 </template>
                             </at-collapse-item>
                         </at-collapse>
+                        <div v-else>
+                            <template v-for="(interval, key) of task.intervals">
+                                <div :key="key" class="row">
+                                    <div class="col-12">
+                                        <span class="h5 screenshots__date">
+                                            {{ moment(interval.date).locale($i18n.locale).format('MMMM DD, YYYY') }}
+                                        </span>
+                                    </div>
+                                    <div class="col-12">
+                                        <span class="h5">{{ formatDurationString(interval.time) }}</span>
+                                    </div>
+                                </div>
+                            </template>
+                        </div>
                     </at-collapse-item>
                 </at-collapse>
             </at-collapse-item>
@@ -114,13 +133,11 @@
 
 <script>
     import moment from 'moment';
+    import { mapGetters } from 'vuex';
     import Screenshot from '@/components/Screenshot';
     import ScreenshotModal from '@/components/ScreenshotModal';
     import UserAvatar from '@/components/UserAvatar';
-    import IntervalService from '@/services/resource/time-interval.service';
     import { formatDurationString } from '@/utils/time';
-
-    const intervalService = new IntervalService();
 
     export default {
         name: 'ProjectLine',
@@ -144,6 +161,9 @@
                 taskDurations: {},
                 screenshotsPerRow: 6,
             };
+        },
+        computed: {
+            ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
         },
         props: {
             project: {

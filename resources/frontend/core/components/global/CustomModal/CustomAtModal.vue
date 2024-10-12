@@ -201,6 +201,7 @@
                 }
             },
             handleWrapperClick(evt) {
+                this.action = 'close';
                 if (this.maskClosable) {
                     this.doClose();
                 }

@@ -2,8 +2,10 @@
 
 namespace App\Models;
 
+use App\Contracts\AttachmentAble;
 use App\Scopes\TaskAccessScope;
 use App\Traits\ExposePermissions;
+use App\Traits\HasAttachments;
 use Database\Factories\TaskFactory;
 use Eloquent as EloquentIdeHelper;
 use Illuminate\Database\Eloquent\Builder as EloquentBuilder;
@@ -26,6 +28,7 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
  * @property int $id
  * @property int $project_id
  * @property int $project_phase_id
+ * @property string $phase
  * @property string $task_name
  * @property string|null $description
  * @property int $assigned_by
@@ -79,12 +82,15 @@ use Staudenmeir\LaravelAdjacencyList\Eloquent\HasGraphRelationships;
  * @property-read Collection|Property[] $properties
  * @property-read int|null $properties_count
  */
-class Task extends Model
+class Task extends Model implements AttachmentAble
 {
     use SoftDeletes;
     use ExposePermissions;
     use HasFactory;
     use HasGraphRelationships;
+    use HasAttachments;
+
+    public const TYPE = 'tasks';
 
     /**
      * table name from database
@@ -171,6 +177,17 @@ class Task extends Model
                 }
             });
         });
+
+        static::updated(static function (Task $task) {
+            dispatch(static function () use ($task) {
+                foreach ($task->users as $user) {
+                    $task->project->users()->firstOrCreate(
+                        ['id' => $user->id],
+                        ['role_id' => \App\Enums\Role::USER]
+                    );
+                }
+            });
+        });
     }
 
     public function timeIntervals(): HasMany
@@ -231,6 +248,12 @@ class Task extends Model
     public function phase(): BelongsTo
     {
         return $this->belongsTo(ProjectPhase::class, 'project_phase_id');
+    }
+
+    // related to attachments
+    public function getProjectId(): int
+    {
+        return $this->project_id;
     }
 
     // Below methods are related to Cattr gantt functionality and LaravelAdjacencyList package

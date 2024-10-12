@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AboutController;
+use App\Http\Controllers\Api\AttachmentController;
 use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\PriorityController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Api\StatusController as ApiStatusController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StatusController;
+use App\Http\Controllers\Api\TaskActivityController;
 use Illuminate\Routing\Router;
 
 // Routes for login/register processing
@@ -53,16 +55,16 @@ Route::group([
             ->name('auth.desktop.request');
     });
 
-        $router->withoutMiddleware('auth:sanctum')->group(static function (Router $router) {
-            $router->post('login', [AuthController::class, 'login'])
-                ->name('auth.login');
-            $router->post('password/reset/request', [PasswordResetController::class, 'request'])
-                ->name('auth.reset.request');
-            $router->post('password/reset/validate', [PasswordResetController::class, 'validate'])
-                ->name('auth.reset.validate');
-            $router->post('password/reset/process', [PasswordResetController::class, 'process'])
-                ->name('auth.reset.process');
-        });
+    $router->withoutMiddleware('auth:sanctum')->group(static function (Router $router) {
+        $router->post('login', [AuthController::class, 'login'])
+            ->name('auth.login');
+        $router->post('password/reset/request', [PasswordResetController::class, 'request'])
+            ->name('auth.reset.request');
+        $router->post('password/reset/validate', [PasswordResetController::class, 'validate'])
+            ->name('auth.reset.validate');
+        $router->post('password/reset/process', [PasswordResetController::class, 'process'])
+            ->name('auth.reset.process');
+    });
 
     $router->put('desktop-key', [AuthController::class, 'authDesktopKey'])
         ->name('auth.desktop.process');
@@ -156,6 +158,8 @@ Route::group([
             ->name('tasks.show');
         $router->post('tasks/remove', [TaskController::class, 'destroy'])
             ->name('tasks.destroy');
+        $router->post('tasks/activity', [TaskActivityController::class, 'index'])
+            ->name('task.activity');
 
         // Gantt routes
         $router->post('tasks/create-relation', [TaskController::class, 'createRelation'])
@@ -217,6 +221,17 @@ Route::group([
         $router->put('time-intervals/app', [IntervalController::class, 'trackApp'])
             ->name('intervals.app');
 
+        // Offline Sync
+        $router->get('offline-sync/download-projects-and-tasks/{user}', [TaskController::class, 'downloadProjectsAndTasks'])
+            ->where('user', '[0-9]+')
+            ->name('offline_sync.download_projects_and_tasks');
+        $router->post('offline-sync/upload-intervals', [IntervalController::class, 'uploadOfflineIntervals'])
+            ->name('offline_sync.upload_intervals');
+        $router->post('offline-sync/upload-screenshots', [IntervalController::class, 'uploadOfflineScreenshots'])
+            ->name('offline_sync.upload_screenshots');
+        $router->get('offline-sync/public-key', [CompanySettingsController::class, 'getOfflineSyncPublicKey'])
+            ->name('offline_sync.public_key');
+
         //Time routes
         $router->any('time/total', [IntervalController::class, 'total'])
             ->name('time.total');
@@ -260,13 +275,22 @@ Route::group([
             ->name('settings.list');
         $router->patch('company-settings', [CompanySettingsController::class, 'update'])
             ->name('settings.save');
+
+        // Attachments routes
+        $router->post('attachment', [AttachmentController::class, 'create'])
+            ->name('attachment.create');
+        $router->withoutMiddleware('auth:sanctum')->middleware('signed')
+            ->get('tmp-attachment-link/{attachment}', [AttachmentController::class, 'tmpDownload'])
+            ->whereUuid('attachment')->name('attachment.temporary-download');
+        $router->get('attachment/{attachment}/temporary-url', [AttachmentController::class, 'createTemporaryUrl'])
+            ->whereUuid('attachment')->name('attachment.temporary_url');
     });
 
     //Screenshots routes
     $router->get('time-intervals/{interval}/screenshot', [IntervalController::class, 'showScreenshot'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.original');
     $router->get('time-intervals/{interval}/thumb', [IntervalController::class, 'showThumbnail'])
-           ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
+        ->where('interval', '[0-9]+')->name('intervals.screenshot.thumb');
 });
 
 Route::any('(.*)', [Controller::class, 'universalRoute'])->name('universal_route');

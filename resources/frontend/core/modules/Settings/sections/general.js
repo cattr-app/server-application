@@ -3,6 +3,7 @@ import TimezonePicker from '@/components/TimezonePicker';
 import CompanyService from '../services/company.service';
 import ColorSelect from '../components/ColorSelect';
 import PrioritySelect from '@/components/PrioritySelect';
+import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
 import { store } from '@/store';
 import { hasRole } from '@/utils/user';
 
@@ -136,6 +137,26 @@ export default {
                         placeholder: 'field.auto_thin',
                     },
                     tooltipValue: 'tooltip.auto_thin',
+                },
+                {
+                    label: 'field.screenshots_state',
+                    key: 'screenshots_state',
+                    render: (h, props) => {
+                        return h(ScreenshotsStateSelect, {
+                            props: {
+                                value: store.getters['screenshots/getCompanyStateWithOverrides'](
+                                    props.values.screenshots_state,
+                                ),
+                                isDisabled: store.getters['screenshots/isCompanyStateLocked'],
+                                hideIndexes: [0],
+                            },
+                            on: {
+                                input(value) {
+                                    props.inputHandler(value);
+                                },
+                            },
+                        });
+                    },
                 },
                 {
                     label: 'field.default_priority',

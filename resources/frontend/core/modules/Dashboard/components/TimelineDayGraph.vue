@@ -34,7 +34,7 @@
             class="popup"
         >
             <Screenshot
-                v-if="clickPopup.event"
+                v-if="clickPopup.event && screenshotsEnabled"
                 :disableModal="true"
                 :lazyImage="false"
                 :project="{ id: clickPopup.event.project_id, name: clickPopup.event.project_name }"
@@ -130,6 +130,7 @@
         computed: {
             ...mapGetters('dashboard', ['tasks', 'intervals']),
             ...mapGetters('user', ['user', 'companyData']),
+            ...mapGetters('screenshots', { screenshotsEnabled: 'enabled' }),
             height() {
                 return timelineHeight + titleHeight + subtitleHeight;
             },

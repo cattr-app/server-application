@@ -28,3 +28,6 @@ Broadcast::channel('gantt.{userId}', static function (User $user, $userId) {
 Broadcast::channel('intervals.{userId}', static function (User $user, $userId) {
     return (int)$user->id === (int)$userId;
 });
+Broadcast::channel('tasks_activities.{userId}', static function (User $user, $userId) {
+    return (int)$user->id === (int)$userId;
+});

@@ -8,10 +8,11 @@ use Illuminate\Support\Facades\Facade;
 use Illuminate\Support\Testing\Fakes\EventFake;
 
 /**
+ * @template T of mixed
  * @see Dispatcher
  * @method static subscribe(object|string $subscriber)
  * @method static listen(string|array $events, mixed $listener)
- * @method static process(string $event, mixed $payload)
+ * @method static T process(string $event, T $payload)
  * @mixin Dispatcher
  */
 class FilterFacade extends Facade
