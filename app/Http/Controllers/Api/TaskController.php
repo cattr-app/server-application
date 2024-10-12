@@ -373,15 +373,16 @@ class TaskController extends ItemController
                 }
 
                 $requestData['priority_id'] = Priority::firstOrFail()->id;
-                dd($requestData);
+
                 return $requestData;
             }
         );
-        Filter::listen(Filter::getRequestFilterName(),static function ($item) {
+        Filter::listen(Filter::getRequestFilterName(), static function ($requestData) {
             $maxPosition = Task::max('relative_position');
-            $item['relative_position'] = $maxPosition + 1;
-            return $item;
-    });
+            $requestData['relative_position'] = $maxPosition + 1;
+            return $requestData;
+        });
+
         return $this->_create($request);
     }
 
