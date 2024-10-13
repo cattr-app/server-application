@@ -621,28 +621,20 @@
                                                     : true
                                             ) {
                                                 return h(
-                                                    'div',
+                                                    'AtButton',
                                                     {
-                                                        style: item.style,
-                                                    },
-                                                    [
-                                                        h(
-                                                            'AtButton',
-                                                            {
-                                                                props: {
-                                                                    type: item.actionType || 'primary', // AT-ui button display type
-                                                                    icon: item.icon || undefined, // Prepend icon to button
-                                                                },
-                                                                on: {
-                                                                    click: () => {
-                                                                        item.onClick(this.$router, params, this);
-                                                                    },
-                                                                },
-                                                                class: 'action-button',
+                                                        props: {
+                                                            type: item.actionType || 'primary', // AT-ui button display type
+                                                            icon: item.icon || undefined, // Prepend icon to button
+                                                        },
+                                                        on: {
+                                                            click: () => {
+                                                                item.onClick(this.$router, params, this);
                                                             },
-                                                            this.$t(item.title),
-                                                        ),
-                                                    ],
+                                                        },
+                                                        class: 'action-button',
+                                                    },
+                                                    this.$t(item.title),
                                                 );
                                             }
                                         }),
@@ -1039,5 +1031,12 @@
 
     .at-container ::v-deep {
         margin-bottom: $layout-01;
+    }
+</style>
+
+<style lang="scss">
+    .icon-bar-chart-2 {
+        display: inline-block;
+        transform: rotate(180deg);
     }
 </style>
