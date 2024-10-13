@@ -1,5 +1,5 @@
 <template>
-    <div ref="container" class="svg-container"></div>
+    <div ref="container"></div>
 </template>
 
 <script>
@@ -18,7 +18,6 @@
             tasksByDay: {
                 type: Array,
                 required: true,
-                default: () => [],
             },
         },
         created() {
@@ -63,11 +62,6 @@
                 let horizontalOffset = 0;
                 let verticalOffset = 0;
 
-                const showTasksModal = tasks => {
-                    // TODO: show modal
-                    console.log(tasks);
-                };
-
                 const drawHeader = () => {
                     for (const day of daysOfWeek) {
                         const rect = group
@@ -94,9 +88,9 @@
 
                     const days = this.tasksByDay;
                     for (let i = 0; i < days.length; i++) {
-                        const { day, tasks } = days[i];
+                        const { date, day, tasks } = days[i];
 
-                        const onClick = () => showTasksModal(tasks);
+                        const onClick = () => this.$emit('show-tasks-modal', { date, tasks });
 
                         const rect = group
                             .rect(`${cellWidth.toFixed(2)}%`, 2 * cellHeight)
@@ -105,7 +99,7 @@
                             .stroke('#F4F4FF')
                             .on('click', onClick);
 
-                        group
+                        const text = group
                             .text(add => add.tspan(day.toString()))
                             .font({ anchor: 'middle', size: 16 })
                             .amove(`${(horizontalOffset + cellWidth / 2).toFixed(2)}%`, verticalOffset + cellHeight / 2)
@@ -114,12 +108,15 @@
                             .on('click', onClick);
 
                         if (tasks.length > 0) {
+                            rect.attr('cursor', 'pointer');
+                            text.attr('cursor', 'pointer');
                             group
                                 .circle(10)
                                 .attr('cx', `${(horizontalOffset + cellWidth / 2).toFixed(2)}%`)
                                 .attr('cy', verticalOffset + cellHeight * 1.5)
                                 .fill('rgb(177, 177, 190)')
-                                .on('click', onClick);
+                                .on('click', onClick)
+                                .attr('cursor', 'pointer');
                         }
 
                         if (i % daysOfWeek.length === daysOfWeek.length - 1) {

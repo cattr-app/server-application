@@ -11,6 +11,7 @@
       "friday": "Fri",
       "saturday": "Sat",
       "sunday": "Sun"
-    }
+    },
+    "tasks": "Tasks {date}"
   }
 }

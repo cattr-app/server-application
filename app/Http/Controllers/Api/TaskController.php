@@ -642,15 +642,16 @@ class TaskController extends ItemController
      *          "due_date": "2024-10-03"
      *        }
      *      },
-     *      "tasks_by_day": {
-     *        "2024-10-03": {
+     *      "tasks_by_day": [
+     *        {
+     *          "date": "2024-10-03",
      *          "month": 10,
      *          "day": 3,
      *          "task_ids": [1]
      *        }
-     *      },
-     *      "tasks_by_week": {
-     *        "2024-09-30": {
+     *      ],
+     *      "tasks_by_week": [
+     *        {
      *          "days": [30, 1, 2, 3, 4, 5, 6],
      *          "tasks": [
      *            {
@@ -660,7 +661,7 @@ class TaskController extends ItemController
      *            }
      *          ]
      *        }
-     *      }
+     *      ]
      *    }
      *  }
      *
@@ -711,8 +712,9 @@ class TaskController extends ItemController
         $period = CarbonPeriod::create($startAt, '1 day', $endAt);
         foreach ($period as $date)
             $tasksByDay[$date->format(static::ISO8601_DATE_FORMAT)] = [
-                'month' => (int)$date->format('m'),
+                'date' => $date->format(static::ISO8601_DATE_FORMAT),
                 'day' => (int)$date->format('d'),
+                'month' => (int)$date->format('m'),
                 'task_ids' => [],
             ];
 
@@ -754,8 +756,8 @@ class TaskController extends ItemController
 
         return responder()->success([
             'tasks' => $tasks,
-            'tasks_by_day' => $tasksByDay,
-            'tasks_by_week' => $tasksByWeek,
+            'tasks_by_day' => array_values($tasksByDay),
+            'tasks_by_week' => array_values($tasksByWeek),
         ])->respond();
     }
 }

@@ -11,6 +11,7 @@
       "friday": "Пт.",
       "saturday": "Сб.",
       "sunday": "Вс."
-    }
+    },
+    "tasks": "Задачи {date}"
   }
 }

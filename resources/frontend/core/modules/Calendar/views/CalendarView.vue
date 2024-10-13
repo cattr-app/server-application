@@ -1,5 +1,5 @@
 <template>
-    <div ref="container" class="svg-container"></div>
+    <div ref="container"></div>
 </template>
 
 <script>
@@ -18,7 +18,6 @@
             tasksByWeek: {
                 type: Array,
                 required: true,
-                default: () => [],
             },
         },
         created() {
