@@ -571,6 +571,7 @@
 
                 const columns = gridData.columns.map(col => {
                     col = { ...col, title: this.$t(col.title) };
+                    // Used to edit statuses in company settings
                     if ('render' in col) {
                         col._render = col.render;
                         col.render = (h, params) => col._render(h, { ...params, gridView: this });
