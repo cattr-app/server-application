@@ -11,8 +11,6 @@
     const cellWidth = 100 / daysOfWeek.length;
     const cellHeight = 32;
 
-    const maxWidth = 1200;
-
     export default {
         props: {
             tasksByDay: {
@@ -46,7 +44,7 @@
                 const weeks = Math.ceil(this.tasksByDay.length / 7);
                 const rows = 1 + 2 * weeks;
 
-                const width = Math.min(maxWidth, container.clientWidth);
+                const width = container.clientWidth;
                 const height = rows * cellHeight;
 
                 this.svg.viewbox(0, 0, width, height);
