@@ -3,13 +3,16 @@
         <h1 class="page-title">{{ $t('navigation.calendar') }}</h1>
 
         <div class="controls-row">
-            <div class="controls-row__item">
-                <DatePicker :day="false" :week="false" :range="false" initialTab="month" @change="onDateChange" />
-            </div>
+            <DatePicker
+                class="controls-row__item"
+                :day="false"
+                :week="false"
+                :range="false"
+                initialTab="month"
+                @change="onDateChange"
+            />
 
-            <!-- <div class="select controls-row__item">
-                <UserSelect @change="onUsersChange" />
-            </div> -->
+            <ProjectSelect class="controls-row__item" @change="onProjectsChange" />
         </div>
 
         <div class="at-container">
@@ -29,6 +32,7 @@
 <script>
     import moment from 'moment';
     import DatePicker from '@/components/Calendar';
+    import ProjectSelect from '@/components/ProjectSelect';
     import CalendarMobileView from '../components/CalendarMobileView.vue';
     import CalendarView from '../components/CalendarView.vue';
     import TasksModal from '../components/TasksModal.vue';
@@ -42,11 +46,17 @@
             CalendarView,
             DatePicker,
             TasksModal,
+            ProjectSelect,
         },
         data() {
             return {
+                start: moment().startOf('month').format(ISO8601_DATE_FORMAT),
+                end: moment().endOf('month').format(ISO8601_DATE_FORMAT),
+                projects: [],
+
                 tasksByDay: [],
                 tasksByWeek: [],
+
                 modal: {
                     date: moment().format(ISO8601_DATE_FORMAT),
                     tasks: [],
@@ -55,15 +65,11 @@
         },
         created() {
             this.service = new CalendarService();
-            this.load(moment(), moment());
+            this.load();
         },
         methods: {
-            async load(start, end) {
-                const response = await this.service.get(
-                    moment(start).startOf('month').format(ISO8601_DATE_FORMAT),
-                    moment(end).endOf('month').format(ISO8601_DATE_FORMAT),
-                );
-
+            async load() {
+                const response = await this.service.get(this.start, this.end, this.projects);
                 const { tasks, tasks_by_day, tasks_by_week } = response.data.data;
 
                 this.tasksByDay = tasks_by_day.map(day => ({
@@ -79,8 +85,14 @@
                     })),
                 }));
             },
-            onDateChange({ type, start, end }) {
-                this.load(start, end);
+            onDateChange({ start, end }) {
+                (this.start = moment(start).startOf('month').format(ISO8601_DATE_FORMAT)),
+                    (this.end = moment(end).endOf('month').format(ISO8601_DATE_FORMAT)),
+                    this.load();
+            },
+            onProjectsChange(projects) {
+                this.projects = projects;
+                this.load();
             },
             showTasksModal({ date, tasks }) {
                 this.modal.date = date;

@@ -57,7 +57,7 @@
 
         padding: 0.75em 24px;
 
-        z-index: 1;
+        z-index: 10;
 
         &__header {
             display: flex;
