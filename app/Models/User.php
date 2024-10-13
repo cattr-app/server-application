@@ -3,9 +3,11 @@
 namespace App\Models;
 
 use App\Enums\Role;
+use App\Enums\ScreenshotsState;
 use App\Mail\ResetPassword;
 use App\Scopes\UserAccessScope;
 use App\Traits\HasRole;
+use Auth;
 use Carbon\Carbon;
 use Database\Factories\UserFactory;
 use Eloquent as EloquentIdeHelper;
@@ -35,7 +37,8 @@ use Laravel\Sanctum\PersonalAccessToken;
  * @property string|null $url
  * @property int|null $company_id
  * @property string|null $avatar
- * @property int|null $screenshots_active
+ * @property ScreenshotsState $screenshots_state
+ * @property bool $screenshots_state_locked
  * @property int|null $manual_time
  * @property int|null $computer_time_popup
  * @property bool|null $blur_screenshots
@@ -140,7 +143,8 @@ class User extends Authenticatable
         'url',
         'company_id',
         'avatar',
-        'screenshots_active',
+        'screenshots_state',
+        'screenshots_state_locked',
         'manual_time',
         'computer_time_popup',
         'blur_screenshots',
@@ -169,7 +173,7 @@ class User extends Authenticatable
         'url' => 'string',
         'company_id' => 'integer',
         'avatar' => 'string',
-        'screenshots_active' => 'integer',
+        'screenshots_state_locked' => 'boolean',
         'manual_time' => 'integer',
         'computer_time_popup' => 'integer',
         'blur_screenshots' => 'boolean',
@@ -285,6 +289,32 @@ class User extends Authenticatable
             get: static fn() => $self->hasRole([Role::ADMIN, Role::MANAGER])
                 || $self->hasRoleInAnyProject(Role::MANAGER, Role::USER),
         );
+    }
+
+    /**
+     * Always returns correct state in case env or app settings should override it.
+     */
+    protected function screenshotsState(): Attribute
+    {
+        return Attribute::make(
+            get: static function (mixed $value, array $attributes): ScreenshotsState {
+                $userState = ScreenshotsState::withGlobalOverrides($value);
+                $showOriginalValues = Auth::user() !== null && Auth::user()->hasRole(Role::ADMIN) && (int)Auth::id() !== (int)$attributes['id'];
+                if ($showOriginalValues) {
+                    return match ($userState) {
+                        null => ScreenshotsState::REQUIRED,
+                        ScreenshotsState::ANY => ScreenshotsState::OPTIONAL,
+                        default => $userState,
+                    };
+                }
+
+                return match ($userState) {
+                    null, ScreenshotsState::ANY, ScreenshotsState::OPTIONAL => ScreenshotsState::REQUIRED,
+                    default => $userState,
+                };
+            },
+            set: static fn ($value) => (string)ScreenshotsState::getNormalizedValue($value),
+        )->shouldCache();
     }
 
     public function scopeAdmin(EloquentBuilder $query): EloquentBuilder

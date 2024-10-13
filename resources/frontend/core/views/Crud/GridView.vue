@@ -234,6 +234,7 @@
                 values: [],
                 queryParams: {
                     with: withParam,
+                    orderBy: gridData.orderBy,
                     where: whereParam,
                     withCount,
                     withSum,
@@ -568,7 +569,16 @@
             columns() {
                 const { gridData, sortable } = this.$route.meta;
 
-                const columns = gridData.columns.map(col => ({ ...col, title: this.$t(col.title) }));
+                const columns = gridData.columns.map(col => {
+                    col = { ...col, title: this.$t(col.title) };
+                    // Used to edit statuses in company settings
+                    if ('render' in col) {
+                        col._render = col.render;
+                        col.render = (h, params) => col._render(h, { ...params, gridView: this });
+                    }
+
+                    return col;
+                });
 
                 if (gridData.actions.length > 0 && columns.filter(t => t.title === 'field.actions').length === 0) {
                     columns.push({
@@ -1021,5 +1031,12 @@
 
     .at-container ::v-deep {
         margin-bottom: $layout-01;
+    }
+</style>
+
+<style lang="scss">
+    .icon-bar-chart-2 {
+        display: inline-block;
+        transform: rotate(180deg);
     }
 </style>

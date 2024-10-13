@@ -4,7 +4,9 @@ import i18n from '@/i18n';
 import { formatDurationString } from '@/utils/time';
 import { ModuleLoaderInterceptor } from '@/moduleLoader';
 import PrioritySelect from '@/components/PrioritySelect';
+import ScreenshotsStateSelect from '@/components/ScreenshotsStateSelect';
 import TeamAvatars from '@/components/TeamAvatars';
+import { store } from '@/store';
 import Statuses from './components/Statuses';
 import Phases from './components/Phases.vue';
 import Vue from 'vue';
@@ -144,6 +146,13 @@ export function init(context) {
                         h('span', {}, [currentValue.name]),
                     ],
                 );
+            },
+        },
+        {
+            label: 'field.screenshots_state',
+            key: 'screenshots_state',
+            render: (h, { currentValue }) => {
+                return h('span', currentValue ? i18n.t('control.yes') : i18n.t('control.no'));
             },
         },
         {
@@ -289,6 +298,25 @@ export function init(context) {
             required: false,
         },
         {
+            label: 'field.screenshots_state',
+            key: 'screenshots_state',
+            default: 1,
+            render: (h, props) => {
+                return h(ScreenshotsStateSelect, {
+                    props: {
+                        value: props.values.screenshots_state,
+                        isDisabled: store.getters['screenshots/isProjectStateLocked'],
+                        hideIndexes: [0],
+                    },
+                    on: {
+                        input(value) {
+                            props.inputHandler(value);
+                        },
+                    },
+                });
+            },
+        },
+        {
             label: 'field.statuses',
             key: 'statuses',
             render: (h, data) => {
@@ -379,14 +407,14 @@ export function init(context) {
     const tasksRouteName = context.getModuleRouteName() + '.tasks';
     const assignRouteName = context.getModuleRouteName() + '.members';
     context.addRoute([
-        // {
-        //     path: `/${context.routerPrefix}/:id/tasks/kanban`,
-        //     name: tasksRouteName,
-        //     component: () => import('./views/Tasks.vue'),
-        //     meta: {
-        //         auth: true,
-        //     },
-        // },
+        {
+            path: `/${context.routerPrefix}/:id/tasks/kanban`,
+            name: tasksRouteName,
+            component: () => import('./views/Tasks.vue'),
+            meta: {
+                auth: true,
+            },
+        },
         {
             path: `/${context.routerPrefix}/:id/members`,
             name: assignRouteName,
@@ -439,6 +467,16 @@ export function init(context) {
             },
             renderCondition({ $can }, item) {
                 return $can('updateMembers', 'project', item);
+            },
+        },
+        {
+            title: 'projects.kanban',
+            icon: 'icon-bar-chart-2',
+            onClick: (router, { item }) => {
+                router.push({ name: tasksRouteName, params: { id: item.id } });
+            },
+            renderCondition({ $can }, item) {
+                return true;
             },
         },
         {

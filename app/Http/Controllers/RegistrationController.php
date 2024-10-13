@@ -2,6 +2,7 @@
 
 namespace App\Http\Controllers;
 
+use App\Enums\ScreenshotsState;
 use App\Models\Invitation;
 use App\Models\User;
 use Illuminate\Http\JsonResponse;
@@ -134,7 +135,8 @@ class RegistrationController extends Controller
             'password' => $request->input('password'),
             'active' => true,
             'manual_time' => false,
-            'screenshots_active' => true,
+            'screenshots_state' => ScreenshotsState::REQUIRED,
+            'screenshots_state_locked' => true,
             'computer_time_popup' => 3,
             'screenshots_interval' => 10,
             'role_id' => $invitation->role_id,

@@ -1,0 +1,22 @@
+{
+  "navigation": {
+    "offline_sync": "Offline Sync"
+  },
+  "offline_sync": {
+    "projects_and_tasks": "Projects and Tasks",
+    "intervals": "Intervals",
+    "screenshots": "Screenshots",
+    "intervals_file": "intervals file",
+    "screenshots_file": "screenshots file",
+    "import": "Import",
+    "export": "Export",
+    "added_intervals": "Added intervals",
+    "added_screenshots": "Added screenshots",
+    "user": "User",
+    "task_id": "Task",
+    "start_at":  "Start",
+    "end_at": "End",
+    "result":  "Result",
+    "total_time": "Duration"
+  }
+}

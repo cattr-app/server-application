@@ -149,4 +149,11 @@ class CompanySettingsController extends Controller
 
         return responder()->success()->respond(204);
     }
+
+    public function getOfflineSyncPublicKey(): JsonResponse
+    {
+        return responder()->success(
+            [ 'key' => Settings::scope('core.offline-sync')->get('public_key')],
+        )->respond();
+    }
 }

@@ -2,6 +2,7 @@
 
 namespace App\Models;
 
+use App\Enums\ScreenshotsState;
 use App\Scopes\ProjectAccessScope;
 use App\Traits\ExposePermissions;
 use Database\Factories\ProjectFactory;
@@ -34,6 +35,7 @@ use Illuminate\Support\Carbon;
  * @property int $important
  * @property string $source
  * @property int|null $default_priority_id
+ * @property ScreenshotsState $screenshots_state
  * @property-read Priority|null $defaultPriority
  * @property-read array $can
  * @property-read int|null $roles_count
@@ -82,6 +84,7 @@ class Project extends Model
         'important',
         'source',
         'default_priority_id',
+        'screenshots_state',
     ];
 
     /**
@@ -176,5 +179,20 @@ class Project extends Model
                 ->whereIn('parent_id', $tasksIdsQuery)
                 ->orWhereIn('child_id', $tasksIdsQuery)
                 ->get(['parent_id', 'child_id']))->shouldCache();
+    }
+
+    protected function screenshotsState(): Attribute
+    {
+        return Attribute::make(
+            get: static function ($value): ScreenshotsState {
+                $projectState = ScreenshotsState::withGlobalOverrides($value);
+                return match ($projectState) {
+                    null => ScreenshotsState::REQUIRED,
+                    ScreenshotsState::ANY => ScreenshotsState::OPTIONAL,
+                    default => $projectState,
+                };
+            },
+            set: static fn ($value) => (string)ScreenshotsState::getNormalizedValue($value),
+        )->shouldCache();
     }
 }

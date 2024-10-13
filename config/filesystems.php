@@ -1,5 +1,4 @@
 <?php
-
 return [
 
     /*
@@ -42,6 +41,13 @@ return [
             'url' => '/storage',
             'visibility' => 'public',
             'throw' => false,
+        ],
+
+        'attachments' => [
+            'driver' => 'local',
+            'root' => storage_path('app/attachments'),
+            'throw' => false,
+            'checksum_algo' => 'sha512/256'
         ],
 
         's3' => [

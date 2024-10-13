@@ -5,6 +5,7 @@ namespace App\Events;
 use App\Enums\Role;
 use App\Models\Project;
 use App\Models\Task;
+use App\Models\TaskComment;
 use App\Models\TimeInterval;
 use App\Models\User;
 use App\Reports\DashboardExport;
@@ -29,10 +30,9 @@ class ChangeEvent implements ShouldBroadcast, ShouldDispatchAfterCommit
     public function __construct(
         protected string $entityType,
         protected string $action,
-        protected        $model,
+        protected $model,
         protected int    $userId
-    )
-    {
+    ) {
     }
 
     public function broadcastAs(): string
@@ -85,20 +85,24 @@ class ChangeEvent implements ShouldBroadcast, ShouldDispatchAfterCommit
                     'project',
                     'users',
                     'status',
-                    'changes',
-                    'changes.user',
-                    'comments',
-                    'comments.user',
                     'parents',
                     'children',
                     'phase:id,name',
                     'workers',
-                    'workers.user:id,full_name'
+                    'workers.user:id,full_name',
+                    'attachmentsRelation',
+                    'attachmentsRelation.user:id,full_name',
                 ])
                 ->append(['can'])
                 ->loadSum('workers as total_spent_time', 'duration')
                 ->loadSum('workers as total_offset', 'offset')
                 ->makeVisible('can'),
+            $this->model instanceof TaskComment => $this->model
+                ->load(
+                    'user',
+                    'attachmentsRelation',
+                    'attachmentsRelation.user:id,full_name'
+                ),
             $this->model instanceof Project => $this->model->setPermissionsUser(User::query()->find($this->userId))
                 ->load([
                     'users',

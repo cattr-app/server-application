@@ -1,0 +1,21 @@
+{
+  "navigation": {
+    "offline_sync": "Оффлайн Синхронизация"
+  },
+  "offline_sync": {
+    "projects_and_tasks": "Проекты и Задачи",
+    "intervals": "Интервалы",
+    "intervals_file": "файл интервалов",
+    "screenshots_file": "файл скриншотов",
+    "import": "Импортировать",
+    "export": "Экспортировать",
+    "added_intervals": "Добавленные интервалы",
+    "added_screenshots": "Добавленные скриншоты",
+    "user": "Пользователь",
+    "task_id": "Задача",
+    "start_at":  "От",
+    "end_at": "До",
+    "result":  "Результат",
+    "total_time": "Продолжительность"
+  }
+}

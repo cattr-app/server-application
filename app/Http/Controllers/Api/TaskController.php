@@ -19,9 +19,13 @@ use Exception;
 use Filter;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\JsonResponse;
 use CatEvent;
+use Illuminate\Http\Response;
+use MessagePack\MessagePack;
 use Settings;
 use Throwable;
 
@@ -238,8 +242,15 @@ class TaskController extends ItemController
             )));
         });
 
-        CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $data) use ($request) {
-            $oldUsers = $data->users()->select('id', 'full_name');
+        $taskBeforeChanges = null;
+        CatEvent::listen(Filter::getBeforeActionEventName(), static function (Task $task) use (&$taskBeforeChanges) {
+            $taskBeforeChanges = $task->getOriginal();
+            $taskBeforeChanges['_old_phase_name'] = $task->phase?->name;
+            $taskBeforeChanges['_old_users'] = $task->users()->select('id', 'full_name')->get()->map(fn($item)=>$item->full_name)->join(', ');
+        });
+
+        CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $data) use (&$taskBeforeChanges, $request) {
+            $oldUsers = $taskBeforeChanges['_old_users'];
             $changes = $data->users()->sync($request->get('users'));
             if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
                 SaveTaskEditHistory::dispatch(
@@ -248,15 +259,14 @@ class TaskController extends ItemController
                     [
                         'users' => User::withoutGlobalScopes()
                             ->whereIn('id', $request->get('users'))
-                            ->select(['id', 'full_name'])
-                            ->get(),
+                            ->select(['id', 'full_name'])->get()->map(fn($item)=>$item->full_name)->join(', ')
                     ],
                     [
-                        'users' => json_encode($oldUsers),
+                        'users' => $oldUsers,
                     ]
                 );
             }
-            SaveTaskEditHistory::dispatch($data, request()->user());
+            SaveTaskEditHistory::dispatch($data, request()->user(), null, $taskBeforeChanges);
         });
 
         return $this->_edit($request);
@@ -334,7 +344,7 @@ class TaskController extends ItemController
     {
         CatEvent::listen(
             Filter::getAfterActionEventName(),
-            static fn(Task $task) => $task->users()->sync($request->get('users'))
+            static fn (Task $task) => $task->users()->sync($request->get('users'))
         );
 
         Filter::listen(
@@ -367,6 +377,11 @@ class TaskController extends ItemController
                 return $requestData;
             }
         );
+        Filter::listen(Filter::getRequestFilterName(), static function ($requestData) {
+            $maxPosition = Task::max('relative_position');
+            $requestData['relative_position'] = $maxPosition + 1;
+            return $requestData;
+        });
 
         return $this->_create($request);
     }
@@ -594,5 +609,45 @@ class TaskController extends ItemController
         RegisterModulesEvents::broadcastEvent('tasks', 'edit', Task::find($requestData['child_id']));
 
         return responder()->success()->respond(204);
+    }
+
+    /**
+     * @throws BindingResolutionException
+     */
+    public function downloadProjectsAndTasks(User $user): Response
+    {
+        $projectsAndTasks = collect($user->load([
+            'projects' => fn(BelongsToMany $q) => $q->select([
+                'projects.id',
+                'projects.name',
+                'projects.description',
+                'projects.source',
+                'projects.updated_at'
+            ])->withoutGlobalScopes(),
+            'tasks' => fn(BelongsToMany $q) => $q->select([
+                'tasks.id',
+                'tasks.project_id',
+                'tasks.task_name',
+                'tasks.description',
+                'tasks.url',
+                'tasks.priority_id',
+                'tasks.status_id',
+                'tasks.updated_at'
+            ])->withoutGlobalScopes(),
+        ]))->only(['id', 'projects', 'tasks'])->all();
+
+        foreach ($projectsAndTasks['projects'] as $project) {
+            unset($project['pivot']);
+        }
+        foreach ($projectsAndTasks['tasks'] as $task) {
+            unset($task['pivot']);
+        }
+
+        $packed = MessagePack::pack($projectsAndTasks);
+
+        return response()->make($packed, 200, [
+            'Content-type: application/octet-stream',
+            'Content-Disposition: attachment; filename=ProjectsAndTasks.cattr'
+        ]);
     }
 }

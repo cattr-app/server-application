@@ -140,7 +140,18 @@ return [
         ],
     ],
 
-    'time_interval_does_not_exist' => 'Время для этого интервала уже существует.',
+    'time_interval_already_exist' => 'Время для этого интервала уже существует.',
+
+    'offline-sync' => [
+        'cannot_create_interval' => 'Невозможно создать интервал, убедитесь что Вы являетесь членом проекта или исполнителем задачи.',
+        'cannot_find_interval' => 'Не получилось найти интервал для прикрепления скриншота',
+        'screenshot_attached' => 'Скриншот добавлен в очередь (см. лог очереди)',
+        'screenshot_not_attached' => 'Скриншот не прикреплён (см. логи)',
+        'time_interval_already_exist' => 'Время для этого интервала уже существует.',
+        'time_interval_added' => 'Добавлен',
+        'wrong_extension' => 'Расширение файла должно быть .cattr'
+    ],
+
     'tasks-relations' => [
         'already_exists' => 'Связь уже существует!',
         'must_have_same_project' => 'Задачи должны быть из одного проекта.',
@@ -171,7 +182,7 @@ return [
         'url' => 'URL',
         'company_id' => 'Компания',
         'avatar' => 'Изображение пользователя',
-        'screenshots_active' => 'Снятие скриншотов',
+        'screenshots_state' => 'Снятие скриншотов',
         'manual_time' => 'Ручная установка интервалов',
         'computer_time_popup' => 'Время неактивности пользователя',
         'screenshots_interval' => 'Интервал снятия скриншота',
