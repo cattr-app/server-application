@@ -472,6 +472,9 @@ export function init(context) {
         {
             title: 'projects.kanban',
             icon: 'icon-bar-chart-2',
+            style: {
+                transform: 'rotate(180deg)',
+            },
             onClick: (router, { item }) => {
                 router.push({ name: tasksRouteName, params: { id: item.id } });
             },
