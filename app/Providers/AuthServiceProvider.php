@@ -5,6 +5,7 @@ namespace App\Providers;
 use App\Models\Invitation;
 use App\Models\Priority;
 use App\Models\Project;
+use App\Models\ProjectGroup;
 use App\Models\Status;
 use App\Models\Task;
 use App\Models\TaskComment;
@@ -12,6 +13,7 @@ use App\Models\TimeInterval;
 use App\Models\User;
 use App\Policies\InvitationPolicy;
 use App\Policies\PriorityPolicy;
+use App\Policies\ProjectGroupPolicy;
 use App\Policies\ProjectPolicy;
 use App\Policies\StatusPolicy;
 use App\Policies\TaskCommentPolicy;
@@ -28,6 +30,7 @@ class AuthServiceProvider extends ServiceProvider
      * @var array
      */
     protected $policies = [
+        ProjectGroup::class => ProjectGroupPolicy::class,
         Project::class => ProjectPolicy::class,
         Task::class => TaskPolicy::class,
         User::class => UserPolicy::class,

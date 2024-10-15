@@ -1,6 +1,6 @@
 {
   "navigation": {
-    "projects": "Projects"
+    "projects": "List"
   },
   "projects": {
     "grid-title": "Projects",
@@ -26,7 +26,14 @@
     "priority_id": "Priority",
     "status_id": "Status",
     "comments": "Comments",
-    "project_phase_id": "Phase"
+    "project_phase_id": "Phase",
+    "group": "Group",
+    "no_group_selected": "No group selected",
+    "loading_groups": "Loading groups",
+    "no_groups_found": "No groups found for {query}",
+    "fast_create_group": "Quickly create a group {query}",
+    "to_create_group": "Go to create group {query}",
+    "type_to_search_for_group": "Start typing to search for a group."
   },
   "control": {
     "task-list": "Task List"

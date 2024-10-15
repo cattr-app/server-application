@@ -13,6 +13,7 @@ use Illuminate\Database\Eloquent\Casts\Attribute;
 use Illuminate\Database\Eloquent\Collection;
 use Illuminate\Database\Eloquent\Factories\HasFactory;
 use Illuminate\Database\Eloquent\Model;
+use Illuminate\Database\Eloquent\Relations\BelongsTo;
 use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Database\Eloquent\Relations\HasMany;
 use Illuminate\Database\Eloquent\Relations\HasManyThrough;
@@ -64,7 +65,7 @@ use Illuminate\Support\Carbon;
  * @method static QueryBuilder|Project withTrashed()
  * @method static QueryBuilder|Project withoutTrashed()
  * @mixin EloquentIdeHelper
- * @property-read Collection|\App\Models\Property[] $properties
+ * @property-read Collection|Property[] $properties
  * @property-read int|null $properties_count
  */
 
@@ -85,6 +86,7 @@ class Project extends Model
         'source',
         'default_priority_id',
         'screenshots_state',
+        'group',
     ];
 
     /**
@@ -143,6 +145,11 @@ class Project extends Model
             ->withPivot('role_id')
             ->using(ProjectUserPivot::class)
             ->withoutGlobalScopes();
+    }
+
+    public function group(): BelongsTo
+    {
+        return $this->belongsTo(ProjectGroup::class, 'group');
     }
 
     public function defaultPriority(): HasOne

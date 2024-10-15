@@ -27,6 +27,7 @@
     "flugger/laravel-responder": "^3.3.0",
     "guzzlehttp/guzzle": "^7.2",
     "intervention/image": "^2.7",
+    "kalnoy/nestedset": "^6.0",
     "laravel/framework": "^10.0",
     "laravel/octane": "^2.2",
     "laravel/reverb": "@beta",
@@ -35,11 +36,11 @@
     "matanyadaev/laravel-eloquent-spatial": "^3.1",
     "mpdf/mpdf": "^8.0",
     "nwidart/laravel-modules": "^10",
-    "sentry/sentry-laravel": "^4.1",
-    "staudenmeir/laravel-adjacency-list": "^1.19",
     "phpseclib/phpseclib": "^3.0",
     "rybakit/msgpack": "^0.9.1",
+    "sentry/sentry-laravel": "^4.1",
     "spatie/temporary-directory": "^2.2",
+    "staudenmeir/laravel-adjacency-list": "^1.19",
     "wikimedia/composer-merge-plugin": "^2.0"
   },
   "require-dev": {

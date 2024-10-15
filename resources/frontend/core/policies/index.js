@@ -5,6 +5,7 @@ import UserPolicy from './user.policy';
 import InvitationPolicy from './invitation.policy';
 import PriorityPolicy from './priority.policy';
 import StatusPolicy from './status.policy';
+import ProjectGroupPolicy from './project-group.policy';
 
 store.dispatch('policies/registerPolicies', {
     task: TaskPolicy,
@@ -13,4 +14,5 @@ store.dispatch('policies/registerPolicies', {
     invitation: InvitationPolicy,
     priority: PriorityPolicy,
     status: StatusPolicy,
+    projectGroup: ProjectGroupPolicy,
 });

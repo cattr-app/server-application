@@ -6,7 +6,8 @@
     "company_settings": "Company Settings",
     "logout": "Logout",
     "dropdown": {
-      "reports": "Reports"
+      "reports": "Reports",
+      "projects": "Projects"
     }
   },
   "setup": {
@@ -302,7 +303,8 @@
     "minutes": "{value} minutes",
     "duration": "Duration",
     "duration_value": "{0} to {1}",
-    "web_and_app_monitoring": "Enable app monitoring"
+    "web_and_app_monitoring": "Enable app monitoring",
+    "parent_group": "Parent group"
   },
   "filter": {
     "enter-single": "Enter {0}",

@@ -10,6 +10,9 @@ import { store } from '@/store';
 import Statuses from './components/Statuses';
 import Phases from './components/Phases.vue';
 import Vue from 'vue';
+import Groups from './components/Groups';
+import GroupSelect from '@/components/GroupSelect';
+import { ref } from 'vue';
 
 export const ModuleConfig = {
     routerPrefix: 'projects',
@@ -64,7 +67,7 @@ export function init(context) {
     crud.edit.addToMetaProperties('permissions', 'projects/edit', crud.edit.getRouterConfig());
 
     const grid = context.createGrid('projects.grid-title', 'projects', ProjectService, {
-        with: ['users', 'defaultPriority', 'statuses', 'can'],
+        with: ['users', 'defaultPriority', 'statuses', 'can', 'group:id,name'],
         withCount: ['tasks'],
     });
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
@@ -91,6 +94,12 @@ export function init(context) {
         {
             label: 'field.description',
             key: 'description',
+        },
+        {
+            label: 'field.group',
+            key: 'group',
+            render: (h, props) =>
+                h('span', props.currentValue !== null ? props.currentValue.name : i18n.t('field.no_group_selected')),
         },
         {
             key: 'total_spent_time',
@@ -251,6 +260,37 @@ export function init(context) {
             placeholder: 'field.description',
         },
         {
+            label: 'field.group',
+            key: 'group',
+            render: (h, data) => {
+                if (typeof data.values.group == 'object') {
+                    data.setValue('_currentGroup', data.values.group);
+                }
+                let currentGroup = ref(data.values?._currentGroup || '');
+
+                let value = ref(data.currentValue?.id || data.currentValue || '');
+
+                return h(Groups, {
+                    props: {
+                        currentGroup,
+                        value,
+                        clearable: true,
+                    },
+                    on: {
+                        input(val) {
+                            data.inputHandler(val);
+                            value.value = val;
+                        },
+                        setCurrent(group) {
+                            data.setValue('_currentGroup', group);
+                            currentGroup.value = group;
+                        },
+                    },
+                });
+            },
+            required: false,
+        },
+        {
             label: 'field.important',
             tooltipValue: 'tooltip.task_important',
             key: 'important',
@@ -356,6 +396,54 @@ export function init(context) {
             },
         },
         {
+            title: 'field.group',
+            key: 'group',
+            render: (h, data) => {
+                let currentGroup = ref({
+                    id: data.item.group?.id || '',
+                    name: data.item.group?.name || '',
+                });
+
+                let value = ref(data.item.group?.name || '');
+
+                return h(GroupSelect, {
+                    props: {
+                        value,
+                        currentGroup,
+                        clearable: true,
+                        project: data.item,
+                    },
+                    on: {
+                        input(val) {
+                            value.value = val;
+                        },
+                        setCurrent(group) {
+                            currentGroup.value = group;
+
+                            if (group !== '') {
+                                new ProjectService().save({
+                                    id: data.item.id,
+                                    group: group.id,
+                                });
+                            }
+                        },
+                        createGroup(group) {
+                            value.value = group.name;
+                            currentGroup.value = {
+                                id: group.id,
+                                name: group.name,
+                            };
+
+                            new ProjectService().save({
+                                id: data.item.id,
+                                group: group.id,
+                            });
+                        },
+                    },
+                });
+            },
+        },
+        {
             title: 'field.members',
             key: 'users',
             hideForMobile: true,
@@ -407,14 +495,6 @@ export function init(context) {
     const tasksRouteName = context.getModuleRouteName() + '.tasks';
     const assignRouteName = context.getModuleRouteName() + '.members';
     context.addRoute([
-        // {
-        //     path: `/${context.routerPrefix}/:id/tasks/kanban`,
-        //     name: tasksRouteName,
-        //     component: () => import('./views/Tasks.vue'),
-        //     meta: {
-        //         auth: true,
-        //     },
-        // },
         {
             path: `/${context.routerPrefix}/:id/members`,
             name: assignRouteName,
@@ -509,8 +589,9 @@ export function init(context) {
     context.addRoute(crud.getRouterConfig());
     context.addRoute(grid.getRouterConfig());
 
-    context.addNavbarEntry({
+    context.addNavbarEntryDropDown({
         label: 'navigation.projects',
+        section: 'navigation.dropdown.projects',
         to: {
             name: 'Projects.crud.projects',
         },

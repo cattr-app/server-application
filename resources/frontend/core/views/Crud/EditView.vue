@@ -219,13 +219,40 @@
                         </div>
                         <component
                             :is="component"
-                            v-for="(component, index) of pageData.bottomComponents"
+                            v-for="(component, index) of pageData.bottomComponents.components"
                             :key="index"
                             :parent="this"
                         />
-                        <at-button type="primary" :disabled="invalid || isLoading" :loading="isLoading" @click="submit"
-                            >{{ $t('control.save') }}
-                        </at-button>
+                        <div class="bottom-control">
+                            <at-button
+                                type="primary"
+                                :disabled="invalid || isLoading"
+                                :loading="isLoading"
+                                @click="submit"
+                                >{{ $t('control.save') }}</at-button
+                            >
+                            <template
+                                v-if="
+                                    pageData.bottomComponents.pageControls &&
+                                    pageData.bottomComponents.pageControls.length > 0
+                                "
+                            >
+                                <div class="bottom-control__added-items">
+                                    <template v-for="(button, key) of pageData.bottomComponents.pageControls">
+                                        <at-button
+                                            v-if="checkRenderCondition(button)"
+                                            :key="key"
+                                            class="bottom-control__added-items__item"
+                                            :type="button.type || ''"
+                                            :icon="button.icon || ''"
+                                            @click="handleClick(button)"
+                                        >
+                                            {{ $t(button.label) }}
+                                        </at-button>
+                                    </template>
+                                </div>
+                            </template>
+                        </div>
                     </validation-observer>
                 </div>
             </div>
@@ -419,6 +446,14 @@
                             width: 100%;
                         }
                     }
+                }
+            }
+
+            .bottom-control {
+                display: flex;
+
+                &__added-items {
+                    margin-left: auto;
                 }
             }
         }

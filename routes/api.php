@@ -6,6 +6,7 @@ use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\PriorityController;
 use App\Http\Controllers\Api\ProjectController;
+use App\Http\Controllers\Api\ProjectGroupController;
 use App\Http\Controllers\Api\ProjectMemberController;
 use App\Http\Controllers\Api\Reports\DashboardController;
 use App\Http\Controllers\Api\Reports\PlannedTimeReportController;
@@ -133,6 +134,19 @@ Route::group([
             ->name('projects.show');
         $router->post('projects/remove', [ProjectController::class, 'destroy'])
             ->name('projects.destroy');
+
+        $router->any('project-groups/list', [ProjectGroupController::class, 'index'])
+            ->name('project_groups.list');
+        $router->any('project-groups/count', [ProjectGroupController::class, 'count'])
+            ->name('project_groups.count');
+        $router->post('project-groups/create', [ProjectGroupController::class, 'create'])
+            ->name('project_groups.create');
+        $router->post('project-groups/edit', [ProjectGroupController::class, 'edit'])
+            ->name('project_groups.edit');
+        $router->any('project-groups/show', [ProjectGroupController::class, 'show'])
+            ->name('project_groups.show');
+        $router->post('project-groups/remove', [ProjectGroupController::class, 'destroy'])
+            ->name('project_groups.destroy');
 
         $router->any('project-members/list', [ProjectMemberController::class, 'list'])
             ->name('projects_members.list');
