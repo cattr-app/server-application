@@ -54,7 +54,7 @@ tag_latest:
 pages :
   stage: pages
   when: manual
-  image: node:14-alpine
+  image: node:18-alpine
   before_script:
     - apk add yarn
     - yarn
