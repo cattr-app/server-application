@@ -49,7 +49,7 @@
 <script>
     import { offset } from 'caret-pos';
     import TeamAvatars from '@/components/TeamAvatars';
-    import TaskCommentService from '@/services/resource/task-comment.service';
+    import TaskActivityService from '@/services/resource/task-activity.service';
     import UsersService from '@/services/resource/user.service';
     import { formatDate } from '@/utils/time';
 
@@ -66,7 +66,7 @@
         inject: ['reload'],
         data() {
             return {
-                taskCommentService: new TaskCommentService(),
+                taskActivityService: new TaskActivityService(),
                 userService: new UsersService(),
                 commentMessage: '',
                 users: [],
@@ -90,7 +90,7 @@
         methods: {
             formatDate,
             async createComment(id) {
-                const comment = await this.taskCommentService.save({
+                const comment = await this.taskActivityService.save({
                     task_id: id,
                     content: this.commentMessage,
                 });

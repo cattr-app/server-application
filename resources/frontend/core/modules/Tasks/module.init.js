@@ -21,6 +21,7 @@ import Vue from 'vue';
 import ResourceSelect from '@/components/ResourceSelect.vue';
 import PhaseSelect from './components/PhaseSelect';
 import RelationsSelector from './components/RelationsSelector';
+import Attachments from './components/Attachments.vue';
 
 export const ModuleConfig = {
     routerPrefix: 'tasks',
@@ -59,12 +60,10 @@ export function init(context, router) {
             'children',
             'users',
             'status',
-            'changes',
-            'changes.user',
-            'comments',
-            'comments.user',
             'workers',
             'workers.user:id,full_name',
+            'attachmentsRelation',
+            'attachmentsRelation.user:id,full_name',
         ],
         withSum: [
             ['workers as total_spent_time', 'duration'],
@@ -244,6 +243,18 @@ export function init(context, router) {
             },
         },
         {
+            key: 'attachments_relation',
+            label: 'field.attachments',
+            render: (h, data) => {
+                return h(Attachments, {
+                    props: {
+                        attachments: Array.isArray(data.currentValue) ? data.currentValue : [],
+                        showControls: false,
+                    },
+                });
+            },
+        },
+        {
             key: 'url',
             label: 'field.source',
             render: (h, props) => {
@@ -413,16 +424,16 @@ export function init(context, router) {
                 return h(TaskHistory, { props: { task: props.values } });
             },
         },
-        {
-            key: 'comments',
-            label: 'field.comments',
-            render: (h, props) => {
-                return h(TaskComments, {
-                    props: { task: props.values },
-                });
-            },
-        },
     ];
+    // {
+    //     key: 'comments',
+    //     label: 'field.comments',
+    //     render: (h, props) => {
+    //         return h(TaskComments, {
+    //             props: { task: props.values },
+    //         });
+    //     },
+    // },
 
     const fieldsToFill = [
         {
@@ -527,6 +538,38 @@ export function init(context, router) {
                     on: {
                         input: function (text) {
                             props.inputHandler(text);
+                        },
+                    },
+                });
+            },
+        },
+        {
+            key: 'attachments_relation',
+            label: 'field.attachments',
+            render: (h, data) => {
+                return h(Attachments, {
+                    props: {
+                        attachments: Array.isArray(data.currentValue) ? data.currentValue : [],
+                        showControls: true,
+                    },
+                    on: {
+                        change(attachments) {
+                            data.inputHandler(attachments);
+                            data.setValue(
+                                'attachmentsRelation',
+                                attachments.filter(el => !el.toDelete).map(el => el.id),
+                            );
+                            data.setValue(
+                                'attachmentsToRemove',
+                                attachments.filter(el => el.toDelete).map(el => el.id),
+                            );
+                            // mitigate validation issues for empty array
+                            if (data.values.attachmentsRelation.length === 0) {
+                                delete data.values.attachmentsRelation;
+                            }
+                            if (data.values.attachmentsToRemove.length === 0) {
+                                delete data.values.attachmentsToRemove;
+                            }
                         },
                     },
                 });

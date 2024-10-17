@@ -10,7 +10,9 @@ use App\Http\Requests\Status\DestroyStatusRequest;
 use App\Http\Requests\Status\ListStatusRequest;
 use App\Http\Requests\Status\ShowStatusRequestStatus;
 use App\Http\Requests\Status\UpdateStatusRequest;
+use CatEvent;
 use Exception;
+use Filter;
 use Illuminate\Http\JsonResponse;
 use Throwable;
 
@@ -115,6 +117,12 @@ class StatusController extends ItemController
      */
     public function create(CreateStatusRequest $request): JsonResponse
     {
+        Filter::listen(Filter::getRequestFilterName(), static function ($item) {
+            $maxOrder = Status::max('order');
+            $item['order'] = $maxOrder + 1;
+            return $item;
+        });
+
         return $this->_create($request);
     }
 
@@ -151,8 +159,38 @@ class StatusController extends ItemController
      */
     public function edit(UpdateStatusRequest $request): JsonResponse
     {
+        CatEvent::listen(Filter::getBeforeActionEventName(), static function ($item, $requestData) {
+            if (isset($requestData['order'])) {
+                $newOrder = $requestData['order'];
+                $oldOrder = $item->order;
+                if ($newOrder < 1) {
+                    $newOrder = 1;
+                }
+                $maxOrder = Status::max('order');
+                if ($newOrder > $maxOrder) {
+                    $newOrder = $maxOrder + 1;
+                }
+                $swapItem = Status::where('order', '=', $newOrder)->first();
+                if (isset($swapItem)) {
+                    $swapItemOrder = $swapItem->order;
+
+                    $item->order = 0;
+                    $item->save();
+
+                    $swapItem->order = $oldOrder;
+                    $swapItem->save();
+
+                    $item->order = $swapItemOrder;
+                    $item->save();
+
+                } else {
+                    $item->order = $newOrder;
+                }
+            }
+        });
         return $this->_edit($request);
     }
+
 
     /**
      * @throws Throwable

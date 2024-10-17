@@ -16,6 +16,9 @@ class UpdateTaskCommentRequest extends CattrFormRequest
 
     public function _rules(): array
     {
-        return [];
+        return [
+            'id' => 'required',
+            'content' => 'required'
+        ];
     }
 }

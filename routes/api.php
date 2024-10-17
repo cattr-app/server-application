@@ -1,6 +1,7 @@
 <?php
 
 use App\Http\Controllers\Api\AboutController;
+use App\Http\Controllers\Api\AttachmentController;
 use App\Http\Controllers\Api\CompanySettingsController;
 use App\Http\Controllers\Api\InvitationController;
 use App\Http\Controllers\Api\PriorityController;
@@ -21,6 +22,7 @@ use App\Http\Controllers\Api\StatusController as ApiStatusController;
 use App\Http\Controllers\Api\TaskCommentController;
 use App\Http\Controllers\Controller;
 use App\Http\Controllers\StatusController;
+use App\Http\Controllers\Api\TaskActivityController;
 use Illuminate\Routing\Router;
 
 // Routes for login/register processing
@@ -53,16 +55,16 @@ Route::group([
             ->name('auth.desktop.request');
     });
 
-        $router->withoutMiddleware('auth:sanctum')->group(static function (Router $router) {
-            $router->post('login', [AuthController::class, 'login'])
-                ->name('auth.login');
-            $router->post('password/reset/request', [PasswordResetController::class, 'request'])
-                ->name('auth.reset.request');
-            $router->post('password/reset/validate', [PasswordResetController::class, 'validate'])
-                ->name('auth.reset.validate');
-            $router->post('password/reset/process', [PasswordResetController::class, 'process'])
-                ->name('auth.reset.process');
-        });
+    $router->withoutMiddleware('auth:sanctum')->group(static function (Router $router) {
+        $router->post('login', [AuthController::class, 'login'])
+            ->name('auth.login');
+        $router->post('password/reset/request', [PasswordResetController::class, 'request'])
+            ->name('auth.reset.request');
+        $router->post('password/reset/validate', [PasswordResetController::class, 'validate'])
+            ->name('auth.reset.validate');
+        $router->post('password/reset/process', [PasswordResetController::class, 'process'])
+            ->name('auth.reset.process');
+    });
 
     $router->put('desktop-key', [AuthController::class, 'authDesktopKey'])
         ->name('auth.desktop.process');
@@ -156,6 +158,8 @@ Route::group([
             ->name('tasks.show');
         $router->post('tasks/remove', [TaskController::class, 'destroy'])
             ->name('tasks.destroy');
+        $router->post('tasks/activity', [TaskActivityController::class, 'index'])
+            ->name('task.activity');
 
         // Gantt routes
         $router->post('tasks/create-relation', [TaskController::class, 'createRelation'])
@@ -271,6 +275,15 @@ Route::group([
             ->name('settings.list');
         $router->patch('company-settings', [CompanySettingsController::class, 'update'])
             ->name('settings.save');
+
+        // Attachments routes
+        $router->post('attachment', [AttachmentController::class, 'create'])
+            ->name('attachment.create');
+        $router->withoutMiddleware('auth:sanctum')->middleware('signed')
+            ->get('tmp-attachment-link/{attachment}', [AttachmentController::class, 'tmpDownload'])
+            ->whereUuid('attachment')->name('attachment.temporary-download');
+        $router->get('attachment/{attachment}/temporary-url', [AttachmentController::class, 'createTemporaryUrl'])
+            ->whereUuid('attachment')->name('attachment.temporary_url');
     });
 
     //Screenshots routes

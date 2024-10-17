@@ -334,6 +334,7 @@
     "report_has_been_queued": "Report has been queued and will be sent on your email"
   },
   "time": {
+    "d": "d",
     "h": "h",
     "m": "m",
     "s": "s"
