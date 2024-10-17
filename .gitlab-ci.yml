@@ -5,6 +5,7 @@ stages:
   - build
   - test
   - release
+  - pages
   - deploy
 
 sast:
@@ -49,6 +50,27 @@ tag_latest:
     - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
   script:
     - crane tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME latest
+
+pages :
+  stage: pages
+  when: manual
+  image: node:14-alpine
+  before_script:
+    - apk add yarn
+    - yarn
+  pages:
+    script:
+      - node_modules/apidoc/bin/apidoc -i app -t ./resources/template-apidoc -o
+        public/apidoc
+    artifacts:
+      paths:
+        # The folder that contains the files to be exposed at the Page URL
+        - public/apidoc
+  # rules:
+      # This ensures that only pushes to the default branch will trigger
+      # a pages deploy
+    #  - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+
 
 deploy_prod:
   stage: deploy
