@@ -1,18 +1,83 @@
-# The Docker image that will be used to build your app
-image: node:14-alpine
-# Functions that should be executed before the build script is run
-before_script:
-  - apk add yarn
-  - yarn
-pages:
+variables:
+  DOCKER_TLS_CERTDIR: "/certs"
+
+stages:
+  - build
+  - test
+  - release
+  - deploy
+
+sast:
+  stage: test
+
+sentry_upload:
+  image: getsentry/sentry-cli:latest
+  stage: release
+  rules:
+    - if: $CI_COMMIT_TAG && $SENTRY_ORG
   script:
-    - node_modules/apidoc/bin/apidoc -i app -t ./resources/template-apidoc -o
-      public/apidoc
-  artifacts:
-    paths:
-      # The folder that contains the files to be exposed at the Page URL
-      - public/apidoc
- # rules:
-    # This ensures that only pushes to the default branch will trigger
-    # a pages deploy
-  #  - if: $CI_COMMIT_REF_NAME == $CI_DEFAULT_BRANCH
+    - sentry-cli releases new --finalize "$CI_COMMIT_REF_NAME"
+    - sentry-cli releases set-commits --auto "$CI_COMMIT_REF_NAME"
+
+build:
+  image:
+    name: gcr.io/kaniko-project/executor:debug
+    entrypoint: [""]
+  stage: build
+  before_script:
+    - export APP_TAG=$(echo "$CI_COMMIT_REF_NAME" | sed 's/^v//g')
+    - mkdir -p /kaniko/.docker
+    - echo "{\"auths\":{\"${CI_REGISTRY}\":{\"auth\":\"$(printf "%s:%s" "${CI_REGISTRY_USER}" "${CI_REGISTRY_PASSWORD}" | base64 | tr -d '\n')\"}}}" > /kaniko/.docker/config.json
+  script:
+    - >-
+      /kaniko/executor
+      --context "${CI_PROJECT_DIR}"
+      --dockerfile "${CI_PROJECT_DIR}/Dockerfile"
+      --destination "${CI_REGISTRY_IMAGE}:${CI_COMMIT_REF_NAME}"
+      --build-arg "SENTRY_DSN=$SENTRY_DSN"
+      --build-arg "APP_VERSION=$APP_TAG"
+      --ignore-var-run
+
+tag_latest:
+  image:
+    name: gcr.io/go-containerregistry/crane:debug
+    entrypoint: [""]
+  stage: release
+  only:
+    - tags
+  before_script:
+    - crane auth login -u $CI_REGISTRY_USER -p $CI_REGISTRY_PASSWORD $CI_REGISTRY
+  script:
+    - crane tag $CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME latest
+
+deploy_prod:
+  stage: deploy
+  image: alpine
+  environment:
+    name: production
+    url: https://time.amazingcat.net
+  only:
+    - tags
+  when: manual
+  before_script:
+    - 'which ssh-agent || ( apk add --update openssh )'
+    - eval $(ssh-agent -s)
+    - echo "$CI_KEY" | base64 -d | ssh-add -
+    - mkdir -p ~/.ssh
+    - chmod 700 ~/.ssh
+    - echo -e "Host *\n\tStrictHostKeyChecking no\n\n" > ~/.ssh/config
+  script:
+    - ssh $CI_USER@$CI_HOST 'cd /opt/services/cattr/tracker && docker compose pull'
+    - ssh $CI_USER@$CI_HOST 'cd /opt/services/cattr/tracker && docker compose up -d'
+
+container_scanning:
+  variables:
+    CS_IMAGE: '$CI_REGISTRY_IMAGE:$CI_COMMIT_REF_NAME'
+
+include:
+  - template: Security/SAST.gitlab-ci.yml
+  - template: Security/Dependency-Scanning.gitlab-ci.yml
+  - template: Security/Secret-Detection.gitlab-ci.yml
+  - template: Security/License-Scanning.gitlab-ci.yml
+  - template: Security/Container-Scanning.gitlab-ci.yml
+  - template: Code-Quality.gitlab-ci.yml
