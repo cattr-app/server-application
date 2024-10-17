@@ -58,13 +58,15 @@ pages :
   before_script:
     - apk add yarn
     - yarn
+    - rm -rf public
+    - mkdir public
   script:
     - node_modules/apidoc/bin/apidoc -i app -t ./resources/template-apidoc -o
-      public/apidoc
+      public
   artifacts:
     paths:
       # The folder that contains the files to be exposed at the Page URL
-      - public/apidoc
+      - public
   # rules:
       # This ensures that only pushes to the default branch will trigger
       # a pages deploy
