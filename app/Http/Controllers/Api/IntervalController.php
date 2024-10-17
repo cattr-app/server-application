@@ -418,11 +418,11 @@ class IntervalController extends ItemController
         return responder()->success()->respond(204);
     }
     /**
-     * @api             {put} /time-intervals/app Adds the current user’s ID.
-     * @apiDescription  Adds the current user’s ID.
+     * @api             {put} /time-intervals/app Adds the current user’s ID
+     * @apiDescription  Adds the current user’s ID
      *
      * @apiVersion      4.0.0
-     * @apiName         Adds the current user’s ID.
+     * @apiName         Adds the current user’s ID
      * @apiGroup        Time Interval
      *
      * @apiUse          AuthHeader

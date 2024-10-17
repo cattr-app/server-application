@@ -74,3 +74,5 @@ composer.phar
 /public/workbox*
 
 erd.svg
+
+apidoc
