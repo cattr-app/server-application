@@ -4,7 +4,7 @@ FROM registry.git.amazingcat.net/cattr/core/wolfi-os-image/cattr-dev:latest AS b
 ARG SENTRY_DSN
 ARG APP_VERSION
 ARG APP_ENV=production
-ARG REVERB_SCHEME=https
+ARG REVERB_SCHEME=http
 ARG REVERB_PORT=8080
 ARG BACKEND_MODULES="cattr/gitlab_integration-module cattr/redmine_integration-module"
 ENV IMAGE_VERSION=5.0.0
@@ -48,7 +48,7 @@ ARG APP_VERSION
 ARG APP_ENV=production
 ARG APP_KEY="base64:PU/8YRKoMdsPiuzqTpFDpFX1H8Af74nmCQNFwnHPFwY="
 ARG REVERB_APP_SECRET="secret"
-ARG REVERB_SCHEME=https
+ARG REVERB_SCHEME=http
 ARG REVERB_PORT=8080
 ENV IMAGE_VERSION=5.0.0
 ENV REVERB_APP_KEY="cattr"

@@ -16,6 +16,8 @@ class UserPolicy
         'email',
         'password',
         'user_language',
+        'screenshots_state',
+        'screenshots_state_locked',
     ];
 
     public function before(User $user): ?bool

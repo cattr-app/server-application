@@ -3,6 +3,8 @@
 namespace App\Http\Controllers\Api;
 
 use App;
+use App\Enums\Role;
+use App\Enums\ScreenshotsState;
 use App\Http\Requests\User\ListUsersRequest;
 use App\Scopes\UserAccessScope;
 use Settings;
@@ -22,6 +24,7 @@ use App\Http\Requests\User\EditUserRequest;
 use App\Http\Requests\User\SendInviteUserRequest;
 use App\Http\Requests\User\ShowUserRequest;
 use App\Http\Requests\User\DestroyUserRequest;
+use App\Models\Setting;
 use Illuminate\Support\Str;
 use Symfony\Component\HttpKernel\Exception\NotFoundHttpException;
 use Throwable;
@@ -57,7 +60,7 @@ class UserController extends ItemController
      *      "url": "",
      *      "company_id": 1,
      *      "avatar": "",
-     *      "screenshots_active": 1,
+     *      "screenshots_state": 1,
      *      "manual_time": 0,
      *      "computer_time_popup": 300,
      *      "blur_screenshots": false,
@@ -79,7 +82,7 @@ class UserController extends ItemController
      *      "url": null,
      *      "company_id": null,
      *      "avatar": null,
-     *      "screenshots_active": 1,
+     *      "screenshots_state": 1,
      *      "manual_time": 1,
      *      "computer_time_popup": 5000,
      *      "blur_screenshots": null,
@@ -163,6 +166,12 @@ class UserController extends ItemController
      */
     public function create(CreateUserRequest $request): JsonResponse
     {
+        Filter::listen(Filter::getRequestFilterName(), static function ($requestData) use ($request) {
+            $requestData['screenshots_state_locked'] = $request->user()->isAdmin() && ScreenshotsState::tryFrom($requestData['screenshots_state'])->mustBeInherited();
+
+            return $requestData;
+        });
+
         return $this->_create($request);
     }
 
@@ -205,7 +214,7 @@ class UserController extends ItemController
      *       "url": "",
      *       "company_id": 1,
      *       "avatar": "",
-     *       "screenshots_active": 1,
+     *       "screenshots_state": 1,
      *       "manual_time": 0,
      *       "computer_time_popup": 300,
      *       "blur_screenshots": 0,
@@ -235,6 +244,17 @@ class UserController extends ItemController
      */
     public function edit(EditUserRequest $request): JsonResponse
     {
+        Filter::listen(Filter::getActionFilterName(), static function (User $user) use ($request) {
+            if ($user->screenshots_state_locked && !$request->user()->isAdmin()) {
+                $user->screenshots_state = $user->getOriginal('screenshots_state');
+                return $user;
+            }
+
+            $user->screenshots_state_locked = $request->user()->isAdmin() && ScreenshotsState::tryFrom($user->screenshots_state)->mustBeInherited();
+
+            return $user;
+        });
+
         return $this->_edit($request);
     }
 
@@ -269,7 +289,7 @@ class UserController extends ItemController
      *    "url": "",
      *    "company_id": 1,
      *    "avatar": "",
-     *    "screenshots_active": 1,
+     *    "screenshots_state": 1,
      *    "manual_time": 0,
      *    "computer_time_popup": 300,
      *    "blur_screenshots": 0,

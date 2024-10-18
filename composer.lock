@@ -4,7 +4,7 @@
         "Read more about it at https://getcomposer.org/doc/01-basic-usage.md#installing-dependencies",
         "This file is @generated automatically"
     ],
-    "content-hash": "1004cd619cab167bcbc66fd0fe3482ee",
+    "content-hash": "fe2049cc53608811380a3532a9b4f0fd",
     "packages": [
         {
             "name": "brick/math",
@@ -2223,16 +2223,16 @@
         },
         {
             "name": "laravel/framework",
-            "version": "v10.48.7",
+            "version": "v10.48.8",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/framework.git",
-                "reference": "118c686992f4b90d4da6deaf0901315c337bbaf9"
+                "reference": "8e9ab6da362f268170fe815127aed5ec7d303697"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/framework/zipball/118c686992f4b90d4da6deaf0901315c337bbaf9",
-                "reference": "118c686992f4b90d4da6deaf0901315c337bbaf9",
+                "url": "https://api.github.com/repos/laravel/framework/zipball/8e9ab6da362f268170fe815127aed5ec7d303697",
+                "reference": "8e9ab6da362f268170fe815127aed5ec7d303697",
                 "shasum": ""
             },
             "require": {
@@ -2426,7 +2426,7 @@
                 "issues": "https://github.com/laravel/framework/issues",
                 "source": "https://github.com/laravel/framework"
             },
-            "time": "2024-04-10T14:57:20+00:00"
+            "time": "2024-04-16T14:26:04+00:00"
         },
         {
             "name": "laravel/octane",
@@ -2519,16 +2519,16 @@
         },
         {
             "name": "laravel/prompts",
-            "version": "v0.1.18",
+            "version": "v0.1.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/prompts.git",
-                "reference": "3b5e6b03f1f1175574b5a32331d99c9819da9848"
+                "reference": "0ab75ac3434d9f610c5691758a6146a3d1940c18"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/prompts/zipball/3b5e6b03f1f1175574b5a32331d99c9819da9848",
-                "reference": "3b5e6b03f1f1175574b5a32331d99c9819da9848",
+                "url": "https://api.github.com/repos/laravel/prompts/zipball/0ab75ac3434d9f610c5691758a6146a3d1940c18",
+                "reference": "0ab75ac3434d9f610c5691758a6146a3d1940c18",
                 "shasum": ""
             },
             "require": {
@@ -2570,22 +2570,22 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel/prompts/issues",
-                "source": "https://github.com/laravel/prompts/tree/v0.1.18"
+                "source": "https://github.com/laravel/prompts/tree/v0.1.19"
             },
-            "time": "2024-04-04T17:41:50+00:00"
+            "time": "2024-04-16T14:20:35+00:00"
         },
         {
             "name": "laravel/reverb",
-            "version": "v1.0.0-beta6",
+            "version": "v1.0.0-beta7",
             "source": {
                 "type": "git",
                 "url": "https://github.com/laravel/reverb.git",
-                "reference": "4d64c3bc4d4d196fee46840ac93d9247ff06868f"
+                "reference": "bf6b6f85cdc3fff360761dac9f854c27ffc792fe"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/laravel/reverb/zipball/4d64c3bc4d4d196fee46840ac93d9247ff06868f",
-                "reference": "4d64c3bc4d4d196fee46840ac93d9247ff06868f",
+                "url": "https://api.github.com/repos/laravel/reverb/zipball/bf6b6f85cdc3fff360761dac9f854c27ffc792fe",
+                "reference": "bf6b6f85cdc3fff360761dac9f854c27ffc792fe",
                 "shasum": ""
             },
             "require": {
@@ -2652,9 +2652,9 @@
             ],
             "support": {
                 "issues": "https://github.com/laravel/reverb/issues",
-                "source": "https://github.com/laravel/reverb/tree/v1.0.0-beta6"
+                "source": "https://github.com/laravel/reverb/tree/v1.0.0-beta7"
             },
-            "time": "2024-04-07T17:34:30+00:00"
+            "time": "2024-04-16T14:02:51+00:00"
         },
         {
             "name": "laravel/sanctum",
@@ -4413,6 +4413,73 @@
             "time": "2023-11-13T09:31:12+00:00"
         },
         {
+            "name": "paragonie/constant_time_encoding",
+            "version": "v2.6.3",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/paragonie/constant_time_encoding.git",
+                "reference": "58c3f47f650c94ec05a151692652a868995d2938"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/paragonie/constant_time_encoding/zipball/58c3f47f650c94ec05a151692652a868995d2938",
+                "reference": "58c3f47f650c94ec05a151692652a868995d2938",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7|^8"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^6|^7|^8|^9",
+                "vimeo/psalm": "^1|^2|^3|^4"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "ParagonIE\\ConstantTime\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Paragon Initiative Enterprises",
+                    "email": "security@paragonie.com",
+                    "homepage": "https://paragonie.com",
+                    "role": "Maintainer"
+                },
+                {
+                    "name": "Steve 'Sc00bz' Thomas",
+                    "email": "steve@tobtu.com",
+                    "homepage": "https://www.tobtu.com",
+                    "role": "Original Developer"
+                }
+            ],
+            "description": "Constant-time Implementations of RFC 4648 Encoding (Base-64, Base-32, Base-16)",
+            "keywords": [
+                "base16",
+                "base32",
+                "base32_decode",
+                "base32_encode",
+                "base64",
+                "base64_decode",
+                "base64_encode",
+                "bin2hex",
+                "encoding",
+                "hex",
+                "hex2bin",
+                "rfc4648"
+            ],
+            "support": {
+                "email": "info@paragonie.com",
+                "issues": "https://github.com/paragonie/constant_time_encoding/issues",
+                "source": "https://github.com/paragonie/constant_time_encoding"
+            },
+            "time": "2022-06-14T06:56:20+00:00"
+        },
+        {
             "name": "paragonie/random_compat",
             "version": "v9.99.100",
             "source": {
@@ -4464,16 +4531,16 @@
         },
         {
             "name": "paragonie/sodium_compat",
-            "version": "v1.20.1",
+            "version": "v1.21.0",
             "source": {
                 "type": "git",
                 "url": "https://github.com/paragonie/sodium_compat.git",
-                "reference": "1840b98d228bdad83869b191d7e51f9bb6624d8d"
+                "reference": "102bcf2312dc21c16c7c93fd44a6d2a2e1343e26"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/paragonie/sodium_compat/zipball/1840b98d228bdad83869b191d7e51f9bb6624d8d",
-                "reference": "1840b98d228bdad83869b191d7e51f9bb6624d8d",
+                "url": "https://api.github.com/repos/paragonie/sodium_compat/zipball/102bcf2312dc21c16c7c93fd44a6d2a2e1343e26",
+                "reference": "102bcf2312dc21c16c7c93fd44a6d2a2e1343e26",
                 "shasum": ""
             },
             "require": {
@@ -4544,9 +4611,9 @@
             ],
             "support": {
                 "issues": "https://github.com/paragonie/sodium_compat/issues",
-                "source": "https://github.com/paragonie/sodium_compat/tree/v1.20.1"
+                "source": "https://github.com/paragonie/sodium_compat/tree/v1.21.0"
             },
-            "time": "2024-04-05T21:00:10+00:00"
+            "time": "2024-04-19T09:18:28+00:00"
         },
         {
             "name": "phayes/geophp",
@@ -4767,6 +4834,116 @@
                 }
             ],
             "time": "2023-11-12T21:59:55+00:00"
+        },
+        {
+            "name": "phpseclib/phpseclib",
+            "version": "3.0.37",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/phpseclib/phpseclib.git",
+                "reference": "cfa2013d0f68c062055180dd4328cc8b9d1f30b8"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/phpseclib/phpseclib/zipball/cfa2013d0f68c062055180dd4328cc8b9d1f30b8",
+                "reference": "cfa2013d0f68c062055180dd4328cc8b9d1f30b8",
+                "shasum": ""
+            },
+            "require": {
+                "paragonie/constant_time_encoding": "^1|^2",
+                "paragonie/random_compat": "^1.4|^2.0|^9.99.99",
+                "php": ">=5.6.1"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "*"
+            },
+            "suggest": {
+                "ext-dom": "Install the DOM extension to load XML formatted public keys.",
+                "ext-gmp": "Install the GMP (GNU Multiple Precision) extension in order to speed up arbitrary precision integer arithmetic operations.",
+                "ext-libsodium": "SSH2/SFTP can make use of some algorithms provided by the libsodium-php extension.",
+                "ext-mcrypt": "Install the Mcrypt extension in order to speed up a few other cryptographic operations.",
+                "ext-openssl": "Install the OpenSSL extension in order to speed up a wide variety of cryptographic operations."
+            },
+            "type": "library",
+            "autoload": {
+                "files": [
+                    "phpseclib/bootstrap.php"
+                ],
+                "psr-4": {
+                    "phpseclib3\\": "phpseclib/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Jim Wigginton",
+                    "email": "terrafrost@php.net",
+                    "role": "Lead Developer"
+                },
+                {
+                    "name": "Patrick Monnerat",
+                    "email": "pm@datasphere.ch",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Andreas Fischer",
+                    "email": "bantu@phpbb.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Hans-Jürgen Petrich",
+                    "email": "petrich@tronic-media.com",
+                    "role": "Developer"
+                },
+                {
+                    "name": "Graham Campbell",
+                    "email": "graham@alt-three.com",
+                    "role": "Developer"
+                }
+            ],
+            "description": "PHP Secure Communications Library - Pure-PHP implementations of RSA, AES, SSH2, SFTP, X.509 etc.",
+            "homepage": "http://phpseclib.sourceforge.net",
+            "keywords": [
+                "BigInteger",
+                "aes",
+                "asn.1",
+                "asn1",
+                "blowfish",
+                "crypto",
+                "cryptography",
+                "encryption",
+                "rsa",
+                "security",
+                "sftp",
+                "signature",
+                "signing",
+                "ssh",
+                "twofish",
+                "x.509",
+                "x509"
+            ],
+            "support": {
+                "issues": "https://github.com/phpseclib/phpseclib/issues",
+                "source": "https://github.com/phpseclib/phpseclib/tree/3.0.37"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/terrafrost",
+                    "type": "github"
+                },
+                {
+                    "url": "https://www.patreon.com/phpseclib",
+                    "type": "patreon"
+                },
+                {
+                    "url": "https://tidelift.com/funding/github/packagist/phpseclib/phpseclib",
+                    "type": "tidelift"
+                }
+            ],
+            "time": "2024-03-03T02:14:58+00:00"
         },
         {
             "name": "psr/cache",
@@ -6103,6 +6280,68 @@
             "time": "2023-06-16T10:52:11+00:00"
         },
         {
+            "name": "rybakit/msgpack",
+            "version": "v0.9.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/rybakit/msgpack.php.git",
+                "reference": "fc6bc45e92274e78c32d0a86f2e2cc1f8b5e017b"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/rybakit/msgpack.php/zipball/fc6bc45e92274e78c32d0a86f2e2cc1f8b5e017b",
+                "reference": "fc6bc45e92274e78c32d0a86f2e2cc1f8b5e017b",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^7.1.1|^8"
+            },
+            "require-dev": {
+                "ext-gmp": "*",
+                "friendsofphp/php-cs-fixer": "^2.14",
+                "phpunit/phpunit": "^7.1|^8|^9",
+                "vimeo/psalm": "^3.9|^4"
+            },
+            "suggest": {
+                "ext-decimal": "For converting overflowed integers to Decimal objects",
+                "ext-gmp": "For converting overflowed integers to GMP objects"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "MessagePack\\": "src/"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Eugene Leonovich",
+                    "email": "gen.work@gmail.com"
+                }
+            ],
+            "description": "A pure PHP implementation of the MessagePack serialization format.",
+            "keywords": [
+                "messagepack",
+                "msgpack",
+                "pure",
+                "streaming"
+            ],
+            "support": {
+                "issues": "https://github.com/rybakit/msgpack.php/issues",
+                "source": "https://github.com/rybakit/msgpack.php/tree/v0.9.1"
+            },
+            "funding": [
+                {
+                    "url": "https://github.com/rybakit",
+                    "type": "github"
+                }
+            ],
+            "time": "2022-02-16T00:48:07+00:00"
+        },
+        {
             "name": "sentry/sentry",
             "version": "4.7.0",
             "source": {
@@ -6353,6 +6592,67 @@
             "time": "2023-12-11T16:03:32+00:00"
         },
         {
+            "name": "spatie/temporary-directory",
+            "version": "2.2.1",
+            "source": {
+                "type": "git",
+                "url": "https://github.com/spatie/temporary-directory.git",
+                "reference": "76949fa18f8e1a7f663fd2eaa1d00e0bcea0752a"
+            },
+            "dist": {
+                "type": "zip",
+                "url": "https://api.github.com/repos/spatie/temporary-directory/zipball/76949fa18f8e1a7f663fd2eaa1d00e0bcea0752a",
+                "reference": "76949fa18f8e1a7f663fd2eaa1d00e0bcea0752a",
+                "shasum": ""
+            },
+            "require": {
+                "php": "^8.0"
+            },
+            "require-dev": {
+                "phpunit/phpunit": "^9.5"
+            },
+            "type": "library",
+            "autoload": {
+                "psr-4": {
+                    "Spatie\\TemporaryDirectory\\": "src"
+                }
+            },
+            "notification-url": "https://packagist.org/downloads/",
+            "license": [
+                "MIT"
+            ],
+            "authors": [
+                {
+                    "name": "Alex Vanderbist",
+                    "email": "alex@spatie.be",
+                    "homepage": "https://spatie.be",
+                    "role": "Developer"
+                }
+            ],
+            "description": "Easily create, use and destroy temporary directories",
+            "homepage": "https://github.com/spatie/temporary-directory",
+            "keywords": [
+                "php",
+                "spatie",
+                "temporary-directory"
+            ],
+            "support": {
+                "issues": "https://github.com/spatie/temporary-directory/issues",
+                "source": "https://github.com/spatie/temporary-directory/tree/2.2.1"
+            },
+            "funding": [
+                {
+                    "url": "https://spatie.be/open-source/support-us",
+                    "type": "custom"
+                },
+                {
+                    "url": "https://github.com/spatie",
+                    "type": "github"
+                }
+            ],
+            "time": "2023-12-25T11:46:58+00:00"
+        },
+        {
             "name": "staudenmeir/eloquent-has-many-deep-contracts",
             "version": "v1.1",
             "source": {
@@ -6395,16 +6695,16 @@
         },
         {
             "name": "staudenmeir/laravel-adjacency-list",
-            "version": "v1.20",
+            "version": "v1.20.1",
             "source": {
                 "type": "git",
                 "url": "https://github.com/staudenmeir/laravel-adjacency-list.git",
-                "reference": "1101205c6b822001f5b521d0664c32c8173f55bf"
+                "reference": "053c37da52caed7273eff8cc1ef434c226ad14da"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/staudenmeir/laravel-adjacency-list/zipball/1101205c6b822001f5b521d0664c32c8173f55bf",
-                "reference": "1101205c6b822001f5b521d0664c32c8173f55bf",
+                "url": "https://api.github.com/repos/staudenmeir/laravel-adjacency-list/zipball/053c37da52caed7273eff8cc1ef434c226ad14da",
+                "reference": "053c37da52caed7273eff8cc1ef434c226ad14da",
                 "shasum": ""
             },
             "require": {
@@ -6453,7 +6753,7 @@
             "description": "Recursive Laravel Eloquent relationships with CTEs",
             "support": {
                 "issues": "https://github.com/staudenmeir/laravel-adjacency-list/issues",
-                "source": "https://github.com/staudenmeir/laravel-adjacency-list/tree/v1.20"
+                "source": "https://github.com/staudenmeir/laravel-adjacency-list/tree/v1.20.1"
             },
             "funding": [
                 {
@@ -6461,7 +6761,7 @@
                     "type": "custom"
                 }
             ],
-            "time": "2024-03-08T12:32:10+00:00"
+            "time": "2024-04-22T07:18:03+00:00"
         },
         {
             "name": "staudenmeir/laravel-cte",
@@ -10798,16 +11098,16 @@
         },
         {
             "name": "phpunit/phpunit",
-            "version": "10.5.18",
+            "version": "10.5.19",
             "source": {
                 "type": "git",
                 "url": "https://github.com/sebastianbergmann/phpunit.git",
-                "reference": "835df1709ac6c968ba34bf23f3c30e5d5a266de8"
+                "reference": "c726f0de022368f6ed103e452a765d3304a996a4"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/835df1709ac6c968ba34bf23f3c30e5d5a266de8",
-                "reference": "835df1709ac6c968ba34bf23f3c30e5d5a266de8",
+                "url": "https://api.github.com/repos/sebastianbergmann/phpunit/zipball/c726f0de022368f6ed103e452a765d3304a996a4",
+                "reference": "c726f0de022368f6ed103e452a765d3304a996a4",
                 "shasum": ""
             },
             "require": {
@@ -10879,7 +11179,7 @@
             "support": {
                 "issues": "https://github.com/sebastianbergmann/phpunit/issues",
                 "security": "https://github.com/sebastianbergmann/phpunit/security/policy",
-                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.18"
+                "source": "https://github.com/sebastianbergmann/phpunit/tree/10.5.19"
             },
             "funding": [
                 {
@@ -10895,7 +11195,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-04-14T07:05:31+00:00"
+            "time": "2024-04-17T14:06:18+00:00"
         },
         {
             "name": "psy/psysh",
@@ -10982,12 +11282,12 @@
             "source": {
                 "type": "git",
                 "url": "https://github.com/Roave/SecurityAdvisories.git",
-                "reference": "26c93a86d619bca3122e9c2d5be82578ba5ef843"
+                "reference": "a6fb2a760c95f45ccb6a412599770061c330c624"
             },
             "dist": {
                 "type": "zip",
-                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/26c93a86d619bca3122e9c2d5be82578ba5ef843",
-                "reference": "26c93a86d619bca3122e9c2d5be82578ba5ef843",
+                "url": "https://api.github.com/repos/Roave/SecurityAdvisories/zipball/a6fb2a760c95f45ccb6a412599770061c330c624",
+                "reference": "a6fb2a760c95f45ccb6a412599770061c330c624",
                 "shasum": ""
             },
             "conflict": {
@@ -11141,7 +11441,7 @@
                 "ezsystems/ezplatform-solr-search-engine": ">=1.7,<1.7.12|>=2,<2.0.2|>=3.3,<3.3.15",
                 "ezsystems/ezplatform-user": ">=1,<1.0.1",
                 "ezsystems/ezpublish-kernel": "<6.13.8.2-dev|>=7,<7.5.31",
-                "ezsystems/ezpublish-legacy": "<=2017.12.7.3|>=2018.6,<=2019.03.5.1",
+                "ezsystems/ezpublish-legacy": "<=2017.12.7.3|>=2018.06,<=2019.03.5.1",
                 "ezsystems/platform-ui-assets-bundle": ">=4.2,<4.2.3",
                 "ezsystems/repository-forms": ">=2.3,<2.3.2.1-dev|>=2.5,<2.5.15",
                 "ezyang/htmlpurifier": "<4.1.1",
@@ -11172,7 +11472,8 @@
                 "friendsofsymfony/oauth2-php": "<1.3",
                 "friendsofsymfony/rest-bundle": ">=1.2,<1.2.2",
                 "friendsofsymfony/user-bundle": ">=1.2,<1.3.5",
-                "friendsofsymfony1/symfony1": ">=1.1,<1.5.19",
+                "friendsofsymfony1/swiftmailer": ">=4,<5.4.13|>=6,<6.2.5",
+                "friendsofsymfony1/symfony1": ">=1.1,<1.15.19",
                 "friendsoftypo3/mediace": ">=7.6.2,<7.6.5",
                 "friendsoftypo3/openid": ">=4.5,<4.5.31|>=4.7,<4.7.16|>=6,<6.0.11|>=6.1,<6.1.6",
                 "froala/wysiwyg-editor": "<3.2.7|>=4.0.1,<=4.1.3",
@@ -11508,7 +11809,7 @@
                 "sumocoders/framework-user-bundle": "<1.4",
                 "superbig/craft-audit": "<3.0.2",
                 "swag/paypal": "<5.4.4",
-                "swiftmailer/swiftmailer": ">=4,<5.4.5",
+                "swiftmailer/swiftmailer": ">=4,<6.2.5",
                 "swiftyedit/swiftyedit": "<1.2",
                 "sylius/admin-bundle": ">=1,<1.0.17|>=1.1,<1.1.9|>=1.2,<1.2.2",
                 "sylius/grid": ">=1,<1.1.19|>=1.2,<1.2.18|>=1.3,<1.3.13|>=1.4,<1.4.5|>=1.5,<1.5.1",
@@ -11558,7 +11859,7 @@
                 "t3s/content-consent": "<1.0.3|>=2,<2.0.2",
                 "tastyigniter/tastyigniter": "<3.3",
                 "tcg/voyager": "<=1.4",
-                "tecnickcom/tcpdf": "<6.7.4",
+                "tecnickcom/tcpdf": "<=6.7.4",
                 "terminal42/contao-tablelookupwizard": "<3.3.5",
                 "thelia/backoffice-default-template": ">=2.1,<2.1.2",
                 "thelia/thelia": ">=2.1,<2.1.3",
@@ -11566,7 +11867,7 @@
                 "thinkcmf/thinkcmf": "<=5.1.7",
                 "thorsten/phpmyfaq": "<3.2.2",
                 "tikiwiki/tiki-manager": "<=17.1",
-                "timber/timber": "<=2",
+                "timber/timber": ">=0.16.6,<1.23.1|>=1.24,<1.24.1|>=2,<2.1",
                 "tinymce/tinymce": "<7",
                 "tinymighty/wiki-seo": "<1.2.2",
                 "titon/framework": "<9.9.99",
@@ -11722,7 +12023,7 @@
                     "type": "tidelift"
                 }
             ],
-            "time": "2024-04-15T19:04:12+00:00"
+            "time": "2024-04-19T20:04:33+00:00"
         },
         {
             "name": "sebastian/cli-parser",
@@ -12783,7 +13084,9 @@
         "php": "~8.2",
         "ext-gd": "*",
         "ext-json": "*",
-        "ext-pdo": "*"
+        "ext-openssl": "*",
+        "ext-pdo": "*",
+        "ext-zip": "*"
     },
     "platform-dev": [],
     "plugin-api-version": "2.3.0"

@@ -12,14 +12,9 @@
     "enable_status": "Enable status in project",
     "override_color": "Override color",
     "tasks": "Tasks",
+    "kanban": "Kanban",
     "project_tasks": "Project tasks",
-    "add_task": "Add task",
-    "task_change": "{user} changed {field} {date}",
-    "task_change_to": "{user} changed {field} to {value} {date}",
-    "task_change_users": "{user} assigned to {value} {date}",
-    "show_history": "Show",
-    "hide_history": "Hide",
-    "add_comment": "Add"
+    "add_task": "Add task"
   },
   "field": {
     "default_priority": "Default priority",
@@ -31,10 +26,13 @@
     "add_phase": "Add",
     "priority_id": "Priority",
     "status_id": "Status",
-    "comments": "Comments"
+    "comments": "Comments",
+    "project_phase_id": "Phase"
   },
   "control": {
-    "task-list": "Task List"
+    "task-list": "Task List",
+    "project-list": "Project List",
+    "of": "of"
   },
   "project-roles-description": {
     "auditor": "Read access to assigned projects, create and view all the assigned project's tasks, view all the project users' activity",

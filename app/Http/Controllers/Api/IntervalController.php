@@ -3,6 +3,7 @@
 namespace App\Http\Controllers\Api;
 
 use App\Contracts\ScreenshotService;
+use App\Enums\ScreenshotsState;
 use App\Http\Requests\Interval\BulkDestroyTimeIntervalRequest;
 use App\Http\Requests\Interval\BulkEditTimeIntervalRequest;
 use App\Http\Requests\Interval\CreateTimeIntervalRequest;
@@ -15,7 +16,10 @@ use App\Http\Requests\Interval\PutScreenshotRequest;
 use App\Http\Requests\Interval\ScreenshotRequest;
 use App\Http\Requests\Interval\ShowIntervalRequest;
 use App\Http\Requests\Interval\TrackAppRequest;
+use App\Http\Requests\Interval\UploadOfflineIntervalsRequest;
+use App\Http\Requests\Interval\UploadOfflineScreenshotsRequest;
 use App\Jobs\AssignAppsToTimeInterval;
+use App\Models\Task;
 use App\Models\TrackedApplication;
 use App\Models\User;
 use CatEvent;
@@ -25,11 +29,18 @@ use Carbon\Carbon;
 use Exception;
 use Illuminate\Database\Eloquent\Model;
 use Illuminate\Http\JsonResponse;
+use Illuminate\Http\UploadedFile;
 use Illuminate\Support\Arr;
+use MessagePack\MessagePack;
+use phpseclib3\Crypt\RSA;
 use Settings;
+use Spatie\TemporaryDirectory\TemporaryDirectory;
 use Storage;
+use Str;
 use Symfony\Component\HttpFoundation\BinaryFileResponse;
 use Throwable;
+use Validator;
+use ZipArchive;
 
 class IntervalController extends ItemController
 {
@@ -537,9 +548,16 @@ class IntervalController extends ItemController
 
             CatEvent::listen(
                 Filter::getAfterActionEventName(),
-                static function ($data) use ($path, $screenshotService) {
-                    $screenshotService->saveScreenshot(Storage::path($path), $data);
-                    dispatch(static fn() => Storage::delete($path))->delay(now()->addMinute());
+                static function (TimeInterval $interval) use ($path, $screenshotService) {
+                    $projScreenshotsState = $interval->task->project->screenshots_state;
+                    $mustCapture = $projScreenshotsState === ScreenshotsState::REQUIRED;
+                    $optionalCapture = $projScreenshotsState === ScreenshotsState::OPTIONAL;
+                    if ($mustCapture
+                        || ($optionalCapture && $interval->user->screenshots_state === ScreenshotsState::REQUIRED)
+                    ) {
+                        $screenshotService->saveScreenshot(Storage::path($path), $interval);
+                        dispatch(static fn() => Storage::delete($path))->delay(now()->addMinute());
+                    }
                 }
             );
         }
@@ -590,9 +608,239 @@ class IntervalController extends ItemController
             __('Screenshot for requested interval already exists')
         );
 
-        $this->screenshotService->saveScreenshot($data['screenshot'], $interval);
+        $projScreenshotsState = $interval->task->project->screenshots_state;
+        $mustCapture = $projScreenshotsState === ScreenshotsState::REQUIRED;
+        $optionalCapture = $projScreenshotsState === ScreenshotsState::OPTIONAL;
+        if ($mustCapture
+            || ($optionalCapture && $interval->user->screenshots_state === ScreenshotsState::REQUIRED)
+        ) {
+            $this->screenshotService->saveScreenshot($data['screenshot'], $interval);
+        } else {
+            abort(
+                409,
+                __('Screenshots disabled for interval\'s project')
+            );
+        }
 
         return responder()->success()->respond(204);
+    }
+
+    public function uploadOfflineIntervals(UploadOfflineIntervalsRequest $request): JsonResponse
+    {
+        /**
+         * @var UploadedFile $file
+         */
+        $file = $request->validated()['file'];
+
+        $zip = new ZipArchive;
+        $zipOpenResult = $zip->open($file->path());
+        abort_if(
+            $zipOpenResult === false || (is_int($zipOpenResult) && $zipOpenResult > 0),
+            400,
+            __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
+        );
+
+        $temporaryDirectory = (new TemporaryDirectory())->deleteWhenDestroyed()->force()->create();
+        $zip->extractTo($temporaryDirectory->path());
+        $zip->close();
+
+        $privateKey = RSA::load(Settings::scope('core.offline-sync')->get('private_key'));
+
+        $intervalsContent = file_get_contents($temporaryDirectory->path('Intervals'));
+        $digestContent = file_get_contents($temporaryDirectory->path('EncryptedDigest'));
+
+        abort_if(
+            $intervalsContent === false || $digestContent === false,
+            400,
+            __('Unable to read content of Intervals or its EncryptedDigest')
+        );
+
+        $digest = $privateKey->withPadding(RSA::ENCRYPTION_OAEP)->withHash('sha256')->decrypt($digestContent);
+        $actualDigest = openssl_digest($intervalsContent, 'sha256');
+
+        abort_if(
+            $digest === false || $actualDigest === false || $digest !== $actualDigest,
+            400,
+            __('Unable to verify Intervals digest')
+        );
+
+        $intervals = MessagePack::unpack($intervalsContent);
+
+        $timezone = Settings::scope('core')->get('timezone', 'UTC');
+        $validatorClass = new CreateTimeIntervalRequest();
+        $creationResult = [];
+
+        abort_if(
+            count($intervals) === 0,
+            400,
+            __('File contains 0 intervals')
+        );
+
+        $user = User::whereId($intervals[0]['user_id'])->first(['id', 'email', 'full_name', 'screenshots_state']);
+
+        abort_if(
+            $user === null,
+            400,
+            __('User not found')
+        );
+
+        $canCreate = fn($interval) => $request->user()->can(
+            'create',
+            [
+                TimeInterval::class,
+                $interval['user_id'],
+                $interval['task_id'],
+                false,
+            ],
+        );
+
+        $tasksScreenshotsState = Task::with('project:id,screenshots_state')
+            ->whereIn('id', collect($intervals)->pluck('task_id'))
+            ->select(['id', 'project_id'])
+            ->get()
+            ->mapWithKeys(fn($item)=>[$item->id => $item->project->screenshots_state])
+            ->toArray();
+        $globalScreenshotsState = ScreenshotsState::withGlobalOverrides(null) ?? ScreenshotsState::OPTIONAL;
+
+        foreach ($intervals as $interval) {
+            $interval['user'] = $user;
+
+            if ($canCreate($interval) === false) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'message' => __('validation.offline-sync.cannot_create_interval'),
+                    'success' => false
+                ];
+                continue;
+            }
+
+            $screenshotIdValidationRule = $interval['has_screenshot'] ? ['screenshot_id' => 'required|uuid'] : [];
+
+            if ($interval['has_screenshot']) {
+                $mustNotCapture = $globalScreenshotsState === ScreenshotsState::FORBIDDEN;
+                $optionalCapture = $globalScreenshotsState === ScreenshotsState::OPTIONAL
+                    && isset($tasksScreenshotsState[$interval['task_id']]);
+
+                if ($optionalCapture && $tasksScreenshotsState[$interval['task_id']] === ScreenshotsState::FORBIDDEN) {
+                    $mustNotCapture = true;
+                } elseif ($optionalCapture
+                    && $tasksScreenshotsState[$interval['task_id']] === ScreenshotsState::OPTIONAL) {
+                    $mustNotCapture = $user->screenshots_state === ScreenshotsState::FORBIDDEN;
+                }
+                if ($mustNotCapture) {
+                    $screenshotIdValidationRule = [];
+                }
+            }
+
+            $intervalValidator = Validator::make(
+                $interval,
+                array_merge(
+                    $validatorClass->getRules($interval['user_id'], $interval['start_at'], $interval['end_at']),
+                    $screenshotIdValidationRule
+                )
+            );
+
+            if ($intervalValidator->fails()) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'message' => $intervalValidator->errors(),
+                    'success' => false
+                ];
+                continue;
+            }
+
+            $requestData = $intervalValidator->validated();
+            $requestData['start_at'] = Carbon::parse($requestData['start_at'])->setTimezone($timezone);
+            $requestData['end_at'] = Carbon::parse($requestData['end_at'])->setTimezone($timezone);
+
+            TimeInterval::create($requestData);
+            $creationResult[] = [
+                'interval' => $interval,
+                'message' => __('validation.offline-sync.time_interval_added'),
+                'success' => true
+            ];
+        }
+
+
+        return responder()->success($creationResult)->respond();
+    }
+
+    public function uploadOfflineScreenshots(UploadOfflineScreenshotsRequest $request): JsonResponse
+    {
+        /**
+         * @var UploadedFile $file
+         */
+        $file = $request->validated()['file'];
+
+        $zip = new ZipArchive;
+        $zipOpenResult = $zip->open($file->path());
+        abort_if(
+            $zipOpenResult === false || (is_int($zipOpenResult) && $zipOpenResult > 0),
+            400,
+            __('Cannot open file.' . is_int($zipOpenResult) ? " ZipArchive error code: $zipOpenResult" : ""),
+        );
+
+        $temporaryDirectory = (new TemporaryDirectory())
+            ->location(Storage::disk('local')->path('tmp'))->force()->create();
+        $zip->extractTo($temporaryDirectory->path());
+        $zip->close();
+
+        $dirPath = Str::of($temporaryDirectory->path())->match('/tmp.+/');
+        dispatch(static fn() => $temporaryDirectory->delete())->delay(now()->addHour());
+
+
+        $allScreenshots = Storage::disk('local')->files($dirPath);
+
+        $creationResult = [];
+
+        $screenshotService = $this->screenshotService;
+        foreach ($allScreenshots as $screenshotPath) {
+            $pathArr = Str::of($screenshotPath)->match('/\d_.+/')->split('/_/');
+            abort_if(
+                count($pathArr) !== 2 || (count($pathArr) === 2 && !Str::isUuid($pathArr[1])),
+                400,
+                __('Wrong screenshot file name')
+            );
+
+            [$userId, $screenshotId] = $pathArr;
+
+            $interval = TimeInterval::where('user_id', $userId)->where('screenshot_id', $screenshotId)->first();
+            if ($interval === null) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'user_id' => $userId,
+                    'screenshot_id' => $screenshotId,
+                    'message' => __('validation.offline-sync.cannot_find_interval'),
+                    'success' => false
+                ];
+                continue;
+            }
+            try {
+                dispatch(static function () use ($screenshotService, $interval, $screenshotPath) {
+                    $screenshotService->saveScreenshot(Storage::path($screenshotPath), $interval);
+                    $interval->screenshot_id = null;
+                    $interval->save();
+                });
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'user_id' => $userId,
+                    'screenshot_id' => $screenshotId,
+                    'message' => __('validation.offline-sync.screenshot_attached'),
+                    'success' => true
+                ];
+            } catch (\Exception $e) {
+                $creationResult[] = [
+                    'interval' => $interval,
+                    'user_id' => $userId,
+                    'screenshot_id' => $screenshotId,
+                    'message' => __('validation.offline-sync.screenshot_not_attached'),
+                    'success' => false
+                ];
+                \Log::error($e);
+            }
+        }
+
+        return responder()->success($creationResult)->respond();
     }
 
     /**

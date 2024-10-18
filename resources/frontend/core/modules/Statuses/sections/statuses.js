@@ -5,6 +5,8 @@ import StatusService from '../services/statuse.service';
 import Statuses from '../views/Statuses';
 import ColorInput from '@/components/ColorInput';
 import { hasRole } from '@/utils/user';
+import Vue from 'vue';
+import { throttle } from 'lodash';
 
 export default (context, router) => {
     const statusesContext = cloneDeep(context);
@@ -15,14 +17,32 @@ export default (context, router) => {
     const crudNewRoute = crud.new.getNewRouteName();
 
     const navigation = { edit: crudEditRoute, new: crudNewRoute };
+    const statusOrder = throttle(async (data, direction) => {
+        const { gridView } = data;
+        const { tableData } = gridView;
 
+        const service = new StatusService();
+        const index = tableData.findIndex(item => item.id === data.item.id);
+
+        const item = tableData[index];
+        const targetIndex = direction === 'up' ? index - 1 : index + 1;
+        const targetItem = tableData[targetIndex];
+
+        await service.save({ ...targetItem, order: item.order });
+
+        Vue.set(tableData, index, { ...targetItem, order: item.order });
+        Vue.set(tableData, targetIndex, { ...item, order: targetItem.order });
+    }, 1000);
     crud.new.addToMetaProperties('permissions', 'statuses/create', crud.new.getRouterConfig());
     crud.new.addToMetaProperties('navigation', navigation, crud.new.getRouterConfig());
     crud.new.addToMetaProperties('afterSubmitCallback', () => router.go(-1), crud.new.getRouterConfig());
 
     crud.edit.addToMetaProperties('permissions', 'statuses/edit', crud.edit.getRouterConfig());
 
-    const grid = statusesContext.createGrid('statuses.grid-title', 'statuses', StatusService);
+    const grid = statusesContext.createGrid('statuses.grid-title', 'statuses', StatusService, {
+        orderBy: ['order', 'asc'],
+    });
+
     grid.addToMetaProperties('navigation', navigation, grid.getRouterConfig());
     grid.addToMetaProperties('permissions', () => hasRole(store.getters['user/user'], 'admin'), grid.getRouterConfig());
 
@@ -77,12 +97,71 @@ export default (context, router) => {
 
     crud.edit.addField(fieldsToFill);
     crud.new.addField(fieldsToFill);
-
     grid.addColumn([
         {
             title: 'field.name',
             key: 'name',
         },
+        {
+            title: 'field.order',
+            key: 'order',
+            render(h, data) {
+                const index = data.gridView.tableData.findIndex(item => item.id === data.item.id);
+                const result = [];
+                result.push(
+                    h(
+                        'at-button',
+                        {
+                            style: {
+                                marginRight: '8px',
+                            },
+                            on:
+                                index > 0
+                                    ? {
+                                          click: function () {
+                                              statusOrder(data, 'up');
+                                          },
+                                      }
+                                    : {},
+                            props:
+                                index > 0
+                                    ? {}
+                                    : {
+                                          disabled: true,
+                                      },
+                        },
+                        [h('i', { class: 'icon icon-chevrons-up' })],
+                    ),
+                );
+                result.push(
+                    h(
+                        'at-button',
+                        {
+                            style: {
+                                marginRight: '8px',
+                            },
+                            on:
+                                index < data.gridView.tableData.length - 1
+                                    ? {
+                                          click: function () {
+                                              statusOrder(data, 'down');
+                                          },
+                                      }
+                                    : {},
+                            props:
+                                index < data.gridView.tableData.length - 1
+                                    ? {}
+                                    : {
+                                          disabled: true,
+                                      },
+                        },
+                        [h('i', { class: 'icon icon-chevrons-down' })],
+                    ),
+                );
+                return result;
+            },
+        },
+
         {
             title: 'field.close_task',
             key: 'active',

@@ -20,11 +20,15 @@ use Exception;
 use Filter;
 use App\Models\Task;
 use App\Models\User;
+use Illuminate\Contracts\Container\BindingResolutionException;
 use Carbon\Carbon;
 use Carbon\CarbonPeriod;
 use Illuminate\Database\Eloquent\Builder;
+use Illuminate\Database\Eloquent\Relations\BelongsToMany;
 use Illuminate\Http\JsonResponse;
 use CatEvent;
+use Illuminate\Http\Response;
+use MessagePack\MessagePack;
 use DB;
 use Settings;
 use Throwable;
@@ -242,8 +246,15 @@ class TaskController extends ItemController
             )));
         });
 
-        CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $data) use ($request) {
-            $oldUsers = $data->users()->select('id', 'full_name');
+        $taskBeforeChanges = null;
+        CatEvent::listen(Filter::getBeforeActionEventName(), static function (Task $task) use (&$taskBeforeChanges) {
+            $taskBeforeChanges = $task->getOriginal();
+            $taskBeforeChanges['_old_phase_name'] = $task->phase?->name;
+            $taskBeforeChanges['_old_users'] = $task->users()->select('id', 'full_name')->get()->map(fn($item)=>$item->full_name)->join(', ');
+        });
+
+        CatEvent::listen(Filter::getAfterActionEventName(), static function (Task $data) use (&$taskBeforeChanges, $request) {
+            $oldUsers = $taskBeforeChanges['_old_users'];
             $changes = $data->users()->sync($request->get('users'));
             if (!empty($changes['attached']) || !empty($changes['detached']) || !empty($changes['updated'])) {
                 SaveTaskEditHistory::dispatch(
@@ -252,15 +263,14 @@ class TaskController extends ItemController
                     [
                         'users' => User::withoutGlobalScopes()
                             ->whereIn('id', $request->get('users'))
-                            ->select(['id', 'full_name'])
-                            ->get(),
+                            ->select(['id', 'full_name'])->get()->map(fn($item)=>$item->full_name)->join(', ')
                     ],
                     [
-                        'users' => json_encode($oldUsers),
+                        'users' => $oldUsers,
                     ]
                 );
             }
-            SaveTaskEditHistory::dispatch($data, request()->user());
+            SaveTaskEditHistory::dispatch($data, request()->user(), null, $taskBeforeChanges);
         });
 
         return $this->_edit($request);
@@ -338,7 +348,7 @@ class TaskController extends ItemController
     {
         CatEvent::listen(
             Filter::getAfterActionEventName(),
-            static fn(Task $task) => $task->users()->sync($request->get('users'))
+            static fn (Task $task) => $task->users()->sync($request->get('users'))
         );
 
         Filter::listen(
@@ -371,6 +381,11 @@ class TaskController extends ItemController
                 return $requestData;
             }
         );
+        Filter::listen(Filter::getRequestFilterName(), static function ($requestData) {
+            $maxPosition = Task::max('relative_position');
+            $requestData['relative_position'] = $maxPosition + 1;
+            return $requestData;
+        });
 
         return $this->_create($request);
     }
@@ -600,6 +615,46 @@ class TaskController extends ItemController
         return responder()->success()->respond(204);
     }
 
+    /**
+     * @throws BindingResolutionException
+     */
+    public function downloadProjectsAndTasks(User $user): Response
+    {
+        $projectsAndTasks = collect($user->load([
+            'projects' => fn(BelongsToMany $q) => $q->select([
+                'projects.id',
+                'projects.name',
+                'projects.description',
+                'projects.source',
+                'projects.updated_at'
+            ])->withoutGlobalScopes(),
+            'tasks' => fn(BelongsToMany $q) => $q->select([
+                'tasks.id',
+                'tasks.project_id',
+                'tasks.task_name',
+                'tasks.description',
+                'tasks.url',
+                'tasks.priority_id',
+                'tasks.status_id',
+                'tasks.updated_at'
+            ])->withoutGlobalScopes(),
+        ]))->only(['id', 'projects', 'tasks'])->all();
+
+        foreach ($projectsAndTasks['projects'] as $project) {
+            unset($project['pivot']);
+        }
+        foreach ($projectsAndTasks['tasks'] as $task) {
+            unset($task['pivot']);
+        }
+
+        $packed = MessagePack::pack($projectsAndTasks);
+
+        return response()->make($packed, 200, [
+            'Content-type: application/octet-stream',
+            'Content-Disposition: attachment; filename=ProjectsAndTasks.cattr'
+        ]);
+    }
+
     protected const ISO8601_DATE_FORMAT = 'Y-m-d';
 
     /**
@@ -698,10 +753,11 @@ class TaskController extends ItemController
             ->orderBy('id');
 
         if (isset($requestData['project_id'])) {
-            if (is_array($requestData['project_id']))
+            if (is_array($requestData['project_id'])) {
                 $query->whereIn('project_id', array_values($requestData['project_id']));
-            else
+            } else {
                 $query->where('project_id', (int)$requestData['project_id']);
+            }
         }
 
         /** @var \Illuminate\Support\Collection<int, Task> $tasks */
@@ -711,13 +767,14 @@ class TaskController extends ItemController
         $tasksByWeek = [];
 
         $period = CarbonPeriod::create($startAt, '1 day', $endAt);
-        foreach ($period as $date)
+        foreach ($period as $date) {
             $tasksByDay[$date->format(static::ISO8601_DATE_FORMAT)] = [
                 'date' => $date->format(static::ISO8601_DATE_FORMAT),
                 'day' => (int)$date->format('d'),
                 'month' => (int)$date->format('m'),
                 'task_ids' => [],
             ];
+        }
 
         $period = CarbonPeriod::create($startAt, '7 days', $endAt);
         foreach ($period as $date) {
@@ -728,8 +785,9 @@ class TaskController extends ItemController
             ];
 
             $weekPeriod = CarbonPeriod::create($date, '1 day', $date->clone()->addDays(7))->excludeEndDate();
-            foreach ($weekPeriod as $date)
-                $tasksByWeek[$week]['days'][] = (int)$date->format('d');
+            foreach ($weekPeriod as $day) {
+                $tasksByWeek[$week]['days'][] = (int)$day->format('d');
+            }
         }
 
         foreach ($tasks as $task) {
@@ -742,8 +800,9 @@ class TaskController extends ItemController
             $endDate = $task->due_date->lessThan($endAt) ? $task->due_date : $endAt;
 
             $period = new CarbonPeriod($startDate, '1 day', $endDate);
-            foreach ($period as $date)
+            foreach ($period as $date) {
                 $tasksByDay[$date->format(static::ISO8601_DATE_FORMAT)]['task_ids'][] = $task->id;
+            }
 
             $period = new CarbonPeriod($startDate->startOfWeek(), '7 days', $endDate);
             foreach ($period as $date) {

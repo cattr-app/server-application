@@ -27,6 +27,7 @@ use MatanYadaev\EloquentSpatial\Traits\HasSpatial;
  *
  * @property int $id
  * @property int $task_id
+ * @property string|null $screenshot_id
  * @property Carbon $start_at
  * @property Carbon $end_at
  * @property Carbon|null $created_at
@@ -103,6 +104,7 @@ class TimeInterval extends Model
      */
     protected $fillable = [
         'task_id',
+        'screenshot_id',
         'start_at',
         'user_id',
         'end_at',

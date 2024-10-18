@@ -9,17 +9,12 @@
     "project_members": "Участники",
     "gantt": "Гант",
     "members": "Участники",
+    "kanban": "Канбан",
     "enable_status": "Включить статус в проекте",
     "override_color": "Переопределить цвет",
     "tasks": "Задачи",
     "project_tasks": "Задачи проекта",
-    "add_task": "Добавить задачу",
-    "task_change": "{user} изменил {field} {date}",
-    "task_change_to": "{user} изменил {field} на {value} {date}",
-    "task_change_users": "{user} назначил исполнителем {value} {date}",
-    "show_history": "Показать",
-    "hide_history": "Скрыть",
-    "add_comment": "Добавить"
+    "add_task": "Добавить задачу"
   },
   "field": {
     "default_priority": "Приоритет по-умолчанию",
@@ -31,10 +26,13 @@
     "add_phase": "Добавить",
     "priority_id": "Приоритет",
     "status_id": "Статус",
-    "comments": "Комментарии"
+    "comments": "Комментарии",
+    "project_phase_id": "Стадия"
   },
   "control": {
-    "task-list": "Список задач"
+    "task-list": "Список задач",
+    "project-list": "Список проектов",
+    "of": "из"
   },
   "project-roles-description": {
     "auditor": "Доступ на чтение к проектам, над которыми работает, создание и просмотр всех задач проекта, просмотр активности всех пользователей проекта",

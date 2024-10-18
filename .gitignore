@@ -43,6 +43,8 @@ cghooks.lock
 
 /storage/app/reports
 
+/storage/app/attachments
+
 Modules/*
 !Modules/.gitkeep
 

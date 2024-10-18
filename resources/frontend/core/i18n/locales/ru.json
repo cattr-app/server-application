@@ -199,6 +199,11 @@
     "project_selected_all": "Выбраны все проекты",
     "status_selected": "Нет выбранных статусов | Выбран 1 статус | Выбрано {count} статуса(ов)",
     "status_selected_all": "Выбраны все статусы",
+    "screenshot_state_options": {
+      "required": "Обязательны",
+      "optional": "Необязательны",
+      "forbidden": "Запрещены"
+    },
     "day": "День",
     "week": "Неделя",
     "month": "Месяц",
@@ -228,7 +233,6 @@
     "change_password": "Сменить пароль",
     "screenshot": "Скриншот",
     "screenshots": "Скриншоты",
-    "screenshots_active": "Создание скриншотов",
     "manual_time": "Установка интервалов",
     "screenshots_interval": "Интервал скриншотов",
     "computer_time_popup": "Время неактивности",
@@ -257,6 +261,7 @@
     "total_spent": "Потраченное время",
     "time": "Время",
     "auto_thin": "Автоматическая очистка хранилища",
+    "screenshots_state": "Включить скриншоты",
     "members": "Участники",
     "url": "URL",
     "statuses": {
@@ -328,6 +333,7 @@
     "report_has_been_queued": "Отчет заказан и будет отправлен на почту"
   },
   "time": {
+    "d": "д",
     "h": "ч",
     "m": "м",
     "s": "с"

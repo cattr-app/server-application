@@ -12,9 +12,7 @@ export function init(context) {
     context.addUserMenuEntry({
         label: 'navigation.company_settings',
         icon: 'icon-settings',
-        to: {
-            name: 'company.settings.general',
-        },
+        to: { name: 'company.settings.general' },
         displayCondition: store => hasRole(store.getters['user/user'], 'admin'),
     });
     context.addLocalizationData({
