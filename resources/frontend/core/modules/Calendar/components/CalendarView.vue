@@ -11,11 +11,17 @@
     const cellWidth = 100 / daysOfWeek.length;
     const cellHeight = 32;
 
+    const maxTasks = 5;
+
     export default {
         props: {
             tasksByWeek: {
                 type: Array,
                 required: true,
+            },
+            showAll: {
+                type: Boolean,
+                default: true,
             },
         },
         created() {
@@ -36,13 +42,21 @@
                 this.resize();
                 this.draw();
             },
+            showAll() {
+                this.resize();
+                this.draw();
+            },
         },
         methods: {
             resize: throttle(function () {
                 const { container } = this.$refs;
 
                 const weeks = this.tasksByWeek.length;
-                const tasks = this.tasksByWeek.reduce((acc, item) => acc + item.tasks.length, 0);
+                const tasks = this.tasksByWeek.reduce(
+                    (acc, item) => acc + (this.showAll ? item.tasks.length : Math.min(maxTasks, item.tasks.length)),
+                    0,
+                );
+
                 const rows = 1 + weeks + tasks;
 
                 const width = container.clientWidth;
@@ -150,7 +164,7 @@
                         task: { id, task_name },
                         start_week_day,
                         end_week_day,
-                    } of tasks) {
+                    } of this.showAll ? tasks : tasks.slice(0, maxTasks)) {
                         drawTaskRow(id, task_name, start_week_day, end_week_day);
                     }
                 }

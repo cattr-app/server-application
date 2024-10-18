@@ -694,7 +694,8 @@ class TaskController extends ItemController
                 ->orWhereBetween('due_date', [$startAt, $endAt])
                 ->orWhereBetween(DB::raw(DB::escape($startAt->format(static::ISO8601_DATE_FORMAT))), [DB::raw('start_date'), DB::raw('due_date')])
                 ->orWhereBetween(DB::raw(DB::escape($endAt->format(static::ISO8601_DATE_FORMAT))), [DB::raw('start_date'), DB::raw('due_date')]))
-            ->orderBy('start_date');
+            ->orderBy('start_date')
+            ->orderBy('id');
 
         if (isset($requestData['project_id'])) {
             if (is_array($requestData['project_id']))

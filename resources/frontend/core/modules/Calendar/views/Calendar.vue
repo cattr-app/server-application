@@ -13,10 +13,18 @@
             />
 
             <ProjectSelect class="controls-row__item" @change="onProjectsChange" />
+
+            <at-button class="controls-row__item show-all" @click="onShowAllClick">{{
+                showAll ? $t('calendar.show_first') : $t('calendar.show_all')
+            }}</at-button>
         </div>
 
         <div class="at-container">
-            <calendar-view class="svg-container svg-container__desktop" :tasks-by-week="tasksByWeek" />
+            <calendar-view
+                class="svg-container svg-container__desktop"
+                :tasks-by-week="tasksByWeek"
+                :show-all="showAll"
+            />
 
             <calendar-mobile-view
                 class="svg-container svg-container__mobile"
@@ -61,6 +69,8 @@
                     date: moment().format(ISO8601_DATE_FORMAT),
                     tasks: [],
                 },
+
+                showAll: false,
             };
         },
         created() {
@@ -101,11 +111,22 @@
             hideTasksModal() {
                 this.modal.tasks = [];
             },
+            onShowAllClick() {
+                this.showAll = !this.showAll;
+            },
         },
     };
 </script>
 
 <style lang="scss" scoped>
+    .show-all {
+        display: none;
+
+        @media screen and (min-width: 768px) {
+            display: block;
+        }
+    }
+
     .svg-container {
         align-items: center;
         justify-content: center;

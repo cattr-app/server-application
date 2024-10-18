@@ -12,6 +12,8 @@
       "saturday": "Сб.",
       "sunday": "Вс."
     },
-    "tasks": "Задачи {date}"
+    "tasks": "Задачи {date}",
+    "show_all": "Показать всё",
+    "show_first": "Показать первые 5 задач"
   }
 }
