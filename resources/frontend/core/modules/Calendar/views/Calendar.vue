@@ -156,4 +156,8 @@
             dominant-baseline: central;
         }
     }
+
+    .controls-row {
+        flex-flow: row wrap;
+    }
 </style>

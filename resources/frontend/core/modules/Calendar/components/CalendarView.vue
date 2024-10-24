@@ -123,19 +123,18 @@
                 };
 
                 /**
-                 * @param {number} task_id
-                 * @param {string} task_name
+                 * @param {number} taskId
+                 * @param {string} taskName
                  * @param {number} startWeekDay
                  * @param {number} endWeekDay
                  */
-                const drawTaskRow = (task_id, task_name, startWeekDay, endWeekDay) => {
+                const drawTaskRow = (taskId, taskName, startWeekDay, endWeekDay) => {
                     const width = cellWidth * (endWeekDay - startWeekDay + 1);
                     horizontalOffset = cellWidth * startWeekDay;
 
                     group.rect(`100%`, cellHeight).move(0, verticalOffset).fill('#fafafa').stroke('#F4F4FF');
 
-                    const link = group.link(`/tasks/view/${task_id}`);
-                    link.target('_blank');
+                    const link = group.link(`/tasks/view/${taskId}`);
 
                     const taskHorizontalPadding = 0.25;
                     const taskVerticaladding = 2;
@@ -146,7 +145,7 @@
                         .fill('#fff')
                         .stroke('#F4F4FF');
 
-                    link.text(add => add.tspan(task_name).dmove(8, 0))
+                    link.text(add => add.tspan(taskName).dmove(8, 0))
                         .font({ anchor: 'start', size: 16 })
                         .amove(`${horizontalOffset + taskHorizontalPadding}%`, verticalOffset + cellHeight / 2)
                         .fill('rgb(63, 83, 110)')

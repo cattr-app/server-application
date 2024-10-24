@@ -7,7 +7,7 @@
 
         <ul class="tasks-modal__list">
             <li v-for="task of tasks" :key="task.id" class="tasks-modal__item">
-                <a class="tasks-modal__link" target="_blank" :href="`/tasks/view/${task.id}`">
+                <a class="tasks-modal__link" :href="`/tasks/view/${task.id}`">
                     {{ task.task_name }}
                 </a>
             </li>
