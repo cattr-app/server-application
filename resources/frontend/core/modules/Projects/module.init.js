@@ -45,7 +45,14 @@ export function init(context) {
     });
 
     const crud = context.createCrud('projects.crud-title', 'projects', ProjectService, {
-        with: ['defaultPriority', 'tasks', 'workers', 'workers.task:id,task_name', 'workers.user:id,full_name'],
+        with: [
+            'defaultPriority',
+            'tasks',
+            'workers',
+            'workers.task:id,task_name',
+            'workers.user:id,full_name',
+            'group:id,name',
+        ],
         withSum: [
             ['workers as total_spent_time', 'duration'],
             ['workers as total_offset', 'offset'],
